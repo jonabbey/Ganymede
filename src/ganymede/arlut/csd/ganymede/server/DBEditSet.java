@@ -111,7 +111,7 @@ import arlut.csd.ganymede.common.SchemaConstants;
  * {@link arlut.csd.ganymede.server.dumpTask dumpTask} is run, or until the server
  * undergoes a formal shutdown.</p>
  *
- * <p>Typically, the {@link arlut.csd.ganymede.server.DBEditSet#commit() commit()}
+ * <p>Typically, the {@link arlut.csd.ganymede.server.DBEditSet#commit(java.lang.String) commit()}
  * method is called by the
  * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction(boolean) GanymedeSession.commitTransaction()}
  * method, which will induce the server to schedule any commit-time build

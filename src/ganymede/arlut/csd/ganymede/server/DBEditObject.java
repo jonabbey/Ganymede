@@ -85,26 +85,26 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * DBEditObject is the main base class that is subclassed by individual
+ * <p>DBEditObject is the main base class that is subclassed by individual
  * application object types to provide editing and management intelligence.
  * Both static and instance methods are defined in DBEditObject which can
- * be subclassed to provide object management intelligence.
+ * be subclassed to provide object management intelligence.</p>
  *
- * A instance of DBEditObject is a copy of a DBObject that has been
+ * <p>A instance of DBEditObject is a copy of a DBObject that has been
  * exclusively checked out from the main database so that a
  * {@link arlut.csd.ganymede.server.DBSession DBSession}
  * can edit the fields of the object.  The DBEditObject class keeps
  * track of the changes made to fields, keeping things properly
- * synchronized with unique field name spaces.
+ * synchronized with unique field name spaces.</p>
  *
- * Generally, DBEditObjects are obtained in the context of a
+ * <p>Generally, DBEditObjects are obtained in the context of a
  * {@link arlut.csd.ganymede.server.DBEditSet DBEditSet} transaction object.  When
  * the DBEditSet is committed, a new {@link arlut.csd.ganymede.server.DBObject DBObject}
  * is created from the contents of the DBEditObject and is made to replace the
  * original object in the DBStore.  If the EditSet is aborted, the
- * DBEditObject is dropped.
+ * DBEditObject is dropped.</p>
  *
- * There is one case, however, in which a DBEditObject will be
+ * <p>There is one case, however, in which a DBEditObject will be
  * present in the server outside of a DBEditSet context, and that is
  * the DBEditObject instance used for the {@link
  * arlut.csd.ganymede.server.DBObjectBase DBObjectBase}'s {@link
@@ -115,7 +115,7 @@ import arlut.csd.Util.TranslationService;
  * first constructor variant}.  A wide variety of methods in the
  * server will make method calls on the DBObjectBase objectHook to
  * allow a custom DBEditObject subclass to customize the server's
- * behavior.  Such methods are labeled <B>*PSEUDOSTATIC*</B>, which
+ * behavior.  Such methods are labeled <b>*PSEUDOSTATIC*</b>, which
  * means that those methods are designed not to examine or report on
  * the internal state of the objectHook, but rather are meant to
  * operate based only on parameters passed into the method.  These
@@ -123,15 +123,15 @@ import arlut.csd.Util.TranslationService;
  * true static methods, every place in the server where such methods
  * are called would have to use the relatively cumbersome Java
  * Reflection API rather than being able to call methods on a
- * instance of the appropriate DBEditObject subclass.
+ * instance of the appropriate DBEditObject subclass.</p>
  *
- * See the DBEditObject subclassing guide for more information generally on
- * DBEditObject customization.
+ * <p>See the DBEditObject subclassing guide for more information generally on
+ * DBEditObject customization.</p>
  *
- * <b>IMPORTANT PROGRAMMING NOTE!</b>: It is critical that
+ * <p><b>IMPORTANT PROGRAMMING NOTE!</b>: It is critical that
  * synchronized methods in DBEditObject and in subclasses thereof do not
  * call synchronized methods in DBSession, as there is a strong possibility
- * of nested monitor deadlocking.
+ * of nested monitor deadlocking.</p>
  *
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
@@ -246,14 +246,14 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Creation constructor, is responsible for creating a new editable
+   * <p>Creation constructor, is responsible for creating a new editable
    * object with all fields listed in the
    * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField} instantiated
-   * but undefined.
+   * but undefined.</p>
    *
-   * This constructor is not really intended to be overridden in subclasses.
+   * <p>This constructor is not really intended to be overridden in subclasses.
    * Creation time field value initialization is to be handled by
-   * initializeNewObject().
+   * initializeNewObject().</p>
    *
    * @see arlut.csd.ganymede.server.DBField
    */
@@ -410,11 +410,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Returns the transaction object owning this object, or
-   * null if an unowned data object.
+   * <p>Returns the transaction object owning this object, or
+   * null if an unowned data object.</p>
    *
-   * Note that this is public, but not made available
-   * to the client via a remote interface.
+   * <p>Note that this is public, but not made available
+   * to the client via a remote interface.</p>
    */
 
   public final DBEditSet getEditSet()
@@ -475,12 +475,12 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * If this object type is embedded, this method will return the
-   * desired display label for the embedded object.
+   * <p>If this object type is embedded, this method will return the
+   * desired display label for the embedded object.</p>
    *
-   * This label may not be the same as returned by getLabel(), which
+   * <p>This label may not be the same as returned by getLabel(), which
    * is guaranteed to be derived from a namespace constrained label
-   * field, suitable for use in the XML context.
+   * field, suitable for use in the XML context.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_object
    */
@@ -496,14 +496,14 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * If this DBEditObject is managing an embedded object, the
+   * <p>If this DBEditObject is managing an embedded object, the
    * getEmbeddedObjectLabel() can be overridden to display a synthetic
    * label in the context of viewing or editing the containing object,
-   * and when doing queries on the containing type.
+   * and when doing queries on the containing type.</p>
    *
-   * The getLabel() method will not consult this hook, however, and
+   * <p>The getLabel() method will not consult this hook, however, and
    * embedded objects will be represented with their unique label
-   * field when processed in an XML context.
+   * field when processed in an XML context.</p>
    *
    * <b>*PSEUDOSTATIC*</b>
    */
@@ -514,15 +514,15 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is used to make sure that the built-in fields that
+   * <p>This method is used to make sure that the built-in fields that
    * the server assumes will always be present in any editable object
-   * will be in place.
+   * will be in place.</p>
    *
-   * This method checks with instantiateNewField() if the field id is
+   * <p>This method checks with instantiateNewField() if the field id is
    * not one of those that is needfull.  If instantiateNewField() approves
    * the creation of a new field, checkNewField() will check to see if
    * the {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
-   * permissions permit the field creation.
+   * permissions permit the field creation.</p>
    */
 
   public final boolean checkNewField(short fieldID)
@@ -561,11 +561,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Shortcut method to set a field's value.  Using this
-   * method can save the client a roundtrip to the server.
+   * <p>Shortcut method to set a field's value.  Using this
+   * method can save the client a roundtrip to the server.</p>
    *
-   * This method cannot be used on permission fields or password
-   * fields.
+   * <p>This method cannot be used on permission fields or password
+   * fields.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_object
    */
@@ -589,12 +589,12 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Shortcut method to set a field's value.  This version bypasses
+   * <p>Shortcut method to set a field's value.  This version bypasses
    * permission checking and is only intended for server-side
-   * use.
+   * use.</p>
    *
-   * This method cannot be used on permission fields or password
-   * fields.
+   * <p>This method cannot be used on permission fields or password
+   * fields.</p>
    */
 
   public final ReturnVal setFieldValueLocal(short fieldID, Object value)
@@ -639,19 +639,19 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   */
 
   /**
-   * This method is used to control whether or not it is acceptable to
+   * <p>This method is used to control whether or not it is acceptable to
    * make a link to the given field in this
    * {@link arlut.csd.ganymede.server.DBObject DBObject} type when the
    * user only has editing access for the source
    * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField} and not
-   * the target.
+   * the target.</p>
    *
-   * This version of anonymousLinkOK takes additional parameters
+   * <p>This version of anonymousLinkOK takes additional parameters
    * to allow an object type to decide that it does or does not want
    * to allow a link based on what field of what object wants to link
-   * to it.
+   * to it.</p>
    *
-   * By default, the 3 variants of the DBEditObject anonymousLinkOK()
+   * <p>By default, the 3 variants of the DBEditObject anonymousLinkOK()
    * method are chained together, so that the customizer can choose
    * which level of detail he is interested in.
    * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField}'s
@@ -660,24 +660,24 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * version, which calls the two parameter version, which returns
    * false by default.  Customizers can implement any of the three
    * versions, but unless you maintain the version chaining yourself,
-   * there's no point to implementing more than one of them.
+   * there's no point to implementing more than one of them.</p>
    *
-   * Note that the {@link arlut.csd.ganymede.server.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.server.DBField)
+   * <p>Note that the {@link arlut.csd.ganymede.server.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.server.DBField)
    * choiceListHasExceptions()} method will call this version of anonymousLinkOK()
    * with a null targetObject, to determine that the client should not
    * use its cache for an InvidDBField's choices.  Any overriding done
    * of this method must be able to handle a null targetObject, or else
-   * an exception will be thrown inappropriately.
+   * an exception will be thrown inappropriately.</p>
    *
-   * The only reason to consult targetObject in any case is to
+   * <p>The only reason to consult targetObject in any case is to
    * allow or disallow anonymous object linking to a field based on
    * the current state of the target object.  If you are just writing
    * generic anonymous linking rules for a field in this object type,
    * targetObject won't concern you anyway.  If you do care about the
    * targetObject's state, though, you have to be prepared to handle
-   * a null valued targetObject.
+   * a null valued targetObject.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    *
    * @param targetObject The object that the link is to be created in (may be null)
    * @param targetFieldID The field that the link is to be created in
@@ -695,19 +695,19 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is used to control whether or not it is acceptable to
+   * <p>This method is used to control whether or not it is acceptable to
    * rescind a link to the given field in this
    * {@link arlut.csd.ganymede.server.DBObject DBObject} type when the
    * user only has editing access for the source
    * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField} and not
-   * the target.
+   * the target.</p>
    *
-   * This version of anonymousUnlinkOK takes additional parameters
+   * <p>This version of anonymousUnlinkOK takes additional parameters
    * to allow an object type to decide that it does or does not want
    * to allow a link to be rescinded based on what field of what
-   * object wants to unlink from it.
+   * object wants to unlink from it.</p>
    *
-   * By default, the 3 variants of the DBEditObject anonymousUnlinkOK()
+   * <p>By default, the 3 variants of the DBEditObject anonymousUnlinkOK()
    * method are chained together, so that the customizer can choose
    * which level of detail he is interested in.
    * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField}'s
@@ -716,9 +716,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * version, which calls the two parameter version, which returns
    * true by default.  Customizers can implement any of the three
    * versions, but unless you maintain the version chaining yourself,
-   * there's no point to implementing more than one of them.
+   * there's no point to implementing more than one of them.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    *
    * @param targetObject The object that the link is removed from
    * @param targetFieldID The field that the link is removed from
@@ -737,34 +737,34 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is used to control whether or not it is acceptable to
+   * <p>This method is used to control whether or not it is acceptable to
    * make a link to the given field in this
    * {@link arlut.csd.ganymede.server.DBObject DBObject} type when the
    * user only has editing access for the source
    * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField} and not
-   * the target.
+   * the target.</p>
    *
-   * See {@link arlut.csd.ganymede.server.DBEditObject#anonymousLinkOK(arlut.csd.ganymede.server.DBObject,short,
+   * <p>See {@link arlut.csd.ganymede.server.DBEditObject#anonymousLinkOK(arlut.csd.ganymede.server.DBObject,short,
    * arlut.csd.ganymede.server.DBObject,short,arlut.csd.ganymede.server.GanymedeSession)
    * anonymousLinkOK(obj,short,obj,short,GanymedeSession)} for details on
-   * anonymousLinkOK() method chaining.
+   * anonymousLinkOK() method chaining.</p>
    *
-   * Note that the {@link arlut.csd.ganymede.server.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.server.DBField)
+   * <p>Note that the {@link arlut.csd.ganymede.server.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.server.DBField)
    * choiceListHasExceptions()} method will call this version of anonymousLinkOK()
    * with a null targetObject, to determine that the client should not
    * use its cache for an InvidDBField's choices.  Any overriding done
    * of this method must be able to handle a null targetObject, or else
-   * an exception will be thrown inappropriately.
+   * an exception will be thrown inappropriately.</p>
    *
-   * The only reason to consult targetObject in any case is to
+   * <p>The only reason to consult targetObject in any case is to
    * allow or disallow anonymous object linking to a field based on
    * the current state of the target object.  If you are just writing
    * generic anonymous linking rules for a field in this object type,
    * targetObject won't concern you anyway.  If you do care about the
    * targetObject's state, though, you have to be prepared to handle
-   * a null valued targetObject.
+   * a null valued targetObject.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    *
    * @param targetObject The object that the link is to be created in (may be null)
    * @param targetFieldID The field that the link is to be created in
@@ -776,23 +776,23 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is used to control whether or not it is acceptable to
+   * <p>This method is used to control whether or not it is acceptable to
    * rescind a link to the given field in this
    * {@link arlut.csd.ganymede.server.DBObject DBObject} type when the
    * user only has editing access for the source
    * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField} and not
-   * the target.
+   * the target.</p>
    *
-   * By default, the server always allows anonymous unlinking.
+   * <p>By default, the server always allows anonymous unlinking.
    * Overriding this method is only required when you want to DISallow
-   * such unlinking.
+   * such unlinking.</p>
    *
-   * See {@link arlut.csd.ganymede.server.DBEditObject#anonymousUnlinkOK(arlut.csd.ganymede.server.DBObject,short,
+   * <p>See {@link arlut.csd.ganymede.server.DBEditObject#anonymousUnlinkOK(arlut.csd.ganymede.server.DBObject,short,
    * arlut.csd.ganymede.server.DBObject,short,arlut.csd.ganymede.server.GanymedeSession)
    * anonymousUnlinkOK(obj,short,obj,short,GanymedeSession)} for details on
-   * anonymousUnlinkOK() method chaining.
+   * anonymousUnlinkOK() method chaining.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    *
    * @param object The object that the link is to be removed from
    * @param fieldID The field that the linkk is to be removed from
@@ -805,35 +805,35 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is used to control whether or not it is acceptable to
+   * <p>This method is used to control whether or not it is acceptable to
    * make a link to the given field in this
    * {@link arlut.csd.ganymede.server.DBObject DBObject} type when the
    * user only has editing access for the source
    * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField} and not
-   * the target.
+   * the target.</p>
    *
-   * See {@link arlut.csd.ganymede.server.DBEditObject#anonymousLinkOK(arlut.csd.ganymede.server.DBObject,short,
+   * <p>See {@link arlut.csd.ganymede.server.DBEditObject#anonymousLinkOK(arlut.csd.ganymede.server.DBObject,short,
    * arlut.csd.ganymede.server.DBObject,short,arlut.csd.ganymede.server.GanymedeSession)
    * anonymousLinkOK(obj,short,obj,short,GanymedeSession)} for details on
-   * anonymousLinkOK() method chaining.
+   * anonymousLinkOK() method chaining.</p>
    *
-   * Note that the {@link
+   * <p>Note that the {@link
    * arlut.csd.ganymede.server.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.server.DBField)
    * choiceListHasExceptions()} method will call this version of anonymousLinkOK()
    * with a null targetObject, to determine that the client should not
    * use its cache for an InvidDBField's choices.  Any overriding done
    * of this method must be able to handle a null targetObject, or else
-   * an exception will be thrown inappropriately.
+   * an exception will be thrown inappropriately.</p>
    *
-   * The only reason to consult targetObject in any case is to
+   * <p>The only reason to consult targetObject in any case is to
    * allow or disallow anonymous object linking to a field based on
    * the current state of the target object.  If you are just writing
    * generic anonymous linking rules for a field in this object type,
    * targetObject won't concern you anyway.  If you do care about the
    * targetObject's state, though, you have to be prepared to handle
-   * a null valued targetObject.
+   * a null valued targetObject.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    *
    * @param targetObject The object that the link is to be created in (may be null)
    * @param targetFieldID The field that the link is to be created in
@@ -845,24 +845,24 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is used to control whether or not it is acceptable to
+   * <p>This method is used to control whether or not it is acceptable to
    * rescind a link to the given field in this
    * {@link arlut.csd.ganymede.server.DBObject DBObject} type when the
    * user only has editing access for the source
    * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField} and not
-   * the target.
+   * the target.</p>
    *
-   * By default, the server always allows anonymous unlinking.
+   * <p>By default, the server always allows anonymous unlinking.
    * Overriding this method is only required when you want to DISallow
-   * such unlinking.
+   * such unlinking.</p>
    *
-   * See {@link
+   * <p>See {@link
    * arlut.csd.ganymede.server.DBEditObject#anonymousUnlinkOK(arlut.csd.ganymede.server.DBObject,short,
    * arlut.csd.ganymede.server.DBObject,short,arlut.csd.ganymede.server.GanymedeSession)
    * anonymousUnlinkOK(obj,short,obj,short,GanymedeSession)} for details on
-   * anonymousUnlinkOK() method chaining.
+   * anonymousUnlinkOK() method chaining.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    *
    * @param object The object that the link is to be removed from
    * @param fieldID The field that the linkk is to be removed from
@@ -874,28 +874,28 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Customization method to allow this Ganymede object type to
+   * <p>Customization method to allow this Ganymede object type to
    * override the default permissions mechanism for special
-   * purposes.
+   * purposes.</p>
    *
-   * If this method returns null, the default permissions mechanism
+   * <p>If this method returns null, the default permissions mechanism
    * will be followed.  If not, the permissions system will grant
    * the permissions specified by this method for access to the
    * given object, and no further elaboration of the permission
    * will be performed.  Note that this override capability does
-   * not apply to operations performed in supergash mode.
+   * not apply to operations performed in supergash mode.</p>
    *
-   * Note as well that this permOverride() has no effect when
+   * <p>Note as well that this permOverride() has no effect when
    * creating new objects of this type. Take a look at overriding
    * {@link arlut.csd.ganymede.server.DBEditObject#canCreate(arlut.csd.ganymede.rmi.Session) canCreate()}
    * if you need to provide an exception to the normal permissions
-   * system for creating new objects.
+   * system for creating new objects.</p>
    *
-   * This method should be used very sparingly.
+   * <p>This method should be used very sparingly.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public PermEntry permOverride(GanymedeSession session, DBObject object)
@@ -904,29 +904,29 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Customization method to allow this Ganymede object type to grant
+   * <p>Customization method to allow this Ganymede object type to grant
    * permissions above and beyond the default permissions mechanism
-   * for special purposes.
+   * for special purposes.</p>
    *
-   * If this method returns null, the default permissions mechanism
+   * <p>If this method returns null, the default permissions mechanism
    * will be followed.  If not, the permissions system will grant
    * the union of the permissions specified by this method for access to the
-   * given object.
+   * given object.</p>
    *
-   * Note as well that this permExpand() has no effect when
+   * <p>Note as well that this permExpand() has no effect when
    * creating new objects of this type. Take a look at overriding
    * {@link arlut.csd.ganymede.server.DBEditObject#canCreate(arlut.csd.ganymede.rmi.Session) canCreate()}
    * if you need to provide an exception to the normal permissions
-   * system for creating new objects.
+   * system for creating new objects.</p>
    *
-   * This method is essentially different from permOverride() in that
+   * <p>This method is essentially different from permOverride() in that
    * the permissions system will not just take the result of this
    * method for an answer, but will grant additional permissions as
-   * appropriate.
+   * appropriate.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public PermEntry permExpand(GanymedeSession session, DBObject object)
@@ -935,11 +935,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Customization method to allow this Ganymede object type to
+   * <p>Customization method to allow this Ganymede object type to
    * override the default permissions mechanism for special
-   * purposes.
+   * purposes.</p>
    *
-   * If this method returns null, the default permissions mechanism
+   * <p>If this method returns null, the default permissions mechanism
    * will be followed.  If not, the permissions system will grant the
    * permissions specified by this method for access to the given
    * field, and no further elaboration of the permission will be
@@ -948,13 +948,13 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * Just as with permExpand(), this method can never cause greater
    * permissions to be granted to a field than is available to the
    * object as a whole, and this override capability does not
-   * apply to operations performed in supergash mode.
+   * apply to operations performed in supergash mode.</p>
    *
-   * This method should be used very sparingly.
+   * <p>This method should be used very sparingly.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public PermEntry permOverride(GanymedeSession session, DBObject object, short fieldid)
@@ -963,27 +963,27 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Customization method to allow this Ganymede object type to grant
+   * <p>Customization method to allow this Ganymede object type to grant
    * permissions above and beyond the default permissions mechanism
-   * for special purposes.
+   * for special purposes.</p>
    *
-   * If this method returns null, the default permissions mechanism
+   * <p>If this method returns null, the default permissions mechanism
    * will be followed.  If not, the permissions system will grant the
    * union of the permissions returned by this method and those
    * determined normally by GanymedeSession's default field
    * permissions logic.  This method can never cause greater
    * permissions to be granted to a field than is available to the
    * object as a whole, and the results of permExpand() will have
-   * no effect on operations performed in supergash mode.
+   * no effect on operations performed in supergash mode.</p>
    *
-   * This method is essentially different from permOverride() in that
+   * <p>This method is essentially different from permOverride() in that
    * the permissions system will not just take the result of this
    * method for an answer, but will grant additional permissions as
-   * appropriate.
+   * appropriate.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public PermEntry permExpand(GanymedeSession session, DBObject object, short fieldid)
@@ -992,7 +992,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Customization method to verify overall consistency of
+   * <p>Customization method to verify overall consistency of
    * a DBObject.  This method is intended to be overridden
    * in DBEditObject subclasses, and will be called by
    * {@link arlut.csd.ganymede.server.DBEditObject#commitPhase1() commitPhase1()}
@@ -1001,18 +1001,18 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * complete with that object's GanymedeSession reference
    * if this method is called during transaction commit, and
    * that session reference may be used by the verifying code if
-   * the code needs to access the database.
+   * the code needs to access the database.</p>
    *
-   * This method is for custom checks specific to custom DBEditObject
+   * <p>This method is for custom checks specific to custom DBEditObject
    * subclasses.  Standard checking for missing fields for which
    * fieldRequired() returns true is done by {@link
    * arlut.csd.ganymede.server.DBEditSet#commit_checkObjectMissingFields(arlut.csd.ganymede.server.DBEditObject)}
    * during {@link
-   * arlut.csd.ganymede.server.DBEditSet#commit_handlePhase1()}.
+   * arlut.csd.ganymede.server.DBEditSet#commit_handlePhase1()}.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
@@ -1025,21 +1025,21 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Customization method to control whether a specified field
-   * is required to be defined at commit time for a given object.
+   * <p>Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * Note that this method will not be called if the controlling
+   * <p>Note that this method will not be called if the controlling
    * GanymedeSession's enableOversight is turned off, as in
-   * bulk loading.
+   * bulk loading.</p>
    *
-   * Note as well that the designated label field for objects are
+   * <p>Note as well that the designated label field for objects are
    * always required, whatever this method returns, and that this
    * requirement holds without regard to the GanymedeSession's
-   * enableOversight value.
+   * enableOversight value.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public boolean fieldRequired(DBObject object, short fieldid)
@@ -1048,15 +1048,15 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Customization method to verify whether the user has permission
+   * <p>Customization method to verify whether the user has permission
    * to view a given object.  The client's DBSession object
    * will call this per-class method to do an object type-
    * sensitive check to see if this object feels like being
-   * available for viewing to the client.
+   * available for viewing to the client.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public boolean canRead(DBSession session, DBObject object)
@@ -1065,16 +1065,16 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Customization method to verify whether the user has permission
+   * <p>Customization method to verify whether the user has permission
    * to edit a given object.  The client's
    * {@link arlut.csd.ganymede.server.DBSession DBSession} object
    * will call this per-class method to do an object type-
    * sensitive check to see if this object feels like being
-   * available for editing by the client.
+   * available for editing by the client.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public boolean canWrite(DBSession session, DBObject object)
@@ -1083,22 +1083,22 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Customization method to verify whether the user should be able to
+   * <p>Customization method to verify whether the user should be able to
    * see a specific field in a given object.  Instances of
    * {@link arlut.csd.ganymede.server.DBField DBField} will
    * wind up calling up to here to let us override the normal visibility
-   * process.
+   * process.</p>
    *
-   * Note that it is permissible for session to be null, in which case
+   * <p>Note that it is permissible for session to be null, in which case
    * this method will always return the default visiblity for the field
-   * in question.
+   * in question.</p>
    *
-   * If field is not from an object of the same base as this DBEditObject,
-   * an exception will be thrown.
+   * <p>If field is not from an object of the same base as this DBEditObject,
+   * an exception will be thrown.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public boolean canSeeField(DBSession session, DBField field)
@@ -1115,21 +1115,21 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Controls whether change information for the field can be safely
+   * <p>Controls whether change information for the field can be safely
    * logged to the Ganymede log and emailed to the owner notification
-   * list for the field's containing object.
+   * list for the field's containing object.</p>
    *
-   * If okToLogField() returns false for a field, the change to the
+   * <p>If okToLogField() returns false for a field, the change to the
    * field will be mentioned in email and the log, but the actual
-   * values will not be.
+   * values will not be.</p>
    *
-   * With the exception of PasswordDBFields, you should consider any
+   * <p>With the exception of PasswordDBFields, you should consider any
    * field for which okToLogField() returns true to be public data, as
    * any user able to log into Ganymede may be able to see the data in
    * the logs.  PasswordDBFields contain special logic to prevent the
-   * data they contain from being revealed in logs or email.
+   * data they contain from being revealed in logs or email.<p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public boolean okToLogField(DBField field)
@@ -1138,12 +1138,12 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Customization method to verify whether this object type has an inactivation
-   * mechanism.
+   * <p>Customization method to verify whether this object type has an inactivation
+   * mechanism.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public boolean canBeInactivated()
@@ -1152,27 +1152,27 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Customization method to verify whether the user has permission
+   * <p>Customization method to verify whether the user has permission
    * to inactivate a given object.  The client's
    * {@link arlut.csd.ganymede.server.DBSession DBSession} object
    * will call this per-class method to do an object type-
    * sensitive check to see if this object feels like being
-   * available for inactivating by the client.
+   * available for inactivating by the client.</p>
    *
-   * Note that unlike canRemove(), canInactivate() takes a
+   * <p>Note that unlike canRemove(), canInactivate() takes a
    * DBEditObject instead of a DBObject.  This is because inactivating
    * an object is based on editing the object, and so we have the
    * GanymedeSession/DBSession classes go ahead and check the object
    * out for editing before calling us.  This serves to force the
    * session classes to check for write permission before attempting
-   * inactivation.
+   * inactivation.</p>
    *
-   * Use canBeInactivated() to test for the presence of an inactivation
-   * protocol outside of an edit context if needed.
+   * <p>Use canBeInactivated() to test for the presence of an inactivation
+   * protocol outside of an edit context if needed.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public boolean canInactivate(DBSession session, DBEditObject object)
@@ -1181,15 +1181,15 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Customization method to verify whether the user has permission
+   * <p>Customization method to verify whether the user has permission
    * to remove a given object.  The client's DBSession object
    * will call this per-class method to do an object type-
    * sensitive check to see if this object feels like being
-   * available for removal by the client.
+   * available for removal by the client.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
@@ -1229,16 +1229,16 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Customization method to verify whether the user has permission
+   * <p>Customization method to verify whether the user has permission
    * to clone a given object.  The client's {@link
    * arlut.csd.ganymede.server.GanymedeSession} object will call this
    * per-class method to do an object type- sensitive check to see if
    * this object feels like being available for cloning by the
-   * client.
+   * client.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public boolean canClone(DBSession session, DBObject object)
@@ -1247,13 +1247,13 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Customization method to verify whether a specific field
+   * <p>Customization method to verify whether a specific field
    * in object should be cloned using the basic field-clone
-   * logic.
+   * logic.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public boolean canCloneField(DBSession session, DBObject object, DBField field)
@@ -1264,18 +1264,17 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     return field.getID() > SchemaConstants.FinalSystemField;
   }
 
-
   /**
-   * Customization method to verify whether the user has permission
+   * <p>Customization method to verify whether the user has permission
    * to create an instance of this object type.  The client's
    * {@link arlut.csd.ganymede.server.DBSession DBSession} object
    * will call the canCreate method in the
    * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} for this object type
-   * to determine whether creation is allowed to the user.
+   * to determine whether creation is allowed to the user.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public boolean canCreate(Session session)
@@ -1300,15 +1299,15 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Hook to allow subclasses to grant ownership privileges to a given
+   * <p>Hook to allow subclasses to grant ownership privileges to a given
    * object.  If this method returns true on a given object, the Ganymede
    * Permissions system will provide access to the object as owned with
    * whatever permissions apply to objects owned by the persona active
-   * in gSession.
+   * in gSession.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public boolean grantOwnership(GanymedeSession gSession, DBObject object)
@@ -1317,14 +1316,14 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method provides a hook to allow custom DBEditObject subclasses to
+   * <p>This method provides a hook to allow custom DBEditObject subclasses to
    * indicate that the given object is interested in receiving notification
    * when changes involving it occur, and can provide one or more addresses for
-   * such notification to go to.
+   * such notification to go to.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public boolean hasEmailTarget(DBObject object)
@@ -1333,18 +1332,18 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method provides a hook to allow custom DBEditObject subclasses to
+   * <p>This method provides a hook to allow custom DBEditObject subclasses to
    * return a List of Strings comprising a list of addresses to be
    * notified above and beyond the normal owner group notification when
    * the given object is changed in a transaction.  Used for letting end-users
-   * be notified of changes to their account, etc.
+   * be notified of changes to their account, etc.</p>
    *
-   * If no email targets are present in this object, either a null value
-   * or an empty List may be returned.
+   * <p>If no email targets are present in this object, either a null value
+   * or an empty List may be returned.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public List<String> getEmailTargets(DBObject object)
@@ -1353,13 +1352,13 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method provides a hook to allow custom DBEditObject
+   * <p>This method provides a hook to allow custom DBEditObject
    * subclasses to return a String containing a URL for an image to
-   * represent this object.  Intended to be used for users, primarily.
+   * represent this object.  Intended to be used for users, primarily.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public String getImageURLForObject(DBObject object)
@@ -1368,17 +1367,17 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method provides a hook to allow custom DBEditObject
+   * <p>This method provides a hook to allow custom DBEditObject
    * subclasses to react to forthcoming object expiration, during the
-   * execution of the GanymedeWarningTask.
+   * execution of the GanymedeWarningTask.</p>
    *
-   * This method will be called without benefit of an open DBEditSet,
+   * <p>This method will be called without benefit of an open DBEditSet,
    * so any email generated will need to make use of the
-   * non-transactional mail methods in the Ganymede.log object.
+   * non-transactional mail methods in the Ganymede.log object.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    *
    * @return true if the DBEditObject subclass wishes to completely
    * handle the warning, or false if the default warning transmisssion
@@ -1391,16 +1390,16 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method provides a hook to allow custom DBEditObject
-   * subclasses to react to forthcoming object removal.
+   * <p>This method provides a hook to allow custom DBEditObject
+   * subclasses to react to forthcoming object removal.</p>
    *
-   * This method will be called without benefit of an open DBEditSet,
+   * <p>This method will be called without benefit of an open DBEditSet,
    * so any email generated will need to make use of the
-   * non-transactional mail methods in the Ganymede.log object.
+   * non-transactional mail methods in the Ganymede.log object.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    *
    * @return true if the DBEditObject subclass wishes to completely
    * handle the warning, or false if the default warning transmisssion
@@ -1413,30 +1412,30 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method provides a hook that can be used by subclasses of
+   * <p>This method provides a hook that can be used by subclasses of
    * DBEditObject to return a list of attribute names and attribute
    * values to include when writing out &lt;invid&gt; elements to a
-   * sync channel during transactional sync'ing.
+   * sync channel during transactional sync'ing.</p>
    *
-   * The point of this is to allow DBEditObject subclasses to
+   * <p>The point of this is to allow DBEditObject subclasses to
    * inject additional data into a transactional sync record so that
    * external sync channel service code can have enough information to
    * identify a relationship that was made or broken within the
-   * tranaction.
+   * tranaction.</p>
    *
-   * The array returned should have an even number of values.  The
+   * <p>The array returned should have an even number of values.  The
    * first value should be an attribute name, the second should be
    * the value for that attribute name, the third should be another
-   * attribute name, and etc.
+   * attribute name, and etc.</p>
    *
-   * It is an error to return an attribute name that conflicts with
+   * <p>It is an error to return an attribute name that conflicts with
    * the set pre-defined for use with the &lt;invid&gt; XML element.
    * This includes <code>type</code>, <code>num</code>, <code>id</code>,
-   * and <code>oid</code>.
+   * and <code>oid</code>.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    *
    * @param invid The Invid that is to be written out.
    * @param sourceObj The object that contains the Invid to be written out.
@@ -1456,7 +1455,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method provides a hook that can be used by subclasses of
+   * <p>This method provides a hook that can be used by subclasses of
    * DBEditObject to return a list of attribute names and attribute
    * values to include when writing out &lt;invid&gt; elements that
    * point to them during a sync channel operation.  This method
@@ -1467,9 +1466,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * in that this method adds extra attributes to &lt;invid&gt;
    * elements pointing to objects of this kind, where
    * getForeignSyncKeys() adds extra attributes to &lt;invid&gt;
-   * elements that point from objects of this kind.
+   * elements that point from objects of this kind.</p>
    *
-   * The point of this is to allow DBEditObject subclasses to
+   * <p>The point of this is to allow DBEditObject subclasses to
    * inject additional data into a transactional sync record so that
    * external sync channel service code can have enough information to
    * identify a relationship that was made or broken within the
@@ -1477,21 +1476,21 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * structure with the XML Sync Channel mechanism, you might want all
    * of your &lt;invid&gt; elements that point to Users to include a
    * dn attribute that provides the fully qualified LDAP DN for the
-   * User object.
+   * User object.</p>
    *
-   * The array returned should have an even number of values.  The
+   * <p>The array returned should have an even number of values.  The
    * first value should be an attribute name, the second should be
    * the value for that attribute name, the third should be another
-   * attribute name, and etc.
+   * attribute name, and etc.</p>
    *
-   * It is an error to return an attribute name that conflicts with
+   * <p>It is an error to return an attribute name that conflicts with
    * the set pre-defined for use with the &lt;invid&gt; XML element.
    * This includes <code>type</code>, <code>num</code>, <code>id</code>,
-   * and <code>oid</code>.
+   * and <code>oid</code>.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    *
    * @param myObj The object that is being targetted by an &lt;invid&gt; element.
    * @param syncChannel The name of the Sync Channel that the &lt;invid&gt; is being written to.
@@ -1518,22 +1517,22 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 
   /**
-   * Initializes a newly created DBEditObject.
+   * <p>Initializes a newly created DBEditObject.</p>
    *
-   * When this method is called, the DBEditObject has been created,
+   * <p>When this method is called, the DBEditObject has been created,
    * its ownership set, and all fields defined in the controlling
    * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * have been instantiated without defined
    * values.  If this DBEditObject is an embedded type, it will
    * have been linked into its parent object before this method
-   * is called.
+   * is called.</p>
    *
-   * This method is responsible for filling in any default
+   * <p>This method is responsible for filling in any default
    * values that can be calculated from the
    * {@link arlut.csd.ganymede.server.DBSession DBSession}
-   * associated with the editset defined in this DBEditObject.
+   * associated with the editset defined in this DBEditObject.</p>
    *
-   * If initialization fails for some reason, initializeNewObject()
+   * <p>If initialization fails for some reason, initializeNewObject()
    * will return a ReturnVal with an error result..  If the owning
    * GanymedeSession is not in bulk-loading mode (i.e.,
    * GanymedeSession.enableOversight is true), {@link
@@ -1542,14 +1541,14 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * before calling this method.  If this method returns a failure code, the
    * calling method will rollback the transaction.  This method has no
    * responsibility for undoing partial initialization, the
-   * checkpoint/rollback logic will take care of that.
+   * checkpoint/rollback logic will take care of that.</p>
    *
-   * If enableOversight is false, DBSession.createDBObject() will not
+   * <p>If enableOversight is false, DBSession.createDBObject() will not
    * checkpoint the transaction status prior to calling initializeNewObject(),
    * so it is the responsibility of this method to handle any checkpointing
-   * needed.
+   * needed.</p>
    *
-   * This method should be overridden in subclasses.
+   * <p>This method should be overridden in subclasses.</p>
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
@@ -1562,24 +1561,24 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method provides a hook that can be used to indicate whether
+   * <p>This method provides a hook that can be used to indicate whether
    * a field that is defined in this object's field dictionary
-   * should be newly instantiated in this particular object.
+   * should be newly instantiated in this particular object.</p>
    *
-   * This method does not affect those fields which are actually present
+   * <p>This method does not affect those fields which are actually present
    * in a previously existing object's record in the
    * {@link arlut.csd.ganymede.server.DBStore DBStore}.  What this method allows
    * you to do is have a subclass decide whether it wants to instantiate
    * a potential field (one that is declared in the field dictionary for
    * this object, but which doesn't happen to be presently defined in
-   * this object) in this particular object.
+   * this object) in this particular object.</p>
    *
-   * A concrete example will help here.  The Permissions Object type
+   * <p>A concrete example will help here.  The Permissions Object type
    * (base number SchemaConstants.PermBase) holds a permission
    * matrix, a descriptive title, and a list of admin personae that hold
-   * those permissions for objects they own.
+   * those permissions for objects they own.</p>
    *
-   * There are a few specific instances of SchemaConstants.PermBase
+   * <p>There are a few specific instances of SchemaConstants.PermBase
    * that don't properly need the list of admin personae, as their
    * object invids are hard-coded into the Ganymede security system, and
    * their permission matrices are automatically consulted in certain
@@ -1589,9 +1588,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * false if the fieldID corresponds to the admin personae list if the
    * object's ID is that of one of these special objects.  As a result,
    * when the objects are viewed by an administrator, the admin personae
-   * list will not be seen.
+   * list will not be seen.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
    */
 
@@ -1601,35 +1600,35 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Hook to allow the cloning of an object.  If this object type
+   * <p>Hook to allow the cloning of an object.  If this object type
    * supports cloning (which should be very much customized for this
    * object type.. creation of the ancillary objects, which fields to
-   * clone, etc.), this customization method will actually do the work.
+   * clone, etc.), this customization method will actually do the work.</p>
    *
-   * This method is called on a newly created object, in order
+   * <p>This method is called on a newly created object, in order
    * to clone the state of origObj into it.  This method does not actually
    * create a new object.. that is handled by
    * {@link arlut.csd.ganymede.server.GanymedeSession#clone_db_object(arlut.csd.ganymede.common.Invid) clone_db_object()}
-   * before this method is called on the newly created object.
+   * before this method is called on the newly created object.</p>
    *
-   * The default (DBEditObject) implementation of this method will only clone
+   * <p>The default (DBEditObject) implementation of this method will only clone
    * fields for which
    * {@link arlut.csd.ganymede.server.DBEditObject#canCloneField(arlut.csd.ganymede.server.DBSession,
    * arlut.csd.ganymede.server.DBObject, arlut.csd.ganymede.server.DBField) canCloneField()}
    * returns true, and which are not connected to a namespace (and
    * thus could not possibly be cloned, because the values are
-   * constrained to be unique and non-duplicated).
+   * constrained to be unique and non-duplicated).</p>
    *
-   * If one or more fields in the original object are unreadable by the cloning
+   * <p>If one or more fields in the original object are unreadable by the cloning
    * session, we will provide a list of fields that could not be cloned due to
    * a lack of read permissions in a dialog in the ReturnVal.  Such a problem will
    * not result in a failure code being returned, however.. the clone will succeed,
-   * but an informative dialog will be provided to the user.
+   * but an informative dialog will be provided to the user.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses, but
+   * <p>To be overridden on necessity in DBEditObject subclasses, but
    * this method's default logic will probably do what you need it to
    * do.  If you need to make changes, try to chain your subclassed
-   * method to this one via super.cloneFromObject().
+   * method to this one via super.cloneFromObject().</p>
    *
    * @param session The DBSession that the new object is to be created in
    * @param origObj The object we are cloning
@@ -1764,38 +1763,38 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is the hook that DBEditObject subclasses use to interpose
+   * <p>This method is the hook that DBEditObject subclasses use to interpose
    * {@link arlut.csd.ganymede.server.GanymediatorWizard wizards} when a field's
-   * value is being changed.
+   * value is being changed.</p>
    *
-   * Whenever a field is changed in this object, this method will be
+   * <p>Whenever a field is changed in this object, this method will be
    * called with details about the change. This method can refuse to
    * perform the operation, it can make changes to other objects in
    * the database in response to the requested operation, or it can
-   * choose to allow the operation to continue as requested.
+   * choose to allow the operation to continue as requested.</p>
    *
-   * In the latter two cases, the wizardHook code may specify a list
+   * <p>In the latter two cases, the wizardHook code may specify a list
    * of fields and/or objects that the client may need to update in
-   * order to maintain a consistent view of the database.
+   * order to maintain a consistent view of the database.</p>
    *
-   * If server-local code has called
+   * <p>If server-local code has called
    * {@link arlut.csd.ganymede.server.GanymedeSession#enableOversight(boolean)
    * enableOversight(false)},
    * this method will never be
    * called.  This mode of operation is intended only for initial
-   * bulk-loading of the database.
+   * bulk-loading of the database.</p>
    *
-   * This method may also be bypassed when server-side code uses
-   * setValueLocal() and the like to make changes in the database.
+   * <p>This method may also be bypassed when server-side code uses
+   * setValueLocal() and the like to make changes in the database.</p>
    *
-   * This method is called before the finalize*() methods.. the finalize*()
+   * <p>This method is called before the finalize*() methods.. the finalize*()
    * methods is where last minute cascading changes should be performed..
    * Note as well that wizardHook() is called before the namespace checking
    * for the proposed value is performed, while the finalize*() methods are
-   * called after the namespace checking.
+   * called after the namespace checking.</p>
    *
-   * The operation parameter will be a small integer, and should hold one of the
-   * following values:
+   * <p>The operation parameter will be a small integer, and should hold one of the
+   * following values:</p>
    *
    * <dl>
    * <dt>1 - SETVAL</dt>
@@ -1843,7 +1842,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * being cleared.  param2 will be null.</dd>
    * </dl>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
    * @return null if the operation is approved without comment, or a
    * ReturnVal object indicating success or failure, objects and
@@ -1865,18 +1864,18 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Hook to have this object create a new embedded object
-   * in the given field.
+   * <p>Hook to have this object create a new embedded object
+   * in the given field.</p>
    *
-   * This method now has the appropriate default logic for creating
+   * <p>This method now has the appropriate default logic for creating
    * embedded objects with the user's permissions, but this method may
-   * still be overridden to do customization, if needed.
+   * still be overridden to do customization, if needed.</p>
    *
-   * XXX: It is essential that createNewEmbeddedObject() use
+   * <p>XXX: It is essential that createNewEmbeddedObject() use
    * GanymedeSession.create_db_object() in order to check permissions
    * and to export the created embedded object for the client's use, if
    * necessary, whatever other customizations a subclass might choose to
-   * do.  We may want to make this method final.
+   * do.  We may want to make this method final.</p>
    *
    * @return A ReturnVal indicating success or failure.  If the
    * embedded object was created successfully, the getInvid() method
@@ -1926,16 +1925,16 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method provides a hook that can be used to check any values
+   * <p>This method provides a hook that can be used to check any values
    * to be set in any field in this object.  Subclasses of
    * DBEditObject should override this method, implementing basically
    * a large switch statement to check for any given field whether the
    * submitted value is acceptable given the current state of the
-   * object.
+   * object.</p>
    *
-   * Question: what synchronization issues are going to be needed
+   * <p>Question: what synchronization issues are going to be needed
    * between DBEditObject and DBField to insure that we can have
-   * a reliable verifyNewValue method here?
+   * a reliable verifyNewValue method here?</p>
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
@@ -1958,7 +1957,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   // ****
 
   /**
-   * This method allows the DBEditObject to have executive approval of
+   * <p>This method allows the DBEditObject to have executive approval of
    * any vector delete operation, and to take any special actions in
    * reaction to the delete.. if this method returns null or a success
    * code in its ReturnVal, the {@link arlut.csd.ganymede.server.DBField DBField}
@@ -1966,16 +1965,16 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * make the change to its vector.  If this method returns a
    * non-success code in its ReturnVal, the DBField that called us
    * will not make the change, and the field will be left
-   * unchanged.
+   * unchanged.</p>
    *
-   * The &lt;field&gt; parameter identifies the field that is requesting
+   * <p>The &lt;field&gt; parameter identifies the field that is requesting
    * approval for item deletion, and the &lt;index&gt; parameter identifies
-   * the element number that is to be deleted.
+   * the element number that is to be deleted.</p>
    *
-   * The DBField that called us will take care of all standard
+   * <p>The DBField that called us will take care of all standard
    * checks on the operation (including vector bounds, etc.) before
    * calling this method.  Under normal circumstances, we won't need
-   * to do anything here.
+   * to do anything here.</p>
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
@@ -1988,24 +1987,24 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method allows the DBEditObject to have executive approval
+   * <p>This method allows the DBEditObject to have executive approval
    * of any vector-vector removal operation, and to take any special
    * actions in reaction to the removal.. if this method returns null
    * or a success code in its ReturnVal, the DBField that called us is
    * guaranteed to proceed to make the change to its vector.  If this
    * method returns a non-success code in its ReturnVal, the DBField
    * that called us will not make the change, and the field will be
-   * left unchanged.
+   * left unchanged.</p>
    *
-   * The &lt;field&gt; parameter identifies the field that is
+   * <p>The &lt;field&gt; parameter identifies the field that is
    * requesting approval for item deletion, and the
    * &lt;valuesToDelete&gt; parameter contains a list of elements to
-   * be deleted.
+   * be deleted.</p>
    *
-   * The DBField that called us will take care of all standard
+   * <p>The DBField that called us will take care of all standard
    * checks on the operation (including vector bounds, etc.) before
    * calling this method.  Under standard circumstances, we won't need
-   * to do anything here.
+   * to do anything here.</p>
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
@@ -2018,23 +2017,23 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method allows the DBEditObject to have executive approval
+   * <p>This method allows the DBEditObject to have executive approval
    * of any vector add operation, and to take any special actions in
    * reaction to the add.. if this method returns null or a success
    * code in its ReturnVal, the DBField that called us is guaranteed
    * to proceed to make the change to its vector.  If this method
    * returns a non-success code in its ReturnVal, the DBField that
    * called us will not make the change, and the field will be left
-   * unchanged.
+   * unchanged.</p>
    *
-   * The &lt;field&gt; parameter identifies the field that is
+   * <p>The &lt;field&gt; parameter identifies the field that is
    * requesting approval for item deletion, and the &lt;value&gt;
-   * parameter carries the value to be added.
+   * parameter carries the value to be added.</p>
    *
-   * The DBField that called us will take care of all standard
+   * <p>The DBField that called us will take care of all standard
    * checks on the operation (including vector bounds, etc.) before
    * calling this method.  Under normal circumstances, we won't need
-   * to do anything here.
+   * to do anything here.</p>
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
@@ -2047,23 +2046,23 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method allows the DBEditObject to have executive approval
+   * <p>This method allows the DBEditObject to have executive approval
    * of any vector-vector add operation, and to take any special
    * actions in reaction to the add.. if this method returns null or a
    * success code in its ReturnVal, the DBField that called us is
    * guaranteed to proceed to make the change to its vector.  If this
    * method returns a non-success code in its ReturnVal, the DBField
    * that called us will not make the change, and the field will be
-   * left unchanged.
+   * left unchanged.</p>
    *
-   * The &lt;field&gt; parameter identifies the field that is
+   * <p>The &lt;field&gt; parameter identifies the field that is
    * requesting approval for item deletion, and the &lt;submittedValues&gt;
-   * parameter carries the values to be added.
+   * parameter carries the values to be added.</p>
    *
-   * The DBField that called us will take care of all standard
+   * <p>The DBField that called us will take care of all standard
    * checks on the operation (including vector bounds, etc.) before
    * calling this method.  Under normal circumstances, we won't need
-   * to do anything here.
+   * to do anything here.</p>
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
@@ -2076,25 +2075,25 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method allows the DBEditObject to have executive approval
+   * <p>This method allows the DBEditObject to have executive approval
    * of any vector set operation, and to take any special actions in
    * reaction to the set.. if this method returns null or a success
    * code in its ReturnVal, the DBField that called us is guaranteed
    * to proceed to make the change to its vector.  If this method
    * returns a non-success code in its ReturnVal, the DBField that
    * called us will not make the change, and the field will be left
-   * unchanged.
+   * unchanged.</p>
    *
-   * The &lt;field&gt; parameter identifies the field that is
+   * <p>The &lt;field&gt; parameter identifies the field that is
    * requesting approval for item deletion, the &lt;index&gt;
    * parameter identifies which element in the given vector field is
    * to be set, and the &lt;value&gt; parameter carries the proposed
-   * new value.
+   * new value.</p>
    *
-   * The DBField that called us will take care of all standard
+   * <p>The DBField that called us will take care of all standard
    * checks on the operation (including vector bounds, etc.) before
    * calling this method.  Under normal circumstances, we won't need
-   * to do anything here.
+   * to do anything here.</p>
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
@@ -2107,7 +2106,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method allows the DBEditObject to have executive approval
+   * <p>This method allows the DBEditObject to have executive approval
    * of any scalar set operation, and to take any special actions in
    * reaction to the set.  When a scalar field has its value set, it
    * will call its owners finalizeSetValue() method, passing itself as
@@ -2115,33 +2114,33 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * approved as the &lt;value&gt; parameter.  A Ganymede customizer
    * who creates custom subclasses of the DBEditObject class can
    * override the finalizeSetValue() method and write his own logic
-   * to examine any change and either approve or reject the change.
+   * to examine any change and either approve or reject the change.</p>
    *
-   * A custom finalizeSetValue() method will typically need to
+   * <p>A custom finalizeSetValue() method will typically need to
    * examine the field parameter to see which field is being changed,
    * and then do the appropriate checking based on the value
    * parameter.  The finalizeSetValue() method can call the normal
    * this.getFieldValueLocal() type calls to examine the current state
    * of the object, if such information is necessary to make
-   * appropriate decisions.
+   * appropriate decisions.</p>
    *
-   * If finalizeSetValue() returns null or a ReturnVal object with
+   * <p>If finalizeSetValue() returns null or a ReturnVal object with
    * a positive success value, the DBField that called us is
    * guaranteed to proceed to make the change to its value.  If this
    * method returns a non-success code in its ReturnVal, as with the
    * result of a call to Ganymede.createErrorDialog(), the DBField
    * that called us will not make the change, and the field will be
    * left unchanged.  Any error dialog returned from finalizeSetValue()
-   * will be passed to the user.
+   * will be passed to the user.</p>
    *
-   * The DBField that called us will take care of all standard
+   * <p>The DBField that called us will take care of all standard
    * checks on the operation (including a call to our own
    * verifyNewValue() method before calling this method.  Under normal
    * circumstances, we won't need to do anything here.
    * finalizeSetValue() is useful when you need to do unusually
    * involved checks, and for when you want a chance to trigger other
    * changes in response to a particular field's value being
-   * changed.
+   * changed.</p>
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
@@ -2154,12 +2153,12 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method returns true if field1 should not show any choices
+   * <p>This method returns true if field1 should not show any choices
    * that are currently selected in field2, where both field1 and
-   * field2 are fields in this object.
+   * field2 are fields in this object.</p>
    *
-   * The purpose of this method is to allow mutual exclusion between
-   * a pair of fields with mandatory choices.
+   * <p>The purpose of this method is to allow mutual exclusion between
+   * a pair of fields with mandatory choices.</p>
    *
    * To be overridden on necessity in DBEditObject subclasses.
    */
@@ -2170,27 +2169,27 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method returns a key that can be used by the client
+   * <p>This method returns a key that can be used by the client
    * to cache the value returned by choices().  If the client
    * already has the key cached on the client side, it
    * can provide the choice list from its cache rather than
-   * calling choices() on this object again.
+   * calling choices() on this object again.</p>
    *
-   * The default logic in this method is designed to cause the client
+   * <p>The default logic in this method is designed to cause the client
    * to cache choice lists for invid fields in the 'all objects of
    * invid target type' cache bucket.  If your InvidDBField needs to
    * provide a restricted subset of objects of the targeted type as
    * the choice list, you'll need to override this method to either
    * return null (to turn off choice list caching), or generate some
    * kind of unique key that won't collide with the Short objects used
-   * to represent the default object list caches.
+   * to represent the default object list caches.</p>
    *
-   * See also the {@link
+   * <p>See also the {@link
    * arlut.csd.ganymede.server.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.server.DBField)}
    * hook, which controls whether or not the default logic will
-   * encourage the client to cache a given InvidDBField's choice list.
+   * encourage the client to cache a given InvidDBField's choice list.</p>
    *
-   * If there is no caching key, this method will return null.
+   * <p>If there is no caching key, this method will return null.</p>
    */
 
   public Object obtainChoicesKey(DBField field)
@@ -2222,18 +2221,18 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method provides a hook that can be used to generate
+   * <p>This method provides a hook that can be used to generate
    * choice lists for invid and string fields that provide
    * such.  String and Invid DBFields will call their owner's
-   * obtainChoiceList() method to get a list of valid choices.
+   * obtainChoiceList() method to get a list of valid choices.</p>
    *
-   * This method will provide a reasonable default for targetted
+   * <p>This method will provide a reasonable default for targetted
    * invid fields, filtered by the GanymedeSession's
-   * visibilityFilterInvids list.
+   * visibilityFilterInvids list.</p>
    *
-   * NOTE: This method does not need to be synchronized.  Making this
+   * <p>NOTE: This method does not need to be synchronized.  Making this
    * synchronized can lead to DBEditObject/DBSession nested monitor
-   * deadlocks.
+   * deadlocks.</p>
    */
 
   public QueryResult obtainChoiceList(String fieldName) throws NotLoggedInException
@@ -2242,18 +2241,18 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method provides a hook that can be used to generate
+   * <p>This method provides a hook that can be used to generate
    * choice lists for invid and string fields that provide
    * such.  String and Invid DBFields will call their owner's
-   * obtainChoiceList() method to get a list of valid choices.
+   * obtainChoiceList() method to get a list of valid choices.</p>
    *
-   * This method will provide a reasonable default for targetted
+   * <p>This method will provide a reasonable default for targetted
    * invid fields, filtered by the GanymedeSession's
-   * visibilityFilterInvids list.
+   * visibilityFilterInvids list.</p>
    *
-   * NOTE: This method does not need to be synchronized.  Making this
+   * <p>NOTE: This method does not need to be synchronized.  Making this
    * synchronized can lead to DBEditObject/DBSession nested monitor
-   * deadlocks.
+   * deadlocks.</p>
    */
 
   public QueryResult obtainChoiceList(short fieldID) throws NotLoggedInException
@@ -2262,18 +2261,18 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method provides a hook that can be used to generate
+   * <p>This method provides a hook that can be used to generate
    * choice lists for invid and string fields that provide
    * such.  String and Invid DBFields will call their owner's
-   * obtainChoiceList() method to get a list of valid choices.
+   * obtainChoiceList() method to get a list of valid choices.</p>
    *
-   * This method will provide a reasonable default for targetted
+   * <p>This method will provide a reasonable default for targetted
    * invid fields, filtered by the GanymedeSession's
-   * visibilityFilterInvids list.
+   * visibilityFilterInvids list.</p>
    *
-   * NOTE: This method does not need to be synchronized.  Making this
+   * <p>NOTE: This method does not need to be synchronized.  Making this
    * synchronized can lead to DBEditObject/DBSession nested monitor
-   * deadlocks.
+   * deadlocks.</p>
    */
 
   public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
@@ -2328,20 +2327,20 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is used to tell the client whether the list of options it gets
+   * <p>This method is used to tell the client whether the list of options it gets
    * back for a field can be taken out of the cache.  If this method returns
    * true, that means that some of the results that obtainChoiceList() will
    * return will include items that normally wouldn't be availble to the
-   * client, but are in this case because of the anonymousLinkOK() results.
+   * client, but are in this case because of the anonymousLinkOK() results.</p>
    *
-   * This is kind of wacked-out random stuff.  It's basically a way of
+   * <p>This is kind of wacked-out random stuff.  It's basically a way of
    * allowing DBEditObject to get involved in the decision as to whether an
    * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField}'s
    * {@link arlut.csd.ganymede.server.InvidDBField#choicesKey() choicesKey()}'s
-   * method should disallow client-side caching for the field's choice list.
+   * method should disallow client-side caching for the field's choice list.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses, though the default
-   * logic here tries to be smart about the typical cases.
+   * <p>To be overridden on necessity in DBEditObject subclasses, though the default
+   * logic here tries to be smart about the typical cases.</p>
    */
 
   public boolean choiceListHasExceptions(DBField field)
@@ -2381,14 +2380,14 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method provides a hook that a DBEditObject subclass
+   * <p>This method provides a hook that a DBEditObject subclass
    * can use to indicate whether a given field can only
-   * choose from a choice provided by obtainChoiceList()
+   * choose from a choice provided by obtainChoiceList()</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses,
+   * <p>To be overridden on necessity in DBEditObject subclasses,
    * particularly if you have a StringDBField that you want to force
    * to pick from the list of choices provided by your DBEditObject
-   * subclass' obtainChoiceList() method.
+   * subclass' obtainChoiceList() method.</p>
    */
 
   public boolean mustChoose(DBField field)
@@ -2405,12 +2404,12 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method provides a hook that a DBEditObject subclass can use
+   * <p>This method provides a hook that a DBEditObject subclass can use
    * to determine whether it is permissible to enter IPv6 address in a
    * particular (IP) DBField.  The default assumption is that IPv6
-   * addresses are not accepted.
+   * addresses are not accepted.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    */
 
   public boolean isIPv6OK(DBField field)
@@ -2419,12 +2418,12 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method provides a hook that a DBEditObject subclass
+   * <p>This method provides a hook that a DBEditObject subclass
    * can use to indicate that a given
    * {@link arlut.csd.ganymede.server.DateDBField DateDBField} has a restricted
-   * range of possibilities.
+   * range of possibilities.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    */
 
   public boolean isDateLimited(DBField field)
@@ -2440,10 +2439,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is used to specify the earliest acceptable date
-   * for the specified {@link arlut.csd.ganymede.server.DateDBField DateDBField}.
+   * <p>This method is used to specify the earliest acceptable date
+   * for the specified {@link arlut.csd.ganymede.server.DateDBField DateDBField}.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    */
 
   public Date minDate(DBField field)
@@ -2459,10 +2458,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is used to specify the latest acceptable date
-   * for the specified {@link arlut.csd.ganymede.server.DateDBField DateDBField}.
+   * <p>This method is used to specify the latest acceptable date
+   * for the specified {@link arlut.csd.ganymede.server.DateDBField DateDBField}.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    */
 
   public Date maxDate(DBField field)
@@ -2471,12 +2470,12 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method provides a hook that a DBEditObject subclass
+   * <p>This method provides a hook that a DBEditObject subclass
    * can use to indicate that a given
    * {@link arlut.csd.ganymede.server.NumericDBField NumericDBField}
-   * has a restricted range of possibilities.
+   * has a restricted range of possibilities.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    */
 
   public boolean isIntLimited(DBField field)
@@ -2485,11 +2484,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is used to specify the minimum acceptable value
+   * <p>This method is used to specify the minimum acceptable value
    * for the specified
-   * {@link arlut.csd.ganymede.server.NumericDBField NumericDBField}.
+   * {@link arlut.csd.ganymede.server.NumericDBField NumericDBField}.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    */
 
   public int minInt(DBField field)
@@ -2498,11 +2497,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is used to specify the maximum acceptable value
+   * <p>This method is used to specify the maximum acceptable value
    * for the specified
-   * {@link arlut.csd.ganymede.server.NumericDBField NumericDBField}.
+   * {@link arlut.csd.ganymede.server.NumericDBField NumericDBField}.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    */
 
   public int maxInt(DBField field)
@@ -2511,12 +2510,12 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method provides a hook that a DBEditObject subclass
+   * <p>This method provides a hook that a DBEditObject subclass
    * can use to indicate that a given
    * {@link arlut.csd.ganymede.server.FloatDBField FloatDBField}
-   * has a restricted range of possibilities.
+   * has a restricted range of possibilities.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    */
 
   public boolean isFloatLimited(DBField field)
@@ -2525,11 +2524,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is used to specify the minimum acceptable value
+   * <p>This method is used to specify the minimum acceptable value
    * for the specified
-   * {@link arlut.csd.ganymede.server.FloatDBField FloatDBField}.
+   * {@link arlut.csd.ganymede.server.FloatDBField FloatDBField}.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    */
 
   public double minFloat(DBField field)
@@ -2538,11 +2537,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is used to specify the maximum acceptable value
+   * <p>This method is used to specify the maximum acceptable value
    * for the specified
-   * {@link arlut.csd.ganymede.server.FloatDBField FloatDBField}.
+   * {@link arlut.csd.ganymede.server.FloatDBField FloatDBField}.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    */
 
   public double maxFloat(DBField field)
@@ -2551,44 +2550,44 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method handles inactivation logic for this object type.  A
+   * <p>This method handles inactivation logic for this object type.  A
    * DBEditObject must first be checked out for editing, then the
    * inactivate() method can then be called on the object to put the
    * object into inactive mode.  inactivate() will set the object's
    * removal date and fix up any other state information to reflect
-   * the object's inactive status.
+   * the object's inactive status.</p>
    *
-   * inactive() is designed to run synchronously with the user's
+   * <p>inactive() is designed to run synchronously with the user's
    * request for inactivation.  It can return a wizard reference
    * in the ReturnVal object returned, to guide the user through
-   * a set of interactive dialogs to inactive the object.
+   * a set of interactive dialogs to inactive the object.</p>
    *
-   * The inactive() method can cause other objects to be deleted, can cause
-   * strings to be removed from fields in other objects, whatever.
+   * <p>The inactive() method can cause other objects to be deleted, can cause
+   * strings to be removed from fields in other objects, whatever.</p>
    *
-   * If inactivate() returns a ReturnVal that has its success flag set
+   * <p>If inactivate() returns a ReturnVal that has its success flag set
    * to false and does not include a JDialogBuff for further
    * interaction with the user, then DBSEssion.inactivateDBObject()
-   * method will rollback any changes made by this method.
+   * method will rollback any changes made by this method.</p>
    *
-   * If inactivate() returns a success value, we expect that the object
-   * will have a removal date set.
+   * <p>If inactivate() returns a success value, we expect that the object
+   * will have a removal date set.</p>
    *
-   * IMPORTANT NOTE 1: This method is intended to be called by the
+   * <p>IMPORTANT NOTE 1: This method is intended to be called by the
    * DBSession.inactivateDBObject() method, which establishes a
    * checkpoint before calling inactivate.  If this method is not
    * called by DBSession.inactivateDBObject(), you need to push
    * a checkpoint with the key 'inactivate'+label, where label is
-   * the returned name of this object.
+   * the returned name of this object.</p>
    *
-   * IMPORTANT NOTE 2: If a custom object's inactivate() logic decides
+   * <p>IMPORTANT NOTE 2: If a custom object's inactivate() logic decides
    * to enter into a wizard interaction with the user, that logic is
    * responsible for calling finalizeInactivate() with a boolean
-   * indicating ultimate success of the operation.
+   * indicating ultimate success of the operation.</p>
    *
-   * Finally, it is up to commitPhase1() and commitPhase2() to handle
+   * <p>Finally, it is up to commitPhase1() and commitPhase2() to handle
    * any external actions related to object inactivation when
-   * the transaction is committed..
+   * the transaction is committed..</p>
    *
    * @see #commitPhase1()
    * @see #commitPhase2()
@@ -2610,12 +2609,12 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is to be called by the custom DBEditObject inactivate()
+   * <p>This method is to be called by the custom DBEditObject inactivate()
    * logic when the inactivation is performed so that logging can be
-   * done.
+   * done.</p>
    *
-   * If inactivation of an object causes the label to be null, this
-   * won't work as well as we'd really like.
+   * <p>If inactivation of an object causes the label to be null, this
+   * won't work as well as we'd really like.</p>
    */
 
   public final void finalizeInactivate(boolean success, String ckp_label)
@@ -2664,35 +2663,35 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method handles reactivation logic for this object type.  A
+   * <p>This method handles reactivation logic for this object type.  A
    * DBEditObject must first be checked out for editing, then the
    * reactivate() method can then be called on the object to make the
    * object active again.  reactivate() will clear the object's
    * removal date and fix up any other state information to reflect
-   * the object's reactive status.
+   * the object's reactive status.</p>
    *
-   * reactive() is designed to run synchronously with the user's
+   * <p>reactive() is designed to run synchronously with the user's
    * request for inactivation.  It can return a wizard reference
    * in the ReturnVal object returned, to guide the user through
-   * a set of interactive dialogs to reactive the object.
+   * a set of interactive dialogs to reactive the object.</p>
    *
-   * If reactivate() returns a ReturnVal that has its success flag set to false
+   * <p>If reactivate() returns a ReturnVal that has its success flag set to false
    * and does not include a {@link arlut.csd.JDialog.JDialogBuff JDialogBuff}
    * for further interaction with the
    * user, then
    * {@link arlut.csd.ganymede.server.DBSession#inactivateDBObject(arlut.csd.ganymede.server.DBEditObject) inactivateDBObject()}
-   * method will rollback any changes made by this method.
+   * method will rollback any changes made by this method.</p>
    *
-   * IMPORTANT NOTE: If a custom object's inactivate() logic decides
+   * <p>IMPORTANT NOTE: If a custom object's inactivate() logic decides
    * to enter into a wizard interaction with the user, that logic is
    * responsible for calling finalizeInactivate() with a boolean
-   * indicating ultimate success of the operation.
+   * indicating ultimate success of the operation.</p>
    *
-   * Finally, it is up to commitPhase1() and commitPhase2() to handle
+   * <p>Finally, it is up to commitPhase1() and commitPhase2() to handle
    * any external actions related to object reactivation when
-   * the transaction is committed..
+   * the transaction is committed..</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
    * @see #commitPhase1()
    * @see #commitPhase2()
@@ -2751,29 +2750,29 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method handles removal logic for this object type.  This method
-   * will be called immediately from DBSession.deleteDBObject().
+   * <p>This method handles removal logic for this object type.  This method
+   * will be called immediately from DBSession.deleteDBObject().</p>
    *
-   * The remove() method can cause other objects to be deleted, can cause
-   * strings to be removed from fields in other objects, whatever.
+   * <p>The remove() method can cause other objects to be deleted, can cause
+   * strings to be removed from fields in other objects, whatever.</p>
    *
-   * If remove() returns a ReturnVal that has its success flag set to false
+   * <p>If remove() returns a ReturnVal that has its success flag set to false
    * and does not include a JDialogBuff for further interaction with the
    * user, the DBSession.deleteDBObject() method will roll back any changes
-   * made by this method.
+   * made by this method.</p>
    *
-   * remove() is intended for subclassing, whereas finalizeRemove() is
+   * <p>remove() is intended for subclassing, whereas finalizeRemove() is
    * not.  finalizeRemove() provides the standard logic for wiping out
    * fields and what not to cause the object to be unlinked from
-   * other objects.
+   * other objects.</p>
    *
-   * IMPORTANT NOTE: If a custom object's remove() logic decides to
+   * <p>IMPORTANT NOTE: If a custom object's remove() logic decides to
    * enter into a wizard interaction with the user, that logic is
    * responsible for calling finalizeRemove() on the object when
    * it is determined that the object really should be removed,
-   * with a boolean indicating whether success was had.
+   * with a boolean indicating whether success was had.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
@@ -2786,24 +2785,24 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method handles Ganymede-internal deletion logic for this
+   * <p>This method handles Ganymede-internal deletion logic for this
    * object type.  finalizeRemove() is responsible for dissolving any
-   * invid inter-object references in particular.
+   * invid inter-object references in particular.</p>
    *
-   * It is up to commitPhase1() and commitPhase2() to handle
+   * <p>It is up to commitPhase1() and commitPhase2() to handle
    * any external actions related to object removal when
-   * the transaction is committed..
+   * the transaction is committed..</p>
    *
-   * finalizeremove() returns a ReturnVal indicating whether the
+   * <p>finalizeremove() returns a ReturnVal indicating whether the
    * internal removal bookkeeping was successful.  A failure result
    * will cause the DBSession to rollback the transaction to the state
    * prior to any removal actions for this object were
-   * attempted.
+   * attempted.</p>
    *
-   * remove() is intended for subclassing, whereas finalizeRemove() is
+   * <p>remove() is intended for subclassing, whereas finalizeRemove() is
    * not.  finalizeRemove() provides the standard logic for wiping out
    * fields and what not to cause the object to be unlinked from
-   * other objects.
+   * other objects.</p>
    *
    * @param success If true, finalizeRemove() will clear all fields,
    * thereby unlinking invid fields and relinquishing namespace claims.
@@ -3029,14 +3028,14 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is used to find all objects which point to us through
+   * <p>This method is used to find all objects which point to us through
    * non-symmetric links, edit them, and break the link.  We do this
    * by consulting the global Ganymede.db.backPointers DBLinkTracker
    * to get the list of objects which point to us, and doing the
-   * unlink in a fashion similar to InvidDBField.unbindAll().
+   * unlink in a fashion similar to InvidDBField.unbindAll().</p>
    *
-   * <b>This method is private, and is not to be called by any code outside
-   * of this class.</b>
+   * <p><b>This method is private, and is not to be called by any code outside
+   * of this class.</b></p>
    *
    * @param local if true, this operation will be performed without regard
    * to permissions limitations.
@@ -3072,14 +3071,13 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is called by attemptAsymBackLinkClear(), and is
+   * <p>This method is called by attemptAsymBackLinkClear(), and is
    * responsible for checking the object with Invid remote out for
    * editing, and clearing our own Invid out of all of the remote
-   * object's asymmetric Invid fields.
-   * object's fields.
+   * object's asymmetric Invid fields.</p>
    *
-   * This method does no checkpointing, so attemptAsymBackLinkClear()
-   * has to do that for us.
+   * <p>This method does no checkpointing, so attemptAsymBackLinkClear()
+   * has to do that for us.</p>
    *
    * @param remote An Invid for an object that we believe has
    * asymmetric forward links to us.
@@ -3283,20 +3281,20 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method provides a pre-commit hook that runs after the user
+   * <p>This method provides a pre-commit hook that runs after the user
    * has hit commit but before the system has established write locks
-   * for the commit.
+   * for the commit.</p>
    *
-   * The intended purpose of this hook is to allow objects that
+   * <p>The intended purpose of this hook is to allow objects that
    * dynamically maintain hidden label fields to update those fields
-   * from the contents of the object's other fields at commit time.
+   * from the contents of the object's other fields at commit time.</p>
    *
-   * This method runs in a checkpointed context.  If this method fails
+   * <p>This method runs in a checkpointed context.  If this method fails
    * in any operation, you should return a ReturnVal with a failure
    * dialog encoded, and the transaction's commit will be blocked and
-   * a dialog explaining the problem will be presented to the user.
+   * a dialog explaining the problem will be presented to the user.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
@@ -3309,7 +3307,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method performs verification for the first phase of
+   * <p>This method performs verification for the first phase of
    * the two-phase commit algorithm.  If this object returns
    * true from commitPhase1() when called during an editSet's
    * commit() routine, this object CAN NOT refuse commit()
@@ -3318,31 +3316,31 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * is either committed, abandoned, or released from the
    * commit process by the
    * {@link arlut.csd.ganymede.server.DBEditObject#release(boolean) release()}
-   * method.
+   * method.</p>
    *
-   * This method may be subclassed by application objects that need
+   * <p>This method may be subclassed by application objects that need
    * to include extra-Ganymede processes in the two-phase commit
    * protocol.  If a particular subclass of DBEditObject does not need
    * to involve outside processes in the full two-phase commit
-   * protocol, this method should not be overridden.
+   * protocol, this method should not be overridden.</p>
    *
-   * If this method is overridden, be sure and call
+   * <p>If this method is overridden, be sure and call
    * setCommitting(true) before doing anything else.  Failure to call
    * setCommitting() in this method will cause the two phase commit
-   * mechanism to behave unpredictably.
+   * mechanism to behave unpredictably.</p>
    *
-   * <B>WARNING!</B> this method is called at a time when portions
+   * <p><b>WARNING!</b> this method is called at a time when portions
    * of the database are locked for the transaction's integration into
    * the database.  You must not call methods that seek to gain a lock
    * on the Ganymede database.  At this point, this means no composite
    * queries on embedded object types, where you seek an object based
    * on a field in an embedded object and in the object itself, using
-   * the GanymedeSession query calls, or else you will lock the server.
+   * the GanymedeSession query calls, or else you will lock the server.</p>
    *
-   * This method should NEVER try to edit or change any DBEditObject
+   * <p>This method should NEVER try to edit or change any DBEditObject
    * in the server.. at this point in the game, the server has fixed the
    * transaction working set and is depending on commitPhase1() not trying
-   * to make changes.
+   * to make changes.</p>
    *
    * @see arlut.csd.ganymede.server.DBEditSet
    *
@@ -3434,39 +3432,39 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is a hook for subclasses to override to
-   * pass the phase-two commit command to external processes.
+   * <p>This method is a hook for subclasses to override to
+   * pass the phase-two commit command to external processes.</p>
    *
-   * For normal usage this method would not be overridden.  For
+   * <p>For normal usage this method would not be overridden.  For
    * cases in which change to an object would result in an external
    * process being initiated whose <b>success or failure would not
    * affect the successful commit of this DBEditObject in the
    * Ganymede server</b>, the process invocation should be placed here,
    * rather than in
-   * {@link arlut.csd.ganymede.server.DBEditObject#commitPhase1() commitPhase1()}.
+   * {@link arlut.csd.ganymede.server.DBEditObject#commitPhase1() commitPhase1()}.</p>
    *
-   * commitPhase2() is generally the last method called on a
+   * <p>commitPhase2() is generally the last method called on a
    * DBEditObject before it is discarded by the server in the
    * {@link arlut.csd.ganymede.server.DBEditSet DBEditSet}
-   * {@link arlut.csd.ganymede.server.DBEditSet#commit() commit()} method.
+   * {@link arlut.csd.ganymede.server.DBEditSet#commit(java.lang.String) commit()} method.</p>
    *
-   * Subclasses that override this method may wish to make this method
-   * synchronized.
+   * <p>Subclasses that override this method may wish to make this method
+   * synchronized.</p>
    *
-   * <B>WARNING!</B> this method is called at a time when portions
+   * <p><b>WARNING!</b> this method is called at a time when portions
    * of the database are locked for the transaction's integration into
    * the database.  You must not call methods that seek to gain a lock
    * on the Ganymede database.  At this point, this means no composite
    * queries on embedded object types, where you seek an object based
    * on a field in an embedded object and in the object itself, using
-   * the GanymedeSession query calls, or else you will lock the server.
-
-   * This method should NEVER try to edit or change any DBEditObject
+   * the GanymedeSession query calls, or else you will lock the server.</p>
+   *
+   * <p>This method should NEVER try to edit or change any DBEditObject
    * in the server.. at this point in the game, the server has fixed the
    * transaction working set and is depending on commitPhase2() not trying
-   * to make changes internal to the server.
+   * to make changes internal to the server.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    */
 
   public void commitPhase2()
@@ -3475,7 +3473,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * A hook for subclasses to use to clean up any external
+   * <p>A hook for subclasses to use to clean up any external
    * resources allocated for this object.  This method can be called
    * after commitPhase1() has been called, or it may be called at any
    * time to indicate that this object is being withdrawn from the
@@ -3484,57 +3482,57 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * do anything external in commitPhase2(), make sure that all
    * resources allocated for this object (at any time in this object's
    * editing life-cycle) are released before commitPhase2()
-   * completes.
+   * completes.</p>
    *
-   * Ordinarily, there is no need for customizers to override this
+   * <p>Ordinarily, there is no need for customizers to override this
    * method.  The only reason to override the release method is if you
    * need to do maintenance on external data structures or connections
    * that were created in commitPhase1() or when this DBEditObject was
-   * created.
+   * created.</p>
    *
-   * If &lt;finalAbort&gt; is true, the transaction for which this
+   * <p>If &lt;finalAbort&gt; is true, the transaction for which this
    * DBEditObject was created is being completely abandoned (if
    * isCommitting() returns true), or this object is being dropped out
    * of the transaction by a checkpoint rollback.  In either case, a
    * customizer may want to clean up all external structures or
    * connections that were created either at the time this
    * DBEditObject was created/checked-out and/or that were created by
-   * commitPhase1().
+   * commitPhase1().</p>
    *
-   * If &lt;finalAbort&gt; is false, isCommitting() should always
+   * <p>If &lt;finalAbort&gt; is false, isCommitting() should always
    * return true.  In this case, one of the DBEditObjects in the
    * transaction returned false from a later commitPhase1() call
    * and all objects that had their commitPhase1() methods called
    * previously will be revisted and release(false) will be called
    * on them.  Customizers may want to clean up any external structures
-   * or connections that were established in commitPhase1().
+   * or connections that were established in commitPhase1().</p>
    *
-   * Remember, you will usually want to perform external actions in
+   * <p>Remember, you will usually want to perform external actions in
    * commitPhase2(), in which case release() is not needed.  release()
    * is only useful when you allocate external structures or
-   * connections when the object is created or during commitPhase1().
+   * connections when the object is created or during commitPhase1().</p>
    *
-   * It is safe to call release() from your commitPhase2() method
+   * <p>It is safe to call release() from your commitPhase2() method
    * if you wish to have one place to clean up structures allocated by
-   * initializeNewObject() or commitPhase1().
+   * initializeNewObject() or commitPhase1().</p>
    *
-   * Customizers subclassing this method may want to keep a couple of
+   * <p>Customizers subclassing this method may want to keep a couple of
    * things in mind.  First, the default release method is not synchronized,
    * and it basically just clear a boolean flag (call setCommitting(false)) to
    * indicate that edit methods on this object may once again go forward.
    * You may want to synchronize your release method if you do anything
    * at all fancy.  More importantly, it is essential that you call setCommitting(false)
-   * if &lt;finalAbort&gt; is false so that this object can be edited afterwards.
+   * if &lt;finalAbort&gt; is false so that this object can be edited afterwards.</p>
    *
-   * <B>WARNING!</B> this method is called at a time when portions
+   * <p><b>WARNING!</b> this method is called at a time when portions
    * of the database are locked for the transaction's integration into
    * the database.  You must not call methods that seek to gain a lock
    * on the Ganymede database.  At this point, this means no composite
    * queries on embedded object types, where you seek an object based
    * on a field in an embedded object and in the object itself, using
-   * the GanymedeSession query calls, or else you will lock the server.
+   * the GanymedeSession query calls, or else you will lock the server.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
    * @param finalAbort If true, this object is being dropped, either due to an
    * aborted transaction or a checkpoint rollback.
@@ -3555,16 +3553,16 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   // ***
 
   /**
-   * Returns a hashtable mapping Short field id's to their current
+   * <p>Returns a hashtable mapping Short field id's to their current
    * value, used by the {@link arlut.csd.ganymede.server.DBEditSet DBEditSet}
    * intra-transaction checkpointing logic to capture this object's
-   * state at a given time.
+   * state at a given time.</p>
    *
-   * Each subclass of {@link arlut.csd.ganymede.server.DBField DBField}
+   * <p>Each subclass of {@link arlut.csd.ganymede.server.DBField DBField}
    * is responsible for implementing its own version of
    * {@link arlut.csd.ganymede.server.DBField#checkpoint() checkpoint()} to
    * stuff its state into an Object for inclusion in this method's
-   * hashtable.
+   * hashtable.</p>
    */
 
   final Hashtable checkpoint()
@@ -3606,16 +3604,16 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Reinstates this object's state from a hashtable returned
+   * <p>Reinstates this object's state from a hashtable returned
    * by {@link arlut.csd.ganymede.server.DBEditObject#checkpoint() checkpoint()},
    * used by the {@link arlut.csd.ganymede.server.DBEditSet DBEditSet}
    * intra-transaction checkpoint rollback logic to restore this object's
-   * state at a given time.
+   * state at a given time.</p>
    *
-   * Each subclass of {@link arlut.csd.ganymede.server.DBField DBField}
+   * <p>Each subclass of {@link arlut.csd.ganymede.server.DBField DBField}
    * is responsible for implementing its own version of
    * {@link arlut.csd.ganymede.server.DBField#rollback(java.lang.Object) rollback()} to
-   * restore its state.
+   * restore its state.</p>
    */
 
   synchronized final void rollback(Hashtable ckpoint)
@@ -3653,22 +3651,22 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is used to write out this DBEditObject and the
+   * <p>This method is used to write out this DBEditObject and the
    * deltas between this DBEditObject and the original checked in
    * version of this DBEditObject to the provided XMLDumpContext.  The
    * constraints specified in the {@link
    * arlut.csd.ganymede.server.SyncRunner} registered with the
    * XMLDumpContext parameter will be used to control what fields are
-   * written.
+   * written.</p>
    *
-   * This method should only be called on a DBEditObject that is known
+   * <p>This method should only be called on a DBEditObject that is known
    * to have been edited.. calling this method on a newly created
    * object should not be done.. use the normal DBObject emitXML()
    * method in an &lt;object_delta&gt; element's &lt;after&gt; element
-   * instead.
+   * instead.</p>
    */
 
-  public void emitXMLDelta(XMLDumpContext xmlOut) throws IOException
+  public final void emitXMLDelta(XMLDumpContext xmlOut) throws IOException
   {
     boolean fieldChanged;
 
@@ -3776,13 +3774,13 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method is used to generate a String describing the difference
+   * <p>This method is used to generate a String describing the difference
    * between the current state of the DBEditObject and the original
-   * object's state.
+   * object's state.</p>
    *
-   * This method can also be used if this object is newly created.. in
+   * <p>This method can also be used if this object is newly created.. in
    * this case, it will just return a string containing many 'FieldAdded'
-   * entries.
+   * entries.</p>
    *
    * @return null if no difference was found
    */
@@ -3793,16 +3791,16 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * This method does two things.  First and foremost, it is used
+   * <p>This method does two things.  First and foremost, it is used
    * to generate a String describing the difference between the
    * current state of the DBEditObject and the original object's
-   * state.
+   * state.</p>
    *
-   * This method can also be used if this object is newly created.. in
+   * <p>This method can also be used if this object is newly created.. in
    * this case, it will just return a string containing many 'FieldAdded'
-   * entries.
+   * entries.</p>
    *
-   * The second purpose of this method is to generate entries in
+   * <p>The second purpose of this method is to generate entries in
    * the changedFieldDefs map, listing those DBObjectBaseFields for
    * which we have observed a value change when comparing this
    * object's state with its original.  We do this as part of the diff
@@ -3814,7 +3812,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * the DBEditSet class to update time stamps in the
    * DBObjectBaseFields, so that builder tasks can tell whether they
    * have been run since any of a given field have been changed in a given
-   * DBObjectBase.
+   * DBObjectBase.</p>
    *
    * @param changedFieldDefs If not null, this parameter will be a Set
    * that the diff algorithm should insert DBObjectBaseFields whose
@@ -3823,7 +3821,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * @return null if no difference was found
    */
 
-  public synchronized String diff(Set<DBObjectBaseField> changedFieldDefs)
+  public final synchronized String diff(Set<DBObjectBaseField> changedFieldDefs)
   {
     boolean diffFound = false;
     StringBuilder result = new StringBuilder();
