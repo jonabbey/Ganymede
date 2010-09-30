@@ -78,7 +78,7 @@ import arlut.csd.ganymede.rmi.Ganymediator;
 ------------------------------------------------------------------------------*/
 
 /** 
- * This class is a template for all Wizards implemented on the
+ * <p>This class is a template for all Wizards implemented on the
  * server.  Custom plug-in GanymediatorWizards may be authored to
  * handle step-by-step interactions with a user.  GanymediatorWizards
  * are typically created on the server when a client attempts an
@@ -93,9 +93,9 @@ import arlut.csd.ganymede.rmi.Ganymediator;
  * state to keep track of where it is with respect to the user, and
  * will return another {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
  * which requests the client present another dialog and call back this
- * GanymediatorWizard to continue along the process.
+ * GanymediatorWizard to continue along the process.</p>
  *
- * After a GanymediatorWizard is constructed, the respond() method
+ * <p>After a GanymediatorWizard is constructed, the respond() method
  * will first call processDialog0().  processDialog0() can generate a
  * return value using the {@link
  * arlut.csd.ganymede.server.GanymediatorWizard#continueOn(java.lang.String,
@@ -111,48 +111,48 @@ import arlut.csd.ganymede.rmi.Ganymediator;
  * success or failure indication, or it can return null to indicate
  * success with no dialog.  If the return result from processDialog0()
  * was generated using continueOn(), the client's response to that
- * dialog will be forwarded to processDialog1().
+ * dialog will be forwarded to processDialog1().</p>
  *
- * For processDialog1() and after, the wizard can use the
+ * <p>For processDialog1() and after, the wizard can use the
  * {@link arlut.csd.ganymede.server.GanymediatorWizard#getKeys() getKeys()}
  * method to get an enumeration of labeled values passed back from
  * the client, and {@link arlut.csd.ganymede.server.GanymediatorWizard#getParam(java.lang.Object) getParam()}
  * to get the value for a specific key.  Based on values passed back from
  * the client, processDialog1() can decide to continue the interaction,
  * or to return a dialog indicating success or failure, or a silent
- * success result.
+ * success result.</p>
  *
- * Typically, a continueOn() will cause the wizard system to
+ * <p>Typically, a continueOn() will cause the wizard system to
  * proceed to the next highest processDialogXX() method.  If a wizard
  * needs to skip to a specific step, it can use the {@link
  * arlut.csd.ganymede.server.GanymediatorWizard#setNextState(int)
  * setNextState()} method to set the number for the next processDialog
- * method before returning a continueOn() result.
+ * method before returning a continueOn() result.</p>
  *
- * If at any time after processDialog0() the user hits cancel on
+ * <p>If at any time after processDialog0() the user hits cancel on
  * a dialog, the GanymediatorWizard respond() mechanism will call
  * the wizard's {@link arlut.csd.ganymede.server.GanymediatorWizard#cancel() cancel()}
- * method to retrieve a final dialog for the user.
+ * method to retrieve a final dialog for the user.</p>
  *
- * A wizard may only have 99 steps, from processDialog0() to
- * processDialog98().
+ * <p>A wizard may only have 99 steps, from processDialog0() to
+ * processDialog98().</p>
  *
- * The {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
+ * <p>The {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
  * class keeps track of the client's active wizard.  It is an error
  * for there to be more than one wizard active at a time for a given
  * client.  respond() is responsible for calling {@link
  * arlut.csd.ganymede.server.GanymediatorWizard#unregister unregister()} when
- * a wizard is through talking to the client.
+ * a wizard is through talking to the client.</p>
  *
- * Server-side code that is meant to return a ReturnVal object
+ * <p>Server-side code that is meant to return a ReturnVal object
  * will pass control to a wizard by constructing a new wizard subclass
- * and doing a
+ * and doing a</p>
  *
- * <code>return wizard.respond(null);</code>
+ * <p><code>return wizard.respond(null);</code></p>
  *
- * to return the results of processDialog0() to the client.  From that
+ * <p>to return the results of processDialog0() to the client.  From that
  * point on, the client will communicate back to the wizard as
- * required to iterate through the processDialog steps.
+ * required to iterate through the processDialog steps.</p>
  *
  * @see arlut.csd.ganymede.common.ReturnVal
  * @see arlut.csd.ganymede.rmi.Ganymediator
@@ -212,17 +212,16 @@ public abstract class GanymediatorWizard implements Ganymediator {
   }
 
   /**
-   *
-   * This method is used to provide feedback to the server from a client
+   * <p>This method is used to provide feedback to the server from a client
    * in response to a specific request.  Calls to this method drive the
-   * wizard from state to state.<br><br>
+   * wizard from state to state.</p>
    *
-   * This method is not final, and adopters are free to totally
+   * <p>This method is not final, and adopters are free to totally
    * override this method in their wizard classes to provide custom
    * logic.  Generally, though, adopters are encouraged to take
    * advantage of the state machine implemented in this method and use
    * methods called processDialog1(), processDialog2(), and so on to
-   * handle the dialogs at each stage of a wizard sequence.
+   * handle the dialogs at each stage of a wizard sequence.</p>
    *
    * @param returnHash a hashtable mapping strings to values.  The strings
    * are titles of fields specified in a dialog that was provided to the
@@ -231,7 +230,7 @@ public abstract class GanymediatorWizard implements Ganymediator {
    *
    * @see arlut.csd.ganymede.rmi.Ganymediator
    * @see arlut.csd.ganymede.common.ReturnVal
-   * */
+   */
 
   public ReturnVal respond(Hashtable returnHash)
   {
@@ -291,12 +290,10 @@ public abstract class GanymediatorWizard implements Ganymediator {
   }
 
   /**
-   *
    * This method provides a default response if a user
    * hits cancel on a wizard dialog.  This should be
    * subclassed if a wizard wants to provide a more
    * detailed cancel response.
-   *
    */
 
   public ReturnVal cancel()
@@ -309,7 +306,6 @@ public abstract class GanymediatorWizard implements Ganymediator {
   }
 
   /**
-   *
    * This method should be called by a processDialog*()
    * method that does not intend to proceed to the next
    * state.  By default, if a processDialog() returns
@@ -317,7 +313,6 @@ public abstract class GanymediatorWizard implements Ganymediator {
    * or failure _without_ the callback being set,
    * respond() will call the next processDialog() method
    * in the ordinal sequence.
-   *
    */
 
   protected void setNextState(int state)
@@ -328,10 +323,8 @@ public abstract class GanymediatorWizard implements Ganymediator {
   }
 
   /**
-   *
    * This method returns a ReturnVal that indicates that the 
    * wizard sequence has not yet finished.
-   *
    */
 
   protected ReturnVal continueOn(String title, String body,
@@ -346,10 +339,8 @@ public abstract class GanymediatorWizard implements Ganymediator {
   }
 
   /**
-   *
    * This method returns a ReturnVal that indicates that the 
    * wizard sequence has finished without success.
-   *
    */
 
   protected ReturnVal fail(String title, String body,
@@ -366,10 +357,8 @@ public abstract class GanymediatorWizard implements Ganymediator {
   }
 
   /**
-   *
    * This method returns a ReturnVal that indicates that the 
    * wizard sequence has terminated successfully.
-   *
    */
 
   protected ReturnVal success(String title, String body,
@@ -385,12 +374,10 @@ public abstract class GanymediatorWizard implements Ganymediator {
   }
 
   /**
-   *
    * This method allows a processDialog*() method
    * in a GanymediatorWizard subclass to get access
    * to a value returned to the wizard from a 
    * previous dialog.
-   *
    */
 
   protected Object getParam(Object key)
@@ -399,12 +386,10 @@ public abstract class GanymediatorWizard implements Ganymediator {
   }
 
   /**
-   *
    * This method allows a processDialog*() method
    * in a GanymediatorWizard subclass to get access
    * to an enum of keys returned to the wizard from a 
    * previous dialog.
-   *
    */
 
   protected Enumeration getKeys()
@@ -413,12 +398,10 @@ public abstract class GanymediatorWizard implements Ganymediator {
   }
 
   /**
-   *
    * This method allows a processDialog*() method
    * in a GanymediatorWizard subclass to get access
    * to an enum of values returned to the wizard from a 
    * previous dialog.
-   *
    */
 
   protected Enumeration getElements()
@@ -427,11 +410,9 @@ public abstract class GanymediatorWizard implements Ganymediator {
   }
 
   /**
-   *
    * This method uses the Java Reflection API to call a method named
    * processDialogX() in the derived class, where X is a positive integer
    * corresponding to &lt;state&gt;.
-   * 
    */
 
   public ReturnVal callDialog(int state)
@@ -480,12 +461,10 @@ public abstract class GanymediatorWizard implements Ganymediator {
   }
 
   /**
-   *
    * This method is used to inform this GanymediatorWizard that the client
    * has logged out or otherwise aborted the transaction that this wizard
    * is part of, and that it should release any references to checked out
    * DBEditObjects.
-   *
    */
 
   public void unregister()
@@ -502,7 +481,6 @@ public abstract class GanymediatorWizard implements Ganymediator {
    * This method is used to allow server code to determine whether
    * this GanymediatorWizard is in the middle of an interaction
    * with the client.
-   * 
    */
 
   public boolean isActive()
@@ -511,9 +489,7 @@ public abstract class GanymediatorWizard implements Ganymediator {
   }
 
   /**
-   *
    * This method lets us know where the wizard is in its process
-   *
    */
 
   public int getState()
@@ -522,13 +498,13 @@ public abstract class GanymediatorWizard implements Ganymediator {
   }
 
   /**
-   * This method starts off the wizard process.
+   * <p>This method starts off the wizard process.</p>
    *
-   * This method will always be overridden in GanymediatorWizard
+   * <p>This method will always be overridden in GanymediatorWizard
    * subclasses.  It is critical that if this method returns null
    * (indicating that the wizard doesn't need to interact with
    * the client), that this method calls unregister() to clear the
-   * wizard from the GanymedeSession.
+   * wizard from the GanymedeSession.</p>
    *
    * @deprecated getStartDialog() has been deprecated.. use
    * processDialog0() in your GanymediatorWizard subclasses instead.
