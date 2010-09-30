@@ -2998,7 +2998,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * <p>This method returns -1 if the password is known with no limits
    * on its precision (plaintext, or md5crypt, or ssha which is
    * precise to 2^64 bits.. close enough), 0 if the password is not
-   * know, or a positive integer indicating the number of characters
+   * known, or a positive integer indicating the number of characters
    * of precision that we believe we can recognize from our hash
    * authenticators.</p>
    */
