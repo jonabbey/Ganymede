@@ -77,26 +77,26 @@ import arlut.csd.ganymede.rmi.pass_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * PasswordDBField is a subclass of {@link
+ * <p>PasswordDBField is a subclass of {@link
  * arlut.csd.ganymede.server.DBField DBField} for the storage and
  * handling of password fields in the {@link
- * arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede server.
+ * arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede server.</p>
  *
- * The Ganymede client talks to PasswordDBFields through the {@link
- * arlut.csd.ganymede.rmi.pass_field pass_field} RMI interface.
+ * <p>The Ganymede client talks to PasswordDBFields through the {@link
+ * arlut.csd.ganymede.rmi.pass_field pass_field} RMI interface.</p>
  *
- * This class differs a bit from most subclasses of {@link
+ * <p>This class differs a bit from most subclasses of {@link
  * arlut.csd.ganymede.server.DBField DBField} in that the normal
  * setValue()/getValue() methods are non-functional.  Instead, there
  * are special methods used to set or access password information in
- * hashed and non-hashed forms.
+ * hashed and non-hashed forms.</p>
  *
- * PasswordDBField supports a significant variety of password hash
+ * <p>PasswordDBField supports a significant variety of password hash
  * formats, to allow Ganymede to (optionally) avoid storing passwords
  * in plain text, while still retaining the ability to emit password
- * information to a variety of information systems.
+ * information to a variety of information systems.</p>
  *
- * Here are the hash algorithms supported by PasswordDBField:
+ * <p>Here are the hash algorithms supported by PasswordDBField:</p>
  *
  * <ul>
  * <li>Traditional Unix Crypt()</li>
@@ -109,33 +109,33 @@ import arlut.csd.ganymede.rmi.pass_field;
  * algorithm, supported in Linux starting with glibc version 2.7.</li>
  * </ul>
  *
- * There are no methods provided to allow remote access to password
+ * <p>There are no methods provided to allow remote access to password
  * information..  server-side code must locally access call methods to
  * get access to stored password information.  Generally, even in that
  * case, only hashed password information will be available.  If this
  * password field was configured to store only hashed passwords by way
  * of its {@link arlut.csd.ganymede.server.DBObjectBaseField
  * DBObjectBaseField}, this password field will never emit() the
- * plaintext to disk.
+ * plaintext to disk.</p>
  *
- * In such cases, only the hash text password information will be
+ * <p>In such cases, only the hash text password information will be
  * retained on disk for user authentication.  The plaintext of the
  * password can be retained in memory for the duration of a run of the
  * Ganymede server process, but as the plaintext is not stored in the
  * Ganymede server's ganymede.db file, the plaintext is lost when the
- * server is stopped.
+ * server is stopped.</p>
  *
- * This transient retention of plaintext password information can
+ * <p>This transient retention of plaintext password information can
  * still be useful in the context of the Ganymede 2.0 {@link
  * arlut.csd.ganymede.server.SyncRunner Sync Channel} mechanism,
  * however.  If a user changes his password, a Sync Channel can be
  * configured to write the plaintext password change information out,
  * even though the server is prone to forget the plaintext if it is
- * stopped and restarted.
+ * stopped and restarted.</p>
  *
- * At ARL, we use this transient plaintext retention to allow us to
+ * <p>At ARL, we use this transient plaintext retention to allow us to
  * synchronize passwords to Active Directory without having the risk
- * of long term plaintext storage in the ganymede.db file.
+ * of long term plaintext storage in the ganymede.db file.</p>
  */
 
 public class PasswordDBField extends DBField implements pass_field {
@@ -191,12 +191,6 @@ public class PasswordDBField extends DBField implements pass_field {
    * actually incredibly, mind-crushingly weak.. weaker than
    * traditional Unix crypt, even.  If you're basing your password
    * security on this hash still, you're in trouble.
-   *
-   * At the time this comment was written (26 October 2004), the
-   * following URL had a really good discussion of a great number of
-   * password authenticator hash algorithms:
-   *
-   * http://www.harper.no/valery/default,date,2004-08-27.aspx
    */
 
   private String lanHash;
@@ -210,46 +204,46 @@ public class PasswordDBField extends DBField implements pass_field {
   private String ntHash;
 
   /**
-   * Salted SHA-1 hash, for OpenLDAP.  Good for validating up to 2^64
+   * <p>Salted SHA-1 hash, for OpenLDAP.  Good for validating up to 2^64
    * bits of plaintext.. effectively indefinite in extent.  A very
    * strong hash format in terms of the difficulty of finding
    * collisions in the hash range, but it's very quick to evaluate, so
-   * a dictionary attack against this hash can proceed rapidly.
+   * a dictionary attack against this hash can proceed rapidly.</p>
    *
-   * Note that we keep the sshaHash string here in the same form
-   * as would be used in an LDAP store.
+   * <p>Note that we keep the sshaHash string here in the same form
+   * as would be used in an LDAP store.</p>
    *
-   * This is Netscape's salted variant of the FIPS SHA-1 standard.
-   * SHA-1 is described at http://en.wikipedia.org/wiki/SHA-1, while
-   * SSHA is described at
-   * http://www.openldap.org/faq/data/cache/347.html.
+   * <p>This is Netscape's salted variant of the FIPS SHA-1 standard.
+   * SHA-1 is described at <a href="http://en.wikipedia.org/wiki/SHA-1">http://en.wikipedia.org/wiki/SHA-1</a>,
+   * while SSHA is described at
+   * <a href="http://www.openldap.org/faq/data/cache/347.html">http://www.openldap.org/faq/data/cache/347.html</a>.</p>
    */
 
   private String sshaHash;
 
   /**
-   * Password hashed using the SHA Unix Crypt algorithm published by
-   * Ulrich Drepper at
+   * <p>Password hashed using the SHA Unix Crypt algorithm published by
+   * Ulrich Drepper at</p>
    *
-   * http://people.redhat.com/drepper/sha-crypt.html
+   * <p><a href="http://people.redhat.com/drepper/sha-crypt.html">http://people.redhat.com/drepper/sha-crypt.html</a></p>
    *
-   * The hash text in shaUnixCrypt can be generated using either the
+   * <p>The hash text in shaUnixCrypt can be generated using either the
    * Sha256Crypt or Sha512Crypt variants of the SHA Unix Crypt
-   * algorithm described at the above URL.
+   * algorithm described at the above URL.</p>
    *
-   * This hash format can have a very large digest size, a large salt,
+   * <p>This hash format can have a very large digest size, a large salt,
    * and a very significant computational cost, which makes this hash
-   * the most resistant to brute force attacks.
+   * the most resistant to brute force attacks.</p>
    */
 
   private String shaUnixCrypt;
 
   /**
-   * History archive of previous password hashes, and the dates that
-   * the previous passwords were committed into the database.
+   * <p>History archive of previous password hashes, and the dates that
+   * the previous passwords were committed into the database.</p>
    *
-   * This variable will only be non-null if the DBObjectBaseField
-   * definition for this field has history_check set.
+   * <p>This variable will only be non-null if the DBObjectBaseField
+   * definition for this field has history_check set.</p>
    */
 
   private passwordHistoryArchive history = null;
@@ -270,15 +264,15 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /** 
-   * No-value constructor.  Allows the construction of a
+   * <p>No-value constructor.  Allows the construction of a
    * 'non-initialized' field, for use where the {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} definition
    * indicates that a given field may be present, but for which no
    * value has been stored in the {@link arlut.csd.ganymede.server.DBStore
-   * DBStore}.
+   * DBStore}.</p>
    *
-   * Used to provide the client a template for 'creating' this
-   * field if so desired. 
+   * <p>Used to provide the client a template for 'creating' this
+   * field if so desired.</p>
    */
 
   PasswordDBField(DBObject owner, DBObjectBaseField definition)
@@ -295,10 +289,10 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * Copy constructor, used when checking edit objects in and out.
+   * <p>Copy constructor, used when checking edit objects in and out.</p>
    *
-   * As a field copy constructor, this method must not throw an
-   * exception, or else commits can be seriously broken.
+   * <p>As a field copy constructor, this method must not throw an
+   * exception, or else commits can be seriously broken.</p>
    */
 
   public PasswordDBField(DBObject owner, PasswordDBField field)
@@ -371,24 +365,24 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * This method is used to mark a field as undefined when it is
+   * <p>This method is used to mark a field as undefined when it is
    * checked out for editing.  Different subclasses of {@link
    * arlut.csd.ganymede.server.DBField DBField} may implement this in
    * different ways, if simply setting the field's value member to
    * null is not appropriate.  Any namespace values claimed by the
    * field will be released, and when the transaction is committed,
-   * this field will be released.
+   * this field will be released.</p>
    *
-   * Note that this method is really only intended for those fields
+   * <p>Note that this method is really only intended for those fields
    * which have some significant internal structure to them, such as
-   * permission matrix, field option matrix, and password fields.
+   * permission matrix, field option matrix, and password fields.</p>
    *
-   * NOTE: There is, at present, no defined DBEditObject callback
+   * <p>NOTE: There is, at present, no defined DBEditObject callback
    * method that tracks generic field nullification.  This means that
    * if your code uses setUndefined on a PermissionMatrixDBField,
    * FieldOptionDBField, or PasswordDBField, the plugin code is not
    * currently given the opportunity to review and refuse that
-   * operation.  Caveat Coder.
+   * operation.  Caveat Coder.</p>
    */
 
   public synchronized ReturnVal setUndefined(boolean local)
@@ -474,11 +468,11 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * Returns true if obj is a field with the same value(s) as
-   * this one.
+   * <p>Returns true if obj is a field with the same value(s) as
+   * this one.</p>
    *
-   * This method is ok to be synchronized because it does not
-   * call synchronized methods on any other object.
+   * <p>This method is ok to be synchronized because it does not
+   * call synchronized methods on any other object.</p>
    */
 
   public synchronized boolean equals(Object obj)
@@ -525,15 +519,15 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * This method copies the current value of this DBField
+   * <p>This method copies the current value of this DBField
    * to target.  The target DBField must be contained within a
    * checked-out DBEditObject in order to be updated.  Any actions
    * that would normally occur from a user manually setting a value
-   * into the field will occur.
+   * into the field will occur.</p>
    *
-   * NOTE: this method is mainly used in cloning objects, and
+   * <p>NOTE: this method is mainly used in cloning objects, and
    * {@link arlut.csd.ganymede.server.DBEditObject#cloneFromObject(arlut.csd.ganymede.server.DBSession, arlut.csd.ganymede.server.DBObject, boolean) cloneFromObject}
-   * doesn't allow cloning of password fields by default.
+   * doesn't allow cloning of password fields by default.</p>
    *
    * @param target The DBField to copy this field's contents to.
    * @param local If true, permissions checking is skipped.
@@ -588,6 +582,18 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     throw new CloneNotSupportedException();
   }
+
+  /**
+   * <p>This method is responsible for writing out the contents of
+   * this field to an binary output stream.  It is used in writing
+   * fields to the ganymede.db file and to the journal file.</p>
+   *
+   * <p>This method only writes out the value contents of this field.
+   * The {@link arlut.csd.ganymede.server.DBObject DBObject}
+   * {@link arlut.csd.ganymede.server.DBObject#emit(java.io.DataOutput) emit()}
+   * method is responsible for writing out the field identifier information
+   * ahead of the field's contents.</p>
+   */
 
   void emit(DataOutput out) throws IOException
   {
@@ -730,28 +736,28 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * This method helps calculate what we should do if the
+   * <p>This method helps calculate what we should do if the
    * administrator has reconfigured the hash requirements for this
-   * field.
+   * field.</p>
    *
-   * Effectively, we're looking to see if we have any validly
+   * <p>Effectively, we're looking to see if we have any validly
    * constructed hash text that suits any hash algorithms left enabled
    * in the schema editor.  If we find anything that we have been told
    * to use (i.e., getFieldDef().isCrypted(), etc.) and for which we
    * have a non-null text available, we won't need to take any special
-   * action, and we'll return false here.
+   * action, and we'll return false here.</p>
    *
-   * If we get through the plaintext and all the supported hash forms,
+   * <p>If we get through the plaintext and all the supported hash forms,
    * and we determine that we have no requested hash information for
    * the user at all, we'll return true, which will cause the emit()
    * routine above to write out any hash text which it still has
    * possession of, even if this field is no longer configured to
-   * cause that hash to be generated for further usage.
+   * cause that hash to be generated for further usage.</p>
    *
-   * Thanks to our password capture logic, if a user validates his
+   * <p>Thanks to our password capture logic, if a user validates his
    * password against this password field, we'll generate the new hash
    * format when the user validates, and from then on, we won't need
-   * to save the old type of hash text.
+   * to save the old type of hash text.</p>
    */
 
   private boolean writeOutAllStoredValues()
@@ -805,6 +811,17 @@ public class PasswordDBField extends DBField implements pass_field {
 
     return true;
   }
+
+  /**
+   * <p>This method is responsible for reading in the contents of
+   * this field from an binary input stream.  It is used in reading
+   * fields from the ganymede.db file and from the journal file.</p>
+   *
+   * <p>The code that calls receive() on this field is responsible for
+   * having read enough of the binary input stream's context to
+   * place the read cursor at the point in the file immediately after
+   * the field's id and type information has been read.</p>
+   */
 
   void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
@@ -1033,10 +1050,11 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * Standard {@link arlut.csd.ganymede.rmi.db_field db_field} method
-   * to retrieve the value of this field.  Because we are holding sensitive
-   * password information, this method always returns null.. we don't want
-   * to make password values available to the client under any circumstances.
+   * <p>Standard {@link arlut.csd.ganymede.rmi.db_field db_field}
+   * method to retrieve the value of this field.  Because we are
+   * holding sensitive password information, this method always
+   * returns null.. we don't want to make password values available to
+   * a remote client under any circumstances.</p>
    */
 
   public Object getValue()
@@ -1045,14 +1063,14 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /** 
-   * Returns an Object carrying the value held in this field.
+   * <po>Returns an Object carrying the value held in this field.</p>
    *
-   * This is intended to be used within the Ganymede server, it bypasses
-   * the permissions checking that getValues() does.
+   * <p>This is intended to be used within the Ganymede server, it bypasses
+   * the permissions checking that getValues() does.</p>
    *
-   * Note that this method will always return null, as you need to use
+   * <p>Note that this method will always return null, as you need to use
    * the special Password-specific value accessors to get access to the
-   * password information in crypted or non-crypted form.
+   * password information in crypted or non-crypted form.</p>
    */
 
   public Object getValueLocal()
@@ -1067,21 +1085,24 @@ public class PasswordDBField extends DBField implements pass_field {
   // ****
 
   /**
-   * This method returns a text encoded value for this DBField
-   * without checking permissions.
+   * <p>Returns a descriptive text value for this PasswordDBField
+   * without checking permissions.  The returned string will include
+   * information about what hash formats are present in this field,
+   * but will not include any other information about the contents of
+   * this password field.</p>
    *
-   * This method avoids checking permissions because it is used on
+   * <p>This method avoids checking permissions because it is used on
    * the server side only and because it is involved in the 
    * {@link arlut.csd.ganymede.server.DBObject#getLabel() getLabel()}
    * logic for {@link arlut.csd.ganymede.server.DBObject DBObject}, 
    * which is invoked from {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
    * {@link arlut.csd.ganymede.server.GanymedeSession#getPerm(arlut.csd.ganymede.server.DBObject) getPerm()} 
-   * method.
+   * method.</p>
    *
-   * If this method checked permissions and the getPerm() method
+   * <p>If this method checked permissions and the getPerm() method
    * failed for some reason and tried to report the failure using
    * object.getLabel(), as it does at present, the server could get
-   * into an infinite loop.
+   * into an infinite loop.</p>
    */
 
   public synchronized String getValueString()
@@ -1152,13 +1173,16 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * Returns a String representing the change in value between this
+   * <p>Returns a String representing the change in value between this
    * field and orig.  This String is intended for logging and email,
    * not for any sort of programmatic activity.  The format of the
    * generated string is not defined, but is intended to be suitable
-   * for inclusion in a log entry and in an email message.
+   * for inclusion in a log entry and in an email message.</p>
    *
-   * If there is no change in the field, null will be returned.
+   * <p>In the case of the PasswordDBField, the string returned simply
+   * indicates that the password has changed.</p>
+   *
+   * <p>If there is no change in the field, null will be returned.</p>
    */
 
   public String getDiffString(DBField orig)
@@ -1277,13 +1301,19 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * This method is used for authenticating a provided plaintext
-   * password against the stored contents of this password field.  The
-   * password field may have stored the password in plaintext, or in
-   * any of a variety of cryptographic hash formats.  matchPlainText()
-   * will perform whatever operation on the provided plaintext as is
-   * required to determine whether or not it matches with the stored
-   * password data.
+   * <p>Authenticates a provided plaintext password against the stored
+   * contents of this password field.</p>
+   *
+   * <p>The password field may have stored the password in plaintext,
+   * or in any of a variety of cryptographic hash formats.
+   * matchPlainText() will perform whatever operation on the provided
+   * plaintext as is required to determine whether or not it matches
+   * with the stored password data.</p>
+   *
+   * <p>If this field is configured to create and retain other hash
+   * formats, this method will create the missing hash formats as
+   * needed if the input text is successfully matched against the
+   * password data held in this field.</p>
    *
    * @return true if the given plaintext matches the stored password
    *
@@ -1375,9 +1405,10 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * This server-side only method returns the UNIX-encrypted password text.
+   * <p>This server-side only method returns the UNIX-encrypted
+   * password text.</p>
    *
-   * This method is never meant to be available remotely.
+   * <p>This method is never meant to be available remotely.</p>
    */
 
   public String getUNIXCryptText()
@@ -1400,10 +1431,10 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /** 
-   * This server-side only method returns the md5crypt()-encrypted
-   * hashed password text.
+   * <p>This server-side only method returns the md5crypt()-encrypted
+   * hashed password text.</p>
    *
-   * This method is never meant to be available remotely. 
+   * <p>This method is never meant to be available remotely.</p>
    */
 
   public String getMD5CryptText()
@@ -1452,10 +1483,10 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /** 
-   * This server-side only method returns the LANMAN-compatible
-   * password hash of the password data held in this field.
+   * <p>This server-side only method returns the LANMAN-compatible
+   * password hash of the password data held in this field.</p>
    *
-   * This method is never meant to be available remotely. 
+   * <p>This method is never meant to be available remotely.</p>
    */
 
   public String getLANMANCryptText()
@@ -1478,11 +1509,11 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /** 
-   * This server-side only method returns the Windows NT 4
+   * <p>This server-side only method returns the Windows NT 4
    * SP3-compatible md4/Unicode password hash of the password data
-   * held in this field.
+   * held in this field.</p>
    *
-   * This method is never meant to be available remotely.
+   * <p>This method is never meant to be available remotely.</p>
    */
 
   public String getNTUNICODECryptText()
@@ -1505,10 +1536,10 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /** 
-   * This server-side only method returns the Netscape SSHA (salted
-   * SHA) LDAP hash of the password data held in this field.
+   * <p>This server-side only method returns the Netscape SSHA (salted
+   * SHA) LDAP hash of the password data held in this field.</p>
    *
-   * This method is never meant to be available remotely.
+   * <p>This method is never meant to be available remotely.</p>
    */
 
   public String getSSHAHashText()
@@ -1531,12 +1562,30 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /** 
-   * This server-side only method returns the Sha Unix Crypt hash text
+   * <p>This server-side only method returns the Sha Unix Crypt hash text
    * of the password data held in this field, generating the hash text
    * from scratch if it is not contained in the local shaUnixCrypt
-   * variable.
+   * variable.</p>
    *
-   * This method is never meant to be available remotely.
+   * <p>This method is never meant to be available remotely.</p>
+   *
+   * <p>The hashText returned by this method will match one of the
+   * following four forms:</p>
+   *
+   * <pre>
+   * $5$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
+   * $5$rounds=&lt;round-count&gt;$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
+   *
+   * $6$&lt;saltstring&gt;$&lt;64 bytes of hash text, base 64 encoded&gt;
+   * $6$rounds=&lt;round-count&gt;$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
+   * </pre>
+   *
+   * <p>If the round count is specified using the '$rounds=n' syntax, the
+   * higher the round count, the more computational work will be
+   * required to verify passwords against this hash text.</p>
+   *
+   * <p>See <a href="http://people.redhat.com/drepper/sha-crypt.html">http://people.redhat.com/drepper/sha-crypt.html</a>
+   * for full details of the hash format this method is expecting.</p>
    */
 
   public String getShaUnixCryptText()
@@ -1576,13 +1625,13 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /** 
-   * Method to obtain the SALT for a stored crypted password.  If
+   * <p>Method to obtain the SALT for a stored crypted password.  If
    * the client is going to submit a pre-crypted password for
    * comparison via matchCryptText(), it must be salted by the salt
-   * returned by this method.
+   * returned by this method.</p>
    * 
-   * If the password is not stored in crypt() form, null will be
-   * returned. 
+   * <p>If the password is not stored in crypt() form, null will be
+   * returned.</p>
    */
 
   public String getSalt()
@@ -1598,13 +1647,13 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /** 
-   * Method to obtain the SALT for a stored OpenBSD-style
+   * <p>Method to obtain the SALT for a stored OpenBSD-style
    * md5crypt()'ed password.  If the client is going to submit a
    * pre-crypted password for comparison via matchMD5CryptText(), it
-   * must be salted by the salt returned by this method.
+   * must be salted by the salt returned by this method.</p>
    *
-   * If the password is not stored in md5crypt() form,
-   * null will be returned.
+   * <p>If the password is not stored in md5crypt() form,
+   * null will be returned.</p>
    */
 
   public String getMD5Salt()
@@ -1640,14 +1689,14 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /** 
-   * Method to obtain the SALT for a stored Apache-style
+   * <p>Method to obtain the SALT for a stored Apache-style
    * md5crypt()'ed password.  If the client is going to submit a
    * pre-crypted Apache password for comparison via
    * matchMD5CryptText(), it must be salted by the salt returned by
-   * this method.
+   * this method.</p>
    *
-   * If the password is not stored in apacheMd5crypt() form,
-   * null will be returned.
+   * <p>If the password is not stored in apacheMd5crypt() form,
+   * null will be returned.</p>
    */
 
   public String getApacheMD5Salt()
@@ -1683,10 +1732,7 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * Sets the value of this field, if a scalar.
-   *
-   * The ReturnVal object returned encodes success or failure, and
-   * may optionally pass back a dialog. 
+   * <p>Not supported for PasswordDBField.</p>
    */
 
   public ReturnVal setValue(Object value, boolean local, boolean noWizards)
@@ -1696,9 +1742,9 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /** 
-   * This method is used to set the password for this field,
+   * <p>This method is used to set the password for this field,
    * crypting it in various ways if this password field is stored
-   * crypted.
+   * crypted.</p>
    *
    * @see arlut.csd.ganymede.rmi.pass_field
    */
@@ -1709,9 +1755,17 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /** 
-   * This method is used to set the password for this field,
-   * crypting it in various ways if this password field is stored
-   * crypted.
+   * <p>Set the plain text password for this field.</p>
+   *
+   * <p>If this field is configured to create and retain other hash
+   * formats, it will do so as needed during the call to this
+   * method.</p>
+   *
+   * <p>Not exported for access by remote clients.</p>
+   *
+   * @param plaintext The crypt text to load into this PasswordDBField
+   * @param local If true, permission checking is skipped
+   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited. 
    */
 
   public synchronized ReturnVal setPlainTextPass(String plaintext, boolean local, boolean noWizards)
@@ -1782,13 +1836,18 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * This method is used to set a pre-crypted password for this field.
+   * <p>This method is used to set a pre-hashed password for this field,
+   * using the traditional (weak) Unix Crypt algorithm.</p>
    *
-   * This method will return an error dialog if this field does not store
-   * passwords in UNIX crypted format.
+   * <p>This method will return an error code if this password field is
+   * not configured to store Crypt hashed password text.</p>
    *
-   * Because the UNIX crypt() hashing is not reversible, any MD5 and plain text
-   * password information stored in this field will be lost.
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
    *
    * @see arlut.csd.ganymede.rmi.pass_field
    */
@@ -1799,13 +1858,24 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * This method is used to set a pre-crypted password for this field.
+   * <p>This server-side method is used to set a pre-crypted password
+   * for this field.</p>
    *
-   * This method will return an error dialog if this field does not store
-   * passwords in UNIX crypted format.
+   * <p>This method will return an error dialog if this field does not store
+   * passwords in UNIX crypted format.</p>
    *
-   * Because the UNIX crypt() hashing is not reversible, any MD5 and plain text
-   * password information stored in this field will be lost.
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
+   *
+   * <p>Not exported for access by remote clients.</p>
+   *
+   * @param text The crypt text to load into this PasswordDBField
+   * @param local If true, permission checking is skipped
+   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited. 
    */
 
   public ReturnVal setCryptPass(String text, boolean local, boolean noWizards)
@@ -1872,9 +1942,18 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * This method is used to set a pre-crypted OpenBSD-style
-   * MD5Crypt password for this field.  This method will return
-   * an error code if this password field is not stored crypted.
+   * <p>This method is used to set a pre-crypted FreeBSD-style MD5Crypt
+   * password for this field.</p>
+   *
+   * <p>This method will return an error code if this password field is
+   * not configured to store MD5Crypt hashed password text.</p>
+   *
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
    *
    * @see arlut.csd.ganymede.rmi.pass_field
    */
@@ -1885,9 +1964,24 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * This method is used to set a pre-crypted OpenBSD-style
-   * MD5Crypt password for this field.  This method will return
-   * an error code if this password field is not stored crypted.
+   * <p>This method is used to set a pre-crypted FreeBSD-style MD5Crypt
+   * password for this field.</p>
+   *
+   * <p>This method will return an error code if this password field is
+   * not configured to store MD5Crypt hashed password text.</p>
+   *
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
+   *
+   * <p>Not exported for access by remote clients.</p>
+   *
+   * @param text The crypt text to load into this PasswordDBField
+   * @param local If true, permission checking is skipped
+   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited. 
    */
 
   public ReturnVal setMD5CryptedPass(String text, boolean local, boolean noWizards)
@@ -1962,9 +2056,19 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * This method is used to set a pre-crypted Apache-style
-   * MD5Crypt password for this field.  This method will return
-   * an error code if this password field is not stored crypted.
+   * <p>This method is used to set a pre-crypted Apache-style MD5Crypt
+   * password for this field.</p>
+   *
+   * <p>This method will return an error code if this password field is
+   * not configured to store Apache-style MD5Crypt hashed password
+   * text.</p>
+   *
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
    *
    * @see arlut.csd.ganymede.rmi.pass_field
    */
@@ -1975,9 +2079,25 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * This method is used to set a pre-crypted Apache-style
-   * MD5Crypt password for this field.  This method will return
-   * an error code if this password field is not stored crypted.
+   * <p>This method is used to set a pre-crypted Apache-style MD5Crypt
+   * password for this field.</p>
+   *
+   * <p>This method will return an error code if this password field is
+   * not configured to store Apache-style MD5Crypt hashed password
+   * text.</p>
+   *
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
+   *
+   * <p>Not exported for access by remote clients.</p>
+   *
+   * @param text The crypt text to load into this PasswordDBField
+   * @param local If true, permission checking is skipped
+   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited. 
    */
 
   public ReturnVal setApacheMD5CryptedPass(String text, boolean local, boolean noWizards)
@@ -2052,11 +2172,19 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * This method is used to set pre-crypted Windows-style password
-   * hashes for this field.  These strings are formatted as used in Samba's
-   * encrypted password files.  This method will return
-   * an error code if this password field is not configured to accept
-   * Windows-hashed password strings.
+   * <p>This method is used to set pre-crypted Windows-style password
+   * hashes for this field.  These strings are formatted as used in
+   * Samba's encrypted password files.</p>
+   *
+   * <p>This method will return an error code if this password field is
+   * not configured to accept Windows-hashed password strings.</p>
+   *
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
    *
    * @see arlut.csd.ganymede.rmi.pass_field
    */
@@ -2067,11 +2195,26 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * This method is used to set pre-crypted Windows-style password
-   * hashes for this field.  These strings are formatted as used in Samba's
-   * encrypted password files.  This method will return
-   * an error code if this password field is not configured to accept
-   * Windows-hashed password strings.
+   * <p>This method is used to set pre-crypted Windows-style password
+   * hashes for this field.  These strings are formatted as used in
+   * Samba's encrypted password files.</p>
+   *
+   * <p>This method will return an error code if this password field is
+   * not configured to accept Windows-hashed password strings.</p>
+   *
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
+   *
+   * <p>Not exported for access by remote clients.</p>
+   *
+   * @param LANMAN  The LANMAN hash text to load into this PasswordDBField
+   * @param NTUnicodeMD4  The NTUnicodeMD4 hash text to load into this PasswordDBField
+   * @param local If true, permission checking is skipped
+   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited. 
    */
 
   public ReturnVal setWinCryptedPass(String LANMAN, String NTUnicodeMD4, boolean local, boolean noWizards)
@@ -2147,13 +2290,18 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * This method is used to set a pre-crypted password for this field.
+   * <p>This method is used to set a pre-crypted OpenLDAP/Netscape
+   * Directory Server Salted SHA (SSHA) password for this field.</p>
    *
-   * This method will return an error dialog if this field does not store
-   * passwords in SSHA format.
+   * <p>This method will return an error code if this password field is
+   * not configured to store SSHA hashed password text.</p>
    *
-   * Because the SSHA hashing is not reversible, any other password
-   * information stored in this field will be lost.
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
    *
    * @see arlut.csd.ganymede.rmi.pass_field
    */
@@ -2164,13 +2312,24 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * This method is used to set a pre-crypted password for this field.
+   * <p>Sets a pre-crypted OpenLDAP/Netscape Directory Server Salted
+   * SHA (SSHA) password for this field.</p>
    *
-   * This method will return an error dialog if this field does not store
-   * passwords in SSHA format.
+   * <p>This method will return an error code if this password field is
+   * not configured to store SSHA hashed password text.</p>
    *
-   * Because the SSHA hashing is not reversible, any other password
-   * information stored in this field will be lost.
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
+   *
+   * <p>Not exported for access by remote clients.</p>
+   *
+   * @param text The crypt text to load into this PasswordDBField
+   * @param local If true, permission checking is skipped
+   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited. 
    */
 
   public ReturnVal setSSHAPass(String text, boolean local, boolean noWizards)
@@ -2245,26 +2404,38 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * This method is used to set a pre-crypted Sha256Crypt or
-   * Sha512Crypt password for this field.  This method will return an
-   * error code if this password field does not allow storage in
-   * ShaCrypt format.
+   * <p>This method is used to set a pre-crypted Sha256Crypt or
+   * Sha512Crypt password for this field.</p>
    *
-   * The hashText submitted to this method must match one of the
-   * following four forms:
+   * <p>This method will return an error code if this password field is
+   * not configured to store ShaCrypt hashed password text.</p>
    *
+   * <p>The hashText submitted to this method must match one of the
+   * following four forms:</p>
+   *
+   * <pre>
    * $5$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
    * $5$rounds=&lt;round-count&gt;$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
    *
    * $6$&lt;saltstring&gt;$&lt;64 bytes of hash text, base 64 encoded&gt;
    * $6$rounds=&lt;round-count&gt;$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
+   * </pre>
    *
-   * If the round count is specified using the '$rounds=n' syntax, the
+   * <p>If the round count is specified using the '$rounds=n' syntax, the
    * higher the round count, the more computational work will be
-   * required to verify passwords against this hash text.
+   * required to verify passwords against this hash text.</p>
    *
-   * See http://people.redhat.com/drepper/sha-crypt.html for full
-   * details of the hash format this method is expecting.
+   * <p>See <a href="http://people.redhat.com/drepper/sha-crypt.html">http://people.redhat.com/drepper/sha-crypt.html</a>
+   * for full details of the hash format this method is expecting.</p>
+   *
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.pass_field
    */
 
   public ReturnVal setShaUnixCryptPass(String hashText)
@@ -2273,26 +2444,42 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * This method is used to set a pre-crypted Sha256Crypt or
-   * Sha512Crypt password for this field.  This method will return an
-   * error code if this password field does not allow storage in
-   * ShaCrypt format.
+   * <p>This method is used to set a pre-crypted Sha256Crypt or
+   * Sha512Crypt password for this field.</p>
    *
-   * The hashText submitted to this method must match one of the
-   * following four forms:
+   * <p>This method will return an error code if this password field is
+   * not configured to store ShaCrypt hashed password text.</p>
    *
+   * <p>The hashText submitted to this method must match one of the
+   * following four forms:</p>
+   *
+   * <pre>
    * $5$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
    * $5$rounds=&lt;round-count&gt;$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
    *
    * $6$&lt;saltstring&gt;$&lt;64 bytes of hash text, base 64 encoded&gt;
    * $6$rounds=&lt;round-count&gt;$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
+   * </pre>
    *
-   * If the round count is specified using the '$rounds=n' syntax, the
+   * <p>If the round count is specified using the '$rounds=n' syntax, the
    * higher the round count, the more computational work will be
-   * required to verify passwords against this hash text.
+   * required to verify passwords against this hash text.</p>
    *
-   * See http://people.redhat.com/drepper/sha-crypt.html for full
-   * details of the hash format this method is expecting.
+   * <p>See <a href="http://people.redhat.com/drepper/sha-crypt.html">http://people.redhat.com/drepper/sha-crypt.html</a>
+   * for full details of the hash format this method is expecting.</p>
+   *
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
+   *
+   * <p>Not exported for access by remote clients.</p>
+   *
+   * @param hashText The crypt text to load into this PasswordDBField
+   * @param local If true, permission checking is skipped
+   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited. 
    */
 
   public ReturnVal setShaUnixCryptPass(String hashText, boolean local, boolean noWizards)
@@ -2368,25 +2555,33 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * This method is used to force all known hashes into this password
+   * <p>This method is used to force all known hashes into this password
    * field.  Ganymede does no verifications to insure that all of these
    * hashes really match the same password, so caveat emptor.  If any of
-   * these hashes are null or empty string, those hashes will be cleared.
+   * these hashes are null or empty string, those hashes will be cleared.</p>
    *
-   * Calling this method will clear the password's stored plaintext,
-   * if any.
+   * </p>Calling this method will clear the password's stored plaintext,
+   * if any.</p>
    *
-   * This method is typically called from the xmlclient, and is
-   * specifically designed to allow all types of hash text to be
-   * loaded, without regard for which hash formats this password field
-   * is configured to generate.
+   * <p>This method is intended to be called via the {@link
+   * arlut.csd.ganymede.server.GanymedeXMLSession GanymedeXMLSession}
+   * in support of the xmlclient, and is specifically designed to
+   * allow all types of hash text to be loaded, without regard for
+   * which hash formats this password field is configured to
+   * generate.</p>
    *
-   * We're deliberately permissive in accepting hash text from the
+   * <p>We're deliberately permissive in accepting hash text from the
    * xmlclient so that we can take hash text in for the purpose of
    * authenticating users logging to Ganymede itself, even if the
    * adopter doesn't necessarily intend to use that hash text format
-   * going forward.
+   * going forward.  This is mainly for the purpose of bootstrapping a
+   * new Ganymede server with pre-hashed password data from a
+   * pre-existing authentication system.</p>
+   *
    * <p>Not exported for access by remote clients.</p>
+   *
+   * @param local If true, permission checking is skipped
+   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited. 
    */
 
   public ReturnVal setAllHashes(String crypt,
@@ -2795,17 +2990,17 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
-   * This method returns an int indicating to what precision the
+   * <p>This method returns an int indicating to what precision the
    * password in this PasswordDBField is known.  Certain cryptographic
    * hashes have limits on how many characters of the input text are
-   * taken into account in the hash.
+   * taken into account in the hash.</p>
    *
-   * This method returns -1 if the password is known with no limits
+   * <p>This method returns -1 if the password is known with no limits
    * on its precision (plaintext, or md5crypt, or ssha which is
    * precise to 2^64 bits.. close enough), 0 if the password is not
    * know, or a positive integer indicating the number of characters
    * of precision that we believe we can recognize from our hash
-   * authenticators.
+   * authenticators.</p>
    */
 
   private int getHashPrecision()
@@ -2893,8 +3088,14 @@ public class PasswordDBField extends DBField implements pass_field {
   ----------------------------------------------------------------------------*/
 
   /**
-   * This nested class holds previous passwords that have been
-   * associated with this account.
+   * <p>Holds previous passwords that have been associated with this
+   * password field.</p>
+   *
+   * <p>This archive is stored on disk in the ganymede.db and journal
+   * files as part of the on-disk storage of the PasswordDBField.</p>
+   *
+   * <p>All passwords in the archive are stored in an unsalted SSHA
+   * hash format, LDAP style.</p>
    */
 
   static class passwordHistoryArchive {
@@ -2963,13 +3164,13 @@ public class PasswordDBField extends DBField implements pass_field {
     }
 
     /**
-     * This method changes the size of this archive.  If poolSize is
+     * <p>This method changes the size of this archive.  If poolSize is
      * less than the current size of this archive, older passwords are
-     * trimmed from this archive.
+     * trimmed from this archive.</p>
      *
-     * If poolSize is greater than the current size of this archive,
+     * <p>If poolSize is greater than the current size of this archive,
      * space is added, but no values are put in the newly available
-     * slots until add() is called.
+     * slots until add() is called.</p>
      */
 
     public synchronized void setPoolSize(int poolSize)
@@ -3021,13 +3222,13 @@ public class PasswordDBField extends DBField implements pass_field {
     }
 
     /**
-     * This method checks to see if the plaintext password was
-     * previously associated with this passwordHistoryArchive.
+     * <p>This method checks to see if the plaintext password was
+     * previously associated with this passwordHistoryArchive.</p>
      *
-     * If a previous instance of this password is found in this
-     * archive, the Date of the previous use is returned.
+     * <p>If a previous instance of this password is found in this
+     * archive, the Date of the previous use is returned.</p>
      *
-     * If not, this method returns null.
+     * <p>If not, this method returns null.</p>
      */
 
     public synchronized Date contains(String password)

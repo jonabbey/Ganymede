@@ -65,7 +65,6 @@ import arlut.csd.ganymede.common.ReturnVal;
  * db_field is used by the client to make changes to a field when editing the
  * {@link arlut.csd.ganymede.rmi.db_object db_object} the field is contained within.</p>
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 

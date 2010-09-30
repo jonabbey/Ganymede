@@ -48,52 +48,52 @@ package arlut.csd.ganymede.rmi;
 
 import java.rmi.RemoteException;
 
+/**
+ * <p>Remote RMI reference to a Ganymede {@link
+ * arlut.csd.ganymede.server.IPDBField IPDBField}.</p>
+ *
+ * <p>ip_field is an extension of the {@link
+ * arlut.csd.ganymede.rmi.db_field} interface, and provides a set of
+ * additional methods that the client can use to query the status and
+ * acceptable data types for an IP Address field.</p>
+ */
+
 public interface ip_field extends db_field {
 
   /**
-   *
    * Returns true if this field is permitted to hold IPv6 addresses.
-   *
    */
 
   boolean v6Allowed() throws RemoteException;
   
   /**
-   *
    * Returns true if the (scalar) value stored in this IP field is an
    * IPV6 address
-   * 
    */
 
   boolean isIPV6() throws RemoteException;
 
   /**
-   *
    * Returns true if the (scalar) value stored in this IP field is an
    * IPV6 address
-   * 
    */
 
   boolean isIPV4() throws RemoteException;
 
   /**
-   *
    * Returns true if the value stored in the given element of this IP
    * field is an IPV6 address.
    *
    * @param index Array index for the value to be checked
-   *
    */
 
   boolean isIPV6(short index) throws RemoteException;
 
   /**
-   *
    * Returns true if the value stored in the given element of this IP
    * field is an IPV4 address.
    *
    * @param index Array index for the value to be checked
-   *
    */
 
   boolean isIPV4(short index) throws RemoteException;

@@ -56,6 +56,16 @@ import arlut.csd.ganymede.common.ReturnVal;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <p>Remote RMI reference to a Ganymede {@link
+ * arlut.csd.ganymede.server.PasswordDBField PasswordDBField}.</p>
+ *
+ * <p>pass_field is an extension of the {@link
+ * arlut.csd.ganymede.rmi.db_field} interface, and provides a set of
+ * additional methods that the client can use to interact with a
+ * password field on the Ganymede server.</p>
+ */
+
 public interface pass_field extends db_field {
 
   int maxSize() throws RemoteException;
@@ -94,13 +104,19 @@ public interface pass_field extends db_field {
   boolean crypted() throws RemoteException;
 
   /**
-   * This method is used for authenticating a provided plaintext
-   * password against the stored contents of this password field.  The
-   * password field may have stored the password in plaintext, or in
-   * any of a variety of cryptographic hash formats.  matchPlainText()
-   * will perform whatever operation on the provided plaintext as is
-   * required to determine whether or not it matches with the stored
-   * password data.
+   * <p>Authenticates a provided plaintext password against the stored
+   * contents of this password field.</p>
+   *
+   * <p>The password field may have stored the password in plaintext,
+   * or in any of a variety of cryptographic hash formats.
+   * matchPlainText() will perform whatever operation on the provided
+   * plaintext as is required to determine whether or not it matches
+   * with the stored password data.</p>
+   *
+   * <p>If this field is configured to create and retain other hash
+   * formats, this method will create the missing hash formats as
+   * needed if the input text is successfully matched against the
+   * password data held in this field.</p>
    *
    * @return true if the given plaintext matches the stored password
    */
@@ -108,87 +124,133 @@ public interface pass_field extends db_field {
   boolean matchPlainText(String text) throws RemoteException;
 
   /** 
-   * This method is used to set the password for this field,
-   * crypting it in various ways if this password field is stored
-   * crypted.
+   * <p>Set the plain text password for this field.</p>
+   *
+   * <p>If this field is configured to create and retain other hash
+   * formats, it will do so as needed during the call to this
+   * method.</p>
    */
 
   ReturnVal setPlainTextPass(String text) throws RemoteException;
 
   /**
-   * This method is used to set a pre-hashed password for this field,
-   * using the traditional (weak) Unix Crypt algorithm.
+   * <p>This method is used to set a pre-hashed password for this field,
+   * using the traditional (weak) Unix Crypt algorithm.</p>
    *
-   * This method will return an error code if this password field is
-   * not configured to store Crypt hashed password text.
+   * <p>This method will return an error code if this password field is
+   * not configured to store Crypt hashed password text.</p>
+   *
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
    */
 
   ReturnVal setCryptPass(String text) throws RemoteException;
 
   /**
-   * This method is used to set a pre-crypted FreeBSD-style MD5Crypt
-   * password for this field.
+   * <p>This method is used to set a pre-crypted FreeBSD-style MD5Crypt
+   * password for this field.</p>
    *
-   * This method will return an error code if this password field is
-   * not configured to store MD5Crypt hashed password text.
+   * <p>This method will return an error code if this password field is
+   * not configured to store MD5Crypt hashed password text.</p>
+   *
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
    */
 
   ReturnVal setMD5CryptedPass(String text) throws RemoteException;
 
   /**
-   * This method is used to set a pre-crypted Apache-style MD5Crypt
-   * password for this field.
+   * <p>This method is used to set a pre-crypted Apache-style MD5Crypt
+   * password for this field.</p>
    *
-   * This method will return an error code if this password field is
+   * <p>This method will return an error code if this password field is
    * not configured to store Apache-style MD5Crypt hashed password
-   * text.
+   * text.</p>
+   *
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
    */
 
   ReturnVal setApacheMD5CryptedPass(String text) throws RemoteException;
 
   /**
-   * This method is used to set pre-crypted Windows-style password
+   * <p>This method is used to set pre-crypted Windows-style password
    * hashes for this field.  These strings are formatted as used in
-   * Samba's encrypted password files.
+   * Samba's encrypted password files.</p>
    *
-   * This method will return an error code if this password field is
-   * not configured to accept Windows-hashed password strings.
+   * <p>This method will return an error code if this password field is
+   * not configured to accept Windows-hashed password strings.</p>
+   *
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
    */
 
   ReturnVal setWinCryptedPass(String LANMAN, String NTUnicodeMD4) throws RemoteException;
 
   /**
-   * This method is used to set a pre-crypted OpenLDAP/Netscape
-   * Directory Server Salted SHA (SSHA) password for this field.
+   * <p>This method is used to set a pre-crypted OpenLDAP/Netscape
+   * Directory Server Salted SHA (SSHA) password for this field.</p>
    *
-   * This method will return an error code if this password field is
-   * not configured to store SSHA hashed password text.
+   * <p>This method will return an error code if this password field is
+   * not configured to store SSHA hashed password text.</p>
+   *
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
    */
 
   ReturnVal setSSHAPass(String text) throws RemoteException;
 
   /**
-   * This method is used to set a pre-crypted Sha256Crypt or
-   * Sha512Crypt password for this field.
+   * <p>This method is used to set a pre-crypted Sha256Crypt or
+   * Sha512Crypt password for this field.</p>
    *
-   * This method will return an error code if this password field is
-   * not configured to store ShaCrypt hashed password text.
+   * <p>This method will return an error code if this password field is
+   * not configured to store ShaCrypt hashed password text.</p>
    *
-   * The hashText submitted to this method must match one of the
-   * following four forms:
+   * <p>The hashText submitted to this method must match one of the
+   * following four forms:</p>
    *
+   * <pre>
    * $5$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
    * $5$rounds=&lt;round-count&gt;$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
    *
    * $6$&lt;saltstring&gt;$&lt;64 bytes of hash text, base 64 encoded&gt;
    * $6$rounds=&lt;round-count&gt;$&lt;saltstring&gt;$&lt;32 bytes of hash text, base 64 encoded&gt;
+   * </pre>
    *
-   * If the round count is specified using the '$rounds=n' syntax, the
+   * <p>If the round count is specified using the '$rounds=n' syntax, the
    * higher the round count, the more computational work will be
-   * required to verify passwords against this hash text.
+   * required to verify passwords against this hash text.</p>
    *
-   * See http://people.redhat.com/drepper/sha-crypt.html for full
-   * details of the hash format this method is expecting.
+   * <p>See <a href="http://people.redhat.com/drepper/sha-crypt.html">http://people.redhat.com/drepper/sha-crypt.html</a>
+   * for full details of the hash format this method is expecting.</p>
+   *
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
    */
 
   ReturnVal setShaUnixCryptPass(String hashText) throws RemoteException;

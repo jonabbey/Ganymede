@@ -113,9 +113,9 @@ public class xmlobject {
   String actionMode = null;
 
   /**
-   * The short object type id for this object type.
+   * <p>The short object type id for this object type.</p>
    *
-   * Will be null if undefined.
+   * <p>Will be null if undefined.</p>
    */
 
   Short type = null;
@@ -143,11 +143,11 @@ public class xmlobject {
   boolean knownNonExistent = false;
 
   /**
-   * The object number, if known.  This may be used to identify
+   * <p>The object number, if known.  This may be used to identify
    * an object on the server if the object is not thought to have
-   * a unique identifier string.
+   * a unique identifier string.</p>
    *
-   * Will be negative one if undefined.
+   * <p>Will be negative one if undefined.</p>
    */
 
   int num = -1;
@@ -175,20 +175,20 @@ public class xmlobject {
   boolean forceCreate = false;
 
   /**
-   * If we're an embedded object, the owner object will refer to the
-   * invid xmlfield that contains this embedded object.
+   * <p>If we're an embedded object, the owner object will refer to the
+   * invid xmlfield that contains this embedded object.</p>
    *
-   * Otherwise, it will be null.
+   * <p>Otherwise, it will be null.</p>
    */
 
   xmlfield ownerField = null;
 
   /**
-   * If we are a pre-existing embedded object, we may be identified by
+   * <p>If we are a pre-existing embedded object, we may be identified by
    * an index attribute rather than an id, which the xml author may
-   * not have easy access to.
+   * not have easy access to.</p>
    *
-   * Otherwise, it will be -1.
+   * <p>Otherwise, it will be -1.</p>
    */
 
   int index = -1;
@@ -202,13 +202,13 @@ public class xmlobject {
   /* -- */
 
   /**
-   * This constructor takes the XMLElement defining an object to
+   * <p>This constructor takes the XMLElement defining an object to
    * be created or manipulated on the server and loads all information
-   * for this object into the xmlobject created.
+   * for this object into the xmlobject created.</p>
    *
-   * This constructor reads all elements from the xmlclient
+   * <p>This constructor reads all elements from the xmlclient
    * XML stream up to and including the matching close element for
-   * this object.
+   * this object.</p>
    */
   
   public xmlobject(XMLElement openElement, GanymedeXMLSession xSession, xmlfield ownerField) throws SAXException
@@ -342,11 +342,11 @@ public class xmlobject {
   }
 
   /**
-   * This method causes this object to be created on
-   * the server.
+   * <p>This method causes this object to be created on
+   * the server.</p>
    *
-   * This method uses the standard {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
-   * return semantics.
+   * <p>This method uses the standard {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
+   * return semantics.</p>
    */
 
   public ReturnVal createOnServer(GanymedeSession session) throws NotLoggedInException
@@ -382,11 +382,11 @@ public class xmlobject {
   }
 
   /**
-   * This method causes this object to be checked out for editing
-   * on the server.
+   * <p>This method causes this object to be checked out for editing
+   * on the server.</p>
    *
-   * This method uses the standard {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
-   * return semantics.
+   * <p>This method uses the standard {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
+   * return semantics.</p>
    */
 
   public ReturnVal editOnServer(GanymedeSession session) throws NotLoggedInException
@@ -524,13 +524,13 @@ public class xmlobject {
   }
 
   /**
-   * This method returns an invid for this xmlobject record,
-   * performing a lookup on the server if necessary.
+   * <p>This method returns an invid for this xmlobject record,
+   * performing a lookup on the server if necessary.</p>
    *
-   * The first time getInvid() is called, we'll try to find the
+   * <p>The first time getInvid() is called, we'll try to find the
    * Invid from the DBStore by doing a look-up of the xml object's
    * label (if we're not given a num attribute).  getInvid() stores
-   * the Invid upon first lookup as a side effect.
+   * the Invid upon first lookup as a side effect.</p>
    */
 
   public Invid getInvid() throws NotLoggedInException

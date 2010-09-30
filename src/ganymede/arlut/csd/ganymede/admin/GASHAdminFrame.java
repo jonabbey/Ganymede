@@ -1236,11 +1236,11 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   }
 
   /**
-   * Add text from the server log to the log text pane.
+   * <p>Add text from the server log to the log text pane.</p>
    *
-   * This method looks for patterns in the Ganymede server's log text,
+   * <p>This method looks for patterns in the Ganymede server's log text,
    * and will break the text apart to apply coloring to make different
-   * pieces of the log text stand out.
+   * pieces of the log text stand out.</p>
    */
 
   public void appendStyledLogText(String text)
@@ -1823,11 +1823,11 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   }
 
   /**
-   * Method to handle properly logging out if the main admin
-   * frame is closed by the window system.
+   * <p>Method to handle properly logging out if the main admin
+   * frame is closed by the window system.</p>
    *
-   * We do an enableEvents(AWT.WINDOW_EVENT_MASK) in the
-   * GASHAdminFrame constructor to activate this method.
+   * <p>We do an enableEvents(AWT.WINDOW_EVENT_MASK) in the
+   * GASHAdminFrame constructor to activate this method.</p>
    */
 
   protected void processWindowEvent(WindowEvent e) 
@@ -1867,10 +1867,10 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   }
 
   /**
-   * Loads and returns the error Image for use in client dialogs.
+   * <p>Loads and returns the error Image for use in client dialogs.</p>
    * 
-   * Once the image is loaded, it is cached for future calls to 
-   * getErrorImage().
+   * <p>Once the image is loaded, it is cached for future calls to 
+   * getErrorImage().</p>
    */
 
   public final Image getErrorImage()
@@ -2089,13 +2089,13 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
   }
 
   /**
-   * Display the dialog box, locks this thread while the dialog is being
+   * <p>Display the dialog box, locks this thread while the dialog is being
    * displayed, and returns a hashtable of data field values when the
-   * user closes the dialog box.
+   * user closes the dialog box.</p>
    *
-   * Use this instead of Dialog.show().  If Hashtable returned is null,
+   * <p>Use this instead of Dialog.show().  If Hashtable returned is null,
    * then the cancel button was clicked.  Otherwise, it will contain a 
-   * hash of labels(String) to results (Object).
+   * hash of labels(String) to results (Object).</p>
    *
    * @return HashTable of labels to values
    */
