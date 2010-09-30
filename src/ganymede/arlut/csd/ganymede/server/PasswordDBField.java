@@ -2386,6 +2386,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * authenticating users logging to Ganymede itself, even if the
    * adopter doesn't necessarily intend to use that hash text format
    * going forward.
+   * <p>Not exported for access by remote clients.</p>
    */
 
   public ReturnVal setAllHashes(String crypt,

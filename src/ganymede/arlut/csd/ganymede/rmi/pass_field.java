@@ -192,30 +192,4 @@ public interface pass_field extends db_field {
    */
 
   ReturnVal setShaUnixCryptPass(String hashText) throws RemoteException;
-
-  /**
-   * This method is used to force all known hashes into this password
-   * field.  Ganymede does no verifications to insure that all of these
-   * hashes really match the same password, so caveat emptor.  If any of
-   * these hashes are null or empty string, those hashes will be cleared.
-   *
-   * Calling this method will clear the password's stored plaintext,
-   * if any.
-   *
-   * This method is typically called from the xmlclient, and is
-   * specifically designed to allow all types of hash text to be
-   * loaded, without regard for which hash formats this password field
-   * is configured to generate.
-   *
-   * We're deliberately permissive in accepting hash text from the
-   * xmlclient so that we can take hash text in for the purpose of
-   * authenticating users logging to Ganymede itself, even if the
-   * adopter doesn't necessarily intend to use that hash text format
-   * going forward.
-   */
-
-  public ReturnVal setAllHashes(String crypt, String md5crypt, String apacheMd5crypt,
-				String LANMAN, String NTUnicodeMD4, String sshaCrypt, String shaUnixCrypt,
-				boolean local, boolean noWizards) throws RemoteException;
-
 }

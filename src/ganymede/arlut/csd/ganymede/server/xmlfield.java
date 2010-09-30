@@ -1132,7 +1132,7 @@ public class xmlfield implements FieldType {
 	else if (fieldDef.isPassword())
 	  {
 	    xPassword xp = (xPassword) value;
-	    pass_field field = (pass_field) owner.objref.getField(fieldDef.getID());
+	    PasswordDBField field = (PasswordDBField) owner.objref.getField(fieldDef.getID());
 
 	    // set anything we can.. note that if we transmit null for
 	    // any of the password hash options, it will null the
