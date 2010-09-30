@@ -57,32 +57,32 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * DBLocks arbitrate access to {@link
+ * <p>DBLocks arbitrate access to {@link
  * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects in the
  * Ganymede server's {@link arlut.csd.ganymede.server.DBStore
- * DBStore}.
+ * DBStore}.</p>
  *
- * Threads wishing to read from, dump, or update object bases in the
- * DBStore must be in possession of an established DBLock.
+ * <p>Threads wishing to read from, dump, or update object bases in the
+ * DBStore must be in possession of an established DBLock.</p>
  *
- * The general scheme is that any number of readers and/or dumpers can
+ * <p>The general scheme is that any number of readers and/or dumpers can
  * read from an object base simultaneously.  If a DBWriteLock to
  * establish on an object base, all active readers are allowed to
  * complete their reading, but no new read lock may be established
  * until the writer has a chance to get in and make its update and
  * then signals completion by calling release().  Writers are given
- * priority in the DBLock queue over readers.
+ * priority in the DBLock queue over readers.</p>
  * 
- * Similarly, if there are a number of writer locks queued up for
+ * <p>Similarly, if there are a number of writer locks queued up for
  * update access to a DBObjectBase in the DBStore when a thread
  * attempts to establish a DBDumpLock, those writers are allowed to
  * complete their updates, but no new writer is queued until the dump
- * thread finishes dumping the locked bases.
+ * thread finishes dumping the locked bases.</p>
  *
- * All of this priority logic is implemented in the establish()
- * methods of the concrete DBLock subclasses.
+ * <p>All of this priority logic is implemented in the establish()
+ * methods of the concrete DBLock subclasses.</p>
  *
- * As mentioned above, all DBLock's are issued in the context of one
+ * <p>As mentioned above, all DBLock's are issued in the context of one
  * or more {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
  * objects.  The DBObjectBases are actually the things being locked.
  * To maintain multi-threaded safety of the lock system across
@@ -95,13 +95,13 @@ import java.util.Vector;
  * arlut.csd.ganymede.server.DBReadLock DBDumpLock}) are all
  * synchronized on the Ganymede's DBStore object.  This
  * synchronization is critical for the proper functioning of the
- * DBLock system.
+ * DBLock system.</p>
  * 
- * There is currently no support for handling timeouts, and locks can
+ * <p>There is currently no support for handling timeouts, and locks can
  * persist indefinitely.  However, the {@link
  * arlut.csd.ganymede.server.GanymedeSession GanymedeSession} class
  * will detect a client that has died, and will properly clean up any
- * locks held by the user.
+ * locks held by the user.</p>
  */
 
 public abstract class DBLock {
@@ -233,27 +233,27 @@ public abstract class DBLock {
   }
 
   /**
-   * <P>This method waits until the lock can be established.  The
+   * <p>This method waits until the lock can be established.  The
    * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBases} locked
    * are specified in the constructor of the implementation subclass
    * ({@link arlut.csd.ganymede.server.DBReadLock DBReadLock},
    * {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLock}, or
-   * {@link arlut.csd.ganymede.server.DBDumpLock DBDumpLock}).</P>
+   * {@link arlut.csd.ganymede.server.DBDumpLock DBDumpLock}).</p>
    *
-   * <P>A thread that calls establish() will be suspended (waiting
+   * <p>A thread that calls establish() will be suspended (waiting
    * on the server's {@link arlut.csd.ganymede.server.DBStore DBStore} until 
    * all DBObjectBases listed in the DBLock's constructor are available
    * to be locked.  At that point, the thread blocking on establish()
-   * will wake up possessing a lock on the requested DBObjectBases.</P>
+   * will wake up possessing a lock on the requested DBObjectBases.</p>
    *
-   * <P>It is possible for the establish() to fail completely.. the
+   * <p>It is possible for the establish() to fail completely.. the
    * admin console may reject a client whose thread is blocking on
    * establish(), for instance, or the server may be shut down.  In
    * those cases, another thread may call the DBLock's
    * {@link arlut.csd.ganymede.server.DBLock#abort() abort()} method, in
    * which case
    * establish() will throw an InterruptedException, and the lock will
-   * not be established.</P>
+   * not be established.</p>
    */
 
   abstract void establish(Object key) throws InterruptedException;

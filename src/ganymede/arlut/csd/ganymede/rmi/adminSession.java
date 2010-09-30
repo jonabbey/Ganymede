@@ -76,9 +76,7 @@ import arlut.csd.ganymede.common.ReturnVal;
 public interface adminSession extends Remote {
 
   /**
-   *
    * Disconnect the remote admin console associated with this object
-   *
    */
 
   void        logout() throws RemoteException;
@@ -119,19 +117,19 @@ public interface adminSession extends Remote {
   ReturnVal     forceBuild() throws RemoteException;
 
   /**
-   * Kick a user off of the Ganymede server on behalf of this admin console
+   * Kicks a user off of the Ganymede server on behalf of this admin console
    */
 
   ReturnVal     kill(String user) throws RemoteException;
 
   /**
-   * Kick all users off of the Ganymede server on behalf of this admin console
+   * Kicks all users off of the Ganymede server on behalf of this admin console
    */
 
   ReturnVal     killAll() throws RemoteException;
 
   /**
-   * <p>shutdown the server cleanly, on behalf of this admin console.</p>
+   * <p>Shuts down the server cleanly, on behalf of this admin console.</p>
    *
    * @param waitForUsers if true, shutdown will be deferred until all
    * users are logged out.  No new users will be allowed to login.
@@ -140,21 +138,21 @@ public interface adminSession extends Remote {
   ReturnVal     shutdown(boolean waitForUsers) throws RemoteException;
 
   /**
-   * <P>dump the current state of the db to disk</P>
+   * <P>Dumps the current state of the db to disk.</p>
    */
 
   ReturnVal     dumpDB() throws RemoteException;
 
   /**
-   * <p>run a long-running verification suite on the Ganymede server
-   * database's invid links</p>
+   * <p>Runs a potentially long-running verification suite on the
+   * Ganymede server database's invid links.</p>
    */
 
   ReturnVal        runInvidTest() throws RemoteException;
 
   /**
-   * <p>run a long-running verification and repair operation on the
-   * Ganymede server's invid database links</p>
+   * <p>Runs a potentially long-running verification and repair
+   * operation on the Ganymede server's invid database links.</p>
    *
    * <p>Removes any invid pointers in the Ganymede database whose
    * targets are not properly defined.  This should not ever happen
@@ -164,24 +162,22 @@ public interface adminSession extends Remote {
   ReturnVal     runInvidSweep() throws RemoteException;
 
   /**
-   *
-   * run a verification on the integrity of embedded objects and
+   * Runs a verification on the integrity of embedded objects and
    * their containers
-   *
    */
 
   ReturnVal        runEmbeddedTest() throws RemoteException;
 
   /**
-   * <P>Removes any embedded objects which do not have containers.</P>
+   * <p>Removes any embedded objects which do not have containers.</p>
    */
 
   ReturnVal     runEmbeddedSweep() throws RemoteException;
 
   /**
-   * <P>Causes a pre-registered task in the Ganymede server
+   * <p>Causes a pre-registered task in the Ganymede server
    * to be executed as soon as possible.  This method call
-   * will have no effect if the task is currently running.</P>
+   * will have no effect if the task is currently running.</p>
    *
    * @param name The name of the task to run
    */
@@ -223,8 +219,10 @@ public interface adminSession extends Remote {
   ReturnVal     enableTask(String name) throws RemoteException;
 
   /**
-   * <p>Lock the server to prevent client logins and edit the server
-   * schema.  This method will return a {@link
+   * <p>Locks the server to prevent client logins and edits the server
+   * schema.</p> 
+   *
+   * <p>This method will return a {@link
    * arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} remote reference to
    * the admin console, which will present a graphical schema editor
    * using this remote reference.  The server will remain locked until

@@ -67,35 +67,34 @@ import arlut.csd.ganymede.rmi.db_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * The DBJournal class is used to provide journalling of changes to the
+ * <p>The DBJournal class is used to provide journalling of changes to the
  * {@link arlut.csd.ganymede.server.DBStore DBStore}
  * during operations.  The Journal file will contain a complete list of all
  * changes made since the last dump of the complete DBStore.  The Journal file
- * is composed of a header block followed by a number of transactions.
+ * is composed of a header block followed by a number of transactions.</p>
  *
- * Each transaction consists of a number of object modification records, each
+ * <p>Each transaction consists of a number of object modification records, each
  * record specifying the creation, deletion, or modification of a particular
  * object.  At the end of the transaction, a marker indicates the completion of
  * the transaction.  At DBStore startup time, the journal is read in and all
- * complete transactions recorded are performed on the main DBStore.
+ * complete transactions recorded are performed on the main DBStore.</p>
  *
- * Generally, if the DBStore was shut down correctly, the entire memory
+ * <p>Generally, if the DBStore was shut down correctly, the entire memory
  * structure of the DBStore will be cleanly dumped out and the Journal will
  * be removed.  The Journal is intended to insure that the DBStore remains
  * transaction consistent if the server running Ganymede crashes during
- * runtime.
+ * runtime.</p>
  *
- * See the {@link arlut.csd.ganymede.server.DBEditSet DBEditSet} class for
- * more information on Ganymede transactions.
+ * <p>See the {@link arlut.csd.ganymede.server.DBEditSet DBEditSet} class for
+ * more information on Ganymede transactions.</p>
  *
- * Nota bene: this class includes synchronized methods which serialize
+ * <p>Nota bene: this class includes synchronized methods which serialize
  * operations on the Ganymede transaction journal.  The DBJournal
  * monitor is intended to be the innermost monitor for operations
  * involving the DBStore and DBJournal objects.  Synchronized methods
  * in DBJournal must not call synchronized methods on DBStore, as
  * synchronized DBStore methods can and will call methods on
- * DBJournal.
- *
+ * DBJournal.</p>
  */
 
 public class DBJournal implements ObjectStatus {
@@ -335,11 +334,9 @@ public class DBJournal implements ObjectStatus {
   }
 
   /**
-   *
    * The reset() method is used to copy the journal file to a safe location and
    * truncate it.  reset() should be called immediately after the DBStore is
    * dumped to disk and before the DumpLock is relinquished.
-   *
    */
 
   public synchronized void reset() throws IOException
@@ -400,18 +397,18 @@ public class DBJournal implements ObjectStatus {
   }
 
   /**
-   * <P>The load() method reads in all transactions in the current
+   * <p>The load() method reads in all transactions in the current
    * DBStore Journal and makes the appropriate changes to the DBStore
    * Object Bases.  This method should be called after the main body
    * of the DBStore is loaded and before the DBStore is put into
-   * production mode.</P>
+   * production mode.</p>
    *
-   * <P>load() will return true if the on-disk journal was in a
+   * <p>load() will return true if the on-disk journal was in a
    * consistent state, with no incomplete transactions.  If load()
    * encounters EOF in the middle of attempting to read in a
    * transaction record, load() will return false.  In either case,
    * any valid and complete transaction records will be processed and
-   * integrated into the DBStore.</P>
+   * integrated into the DBStore.</p>
    */
 
   public synchronized boolean load() throws IOException
@@ -868,7 +865,6 @@ public class DBJournal implements ObjectStatus {
   }
 
   /**
-   *
    * The finalizeTransaction() method actually performs the full work of
    * writing out a transaction to the DBStore Journal.
    * writeTransaction() should be called before the changes are
@@ -878,7 +874,6 @@ public class DBJournal implements ObjectStatus {
    * thrown.  The Journal entries are structured so that if a Journal
    * entry can't be completed, the transaction's whole entry will
    * be ignored at load time.
-   *
    */
 
   public synchronized void finalizeTransaction(DBJournalTransaction transRecord) throws IOException
@@ -946,8 +941,7 @@ public class DBJournal implements ObjectStatus {
   }
 
   /**
-   *  returns true if the journal does not contain any transactions
-   *
+   * Returns true if the journal does not contain any transactions.
    */
 
   public boolean isClean()
@@ -956,13 +950,11 @@ public class DBJournal implements ObjectStatus {
   }
 
   /**
-   *
    * <p>This method is used to read and check the first few fields of the journal
    * as a sanity check on journal open/load.</p>
    *
    * <p>This method <b>MUST NOT</b> be called after the journal is open and active,
    * or else the journal will become corrupted.</p>
-   *
    */
 
   void readHeaders() throws IOException

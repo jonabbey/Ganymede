@@ -148,35 +148,31 @@ public class DBBaseCategory implements Category, CategoryNode {
   private Vector contents;
 
   /**
-   * In order to keep compatibility with versions 1.17 and previous of
+   * <p>In order to keep compatibility with versions 1.17 and previous of
    * the ganymede.db file format, we'll keep this field so we can do a
-   * sort after loading when reading an old file.
+   * sort after loading when reading an old file.</p>
    *
-   * Note that this is currently DBBaseCategory's only package private
+   * <p>Note that this is currently DBBaseCategory's only package private
    * field, because we share the use of these tmp_displayOrder fields
    * with DBObjectBase and DBObjectBaseField, and there's just little
    * upside in reworking the old compatibility code to use setters and
-   * accessors for this purpose.
+   * accessors for this purpose.</p>
    */
 
   int tmp_displayOrder = -1;
 
   /**
-   *
    * We use this baseHash to keep a map of DBObjectBase.getKey() to
    * instances of DBObjectBase.  addNodeAfter() uses this to find a
    * server-local DBObjectBase from a remote Base reference passed
    * us by the schema editor on the client.
-   *
    */
 
   private Hashtable baseHash;
 
   /**
-   *
    * A reference to the DBSchemaEdit object that is editing us
    * for a client-side schema editor.
-   *
    */
 
   private DBSchemaEdit editor = null;
@@ -685,7 +681,6 @@ public class DBBaseCategory implements Category, CategoryNode {
    * a visible base.
    */
 
-
   private boolean containsVisibleBase(GanymedeSession session)
   {
     Vector contents;
@@ -729,7 +724,7 @@ public class DBBaseCategory implements Category, CategoryNode {
   }
 
   /**
-   * <p>Resorts this category's contents based on the tmp_displayOrder field.</p>
+   * <p>Re-sorts this category's contents based on the tmp_displayOrder field.</p>
    *
    * <p>We only use this when loading DBBaseCategory's from old-style
    * ganymede.db files.  The modern way of doing things depends on the
@@ -863,13 +858,11 @@ public class DBBaseCategory implements Category, CategoryNode {
   }
 
   /**
-   *
    * This method returns the category that this
    * category node belongs to.
    *
    * @see arlut.csd.ganymede.rmi.Category
    * @see arlut.csd.ganymede.rmi.CategoryNode
-   *
    */
 
   public Category getCategory()
@@ -878,12 +871,10 @@ public class DBBaseCategory implements Category, CategoryNode {
   }
 
   /**
-   *
    * This method tells the CategoryNode what it's containing
    * category is.
    *
    * @see arlut.csd.ganymede.rmi.CategoryNode
-   *
    */
 
   public void setCategory(Category category)

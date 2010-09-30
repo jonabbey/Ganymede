@@ -100,7 +100,6 @@ public class DBQueryHandler {
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBQueryHandler");
 
   /**
-   *
    * This method compares an object with a submitted query, returning true if
    * the object matches the query.
    *
@@ -109,7 +108,6 @@ public class DBQueryHandler {
    * any clauses matching against the object's label.
    * @param q The Query being compared to this object.
    * @param obj The object being tested.
-   *
    */
 
   public static final boolean matches(GanymedeSession session, Query q, DBObject obj)
@@ -130,7 +128,6 @@ public class DBQueryHandler {
   }
 
   /**
-   *
    * Recursive static method to compare a Query tree against an object in the database.
    *
    * @param session The GanymedeSession performing the query.  This parameter is
@@ -138,7 +135,6 @@ public class DBQueryHandler {
    * any clauses matching against the object's label.
    * @param qN The QueryNode being compared to this object.
    * @param obj The object being tested.
-   *
    */
 
   public static final boolean nodeMatch(GanymedeSession session, QueryNode qN, DBObject obj)
@@ -914,10 +910,8 @@ public class DBQueryHandler {
   }
 
   /**
-   *
    * string1 is the query value provided by the client, string2 is the 
    * value we are testing.
-   *
    */
 
   private static boolean compareString(QueryDataNode n, String string1, String string2)
@@ -1099,10 +1093,8 @@ public class DBQueryHandler {
   // helpers
 
   /**
-   *
    * IP address values are encoded as byte arrays in the Ganymede server.. this 
    * method is used to compare two IP address values for equality.
-   *
    */
 
   private static boolean compareIPs(Byte[] param1, Byte[] param2)
@@ -1126,12 +1118,10 @@ public class DBQueryHandler {
   }
 
   /**
-   *
    * IP address values are encoded as byte arrays in the Ganymede server.. this 
    * method is used to compare two IP address values for a prefix relationship.
    *
    * @return Returns true if param1 begins with param2.
-   *
    */
 
   private static boolean ipBeginsWith(Byte[] param1, Byte[] param2)
@@ -1159,12 +1149,10 @@ public class DBQueryHandler {
   }
 
   /**
-   *
    * IP address values are encoded as byte arrays in the Ganymede server.. this 
    * method is used to compare two IP address values for a suffix relationship.
    *   
    * @return Returns true if param1 ends with param2.
-   *
    */
 
   private static boolean ipEndsWith(Byte[] param1, Byte[] param2)

@@ -72,18 +72,18 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * GanymedeAdmin is the server-side implementation of the
+ * <p>GanymedeAdmin is the server-side implementation of the
  * {@link arlut.csd.ganymede.rmi.adminSession adminSession}
  * interface;  GanymedeAdmin provides the means by which privileged users
  * can carry out privileged operations on the Ganymede server, including
- * status monitoring and administrative activities.
+ * status monitoring and administrative activities.</p>
  *
- * GanymedeAdmin is actually a dual purpose class.  One the one hand,
+ * <p>GanymedeAdmin is actually a dual purpose class.  One the one hand,
  * GanymedeAdmin implements {@link arlut.csd.ganymede.rmi.adminSession adminSession},
  * providing a hook for the admin console to talk to.  On the other,
  * GanymedeAdmin contains a lot of static fields and methods which the
  * server code uses to communicate information to any admin consoles
- * that are attached to the server at any given time.
+ * that are attached to the server at any given time.</p>
  *
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
@@ -569,15 +569,15 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * This private static method handles communications link
+   * <p>This private static method handles communications link
    * failures.  Note that the serverAdminAsyncResponder will handle
    * single instances of admin console RemoteExceptions so that only
    * two RemoteExceptions in sequence will raise a
-   * RemoteException.
+   * RemoteException.</p>
    *
-   * Any code that calls this method should call detachBadConsoles()
+   * <p>Any code that calls this method should call detachBadConsoles()
    * once it has exited any loops over the static consoles vector to
-   * actually expunge any failed consoles from our consoles vector.
+   * actually expunge any failed consoles from our consoles vector.</p>
    */
 
   private final static void handleConsoleRMIFailure(GanymedeAdmin console, RemoteException ex)
@@ -590,10 +590,10 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * This private static method is called to remove any consoles
+   * <p>This private static method is called to remove any consoles
    * that have experienced RMI failures from the static
    * GanymedeAdmin.consoles vector.  This method should never be
-   * called from within a loop over GanymedeAdmin.consoles.
+   * called from within a loop over GanymedeAdmin.consoles.</p>
    */
    
   private static void detachBadConsoles()
@@ -657,16 +657,16 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   /* -- */
 
   /**
-   * This is the GanymedeAdmin constructor, used to create a new
-   * server-side admin console attachment.
+   * <p>This is the GanymedeAdmin constructor, used to create a new
+   * server-side admin console attachment.</p>
    *
-   * Admin is an RMI remote object exported by the client in the
-   * form of a callback.
+   * <p>Admin is an RMI remote object exported by the client in the
+   * form of a callback.</p>
    *
-   * This constructor is called from
+   * <p>This constructor is called from
    * {@link arlut.csd.ganymede.rmi.Server#admin(java.lang.String username, java.lang.String password) admin()},
    * which is responsible for authenticating the name and password before
-   * calling this constructor.
+   * calling this constructor.</p>
    */
 
   public GanymedeAdmin(boolean fullprivs, String adminName, String clientHost) throws RemoteException
@@ -792,14 +792,14 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * This public method forces a disconnect of the remote admin console
-   * and cleans up the asyncPort.
+   * <p>This public method forces a disconnect of the remote admin console
+   * and cleans up the asyncPort.</p>
    *
-   * This method *does not* handle removing this GanymedeAdmin
+   * <p>This method *does not* handle removing this GanymedeAdmin
    * console object from the static GanymedeAdmin.consoles Vector, so
    * that it can safely be called from a loop over
    * GanymedeAdmin.consoles in closeAllConsoles() when the server is
-   * being shut down.
+   * being shut down.</p>
    */
 
   public void forceDisconnect(String reason) throws RemoteException
@@ -828,17 +828,17 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
      -----====================--------------------====================----- */
 
   /**
-   * Disconnect the remote admin console associated with this
-   * object
+   * <p>Disconnect the remote admin console associated with this
+   * object</p>
    *
-   * This method is part of the {@link
+   * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.
+   * and may be called remotely by attached admin consoles.</p>
    *
-   * No server-side code should call this method from a thread that
+   * <p>No server-side code should call this method from a thread that
    * is looping over the static GanymedeAdmin.consoles Vector, or else
    * the Vector will be changed from within the loop, possibly
-   * resulting in an exception being thrown.
+   * resulting in an exception being thrown.</p>
    */
 
   public void logout()
@@ -847,17 +847,17 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * Disconnect the remote admin console associated with this
-   * object
+   * <p>Disconnect the remote admin console associated with this
+   * object.</p>
    *
-   * This method is part of the {@link
+   * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.
+   * and may be called remotely by attached admin consoles.</p>
    *
-   * No server-side code should call this method from a thread that
+   * <p>No server-side code should call this method from a thread that
    * is looping over the static GanymedeAdmin.consoles Vector, or else
    * the Vector will be changed from within the loop, possibly
-   * resulting in an exception being thrown.
+   * resulting in an exception being thrown.</p>
    */
 
   public void logout(String reason)
@@ -902,11 +902,14 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * This method is called when the Java RMI system detects that this
-   * remote object is no longer referenced by any remote objects.
+   * <p>This method is called when the Java RMI system detects that this
+   * remote object is no longer referenced by any remote objects.</p>
    *
-   * This method handles abnormal logouts and time outs for us.  By
-   * default, the 1.1 RMI time-out is 10 minutes.
+   * <p>This method handles abnormal logouts and time outs for us.  By
+   * default, the 1.1 RMI time-out is 10 minutes.</p>
+   *
+   * <p>The RMI timeout can be modified by setting the system property
+   * sun.rmi.transport.proxy.connectTimeout.</p>
    *
    * @see java.rmi.server.Unreferenced
    */
@@ -918,15 +921,15 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * This method is used to allow the admin console to retrieve a remote reference to
+   * <p>This method is used to allow the admin console to retrieve a remote reference to
    * a {@link arlut.csd.ganymede.server.serverAdminAsyncResponder}, which will allow
-   * the admin console to poll the server for asynchronous messages from the server.
+   * the admin console to poll the server for asynchronous messages from the server.</p>
    *
-   * This is used to allow the server to send admin notifications
+   * <p>This is used to allow the server to send admin notifications
    * to the console, even if the console is behind a network or
    * personal system firewall.  The serverAdminAsyncResponder blocks
    * while there is no message to send, and the console will poll for
-   * new messages.
+   * new messages.</p>
    */
 
   public AdminAsyncResponder getAsyncPort() throws RemoteException
@@ -940,16 +943,16 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * This method lets the admin console explicitly request a
+   * <p>This method lets the admin console explicitly request a
    * refresh.  Upon being called, the server will call several methods
    * on the admin console's {@link
    * arlut.csd.ganymede.server.serverAdminAsyncResponder
    * serverAdminAsyncResponder} interface to pass current status
-   * information to the console.
+   * information to the console.</p>
    *
-   * This method is part of the {@link
+   * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.
+   * and may be called remotely by attached admin consoles.</p>
    */
 
   public void refreshMe() throws RemoteException
@@ -979,15 +982,15 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * This method is called by admin console code to force
+   * <p>This method is called by admin console code to force
    * a complete rebuild of all external builds.  This means that
    * all databases will have their last modification timestamp
    * cleared and all builder tasks will be scheduled for immediate
-   * execution.
+   * execution.</p>
    *
-   * This method is part of the {@link
+   * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.
+   * and may be called remotely by attached admin consoles.</p>
    */
 
   public ReturnVal forceBuild()
@@ -1009,12 +1012,12 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * Kick all users off of the Ganymede server on behalf of this
-   * admin console
+   * <p>Kicks all users off of the Ganymede server on behalf of this
+   * admin console</p>
    *
-   * This method is part of the {@link
+   * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.
+   * and may be called remotely by attached admin consoles.</p>
    */
 
   public ReturnVal killAll()
@@ -1034,12 +1037,12 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * Kick a user off of the Ganymede server on behalf of this admin
-   * console
+   * <p>Kicks a user off of the Ganymede server on behalf of this admin
+   * console.</p>
    *
-   * This method is part of the {@link
+   * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.
+   * and may be called remotely by attached admin consoles.</p>
    */
 
   public ReturnVal kill(String user)
@@ -1065,14 +1068,14 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * shutdown the server cleanly, on behalf of this admin console.
+   * <p>Shutdown the server cleanly, on behalf of this admin console.</p>
+   *
+   * <p>This method is part of the {@link
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
+   * and may be called remotely by attached admin consoles.</p>
    *
    * @param waitForUsers if true, shutdown will be deferred until all users are logged
    * out.  No new users will be allowed to login.
-   *
-   * This method is part of the {@link
-   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.
    */
 
   public ReturnVal shutdown(boolean waitForUsers)
@@ -1102,11 +1105,13 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * dump the current state of the db to disk
+   * <p>Dumps the current state of the db to disk.</p>
    *
-   * This method is part of the {@link
+   * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.
+   * and may be called remotely by attached admin consoles.</p>
+   *
+   * @see arlut.csd.ganymede.server.DBStore#dump(java.lang.String, boolean, boolean)
    */
 
   public ReturnVal dumpDB()
@@ -1152,12 +1157,12 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * run a long-running verification suite on the Ganymede server
-   * database's invid links
+   * <p>Runs a possibly long-running verification suite on the Ganymede server
+   * database's invid links.</p>
    *
-   * This method is part of the {@link
+   * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.
+   * and may be called remotely by attached admin consoles.</p>
    */
 
   public ReturnVal runInvidTest()
@@ -1191,16 +1196,16 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * run a long-running verification and repair operation on the Ganymede
-   * server's invid database links   
+   * <p>Runs a possibly long-running verification and repair operation on
+   * the Ganymede server's invid database links.</p>
    *
-   * Removes any invid pointers in the Ganymede database whose
+   * <p>Removes any invid pointers in the Ganymede database whose
    * targets are not properly defined.  This should not ever happen
-   * unless there is a bug some place in the server.
+   * unless there is a bug some place in the server.</p>
    *
-   * This method is part of the {@link
+   * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.
+   * and may be called remotely by attached admin consoles.</p>
    */
 
   public ReturnVal runInvidSweep()
@@ -1227,12 +1232,12 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * run a verification on the integrity of embedded objects and
-   * their containers
+   * <p>Runs a verification on the integrity of embedded objects and
+   * their containers.</p>
    *
-   * This method is part of the {@link
+   * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.
+   * and may be called remotely by attached admin consoles.</p>
    */
 
   public ReturnVal runEmbeddedTest()
@@ -1266,11 +1271,11 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * Removes any embedded objects which do not have containers.
+   * <p>Removes any embedded objects which do not have containers.</p>
    *
-   * This method is part of the {@link
+   * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.
+   * and may be called remotely by attached admin consoles.</p>
    */
 
   public ReturnVal runEmbeddedSweep()
@@ -1287,15 +1292,15 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * Causes a pre-registered task in the Ganymede server
+   * <p>Causes a pre-registered task in the Ganymede server
    * to be executed as soon as possible.  This method call
-   * will have no effect if the task is currently running.
+   * will have no effect if the task is currently running.</p>
+   *
+   * <p>This method is part of the {@link
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
+   * and may be called remotely by attached admin consoles.</p>
    *
    * @param name The name of the task to run
-   *
-   * This method is part of the {@link
-   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.
    */
 
   public ReturnVal runTaskNow(String name)
@@ -1318,17 +1323,17 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * Causes a running task to be interrupted as soon as possible.
+   * <p>Causes a running task to be interrupted as soon as possible.
    * Ganymede tasks need to be specifically written to be able
    * to respond to interruption, so it is not guaranteed that the
    * task named will always be able to safely or immediately respond
-   * to a stopTask() command.
+   * to a stopTask() command.</p>
+   *
+   * <p>This method is part of the {@link
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
+   * and may be called remotely by attached admin consoles.</p>
    *
    * @param name The name of the task to interrupt
-   *
-   * This method is part of the {@link
-   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.
    */
 
   public ReturnVal stopTask(String name)
@@ -1351,16 +1356,16 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * Causes a registered task to be made ineligible for execution
+   * <p>Causes a registered task to be made ineligible for execution
    * until {@link arlut.csd.ganymede.server.GanymedeAdmin#enableTask(java.lang.String) enableTask()}
    * is called.  This method will not stop a task that is currently
-   * running.
+   * running.</p>
+   *
+   * <p>This method is part of the {@link
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
+   * and may be called remotely by attached admin consoles.</p>
    *
    * @param name The name of the task to disable
-   *
-   * This method is part of the {@link
-   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.
    */
 
   public ReturnVal disableTask(String name)
@@ -1383,15 +1388,15 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * Causes a task that was temporarily disabled by
+   * <p>Causes a task that was temporarily disabled by
    * {@link arlut.csd.ganymede.server.GanymedeAdmin#disableTask(java.lang.String) disableTask()}
-   * to be available for execution again.
+   * to be available for execution again.</p>
+   *
+   * <p>This method is part of the {@link
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
+   * and may be called remotely by attached admin consoles.</p>
    *
    * @param name The name of the task to enable
-   *
-   * This method is part of the {@link
-   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.
    */
 
   public ReturnVal enableTask(String name)
@@ -1414,8 +1419,10 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * Lock the server to prevent client logins and edit the server
-   * schema.  This method will return a {@link
+   * <p>Locks the server to prevent client logins and edits the server
+   * schema.</p>
+   *
+   * <p>This method will return a {@link
    * arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} remote reference to the
    * admin console, which will present a graphical schema editor using
    * this remote reference.  The server will remain locked until the
@@ -1423,11 +1430,11 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * either through affirmative action or through the death of the
    * admin console or the network connection.  The {@link
    * arlut.csd.ganymede.server.DBSchemaEdit DBSchemaEdit} class on the server
-   * coordinates everything.
+   * coordinates everything.</p>
    *
-   * This method is part of the {@link
+   * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.
+   * and may be called remotely by attached admin consoles.</p>
    */
 
   public SchemaEdit editSchema()

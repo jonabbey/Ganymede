@@ -67,10 +67,8 @@ import arlut.csd.ganymede.common.ReturnVal;
 public interface perm_field extends db_field {
 
   /**
-   *
    * Return a serializable, read-only copy of this field's permission
    * matrix
-   *
    */
 
   public PermMatrix getMatrix() throws RemoteException;

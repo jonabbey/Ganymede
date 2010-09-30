@@ -57,7 +57,7 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * DBDumpLock is a {@link arlut.csd.ganymede.server.DBLock DBLock}
+ * <p>DBDumpLock is a {@link arlut.csd.ganymede.server.DBLock DBLock}
  * object used to lock the {@link arlut.csd.ganymede.server.DBStore
  * DBStore} either for the purpose of dumping the database or for
  * handling a GanymedeBuilderTask build.  A DBDumpLock establish
@@ -65,12 +65,12 @@ import java.util.Vector;
  * arlut.csd.ganymede.server.DBWriteLock DBWriteLock} requests, but
  * once a DBDumpLock establish request is submitted, no new
  * DBWriteLock can be established until the dumping thread has
- * completed the dump and released the lock.
+ * completed the dump and released the lock.</p>
  *
- * {@link arlut.csd.ganymede.server.DBReadLock DBReadLock}'s can be established
- * while a DBDumpLock is active, though.
+ * <p>{@link arlut.csd.ganymede.server.DBReadLock DBReadLock}'s can be established
+ * while a DBDumpLock is active, though.</p>
  *
- * A DBDumpLock acts as a highest priority DBReadLock.
+ * <p>A DBDumpLock acts as a highest priority DBReadLock.</p>
  */
 
 class DBDumpLock extends DBLock {
@@ -80,9 +80,7 @@ class DBDumpLock extends DBLock {
   /* -- */
 
   /**
-   *
-   * constructor to get a dump lock on all the object bases
-   *
+   * Constructor to get a dump lock on all the object bases.
    */
 
   public DBDumpLock(DBStore store)
@@ -94,10 +92,8 @@ class DBDumpLock extends DBLock {
   }
 
   /**
-   *
-   * constructor to get a dump lock on a subset of the
+   * Constructor to get a dump lock on a subset of the
    * object bases.
-   *
    */
 
   public DBDumpLock(DBStore store, Vector<DBObjectBase> baseSet)
@@ -109,10 +105,10 @@ class DBDumpLock extends DBLock {
   }
 
   /**
-   * <P>Establish a dump lock on bases specified in this DBDumpLock's
+   * <p>Establish a dump lock on bases specified in this DBDumpLock's
    * constructor.  Can throw InterruptedException if another thread
    * orders us to abort() while we're waiting for permission to
-   * proceed with reads on the specified baseset.</P>
+   * proceed with reads on the specified baseset.</p>
    */
 
   public void establish(Object key) throws InterruptedException
@@ -245,9 +241,7 @@ class DBDumpLock extends DBLock {
   }
 
   /**
-   *
    * Release this lock on all bases locked
-   *
    */
 
   public void release()
@@ -294,16 +288,16 @@ class DBDumpLock extends DBLock {
   }
 
   /**
-   * <P>Withdraw this lock.  This method can be called by a thread to
+   * <p>Withdraw this lock.  This method can be called by a thread to
    * interrupt a lock establish that is blocked waiting to get
    * access to the appropriate set of
    * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects.  If
    * this method is called while another thread is blocked in
-   * establish(), establish() will throw an InterruptedException.</P>
+   * establish(), establish() will throw an InterruptedException.</p>
    *
-   * <P>Once abort() is processed, this lock may never be established.
+   * <p>Once abort() is processed, this lock may never be established.
    * Any subsequent calls to estabish() will always throw
-   * InterruptedException.</P>
+   * InterruptedException.</p>
    */
 
   public void abort()

@@ -71,12 +71,12 @@ import arlut.csd.Util.VectorUtils;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>StringDBField is a subclass of DBField for the storage and handling of string
+ * <p>StringDBField is a subclass of DBField for the storage and handling of string
  * fields in the {@link arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede
- * server.</P>
+ * server.</p>
  *
- * <P>The Ganymede client talks to StringDBFields through the
- * {@link arlut.csd.ganymede.rmi.string_field string_field} RMI interface.</P> 
+ * <p>The Ganymede client talks to StringDBFields through the
+ * {@link arlut.csd.ganymede.rmi.string_field string_field} RMI interface.</p> 
  */
 
 public class StringDBField extends DBField implements string_field {
@@ -89,9 +89,9 @@ public class StringDBField extends DBField implements string_field {
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.StringDBField");
 
   /**
-   * <P>Receive constructor.  Used to create a StringDBField from a
+   * <p>Receive constructor.  Used to create a StringDBField from a
    * {@link arlut.csd.ganymede.server.DBStore DBStore}/{@link arlut.csd.ganymede.server.DBJournal DBJournal}
-   * DataInput stream.</P>
+   * DataInput stream.</p>
    */
 
   StringDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
@@ -103,15 +103,15 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   * <P>No-value constructor.  Allows the construction of a
+   * <p>No-value constructor.  Allows the construction of a
    * 'non-initialized' field, for use where the 
    * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * definition indicates that a given field may be present,
    * but for which no value has been stored in the 
-   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</p>
    *
-   * <P>Used to provide the client a template for 'creating' this
-   * field if so desired.</P>
+   * <p>Used to provide the client a template for 'creating' this
+   * field if so desired.</p>
    */
 
   StringDBField(DBObject owner, DBObjectBaseField definition)
@@ -130,9 +130,7 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   *
    * Copy constructor.
-   *
    */
 
   public StringDBField(DBObject owner, StringDBField field)
@@ -151,9 +149,7 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   *
    * Scalar value constructor.
-   *
    */
 
   public StringDBField(DBObject owner, String value, DBObjectBaseField definition)
@@ -169,9 +165,7 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   *
    * Vector value constructor.
-   *
    */
 
   public StringDBField(DBObject owner, Vector values, DBObjectBaseField definition)
@@ -328,21 +322,21 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   * <P>This method returns a text encoded value for this StringDBField
-   * without checking permissions.</P>
+   * <p>This method returns a text encoded value for this StringDBField
+   * without checking permissions.</p>
    *
-   * <P>This method avoids checking permissions because it is used on
+   * <p>This method avoids checking permissions because it is used on
    * the server side only and because it is involved in the 
    * {@link arlut.csd.ganymede.server.DBObject#getLabel() getLabel()}
    * logic for {@link arlut.csd.ganymede.server.DBObject DBObject}, 
    * which is invoked from {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
    * {@link arlut.csd.ganymede.server.GanymedeSession#getPerm(arlut.csd.ganymede.server.DBObject) getPerm()} 
-   * method.</P>
+   * method.</p>
    *
-   * <P>If this method checked permissions and the getPerm() method
+   * <p>If this method checked permissions and the getPerm() method
    * failed for some reason and tried to report the failure using
    * object.getLabel(), as it does at present, the server could get
-   * into an infinite loop.</P>
+   * into an infinite loop.</p>
    */
 
   public synchronized String getValueString()
@@ -402,9 +396,9 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   * <P>For strings, we don't care about having a reversible encoding,
+   * <p>For strings, we don't care about having a reversible encoding,
    * because we can sort and select normally based on the getValueString()
-   * result.</P>
+   * result.</p>
    */
 
   public String getEncodingString()
@@ -413,13 +407,13 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   * <P>Returns a String representing the change in value between this
+   * <p>Returns a String representing the change in value between this
    * field and orig.  This String is intended for logging and email,
    * not for any sort of programmatic activity.  The format of the
    * generated string is not defined, but is intended to be suitable
-   * for inclusion in a log entry and in an email message.</P>
+   * for inclusion in a log entry and in an email message.</p>
    *
-   * <P>If there is no change in the field, null will be returned.</P>
+   * <p>If there is no change in the field, null will be returned.</p>
    */
 
   public synchronized String getDiffString(DBField orig)
@@ -572,8 +566,8 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   * <P>Returns true if this field has a value associated
-   * with it, or false if it is an unfilled 'placeholder'.</P>
+   * <p>Returns true if this field has a value associated
+   * with it, or false if it is an unfilled 'placeholder'.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_field
    */
@@ -712,11 +706,11 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   * <P>Returns a list of recommended and/or mandatory choices 
+   * <p>Returns a list of recommended and/or mandatory choices 
    * for this field.  This list is dynamically generated by
    * subclasses of {@link arlut.csd.ganymede.server.DBEditObject DBEditObject};
    * this method should not need
-   * to be overridden.</P>
+   * to be overridden.</p>
    *
    * @see arlut.csd.ganymede.rmi.string_field
    */
@@ -732,13 +726,13 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   * <P>This method returns a key that can be used by the client
+   * <p>This method returns a key that can be used by the client
    * to cache the value returned by choices().  If the client
    * already has the key cached on the client side, it
    * can provide the choice list from its cache rather than
-   * calling choices() on this object again.</P>
+   * calling choices() on this object again.</p>
    *
-   * <P>If there is no caching key, this method will return null.</P>
+   * <p>If there is no caching key, this method will return null.</p>
    */
 
   public Object choicesKey()
@@ -754,10 +748,10 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   * <P>Returns a string containing the list of acceptable characters.
+   * <p>Returns a string containing the list of acceptable characters.
    * If the string is null, it should be interpreted as meaning all
    * characters not listed in disallowedChars() are allowable by
-   * default.</P>
+   * default.</p>
    *
    * @see arlut.csd.ganymede.rmi.string_field
    */
@@ -768,10 +762,10 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   * <P>Returns a string containing the list of forbidden
+   * <p>Returns a string containing the list of forbidden
    * characters for this field.  If the string is null,
    * it should be interpreted as meaning that no characters
-   * are specifically disallowed.</P>
+   * are specifically disallowed.</p>
    *
    * @see arlut.csd.ganymede.rmi.string_field
    */
@@ -782,8 +776,8 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   * <P>Convenience method to identify if a particular
-   * character is acceptable in this field.</P>
+   * <p>Convenience method to identify if a particular
+   * character is acceptable in this field.</p>
    *
    * @see arlut.csd.ganymede.rmi.string_field
    */
@@ -816,19 +810,19 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   * Overridable method to verify that an object submitted to this
-   * field has an appropriate value.
+   * <p>Overridable method to verify that an object submitted to this
+   * field has an appropriate value.</p>
    *
-   * This check is more limited than that of verifyNewValue().. all it
+   * <p>This check is more limited than that of verifyNewValue().. all it
    * does is make sure that the object parameter passes the simple
    * value constraints of the field.  verifyNewValue() does that plus
    * a bunch more, including calling to the DBEditObject hook for the
    * containing object type to see whether it happens to feel like
-   * accepting the new value or not.
+   * accepting the new value or not.</p>
    *
-   * verifyBasicConstraints() is used to double check for values that
+   * <p>verifyBasicConstraints() is used to double check for values that
    * are already in fields, in addition to being used as a likely
-   * component of verifyNewValue() to verify new values.
+   * component of verifyNewValue() to verify new values.</p>
    */
 
   public ReturnVal verifyBasicConstraints(Object o)
@@ -934,29 +928,29 @@ public class StringDBField extends DBField implements string_field {
   }
 
   /**
-   * Overridable method to verify that an object
+   * <p>Overridable method to verify that an object
    * submitted to this field has an appropriate
-   * value.
+   * value.</p>
    *
-   * This method is intended to make the final go/no go decision about
+   * <p>This method is intended to make the final go/no go decision about
    * whether a given value is appropriate to be placed in this field,
    * by whatever means (vector add, vector replacement, scalar
-   * replacement).
+   * replacement).</p>
    *
-   * This method is expected to call the {@link
+   * <p>This method is expected to call the {@link
    * arlut.csd.ganymede.server.DBEditObject#verifyNewValue(arlut.csd.ganymede.server.DBField,
    * java.lang.Object)} method on {@link
    * arlut.csd.ganymede.server.DBEditObject} in order to allow custom
    * plugin classes to deny any given value that the plugin might not
    * care for, for whatever reason.  Otherwise, the go/no-go decision
    * will be made based on the checks performed by {@link
-   * arlut.csd.ganymede.server.DBField#verifyBasicConstraints(java.lang.Object)}.
+   * arlut.csd.ganymede.server.DBField#verifyBasicConstraints(java.lang.Object)}.</p>
    *
-   * The ReturnVal that is returned may have transformedValue set, in
+   * <p>The ReturnVal that is returned may have transformedValue set, in
    * which case the code that calls this verifyNewValue() method
    * should consider transformedValue as replacing the 'o' parameter
    * as the value that verifyNewValue wants to be put into this field.
-   * This usage of transformedValue is for canonicalizing input data.
+   * This usage of transformedValue is for canonicalizing input data.</p>
    */
 
   public ReturnVal verifyNewValue(Object o)

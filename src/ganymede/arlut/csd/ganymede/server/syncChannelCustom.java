@@ -79,10 +79,10 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.syncChannelCustom");
 
+  // ---
+
   /**
-   *
    * Customization Constructor
-   *
    */
 
   public syncChannelCustom(DBObjectBase objectBase) throws RemoteException
@@ -91,9 +91,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * Create new object constructor
-   *
    */
 
   public syncChannelCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset) throws RemoteException
@@ -102,51 +100,14 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * Check-out constructor, used by DBObject.createShadow()
    * to pull out an object for editing.
-   *
    */
 
   public syncChannelCustom(DBObject original, DBEditSet editset) throws RemoteException
   {
     super(original, editset);
   }
-
-  /**
-   * Initializes a newly created DBEditObject.
-   *
-   * When this method is called, the DBEditObject has been created,
-   * its ownership set, and all fields defined in the controlling
-   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
-   * have been instantiated without defined
-   * values.  If this DBEditObject is an embedded type, it will
-   * have been linked into its parent object before this method
-   * is called.
-   *
-   * This method is responsible for filling in any default
-   * values that can be calculated from the 
-   * {@link arlut.csd.ganymede.server.DBSession DBSession}
-   * associated with the editset defined in this DBEditObject.
-   *
-   * If initialization fails for some reason, initializeNewObject()
-   * will return a ReturnVal with an error result..  If the owning
-   * GanymedeSession is not in bulk-loading mode (i.e.,
-   * GanymedeSession.enableOversight is true), {@link
-   * arlut.csd.ganymede.server.DBSession#createDBObject(short, arlut.csd.ganymede.common.Invid, java.util.Vector)
-   * DBSession.createDBObject()} will checkpoint the transaction
-   * before calling this method.  If this method returns a failure code, the
-   * calling method will rollback the transaction.  This method has no
-   * responsibility for undoing partial initialization, the
-   * checkpoint/rollback logic will take care of that.
-   *
-   * If enableOversight is false, DBSession.createDBObject() will not
-   * checkpoint the transaction status prior to calling initializeNewObject(),
-   * so it is the responsibility of this method to handle any checkpointing
-   * needed.
-   *
-   * This method should be overridden in subclasses.
-   */
 
   public ReturnVal initializeNewObject()
   {
@@ -209,17 +170,21 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   * customization method to control whether a specified field
-   * is required to be defined at commit time for a given object.
+   * <p>Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.</p>
    *
-   * To be overridden in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * Note that this method will not be called if the controlling
+   * <p>Note that this method will not be called if the controlling
    * GanymedeSession's enableOversight is turned off, as in
-   * bulk loading.
+   * bulk loading.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p>Note as well that the designated label field for objects are
+   * always required, whatever this method returns, and that this
+   * requirement holds without regard to the GanymedeSession's
+   * enableOversight value.</p>
    *
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public boolean fieldRequired(DBObject object, short fieldid)
@@ -271,22 +236,45 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   * This method allows the DBEditObject to have executive approval
-   * of any scalar set operation, and to take any special actions
-   * in reaction to the set.. if this method returns true, the
-   * DBField that called us will proceed to make the change to
-   * it's value.  If this method returns false, the DBField
-   * that called us will not make the change, and the field
-   * will be left unchanged.
+   * <p>This method allows the DBEditObject to have executive approval
+   * of any scalar set operation, and to take any special actions in
+   * reaction to the set.  When a scalar field has its value set, it
+   * will call its owners finalizeSetValue() method, passing itself as
+   * the &lt;field&gt; parameter, and passing the new value to be
+   * approved as the &lt;value&gt; parameter.  A Ganymede customizer
+   * who creates custom subclasses of the DBEditObject class can
+   * override the finalizeSetValue() method and write his own logic
+   * to examine any change and either approve or reject the change.</p>
    *
-   * The DBField that called us will take care of all possible checks
-   * on the operation (including a call to our own verifyNewValue()
-   * method.  Under normal circumstances, we won't need to do anything
-   * here.
+   * <p>A custom finalizeSetValue() method will typically need to
+   * examine the field parameter to see which field is being changed,
+   * and then do the appropriate checking based on the value
+   * parameter.  The finalizeSetValue() method can call the normal
+   * this.getFieldValueLocal() type calls to examine the current state
+   * of the object, if such information is necessary to make
+   * appropriate decisions.</p>
    *
-   * If we do return false, we should set editset.setLastError to
-   * provide feedback to the client about what we disapproved of.
-   *  
+   * <p>If finalizeSetValue() returns null or a ReturnVal object with
+   * a positive success value, the DBField that called us is
+   * guaranteed to proceed to make the change to its value.  If this
+   * method returns a non-success code in its ReturnVal, as with the
+   * result of a call to Ganymede.createErrorDialog(), the DBField
+   * that called us will not make the change, and the field will be
+   * left unchanged.  Any error dialog returned from finalizeSetValue()
+   * will be passed to the user.</p>
+   *
+   * <p>The DBField that called us will take care of all standard
+   * checks on the operation (including a call to our own
+   * verifyNewValue() method before calling this method.  Under normal
+   * circumstances, we won't need to do anything here.
+   * finalizeSetValue() is useful when you need to do unusually
+   * involved checks, and for when you want a chance to trigger other
+   * changes in response to a particular field's value being
+   * changed.</p>
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
   public ReturnVal finalizeSetValue(DBField field, Object value)
@@ -345,21 +333,22 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   * Customization method to verify whether the user should be able to
-   * see a specific field in a given object.  Instances of DBField will
+   * <p>Customization method to verify whether the user should be able to
+   * see a specific field in a given object.  Instances of
+   * {@link arlut.csd.ganymede.server.DBField DBField} will
    * wind up calling up to here to let us override the normal visibility
-   * process.
+   * process.</p>
    *
-   * Note that it is permissible for session to be null, in which case
+   * <p>Note that it is permissible for session to be null, in which case
    * this method will always return the default visiblity for the field
-   * in question.
+   * in question.</p>
    *
-   * If field is not from an object of the same base as this DBEditObject,
-   * an exception will be thrown.
+   * <p>If field is not from an object of the same base as this DBEditObject,
+   * an exception will be thrown.</p>
    *
-   * To be overridden in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public boolean canSeeField(DBSession session, DBField field)
@@ -459,20 +448,39 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   * This method is a hook for subclasses to override to
-   * pass the phase-two commit command to external processes.
+   * <p>This method is a hook for subclasses to override to
+   * pass the phase-two commit command to external processes.</p>
    *
-   * For normal usage this method would not be overridden.  For
+   * <p>For normal usage this method would not be overridden.  For
    * cases in which change to an object would result in an external
    * process being initiated whose <b>success or failure would not
    * affect the successful commit of this DBEditObject in the
-   * Ganymede server</b>, the process invokation should be placed here,
-   * rather than in commitPhase1().
+   * Ganymede server</b>, the process invocation should be placed here,
+   * rather than in
+   * {@link arlut.csd.ganymede.server.DBEditObject#commitPhase1() commitPhase1()}.</p>
    *
-   * Subclasses that override this method may wish to make this method 
-   * synchronized.
+   * <p>commitPhase2() is generally the last method called on a
+   * DBEditObject before it is discarded by the server in the
+   * {@link arlut.csd.ganymede.server.DBEditSet DBEditSet}
+   * {@link arlut.csd.ganymede.server.DBEditSet#commit(java.lang.String) commit()} method.</p>
    *
-   * @see arlut.csd.ganymede.server.DBEditSet
+   * <p>Subclasses that override this method may wish to make this method
+   * synchronized.</p>
+   *
+   * <p><b>WARNING!</b> this method is called at a time when portions
+   * of the database are locked for the transaction's integration into
+   * the database.  You must not call methods that seek to gain a lock
+   * on the Ganymede database.  At this point, this means no composite
+   * queries on embedded object types, where you seek an object based
+   * on a field in an embedded object and in the object itself, using
+   * the GanymedeSession query calls, or else you will lock the server.</p>
+   *
+   * <p>This method should NEVER try to edit or change any DBEditObject
+   * in the server.. at this point in the game, the server has fixed the
+   * transaction working set and is depending on commitPhase2() not trying
+   * to make changes internal to the server.</p>
+   *
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    */
 
   public void commitPhase2()

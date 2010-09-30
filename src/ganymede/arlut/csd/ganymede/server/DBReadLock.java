@@ -58,25 +58,25 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>DBReadLock is a class used in the Ganymede server to represent a read lock on
+ * <p>DBReadLock is a class used in the Ganymede server to represent a read lock on
  * one or more {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects.  A
  * DBReadLock is used in the
  * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession} class to guarantee
  * that all query operations go from start to finish without any changes being made
- * along the way.</P>
+ * along the way.</p>
  *
- * <P>While a DBReadLock is established on a DBObjectBase, no changes may be made
+ * <p>While a DBReadLock is established on a DBObjectBase, no changes may be made
  * to that base.  The {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLock}'s
  * {@link arlut.csd.ganymede.server.DBWriteLock#establish(java.lang.Object) establish()}
  * method will suspend until all read locks on a base are cleared.  As soon as
  * a thread attempts to establish a DBWriteLock on a base, no more DBReadLocks
  * will be established on that base until the DBWriteLock is cleared, but any
  * DBReadLocks already established will persist until released, whereupon the
- * DBWriteLock will establish.</P>
+ * DBWriteLock will establish.</p>
  *
- * <P>See {@link arlut.csd.ganymede.server.DBLock DBLock},
+ * <p>See {@link arlut.csd.ganymede.server.DBLock DBLock},
  * {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLock}, and
- * {@link arlut.csd.ganymede.server.DBDumpLock DBDumpLock} for details.</P>
+ * {@link arlut.csd.ganymede.server.DBDumpLock DBDumpLock} for details.</p>
  */
 
 public class DBReadLock extends DBLock {
@@ -113,10 +113,10 @@ public class DBReadLock extends DBLock {
   }
 
   /**
-   * <P>Establish a read lock on bases specified in this DBReadLock's
+   * <p>Establish a read lock on bases specified in this DBReadLock's
    * constructor.  Can throw InterruptedException if another thread
    * orders us to abort() while we're waiting for permission to
-   * proceed with reads on the specified baseset.</P>
+   * proceed with reads on the specified baseset.</p>
    */
 
   public void establish(Object key) throws InterruptedException
@@ -303,21 +303,21 @@ public class DBReadLock extends DBLock {
   }
 
   /**
-   * <P>Relinquish the lock on bases held by this lock object.</P>
+   * <p>Relinquish the lock on bases held by this lock object.</p>
    *
-   * <P>Should be called by {@link arlut.csd.ganymede.server.DBSession DBSession}'s
+   * <p>Should be called by {@link arlut.csd.ganymede.server.DBSession DBSession}'s
    * {@link arlut.csd.ganymede.server.DBSession#releaseLock(arlut.csd.ganymede.server.DBLock) releaseLock()}
-   * method.</P>
+   * method.</p>
    *
-   * <P>Note that this method is designed to be able to be called from
+   * <p>Note that this method is designed to be able to be called from
    * one thread while another is trying to use and/or establish the lock.  If
    * this.abort is not set to true before calling release(), release() will
    * block until the establish is granted.  That's why abort() sets this.abort
-   * to true before calling release().</P>
+   * to true before calling release().</p>
    *
-   * <P>The point of release() is to clear out this lock's connections to
+   * <p>The point of release() is to clear out this lock's connections to
    * the locked object bases and to allow DBLock establish() methods in other
-   * threads to proceed.</P>
+   * threads to proceed.</p>
    */
 
   public void release()
@@ -392,25 +392,25 @@ public class DBReadLock extends DBLock {
   }
 
   /**
-   * <P>Withdraw this lock.  This method can be called by a thread to
+   * <p>Withdraw this lock.  This method can be called by a thread to
    * interrupt a lock establish that is blocked waiting to get
    * access to the appropriate set of
    * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects.  If
    * this method is called while another thread is blocked in
-   * establish(), establish() will throw an InterruptedException.</P>
+   * establish(), establish() will throw an InterruptedException.</p>
    *
-   * <P>Once abort() is processed, this lock may never be established.
+   * <p>Once abort() is processed, this lock may never be established.
    * Any subsequent calls to establish() will always throw
-   * InterruptedException.</P>
+   * InterruptedException.</p>
    *
-   * <P>Note that calling abort() on a lock that has already established
+   * <p>Note that calling abort() on a lock that has already established
    * in another thread will remove the lock, but a thread that is using
    * the lock to iterate over a list will explicitly need to check to
    * see if its lock was pulled.  
    *{@link arlut.csd.ganymede.server.GanymedeSession#queryDispatch(arlut.csd.ganymede.common.Query,boolean,boolean,arlut.csd.ganymede.server.DBLock,arlut.csd.ganymede.server.DBEditObject) queryDispatch()} 
    * and {@link arlut.csd.ganymede.server.GanymedeSession#getObjects(short) getObjects()}
    * both do this properly, so it is generally safe to abort read locks in the
-   * GanymedeServer as needed.</P>
+   * GanymedeServer as needed.</p>
    */
 
   public void abort()

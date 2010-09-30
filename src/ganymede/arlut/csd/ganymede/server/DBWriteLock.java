@@ -57,7 +57,7 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * A DBWriteLock is a {@link arlut.csd.ganymede.server.DBLock DBLock}
+ * <p>A DBWriteLock is a {@link arlut.csd.ganymede.server.DBLock DBLock}
  * subclass used to lock one or more {@link
  * arlut.csd.ganymede.server.DBObjectBase DBObjectBases} for the
  * purposes of committing changes into those bases, preventing any
@@ -67,13 +67,13 @@ import java.util.Vector;
  * currently working in the specified DBObjectBases complete.  The
  * write lock is then established, and the thread possessing the
  * DBWriteLock is free to replace objects in the {@link
- * arlut.csd.ganymede.server.DBStore DBStore} with modified copies.
+ * arlut.csd.ganymede.server.DBStore DBStore} with modified copies.</p>
  *
- * DBWriteLocks are typically created and managed by the code in the
+ * <p>DBWriteLocks are typically created and managed by the code in the
  * {@link arlut.csd.ganymede.server.DBEditSet DBEditSet} class.  It is
  * very important that any thread that obtains a DBWriteLock be
  * scrupulous about releasing the lock in a timely fashion once the
- * appropriate changes are made in the database.
+ * appropriate changes are made in the database.</p>
  *
  * @see arlut.csd.ganymede.server.DBEditSet
  * @see arlut.csd.ganymede.server.DBObjectBase
@@ -86,9 +86,7 @@ public class DBWriteLock extends DBLock {
   /* -- */
 
   /**
-   *
-   * constructor to get a write lock on all the object bases
-   *
+   * Constructor to get a write lock on all the object bases
    */
 
   public DBWriteLock(DBStore store)
@@ -99,10 +97,8 @@ public class DBWriteLock extends DBLock {
   }
 
   /**
-   *
-   * constructor to get a write lock on a subset of the
+   * Constructor to get a write lock on a subset of the
    * object bases.
-   *
    */
 
   public DBWriteLock(DBStore store, Vector<DBObjectBase> baseSet)
@@ -113,10 +109,10 @@ public class DBWriteLock extends DBLock {
   }
 
   /**
-   * <P>Establish a dump lock on bases specified in this DBWriteLock's
+   * <p>Establish a dump lock on bases specified in this DBWriteLock's
    * constructor.  Can throw InterruptedException if another thread
    * orders us to abort() while we're waiting for permission to
-   * proceed with writes on the specified baseset.</P>
+   * proceed with writes on the specified baseset.</p>
    */
 
   public void establish(Object key) throws InterruptedException
@@ -405,9 +401,7 @@ public class DBWriteLock extends DBLock {
   }
 
   /**
-   *
    * Release this lock on all bases locked
-   *
    */
 
   public void release()
@@ -460,16 +454,16 @@ public class DBWriteLock extends DBLock {
   }
 
   /**
-   * <P>Withdraw this lock.  This method can be called by a thread to
+   * <p>Withdraw this lock.  This method can be called by a thread to
    * interrupt a lock establish that is blocked waiting to get
    * access to the appropriate set of
    * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects.  If
    * this method is called while another thread is blocked in
-   * establish(), establish() will throw an InterruptedException.</P>
+   * establish(), establish() will throw an InterruptedException.</p>
    *
-   * <P>Once abort() is processed, this lock may never be established.
+   * <p>Once abort() is processed, this lock may never be established.
    * Any subsequent calls to estabish() will always throw
-   * InterruptedException.</P>
+   * InterruptedException.</p>
    */
   
   public void abort()

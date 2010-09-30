@@ -103,42 +103,42 @@ public class GanymedeServer implements Server {
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.GanymedeServer");
 
   /**
-   * <P>Singleton server object.  A running Ganymede Server will have one
+   * <p>Singleton server object.  A running Ganymede Server will have one
    * instance of GanymedeServer active and bound into the RMI registry,
-   * and this field will point to it.</P>
+   * and this field will point to it.</p>
    */
 
   static GanymedeServer server = null;
 
   /**
-   * <P>Vector of {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
-   * objects for users that are logged into the Ganymede server remotely.</P>
+   * <p>Vector of {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
+   * objects for users that are logged into the Ganymede server remotely.</p>
    *
-   * <P>Note that there may be GanymedeSession objects active that are
+   * <p>Note that there may be GanymedeSession objects active that are
    * not listed in this sessions Vector; GanymedeSession objects used for
    * server-side internal operations are not counted here.  This Vector is
    * primarily used to keep track of things for the admin console code in
-   * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin}.</P>
+   * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin}.</p>
    */
 
   static private Vector sessions = new Vector();
 
   /**
-   * <P>A hashtable mapping session names to identity.  Used by the login
+   * <p>A hashtable mapping session names to identity.  Used by the login
    * process to insure that each active remote session will be given a unique
-   * identifying name.</P>
+   * identifying name.</p>
    */
 
   static Hashtable activeUsers = new Hashtable();
 
   /**
-   * <P>A hashtable mapping user Invids to a java.lang.Date object
+   * <p>A hashtable mapping user Invids to a java.lang.Date object
    * representing the last time that user logged into Ganymede.  This
    * data structure is used to check to see if the server's motd.html
    * file has changed since the user last logged in.  This hash of
    * timestamps is not preserved in the ganymede.db file, so whenever
    * the server is restarted, all users are presumed to need to see
-   * the motd.html file on their next login.</P>
+   * the motd.html file on their next login.</p>
    */
 
   static Hashtable userLogOuts = new Hashtable();
@@ -231,7 +231,7 @@ public class GanymedeServer implements Server {
    * <p>The GanymedeSession object contains all of the server's
    * knowledge about a given client's status., and is tracked by
    * the GanymedeServer object for statistics and for the admin
-   * console's monitoring support.</P>
+   * console's monitoring support.</p>
    *
    * @see arlut.csd.ganymede.rmi.Server 
    */
@@ -256,7 +256,7 @@ public class GanymedeServer implements Server {
    * GanymedeSession object, which contains all of the server's
    * knowledge about a given client's status., and is tracked by the
    * GanymedeServer object for statistics and for the admin console's
-   * monitoring support.</P>
+   * monitoring support.</p>
    *
    * @see arlut.csd.ganymede.rmi.Server 
    */
@@ -608,13 +608,13 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   * <P>This method is called to add a remote user's
+   * <p>This method is called to add a remote user's
    * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
    * object to the GanymedeServer's static
    * {@link arlut.csd.ganymede.server.GanymedeServer#sessions sessions}
    * field, which is used by the admin console code to iterate
    * over connected users when logging user actions to the
-   * Ganymede admin console.</P>
+   * Ganymede admin console.</p>
    */
 
   public static void addRemoteUser(GanymedeSession session)
@@ -634,13 +634,13 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   * <P>This method is called to remove a remote user's
+   * <p>This method is called to remove a remote user's
    * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
    * object from the GanymedeServer's static
    * {@link arlut.csd.ganymede.server.GanymedeServer#sessions sessions}
    * field, which is used by the admin console code to iterate
    * over connected users when logging user actions to the
-   * Ganymede admin console.</P>
+   * Ganymede admin console.</p>
    */
 
   public static void removeRemoteUser(GanymedeSession session)
@@ -659,10 +659,10 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   * <P>This method is used by the
+   * <p>This method is used by the
    * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin}
    * refreshUsers() method to get a summary of the state of the
-   * remotely connected users.</P>
+   * remotely connected users.</p>
    */
 
   public static Vector getUserTable()
@@ -864,10 +864,10 @@ public class GanymedeServer implements Server {
   }
 
   /** 
-   * <P>This method retrieves a message from a specified directory in
+   * <p>This method retrieves a message from a specified directory in
    * the Ganymede installation and passes it back as a StringBuffer.
    * Used by the Ganymede server to pass motd information to the
-   * client.</P>
+   * client.</p>
    *
    * @param key A text key indicating the file to be retrieved, minus
    * the .txt or .html extension
@@ -981,12 +981,12 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   * <P>This public remotely accessible method is called by the
+   * <p>This public remotely accessible method is called by the
    * Ganymede admin console and/or the Ganymede stopServer script to
    * establish a new admin console connection to the server.
-   * Establishes an GanymedeAdmin object in the server.</P>
+   * Establishes an GanymedeAdmin object in the server.</p>
    *
-   * <P>Adds &lt;admin&gt; as a monitoring admin console.</P>
+   * <p>Adds &lt;admin&gt; as a monitoring admin console.</p>
    *
    * @see arlut.csd.ganymede.rmi.Server
    */
@@ -1539,11 +1539,11 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   * <P>This method is used for testing.  This method sweeps through
+   * <p>This method is used for testing.  This method sweeps through
    * all invid's listed in the (loaded) database, and checks to make
    * sure that they all point to valid objects in the datastore.
    * Invid fields that are in symmetric relationships are tested to
-   * make sure both ends of the symmetry properly hold.</P>
+   * make sure both ends of the symmetry properly hold.</p>
    *
    * @return true if there were any broken invids in the database
    */
@@ -1643,9 +1643,9 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   * <P>This method is used for testing.  This method sweeps 
+   * <p>This method is used for testing.  This method sweeps 
    * through all embedded objects in the (loaded) database, and
-   * checks to make sure that they all have valid containing objects.</P>
+   * checks to make sure that they all have valid containing objects.</p>
    *
    * @return true if there were any embedded objects without containers in
    * the database
@@ -1722,10 +1722,10 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   * <P>This method is used for fixing the server if it somehow leaks
+   * <p>This method is used for fixing the server if it somehow leaks
    * embedded objects..  This method sweeps 
    * through all embedded objects in the (loaded) database, and
-   * deletes any that do not have valid containing objects.</P>
+   * deletes any that do not have valid containing objects.</p>
    */
 
   public ReturnVal sweepEmbeddedObjects()

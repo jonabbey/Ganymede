@@ -81,30 +81,32 @@ import arlut.csd.ganymede.common.SchemaConstants;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class is designed to be subclassed in order to handle
+ * <p>This class is designed to be subclassed in order to handle
  * full-state synchronization from the Ganymede server to external
- * directory service targets.  GanymedeBuilderTask is really only
- * intended to support directory service targets that are 'dump and
- * replace' in nature, like NIS and classical DNS.  The reason for
- * this is that GanymedeBuilderTasks are executed asynchronously with
- * respect to transaction commits.  By the time a GanymedeBuilderTask
- * subclass runs, the Ganymede server has forgotten all previous
- * states of the data in the server.  All the GanymedeBuilderTask can
- * do is check to see what kinds of objects (Users, Groups, Systems,
- * etc.) have changed since the last time it was run.  It can also
- * check to see which fields have been changed, within those object
- * types.  It cannot check to see whether a particular field in a
- * specific object has changed, however.  Since there's no way for a
- * GanymedeBuilderTask to do a before-and-after comparison, all it can
- * reliably do is to write out absolutely everything relevant to its
- * synchronization channel, and then hand off the build to an external
- * process.  If you want to do a more granular, before-and-after
- * incremental build, you can instead choose to use the more
- * synchronous {@link arlut.csd.ganymede.server.SyncRunner} class,
- * which uses a standard XML format to represent changes to external
- * synchronization processes.
+ * directory service targets.</p>
  *
- * Subclasses of GanymedeBuilderTask need to implement the {@link
+ * <p>GanymedeBuilderTask is really only intended to support directory
+ * service targets that are 'dump and replace' in nature, like NIS and
+ * classical DNS.  The reason for this is that GanymedeBuilderTasks
+ * are executed asynchronously with respect to transaction commits.
+ * By the time a GanymedeBuilderTask subclass runs, the Ganymede
+ * server has forgotten all previous states of the data in the server.
+ * All the GanymedeBuilderTask can do is check to see what kinds of
+ * objects (Users, Groups, Systems, etc.) have changed since the last
+ * time it was run.  It can also check to see which fields have been
+ * changed, within those object types.  It cannot check to see whether
+ * a particular field in a specific object has changed, however.
+ * Since there's no way for a GanymedeBuilderTask to do a
+ * before-and-after comparison, all it can reliably do is to write out
+ * absolutely everything relevant to its synchronization channel, and
+ * then hand off the build to an external process.  If you want to do
+ * a more granular, before-and-after incremental build, you can
+ * instead choose to use the more synchronous {@link
+ * arlut.csd.ganymede.server.SyncRunner} class, which uses a standard
+ * XML format to represent changes to external synchronization
+ * processes.</p>
+ *
+ * <p>Subclasses of GanymedeBuilderTask need to implement the {@link
  * arlut.csd.ganymede.server.GanymedeBuilderTask#builderPhase1()} and
  * {@link
  * arlut.csd.ganymede.server.GanymedeBuilderTask#builderPhase2()}
@@ -120,9 +122,9 @@ import arlut.csd.ganymede.common.SchemaConstants;
  * builderPhase1() returns true, the builderPhase2() method is then
  * run.  This method is intended to run external scripts (typically
  * written in Perl or Python) that process the files written out by
- * the builderPhase1() method.
+ * the builderPhase1() method.</p>
  *
- * All subclasses of GanymedeBuilderTask need to be registered in
+ * <p>All subclasses of GanymedeBuilderTask need to be registered in
  * the Ganymede database via the Task object type.
  * GanymedeBuilderTasks registered to be run on database commit will
  * automatically be issued by the {@link
@@ -137,9 +139,9 @@ import arlut.csd.ganymede.common.SchemaConstants;
  * minimum build-to-build latency, according to how long your
  * builderPhase1() and builderPhase2() methods take to complete.  No
  * matter how long builderPhase2() takes, the GanymedeScheduler will
- * run the builds as fast as it can, back-to-back.
+ * run the builds as fast as it can, back-to-back.</p>
  *
- * Your builderPhase1() method, however, should execute and
+ * <p>Your builderPhase1() method, however, should execute and
  * complete as fast as possible.  The dump lock protecting
  * builderPhase1() prevents any transactions from committing while a
  * builderPhase1() method is executing.  Any significant delay in
@@ -153,11 +155,11 @@ import arlut.csd.ganymede.common.SchemaConstants;
  * multiple distinct builder tasks concurrently.  Splitting your build
  * into multiple pieces that can be run concurrently can also improve
  * your build latency by reducing the amount of work that a given
- * external process has to do when called by builderPhase2().
+ * external process has to do when called by builderPhase2().</p>
  *
- * GanymedeBuilderTask includes a set of helper methods that
+ * <p>GanymedeBuilderTask includes a set of helper methods that
  * subclasses can take advantage of in order to facilitate their
- * operation.
+ * operation.</p>
  *
  * <ul>
  * <li>The {@link
@@ -197,13 +199,13 @@ import arlut.csd.ganymede.common.SchemaConstants;
  * objects of a given type to examine for writing.</li>
  *</ul>
  *
- * In addition, the GanymedeBuilderTask base class logic is
+ * <p>In addition, the GanymedeBuilderTask base class logic is
  * responsible for interfacing with the rest of the Ganymede server to
  * display each builder task's status, both in the admin console and
  * in the client.  The little conveyor belt icon in the lower left
  * corner of the Ganymede graphical client is controlled by the action
  * of the GanymedeBuilderTask and SyncRunner objects being run after a
- * transaction commit.
+ * transaction commit.</p>
  *
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  */
@@ -519,7 +521,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
   }
 
   /**
-   * This method is used by subclasses of GanymedeBuilderTask to
+   * <p>This method is used by subclasses of GanymedeBuilderTask to
    * determine whether a particular base has had any modifications
    * made to it since the last time this builder task was run.  This
    * method works because each GanymedeBuilderTask object keeps a
@@ -531,12 +533,12 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * always return true the first time a particular builder task is
    * run after the server is started.  This means that the first time
    * a transaction is committed when you start your server, your
-   * builder task will wind up doing a full build.
+   * builder task will wind up doing a full build.</p>
    *
-   * See also the {@link
+   * <p>See also the {@link
    * arlut.csd.ganymede.server.GanymedeBuilderTask#baseChanged(short,
    * java.util.List)} version of this method, which allows you to
-   * specify a list of fields that you are interested in testing.
+   * specify a list of fields that you are interested in testing.</p>
    *
    * @param baseid The id number of the base to be checked
    */
@@ -570,7 +572,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
   }
 
   /**
-   * This method is used by subclasses of GanymedeBuilderTask to
+   * <p>This method is used by subclasses of GanymedeBuilderTask to
    * determine whether a particular base has had any modifications
    * made to it since the last time this builder task was run.  This
    * method works because each GanymedeBuilderTask object keeps a
@@ -582,18 +584,18 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * always return true the first time a particular builder task is
    * run after the server is started.  This means that the first time
    * a transaction is committed when you start your server, your
-   * builder task will wind up doing a full build.
+   * builder task will wind up doing a full build.</p>
    *
-   * See also the {@link
+   * <p>See also the {@link
    * arlut.csd.ganymede.server.GanymedeBuilderTask#baseChanged(short,
    * java.util.List)} version of this method, which allows you to
-   * specify a list of fields that you are interested in testing.
+   * specify a list of fields that you are interested in testing.</p>
    *
-   * Note: This variant of baseChanged() takes an int and casts it to
+   * <p>Note: This variant of baseChanged() takes an int and casts it to
    * a short to remove the need from casting literals on the caller's
    * behalf.  If the baseid does not fit in the 16 bit two's
    * complement short range, an IllegalArgumentExceptio will be
-   * thrown.
+   * thrown.</p>
    *
    * @param baseid The id number of the base to be checked
    */
@@ -609,7 +611,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
   }
 
   /**
-   * This method is used by subclasses of GanymedeBuilderTask to
+   * <p>This method is used by subclasses of GanymedeBuilderTask to
    * determine whether a particular field of a particular base has had
    * any modifications made to it since the last time this builder
    * task was run.  This method works because each GanymedeBuilderTask
@@ -623,13 +625,13 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * true the first time a particular builder task is run after the
    * server is started.  This means that the first time a transaction
    * is committed when you start your server, your builder task will
-   * wind up doing a full build.
+   * wind up doing a full build.</p>
    *
-   * Otherwise, if none of the fields listed have changed since
+   * <p>Otherwise, if none of the fields listed have changed since
    * this GanymedeBuilderTask was last run, baseChanged() will return
    * false.  If any of the fields in the fieldIds list have changed
    * since this GanymedeBuilderTask last ran, baseChanged() will
-   * return true.
+   * return true.</p>
    *
    * @param baseid The id number of the base to be checked
    * @param fieldIds A list of java.lang.Short's containing the
@@ -688,7 +690,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
   }
 
   /**
-   * This method is used by subclasses of GanymedeBuilderTask to
+   * <p>This method is used by subclasses of GanymedeBuilderTask to
    * determine whether a particular field of a particular base has had
    * any modifications made to it since the last time this builder
    * task was run.  This method works because each GanymedeBuilderTask
@@ -702,19 +704,19 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * true the first time a particular builder task is run after the
    * server is started.  This means that the first time a transaction
    * is committed when you start your server, your builder task will
-   * wind up doing a full build.
+   * wind up doing a full build.</p>
    *
-   * Otherwise, if none of the fields listed have changed since
+   * <p>Otherwise, if none of the fields listed have changed since
    * this GanymedeBuilderTask was last run, baseChanged() will return
    * false.  If any of the fields in the fieldIds list have changed
    * since this GanymedeBuilderTask last ran, baseChanged() will
-   * return true.
+   * return true.</p>
    *
-   * Note: This variant of baseChanged() takes an int and casts it
+   * <p>Note: This variant of baseChanged() takes an int and casts it
    * to a short to remove the need from casting literals on the
    * caller's behalf.  If the baseid does not fit in the 16 bit two's
-   * complement short range, an IllegalArgumentExceptio will be
-   * thrown.
+   * complement short range, an IllegalArgumentException will be
+   * thrown.</p>
    *
    * @param baseid The id number of the base to be checked
    * @param fieldIds A list of java.lang.Short's containing the
@@ -732,15 +734,15 @@ public abstract class GanymedeBuilderTask implements Runnable {
   }
 
   /**
-   * This method is used by subclasses of GanymedeBuilderTask to
+   * <p>This method is used by subclasses of GanymedeBuilderTask to
    * obtain a list of DBObject references of the requested
-   * type.
+   * type.</p>
    *
-   * Note that the Enumeration returned by this method MUST NOT
+   * <p>Note that the Enumeration returned by this method MUST NOT
    * be used after builderPhase1() returns.  This Enumeration is
    * only valid while the base in question is locked with the
    * global dumpLock obtained before builderPhase1() is run and
-   * which is released after builderPhase1() returns.
+   * which is released after builderPhase1() returns.</p>
    *
    * @param baseid The id number of the base to be listed
    *
@@ -764,21 +766,21 @@ public abstract class GanymedeBuilderTask implements Runnable {
   }
 
   /**
-   * This method is used by subclasses of GanymedeBuilderTask to
+   * <p>This method is used by subclasses of GanymedeBuilderTask to
    * obtain a list of DBObject references of the requested
-   * type.
+   * type.</p>
    *
-   * Note that the Enumeration returned by this method MUST NOT
+   * <p>Note that the Enumeration returned by this method MUST NOT
    * be used after builderPhase1() returns.  This Enumeration is
    * only valid while the base in question is locked with the
    * global dumpLock obtained before builderPhase1() is run and
-   * which is released after builderPhase1() returns.
+   * which is released after builderPhase1() returns.</p>
    *
-   * Note: This variant of enumerateObjects takes an int and casts it
+   * <p>Note: This variant of enumerateObjects takes an int and casts it
    * to a short to remove the need from casting constants on the
    * caller's behalf.  If the baseid does not fit in the 16 bit two's
-   * complement short range, an IllegalArgumentExceptio will be
-   * thrown.
+   * complement short range, an IllegalArgumentException will be
+   * thrown.</p>
    *
    * @param baseid The id number of the base to be listed
    *
@@ -796,15 +798,15 @@ public abstract class GanymedeBuilderTask implements Runnable {
   }
 
   /**
-   * This method is used by subclasses of GanymedeBuilderTask to
+   * <p>This method is used by subclasses of GanymedeBuilderTask to
    * obtain a list of DBObject references of the requested
-   * type.
+   * type.</p>
    *
-   * Note that the Iterable returned by this method MUST NOT
+   * <p>Note that the Iterable returned by this method MUST NOT
    * be used after builderPhase1() returns.  This Iterable is
    * only valid while the base in question is locked with the
    * global dumpLock obtained before builderPhase1() is run and
-   * which is released after builderPhase1() returns.
+   * which is released after builderPhase1() returns.</p>
    *
    * @param baseid The id number of the base to be listed
    *
@@ -829,21 +831,21 @@ public abstract class GanymedeBuilderTask implements Runnable {
   }
 
   /**
-   * This method is used by subclasses of GanymedeBuilderTask to
+   * <p>This method is used by subclasses of GanymedeBuilderTask to
    * obtain a list of DBObject references of the requested
-   * type.
+   * type.</p>
    *
-   * Note that the Iterable returned by this method MUST NOT
+   * <p>Note that the Iterable returned by this method MUST NOT
    * be used after builderPhase1() returns.  This Iterable is
    * only valid while the base in question is locked with the
    * global dumpLock obtained before builderPhase1() is run and
-   * which is released after builderPhase1() returns.
+   * which is released after builderPhase1() returns.</p>
    *
-   * Note: This variant of getObjects() takes an int and casts it
+   * <p>Note: This variant of getObjects() takes an int and casts it
    * to a short to remove the need from casting constants on the
    * caller's behalf.  If the baseid does not fit in the 16 bit two's
-   * complement short range, an IllegalArgumentExceptio will be
-   * thrown.
+   * complement short range, an IllegalArgumentException will be
+   * thrown.</p>
    *
    * @param baseid The id number of the base to be listed
    *
@@ -903,18 +905,18 @@ public abstract class GanymedeBuilderTask implements Runnable {
   }
 
   /**
-   * This method is intended to be overridden by subclasses of
-   * GanymedeBuilderTask.
+   * <p>This method is intended to be overridden by subclasses of
+   * GanymedeBuilderTask.</p>
    *
-   * This method runs with a dumpLock obtained for the builder task.
+   * <p>This method runs with a dumpLock obtained for the builder task.</p>
    *
-   * Code run in builderPhase1() can call enumerateObjects() and
+   * <p>Code run in builderPhase1() can call enumerateObjects() and
    * baseChanged().  Note that the Enumeration of objects returned
    * by enumerateObjects() is only valid and should only be consulted
    * while builderPhase1 is running.. as soon as builderPhase1 returns,
    * the dumpLock used to make the enumerateObjects() call safe to
    * use is relinquished, and any Enumerations obtained will then
-   * be unsafe to depend on.
+   * be unsafe to depend on.</p>
    *
    * @return true if builderPhase1 made changes necessitating the
    * execution of builderPhase2.
@@ -923,74 +925,73 @@ public abstract class GanymedeBuilderTask implements Runnable {
   abstract public boolean builderPhase1();
 
   /**
-   * This method is intended to be overridden by subclasses of
-   * GanymedeBuilderTask.
+   * <p>This method is intended to be overridden by subclasses of
+   * GanymedeBuilderTask.</p>
    *
-   * This method runs after this task's dumpLock has been
+   * <p>This method runs after this task's dumpLock has been
    * relinquished.  This method is intended to be used to finish off a
    * build process by running (probably external) code that does not
-   * require direct access to the database.
+   * require direct access to the database.</p>
    *
-   * For instance, for an NIS builder task, builderPhase1() would scan
+   * <p>For instance, for an NIS builder task, builderPhase1() would scan
    * the Ganymede object store and write out NIS-compatible source
    * files.  builderPhase1() would return, the run() method drops the
    * dump lock so that other transactions can be committed, and then
    * builderPhase2() can be run to turn those on-disk files written by
    * builderPhase1() into NIS maps.  This generally involves executing
    * an external Makefile, which can take an indeterminate period of
-   * time.
+   * time.</p>
    *
-   * It is important that any external process run by
+   * <p>It is important that any external process run by
    * builderPhase2() blocks until it is finished doing the build.  If
    * the external script tries to put itself into the background and
    * return early, the Ganymede server will conclude that the external
    * build has completely finished, and it will feel free to
    * immediately schedule this builder task again, which may mean that
    * the builderPhase1() method will overwrite files the backgrounded
-   * external builder process is still using.
+   * external builder process is still using.</p>
    *
-   * Note as well that the Ganymede server makes no guarantee as to
+   * <p>Note as well that the Ganymede server makes no guarantee as to
    * what the environment variables or current working directory will
    * be set to when any external builder scripts are executed.  If
    * your external scripts depend on these things, you should make
-   * sure that your external builder script sets them itself.
+   * sure that your external builder script sets them itself.</p>
    *
-   * By releasing the dumpLock before we get to that point, we
-   * minimize contention for users of the system.
+   * <p>By releasing the dumpLock before we get to that point, we
+   * minimize contention for users of the system.</p>
    *
-   * As a result of having dropped the dumpLock, enumerateObjects()
-   * cannot be called by this method.
+   * <p>As a result of having dropped the dumpLock, enumerateObjects()
+   * cannot be called by this method.</p>
    *
-   * builderPhase2() can throw a ServiceNotFoundException or
+   * <p>builderPhase2() can throw a ServiceNotFoundException or
    * ServiceFailedException to indicate to the admin console that the
    * build failed, or it can simply return a boolean result to
-   * indicate the same in a less specific fashion.
+   * indicate the same in a less specific fashion.</p>
    *
-   * builderPhase2 is only run if builderPhase1 returns true.
+   * <p>builderPhase2 is only run if builderPhase1 returns true.</p>
    */
 
   abstract public boolean builderPhase2();
 
   /**
-   * This method looks in the optionStrings field in the task
+   * <p>This method looks in the optionStrings field in the task
    * object associated with this task and determines whether the given
    * option name is present in the field.  This works only if this
    * builder task was registered with taskDefObjInvid set by a
    * subclass whose constructor takes an Invid parameter and which
-   * sets taskDefObjInvid in GanymedeBuilderTask.
+   * sets taskDefObjInvid in GanymedeBuilderTask.</p>
    *
-   * That is, if the task object for this task has an option strings
-   * vector with the following contents:
+   * <p>That is, if the task object for this task has an option strings
+   * vector with the following contents:</p>
    *
-   * <PRE>
+   * <pre>
    *  useMD5
    *  useShadow
-   * </PRE>
+   * </pre>
    *
-   * then a call to isOptionSet with 'useMD5' or 'useShadow', of
+   * <p>then a call to isOptionSet with 'useMD5' or 'useShadow', of
    * any capitalization, will return true.  Any other parameter
-   * provided to isOptionSet() will cause null to be returned.
-   *
+   * provided to isOptionSet() will cause null to be returned.</p>
    */
 
   protected boolean isOptionSet(String option)
@@ -1025,30 +1026,30 @@ public abstract class GanymedeBuilderTask implements Runnable {
   }
 
   /**
-   * This method retrieves the value associated with the provided
+   * <p>This method retrieves the value associated with the provided
    * option name if this builder task was registered with taskDefObjInvid
    * set by a subclass whose constructor takes an Invid parameter and which
-   * sets taskDefObjInvid in GanymedeBuilderTask.
+   * sets taskDefObjInvid in GanymedeBuilderTask.</p>
    *
-   * getOptionValue() will search through the option strings for
+   * <p>getOptionValue() will search through the option strings for
    * the task object associated with this task and return the
    * substring after the '=' character, if the option name is found on
-   * the left.
+   * the left.</p>
    *
-   * That is, if the task object for this task has an option strings
-   * vector with the following contents:
+   * <p>That is, if the task object for this task has an option strings
+   * vector with the following contents:</p>
    *
-   * <PRE>
+   * <pre>
    *  useMD5
    *  buildPath=/var/ganymede/schema/NT
    *  useShadow
-   * </PRE>
+   * </pre>
    *
-   * then a call to getOptionValue() with 'buildPath', of any capitalization,
-   * as the parameter will return '/var/ganymede/schema/NT'.
+   * <p>then a call to getOptionValue() with 'buildPath', of any capitalization,
+   * as the parameter will return '/var/ganymede/schema/NT'.</p>
    *
-   * Any other parameter provided to getOptionValue() will cause null to 
-   * be returned. 
+   * <p>Any other parameter provided to getOptionValue() will cause null to 
+   * be returned.</p>
    */
 
   protected String getOptionValue(String option)
@@ -1137,20 +1138,20 @@ public abstract class GanymedeBuilderTask implements Runnable {
   }
 
   /**
-   * This method opens the specified file for writing out a text stream.
+   * <p>This method opens the specified file for writing out a text stream.</p>
    *
-   * If the <code>ganymede.builder.backups</code> property is set to a
+   * <p>If the <code>ganymede.builder.backups</code> property is set to a
    * path in the Ganymede server's ganymede.properties file,
    * openOutFile() will look to see if the filename provided as a
    * parameter already exists.  If it does, it will be copied to a
    * subdirectory of the <code>ganymede.builder.backups</code>
    * directory.  This subdirectory will be named with the date in
-   * which the backups therein were copied.
+   * which the backups therein were copied.</p>
    *
-   * If <code>ganymede.builder.backups</code> is set, the first time
+   * <p>If <code>ganymede.builder.backups</code> is set, the first time
    * openOutFile() is called after midnight, openOutFile will zip all
    * the files in any preceding days' backup subdirectories into one
-   * zip file per day.
+   * zip file per day.</p>
    *
    * @param filename The fully specified path to the file to open
    */
@@ -1161,20 +1162,20 @@ public abstract class GanymedeBuilderTask implements Runnable {
   }
 
   /**
-   * This method opens the specified file for writing out a text stream.
+   * <p>This method opens the specified file for writing out a text stream.</p>
    *
-   * If the <code>ganymede.builder.backups</code> property is set to a
+   * <p>If the <code>ganymede.builder.backups</code> property is set to a
    * path in the Ganymede server's ganymede.properties file,
    * openOutFile() will look to see if the filename provided as a
    * parameter already exists.  If it does, it will be copied to a
    * subdirectory of the <code>ganymede.builder.backups</code>
    * directory.  This subdirectory will be named with the date in
-   * which the backups therein were copied.
+   * which the backups therein were copied.</p>
    *
-   * If <code>ganymede.builder.backups</code> is set, the first time
+   * <p>If <code>ganymede.builder.backups</code> is set, the first time
    * openOutFile() is called after midnight, openOutFile will zip all
    * the files in any preceding days' backup subdirectories into one
-   * zip file per day.
+   * zip file per day.</p>
    *
    * @param filename The name of the file to open
    * @param taskName The name of the builder task that is writing this file.  Used
@@ -1498,7 +1499,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
   }
 
   /**
-   *  This static method is run before the first time a builder task
+   * This static method is run before the first time a builder task
    * writes any file on server start-up.  It is responsible for sweeping
    * through the system backup directory and zipping up any day directories
    * that are lingering from earlier runs.

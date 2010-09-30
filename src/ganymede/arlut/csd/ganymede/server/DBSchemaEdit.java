@@ -72,45 +72,45 @@ import arlut.csd.ganymede.rmi.SchemaEdit;
 ------------------------------------------------------------------------------*/
 
 /**
- * Server-side schema editing class.  This class implements the {@link
+ * <p>Server-side schema editing class.  This class implements the {@link
  * arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} remote interface to
- * support schema editing by the admin console.
+ * support schema editing by the admin console.</p>
  *
- * Only one DBSchemaEdit object may be active in the server at a time;
+ * <p>Only one DBSchemaEdit object may be active in the server at a time;
  * only one admin console can edit the server's schema at a time.
  * While the server's schema is being edited, no users may be logged
  * on to the system. An admin console puts the server into
  * schema-editing mode by calling the {@link
  * arlut.csd.ganymede.server.GanymedeAdmin#editSchema editSchema()}
  * method on a server-side {@link
- * arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} object.
+ * arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} object.</p>
  *
- * When the DBSchemaEdit object is created, it makes copies of all of
+ * <p>When the DBSchemaEdit object is created, it makes copies of all of
  * the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
  * type definition objects in the server.  The admin console can then
  * talk to those DBObjectBase objects remotely by way of the {@link
  * arlut.csd.ganymede.rmi.Base Base} remote interface, accessing data
  * fields, reordering the type tree visible in the client, and so
- * forth.
+ * forth.</p>
  *
- * When the user has made the desired changes, the {@link
+ * <p>When the user has made the desired changes, the {@link
  * arlut.csd.ganymede.server.DBSchemaEdit#commit() commit()} method is
  * called, which replaces the set of DBObjectBase objects held in the
  * server's {@link arlut.csd.ganymede.server.DBStore DBStore} with the
- * modified set that was created and modified by DBSchemaEdit.
+ * modified set that was created and modified by DBSchemaEdit.</p>
  *
- * The schema editing code in the server currently has only a limited
+ * <p>The schema editing code in the server currently has only a limited
  * ability to verify that changes made in the schema editor will not
  * break the database's consistency constraints in some fashion.
  * Generally speaking, you should be using the schema editor to define
  * new fields, or to change field definitions for fields that are not
  * yet in use in the database, not to try to redefine parts of the
- * database that are in actual use and which hold actual data.
+ * database that are in actual use and which hold actual data.</p>
  *
- * The schema editing system is really the most fragile thing in the
+ * <p>The schema editing system is really the most fragile thing in the
  * Ganymede server.  It generally works, but it is not as robust as it
  * ought to be.  It's always a good idea to make a backup copy of your
- * ganymede.db file before going in and editing your database schema.
+ * ganymede.db file before going in and editing your database schema.</p>
  */
 
 public class DBSchemaEdit implements Unreferenced, SchemaEdit {
@@ -140,25 +140,24 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   private final DBStore store;
 
   /**
-   * this holds a copy of the DBObjectBase objects comprising
-   * the DBStore's database.  All changes made during Base editing
-   * are performed on the copies held in this hashtable.. if the
-   * DBSchemaEdit session is aborted, newBases is thrown away.
-   * If the DBSchemaEdit session is confirmed, newBases replaces
-   * store.db.objectBases.
+   * A copy of the DBObjectBase objects comprising the DBStore's
+   * database.  All changes made during Base editing are performed on
+   * the copies held in this hashtable.. if the DBSchemaEdit session
+   * is aborted, newBases is thrown away.  If the DBSchemaEdit session
+   * is confirmed, newBases replaces store.db.objectBases.
    */
 
   Hashtable newBases;		
 
   /**
-   * this holds the original vector of namespace objects extant
-   * at the time the DBSchemaEdit editing session is established.
+   * The original vector of namespace objects extant at the time the
+   * DBSchemaEdit editing session is established.
    */
 
   Vector oldNameSpaces;
 
   /**
-   * root node of the working DBBaseCategory tree.. if the
+   * Root node of the working DBBaseCategory tree.. if the
    * DBSchemaEdit session is committed, this DBBaseCategory tree
    * will replace store.rootCategory.
    */
@@ -247,10 +246,8 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   *
-   * Method to get a category from the category list, by
-   * it's full path name.
-   *
+   * Gets a category from the category list, by it's fully qualified
+   * path name.
    */
 
   public CategoryNode getCategoryNode(String pathName)
@@ -329,7 +326,8 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * Returns a list of bases from the current (non-committed) state of the system.
+   * Returns an array of bases from the current (non-committed) state
+   * of the system.
    *
    * @param embedded If true, getBases() will only show bases that are intended
    * for embedding in other objects.  If false, getBases() will only show bases
@@ -402,7 +400,8 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * Returns a list of bases from the current (non-committed) state of the system.
+   * Returns an array of bases from the current (non-committed) state
+   * of the system.
    *
    * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
@@ -838,10 +837,11 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * Commit this schema edit, instantiate the modified schema
+   * <p>Commits this schema edit, replaces the server's schema with
+   * the modified schema produced by this DBSchemaEdit session.</p>
    *
-   * It is an error to attempt any schema editing operations after this
-   * method has been called.
+   * <p>It is an error to attempt any schema editing operations after this
+   * method has been called.</p>
    */
 
   public synchronized ReturnVal commit()
@@ -1008,10 +1008,10 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * Abort this schema edit, return the schema to its prior state.
+   * <p>Abort this schema edit, return the schema to its prior state.</p>
    *
-   * It is an error to attempt any schema editing operations after this
-   * method has been called.
+   * <p>It is an error to attempt any schema editing operations after this
+   * method has been called.</p>
    */
 
   public synchronized void release()
@@ -1088,10 +1088,8 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   *
    * This method is called when the client loses connection.  unreferenced()
    * should do cleanup.
-   *
    */
 
   public void unreferenced()

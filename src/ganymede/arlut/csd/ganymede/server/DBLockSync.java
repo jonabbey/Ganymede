@@ -58,32 +58,32 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class acts to provide a singleton object for interlock
+ * <p>This class acts to provide a singleton object for interlock
  * coordination.  All global data required for coordinating DBLock
- * lock activity is stored in the singleton object.
+ * lock activity is stored in the singleton object.</p>
  *
- * Note that much code in the various {@link
+ * <p>Note that much code in the various {@link
  * arlut.csd.ganymede.server.DBLock} subclasses, and in the rest of
  * the Ganymede server, establishes external synchronization on the
  * DBLockSync object referenced in {@link
  * arlut.csd.ganymede.server.DBStore#lockSync DBStore.lockSync}, so
  * certain methods in this class which do not appear synchronized may
- * in fact be dependent on external synchronization.
+ * in fact be dependent on external synchronization.</p>
  */
 
 public class DBLockSync {
 
   /** 
-   * <P>Identifier keys for current {@link arlut.csd.ganymede.server.DBLock
-   * DBLocks}.</P>
+   * <p>Identifier keys for current {@link arlut.csd.ganymede.server.DBLock
+   * DBLocks}.</p>
    *
-   * <P>This hash is used by the establish() method in various DBLock
+   * <p>This hash is used by the establish() method in various DBLock
    * subclasses to guarantee that only one lock will established by
-   * a client at a time, to prevent any possibility of DBLock deadlock.</P>
+   * a client at a time, to prevent any possibility of DBLock deadlock.</p>
    *
-   * <P>The values in this hash may either be scalar DBLock objects, or
+   * <p>The values in this hash may either be scalar DBLock objects, or
    * in the case of readers (where it is permissible for a single client
-   * to have several distinct reader locks), a Vector of DBLocks.</P>
+   * to have several distinct reader locks), a Vector of DBLocks.</p>
    */
 
   private Hashtable lockHash;
@@ -104,9 +104,9 @@ public class DBLockSync {
   }
 
   /**
-   * <P>This method causes the DBLockSync object's lock owner hashtable
+   * <p>This method causes the DBLockSync object's lock owner hashtable
    * to be reset.  If count is not zero, that value will be used to set
-   * the initial capacity for the hashtable.</P>
+   * the initial capacity for the hashtable.</p>
    */
 
   public synchronized void resetLockHash(int count)
@@ -124,8 +124,8 @@ public class DBLockSync {
   }
 
   /** 
-   * <P>This method returns true if there is a lock held in care of
-   * the given identifier in this DBLockSync object.</P> 
+   * <p>This method returns true if there is a lock held in care of
+   * the given identifier in this DBLockSync object.</p> 
    */
 
   public boolean isLockHeld(Object key)
@@ -134,12 +134,12 @@ public class DBLockSync {
   }
 
   /**
-   * <P>This method returns true if the lock associated with
-   * key in the DBLockSync lockHash is a DBReadLock.</P>
+   * <p>This method returns true if the lock associated with
+   * key in the DBLockSync lockHash is a DBReadLock.</p>
    *
-   * <P>If there is no lock associated with the key, or if
+   * <p>If there is no lock associated with the key, or if
    * the lock associated with the key is not a read lock,
-   * false will be returned.</P>
+   * false will be returned.</p>
    */
 
   public synchronized boolean isReadLock(Object key)
@@ -155,12 +155,12 @@ public class DBLockSync {
   }
 
   /**
-   * <P>This method returns true if the lock associated with
-   * key in the DBLockSync lockHash is a DBDumpLock.</P>
+   * <p>This method returns true if the lock associated with
+   * key in the DBLockSync lockHash is a DBDumpLock.</p>
    *
-   * <P>If there is no lock associated with the key, or if
+   * <p>If there is no lock associated with the key, or if
    * the lock associated with the key is not a dump lock,
-   * false will be returned.</P>
+   * false will be returned.</p>
    */
 
   public synchronized boolean isDumpLock(Object key)
@@ -176,12 +176,12 @@ public class DBLockSync {
   }
 
   /**
-   * <P>This method returns true if the lock associated with
-   * key in the DBLockSync lockHash is a DBWriteLock.</P>
+   * <p>This method returns true if the lock associated with
+   * key in the DBLockSync lockHash is a DBWriteLock.</p>
    *
-   * <P>If there is no lock associated with the key, or if
+   * <p>If there is no lock associated with the key, or if
    * the lock associated with the key is not a write lock,
-   * false will be returned.</P>
+   * false will be returned.</p>
    */
 
   public synchronized boolean isWriteLock(Object key)
@@ -197,7 +197,7 @@ public class DBLockSync {
   }
 
   /**
-   * <P>This method associates a write lock with the given key.</P>
+   * <p>This method associates a write lock with the given key.</p>
    */
 
   public void setWriteLockHeld(Object key, DBWriteLock lock)
@@ -211,7 +211,7 @@ public class DBLockSync {
   }
 
   /**
-   * <P>This method associates a dump lock with the given key.</P>
+   * <p>This method associates a dump lock with the given key.</p>
    */
 
   public void setDumpLockHeld(Object key, DBDumpLock lock)
@@ -225,13 +225,13 @@ public class DBLockSync {
   }
 
   /**
-   * <P>This method associates a new DBReadLock with the given
+   * <p>This method associates a new DBReadLock with the given
    * key, if possible.  Multiple read locks may be associated
    * with a single key in DBLockSync, but not if there is a
-   * write lock or dump lock associated with the key.</P>
+   * write lock or dump lock associated with the key.</p>
    *
-   * <P>If there is already a dump or write lock associated with
-   * the key, an IllegalStateException will be thrown.</P>
+   * <p>If there is already a dump or write lock associated with
+   * the key, an IllegalStateException will be thrown.</p>
    */
 
   public synchronized void addReadLock(Object key, DBReadLock lock)
@@ -256,11 +256,11 @@ public class DBLockSync {
   }
 
   /**
-   * <P>This method disassociates a DBReadLock from the given
-   * key, if possible.</P>
+   * <p>This method disassociates a DBReadLock from the given
+   * key, if possible.</p>
    *
-   * <P>If there are no read locks associated with the given
-   * key, an IllegalStateException will be thrown.</P>
+   * <p>If there are no read locks associated with the given
+   * key, an IllegalStateException will be thrown.</p>
    */
 
   public synchronized void delReadLock(Object key, DBReadLock lock)
@@ -292,16 +292,16 @@ public class DBLockSync {
   }
 
   /**
-   * <P>This method returns a Vector of DBReadLock objects associated
+   * <p>This method returns a Vector of DBReadLock objects associated
    * with key, if any.  If there is no DBReadLock vector associated
-   * with the key, an IllegalStateException will be thrown.</P>
+   * with the key, an IllegalStateException will be thrown.</p>
    *
-   * <P>The Vector returned is part of DBLockSync's internal
+   * <p>The Vector returned is part of DBLockSync's internal
    * data structures, and should only be browsed in a
-   * block synchronized on this DBLockSync object.</P>
+   * block synchronized on this DBLockSync object.</p>
    *
-   * <P>The Vector returned should not be modified by external
-   * code.</P>
+   * <p>The Vector returned should not be modified by external
+   * code.</p>
    */
 
   public synchronized Vector getReadLockVector(Object key)
@@ -322,12 +322,12 @@ public class DBLockSync {
   }
 
   /**
-   * <P>This method returns a DBLock associated with the
-   * given key, if any.</P> 
+   * <p>This method returns a DBLock associated with the
+   * given key, if any.</p> 
    *
-   * <P>This method will only ever return a DBWriteLock or
+   * <p>This method will only ever return a DBWriteLock or
    * a DBDumpLock.  If the key is associated with a Vector
-   * of DBReadLocks, null will be returned.</P>
+   * of DBReadLocks, null will be returned.</p>
    */
 
   public synchronized DBLock getLockHeld(Object key)
@@ -343,7 +343,7 @@ public class DBLockSync {
   }
 
   /**
-   * <P>This method clears out a lock associated with the given key.</P>
+   * <p>This method clears out a lock associated with the given key.</p>
    */
 
   public void clearLockHeld(Object key)
@@ -352,7 +352,7 @@ public class DBLockSync {
   }
 
   /**
-   * <P>Increments the count of held locks for the admin consoles.</P>
+   * <p>Increments the count of held locks for the admin consoles.</p>
    */
 
   public synchronized void addLock()
@@ -362,7 +362,7 @@ public class DBLockSync {
   }
 
   /**
-   * <P>Decrements the count of held locks for the admin consoles.</P>
+   * <p>Decrements the count of held locks for the admin consoles.</p>
    */
 
   public synchronized void removeLock()
@@ -377,7 +377,7 @@ public class DBLockSync {
   }
 
   /**
-   * <P>Returns the number of locks presently held in the database.</P>
+   * <p>Returns the number of locks presently held in the database.</p>
    */
 
   public int getLockCount()

@@ -60,10 +60,10 @@ import java.util.NoSuchElementException;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>A customized variant of the java.util.Hashtable class that is
+ * <p>A customized variant of the java.util.Hashtable class that is
  * tuned for use in managing
  * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField}s
- * in a Ganymede {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}.</P>
+ * in a Ganymede {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}.</p>
  * 
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
@@ -119,13 +119,13 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
   }
 
   /**
-   * Returns an Iterator of the objects in this DBBaseFieldTable.
+   * <p>Returns an Iterator of the objects in this DBBaseFieldTable.</p>
    *
-   * Use the Iterator methods on the returned object to fetch the
-   * elements sequentially.
+   * <p>Use the Iterator methods on the returned object to fetch the
+   * elements sequentially.</p>
    *
-   * This method allows DBBaseFieldTable to support the Java 5 foreach
-   * loop construct.
+   * <p>This method allows DBBaseFieldTable to support the Java 5 foreach
+   * loop construct.</p>
    *
    * @return  an Iterator of the objects in this DBObjectTable.
    * @see     java.util.Iterator
@@ -137,11 +137,11 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
   }
 
   /**
-   * Returns an Iterator of the built-in DBObjectBaseField objects in
-   * this DBBaseFieldTable.
+   * <p>Returns an Iterator of the built-in DBObjectBaseField objects in
+   * this DBBaseFieldTable.</p>
    *
-   * Use the Iterator methods on the returned object to fetch the
-   * elements sequentially.
+   * <p>Use the Iterator methods on the returned object to fetch the
+   * elements sequentially.</p>
    */
 
   public synchronized Iterator<DBObjectBaseField> builtInIterator()
@@ -225,10 +225,8 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
   }
 
   /**
-   *
    * Returns the DBObjectBaseField with the specified key from this DBBaseFieldTable, or
    * null if no object with that id is in this table.
-   *
    */
 
   public DBObjectBaseField getNoSync(short key) 
@@ -244,10 +242,8 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
   }
 
   /**
-   *
    * Returns the DBObjectBaseField with the specified key from this DBBaseFieldTable, or
    * null if no object with that id is in this table.
-   *
    */
 
   public synchronized DBObjectBaseField get(short key) 
@@ -263,7 +259,6 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
   }
 
   /**
-   *
    * Returns the DBObjectBaseField with the specified name from this
    * DBBaseFieldTable, or null if no object with that name is in this
    * table.
@@ -291,12 +286,10 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
   }
 
   /**
-   *
    * Inserts a DBObjectBaseField into this DBBaseFieldTable.
    *
    * This put is not sync'ed, and should only be used with
    * higher level sync provisions.
-   *
    */
 
   public void putNoSync(DBObjectBaseField value) 
@@ -365,9 +358,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
   }
 
   /**
-   *
    * Inserts a DBObjectBaseField into this DBBaseFieldTable
-   *
    */
 
   public synchronized void put(DBObjectBaseField value) 
@@ -376,12 +367,10 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
   }
 
   /**
+   * <p>Inserts a DBObjectBaseField into this DBBaseFieldTable.</p>
    *
-   * Inserts a DBObjectBaseField into this DBBaseFieldTable.
-   *
-   * This put is not sync'ed, and should only be used with
-   * higher level sync provisions.
-   *
+   * <p>This put is not sync'ed, and should only be used with
+   * higher level sync provisions.</p>
    */
 
   public void putNoSyncNoRemove(DBObjectBaseField value) 
@@ -390,9 +379,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
   }
 
   /**
-   *
    * Removes the DBObjectBaseField with the given id from this DBBaseFieldTable.
-   *
    */
 
   private void removeNoSync(short key) 
@@ -420,9 +407,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
   }
 
   /**
-   *
    * Removes the DBObjectBaseField with the given id from this DBBaseFieldTable.
-   *
    */
 
   public synchronized void remove(short key) 
@@ -431,9 +416,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
   }
 
   /**
-   *
    * Clears this DBBaseFieldTable.
-   *
    */
 
   public synchronized void clear() 
@@ -543,10 +526,10 @@ class DBBaseFieldTableIterator implements Iterator<DBObjectBaseField> {
 ------------------------------------------------------------------------------*/
 
 /**
- * A DBBaseFieldTable Iterator class that iterates over the built-in
- * field definitions in a DBObjectBase, in ascending field id order.
+ * <p>A DBBaseFieldTable Iterator class that iterates over the built-in
+ * field definitions in a DBObjectBase, in ascending field id order.</p>
  *
- * This class should remain opaque to the client.
+ * <p>This class should remain opaque to the client.</p>
  */
 
 class DBBaseFieldTableBuiltInIterator implements Iterator<DBObjectBaseField> {
