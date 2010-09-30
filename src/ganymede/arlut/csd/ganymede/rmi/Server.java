@@ -57,6 +57,17 @@ import arlut.csd.ganymede.common.ReturnVal;
 
 // Server is our remote access interface 
 
+/**
+ * <p>Master remote interface definition for the Ganymede Server Object.</p>
+ *
+ * <p>The Ganymede Server object provides the interface that clients
+ * use to log in to the Ganymede Server.</p>
+ *
+ * <p>This RMI remote interface is implemented by the first object
+ * published by the Ganymede server at system startup, and is used by
+ * clients to begin their interaction with the server.</p>
+ */
+
 public interface Server extends Remote {
 
   /** 
