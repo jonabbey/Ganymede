@@ -55,12 +55,16 @@ package arlut.csd.Util;
 
 /**
  * A utility class to fix up a path string.
- *
  */
 
 public class PathComplete {
 
   static String separator = null;
+
+  /**
+   * Returns path with the system path separator concatenated to the
+   * end if not already present.
+   */
 
   public static String completePath(String path)
   {
