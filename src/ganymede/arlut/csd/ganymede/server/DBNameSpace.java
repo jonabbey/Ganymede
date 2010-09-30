@@ -194,7 +194,7 @@ public final class DBNameSpace implements NameSpace {
   /**
    * Hashtable mapping {@link arlut.csd.ganymede.server.DBEditSet
    * DBEditSet's} currently active modifying values in this namespace
-   * to {@link arlut.csd.ganymede.server.DBNameSpaceTransaction
+   * to {@link arlut.csd.ganymede.server.DBNameSpace.DBNameSpaceTransaction
    * DBNameSpaceTransaction} objects.
    */
 
@@ -1478,7 +1478,7 @@ public final class DBNameSpace implements NameSpace {
 
   /**
    * This method returns the {@link
-   * arlut.csd.ganymede.server.DBNameSpaceTransaction
+   * arlut.csd.ganymede.server.DBNameSpace.DBNameSpaceTransaction
    * DBNameSpaceTransaction} associated with the given transaction,
    * creating one if one was not previously so associated.
    *

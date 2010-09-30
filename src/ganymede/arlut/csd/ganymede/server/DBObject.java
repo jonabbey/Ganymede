@@ -350,7 +350,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    *
    * @param eObj The shadow object to copy into the new DBObject
    *
-   * @see arlut.csd.ganymede.server.DBEditSet#commit()
+   * @see arlut.csd.ganymede.server.DBEditSet#commit(java.lang.String)
    * @see arlut.csd.ganymede.server.DBEditSet#release()
    */
   
@@ -2908,9 +2908,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * hash structure has no entries for this object at all.</p>
    *
    * <p>During the commit process of a normal transaction, the {@link
-   * arlut.csd.ganymede.server.DBEditSet#syncObjBackPointers(arlut.csd.ganymede.server.DBEditObject)
-   * syncObjBackPointers()} method in the {@link
-   * arlut.csd.ganymede.server.DBEditSet DBEditSet} class handles
+   * arlut.csd.ganymede.server.DBLinkTracker#commit(arlut.csd.ganymede.server.DBSession)
+   * commit()} method in the {@link
+   * arlut.csd.ganymede.server.DBLinkTracker DBLinkTracker} class handles
    * these updates instead.</p>
    */
 

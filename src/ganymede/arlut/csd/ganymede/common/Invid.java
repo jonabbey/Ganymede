@@ -62,17 +62,17 @@ import java.io.IOException;
 ------------------------------------------------------------------------------*/
 
 /**
- * An Invid is an immutable object id (an INVariant ID) in the
+ * <p.An Invid is an immutable object id (an INVariant ID) in the
  * Ganymede system.  All objects created in the database have a unique
  * and permanent Invid that identify the object's type and identity.
  * Because of these properties, the Invid can be used as a persistent
- * object pointer type.
+ * object pointer type.</p>
  *
- * Invid's are used extensively in the server to track pointer
+ * <p>Invid's are used extensively in the server to track pointer
  * relationships between objects.  Invid's are also used by the client
  * to identify objects to be viewed, edited, deleted, etc.  Basically
  * whenever any code in Ganymede deals with a reference to an object,
- * it is done through the use of Invid's.
+ * it is done through the use of Invid's.</p>
  *
  * @see arlut.csd.ganymede.server.InvidDBField
  * @see arlut.csd.ganymede.rmi.Session
@@ -96,15 +96,15 @@ public final class Invid implements java.io.Serializable {
   }
 
   /**
-   * This method can be used to prep the Invid class with an {@link
+   * <p>This method can be used to prep the Invid class with an {@link
    * arlut.csd.ganymede.common.InvidAllocator} that will return a
    * possibly pre-existing Invid object, given a short/int
-   * combination.
+   * combination.</p>
    *
-   * The purpose of this allocator is to allow the Ganymede server to
+   * <p>The purpose of this allocator is to allow the Ganymede server to
    * re-use previously created Invids in the server to minimize memory
    * usage, in a fashion similar to the Java language's
-   * java.lang.String.intern() scheme.
+   * java.lang.String.intern() scheme.</p>
    */
 
   static final public void setAllocator(InvidAllocator newAllocator)
@@ -257,27 +257,27 @@ public final class Invid implements java.io.Serializable {
   }
 
   /**
-   * As with java.lang.String, Invids are immutable objects that we
+   * <p>As with java.lang.String, Invids are immutable objects that we
    * may be able to usefully pool for object re-use.  The result of an
    * intern method is a single immutable Invid that will be reused by
    * all other Invid's that point to the same object in the Ganymede
-   * server (if you're calling intern() on the server, that is.)
+   * server (if you're calling intern() on the server, that is.)</p>
    *
-   * If an Invid Allocator has not been set with setAllocator(),
-   * intern() will do nothing, and will return this.
+   * <p>If an Invid Allocator has not been set with setAllocator(),
+   * intern() will do nothing, and will return this.</p>
    *
-   * Note that there only two ways to create an Invid.. to use the
+   * <p>Note that there only two ways to create an Invid.. to use the
    * public static createInvid factory methods, in which case the
    * Invids you get will already be interned, or through
    * deserialization, in which case the JVM creates the Invid from the
    * serialized representation without going through the Invid class
-   * constructors or factory methods.
+   * constructors or factory methods.</p>
    *
-   * The intern method is to provide for the latter case, so that
+   * <p>The intern method is to provide for the latter case, so that
    * Ganymede code which receives Invids from serialization streams
    * can look up a pooled reference pointing to the content of the
    * Invid and use that for in-heap storage, rather than a possibly
-   * redundant copy.
+   * redundant copy.</p>
    */
 
   public Invid intern()

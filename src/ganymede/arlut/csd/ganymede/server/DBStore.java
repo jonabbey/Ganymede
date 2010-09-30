@@ -96,22 +96,22 @@ import com.jclark.xml.output.UTF8XMLWriter;
 ------------------------------------------------------------------------------*/
 
 /**
- * DBStore is the main Ganymede database class. DBStore is responsible for
+ * <p>DBStore is the main Ganymede database class. DBStore is responsible for
  * actually handling the Ganymede database, and manages
  * database loads and dumps, locking (in conjunction with 
  * {@link arlut.csd.ganymede.server.DBSession DBSession} and
  * {@link arlut.csd.ganymede.server.DBLock DBLock}), 
- * the {@link arlut.csd.ganymede.server.DBJournal journal}, and schema dumping.
+ * the {@link arlut.csd.ganymede.server.DBJournal journal}, and schema dumping.</p>
  *
- * The DBStore class holds the server's namespace and schema
+ * <p>The DBStore class holds the server's namespace and schema
  * dictionaries, in the form of a collection of
  * {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} and {@link
  * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects.  Each
  * DBObjectBase contains schema information for an object type,
  * including field definitions for all fields that may be stored in
- * objects of that type.
+ * objects of that type.</p>
  *
- * In addition to holding schema information, each DBObjectBase
+ * <p>In addition to holding schema information, each DBObjectBase
  * contains an {@link arlut.csd.ganymede.common.Invid Invid}-keyed hash of
  * {@link arlut.csd.ganymede.server.DBObject DBObject}'s of that type in
  * memory after the database loading is complete at start-up.  Changes
@@ -125,16 +125,16 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * dump} to consolidate the journal and update the on-disk database
  * file.  The server will also do a dump when the server's admin
  * console {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin}
- * interface initiates a server shutdown.
+ * interface initiates a server shutdown.</p>
  *
- * DBStore was originally written with the intent of being able to serve as
+ * <p>DBStore was originally written with the intent of being able to serve as
  * a stand-alone in-process transactional object storage system, but in practice, DBStore
  * is now thoroughly integrated with the rest of the Ganymede server, and particularly
  * with {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}.  Various
  * component classes ({@link arlut.csd.ganymede.server.DBSession DBSession},
  * {@link arlut.csd.ganymede.server.DBObject DBObject}, and
  * {@link arlut.csd.ganymede.server.DBField DBField}), assume that there is usually
- * an associated GanymedeSession to be consulted for permissions and the like.
+ * an associated GanymedeSession to be consulted for permissions and the like.</p>
  *
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
  */
@@ -205,12 +205,12 @@ public final class DBStore implements JythonMap {
   private Object transactionNumberLock = new Object();
 
   /**
-   * Convenience function to find and return objects from the database
-   * without having to go through the GanymedeSession and DBSession layers.
+   * <p>Convenience function to find and return objects from the database
+   * without having to go through the GanymedeSession and DBSession layers.</p>
    *
-   * This method provides a direct reference to an object in the DBStore,
+   * <p>This method provides a direct reference to an object in the DBStore,
    * without exporting it for remote RMI reference and without doing any
-   * permissions setting.
+   * permissions setting.</p>
    */
 
   public static DBObject viewDBObject(Invid invid)
@@ -332,12 +332,12 @@ public final class DBStore implements JythonMap {
   /* -- */
 
   /**
-   * This is the constructor for DBStore.
+   * <p>This is the constructor for DBStore.</p>
    *
-   * Currently, once you construct a DBStore object, all you can do to
+   * <p>Currently, once you construct a DBStore object, all you can do to
    * initialize it is call load().  This API needs to be extended to
    * provide for programmatic bootstrapping, or another tool needs
-   * to be produced for the purpose.
+   * to be produced for the purpose.</p>
    */
 
   public DBStore()
@@ -443,10 +443,10 @@ public final class DBStore implements JythonMap {
   }
 
   /**
-   * Load the database from disk.
+   * <p>Load the database from disk.</p>
    *
-   * This method loads both the database type definition and database
-   * contents from a single disk file.
+   * <p>This method loads both the database type definition and database
+   * contents from a single disk file.</p>
    *
    * @param filename Name of the database file
    * @see arlut.csd.ganymede.server.DBJournal
@@ -458,10 +458,10 @@ public final class DBStore implements JythonMap {
   }
 
   /**
-   * Load the database from disk.
+   * <p>Load the database from disk.</p>
    *
-   * This method loads both the database type definition and database
-   * contents from a single disk file.
+   * <p>This method loads both the database type definition and database
+   * contents from a single disk file.</p>
    *
    * @param filename Name of the database file
    * @param loadJournal if true, process and consolidate the journal
@@ -783,17 +783,17 @@ public final class DBStore implements JythonMap {
   }
 
   /**
-   * Dumps the database to disk
+   * <p>Dumps the database to disk</p>
    *
-   * This method dumps the entire database to disk.  The thread that calls the
+   * <p>This method dumps the entire database to disk.  The thread that calls the
    * dump method will be suspended until there are no threads performing update
    * writes to the in-memory database.  In practice this will likely never be
    * a long interval.  Note that this method *will* dump the database, even
    * if no changes have been made.  You should check the DBStore journal's 
    * isClean() method to determine whether or not a dump is really needed,
-   * if you're not sure.
+   * if you're not sure.</p>
    *
-   * The dump is guaranteed to be transaction consistent.
+   * <p>The dump is guaranteed to be transaction consistent.</p>
    *
    * @param filename Name of the database file to emit
    * @param releaseLock boolean.  If releaseLock==false, dump() will not release
@@ -1024,17 +1024,17 @@ public final class DBStore implements JythonMap {
   }
 
   /**
-   * Dumps the database to disk as an XML file
+   * <p>Dumps the database to disk as an XML file</p>
    *
-   * This method dumps the entire database to disk.  The thread that calls the
+   * <p>This method dumps the entire database to disk.  The thread that calls the
    * dump method will be suspended until there are no threads performing update
    * writes to the in-memory database.  In practice this will likely never be
    * a long interval.  Note that this method *will* dump the database, even
    * if no changes have been made.  You should check the DBStore journal's 
    * isClean() method to determine whether or not a dump is really needed,
-   * if you're not sure.
+   * if you're not sure.</p>
    *
-   * The dump is guaranteed to be transaction consistent.
+   * <p>The dump is guaranteed to be transaction consistent.</p>
    *
    * @param filename Name of the database file to emit
    *
@@ -1071,19 +1071,19 @@ public final class DBStore implements JythonMap {
   }
 
   /**
-   * Dumps the database and/or database schema to an OutputStream
-   * as an XML file
+   * <p>Dumps the database and/or database schema to an OutputStream
+   * as an XML file</p>
    *
-   * This method dumps the entire database to the OutputStream.
+   * <p>This method dumps the entire database to the OutputStream.
    * The thread that calls the dump method will be suspended until
    * there are no threads performing update writes to the in-memory
    * database.  In practice this will likely never be a long interval.
    * Note that this method *will* dump the database, even if no
    * changes have been made.  You should check the DBStore journal's
    * isClean() method to determine whether or not a dump is really
-   * needed, if you're not sure.
+   * needed, if you're not sure.</p>
    *
-   * The dump is guaranteed to be transaction consistent.
+   * <p>The dump is guaranteed to be transaction consistent.</p>
    *
    * @param outStream Stream to write the XML to @param
    * dumpDataObjects if false, only the schema definition will be
@@ -1398,9 +1398,7 @@ public final class DBStore implements JythonMap {
   }
 
   /**
-   * 
    * Method to replace/add a DBObjectBase in the DBStore.
-   *
    */
 
   public synchronized void setBase(DBObjectBase base)
@@ -1483,12 +1481,12 @@ public final class DBStore implements JythonMap {
   }
 
   /**
-   * Method to obtain the object from the DBStore represented by the
-   * given Invid.
+   * <p>Method to obtain the object from the DBStore represented by the
+   * given Invid.</p>
    *
-   * NOTE: this method will give you a direct reference to the actual
+   * <p>NOTE: this method will give you a direct reference to the actual
    * DBObject, not a clone. So be careful, and treat the returned
-   * objects as "read only".
+   * objects as "read only".</p>
    */
 
   public DBObject getObject(Invid invid)
@@ -1497,9 +1495,7 @@ public final class DBStore implements JythonMap {
   }
 
   /**
-   *
    * Method to locate a registered namespace by name.
-   *
    */
 
   public DBNameSpace getNameSpace(String name)
@@ -1519,10 +1515,8 @@ public final class DBStore implements JythonMap {
   }
 
   /**
-   *
    * Method to get a category from the category list, by
    * it's full path name.
-   *
    */
 
   public synchronized CategoryNode getCategoryNode(String pathName)
@@ -1609,16 +1603,16 @@ public final class DBStore implements JythonMap {
   }
 
   /**
-   * Initialization method for a newly created DBStore.. this
+   * <p>Initialization method for a newly created DBStore.. this
    * method creates a new Schema from scratch, defining the
    * mandatory Ganymede object types, registering their customization
-   * classes, defining fields, and all the rest.
+   * classes, defining fields, and all the rest.</p>
    *
-   * Note that we don't go through a 
+   * <p>Note that we don't go through a 
    * {@link arlut.csd.ganymede.server.DBSchemaEdit DBSchemaEdit}
    * here, we just initialize the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}/
    * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField} structures
-   * manually.
+   * manually.</p>
    */
 
   void initializeSchema()

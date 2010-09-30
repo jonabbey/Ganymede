@@ -71,26 +71,23 @@ import arlut.csd.ganymede.common.ReturnVal;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Client side interface definition for the
+ * <p>Client side interface definition for the
  * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession} class.  The Session
  * interface is provided to the client by the
  * {@link arlut.csd.ganymede.server.GanymedeServer GanymedeServer}'s 
  * {@link arlut.csd.ganymede.rmi.Server#login(java.lang.String username, java.lang.String password) login()}
  * method, and provides the client with an RMI reference that can be used
- * to communicate with the Ganymede server.</P>
+ * to communicate with the Ganymede server.</p>
  *
- * <P>Many of the methods in this interface, when called, will return
+ * <p>Many of the methods in this interface, when called, will return
  * remote object references that the client can in turn interact with
  * to perform operations on the server.  These include the
  * {@link arlut.csd.ganymede.rmi.db_object db_object} reference that can
  * be returned as part of a {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
  * return value, and the {@link arlut.csd.ganymede.rmi.db_field db_field}
- * references that are obtained from the db_object references.</P>
+ * references that are obtained from the db_object references.</p>
  *
- * @version $Id$
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
- *
- * @see arlut.csd.ganymede.server.DBSession
  */
 
 public interface Session extends Remote {
@@ -98,10 +95,8 @@ public interface Session extends Remote {
   // Client/server interface operations
 
   /**
-   *
    * This method logs a client out and closes up any resources
    * used by the client on the server. 
-   *
    */
 
   void        logout() throws RemoteException;
@@ -820,9 +815,6 @@ public interface Session extends Remote {
    * will be cleared.  The object may retain an expiration date,
    * however.</p>
    *
-   * <p>The client should check the returned ReturnVal's
-   * {@link arlut.csd.ganymede.common.ReturnVal#getObjectStatus() getObjectStatus()}
-   * method to see whether the re-activated object has an expiration date set.</p>
    *
    * <p>This method must be called within a transactional context.  The object's
    * change in status will not be visible to other sessions until this session calls 

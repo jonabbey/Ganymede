@@ -131,7 +131,7 @@ public class DBLogEvent {
    * @param admin Invid pointing to the adminPersona that fired the event, if any
    * @param adminName String containing the name of the adminPersona that fired the event, if any
    * @param objects A List of Invids of objects involved in this event.
-   * @param notifyVec A List of Strings listing email addresses to send notification
+   * @param notifyList A List of Strings listing email addresses to send notification
    * of this event to.
    */
 

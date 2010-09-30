@@ -656,7 +656,7 @@ public class DBLog {
 
   /**
    * <P>This method is used to start logging events for a transaction.  It is called from
-   * {@link arlut.csd.ganymede.server.DBEditSet#commit_logTransaction(java.util.HashMap)},
+   * {@link arlut.csd.ganymede.server.DBEditSet#commit_logTransaction(java.util.Set)},
    * which is responsible for sequencing this call with calls to streamLogEvent() and
    * endTransactionLog().</P>
    *
@@ -744,7 +744,7 @@ public class DBLog {
    * <p>This method should only be called after a
    * startTransactionLog() call and before the corresponding
    * endTransactionLog() call, made by {@link
-   * arlut.csd.ganymede.server.DBEditSet#commit_logTransaction(java.util.HashMap)}.</p>
+   * arlut.csd.ganymede.server.DBEditSet#commit_logTransaction(java.util.Set)}.</p>
    *
    * <p>DBEditSet.commit_logTransaction() is responsible for
    * synchronizing on Ganymede.log, and thereby excluding all other
@@ -897,7 +897,7 @@ public class DBLog {
    * <p>This method should only be called after a
    * startTransactionLog() call and any corresponding
    * endTransactionLog() calls, made by {@link
-   * arlut.csd.ganymede.server.DBEditSet#commit_logTransaction(java.util.HashMap)}.</p>
+   * arlut.csd.ganymede.server.DBEditSet#commit_logTransaction(java.util.Set)}.</p>
    *
    * <p>DBEditSet.commit_logTransaction() is responsible for
    * synchronizing on Ganymede.log, and thereby excluding all other
@@ -1019,7 +1019,7 @@ public class DBLog {
 
   /**
    * <p>Emergency cleanup function called by {@link
-   * arlut.csd.ganymede.server.DBEditSet#commit_logTransaction(java.util.HashMap)} in
+   * arlut.csd.ganymede.server.DBEditSet#commit_logTransaction(java.util.Set)} in
    * the event of a problem during logging.</p>
    */
 

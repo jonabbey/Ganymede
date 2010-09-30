@@ -66,16 +66,16 @@ import java.util.Set;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class is responsible for tracking forward asymmetric links
- * from sources to targets in the Ganymede data store.
+ * <p>This class is responsible for tracking forward asymmetric links
+ * from sources to targets in the Ganymede data store.</p>
  *
- * This class makes it possible to efficiently delete objects from the
+ * <p>This class makes it possible to efficiently delete objects from the
  * Ganymede datastore without having to scan the entire datastore in
- * search of objects that point to the to-be-deleted object.
+ * search of objects that point to the to-be-deleted object.</p>
  *
- * Once the Invids for objects which link to a to-be-deleted object
+ * <p>Once the Invids for objects which link to a to-be-deleted object
  * are retrieved, the objects containing these Invids can (and will
- * be) edited to remove these links.
+ * be) edited to remove these links.</p>
  */
 
 public class DBLinkTracker {
@@ -101,14 +101,14 @@ public class DBLinkTracker {
   private DBLinkTrackerContext persistentLinks;
 
   /**
-   * sessionOverlays tracks modifications that are accruing in active
+   * <p>sessionOverlays tracks modifications that are accruing in active
    * sessions on the DBStore.  These modifications are private to the
    * session unless/until the session is committed, at which time the
-   * overlays are folded into the persistentLinks structure.
+   * overlays are folded into the persistentLinks structure.</p>
    *
-   * The DBLinkTrackerSession objects kept in this Map for each active
+   * <p>The DBLinkTrackerSession objects kept in this Map for each active
    * DBSession include support for handling checkpoints and rollbacks
-   * across the duration of the DBSessions.
+   * across the duration of the DBSessions.</p>
    */
 
   private Map<DBSession, DBLinkTrackerSession> sessionOverlays;
@@ -344,17 +344,17 @@ public class DBLinkTracker {
   }
 
   /**
-   * This method is called from GanymedeServer.checkInvids() to
+   * <p>This method is called from GanymedeServer.checkInvids() to
    * perform a validation of the persistent DBLinkTracker structures
    * for the sake of the 'check invid integrity' debug option in the
-   * Ganymede Admin console.
+   * Ganymede Admin console.</p>
    *
-   * This method should always be called from a context that has a
-   * DBDumpLock established on the entirety of the server.
+   * <p>This method should always be called from a context that has a
+   * DBDumpLock established on the entirety of the server.</p>
    *
-   * Note that this method will be *extremely* expensive to run, and
+   * <p>Note that this method will be *extremely* expensive to run, and
    * will effectively shut down the server due to its synchronization
-   * and dump lock!
+   * and dump lock!</p>
    */
 
   public synchronized boolean checkInvids(DBSession session)
@@ -469,15 +469,15 @@ public class DBLinkTracker {
   }
 
   /**
-   * This method returns the appropriate, active DBLinkTrackerContext
-   * for the session being requested.
+   * <p>This method returns the appropriate, active DBLinkTrackerContext
+   * for the session being requested.</p>
    *
-   * The session parameter may be null, in which case the
-   * persistentLinks context is returned.
+   * <p>The session parameter may be null, in which case the
+   * persistentLinks context is returned.</p>
    *
-   * If the session has not been seen before, a new
+   * <p>If the session has not been seen before, a new
    * DBLinkTrackerSession and DBLinkTrackerContext will be created to
-   * service the session.
+   * service the session.</p>
    */
 
   private DBLinkTrackerContext getContext(DBSession session)
@@ -511,25 +511,25 @@ public class DBLinkTracker {
   ----------------------------------------------------------------------------*/
 
   /**
-   * Helper class associated with {@link
-   * arlut.csd.ganymede.server.DBLinkTracker}.
+   * <p>Helper class associated with {@link
+   * arlut.csd.ganymede.server.DBLinkTracker}.</p>
    *
-   * DBLinkTrackerSession is responsible for tracking the view a
+   * <p>DBLinkTrackerSession is responsible for tracking the view a
    * particular DBSession has of the Ganymede DBStore's asymmetric
-   * links.
+   * links.</p>
    *
-   * In the Ganymede DBStore, each DBSession has its own view of the
+   * <p>In the Ganymede DBStore, each DBSession has its own view of the
    * underlying data store, with private visibility of changes that have
    * been made in the session's transaction, but not yet committed into
-   * the underlying object store.
+   * the underlying object store.</p>
    *
-   * DBLinkTrackerSession maintains the per-session overlay on top of
+   * <p>DBLinkTrackerSession maintains the per-session overlay on top of
    * the persisted back link structure, and supports a {@link
    * arlut.csd.Util.NamedStack} of {@link
-   * arlut.csd.ganymede.server.DBLinkTrackerContext
+   * arlut.csd.ganymede.server.DBLinkTracker.DBLinkTrackerContext
    * DBLinkTrackerContexts} to allow checkpoint, popCheckpoint, and
    * rollback operations to properly interact with the DBLinkTracker
-   * system.
+   * system.</p>
    */
 
   class DBLinkTrackerSession
@@ -569,17 +569,17 @@ public class DBLinkTracker {
     }
 
     /**
-     * Creates a new DBLinkTrackerContext for the session, which will
+     * <p>Creates a new DBLinkTrackerContext for the session, which will
      * be used for all future modifications to the invids tracked by
      * the session until such time as the top of the contexts stack is
      * modified by another checkpoint, a rollback, or a consolidate
-     * call.
+     * call.</p>
      *
-     * Whatever context is at the top of the stack prior to pushing
+     * <p>Whatever context is at the top of the stack prior to pushing
      * the new DBLinkTrackerContext effectively becomes the named
      * checkpoint, and will be restored when and if a rollback
      * operation removes all contexts above the checkpoint on the
-     * contexts stack.
+     * contexts stack.</p>
      */
 
     public void checkpoint(String ckp_key)
@@ -600,13 +600,13 @@ public class DBLinkTracker {
     }
 
     /**
-     * Removes all contexts above checkpoint ckp_key from the stack
+     * <p>Removes all contexts above checkpoint ckp_key from the stack
      * and updates the remaining top context with the contents of the
-     * context at the top of the stack when consolidate() is called.
+     * context at the top of the stack when consolidate() is called.</p>
      *
-     * Used to reduce memory loading in the contexts stack when it is
+     * <P>Used to reduce memory loading in the contexts stack when it is
      * known that we will never need to rollback to a specific
-     * checkpoint.
+     * checkpoint.</p>
      */
 
     public void consolidate(String ckp_key)
@@ -627,16 +627,16 @@ public class DBLinkTracker {
   ----------------------------------------------------------------------------*/
 
   /**
-   * Helper class associated with DBLinkTracker.
+   * <p>Helper class associated with DBLinkTracker.</p>
    *
-   * DBLinkTrackerContext is responsible for recording per-DBSession
+   * <p>DBLinkTrackerContext is responsible for recording per-DBSession
    * overlays onto the DBLinkTracker's main overlay structure,
    * representing additions or subtractions from the overlay
-   * that affect a particular DBSession.
+   * that affect a particular DBSession.</p>
    *
-   * DBLinkTrackerSession supports maintaining a checkpoint NamedStack
+   * <p>DBLinkTrackerSession supports maintaining a checkpoint NamedStack
    * to allow checkpoint, popCheckpoint, and rollback operations to
-   * properly interact with the DBLinkTracker system.
+   * properly interact with the DBLinkTracker system.</p>
    */
 
   class DBLinkTrackerContext
@@ -653,12 +653,12 @@ public class DBLinkTracker {
     DBLinkTrackerContext parent;
 
     /**
-     * If we are tracking changes made by a specific DBSession, we'll
-     * record a reference to the DBLinkTrackerSession here.
+     * <p>If we are tracking changes made by a specific DBSession, we'll
+     * record a reference to the DBLinkTrackerSession here.</p>
      *
-     * Note that sessionTracker will only be null if parent is null,
+     * <p>Note that sessionTracker will only be null if parent is null,
      * as we must then be representing the persistent, checked-in
-     * state of the linkages.
+     * state of the linkages.</p>
      */
 
     DBLinkTrackerSession sessionTracker;
@@ -671,15 +671,15 @@ public class DBLinkTracker {
     Map<Invid, Set<Invid>> targetToSourcesMap;
 
     /**
-     * These are source invids that our session has modified.  We know
+     * <p>These are source invids that our session has modified.  We know
      * that only one session at a time can have an object checked out
      * for editing, so we know that sourcesTouched by one
      * DBLinkTrackerContext cannot overlap with sourcesTouched from a
-     * DBLinkTrackerContext associated with a different DBSession.
+     * DBLinkTrackerContext associated with a different DBSession.</p>
      *
-     * Thus, if we have an Invid our sourcesTouched Set, we know that
+     * <p>Thus, if we have an Invid our sourcesTouched Set, we know that
      * we can add or remove it from another context when we are merged
-     * down into it.
+     * down into it.</p>
      */
 
     Set<Invid> sourcesTouched;
@@ -739,20 +739,20 @@ public class DBLinkTracker {
     }
 
     /**
-     * This method is used to fold changes made in another context
-     * into our own.
+     * <p>This method is used to fold changes made in another context
+     * into our own.</p>
      *
-     * If we are associated with a DBLinkTrackerSession, we must be
+     * <p>If we are associated with a DBLinkTrackerSession, we must be
      * receiving a fold-in from a checkpoint context that is being
      * coalesced into our own in response to a
      * DBEditSet.popCheckpoint().  In this case, we want to replace
-     * our own data with the one from the newer checkpoint.
+     * our own data with the one from the newer checkpoint.</p>
      *
-     * If do not have an associated DBLinkTrackerSession, we are the
+     * <p>If do not have an associated DBLinkTrackerSession, we are the
      * context for the persisted checked-in objects in the DBStore,
      * and we have to take care to only transfer relating to
      * asymmetric links from Invids that were checked out by the
-     * otherContext's associated DBSession.
+     * otherContext's associated DBSession.</p>
      */
 
     public void transferFrom(DBLinkTrackerContext otherContext)
@@ -776,13 +776,13 @@ public class DBLinkTracker {
     }
 
     /**
-     * Recursive helper function to integrate changes from
-     * otherContext.
+     * <p>Recursive helper function to integrate changes from
+     * otherContext.</p>
      *
-     * rollupMerge() recurses up the chain of DBLinkTrackerContexts
+     * <p>rollupMerge() recurses up the chain of DBLinkTrackerContexts
      * from otherContext to find the context whose parent this is,
      * then unwinds down the chain (and up the contexts stack),
-     * merging changes as it goes.
+     * merging changes as it goes.</p>
      */
 
     private void rollupMerge(DBLinkTrackerContext otherContext)
@@ -983,15 +983,15 @@ public class DBLinkTracker {
     }
 
     /**
-     * This method returns a Set of all Invids that point to the
+     * <p>This method returns a Set of all Invids that point to the
      * target object through forward asymmetric links in this
-     * DBLinkTrackerContext's context.
+     * DBLinkTrackerContext's context.</p>
      *
-     * If we don't have a set in our own context, we'll either copy
+     * <p>If we don't have a set in our own context, we'll either copy
      * the set for the target from our nearest parent that has a set
      * for the target, or else we'll create a new empty set.. in this
      * way, we provide a Set of forward pointer Invids that is
-     * specific to this context in our session/checkpoint stack.
+     * specific to this context in our session/checkpoint stack.</p>
      */
 
     private Set<Invid> getForwardLinkSources(Invid target)
