@@ -1055,6 +1055,11 @@ public final class ReturnVal implements java.io.Serializable {
       }
   }
 
+  public ReturnVal merge(ReturnVal otherReturnVal)
+  {
+    return ReturnVal.merge(this, otherReturnVal);
+  }
+
   public ReturnVal setSuccess(boolean didSucceed)
   {
     this.success = didSucceed;
