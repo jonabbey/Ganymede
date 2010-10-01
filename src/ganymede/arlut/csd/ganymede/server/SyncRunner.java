@@ -639,15 +639,15 @@ public class SyncRunner implements Runnable {
 	      {
 		for (Invid invid: book.objects())
 		  {
-		    if (!transaction.isEditingObject(invid))
+		    if (!type.equals(invid.getType()))
 		      {
-			context_count++;
-
 			continue;
 		      }
 
-		    if (!type.equals(invid.getType()))
+		    if (!shouldInclude(transaction.findObject(invid)))
 		      {
+			context_count++;
+
 			continue;
 		      }
 
@@ -725,12 +725,12 @@ public class SyncRunner implements Runnable {
 		  {
 		    for (Invid invid: book.objects())
 		      {
-			if (transaction.isEditingObject(invid))
+			if (!type.equals(invid.getType()))
 			  {
 			    continue;	// skip
 			  }
 
-			if (!type.equals(invid.getType()))
+			if (shouldInclude(transaction.findObject(invid)))
 			  {
 			    continue;	// skip
 			  }
