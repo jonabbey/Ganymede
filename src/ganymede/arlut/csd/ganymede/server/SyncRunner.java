@@ -224,8 +224,8 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * expensive process of reconciliation to bring the directory service
  * target into compliance with the data in the Ganymede server.</p>
  *
- * <p>See the Ganymede synchronization guide for more details on all
- * of this.</p>
+ * <p>See the <a href="../../../../../synchronization/index.html" target="_top">Ganymede
+ * synchronization guide</a> for more details on all of this.</p>
  */
 
 public class SyncRunner implements Runnable {

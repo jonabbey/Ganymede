@@ -11,7 +11,7 @@
 
       <div id="title">
         <h1>Ganymede 2.0 Sync Channel Guide</h1>
-        <p>Release 2.0 - 1 April 2008<br/>$Rev$</p>
+        <p>Release 2.0 - 30 September 2010</p>
       </div>
 
       <div id="abstract">
@@ -33,10 +33,6 @@
         is not the case, you might want to read the <a
         href="../xml/schema.html">Ganymede XML Schema</a> document for
         some details on how a Ganymede schema is specified.</p>
-
-        <p class="note">A more general Ganymede data model / schema
-        document still needs to be put together at the time of this
-        writing (11 April 2005).</p>
       </div>
 
       <p>By <a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></p>
@@ -86,8 +82,7 @@
     target directory will just catch up the next time a
     synchronization occurs.  The inherent redundancy of this approach
     can make the synchronization process very robust, but the downside
-    is that a full state synchronization can be very time
-    consuming.</p>
+    is that a full state synchronization can be time consuming.</p>
 
     <p>In addition, if it isn't possible to efficiently wipe and
     reload the target directory service, a process of comparison must
@@ -263,6 +258,13 @@
       <li><code class="type">Sync Channel Type</code> -- Your choice
       among 'Manual', 'Automatic Full State', and 'Automatic
       Incremental'.</li>
+
+      <li><code class="type">Sync Master Classname</code> -- Optional,
+      the name of a Java class file in your Ganymede server's
+      CLASSPATH that implements
+      the <a href="../javadoc/arlut/csd/ganymede/server/SyncMaster">SyncMaster</a>
+      interface.  A SyncMaster class is used to inject additional
+      context into the XML files produced by a given Sync Channel.</p>
 
       <li><code class="type">Queue Directory</code> -- Path to the
       directory that the Ganymede server will write incremental
@@ -933,7 +935,6 @@
 
     <hr/>
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
-    <p class="address">$Date$, $Rev$, $Author$</p>
   </body>
 
 </html>

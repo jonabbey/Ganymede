@@ -51,46 +51,46 @@ import arlut.csd.ganymede.common.FieldBook;
 import arlut.csd.ganymede.common.Invid;
 
 /*------------------------------------------------------------------------------
-									   class
+								       interface
 								      SyncMaster
 
 ------------------------------------------------------------------------------*/
 
 /**
- * This interface is used to expand the list of objects (and fields)
- * that are emitted to an incremental sync channel output stream.
+ * <p>This interface is used to expand the list of objects (and fields)
+ * that are emitted to an incremental sync channel output stream.</p>
  *
- * The idea for this interface is that we may need to provide
- * additional context for an incremental synchronization.
+ * <p>The idea for this interface is that we may need to provide
+ * additional context for an incremental synchronization.</p>
  *
- * Imagine a transaction in which a user is modified.  A Sync Channel
+ * <p>Imagine a transaction in which a user is modified.  A Sync Channel
  * is defined which specifies an interest in one of the user object's
  * fields which was modified by the transaction.  The Sync Channel
  * will write out an XML file describing all the changes to the user
- * object that the Sync Channel definition is interested in.
+ * object that the Sync Channel definition is interested in.</p>
  *
- * What happens if the synchronization software that reads that XML
+ * <p>What happens if the synchronization software that reads that XML
  * file needs information to complete the synchronization that comes
  * from other objects in the Ganymede data store?  Those objects may
  * not have changed in the transaction, so the Sync Channel will not
- * know to include that infromation in the XML.
+ * know to include that infromation in the XML.</p>
  *
- * That's where the SyncMaster interface comes in.  A Sync Channel can
+ * <p>That's where the SyncMaster interface comes in.  A Sync Channel can
  * be configured with the fully qualified classname of a Java class
  * implementing this interface.  When this is done, the Sync Channel
  * calls augment() on the SyncMaster for every object to be written to
  * the XML file.  The augment() method examines each DBEditObject and
  * will call methods on the FieldBook parameter to request other
  * objects and fields to be included in the XML transaction file for
- * the benefit of the script servicing the Sync Channel queue.
+ * the benefit of the script servicing the Sync Channel queue.</p>
  *
- * The objects added to the XML file by a SyncMaster will be contained
+ * <p>The objects added to the XML file by a SyncMaster will be contained
  * in a &lt;context_objects&gt; element, unless the context object
  * itself was modified in the transaction.  Sync Channels that need
  * context augmentation should have queue service programs that can
  * deal with these objects being written out either in the
  * &lt;context_objects&gt; element or in an &lt;object_delta&gt;
- * element along with the rest of the changes made by the transaction.
+ * element along with the rest of the changes made by the transaction.</p>
  */
 
 public interface SyncMaster {
