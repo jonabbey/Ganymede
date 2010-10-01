@@ -644,7 +644,7 @@ public class SyncRunner implements Runnable {
 			continue;
 		      }
 
-		    if (!transaction.isEditingObject(invid) || !shouldInclude(transaction.findObject(invid)))
+		    if (!transaction.isEditingObject(invid) || !mayInclude(invid.getType()))
 		      {
 			context_count++;
 
@@ -730,9 +730,9 @@ public class SyncRunner implements Runnable {
 			    continue;	// skip
 			  }
 
-			if (transaction.isEditingObject(invid) && shouldInclude(transaction.findObject(invid)))
+			if (transaction.isEditingObject(invid) && mayInclude(invid.getType()))
 			  {
-			    continue;	// skip
+			    continue;	// skip, we handled this in the delta section
 			  }
 
 			DBObject refObject = transaction.getSession().viewDBObject(invid);
@@ -997,6 +997,9 @@ public class SyncRunner implements Runnable {
   /**
    * <p>Returns true if the DBEditObject passed in needs to be synced
    * to this channel.</p>
+   *
+   * <p>Only intended to be used for Full State Dumps, as it doesn't
+   * include the SyncMaster augmentation for incrementals.</p>
    */
 
   public boolean shouldInclude(DBEditObject object)
@@ -1083,6 +1086,9 @@ public class SyncRunner implements Runnable {
    * <p>Returns true if the given field needs to be sent to this sync
    * channel.  This method is responsible for doing the determination
    * only if both field and origField are not null and isDefined().</p>
+   *
+   * <p>Only intended to be used for Full State Dumps, as it doesn't
+   * include the SyncMaster augmentation for incrementals.</p>
    */
 
   public boolean shouldInclude(DBField newField, DBField origField, FieldBook book)
