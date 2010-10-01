@@ -262,7 +262,7 @@
       <li><code class="type">Sync Master Classname</code> -- Optional,
       the name of a Java class file in your Ganymede server's
       CLASSPATH that implements
-      the <a href="../javadoc/arlut/csd/ganymede/server/SyncMaster">SyncMaster</a>
+      the <a href="../javadoc/arlut/csd/ganymede/server/SyncMaster.html">SyncMaster</a>
       interface.  A SyncMaster class is used to inject additional
       context into the XML files produced by a given Sync Channel.</li>
 
@@ -638,19 +638,26 @@
 
     <p>Each file that is written out looks like this:</p>
 
-    <pre class="listing">&lt;transaction major_version="1" minor_version="1" channel="Users" user="supergash" number="18" time="1111015745225"&gt;
+    <pre class="listing">&lt;transaction major_version="1" minor_version="1" channel="Mac Sync Channel" user="supergash" number="18" time="1111015745225"&gt;
   &lt;object_delta&gt;
     &lt;before&gt;
       &lt;object type="User" id="barkerr" oid="3:1175"&gt;
         &lt;Home_Phone&gt;512-555-3481&lt;/Home_Phone&gt;
+        &lt;Domain&gt;&lt;invid type="LDAP_Domain" id="ARL_Mac" oid="284:4"/&gt;&lt;/Domain&gt;
       &lt;/object&gt;
     &lt;/before&gt;
     &lt;after&gt;
       &lt;object type="User" id="barkerr" oid="3:1175"&gt;
         &lt;Home_Phone&gt;512-555-3522&lt;/Home_Phone&gt;
+        &lt;Domain&gt;&lt;invid type="LDAP_Domain" id="ARL_Mac" oid="284:4"/&gt;&lt;/Domain&gt;
       &lt;/object&gt;
     &lt;/after&gt;
   &lt;/object_delta&gt;
+  &lt;context_objects&gt;
+    &lt;object type="LDAP_Domain" id="ARL_Mac" oid="284:4"&gt;
+      &lt;DN&gt;cn=arlut,cn=utexas,cn=edu&lt;/DN&gt;
+    &lt;/object&gt;
+  &lt;/context_objects&gt;
 &lt;/transaction&gt;</pre>
 
     <p id="transaction_element">The attributes in the &lt;transaction&gt; element are as follows:</p>
@@ -677,8 +684,13 @@
     </div>
 
     <p>The <b>&lt;transaction&gt;</b> element contains a series of one
-    or more <b>&lt;object_delta&gt;</b> elements.  Each
-    <b>&lt;object_delta&gt;</b> element contains a
+    or more <b>&lt;object_delta&gt;</b> elements, followed by an
+    optional <b>&lt;context_objects&gt;</b> element, which we will
+    discuss shortly.</p>
+
+    <p>The <b>&lt;object_delta&gt;</b> elements record the actual
+    changes made to an individual object in this transaction.  It
+    contains a
     <b>&lt;before&gt;</b> element and an <b>&lt;after&gt;</b>
     element.</p>
 
@@ -729,10 +741,52 @@
     than merely edited, the <b>&lt;before&gt;</b> or
     <b>&lt;after&gt;</b> elements, respectively, will be empty.</p>
 
+    <p>Note that in this example, we have the optional <b>&lt;context_objects&gt;</b> element
+    after our &lt;object_delta&gt; elements.</p>
+
+    <p>If you look at the <b>User</b> records in
+    the <b>&lt;object_delta&gt;</b>, you'll see that the <b>Domain</b>
+    field element is present, and contains
+    an <a href="../xml/data.html#INVID">&lt;invid&gt;</b></a> pointer
+    field element.  It is pointing to an <b>LDAP Domain</b> object.</p>
+
+    <p>The <b>LDAP Domain</b> object is not included in
+    an <b>&lt;object_delta&gt;</b> element because it was not modified
+    by this transaction.  Still, in this case, the information in this
+    other object is needed by the service program to locate the User
+    object in the remote directory service.</p>
+
+    <p>How did this extra, unmodified object get into this transaction
+    file?  Who decided to create the <b>&lt;context_objects&gt;</b>
+    element for us?</p>
+
+    <p>The Sync
+    Channel's <a href="../javadoc/arlut/csd/ganymede/server/SyncMaster.html">Sync
+    Master</a> did.  It was programmed to know that the service
+    program needed to know the <b>LDAP Domain</b>'s Distinguished Name
+    (DN) in order to find the User account's counterpart in the target
+    directory service.  Because that information was not included in
+    the modified <b>User</b> object, the Sync Master had to add
+    it.</p>
+
+    <p>If this context information had been physically located inside
+    the <b>User</b> object type, we wouldn't have needed to set up
+    a <a href="../javadoc/arlut/csd/ganymede/server/SyncMaster.html">SyncMaster</a>
+    for this Sync Channel.  The <b>DN</b> field would have been marked
+    as <b>Always</b> in the <b>Sync Data</b> field, and the Sync
+    Channel would have automatically included it whenever when changes
+    made to this User.</p>
+
+    <p>Because that information is held in a linked object instead,
+    the <b>&lt;context_objects&gt;</b> section comes into play, along
+    with the <b>Domain</b> link field which was marked as
+    an <b>Always</b> field in the <b>Sync Data</b> for this
+    channel.</p>
+
     <p>Here's an example of a user in the laboratory's Ganymede server
     being deleted by the expiration task:</p>
 
-<pre class="listing">&lt;transaction major_version="1" minor_version="1" channel="Users" user="expiration" number="21" time="1111730401435"&gt;
+<pre class="listing">&lt;transaction major_version="1" minor_version="1" channel="Mac Sync Channel" user="expiration" number="21" time="1111730401435"&gt;
   &lt;object_delta&gt;
     &lt;before&gt;
       &lt;object type="User" id="raghu" oid="3:1657"&gt;
@@ -911,7 +965,7 @@
 
     <p>To generate a Sync Channel manual dump, you can run:</p>
 
-    <div class="listing">xmlclient -dumpdata -includeOid sync=Users &gt; user_full_state.xml</div>
+    <div class="listing">xmlclient -dumpdata -includeOid "sync=Mac Sync Channel" &gt; user_full_state.xml</div>
 
     <p>The output of such a <code>xmlclient -dumpdata -includeOid</code> command
     is identical to that produced by the <a
