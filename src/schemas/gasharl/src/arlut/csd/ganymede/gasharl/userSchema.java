@@ -99,4 +99,6 @@ public interface userSchema {
   final static short OLDMAILUSER=282;
   //  final static short OLDMAILPASSWORD=283; // removed
   final static short OLDMAILPASSWORD2=285;
+  final static short EMAILACCOUNTTYPE=286;
+  final static short EXCHANGESTORE=287;
 }

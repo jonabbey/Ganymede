@@ -711,6 +711,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       case OLDMAILUSER:
       case OLDMAILPASSWORD2:
 	return false;
+
+      case EXCHANGESTORE:
+	String type = (String) getFieldValueLocal(EMAILACCOUNTTYPE);
+
+	if (type == null || !type.equals("Exchange"))
+	  {
+	    return false;
+	  }
       }
 
     return super.canSeeField(session, field);
@@ -1343,6 +1351,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
       }
 
+    // now let's make sure an Exchange Mail Store is selected if this
+    // user is on Exchange
+
+    if (StringUtils.stringEquals((String) object.getFieldValueLocal(EMAILACCOUNTTYPE), "Exchange") && !object.isDefined(EXCHANGESTORE))
+      {
+	return Ganymede.createErrorDialog("Missing Exchange Store",
+					  "Users who are configured to receive mail on Exchange must have an Exchange Store selected.");
+      }
+
     // now let's make sure the signature alias is valid
 
     String signature = (String) object.getFieldValueLocal(SIGNATURE);
@@ -1965,10 +1982,12 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   public boolean mustChoose(DBField field)
   {
-    if (field.getID() == SIGNATURE)
+    switch (field.getID())
       {
+      case SIGNATURE:
 	// we want to force signature alias choosing
 
+      case EXCHANGESTORE:
 	return true;
       }
 
@@ -2006,6 +2025,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	updateGroupChoiceList();
 	return groupChoices;
+
+      case EMAILACCOUNTTYPE:
+	QueryResult typeResult = new QueryResult();
+
+	typeResult.addRow("IMAP");
+	typeResult.addRow("Exchange");
+	typeResult.addRow("Other");
+	return typeResult;
 	
       case SIGNATURE:			// signature alias
 
@@ -2688,6 +2715,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     try
       {
+	if (field.getID() == EMAILACCOUNTTYPE)
+	  {
+	    result = ReturnVal.success();
+
+	    result.addRescanField(field.getOwner().getInvid(), EXCHANGESTORE);
+
+	    return result;
+	  }
+
 	if (field.getID() == ALLOWEXTERNAL)
 	  {
 	    // a success ReturnVal is used to tell the Ganymede logic
