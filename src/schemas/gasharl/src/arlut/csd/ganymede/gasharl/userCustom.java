@@ -1981,7 +1981,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       case SIGNATURE:
 	// we want to force signature alias choosing
 
-      case EXCHANGESTORE:
+      case EMAILACCOUNTTYPE:
 	return true;
       }
 
@@ -2715,7 +2715,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    result.addRescanField(field.getObject().getInvid(), EXCHANGESTORE);
 
-	    return result;
+	    if (!StringUtils.stringEquals((String) field.getObject().getFieldValueLocal(EMAILACCOUNTTYPE), "Exchange"))
+	      {
+		return result.merge(((DBEditObject) field.getObject()).setFieldValueLocal(EXCHANGESTORE, null));
+	      }
+	    else
+	      {
+		return result;
+	      }
 	  }
 
 	if (field.getID() == ALLOWEXTERNAL)
