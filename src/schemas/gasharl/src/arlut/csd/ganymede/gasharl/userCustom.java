@@ -1246,6 +1246,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       case userSchema.MAILPASSWORD2:
       case userSchema.MAILEXPDATE:
 	return object.isSet(ALLOWEXTERNAL);
+
+      case userSchema.EXCHANGESTORE:
+	return StringUtils.stringEquals((String) object.getFieldValueLocal(EMAILACCOUNTTYPE), "Exchange");
       }
 
     // Whether or not the Badge number field is required depends on
@@ -1349,15 +1352,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 					      "User objects belonging to the " + categoryName +
 					      " category require an expiration date to be set.");
 	  }
-      }
-
-    // now let's make sure an Exchange Mail Store is selected if this
-    // user is on Exchange
-
-    if (StringUtils.stringEquals((String) object.getFieldValueLocal(EMAILACCOUNTTYPE), "Exchange") && !object.isDefined(EXCHANGESTORE))
-      {
-	return Ganymede.createErrorDialog("Missing Exchange Store",
-					  "Users who are configured to receive mail on Exchange must have an Exchange Store selected.");
       }
 
     // now let's make sure the signature alias is valid
