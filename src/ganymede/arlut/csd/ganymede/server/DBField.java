@@ -383,7 +383,10 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * Returns the DBObject that this field is contained within.
+   * <p>Returns the DBObject that this field is contained within.</p>
+   *
+   * <p>This method is duplicative of getOwner(), but we are keeping
+   * both around for backwards compatibility.</p>
    */
 
   public final DBObject getObject()
@@ -842,9 +845,10 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
+   * <p>Returns the object this field is part of.</p>
    *
-   * Returns the object this field is part of.
-   * 
+   * <p>This method is duplicative of getObject(), but we are keeping
+   * both around for backwards compatibility.</p>
    */
 
   public final DBObject getOwner()
