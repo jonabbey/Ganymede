@@ -713,7 +713,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	return false;
 
       case EXCHANGESTORE:
-	String type = (String) getFieldValueLocal(EMAILACCOUNTTYPE);
+	String type = (String) field.getObject().getFieldValueLocal(EMAILACCOUNTTYPE);
 
 	if (type == null || !type.equals("Exchange"))
 	  {
@@ -2719,7 +2719,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    result = ReturnVal.success();
 
-	    result.addRescanField(field.getOwner().getInvid(), EXCHANGESTORE);
+	    result.addRescanField(field.getObject().getInvid(), EXCHANGESTORE);
 
 	    return result;
 	  }
