@@ -644,7 +644,7 @@ public class SyncRunner implements Runnable {
 			continue;
 		      }
 
-		    if (!shouldInclude(transaction.findObject(invid)))
+		    if (!transaction.isEditingObject(invid) || !shouldInclude(transaction.findObject(invid)))
 		      {
 			context_count++;
 
@@ -730,7 +730,7 @@ public class SyncRunner implements Runnable {
 			    continue;	// skip
 			  }
 
-			if (shouldInclude(transaction.findObject(invid)))
+			if (transaction.isEditingObject(invid) && shouldInclude(transaction.findObject(invid)))
 			  {
 			    continue;	// skip
 			  }
