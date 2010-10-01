@@ -3289,7 +3289,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    // make sure we've got the path separator at the end of
 	    // createFilename, add our script name
 
-	    createFilename = PathComplete.completePath(createFilename) + "/scripts/directory_maker";
+	    createFilename = PathComplete.completePath(createFilename) + "scripts/directory_maker";
 
 	    if (debug)
 	      {
@@ -3586,7 +3586,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		// make sure we've got the path separator at the end of
 		// deleteFilename, add our script name
 	    
-		deleteFilename = PathComplete.completePath(deleteFilename) + "/scripts/user_deleter";
+		deleteFilename = PathComplete.completePath(deleteFilename) + "scripts/user_deleter";
 	    
 		deleteHandler = new File(deleteFilename);
 	      }
@@ -3976,7 +3976,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		// make sure we've got the path separator at the end of
 		// renameFilename, add our script name
 	    
-		renameFilename = PathComplete.completePath(renameFilename) + "/scripts/directory_namer";
+		renameFilename = PathComplete.completePath(renameFilename) + "scripts/directory_namer";
 	    
 		renameHandler = new File(renameFilename);
 	      }
