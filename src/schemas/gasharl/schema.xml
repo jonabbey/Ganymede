@@ -635,6 +635,21 @@ Limited to 16 for NFS.</comment>
               </typedef>
             </fielddef>
           </tab>
+          <tab name="Email">
+            <fielddef name="Email_Account_Type" id="286">
+              <comment>Which type of mail server is holding the mail for this user?</comment>
+              <typedef type="string">
+                <maxlength val="1024"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Exchange_Mail_Store" id="287">
+              <comment>Which Exchange mail store is holding mail for this user?</comment>
+              <typedef type="invid">
+                <targetobject name="Exchange_Store"/>
+                <targetfield name="Users"/>
+              </typedef>
+            </fielddef>
+          </tab>
         </objectdef>
         <objectdef name="Group" id="257">
           <classdef name="arlut.csd.ganymede.gasharl.groupCustom" optionString=""/>
@@ -1440,6 +1455,14 @@ if the client does not explicitly request it.</comment>
               <comment>Fully qualified LDAP DN for this Exchange Mail Store</comment>
               <typedef type="string">
                 <maxlength val="1024"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Users" id="258">
+              <comment>Ganymede Users whose email is stored on this Exchange Mail Store</comment>
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="User"/>
+                <targetfield name="Exchange_Mail_Store"/>
               </typedef>
             </fielddef>
           </tab>
