@@ -73,13 +73,13 @@ public class ADSyncMaster implements arlut.csd.ganymede.server.SyncMaster {
    * to a delta sync channel in response to the changes made to obj.
    */
 
-  public void augment(FieldBook book, DBEditObject obj)
+  public void augment(FieldBook book, DBEditObject eObj)
   {
-    if (obj.getTypeID() == SchemaConstants.UserBase)
+    if (eObj.getTypeID() == SchemaConstants.UserBase)
       {
-	if (obj.isDefined(userSchema.EXCHANGESTORE))
+	if (eObj.isDefined(userSchema.EXCHANGESTORE) || eObj.getOriginal().isDefined(userSchema.EXCHANGESTORE))
 	  {
-	    Invid exchangeStore = (Invid) obj.getFieldValueLocal(userSchema.EXCHANGESTORE);
+	    Invid exchangeStore = (Invid) eObj.getFieldValueLocal(userSchema.EXCHANGESTORE);
 
 	    book.add(exchangeStore, exchangeStoreSchema.EXCHANGEMDB);
 	  }
