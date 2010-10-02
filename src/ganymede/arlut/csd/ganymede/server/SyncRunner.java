@@ -237,7 +237,7 @@ public class SyncRunner implements Runnable {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.SyncRunner");
 
-  static final boolean debug = false;
+  static final boolean debug = true;
 
   private static int id = 0;
 
@@ -646,6 +646,18 @@ public class SyncRunner implements Runnable {
 
 		    if (!transaction.isEditingObject(invid) || !mayInclude(invid.getType()))
 		      {
+			if (debug)
+			  {
+			    if (!transaction.isEditingObject(invid))
+			      {
+				Ganymede.debug("Hey, SyncRunner says the transaction is not editing object " + invid);
+			      }
+			    else if (!mayInclude(invid.getType()))
+			      {
+				Ganymede.debug("Hey, SyncRunner says we may not include objects of type " + invid);			    
+			      }
+			  }
+
 			context_count++;
 
 			continue;
@@ -877,6 +889,8 @@ public class SyncRunner implements Runnable {
       {
 	if (syncObject.getStatus() == ObjectStatus.DROPPING)
 	  {
+	    // Created and destroyed in this transaction.. no-op.
+
 	    continue;
 	  }
 
@@ -884,7 +898,7 @@ public class SyncRunner implements Runnable {
 	  {
 	    DBObject origObj = syncObject.getOriginal();
 
-	    // we know that checked-out DBEditObjects have a copy of all
+	    // We know that checked-out DBEditObjects have a copy of all
 	    // defined fields, so we don't need to also loop over
 	    // origObj.getFieldVect() looking for fields that were deleted
 	    // from syncObject.
@@ -973,6 +987,9 @@ public class SyncRunner implements Runnable {
   /**
    * <p>Returns true if this sync channel is configured to ever
    * include objects of the given baseID.</p>
+   *
+   * <p>This method does not take into account any augmentation done
+   * by a linked {@link arlut.csd.ganymede.server.SyncMaster SyncMaster}.</p>
    */
 
   public boolean mayInclude(short baseID)
@@ -985,6 +1002,9 @@ public class SyncRunner implements Runnable {
   /**
    * <p>Returns true if this sync channel is configured to ever
    * include objects of the given baseID.</p>
+   *
+   * <p>This method does not take into account any augmentation done
+   * by a linked {@link arlut.csd.ganymede.server.SyncMaster SyncMaster}.</p>
    */
 
   public boolean mayInclude(DBObject object)

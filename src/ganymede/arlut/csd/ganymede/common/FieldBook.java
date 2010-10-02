@@ -95,6 +95,11 @@ public class FieldBook {
 
   public void add(Invid invid, short fieldId)
   {
+    if (invid == null)
+      {
+	throw new IllegalArgumentException("Null invid in FieldBook.add()");
+      }
+
     Set<Short> set;
 
     if (map.containsKey(invid))
