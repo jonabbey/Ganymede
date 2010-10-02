@@ -70,13 +70,13 @@ import java.util.Set;
 public class FieldBook {
 
   /**
-   * A Map structure holding the invids and fields that comprise our
-   * book.
+   * <p>A Map structure holding the invids and fields that comprise our
+   * book.</p>
    *
-   * If an Invid maps to null, this means that all fields in the
+   * <p>If an Invid maps to null, this means that all fields in the
    * DBObject corresponding to the Invid are selected.  Otherwise, the
    * Invid will map to a Set which enumerates the fields to be
-   * included in the book.
+   * included in the book.</p>
    */
   
   private Map<Invid, Set<Short>> map;
@@ -203,12 +203,12 @@ public class FieldBook {
   }
 
   /**
-   * Returns a Set of field ids for fields for Invid invid that are
+   * <p>Returns a Set of field ids for fields for Invid invid that are
    * part of this FieldBook, or null if all fields for the provided
-   * Invid are in this FieldBook.
+   * Invid are in this FieldBook.</p>
    *
-   * If this FieldBook contains no fields for the given Invid, an
-   * IllegalArgumentException will be thrown.
+   * <p>If this FieldBook contains no fields for the given Invid, an
+   * IllegalArgumentException will be thrown.</p>
    */
 
   public Set<Short> fields(Invid invid)

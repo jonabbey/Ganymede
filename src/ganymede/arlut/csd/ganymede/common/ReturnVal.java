@@ -1055,6 +1055,18 @@ public final class ReturnVal implements java.io.Serializable {
       }
   }
 
+  /**
+   * <p>This method can be handy if you know for a certain fact that the
+   * ReturnVal you're calling merge on is not null.  Remember that any
+   * method returning a ReturnVal is likely to return null to indicate
+   * unexceptional success, and that if you assume you have a real
+   * ReturnVal without checking, you're going to lose.</p>
+   *
+   * <p>In most situations, you should be using
+   * ReturnVal.merge(retVal1, retVal2), even though that makes for
+   * noisier code.</p>
+   */
+
   public ReturnVal merge(ReturnVal otherReturnVal)
   {
     return ReturnVal.merge(this, otherReturnVal);
