@@ -2715,7 +2715,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    result.addRescanField(field.getObject().getInvid(), EXCHANGESTORE);
 
-	    if (!StringUtils.stringEquals((String) field.getObject().getFieldValueLocal(EMAILACCOUNTTYPE), "Exchange"))
+	    if (!"Exchange".equals(param1))
 	      {
 		return result.merge(((DBEditObject) field.getObject()).setFieldValueLocal(EXCHANGESTORE, null));
 	      }
