@@ -472,14 +472,12 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
   public void commitPhase2()
   {
     String origName = null;
-    SyncType origType = SyncType.MANUAL;
 
     /* -- */
 
     if (original != null)
       {
 	origName = (String) original.getFieldValueLocal(SchemaConstants.SyncChannelName);
-	origType = SyncType.get(((Integer) original.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum)).intValue());
       }
 
     switch (getStatus())
@@ -488,10 +486,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 	return;
 
       case DELETING:
-	if (origType == SyncType.INCREMENTAL || origType == SyncType.FULLSTATE)
-	  {
-	    Ganymede.unregisterSyncChannel(origName);
-	  }
+	Ganymede.unregisterSyncChannel(origName);
 	break;
 
       case EDITING:
