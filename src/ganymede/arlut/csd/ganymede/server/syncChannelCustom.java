@@ -368,17 +368,17 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
  
 	type = ((Integer) myObj.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum)).intValue();
 
-	if (field.getID() == SchemaConstants.SyncChannelDirectory)
+	switch (field.getID())
 	  {
-	    return (type == 1);
-	  }
-	else if (field.getID() == SchemaConstants.SyncChannelFullStateFile)
-	  {
-	    return (type == 2);
-	  }
-	else if (field.getID() == SchemaConstants.SyncChannelServicer)
-	  {
-	    return (type != 0);
+	  case SchemaConstants.SyncChannelClassName:
+	  case SchemaConstants.SyncChannelDirectory:
+	    return type == 1;
+
+	  case SchemaConstants.SyncChannelFullStateFile:
+	    return type == 2;
+
+	  case SchemaConstants.SyncChannelServicer:
+	    return type != 0;
 	  }
       }
     catch (Throwable ex)
