@@ -54,6 +54,8 @@ import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
 
+import arlut.csd.ganymede.server.SyncRunner.SyncType;
+
 import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
@@ -197,36 +199,18 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 	return true;
       }
 
-    int type = ((Integer) object.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum)).intValue();
+    SyncType type = SyncType.get(((Integer) object.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum)).intValue());
 
     switch (fieldid)
       {
       case SchemaConstants.SyncChannelDirectory:
-
-	if (type == 1)
-	  {
-	    return true;
-	  }
-
-	break;
+	return type == SyncType.INCREMENTAL;
 
       case SchemaConstants.SyncChannelFullStateFile:
-
-	if (type == 2)
-	  {
-	    return true;
-	  }
-
-	break;
+	return type == SyncType.FULLSTATE;
 
       case SchemaConstants.SyncChannelServicer:
-
-	if (type != 0)
-	  {
-	    return true;
-	  }
-
-	break;
+	return type != SyncType.MANUAL;
       }
 
     // We'll allow SyncChannelFields and SyncChannelPlaintextOK to be
@@ -305,15 +289,15 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 	  {
 	    if (type.equals(ts.l("global.manual")))
 	      {
-		indexField.setValueLocal(Integer.valueOf(0));
+		indexField.setValueLocal(SyncType.MANUAL.Val());
 	      }
 	    else if (type.equals(ts.l("global.incremental")))
 	      {
-		indexField.setValueLocal(Integer.valueOf(1));
+		indexField.setValueLocal(SyncType.INCREMENTAL.Val());
 	      }
 	    else if (type.equals(ts.l("global.fullstate")))
 	      {
-		indexField.setValueLocal(Integer.valueOf(2));
+		indexField.setValueLocal(SyncType.FULLSTATE.Val());
 	      }
 	    else
 	      {
@@ -361,24 +345,26 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
     try
       {
 	DBObject myObj = field.getOwner();
-	int type = -1;
+	int typeVal = -1;
 
 	// this may throw a NullPointerException if there is no
 	// numeric type index set
  
-	type = ((Integer) myObj.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum)).intValue();
+	typeVal = ((Integer) myObj.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum)).intValue();
+
+	SyncType type = SyncType.get(typeVal);
 
 	switch (field.getID())
 	  {
 	  case SchemaConstants.SyncChannelClassName:
 	  case SchemaConstants.SyncChannelDirectory:
-	    return type == 1;
+	    return type == SyncType.INCREMENTAL;
 
 	  case SchemaConstants.SyncChannelFullStateFile:
-	    return type == 2;
+	    return type == SyncType.FULLSTATE;
 
 	  case SchemaConstants.SyncChannelServicer:
-	    return type != 0;
+	    return type != SyncType.MANUAL;
 	  }
       }
     catch (Throwable ex)
@@ -486,14 +472,14 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
   public void commitPhase2()
   {
     String origName = null;
-    int origType = 0;
+    SyncType origType = SyncType.MANUAL;
 
     /* -- */
 
     if (original != null)
       {
 	origName = (String) original.getFieldValueLocal(SchemaConstants.SyncChannelName);
-	origType = ((Integer) original.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum)).intValue();
+	origType = SyncType.get(((Integer) original.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum)).intValue());
       }
 
     switch (getStatus())
@@ -502,7 +488,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 	return;
 
       case DELETING:
-	if (origType == 1 || origType == 2)
+	if (origType == SyncType.INCREMENTAL || origType == SyncType.FULLSTATE)
 	  {
 	    Ganymede.unregisterSyncChannel(origName);
 	  }
