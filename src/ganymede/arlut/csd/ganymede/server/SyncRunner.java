@@ -267,15 +267,7 @@ public class SyncRunner implements Runnable {
      * the output of an xmlclient dump.
      */
 
-    MANUAL,
-
-    /**
-     * The SyncRunner is triggered automatically on Ganymede commits,
-     * and writes out a filtered set of all data, regardless of
-     * whether or not the data objects were modified recently.
-     */
-
-    FULLSTATE,
+    MANUAL(0),
 
     /**
      * The SyncRunner is triggered automatically, and writes out an
@@ -283,27 +275,53 @@ public class SyncRunner implements Runnable {
      * that is committed in the Ganymede data store.
      */
 
-    INCREMENTAL;
+    INCREMENTAL(1),
+
+
+    /**
+     * The SyncRunner is triggered automatically on Ganymede commits,
+     * and writes out a filtered set of all data, regardless of
+     * whether or not the data objects were modified recently.
+     */
+
+    FULLSTATE(2);
 
     /* -- */
 
     public static SyncType get(int objectVal)
-      {
-	switch (objectVal)
-	  {
-	  case 0:
-	    return SyncType.MANUAL;
+    {
+      switch (objectVal)
+	{
+	case 0:
+	  return SyncType.MANUAL;
 
-	  case 1:
-	    return SyncType.INCREMENTAL;
+	case 1:
+	  return SyncType.INCREMENTAL;
 
-	  case 2:
-	    return SyncType.FULLSTATE;
+	case 2:
+	  return SyncType.FULLSTATE;
 
-	  default:
-	    throw new IllegalArgumentException("Unrecognized integral value");
-	  }
-      }
+	default:
+	  throw new IllegalArgumentException("Unrecognized integral value");
+	}
+    }
+
+    private final int numVal;
+
+    SyncType(int val)
+    {
+      this.numVal = val;
+    }
+
+    public int valOf()
+    {
+      return numVal;
+    }
+
+    public Integer Val()
+    {
+      return Integer.valueOf(numVal);
+    }
   }
 
   private String name;
