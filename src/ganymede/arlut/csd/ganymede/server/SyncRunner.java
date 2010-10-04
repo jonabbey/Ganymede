@@ -237,7 +237,7 @@ public class SyncRunner implements Runnable {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.SyncRunner");
 
-  static final boolean debug = true;
+  static final boolean debug = false;
 
   private static int id = 0;
 
@@ -615,6 +615,11 @@ public class SyncRunner implements Runnable {
 	    if (debug)
 	      {
 		System.err.println("SyncRunner.writeIncrementalSync: inside queueGrowthMonitor section");
+
+		for (DBEditObject eObj: objectList)
+		  {
+		    Ganymede.debug("SyncRunner.writeIncrementalSync(): we'll be processing object " + eObj);
+		  }
 	      }
 
 	    FieldBook book = new FieldBook();
@@ -637,8 +642,18 @@ public class SyncRunner implements Runnable {
 
 	    for (Short type: typeSet)
 	      {
+		if (debug)
+		  {
+		    Ganymede.debug("SyncRunner.writeIncrementalSync(): examining type " + type + " from the typeSet.");
+		  }
+
 		for (Invid invid: book.objects())
 		  {
+		    if (debug)
+		      {
+			Ganymede.debug("SyncRunner.writeIncrementalSync(): examining invid " + invid + " from the book.objects() set.");
+		      }
+
 		    if (!type.equals(invid.getType()))
 		      {
 			continue;
@@ -894,8 +909,18 @@ public class SyncRunner implements Runnable {
 	    continue;
 	  }
 
+	if (debug)
+	  {
+	    Ganymede.debug("SyncRunner.initializeFieldBook(): Contemplating " + syncObject);
+	  }
+
 	if (mayInclude(syncObject))
 	  {
+	    if (debug)
+	      {
+		Ganymede.debug("SyncRunner.initializeFieldBook(): Good news we can consider including " + syncObject);
+	      }
+
 	    DBObject origObj = syncObject.getOriginal();
 
 	    // We know that checked-out DBEditObjects have a copy of all
@@ -920,6 +945,11 @@ public class SyncRunner implements Runnable {
 
 		if (origField == null && memberField.isDefined())
 		  {
+		    if (debug)
+		      {
+			Ganymede.debug("SyncRunner.initializeFieldBook(): Created field " + memberField + " in " + syncObject);
+		      }
+
 		    String fieldOption = getOption(memberField);
 
 		    if (fieldOption != null && !fieldOption.equals("0"))
@@ -933,6 +963,11 @@ public class SyncRunner implements Runnable {
 
 		if (!memberField.isDefined() && origField != null)
 		  {
+		    if (debug)
+		      {
+			Ganymede.debug("SyncRunner.initializeFieldBook(): Deleted field " + memberField + " in " + syncObject);
+		      }
+
 		    String fieldOption = getOption(memberField);
 
 		    if (fieldOption != null && !fieldOption.equals("0"))
@@ -946,6 +981,11 @@ public class SyncRunner implements Runnable {
 
 		if (memberField.isDefined() && origField != null)
 		  {
+		    if (debug)
+		      {
+			Ganymede.debug("SyncRunner.initializeFieldBook(): Edited (maybe) field " + memberField + " in " + syncObject);
+		      }
+
 		    // check to see if the field has changed and whether we
 		    // should include it.  The 'hasChanged()' check is
 		    // required because this shouldInclude() call will always
@@ -957,6 +997,18 @@ public class SyncRunner implements Runnable {
 		    // Basically the hasChanged() call checks to see if the
 		    // field changed, and the shouldInclude() call checks to
 		    // see if it's a field that we care about.
+
+		    if (debug)
+		      {
+			if (memberField.hasChanged(origField))
+			  {
+			    Ganymede.debug("SyncRunner.initializeFieldBook(): Hey field " + memberField + " really did change compared to the original " + origField);
+			  }
+			else
+			  {
+			    Ganymede.debug("SyncRunner.initializeFieldBook(): Hey I don't think field " + memberField + " changed at all compared to the original " + origField);
+			  }
+		      }
 
 		    if (memberField.hasChanged(origField) && shouldInclude(memberField, origField, null))
 		      {
@@ -1117,6 +1169,11 @@ public class SyncRunner implements Runnable {
 
     /* -- */
 
+    if (debug)
+      {
+	Ganymede.debug("SyncRunner.shouldInclude(" + newField + ", " + origField + ", book)");
+      }
+
     if (!newField.isDefined())
       {
 	// "newField is undefined"
@@ -1150,17 +1207,44 @@ public class SyncRunner implements Runnable {
 
     if (fieldOption == null || fieldOption.equals("0"))
       {
+	if (debug)
+	  {
+	    Ganymede.debug("SyncRunner.shouldInclude(): nope, we don't care about field " + newField);
+	  }
+
 	return false;
       }
     else if (fieldOption.equals("2"))
       {
+	if (debug)
+	  {
+	    Ganymede.debug("SyncRunner.shouldInclude(): oh, hell yeah, we totally care about field " + newField);
+	  }
+
 	return true;
       }
     else if (fieldOption.equals("1"))
       {
+	if (debug)
+	  {
+	    Ganymede.debug("SyncRunner.shouldInclude(): Well, we might care about field " + newField);
+	  }
+
 	if (newField.hasChanged(origField))
 	  {
 	    return true;
+	  }
+
+	if (debug)
+	  {
+	    Ganymede.debug("SyncRunner.shouldInclude(): But actually, we don't think that field " + newField + " changed in this transaction, so no.");
+	  }
+      }
+    else
+      {
+	if (debug)
+	  {
+	    Ganymede.debug("SyncRunner.shouldInclude(): WTF?  fieldOption == " + fieldOption + " for field " + newField);
 	  }
       }
 
