@@ -69,8 +69,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.rmi.RemoteException;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Matcher;
@@ -330,7 +332,7 @@ public class SyncRunner implements Runnable {
   private String serviceProgram;
   private int transactionNumber;
   private boolean includePlaintextPasswords;
-  private Hashtable matrix;
+  private Map<String, String> matrix;
 
   /**
    * Controls what type of Sync Channel we're handling.
@@ -476,7 +478,7 @@ public class SyncRunner implements Runnable {
 
     FieldOptionDBField f = (FieldOptionDBField) syncChannel.getField(SchemaConstants.SyncChannelFields);
 
-    this.matrix = (Hashtable) f.matrix.clone();
+    this.matrix = new HashMap<String, String>(f.matrix);
   }
 
   /**
@@ -1342,7 +1344,7 @@ public class SyncRunner implements Runnable {
 
   private String getOption(DBField field)
   {
-    return (String) matrix.get(FieldOptionDBField.matrixEntry(field.getOwner().getTypeID(), field.getID()));
+    return matrix.get(FieldOptionDBField.matrixEntry(field.getOwner().getTypeID(), field.getID()));
   }
 
   /**
@@ -1379,7 +1381,7 @@ public class SyncRunner implements Runnable {
 
   private String getOption(short baseID, short fieldID)
   {
-    return (String) matrix.get(FieldOptionDBField.matrixEntry(baseID, fieldID));
+    return matrix.get(FieldOptionDBField.matrixEntry(baseID, fieldID));
   }
 
   /**
@@ -1396,7 +1398,7 @@ public class SyncRunner implements Runnable {
 
   private String getOption(short baseID)
   {
-    return (String) matrix.get(FieldOptionDBField.matrixEntry(baseID));
+    return matrix.get(FieldOptionDBField.matrixEntry(baseID));
   }
 
   /**

@@ -49,7 +49,8 @@ package arlut.csd.ganymede.common;
 
 import java.rmi.RemoteException;
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 
 import arlut.csd.ganymede.rmi.Base;
 import arlut.csd.ganymede.rmi.BaseField;
@@ -93,30 +94,30 @@ public class FieldOptionMatrix implements java.io.Serializable {
 
   // ---
 
-  public Hashtable matrix;
+  public Map<String, String> matrix;
 
   /* -- */
 
   public FieldOptionMatrix()
   {
-    matrix = new Hashtable();
+    matrix = new HashMap<String, String>();
   }
 
-  public FieldOptionMatrix(Hashtable orig)
+  public FieldOptionMatrix(Map<String, String> orig)
   {
     if (orig == null)
       {
-	this.matrix = new Hashtable();
+	this.matrix = new HashMap<String, String>();
       }
     else
       {
-	this.matrix = (Hashtable) orig.clone();
+	this.matrix = new HashMap<String, String>(orig);
       }
   }
 
   public FieldOptionMatrix(FieldOptionMatrix orig)
   {
-    this.matrix = (Hashtable) orig.matrix.clone();
+    this.matrix = new HashMap<String, String>(orig.matrix);
   }
 
   /**
@@ -129,7 +130,7 @@ public class FieldOptionMatrix implements java.io.Serializable {
 
   public String getOption(short baseID, short fieldID)
   {
-    return (String) matrix.get(matrixEntry(baseID, fieldID));
+    return matrix.get(matrixEntry(baseID, fieldID));
   }
 
   /**
@@ -168,7 +169,7 @@ public class FieldOptionMatrix implements java.io.Serializable {
   {
     try
       {
-	return (String) matrix.get(matrixEntry(base.getTypeID()));
+	return matrix.get(matrixEntry(base.getTypeID()));
       }
     catch (RemoteException ex)
       {

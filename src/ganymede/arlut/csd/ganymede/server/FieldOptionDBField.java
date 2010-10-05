@@ -56,9 +56,12 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.FieldOptionMatrix;
@@ -97,8 +100,8 @@ import arlut.csd.ganymede.rmi.field_option_field;
  * arlut.csd.ganymede.server.DBField DBField} in that the normal
  * setValue()/getValue() methods are non-functional.  Instead, there
  * are special methods used to set or access field option information
- * from the specially coded Hashtable held by a FieldOptionDBField.
- * This Hashtable maps strings encoded by the {@link
+ * from the specially coded Map held by a FieldOptionDBField.
+ * This Map maps strings encoded by the {@link
  * arlut.csd.ganymede.server.FieldOptionDBField#matrixEntry(short,
  * short) matrixEntry()} methods to Strings.</p>
  *
@@ -389,7 +392,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * contents held in matrix.
    */
 
-  static private void debugdump(Hashtable matrix)
+  static private void debugdump(Map<String, String> matrix)
   {
     System.err.println(debugdecode(matrix));
   }
@@ -399,56 +402,38 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * output.
    */
 
-  static public String debugdecode(Hashtable matrix)
+  static public String debugdecode(Map<String, String> matrix)
   {
     StringBuilder result = new StringBuilder();
-    Enumeration en;
-    String key;
-    String option;
-    String basename;
-    Hashtable baseHash = new Hashtable();
-    Vector vec;
+    Map<String, List<String>> baseHash = new HashMap<String, List<String>>();
+    List<String> list = null;
 
     /* -- */
 
     result.append("FieldOption DebugDump\n");
 
-    en = matrix.keys();
-
-    while (en.hasMoreElements())
+    for (Map.Entry<String, String> entry : matrix.entrySet())
       {
-	key = (String) en.nextElement();
-
-	option = (String) matrix.get(key);
-
-	basename = decodeBaseName(key);
+	String basename = decodeBaseName(entry.getKey());
 
 	if (baseHash.containsKey(basename))
 	  {
-	    vec = (Vector) baseHash.get(basename);
+	    list = baseHash.get(basename);
 	  }
 	else
 	  {
-	    vec = new Vector();
-	    baseHash.put(basename, vec);
+	    list = new ArrayList<String>();
+	    baseHash.put(basename, list);
 	  }
 
-	vec.addElement(decodeFieldName(key) + " -- " + option);
+	list.add(decodeFieldName(entry.getKey()) + " -- " + entry.getValue());
       }
 
-    en = baseHash.keys();
-
-    while (en.hasMoreElements())
+    for (Map.Entry<String, List<String>> entry : baseHash.entrySet())
       {
-	key = (String) en.nextElement();
-
-	//	result.append("\nBase - " + key + "\n");
-
-	vec = (Vector) baseHash.get(key);
-
-	for (int i = 0; i < vec.size(); i++)
+	for (int i = 0; i < entry.getValue().size(); i++)
 	  {
-	    result.append(key + ":" + vec.elementAt(i) + "\n");
+	    result.append(entry.getKey() + ":" + entry.getValue().get(i) + "\n");
 	  }
 
 	result.append("\n");
@@ -459,7 +444,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   // ---
 
-  Hashtable matrix;
+  Map<String, String> matrix;
 
   /* -- */
 
@@ -496,7 +481,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     this.owner = owner;
     this.fieldcode = definition.getID();
     
-    matrix = new Hashtable();
+    matrix = new HashMap<String, String>();
     value = null;
   }
 
@@ -520,22 +505,12 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     this.fieldcode = field.getID();
     this.owner = owner;
-    this.matrix = new Hashtable(field.matrix.size());
 
-    Enumeration en = field.matrix.keys();
+    // strings are immutable, so we can safely copy the matrix
 
-    while (en.hasMoreElements())
+    synchronized (field.matrix)
       {
-	key = en.nextElement();
-
-	option = (String) field.matrix.get(key);
-
-	if (debug)
-	  {
-	    System.err.println("FieldOptionDBField: copying " + key + ", contents: " + option);
-	  }
-
-	this.matrix.put(key, option);
+	this.matrix = new HashMap<String, String>(field.matrix);
       }
   }
 
@@ -569,11 +544,9 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * fancy equals method really does check for value equality
    */
 
-  public synchronized boolean equals(Object obj)
+  public boolean equals(Object obj)
   {
     FieldOptionDBField fodb;
-    Enumeration keys;
-    String key;
     
     /* -- */
 
@@ -589,31 +562,10 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     fodb = (FieldOptionDBField) obj;
 
-    if (matrix.size() != fodb.matrix.size())
+    synchronized (fodb.matrix)
       {
-	return false;
+	return this.matrix.equals(fodb.matrix); 
       }
-
-    keys = matrix.keys();
-
-    while (keys.hasMoreElements())
-      {
-	key = (String) keys.nextElement();
-
-	try
-	  {
-	    if (!(matrix.get(key).equals(fodb.matrix.get(key))))
-	      {
-		return false;
-	      }
-	  }
-	catch (NullPointerException ex)
-	  {
-	    return false;
-	  }
-      }
-    
-    return true;
   }
 
   /**
@@ -660,7 +612,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     // keys and values of the matrix are treated as immutable (they
     // are replaced, not changed in-place)
 
-    ((FieldOptionDBField) target).matrix = (Hashtable) this.matrix.clone();
+    ((FieldOptionDBField) target).matrix = new HashMap<String,String>(this.matrix);
 
     return null;
   }
@@ -718,12 +670,6 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   synchronized void emit(DataOutput out) throws IOException
   {
-    Enumeration keys;
-    String key;
-    String option;
-
-    /* -- */
-
     if (debug)
       {
 	debugdump(matrix);
@@ -746,23 +692,16 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     out.writeInt(matrix.size());
 
-    keys = matrix.keys();
-
-    while (keys.hasMoreElements())
+    for (Map.Entry<String, String> entry : matrix.entrySet())
       {
-	key = (String) keys.nextElement();
-	option = (String) matrix.get(key);
-
-	out.writeUTF(key);
-	out.writeUTF(option);
+	out.writeUTF(entry.getKey());
+	out.writeUTF(entry.getValue());
       }
   }
 
   synchronized void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
     int tableSize;
-    String key;
-    String option;
 
     /* -- */
 
@@ -770,18 +709,16 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     if (tableSize <= 0)
       {
-	matrix = new Hashtable();
+	matrix = new HashMap<String, String>();
       }
     else
       {
-	matrix = new Hashtable(tableSize * 2 + 1);
+	matrix = new HashMap<String, String>(tableSize * 2 + 1);
       }
     
     for (int i = 0; i < tableSize; i++)
       {
-	key = in.readUTF();
-	option = in.readUTF().intern();
-	matrix.put(key, option);
+	matrix.put(in.readUTF(), in.readUTF().intern());
       }
   }
 
@@ -802,38 +739,30 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   synchronized void emitXML(XMLDumpContext xmlOut, boolean writeSurroundContext) throws IOException
   {
-    Enumeration en, enum2;
-    String key;
-    String option;
-    String basename;
-    Hashtable baseHash = new Hashtable();
-    Hashtable innerTable;
+    Map<String, Map<String, String>> baseHash = new HashMap<String, Map<String, String>>();
+    Map<String, String> innerTable;
 
     /* -- */
 
     // build up a hashtable structure so we get all the field options
     // grouped by base.
 
-    en = matrix.keys();
-
-    while (en.hasMoreElements())
+    for (Map.Entry<String, String> entry: matrix.entrySet())
       {
-	key = (String) en.nextElement();
-	option = (String) matrix.get(key);
-
-	basename = decodeBaseName(key);
+	String basename = decodeBaseName(entry.getKey());
+	String fieldname = decodeFieldName(entry.getKey());
 
 	if (baseHash.containsKey(basename))
 	  {
-	    innerTable = (Hashtable) baseHash.get(basename);
+	    innerTable = baseHash.get(basename);
 	  }
 	else
 	  {
-	    innerTable = new Hashtable();
+	    innerTable = new HashMap<String, String>();
 	    baseHash.put(basename, innerTable);
 	  }
 
-	innerTable.put(decodeFieldName(key), option);
+	innerTable.put(fieldname, entry.getValue());
       }
 
     if (writeSurroundContext)
@@ -845,43 +774,36 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     xmlOut.startElementIndent("options");
     xmlOut.indentOut();
 
-    en = baseHash.keys();
-
-    while (en.hasMoreElements())
+    for (Map.Entry<String, Map<String, String>> entry: baseHash.entrySet())
       {
-	key = (String) en.nextElement();
+	innerTable = entry.getValue();
 
-	innerTable = (Hashtable) baseHash.get(key);
-	option = (String) innerTable.get("[base]");
+	String outerElementName = arlut.csd.Util.XMLUtils.XMLEncode(entry.getKey());
 
-	xmlOut.startElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(key));
+	xmlOut.startElementIndent(outerElementName);
 	xmlOut.indentOut();
 
-	if (option != null)
+	if (innerTable.containsKey("[base]"))
 	  {
-	    xmlOut.attribute("option", option);
+	    xmlOut.attribute("option", innerTable.get("[base]"));
 	  }
 
-	enum2 = innerTable.keys();
-
-	while (enum2.hasMoreElements())
+	for (Map.Entry<String, String> innerEntry: innerTable.entrySet())
 	  {
-	    String fieldKey = (String) enum2.nextElement();
-
-	    if (fieldKey.equals("[base]"))
+	    if (innerEntry.getKey().equals("[base]"))
 	      {
 		continue;	// we've already wrote field options for the base
 	      }
 
-	    String fieldOption = (String) innerTable.get(fieldKey);
+	    String elementName = arlut.csd.Util.XMLUtils.XMLEncode(innerEntry.getKey());
 
-	    xmlOut.startElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(fieldKey));
-	    xmlOut.attribute("option", fieldOption);
-	    xmlOut.endElement(arlut.csd.Util.XMLUtils.XMLEncode(fieldKey));
+	    xmlOut.startElementIndent(elementName);
+	    xmlOut.attribute("option", innerEntry.getValue());
+	    xmlOut.endElement(elementName);
 	  }
 
 	xmlOut.indentIn();
-	xmlOut.endElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(key));
+	xmlOut.endElementIndent(outerElementName);
       }
 
     xmlOut.indentIn();
@@ -897,30 +819,23 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   public synchronized String getValueString()
   {
     StringBuilder result = new StringBuilder();
-    String key = null;
-    String option = null;
 
     /* -- */
 
     clean();
 
-    Enumeration en = matrix.keys();
-
-    while (en.hasMoreElements())
+    for (Map.Entry<String, String> entry: matrix.entrySet())
       {
-	key = (String) en.nextElement();
-	option = (String) matrix.get(key);
-
-	if (isBase(key))
+	if (isBase(entry.getKey()))
 	  {	
-	    result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
-			  " -- " + option);
+	    result.append(decodeBaseName(entry.getKey()) + " " + decodeFieldName(entry.getKey()) +
+			  " -- " + entry.getValue());
 	    result.append("\n");
 	  }
 	else
 	  {
-	    result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
-			  " -- " + option);
+	    result.append(decodeBaseName(entry.getKey()) + " " + decodeFieldName(entry.getKey()) +
+			  " -- " + entry.getValue());
 	    result.append("\n");
 	  }
       }
@@ -974,36 +889,21 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 	return null;
       }
     
-    Vector myKeys = new Vector();
-    Vector origKeys = new Vector();
+    Set<String> myKeys = new HashSet<String>(matrix.keySet());
+    Set<String> newKeys = new HashSet<String>(myKeys);
 
-    Enumeration en = matrix.keys();
+    Set<String> origKeys = new HashSet<String>(origFO.matrix.keySet());
+    Set<String> keptKeys = new HashSet<String>(origKeys);
+    Set<String> lostKeys = new HashSet<String>(origKeys);
 
-    while (en.hasMoreElements())
+    keptKeys.retainAll(myKeys);
+    newKeys.removeAll(keptKeys);
+    lostKeys.removeAll(keptKeys);
+
+    for (String key : keptKeys)
       {
-	myKeys.addElement(en.nextElement());
-      }
-
-    en = origFO.matrix.keys();
-
-    while (en.hasMoreElements())
-      {
-	origKeys.addElement(en.nextElement());
-      }
-
-    String optionA = null;
-    String optionB = null;
-
-    Vector keptKeys = arlut.csd.Util.VectorUtils.intersection(myKeys, origKeys);
-    Vector newKeys = arlut.csd.Util.VectorUtils.difference(myKeys, keptKeys);
-    Vector lostKeys = arlut.csd.Util.VectorUtils.difference(origKeys, keptKeys);
-
-    for (int i = 0; i < keptKeys.size(); i++)
-      {
-	String key = (String) keptKeys.elementAt(i);
-
-	optionA = (String) matrix.get(key);
-	optionB = (String) origFO.matrix.get(key);
+	String optionA = matrix.get(key);
+	String optionB = origFO.matrix.get(key);
 
 	if (!optionA.equals(optionB))
 	  {
@@ -1014,11 +914,9 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 	  }
       }
 
-    for (int i = 0; i < newKeys.size(); i++)
+    for (String key : newKeys)
       {
-	String key = (String) newKeys.elementAt(i);
-
-	optionA = (String) matrix.get(key);
+	String optionA = matrix.get(key);
 
 	if (isBase(key))
 	  {
@@ -1034,11 +932,9 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 	  }
       }
 
-    for (int i = 0; i < lostKeys.size(); i++)
+    for (String key : lostKeys)
       {
-	String key = (String) lostKeys.elementAt(i);
-
-	optionB = (String) origFO.matrix.get(key);
+	String optionB = origFO.matrix.get(key);
 
 	// "{0} {1} -- Lost {2}\n"
 	result.append(ts.l("getDiffString.old_pattern", decodeBaseName(key), decodeFieldName(key), optionB));
@@ -1136,7 +1032,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     if (isEditable())
       {
 	matrix.clear();
-	matrix = new Hashtable();
+	matrix = new HashMap<String, String>();
 	return null;
       }
     else
@@ -1300,45 +1196,41 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   private void clean()
   {
-    Enumeration keys;
-    String key;
-    String option;
+    Set<String> toRemove = new HashSet<String>();
 
-    /* -- */
-
-    keys = matrix.keys();
-
-    while (keys.hasMoreElements())
+    for (String key : matrix.keySet())
       {
-	key = (String) keys.nextElement();
-	option = (String) matrix.get(key);
-
-	// If we have invalid entries, we're just going to throw them out,
-	// forget they even existed..  this is only remotely reasonable
-	// because matrix is private to this class, and because these
-	// invalid entries could serve no useful purpose, and will only
-	// become invalid after schema editing in any case.  Since
-	// normally the database/schema needs to be dumped after changing
-	// the schema, this is an appropriate place to do the cleanup.
-
 	if (!isValidCode(key))
 	  {
-	    matrix.remove(key);
-
-	    if (debug)
-	      {
-		System.err.println("**** FieldOptionDBField.clean(): throwing out invalid entry " + 
-				   decodeBaseName(key) + " " + 
-				   decodeFieldName(key) + " ---- " + 
-				   option);
-	      }
+	    toRemove.add(key);
 	  }
+      }
+
+    // If we have invalid entries, we're just going to throw them out,
+    // forget they even existed..  this is only remotely reasonable
+    // because matrix is private to this class, and because these
+    // invalid entries could serve no useful purpose, and will only
+    // become invalid after schema editing in any case.  Since
+    // normally the database/schema needs to be dumped after changing
+    // the schema, this is an appropriate place to do the cleanup.
+
+    for (String key: toRemove)
+      {
+	if (debug)
+	  {
+	    System.err.println("**** FieldOptionDBField.clean(): throwing out invalid entry " + 
+			       decodeBaseName(key) + " " + 
+			       decodeFieldName(key) + " ---- " + 
+			       matrix.get(key));
+	  }
+
+	matrix.remove(key);
       }
   }
 
   /**
    * Method to generate a key for use in our internal
-   * Hashtable, used to encode the option for a given {@link
+   * HashMap, used to encode the option for a given {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} and {@link
    * arlut.csd.ganymede.server.DBObjectBaseField
    * DBObjectBaseField}.
@@ -1351,7 +1243,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   /**
    * Method to generate a key for use in our internal
-   * Hashtable, used to encode the option for a given {@link
+   * HashMap, used to encode the option for a given {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase}.
    */
   
@@ -1440,12 +1332,12 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
 class FieldOptionMatrixCkPoint {
 
-  Hashtable matrix;
+  Map<String, String> matrix;
 
   /* -- */
 
   public FieldOptionMatrixCkPoint(FieldOptionDBField field)
   {
-    this.matrix = (Hashtable) field.matrix.clone();
+    this.matrix = new HashMap<String, String>(field.matrix);
   }
 }
