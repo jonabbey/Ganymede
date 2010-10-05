@@ -59,6 +59,7 @@ import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1196,35 +1197,32 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   private void clean()
   {
-    Set<String> toRemove = new HashSet<String>();
+    Iterator<String> iterator = matrix.keySet().iterator();
 
-    for (String key : matrix.keySet())
+    while (iterator.hasNext())
       {
+	String key = iterator.next();
+
+	// If we have invalid entries, we're just going to throw them out,
+	// forget they even existed..  this is only remotely reasonable
+	// because matrix is private to this class, and because these
+	// invalid entries could serve no useful purpose, and will only
+	// become invalid after schema editing in any case.  Since
+	// normally the database/schema needs to be dumped after changing
+	// the schema, this is an appropriate place to do the cleanup.
+
 	if (!isValidCode(key))
 	  {
-	    toRemove.add(key);
+	    if (debug)
+	      {
+		System.err.println("**** FieldOptionDBField.clean(): throwing out invalid entry " + 
+				   decodeBaseName(key) + " " + 
+				   decodeFieldName(key) + " ---- " + 
+				   matrix.get(key));
+	      }
+
+	    iterator.remove();
 	  }
-      }
-
-    // If we have invalid entries, we're just going to throw them out,
-    // forget they even existed..  this is only remotely reasonable
-    // because matrix is private to this class, and because these
-    // invalid entries could serve no useful purpose, and will only
-    // become invalid after schema editing in any case.  Since
-    // normally the database/schema needs to be dumped after changing
-    // the schema, this is an appropriate place to do the cleanup.
-
-    for (String key: toRemove)
-      {
-	if (debug)
-	  {
-	    System.err.println("**** FieldOptionDBField.clean(): throwing out invalid entry " + 
-			       decodeBaseName(key) + " " + 
-			       decodeFieldName(key) + " ---- " + 
-			       matrix.get(key));
-	  }
-
-	matrix.remove(key);
       }
   }
 
