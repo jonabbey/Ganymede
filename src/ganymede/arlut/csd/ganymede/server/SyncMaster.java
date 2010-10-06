@@ -73,7 +73,7 @@ import arlut.csd.ganymede.common.Invid;
  * file needs information to complete the synchronization that comes
  * from other objects in the Ganymede data store?  Those objects may
  * not have changed in the transaction, so the Sync Channel will not
- * know to include that infromation in the XML.</p>
+ * know to include that information in the XML.</p>
  *
  * <p>That's where the SyncMaster interface comes in.  A Sync Channel can
  * be configured with the fully qualified classname of a Java class
