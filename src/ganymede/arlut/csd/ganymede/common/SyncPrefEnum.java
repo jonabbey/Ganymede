@@ -59,41 +59,67 @@ import arlut.csd.Util.TranslationService;
  * <p>Enum of synchronization choices for a specific object type or field
  * in the Ganymede server.</p>
  *
- * <p>The possible values are:</p>
+ * <p>SyncPrefEnum values are contained in a <a
+ * href="../../../../../synchronization/index.html">Sync Channel</a>
+ * object's Sync Data {@link arlut.csd.ganymede.server.FieldOptionDBField
+ * FieldOptionDBField} field, and control whether a given object or
+ * field should be written to that Sync Channel.</p>
  *
- * <p>NEVER, meaning the field is never included in this sync channel, nor
- * should it be examined to make a decision about whether a given
- * object is written to this sync channel.</p>
+ * <p>Note that a Sync Channel may have an associated {@link
+ * arlut.csd.ganymede.server.SyncMaster SyncMaster} class registered,
+ * which can expand on the set of objects and fields written to a Sync
+ * Channel.  The Sync Master class is free to add objects and fields
+ * to the XML transaction file to provide context, and could be used
+ * if the three-way logic implemented by SyncPrefEnum and the {@link
+ * arlut.csd.ganymede.server.SyncRunner} class is not sufficient for
+ * your needs.</p>
  *
- * <p>WHENCHANGED, meaning that the field is included in this sync channel if
- * it has changed, and that the object that includes the field
- * should be written to the sync channel if this field was changed
- * in the object.  If a field has an option string of WHENCHANGED but has
- * not changed in a given transaction, that field won't trigger the
- * object to be written to the sync channel.</p>
- *
- * <p>ALWAYS, meaning that the field is always included in this sync
- * channel if the object that it is contained in is sent to this
- * sync channel, even if it wasn't changed in the transaction.  If
- * this field was changed in a given transaction, that will suffice
- * to cause an object that is changed in any fashion during a
- * transaction to be sent to this sync channel.  In this sense, it
- * is like WHENCHANGED, but with the added feature that it will "ride along"
- * with its object to the sync channel, even if it wasn't changed
- * during the transaction.</p>
- *
- * <p>If WHENCHANGED or ALWAYS is true for a field in a given object
- * type, the corresponding SyncPrefEnum for the object's type should
- * be WHENCHANGED, signaling that at least some fields in the object
- * should be sent to this sync channel when the object is involved
- * in a transaction.</p>
+ * <p>As a Java 5 enum, this class is inherently serializable, and the
+ * Ganymede server's RMI API involves the transmission of SyncPrefEnum
+ * values to and from Ganymede clients.</p>
  */
 
 public enum SyncPrefEnum {
 
+  /**
+   * <p>When used to control an object-level synchronization, NEVER
+   * means that the object should not be written to the Sync Channel,
+   * no matter what was done to the object during a transaction.</p>
+   *
+   * <p>When used to control synchronization for a specific field,
+   * NEVER means that the field should not be written to the Sync
+   * Channel, even if certain other fields in a modified WHENCHANGED
+   * object are written out to the channel.</p>
+   */
+
   NEVER,
-  ALWAYS,
-  WHENCHANGED;
+
+  /**
+   * <p>When used to control an object-level synchronization,
+   * WHENCHANGED means that the object should be written to the Sync
+   * Channel if any WHENCHANGED or ALWAYS fields contained within it
+   * are modified by a transaction.</p>
+   *
+   * <p>When used to control synchronization for a specific field,
+   * WHENCHANGED means that the field should be written to the Sync
+   * Channel if it was changed in a transaction.</p>
+   */
+
+  WHENCHANGED,
+
+  /**
+   * <p>When used to control synchronization for a specific field,
+   * ALWAYS means that the field should always be included whenever
+   * any part of the object that it is contained in is written to the
+   * Sync Channel.</p>
+   *
+   * <p>ALWAYS is like WHENCHANGED plus; if an ALWAYS field is changed
+   * by a transaction, that will suffice to cause the containing
+   * object to be considered as changed for the purposes of a Sync
+   * Channel.</p>
+   */
+
+  ALWAYS;
 
   /**
    * TranslationService object for handling string localization in the
