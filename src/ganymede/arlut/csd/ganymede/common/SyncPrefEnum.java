@@ -124,6 +124,11 @@ public enum SyncPrefEnum {
    * by a transaction, that will suffice to cause the containing
    * object to be considered as changed for the purposes of a Sync
    * Channel.</p>
+   *
+   * <p>Note: ALWAYS is only meaningful at the field level in a Sync
+   * Channel's Sync Data FieldOptionDBField field.  The client
+   * provides no way to set ALWAYS for an object type, only NEVER and
+   * WHENCHANGED.</p>
    */
 
   ALWAYS;
