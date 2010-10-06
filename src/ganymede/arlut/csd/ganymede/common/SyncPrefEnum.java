@@ -81,12 +81,12 @@ public enum SyncPrefEnum {
 
     if (val.equals("1"))
       {
-	return ALWAYS;
+	return WHENCHANGED;
       }
 
     if (val.equals("2"))
       {
-	return WHENCHANGED;
+	return ALWAYS;
       }
 
     throw new IllegalArgumentException("bad option string");
@@ -99,16 +99,20 @@ public enum SyncPrefEnum {
       case NEVER:
 	return ts.l("never");
 
-      case ALWAYS:
-	return ts.l("always");
-
       case WHENCHANGED:
 	return ts.l("whenchanged");
+
+      case ALWAYS:
+	return ts.l("always");
 
       default:
 	return null;		// no-op
       }
   }
+
+  /**
+   * Returns the on-disk string representation of this enum value.
+   */
 
   public String str()
   {
@@ -116,15 +120,38 @@ public enum SyncPrefEnum {
       {
       case NEVER:
 	return "0";
-
-      case ALWAYS:
+      
+      case WHENCHANGED:
 	return "1";
 
-      case WHENCHANGED:
+      case ALWAYS:   
 	return "2";
 
       default:
 	return null;		// no-op
+      }
+  }
+
+  /**
+   * Returns the numerical representation of this enum value, to match
+   * our previous numeric coding.
+   */
+
+  public int ord()
+  {
+    switch (this)
+      {
+      case NEVER:
+	return 0;
+      
+      case WHENCHANGED:
+	return 1;
+
+      case ALWAYS:   
+	return 2;
+
+      default:
+	return -1;		// no-op
       }
   }
 }
