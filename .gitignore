@@ -4,6 +4,7 @@
 src/build/classes/
 src/build/crypto/
 src/build/doc/
+doc/javadoc/
 installServer
 installWeb
 installClient
