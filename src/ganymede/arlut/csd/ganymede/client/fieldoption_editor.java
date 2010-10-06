@@ -78,10 +78,6 @@ public class fieldoption_editor extends JFrame
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.fieldoption_editor");
 
-  static final String labels[] = {ts.l("global.never"), // "Never"
-				  ts.l("global.changed"), // "When Changed"
-				  ts.l("global.always")}; // "Always"
-
   public static boolean debug = false;
 
   /* Flag that indicated whether or not the widget it currently being
@@ -803,18 +799,7 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
 
     SyncPrefEnum newVal;
 
-    if (((String)value).equals(fieldoption_editor.labels[0])) // "Never"
-      {
-	newVal = SyncPrefEnum.NEVER;
-      }
-    else if (((String)value).equals(fieldoption_editor.labels[1])) // "When Changed"
-      {
-	newVal = SyncPrefEnum.WHENCHANGED;
-      }
-    else
-      {
-	newVal = SyncPrefEnum.ALWAYS;
-      }
+    newVal = SyncPrefEnum.find((String) value);
 
     /* If we're not changing anything, then bail out */
     if (myRow.getOptionValue() == newVal)
@@ -1140,7 +1125,7 @@ class ComboRenderer extends JComboBox implements TableCellRenderer, ItemListener
   public ComboRenderer(boolean editable, JTreeTable treetable, SyncPrefEnum selectionIndex)
   {
     /* Pass in the list of Strings to display in the combo box */
-    super(fieldoption_editor.labels);
+    super(SyncPrefEnum.labels);
     this.treetable = treetable;
     this.selindex = selectionIndex.ord();
 

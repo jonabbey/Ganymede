@@ -102,19 +102,35 @@ public enum SyncPrefEnum {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.common.SyncPrefEnum");
 
+  /**
+   * The localized names for these enum values.  The order of these
+   * labels in the array is significant, and must match the integral
+   * value we associate with these enum values.
+   */
+
+  static public final String labels[] = {ts.l("global.never"), // "Never"
+					 ts.l("global.changed"), // "When Changed"
+					 ts.l("global.always")}; // "Always"
+
+  /**
+   * Locates and returns a SyncPrefEnum instance given the old numeric
+   * strings for the values that we used before SyncPrefEnum and / or
+   * the labels.
+   */
+
   public static SyncPrefEnum find(String val)
   {
-    if (val.equals("0"))
+    if (val.equals("0") || val.equals(labels[0]))
       {
 	return NEVER;
       }
 
-    if (val.equals("1"))
+    if (val.equals("1") || val.equals(labels[1]))
       {
 	return WHENCHANGED;
       }
 
-    if (val.equals("2"))
+    if (val.equals("2") || val.equals(labels[2]))
       {
 	return ALWAYS;
       }
