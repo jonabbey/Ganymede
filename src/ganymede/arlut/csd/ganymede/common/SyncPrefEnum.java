@@ -127,13 +127,13 @@ public enum SyncPrefEnum {
     switch (this)
       {
       case NEVER:
-	return ts.l("never");
+	return ts.l("global.never");
 
       case WHENCHANGED:
-	return ts.l("whenchanged");
+	return ts.l("global.whenchanged");
 
       case ALWAYS:
-	return ts.l("always");
+	return ts.l("global.always");
 
       default:
 	return null;		// no-op
