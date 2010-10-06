@@ -109,7 +109,7 @@ public enum SyncPrefEnum {
    */
 
   static public final String labels[] = {ts.l("global.never"), // "Never"
-					 ts.l("global.changed"), // "When Changed"
+					 ts.l("global.whenchanged"), // "When Changed"
 					 ts.l("global.always")}; // "Always"
 
   /**
@@ -143,13 +143,13 @@ public enum SyncPrefEnum {
     switch (this)
       {
       case NEVER:
-	return ts.l("global.never");
+	return labels[0];
 
       case WHENCHANGED:
-	return ts.l("global.whenchanged");
+	return labels[1];
 
       case ALWAYS:
-	return ts.l("global.always");
+	return labels[2];
 
       default:
 	return null;		// no-op
