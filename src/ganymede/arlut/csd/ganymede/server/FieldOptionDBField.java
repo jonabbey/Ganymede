@@ -904,7 +904,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
 	if (optionA != optionB)
 	  {
-	    // "{0} {1} -- "{2}", was "{3}"\n"
+	    // "\t{0} {1} -- "{2}", was "{3}"\n"
 	    result.append(ts.l("getDiffString.changed_pattern",
 			       decodeBaseName(key), decodeFieldName(key),
 			       optionA, optionB));
@@ -917,13 +917,13 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
 	if (isBase(key))
 	  {
-	    // "{0} {1} -- {2}\n"
+	    // "\t{0} {1} -- {2}\n"
 	    result.append(ts.l("getDiffString.new_pattern",
 			       decodeBaseName(key), decodeFieldName(key), optionA));
 	  }
 	else
 	  {
-	    // "{0} {1} -- {2} (was undefined)\n"
+	    // "\t{0} {1} -- {2} (was undefined)\n"
 	    result.append(ts.l("getDiffString.new_pattern2",
 			       decodeBaseName(key), decodeFieldName(key), optionA));
 	  }
@@ -933,7 +933,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
       {
 	SyncPrefEnum optionB = origFO.matrix.get(key);
 
-	// "{0} {1} -- Lost {2}\n"
+	// "\t{0} {1} -- Lost {2}\n"
 	result.append(ts.l("getDiffString.old_pattern", decodeBaseName(key), decodeFieldName(key), optionB));
       }
 
