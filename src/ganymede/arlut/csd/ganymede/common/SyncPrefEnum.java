@@ -56,7 +56,37 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * Enum of configuration choices for a specific object type or field in
+ * <p>Enum of synchronization choices for a specific object type or field
+ * in the Ganymede server.</p>
+ *
+ * <p>The possible values are:</p>
+ *
+ * <p>NEVER, meaning the field is never included in this sync channel, nor
+ * should it be examined to make a decision about whether a given
+ * object is written to this sync channel.</p>
+ *
+ * <p>WHENCHANGED, meaning that the field is included in this sync channel if
+ * it has changed, and that the object that includes the field
+ * should be written to the sync channel if this field was changed
+ * in the object.  If a field has an option string of WHENCHANGED but has
+ * not changed in a given transaction, that field won't trigger the
+ * object to be written to the sync channel.</p>
+ *
+ * <p>ALWAYS, meaning that the field is always included in this sync
+ * channel if the object that it is contained in is sent to this
+ * sync channel, even if it wasn't changed in the transaction.  If
+ * this field was changed in a given transaction, that will suffice
+ * to cause an object that is changed in any fashion during a
+ * transaction to be sent to this sync channel.  In this sense, it
+ * is like WHENCHANGED, but with the added feature that it will "ride along"
+ * with its object to the sync channel, even if it wasn't changed
+ * during the transaction.</p>
+ *
+ * <p>If WHENCHANGED or ALWAYS is true for a field in a given object
+ * type, the corresponding SyncPrefEnum for the object's type should
+ * be WHENCHANGED, signaling that at least some fields in the object
+ * should be sent to this sync channel when the object is involved
+ * in a transaction.</p>
  */
 
 public enum SyncPrefEnum {
