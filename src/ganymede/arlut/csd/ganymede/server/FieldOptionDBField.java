@@ -68,6 +68,7 @@ import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.FieldOptionMatrix;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.common.SyncPrefEnum;
 import arlut.csd.ganymede.rmi.Base;
 import arlut.csd.ganymede.rmi.BaseField;
 import arlut.csd.ganymede.rmi.field_option_field;
@@ -82,16 +83,11 @@ import arlut.csd.ganymede.rmi.field_option_field;
  * <p>FieldOptionDBField is a subclass of {@link
  * arlut.csd.ganymede.server.DBField DBField} for the storage and
  * handling of Ganymede metadata.  In particular, the
- * FieldOptionDBField is used to allow the association of option
- * strings with each {@link arlut.csd.ganymede.server.DBObjectBase
- * DBObjectBase} and each {@link
- * arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField} on
- * the Ganymede server.</p>
- *
- * <p>The option strings held by this data type, for the purpose of the
- * Sync Channels, are "1", "2", and "3".  Where "1" corresponds to
- * "Never", "2" corresponds to "When Changed", and "3" corresponds to
- * "Always".</p>
+ * FieldOptionDBField is used to allow the association of {@link
+ * arlut.csd.ganymede.common.SyncPrefEnum SyncPrefEnum} values with
+ * each {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
+ * and each {@link arlut.csd.ganymede.server.DBObjectBaseField
+ * DBObjectBaseField} on the Ganymede server.</p>
  *
  * <p>The Ganymede client talks to FieldOptionDBFields through the {@link
  * arlut.csd.ganymede.rmi.field_option_field field_option_field} RMI
@@ -393,7 +389,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * contents held in matrix.
    */
 
-  static private void debugdump(Map<String, String> matrix)
+  static private void debugdump(Map<String, SyncPrefEnum> matrix)
   {
     System.err.println(debugdecode(matrix));
   }
@@ -403,7 +399,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * output.
    */
 
-  static public String debugdecode(Map<String, String> matrix)
+  static public String debugdecode(Map<String, SyncPrefEnum> matrix)
   {
     StringBuilder result = new StringBuilder();
     Map<String, List<String>> baseHash = new HashMap<String, List<String>>();
@@ -413,7 +409,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     result.append("FieldOption DebugDump\n");
 
-    for (Map.Entry<String, String> entry : matrix.entrySet())
+    for (Map.Entry<String, SyncPrefEnum> entry : matrix.entrySet())
       {
 	String basename = decodeBaseName(entry.getKey());
 
@@ -445,7 +441,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   // ---
 
-  Map<String, String> matrix;
+  Map<String, SyncPrefEnum> matrix;
 
   /* -- */
 
@@ -482,7 +478,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     this.owner = owner;
     this.fieldcode = definition.getID();
     
-    matrix = new HashMap<String, String>();
+    matrix = new HashMap<String, SyncPrefEnum>();
     value = null;
   }
 
@@ -511,7 +507,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     synchronized (field.matrix)
       {
-	this.matrix = new HashMap<String, String>(field.matrix);
+	this.matrix = new HashMap<String, SyncPrefEnum>(field.matrix);
       }
   }
 
@@ -613,7 +609,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     // keys and values of the matrix are treated as immutable (they
     // are replaced, not changed in-place)
 
-    ((FieldOptionDBField) target).matrix = new HashMap<String,String>(this.matrix);
+    ((FieldOptionDBField) target).matrix = new HashMap<String, SyncPrefEnum>(this.matrix);
 
     return null;
   }
@@ -693,10 +689,10 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     out.writeInt(matrix.size());
 
-    for (Map.Entry<String, String> entry : matrix.entrySet())
+    for (Map.Entry<String, SyncPrefEnum> entry : matrix.entrySet())
       {
 	out.writeUTF(entry.getKey());
-	out.writeUTF(entry.getValue());
+	out.writeUTF(entry.getValue().str());
       }
   }
 
@@ -710,16 +706,16 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     if (tableSize <= 0)
       {
-	matrix = new HashMap<String, String>();
+	matrix = new HashMap<String, SyncPrefEnum>();
       }
     else
       {
-	matrix = new HashMap<String, String>(tableSize * 2 + 1);
+	matrix = new HashMap<String, SyncPrefEnum>(tableSize * 2 + 1);
       }
     
     for (int i = 0; i < tableSize; i++)
       {
-	matrix.put(in.readUTF(), in.readUTF().intern());
+	matrix.put(in.readUTF(), SyncPrefEnum.find(in.readUTF()));
       }
   }
 
@@ -740,15 +736,15 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   synchronized void emitXML(XMLDumpContext xmlOut, boolean writeSurroundContext) throws IOException
   {
-    Map<String, Map<String, String>> baseHash = new HashMap<String, Map<String, String>>();
-    Map<String, String> innerTable;
+    Map<String, Map<String, SyncPrefEnum>> baseHash = new HashMap<String, Map<String, SyncPrefEnum>>();
+    Map<String, SyncPrefEnum> innerTable;
 
     /* -- */
 
     // build up a hashtable structure so we get all the field options
     // grouped by base.
 
-    for (Map.Entry<String, String> entry: matrix.entrySet())
+    for (Map.Entry<String, SyncPrefEnum> entry: matrix.entrySet())
       {
 	String basename = decodeBaseName(entry.getKey());
 	String fieldname = decodeFieldName(entry.getKey());
@@ -759,7 +755,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 	  }
 	else
 	  {
-	    innerTable = new HashMap<String, String>();
+	    innerTable = new HashMap<String, SyncPrefEnum>();
 	    baseHash.put(basename, innerTable);
 	  }
 
@@ -775,7 +771,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     xmlOut.startElementIndent("options");
     xmlOut.indentOut();
 
-    for (Map.Entry<String, Map<String, String>> entry: baseHash.entrySet())
+    for (Map.Entry<String, Map<String, SyncPrefEnum>> entry: baseHash.entrySet())
       {
 	innerTable = entry.getValue();
 
@@ -786,20 +782,20 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
 	if (innerTable.containsKey("[base]"))
 	  {
-	    xmlOut.attribute("option", innerTable.get("[base]"));
+	    xmlOut.attribute("option", innerTable.get("[base]").toString());
 	  }
 
-	for (Map.Entry<String, String> innerEntry: innerTable.entrySet())
+	for (Map.Entry<String, SyncPrefEnum> innerEntry: innerTable.entrySet())
 	  {
 	    if (innerEntry.getKey().equals("[base]"))
 	      {
-		continue;	// we've already wrote field options for the base
+		continue;	// we've already written field options for the base
 	      }
 
 	    String elementName = arlut.csd.Util.XMLUtils.XMLEncode(innerEntry.getKey());
 
 	    xmlOut.startElementIndent(elementName);
-	    xmlOut.attribute("option", innerEntry.getValue());
+	    xmlOut.attribute("option", innerEntry.getValue().str());
 	    xmlOut.endElement(elementName);
 	  }
 
@@ -825,7 +821,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     clean();
 
-    for (Map.Entry<String, String> entry: matrix.entrySet())
+    for (Map.Entry<String, SyncPrefEnum> entry: matrix.entrySet())
       {
 	if (isBase(entry.getKey()))
 	  {	
@@ -903,10 +899,10 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     for (String key : keptKeys)
       {
-	String optionA = matrix.get(key);
-	String optionB = origFO.matrix.get(key);
+	SyncPrefEnum optionA = matrix.get(key);
+	SyncPrefEnum optionB = origFO.matrix.get(key);
 
-	if (!optionA.equals(optionB))
+	if (optionA != optionB)
 	  {
 	    // "{0} {1} -- "{2}", was "{3}"\n"
 	    result.append(ts.l("getDiffString.changed_pattern",
@@ -917,7 +913,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     for (String key : newKeys)
       {
-	String optionA = matrix.get(key);
+	SyncPrefEnum optionA = matrix.get(key);
 
 	if (isBase(key))
 	  {
@@ -935,7 +931,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     for (String key : lostKeys)
       {
-	String optionB = origFO.matrix.get(key);
+	SyncPrefEnum optionB = origFO.matrix.get(key);
 
 	// "{0} {1} -- Lost {2}\n"
 	result.append(ts.l("getDiffString.old_pattern", decodeBaseName(key), decodeFieldName(key), optionB));
@@ -957,42 +953,42 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * Returns the option string, if any, for the given
-   * base and field.
+   * <p>Returns a SyncPrefEnum representing this field option field's
+   * option on the field &lt;field&gt; in base
+   * &lt;base&gt;<br><br></p>
    *
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
 
-  public String getOption(short baseID, short fieldID)
+  public SyncPrefEnum getOption(short baseID, short fieldID)
   {
-    return (String) matrix.get(matrixEntry(baseID, fieldID));
+    return matrix.get(matrixEntry(baseID, fieldID));
   }
 
   /**
-   * Returns the option string, if any, for the given
-   * base.
+   * <p>Returns a SyncPrefEnum representing this field option field's 
+   * option on the base &lt;base&gt;</p>
    *
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
 
-  public String getOption(short baseID)
+  public SyncPrefEnum getOption(short baseID)
   {
-    return (String) matrix.get(matrixEntry(baseID));
+    return matrix.get(matrixEntry(baseID));
   }
 
   /**
-   * Returns the option string, if any, for the given
-   * base and field.
+   * <p>Returns a SyncPrefEnum representing this field option field's 
+   * option on the field &lt;field&gt; in base &lt;base&gt;</p>
    *
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
 
-  public String getOption(Base base, BaseField field)
+  public SyncPrefEnum getOption(Base base, BaseField field)
   {
     try
       {
-	return (String) matrix.get(matrixEntry(base.getTypeID(), 
-					       field.getID()));
+	return matrix.get(matrixEntry(base.getTypeID(), field.getID()));
       }
     catch (RemoteException ex)
       {
@@ -1000,18 +996,18 @@ public class FieldOptionDBField extends DBField implements field_option_field {
       }
   }
 
-  /*
-   * Returns the option string, if any, for the given
-   * base.
+  /**
+   * <p>Returns a SyncPrefEnum object representing this field option field's 
+   * option on the base &lt;base&gt;</p>
    *
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
 
-  public String getOption(Base base)
+  public SyncPrefEnum getOption(Base base)
   {
     try
       {
-	return (String) matrix.get(matrixEntry(base.getTypeID()));
+	return matrix.get(matrixEntry(base.getTypeID()));
       }
     catch (RemoteException ex)
       {
@@ -1033,7 +1029,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     if (isEditable())
       {
 	matrix.clear();
-	matrix = new HashMap<String, String>();
+	matrix = new HashMap<String, SyncPrefEnum>();
 	return null;
       }
     else
@@ -1046,16 +1042,17 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <p>Sets the option String for base &lt;base&gt;,
-   * field &lt;field&gt; to &lt;option&gt;.</p>
+   * <p>Sets the SyncPrefEnum for this matrix for base &lt;baseID&gt;,
+   * field &lt;fieldID&gt; to &lt;option&gt;.</p>
    *
-   * <p>This operation will fail if this
-   * FieldOptionDBField is not editable.</p>
+   * <p>This operation will fail if this field option field is not
+   * associated with a currently checked-out-for-editing
+   * {@link arlut.csd.ganymede.server.FieldOptionDBField FieldOptionDBField}.</p>
    *
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
 
-  public ReturnVal setOption(Base base, BaseField field, String option)
+  public ReturnVal setOption(Base base, BaseField field, SyncPrefEnum option)
   {
     try
       {
@@ -1070,21 +1067,17 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <p>Sets the option string for base &lt;baseID&gt;,
-   * field &lt;fieldID&gt; to String &lt;option&gt;.</p>
+   * <p>Sets the SyncPrefEnum for this matrix for base &lt;baseID&gt;
+   * to &lt;option&gt;</p>
    *
-   * <p>This operation will fail if this
-   * FieldOptionDBField is not editable.</p>
-   *
-   * @param baseID the object type to set the option string for
-   * @param fieldID the field to set the option string for.  If
-   * fieldID < 0, the option will be applied to the object as a whole
-   * rather than any individual field within the object
+   * <p>This operation will fail if this field option field is not
+   * associated with a currently checked-out-for-editing
+   * {@link arlut.csd.ganymede.server.FieldOptionDBField FieldOptionDBField}.</p>
    *
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
 
-  public synchronized ReturnVal setOption(short baseID, short fieldID, String option)
+  public synchronized ReturnVal setOption(short baseID, short fieldID, SyncPrefEnum option)
   {
     if (!isEditable())
       {
@@ -1094,7 +1087,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 					  ts.l("global.perm_error_text"));
       }
 
-    if (option == null || option.equals(""))
+    if (option == null)
       {
 	matrix.remove(matrixEntry(baseID, fieldID));
 
@@ -1106,7 +1099,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
       }
     else
       {
-	matrix.put(matrixEntry(baseID, fieldID), option.intern());
+	matrix.put(matrixEntry(baseID, fieldID), option);
 
 	if (debug)
 	  {
@@ -1119,16 +1112,17 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <p>Sets the option for base &lt;baseID&gt;
-   * to String &lt;option&gt;.</p>
+   * <p>Sets the SyncPrefEnum for this matrix for base &lt;baseID&gt;,
+   * field &lt;fieldID&gt; to &lt;option&gt;.</p>
    *
-   * <p>This operation will fail if this FieldOptionDBField is not
-   * editable.</p>
+   * <p>This operation will fail if this field option field is not
+   * associated with a currently checked-out-for-editing
+   * {@link arlut.csd.ganymede.server.FieldOptionDBField FieldOptionDBField}.</p>
    *
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
 
-  public ReturnVal setOption(Base base, String option)
+  public ReturnVal setOption(Base base, SyncPrefEnum option)
   {
     // no need for synchronization, since we call a synchronized
     // setOption() call
@@ -1145,16 +1139,17 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <p>Sets the option for base &lt;baseID&gt;
-   * to String &lt;option&gt;.</p>
+   * <p>Sets the SyncPrefEnum for this matrix for base &lt;baseID&gt;
+   * to &lt;option&gt;</p>
    *
-   * <p>This operation will fail if this FieldOptionDBField is not
-   * editable.</p>
+   * <p>This operation will fail if this field option field is not
+   * associated with a currently checked-out-for-editing
+   * {@link arlut.csd.ganymede.server.FieldOptionDBField FieldOptionDBField}.</p>
    *
    * @see arlut.csd.ganymede.rmi.field_option_field
    */
 
-  public synchronized ReturnVal setOption(short baseID, String option)
+  public synchronized ReturnVal setOption(short baseID, SyncPrefEnum option)
   {
     if (!isEditable())
       {
@@ -1164,7 +1159,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 					  ts.l("global.perm_error_text"));
       }
 
-    if (option == null || option.equals(""))
+    if (option == null)
       {
 	matrix.remove(matrixEntry(baseID));
 
@@ -1176,7 +1171,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
       }
     else
       {
-	matrix.put(matrixEntry(baseID), option.intern());
+	matrix.put(matrixEntry(baseID), option);
 	
 	if (debug)
 	  {
@@ -1330,12 +1325,12 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
 class FieldOptionMatrixCkPoint {
 
-  Map<String, String> matrix;
+  Map<String, SyncPrefEnum> matrix;
 
   /* -- */
 
   public FieldOptionMatrixCkPoint(FieldOptionDBField field)
   {
-    this.matrix = new HashMap<String, String>(field.matrix);
+    this.matrix = new HashMap<String, SyncPrefEnum>(field.matrix);
   }
 }

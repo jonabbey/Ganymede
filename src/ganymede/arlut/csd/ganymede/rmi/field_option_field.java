@@ -12,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996 - 2010
    The University of Texas at Austin
 
    Contact information
@@ -50,6 +50,7 @@ import java.rmi.RemoteException;
 
 import arlut.csd.ganymede.common.FieldOptionMatrix;
 import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SyncPrefEnum;
 
 /*------------------------------------------------------------------------------
                                                                        interface
@@ -58,104 +59,101 @@ import arlut.csd.ganymede.common.ReturnVal;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Client-side remote interface to the {@link
+ * <p>Client-side remote interface to the {@link
  * arlut.csd.ganymede.server.FieldOptionDBField FieldOptionDBField}
- * class.</P> 
+ * class.</p> 
  */
 
 public interface field_option_field extends db_field {
 
   /**
-   *
-   * Return a serializable, read-only copy of this field's option
-   * matrix
-   *
+   * <p>Return a serializable, read-only copy of this field's option
+   * matrix</p>
    */
 
   public FieldOptionMatrix getMatrix() throws RemoteException;
 
   /**
-   * <P>Returns a String object representing this field option field's 
-   * option on the field &lt;field&gt; in base &lt;base&gt;<br><br></P>
+   * <p>Returns a SyncPrefEnum representing this field option field's
+   * option on the field &lt;field&gt; in base
+   * &lt;base&gt;<br><br></p>
    */
 
-  public String getOption(short baseID, short fieldID) throws RemoteException;
+  public SyncPrefEnum getOption(short baseID, short fieldID) throws RemoteException;
 
   /**
+   * <p>Returns a SyncPrefEnum representing this field option field's 
+   * option on the base &lt;base&gt;</p>
+   */
+
+  public SyncPrefEnum getOption(short baseID) throws RemoteException;
+
+  /**
+   * <p>Returns a SyncPrefEnum representing this field option field's 
+   * option on the field &lt;field&gt; in base &lt;base&gt;</p>
+   */
+
+  public SyncPrefEnum getOption(Base base, BaseField field) throws RemoteException;
+
+  /**
+   * <p>Returns a SyncPrefEnum object representing this field option field's 
+   * option on the base &lt;base&gt;</p>
+   */
+
+  public SyncPrefEnum getOption(Base base) throws RemoteException;
+
+  /**
+   * <p>Resets the options in this FieldOptionDBField to the empty
+   * set.  Used by non-interactive clients to reset the SyncPrefEnum
+   * values to a known state before setting options.</p>
    *
-   * Returns a String object representing this field option field's 
-   * option on the base &lt;base&gt;
-   */
-
-  public String getOption(short baseID) throws RemoteException;
-
-  /**
-   * <P>Returns a String object representing this field option field's 
-   * option on the field &lt;field&gt; in base &lt;base&gt;</P>
-   */
-
-  public String getOption(Base base, BaseField field) throws RemoteException;
-
-  /**
-   * <P>Returns a String object representing this field option field's 
-   * option on the base &lt;base&gt;</P>
-   */
-
-  public String getOption(Base base) throws RemoteException;
-
-  /**
-   * <P>Resets the options in this FieldOptionDBField to
-   * the empty set.  Used by non-interactive clients to reset
-   * the option strings to a known state before setting
-   * options.</P>
-   *
-   * <P>Returns null on success, or a failure-coded ReturnVal
-   * on permissions failure.</P>
+   * <p>Returns null on success, or a failure-coded ReturnVal
+   * on permissions failure.</p>
    */
 
   public ReturnVal resetOptions() throws RemoteException;
 
   /**
-   * <P>Sets the option string for this matrix for base &lt;baseID&gt;,
-   * field &lt;fieldID&gt; to String &lt;option&gt;.</P>
+   * <p>Sets the SyncPrefEnum for this matrix for base &lt;baseID&gt;,
+   * field &lt;fieldID&gt; to &lt;option&gt;.</p>
    *
-   * <P>This operation will fail if this field option field is not
+   * <p>This operation will fail if this field option field is not
    * associated with a currently checked-out-for-editing
-   * {@link arlut.csd.ganymede.server.FieldOptionDBField FieldOptionDBField}.</P>
+   * {@link arlut.csd.ganymede.server.FieldOptionDBField FieldOptionDBField}.</p>
    */
 
-  public ReturnVal setOption(short baseID, short fieldID, String option) throws RemoteException;
+  public ReturnVal setOption(short baseID, short fieldID, SyncPrefEnum option) throws RemoteException;
 
   /**
-   * <P>Sets the option string for this matrix for base &lt;baseID&gt;
-   * to String &lt;option&gt;</P>
+   * <p>Sets the SyncPrefEnum for this matrix for base &lt;baseID&gt;
+   * to &lt;option&gt;</p>
    *
-   * <P>This operation will fail if this field option field is not
+   * <p>This operation will fail if this field option field is not
    * associated with a currently checked-out-for-editing
-   * {@link arlut.csd.ganymede.server.FieldOptionDBField FieldOptionDBField}.</P>
+   * {@link arlut.csd.ganymede.server.FieldOptionDBField FieldOptionDBField}.</p>
    */
 
-  public ReturnVal setOption(short baseID, String option) throws RemoteException;
+  public ReturnVal setOption(short baseID, SyncPrefEnum option) throws RemoteException;
 
   /**
-   * <P>Sets the option string for this matrix for base &lt;baseID&gt;,
-   * field &lt;fieldID&gt; to String &lt;entry&gt;.</P>
+   * <p>Sets the SyncPrefEnum for this matrix for base &lt;baseID&gt;,
+   * field &lt;fieldID&gt; to &lt;option&gt;.</p>
    *
-   * <P>This operation will fail if this field option field is not
+   * <p>This operation will fail if this field option field is not
    * associated with a currently checked-out-for-editing
-   * {@link arlut.csd.ganymede.server.FieldOptionDBField FieldOptionDBField}.</P>
+   * {@link arlut.csd.ganymede.server.FieldOptionDBField FieldOptionDBField}.</p>
    */
 
-  public ReturnVal setOption(Base base, BaseField field, String option) throws RemoteException;
+  public ReturnVal setOption(Base base, BaseField field, SyncPrefEnum option) throws RemoteException;
 
   /**
-   * <P>Sets the option string for this matrix for base &lt;baseID&gt;
-   * to String &lt;entry&gt;</P>
+   * <p>Sets the SyncPrefEnum for this matrix for base &lt;baseID&gt;
+   * to &lt;option&gt;</p>
    *
-   * <P>This operation will fail if this field option field is not
+   * <p>This operation will fail if this field option field is not
    * associated with a currently checked-out-for-editing
-   * {@link arlut.csd.ganymede.server.FieldOptionDBField FieldOptionDBField}.</P>
+   * {@link arlut.csd.ganymede.server.FieldOptionDBField FieldOptionDBField}.</p>
    */
 
-  public ReturnVal setOption(Base base, String option) throws RemoteException;
+  public ReturnVal setOption(Base base, SyncPrefEnum option) throws RemoteException;
 }

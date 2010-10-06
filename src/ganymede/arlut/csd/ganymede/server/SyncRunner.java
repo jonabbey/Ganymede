@@ -57,6 +57,7 @@ import arlut.csd.ganymede.common.scheduleHandle;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SyncPrefEnum;
 import arlut.csd.ganymede.rmi.FileTransmitter;
 
 import arlut.csd.Util.booleanSemaphore;
@@ -295,13 +296,13 @@ public class SyncRunner implements Runnable {
       switch (objectVal)
 	{
 	case 0:
-	  return SyncType.MANUAL;
+	  return MANUAL;
 
 	case 1:
-	  return SyncType.INCREMENTAL;
+	  return INCREMENTAL;
 
 	case 2:
-	  return SyncType.FULLSTATE;
+	  return FULLSTATE;
 
 	default:
 	  throw new IllegalArgumentException("Unrecognized integral value");
@@ -332,7 +333,7 @@ public class SyncRunner implements Runnable {
   private String serviceProgram;
   private int transactionNumber;
   private boolean includePlaintextPasswords;
-  private Map<String, String> matrix;
+  private Map<String, SyncPrefEnum> matrix;
 
   /**
    * Controls what type of Sync Channel we're handling.
@@ -478,7 +479,7 @@ public class SyncRunner implements Runnable {
 
     FieldOptionDBField f = (FieldOptionDBField) syncChannel.getField(SchemaConstants.SyncChannelFields);
 
-    this.matrix = new HashMap<String, String>(f.matrix);
+    this.matrix = new HashMap<String, SyncPrefEnum>(f.matrix);
   }
 
   /**
@@ -970,9 +971,9 @@ public class SyncRunner implements Runnable {
 			Ganymede.debug("SyncRunner.initializeFieldBook(): Created field " + memberField + " in " + syncObject);
 		      }
 
-		    String fieldOption = getOption(memberField);
+		    SyncPrefEnum fieldOption = getOption(memberField);
 
-		    if (fieldOption != null && !fieldOption.equals("0"))
+		    if (fieldOption != null && fieldOption != SyncPrefEnum.NEVER)
 		      {
 			book.add(syncObject.getInvid(), memberField.getID());
 			continue;
@@ -988,9 +989,9 @@ public class SyncRunner implements Runnable {
 			Ganymede.debug("SyncRunner.initializeFieldBook(): Deleted field " + memberField + " in " + syncObject);
 		      }
 
-		    String fieldOption = getOption(memberField);
+		    SyncPrefEnum fieldOption = getOption(memberField);
 
-		    if (fieldOption != null && !fieldOption.equals("0"))
+		    if (fieldOption != null && fieldOption != SyncPrefEnum.NEVER)
 		      {
 			book.add(syncObject.getInvid(), memberField.getID());
 			continue;
@@ -1066,9 +1067,9 @@ public class SyncRunner implements Runnable {
 
   public boolean mayInclude(short baseID)
   {
-    String x = getOption(baseID);
+    SyncPrefEnum x = getOption(baseID);
 
-    return (x != null && x.equals("1"));
+    return x == SyncPrefEnum.WHENCHANGED;
   }
 
   /**
@@ -1081,9 +1082,9 @@ public class SyncRunner implements Runnable {
 
   public boolean mayInclude(DBObject object)
   {
-    String x = getOption(object.getTypeID());
+    SyncPrefEnum x = getOption(object.getTypeID());
 
-    return (x != null && x.equals("1"));
+    return x == SyncPrefEnum.WHENCHANGED;
   }
 
   /**
@@ -1128,9 +1129,9 @@ public class SyncRunner implements Runnable {
 
 	if (origField == null && memberField.isDefined())
 	  {
-	    String fieldOption = getOption(memberField);
+	    SyncPrefEnum fieldOption = getOption(memberField);
 
-	    if (fieldOption != null && !fieldOption.equals("0"))
+	    if (fieldOption != null && fieldOption != SyncPrefEnum.NEVER)
 	      {
 		return true;
 	      }
@@ -1140,9 +1141,9 @@ public class SyncRunner implements Runnable {
 
 	if (!memberField.isDefined() && origField != null)
 	  {
-	    String fieldOption = getOption(memberField);
+	    SyncPrefEnum fieldOption = getOption(memberField);
 
-	    if (fieldOption != null && !fieldOption.equals("0"))
+	    if (fieldOption != null && fieldOption != SyncPrefEnum.NEVER)
 	      {
 		return true;
 	      }
@@ -1185,7 +1186,7 @@ public class SyncRunner implements Runnable {
 
   public boolean shouldInclude(DBField newField, DBField origField, FieldBook book)
   {
-    String fieldOption;
+    SyncPrefEnum fieldOption;
 
     /* -- */
 
@@ -1225,7 +1226,7 @@ public class SyncRunner implements Runnable {
 
     fieldOption = getOption(newField);
 
-    if (fieldOption == null || fieldOption.equals("0"))
+    if (fieldOption == null || fieldOption == SyncPrefEnum.NEVER)
       {
 	if (debug)
 	  {
@@ -1234,7 +1235,7 @@ public class SyncRunner implements Runnable {
 
 	return false;
       }
-    else if (fieldOption.equals("2"))
+    else if (fieldOption == SyncPrefEnum.ALWAYS)
       {
 	if (debug)
 	  {
@@ -1243,7 +1244,7 @@ public class SyncRunner implements Runnable {
 
 	return true;
       }
-    else if (fieldOption.equals("1"))
+    else if (fieldOption == SyncPrefEnum.WHENCHANGED)
       {
 	if (debug)
 	  {
@@ -1298,105 +1299,114 @@ public class SyncRunner implements Runnable {
 
   public boolean mayInclude(short baseID, short fieldID, boolean hasChanged)
   {
-    String x = getOption(baseID, fieldID);
+    SyncPrefEnum x = getOption(baseID, fieldID);
 
-    if (hasChanged)
+    if (x == null)
       {
-	return (x != null && (x.equals("1") || x.equals("2")));
+	return false;
       }
-    else
+
+    switch (x)
       {
-	return (x != null && x.equals("2"));
+      case WHENCHANGED:
+	return hasChanged;
+
+      case ALWAYS:
+	return true;
+
+      default:
+	return false;
       }
   }
 
   /**
-   * <p>Returns the option string, if any, for the given base and field.
-   * This option string should be one of three values:</p>
+   * <p>Returns the SyncPrefEnum, if any, for the given
+   * field.  This enum can be one of three values:</p>
    *
-   * <p>"0", meaning the field is never included in this sync channel, nor
+   * <p>NEVER, meaning the field is never included in this sync channel, nor
    * should it be examined to make a decision about whether a given
    * object is written to this sync channel.</p>
    *
-   * <p>"1", meaning that the field is included in this sync channel if
+   * <p>WHENCHANGED, meaning that the field is included in this sync channel if
    * it has changed, and that the object that includes the field
    * should be written to the sync channel if this field was changed
-   * in the object.  If a field has an option string of "1" but has
+   * in the object.  If a field has an option string of WHENCHANGED but has
    * not changed in a given transaction, that field won't trigger the
    * object to be written to the sync channel.</p>
    *
-   * <p>"2", meaning that the field is always included in this sync
+   * <p>ALWAYS, meaning that the field is always included in this sync
    * channel if the object that it is contained in is sent to this
    * sync channel, even if it wasn't changed in the transaction.  If
    * this field was changed in a given transaction, that will suffice
    * to cause an object that is changed in any fashion during a
    * transaction to be sent to this sync channel.  In this sense, it
-   * is like "1", but with the added feature that it will "ride along"
+   * is like WHENCHANGED, but with the added feature that it will "ride along"
    * with its object to the sync channel, even if it wasn't changed
    * during the transaction.</p>
    *
-   * <p>If "1" or "2" is true for a field in a given object type, the
-   * corresponding option string for the object's type should be 1,
-   * signaling that at least some fields in the object should be sent
-   * to this sync channel when the object is involved in a
-   * transaction.</p>
+   * <p>If WHENCHANGED or ALWAYS is true for a field in a given object
+   * type, the corresponding SyncPrefEnum for the object's type should
+   * be WHENCHANGED, signaling that at least some fields in the object
+   * should be sent to this sync channel when the object is involved
+   * in a transaction.</p>
    */
 
-  private String getOption(DBField field)
+  private SyncPrefEnum getOption(DBField field)
   {
     return matrix.get(FieldOptionDBField.matrixEntry(field.getOwner().getTypeID(), field.getID()));
   }
 
   /**
-   * <p>Returns the option string, if any, for the given base and field.
-   * This option string should be one of three values:</p>
+   * <p>Returns the SyncPrefEnum, if any, for the given base and field ids.
+   * This enum can be one of three values:</p>
    *
-   * <p>"0", meaning the field is never included in this sync channel, nor
+   * <p>NEVER, meaning the field is never included in this sync channel, nor
    * should it be examined to make a decision about whether a given
    * object is written to this sync channel.</p>
    *
-   * <p>"1", meaning that the field is included in this sync channel if
+   * <p>WHENCHANGED, meaning that the field is included in this sync channel if
    * it has changed, and that the object that includes the field
    * should be written to the sync channel if this field was changed
-   * in the object.  If a field has an option string of "1" but has
+   * in the object.  If a field has an option string of WHENCHANGED but has
    * not changed in a given transaction, that field won't trigger the
    * object to be written to the sync channel.</p>
    *
-   * <p>"2", meaning that the field is always included in this sync
+   * <p>ALWAYS, meaning that the field is always included in this sync
    * channel if the object that it is contained in is sent to this
    * sync channel, even if it wasn't changed in the transaction.  If
    * this field was changed in a given transaction, that will suffice
    * to cause an object that is changed in any fashion during a
    * transaction to be sent to this sync channel.  In this sense, it
-   * is like "1", but with the added feature that it will "ride along"
+   * is like WHENCHANGED, but with the added feature that it will "ride along"
    * with its object to the sync channel, even if it wasn't changed
    * during the transaction.</p>
    *
-   * <p>If "1" or "2" is true for a field in a given object type, the
-   * corresponding option string for the object's type should be 1,
-   * signaling that at least some fields in the object should be sent
-   * to this sync channel when the object is involved in a
-   * transaction.</p>
+   * <p>If WHENCHANGED or ALWAYS is true for a field in a given object
+   * type, the corresponding SyncPrefEnum for the object's type should
+   * be WHENCHANGED, signaling that at least some fields in the object
+   * should be sent to this sync channel when the object is involved
+   * in a transaction.</p>
    */
 
-  private String getOption(short baseID, short fieldID)
+  private SyncPrefEnum getOption(short baseID, short fieldID)
   {
     return matrix.get(FieldOptionDBField.matrixEntry(baseID, fieldID));
   }
 
   /**
-   * <p>Returns the option string, if any, for the given base.  This option
+   * <p>Returns the SyncPrefEnum, if any, for the given base.  This option
    * string should be one of two values:</p>
    *
-   * <p>"0", meaning that this object type will never be sent to this
+   * <p>NEVER, meaning that this object type will never be sent to this
    * sync channel.</p>
    *
-   * <p>"1", meaning that this object type may be sent to this sync
-   * channel if any field contained within it which has an option
-   * string of "1" or "2" was changed during the transaction.
+   * <p>WHENCHANGED, meaning that this object type may be sent to this
+   * sync channel if any field contained within it which has a
+   * SyncPrefEnum of WHENCHANGED or ALWAYS was changed during the
+   * transaction.
    */
 
-  private String getOption(short baseID)
+  private SyncPrefEnum getOption(short baseID)
   {
     return matrix.get(FieldOptionDBField.matrixEntry(baseID));
   }

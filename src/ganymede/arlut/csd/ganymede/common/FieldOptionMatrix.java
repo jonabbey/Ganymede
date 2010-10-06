@@ -94,61 +94,61 @@ public class FieldOptionMatrix implements java.io.Serializable {
 
   // ---
 
-  public Map<String, String> matrix;
+  public Map<String, SyncPrefEnum> matrix;
 
   /* -- */
 
   public FieldOptionMatrix()
   {
-    matrix = new HashMap<String, String>();
+    matrix = new HashMap<String, SyncPrefEnum>();
   }
 
-  public FieldOptionMatrix(Map<String, String> orig)
+  public FieldOptionMatrix(Map<String, SyncPrefEnum> orig)
   {
     if (orig == null)
       {
-	this.matrix = new HashMap<String, String>();
+	this.matrix = new HashMap<String, SyncPrefEnum>();
       }
     else
       {
-	this.matrix = new HashMap<String, String>(orig);
+	this.matrix = new HashMap<String, SyncPrefEnum>(orig);
       }
   }
 
   public FieldOptionMatrix(FieldOptionMatrix orig)
   {
-    this.matrix = new HashMap<String, String>(orig.matrix);
+    this.matrix = new HashMap<String, SyncPrefEnum>(orig.matrix);
   }
 
   /**
-   * <P>Returns a String representing this FieldOptionMatrix's 
+   * <P>Returns a SyncPrefEnum representing this FieldOptionMatrix's 
    * option on the field &lt;fieldID&gt; in base &lt;baseID&gt;</P>
    *
    * <P>If there is no entry in this FieldOptionMatrix for the given
    * field, getOption() will return null.</P>
    */
 
-  public String getOption(short baseID, short fieldID)
+  public SyncPrefEnum getOption(short baseID, short fieldID)
   {
     return matrix.get(matrixEntry(baseID, fieldID));
   }
 
   /**
-   * <P>Returns a String object representing this FieldOptionMatrix's 
+   * <P>Returns a SyncPrefeEnum representing this FieldOptionMatrix's 
    * option on the base &lt;baseID&gt;</P>
    */
 
-  public String getOption(short baseID)
+  public SyncPrefEnum getOption(short baseID)
   {
-    return (String) matrix.get(matrixEntry(baseID));
+    return matrix.get(matrixEntry(baseID));
   }
 
   /**
-   * <P>Returns a String representing this FieldOptionMatrix's 
+   * <P>Returns a SyncPrefEnum representing this FieldOptionMatrix's 
    * option on the field &lt;field&gt; in base &lt;base&gt;</P>
    */
 
-  public String getOption(Base base, BaseField field)
+  public SyncPrefEnum getOption(Base base, BaseField field)
   {
     try
       {
@@ -161,11 +161,11 @@ public class FieldOptionMatrix implements java.io.Serializable {
   }
 
   /**
-   * <P>Returns a String representing this FieldOptionMatrix's 
+   * <P>Returns a SyncPrefEnum representing this FieldOptionMatrix's 
    * option on the base &lt;base&gt;</P>
    */
 
-  public String getOption(Base base)
+  public SyncPrefEnum getOption(Base base)
   {
     try
       {
@@ -221,14 +221,14 @@ public class FieldOptionMatrix implements java.io.Serializable {
    * object id encoded by the given String.
    */
 
-  private short entryBase(String matrixEntry)
+  private short entryBase(String matrixKey)
   {
-    if (matrixEntry.indexOf(':') == -1)
+    if (matrixKey.indexOf(':') == -1)
       {
 	throw new IllegalArgumentException("not a valid matrixEntry");
       }
 
-    String baseStr = matrixEntry.substring(0, matrixEntry.indexOf(':'));
+    String baseStr = matrixKey.substring(0, matrixKey.indexOf(':'));
 
     try
       {
@@ -249,19 +249,19 @@ public class FieldOptionMatrix implements java.io.Serializable {
    * object id encoded by the given String.
    */
   
-  private short entryField(String matrixEntry)
+  private short entryField(String matrixKey)
   {
-    if (matrixEntry.indexOf(':') == -1)
+    if (matrixKey.indexOf(':') == -1)
       {
 	throw new IllegalArgumentException("not a valid matrixEntry");
       }
 
-    if (isBase(matrixEntry))
+    if (isBase(matrixKey))
       {
 	throw new IllegalArgumentException("not a field matrixEntry");
       }
 
-    String fieldStr = matrixEntry.substring(matrixEntry.lastIndexOf(':')+1);
+    String fieldStr = matrixKey.substring(matrixKey.lastIndexOf(':')+1);
 
     try
       {
@@ -279,15 +279,15 @@ public class FieldOptionMatrix implements java.io.Serializable {
    * a matrixEntry() encoded String that also includes a field specification.</P>
    */
 
-  private String baseEntry(String matrixEntry)
+  private String baseEntry(String matrixKey)
   {
-    if (isBase(matrixEntry))
+    if (isBase(matrixKey))
       {
-	return matrixEntry;
+	return matrixKey;
       }
     else
       {
-	return matrixEntry(entryBase(matrixEntry));
+	return matrixEntry(entryBase(matrixKey));
       }
   }
 

@@ -74,6 +74,7 @@ import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.PermEntry;
 import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SyncPrefEnum;
 import arlut.csd.ganymede.rmi.pass_field;
 import arlut.csd.ganymede.rmi.perm_field;
 import arlut.csd.ganymede.rmi.field_option_field;
@@ -520,7 +521,7 @@ public class xmlfield implements FieldType {
 
 	    skipToEndField(elementName);
 
-	    throw new NullPointerException("void field def");	    
+	    throw new NullPointerException("void field def");
 	  }
 	else
 	  {
@@ -2469,7 +2470,7 @@ class xOption {
    * <p>The option for this xOption.</p>
    */
 
-  String option;
+  SyncPrefEnum option;
 
   /* -- */
 
@@ -2501,7 +2502,7 @@ class xOption {
 	label = label.intern();
       }
 
-    String myOption = item.getAttrStr("option").intern();
+    SyncPrefEnum myOption = SyncPrefEnum.find(item.getAttrStr("option"));
 
     if (myOption == null)
       {
@@ -2537,7 +2538,7 @@ class xOption {
     return label;
   }
 
-  public String getOption()
+  public SyncPrefEnum getOption()
   {
     return this.option;
   }

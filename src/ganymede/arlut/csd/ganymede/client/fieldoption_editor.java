@@ -308,8 +308,8 @@ public class fieldoption_editor extends JFrame
     FieldOptionMatrix matrix;
     BaseDump base;
     FieldTemplate template;
-    int basevalue, fieldvalue;
-    String entry;
+    SyncPrefEnum basevalue, fieldvalue;
+    SyncPrefEnum entry;
     Vector fields;
     Enumeration en;
     short id;
@@ -318,7 +318,7 @@ public class fieldoption_editor extends JFrame
 
     matrix = opField.getMatrix();
 
-    rootNode = new DefaultMutableTreeNode(new FieldOptionRow(null, null, 0));
+    rootNode = new DefaultMutableTreeNode(new FieldOptionRow(null, null, SyncPrefEnum.NEVER));
 
     /* Get a list of base types from the gclient 
      * (we really just care about their names and id's)
@@ -340,7 +340,7 @@ public class fieldoption_editor extends JFrame
          * base to anything other than 0, the GUI will automatically flip all
          * of its constituent fields to "1", aka "When changed". We don't want
          * this, so we'll skip reading the object base's value from the db. */
-        basevalue = 0;
+        basevalue = SyncPrefEnum.NEVER;
 
 	baseNode = new DefaultMutableTreeNode(new FieldOptionRow(base, null, basevalue));
 	rootNode.add(baseNode);
@@ -385,7 +385,8 @@ public class fieldoption_editor extends JFrame
                  * this is a totally hard-coded assumption. Presumably, this
                  * will be remedied with an interface that declares some
                  * constants or the like. */
-                fieldvalue = Integer.parseInt(entry);
+
+                fieldvalue = entry;
 	      }
 
             /* Create a new child node for this field and add it to the node
@@ -491,7 +492,7 @@ public class fieldoption_editor extends JFrame
         DefaultMutableTreeNode node = (DefaultMutableTreeNode)en.nextElement();
         FieldOptionRow row = (FieldOptionRow)node.getUserObject();
 
-        if (row.isBase() && (row.getOptionValue() != 0))
+        if (row.isBase() && (row.getOptionValue() != SyncPrefEnum.NEVER))
 	  {
 	    TreePath path = new TreePath(node.getPath());
 	    tree.expandPath(path);
@@ -510,7 +511,7 @@ public class fieldoption_editor extends JFrame
     BaseDump bd;
     String baseName, templateName;
     FieldTemplate template;
-    int value;
+    SyncPrefEnum value;
    
     if (debug)
       {
@@ -540,7 +541,7 @@ public class fieldoption_editor extends JFrame
 			System.err.println("Setting " + bd.getName() + " to " + value);
 		      }
 
-                    gc.handleReturnVal(opField.setOption(bd.getTypeID(), String.valueOf(value)));
+                    gc.handleReturnVal(opField.setOption(bd.getTypeID(), value));
                   }
                 catch (Exception ex)
                   {
@@ -561,7 +562,7 @@ public class fieldoption_editor extends JFrame
 
                 try
                   {
-                    gc.handleReturnVal(opField.setOption(template.getBaseID(), template.getID(), String.valueOf(value)));
+                    gc.handleReturnVal(opField.setOption(template.getBaseID(), template.getID(), value));
                   }
                 catch (Exception ex)
                   {
@@ -606,7 +607,7 @@ class FieldOptionRow {
   private Object reference;
 
   /* The actual field option value */
-  private int opValue;
+  private SyncPrefEnum opValue;
 
   /* True if we've edited the contained field option value */
   private boolean changed;
@@ -617,7 +618,7 @@ class FieldOptionRow {
   /* Is this row representing a built-in field or not? */
   private boolean builtin = false;
 
-  public FieldOptionRow(BaseDump base, FieldTemplate field, int opValue) 
+  public FieldOptionRow(BaseDump base, FieldTemplate field, SyncPrefEnum opValue) 
   {
     this.opValue = opValue;
 
@@ -667,12 +668,12 @@ class FieldOptionRow {
     this.builtin = builtin;
   }
   
-  public int getOptionValue()
+  public SyncPrefEnum getOptionValue()
   {
     return opValue;
   }
 
-  public void setOptionValue(int newVal)
+  public void setOptionValue(SyncPrefEnum newVal)
   {
     this.opValue = newVal;
   }
@@ -775,7 +776,7 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
     switch(column) 
       {
       case 1:
-	return Integer.valueOf(myRow.getOptionValue());
+	return myRow.getOptionValue();
       }
 
     return null;
@@ -800,19 +801,19 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
 	System.err.println("SETVALUE: " + myRow.toString() + " :: " + value.toString());
       }
 
-    int newVal;
+    SyncPrefEnum newVal;
 
     if (((String)value).equals(fieldoption_editor.labels[0])) // "Never"
       {
-	newVal = 0;
+	newVal = SyncPrefEnum.NEVER;
       }
     else if (((String)value).equals(fieldoption_editor.labels[1])) // "When Changed"
       {
-	newVal = 1;
+	newVal = SyncPrefEnum.ALWAYS;
       }
     else
       {
-	newVal = 2;
+	newVal = SyncPrefEnum.WHENCHANGED;
       }
 
     /* If we're not changing anything, then bail out */
@@ -833,7 +834,7 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
 	  {
             setBaseChildren((DefaultMutableTreeNode)node, newVal);
 
-	    if (newVal == 1)
+	    if (newVal == SyncPrefEnum.WHENCHANGED)
 	      {
 		TreePath path = new TreePath(((DefaultMutableTreeNode)node).getPath());
 		foe.tree.expandPath(path);
@@ -865,7 +866,7 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
   {
     /* Is this node checked or not? */
     boolean checked;
-    if (((Integer) getValueAt(node, 1)).intValue() == 0)
+    if (((SyncPrefEnum) getValueAt(node, 1)) == SyncPrefEnum.NEVER)
       {
 	checked = false;
       }
@@ -879,7 +880,7 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
 
     for (Enumeration e = ((DefaultMutableTreeNode)node).children(); e.hasMoreElements();) 
       {
-        if (((Integer) getValueAt(e.nextElement(), 1)).intValue() > 0)
+        if (((SyncPrefEnum) getValueAt(e.nextElement(), 1)) != SyncPrefEnum.NEVER)
 	  {
 	    numNonZeroNodes++;
 	  }
@@ -888,13 +889,13 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
     if (checked && (numNonZeroNodes == 0))
       {
 	FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject(); 
-	myRow.setOptionValue(0);
+	myRow.setOptionValue(SyncPrefEnum.NEVER);
 	myRow.setChanged(true);
       }
     else if (!checked && (numNonZeroNodes > 0))
       {
 	FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject(); 
-	myRow.setOptionValue(1);
+	myRow.setOptionValue(SyncPrefEnum.WHENCHANGED);
 	myRow.setChanged(true);
       }
 
@@ -907,7 +908,7 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
   /**
    * Give the children of 'node' the value of 'value
    */
-  public void setBaseChildren(DefaultMutableTreeNode node, int value) 
+  public void setBaseChildren(DefaultMutableTreeNode node, SyncPrefEnum value)
   {
     for (Enumeration e = node.children(); e.hasMoreElements();) 
       {
@@ -955,7 +956,7 @@ class DelegateRenderer implements TableCellRenderer
   {
     DefaultMutableTreeNode node = (DefaultMutableTreeNode) (model.nodeForRow(row));
     FieldOptionRow qrow = (FieldOptionRow) (node.getUserObject());
-    int opvalue = qrow.getOptionValue();
+    SyncPrefEnum opvalue = qrow.getOptionValue();
 
     /* ObjectBases are rendered as checkboxes */
     if (qrow.isBase())
@@ -971,7 +972,7 @@ class DelegateRenderer implements TableCellRenderer
 	  }
 	else	/* If we're read-only, then use a simple JLabel */
 	  {
-	    return new JLabel(fieldoption_editor.labels[opvalue]);
+	    return new JLabel(opvalue.toString());
 	  }
       }
   }
@@ -1016,11 +1017,11 @@ class DelegateEditor extends javax.swing.AbstractCellEditor implements TableCell
       {
 	if (((JCheckBox)this.delegate).isSelected())
 	  {
-	    return fieldoption_editor.labels[1]; // "When Changed"
+	    return SyncPrefEnum.WHENCHANGED.toString();
 	  }
 	else
 	  {
-	    return fieldoption_editor.labels[0]; // "Never"
+	    return SyncPrefEnum.NEVER.toString();
 	  }
       }
     else
@@ -1038,7 +1039,7 @@ class DelegateEditor extends javax.swing.AbstractCellEditor implements TableCell
   {
     DefaultMutableTreeNode node = (DefaultMutableTreeNode) (model.nodeForRow(row));
     FieldOptionRow qrow = (FieldOptionRow) (node.getUserObject());
-    int opvalue = qrow.getOptionValue();
+    SyncPrefEnum opvalue = qrow.getOptionValue();
 
     /* Object bases are rendered as checkboxes */
     if (qrow.isBase())
@@ -1067,14 +1068,14 @@ class CheckBoxRenderer extends JCheckBox implements TableCellRenderer, ActionLis
   /* Reference to the main JTreeTable */
   JTreeTable treetable;
 
-  public CheckBoxRenderer(boolean editable, JTreeTable treetable, int onOrOff)
+  public CheckBoxRenderer(boolean editable, JTreeTable treetable, SyncPrefEnum onOrOff)
   {
     this.treetable = treetable;
 
     setEnabled(editable);
 
     /* Set the inital state of the checkbox */
-    if (onOrOff == 0)
+    if (onOrOff == SyncPrefEnum.NEVER)
       {
 	setSelected(false);
       }
@@ -1136,28 +1137,28 @@ class ComboRenderer extends JComboBox implements TableCellRenderer, ItemListener
   /* Sort of a hack; used to hold onto the previous selection index */
   int selindex;
   
-  public ComboRenderer(boolean editable, JTreeTable treetable, int selectionIndex)
+  public ComboRenderer(boolean editable, JTreeTable treetable, SyncPrefEnum selectionIndex)
   {
     /* Pass in the list of Strings to display in the combo box */
     super(fieldoption_editor.labels);
     this.treetable = treetable;
-    this.selindex = selectionIndex;
+    this.selindex = selectionIndex.ord();
 
     setEnabled(editable);
     setEditable(false);
     addItemListener(this);
     setBackground(treetable.getTree().getBackground());
-    setSelectedIndex(selectionIndex);
+    setSelectedIndex(selectionIndex.ord());
   }
   
   public Component getTableCellRendererComponent(JTable table, 
-                                                 Object value, 
+                                                 Object value,
                                                  boolean isSelected,
                                                  boolean hasFocus,
                                                  int row,
                                                  int column)
   {
-    int labelIndex = ((Integer)value).intValue();
+    int labelIndex = ((SyncPrefEnum)value).ord();
     setSelectedIndex(labelIndex);
     this.selindex = labelIndex;
     return this;
