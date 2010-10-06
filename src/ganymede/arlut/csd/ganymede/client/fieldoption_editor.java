@@ -809,11 +809,11 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
       }
     else if (((String)value).equals(fieldoption_editor.labels[1])) // "When Changed"
       {
-	newVal = SyncPrefEnum.ALWAYS;
+	newVal = SyncPrefEnum.WHENCHANGED;
       }
     else
       {
-	newVal = SyncPrefEnum.WHENCHANGED;
+	newVal = SyncPrefEnum.ALWAYS;
       }
 
     /* If we're not changing anything, then bail out */
