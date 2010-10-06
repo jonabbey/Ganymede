@@ -82,6 +82,8 @@ import arlut.csd.Util.TranslationService;
 public enum SyncPrefEnum {
 
   /**
+   * <p>Don't write an object or field out.</p>
+   *
    * <p>When used to control an object-level synchronization, NEVER
    * means that the object should not be written to the Sync Channel,
    * no matter what was done to the object during a transaction.</p>
@@ -95,6 +97,8 @@ public enum SyncPrefEnum {
   NEVER,
 
   /**
+   * <p>Write an object or field out if it changed.</p>
+   *
    * <p>When used to control an object-level synchronization,
    * WHENCHANGED means that the object should be written to the Sync
    * Channel if any WHENCHANGED or ALWAYS fields contained within it
@@ -108,10 +112,13 @@ public enum SyncPrefEnum {
   WHENCHANGED,
 
   /**
+   * <p>Write a field out if it or any other WHENCHANGED or ALWAYS
+   * field in the object is changed.</p>
+   *
    * <p>When used to control synchronization for a specific field,
    * ALWAYS means that the field should always be included whenever
-   * any part of the object that it is contained in is written to the
-   * Sync Channel.</p>
+   * any part of the WHENCHANGED object that it is contained in is
+   * written to the Sync Channel.</p>
    *
    * <p>ALWAYS is like WHENCHANGED plus; if an ALWAYS field is changed
    * by a transaction, that will suffice to cause the containing
