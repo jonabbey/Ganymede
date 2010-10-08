@@ -2842,6 +2842,8 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>Used by the DBStore to mark certain scratch fields as being
    * permanently hidden without having to set a custom DBEditObject
    * subclass to declare the non-visibility of the field.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public void setVisibility(boolean visibility)
