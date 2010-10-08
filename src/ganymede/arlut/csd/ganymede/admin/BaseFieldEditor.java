@@ -238,9 +238,8 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     // name), but disallow the underscore char, which we use in place
     // of the space when we write out the base name as an XML entity.
 
-    nameS = new JstringField(20, 100,  true, false,
-			     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789 .-", 
-			     null);
+    nameS = new JstringField(20, 100,  true, false, null, null);
+
     nameS.setCallback(this);
 
     commentT = new JstringArea(4, 20);
