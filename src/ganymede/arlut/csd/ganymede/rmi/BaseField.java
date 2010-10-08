@@ -237,6 +237,16 @@ public interface BaseField extends Remote {
   public boolean isIP() throws RemoteException;
 
   /**
+   * <p>Method to set the visibility or invisibility of this field.</p>
+   *
+   * <p>Used by the DBStore to mark certain scratch fields as being
+   * permanently hidden without having to set a custom DBEditObject
+   * subclass to declare the non-visibility of the field.</p>
+   */
+
+  public void setVisibility(boolean visibility) throws RemoteException;
+
+  /**
    * <p>Sets the {@link arlut.csd.ganymede.common.FieldType field type}
    * for this field.  Changing the basic type of a field that is already being
    * used in the server will cause very bad things to happen.  The

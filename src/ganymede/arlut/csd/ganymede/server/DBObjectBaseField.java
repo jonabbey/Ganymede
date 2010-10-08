@@ -2837,11 +2837,11 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /**
-   * Method to set the visibility or invisibility of this field.
+   * <p>Method to set the visibility or invisibility of this field.</p>
    *
-   * Used by the DBStore to mark certain scratch fields as being
+   * <p>Used by the DBStore to mark certain scratch fields as being
    * permanently hidden without having to set a custom DBEditObject
-   * subclass to declare the non-visibility of the field.
+   * subclass to declare the non-visibility of the field.</p>
    */
 
   public void setVisibility(boolean visibility)

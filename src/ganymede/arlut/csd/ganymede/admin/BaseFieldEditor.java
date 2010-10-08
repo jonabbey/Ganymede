@@ -166,6 +166,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     shaUnixCryptRoundsN;	// password
 
   JcheckboxField
+    invisibleCF,		// all
     vectorCF,			// invid, string, ip
     labeledCF,			// boolean
     editInPlaceCF,		// invid
@@ -281,6 +282,9 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     history_depthN = new JnumberField(20, true, false, 0, Integer.MAX_VALUE);
     history_depthN.setCallback(this);
 
+    invisibleCF = new JcheckboxField(null, false, true);
+    invisibleCF.setCallback(this);
+
     cryptedCF = new JcheckboxField(null, false, true);
     cryptedCF.setCallback(this);
 
@@ -360,6 +364,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     editPanel.addFillRow(ts.l("setupEditPanel.fieldIdRow"), idN); // "Field ID:"
     editPanel.addFillRow(ts.l("setupEditPanel.fieldNameRow"), nameS); // "Field Name:"
     editPanel.addFillRow(ts.l("setupEditPanel.commentRow"), commentT); // "Comment:"
+    editPanel.addFillRow(ts.l("setupEditPanel.invisible"), invisibleCF); // "Invisible Field:"
     editPanel.addFillRow(ts.l("setupEditPanel.vectorRow"), vectorCF);	// "Vector:"
     editPanel.addFillRow(ts.l("setupEditPanel.arraySizeRow"), maxArrayN); // "Max Array Size:"
     editPanel.addFillRow(ts.l("setupEditPanel.fieldTypeRow"), typeC); // "Field Type:"
@@ -432,6 +437,8 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
       {
 	System.out.println(" Checking visibility");
       }
+
+    editPanel.setRowVisible(invisibleCF, true);
 
     if (stringShowing || ipShowing || referenceShowing)
       {
@@ -1042,6 +1049,8 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	nameS.setText(fieldDef.getName());
 	commentT.setText(fieldDef.getComment());
 
+	invisibleCF.setSelected(!fieldDef.isVisible(), false);
+
         if (fieldDef.isArray())
 	  {
 	    vectorCF.setSelected(true, false);
@@ -1606,6 +1615,15 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 	      {
 		refreshFieldEdit(false);
 	      }
+	  }
+	else if (comp == invisibleCF)
+	  {
+	    if (debug)
+	      {
+		System.out.println("vectorCF");
+	      }
+
+	    fieldDef.setVisibility(!invisibleCF.isSelected());
 	  }
 	else if (comp == vectorCF)
 	  {
@@ -2400,8 +2418,6 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
   private boolean handleReturnVal(ReturnVal retVal)
   {
-    ReturnVal rv = owner.handleReturnVal(retVal);
-
-    return (rv == null || rv.didSucceed());
+    return ReturnVal.didSucceed(owner.handleReturnVal(retVal));
   }
 }
