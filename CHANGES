@@ -1740,6 +1740,30 @@ vertical space taken up by those constant fields.
 
 This will provide more space for the log box.
 
+118. [SERVER] Fixed a security vulnerability in PasswordDBField
+
+The arlut.csd.ganymede.rmi.pass_field remote interface was providing
+remote access to a method that allowed an override of Ganymede's
+permission system.  This method was created for the purpose of
+supporting the xml data loading subsystem, but it should not have been
+exposed to remote clients.
+
+This vulnerability would allow a user who had both valid login access
+to the Ganymede server and permission to edit an object containing a
+password field the ability to set the password in that field, even if
+the Ganymede server was configured not to allow the user to edit the
+password field specifically.
+
+In order to take advantage of this vulnerability, an attacker would
+need to create his own custom client to call the vulnerable published
+method.
+
+And, as mentioned above, valid authority to login to the system and
+edit the object in question.
+
+This method has been removed from the pass_field remote interface,
+removing the ability for a custom client to bypass field permissions.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
