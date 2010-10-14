@@ -11,9 +11,9 @@
    Module By: Navin Manohar, Mike Mulvaney, and Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2010
    The University of Texas at Austin
 
@@ -137,12 +137,12 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
   public static final boolean hideLoginWhenApplication = true;
 
-  public static String 
+  public static String
     properties_file = null,
     serverhost = null,
     server_url = null,
     helpBase = null;
-  
+
   public static Integer
     registryPort = null;
 
@@ -153,14 +153,14 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
   public static int registryPortProperty = 1099;
 
-  /** 
+  /**
    * Client-side properties loaded from the command line or from the
    * web page which contains the definition for glogin as an applet.
    */
 
   public static Properties ganymedeProperties = null;
 
-  /** 
+  /**
    * The main client class, will be null until the user is logged in
    * to the server.
    */
@@ -174,9 +174,9 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
   protected static JFrame my_frame = null;
 
-  /** 
+  /**
    * Reference to the server acquired by RMI naming service.  Used to
-   * log into the server.  
+   * log into the server.
    */
 
   protected static Server  my_server;
@@ -286,7 +286,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
   /**
    * This main() function will allow this applet to run as an application
-   * when it is not executed in the context of a browser.  
+   * when it is not executed in the context of a browser.
    */
 
   public static void main (String args[])
@@ -364,7 +364,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		// in mid-configuration.  FindBugs.
 
 		Properties myGanymedeProperties = new Properties();
-	
+
 		if (debug)
 		  {
 		    System.out.println("Loading properties from: " + properties_file);
@@ -476,7 +476,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	  }
       }
   }
-  
+
   public glogin()
   {
     // we'll offer to send any uncaught exceptions to the server,
@@ -501,7 +501,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
    * Standard applet initialization method.
    */
 
-  public void init() 
+  public void init()
   {
     if (debug)
       {
@@ -513,10 +513,10 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     gclient.sizer.restoreLookAndFeel();
 
     // Retrieve the ganymede logo using the appropriate method
-    
+
     ganymede_logo = PackageResources.getImageResource(this, "ganymede.jpg", getClass());
     ganymede_ssl_logo = PackageResources.getImageResource(this, "ssl_ganymede.jpg", getClass());
-   
+
     if (WeAreApplet)
       {
 	my_glogin = this;
@@ -524,7 +524,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
       }
 
     serverhost = getConfigString("ganymede.serverhost");
-    
+
     try
       {
 	registryPort = getConfigInteger("ganymede.registryPort");
@@ -541,9 +541,9 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     // The Login GUI has been set up.  Now the server connection needs
     // to be properly established.
-    
+
     my_client = new ClientBase(server_url, this);
-    
+
     /* Spawn a thread to get connected to the server, using the
      * ClientBase we just created */
 
@@ -586,8 +586,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     labelPanel.add("North", label);
 
     // "{0}, port {1,number,#}"
-    JLabel hostLabel = new JLabel(ts.l("createLoginPanel.server_label2", 
-				       serverhost, 
+    JLabel hostLabel = new JLabel(ts.l("createLoginPanel.server_label2",
+				       serverhost,
 				       Integer.valueOf(registryPort)));
     Font x = new Font("Courier", Font.ITALIC, 14);
     hostLabel.setFont(x);
@@ -629,7 +629,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     gbl.setConstraints(username, gbc);
     username.setEnabled(false);
     loginBox.add(username);
-    
+
     // "Password:"
     JLabel passL = new JLabel(ts.l("createLoginPanel.password"));
     gbc.fill = GridBagConstraints.NONE;
@@ -651,7 +651,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     gbc.ipady = 0;
 
-    // "Quit"    
+    // "Quit"
     _quitButton = new JButton(ts.l("createLoginPanel.quitButton"));
 
     // "Connecting... {0}"
@@ -690,7 +690,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
    * server has been made.
    */
 
-  public void run() 
+  public void run()
   {
     int try_number = 0;
 
@@ -726,7 +726,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	      {
 		ex.printStackTrace();
 	      }
-	    
+
 	    try
 	      {
 		my_client.connect();	// exceptions ahoy!
@@ -744,20 +744,20 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		  }
 	      }
 
-	    try 
+	    try
 	      {
 		spindex++;
-		
+
 		if (spindex >= spinAry.length)
 		  {
 		    spindex = 0;
 		  }
-		
+
 		// Wait for 1/4 sec before retrying to connect to server
-		
+
 		Thread.sleep(250);
 	      }
-	    catch (InterruptedException e) 
+	    catch (InterruptedException e)
 	      {
 	      }
 	  }
@@ -786,13 +786,13 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		  enableButtons(true);
 		  connector.paintImmediately(connector.getVisibleRect());
 		  setNormalCursor();
-		
+
 		  username.setEnabled(true);
 		  passwd.setEnabled(true);
 		  username.paintImmediately(username.getVisibleRect());
 		  passwd.paintImmediately(passwd.getVisibleRect());
 		  username.requestFocus();
-		
+
 		  invalidate();
 		  validate();
 		}
@@ -804,13 +804,13 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	    // "Couldn''t locate Ganymede server.  Perhaps it is down?\n\n{0}"
 	    // "OK"
 	    new StringDialog(my_frame,
-			     ts.l("run.login_error"), 
+			     ts.l("run.login_error"),
 			     ts.l("run.login_error_text", connectError),
 			     ts.l("global.ok"),
 			     null,
 			     getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
 
-	    EventQueue.invokeLater(new Runnable() 
+	    EventQueue.invokeLater(new Runnable()
 	      {
 		public void run()
 		{
@@ -818,7 +818,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		  connector.setText(ts.l("global.connect_text"));
 		  username.setEnabled(false);
 		  passwd.setEnabled(false);
-		  
+
 		  username.requestFocus();
 		  invalidate();
 		  validate();
@@ -914,7 +914,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
    * If the applet is no longer visible on the page, we exit.
    */
 
-  public void destroy() 
+  public void destroy()
   {
     logout();
   }
@@ -1000,7 +1000,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	    my_passwd = pword;
             active_passwd = pword;
 	    my_session = null;
-	
+
 	    try
 	      {
 		my_session = my_client.login(uname, pword);
@@ -1011,11 +1011,11 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		new JErrorDialog(my_frame,
 				 ts.l("actionPerformed.login_failure", ex.getMessage()),
 				 getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL);
-	    
+
 		enableButtons(true);
 	      }
-	    
-	    if (my_session != null) 
+
+	    if (my_session != null)
 	      {
 		// we need to look up our real username from the
 		// server, since we might have been logged in using a
@@ -1034,7 +1034,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		enableButtons(false);
 		startSession(my_session);
 	      }
-	    else 
+	    else
 	      {
 		// This means that the user was not able to log into the server properly.
 
@@ -1108,7 +1108,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     // now that we've got the g_client reference DeathWatcherThread
     // will need, have the client do its post-setup initialization,
     // including perhaps blocking on the persona dialog.
-    
+
     g_client.start();
   }
 
@@ -1217,7 +1217,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   /**
    * <p>Loads and returns the error Image for use in client
    * dialogs.</p>
-   * 
+   *
    * <p>Once the image is loaded, it is cached for future calls to
    * getErrorImage().</p>
    */
@@ -1228,7 +1228,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
       {
 	errorImage = PackageResources.getImageResource(this, "error.gif", getClass());
       }
-    
+
     return errorImage;
   }
 }
@@ -1239,7 +1239,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
 ------------------------------------------------------------------------------*/
 
-/** 
+/**
  * <p>Client-side background thread to handle force disconnect
  * commands from the server.  We need this thread because jdk 1.2 has
  * a bug where RMI callbacks are not privileged to interact with the
@@ -1440,7 +1440,7 @@ class gloginFrame extends JFrame {
   glogin client;
 
   /* -- */
-  
+
   public gloginFrame(String title, glogin client)
   {
     super(title);
@@ -1448,7 +1448,7 @@ class gloginFrame extends JFrame {
     enableEvents(AWTEvent.WINDOW_EVENT_MASK);
   }
 
-  protected void processWindowEvent(WindowEvent e) 
+  protected void processWindowEvent(WindowEvent e)
   {
     if (e.getID() == WindowEvent.WINDOW_CLOSING)
       {
