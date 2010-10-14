@@ -724,7 +724,10 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     client = this;
 
-    Invid.setAllocator(new InvidPool(3257)); // modest sized prime, should be adequate for the client
+    if (!Invid.hasAllocator())
+      {
+	Invid.setAllocator(new InvidPool(3257)); // modest sized prime, should be adequate for the client
+      }
 
     if (!debug)
       {
