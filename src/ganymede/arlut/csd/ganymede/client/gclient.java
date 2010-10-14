@@ -1110,9 +1110,11 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	fileMenu.add(logoutMI);
       }
 
-    // Edit menu
+    // Edit menu.. don't enable until i figure out whether we actually
+    // need it, and how to update the activation status of the menu
+    // items based on swing focus.
 
-    if (glogin.isRunningOnMac())
+    if (false && glogin.isRunningOnMac())
       {
 	editMenu = new JMenu(ts.l("createMenuBar.edit_menu")); // "Edit"
 
@@ -1275,7 +1277,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     menubar.add(fileMenu);
 
-    if (glogin.isRunningOnMac())
+    if (false && glogin.isRunningOnMac())
       {
 	menubar.add(editMenu);
       }
