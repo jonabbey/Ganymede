@@ -1114,7 +1114,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (glogin.isRunningOnMac())
       {
-	editMenu = new JMenu(ts.l("createMenuBar.edit_menu_mac")); // "Edit"
+	editMenu = new JMenu(ts.l("createMenuBar.edit_menu")); // "Edit"
 
 	cutMI = new JMenuItem(ts.l("createMenuBar.edit_menu_0")); // "Cut"
 	setAccelerator(cutMI, ts.l("createMenuBar.edit_menu_0_mac_accelerator_optional")); // "X"
