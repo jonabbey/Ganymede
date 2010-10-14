@@ -576,6 +576,9 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     menubar;
 
   JMenuItem
+    copyMI,
+    cutMI,
+    pasteMI,
     logoutMI,
     clearTreeMI,
     filterQueryMI,
@@ -638,9 +641,10 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     my_username;
 
   JMenu
+    fileMenu,
+    editMenu,
     actionMenu,
     windowMenu,
-    fileMenu,
     helpMenu,
     PersonaMenu = null;
 
@@ -1106,6 +1110,28 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	fileMenu.add(logoutMI);
       }
 
+    // Edit menu
+
+    if (glogin.isRunningOnMac())
+      {
+	editMenu = new JMenu(ts.l("createMenuBar.edit_menu_mac")); // "Edit"
+
+	cutMI = new JMenuItem(ts.l("createMenuBar.edit_menu_0")); // "Cut"
+	setAccelerator(cutMI, ts.l("createMenuBar.edit_menu_0_mac_accelerator_optional")); // "X"
+	cutMI.addActionListener(this);
+	editMenu.add(cutMI);
+	
+	copyMI = new JMenuItem(ts.l("createMenuBar.edit_menu_1")); // "Copy"
+	setAccelerator(copyMI, ts.l("createMenuBar.edit_menu_1_mac_accelerator_optional")); // "C"
+	copyMI.addActionListener(this);
+	editMenu.add(copyMI);
+	
+	pasteMI = new JMenuItem(ts.l("createMenuBar.edit_menu_2")); // "Paste"
+	setAccelerator(pasteMI, ts.l("createMenuBar.edit_menu_2_mac_accelerator_optional")); // "V"
+	pasteMI.addActionListener(this);
+	editMenu.add(pasteMI);
+      }
+
     // Action menu
 
     // "Actions"
@@ -1141,7 +1167,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     menubarQueryMI.addActionListener(this);
 
     // We created "View Object" and "Create Object" above.  If we're
-    // not on a Mac, we'll show them under the ACtions menu.
+    // not on a Mac, we'll show them under the Actions menu.
 
     // "Edit Object"
     editObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_4")));
@@ -1248,6 +1274,12 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     helpMenu.add(javaVersionMI);
 
     menubar.add(fileMenu);
+
+    if (glogin.isRunningOnMac())
+      {
+	menubar.add(editMenu);
+      }
+
     menubar.add(LandFMenu);
     menubar.add(actionMenu);
     menubar.add(windowMenu);
