@@ -259,7 +259,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   /* our fixed (no localization needed) action command strings for
    * node-attached popup menus. */
 
-  private static String
+  private final static String
     hide_pop_action = "Hide Non-Editables",
     show_pop_action = "Show Non-Editables",
     query_pop_action = "Query",
@@ -276,7 +276,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   /* our fixed (no localization needed) action command strings for
    * menus and toolbar items. */
 
-  private static String
+  private final static String
     persona_action = "change persona",
     query_action = "compose a query",
     create_action = "create new object",
