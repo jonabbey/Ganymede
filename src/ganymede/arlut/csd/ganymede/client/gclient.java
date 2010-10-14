@@ -7166,6 +7166,23 @@ class ClientExceptionHandler implements Thread.UncaughtExceptionHandler {
 
   public void uncaughtException(Thread thread, Throwable ex)
   {
+    // Apple seems to have a bug in their AquaInternalFramePaneUI
+    // class that throws a (otherwise silent) NullPointerException on
+    // the GUI event thread if the user clicks on the background of
+    // the JDesktopPane.
+
+    if (ex instanceof NullPointerException)
+      {
+	for (StackTraceElement el: ex.getStackTrace())
+	  {
+	    if (el.getClassName().equals("com.apple.laf.AquaInternalFramePaneUI") &&
+		el.getMethodName().equals("mousePressed"))
+	      {
+		return;		// silently eat the exception
+	      }
+	  }
+      }
+
     if (gclient.client != null)
       {
 	try
