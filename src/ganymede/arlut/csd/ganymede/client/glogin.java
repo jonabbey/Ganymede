@@ -1097,7 +1097,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     // and pop up everything
 
-    g_client = new gclient(session,this);
+    g_client = new gclient(session, this);
 
     passwd.setText("");
 
