@@ -98,17 +98,16 @@ import arlut.csd.ganymede.rmi.Session;
 ------------------------------------------------------------------------------*/
 
 /**
- * Ganymede client start class.  This class can be run from the command
+ * <p>Ganymede client start class.  This class can be run from the command
  * line via its static main() method, or as an applet loaded into a
- * web browser, generally with Sun's Java plug-in.
+ * web browser, generally with Sun's Java plug-in.</p>
  *
- * This class has a run() method for attempting to connect to
- * the server in the background once the applet is initialized.
+ * <p>This class has a run() method for attempting to connect to
+ * the server in the background once the applet is initialized.</p>
  *
- * Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
- * object is constructed, which handles all of the user's interactions with the server.
+ * <p>Once glogin handles the user's login, a {@link arlut.csd.ganymede.client.gclient gclient}
+ * object is constructed, which handles all of the user's interactions with the server.</p>
  *
- * @version $Id$
  * @author Navin Manohar, Mike Mulvaney, and Jonathan Abbey
  */
 
@@ -124,15 +123,16 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.glogin");
 
   /**
-   * If this boolean is set to true, when the Ganymede client is
+   * <p>If this boolean is set to true, when the Ganymede client is
    * run as an application, the login box will hide itself away when
-   * the client's main frame is up.
+   * the client's main frame is up.</p>
    *
-   * Unfortunately, I don't think that it's generally possible to
+   * <p>Unfortunately, I don't think that it's generally possible to
    * duplicate this sort of behavior when running Ganymede as an
-   * applet, so it may be confusing to some to enable this behavior.
+   * applet, so it may be confusing to some to enable this
+   * behavior.</p>
    *
-   * I'm enabling it. - JDA 29 September 2005
+   * <p>I'm enabling it. - JDA 29 September 2005</p>
    */
 
   public static final boolean hideLoginWhenApplication = true;
@@ -332,18 +332,18 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   }
 
   /**
-   * Returns a configuration String from a property file or applet
+   * <p>Returns a configuration String from a property file or applet
    * parameter element, depending on whether the Ganymede client is
-   * being run as an application or as an applet.
+   * being run as an application or as an applet.</p>
    *
-   * If glogin is being run as an application, the static variable
+   * <p>If glogin is being run as an application, the static variable
    * WeAreApplet must be set to false, and properties_file should be
    * set to point to the Ganymede property file on disk before
-   * getConfigString() is called.
+   * getConfigString() is called.</p>
    *
-   * If glogin is being run as an applet, the static variable my_login
+   * <p>If glogin is being run as an applet, the static variable my_login
    * must be set to point to the singleton glogin object before
-   * getConfigString() is called.
+   * getConfigString() is called.</p>
    */
 
   static public String getConfigString(String configKey)
@@ -415,18 +415,18 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   }
 
   /**
-   * Returns a configuration Integer from a property file or applet
+   * <p>Returns a configuration Integer from a property file or applet
    * parameter element, depending on whether the Ganymede client is
-   * being run as an application or as an applet.
+   * being run as an application or as an applet.</p>
    *
-   * If glogin is being run as an application, the static variable
+   * <p>If glogin is being run as an application, the static variable
    * WeAreApplet must be set to false, and properties_file should be
    * set to point to the Ganymede property file on disk before
-   * getConfigInteger() is called.
+   * getConfigInteger() is called.</p>
    *
-   * If glogin is being run as an applet, the static variable my_login
+   * <p>If glogin is being run as an applet, the static variable my_login
    * must be set to point to the singleton glogin object before
-   * getConfigInteger() is called.
+   * getConfigInteger() is called.</p>
    *
    * @throws NumberFormatException if the config value returned for
    * configKey is not a number.
@@ -438,18 +438,18 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   }
 
   /**
-   * Returns a configuration boolean from a property file or applet
+   * <p>Returns a configuration boolean from a property file or applet
    * parameter element, depending on whether the Ganymede client is
-   * being run as an application or as an applet.
+   * being run as an application or as an applet.</p>
    *
-   * If glogin is being run as an application, the static variable
+   * <p>If glogin is being run as an application, the static variable
    * WeAreApplet must be set to false, and properties_file should be
    * set to point to the Ganymede property file on disk before
-   * getConfigBoolean() is called.
+   * getConfigBoolean() is called.</p>
    *
-   * If glogin is being run as an applet, the static variable my_login
+   * <p>If glogin is being run as an applet, the static variable my_login
    * must be set to point to the singleton glogin object before
-   * getConfigBoolean() is called.
+   * getConfigBoolean() is called.</p>
    *
    * @returns defaultValue if there is no property or applet parameter
    * matching configKey, else returns true if the property/parameter
@@ -833,9 +833,9 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   }
 
   /**
-   * Logout from the server. 
+   * <p>Logout from the server.</p>
    *
-   * This is called from the gclient.
+   * <p>This is called from the gclient.</p>
    */
 
   public void logout()
@@ -844,9 +844,9 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   }
 
   /**
-   * Logout from the server. 
+   * <p>Logout from the server.</p>
    *
-   * This is called from the gclient.
+   * <p>This is called from the gclient.</p>
    */
 
   public void logout(boolean andQuit)
@@ -911,9 +911,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   }
 
   /**
-   *
    * If the applet is no longer visible on the page, we exit.
-   *
    */
 
   public void destroy() 
@@ -937,7 +935,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   }
 
   /**
-   * Set the cursor to a wait cursor(usually a watch.)
+   * <p>Set the cursor to a wait cursor (usually a watch.)</p>
    */
 
   public void setWaitCursor()
@@ -946,9 +944,9 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   }
 
   /**
-   * Set the cursor to the normal cursor(usually a pointer).
+   * <p>Set the cursor to the normal cursor (usually a pointer).</p>
    *
-   * This is dependent on the operating system.
+   * <p>This is dependent on the operating system.</p>
    */
 
   public void setNormalCursor()
@@ -957,8 +955,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   }
 
   /**
-   * Handle button clicks, and enter being hit in the password
-   * field.
+   * <p>Handle button clicks, and enter being hit in the password
+   * field.</p>
    */
 
   public void actionPerformed(ActionEvent e)
@@ -1217,10 +1215,11 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   }
 
   /**
-   * Loads and returns the error Image for use in client dialogs.
+   * <p>Loads and returns the error Image for use in client
+   * dialogs.</p>
    * 
-   * Once the image is loaded, it is cached for future calls to 
-   * getErrorImage().
+   * <p>Once the image is loaded, it is cached for future calls to
+   * getErrorImage().</p>
    */
 
   public final Image getErrorImage()
@@ -1241,19 +1240,18 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 ------------------------------------------------------------------------------*/
 
 /** 
- * Client-side background thread to handle force disconnect commands
- * from the server.  We need this thread because jdk 1.2 has a bug
- * where RMI callbacks are not privileged to interact with the Swing
- * thread.  By creating a thread to handle forced logouts ourselves,
- * we can have an RMI callback pass a message to this thread (which
- * has local privileges), which can then throw up a dialog explaining
- * about being disconnected, etc.
+ * <p>Client-side background thread to handle force disconnect
+ * commands from the server.  We need this thread because jdk 1.2 has
+ * a bug where RMI callbacks are not privileged to interact with the
+ * Swing thread.  By creating a thread to handle forced logouts
+ * ourselves, we can have an RMI callback pass a message to this
+ * thread (which has local privileges), which can then throw up a
+ * dialog explaining about being disconnected, etc.</p>
  *
- * When run, this thread waits for die() to be called, whereupon it
- * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread} to
- * actually shut down the client.
+ * <p>When run, this thread waits for die() to be called, whereupon it
+ * creates an {@link arlut.csd.ganymede.client.ExitThread ExitThread}
+ * to actually shut down the client.</p>
  *
- * @version $Id$
  * @author Jonathan Abbey
  */
 
@@ -1344,8 +1342,8 @@ class DeathWatcherThread extends Thread {
 ------------------------------------------------------------------------------*/
 
 /**
- * Client-side self-destruction thread.  This thread will be created
- * and run when the server sends the client's {@link
+ * <p>Client-side self-destruction thread.  This thread will be
+ * created and run when the server sends the client's {@link
  * arlut.csd.ganymede.client.ClientBase ClientBase} a forced
  * disconnect RMI call.  When run, this thread starts a 30 second
  * timer, while the {@link
@@ -1354,9 +1352,8 @@ class DeathWatcherThread extends Thread {
  * can click ok on that dialog, causing this thread's dieNow() method
  * to terminate the timer.  In any case, when the timer counts down to
  * zero, the glogin's logout() method will be called, and the client's
- * main window will be shutdown.
+ * main window will be shutdown.</p>
  *
- * @version $Id$
  * @author Jonathan Abbey
  */
 
