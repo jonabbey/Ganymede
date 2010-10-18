@@ -77,7 +77,7 @@ public class ADSyncMaster implements arlut.csd.ganymede.server.SyncMaster {
   {
     if (eObj.getTypeID() == SchemaConstants.UserBase)
       {
-	if (eObj.isDefined(userSchema.EXCHANGESTORE) || eObj.getOriginal().isDefined(userSchema.EXCHANGESTORE))
+	if (eObj.isDefined(userSchema.EXCHANGESTORE) || eObj.getOriginal() != null && eObj.getOriginal().isDefined(userSchema.EXCHANGESTORE))
 	  {
 	    book.add(eObj.getInvid(), userSchema.EXCHANGESTORE);
 
