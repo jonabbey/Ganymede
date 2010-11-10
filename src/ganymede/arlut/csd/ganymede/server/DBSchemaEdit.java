@@ -717,10 +717,10 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * This method creates a new {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} 
+   * <p>This method creates a new {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} 
    * object and returns a remote handle
    * to it so that the admin client can set attributes on the DBNameSpace,
-   * and generally make a nuisance of itself.
+   * and generally make a nuisance of itself.</p>
    *
    * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
@@ -749,9 +749,10 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * This method deletes a
-   *  {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} object, returning true if
-   * the deletion could be carried out, false otherwise.
+   * <p>This method deletes a {@link
+   * arlut.csd.ganymede.server.DBNameSpace DBNameSpace} object,
+   * returning true if the deletion could be carried out, false
+   * otherwise.</p>
    *
    * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
