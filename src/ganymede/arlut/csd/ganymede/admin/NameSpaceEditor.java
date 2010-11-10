@@ -203,20 +203,17 @@ public class NameSpaceEditor extends JStretchPanel implements ActionListener {
 		      {
 			currentField = (BaseField)fields.elementAt(j);
 
-			if (currentField.isString())
+			thisSpace = currentField.getNameSpaceLabel();
+			
+			if ((thisSpace != null) && (thisSpace.equals(currentNameSpaceLabel)))
 			  {
-			    thisSpace = currentField.getNameSpaceLabel();
-
-			    if ((thisSpace != null) && (thisSpace.equals(currentNameSpaceLabel)))
+			    if (debug)
 			      {
-				if (debug)
-				  {
-				    System.out.println("Adding to spaceV: " + thisBase +
-						       ":" + currentField.getName());;
-				  }
-
-				spaceV.addElement(thisBase + ":" + currentField.getName());
+				System.out.println("Adding to spaceV: " + thisBase +
+						   ":" + currentField.getName());;
 			      }
+
+			    spaceV.addElement(thisBase + ":" + currentField.getName());
 			  }
 		      }
 		    catch (RemoteException rx)
