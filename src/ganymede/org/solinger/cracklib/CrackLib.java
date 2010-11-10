@@ -527,6 +527,12 @@ public class CrackLib {
 	return ts.l("fascistLook.complexity");
       }
 
+    if (password.toUpperCase().equals(password) || password.toLowerCase().equals(password))
+      {
+	// "It needs to be mixed case."
+	return ts.l("fascistLook.notmixedcase");
+      }
+
     // check for worrisome numbers and such
 
     if (Rules.pMatch("aadddddda", password))
