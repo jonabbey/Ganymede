@@ -58,7 +58,7 @@ import arlut.csd.ganymede.common.ReturnVal;
 ------------------------------------------------------------------------------*/
 
 /** 
- * <P>Primary remote interface for Ganymede schema editing.  The
+ * <p>Primary remote interface for Ganymede schema editing.  The
  * Ganymede admin console calls the 
  * {@link arlut.csd.ganymede.server.GanymedeAdmin#editSchema editSchema()} method on
  * a server-side {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} object
@@ -66,7 +66,7 @@ import arlut.csd.ganymede.common.ReturnVal;
  * the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects which
  * hold the type definitions for the objects held in the Ganymede server.  The
  * DBObjectBase objects in turn provide access to the definitions for
- * the fields held in those object types.</P>
+ * the fields held in those object types.</p>
  *
  */
 
@@ -77,13 +77,13 @@ public interface SchemaEdit extends Remote {
   //
 
   /**
-   * <P>Returns the root category node from the server</P>
+   * <p>Returns the root category node from the server</p>
    */
 
   public Category getRootCategory() throws RemoteException;
 
   /**
-   * <P>Returns a list of bases from the current (non-committed) state of the system.</P>
+   * <p>Returns a list of bases from the current (non-committed) state of the system.</p>
    *
    * @param embedded If true, getBases() will only show bases that are intended
    * for embedding in other objects.  If false, getBases() will only show bases
@@ -93,89 +93,89 @@ public interface SchemaEdit extends Remote {
   public Base[] getBases(boolean embedded) throws RemoteException;
 
   /**
-   * <P>Returns a list of bases from the current (non-committed) state of the system.</P>
+   * <p>Returns a list of bases from the current (non-committed) state of the system.</p>
    */
 
   public Base[] getBases() throws RemoteException;
 
   /**
-   * <P>Returns a {@link arlut.csd.ganymede.rmi.Base Base} reference to 
-   * match the id, or null if no match.</P>
+   * <p>Returns a {@link arlut.csd.ganymede.rmi.Base Base} reference to 
+   * match the id, or null if no match.</p>
    */
 
   public Base getBase(short id) throws RemoteException;
 
   /** 
-   * <P>Returns a {@link arlut.csd.ganymede.rmi.Base Base} reference to
-   * match the baseName, or null if no match.</P>
+   * <p>Returns a {@link arlut.csd.ganymede.rmi.Base Base} reference to
+   * match the baseName, or null if no match.</p>
    */
 
   public Base getBase(String baseName) throws RemoteException;
 
   /** 
-   * <P>This method creates a new {@link
+   * <p>This method creates a new {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} object and returns
    * a remote handle to it so that the admin client can set fields on
    * the base, set attributes, and generally make a nuisance of
-   * itself.</P>
+   * itself.</p>
    */
 
   public Base createNewBase(Category category, boolean embedded, boolean lowRange) throws RemoteException;
 
   /**
-   * <P>This method deletes a {@link
+   * <p>This method deletes a {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase}, removing it from the
    * Schema Editor's working set of bases.  The removal won't
-   * take place for real unless the SchemaEdit is committed.</P>
+   * take place for real unless the SchemaEdit is committed.</p>
    */
 
   public ReturnVal deleteBase(String baseName) throws RemoteException;
 
   /**
-   * <P>This method returns an array of defined 
-   * {@link arlut.csd.ganymede.rmi.NameSpace NameSpace} objects.</P>
+   * <p>This method returns an array of defined 
+   * {@link arlut.csd.ganymede.rmi.NameSpace NameSpace} objects.</p>
    */
 
   public NameSpace[] getNameSpaces() throws RemoteException;
 
   /**
-   * <P>This method returns a {@link arlut.csd.ganymede.rmi.NameSpace NameSpace} by matching name,
-   * or null if no match is found.</P>
+   * <p>This method returns a {@link arlut.csd.ganymede.rmi.NameSpace NameSpace} by matching name,
+   * or null if no match is found.</p>
    */
 
   public NameSpace getNameSpace(String spaceName) throws RemoteException;
 
   /**
-   * <P>This method creates a new {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} 
+   * <p>This method creates a new {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} 
    * object and returns a remote handle
    * to it so that the admin client can set attributes on the DBNameSpace,
-   * and generally make a nuisance of itself.</P>
+   * and generally make a nuisance of itself.</p>
    */
 
   public NameSpace createNewNameSpace(String name, boolean caseInsensitive) throws RemoteException;
 
   /**
-   * <P>This method deletes a
+   * <p>This method deletes a
    *  {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} object, returning true if
-   * the deletion could be carried out, false otherwise.</P>
+   * the deletion could be carried out, false otherwise.</p>
    */
 
   public ReturnVal deleteNameSpace(String name) throws RemoteException;
 
   /**
-   * <P>Commit this schema edit, instantiate the modified schema</P>
+   * <p>Commit this schema edit, instantiate the modified schema</p>
    *
-   * <P>It is an error to attempt any schema editing operations after this
-   * method has been called.</P>
+   * <p>It is an error to attempt any schema editing operations after this
+   * method has been called.</p>
    */
 
   public ReturnVal commit() throws RemoteException;
 
   /**
-   * <P>Abort this schema edit, return the schema to its prior state.</P>
+   * <p>Abort this schema edit, return the schema to its prior state.</p>
    *
-   * <P>It is an error to attempt any schema editing operations after this
-   * method has been called.</P>
+   * <p>It is an error to attempt any schema editing operations after this
+   * method has been called.</p>
    */
 
   public void release() throws RemoteException;
