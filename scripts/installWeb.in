@@ -139,7 +139,7 @@ foreach $step (@steps) {
 	}
     }
 
-    if ($step eq "WEBURL" && $vars{"WEBURL"} !~ /^http:\/\//) {
+    if ($step eq "WEBURL" && $vars{"WEBURL"} !~ /^https?:\/\//) {
       print "*Please provide a fully qualified URL.\n";
       $success = 0;
     }
