@@ -54,6 +54,7 @@ import java.rmi.RemoteException;
 import java.rmi.server.Unreferenced;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Vector;
 
 import arlut.csd.Util.TranslationService;
@@ -147,7 +148,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
    * is confirmed, newBases replaces store.db.objectBases.
    */
 
-  Hashtable newBases;		
+  Hashtable<Short, DBObjectBase> newBases;
 
   /**
    * The original vector of namespace objects extant at the time the
@@ -199,7 +200,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 	// duplicate the existing category tree and all the contained
 	// bases
 
-	newBases = new Hashtable();
+	newBases = new Hashtable<Short, DBObjectBase>();
 
 	// this DBBaseCategory constructor recursively copies the
 	// bases referenced from store.rootCategory into newBases,
@@ -339,22 +340,16 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   public synchronized Base[] getBases(boolean embedded)
   {
     Base[] bases;
-    Enumeration en;
     int i = 0;
     int size = 0;
-    DBObjectBase base;
 
     /* -- */
 
     // calculate how many bases of the proper type (embedded or
     // non-embedded) we're going to return to the caller
 
-    en = newBases.elements();
-
-    while (en.hasMoreElements())
+    for (DBObjectBase base: newBases.values())
       {
-	base = (DBObjectBase) en.nextElement();
-
 	if (base.isEmbedded())
 	  {
 	    if (embedded)
@@ -374,12 +369,9 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
     // and create the return list
 
     bases = new Base[size];
-    en = newBases.elements();
 
-    while (en.hasMoreElements())
+    for (DBObjectBase base: newBases.values())
       {
-	base = (DBObjectBase) en.nextElement();
-
 	if (base.isEmbedded())
 	  {
 	    if (embedded)
@@ -409,17 +401,15 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   public synchronized Base[] getBases()
   {
     Base[] bases;
-    Enumeration en;
     int i = 0;
 
     /* -- */
 
     bases = new Base[newBases.size()];
-    en = newBases.elements();
 
-    while (en.hasMoreElements())
+    for (DBObjectBase base: newBases.values())
       {
-	bases[i++] = (Base) en.nextElement();
+	bases[i++] = base;
       }
 
     return bases;
@@ -434,7 +424,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   public Base getBase(short id)
   {
-    return (Base) newBases.get(Short.valueOf(id));
+    return newBases.get(Short.valueOf(id));
   }
 
   /**
@@ -446,15 +436,8 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   public synchronized Base getBase(String baseName)
   {
-    Enumeration en = newBases.elements();
-    DBObjectBase base;
-
-    /* -- */
-
-    while (en.hasMoreElements())
+    for (DBObjectBase base: newBases.values())
       {
-	base = (DBObjectBase) en.nextElement();
-
 	if (base.getName().equalsIgnoreCase(baseName))
 	  {
 	    return (Base) base;
@@ -652,7 +635,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 	throw new RuntimeException("already released/committed");
       }
     
-    tmpBase = (DBObjectBase) newBases.get(Short.valueOf(id));
+    tmpBase = newBases.get(Short.valueOf(id));
 
     if (tmpBase.getObjectCount() > 0)
       {
@@ -809,18 +792,12 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     // check to make sure this namespace isn't tied to a field still
 
-    Enumeration en = newBases.elements();
-
-    while (en.hasMoreElements())
+    for (DBObjectBase base: newBases.values())
       {
-	DBObjectBase base = (DBObjectBase) en.nextElement();
+	Vector<DBObjectBaseField> fieldDefs = base.getFields();
 
-	Vector fieldDefs = base.getFields();
-
-	for (int i = 0; i < fieldDefs.size(); i++)
+	for (DBObjectBaseField fieldDef: fieldDefs)
 	  {
-	    DBObjectBaseField fieldDef = (DBObjectBaseField) fieldDefs.elementAt(i);
-
 	    if (fieldDef.getNameSpace() == ns)
 	      {
 		// "Schema Editing Error"
