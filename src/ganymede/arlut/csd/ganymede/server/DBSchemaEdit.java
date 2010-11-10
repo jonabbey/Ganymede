@@ -155,7 +155,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
    * DBSchemaEdit editing session is established.
    */
 
-  Vector oldNameSpaces;
+  Vector<DBNameSpace> oldNameSpaces;
 
   /**
    * Root node of the working DBBaseCategory tree.. if the
@@ -220,15 +220,13 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 	// note that we'll have to change our namespaces logic if/when
 	// DBNameSpace objects become mutable.
 
-	oldNameSpaces = new Vector();
-    
-	for (int i=0; i < store.nameSpaces.size(); i++)
-	  {
-	    DBNameSpace ns = (DBNameSpace) store.nameSpaces.elementAt(i);
+	oldNameSpaces = new Vector<DBNameSpace>();
 
+	for (DBNameSpace ns: store.nameSpaces)
+	  {
 	    Ganymede.rmi.publishObject(ns);
 
-	    oldNameSpaces.addElement(ns);
+	    oldNameSpaces.add(ns);
 	  }
       }
 
@@ -662,7 +660,6 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   public synchronized NameSpace[] getNameSpaces()
   {
     NameSpace[] spaces;
-    Enumeration en;
     int i;
 
     /* -- */
@@ -671,12 +668,10 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
       {
 	spaces = new NameSpace[store.nameSpaces.size()];
 	i = 0;
-	
-	en = store.nameSpaces.elements();
 
-	while (en.hasMoreElements())
+	for (DBNameSpace ns: store.nameSpaces)
 	  {
-	    spaces[i++] = (NameSpace) en.nextElement();
+	    spaces[i++] = ns;
 	  }
       }
 
@@ -693,19 +688,10 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   public synchronized NameSpace getNameSpace(String name)
   {
-    DBNameSpace ns;
-    Enumeration en;
-
-    /* -- */
-
     synchronized (store)
       {
-	en = store.nameSpaces.elements();
-
-	while (en.hasMoreElements())
+	for (DBNameSpace ns: store.nameSpaces)
 	  {
-	    ns = (DBNameSpace) en.nextElement();
-
 	    if (ns.getName().equals(name))
 	      {
 		return ns;
@@ -740,7 +726,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
       {
 	ns = new DBNameSpace(name, caseInsensitive);
 
-	store.nameSpaces.addElement(ns);
+	store.nameSpaces.add(ns);
       }
 
     Ganymede.rmi.publishObject(ns);
@@ -768,6 +754,9 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
       {
 	throw new RuntimeException("already released/committed");
       }
+
+    // we declare index outside of this loop, and use it to keep track
+    // of the namespace to remove
 
     for (index = 0; index < store.nameSpaces.size(); index++)
       {
@@ -869,8 +858,6 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   public synchronized ReturnVal commit()
   {
-    Enumeration en;
-    DBObjectBase base;
     ReturnVal retVal = null;
 
     /* -- */
@@ -901,12 +888,8 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 	
 	// first the new object bases
 
-	en = newBases.elements();
-
-	while (en.hasMoreElements())
+	for (DBObjectBase base: newBases.values())
 	  {
-	    base = (DBObjectBase) en.nextElement();
-
 	    if (debug)
 	      {
 		System.err.println("Checking in " + base);
@@ -918,10 +901,8 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 	// now the namespaces.  we won't worry about the oldNameSpaces, GC should
 	// take care of those for us.
 
-	for (int i = 0; i < store.nameSpaces.size(); i++)
+	for (DBNameSpace ns: store.nameSpaces)
 	  {
-	    DBNameSpace ns = (DBNameSpace) store.nameSpaces.elementAt(i);
-
 	    ns.schemaEditCommit();
 	  }
 
@@ -1009,16 +990,10 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   private synchronized ReturnVal checkCommitState()
   {
-    Enumeration en;
-    DBObjectBase base;
     ReturnVal retVal = null;
 
-    en = newBases.elements();
-
-    while (en.hasMoreElements())
+    for (DBObjectBase base: newBases.values())
       {
-	base = (DBObjectBase) en.nextElement();
-
 	retVal = base.checkSchemaState();
 
 	if (retVal != null)
@@ -1048,18 +1023,16 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     synchronized (store)
       {
+	unexportNameSpaces();
+
 	// restore the namespace vector
 	store.nameSpaces.setSize(0);
 	store.nameSpaces = oldNameSpaces;
 
-	for (int i = 0; i < store.nameSpaces.size(); i++)
+	for (DBNameSpace ns: store.nameSpaces)
 	  {
-	    DBNameSpace ns = (DBNameSpace) store.nameSpaces.elementAt(i);
-	    
 	    ns.schemaEditAbort();
 	  }
-
-	unexportNameSpaces();
       }
 
     // unlock the server
@@ -1075,7 +1048,8 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
     newBases.clear();
     newBases = null;
 
-    // we've already copied oldNameSpaces, no need to keep a ref here
+    // we've already copied and unexported oldNameSpaces, no need to
+    // keep a ref here
 
     oldNameSpaces = null;
 
@@ -1094,18 +1068,14 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   {
     if (oldNameSpaces != null)
       {
-	for (int i = 0; i < oldNameSpaces.size(); i++)
+	for (DBNameSpace ns: oldNameSpaces)
 	  {
-	    DBNameSpace ns = (DBNameSpace) oldNameSpaces.elementAt(i);
-
 	    Ganymede.rmi.unpublishObject(ns, true);
 	  }
       }
 
-    for (int i = 0; i < store.nameSpaces.size(); i++)
+    for (DBNameSpace ns: store.nameSpaces)
       {
-	DBNameSpace ns = (DBNameSpace) store.nameSpaces.elementAt(i);
-
 	Ganymede.rmi.unpublishObject(ns, true);
       }
   }
