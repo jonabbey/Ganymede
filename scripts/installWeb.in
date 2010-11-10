@@ -109,8 +109,8 @@ foreach $step (@steps) {
       $success = 1;
     }
 
-    # If they have given us a web host name, create the WEBURL we hope
-    # to have
+    # If they have given us a web host name, create a default WEBURL
+    # that we'll suggest.  The user can change that at a later step.
 
     if ($step eq "SYSTEMNAME") {
       $vars{"WEBURL"} = "http://" . $vars{"SYSTEMNAME"}."/ganymede";
