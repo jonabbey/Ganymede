@@ -163,6 +163,15 @@ public interface SchemaEdit extends Remote {
   public ReturnVal deleteNameSpace(String name) throws RemoteException;
 
   /**
+   * <p>This method deletes all {@link
+   * arlut.csd.ganymede.server.DBNameSpace DBNameSpace} objects in the
+   * server's schema that are not currently attached to any
+   * namespace-constrained field.</p>
+   */
+
+  public ReturnVal deleteUnusedNameSpaces() throws RemoteException;
+
+  /**
    * <p>Commit this schema edit, instantiate the modified schema</p>
    *
    * <p>It is an error to attempt any schema editing operations after this

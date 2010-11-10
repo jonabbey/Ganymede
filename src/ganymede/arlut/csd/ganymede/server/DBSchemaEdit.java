@@ -815,6 +815,51 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
+   * <p>This method deletes all {@link
+   * arlut.csd.ganymede.server.DBNameSpace DBNameSpace} objects in the
+   * server's schema that are not currently attached to any
+   * namespace-constrained field.</p>
+   */
+
+  public ReturnVal deleteUnusedNameSpaces() throws RemoteException
+  {
+    Iterator<DBNameSpace> it = store.nameSpaces.iterator();
+
+    while (it.hasNext())
+      {
+	DBNameSpace space = it.next();
+
+	boolean ok_to_delete = true;
+
+	Iterator<DBObjectBase> obIt = newBases.values().iterator();
+
+	while (ok_to_delete && obIt.hasNext())
+	  {
+	    DBObjectBase base = obIt.next();
+
+	    Vector fieldDefs = base.getFields();
+
+	    for (int i = 0; ok_to_delete && i < fieldDefs.size(); i++)
+	      {
+		DBObjectBaseField fieldDef = (DBObjectBaseField) fieldDefs.elementAt(i);
+
+		if (fieldDef.getNameSpace() == space)
+		  {
+		    ok_to_delete = false;
+		  }
+	      }
+	  }
+
+	if (ok_to_delete)
+	  {
+	    it.remove();
+	  }
+      }
+
+    return null;
+  }
+
+  /**
    * <p>Commits this schema edit, replaces the server's schema with
    * the modified schema produced by this DBSchemaEdit session.</p>
    *
