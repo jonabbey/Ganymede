@@ -3025,21 +3025,24 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
           }
       }
 
-    result.setLength(0);
-    result.append(groupname);
-    result.append(": ");
-
-    for (int i = 0; i < targets.size(); i++)
+    if (!empty(targets))
       {
-        if (i > 0)
-          {
-            result.append(", ");
-          }
+	result.setLength(0);
+	result.append(groupname);
+	result.append(": ");
 
-        result.append(targets.get(i));
+	for (int i = 0; i < targets.size(); i++)
+	  {
+	    if (i > 0)
+	      {
+		result.append(", ");
+	      }
+
+	    result.append(targets.get(i));
+	  }
+
+	writer.println(result.toString().toLowerCase());
       }
-
-    writer.println(result.toString().toLowerCase());
   }
 
   /**
