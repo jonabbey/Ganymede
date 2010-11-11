@@ -14,8 +14,14 @@
 #####################################################################
 use CGI;
 
+# add this for errors!!!
+use CGI::Carp qw/fatalsToBrowser/;
+
 #####################################################################
 
+# create the query with whatever CGI info we get from our environment
+
+$tmpdir = "/tmp";
 $query = new CGI;
 $xml_path = "<#XMLPATH#>";
 $xmlclient = $xml_path . "/xmlclient";
@@ -28,13 +34,30 @@ if (!-f $xmlclient) {
     $xmlclient = $xml_path . "/bin/xmlclient";
 }
 
-$tmpdir = "/tmp";
-
 # If this script is run from a different location from where the
 # image files for the HTML result pages are located, the variable
 # $web_loc must be changed to an HTTP path to the image files
 
 $web_loc = ".";
+
+# write out the CGI header
+
+print $query->header;
+
+print <<ENDSTARTHEAD;
+<html>
+  <head>
+    <title>Ganymede Password Changer</title>
+ENDSTARTHEAD
+
+# Print Javascript basic form checker
+JSVerifyForm();
+
+print <<ENDHEAD;
+
+  </head>
+  <body bgcolor="#FFFFFF">
+ENDHEAD
 
 if ($query->param) {
 
@@ -43,13 +66,9 @@ if ($query->param) {
     $new_pass = $query->param('new_pass');
     $verify = $query->param('verify');
 
-    # write out the CGI header
-
-    print $query->header;
-
     if ($new_pass eq $verify) {
         &make_xml;
-        $xml_output = `$xmlclient $filename`;
+        $xml_output = `$xmlclient $filename 2>&1`;
         $xml_status = $? >> 8;
         if (($xml_status == 0)) {
             $time = `/bin/date`;
@@ -127,15 +146,14 @@ if ($query->param) {
     } else {
         &print_nomatch;
     }
+
     unlink $filename;           #remove temp xml file
     &print_tail;
-
-    print $query->end_html;
-
 } else {
-    print $query->header;
     &print_default;
 }
+
+print $query->end_html;
 
 
 ######################################################################
@@ -183,7 +201,6 @@ WRITEXML
     select STDOUT;
 }
 
-
 ######################################################################
 #
 #                                                        print_default
@@ -193,11 +210,6 @@ WRITEXML
 sub print_default {
 
   print <<ENDDEFAULT;
-<html>
-  <head>
-    <title>Ganymede Password Changer</title>
-  </head>
-  <body bgcolor="#FFFFFF">
     <table border="0">
       <tr>
         <td align="left">
@@ -307,10 +319,7 @@ notifying you of the success of your password change request.</p>
 ENDDEFAULT
 
 &print_tail;
-
 }
-
-
 
 ######################################################################
 #
@@ -320,11 +329,6 @@ ENDDEFAULT
 
 sub print_success {
     print <<ENDSUCCESS;
-<html>
-  <head>
-    <title>Ganymede Password Changed Successfully</title>
-  </head>
-  <body bgcolor="#FFFFFF">
     <table border="0">
       <tr>
         <td align="left">
@@ -412,11 +416,6 @@ $failure =~ s/</&lt;/g;
 $failure =~ s/>/&gt;/g;
 
     print <<ENDFAILURE;
- <html>
-  <head>
-    <title>Ganymede Password Changer</title>
-  </head>
-  <body bgcolor="#FFFFFF">
     <table border="0">
       <tr>
         <td align="left">
@@ -516,11 +515,6 @@ ENDFAILURE
 
 sub print_nomatch {
     print <<ENDNOMATCH;
- <html>
-  <head>
-    <title>Ganymede Password Changer</title>
-  </head>
-  <body bgcolor="#FFFFFF">
     <table border="0">
       <tr>
         <td align="left">
@@ -613,7 +607,7 @@ sub print_tail {
 <hr noshade>
 <a href="mailto:webmaster\@arlut.utexas.edu">webmaster\@arlut.utexas.edu</a><P>
   </body>
-</HTML>
+</html>
 END
     return;
 }
