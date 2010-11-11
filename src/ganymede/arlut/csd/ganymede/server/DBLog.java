@@ -1728,6 +1728,14 @@ public class DBLog {
 	    System.err.println("Going to be mailing to " + str);
 	  }
 
+	if (str == null)
+	  {
+	    // if a custom DBEditObject subclass includes a null value
+	    // in a List<String>, we don't want to choke on it.
+
+	    continue;
+	  }
+
 	mailout = (MailOut) map.get(str);
 
 	if (mailout == null)
