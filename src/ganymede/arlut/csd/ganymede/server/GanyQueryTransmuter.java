@@ -272,21 +272,24 @@ public class GanyQueryTransmuter {
 	  {
 	    this.editableFilter = true;
 	  }
-	else if (node.getType() == QueryParser.STRING_VALUE)
+	else
 	  {
-	    from_objectbase = StringUtils.dequote(node.getText());
-	  }
-	else if (node.getType() == QueryParser.TOKEN)
-	  {
-	    from_objectbase = node.getText();
-	  }
+	    if (node.getType() == QueryParser.STRING_VALUE)
+	      {
+		from_objectbase = StringUtils.dequote(node.getText());
+	      }
+	    else if (node.getType() == QueryParser.TOKEN)
+	      {
+		from_objectbase = node.getText();
+	      }
 
-	// we don't allow underscores in object and field type names,
-	// because we reserve that character for representing spaces
-	// in our XML.  A user might be querying using the underscore
-	// variant, so take care of that here.
+	    // we don't allow underscores in object and field type names,
+	    // because we reserve that character for representing spaces
+	    // in our XML.  A user might be querying using the underscore
+	    // variant, so take care of that here.
 
-	from_objectbase = from_objectbase.replace('_', ' ');
+	    from_objectbase = from_objectbase.replace('_', ' ');
+	  }
       }
 
     if (from_objectbase == null) // the grammar _should_ prevent this
