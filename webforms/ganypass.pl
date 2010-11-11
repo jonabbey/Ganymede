@@ -150,6 +150,12 @@ if ($query->param) {
     unlink $filename;           #remove temp xml file
     &print_tail;
 } else {
+    if (!-f $xmlclient) {
+	print "<center><p>Error, can't find xmlclient</p></center>\n";
+	print $query->end_html;
+	exit 0;
+    }
+
     &print_default;
 }
 
