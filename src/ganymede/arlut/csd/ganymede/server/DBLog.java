@@ -109,20 +109,22 @@ public class DBLog {
   // --
 
   /**
-   * Enum used to specify whether the logging system should calculate
-   * additional addresses to send an event to.
+   * <p>Enum used to specify whether the logging system should
+   * calculate additional addresses to send an event to.</p>
    *
-   * Logging methods that receive a mode of NONE will not calculate
-   * any additional email addresses to send an event to.
+   * <p>Logging methods that receive a mode of NONE will not calculate
+   * any additional email addresses to send an event to.</p>
    *
-   * Logging methods that receive a mode of USERS will include any addresses
-   * returned by DBEditObject.getEmailTargets() for a given Invid.
+   * <p>Logging methods that receive a mode of USERS will include any
+   * addresses returned by DBEditObject.getEmailTargets() for a given
+   * Invid.</p>
    *
-   * Logging methods that receive a mode of OWNERS will calculate and
-   * include the addresses for any administrative owners of the
-   * objects referenced by Invid.
+   * <p>Logging methods that receive a mode of OWNERS will calculate
+   * and include the addresses for any administrative owners of the
+   * objects referenced by Invid.</p>
    *
-   * Logging methods that receive a mode of BOTH will do both of the above.
+   * <p>Logging methods that receive a mode of BOTH will do both of
+   * the above.</p>
    */
 
   public enum MailMode
@@ -176,79 +178,63 @@ public class DBLog {
   private DBLogController mailController;
 
   /**
-   *
    * The signature to be appended to any outgoing mail
-   *
    */
 
   private String signature = null;
 
   /**
-   *
    * This variable tracks whether the log file has been closed, or whether
    * it is open for append.  If true, the log file may not be written to.
-   *
    */
 
   private boolean closed = false;
 
   /**
-   *
    * We keep a table of the system event codes to speed the logging process.
    * This hash maps system event classTokens to instances of systemEventType.
    *
    * @see arlut.csd.ganymede.server.systemEventType
-   *
    */
 
   private Map<String, systemEventType> sysEventCodes = Collections.synchronizedMap(new HashMap<String, systemEventType>());
 
   /**
-   *
    * This field keeps track of when we last updated the sysEventCodes
    * hash, so that we can check against the timestamp held in the
    * System Event DBObjectBase to see whether we need to refresh the
    * sysEventCodes hash.
-   *
    */
 
   private Date sysEventCodesTimeStamp = null;
 
   /**
-   *
    * We keep a table of the system event codes to speed the logging process.
    * This hash maps object event classTokens to instances of objectEventType.
    *
    * @see arlut.csd.ganymede.server.objectEventType
-   *
    */
 
   private Map<String, objectEventType> objEventCodes = Collections.synchronizedMap(new HashMap<String, objectEventType>());
 
   /**
-   *
    * This field keeps track of when we last updated the objEventCodes
    * hash, so that we can check against the timestamp held in the
    * Object Event DBObjectBase to see whether we need to refresh the
    * objEventCodes hash.
-   *
    */
 
   private Date objEventCodesTimeStamp = null;
 
   /**
-   *
    * Our mail relay.
-   *
    */
 
   private Qsmtp mailer = null;
 
   /**
-   *
    * GanymedeSession reference to allow the log code to do searching
    * of the database, etc.
-   *
    */
 
   private GanymedeSession gSession = null;
@@ -353,9 +339,7 @@ public class DBLog {
   }
 
   /**
-   *
    * This method closes out the log file.
-   *
    */
 
   synchronized void close() throws IOException
@@ -444,15 +428,15 @@ public class DBLog {
   }
 
   /**
-   * <P>This method is used to handle an email notification event, where
+   * <p>This method is used to handle an email notification event, where
    * the mail title should reflect detailed information about the
-   * event, and extra descriptive information is to be sent out.</P>
+   * event, and extra descriptive information is to be sent out.</p>
    *
-   * <P>mailNotify() will send the message to the owners of any objects
-   * referenced by event if mode so specifies.</P>
+   * <p>mailNotify() will send the message to the owners of any objects
+   * referenced by event if mode so specifies.</p>
    *
-   * <P>description and/or title may be null, in which case the proper
-   * strings will be extracted from the event's database record</P>
+   * <p>description and/or title may be null, in which case the proper
+   * strings will be extracted from the event's database record</p>
    *
    * @param title The email subject for this message, will have the
    * Ganymede.subjectPrefixProperty prepended to it.
@@ -625,9 +609,9 @@ public class DBLog {
   }
 
   /**
-   * <P>This method is used to log an event such as server shutdown/restart,
+   * <p>This method is used to log an event such as server shutdown/restart,
    * user log-in, persona change, etc.  Basically any thing not associated
-   * with a transaction.</P>
+   * with a transaction.</p>
    *
    * @param event A single event to be logged, with its own timestamp.
    */
@@ -655,10 +639,10 @@ public class DBLog {
   }
 
   /**
-   * <P>This method is used to start logging events for a transaction.  It is called from
+   * <p>This method is used to start logging events for a transaction.  It is called from
    * {@link arlut.csd.ganymede.server.DBEditSet#commit_logTransaction(java.util.Set)},
    * which is responsible for sequencing this call with calls to streamLogEvent() and
-   * endTransactionLog().</P>
+   * endTransactionLog().</p>
    *
    * <p>DBEditSet.commit_logTransaction() is responsible for
    * synchronizing on Ganymede.log, and thereby excluding all other
@@ -1436,8 +1420,8 @@ public class DBLog {
   }
 
   /**
-   * <P>Private helper method to (re)initialize our local hash of system
-   * event codes.</P>
+   * <p>Private helper method to (re)initialize our local hash of system
+   * event codes.</p>
    */
 
   private void updateSysEventCodeHash()
@@ -1524,8 +1508,8 @@ public class DBLog {
   }
 
   /**
-   * <P>Private helper method to (re)initialize our local hash of object
-   * event codes.</P>
+   * <p>Private helper method to (re)initialize our local hash of object
+   * event codes.</p>
    */
 
   private void updateObjEventCodeHash()
@@ -1615,14 +1599,14 @@ public class DBLog {
   }
 
   /**
-   * <P>This method generates a list of additional email addresses that
+   * <p>This method generates a list of additional email addresses that
    * notification for this event should be sent to, based on the
    * event's type and the ownership of objects referenced by this
-   * event.</P>
+   * event.</p>
    *
-   * <P>Note that the email addresses added to this event's mail list
+   * <p>Note that the email addresses added to this event's mail list
    * will be in addition to any that were previously specified by the
-   * code that originally generated the log event.</P>
+   * code that originally generated the log event.</p>
    */
 
   private void calculateMailTargets(DBLogEvent event, DBSession session,
@@ -1689,16 +1673,16 @@ public class DBLog {
   }
 
   /**
-   * <P>This method takes a DBLogEvent object, scans it to determine
+   * <p>This method takes a DBLogEvent object, scans it to determine
    * what mailing lists should be notified of the event in the
    * context of a transaction, and adds a description of the
    * passed in event to each {@link arlut.csd.ganymede.server.MailOut MailOut}
-   * object held in map.</P>
+   * object held in map.</p>
    *
-   * <P>That is, the map passed in maps each discrete recipient
+   * <p>That is, the map passed in maps each discrete recipient
    * list to a running MailOut object which has the complete
    * text that will be mailed to that recipient when the
-   * transaction's records are mailed out.</P>
+   * transaction's records are mailed out.</p>
    *
    * @return List of email addresses this event was sent to for
    * system event notification
@@ -1751,9 +1735,7 @@ public class DBLog {
   }
 
   /**
-   *
    * This method gets the signature file loaded.
-   *
    */
 
   private void loadSignature() throws IOException
@@ -1787,11 +1769,11 @@ public class DBLog {
   }
 
   /**
-   * <P>This method takes a List of {@link
+   * <p>This method takes a List of {@link
    * arlut.csd.ganymede.common.Invid Invid}'s representing objects
    * touched during a transaction, and returns a Set of email
    * addresses that should be notified of operations affecting the
-   * objects in the &lt;objects&gt; list.</P>
+   * objects in the &lt;objects&gt; list.</p>
    */
 
   public Set<String> calculateOwnerAddresses(List<Invid> objects, MailMode mode)
@@ -1808,11 +1790,11 @@ public class DBLog {
   //
 
   /**
-   * <P>This method takes a List of {@link
+   * <p>This method takes a List of {@link
    * arlut.csd.ganymede.common.Invid Invid}'s representing objects
    * touched during a transaction, and returns a Set of email
    * addresses that should be notified of operations affecting the
-   * objects in the &lt;objects&gt; list.</P>
+   * objects in the &lt;objects&gt; list.</p>
    */
 
   static public Set<String> calculateOwnerAddresses(List<Invid> objects, DBSession session)
@@ -1821,11 +1803,11 @@ public class DBLog {
   }
 
   /**
-   * <P>This method takes a List of {@link
+   * <p>This method takes a List of {@link
    * arlut.csd.ganymede.common.Invid Invid}'s representing objects
    * touched during a transaction, and returns a Set of email
    * addresses that should be notified of operations affecting the
-   * objects in the &lt;objects&gt; list.</P>
+   * objects in the &lt;objects&gt; list.</p>
    */
 
   static public Set<String> calculateOwnerAddresses(List<Invid> objects, MailMode mode, DBSession session)
@@ -2043,9 +2025,14 @@ public class DBLog {
   }
 
   /**
-   * describeSmallTransaction provides a subject line with the types
+   * <p>describeSmallTransaction provides a subject line with the types
    * and names of the objects created, modified, or deleted by
-   * transaction.
+   * transaction.</p>
+   *
+   * <p>describeSmallTransaction should be used instead of
+   * describeLargeTransaction if the number of events in a transaction
+   * is small enough that a more complete summary can reasonably be
+   * included in the generated email subject.</p>
    */
 
   private static String describeSmallTransaction(MailOut mailOut, DBEditSet transaction)
@@ -2226,10 +2213,10 @@ public class DBLog {
   }
 
   /**
-   * describeLargeTransaction provides a subject line with the types
-   * and count of objects created, modified, or deleted by
+   * <p>describeLargeTransaction provides a subject line with the
+   * types and count of objects created, modified, or deleted by
    * transaction, but without the names of the objects that
-   * describeSmallTransaction provides.
+   * describeSmallTransaction provides.</p>
    */
 
   private static String describeLargeTransaction(MailOut mailOut, DBEditSet transaction)
@@ -2503,8 +2490,8 @@ public class DBLog {
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class is used to store system event information derived from
- * the Ganymede database.</P>
+ * <p>This class is used to store system event information derived from
+ * the Ganymede database.</p>
  */
 
 class systemEventType {
@@ -2561,9 +2548,9 @@ class systemEventType {
   }
 
   /**
-   * <P>This method takes an event definition object and extracts
+   * <p>This method takes an event definition object and extracts
    * a list of email addresses to which mail will be sent when
-   * an event of this type is logged.</P>
+   * an event of this type is logged.</p>
    */
 
   private List<String> getAddresses(DBObject obj)
@@ -2595,8 +2582,9 @@ class systemEventType {
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class is used to store object event information derived from
- * the Ganymede database for the {@link arlut.csd.ganymede.server.DBLog DBLog} class.</P>
+ * <p>This class is used to store object event information derived
+ * from the Ganymede database for the {@link
+ * arlut.csd.ganymede.server.DBLog DBLog} class.</p>
  */
 
 class objectEventType {
@@ -2662,9 +2650,9 @@ class objectEventType {
   }
 
   /**
-   * <P>This method takes an event definition object and extracts
+   * <p>This method takes an event definition object and extracts
    * a list of email addresses to which mail will be sent when
-   * an event of this type is logged.</P>
+   * an event of this type is logged.</p>
    */
 
   private List<String> getAddresses(DBObject obj)
@@ -2695,8 +2683,9 @@ class objectEventType {
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class is used to store event information derived from the Ganymede
- * database for the {@link arlut.csd.ganymede.server.DBLog DBLog} class.</P>
+ * <p>This class is used to store event information derived from the
+ * Ganymede database for the {@link arlut.csd.ganymede.server.DBLog
+ * DBLog} class.</p>
  */
 
 class MailOut {
