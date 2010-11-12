@@ -282,7 +282,7 @@ notifying you of the success of your password change request.</p>
     </center>
 
     <center>
-      <form method="post" action="ganypass.pl">
+      <form method="post" action="ganypass.pl" name="former">
         <table width="60%" bgcolor="#ccffcc" border="1" cellpadding="2">
           <tr bgcolor="#663366">
             <td colspan="2" align="center">
@@ -311,7 +311,7 @@ notifying you of the success of your password change request.</p>
           </tr>
 
           <tr>
-            <td colspan="2" align="center"><input type="submit" value="submit"></td>
+	    <td colspan="2" align="center"><input type="button" value="submit" onClick="VerifyForm(document.former)"/></td>
           </tr>
 
           <tr bgcolor="#663366">
@@ -615,5 +615,29 @@ sub print_tail {
   </body>
 </html>
 END
-    return;
+}
+
+######################################################################
+#
+#                                                         JSVerifyForm
+#
+#                Javascript basic form checker
+######################################################################
+sub JSVerifyForm()
+{
+  print <<ENDVERIFY;
+<script>
+  // Verify All Users in the form
+  function VerifyForm(former)
+  {
+    if (former.user.value == '') { alert('Please fill in the Username item before submitting'); former.user.focus(); return 0; }
+    if (former.old_pass.value == '') { alert('Please fill in the Old Password item before submitting'); former.old_pass.focus(); return 0; }
+    if (former.new_pass.value == '') { alert('Please fill in the New Password item before submitting'); former.new_pass.focus(); return 0; }
+    if (former.new_pass.value != former.verify.value) { alert('The new and verify passwords do not match, please update before submitting'); former.new_pass.focus(); return 0; }
+
+    // submit form now
+    former.submit();
+  } // VerifyForm
+</script>
+ENDVERIFY
 }
