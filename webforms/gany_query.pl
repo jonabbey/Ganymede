@@ -33,15 +33,14 @@ $schema_label = "Retrieve Schema";
 if (!$query->param) {
     print_headers();
     print_default();
-    print $query->end_html;
     print_footers();
+    print $query->end_html;
     exit 0;
 } else {
     if (!-f $xmlclient) {
 	print_headers();
-
 	print "<center><p>Error, can't find xmlclient</p></center>\n";
-
+	print_footers();
 	print $query->end_html;
 	exit 0;
     }
@@ -110,6 +109,8 @@ if (!$query->param) {
 
 	unlink($filename);
 
+	# cut out the interactive password prompt from xmlclient
+
 	$xml_output =~ s/^Password for.*\n//m;
     }
 
@@ -143,6 +144,7 @@ $xml_output
 </pre>
 ERRORS
 
+        print_footers();
 	print $query->end_html;
     }
 }
@@ -210,8 +212,6 @@ CUSTOMHEAD
 sub print_footers {
 print <<FOOTER;
   <!-- your custom footer goes here -->
-  </body>
-</html>
 FOOTER
 }
 
