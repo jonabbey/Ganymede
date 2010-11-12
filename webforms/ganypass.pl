@@ -291,17 +291,17 @@ notifying you of the success of your password change request.</p>
           </tr>
 
           <tr>
-            <td align="right"><b>Username?</b></td>
+            <td align="right"><b>Username</b></td>
             <td><input type="text" name="user"></td>
           </tr>
 
           <tr>
-            <td align="right"><b>Old Password?</b></td>
+            <td align="right"><b>Old Password</b></td>
             <td><input type="password" name="old_pass"></td>
           </tr>
 
           <tr>
-            <td align="right"><b>New Password?</b></td>
+            <td align="right"><b>New Password</b></td>
             <td><input type="password" name="new_pass"></td>
           </tr>
 
