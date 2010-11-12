@@ -616,8 +616,6 @@ sub print_tail {
     print <<END;
 <hr noshade>
 <a href="mailto:webmaster\@arlut.utexas.edu">webmaster\@arlut.utexas.edu</a><P>
-  </body>
-</html>
 END
 }
 
