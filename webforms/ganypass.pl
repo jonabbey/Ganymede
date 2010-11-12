@@ -103,65 +103,47 @@ if ($query->param) {
                 }
 
                 $loggedin_ok = 1;
-            }
-
-            if ($xml_output =~ /is too short/) {
+            } elsif ($xml_output =~ /is too short/) {
                 $xml_output = "The new password you proposed is too short.\nPick a password that is at least 6 characters long.";
 
                 $loggedin_ok = 1;
-            }
-
-            if ($xml_output =~ /simplistic/) {
+            } elsif ($xml_output =~ /simplistic/) {
                 $xml_output = "The new password you proposed follows too predictable a pattern.\n\nPlease try to pick a more random password.";
 
                 $loggedin_ok = 1;
-            }
-
-            if ($xml_output =~ /DIFFERENT/) {
+            } elsif ($xml_output =~ /DIFFERENT/) {
                 $xml_output = "The new password you proposed does not contain enough different characters.\n\nPlease try to pick a more complex password.";
 
                 $loggedin_ok = 1;
-            }
-
-            if ($xml_output =~ /used too recently/ && $xml_output =~ /last used with this account at ([^.]*)/) {
+            } elsif ($xml_output =~ /used too recently/ && $xml_output =~ /last used with this account at ([^.]*)/) {
                 $xml_output = "The new password you proposed was used for this account at $1.\n\nYou must choose a password that has not been used in conjunction with this account recently.";
 
                 $loggedin_ok = 1;
-            }
-
-            if ($xml_output =~ /It is based on your username/) {
+            } elsif ($xml_output =~ /It is based on your username/) {
                 $xml_output = "The new password you proposed was based on your username.\n\nYou must choose a password that can not be easily guessed from your account's name.";
 
                 $loggedin_ok = 1;
-            }
-
-            if ($xml_output =~ /It needs to be mixed case/) {
-                $xml_output = "Passwords are not allowed to be all lower or all upper case.";
+            } elsif ($xml_output =~ /It needs to be mixed case/) {
+                $xml_output = "Passwords must have at least one upper case and at least one lower case letter.";
 
                 $loggedin_ok = 1;
-            }
-
-            if ($xml_output =~ /contains an unacceptable character \('([^'])'\)/) {
+            } elsif ($xml_output =~ /contains an unacceptable character \('([^'])'\)/) {
                 $xml_output = "The new password you proposed contains an unacceptable character: $1\n\nPlease try again.";
 
                 $loggedin_ok = 1;
-            }
-
-            # Couldn't login to server... the server is going down for some reason?
-            # Can't login to the Ganymede server.. semaphore disabled: schema edit
-            # Error, couldn't log in to server.. bad username or password?
-            #
-            # XML submission failed.
-
-            if ($xml_output =~ /semaphore disabled/) {
+            } elsif ($xml_output =~ /semaphore disabled/) {
+		# Couldn't login to server... the server is going down for some reason?
+		# Can't login to the Ganymede server.. semaphore disabled: schema edit
+		# Error, couldn't log in to server.. bad username or password?
+		#
+		# XML submission failed.
+		
                 $xml_output = "The Ganymede server is not currently accepting logins.\nPlease try again later.";
-            }
+            } elsif ($xml_output =~ /bad username/) {
+		# Couldn't login to server... bad username/password?
+		# Error, couldn't log in to server.. bad username or password?
+		# XML submission failed.
 
-            # Couldn't login to server... bad username/password?
-            # Error, couldn't log in to server.. bad username or password?
-            # XML submission failed.
-
-            if ($xml_output =~ /bad username/) {
                 $xml_output = "You did not enter your current username and/or password correctly.\n\nPlease try again.";
             }
 
