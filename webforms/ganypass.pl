@@ -59,8 +59,14 @@ print <<ENDHEAD;
   <body bgcolor="#FFFFFF">
 ENDHEAD
 
-if ($query->param) {
+if (!-f $xmlclient) {
+    print "<center><p>Error, can't find xmlclient</p></center>\n";
+    print_tail();
+    print $query->end_html;
+    exit 0;
+}
 
+if ($query->param) {
     $user = $query->param('user');
     $old_pass = $query->param('old_pass');
     $new_pass = $query->param('new_pass');
@@ -151,12 +157,6 @@ if ($query->param) {
     print_tail();
 } else {
     print_default();
-    if (!-f $xmlclient) {
-	print "<center><p>Error, can't find xmlclient</p></center>\n";
-	print $query->end_html;
-	exit 0;
-    }
-
 }
 
 print $query->end_html;
