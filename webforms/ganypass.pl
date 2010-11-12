@@ -123,6 +123,12 @@ if ($query->param) {
                 $loggedin_ok = 1;
             }
 
+            if ($xml_output =~ /It needs to be mixed case/) {
+                $xml_output = "Passwords are not allowed to be all lower or all upper case.";
+
+                $loggedin_ok = 1;
+            }
+
             if ($xml_output =~ /contains an unacceptable character \('([^'])'\)/) {
                 $xml_output = "The new password you proposed contains an unacceptable character: $1\n\nPlease try again.";
 
