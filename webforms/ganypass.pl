@@ -67,12 +67,12 @@ if ($query->param) {
     $verify = $query->param('verify');
 
     if ($new_pass eq $verify) {
-        &make_xml;
+        make_xml();
         $xml_output = `$xmlclient $filename 2>&1`;
         $xml_status = $? >> 8;
         if (($xml_status == 0)) {
             $time = `/bin/date`;
-            &print_success;
+            print_success();
         } else {
             # we need to make an error message more clear
             if ($xml_output =~ /It is based on the dictionary word ([^.]*)/) {
@@ -141,22 +141,22 @@ if ($query->param) {
                 $xml_output = "You did not enter your current username and/or password correctly.\n\nPlease try again.";
             }
 
-            &print_failure($xml_output);
+            print_failure($xml_output);
         }
     } else {
-        &print_nomatch;
+        print_nomatch();
     }
 
     unlink $filename;           #remove temp xml file
-    &print_tail;
+    print_tail();
 } else {
+    print_default();
     if (!-f $xmlclient) {
 	print "<center><p>Error, can't find xmlclient</p></center>\n";
 	print $query->end_html;
 	exit 0;
     }
 
-    &print_default;
 }
 
 print $query->end_html;
@@ -324,7 +324,7 @@ notifying you of the success of your password change request.</p>
 
 ENDDEFAULT
 
-&print_tail;
+print_tail();
 }
 
 ######################################################################
