@@ -16,7 +16,7 @@ $perlloc = "/opt/bin/perl";
 # Make sure our current working directory is in the same directory as
 # the script
 
-$rootdir = &dirname($0);
+$rootdir = dirname($0);
 chdir($rootdir);
 
 # This script needs to get a several pieces of information from
@@ -46,7 +46,7 @@ chdir($rootdir);
 	    "DOCS" => "Do you want the Ganymede documentation installed in this directory as well?",
 	    "ANT" => "Where is Apache Ant installed?");
 
-&removelastslash($vars{"XMLPATH"});
+removelastslash($vars{"XMLPATH"});
 
 ####################
 
@@ -113,7 +113,7 @@ foreach $step (@steps) {
     }
 
     if ($step eq "HTMLINSTALL" || $step eq "XMLPATH") {
-      $vars{$step} = &canonify($vars{$step});
+      $vars{$step} = canonify($vars{$step});
 
       if ($vars{$step} !~ /^\//) {
 	print "*Could not resolve the pathname, please enter a full path.\n";
@@ -177,25 +177,27 @@ Installing web resources into $installdir.
 
 ENDOK
 
-&copy_file("jars/ganymede.jar", "$installdir/ganymede.jar");
-&copy_file("jars/ganymedeAdmin.jar", "$installdir/ganymedeAdmin.jar");
-&copy_file("webforms/ganymede_title.gif", "$installdir/ganymede_title.gif");
-&copy_file("webforms/ganymede_title2_sm.gif", "$installdir/ganymede_title2_sm.gif");
-&copy_file("webforms/arlbw.jpg", "$installdir/arlbw.jpg");
-&copy_file("webforms/ganymede_128.png", "$installdir/ganymede_128.png");
-&copy_file("webforms/ganymede_splash.png", "$installdir/ganymede_splash.png");
+copy_file("jars/ganymede.jar", "$installdir/ganymede.jar");
+copy_file("jars/ganymedeAdmin.jar", "$installdir/ganymedeAdmin.jar");
+copy_file("webforms/ganymede_title.gif", "$installdir/ganymede_title.gif");
+copy_file("webforms/ganymede_title2_sm.gif", "$installdir/ganymede_title2_sm.gif");
+copy_file("webforms/arlbw.jpg", "$installdir/arlbw.jpg");
+copy_file("webforms/ganymede_128.png", "$installdir/ganymede_128.png");
+copy_file("webforms/ganymede_splash.png", "$installdir/ganymede_splash.png");
 
 # Customize and copy the client web pages
 
-&install_file("webforms/index.html", "$installdir/index.html");
-&install_file("webforms/client_plugin.html", "$installdir/client_plugin.html");
-&install_file("webforms/client_native.html", "$installdir/client_native.html");
-&install_file("webforms/console_plugin.html", "$installdir/console_plugin.html");
-&install_file("webforms/console_native.html", "$installdir/console_native.html");
-&install_file("webforms/ganypass.pl", "$installdir/ganypass.pl");
-&install_file("webforms/client.jnlp", "$installdir/client.jnlp");
-&install_file("webforms/console.jnlp", "$installdir/console.jnlp");
+install_file("webforms/index.html", "$installdir/index.html");
+install_file("webforms/client_plugin.html", "$installdir/client_plugin.html");
+install_file("webforms/client_native.html", "$installdir/client_native.html");
+install_file("webforms/console_plugin.html", "$installdir/console_plugin.html");
+install_file("webforms/console_native.html", "$installdir/console_native.html");
+install_file("webforms/ganypass.pl", "$installdir/ganypass.pl");
+install_file("webforms/gany_query.pl", "$installdir/gany_query.pl");
+install_file("webforms/client.jnlp", "$installdir/client.jnlp");
+install_file("webforms/console.jnlp", "$installdir/console.jnlp");
 chmod 0755, "$installdir/ganypass.pl";
+chmod 0755, "$installdir/gany_query.pl";
 
 print "\nDone installing web resources\n";
 
@@ -216,13 +218,13 @@ if ($vars{"DOCS"} =~ /^y/i) {
     chdir("$rootdir");
   }
 
-  &copydir("doc", "$installdir/doc");
+  copydir("doc", "$installdir/doc");
 
   foreach $file ("README", "FAQ", "CHANGES", "CREDITS", "THINGSTODO", "KNOWNBUGS") {
-    &copy_file($file, "$installdir/$file");
+    copy_file($file, "$installdir/$file");
   }
 
-  &install_file("webforms/index_doc.html", "$installdir/index.html");
+  install_file("webforms/index_doc.html", "$installdir/index.html");
 
   print "\nDone installing documentation.\nDocumentation is accessible at $doc_url.\n";
 }
@@ -289,11 +291,11 @@ sub copydir{
   my ($source, $target) = @_;
   my (@dirs, $file);
 
-  &removelastslash($source);
-  &removelastslash($target);
+  removelastslash($source);
+  removelastslash($target);
 
   if (!-e $target) {
-    &makedir($target, 0755);
+    makedir($target, 0755);
   }
 
   opendir SOURCE, $source || die "Failure in copydir";
@@ -306,7 +308,7 @@ sub copydir{
     }
 
     if (-d "$source/$file") {
-      &copydir("$source/$file", "$target/$file"); #recurse
+      copydir("$source/$file", "$target/$file"); #recurse
     } else {
       copy("$source/$file", "$target/$file");
     }
@@ -419,15 +421,15 @@ sub canonify {
   my ($pathname) = @_;
   my ($homedir);
 
-  $pathname = &removelastslash($pathname);
+  $pathname = removelastslash($pathname);
 
   if (!(($pathname =~ /^\//) || ($pathname =~ /^~\//))) {
-    $pathname = &resolve(cwd(), $pathname);
+    $pathname = resolve(cwd(), $pathname);
   }
 
   if ($pathname =~ /^~\//) {
     $homedir = $ENV{'HOME'};
-    &removelastslash($homedir);
+    removelastslash($homedir);
     $pathname =~ s/\~\//$homedir\//g;
   }
 
@@ -447,7 +449,7 @@ sub dirname{
   my ($dirpath) = @_;
   my (@comps);
 
-  $dirpath = &canonify($dirpath);
+  $dirpath = canonify($dirpath);
 
   @comps = split(/\//, $dirpath);
   pop @comps;
