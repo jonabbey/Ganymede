@@ -143,8 +143,8 @@ $xml_output
 </pre>
 ERRORS
 
-print $query->end_html;
-}
+	print $query->end_html;
+    }
 }
 
 ######################################################################
@@ -193,13 +193,12 @@ print <<ENDSTARTHEAD;
 
     <!-- Insert your CSS here -->
   </head>
-  <body>
+  <body bgcolor="#FFFFFF">
 ENDSTARTHEAD
 
 print <<CUSTOMHEAD;
   <!-- Insert your site-specific header here -->
 CUSTOMHEAD
-
 }
 
 ######################################################################
@@ -210,7 +209,9 @@ CUSTOMHEAD
 
 sub print_footers {
 print <<FOOTER;
-  <!-- our footer goes here -->
+  <!-- your custom footer goes here -->
+  </body>
+</html>
 FOOTER
 }
 
@@ -223,12 +224,6 @@ FOOTER
 sub print_default {
 
   print <<ENDDEFAULT;
-<html>
-  <head>
-    <title>Ganymede Query Utility</title>
-  </head>
-  <body bgcolor="#FFFFFF">
-
     <table border="0">
       <tr>
 	<td align="left">
@@ -289,14 +284,13 @@ sub print_default {
     </center>
 
 ENDDEFAULT
-
-print_footers();
-
 }
 
 ######################################################################
 #
 #                                                        print_success
+#
+# Outputs the $xml_output to the user with an appropriate MIME header
 #
 ######################################################################
 
