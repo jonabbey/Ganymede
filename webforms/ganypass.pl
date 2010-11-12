@@ -19,9 +19,21 @@ use CGI::Carp qw/fatalsToBrowser/;
 
 #####################################################################
 
+$tmpdir = "/tmp";
+$pass_advice = "<table><td>
+<p>Characteristics of good passwords:</p>
+
+<ul>
+    <li>easy to remember;</li>
+    <li>8 characters long (fewer are cracked more easily, more are ignored);</li>
+    <li>not easily generated from a dictionary;</li>
+    <li>contain at least one punctuation character.</li>
+    <li>contain uppercase, lowercase, and numeric characters;</li>
+</ul>
+</td></table>";
+
 # create the query with whatever CGI info we get from our environment
 
-$tmpdir = "/tmp";
 $query = new CGI;
 $xml_path = "<#XMLPATH#>";
 $xmlclient = $xml_path . "/xmlclient";
@@ -280,6 +292,8 @@ You need to change this as well, of course
 <p>This form changes your user password for Ganymede and all network
 services managed by Ganymede at ARL:UT.</p>
 
+$pass_advice
+
 <p>All use of this form is logged, and you will receive email from Ganymede
 notifying you of the success of your password change request.</p>
 </td>
@@ -427,6 +441,15 @@ my ($failure) = @_;
 $failure =~ s/</&lt;/g;
 $failure =~ s/>/&gt;/g;
 
+if (!$loggedin_ok) {
+  $about_mess = "<p>If your current password was not entered properly, you may receive
+mail from Ganymede reporting a failure to login.  This is normal, and
+is simply letting you know that someone unsuccessfully attempted to
+make a change in Ganymede on your behalf.</p>";
+} else {
+  $about_mess = $pass_advice;
+}
+
     print <<ENDFAILURE;
     <table border="0">
       <tr>
@@ -465,14 +488,8 @@ $failure =~ s/>/&gt;/g;
             password change request.  The following error message was
             reported:</p>
 
-            <pre>
-$failure
-            </pre>
-
-            <p>If your current password was not entered properly, you will receive
-            mail from Ganymede reporting a failure to login.  This is normal, and
-            is simply letting you know that someone unsuccessfully attempted to
-            make a change in Ganymede on your behalf.</p>
+            <font color="red"><pre>$failure</pre></font>
+            $about_mess
           </td>
         </tr>
       </table>
