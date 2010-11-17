@@ -3349,8 +3349,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     for (String account: set)
       {
+	// needs to end in @arlut.utexas.edu on postfix side.
+	// jgs 17 nov 2010
+
         writer.print(account);
-        writer.println(" OK");
+        writer.println("@arlut.utexas.edu OK");
       }
 
     return;
