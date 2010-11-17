@@ -14,6 +14,7 @@ use CGI::Carp qw/fatalsToBrowser/;
 # create the query with whatever CGI info we get from our environment
 $query = new CGI;
 
+$my_url = url();
 $tmpdir = "/tmp";
 $xml_path = "<#XMLPATH#>";
 $xmlclient = $xml_path . "/xmlclient";
@@ -248,7 +249,7 @@ sub print_default {
 <center>
 
     <center>
-      <form method="post" action="gany_query.pl" name="former">
+      <form method="post" action="$my_url" name="former">
 	<table width="60%" bgcolor="#ccffcc" border="1" cellpadding="2">
 	  <tr bgcolor="#663366">
 	    <td colspan="2" align="center">

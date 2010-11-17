@@ -19,6 +19,7 @@ use CGI::Carp qw/fatalsToBrowser/;
 
 #####################################################################
 
+$my_url = url();
 $tmpdir = "/tmp";
 $pass_advice = "<table><td>
 <p>Characteristics of good passwords:</p>
@@ -283,7 +284,7 @@ notifying you of the success of your password change request.</p>
     </center>
 
     <center>
-      <form method="post" action="ganypass.pl" name="former">
+      <form method="post" action="$my_url" name="former">
         <table width="60%" bgcolor="#ccffcc" border="1" cellpadding="2">
           <tr bgcolor="#663366">
             <td colspan="2" align="center">
@@ -475,7 +476,7 @@ make a change in Ganymede on your behalf.</p>";
         </tr>
       </table>
 
-      <form method="POST" action="ganypass.pl">
+      <form method="POST" action="$my_url">
         <table width="60%" bgcolor="#ccffcc" border="1" cellpadding="2">
           <tr bgcolor="#663366">
             <td colspan="2" align="center">
@@ -564,7 +565,7 @@ sub print_nomatch {
         </tr>
       </table>
 
-      <form method="POST" action="ganypass.pl">
+      <form method="POST" action="$my_url">
         <table width="60%" bgcolor="#ccffcc" border="1" cellpadding="2">
           <tr bgcolor="#663366">
             <td colspan="2" align="center">
