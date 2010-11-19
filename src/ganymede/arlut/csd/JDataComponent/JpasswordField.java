@@ -2,16 +2,16 @@
 /*
    JpasswordField.java
 
-   
+
    Created: 12 Jul 1996
 
 
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2010
    The University of Texas at Austin
 
@@ -54,25 +54,29 @@ import java.rmi.RemoteException;
 
 import javax.swing.JPasswordField;
 
-/*******************************************************************
-                                                    JpasswordField()
-*******************************************************************/
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                  JpasswordField
+
+------------------------------------------------------------------------------*/
 
 /**
  * <p>This class defines an entry field that is capable of handling
- *    strings.  It is also possible to restrict the characters which
- *    are accepted by this gui component.  Furthermore, the maximum
- *    size of the string that can be entered into this JstringField can
- *    be preset.</p>
+ * strings.  It is also possible to restrict the characters which are
+ * accepted by this gui component.  Furthermore, the maximum size of
+ * the string that can be entered into this JstringField can be
+ * preset.</p>
  */
 
-public class JpasswordField extends JPasswordField implements KeyListener{
+public class JpasswordField extends JPasswordField implements KeyListener {
 
   public static final boolean debug = false;
 
   public static int DEFAULT_COLS = 15;
   public static int DEFAULT_SIZE = 4096;
-  
+
+  // ---
+
   private int size = DEFAULT_SIZE;
 
   private String value = null;
@@ -81,20 +85,21 @@ public class JpasswordField extends JPasswordField implements KeyListener{
 
   private JsetValueCallback my_parent;
 
-  private boolean 
+  private boolean
     allowCallback = false,
     changed = false,
-    addedKeyListener = false, 
+    addedKeyListener = false,
     incrementalCallback = false;
 
-  /**  Constructors ***/
+  /* -- */
 
- /**
+  /**
    * Base constructor for JpasswordField
-   * 
+   *
    * @param columns number of colums in the JpasswordField
    * @param is_editable true if this JpasswordField is editable
    */
+
   public JpasswordField(int columns,
 		      int maxstrlen,
 		      boolean is_editable,
@@ -103,7 +108,7 @@ public class JpasswordField extends JPasswordField implements KeyListener{
 		      String disallowed)
   {
     super(columns);
-    
+
     if (maxstrlen <= 0)
       {
 	throw new IllegalArgumentException("Invalid Parameter: maximum string size is negative or zero");
@@ -111,21 +116,12 @@ public class JpasswordField extends JPasswordField implements KeyListener{
 
     size = maxstrlen;
 
-    //    setText(null);
-
     enableEvents(AWTEvent.FOCUS_EVENT_MASK);
 
     setEditable(is_editable);  // will this JpasswordField be editable or not?
 
     setEchoChar('*');
 
-    // This will take care of masking the characters
-    // in the JpasswordField if necessary.
-    /* JTextField doesn't have this :(    
-    if (invisible)
-      setEchoChar(' ');
-     */
-     
     if (allowed != null)
       {
 	setAllowedChars(allowed);
@@ -137,14 +133,14 @@ public class JpasswordField extends JPasswordField implements KeyListener{
       }
 
     enableEvents(AWTEvent.FOCUS_EVENT_MASK);
-    enableEvents(AWTEvent.KEY_EVENT_MASK); 
+    enableEvents(AWTEvent.KEY_EVENT_MASK);
   }
 
   public boolean isChanged()
-    {
-      return changed;
-    }
-  
+  {
+    return changed;
+  }
+
   /**
    * Constructor which uses default fonts,no parent,
    * default column size, and default foregound/background
@@ -162,8 +158,6 @@ public class JpasswordField extends JPasswordField implements KeyListener{
 
   /**
    * Simple constructor.
-   *
-   *
    */
 
   public JpasswordField(int cols, boolean is_editable)
@@ -176,15 +170,14 @@ public class JpasswordField extends JPasswordField implements KeyListener{
   }
 
   /**
-    * Constructor that allows for the creation of a JpasswordField
-    * that knows about its parent.
-    *
-    * @param cols number of colums in the JpasswordField
-    * @param callback An interface for the container within which this
-    * JpasswordField is typically contained.  The JpasswordField will
-    * call this interface to pass password change notifications.
-    *
-    */
+   * Constructor that allows for the creation of a JpasswordField
+   * that knows about its parent.
+   *
+   * @param cols number of colums in the JpasswordField
+   * @param callback An interface for the container within which this
+   * JpasswordField is typically contained.  The JpasswordField will
+   * call this interface to pass password change notifications.
+   */
 
   public JpasswordField(int cols,
 			int maxstrlen,
@@ -198,13 +191,9 @@ public class JpasswordField extends JPasswordField implements KeyListener{
 
     setCallback(callback);
   }
-  
- /************************************************************/
- // JpasswordField methods
 
   /**
    *  sets the parent of this component for callback purposes
-   *
    */
 
   public void setCallback(JsetValueCallback parent)
@@ -213,29 +202,29 @@ public class JpasswordField extends JPasswordField implements KeyListener{
       {
 	throw new IllegalArgumentException("Invalid Parameter: parent cannot be null");
       }
-    
+
     my_parent = parent;
 
     allowCallback = true;
   }
 
   /**
-   *  sets the JpasswordField to a specific value
+   * Sets the JpasswordField to a specific value
    *
    * @param str value to which the JpasswordField is set
    */
 
   public void setText(String str)
   {
-    if (str == null) 
+    if (str == null)
       {
 	value = "";
-	
+
 	super.setText("");
-      
+
 	changed = true;
       }
-    else 
+    else
       {
 	if (str.length() > size)
 	  {
@@ -246,32 +235,30 @@ public class JpasswordField extends JPasswordField implements KeyListener{
 	  {
 	    if (!isAllowed(str.charAt(i)))
 	      {
-		throw new IllegalArgumentException("invalid char in string: " + 
+		throw new IllegalArgumentException("invalid char in string: " +
 						   str.charAt(i));
 	      }
 	  }
 
-	super.setText(str); 
+	super.setText(str);
 
 	value = str;
-	
+
 	changed = true;
       }
   }
 
   /**
-   *
-   *  returns the value of the member variable value
-   *
+   * Returns the value of the member variable value
    */
 
-  public String getValue() 
+  public String getValue()
   {
     return value;
   }
 
   /**
-   *  returns the character located at position n in the JpasswordField value
+   * Returns the character located at position n in the JpasswordField value
    *
    * @param n position in the JpasswordField value from which to retrieve character
    */
@@ -282,78 +269,41 @@ public class JpasswordField extends JPasswordField implements KeyListener{
   }
 
   /**
-   *  assigns a set of characters which are valid within the JpasswordField
+   * Assigns a set of characters which are valid within the JpasswordField
    *
    * @param s each character in this string will be considered an allowed character
    */
 
   public void setAllowedChars(String s)
   {
-     if (s != null)
-       {
+    if (s != null)
+      {
  	this.allowedChars = s;
-       }
-     else 
-       {
+      }
+    else
+      {
  	this.allowedChars = null;
-       }
+      }
 
-     if (s == null || s.equals(""))
-       {
+    if (s == null || s.equals(""))
+      {
  	return;
-       }
-     else
-       {
-	 //	 Keymap map = getKeymap();
-	 //	
-	 //	 Action insert = new DefaultAction(JTextComponent.insertContentAction);
-	 //
-	 //	 KeyStroke[] strokes = map.getKeyStrokesForAction(insert);
-	 //
-	 //	 map.removeBindings();
-	 //	 
-	 //	 for (int i = 0; i < s.length(); i++)
-	 //	   {
-	 //	     map.addActionForKeyStroke(KeyStroke.getKeyStroke(s.charAt(i), 0), insert);
-	 //	   }
-       }
+      }
   }
- 
+
   /**
-   *  assigns a set of characters which are invalid within the JpasswordField
+   * Assigns a set of characters which are invalid within the JpasswordField
    *
    * @param s each character in this string will be considered a disallowed character
    */
+
   public void setDisallowedChars(String s)
   {
-    //    Keymap map;
-
-    /* -- */
-
-    //    map = getKeymap();
-
-    if (s != null && !s.equals(""))
-      {
-	// 	for (int i = 0; i < s.length(); i++)
-	// 	  {
-	//	    //	    map.removeKeyStrokeBinding(KeyStroke.getKeyStroke(s.charAt(i), 0));
-	//	    map.addActionForKeyStroke(KeyStroke.getKeyStroke(s.charAt(i)),
-	//			      new DefaultAction("null action"));
-	// 	  }
-      }
-
-    if (s!= null)
-      {
- 	this.disallowedChars = s;
-      }
-    else 
-      {
- 	this.disallowedChars = null;
-      }
+    this.disallowedChars = s;
   }
 
   /**
-   *   returns the set of allowed characters as a String object
+   * Returns the set of allowed characters as a String object
    */
 
   public String getAllowedChars()
@@ -362,7 +312,7 @@ public class JpasswordField extends JPasswordField implements KeyListener{
   }
 
   /**
-   *  returns the set of disallowed characters as a String object
+   * Returns the set of disallowed characters as a String object
    */
 
   public String getDisallowedChars()
@@ -371,7 +321,8 @@ public class JpasswordField extends JPasswordField implements KeyListener{
   }
 
   /**
-   * returns the maximum size of the string that can be placed in this JpasswordField
+   * Returns the maximum size of the string that can be placed in this
+   * JpasswordField
    */
 
   public int getMaxStringSize()
@@ -379,9 +330,9 @@ public class JpasswordField extends JPasswordField implements KeyListener{
     return this.size;
   }
 
-
   /**
-   *  determines whether a given character is valid or invalid for a JpasswordField
+   * Determines whether a given character is valid or invalid for a
+   * JpasswordField
    *
    * @param ch the character which is being tested for its validity
    */
@@ -395,26 +346,25 @@ public class JpasswordField extends JPasswordField implements KeyListener{
 	    return false;
 	  }
       }
-    
-    if (allowedChars != null)
 
+    if (allowedChars != null)
       {
 	if (allowedChars.indexOf(ch) == -1)
 	  {
 	    return false;
 	  }
       }
-    
+
     return true;
   }
 
   /**
-   * When the JpasswordField looses focus, any changes made to 
+   * <p>When the JpasswordField looses focus, any changes made to
    * the value in the JpasswordField need to be propogated to the
-   * server.  This method will handle that functionality.
+   * server.  This method will handle that functionality.</p>
    *
-   * This method is synchronized to prevent overlapping callbacks
-   * if we are in a threaded environment.
+   * <p>This method is synchronized to prevent overlapping callbacks
+   * if we are in a threaded environment.</p>
    *
    * @param e the FocusEvent that needs to be process
    */
@@ -432,24 +382,24 @@ public class JpasswordField extends JPasswordField implements KeyListener{
       {
 	sendCallback();
       }
-
   }
 
   public void sendCallback()
   {
     String str;
+
     // if nothing in the JpasswordField has changed,
     // we don't need to worry about this event.
-    
+
     str = new String(getPassword());
-    
+
     if (value != null)
       {
 	if (debug)
 	  {
 	    System.err.println("JpasswordField.processFocusEvent: old value != null");
 	  }
-	
+
 	changed = !value.equals(str);
       }
     else
@@ -458,25 +408,25 @@ public class JpasswordField extends JPasswordField implements KeyListener{
 	  {
 	    System.err.println("JpasswordField.processFocusEvent: old value == null");
 	  }
-	
+
 	changed = true;
       }
-    
+
     if (!changed)
       {
 	if (debug)
 	  {
 	    System.err.println("JpasswordField.processFocusEvent: no change, ignoring");
 	  }
-	
+
 	return;
       }
-    
-    if (allowCallback) 
+
+    if (allowCallback)
       {
 	boolean b = false;
-	  
-	try 
+
+	try
 	  {
 	    if (debug)
 	      {
@@ -488,13 +438,13 @@ public class JpasswordField extends JPasswordField implements KeyListener{
 	catch (RemoteException re)
 	  {
 	  }
-	    
-	if (b==false) 
+
+	if (!b)
 	  {
 	    if (debug)
 	      {
 		System.err.println("JpasswordField.processFocusEvent: setValue rejected");
-		
+
 		if (value == null)
 		  {
 		    System.err.println("JpasswordField.processFocusEvent: resetting to empty string");
@@ -504,7 +454,7 @@ public class JpasswordField extends JPasswordField implements KeyListener{
 		    System.err.println("JpasswordField.processFocusEvent: resetting to " + value);
 		  }
 	      }
-	    
+
 	    if (value == null)
 	      {
 		super.setText("");
@@ -513,10 +463,10 @@ public class JpasswordField extends JPasswordField implements KeyListener{
 	      {
 		super.setText(value);
 	      }
-	    
+
 	    changed = false;
 	  }
-	else 
+	else
 	  {
 	    if (debug)
 	      {
@@ -524,12 +474,12 @@ public class JpasswordField extends JPasswordField implements KeyListener{
 	      }
 
 	    value = str;
-		
+
 	    changed = true;
 	  }
       }
   }
-  
+
   public void keyPressed(KeyEvent e) {}
   public void keyReleased(KeyEvent e) {}
   public void keyTyped(KeyEvent e)
@@ -542,7 +492,7 @@ public class JpasswordField extends JPasswordField implements KeyListener{
 	  }
 	catch (RemoteException rx)
 	  {
-	    
+
 	  }
       }
   }

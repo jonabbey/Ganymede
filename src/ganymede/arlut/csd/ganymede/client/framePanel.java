@@ -115,7 +115,6 @@ import arlut.csd.ganymede.rmi.string_field;
  * {@link arlut.csd.ganymede.client.historyPanel historyPanel}, and other
  * panels as appropriate for specific object types.
  *
- * @version $Id$
  * @author Michael Mulvaney 
  */
 
@@ -144,31 +143,32 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   boolean debug = false;
 
   /**
-   * Used with vetoableChange() to work around Swing 1.1 bug preventing
-   * setDefaultCloseOperation(DO_NOTHING_ON_CLOSE) from doing anything
-   * useful.
+   * <p>Used with vetoableChange() to work around Swing 1.1 bug
+   * preventing setDefaultCloseOperation(DO_NOTHING_ON_CLOSE) from
+   * doing anything useful.</p>
    *
-   * This variable needs to be set to true in order for setClosed() calls
-   * in windowPanel to avoid bringing up the dialogs.
+   * <p>This variable needs to be set to true in order for setClosed()
+   * calls in windowPanel to avoid bringing up the dialogs.</p>
    *
-   * Actually, this variable has now been overloaded with an
+   * <p>Actually, this variable has now been overloaded with an
    * additional function.  When we are closing a newly created window,
    * we set closingApproved to true so that the gclient deleteObject()
-   * method won't balk at our deleting the newly created objects.
+   * method won't balk at our deleting the newly created objects.</p>
    *
-   * This is totally like biological evolution, in which a
-   * pre-existing feature is adapted for a new purpose over time.
-   * Hot-cha-cha.
+   * <p>This is totally like biological evolution, in which a
+   * pre-existing feature is adapted for a new purpose over time.</p>
+   *
+   * <p>Hot-cha-cha.</p>
    */
 
   boolean closingApproved = false;
 
   /**
-   * Used with internalFrameClosed() to make our JInternalFrame close
-   * interception hack from Swing 1.1 work with Kestrel.
+   * <p>Used with internalFrameClosed() to make our JInternalFrame
+   * close interception hack from Swing 1.1 work with Kestrel.</p>
    *
-   * If this variable is set to true, internalFrameClosed() will
-   * not attempt to call dispose().
+   * <p>If this variable is set to true, internalFrameClosed() will
+   * not attempt to call dispose().</p>
    */
 
   private booleanSemaphore closed = new booleanSemaphore(false);
@@ -200,15 +200,15 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     pane;
 
   /** 
-   * A vector of {@link arlut.csd.ganymede.client.containerPanel}s,
+   * <p>A vector of {@link arlut.csd.ganymede.client.containerPanel}s,
    * used to allow the gclient to refresh containerPanels on demand,
    * and to allow the gclient to order any containerPanels contained
-   * in this framePanel to stop loading on a transaction cancel.
+   * in this framePanel to stop loading on a transaction cancel.</p>
    *
-   * Note that the cleanUp() method in this class can null out
+   * <p>Note that the cleanUp() method in this class can null out
    * this reference, so all methods that loop over containerPanels
    * should be synchronized.  This is also why containerPanels
-   * is kept private.
+   * is kept private.</p>
    */
 
   private Vector containerPanels = new Vector();

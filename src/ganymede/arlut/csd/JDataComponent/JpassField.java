@@ -282,8 +282,7 @@ public class JpassField extends JPanel implements JsetValueCallback {
   }
   
   /**
-   *  returns true if the value in the JpassField has 
-   *  been modified.
+   * Returns true if the value in the JpassField has been modified.
    */
 
   public boolean getChanged()
@@ -292,8 +291,7 @@ public class JpassField extends JPanel implements JsetValueCallback {
   }
 
   /**
-   *  sets the parent of this component for callback purposes
-   *
+   * Sets the parent of this component for callback purposes
    */
 
   public void setCallback(JsetValueCallback parent)
@@ -307,7 +305,6 @@ public class JpassField extends JPanel implements JsetValueCallback {
 
     allowCallback = true;
   }
-
 
   /**
    * <p>This private helper method relays a descriptive error message to
