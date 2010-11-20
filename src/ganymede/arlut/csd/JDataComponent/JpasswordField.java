@@ -46,10 +46,8 @@
 
 package arlut.csd.JDataComponent;
 
-import java.awt.AWTEvent;
 import java.awt.event.FocusEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.FocusListener;
 import java.rmi.RemoteException;
 
 import javax.swing.JPasswordField;
@@ -68,7 +66,7 @@ import javax.swing.JPasswordField;
  * preset.</p>
  */
 
-public class JpasswordField extends JPasswordField implements KeyListener {
+public class JpasswordField extends JPasswordField implements FocusListener {
 
   public static final boolean debug = false;
 
@@ -87,9 +85,7 @@ public class JpasswordField extends JPasswordField implements KeyListener {
 
   private boolean
     allowCallback = false,
-    changed = false,
-    addedKeyListener = false,
-    incrementalCallback = false;
+    changed = false;
 
   /* -- */
 
@@ -101,11 +97,11 @@ public class JpasswordField extends JPasswordField implements KeyListener {
    */
 
   public JpasswordField(int columns,
-		      int maxstrlen,
-		      boolean is_editable,
-		      boolean invisible,
-		      String allowed,
-		      String disallowed)
+			int maxstrlen,
+			boolean is_editable,
+			boolean invisible,
+			String allowed,
+			String disallowed)
   {
     super(columns);
 
@@ -115,8 +111,6 @@ public class JpasswordField extends JPasswordField implements KeyListener {
       }
 
     size = maxstrlen;
-
-    enableEvents(AWTEvent.FOCUS_EVENT_MASK);
 
     setEditable(is_editable);  // will this JpasswordField be editable or not?
 
@@ -132,8 +126,7 @@ public class JpasswordField extends JPasswordField implements KeyListener {
 	setDisallowedChars(disallowed);
       }
 
-    enableEvents(AWTEvent.FOCUS_EVENT_MASK);
-    enableEvents(AWTEvent.KEY_EVENT_MASK);
+    addFocusListener(this);
   }
 
   public boolean isChanged()
@@ -358,32 +351,6 @@ public class JpasswordField extends JPasswordField implements KeyListener {
     return true;
   }
 
-  /**
-   * <p>When the JpasswordField looses focus, any changes made to
-   * the value in the JpasswordField need to be propogated to the
-   * server.  This method will handle that functionality.</p>
-   *
-   * <p>This method is synchronized to prevent overlapping callbacks
-   * if we are in a threaded environment.</p>
-   *
-   * @param e the FocusEvent that needs to be process
-   */
-
-  public void processFocusEvent(FocusEvent e)
-  {
-    super.processFocusEvent(e);
-
-    if (debug)
-      {
-	System.err.println("JpasswordField.processFocusEvent: entering");
-      }
-
-    if (e.getID() == FocusEvent.FOCUS_LOST)
-      {
-	sendCallback();
-      }
-  }
-
   public void sendCallback()
   {
     String str;
@@ -397,7 +364,7 @@ public class JpasswordField extends JPasswordField implements KeyListener {
       {
 	if (debug)
 	  {
-	    System.err.println("JpasswordField.processFocusEvent: old value != null");
+	    System.err.println("JpasswordField.sendCallback(): old value != null");
 	  }
 
 	changed = !value.equals(str);
@@ -406,7 +373,7 @@ public class JpasswordField extends JPasswordField implements KeyListener {
       {
 	if (debug)
 	  {
-	    System.err.println("JpasswordField.processFocusEvent: old value == null");
+	    System.err.println("JpasswordField.sendCallback(): old value == null");
 	  }
 
 	changed = true;
@@ -416,7 +383,7 @@ public class JpasswordField extends JPasswordField implements KeyListener {
       {
 	if (debug)
 	  {
-	    System.err.println("JpasswordField.processFocusEvent: no change, ignoring");
+	    System.err.println("JpasswordField.sendCallback(): no change, ignoring");
 	  }
 
 	return;
@@ -430,7 +397,7 @@ public class JpasswordField extends JPasswordField implements KeyListener {
 	  {
 	    if (debug)
 	      {
-		System.err.println("JpasswordField.processFocusEvent: making callback");
+		System.err.println("JpasswordField.sendCallback(): making callback");
 	      }
 
 	    b = my_parent.setValuePerformed(new JSetValueObject(this, str));
@@ -443,15 +410,15 @@ public class JpasswordField extends JPasswordField implements KeyListener {
 	  {
 	    if (debug)
 	      {
-		System.err.println("JpasswordField.processFocusEvent: setValue rejected");
+		System.err.println("JpasswordField.sendCallback(): setValue rejected");
 
 		if (value == null)
 		  {
-		    System.err.println("JpasswordField.processFocusEvent: resetting to empty string");
+		    System.err.println("JpasswordField.sendCallback(): resetting to empty string");
 		  }
 		else
 		  {
-		    System.err.println("JpasswordField.processFocusEvent: resetting to " + value);
+		    System.err.println("JpasswordField.sendCallback(): resetting to " + value);
 		  }
 	      }
 
@@ -470,7 +437,7 @@ public class JpasswordField extends JPasswordField implements KeyListener {
 	  {
 	    if (debug)
 	      {
-		System.err.println("JpasswordField.processFocusEvent: setValue accepted");
+		System.err.println("JpasswordField.sendCallback(): setValue accepted");
 	      }
 
 	    value = str;
@@ -480,20 +447,11 @@ public class JpasswordField extends JPasswordField implements KeyListener {
       }
   }
 
-  public void keyPressed(KeyEvent e) {}
-  public void keyReleased(KeyEvent e) {}
-  public void keyTyped(KeyEvent e)
-  {
-    if (incrementalCallback && allowCallback)
-      {
-	try
-	  {
-	    my_parent.setValuePerformed(new JAddValueObject(this, new String(getPassword())));
-	  }
-	catch (RemoteException rx)
-	  {
+  // FocusListener methods
 
-	  }
-      }
+  public void focusGained(FocusEvent e) {}
+  public void focusLost(FocusEvent e)
+  {
+    sendCallback();
   }
 }
