@@ -142,7 +142,8 @@ public class JpasswordField extends JPasswordField implements FocusListener {
 
   public JpasswordField()
   {
-    this(JpasswordField.DEFAULT_COLS,JpasswordField.DEFAULT_SIZE,
+    this(JpasswordField.DEFAULT_COLS,
+	 JpasswordField.DEFAULT_SIZE,
 	 true,
 	 false,
 	 null,
@@ -155,7 +156,8 @@ public class JpasswordField extends JPasswordField implements FocusListener {
 
   public JpasswordField(int cols, boolean is_editable)
   {
-    this(cols,JpasswordField.DEFAULT_SIZE,
+    this(cols,
+	 JpasswordField.DEFAULT_SIZE,
 	 is_editable,
 	 false,
 	 null,
@@ -180,7 +182,7 @@ public class JpasswordField extends JPasswordField implements FocusListener {
 			String disallowed,
 			JsetValueCallback callback)
   {
-    this(cols,maxstrlen,is_editable,invisible,allowed,disallowed);
+    this(cols, maxstrlen, is_editable, invisible, allowed, disallowed);
 
     setCallback(callback);
   }
@@ -269,19 +271,7 @@ public class JpasswordField extends JPasswordField implements FocusListener {
 
   public void setAllowedChars(String s)
   {
-    if (s != null)
-      {
- 	this.allowedChars = s;
-      }
-    else
-      {
- 	this.allowedChars = null;
-      }
-
-    if (s == null || s.equals(""))
-      {
- 	return;
-      }
+    this.allowedChars = s;
   }
 
   /**
