@@ -14,7 +14,7 @@ use CGI::Carp qw/fatalsToBrowser/;
 # create the query with whatever CGI info we get from our environment
 $query = new CGI;
 
-$my_url = url();
+$my_url = $query->url();
 $tmpdir = "/tmp";
 $xml_path = "<#XMLPATH#>";
 $xmlclient = $xml_path . "/xmlclient";

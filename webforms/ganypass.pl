@@ -19,7 +19,7 @@ use CGI::Carp qw/fatalsToBrowser/;
 
 #####################################################################
 
-$my_url = url();
+
 $tmpdir = "/tmp";
 $pass_advice = "<table><td>
 <p>Characteristics of good passwords:</p>
@@ -36,6 +36,7 @@ $pass_advice = "<table><td>
 # create the query with whatever CGI info we get from our environment
 
 $query = new CGI;
+$my_url = $query->url();
 $xml_path = "<#XMLPATH#>";
 $xmlclient = $xml_path . "/xmlclient";
 
