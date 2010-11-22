@@ -1,12 +1,12 @@
 Ganymede Release 2.0
-28 September 2010
+20 November 2010
 CHANGES
 
 ---------------------------------------------
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: 28 September 2010
+RELEASE DATE: 20 November 2010
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -1763,6 +1763,53 @@ edit the object in question.
 
 This method has been removed from the pass_field remote interface,
 removing the ability for a custom client to bypass field permissions.
+
+119. [SERVER] Added SyncMaster interface to augment Sync Channel feeds
+
+We've added a new arlut.csd.ganymede.server.SyncMaster interface that
+can be used to programmatically enhance the context passed to Sync
+Channels for incremental synchronization.  With a SyncMaster attached
+to a Sync Channel, you can pull in information from any part of the
+Ganymede object database and include it as needed in a Sync Channel's
+incremental XML sync files to provide whatever context might be needed
+to allow the XML processor to communicate with its backend services.
+
+120. [ADMIN CONSOLE] Fixed some errors in the schema editor
+
+The schema editor's namespace editing panel has been fixed.
+Previously, when you clicked on namespace name, it would only show you
+fields managed by it if they were string fields.  Now, any namespace
+managed field (i.e., I.P. Address, Numeric) will be properly shown.
+
+121. [SERVER] Improved error handling in DBLog
+
+The DBLog code would throw an exception if the mail host could not be
+reached in such a way that the log message would be lost.  This has
+been repaired, and all messages will be fully logged even if the SMTP
+host cannot be found.
+
+122. [WEB] Improved password change web page
+
+The password change CGI has been significantly cleaned up, and now
+properly autoconfigures the URLs it uses when generating forms, rather
+than depending on a pre-specified URL when you run installWeb.
+
+123. [WEB] Added GanyQL query web page
+
+The installWeb script now installs a CGI that allows you make GanyQL
+queries against the Ganymede server.
+
+124. [CLIENT] Fixed password field focus problems on multi-monitor Linux
+
+The Ganymede client's double entry password field was using a
+deprecated method for doing focus handling.  This was causing problems
+where you couldn't click on a password edit field and have it take
+keyboard focus.
+
+This wasn't revealing itself in my testing, but it came up on a
+Linux box with more than one screens attached to its X Server.
+
+Fixed.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
