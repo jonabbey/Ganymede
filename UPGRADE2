@@ -3,7 +3,6 @@
                            Ganymede 2.0 Upgrade Guide
 
    Release 2.0 - April 1, 2008
-   $Rev: 8219 $
 
    This document discusses what's new in Ganymede 2.0, and what you'll need
    to think about if you are upgrading from an installation of Ganymede 1.0.
@@ -157,6 +156,3 @@ Schema Changes
    --------------------------------------------------------------------------
 
     Jonathan Abbey
-
-   $Date: 2008-07-14 15:55:19 -0500 (Mon, 14 Jul 2008) $, $Rev: 8219 $,
-   $Author: broccol $

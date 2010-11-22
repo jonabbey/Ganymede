@@ -1,401 +1,361 @@
 Ganymede Release 2.0
-28 August 2010
+22 November 2010
 FAQ
 ---------------------------------------------
 
 Questions Answered:
 
-1) What is Ganymede?
-2) Great!  Then I can just jump right in and use it, right?
-3) Who should be thinking of using Ganymede?
-4) Is Ganymede secure from packet-sniffing?
-5) What do I need to run Ganymede?
-6) How scalable is Ganymede, with its memory-based database?
-7) Why isn't Ganymede LDAP-based?  What about replication?
-8) What's up with DNS management?  The current stuff is weak.
-9) Where's the documentation?
-10) How can I help?
-11) Why is it called Ganymede?
-12) What is Ganymede's development history like?
-13) When I try to start the Ganymede server, I see a message complaining about
-    the system hostname resolving to the 127.0.0.1 loopback address and
-    the server quits.  What's going on?
-14) Where's the Ganymede web site?
-15) What's the best way to report bugs?  How should I ask questions?
+   1.  What is Ganymede?
+   2.  Great! Then I can just jump right in and use it, right?
+   3.  Who should be thinking of using Ganymede?
+   4.  Is Ganymede secure from packet-sniffing?
+   5.  What do I need to run Ganymede?
+   6.  How scalable is Ganymede, with its memory-based database?
+   7.  Why isn't Ganymede LDAP-based? What about replication?
+   8.  What's up with DNS management? The current stuff is weak.
+   9.  Where's the documentation?
+   10. How can I help?
+   11. Why is it called Ganymede?
+   12. What is Ganymede's development history like?
+   13. When I try to start the Ganymede server, I see a message complaining
+       about the system hostname resolving to the 127.0.0.1 loopback address
+       and the server quits. What's going on?
+   14. Where's the Ganymede web site?
+   15. What's the best way to report bugs? How should I ask questions?
 
---====================================================================--
+   --------------------------------------------------------------------------
 
-1) What is Ganymede?
+  1. What is Ganymede?
 
-   Ganymede is a system for managing network directories.  A network
-directory is something like NIS, LDAP, or DNS.  Ganymede has its own
-built-in object database that holds authoritative information and
-which is fed into NIS, DNS, etc., when things change.  Unlike stock
-NIS, DNS, or LDAP, Ganymede is designed to be very smart about what
-changes are allowed to the network information.
+   Ganymede is a system for managing network directories. A network directory
+   is something like NIS, LDAP, or DNS. Ganymede has its own built-in object
+   database that holds authoritative information and which is fed into NIS,
+   DNS, etc., when things change. Unlike stock NIS, DNS, or LDAP, Ganymede is
+   designed to be very smart about what changes are allowed to the network
+   information.
 
-   Customizers can write Java classes to provide very sophisticated
-data checking and inter-object relationship maintenance.  The Ganymede
-server does a lot to keep everything sane.. if you delete a user, the
-user is automatically removed from all groups, email lists, systems,
-etc., that refer to the user.  If any of those secondary changes would
-violate permissions, the whole operation is refused.
+   Customizers can write Java classes to provide very sophisticated data
+   checking and inter-object relationship maintenance. The Ganymede server
+   does a lot to keep everything sane.. if you delete a user, the user is
+   automatically removed from all groups, email lists, systems, etc., that
+   refer to the user. If any of those secondary changes would violate
+   permissions, the whole operation is refused.
 
-   With Ganymede's sophisticated permissions system, you can give
-different levels of authority to different kinds of users, over
-distinct portions of Ganymede's database, making it possible for
-administrators to take care of their own portions of your network
-directories without getting in each others' way.  Ganymede logs all
-changes and has an extensive system for sending email notification to
-various interested parties when things change. Objects in the database
-can be set to expire or be removed at a later date, making it possible
-to create temporary user accounts and so forth.
+   With Ganymede's sophisticated permissions system, you can give different
+   levels of authority to different kinds of users, over distinct portions of
+   Ganymede's database, making it possible for administrators to take care of
+   their own portions of your network directories without getting in each
+   others' way. Ganymede logs all changes and has an extensive system for
+   sending email notification to various interested parties when things
+   change. Objects in the database can be set to expire or be removed at a
+   later date, making it possible to create temporary user accounts and so
+   forth.
 
-   Customizers/adopters can write code to take the data from Ganymede
-and propagate it into NIS, DNS, or anything else when changes are made
-in the Ganymede database.  At ARL:UT, we take the data from Ganymede and
-propagate it into NIS, DNS, tacacs+ for router configuration, Samba,
-Active Directory, Sendmail, OpenLDAP, and more.
+   Customizers/adopters can write code to take the data from Ganymede and
+   propagate it into NIS, DNS, or anything else when changes are made in the
+   Ganymede database. At ARL:UT, we take the data from Ganymede and propagate
+   it into NIS, DNS, tacacs+ for router configuration, Samba, Active
+   Directory, Sendmail, OpenLDAP, and more.
 
-   In addition to maintaining the directory services, Ganymede also
-triggers external scripts to create users' home directories, handle
-user rename, NFS volume creation, etc. Having a central point
-through which all network information changes go through before
-fanning out to all of your network distribution mechanisms is
-extremely powerful.
+   In addition to maintaining the directory services, Ganymede also triggers
+   external scripts to create users' home directories, handle user rename,
+   NFS volume creation, etc. Having a central point through which all network
+   information changes go through before fanning out to all of your network
+   distribution mechanisms is extremely powerful.
 
-   Ganymede is much more than a simple directory system like LDAP,
-NIS, or even DNS. Ganymede is a total system for managing your
-directory information, and is designed with the goal of making it
-possible to let even untrained clerical staff handle things like user
-and DNS record creation and maintenance.
+   Ganymede is much more than a simple directory system like LDAP, NIS, or
+   even DNS. Ganymede is a total system for managing your directory
+   information, and is designed with the goal of making it possible to let
+   even untrained clerical staff handle things like user and DNS record
+   creation and maintenance.
 
-     ------------------------------------------------------------
+  2. Great! Then I can just jump right in and use it, right?
 
-2) Great!  Then I can just jump right in and use it, right?
+   Um, no. Ganymede itself is an extensible and customizable system that can
+   do a tremendous amount for you, but right now it is not an
+   'out-of-the-box' admin package. In order to make Ganymede useful, you need
+   a schema kit, which consists of a database definition for the network
+   information you want to manage, a set of custom Java plug-in classes that
+   will make the Ganymede server smart about how your information is supposed
+   to be connected together, and a set of classes and scripts that will take
+   information from Ganymede and propagate it into your network.
 
-   Um, no.  Ganymede itself is an extensible and customizable system
-that can do a tremendous amount for you, but right now it is not an
-'out-of-the-box' admin package.  In order to make Ganymede useful, you
-need a schema kit, which consists of a database definition for the
-network information you want to manage, a set of custom Java plug-in
-classes that will make the Ganymede server smart about how your
-information is supposed to be connected together, and a set of classes
-and scripts that will take information from Ganymede and propagate it
-into your network.
+   Ganymede comes with a few demonstration schema kits, and one very complex
+   schema kit that manages the ARL laboratory environment, but if you are
+   serious about Ganymede you're going to need to do some work to design your
+   network environment management system.
 
-   Ganymede comes with a few demonstration schema kits, and one very
-complex schema kit that manages the ARL:UT laboratory environment, but if
-you are serious about Ganymede you're going to need to do some work to
-design your network environment management system.
+   Hopefully as time goes on, people will produce a variety of schema kits
+   that will be useful for a variety of common scenarios (like managing DNS
+   at an ISP, for instance), but whenever you get into an environment as
+   complex as Ganymede is designed to be able to handle, you're likely to get
+   a lot of details that will be different for each network.
 
-   Hopefully as time goes on, people will produce a variety of schema
-kits that will be useful for a variety of common scenarios (like
-managing DNS at an ISP, for instance), but whenever you get into an
-environment as complex as Ganymede is designed to be able to handle,
-you're likely to get a lot of details that will be different for each
-network.
+  3. Who should be thinking of using Ganymede?
 
-     ------------------------------------------------------------
+   From reading the above, you can tell that Ganymede is probably overkill
+   for a small network. If you start getting hundreds of users and/or
+   hundreds of systems, Ganymede will make your life a lot better, but for
+   less than a couple dozen systems or users, you may find that Ganymede is a
+   bit much. Ganymede is not at all a good fit for managing things on a
+   single system.. the Ganymede server takes up a lot of memory and you just
+   wouldn't need its features for something so small.
 
-3) Who should be thinking of using Ganymede?
+  4. Is Ganymede secure from packet-sniffing?
 
-   From reading the above, you can tell that Ganymede is probably
-overkill for a small network.  If you start getting hundreds of users
-and/or hundreds of systems, Ganymede will make your life a lot better,
-but for less than a couple dozen systems or users, you may find that
-Ganymede is a bit much.  Ganymede is not at all a good fit for
-managing things on a single system.. the Ganymede server takes up a
-lot of memory and you just wouldn't need its features for something so
-small.
+   Yes. The Ganymede 2.0 server opens two TCP ports for communication with
+   the Ganymede client and admin console. Communications to the first port
+   (the RMI registry) is unencrypted, but the only traffic to that port is
+   the server telling the clients where to find the second port.
 
-     ------------------------------------------------------------
+   The second port is what the clients use to log in and talk to the server.
+   Communications to and from this port are protected with SSL. The Ganymede
+   client and server are cryptographically mated. The server contains a
+   private key that is generated when you build the software, along with a
+   matching public key certificate. This certificate is incorporated into the
+   client so that the client can validate the server's identity.
 
-4) Is Ganymede secure from packet-sniffing?
+   In addition to protecting the data communications with SSL, the server is
+   configured to cryptographically randomize the RMI-level object
+   identifiers, to prevent attackers from attempting to inject commands to
+   objects on the Ganymede server that are published for someone else's
+   client.
 
-  Yes.  The Ganymede 2.0 server opens two TCP ports for communication
-with the Ganymede client and admin console.  Communications to the first
-port (the RMI registry) is unencrypted, but the only traffic to that port
-is the server telling the clients where to find the second port.
+  5. What do I need to run Ganymede?
 
-  The second port is what the clients use to log in and talk to the
-server.  Communications to and from this port are protected with
-SSL.  The Ganymede client and server are cryptographically mated.
-The server contains a private key that is generated when you build
-the software, along with a matching public key certificate.  This
-certificate is incorporated into the client so that the client can
-validate the server's identity.
+   Ganymede has very few prerequisites. You'll need to have Java 6 installed,
+   but otherwise everything you'll need for basic operations is included in
+   the Ganymede download.
 
-  In addition to protecting the data communications with SSL, the
-server is configured to cryptographically randomize the RMI-level
-object identifiers, to prevent attackers from attempting to inject
-commands to objects on the Ganymede server that are published for
-someone else's client.
+   We do expect that you have a Unix-like system to run the server on,
+   however. You can use Mac OS X, Linux, FreeBSD, Solaris, or any other
+   Unix-like system that has Java 6, Bourne Shell, and Perl 5. Cygwin on
+   Windows might even work, though we haven't tested that.
 
-     ------------------------------------------------------------
-
-5) What do I need to run Ganymede?
-
-   The Ganymede distribution is packaged as a gzipped UNIX tar file,
-and requires GNU tar to decompress it, due to extremely long
-file/path names in the archive.
-
-   The Ganymede system requires Java 5 or better.  Since Ganymede
-supports running the Ganymede client and admin console on Windows
-browsers with Sun's Plug-In (see
-http://java.sun.com/products/plugin/), you can get away with just the
-basic Java environment on your UNIX system to run the server on.
+   The Ganymede client and admin console require Java 6 and a GUI
+   environment. You can run the client and admin console remotely from
+   Windows, Linux, Mac, or whatever you have, if your Unix server doesn't
+   have GUI support on it.
 
    The Ganymede server can be memory intensive, as all data registered in
-Ganymede is kept in an in-memory database backed by disk.  A 64 meg
-system dedicated to Ganymede is adequate to run a lab like ours, with
-DNS for a couple thousand systems, and user, group, and email records
-for around 1000 users.  More memory is better.  You'll probably want a
-Pentium 200 or better for good performance on something like Linux.
-JITs are great, anything with a good generational garbage collector
-like Sun's HotSpot VM are super-great.
+   Ganymede is kept in an in-memory database backed by disk. A 64 meg system
+   dedicated to Ganymede is adequate to run a lab like ours, with DNS for a
+   couple thousand systems, and user, group, and email records for around
+   1000 users. More memory is better. You'll probably want a Pentium 200 or
+   better for good performance on something like Linux. JITs are great,
+   anything with a good generational garbage collector like Sun's HotSpot VM
+   are super-great.
 
-   (The above paragraph is pretty old, obviously, but it's still true,
-   so I'm perfectly happy leaving it as it is. ;-)
+   (The above paragraph is pretty old, obviously, but it's still true, so I'm
+   perfectly happy leaving it as it is. ;-)
 
-   The best way to launch the Ganymede clients is to use Sun's Java
-Web Start product, which comes with Sun's Java environment.  Mac OS
-X ships with very good Java Web Start support, as well.
+   The best way to launch the Ganymede clients is to use Sun's Java Web Start
+   product, which comes with Sun's Java environment. Mac OS X ships with very
+   good Java Web Start support, as well.
 
-     ------------------------------------------------------------
+  6. How scalable is Ganymede, with its memory-based database?
 
-6) How scalable is Ganymede, with its memory-based database?
+   Fairly scalable. At ARL:UT, we use Ganymede to manage a rather complex NIS
+   domain containing around 800 users and our DNS domain with over 2500
+   system records defined. During execution our Ganymede server takes up only
+   about 25 megabytes of JVM heap space, or about 100 megabytes in total
+   counting shared libraries, etc., for the JVM.
 
-   Fairly scalable.  At ARL:UT, we use Ganymede to manage a rather
-complex NIS domain containing around 800 users and our DNS domain with
-over 2500 system records defined. During execution our Ganymede server
-takes up only about 25 megabytes of JVM heap space, or about 100
-megabytes in total counting shared libraries, etc., for the JVM.
-
-   During development of Ganymede 2.0, we test-loaded the Ganymede
-server to 250,000 users and 250,000 groups of random data, using the
-userKit.  At those crazy levels, the Ganymede server balloons up to
-600 megs of RAM, but it still works fine.
+   During development of Ganymede 2.0, we test-loaded the Ganymede server to
+   250,000 users and 250,000 groups of random data, using the userKit. At
+   those crazy levels, the Ganymede server balloons up to 600 megs of RAM,
+   but it still works fine.
 
    So we feel very confident in saying that the Ganymede server should be
-able to scale up to handle just about as large a set of data as you'd ever
-want to manage on a single server.
+   able to scale up to handle just about as large a set of data as you'd ever
+   want to manage on a single server.
 
-   The server should degrade gracefully if the heap usage gets to be
-too much.  As the amount of data loaded into the server increases
-towards the upper limits that can be held in the the JVM's maximum
-allocated heap, garbage collection activity will increase
-significantly.  If there is simply too much data to fit into the set
-heap size, an OutOfMemoryError will eventually be thrown and the
-server will be unable to handle new logins, new object creation, and
-such.  With the current design an OutOfMemoryError would not cause
-precipitous data loss.  At the worst, the server would have to be shut
-down, the amount of heap dedicated to the jvm increased, and the
-server re-started.  If the heap size is bumping up against the maximum
-available on a given machine, it would be necessary to export the
-server's data to XML, split the data, and create separate Ganymede
-servers for separate subdomains or separate object types.
+   The server should degrade gracefully if the heap usage gets to be too
+   much. As the amount of data loaded into the server increases towards the
+   upper limits that can be held in the the JVM's maximum allocated heap,
+   garbage collection activity will increase significantly. If there is
+   simply too much data to fit into the set heap size, an OutOfMemoryError
+   will eventually be thrown and the server will be unable to handle new
+   logins, new object creation, and such. With the current design an
+   OutOfMemoryError would not cause precipitous data loss. At the worst, the
+   server would have to be shut down, the amount of heap dedicated to the jvm
+   increased, and the server re-started. If the heap size is bumping up
+   against the maximum available on a given machine, it would be necessary to
+   export the server's data to XML, split the data, and create separate
+   Ganymede servers for separate subdomains or separate object types.
 
-   The final word on scalability remains that you should be sure and
-test with a representative dataset before committing to Ganymede, and
-if you find that it doesn't scale adequately, report your findings to
-the Ganymede mailing list.
+   The final word on scalability remains that you should be sure and test
+   with a representative dataset before committing to Ganymede, and if you
+   find that it doesn't scale adequately, report your findings to the
+   Ganymede forums.
 
-     ------------------------------------------------------------
+  7. Why isn't Ganymede LDAP-based? What about replication?
 
-7) Why isn't Ganymede LDAP-based?  What about replication?
+   For a number of reasons, most having to do with the fact that development
+   on Ganymede started in early 1996, before LDAP was as prominent as it is
+   today. Ganymede provides a lot of intelligence and customizability that
+   you don't get with a stock LDAP solution, and its transaction and
+   permissions models are superior to that of LDAP.
 
-   For a number of reasons, most having to do with the fact that
-development on Ganymede started in early 1996, before LDAP was as
-prominent as it is today.  Ganymede provides a lot of intelligence and
-customizability that you don't get with a stock LDAP solution, and its
-transaction and permissions models are superior to that of LDAP.
+   The point of Ganymede is as much intelligent management of changes and
+   relationships as it is mass storage of data. Because Ganymede has a richer
+   data model in some ways (object id's, symmetrical object pointers,
+   explicit representations of IP address data types), and poorer in others
+   (Ganymede's current lack of support for an object type hierarchy),
+   reworking Ganymede on-top of LDAP would be difficult. A lot of the
+   intelligent management of Ganymede would have to be sacrificed in such a
+   move, although the resulting system would probably be more scalable and
+   would have higher performance at the high end.
 
-   The point of Ganymede is as much intelligent management of changes
-and relationships as it is mass storage of data.  Because Ganymede has
-a richer data model in some ways (object id's, symmetrical object
-pointers, explicit representations of IP address data types), and
-poorer in others (Ganymede's current lack of support for an object
-type hierarchy), reworking Ganymede on-top of LDAP would be difficult.
-A lot of the intelligent management of Ganymede would have to be
-sacrificed in such a move, although the resulting system would
-probably be more scalable and would have higher performance at the
-high end.
-
-   Going to a multi-server Ganymede system, a la Active Directory and
-NDS and LDAP servers generally might be interesting, but that would be
-Hard.  All of the namespace indices used for unique-value management
-and object locking would have to be coordinated across servers, and in
-such a way that a server could go down and be brought back up without
-losing such run-time state.  Also, the scripts to emit data from
-Ganymede server's into local DNS, NIS, and the like would be complex.
+   Going to a multi-server Ganymede system, a la Active Directory and NDS and
+   LDAP servers generally might be interesting, but that would be Hard. All
+   of the namespace indices used for unique-value management and object
+   locking would have to be coordinated across servers, and in such a way
+   that a server could go down and be brought back up without losing such
+   run-time state. Also, the scripts to emit data from Ganymede server's into
+   local DNS, NIS, and the like would be complex.
 
    Generally speaking, Ganymede is not intended to be the service that
-operating system (PAM) and/or application code consults directly.
-Instead, Ganymede is intended to feed things like NIS, DNS, and LDAP,
-which have their own means of doing replication and redundant servers
-for backups.
+   operating system (PAM) and/or application code consults directly. Instead,
+   Ganymede is intended to feed things like NIS, DNS, and LDAP, which have
+   their own means of doing replication and redundant servers for backups.
 
-   In Ganymede 2.0, we have a new Synchronization system based on
-XML deltas which we use at the laboratory to manage Active Directory and
-OpenLDAP servers.  The external code we use to do this is Deepak Giridharagopal's
-excellent but cryptically named 'SyncUtils' package for Python.
+   In Ganymede 2.0, we have a new Synchronization system based on XML deltas
+   which we use at the laboratory to manage Active Directory and OpenLDAP
+   servers. The external code we use to do this is Deepak Giridharagopal's
+   excellent but cryptically named 'SyncUtils' package for Python.
 
-     ------------------------------------------------------------
+  8. What's up with DNS management? The current stuff is weak.
 
-8) What's up with DNS management?  The current stuff is weak.
+   Yes, that's true. Our use of Ganymede to manage DNS is limited to only
+   that which we need in our environment, and it's part of the larger GASHARL
+   schema kit, which is partially shipped with Ganymede 2.0. If you want a
+   more full featured DNS management kit built on top of Ganymede, and you
+   can speak German, take a look at DoctorDNS, at
+   http://www.fg-networking.de/index.php/spektrum/forschung-a-entwicklung/doctordns.
 
-   Yes, that's true.  Our use of Ganymede to manage DNS is limited to
-only that which we need in our environment, and it's part of the
-larger GASHARL schema kit, which is partially shipped with Ganymede
-2.0.  If you want a more full featured DNS management kit built on top
-of Ganymede, and you can speak German, take a look at DoctorDNS, at
-http://www.doctordns.org/.
+  9. Where's the documentation?
 
-     ------------------------------------------------------------
-
-9) Where's the documentation?
-
-   What documentation do you want?  I know more and better docs are
-needed, but feedback is pretty scarce.  Are the current docs adequate
-at all?  Where does it break?  Ask questions, send mail to the
-Ganymede mailing list (ganymede@arlut.utexas.edu).  Code development
-is like a child's brain, it needs input.
+   What documentation do you want? I know more and better docs are needed,
+   but feedback is pretty scarce. Are the current docs adequate at all? Where
+   does it break? Ask questions, post in the Ganymede forums. Code
+   development is like a child's brain, it needs input.
 
    If you haven't seen it, look on the Ganymede web page
-(http://www.arlut.utexas.edu/gash2/) for the 1998 LISA paper we wrote
-on Ganymede.  It provides a very good conceptual and technical
-overview.  It's not so good as an operational manual, but we're
-struggling to get more operational documentation written.
+   (http://www.arlut.utexas.edu/gash2/) for the 1998 LISA paper we wrote on
+   Ganymede. It provides a very good conceptual and technical overview. It's
+   not so good as an operational manual, but we're struggling to get more
+   operational documentation written.
 
-     ------------------------------------------------------------
+  10. How can I help?
 
-10) How can I help?
+   Post in the Ganymede forums. Post about problems and please post success
+   reports. If you are having problems or see an issue, it's likely other
+   people on the forum will be interested and have something to say about it
+   as well. If you find bugs or want something enhanced, file a bug report in
+   our Bugzilla database.
 
-   Send in bug reports and success reports, to
-jonabbey@arlut.utexas.edu or, preferably, ganymede@arlut.utexas.edu to
-send it to the mailing list.  If you are having problems or see an
-issue, it's likely people on the list will be interested and have
-something to say about it as well.
+   Help is always welcome. Ganymede is designed to be a generic engine that
+   can be customized with schema kits for differing environments.. if you
+   want to work to customize Ganymede for some environment, let the forums
+   know. If you see things in the basic engine or client that you think you
+   could contribute to improving, let me know.
 
-   Help is always welcome. Ganymede is designed to be a generic engine
-that can be customized with schema kits for differing
-environments.. if you want to work to customize Ganymede for some
-environment, let the list know.  If you see things in the basic engine
-or client that you think you could contribute to improving, let me
-know.
-
-     ------------------------------------------------------------
-
-11) Why is it called Ganymede?
+  11. Why is it called Ganymede?
 
    It's actually an acronym, standing for GAsh Network Manager, Deluxe
-Edition.  I wanted a name that connected this project to GASH, and I
-just couldn't come up with any great names that involved GASH in some
-fashion (I did come up with a lot of really bad names, though...)
+   Edition. I wanted a name that connected this project to GASH, and I just
+   couldn't come up with any great names that involved GASH in some fashion
+   (I did come up with a lot of really bad names, though...)
 
-     ------------------------------------------------------------
-
-12) What is Ganymede's development history like?
+  12. What is Ganymede's development history like?
 
    Ganymede is the successor to GASH, the Group Admin Shell, which was
-developed at ARL:UT starting in early 1993, and which was presented at
-the USENIX LISA VIII conference in San Diego, CA in September, 1994.
-Refinements and further development of GASH continued into mid-1995,
-before we decided that the GASH design wouldn't carry us much further
-without massive pain and effort.
+   developed at ARL starting in early 1993, and which was presented at the
+   USENIX LISA VIII conference in San Diego, CA in September, 1994.
+   Refinements and further development of GASH continued into mid-1995,
+   before we decided that the GASH design wouldn't carry us much further
+   without massive pain and effort.
 
-   Initial work on spec'ing Ganymede started in late 1995.  After
-several months of planning on pen and paper, active code development
-started around June 1996.  In March 1998, the first binary developer's
-pre-release was put on the ftp site.  In December 1998, we presented
-Ganymede at the USENIX LISA XII conference in Boston, MA.  The first
-full source distribution, under GPL licensing, was sent out in
-January, 1999.
+   Initial work on spec'ing Ganymede started in late 1995. After several
+   months of planning on pen and paper, active code development started
+   around June 1996. In March 1998, the first binary developer's pre-release
+   was put on the ftp site. In December 1998, we presented Ganymede at the
+   USENIX LISA XII conference in Boston, MA. The first full source
+   distribution, under GPL licensing, was sent out in January, 1999.
 
-  Minor refinements continued for several years as ARL:UT used Ganymede in
-24/7 production.
+   Work on Ganymede 2.0 began in earnest in 2004 when the release of
+   Subversion made it feasible to really move things around and start
+   breaking things in the source tree. Since then, we've made continual
+   refinements and improvements, some quite extensive.
 
-  Work on Ganymede 2.0 began in earnest in 2004 when the release of
-Subversion made it feasible to really move things around and start
-breaking things in the source tree.  Since then, we've made continual
-refinements and improvements, some quite extensive.
+   We've recently moved to GIT, and that has accelerated our work even
+   further.
 
-  We've recently moved to GIT, and that has accelerated our work even
-further.
+   At this point, Ganymede proper has been under development for fifteen
+   years, and in 24/7 production use for eleven.
 
-  At this point, Ganymede proper has been under development for
-fifteen years, and in 24/7 production use for eleven.
+  13. When I try to start the Ganymede server, I see a message complaining about
+  the system hostname resolving to the 127.0.0.1 loopback address and the server
+  quits. What's going on?
 
-     ------------------------------------------------------------
+   The Ganymede server is trying to protect you from a misconfiguration of
+   your system.
 
-13) When I try to start the Ganymede server, I see a message complaining about
-    the system hostname resolving to the 127.0.0.1 loopback address and
-    the server quits.  What's going on?
+   In order for the Ganymede server to work, it needs to pass a URL to the
+   rmiregistry process describing the network name that the Ganymede server
+   wants to be known by. This will look like
+   rmi://myhost.domain.com:1099/ganymede.server. When the rmiregistry on the
+   server system receives a network call asking to talk to the Ganymede
+   server, it will return an IP address and TCP port number that the client
+   should use to talk to the server.
 
-The Ganymede server is trying to protect you from a misconfiguration
-of your system.
+   On some systems, the 'hostname' command returns a name that is associated
+   with the 127.0.0.1 loopback address in /etc/hosts. On such systems, the
+   rmiregistry will get the idea that the I.P. address that the client should
+   talk to in order to find the server is 127.0.0.1. 127.0.0.1 is a 'magic'
+   address, which is always interpreted to mean 'myself'. Remote Ganymede
+   clients obviously won't find the server on their own system, so you'll
+   experience mysterious failures when the clients try to talk to the server.
 
-In order for the Ganymede server to work, it needs to create a URL for
-its internal RMI registry describing the network name that the
-Ganymede server wants to be known by.  This will look like
-rmi://myhost.domain.com:1099/ganymede.server.  When the Ganymede
-server's internal rmiregistry receives a network call asking to talk
-to the Ganymede server's RMI entry point, it will return an IP address
-and TCP port number that the client should use to talk to the server.
+   To prevent this problem, the Ganymede server checks the system's idea of
+   its name against the 127.0.0.1 address. If it finds that the systems'
+   hostname would cause the rmiregistry to provide the unhelpful 127.0.0.1
+   address, it tries instead to use the system name provided by the user when
+   the Ganymede server was installed. If that name also resolves to
+   127.0.0.1, the server prints the error message and exits, rather than
+   confusing you with an inability to talk to remote clients.
 
-On some systems, the 'hostname' command returns a name that is
-associated with the 127.0.0.1 loopback address in /etc/hosts.  On such
-systems, the RMI registry will get the idea that the I.P. address that
-the client should talk to in order to find the server is 127.0.0.1.
-127.0.0.1 is a 'magic' address, which is always interpreted to mean
-'myself'.  Remote Ganymede clients obviously won't find the server on
-their own system, so you'll experience mysterious failures when the
-clients try to talk to the server.
+   If you experience this problem, edit the server's ganymede.properties file
+   and change the ganymede.serverhost definition to something that will
+   resolve on the server to something other than 127.0.0.1. This can even be
+   the server's network accessible I.P. address, if you like.
 
-To prevent this problem, the Ganymede server checks the system's idea
-of its name against the 127.0.0.1 address.  If it finds that the
-systems' hostname would cause the RMI registry to provide the unhelpful
-127.0.0.1 address, it tries instead to use the system name provided by
-the user when the Ganymede server was installed.  If that name also
-resolves to 127.0.0.1, the server prints the error message and exits,
-rather than confusing you with an inability to talk to remote clients.
+   Hopefully a future version of the Java rmiregistry utility will have
+   smarter behavior regarding the loopback address. If you do find that you
+   need to override this check, you can edit the server's runServer script
+   and add the -forcelocalhost option to the Java invocation line.
 
-If you experience this problem, edit the server's ganymede.properties
-file and change the ganymede.serverhost definition to something that
-will resolve on the server to something other than 127.0.0.1.  This
-can even be the server's network accessible I.P. address, if you like.
+  14. Where's the Ganymede web site?
 
-Hopefully a future version of the Java RMI registry classes will have
-smarter behavior regarding the loopback address.  If you do find that
-you need to override this check, you can edit the server's runServer
-script and add the -forcelocalhost option to the Java invocation line.
+   The Ganymede web site is located at http://www.arlut.utexas.edu/gash2/.
 
-     ------------------------------------------------------------
+  15. What's the best way to report bugs? How should I ask questions?
 
-14) Where's the Ganymede web site?
+   We have a bugzilla database running at the Ganymede web site. You should
+   visit the bugzilla database and report bugs there.
 
-    http://www.arlut.utexas.edu/gash2/
+   If you want a more interactive experience, or if you want to ask
+   questions, you should participate in the Ganymede forums, where other
+   Ganymede users (present or future) can benefit from the discussion.
 
-     ------------------------------------------------------------
+   If you want to send mail to the developers, you can send mail to
+   ganymede@arlut.utexas.edu. For any long term discussion, though, we prefer
+   the forums, so that the discussion is public and can benefit others down
+   the line.
 
-15) What's the best way to report bugs?  How should I ask questions?
+   Thanks!
 
-    We have a bugzilla database running at the Ganymede web site.  You should
-visit the bugzilla database and report bugs there.  
+   --------------------------------------------------------------------------
 
-    If you want a more interactive experience, or if you want to email
-questions, you should send email to the Ganymede Discussion mailing
-list at ganymede@arlut.utexas.edu, and your mail will be seen by
-a decently large number of people with an interest in Ganymede.
-Sending mail to ganymede@arlut.utexas.edu also results in an online
-web archive of your questions, so that others will later be able to
-see the question you asked or bug you reported.
-
-    Thanks!
-
--------------------------------------------------------------------------------
-Ganymede FAQ
-Author: Jonathan Abbey
-Last Commit: $Format:%cd$
--------------------------------------------------------------------------------
+   Authors: ganymede@arlut.utexas.edu                                     ARL
