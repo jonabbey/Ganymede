@@ -2829,6 +2829,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     Vector<String> group_aliases = (Vector<String>) object.getFieldValuesLocal(emailListSchema.ALIASES);
     Vector<Invid> group_targets = (Vector<Invid>) object.getFieldValuesLocal(emailListSchema.MEMBERS);
     Vector<String> external_targets = (Vector<String>) object.getFieldValuesLocal(emailListSchema.EXTERNALTARGETS);
+    Integer didSomething = 0;
 
     //  if the idea is to write each group out as the full list, then,
     //  okay, i guess we can do that.  actually, that is a chore,
@@ -2872,6 +2873,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                   }
 
                 result.append(getLabel(memberInvid));
+	        didSomething++;
               }
           }
 
@@ -2885,10 +2887,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                   }
 
                 result.append(external_targets.get(i));
+	        didSomething++;
               }
           }
 
-        writer.println(result.toString().toLowerCase());
+        if( didSomething > 0 )
+	  {
+            writer.println(result.toString().toLowerCase());
+	  }
       }
   }
 
