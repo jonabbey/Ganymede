@@ -108,6 +108,13 @@ public interface DBLogController {
   public StringBuffer retrieveHistory(Invid invid, Date sinceTime, Date beforeTime, boolean keyOnAdmin, boolean fullTransactions, boolean getLoginEvents);
 
   /**
+   * <p>This method flushes the log and syncs it to disk.  May be
+   * no-op for some controllers.</p>
+   */
+
+  public void flushAndSync();
+
+  /**
    * <p>This method shuts down this controller, freeing up any resources used by this
    * controller.</p>
    */

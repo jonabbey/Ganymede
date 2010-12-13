@@ -739,6 +739,15 @@ public class DBLogPostGreSQLController implements DBLogController {
   }
 
   /**
+   * <p>This method flushes the log and syncs it to disk.  May be
+   * no-op for some controllers.</p>
+   */
+
+  public void flushAndSync()
+  {
+  }
+
+  /**
    * <p>This method shuts down this controller, freeing up any resources used by this
    * controller.</p>
    */

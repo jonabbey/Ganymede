@@ -997,6 +997,8 @@ public class DBLog {
 	  }
       }
 
+    logController.flushAndSync();
+
     this.transactionMailOuts.clear();
     this.transactionMailOuts = null;
   }

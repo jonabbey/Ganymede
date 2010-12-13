@@ -97,8 +97,12 @@ public class DBLogFileController implements DBLogController {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBLogFileController");
 
+  // ---
+
   String logFileName = null;
   PrintWriter logWriter = null;
+
+  private FileOutputStream logStream = null;
 
   /* -- */
 
@@ -109,10 +113,6 @@ public class DBLogFileController implements DBLogController {
 
   public DBLogFileController(String filename) throws IOException
   {
-    FileOutputStream logStream = null;
-
-    /* -- */
-
     logFileName = filename;
     logStream = new FileOutputStream(logFileName, true); // append
     logWriter = new PrintWriter(logStream, true); // auto-flush on newline
@@ -853,6 +853,25 @@ public class DBLogFileController implements DBLogController {
   }
 
   /**
+   * <p>This method flushes the log and syncs it to disk.  May be
+   * no-op for some controllers.</p>
+   */
+
+  public synchronized void flushAndSync()
+  {
+    logWriter.flush();
+
+    try
+      {
+	logStream.getFD().sync();
+      }
+    catch (IOException ex)
+      {
+	ex.printStackTrace();
+      }
+  }
+
+  /**
    * This method shuts down this controller, freeing up any resources used by this
    * controller.
    */
@@ -866,5 +885,6 @@ public class DBLogFileController implements DBLogController {
 
     logWriter = null;
     logFileName = null;
+    logStream = null;
   }
 }
