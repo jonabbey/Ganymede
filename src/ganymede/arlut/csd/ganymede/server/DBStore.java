@@ -927,6 +927,7 @@ public final class DBStore implements JythonMap {
 
 	rootCategory.emit(out);	// writes out categories and bases
 
+	out.flush();
 	outStream.getFD().sync();
 	out.close();
 	out = null;
