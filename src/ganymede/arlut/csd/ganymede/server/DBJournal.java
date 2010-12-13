@@ -379,6 +379,7 @@ public class DBJournal implements ObjectStatus {
 
     jFile = new RandomAccessFile(filename, "rw");
     initialize(jFile);
+    jFile.getFD().sync();
 
     dirty = false;
 
