@@ -174,6 +174,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   private boolean amChangingExpireDate = false;
 
+  private boolean IRISWarningGiven = false;
+
   /**
    *
    * Customization Constructor
@@ -491,16 +493,20 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		String badgeConflict = IRISLink.findHistoricalBadge(username);
 		String fullNameConflict = IRISLink.findHistoricalEmployeeName(username);
 
-		return ReturnVal.merge(retVal, Ganymede.createInfoDialog("Warning: Historical username conflict",
-									  "The '" + username +
-									  "' user object (with badge id '" + badge + "') conflicts with an earlier '" + username +
-									  "' account that is still referenced in the HR database.\n\n" +
-									  "The previous account was owned by employee '" + fullNameConflict +
-									  "', with badge id '" + badgeConflict +
-									  "'.\n\n" +
-									  "You must change the username or badge id in the '" + username + "' object in order " +
-									  "to resolve this conflict.\n\n" +
-									  "You could also change this user object's user category to something other than 'normal'."));
+		if (!IRISWarningGiven)
+		  {
+		    IRISWarningGiven = true;
+		    return ReturnVal.merge(retVal, Ganymede.createErrorDialog("Warning: Historical username conflict",
+									     "The '" + username +
+									     "' user object (with badge id '" + badge + "') conflicts with an earlier '" + username +
+									     "' account that is still referenced in the HR database.\n\n" +
+									     "The previous account was owned by employee '" + fullNameConflict +
+									     "', with badge id '" + badgeConflict +
+									     "'.\n\n" +
+									     "You must change the username or badge id in the '" + username + "' object in order " +
+									     "to resolve this conflict.\n\n" +
+									     "You could also change this user object's user category to something other than 'normal'."));
+		  }
 	      }
 	  }
 	catch (Exception ex)
@@ -2698,6 +2704,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     ReturnVal result;
     
     /* -- */
+
+    // something's changed, forget that we've given a warning about
+    // username/badge issues in IRIS
+
+    this.IRISWarningGiven = false;
 
     // if the groups field is being changed, we may need to intervene
 
