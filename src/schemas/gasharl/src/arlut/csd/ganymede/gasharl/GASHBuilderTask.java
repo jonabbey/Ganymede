@@ -1893,18 +1893,19 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
-   * This method writes out a mailman alias line to the aliases_info GASH source file.<br/><br/>
+   * <p>This method writes out a mailman alias line to the aliases_info GASH source file.</p>
    *
-   * The mailman alias lines in this file look like the following:<br/><br/>
+   * <p>The mailman alias lines in this file look like the following:</p>
    *
    * <pre>
-   *
-   * test:test@arlut.utexas.edu
-   *
+   * &lt;xxx&gt;test:test:test@hostname.arlut.utexas.edu
    * </pre>
    *
-   * Where listname is the name of the mailman list, owneremail is the
-   * email of the owner, and password is the password for the mailing list.
+   * <p>Where the first occurrence of test is the name of the mailman
+   * list, the second is the (comma separated) list of aliases for the
+   * list, if any (there aren't any), and
+   * test@hostname.arlut.utexas.edu is the delivery target for the
+   * list.</p>
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
@@ -1919,6 +1920,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     result.setLength(0);
     result.append("<xxx>");
+    result.append(name);
+    result.append(":");
     result.append(name);
     result.append(":");
     result.append(name);
@@ -1942,6 +1945,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
               {
                 result.setLength(0);
                 result.append("<xxx>");
+                result.append(aliasName);
+                result.append(":");
                 result.append(aliasName);
                 result.append(":");
                 result.append(aliasName);
