@@ -1876,6 +1876,13 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
           {
             writeExternalAlias(external, aliases_info);
           }
+
+	// as well as the aliases for the mailman lists
+
+        for (DBObject mailman: getObjects(MailmanListSchema.BASE))
+          {
+            writeMailmanListAlias(mailman, aliases_info);
+          }
       }
     finally
       {
@@ -1901,8 +1908,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this alias line
-   *
-   * XXX unused XXX
    */
 
   private void writeMailmanListAlias(DBObject object, PrintWriter writer)
