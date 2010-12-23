@@ -1324,6 +1324,7 @@ conflicts with this name.</comment>
           </tab>
         </objectdef>
         <objectdef name="Mailman_List" id="260">
+          <classdef name="arlut.csd.ganymede.gasharl.MailmanListCustom"/>
           <label fieldid="256"/>
           <tab name="General">
             <fielddef name="Name" id="256">
