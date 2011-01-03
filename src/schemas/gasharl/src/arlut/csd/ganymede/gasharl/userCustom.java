@@ -1293,6 +1293,53 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     return false;
   }
 
+
+  /**
+   * <p>This method provides a hook that can be used to check any values
+   * to be set in any field in this object.  Subclasses of
+   * DBEditObject should override this method, implementing basically
+   * a large switch statement to check for any given field whether the
+   * submitted value is acceptable given the current state of the
+   * object.</p>
+   *
+   * <p>Question: what synchronization issues are going to be needed
+   * between DBEditObject and DBField to insure that we can have
+   * a reliable verifyNewValue method here?</p>
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
+   */
+
+  public ReturnVal verifyNewValue(DBField field, Object value)
+  {
+    short fieldid = field.getID();
+
+    switch (fieldid)
+      {
+      case userSchema.PASSWORD:
+	String plaintext = (String) value;
+
+	if (plaintext == null || plaintext.length() == 0)
+	  {
+	    return null;
+	  }
+
+	char firstChar = plaintext.charAt(0);
+
+	if (!((firstChar >= 'A' && firstChar <= 'Z') ||
+	      (firstChar >= 'a' && firstChar <= 'z')))
+	  {
+	    return Ganymede.createErrorDialog("Passwords must start with an upper or lower case letter.");
+	  }
+
+	return null;
+
+      default:
+	return null;
+      }
+  }
+
   /**
    * <p>Customization method to verify overall consistency of
    * a DBObject.  This method is intended to be overridden
