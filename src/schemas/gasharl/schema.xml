@@ -462,7 +462,7 @@ xmlclient.</comment>
               <comment>Password for an individual privileged to log into Ganymede and/or the network</comment>
               <typedef type="password">
                 <minlength val="12"/>
-                <maxlength val="14"/>
+                <maxlength val="28"/>
                 <badchars val=",&quot;@&amp;"/>
                 <cracklib_check exception="supergash"/>
                 <history_check exception="supergash" depth="5"/>
