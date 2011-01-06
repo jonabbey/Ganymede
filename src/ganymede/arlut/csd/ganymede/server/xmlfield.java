@@ -14,7 +14,7 @@
 	    
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -1154,7 +1154,7 @@ public class xmlfield implements FieldType {
 
 	    return field.setAllHashes(xp.crypttext, xp.md5text,
 				      xp.apachemd5text, xp.lanman,
-				      xp.ntmd4, xp.sshatext, xp.shaunixcrypt,
+				      xp.ntmd4, xp.sshatext, xp.shaunixcrypt, xp.bcrypt,
 				      false, false);
 	  }
 	else if (fieldDef.isInvid())
@@ -2207,6 +2207,7 @@ class xPassword {
   String ntmd4;
   String sshatext;
   String shaunixcrypt;
+  String bcrypt;
 
   /* -- */
 
@@ -2233,6 +2234,7 @@ class xPassword {
     ntmd4 = item.getAttrStr("ntmd4");
     sshatext = item.getAttrStr("ssha");
     shaunixcrypt = item.getAttrStr("shaUnixCrypt");
+    bcrypt = item.getAttrStr("bCrypt");
   }
 
   public String toString()
@@ -2296,6 +2298,13 @@ class xPassword {
       {
 	result.append(" shaUnixCrypt=\"");
 	result.append(shaunixcrypt);
+	result.append("\"");
+      }
+
+    if (bcrypt != null)
+      {
+	result.append(" bCrypt=\"");
+	result.append(bcrypt);
 	result.append("\"");
       }
 

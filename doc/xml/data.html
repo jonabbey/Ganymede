@@ -742,8 +742,8 @@ As password fields are scalar in Ganymede, only one
 element.  The <b>&lt;password&gt;</b> element must be empty.  The
 <b>&lt;password&gt;</b> element may contain any or all of the eight
 optional attributes: <b>plaintext</b>, <b>crypt</b>, <b>md5crypt</b>,
-<b>apachemd5crypt</b>, <b>lanman</b>, <b>ntmd4</b>, <b>ssha</b>, and
-<b>shaUnixCrypt</b>.</p>
+<b>apachemd5crypt</b>, <b>lanman</b>, <b>ntmd4</b>, <b>ssha</b>,
+<b>shaUnixCrypt</b>, and <b>bCrypt</b>.</p>
 
 <p>If the <b>plaintext</b> attribute is present,
 all other hashes will be ignored when the client submits a
@@ -851,6 +851,16 @@ effect if the <b>plaintext</b> attribute is specified.</p></dd>
 pre-hashed in Ulrich Drepper's Sha Unix Crypt format.  See <a
 href="http://people.redhat.com/drepper/sha-crypt.html">http://people.redhat.com/drepper/sha-crypt.html</a>
 for a discussion and a link to the specification for this format.</p>
+
+<p>As with the other hash attributes, the client will transmit this
+hash text to the server, where it and any other hash text
+simultaneously provided will be retained.  This attribute has no
+effect if the <b>plaintext</b> attribute is specified.</p></dd>
+
+<dt><b>bCrypt</b></dt>
+
+<dd><p>This attribute, if present, contains a password string
+pre-hashed in the OpenBSD BCrypt format</p>
 
 <p>As with the other hash attributes, the client will transmit this
 hash text to the server, where it and any other hash text

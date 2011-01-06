@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -161,7 +161,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   public final static int SETPASSAPACHEMD5 = 11;
   public final static int SETPASSSSHA = 12;
   public final static int SETPASS_SHAUNIXCRYPT = 13;
-  public final static int LASTOP = 13;
+  public final static int SETPASS_BCRYPT = 14;
+  public final static int LASTOP = 14;
 
   public final static Date minDate = new Date(Long.MIN_VALUE);
   public final static Date maxDate = new Date(Long.MAX_VALUE);
@@ -1835,10 +1836,26 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * set using Windows style password hashes.  param1 will be the password in
    * LANMAN hash form, param2 will be the password in NT Unicode MD4 hash
    * form.  Either or both of param1 and param2 may be null.</dd>
-   * <dt>11 - SETPASSSSHA</dt>
+   * <dt>11 - SETPASSAPACHEMD5</dt>
+   * <dd>This operation is used when a password field is having its
+   * password set using the Apache variant of the md5crypt algorithm.
+   * param1 will be the password in Apache md5crypt hash form, or null
+   * if the password hash is being cleared.  param2 will be null.</dd>
+   * <dt>12 - SETPASSSSHA</dt>
    * <dd>This operation is used when a password field is having its
    * password set using the OpenLDAP-style SSHA password hash.  param1
    * will be the password in SSHA form, or null if the password is
+   * being cleared.  param2 will be null.</dd>
+   * <dt>13 - SETPASS_SHAUNIXCRYPT</dt>
+   * <dd>This operation is used when a password field is having its
+   * password set using Ulrich Drepper's SHA256 or SHA512 Unix Crypt
+   * algorithms.  param1 will be the password in SHA Unix Crypt form,
+   * or null if the password is being cleared.  param2 will be
+   * null.</dd>
+   * <dt>14 - SETPASS_BCRYPT</dt>
+   * <dd>This operation is used when a password field is having its
+   * password set using the OpenBSD-style BCrypt password hash.  param1
+   * will be the password in BCrypt form, or null if the password is
    * being cleared.  param2 will be null.</dd>
    * </dl>
    *

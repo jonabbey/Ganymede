@@ -13,7 +13,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -57,6 +57,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.solinger.cracklib.CrackLib;
+
+import org.mindrot.BCrypt;
 
 import arlut.csd.Util.TranslationService;
 
@@ -102,6 +104,7 @@ import arlut.csd.ganymede.rmi.pass_field;
  * <li>Traditional Unix Crypt()</li>
  * <li>OpenBSD-style md5Crypt</li>
  * <li>OpenBSD-style md5Crypt, as modified for use with Apache</li>
+ * <li>OpenBSD-style BCrypt</li>
  * <li>Traditional LAN Manager hash</li>
  * <li>Windows NT Unicode Hash algorithm</li>
  * <li>SSHA, Salted SHA-1 hash, as used in OpenLDAP</li>
@@ -165,6 +168,17 @@ public class PasswordDBField extends DBField implements pass_field {
    */
 
   private String md5CryptPass;
+
+  /**
+   * <p>The complex bCrypted password, as in OpenBSD. Very high,
+   * scalable security.</p>
+   *
+   * <p>This hash format can have a very large digest size, a large salt,
+   * and a very significant computational cost, which makes this hash
+   * the most resistant to brute force attacks.</p>
+   */
+
+  private String bCryptPass;
 
   /**
    * The complex md5crypt()'ed password, with the magic string used
@@ -308,6 +322,7 @@ public class PasswordDBField extends DBField implements pass_field {
     ntHash = field.ntHash;
     sshaHash = field.sshaHash;
     shaUnixCrypt = field.shaUnixCrypt;
+    bCryptPass = field.bCryptPass;
     history = field.history;
 
     try
@@ -361,7 +376,7 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     return (cryptedPass != null || md5CryptPass != null ||
 	    apacheMd5CryptPass != null || uncryptedPass != null || lanHash != null
-	    || ntHash != null || sshaHash != null || shaUnixCrypt != null);
+	    || ntHash != null || bCryptPass != null | sshaHash != null || shaUnixCrypt != null);
   }
 
   /**
@@ -408,6 +423,7 @@ public class PasswordDBField extends DBField implements pass_field {
     cryptedPass = null;
     md5CryptPass = null;
     apacheMd5CryptPass = null;
+    bCryptPass = null;
     uncryptedPass = null;
     ntHash = null;
     lanHash = null;
@@ -445,6 +461,11 @@ public class PasswordDBField extends DBField implements pass_field {
       {
 	lanHash = null;
 	ntHash = null;
+      }
+
+    if (!getFieldDef().isBCrypted())
+      {
+	bCryptPass = null;
       }
 
     if (!getFieldDef().isSSHAHashed())
@@ -495,6 +516,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	    streq(uncryptedPass, origP.uncryptedPass) && 
 	    streq(lanHash, origP.lanHash) && 
 	    streq(ntHash, origP.ntHash) &&
+	    streq(bCryptPass, origP.bCryptPass) &&
 	    streq(sshaHash, origP.sshaHash) &&
 	    streq(shaUnixCrypt, origP.shaUnixCrypt));
   }
@@ -560,6 +582,7 @@ public class PasswordDBField extends DBField implements pass_field {
     target.lanHash = lanHash;
     target.ntHash = ntHash;
     target.uncryptedPass = uncryptedPass;
+    target.bCryptPass = bCryptPass;
     target.sshaHash = sshaHash;
     target.shaUnixCrypt = shaUnixCrypt;
 
@@ -668,6 +691,20 @@ public class PasswordDBField extends DBField implements pass_field {
       {
 	shaUnixCrypt = getShaUnixCryptText();
 	wrote_hash = emitHelper(out, shaUnixCrypt, wrote_hash);
+      }
+    else
+      {
+	out.writeUTF("");
+      }
+
+    // starting at file version 2.21
+    //
+    // (see DBStore.major_version and DBStore.minor_version)
+
+    if (getFieldDef().isBCrypted() || (bCryptPass != null && need_to_write_all_hashes))
+      {
+	bCryptPass = getBCryptText();
+	wrote_hash = emitHelper(out, bCryptPass, wrote_hash);
       }
     else
       {
@@ -804,6 +841,11 @@ public class PasswordDBField extends DBField implements pass_field {
         return false;
       }
 
+    if (def.isBCrypted() && bCryptPass != null)
+      {
+	return false;
+      }
+
     if (def.isShaUnixCrypted() && shaUnixCrypt != null)
       {
         return false;
@@ -851,6 +893,11 @@ public class PasswordDBField extends DBField implements pass_field {
 	if (Ganymede.db.isAtLeast(2,13))
 	  {
 	    shaUnixCrypt = readUTF(in);
+	  }
+
+	if (Ganymede.db.isAtLeast(2,21))
+	  {
+	    bCryptPass = readUTF(in);
 	  }
 
 	uncryptedPass = readUTF(in);
@@ -1001,7 +1048,8 @@ public class PasswordDBField extends DBField implements pass_field {
 	  lanHash == null &&
 	  ntHash == null &&
 	  sshaHash == null &&
-	  shaUnixCrypt == null)))
+	  shaUnixCrypt == null &&
+	  bCryptPass == null)))
       {
 	dump.attribute("plaintext", uncryptedPass);
       }
@@ -1039,6 +1087,11 @@ public class PasswordDBField extends DBField implements pass_field {
     if (shaUnixCrypt != null)
       {
 	dump.attribute("shaUnixCrypt", shaUnixCrypt);
+      }
+
+    if (bCryptPass != null)
+      {
+	dump.attribute("bCrypt", bCryptPass);
       }
 
     dump.endElement("password");
@@ -1558,6 +1611,34 @@ public class PasswordDBField extends DBField implements pass_field {
 	  {
 	    return null;
 	  }
+      }
+  }
+
+  /** 
+   * <p>This server-side only method returns the OpenBSD BCrypt hash text
+   * of the password data held in this field, generating the hash text
+   * from scratch if it is not contained in the local bCryptPass
+   * variable.</p>
+   *
+   * <p>This method is never meant to be available remotely.</p>
+   */
+
+  public String getBCryptText()
+  {
+    if (bCryptPass != null)
+      {
+	return bCryptPass;
+      }
+    else
+      {
+	if (uncryptedPass == null)
+	  {
+	    return null;
+	  }
+
+	bCryptPass = BCrypt.hashpw(uncryptedPass, BCrypt.gensalt(getFieldDef().getBCryptRounds()));
+
+	return bCryptPass;
       }
   }
 
@@ -2591,12 +2672,13 @@ public class PasswordDBField extends DBField implements pass_field {
 				String NTUnicodeMD4,
 				String SSHAText,
 				String ShaUnixCryptText,
+				String bCryptText,
 				boolean local, 
 				boolean noWizards)
   {
     ReturnVal retVal = null;
     DBEditObject eObj;
-    boolean settingCrypt, settingMD5, settingApacheMD5, settingWin, settingSSHA, settingShaUnixCrypt;
+    boolean settingCrypt, settingMD5, settingApacheMD5, settingWin, settingSSHA, settingShaUnixCrypt, settingBCrypt;
 
     /* -- */
 
@@ -2614,8 +2696,9 @@ public class PasswordDBField extends DBField implements pass_field {
     settingWin = (LANMAN != null && !LANMAN.equals("")) || (NTUnicodeMD4 != null && !NTUnicodeMD4.equals(""));
     settingSSHA = (SSHAText != null && !SSHAText.equals(""));
     settingShaUnixCrypt = (ShaUnixCryptText != null && !ShaUnixCryptText.equals(""));
+    settingBCrypt = (bCryptText != null && !bCryptText.equals(""));
 
-    if (!settingCrypt && !settingWin && !settingMD5 && !settingApacheMD5 && !settingSSHA && !settingShaUnixCrypt)
+    if (!settingCrypt && !settingWin && !settingMD5 && !settingApacheMD5 && !settingSSHA && !settingShaUnixCrypt && !settingBCrypt)
       {
 	// clear it!
 
@@ -2760,6 +2843,21 @@ public class PasswordDBField extends DBField implements pass_field {
 		return retVal;
 	      }
 	  }
+
+	if (settingBCrypt)
+	  {
+	    retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+							     DBEditObject.SETPASS_BCRYPT,
+							     bCryptText,
+							     null));
+
+	    // if a wizard intercedes, we are going to let it take the ball.
+
+	    if (ReturnVal.wizardHandled(retVal))
+	      {
+		return retVal;
+	      }
+	  }
       }
 
     // call finalizeSetValue to allow for chained reactions.  note
@@ -2817,6 +2915,11 @@ public class PasswordDBField extends DBField implements pass_field {
 	if (settingShaUnixCrypt)
 	  {
 	    shaUnixCrypt = ShaUnixCryptText;
+	  }
+
+	if (settingBCrypt)
+	  {
+	    bCryptPass = bCryptText;
 	  }
       }
 
@@ -3007,7 +3110,7 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (uncryptedPass != null || md5CryptPass != null ||
 	apacheMd5CryptPass != null || sshaHash != null || ntHash != null ||
-	shaUnixCrypt != null)
+	shaUnixCrypt != null || bCryptPass != null)
       {
 	return -1;		// full precision
       }
@@ -3078,6 +3181,13 @@ public class PasswordDBField extends DBField implements pass_field {
         shaUnixCrypt = null;    // force new hash
 
         shaUnixCrypt = getShaUnixCryptText();
+      }
+
+    if (getFieldDef().isBCrypted() && (forceChange || bCryptPass == null))
+      {
+	bCryptPass = null;	// force new hash
+
+	bCryptPass = getBCryptText();
       }
   }
 

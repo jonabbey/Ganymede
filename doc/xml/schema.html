@@ -833,6 +833,42 @@
 	</td>
 	<td>&lt;shaUnixCrypted type="512" rounds="7500"/&gt;</td>
       </tr>
+
+      <tr>
+        <td></td><td>bCrypted</td>
+        <td>
+          <p>The <b>bCrypted</b> element is an optional, empty element
+          with an optional attribute: <b>rounds</b>.  If this element
+          is present, the Ganymede server will store the contents of
+          this password using the scalable OpenBSD BCrypt
+          algorithm.</p>
+
+          <p><b>Attributes:</b></p>
+
+          <dl>
+            <dt>rounds</dt>
+
+            <dd><p>This attribute can take an integer value between 4
+            and 31, and controls the exponential number of cryptographic
+            hash rounds performed to generate the final password hash.</p>
+
+            <p>If the rounds attribute is not provided, Ganymede will
+            use a round factor of 10 to generate the final result.</p>
+
+            <p>By specifying a higher number of BCrypt rounds with
+            this attribute, you can appropriately scale your defenses
+            against password cracking, no matter how cheap
+            computational power gets.</p>
+
+            <p>The higher the number of rounds, the more computing
+            power your attackers will require in order to do a
+            time-efficient password guessing attack against your
+            stored password hash.</p></dd>
+          </dl>
+        </td>
+        <td>&lt;bCrypted rounds="15"/&gt;</td>
+      </tr>
+
       <tr>
 	<td></td><td>plaintext</td>
 	<td>
@@ -841,15 +877,15 @@
 	  will store the plaintext of passwords stored in this field
 	  to disk.  Normally, if the Ganymede server has any of
 	  <b>crypted</b>, <b>md5crypted</b>, <b>apacheMd5crypted</b>,
-	  <b>winHashed</b>, <b>sshaHashed</b>, or
-	  <b>shaUnixCrypted</b> set, the server will never dump the
-	  plaintext of passwords in this field to disk, as it is
-	  capable of authenticating logins against any of the
-	  supported hash formats.  If the <b>plaintext</b> element is
-	  present, the password will be preserved in plaintext form in
-	  the ganymede.db file, regardless of whether or not the
-	  password is also handled via one of the encryption
-	  hashes.</p>
+	  <b>winHashed</b>, <b>sshaHashed</b>,
+	  <b>shaUnixCrypted</b>, or <b>bCrypted</b> set, the server
+	  will never dump the plaintext of passwords in this field to
+	  disk, as it is capable of authenticating logins against any
+	  of the supported hash formats.  If the <b>plaintext</b>
+	  element is present, the password will be preserved in
+	  plaintext form in the ganymede.db file, regardless of
+	  whether or not the password is also handled via one of the
+	  encryption hashes.</p>
 	</td>
 	<td>&lt;plaintext/&gt;</td>
       </tr>

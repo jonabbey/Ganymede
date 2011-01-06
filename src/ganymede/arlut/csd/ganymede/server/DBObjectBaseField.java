@@ -13,7 +13,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2010
+   Copyright (C) 1996 - 2011
    The University of Texas at Austin
 
    Contact information
@@ -282,8 +282,17 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   private boolean apachemd5crypted = false;	// Apache style md5crypt() is not
   private boolean winHashed = false;	// Windows NT/Samba hashes are not
   private boolean sshaHashed = false;	// SSHA hash is not either
+  private boolean bCrypted = false;	// OpenBSD BCrypt is not either
   private boolean shaUnixCrypted = false;	// SHA Unix Crypt is not either
   private boolean storePlaintext = false; // nor is plaintext
+
+  /**
+   * If the password field is to use the bCrypt algorithm, we'll need
+   * to know how many rounds to use.  This value holds the exponent of
+   * the round count.
+   */
+
+  private int bCryptRounds = 10;
 
   /**
    * If the password field is to use the shaUnixCrypt algorithm, which
@@ -442,6 +451,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     apachemd5crypted = original.apachemd5crypted;
     winHashed = original.winHashed;
     sshaHashed = original.sshaHashed;
+    bCryptRounds = original.bCryptRounds;
     shaUnixCrypted = original.shaUnixCrypted;
     useShaUnixCrypted512 = original.useShaUnixCrypted512;
     shaUnixCryptRounds = original.shaUnixCryptRounds;
@@ -667,6 +677,11 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	out.writeBoolean(shaUnixCrypted);
 	out.writeBoolean(useShaUnixCrypted512);
 	out.writeInt(shaUnixCryptRounds);
+
+	// at 2.21 we introduce bCrypt support
+
+	out.writeBoolean(bCrypted);
+	out.writeInt(bCryptRounds);
 
 	out.writeBoolean(storePlaintext);
       }
@@ -999,6 +1014,17 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	    shaUnixCrypted = false;
 	    useShaUnixCrypted512 = false;
 	    shaUnixCryptRounds = 5000;
+	  }
+
+	if (base.getStore().isAtLeast(2,21))
+	  {
+	    bCrypted = in.readBoolean();
+	    bCryptRounds = in.readInt();
+	  }
+	else
+	  {
+	    bCrypted = false;
+	    bCryptRounds = 10;
 	  }
 
 	// at 1.10 we introduced storePlaintext
@@ -1350,6 +1376,13 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	  {
 	    xmlOut.startElementIndent("sshaHashed");
 	    xmlOut.endElement("sshaHashed");
+	  }
+
+	if (bCrypted)
+	  {
+	    xmlOut.startElementIndent("bCrypted");
+	    xmlOut.attribute("rounds", java.lang.Integer.toString(bCryptRounds));
+	    xmlOut.endElement("bCrypted");
 	  }
 
 	if (shaUnixCrypted)
@@ -2029,6 +2062,8 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     boolean _apachemd5crypted = false;
     boolean _winHashed = false;
     boolean _sshaHashed = false;
+    boolean _bCrypted = false;
+    int _bCryptRounds = 10;
     boolean _shaUnixCrypted = false;
     boolean _shaUnixCrypt512 = false;
     int _shaUnixCryptRounds = 5000;
@@ -2130,6 +2165,26 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 	    else if (child.matches("sshaHashed"))
 	      {
 		_sshaHashed = true;
+	      }
+	    else if (child.matches("bCrypted"))
+	      {
+		_bCrypted = true;
+
+		Integer roundCount = child.getAttrInt("rounds");
+
+		if (roundCount != null)
+		  {
+		    _bCryptRounds = roundCount.intValue();
+
+		    if (_bCryptRounds < 4 || _bCryptRounds > 31)
+		      {
+			// "fielddef tried to set an invalid bcrypt round count (must be >= 4 and <= 31): {0}\n{1}"
+			return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+							  ts.l("doPasswordXML.bad_bcrypt_rounds",
+							       child, root.getTreeString()));
+		      }
+		  }
+		
 	      }
 	    else if (child.matches("shaUnixCrypted"))
 	      {
@@ -2311,6 +2366,32 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 					       Boolean.valueOf(_sshaHashed),
 					       root.getTreeString(),
 					       retVal.getDialogText()));
+      }
+
+    retVal = setBCrypted(_bCrypted);
+
+    if (!ReturnVal.didSucceed(retVal))
+      {
+	// "XML"
+	// "fielddef could not set BCrypt hashing flag: {0}\n{1}\n{2}"
+	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+					  ts.l("doPasswordXML.bad_bcrypt_hashed",
+					       Boolean.valueOf(_bCrypted),
+					       root.getTreeString(),
+					       retVal.getDialogText()));
+      }
+
+    if (_bCrypted)
+      {
+	retVal = setBCryptRounds(_bCryptRounds);
+
+	if (!ReturnVal.didSucceed(retVal))
+	  {
+	    // we should already have caught any XML error above,
+	    // here, so I'm not going to bother wrapping the error
+
+	    return retVal;
+	  }
       }
 
     retVal = setShaUnixCrypted(_shaUnixCrypted);
@@ -5243,13 +5324,110 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /** 
-   * This method returns true if this is a password field that will
-   * store passwords in the SHA Unix Crypt format, specified by Ulrich
-   * Drepper at http://people.redhat.com/drepper/sha-crypt.html.
+   * <p>This method returns true if this is a password field that will
+   * store passwords in the OpenBSD BCrypt format.</p>
    *
-   * If passwords are stored in the SHA Unix Crypt format, they will
+   * <p>If passwords are stored in the BCrypt format, they will not be
+   * kept in plaintext on disk, unless isPlainText() returns true.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField 
+   */
+
+  public boolean isBCrypted()
+  {
+    return bCrypted;
+  }
+
+  /**
+   * <p>This method is used to specify that this password field should
+   * store passwords in the OpenBSD BCrypt format.</p>
+   *
+   * <p>setBCrypted() is not mutually exclusive with any other
+   * encryption or plaintext options.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if this field
+   * definition is not a password type.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField 
+   */
+
+  public ReturnVal setBCrypted(boolean b)
+  {
+    securityCheck();
+
+    if (!isPassword())
+      {
+	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
+      }
+
+    bCrypted = b;
+
+    return null;
+  }
+
+  /** 
+   * <p>This method returns the complexity factor (in the exponential
+   * number of rounds) to be applied to password hash text generated
+   * in this password field definition by the OpenBSD BCrypt
+   * format.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField 
+   */
+
+  public int getBCryptRounds()
+  {
+    return bCryptRounds;
+  }
+
+  /**
+   * <p>This method is used to specify the complexity factor (in the
+   * exponential number of rounds) to be applied to password hash text
+   * generated in this password field definition by the OpenBSD
+   * BCrypt format.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if this
+   * field definition is not a BCrypt using password type.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField 
+   */
+
+  public ReturnVal setBCryptRounds(int n)
+  {
+    securityCheck();
+
+    if (!isPassword())
+      {
+	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
+      }
+
+    if (!bCrypted)
+      {
+	// "Not a BCrypt-using password field: {0}"
+	throw new IllegalStateException(ts.l("global.not_bcrypt", this.toString()));
+      }
+
+    if (n < 4)
+      {
+	n = 4;
+      }
+    else if (n > 31)
+      {
+	n = 31;
+      }
+
+    bCryptRounds = n;
+
+    return null;
+  }
+
+  /** 
+   * <p>This method returns true if this is a password field that will
+   * store passwords in the SHA Unix Crypt format, specified by Ulrich
+   * Drepper at http://people.redhat.com/drepper/sha-crypt.html.</p>
+   *
+   * <p>If passwords are stored in the SHA Unix Crypt format, they will
    * not be kept in plaintext on disk, unless isPlainText() returns
-   * true.
+   * true.</p>
    *
    * @see arlut.csd.ganymede.rmi.BaseField 
    */
@@ -5260,15 +5438,15 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /**
-   * This method is used to specify that this password field should
+   * <p>This method is used to specify that this password field should
    * store passwords in the SHA Unix Crypt format, specified by Ulrich
-   * Drepper at http://people.redhat.com/drepper/sha-crypt.html.
+   * Drepper at http://people.redhat.com/drepper/sha-crypt.html.</p>
    *
-   * setShaUnixCrypted() is not mutually exclusive with any other
-   * encryption or plaintext options.
+   * <p>setShaUnixCrypted() is not mutually exclusive with any other
+   * encryption or plaintext options.</p>
    *
-   * This method will throw an IllegalArgumentException if this field
-   * definition is not a password type.
+   * <p>This method will throw an IllegalArgumentException if this field
+   * definition is not a password type.</p>
    *
    * @see arlut.csd.ganymede.rmi.BaseField 
    */
@@ -5288,10 +5466,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /** 
-   * This method returns true if this is a shaUnixCrypted password
+   * <p>This method returns true if this is a shaUnixCrypted password
    * field that will store passwords using the SHA512 variant of the
    * SHA Unix Crypt format, specified by Ulrich Drepper at
-   * http://people.redhat.com/drepper/sha-crypt.html.
+   * http://people.redhat.com/drepper/sha-crypt.html.</p>
    *
    * @see arlut.csd.ganymede.rmi.BaseField 
    */
@@ -5302,13 +5480,13 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /**
-   * This method is used to specify that this password field should
+   * <p>This method is used to specify that this password field should
    * store passwords in the SHA512 variant of the SHA Unix Crypt
    * format, specified by Ulrich Drepper at
-   * http://people.redhat.com/drepper/sha-crypt.html.
+   * http://people.redhat.com/drepper/sha-crypt.html.</p>
    *
-   * This method will throw an IllegalArgumentException if this field
-   * definition is not a ShaUnixCrypt using password type.
+   * <p>This method will throw an IllegalArgumentException if this field
+   * definition is not a ShaUnixCrypt using password type.</p>
    *
    * @see arlut.csd.ganymede.rmi.BaseField 
    */

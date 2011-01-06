@@ -13,7 +13,7 @@
 	    
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -810,6 +810,50 @@ public interface BaseField extends Remote {
    */
 
   public ReturnVal setSSHAHashed(boolean b) throws RemoteException;
+
+  /** 
+   * <p>This method returns true if this is a password field that will
+   * store passwords in the OpenBSD BCrypt format.</p>
+   *
+   * <p>If passwords are stored in the BCrypt format, they will not be
+   * kept in plaintext on disk, unless isPlainText() returns true.</p>
+   */
+
+  public boolean isBCrypted() throws RemoteException;
+
+  /**
+   * <p>This method is used to specify that this password field should
+   * store passwords in the OpenBSD BCrypt format.</p>
+   *
+   * <p>setBCrypted() is not mutually exclusive with any other
+   * encryption or plaintext options.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if this field
+   * definition is not a password type.</p>
+   */
+
+  public ReturnVal setBCrypted(boolean b) throws RemoteException;
+
+  /** 
+   * <p>This method returns the complexity factor (in the exponential
+   * number of rounds) to be applied to password hash text generated
+   * in this password field definition by the OpenBSD BCrypt
+   * format.</p>
+   */
+
+  public int getBCryptRounds() throws RemoteException;
+
+  /**
+   * <p>This method is used to specify the complexity factor (in the
+   * exponential number of rounds) to be applied to password hash text
+   * generated in this password field definition by the OpenBSD
+   * BCrypt format.</p>
+   *
+   * <p>This method will throw an IllegalArgumentException if this
+   * field definition is not a BCrypt using password type.</p>
+   */
+
+  public ReturnVal setBCryptRounds(int n) throws RemoteException;
 
   /** 
    * This method returns true if this is a password field that will
