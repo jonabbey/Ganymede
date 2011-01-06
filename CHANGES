@@ -1,12 +1,12 @@
 Ganymede Release 2.0
-20 November 2010
+6 January 2011
 CHANGES
 
 ---------------------------------------------
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: 20 November 2010
+RELEASE DATE: 6 January 2011
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -1810,6 +1810,12 @@ This wasn't revealing itself in my testing, but it came up on a
 Linux box with more than one screens attached to its X Server.
 
 Fixed.
+
+125. [SERVER] Added support for the OpenBSD bcrypt hash format.
+
+The PasswordDBField class in the server now understands the OpenBSD
+bcrypt hash format, in addition to SHA Unix Crypt and all the rest
+already supported.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
