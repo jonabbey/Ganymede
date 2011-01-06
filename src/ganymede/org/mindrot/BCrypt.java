@@ -12,9 +12,9 @@
 // ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 // OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-import java.security.SecureRandom;
-
 package org.mindrot;
+
+import java.security.SecureRandom;
 
 /**
  * BCrypt implements OpenBSD-style Blowfish password hashing using
