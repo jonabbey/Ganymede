@@ -1412,6 +1412,10 @@ public class PasswordDBField extends DBField implements pass_field {
 	    success = Sha512Crypt.verifyPassword(plaintext, shaUnixCrypt);
 	  }
       }
+    else if (bCryptPass != null) // ditto
+      {
+	success = BCrypt.checkpw(plaintext, bCryptPass);
+      }
     else if (md5CryptPass != null) // indefinite
       {
 	success = md5CryptPass.equals(MD5Crypt.crypt(plaintext, getMD5Salt()));
