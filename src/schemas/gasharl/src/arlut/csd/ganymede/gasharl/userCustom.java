@@ -474,6 +474,18 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     Invid category = (Invid) this.getFieldValueLocal(userSchema.CATEGORY);
     DBObject categoryObj = lookupInvid(category, false);
+
+    if (categoryObj == null)
+      {
+	// The checkRequiredFields() method is run after
+	// preCommitHook(), so this could be null here.
+	//
+	// If null, we'll just return early and let
+	// checkRequiredFields() report the error.
+	
+	return null;
+      }
+
     String categoryName = categoryObj.getLabel();
 
     if (!categoryName.equals("normal"))
