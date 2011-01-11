@@ -810,7 +810,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
       case USERNAME:
       case UID:
-      case CATEGORY:		// would trigger wizard, otherwise
+      case CATEGORY:		// but see special logic in cloneFromObject()
       case userSchema.PASSWORD:
       case HOMEDIR:
       case PERSONAE:
@@ -895,11 +895,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    problem = true;
 	  }
 
-	// we have the default canCloneField() refuse to clone
+	// We have the default canCloneField() refuse to clone
 	// userSchema.CATEGORY to avoid dealing or bypassing with the
-	// wizard.  If we are cloning a normal user, it is safe enough to
-	// copy that value.  Else we'll leave it blank for the user to
-	// set.
+	// wizard.  If we are cloning a normal user, it is safe enough
+	// to copy that value.  Else we'll leave it blank for the user
+	// to set.
 
 	Invid category = (Invid) origObj.getFieldValueLocal(userSchema.CATEGORY);
 	
