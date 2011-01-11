@@ -345,13 +345,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	Invid normalCat = getGSession().findLabeledObject("normal", userCategorySchema.BASE);
 
-	if (normalCat == null)
-	  {
-	    // in case we later change the capitalization
-
-	    normalCat = getGSession().findLabeledObject("Normal", userCategorySchema.BASE);
-	  }
-
 	retVal = catf.setValueLocal(normalCat, true);
 
 	if (!ReturnVal.didSucceed(retVal))
@@ -1249,14 +1242,12 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
+   * <p>Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.</p>
    *
-   * Customization method to control whether a specified field
-   * is required to be defined at commit time for a given object.<br><br>
-   *
-   * To be overridden in DBEditObject subclasses.<br><br>
+   * <p>To be overridden in DBEditObject subclasses.</p>
    *
    * <b>*PSEUDOSTATIC*</b>
-   *
    */
 
   public boolean fieldRequired(DBObject object, short fieldid)
