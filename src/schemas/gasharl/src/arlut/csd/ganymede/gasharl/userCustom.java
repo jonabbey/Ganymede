@@ -12,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -277,7 +277,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	retVal = guidField.setValueLocal(guid);
 
-	if (retVal != null && !retVal.didSucceed())
+	if (ReturnVal.didSucceed(retVal))
 	  {
 	    return retVal;
 	  }
@@ -334,7 +334,20 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	retVal = numField.setValueLocal(uidVal);
 
-	if (retVal != null && !retVal.didSucceed())
+	if (ReturnVal.didSucceed(retVal))
+	  {
+	    return retVal;
+	  }
+
+	// set the new user account to type 'normal'.
+
+	InvidDBField catf = (InvidDBField) getField(userSchema.CATEGORY);
+
+	Invid normalCat = getGSession().findLabeledObject("Normal", userCategorySchema.BASE);
+
+	retVal = catf.setValueLocal(normalCat, true);
+
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    return retVal;
 	  }
