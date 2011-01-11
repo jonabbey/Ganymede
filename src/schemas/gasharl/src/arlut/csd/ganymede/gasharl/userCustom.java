@@ -277,7 +277,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	retVal = guidField.setValueLocal(guid);
 
-	if (ReturnVal.didSucceed(retVal))
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    return retVal;
 	  }
@@ -334,7 +334,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	retVal = numField.setValueLocal(uidVal);
 
-	if (ReturnVal.didSucceed(retVal))
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    return retVal;
 	  }
