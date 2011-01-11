@@ -2320,6 +2320,14 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	// if we are pointing to objects of our own type, we don't want ourselves to be
 	// a valid choice by default.. (DBEditObject subclasses can override this, of course)
 
+	// XXX
+	//
+	// note: if we are omitting ourself from a choice list, we
+	// sure shouldn't be cached by the client.  Right now, nothing
+	// ensures this.
+	//
+	// XXX
+
 	if (baseId == getTypeID())
 	  {
 	    root = new QueryNotNode(new QueryDataNode((short) -2, QueryDataNode.EQUALS, getInvid()));
