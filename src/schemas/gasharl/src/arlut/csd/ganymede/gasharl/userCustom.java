@@ -2029,17 +2029,31 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
-   * This method returns a key that can be used by the client
+   * <p>This method returns a key that can be used by the client
    * to cache the value returned by choices().  If the client
    * already has the key cached on the client side, it
    * can provide the choice list from its cache rather than
-   * calling choices() on this object again.<br><br>
+   * calling choices() on this object again.</p>
    *
-   * If there is no caching key, this method will return null.<br><br>
+   * <p>The default logic in this method is designed to cause the client
+   * to cache choice lists for invid fields in the 'all objects of
+   * invid target type' cache bucket.  If your InvidDBField needs to
+   * provide a restricted subset of objects of the targeted type as
+   * the choice list, you'll need to override this method to either
+   * return null (to turn off choice list caching), or generate some
+   * kind of unique key that won't collide with the Short objects used
+   * to represent the default object list caches.</p>
    *
-   * We don't want the HOMEGROUP field's choice list to be cached on
+   * <p>See also the {@link
+   * arlut.csd.ganymede.server.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.server.DBField)}
+   * hook, which controls whether or not the default logic will
+   * encourage the client to cache a given InvidDBField's choice list.</p>
+   *
+   * <p>If there is no caching key, this method will return null.</p>
+   *
+   * <p>We don't want the HOMEGROUP field's choice list to be cached on
    * the client because it is dynamically generated for this
-   * context, and doesn't make sense in other contexts.
+   * context, and doesn't make sense in other contexts.</p>
    */
 
   public Object obtainChoicesKey(DBField field)
