@@ -343,7 +343,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	InvidDBField catf = (InvidDBField) getField(userSchema.CATEGORY);
 
-	Invid normalCat = getGSession().findLabeledObject("Normal", userCategorySchema.BASE);
+	Invid normalCat = getGSession().findLabeledObject("normal", userCategorySchema.BASE);
+
+	if (normalCat == null)
+	  {
+	    // in case we later change the capitalization
+
+	    normalCat = getGSession().findLabeledObject("Normal", userCategorySchema.BASE);
+	  }
 
 	retVal = catf.setValueLocal(normalCat, true);
 
