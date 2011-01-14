@@ -528,7 +528,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 									     "The previous account was owned by employee '" + fullNameConflict +
 									     "', with badge id '" + badgeConflict +
 									     "'.\n\n" +
-									     "You must change the username or badge id in the '" + username + "' object in order " +
+									     "You should change the username or badge id in the '" + username + "' object in order " +
 									     "to resolve this conflict.\n\n" +
 									     "You could also change this user object's user category to something other than 'normal'.\n\n" +
 									      "If you feel this message is in error, hit commit again to proceed."));
