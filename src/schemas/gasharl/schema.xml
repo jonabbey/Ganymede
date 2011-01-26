@@ -1,3 +1,4 @@
+stty -echo; /opt/bin/java arlut.csd.ganymede.client.xmlclient properties=/home/broccol/ganymede-client/etc/ganymede.properties 'username=broccol:supergash' '-dumpSchema';SAVE=$?;stty echo;exit $SAVE
 
 <ganyschema>
   <namespaces>
@@ -765,6 +766,10 @@ Limited to 16 for NFS.</comment>
               <typedef type="invid">
                 <targetobject name="Room"/>
                 <targetfield name="Systems"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Inventory_Tag" id="272">
+              <typedef type="string">
               </typedef>
             </fielddef>
             <fielddef name="Virtual" id="269">
