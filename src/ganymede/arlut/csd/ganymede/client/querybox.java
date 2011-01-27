@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -1519,6 +1519,11 @@ class QueryRow implements ItemListener {
 	compareChoice.addItem(length_less);
 	compareChoice.addItem(length_greater);
 	compareChoice.addItem(length_equal);
+
+	if (field.isString() || field.isInvid() || field.isIP())
+	  {
+	    compareChoice.setSelectedItem(contain_matching_ci);
+	  }
       }
     else if (field.isDate())
       {
