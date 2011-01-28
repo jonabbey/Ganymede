@@ -230,7 +230,33 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
               }
             finally
               {
-                out.close();
+		out.close();
+              }
+          }
+
+	out = null;
+
+        try
+          {
+            out = openOutFile(path + "passwd.3des", "gasharl");
+          }
+        catch (IOException ex)
+          {
+            System.err.println("GASHBuilderTask.builderPhase1(): couldn't open passwd.3des file: " + ex);
+          }
+
+        if (out != null)
+          {
+            try
+              {
+                for (DBObject user: getObjects(SchemaConstants.UserBase))
+                  {
+                    write3Des(user, out);
+                  }
+              }
+            finally
+              {
+		out.close();
               }
           }
 
@@ -693,6 +719,132 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         System.err.println("GASHBuilder.writeUserLine(): Warning!  user " +
                            username + " overflows the GASH line length!");
       }
+
+    writer.println(result.toString());
+  }
+
+  /**
+   * <p>This method writes out a line to the passwd.3des GASH source file.</p>
+   *
+   * <p>The lines in this file look like the following.</p>
+   *
+   * <p>broccol:393T6k3e/9/w2:12003:12010:Jonathan Abbey,S321 CSD,3199,8343915:/home/broccol:/bin/tcsh</p>
+   *
+   * @param object An object from the Ganymede user object base
+   * @param writer The destination for this user line
+   */
+
+  private void write3Des(DBObject object, PrintWriter writer)
+  {
+    String username;
+    String cryptedPass;
+    int uid;
+    int gid;
+    String name;
+    String room;
+    String div;
+    String officePhone;
+    String homePhone;
+    String directory;
+    String shell;
+
+    PasswordDBField passField;
+    Invid groupInvid;
+    DBObject group;
+
+    boolean inactivated = false;
+
+    /* -- */
+
+    result.setLength(0);
+
+    username = (String) object.getFieldValueLocal(SchemaConstants.UserUserName);
+
+    passField = (PasswordDBField) object.getField(SchemaConstants.UserPassword);
+
+    if (passField != null)
+      {
+        cryptedPass = passField.getUNIXCryptText();
+      }
+    else
+      {
+        inactivated = true;
+
+        // System.err.println("GASHBuilder.write3Des(): null password for user " + username);
+        cryptedPass = "**Nopass**";
+      }
+
+    uid = ((Integer) object.getFieldValueLocal(userSchema.UID)).intValue();
+
+    // extra security precaution.. homey don't play no root accounts in NIS games.
+
+    if (uid == 0)
+      {
+        Ganymede.debug("GASHBuilder.write3Des(): *** root uid in user " + username + ", skipping!! ***");
+        return;                 // no writeLine
+      }
+
+    // get the gid
+
+    groupInvid = (Invid) object.getFieldValueLocal(userSchema.HOMEGROUP); // home group
+
+    if (groupInvid == null)
+      {
+        System.err.println("GASHBuilder.write3Des(): null gid for user " + username);
+        gid = -1;
+      }
+    else
+      {
+        group = getObject(groupInvid);
+        gid = ((Integer) group.getFieldValueLocal(groupSchema.GID)).intValue();
+      }
+
+    name = (String) object.getFieldValueLocal(userSchema.FULLNAME);
+    room = (String) object.getFieldValueLocal(userSchema.ROOM);
+    div = (String) object.getFieldValueLocal(userSchema.DIVISION);
+    officePhone = (String) object.getFieldValueLocal(userSchema.OFFICEPHONE);
+    homePhone = (String) object.getFieldValueLocal(userSchema.HOMEPHONE);
+    directory = (String) object.getFieldValueLocal(userSchema.HOMEDIR);
+
+    // force /bin/false if the user is inactivated
+
+    if (inactivated)
+      {
+        shell = "/bin/false";
+      }
+    else
+      {
+        shell = (String) object.getFieldValueLocal(userSchema.LOGINSHELL);
+      }
+
+    // now build our output line
+
+    result.append(username);
+    result.append(":");
+    result.append(cryptedPass);
+    result.append(":");
+    result.append(Integer.toString(uid));
+    result.append(":");
+    result.append(Integer.toString(gid));
+    result.append(":");
+    result.append(name);
+    result.append(",");
+    result.append(room);
+    result.append(" ");
+    result.append(div);
+    result.append(",");
+    result.append(officePhone);
+
+    if (homePhone != null && !homePhone.equals(""))
+      {
+        result.append(",");
+        result.append(homePhone);
+      }
+
+    result.append(":");
+    result.append(directory);
+    result.append(":");
+    result.append(shell);
 
     writer.println(result.toString());
   }
