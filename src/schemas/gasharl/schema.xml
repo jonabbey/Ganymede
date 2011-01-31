@@ -464,7 +464,7 @@ xmlclient.</comment>
               <typedef type="password">
                 <minlength val="12"/>
                 <maxlength val="28"/>
-                <badchars val=",&quot;@&amp;"/>
+                <badchars val=",|:@"/>
                 <cracklib_check exception="supergash"/>
                 <history_check exception="supergash" depth="5"/>
                 <crypted/>
