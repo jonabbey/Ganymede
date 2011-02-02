@@ -1493,6 +1493,13 @@ if the client does not explicitly request it.</comment>
                 <targetobject name="User"/>
               </typedef>
             </fielddef>
+            <fielddef name="Aliases" id="259">
+              <typedef type="string">
+                <vector/>
+                <maxlength val="64"/>
+                <namespace val="username"/>
+              </typedef>
+            </fielddef>
           </tab>
         </objectdef>
       </category>
