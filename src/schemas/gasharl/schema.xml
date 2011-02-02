@@ -1473,6 +1473,28 @@ if the client does not explicitly request it.</comment>
             </fielddef>
           </tab>
         </objectdef>
+        <objectdef name="IRIS_List" id="282">
+          <label fieldid="256"/>
+          <tab name="General">
+            <fielddef name="List_Name" id="256">
+              <typedef type="string">
+                <maxlength val="64"/>
+                <namespace val="username"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Oracle_Query" id="257">
+              <typedef type="string">
+                <multiline/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Users" id="258">
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="User"/>
+              </typedef>
+            </fielddef>
+          </tab>
+        </objectdef>
       </category>
 
     </category>
