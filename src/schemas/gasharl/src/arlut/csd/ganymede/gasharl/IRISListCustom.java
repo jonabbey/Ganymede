@@ -361,7 +361,7 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
 
 	    if (userInvid != null)
 	      {
-		memberField.addElement(userInvid);
+		memberField.addElementLocal(userInvid);
 	      }
 	  }
 
