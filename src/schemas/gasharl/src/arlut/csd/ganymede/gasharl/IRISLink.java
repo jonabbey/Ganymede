@@ -228,7 +228,7 @@ public class IRISLink {
    * performed.
    */
 
-  public static List<String> getUsernames(String queryString)
+  public static List<String> getUsernames(String queryString) throws SQLException
   {
     Connection myConn = null;
     List<String> result = new ArrayList<String>();
@@ -255,12 +255,7 @@ public class IRISLink {
       }
     catch (SQLException ex)
       {
-	rethrowException(ex);
-
-	// the compiler doesn't realize that rethrowException()
-	// always throws a RuntimeException..
-
-	return null;
+	throw ex;
       }
     finally
       {

@@ -286,7 +286,14 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
 	      }
 	    else
 	      {
-		return setQueryMembers(IRISLink.getUsernames(queryString));
+		try
+		  {
+		    return setQueryMembers(IRISLink.getUsernames(queryString));
+		  }
+		catch (java.sql.SQLException ex)
+		  {
+		    return Ganymede.createErrorDialog(ex.getMessage());
+		  }
 	      }
 	  }
       }
