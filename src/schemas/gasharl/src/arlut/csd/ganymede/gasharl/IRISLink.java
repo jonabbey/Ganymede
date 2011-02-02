@@ -50,6 +50,9 @@ package arlut.csd.ganymede.gasharl;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import java.sql.*;
 import javax.sql.*;
 import com.mchange.v2.c3p0.*;
@@ -215,6 +218,62 @@ public class IRISLink {
     ex.printStackTrace();
 
     throw new RuntimeException(ex);
+  }
+
+  /**
+   * This executes any query that returns a list of single return
+   * values and returns those values as a List of Strings.
+   *
+   * @return a List of String, or null if the query could not be
+   * performed.
+   */
+
+  public static List<String> getUsernames(String queryString)
+  {
+    Connection myConn = null;
+    List<String> result = new ArrayList<String>();
+
+    try
+      {
+	myConn = getConnection();
+
+	Statement query = myConn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+
+	ResultSet rs = query.executeQuery(queryString);
+
+	try
+	  {
+	    while (rs.next())
+	      {
+		result.add(rs.getString(1));
+	      }
+	  }
+	finally
+	  {
+	    rs.close();
+	  }
+      }
+    catch (SQLException ex)
+      {
+	rethrowException(ex);
+
+	// the compiler doesn't realize that rethrowException()
+	// always throws a RuntimeException..
+
+	return null;
+      }
+    finally
+      {
+	try
+	  {
+	    myConn.close();
+	  }
+	catch (SQLException ex)
+	  {
+	  }
+
+	return result;
+      }
   }
 
   /**
