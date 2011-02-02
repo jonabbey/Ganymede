@@ -252,12 +252,12 @@ public class IRISLink {
 	  {
 	    rs.close();
 	  }
+
+	return result;
       }
     finally
       {
 	myConn.close();
-
-	return result;
       }
   }
 
