@@ -111,13 +111,13 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
   }
 
   /**
-   * This method provides a hook that can be used to generate
+   * <p>This method provides a hook that can be used to generate
    * choice lists for invid and string fields that provide
    * such.  String and Invid DBFields will call their owner's
-   * obtainChoiceList() method to get a list of valid choices.<br><br>
+   * obtainChoiceList() method to get a list of valid choices.</p>
    *
-   * This method will provide a reasonable default for targetted
-   * invid fields.
+   * <p>This method will provide a reasonable default for targetted
+   * invid fields.</p>
    */
 
   public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
@@ -128,6 +128,27 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
       }
 
     return super.obtainChoiceList(field);
+  }
+
+  /**
+   * <p>This method provides a hook that a DBEditObject subclass
+   * can use to indicate whether a given field can only
+   * choose from a choice provided by obtainChoiceList()</p>
+   *
+   * <p>To be overridden on necessity in DBEditObject subclasses,
+   * particularly if you have a StringDBField that you want to force
+   * to pick from the list of choices provided by your DBEditObject
+   * subclass' obtainChoiceList() method.</p>
+   */
+
+  public boolean mustChoose(DBField field)
+  {
+    if (field.getID() == IRISListSchema.MEMBERS)
+      {
+	return false;		// don't force choice
+      }
+
+    return super.mustChoose(field);
   }
 
   /**
