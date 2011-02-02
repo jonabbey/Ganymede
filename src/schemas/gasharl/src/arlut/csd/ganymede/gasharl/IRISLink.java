@@ -253,19 +253,9 @@ public class IRISLink {
 	    rs.close();
 	  }
       }
-    catch (SQLException ex)
-      {
-	throw ex;
-      }
     finally
       {
-	try
-	  {
-	    myConn.close();
-	  }
-	catch (SQLException ex)
-	  {
-	  }
+	myConn.close();
 
 	return result;
       }
