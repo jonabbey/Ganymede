@@ -53,6 +53,7 @@ import java.util.List;
 
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.PermEntry;
 import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
@@ -299,6 +300,39 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
       }
     catch (NotLoggedInException ex)
       {
+      }
+
+    return null;
+  }
+
+  /**
+   * <p>Customization method to allow this Ganymede object type to
+   * override the default permissions mechanism for special
+   * purposes.</p>
+   *
+   * <p>If this method returns null, the default permissions mechanism
+   * will be followed.  If not, the permissions system will grant the
+   * permissions specified by this method for access to the given
+   * field, and no further elaboration of the permission will be
+   * performed.  If permOverride() returns a non-null value for a
+   * given field, permExpand() will not be consulted for that field.
+   * Just as with permExpand(), this method can never cause greater
+   * permissions to be granted to a field than is available to the
+   * object as a whole, and this override capability does not
+   * apply to operations performed in supergash mode.</p>
+   *
+   * <p>This method should be used very sparingly.</p>
+   *
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   */
+
+  public PermEntry permOverride(GanymedeSession session, DBObject object, short fieldid)
+  {
+    if (fieldid == MEMBERS)
+      {
+	return PermEntry.getPermEntry(true, false, true, true);
       }
 
     return null;
