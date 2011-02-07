@@ -399,7 +399,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
     if (targetFieldID == SchemaConstants.OwnerObjectsOwned)
       {
-	return false;
+	return true;
       }
 
     return super.anonymousLinkOK(targetObject, targetFieldID);
