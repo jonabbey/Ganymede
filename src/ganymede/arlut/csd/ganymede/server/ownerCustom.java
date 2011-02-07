@@ -12,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2010
+   Copyright (C) 1996 - 2011
    The University of Texas at Austin
 
    Contact information
@@ -254,11 +254,9 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
-   * This method provides a hook that a DBEditObject subclass
+   * <p>This method provides a hook that a DBEditObject subclass
    * can use to indicate whether a given field can only
-   * choose from a choice provided by obtainChoiceList()
-   *
+   * choose from a choice provided by obtainChoiceList()</p>
    */
 
   public boolean mustChoose(DBField field)
@@ -275,15 +273,13 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
-   * This method returns a key that can be used by the client
+   * <p>This method returns a key that can be used by the client
    * to cache the value returned by choices().  If the client
    * already has the key cached on the client side, it
    * can provide the choice list from its cache rather than
-   * calling choices() on this object again.<br><br>
+   * calling choices() on this object again.</p>
    *
-   * If there is no caching key, this method will return null.
-   *
+   * <p>If there is no caching key, this method will return null.</p>
    */
 
   public Object obtainChoicesKey(DBField field)
@@ -300,18 +296,16 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
-   * This method provides a hook that can be used to check any values
+   * <p>This method provides a hook that can be used to check any values
    * to be set in any field in this object.  Subclasses of
    * DBEditObject should override this method, implementing basically
    * a large switch statement to check for any given field whether the
    * submitted value is acceptable given the current state of the
-   * object.<br><br>
+   * object.</p>
    *
-   * Question: what synchronization issues are going to be needed
+   * <p>Question: what synchronization issues are going to be needed
    * between DBEditObject and DBField to insure that we can have
-   * a reliable verifyNewValue method here?
-   * 
+   * a reliable verifyNewValue method here?</p>
    */
 
   public ReturnVal verifyNewValue(DBField field, Object value)
@@ -336,15 +330,13 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
-   * This method is used to control whether or not it is acceptable to
+   * <p>This method is used to control whether or not it is acceptable to
    * rescind a link to the given field in this DBObject type when the
    * user only has editing access for the source InvidDBField and not
-   * the target.
+   * the target.</p>
    *
    * @param object The object that the link is to be removed from
    * @param fieldID The field that the linkk is to be removed from
-   *
    */
 
   public boolean anonymousUnlinkOK(DBObject object, short fieldID)
@@ -357,7 +349,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
       {
 	return false;
       }
-    
+
     return super.anonymousUnlinkOK(object, fieldID);
   }
 }
