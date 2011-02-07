@@ -352,4 +352,56 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
     return super.anonymousUnlinkOK(object, fieldID);
   }
+
+  /**
+   * <p>This method is used to control whether or not it is acceptable to
+   * make a link to the given field in this
+   * {@link arlut.csd.ganymede.server.DBObject DBObject} type when the
+   * user only has editing access for the source
+   * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField} and not
+   * the target.</p>
+   *
+   * <p>See {@link arlut.csd.ganymede.server.DBEditObject#anonymousLinkOK(arlut.csd.ganymede.server.DBObject,short,
+   * arlut.csd.ganymede.server.DBObject,short,arlut.csd.ganymede.server.GanymedeSession)
+   * anonymousLinkOK(obj,short,obj,short,GanymedeSession)} for details on
+   * anonymousLinkOK() method chaining.</p>
+   *
+   * <p>Note that the {@link
+   * arlut.csd.ganymede.server.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.server.DBField)
+   * choiceListHasExceptions()} method will call this version of anonymousLinkOK()
+   * with a null targetObject, to determine that the client should not
+   * use its cache for an InvidDBField's choices.  Any overriding done
+   * of this method must be able to handle a null targetObject, or else
+   * an exception will be thrown inappropriately.</p>
+   *
+   * <p>The only reason to consult targetObject in any case is to
+   * allow or disallow anonymous object linking to a field based on
+   * the current state of the target object.  If you are just writing
+   * generic anonymous linking rules for a field in this object type,
+   * targetObject won't concern you anyway.  If you do care about the
+   * targetObject's state, though, you have to be prepared to handle
+   * a null valued targetObject.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   *
+   * @param targetObject The object that the link is to be created in (may be null)
+   * @param targetFieldID The field that the link is to be created in
+   */
+
+  public boolean anonymousLinkOK(DBObject targetObject, short targetFieldID)
+  {
+    // If you can edit an object, you have permission to 'donate' that
+    // object to another owner group, even if you're not a member of
+    // that owner group.
+    //
+    // This is so admins can 'give away' objects to another owner
+    // group if they need to.
+
+    if (targetFieldID == SchemaConstants.OwnerObjectsOwned)
+      {
+	return false;
+      }
+
+    return super.anonymousLinkOK(targetObject, targetFieldID);
+  }
 }
