@@ -396,8 +396,14 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
     //
     // This is so admins can 'give away' objects to another owner
     // group if they need to.
+    //
+    // Note that we don't use symmetric links for objects owned by
+    // owner groups anymore, to avoid locking owner groups all the
+    // time when database objects are manipulated in Ganymede.
+    // Because of this, we need to check on the BackLinksField
+    // constant, even though BackLinksField is virtual these days.
 
-    if (targetFieldID == SchemaConstants.OwnerObjectsOwned)
+    if (targetFieldID == SchemaConstants.BackLinksField)
       {
 	return true;
       }
