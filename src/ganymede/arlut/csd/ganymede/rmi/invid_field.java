@@ -101,6 +101,10 @@ public interface invid_field extends db_field {
    * already has the key cached on the client side, it
    * can provide the choice list from its cache rather than
    * calling choices() on this object again.</p>
+   *
+   * <p>If choicesKey() returns null, the client should not attempt to
+   * use any cached values for the choice list, and should go ahead
+   * and call choices() to get the freshly generated list.</p>
    */
 
   Object choicesKey() throws RemoteException;

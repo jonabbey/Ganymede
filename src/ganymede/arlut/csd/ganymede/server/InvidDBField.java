@@ -4021,7 +4021,9 @@ public final class InvidDBField extends DBField implements invid_field {
    * can provide the choice list from its cache rather than
    * calling choices() on this object again.</p>
    *
-   * <p>If there is no caching key, this method will return null.</p>
+   * <p>If choicesKey() returns null, the client should not attempt to
+   * use any cached values for the choice list, and should go ahead
+   * and call choices() to get the freshly generated list.</p>
    */
 
   public Object choicesKey()
