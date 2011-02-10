@@ -240,7 +240,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 	  {
 	    list = new objectList(choices);
 		
-	    availableOwners = list.getListHandles(false);
+	    availableOwners = list.getListHandles(false, true);
 	  }
       }
 
