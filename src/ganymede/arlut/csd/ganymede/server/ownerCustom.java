@@ -75,6 +75,14 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.ownerCustom");
 
   /**
+   * Archived property value to determine if we're going to allow
+   * admins to give objects they own to owner groups they don't belong
+   * to.
+   */
+
+  static private Boolean _donateOK = null;
+
+  /**
    * <P>This method takes an {@link arlut.csd.ganymede.common.Invid Invid} for
    * an Owner Group {@link arlut.csd.ganymede.server.DBObject DBObject}
    * and returns a Vector of Strings containing the list
@@ -155,6 +163,38 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
     return result;
   }
 
+  /**
+   * <p>Returns true if the property 'ganymede.allowdonations' contains
+   * the value 'true'.</p>
+   *
+   * <p>If ganymede.allowdonations is set to 'true', the Ganymede server
+   * will allow an admin who has edit authority over an object to
+   * grant access to that object to owner groups that the admin is not
+   * a member of.</p>
+   *
+   * <p>This is used to allow an admin who has edit authority over an
+   * object to transfer or donate it to another owner group,
+   * relinquishing responsibility for the object.</p>
+   */
+
+  static public boolean donateOK()
+  {
+    if (_donateOK == null)
+      {
+	String donateOKString = System.getProperty("ganymede.allowdonations");
+
+	if (donateOKString != null && donateOKString.equalsIgnoreCase("true"))
+	  {
+	    _donateOK = Boolean.valueOf(true);
+	  }
+	else
+	  {
+	    _donateOK = Boolean.valueOf(false);
+	  }
+      }
+
+    return _donateOK.booleanValue();
+  }
 
   /**
    *
@@ -403,7 +443,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
     // Because of this, we need to check on the BackLinksField
     // constant, even though BackLinksField is virtual these days.
 
-    if (targetFieldID == SchemaConstants.BackLinksField)
+    if (donateOK() && targetFieldID == SchemaConstants.BackLinksField)
       {
 	return true;
       }
