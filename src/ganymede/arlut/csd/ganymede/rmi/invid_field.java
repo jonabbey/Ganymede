@@ -73,35 +73,42 @@ public interface invid_field extends db_field {
   QueryResult encodedValues() throws RemoteException;
 
   /**
-   *
    * Returns true if the only valid values for this invid field are in
    * the QueryResult returned by choices().  In particular, if mustChoose()
-   * returns true, <none> is not an acceptable choice for this field
+   * returns true, &lt;none&gt; is not an acceptable choice for this field
    * after the field's value is initially set.
-   *
    */
 
   boolean mustChoose() throws RemoteException;
+
+  /**
+   * <p>Returns a StringBuffer encoded list of acceptable invid values
+   * for this field.</p>
+   */
+
   QueryResult choices(boolean applyFilter) throws RemoteException;
+
+  /**
+   * <p>Returns a StringBuffer encoded list of acceptable invid values
+   * for this field.</p>
+   */
+
   QueryResult choices() throws RemoteException;
 
   /**
-   *
-   * This method returns a key that can be used by the client
+   * <p>This method returns a key that can be used by the client
    * to cache the value returned by choices().  If the client
    * already has the key cached on the client side, it
    * can provide the choice list from its cache rather than
-   * calling choices() on this object again.
-   *
+   * calling choices() on this object again.</p>
    */
 
   Object choicesKey() throws RemoteException;
 
   /**
-   * This method returns true if this invid field should not
+   * <p>This method returns true if this invid field should not
    * show any choices that are currently selected in field
-   * x, where x is another field in this db_object.
-   *
+   * x, where x is another field in this db_object.</p>
    */
 
   boolean excludeSelected(db_field x) throws RemoteException;
@@ -109,28 +116,26 @@ public interface invid_field extends db_field {
   // the following methods apply if this is an edit-in-place vector
 
   /**
-   *
-   * This method is used to create a new embedded object in an
+   * <p>This method is used to create a new embedded object in an
    * invid field that contains a vector of edit-in-place/embedded
    * objects.  The ReturnVal returned indicates success/failure,
    * and on success will provide the Invid of the newly created
-   * embedded when ReturnVal.getInvid() is called on it.
-   *
+   * embedded when ReturnVal.getInvid() is called on it.</p>
    */
 
   ReturnVal createNewEmbedded() throws RemoteException;
 
   /**
+   * <p>Return the object type that this invid field is constrained to
+   * point to, if set</p>
    *
-   * <p>Return the object type that this invid field is constrained to point to, if set</p>
-   *
-   * <p>A negative value means there is no one type of object that this field is constrained
-   * to point to.</p>
+   * <p>A negative value means there is no one type of object that
+   * this field is constrained to point to.</p>
    *
    * <p>-1 means there is no restriction on target type.</p>
    *
-   * <p>-2 means there is no restriction on target type, but there is a specified symmetric field.</p>
-   *
+   * <p>-2 means there is no restriction on target type, but there is
+   * a specified symmetric field.</p>
    */
 
   short getTargetBase() throws RemoteException;
