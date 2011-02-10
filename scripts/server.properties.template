@@ -258,6 +258,20 @@ ganymede.timeoutIdleNoObjs=15
 ganymede.timeoutIdleWithObjs=20
 
 
+# ganymede.allowdonations
+#
+# If true, the Ganymede server will allow admins who have permission
+# to edit an object and its owner field the permission to donate or
+# transfer that object to owner groups that the admin is not a member
+# of.
+#
+# That is, ganymede.allowdonations allows objects to be transferred
+# between owner (administrative) groups without requiring an admin
+# with either supergash or multi-group permissions to do the transfer.
+
+ganymede.allowdonations=
+
+
 # ganymede.helpbase
 #
 # The url for the root of the Ganymede help document tree.
