@@ -1969,11 +1969,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
-   *
-   * This method generates an aliases_info file.  This method must be run during
-   * builderPhase1 so that it has access to the getObjects() method
-   * from our superclass.
-   *
+   * <p>This method generates an aliases_info file.  This method must
+   * be run during builderPhase1 so that it has access to the
+   * getObjects() method from our superclass.</p>
    */
 
   private boolean writeAliasesFile()
@@ -2035,6 +2033,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
           {
             writeMailmanListAlias(mailman, aliases_info);
           }
+
+	// and the IRIS-derived mail lists
+
+	for (DBObject irisList: getObjects(IRISListSchema.BASE))
+	  {
+	    writeIRISListAlias(irisList, aliases_info);
+	  }
+
       }
     finally
       {
@@ -2679,6 +2685,128 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
             target = (String) targets.elementAt(i);
 
             result.append(target);
+          }
+      }
+
+    writer.println(result.toString());
+  }
+
+  /**
+   * <p>This method writes out an IRIS List to the aliases_info GASH
+   * source file.</p>
+   *
+   * <p>The mail list lines in this file look like the following:</p>
+   *
+   * <pre>
+   * :csd-news-dist-omg:alias, alias, alias:csd_staff, granger, iselt, lemma, jonabbey@eden.com
+   * </pre>
+   *
+   * <p>Where the leading colon identifies to the GASH makefile that
+   * it is a group line.</p>
+   *
+   * <p>NB: I've modified this method in 2008 to add the aliases
+   * field, above.  This is a modification of the classic GASH
+   * aliases_info file, which did not support aliases for email
+   * lists.</p>
+   *
+   * @param object An object from the Ganymede IRISList object base
+   * @param writer The destination for this alias line
+   */
+
+  private void writeIRISListAlias(DBObject object, PrintWriter writer)
+  {
+    String listname;
+    Vector list_members;
+    Vector list_aliases;
+    Invid memberInvid;
+    String target;
+
+    int lengthlimit_remaining;
+    int subgroup = 1;
+    String subname;
+
+    /* -- */
+
+    result.setLength(0);
+
+    listname = (String) object.getFieldValueLocal(IRISListSchema.LISTNAME);
+    list_aliases = object.getFieldValuesLocal(IRISListSchema.ALIASES);
+    list_members = object.getFieldValuesLocal(IRISListSchema.MEMBERS);
+
+    result.append(":");
+    result.append(listname);
+    result.append(":");
+
+    if (list_aliases != null)
+      {
+        for (int i = 0; i < list_aliases.size(); i++)
+          {
+            String alias = (String) list_aliases.elementAt(i);
+
+            if (i > 0)
+              {
+                result.append(", ");
+              }
+
+            result.append(alias);
+          }
+      }
+
+    result.append(":");
+
+    // NIS forces us to a 1024 character limit per key and value, we
+    // need to truncate and extend to match, here.  We'll cut it down
+    // to 900 to give ourselves some slack so we can write out our
+    // chain link at the end of the line
+
+    lengthlimit_remaining = 900 - result.length();
+
+    if (list_members != null)
+      {
+        for (int i = 0; i < list_members.size(); i++)
+          {
+            memberInvid = (Invid) list_members.elementAt(i);
+
+            if (isVeryDeadUser(memberInvid))
+              {
+                continue;
+              }
+
+            if (i > 0)
+              {
+                result.append(", ");
+              }
+
+            target = getLabel(memberInvid);
+
+            if (2 + target.length() > lengthlimit_remaining)
+              {
+                if (subgroup > 1)
+                  {
+                    subname = listname + "-gext" + subgroup;
+                  }
+                else
+                  {
+                    subname = listname + "-gext";
+                  }
+
+                // point to the linked sublist, terminate this entry
+                // line
+
+                result.append(subname);
+                result.append("\n");
+
+                // and initialize the next line, containing the linked
+                // sublist
+
+                result.append(":xxx:");
+                result.append(subname);
+                result.append(":");
+                lengthlimit_remaining = 900 - subname.length() - 6;
+              }
+
+            result.append(target);
+            lengthlimit_remaining = lengthlimit_remaining - (2 + target.length());
           }
       }
 
