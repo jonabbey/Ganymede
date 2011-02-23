@@ -51,6 +51,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import arlut.csd.Util.VectorUtils;
+
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.PermEntry;
@@ -415,5 +417,56 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
       {
 	editset.popCheckpoint(x.toString());
       }
+  }
+
+  static public ReturnVal handleUpdate(DBObject listObject, GanymedeSession gsession) throws NotLoggedInException
+  {
+    String queryString = (String) listObject.getFieldValueLocal(IRISListSchema.QUERY);
+
+    if (queryString == null || queryString.trim().equals(""))
+      {
+	return null;
+      }
+
+    List<String> userNames = null;
+
+    try
+      {
+	userNames = IRISLink.getUsernames(queryString);
+      }
+    catch (java.sql.SQLException ex)
+      {
+	return Ganymede.createErrorDialog(ex.getMessage());
+      }
+
+    List<Invid> userInvids = new ArrayList<Invid>();
+
+    for (String user: userNames)
+      {
+	Invid userInvid = gsession.findLabeledObject(user, SchemaConstants.UserBase);
+
+	if (userInvid != null)
+	  {
+	    userInvids.add(userInvid);
+	  }
+      }
+
+    if (VectorUtils.equalMembers(userInvids, listObject.getFieldValuesLocal(IRISListSchema.MEMBERS)))
+      {
+	return null;
+      }
+
+    // we need to make a change
+
+    ReturnVal retVal = gsession.edit_db_object(listObject.getInvid());
+
+    if (!ReturnVal.didSucceed(retVal))
+      {
+	return retVal;
+      }
+
+    IRISListCustom listEditObject = (IRISListCustom) retVal.getObject();
+
+    return listEditObject.setQueryMembers(userNames);
   }
 }
