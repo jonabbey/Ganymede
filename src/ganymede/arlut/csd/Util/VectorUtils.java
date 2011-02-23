@@ -303,6 +303,21 @@ public class VectorUtils {
   }
 
   /**
+   * This method returns true if vectA and vectB contain the same
+   * elements, in whatever order.
+   */
+
+  public static boolean equalMembers(List vectA, List vectB)
+  {
+    if (vectA.size() != vectB.size())
+      {
+	return false;
+      }
+
+    return intersection(vectA, vectB).size() == vectA.size();
+  }
+
+  /**
    * This method returns a Vector of items that appeared in the 
    * vector parameter more than once.
    *
