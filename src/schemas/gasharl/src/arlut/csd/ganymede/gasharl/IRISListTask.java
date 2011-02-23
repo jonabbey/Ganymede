@@ -136,9 +136,14 @@ public class IRISListTask implements Runnable {
 
 	transactionOpen = true;
 
-	updateLists();
-
-	mySession.commitTransaction(true);
+	if (updateLists())
+	  {
+	    mySession.commitTransaction(true);
+	  }
+	else
+	  {
+	    mySession.abortTransaction();
+	  }
 
 	transactionOpen = false;
       }
@@ -165,13 +170,22 @@ public class IRISListTask implements Runnable {
       }
   }
 
-  private void updateLists() throws InterruptedException, NotLoggedInException
+  private boolean updateLists() throws InterruptedException, NotLoggedInException
   {
+    boolean needCommit = false;
+
     List<DBObject> lists = mySession.getObjects(IRISListSchema.BASE);
 
     for (DBObject list: lists)
       {
-	IRISListCustom.handleUpdate(list, mySession);
+	ReturnVal retVal = IRISListCustom.handleUpdate(list, mySession);
+
+	if (retVal != null && ReturnVal.didSucceed(retVal))
+	  {
+	    needCommit = true;
+	  }
       }
+
+    return needCommit;
   }
 }
