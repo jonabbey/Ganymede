@@ -509,6 +509,21 @@ public class CrackLib {
 	return ts.l("fascistLook.mindiff");
       }
 
+    // make sure we don't have an all-numeric password
+
+    StringBuilder numPat = new StringBuilder();
+
+    for (int i = 0; i < password.length(); i++)
+      {
+	numPat.append("d");
+      }
+
+    if (Rules.pMatch(numPat.toString(), password))
+      {
+	// "It is too simplistic / too predictable."
+	return ts.l("fascistLook.complexity");
+      }
+
     // test for step up / step down patternings
 
     int complexity = 0;
@@ -542,14 +557,14 @@ public class CrackLib {
 	return ts.l("fascistLook.insurance");
       }
 
-    if (Rules.pMatch("ddddddddd", password) || Rules.pMatch("ddd#dd#dddd", password))
+    if (Rules.pMatch("ddd#dd#dddd", password))
       {
 	// "It looks like a Social Security number."
 	return ts.l("fascistLook.socialsecurity");
       }
 
-    if (Rules.pMatch("ddddddd", password) || Rules.pMatch("ddd#dddd", password) ||
-	Rules.pMatch("dddddddddd", password) || Rules.pMatch("ddd#ddd#dddd", password) ||
+    if (Rules.pMatch("ddd#dddd", password) ||
+	Rules.pMatch("ddd#ddd#dddd", password) ||
 	Rules.pMatch("#ddd#ddd#dddd", password))
       {
 	// "It looks like a phone number." (american, that is)
