@@ -596,7 +596,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (passField != null)
       {
-        cryptedPass = passField.getUNIXCryptText();
+        cryptedPass = passField.getMD5CryptText();
       }
     else
       {
