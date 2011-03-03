@@ -463,7 +463,7 @@ xmlclient.</comment>
               <comment>Password for an individual privileged to log into Ganymede and/or the network</comment>
               <typedef type="password">
                 <minlength val="12"/>
-                <maxlength val="28"/>
+                <maxlength val="32"/>
                 <badchars val=",|:@"/>
                 <cracklib_check exception="supergash"/>
                 <history_check exception="supergash" depth="5"/>
@@ -1474,7 +1474,7 @@ if the client does not explicitly request it.</comment>
           </tab>
         </objectdef>
         <objectdef name="IRIS_List" id="282">
-          <classdef name="arlut.csd.ganymede.gasharl.IRISListCustom"/>
+          <classdef name="arlut.csd.ganymede.gasharl.IRISListCustom" optionString=""/>
           <label fieldid="256"/>
           <tab name="General">
             <fielddef name="List_Name" id="256">
