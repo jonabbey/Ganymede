@@ -1461,6 +1461,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 writer.println(buffer.toString());
                 buffer = new StringBuilder();
                 buffer.append(subname);
+
                 subgroup++;
               }
 
@@ -1492,6 +1493,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 writer.println(buffer.toString());
                 buffer = new StringBuilder();
                 buffer.append(subname);
+
                 subgroup++;
               }
 
@@ -1578,6 +1580,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 writer.println(buffer.toString());
                 buffer = new StringBuilder();
                 buffer.append(subname);
+
                 subgroup++;
               }
 
@@ -1610,6 +1613,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 writer.println(buffer.toString());
                 buffer = new StringBuilder();
                 buffer.append(subname);
+
                 subgroup++;
               }
 
@@ -2315,6 +2319,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 result.append(subname);
                 result.append(":");
                 lengthlimit_remaining = 900 - subname.length() - 6;
+
+		subgroup++;
               }
 
             result.append(target);
@@ -2357,6 +2363,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 result.append(subname);
                 result.append(":");
                 lengthlimit_remaining = 900 - subname.length() - 6;
+
+		subgroup++;
               }
 
             result.append(target);
@@ -2386,7 +2394,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    * a GASH ownership code that could be used to load the aliases_info file
    * back into GASH.
    *
-   * @param object An object from the Ganymede user object base
+   * @param object An object from the Ganymede account group object base
    * @param writer The destination for this alias line
    *
    */
@@ -2467,6 +2475,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 result.append(subname);
                 result.append(":");
                 lengthlimit_remaining = 900 - subname.length() - 6;
+
+		subgroup++;
               }
 
             result.append(target);
@@ -2477,13 +2487,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     writer.println(result.toString());
   }
 
-
   /**
+   * <p>This method writes out a mail list alias line to the aliases_info
+   * GASH source file, as sourced from a gasharl user netgroup object.</p>
    *
-   * This method writes out a mail list alias line to the aliases_info
-   * GASH source file, as sourced from a gasharl user netgroup object.<br/><br/>
-   *
-   * The mail list lines in this file look like the following:<br/><br/>
+   * <p>The mail list lines in this file look like the following:</p>
    *
    * <pre>
    *
@@ -2491,14 +2499,13 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    * </pre>
    *
-   * Where the leading colon identifies to the GASH makefile that it is a group
+   * <p>Where the leading colon identifies to the GASH makefile that it is a group
    * line and 'oms' is the GASH ownership code.  Ganymede won't try to emit
    * a GASH ownership code that could be used to load the aliases_info file
-   * back into GASH.
+   * back into GASH.</p>
    *
-   * @param object An object from the Ganymede user object base
+   * @param object An object from the Ganymede User Netgroup object base
    * @param writer The destination for this alias line
-   *
    */
 
   private void writeUserNetgroupAlias(DBObject object, PrintWriter writer)
@@ -2601,6 +2608,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
             result.append(subname);
             result.append(":");
             lengthlimit_remaining = 900 - subname.length() - 6;
+
+	    subgroup++;
           }
 
         result.append(target);
@@ -2803,6 +2812,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 result.append(subname);
                 result.append(":");
                 lengthlimit_remaining = 900 - subname.length() - 6;
+
+		subgroup++;
               }
 
             result.append(target);
