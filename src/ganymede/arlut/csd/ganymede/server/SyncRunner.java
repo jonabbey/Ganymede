@@ -16,7 +16,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -1205,15 +1205,6 @@ public class SyncRunner implements Runnable {
       {
 	// "origField is null"
 	throw new NullPointerException(ts.l("shouldInclude.badOrigField"));
-      }
-
-    switch (newField.getID())
-      {
-      case SchemaConstants.CreationDateField:
-      case SchemaConstants.CreatorField:
-      case SchemaConstants.ModificationDateField:
-      case SchemaConstants.ModifierField:
-	return false;
       }
 
     if (book != null)
