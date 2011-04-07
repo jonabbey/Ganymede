@@ -349,18 +349,6 @@ public class fieldoption_editor extends JFrame
 	    /* get the field options for this field */
 	    template = (FieldTemplate) fields.elementAt(j);
 
-	    /* don't show the time fields, since they are always or
-	     * never changing */
-
-	    switch (template.getID())
-	      {
-	      case SchemaConstants.CreationDateField:
-	      case SchemaConstants.CreatorField:
-	      case SchemaConstants.ModificationDateField:
-	      case SchemaConstants.ModifierField:
-		continue;
-	      }
-
 	    if (base.isEmbedded() && template.getID() == SchemaConstants.ContainerField)
 	      {
 		continue;	// the container field is always implicit for embedded objects
