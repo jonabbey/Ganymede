@@ -1574,7 +1574,7 @@ public class SyncRunner implements Runnable {
 
     this.needBuild.set(false);
 
-    ReturnVal retVal = session.getDataXML(this.name, false, true); // don't include history fields, do include oid's
+    ReturnVal retVal = session.getDataXML(this.name, true, true); // include history fields and oid's
     FileTransmitter transmitter = retVal.getFileTransmitter();
     BufferedOutputStream out = null;
 
