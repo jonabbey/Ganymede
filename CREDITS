@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-6 January 2011
+14 April 2011
 CREDITS
 
 ---------------------------------------------
@@ -76,6 +76,9 @@ dialog to be more user-friendly.  During his last year at ARL, Brian
 did an enormous amount of work in preparing for the ultimate
 replacement of the old-style hosts_info DNS support with new code to
 convert BIND files into an XML representation and back again.
+
+As if that wasn't enough, Brian also created the Ganymede logo as well
+as many of the icons used in the Ganymede clients.
 
 --
 
