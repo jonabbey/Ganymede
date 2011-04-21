@@ -4198,14 +4198,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 continue;
               }
 
-            String password = passField.getUNIXCryptText();
+            String password = passField.getApacheMD5CryptText();
 
             if (password == null)
               {
                 continue;
               }
 
-            // ok, we've got a user with valid UNIXCrypt password
+            // ok, we've got a user with valid Apache MD5Crypt password
             // info.  Write it.
 
             webPassword.print(user.getLabel());
