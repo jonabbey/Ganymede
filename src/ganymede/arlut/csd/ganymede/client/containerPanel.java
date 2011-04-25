@@ -3364,9 +3364,10 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     // the server, albeit using our transaction / session.
 
     fieldoption_button fob = new fieldoption_button((field_option_field) field,
-				     editable && fieldInfo.isEditable(),
-				     gc,
-				     fieldTemplate.getName());
+						    this.object,
+						    editable && fieldInfo.isEditable(),
+						    gc,
+						    fieldTemplate.getName());
 
     String comment = fieldTemplate.getComment();
 

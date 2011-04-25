@@ -86,12 +86,10 @@ class fieldoption_button extends JButton implements ActionListener {
   boolean isActiveAlready = false;
 
   /**
-   *
    * fieldoption_button constructor
    *
    * @param field What field are we going to edit field options for?
    * @param enabled If true, will allow editing of the field options matrix
-   *
    */
 
   public fieldoption_button (field_option_field field, 

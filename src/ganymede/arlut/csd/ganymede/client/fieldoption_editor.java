@@ -80,20 +80,35 @@ public class fieldoption_editor extends JFrame
 
   public static boolean debug = false;
 
-  /* Flag that indicated whether or not the widget it currently being
-   * displayed or not. */
+  /**
+   * Flag that indicated whether or not the widget it currently being
+   * displayed or not.
+   */
+
   boolean isActive = true;
 
-  /* Reference to the actual field option data store this widget represents */
+  /**
+   * Reference to the actual field option data store this widget represents
+   */
+
   field_option_field opField;
 
-  /* Should the widget be displayed read-only or not? */
+  /**
+   * Should the widget be displayed read-only or not?
+   */
+
   boolean editable;
 
-  /* The root of our tree, which is in column 0 of our tree table */
+  /**
+   * The root of our tree, which is in column 0 of our tree table
+   */
+
   DefaultMutableTreeNode rowRootNode;
 
-  /* Reference to the main client class */
+  /**
+   * Reference to the main client class
+   */
+
   gclient gc;
 
   /* Layout components */
@@ -143,6 +158,7 @@ public class fieldoption_editor extends JFrame
 			   });
 
     /* Change the images to match the client */
+
     UIManager.put("Tree.leafIcon", new ImageIcon(PackageResources.getImageResource(this, "i043.gif", getClass())));
     UIManager.put("Tree.openIcon", new ImageIcon(PackageResources.getImageResource(this, "openfolder.gif", getClass())));
     UIManager.put("Tree.closedIcon", new ImageIcon(PackageResources.getImageResource(this, "folder.gif", getClass())));
@@ -150,6 +166,7 @@ public class fieldoption_editor extends JFrame
     UIManager.put("Tree.collapsedIcon", new ImageIcon(PackageResources.getImageResource(this, "plus.gif", getClass())));
     
     /* Group the OK and Cancel buttons together */
+
     Choice_Buttons = new JPanel(); 
 
     if (editable)
@@ -177,6 +194,7 @@ public class fieldoption_editor extends JFrame
       }
 
     /* Group the Expand and Collapse buttons together */
+
     Expansion_Buttons = new JPanel(); 
     Expansion_Buttons.setBorder(new EmptyBorder(new Insets(5,5,5,5)));
     Expansion_Buttons.setLayout(new GridLayout(1,2));
@@ -184,12 +202,14 @@ public class fieldoption_editor extends JFrame
     Expansion_Buttons.add(CollapseButton);
 
     /* Now take *those* groups and group them together */
+
     All_Buttons = new JPanel();
     All_Buttons.setLayout(new BorderLayout());
     All_Buttons.add("West", Expansion_Buttons);
     All_Buttons.add("East", Choice_Buttons);
 
     /* Setup the tree table */
+
     try
       {
         rowRootNode = initRowTree();
@@ -212,6 +232,7 @@ public class fieldoption_editor extends JFrame
     tree.setCellRenderer(new FieldOptionTreeRenderer(this));
 
     /* Set the correct initial states of all the object base nodes in the tree */
+
     fixObjectBaseNodes(rowRootNode, (FieldOptionModel)model);
 
     treeTable.setDefaultRenderer(Integer.class,
@@ -220,6 +241,7 @@ public class fieldoption_editor extends JFrame
 			       new DelegateEditor((TreeTableModelAdapter)treeTable.getModel(), editable, treeTable));
 
     /* Expand only nodes with non-default values */
+
     collapseAllNodes();
     smartExpandNodes();
 
@@ -299,6 +321,7 @@ public class fieldoption_editor extends JFrame
    * to store the field option values for the base and basefields.
    * It returns a DefaultMutableTreeNode as the root of the tree structure
    */
+
   private DefaultMutableTreeNode initRowTree() throws RemoteException 
   {
     FieldOptionMatrix matrix;
@@ -327,7 +350,8 @@ public class fieldoption_editor extends JFrame
 	id = base.getTypeID();
 	name = base.getName();
 
-        /* We'll go ahead and hard-code the option value of this object base as
+        /*
+	 * We'll go ahead and hard-code the option value of this object base as
          * "0", aka "Never". A future call to the fixObjectBaseNodes() method
          * will make sure that the checkbox for this object base has the
          * appropriate state.
@@ -335,7 +359,9 @@ public class fieldoption_editor extends JFrame
          * We do this because if we go ahead and set the value of this object
          * base to anything other than 0, the GUI will automatically flip all
          * of its constituent fields to "1", aka "When changed". We don't want
-         * this, so we'll skip reading the object base's value from the db. */
+         * this, so we'll skip reading the object base's value from the db.
+	 */
+
         basevalue = SyncPrefEnum.NEVER;
 
 	baseNode = new DefaultMutableTreeNode(new FieldOptionRow(base, null, basevalue));
@@ -388,11 +414,11 @@ public class fieldoption_editor extends JFrame
     return rootNode;
   }
 
-
   /**
    * Loops over every object base node in the tree, setting its check-box state
    * to what it should be based on the values of its fields
    */
+
   public void fixObjectBaseNodes(DefaultMutableTreeNode root, FieldOptionModel model)
   {
     for (Enumeration e = root.children(); e.hasMoreElements();)
@@ -407,12 +433,10 @@ public class fieldoption_editor extends JFrame
     }
   }
 
-
   /**
-   *
    * Method to pop-up/pop-down the editor
-   *
    */
+
   public void myshow(boolean truth_value)
   {
     if (truth_value)
@@ -426,19 +450,19 @@ public class fieldoption_editor extends JFrame
       }
   }
 
-
   /**
    * Am I currently being displayed or not?
    */
+
   public boolean isActiveEditor()
   {
     return isActive;
   }
 
-
   /**
    * Expands all of the nodes in the JTree
    */
+
   private void expandAllNodes()
   {
     for (Enumeration e = (rowRootNode.children()); e.hasMoreElements();)
@@ -450,10 +474,10 @@ public class fieldoption_editor extends JFrame
       }
   }
 
-
   /**
    * Collapses all of the nodes in the JTree
    */
+
   private void collapseAllNodes()
   {
     for (Enumeration en = (rowRootNode.children()); en.hasMoreElements();) 
@@ -464,11 +488,11 @@ public class fieldoption_editor extends JFrame
       } 
   }
 
-
   /**
    * Expands the nodes for object bases that contain fields with non-default
    * options.
    */
+
   private void smartExpandNodes()
   {
     for (Enumeration en = (rowRootNode.children()); en.hasMoreElements();) 
@@ -484,10 +508,10 @@ public class fieldoption_editor extends JFrame
       }
   }
 
-
   /**
    * Writes all changes the user has made back to the data store.
    */
+
   public void commitChanges()
   {
     FieldOptionRow ref;
@@ -578,6 +602,11 @@ public class fieldoption_editor extends JFrame
   }
 } 
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                  FieldOptionRow
+
+------------------------------------------------------------------------------*/
 
 /**
  * An instance of this class is attached to each node in the JTree. The hooks
@@ -585,22 +614,41 @@ public class fieldoption_editor extends JFrame
  * that the corresponding node in the tree represents. It also holds the value
  * of the options for each node in the tree.
  */
-class FieldOptionRow {
-  /* Either a BaseDump or a FieldTemplate object associated with this node
-   * in the tree */
+
+class FieldOptionRow
+{
+  /**
+   * Either a BaseDump or a FieldTemplate object associated with this
+   * node in the tree
+   */
+
   private Object reference;
 
-  /* The actual field option value */
+  /**
+   * The actual field option value
+   */
+
   private SyncPrefEnum opValue;
 
-  /* True if we've edited the contained field option value */
+  /**
+   * True if we've edited the contained field option value
+   */
+
   private boolean changed;
 
-  /* Title of the tree node */
+  /**
+   * Title of the tree node
+   */
+
   private String name;
 
-  /* Is this row representing a built-in field or not? */
+  /**
+   * Is this row representing a built-in field or not?
+   */
+
   private boolean builtin = false;
+
+  /* -- */
 
   public FieldOptionRow(BaseDump base, FieldTemplate field, SyncPrefEnum opValue) 
   {
@@ -665,6 +713,7 @@ class FieldOptionRow {
   /**
    * Returns the current base or field object
    */
+
   public Object getReference() 
   {
     return reference;
@@ -673,6 +722,7 @@ class FieldOptionRow {
   /**
    * Returns if the current row is dealing w/ base or field
    */
+
   public boolean isBase() 
   {
     if (reference instanceof BaseDump)
@@ -686,7 +736,11 @@ class FieldOptionRow {
   }
 }
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                FieldOptionModel
 
+------------------------------------------------------------------------------*/
 
 /**
  * Custom TreeTableModel model for use with the Ganymede client's
@@ -694,8 +748,8 @@ class FieldOptionRow {
  * field options editor dialog.
  */
 
-class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel {
-
+class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel
+{
   /**
    * TranslationService object for handling string localization in
    * the Ganymede system.
@@ -707,6 +761,8 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
   static protected String[]  cNames = {ts.l("global.name"), ts.l("global.when")};
 
   fieldoption_editor foe = null;
+
+  /* -- */
   
   public FieldOptionModel(DefaultMutableTreeNode root, fieldoption_editor foe)
   {
@@ -794,11 +850,11 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
       {
 	return;
       }
-    
-    switch(col) 
+
+    switch (col)
       {
-      /* case: 0 represents the column the tree is held in. You can't set that
-       * value, so we'll ignore it */
+	/* case: 0 represents the column the tree is held in. You can't set that
+	 * value, so we'll ignore it */
       case 1:
         myRow.setOptionValue(newVal);
 	myRow.setChanged(true);
@@ -830,15 +886,16 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
     fireTreeNodesChanged(FieldOptionModel.this, path, null, null);    
   }
 
-
   /**
    * Make sure that the object base tree node ('node') has a state
    * that reflects the options of all of its constituent fields.
    */
+
   public void fixObjectBaseNode(DefaultMutableTreeNode node)
   {
     /* Is this node checked or not? */
     boolean checked;
+
     if (((SyncPrefEnum) getValueAt(node, 1)) == SyncPrefEnum.NEVER)
       {
 	checked = false;
@@ -876,11 +933,11 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
     TreeNode[] path = ((DefaultMutableTreeNode)node).getPath();
     fireTreeNodesChanged(FieldOptionModel.this, path, null, null);    
   }
-  
 
   /**
    * Give the children of 'node' the value of 'value
    */
+
   public void setBaseChildren(DefaultMutableTreeNode node, SyncPrefEnum value)
   {
     for (Enumeration e = node.children(); e.hasMoreElements();) 
@@ -892,23 +949,37 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel 
   }
 }
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                DelegateRenderer
 
+------------------------------------------------------------------------------*/
 
 /**
  * A cell renderer that delegates rendering functions to one of 2 classes.
  * ObjectBases are rendered with a checkbox, and Fields are rendered with
  * a combo box.
  */
+
 class DelegateRenderer implements TableCellRenderer
 {
-  /* Is the renderer read-only? */
+  /**
+   * Is the renderer read-only?
+   */
+
   boolean editable;
 
-  /* Hook for the backing store of the JTree. This gives us a way to access
-   * our FieldOptionRow objects attached to various nodes in the tree. */
+  /**
+   * Hook for the backing store of the JTree. This gives us a way to access
+   * our FieldOptionRow objects attached to various nodes in the tree.
+   */
+
   TreeTableModelAdapter model;
 
-  /* Reference to the main treetable */
+  /**
+   * Reference to the main treetable
+   */
+
   JTreeTable treetable;
 
   public DelegateRenderer(TreeTableModelAdapter model, boolean editable, JTreeTable treetable)
@@ -932,18 +1003,18 @@ class DelegateRenderer implements TableCellRenderer
     SyncPrefEnum opvalue = qrow.getOptionValue();
 
     /* ObjectBases are rendered as checkboxes */
+
     if (qrow.isBase())
       {
 	return new CheckBoxRenderer(editable, this.treetable, opvalue);
       }
-    else    /* Fields are rendered as combo boxes */
+    else
       {
-	/* If we're in edit mode, show a combo box */
 	if (this.editable)
 	  {
 	    return new ComboRenderer(editable, this.treetable, opvalue);
 	  }
-	else	/* If we're read-only, then use a simple JLabel */
+	else
 	  {
 	    return new JLabel(opvalue.toString());
 	  }
@@ -951,26 +1022,43 @@ class DelegateRenderer implements TableCellRenderer
   }
 }
 
+/*------------------------------------------------------------------------------
+                                                                           class
+								  DelegateEditor
 
+------------------------------------------------------------------------------*/
 
 /**
  * A cell editor that delegates editing functions to one of 2 classes.
  * ObjectBases are handled with a checkbox, and Fields are handled with
  * a combo box.
  */
+
 class DelegateEditor extends javax.swing.AbstractCellEditor implements TableCellEditor
 {
-  /* Is the renderer read-only? */
+  /**
+   * Is the renderer read-only?
+   */
+
   boolean editable;
 
-  /* Hook for the backing store of the JTree. This gives us a way to access
-   * our FieldOptionRow objects attached to various nodes in the tree. */
+  /**
+   * Hook for the backing store of the JTree. This gives us a way to access
+   * our FieldOptionRow objects attached to various nodes in the tree.
+   */
+
   TreeTableModelAdapter model;
 
-  /* The component that's actually represents the edited cell */
+  /**
+   * The component that's actually represents the edited cell
+   */
+
   Component delegate;
 
-  /* Quick-access reference to our main JTreeTable */
+  /**
+   * Quick-access reference to our main JTreeTable
+   */
+
   JTreeTable treetable;
 
   public DelegateEditor(TreeTableModelAdapter model, boolean editable, JTreeTable treetable)
@@ -1014,14 +1102,12 @@ class DelegateEditor extends javax.swing.AbstractCellEditor implements TableCell
     FieldOptionRow qrow = (FieldOptionRow) (node.getUserObject());
     SyncPrefEnum opvalue = qrow.getOptionValue();
 
-    /* Object bases are rendered as checkboxes */
     if (qrow.isBase())
       {
 	CheckBoxRenderer cb = new CheckBoxRenderer(editable, this.treetable, opvalue);
 	this.delegate = cb;
 	return cb;
       }
-    /* Fields are rendered as combo boxes */
     else
       {
 	ComboRenderer cr = new ComboRenderer(editable, this.treetable, opvalue);
@@ -1031,14 +1117,22 @@ class DelegateEditor extends javax.swing.AbstractCellEditor implements TableCell
   }
 }
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                CheckBoxRenderer
 
+------------------------------------------------------------------------------*/
 
 /**
  * Renders the field options for an ObjectBase.
  */
+
 class CheckBoxRenderer extends JCheckBox implements TableCellRenderer, ActionListener
 {
-  /* Reference to the main JTreeTable */
+  /**
+   * Reference to the main JTreeTable
+   */
+
   JTreeTable treetable;
 
   public CheckBoxRenderer(boolean editable, JTreeTable treetable, SyncPrefEnum onOrOff)
@@ -1065,6 +1159,7 @@ class CheckBoxRenderer extends JCheckBox implements TableCellRenderer, ActionLis
    * Takes an Integer of value 0 or 1 and returns the corresponding
    * boolean truth value.
    */
+
   public boolean convertValueToBoolean(Object value)
   {
     int i = ((Integer)value).intValue();
@@ -1097,22 +1192,34 @@ class CheckBoxRenderer extends JCheckBox implements TableCellRenderer, ActionLis
   }
 }
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                   ComboRenderer
 
+------------------------------------------------------------------------------*/
 
 /** 
  * Renders the field options for a DBObjectBaseField
  */
+
 class ComboRenderer extends JComboBox implements TableCellRenderer, ItemListener
 {
-  /* Reference to the main JTreeTable */
+  /**
+   * Reference to the main JTreeTable
+   */
+
   JTable treetable;
 
-  /* Sort of a hack; used to hold onto the previous selection index */
+  /**
+   * Sort of a hack; used to hold onto the previous selection index
+   */
+
   int selindex;
   
   public ComboRenderer(boolean editable, JTreeTable treetable, SyncPrefEnum selectionIndex)
   {
     /* Pass in the list of Strings to display in the combo box */
+
     super(SyncPrefEnum.labels);
     this.treetable = treetable;
     this.selindex = selectionIndex.ord();
@@ -1141,10 +1248,13 @@ class ComboRenderer extends JComboBox implements TableCellRenderer, ItemListener
   {
     if (e.getStateChange() == ItemEvent.SELECTED)
       {
-	/* Tell the tree table to call "setValueAt", since we've been edited.
+	/*
+	 * Tell the tree table to call "setValueAt", since we've been edited.
 	 * Now, we'll only do this if the new item we've selected is different
 	 * from the originally selected item. Swing fires this even either way,
-	 * but we need to be more discriminating. */
+	 * but we need to be more discriminating.
+	 */
+
 	if (this.selindex != getSelectedIndex())
 	  {
 	    this.treetable.editingStopped(new ChangeEvent(this));
@@ -1154,10 +1264,16 @@ class ComboRenderer extends JComboBox implements TableCellRenderer, ItemListener
   }
 }
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                         FieldOptionTreeRenderer
+
+------------------------------------------------------------------------------*/
 
 /**
  * Custom tree renderer that will give built-in fields a different icon.
  */
+
 class FieldOptionTreeRenderer extends DefaultTreeCellRenderer
 {
   ImageIcon builtInIcon;

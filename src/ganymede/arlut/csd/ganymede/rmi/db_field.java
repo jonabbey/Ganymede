@@ -177,8 +177,9 @@ public interface db_field extends java.rmi.Remote {
   // for scalars
 
   /**
-   * Returns the value of this field, if a scalar.  An exception
-   * will be thrown if this field is a vector.
+   * <p>Returns the value of this field, if a scalar.  An exception
+   * will be thrown if this field represents a vector or other
+   * non-scalar data.</p>
    */
 
   Object getValue() throws RemoteException;
