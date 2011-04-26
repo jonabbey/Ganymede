@@ -13,7 +13,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -69,10 +69,11 @@ import java.io.IOException;
 public class XMLDumpContext {
 
   /**
-   * If true, the Ganymede server thread using this XMLDumpContext
-   * will include password hash information to the emitted XML file.
+   * <p>If true, the Ganymede server thread using this XMLDumpContext
+   * will include password hash information to the emitted XML
+   * file.</p>
    *
-   * If false, no password hash data will be emitted at all.
+   * <p>If false, no password hash data will be emitted at all.</p>
    */
 
   private boolean dumpPasswordHashes;
@@ -95,28 +96,28 @@ public class XMLDumpContext {
   private boolean dumpCreatorModifierInfo;
 
   /**
-   * If non-null, this SyncRunner will be consulted to answer the
-   * mayInclude and shouldInclude questions.
+   * <p>If non-null, this SyncRunner will be consulted to answer the
+   * mayInclude and shouldInclude questions.</p>
    *
-   * syncConstraints will be null if we are doing a non-sync channel
-   * filtered dump from the DBStore using the xmlclient.
+   * <p>syncConstraints will be null if we are doing a non-sync channel
+   * filtered dump from the DBStore using the xmlclient.</p>
    *
-   * If we're using this XMLDumpContext to do a sync, or we're using
+   * <p>If we're using this XMLDumpContext to do a sync, or we're using
    * xmlclient with a channel specified, syncConstraints will help us
-   * figure out what specific data we need to dump.
+   * figure out what specific data we need to dump.</p>
    */
 
   private SyncRunner syncConstraints;
 
   /**
-   * If we're doing an incremental sync, we'll use a FieldBook to
+   * <p>If we're doing an incremental sync, we'll use a FieldBook to
    * denote what objects and fields we need to write to this
-   * XMLDumpContext.
+   * XMLDumpContext.</p>
    *
-   * If book is non-null, this XMLDumpContext is being used to
+   * <p>If book is non-null, this XMLDumpContext is being used to
    * transmit a transaction delta, in which case we'll want to let
    * callers know so that they can decide to handle certain things
-   * (such as embedded objects) differently.
+   * (such as embedded objects) differently.</p>
    */
 
   private FieldBook book = null;
@@ -130,14 +131,14 @@ public class XMLDumpContext {
   private DBSession session = null;
 
   /**
-   * If true, this XMLDumpContext is currently writing out the
+   * <p>If true, this XMLDumpContext is currently writing out the
    * before state of a transaction incremental dump.  We'll keep hold
    * of this information so server-side code can decide whether to
    * write information from the before or after state of a transaction
-   * in progress.
+   * in progress.</p>
    *
-   * If we're not dumping out a transactional incremental dump, this
-   * variable should always be false.
+   * <p>If we're not dumping out a transactional incremental dump, this
+   * variable should always be false.</p>
    */
 
   private boolean beforeState = false;
@@ -246,13 +247,13 @@ public class XMLDumpContext {
   }
 
   /**
-   * Associates a FieldBook with this XMLDumpContext.
+   * <p>Associates a FieldBook with this XMLDumpContext.</p>
    *
-   * If the book param is non-null, we will use it to decide what
-   * objects and fields need to be written out.
+   * <p>If the book param is non-null, we will use it to decide what
+   * objects and fields need to be written out.</p>
    *
-   * A non-null book parameter will configure this XMLDumpContext for
-   * delta syncing, and isDeltaSyncing() will return true thereafter.
+   * <p>A non-null book parameter will configure this XMLDumpContext for
+   * delta syncing, and isDeltaSyncing() will return true thereafter.</p>
    */
 
   public void setDeltaFieldBook(FieldBook book)
@@ -351,16 +352,16 @@ public class XMLDumpContext {
   }
 
   /**
-   * Returns true if the DBEditObject passed in needs to be synced
+   * <p>Returns true if the DBEditObject passed in needs to be synced
    * to the sync channel we're writing to.  Because we're passed in a
    * DBEditObject, we can assume that we are being asked about whether
    * we should write out this object in the course of a sync
    * operation.  When DBStore is writing out an XML dump, all the
    * objects should be read only copies, so we will always use the
-   * DBObject version of shouldInclude().
+   * DBObject version of shouldInclude().</p>
    *
-   * If we're not writing to a sync channel, this method always
-   * returns true.
+   * <p>If we're not writing to a sync channel, this method always
+   * returns true.</p>
    */
 
   public boolean shouldInclude(DBEditObject object)
@@ -374,12 +375,12 @@ public class XMLDumpContext {
   }
 
   /**
-   * Returns true if the given field needs to be sent to this sync
+   * <p>Returns true if the given field needs to be sent to this sync
    * channel.  This method is responsible for doing the determination
-   * only if both field and origField are not null and isDefined().
+   * only if both field and origField are not null and isDefined().</p>
    *
-   * If we're not writing to a sync channel, this method always
-   * returns true.
+   * <p>If we're not writing to a sync channel, this method always
+   * returns true.</p>
    */
 
   public boolean shouldInclude(DBField newField, DBField oldField)
@@ -400,17 +401,17 @@ public class XMLDumpContext {
   }
 
   /**
-   * Returns true if the kind of DBField passed in needs to be synced
-   * in the context of a query or sync channel attached to this
+   * <p>Returns true if the kind of DBField passed in needs to be
+   * synced in the context of a query or sync channel attached to this
    * XMLDumpContext.  This version of mayInclude() treats the field as
-   * always changed, and is intended for doing queries and full dumps,
-   * and not delta dumps.
+   * always changed, and is intended for doing queries and full state
+   * syncs / dumps, and not delta dumps.</p>
    *
-   * This differs from shouldInclude on DBField in that this method
-   * leaves it to the caller to decide whether the field has changed.
+   * <p>This differs from shouldInclude on DBField in that this method
+   * leaves it to the caller to decide whether the field has changed.</p>
    *
-   * If we're not writing to a sync channel, this method always
-   * returns true.
+   * <p>If we're not writing to a sync channel, this method always
+   * returns true.</p>
    */
 
   public boolean mayInclude(DBField field)
@@ -440,17 +441,17 @@ public class XMLDumpContext {
   }
 
   /**
-   * Returns true if the kind of DBField passed in needs to be
+   * <p>Returns true if the kind of DBField passed in needs to be
    * synced to the sync channel attached to this XMLDumpContext. The
    * hasChanged parameter should be set to true if the field being
    * tested was changed in the current transaction, or false if it
-   * remains unchanged.
+   * remains unchanged.</p>
    *
-   * This differs from shouldInclude on DBField in that this method
-   * leaves it to the caller to decide whether the field has changed.
+   * <p>This differs from shouldInclude on DBField in that this method
+   * leaves it to the caller to decide whether the field has changed.</p>
    *
-   * If we're not writing to a sync channel, this method always
-   * returns true.
+   * <p>If we're not writing to a sync channel, this method always
+   * returns true.</p>
    */
 
   public boolean mayInclude(DBField field, boolean hasChanged)
@@ -473,11 +474,11 @@ public class XMLDumpContext {
   }
 
   /**
-   * Increase the indent level one step.  Successive indent(),
+   * <p>Increase the indent level one step.  Successive indent(),
    * startElementIndent(), and endElementIndent() method calls
-   * will indent one level further.
+   * will indent one level further.</p>
    *
-   * This method itself produces no output.
+   * <p>This method itself produces no output.</p>
    */
 
   public void indentOut()
@@ -486,11 +487,11 @@ public class XMLDumpContext {
   }
 
   /**
-   * Decreases the indent level one step.  Successive indent(),
+   * <p>Decreases the indent level one step.  Successive indent(),
    * startElementIndent(), and endElementIndent() method calls
-   * will decrease one level fiewer.
+   * will decrease one level fiewer.</p>
    *
-   * This method itself produces no output.
+   * <p>This method itself produces no output.</p>
    */
 
   public void indentIn()
@@ -533,11 +534,11 @@ public class XMLDumpContext {
   }
 
   /**
-   * Sets whether an XML Query being processed by this XMLDumpContext
-   * should allow password field hashes to be transmitted.
+   * <p>Sets whether an XML Query being processed by this XMLDumpContext
+   * should allow password field hashes to be transmitted.</p>
    *
-   * Will be set to false by the XMLTransmitter constructor if the
-   * controlling GanymedeSession is not supergash.
+   * <p>Will be set to false by the XMLTransmitter constructor if the
+   * controlling GanymedeSession is not supergash.</p>
    */
 
   public void setDumpPasswords(boolean allowHashes)
@@ -594,31 +595,37 @@ public class XMLDumpContext {
   }
 
   /**
-   * Starts an element.
-   * This may be followed by zero or more calls to <code>attribute</code>.
-   * The start-tag will be closed by the first following call to any method
-   * other than <code>attribute</code>.
+   * <p>Starts an element.</p>
+   *
+   * <p>This may be followed by zero or more calls to
+   * <code>attribute</code>.  The start-tag will be closed by the
+   * first following call to any method other than
+   * <code>attribute</code>.</p>
    */
+
   public void startElement(String name) throws IOException
   {
     xmlOut.startElement(name);
   }
 
   /**
-   * Writes an attribute.
-   * This is not legal if there have been calls to methods other than
-   * <code>attribute</code> since the last call to <code>startElement</code>,
-   * unless inside a <code>startAttribute</code>, <code>endAttribute</code>
-   * pair.
+   * <p>Writes an attribute.</p>
+   *
+   * <p>This is not legal if there have been calls to methods other
+   * than <code>attribute</code> since the last call to
+   * <code>startElement</code>, unless inside a
+   * <code>startAttribute</code>, <code>endAttribute</code> pair.</p>
    */
+
   public void attribute(String name, String value) throws IOException
   {
     xmlOut.attribute(name, value);
   }
 
   /**
-   * Starts an attribute.
-   * This writes the attribute name, <code>=</code> and the opening
+   * <p>Starts an attribute.</p>
+   *
+   * <p>This writes the attribute name, <code>=</code> and the opening
    * quote.
    * This provides an alternative to <code>attribute</code>
    * that allows markup to be included in the attribute value.
@@ -627,30 +634,33 @@ public class XMLDumpContext {
    * <code>endAttribute</code> must be called at the end
    * of the attribute value.
    * Entity and character references can be written using
-   * <code>entityReference</code> and <code>characterReference</code>.
+   * <code>entityReference</code> and <code>characterReference</code>.</p>
    */
+
   public void startAttribute(String name) throws IOException
   {
     xmlOut.startAttribute(name);
   }
 
   /**
-   * Ends an attribute.
-   * This writes the closing quote of the attribute value.
+   * <p>Ends an attribute.</p>
+   *
+   * <p>This writes the closing quote of the attribute value.</p>
    */
+
   public void endAttribute() throws IOException
   {
     xmlOut.endAttribute();
   }
 
   /**
-   * Ends an element, indenting before emitting the end tag.  If
-   * the element comprised no content between the startElement
-   * and endElement calls, aside from attributes, then endElement
-   * should be used.  endElementIndent() will always put space
-   * between a start and end tag.
-   * This may output an end-tag or close the current start-tag as an
-   * empty element.
+   * <p>Ends an element, indenting before emitting the end tag.</p>
+   *
+   * <p>If the element comprised no content between the startElement and
+   * endElement calls, aside from attributes, then endElement should
+   * be used.  endElementIndent() will always put space between a
+   * start and end tag.  This may output an end-tag or close the
+   * current start-tag as an empty element.</p>
    */
 
   public void endElementIndent(String name) throws IOException
@@ -660,20 +670,24 @@ public class XMLDumpContext {
   }
 
   /**
-   * Ends an element.
-   * This may output an end-tag or close the current start-tag as an
-   * empty element.
+   * <p>Ends an element.</p>
+   *
+   * <p>This may output an end-tag or close the current start-tag as an
+   * empty element.</p>
    */
+
   public void endElement(String name) throws IOException
   {
     xmlOut.endElement(name);
   }
 
   /**
-   * Writes a processing instruction.
-   * If <code>data</code> is non-empty a space will be inserted automatically
-   * to separate it from the <code>target</code>.
+   * <p>Writes a processing instruction.</p>
+   *
+   * <p>If <code>data</code> is non-empty a space will be inserted automatically
+   * to separate it from the <code>target</code>.</p>
    */
+
   public void processingInstruction(String target, String data) throws IOException
   {
     xmlOut.processingInstruction(target, data);
@@ -682,6 +696,7 @@ public class XMLDumpContext {
   /**
    * Writes a comment.
    */
+
   public void comment(String body) throws IOException
   {
     xmlOut.comment(body);
@@ -690,6 +705,7 @@ public class XMLDumpContext {
   /**
    * Writes an entity reference.
    */
+
   public void entityReference(boolean isParam, String name) throws IOException
   {
     xmlOut.entityReference(isParam, name);
@@ -698,6 +714,7 @@ public class XMLDumpContext {
   /**
    * Writes a character reference.
    */
+
   public void characterReference(int n) throws IOException
   {
     xmlOut.characterReference(n);
@@ -706,14 +723,16 @@ public class XMLDumpContext {
   /**
    * Writes a CDATA section.
    */
+
   public void cdataSection(String content) throws IOException
   {
     xmlOut.cdataSection(content);
   }
 
   /**
-   * Starts the replacement text for an internal entity.
-   * The replacement text must be ended with
+   * <p>Starts the replacement text for an internal entity.</p>
+   *
+   * <p>The replacement text must be ended with
    * <code>endReplacementText</code>.
    * This enables an extra level of escaping that protects
    * against the process of constructing an entity's replacement
@@ -724,30 +743,38 @@ public class XMLDumpContext {
    * <code>markup</code> would specify entity replacement text;
    * these would be escaped so that when processed as
    * a literal entity value, the specified entity replacement text
-   * would be constructed.
-   * This call does not itself cause anything to be written.
+   * would be constructed.</p>
+   *
+   * <p>This call does not itself cause anything to be written.</p>
    */
+
   public void startReplacementText() throws IOException
   {
     xmlOut.startReplacementText();
   }
 
   /**
-   * Ends the replacement text for an internal entity.
-   * This disables the extra level of escaping enabled by
-   * <code>startReplacementText</code>.
-   * This call does not itself cause anything to be written.
+   * <p>Ends the replacement text for an internal entity.</p>
+   *
+   * <p>This disables the extra level of escaping enabled by
+   * <code>startReplacementText</code>.</p>
+   *
+   * <p>This call does not itself cause anything to be written.</p>
    */
+
   public void endReplacementText() throws IOException
   {
     xmlOut.endReplacementText();
   }
 
   /**
-   * Writes markup.  The characters in the string will be written as is
+   * <p>Writes markup.</p>
+   *
+   * <p>The characters in the string will be written as is
    * without being escaped (except for any escaping enabled by
-   * <code>startReplacementText</code>).
+   * <code>startReplacementText</code>).</p>
    */
+
   public void markup(String str) throws IOException
   {
     xmlOut.markup(str);
