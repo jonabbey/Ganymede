@@ -1300,6 +1300,10 @@ public class SyncRunner implements Runnable {
     switch (x)
       {
       case WHENCHANGED:
+	// hasChanged will be set to true by XMLDumpContext when doing
+	// a full state sync or dump, so WHENCHANGED is equivalent to
+	// ALWAYS in that case.
+
 	return hasChanged;
 
       case ALWAYS:
