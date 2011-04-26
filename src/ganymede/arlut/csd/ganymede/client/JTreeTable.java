@@ -72,7 +72,8 @@ public class JTreeTable extends JTable {
     // Create the tree. It will be used as a renderer and editor. 
     tree = new TreeTableCellRenderer(treeTableModel);
 
-    // Install a tableModel representing the visible rows in the tree. 
+    // Install a adapter wrapper around our treeTableModel, to
+    // represent the visible rows in the tree.
     super.setModel(new TreeTableModelAdapter(treeTableModel, tree));
 
     // Install the tree editor renderer and editor. 

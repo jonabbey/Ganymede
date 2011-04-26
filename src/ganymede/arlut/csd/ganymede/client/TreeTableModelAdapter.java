@@ -49,8 +49,11 @@ import javax.swing.tree.TreePath;
 
 public class TreeTableModelAdapter extends AbstractTableModel
 {
-  JTree tree;
-  TreeTableModel treeTableModel;
+  private JTree tree;
+
+  private TreeTableModel treeTableModel;
+
+  /* -- */
 
   public TreeTableModelAdapter(TreeTableModel treeTableModel, JTree tree)
   {
@@ -92,6 +95,15 @@ public class TreeTableModelAdapter extends AbstractTableModel
       });
   }
   
+  /**
+   * Returns the underlying TreeTableModel that we are wrapped around.
+   */
+
+  public TreeTableModel getTreeModel()
+  {
+    return this.treeTableModel;
+  }
+
   // Wrappers, implementing TableModel interface. 
 
   public int getColumnCount()
