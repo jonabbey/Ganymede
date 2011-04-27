@@ -53,11 +53,14 @@ package arlut.csd.ganymede.client;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.rmi.RemoteException;
 import java.util.Hashtable;
-
 import javax.swing.JButton;
 
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.db_object;
 import arlut.csd.ganymede.rmi.field_option_field;
+
 import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
@@ -86,33 +89,48 @@ class fieldoption_button extends JButton implements ActionListener {
   boolean isActiveAlready = false;
 
   /**
+   * <p>Reference to a remote Sync Channel db_object that we can examine
+   * to decide whether we want to allow option values for an
+   * incremental or a full-state Sync Channel.</p>
+   *
+   * <p>We take this as a remote db_object rather than a boolean at
+   * construction time because the user can change the Sync Channel
+   * mode asynchronously.</p>
+   */
+
+  db_object object_ref = null;
+
+  /**
    * fieldoption_button constructor
    *
    * @param field What field are we going to edit field options for?
+   * @param object_ref Remote reference to the db_object we're viewing/editing
    * @param enabled If true, will allow editing of the field options matrix
    */
 
-  public fieldoption_button (field_option_field field, 
-		      boolean enabled, 
-		      gclient gc,
-		      String title)
-    {
-      if (enabled)
-	{
-	  setText(ts.l("global.edit")); // "Edit Field Options"
-	}
-      else
-	{
-	  setText(ts.l("global.view")); // "View Field Options"
-	}
+  public fieldoption_button(field_option_field field,
+			    db_object object_ref,
+			    boolean enabled,
+			    gclient gc,
+			    String title)
+  {
+    if (enabled)
+      {
+	setText(ts.l("global.edit")); // "Edit Field Options"
+      }
+    else
+      {
+	setText(ts.l("global.view")); // "View Field Options"
+      }
       
-      this.field = field;
-      this.enabled = enabled;
-      this.gc = gc;
-      this.title = title;
+    this.field = field;
+    this.object_ref = object_ref;
+    this.enabled = enabled;
+    this.gc = gc;
+    this.title = title;
       
-      addActionListener(this);
-    }
+    addActionListener(this);
+  }
   
   /**
    * When clicked, this button invokes an instance of the permissions
@@ -121,7 +139,7 @@ class fieldoption_button extends JButton implements ActionListener {
   
   public void actionPerformed(ActionEvent e)
   {
-    if ((e.getSource() == this))
+    if (e.getSource() == this)
       {
 	if (debug)
 	  {
@@ -137,9 +155,24 @@ class fieldoption_button extends JButton implements ActionListener {
 
 	if ((editor == null) || (!editor.isActiveEditor())) 
 	  { 
+	    int channelType = 0;
+
+	    try
+	      {
+		channelType = ((Integer) object_ref.getFieldValue(SchemaConstants.SyncChannelTypeNum)).intValue();
+	      }
+	    catch (RemoteException ex)
+	      {
+		gc.processExceptionRethrow(ex);
+	      }
+
+	    boolean fullState = (channelType == 2); // cf. arlut.csd.ganymede.server.SyncRunner.SyncType
+
 	    Frame parent = new Frame();
 	    editor = new fieldoption_editor(field, 
-				            enabled, gc, 
+				            enabled,
+					    fullState,
+					    gc,
 				            parent, "Field Options Editor: " + title);
 	    
 	    if (debug)

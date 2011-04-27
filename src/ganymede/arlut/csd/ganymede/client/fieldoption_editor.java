@@ -1,8 +1,9 @@
 /*
    fieldoption_editor.java
 
-   TreeTable GUI component dialog used by the client to present and edit synchronization
-   options for the new Ganymede 2.0 sync channels.
+   TreeTable GUI component dialog used by the client to present and
+   edit synchronization options for the new Ganymede 2.0 sync
+   channels.
 
    Created: 2 February 2005
 
@@ -80,62 +81,82 @@ public class fieldoption_editor extends JFrame
 
   public static boolean debug = false;
 
+  // ---
+
   /**
    * Flag that indicated whether or not the widget it currently being
    * displayed or not.
    */
 
-  boolean isActive = true;
+  private boolean isActive = true;
 
   /**
    * Reference to the actual field option data store this widget represents
    */
 
-  field_option_field opField;
+  private field_option_field opField;
 
   /**
    * Should the widget be displayed read-only or not?
    */
 
-  boolean editable;
+  private boolean editable;
+
+  /**
+   * Are we presenting a full-state sync channel or an incremental?
+   */
+
+  private boolean fullstate;
 
   /**
    * The root of our tree, which is in column 0 of our tree table
    */
 
-  DefaultMutableTreeNode rowRootNode;
+  private DefaultMutableTreeNode rowRootNode;
 
   /**
    * Reference to the main client class
    */
 
-  gclient gc;
+  private gclient gc;
 
   /* Layout components */
-  JButton OkButton = new JButton (ts.l("global.okButton")); // "Ok"
-  JButton CancelButton = new JButton(ts.l("global.cancelButton")); // "Cancel"
-  JButton ExpandButton = new JButton (ts.l("global.expandButton")); // "Expand All"
-  JButton CollapseButton = new JButton(ts.l("global.collapseButton")); // "Collapse All"
-  JScrollPane edit_pane;
-  JTreeTable treeTable;
-  JTree tree;
-  JPanel 
+
+  private JButton OkButton = new JButton (ts.l("global.okButton")); // "Ok"
+  private JButton CancelButton = new JButton(ts.l("global.cancelButton")); // "Cancel"
+  private JButton ExpandButton = new JButton (ts.l("global.expandButton")); // "Expand All"
+  private JButton CollapseButton = new JButton(ts.l("global.collapseButton")); // "Collapse All"
+  private JScrollPane edit_pane;
+
+  private JPanel
     Base_Panel,
     Bordered_Panel,
     Choice_Buttons,
     Expansion_Buttons,
     All_Buttons;
 
-  Frame parent = null;
+  private Frame parent = null;
+
+  JTreeTable treeTable;
+  JTree tree;
+
+  /* -- */
 
   /**
    * @param opField The server-side field_option_field RMI reference this fieldoption_editor is to manipulate.
+   * @param editable If false, this fieldoption_editor will be display-only.
+   * @param fullstate If true, the 'when changed' option will not be present, and the choices will devolve to 'always' and 'never'.
    * @param gc The gclient that connects us to the client-side schema caches
    * @param parent The frame we are attaching this dialog to
    * @param DialogTitle The title for this dialog box
    */
-  public fieldoption_editor(field_option_field opField, boolean editable, gclient gc,
-                            Frame parent, String DialogTitle)
+
+  public fieldoption_editor(field_option_field opField,
+			    boolean editable,
+			    boolean fullstate,
+			    gclient gc,
+                            Frame parent,
+			    String DialogTitle)
   {
     super(DialogTitle);
 
@@ -457,6 +478,16 @@ public class fieldoption_editor extends JFrame
   public boolean isActiveEditor()
   {
     return isActive;
+  }
+
+  public boolean isEditable()
+  {
+    return this.editable;
+  }
+
+  public boolean isFullState()
+  {
+    return this.fullstate;
   }
 
   /**
@@ -845,6 +876,18 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel
 
     newVal = SyncPrefEnum.find((String) value);
 
+    if (col == 1 && foe.isFullState())
+      {
+	if (newVal == SyncPrefEnum.WHENCHANGED)
+	  {
+	    // we map the 2nd item in the full state list {never,
+	    // always} to the third on the server, so as to handle the
+	    // differing list of options applicable.
+
+	    newVal = SyncPrefEnum.ALWAYS;
+	  }
+      }
+
     /* If we're not changing anything, then bail out */
     if (myRow.getOptionValue() == newVal)
       {
@@ -982,6 +1025,8 @@ class DelegateRenderer implements TableCellRenderer
 
   JTreeTable treetable;
 
+  /* -- */
+
   public DelegateRenderer(TreeTableModelAdapter model, boolean editable, JTreeTable treetable)
   {
     this.editable = editable;
@@ -1012,7 +1057,14 @@ class DelegateRenderer implements TableCellRenderer
       {
 	if (this.editable)
 	  {
-	    return new ComboRenderer(editable, this.treetable, opvalue);
+	    if (((FieldOptionModel) this.model.getTreeModel()).foe.isFullState())
+	      {
+		return new FullStateComboRenderer(editable, this.treetable, opvalue);
+	      }
+	    else
+	      {
+		return new ComboRenderer(editable, this.treetable, opvalue);
+	      }
 	  }
 	else
 	  {
@@ -1060,6 +1112,8 @@ class DelegateEditor extends javax.swing.AbstractCellEditor implements TableCell
    */
 
   JTreeTable treetable;
+
+  /* -- */
 
   public DelegateEditor(TreeTableModelAdapter model, boolean editable, JTreeTable treetable)
   {
@@ -1110,7 +1164,17 @@ class DelegateEditor extends javax.swing.AbstractCellEditor implements TableCell
       }
     else
       {
-	ComboRenderer cr = new ComboRenderer(editable, this.treetable, opvalue);
+	Component cr = null;
+
+	if (((FieldOptionModel) this.model.getTreeModel()).foe.isFullState())
+	  {
+	    cr = new FullStateComboRenderer(editable, this.treetable, opvalue);
+	  }
+	else
+	  {
+	    cr = new ComboRenderer(editable, this.treetable, opvalue);
+	  }
+
 	this.delegate = cr;
 	return cr;
       }
@@ -1134,6 +1198,8 @@ class CheckBoxRenderer extends JCheckBox implements TableCellRenderer, ActionLis
    */
 
   JTreeTable treetable;
+
+  /* -- */
 
   public CheckBoxRenderer(boolean editable, JTreeTable treetable, SyncPrefEnum onOrOff)
   {
@@ -1216,10 +1282,10 @@ class ComboRenderer extends JComboBox implements TableCellRenderer, ItemListener
 
   int selindex;
   
+  /* -- */
+
   public ComboRenderer(boolean editable, JTreeTable treetable, SyncPrefEnum selectionIndex)
   {
-    /* Pass in the list of Strings to display in the combo box */
-
     super(SyncPrefEnum.labels);
     this.treetable = treetable;
     this.selindex = selectionIndex.ord();
@@ -1239,6 +1305,87 @@ class ComboRenderer extends JComboBox implements TableCellRenderer, ItemListener
                                                  int column)
   {
     int labelIndex = ((SyncPrefEnum)value).ord();
+    setSelectedIndex(labelIndex);
+    this.selindex = labelIndex;
+    return this;
+  }
+
+  public void itemStateChanged(ItemEvent e)
+  {
+    if (e.getStateChange() == ItemEvent.SELECTED)
+      {
+	/*
+	 * Tell the tree table to call "setValueAt", since we've been edited.
+	 * Now, we'll only do this if the new item we've selected is different
+	 * from the originally selected item. Swing fires this even either way,
+	 * but we need to be more discriminating.
+	 */
+
+	if (this.selindex != getSelectedIndex())
+	  {
+	    this.treetable.editingStopped(new ChangeEvent(this));
+	    this.selindex = getSelectedIndex();
+	  }
+      }
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                          FullStateComboRenderer
+
+------------------------------------------------------------------------------*/
+
+/**
+ * Renders the field options for a DBObjectBaseField in a Full State Sync Channel
+ */
+
+class FullStateComboRenderer extends JComboBox implements TableCellRenderer, ItemListener
+{
+  /**
+   * Reference to the main JTreeTable
+   */
+
+  JTable treetable;
+
+  /**
+   * Sort of a hack; used to hold onto the previous selection index
+   */
+
+  int selindex;
+
+  /* -- */
+
+  public FullStateComboRenderer(boolean editable, JTreeTable treetable, SyncPrefEnum selectionIndex)
+  {
+    super(SyncPrefEnum.fullStateLabels);
+    this.treetable = treetable;
+    this.selindex = selectionIndex.ord();
+
+    setEnabled(editable);
+    setEditable(false);
+    addItemListener(this);
+    setBackground(treetable.getTree().getBackground());
+    setSelectedIndex(selectionIndex.ord());
+  }
+
+  public Component getTableCellRendererComponent(JTable table,
+                                                 Object value,
+                                                 boolean isSelected,
+                                                 boolean hasFocus,
+                                                 int row,
+                                                 int column)
+  {
+    int labelIndex = ((SyncPrefEnum)value).ord();
+
+    if (labelIndex == 2)
+      {
+	// the full state mode only has two labels, not three, let's
+	// fold it down into the available label.
+
+	labelIndex = 1;
+      }
+
     setSelectedIndex(labelIndex);
     this.selindex = labelIndex;
     return this;

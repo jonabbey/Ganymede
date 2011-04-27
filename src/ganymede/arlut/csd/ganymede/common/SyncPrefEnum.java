@@ -151,6 +151,13 @@ public enum SyncPrefEnum {
 					 ts.l("global.always")}; // "Always"
 
   /**
+   * Full state sync channel fields only should have never and always.
+   */
+
+  static public final String fullStateLabels[] = {ts.l("global.never"), // "Never"
+						  ts.l("global.always")}; // "Always"
+
+  /**
    * Locates and returns a SyncPrefEnum instance given the old numeric
    * strings for the values that we used before SyncPrefEnum and / or
    * the labels.
