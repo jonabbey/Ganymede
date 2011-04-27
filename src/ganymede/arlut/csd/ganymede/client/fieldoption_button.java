@@ -2,13 +2,10 @@
 
    fieldoption_button.java
 
-   Description.
+   A GUI component to be placed in the container panel to represent
+   the field option editor in sync channel objects.
    
    Created: 20 January 1997
-   Last Mod Date: $Date: 2004-12-01 01:20:07 -0600 (Wed, 01 Dec 2004) $
-   Last Revision Changed: $Rev: 5848 $
-   Last Changed By: $Author: broccol $
-   SVN URL: $HeadURL: http://db1/svn/ganymede/trunk/ganymede/src/ganymede/arlut/csd/ganymede/client/fieldoption_button.java $
 
    Module By: Deepak Giridharagopal
 
@@ -16,7 +13,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996 - 2005
+   Copyright (C) 1996 - 2011
    The University of Texas at Austin
 
    Contact information
