@@ -66,6 +66,12 @@ import arlut.csd.Util.TranslationService;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * This class is a button that launches the client "widget" that
+ * allows a user to edit the field options for a particular builder
+ * task.
+ */
+
 class fieldoption_button extends JButton implements ActionListener {
 
   static final boolean debug = false;

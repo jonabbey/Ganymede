@@ -64,6 +64,12 @@ import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.*;
 import arlut.csd.ganymede.rmi.*;
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                              fieldoption_editor
+
+------------------------------------------------------------------------------*/
+
 /**
  * This class displays the client "widget" that allows a user to edit the
  * field options for a particular builder task. It's modeled loosely after
