@@ -163,6 +163,7 @@ public class fieldoption_editor extends JFrame
     this.parent = parent;
     this.opField = opField;
     this.editable = editable;
+    this.fullstate = fullstate;
     this.gc = gc;
 
     if (!debug)
@@ -1362,11 +1363,16 @@ class FullStateComboRenderer extends JComboBox implements TableCellRenderer, Ite
     this.treetable = treetable;
     this.selindex = selectionIndex.ord();
 
+    if (this.selindex == 2)
+      {
+	this.selindex = 1;
+      }
+
     setEnabled(editable);
     setEditable(false);
     addItemListener(this);
     setBackground(treetable.getTree().getBackground());
-    setSelectedIndex(selectionIndex.ord());
+    setSelectedIndex(this.selindex);
   }
 
   public Component getTableCellRendererComponent(JTable table,
