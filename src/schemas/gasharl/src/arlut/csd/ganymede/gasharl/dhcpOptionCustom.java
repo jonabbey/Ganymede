@@ -2,7 +2,7 @@
 
    dhcpOptionCustom.java
 
-   This file is a management class for NFS volume objects in Ganymede.
+   This file is a management class for DHCP Option objects in Ganymede.
    
    Created: 8 October 2007
 
@@ -139,12 +139,10 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
   }
 
   /**
+   * <p>Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.</p>
    *
-   * Customization method to control whether a specified field
-   * is required to be defined at commit time for a given object.<br><br>
-   *
-   * To be overridden in DBEditObject subclasses.
-   *
+   * <p>To be overridden in DBEditObject subclasses.</p>
    */
 
   public boolean fieldRequired(DBObject object, short fieldid)
@@ -163,22 +161,22 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
   }
 
   /**
-   * Customization method to verify whether the user should be able to
+   * <p>Customization method to verify whether the user should be able to
    * see a specific field in a given object.  Instances of 
    * {@link arlut.csd.ganymede.server.DBField DBField} will
    * wind up calling up to here to let us override the normal visibility
-   * process.
+   * process.</p>
    *
-   * Note that it is permissible for session to be null, in which case
+   * <p>Note that it is permissible for session to be null, in which case
    * this method will always return the default visiblity for the field
-   * in question.
+   * in question.</p>
    *
-   * If field is not from an object of the same base as this DBEditObject,
-   * an exception will be thrown.
+   * <p>If field is not from an object of the same base as this DBEditObject,
+   * an exception will be thrown.</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public boolean canSeeField(DBSession session, DBField field)
@@ -198,15 +196,13 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
   }
 
   /**
-   *
-   * This method returns a key that can be used by the client
+   * <p>This method returns a key that can be used by the client
    * to cache the value returned by choices().  If the client
    * already has the key cached on the client side, it
    * can provide the choice list from its cache rather than
-   * calling choices() on this object again.
+   * calling choices() on this object again.</p>
    *
-   * If there is no caching key, this method will return null.
-   *
+   * <p>If there is no caching key, this method will return null.</p>
    */
 
   public Object obtainChoicesKey(DBField field)
@@ -220,14 +216,14 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
   }
 
   /**
-   * This method provides a hook that a DBEditObject subclass
+   * <p>This method provides a hook that a DBEditObject subclass
    * can use to indicate whether a given field can only
-   * choose from a choice provided by obtainChoiceList()
+   * choose from a choice provided by obtainChoiceList()</p>
    *
-   * To be overridden on necessity in DBEditObject subclasses,
+   * <p>To be overridden on necessity in DBEditObject subclasses,
    * particularly if you have a StringDBField that you want to force
    * to pick from the list of choices provided by your DBEditObject
-   * subclass' obtainChoiceList() method.
+   * subclass' obtainChoiceList() method.</p>
    */
 
   public boolean mustChoose(DBField field)
@@ -241,15 +237,13 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
   }
 
   /**
-   *
-   * This method provides a hook that can be used to generate
+   * <p>This method provides a hook that can be used to generate
    * choice lists for invid and string fields that provide
    * such.  String and Invid DBFields will call their owner's
-   * obtainChoiceList() method to get a list of valid choices.
+   * obtainChoiceList() method to get a list of valid choices.</p>
    *
-   * This method will provide a reasonable default for targetted
-   * invid fields.
-   * 
+   * <p>This method will provide a reasonable default for targetted
+   * invid fields.</p>
    */
 
   public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
@@ -263,35 +257,35 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
   }
 
   /**
-   * This method is used to control whether or not it is acceptable to
+   * <p>This method is used to control whether or not it is acceptable to
    * make a link to the given field in this 
    * {@link arlut.csd.ganymede.server.DBObject DBObject} type when the
    * user only has editing access for the source
    * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField} and not
-   * the target.
+   * the target.</p>
    *
-   * See {@link arlut.csd.ganymede.server.DBEditObject#anonymousLinkOK(arlut.csd.ganymede.server.DBObject,short,
+   * <p>See {@link arlut.csd.ganymede.server.DBEditObject#anonymousLinkOK(arlut.csd.ganymede.server.DBObject,short,
    * arlut.csd.ganymede.server.DBObject,short,arlut.csd.ganymede.server.GanymedeSession)
    * anonymousLinkOK(obj,short,obj,short,GanymedeSession)} for details on
-   * anonymousLinkOK() method chaining.
+   * anonymousLinkOK() method chaining.</p>
    *
-   * Note that the {@link
+   * <p>Note that the {@link
    * arlut.csd.ganymede.server.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.server.DBField)
    * choiceListHasExceptions()} method will call this version of anonymousLinkOK()
    * with a null targetObject, to determine that the client should not
    * use its cache for an InvidDBField's choices.  Any overriding done
    * of this method must be able to handle a null targetObject, or else
-   * an exception will be thrown inappropriately.
+   * an exception will be thrown inappropriately.</p>
    *
-   * The only reason to consult targetObject in any case is to
+   * <p>The only reason to consult targetObject in any case is to
    * allow or disallow anonymous object linking to a field based on
    * the current state of the target object.  If you are just writing
    * generic anonymous linking rules for a field in this object type,
    * targetObject won't concern you anyway.  If you do care about the
    * targetObject's state, though, you have to be prepared to handle
-   * a null valued targetObject.
+   * a null valued targetObject.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    *
    * @param targetObject The object that the link is to be created in (may be null)
    * @param targetFieldID The field that the link is to be created in
@@ -303,38 +297,38 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
   }
 
   /**
-   * This method is the hook that DBEditObject subclasses use to interpose
+   * <p>This method is the hook that DBEditObject subclasses use to interpose
    * {@link arlut.csd.ganymede.server.GanymediatorWizard wizards} when a field's
-   * value is being changed.
+   * value is being changed.</p>
    *
-   * Whenever a field is changed in this object, this method will be
+   * <p>Whenever a field is changed in this object, this method will be
    * called with details about the change. This method can refuse to
    * perform the operation, it can make changes to other objects in
    * the database in response to the requested operation, or it can
-   * choose to allow the operation to continue as requested.
+   * choose to allow the operation to continue as requested.</p>
    *
-   * In the latter two cases, the wizardHook code may specify a list
+   * <p>In the latter two cases, the wizardHook code may specify a list
    * of fields and/or objects that the client may need to update in
-   * order to maintain a consistent view of the database.
+   * order to maintain a consistent view of the database.</p>
    *
-   * If server-local code has called
+   * <p>If server-local code has called
    * {@link arlut.csd.ganymede.server.GanymedeSession#enableOversight(boolean) 
    * enableOversight(false)},
    * this method will never be
    * called.  This mode of operation is intended only for initial
-   * bulk-loading of the database.
+   * bulk-loading of the database.</p>
    *
-   * This method may also be bypassed when server-side code uses
-   * setValueLocal() and the like to make changes in the database.
+   * <p>This method may also be bypassed when server-side code uses
+   * setValueLocal() and the like to make changes in the database.</p>
    *
-   * This method is called before the finalize*() methods.. the finalize*()
+   * <p>This method is called before the finalize*() methods.. the finalize*()
    * methods is where last minute cascading changes should be performed..
    * Note as well that wizardHook() is called before the namespace checking
    * for the proposed value is performed, while the finalize*() methods are
-   * called after the namespace checking.
+   * called after the namespace checking.</p>
    *
-   * The operation parameter will be a small integer, and should hold one of the
-   * following values:
+   * <p>The operation parameter will be a small integer, and should hold one of the
+   * following values:</p>
    *
    * <dl>
    * <dt>1 - SETVAL</dt>
@@ -382,7 +376,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
    * being cleared.  param2 will be null.</dd>
    * </dl>
    *
-   * To be overridden on necessity in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
    * @return null if the operation is approved without comment, or a
    * ReturnVal object indicating success or failure, objects and
@@ -452,16 +446,16 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
   }
 
   /**
-   * This method provides a hook that can be used to check any values
+   * <p>This method provides a hook that can be used to check any values
    * to be set in any field in this object.  Subclasses of
    * DBEditObject should override this method, implementing basically
    * a large switch statement to check for any given field whether the
    * submitted value is acceptable given the current state of the
-   * object.
+   * object.</p>
    *
-   * Question: what synchronization issues are going to be needed
+   * <p>Question: what synchronization issues are going to be needed
    * between DBEditObject and DBField to insure that we can have
-   * a reliable verifyNewValue method here?
+   * a reliable verifyNewValue method here?</p>
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
@@ -493,22 +487,22 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
   }
 
   /**
-   * This method is used to verify the value being set on a
+   * <p>This method is used to verify the value being set on a
    * dhcpEntryCustom object that points to this dhcpOptionCustom
-   * object.
+   * object.</p>
    *
-   * We'll validate the value against the type restriction set in this
-   * dhcpOptionCustom object.
+   * <p>We'll validate the value against the type restriction set in this
+   * dhcpOptionCustom object.</p>
+   *
+   * <p>Returns null on approved value without modification, a ReturnVal
+   * with an encoded error if the value wasn't acceptable and could
+   * not be canonicalized, or a ReturnVal encoding success with a
+   * transformed value if the input could be canonicalized.</p>
    *
    * @param object A reference to the DBObject representing the DHCP
    * option type that this value is being verified as suitable for.
    * @param value The value that is being set in the dhcp entry's
    * value field.
-   *
-   * Returns null on approved value without modification, a ReturnVal
-   * with an encoded error if the value wasn't acceptable and could
-   * not be canonicalized, or a ReturnVal encoding success with a
-   * transformed value if the input could be canonicalized.
    */
 
   public static ReturnVal verifyAcceptableValue(DBObject object, String value)
