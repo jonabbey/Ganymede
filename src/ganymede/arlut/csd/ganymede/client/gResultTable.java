@@ -805,11 +805,11 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	  {
 	    result.append("<td>");
 
-	    cellText = table.getValueAt(i, j).toString();
+	    Object value = table.getValueAt(i, j);
 
-	    if (cellText != null)
+	    if (value != null)
 	      {
-		cellText = escapeHTML(cellText);
+		cellText = escapeHTML(value.toString());
 		result.append(cellText);
 	      }
 
@@ -853,11 +853,11 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 		result.append(sepChar);
 	      }
 
-	    cellText = table.getValueAt(i, j).toString();
+	    Object value = table.getValueAt(i, j);
 
-	    if (cellText != null)
+	    if (value != null)
 	      {
-		cellText = escapeString(cellText, sepChar);
+		cellText = escapeString(value.toString(), sepChar);
 		result.append(cellText);
 	      }
 	  }
