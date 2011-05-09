@@ -1,5 +1,3 @@
-stty -echo; /opt/bin/java arlut.csd.ganymede.client.xmlclient properties=/home/broccol/ganymede-client/etc/ganymede.properties 'username=broccol:supergash' '-dumpSchema';SAVE=$?;stty echo;exit $SAVE
-
 <ganyschema>
   <namespaces>
     <namespace name="ownerbase" case-sensitive="false"/>
@@ -1336,7 +1334,7 @@ conflicts with this name.</comment>
               <typedef type="string">
                 <maxlength val="64"/>
                 <namespace val="username"/>
-                <regexp val="^[a-z|A-Z]+[a-z|A-Z|\d|-]*$" desc="Mailman list names must start with a letter followed by letters, digits, or dashes"/>
+                <regexp val="^[a-z|A-Z]+[a-z|A-Z|\+|\d|-]*$" desc="Mailman list names must start with a letter followed by letters, digits, pluses or dashes"/>
               </typedef>
             </fielddef>
             <fielddef name="Mailman_Server" id="259">
