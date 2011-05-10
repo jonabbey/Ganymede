@@ -481,9 +481,9 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
 
     boolean custom = object.isSet(dhcpOptionSchema.CUSTOMOPTION);
 
-    if (!custom && !supportedOptions.contains(name))
+    if (!custom && !supportedOptions.contains(name) && !builtInOptions.contains(name))
       {
-	return Ganymede.createErrorDialog("Option name " + name + " is not a recognized standard our DHCP server.  You will need to set this as a custom option with a numeric custom option code.");
+	return Ganymede.createErrorDialog("Option name " + name + " is not a recognized standard option supported by our DHCP server.  You will need to set this as a custom option with a numeric custom option code.");
       }
 
     return null;
