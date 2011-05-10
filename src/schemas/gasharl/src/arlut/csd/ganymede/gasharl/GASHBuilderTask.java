@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -130,15 +130,15 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   private Invid agencyCategory = null;
 
   /**
-   * customOptions is a Set of Invids for custom type definitions that
-   * we encountered during a cycle of writing out DHCP information.
+   * <p>customOptions is a Set of Invids for custom type definitions that
+   * we encountered during a cycle of writing out DHCP information.</p>
    *
-   * We'll use this Set to keep track of custom options that we find
+   * <p>We'll use this Set to keep track of custom options that we find
    * during the generation of our dhcp output.  At all other times,
-   * this Map will be null.
+   * this Map will be null.</p>
    */
 
-  private Set customOptions = null;
+  private Set<Invid> customOptions = null;
 
   /* -- */
 
@@ -151,15 +151,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
+   * <p>This method runs with a dumpLock obtained for the builder
+   * task.</p>
    *
-   * This method runs with a dumpLock obtained for the builder task.
-   *
-   * Code run in builderPhase1() can call getObjects() and
-   * baseChanged().
+   * <p>Code run in builderPhase1() can call getObjects() and
+   * baseChanged().</p>
    *
    * @return true if builderPhase1 made changes necessitating the
    * execution of builderPhase2.
-   *
    */
 
   public boolean builderPhase1()
@@ -5085,14 +5084,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   // ***
 
   /**
-   * This method writes out the ISC DHCP server
-   * configuration file from the data in the Ganymede data store.
+   * <p>This method writes out the ISC DHCP server
+   * configuration file from the data in the Ganymede data store.</p>
    *
-   * The pieces of this file include:
-   *   Custom Option Declarations.
-   *   _GLOBAL_ dhcp network options
-   *   List of DHCP Network settings
-   *   List of System DHCP settings
+   * <p>The pieces of this file include:
+   *   Custom Option Declarations.<br/>
+   *   _GLOBAL_ dhcp network options<br/>
+   *   List of DHCP Network settings<br/>
+   *   List of System DHCP settings</p>
    */
 
   private boolean writeDHCPFile()
@@ -5105,7 +5104,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     // need up top, using a side effect of writeDHCPNetwork() and
     // writeDHCPSystem().
 
-    this.customOptions = new HashSet();
+    this.customOptions = new HashSet<Invid>();
 
     networks = (List<DBObject>) java.util.Collections.list(enumerateObjects(dhcpNetworkSchema.BASE));
     java.util.Collections.sort(networks, new NetworkSortByName());
@@ -5208,15 +5207,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     writer.println("# Custom Option Declarations");
     writer.println("#===============================================================================");
 
-    Iterator it = this.customOptions.iterator();
-
     // loop once to find custom option spaces
 
     HashSet foundOptions = new HashSet();
 
-    while (it.hasNext())
+    for (Invid optionInvid: customOptions)
       {
-        Invid optionInvid = (Invid) it.next();
         DBObject obj = getObject(optionInvid);
 
         if (obj != null)
@@ -5239,11 +5235,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     // loop again to declare our custom options
 
-    it = this.customOptions.iterator();
-
-    while (it.hasNext())
+    for (Invid optionInvid: customOptions)
       {
-        Invid optionInvid = (Invid) it.next();
         DBObject obj = getObject(optionInvid);
 
         if (obj != null)
@@ -5709,10 +5702,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         return;
       }
 
-    for (int i = 0; i < entryInvids.size(); i++)
+    for (Invid entryInvid: (Vector<Invid>) entryInvids)
       {
-        Invid entryInvid = (Invid) entryInvids.elementAt(i);
-
         DBObject entryObject = getObject(entryInvid);
 
         Invid optionInvid = (Invid) entryObject.getFieldValueLocal(dhcpEntrySchema.TYPE);
