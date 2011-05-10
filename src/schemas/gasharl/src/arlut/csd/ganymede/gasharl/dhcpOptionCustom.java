@@ -12,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -46,6 +46,8 @@
 
 package arlut.csd.ganymede.gasharl;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Vector;
 
 import java.util.regex.Matcher;
@@ -58,6 +60,7 @@ import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.server.BooleanDBField;
 import arlut.csd.ganymede.server.DBEditObject;
 import arlut.csd.ganymede.server.DBEditSet;
 import arlut.csd.ganymede.server.DBField;
@@ -78,6 +81,94 @@ import arlut.csd.ganymede.server.InvidDBField;
 public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, dhcpOptionSchema {
 
   private final static boolean debug = false;
+
+  /**
+   * This List of Strings represent the options innately recognized by
+   * our DHCP server without having to declare a custom option.
+   */
+
+  private static List<String> supportedOptions = Arrays.asList
+    (
+     "all-subnets-local",
+     "arp-cache-timeout",
+     "boot-size",
+     "bootfile-name",
+     "broadcast-address",
+     "cookie-servers",
+     "default-ip-ttl",
+     "default-tcp-ttl",
+     "dhcp-client-identifier",
+     "dhcp-lease-time",
+     "dhcp-max-message-size",
+     "dhcp-message",
+     "dhcp-message-type",
+     "dhcp-option-overload",
+     "dhcp-parameter-request-list",
+     "dhcp-rebinding-time",
+     "dhcp-renewal-time",
+     "dhcp-requested-address",
+     "dhcp-server-identifier",
+     "domain-name",
+     "domain-name-servers",
+     "extensions-path",
+     "ien116-name-servers",
+     "interface-mtu",
+     "ip-forwarding",
+     "irc-server",
+     "log-servers",
+     "lpr-servers",
+     "mask-supplier",
+     "max-dgram-reassembly",
+     "merit-dump",
+     "mobile-ip-home-agent",
+     "netbios-name-servers",
+     "netbios-node-type",
+     "nis-domain",
+     "nis-servers",
+     "nntp-server",
+     "non-local-source-routing",
+     "ntp-servers",
+     "perform-mask-discovery",
+     "policy-filter",
+     "pop-server",
+     "resource-location-servers",
+     "root-path",
+     "router-discovery",
+     "router-solicitation-address",
+     "routers",
+     "smtp-server",
+     "static-routes",
+     "subnet-mask",
+     "subnet-selection",
+     "swap-server",
+     "tcp-keepalive-garbage",
+     "tcp-keepalive-interval",
+     "tftp-server-name",
+     "time-offset",
+     "time-servers",
+     "trailer-encapsulation",
+     "uap-servers",
+     "user-class",
+     "vendor-class-identifier",
+     "vendor-encapsulated-options",
+     "www-server",
+     "x-display-manager"
+     );
+
+  /**
+   * This List of Strings represent the options innately recognized by
+   * our DHCP server as naked keywords without having to use the
+   * option token.
+   */
+
+  private static List<String> builtInOptions = Arrays.asList
+    (
+     "default-lease-time",
+     "filename",
+     "max-lease-time",
+     "next-server"
+     );
+
   private static QueryResult result = new QueryResult(true);
 
   static
@@ -136,6 +227,60 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
   public dhcpOptionCustom(DBObject original, DBEditSet editset)
   {
     super(original, editset);
+  }
+
+  /**
+   * <p>Initializes a newly created DBEditObject.</p>
+   *
+   * <p>When this method is called, the DBEditObject has been created,
+   * its ownership set, and all fields defined in the controlling
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
+   * have been instantiated without defined
+   * values.  If this DBEditObject is an embedded type, it will
+   * have been linked into its parent object before this method
+   * is called.</p>
+   *
+   * <p>This method is responsible for filling in any default
+   * values that can be calculated from the
+   * {@link arlut.csd.ganymede.server.DBSession DBSession}
+   * associated with the editset defined in this DBEditObject.</p>
+   *
+   * <p>If initialization fails for some reason, initializeNewObject()
+   * will return a ReturnVal with an error result..  If the owning
+   * GanymedeSession is not in bulk-loading mode (i.e.,
+   * GanymedeSession.enableOversight is true), {@link
+   * arlut.csd.ganymede.server.DBSession#createDBObject(short, arlut.csd.ganymede.common.Invid, java.util.Vector)
+   * DBSession.createDBObject()} will checkpoint the transaction
+   * before calling this method.  If this method returns a failure code, the
+   * calling method will rollback the transaction.  This method has no
+   * responsibility for undoing partial initialization, the
+   * checkpoint/rollback logic will take care of that.</p>
+   *
+   * <p>If enableOversight is false, DBSession.createDBObject() will not
+   * checkpoint the transaction status prior to calling initializeNewObject(),
+   * so it is the responsibility of this method to handle any checkpointing
+   * needed.</p>
+   *
+   * <p>This method should be overridden in subclasses.</p>
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
+   */
+
+  public ReturnVal initializeNewObject()
+  {
+    // we don't want to do any of this initialization during
+    // bulk-loading.
+
+    if (!getGSession().enableOversight)
+      {
+	return null;
+      }
+
+    BooleanDBField custom = (BooleanDBField) getField(dhcpOptionSchema.CUSTOMOPTION);
+
+    return custom.setValueLocal(Boolean.TRUE);
   }
 
   /**
@@ -297,6 +442,54 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
   }
 
   /**
+   * <p>Customization method to verify overall consistency of
+   * a DBObject.  This method is intended to be overridden
+   * in DBEditObject subclasses, and will be called by
+   * {@link arlut.csd.ganymede.server.DBEditObject#commitPhase1() commitPhase1()}
+   * to verify the readiness of this object for commit.  The
+   * DBObject passed to this method will be a DBEditObject,
+   * complete with that object's GanymedeSession reference
+   * if this method is called during transaction commit, and
+   * that session reference may be used by the verifying code if
+   * the code needs to access the database.</p>
+   *
+   * <p>This method is for custom checks specific to custom DBEditObject
+   * subclasses.  Standard checking for missing fields for which
+   * fieldRequired() returns true is done by {@link
+   * arlut.csd.ganymede.server.DBEditSet#commit_checkObjectMissingFields(arlut.csd.ganymede.server.DBEditObject)}
+   * during {@link
+   * arlut.csd.ganymede.server.DBEditSet#commit_handlePhase1()}.</p>
+   *
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
+   */
+
+  public ReturnVal consistencyCheck(DBObject object)
+  {
+    String name = (String) object.getFieldValueLocal(dhcpOptionSchema.OPTIONNAME);
+    boolean builtIn = object.isSet(dhcpOptionSchema.BUILTIN);
+
+    if (builtIn && !builtInOptions.contains(name))
+      {
+	return Ganymede.createErrorDialog("Option name " + name + " is not a supported built-in keyword in our DHCP server.");
+      }
+
+    boolean custom = object.isSet(dhcpOptionSchema.CUSTOMOPTION);
+
+    if (!custom && !supportedOptions.contains(name))
+      {
+	return Ganymede.createErrorDialog("Option name " + name + " is not a recognized standard our DHCP server.  You will need to set this as a custom option with a numeric custom option code.");
+      }
+
+    return null;
+  }
+
+  /**
    * <p>This method is the hook that DBEditObject subclasses use to interpose
    * {@link arlut.csd.ganymede.server.GanymediatorWizard wizards} when a field's
    * value is being changed.</p>
@@ -405,6 +598,13 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
               {
                 ReturnVal innerRetVal = null;
                 DBEditObject parent = (DBEditObject) field.getOwner();
+
+		String name = (String) parent.getFieldValueLocal(dhcpOptionSchema.OPTIONNAME);
+
+		if (name != null && !builtInOptions.contains(name))
+		  {
+		    return Ganymede.createErrorDialog("Option name " + name + " not supported as a 'built-in' option type in dhcpd server.");
+		  }
 
                 innerRetVal = parent.setFieldValueLocal(dhcpOptionSchema.CUSTOMOPTION, Boolean.FALSE);
 
