@@ -3,16 +3,16 @@
    SchemaEdit.java
 
    Client side interface for schema editing
-   
+
    Created: 17 April 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2005
+
+   Copyright (C) 1996 - 2011
    The University of Texas at Austin
 
    Contact information
@@ -57,9 +57,9 @@ import arlut.csd.ganymede.common.ReturnVal;
 
 ------------------------------------------------------------------------------*/
 
-/** 
+/**
  * <p>Primary remote interface for Ganymede schema editing.  The
- * Ganymede admin console calls the 
+ * Ganymede admin console calls the
  * {@link arlut.csd.ganymede.server.GanymedeAdmin#editSchema editSchema()} method on
  * a server-side {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} object
  * to get access to
@@ -99,20 +99,20 @@ public interface SchemaEdit extends Remote {
   public Base[] getBases() throws RemoteException;
 
   /**
-   * <p>Returns a {@link arlut.csd.ganymede.rmi.Base Base} reference to 
+   * <p>Returns a {@link arlut.csd.ganymede.rmi.Base Base} reference to
    * match the id, or null if no match.</p>
    */
 
   public Base getBase(short id) throws RemoteException;
 
-  /** 
+  /**
    * <p>Returns a {@link arlut.csd.ganymede.rmi.Base Base} reference to
    * match the baseName, or null if no match.</p>
    */
 
   public Base getBase(String baseName) throws RemoteException;
 
-  /** 
+  /**
    * <p>This method creates a new {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} object and returns
    * a remote handle to it so that the admin client can set fields on
@@ -132,7 +132,7 @@ public interface SchemaEdit extends Remote {
   public ReturnVal deleteBase(String baseName) throws RemoteException;
 
   /**
-   * <p>This method returns an array of defined 
+   * <p>This method returns an array of defined
    * {@link arlut.csd.ganymede.rmi.NameSpace NameSpace} objects.</p>
    */
 
@@ -146,7 +146,7 @@ public interface SchemaEdit extends Remote {
   public NameSpace getNameSpace(String spaceName) throws RemoteException;
 
   /**
-   * <p>This method creates a new {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} 
+   * <p>This method creates a new {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace}
    * object and returns a remote handle
    * to it so that the admin client can set attributes on the DBNameSpace,
    * and generally make a nuisance of itself.</p>
