@@ -96,6 +96,11 @@ import arlut.csd.ganymede.common.Invid;
  * object B to be deletion locked at that time.  See the source of the
  * arlut.csd.ganymede.server.InvidDBField bind() method for
  * details.</p>
+ *
+ * <p>In either of the above scenarios, deletion locks established by
+ * a given {@link arlut.csd.ganymede.server.DBSession} are released
+ * when the session's transactions are committed or aborted in the
+ * session's {@link arlut.csd.ganymede.server.DBEditSet}.</p>
  */
 
 public class DBDeletionManager {
