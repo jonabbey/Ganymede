@@ -12,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -911,7 +911,7 @@ final public class DBSession {
 	// DBDeletionManager, we announce our intention to delete this
 	// object, and lock out any other objects from establishing
 	// asymmetrical links to this object..  if this fails, another
-	// object in an open transaction has linked to this object
+	// object in an open transaction has linked to this eObj
 	// without having checked it out for editing (which always
 	// means an asymmetrical link), and we can't let the object be
 	// deleted

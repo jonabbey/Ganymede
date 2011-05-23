@@ -13,7 +13,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -65,18 +65,47 @@ import arlut.csd.ganymede.common.Invid;
 ------------------------------------------------------------------------------*/
 
 /**
- * The DBDeletionManager class is used to handle deletion locking
- * in the Ganymede {@link arlut.csd.ganymede.server.DBStore DBStore}.
+ * <p>The DBDeletionManager class is used to handle deletion locking
+ * in the Ganymede {@link arlut.csd.ganymede.server.DBStore DBStore}.</p>
+ *
+ * <p>This class was designed to remove the necessity of having all
+ * {@link arlut.csd.ganymede.common.Invid Invid} link relationships be
+ * symmetrical.  Previously, establishing a one-way link from object
+ * 'A' to object 'B' involved editing both A and B, and placing a
+ * reverse link in B that pointed to A.</p>
+ *
+ * <p>This worked, but it meant that it was impossible for multiple
+ * users to be concurrently editing objects to establish or remove
+ * links to object B.  This was especially troublesome for Owner Group
+ * objects, as it meant that only one user at a time could be creating
+ * or deleting objects in a given Owner Group.</p>
+ *
+ * <p>With the introduction of the DBDeletionManager, we eliminate the
+ * need to be constantly editing targets of asymmetric links.</p>
+ *
+ * <p>Instead, when an object 'A' is checked out for editing that
+ * contains asymmetric link to other objects, those objects are locked
+ * (using the DBDeletionManager addSessionInvids() method) so that
+ * they cannot be deleted.  The session editing object A can remove
+ * the links to any of the linked objects if it wants, but if it
+ * doesn't, it can be confident that the targeted objects will still
+ * be there at the time the transaction commits.</p>
+ *
+ * <p>Similarly, if object 'A' does not initially contain a link to
+ * 'B', the act of creating an asymmetric link from A to B will cause
+ * object B to be deletion locked at that time.  See the source of the
+ * arlut.csd.ganymede.server.InvidDBField bind() method for
+ * details.</p>
  */
 
 public class DBDeletionManager {
 
   /**
-   * DBSession objects will appear as keys in this Map when those
-   * sessions have locked Invids in the database against deletion.
+   * <p>DBSession objects will appear as keys in this Map when those
+   * sessions have locked Invids in the database against deletion.</p>
    *
-   * The Set of Invids mapped from the DBSession is the set of Invids
-   * that that DBSession has locked.
+   * <p>The Set of Invids mapped from the DBSession is the set of Invids
+   * that that DBSession has locked.</p>
    */
 
   private static Map<DBSession, Set<Invid>> sessions = new HashMap<DBSession, Set<Invid>>();
