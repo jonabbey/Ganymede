@@ -8,3 +8,4 @@ doc/javadoc/
 installServer
 installWeb
 installClient
+src/schemas/gasharl/ad.properties
