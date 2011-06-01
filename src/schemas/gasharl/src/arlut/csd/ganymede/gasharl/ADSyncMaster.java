@@ -82,6 +82,12 @@ public class ADSyncMaster implements arlut.csd.ganymede.server.SyncMaster {
 	    book.add(eObj.getInvid(), userSchema.EXCHANGESTORE);
 
 	    Invid exchangeStore = (Invid) eObj.getFieldValueLocal(userSchema.EXCHANGESTORE);
+
+	    if (exchangeStore != null)
+	      {
+		exchangeStore = (Invid) eObj.getOriginal().getFieldValueLocal(userSchema.EXCHANGESTORE);
+	      }
+
 	    book.add(exchangeStore, exchangeStoreSchema.EXCHANGEMDB);
 	  }
       }
