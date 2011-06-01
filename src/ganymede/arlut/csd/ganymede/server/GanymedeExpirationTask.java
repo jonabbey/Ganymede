@@ -4,16 +4,16 @@
 
    This class goes through all objects in the database and processes
    any expirations or removals.
-   
+
    Created: 4 February 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -69,7 +69,7 @@ import arlut.csd.ganymede.common.SchemaConstants;
 /**
  * <p>This is a Ganymede server task, for use with the {@link
  * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}.</p>
- * 
+ *
  * <p>The GanymedeExpirationTask scans through all objects in the
  * database and handles expiration and/or removal for any object whose Expiration
  * or Removal timestamps have passed.</p>
@@ -92,13 +92,11 @@ public class GanymedeExpirationTask implements Runnable {
   public GanymedeExpirationTask()
   {
   }
-  
+
   /**
-   *
    * Just Do It (tm)
    *
    * @see java.lang.Runnable
-   *
    */
 
   public void run()
@@ -113,7 +111,7 @@ public class GanymedeExpirationTask implements Runnable {
     Ganymede.debug("Expiration Task: Starting");
 
     String error = GanymedeServer.lSemaphore.checkEnabled();
-	
+
     if (error != null)
       {
 	Ganymede.debug("Deferring expiration task - semaphore disabled: " + error);
@@ -142,7 +140,7 @@ public class GanymedeExpirationTask implements Runnable {
 	// later, they'll be requested to fix the problem.
 
 	mySession.enableOversight(false);
-	
+
 	ReturnVal retVal = mySession.openTransaction("expiration task", false); // non-interactive
 
 	if (!ReturnVal.didSucceed(retVal))
@@ -192,7 +190,7 @@ public class GanymedeExpirationTask implements Runnable {
 	      {
 		continue;
 	      }
-	    
+
 	    if (debug)
 	      {
 		Ganymede.debug("Sweeping base " + base.getName() + " for expired objects");
@@ -217,7 +215,7 @@ public class GanymedeExpirationTask implements Runnable {
 
 		if (debug)
 		  {
-		    Ganymede.debug("Need to inactivate object " + base.getName() + ":" + 
+		    Ganymede.debug("Need to inactivate object " + base.getName() + ":" +
 				   result.toString());
 		  }
 
@@ -225,12 +223,12 @@ public class GanymedeExpirationTask implements Runnable {
 
 		if (!ReturnVal.didSucceed(retVal))
 		  {
-		    Ganymede.debug("Expiration task was not able to inactivate object " + 
+		    Ganymede.debug("Expiration task was not able to inactivate object " +
 				   base.getName() + ":" + result.toString());
 		  }
 		else
 		  {
-		    Ganymede.debug("Expiration task inactivated object " + 
+		    Ganymede.debug("Expiration task inactivated object " +
 				   base.getName() + ":" + result.toString());
 		  }
 	      }
@@ -256,10 +254,10 @@ public class GanymedeExpirationTask implements Runnable {
 	      {
 		continue;
 	      }
-	    
+
 	    if (debug)
 	      {
-		Ganymede.debug("Sweeping base " + base.getName() + 
+		Ganymede.debug("Sweeping base " + base.getName() +
 			       " for objects to be removed");
 	      }
 
@@ -282,7 +280,7 @@ public class GanymedeExpirationTask implements Runnable {
 
 		if (debug)
 		  {
-		    Ganymede.debug("Need to remove object " + base.getName() + ":" + 
+		    Ganymede.debug("Need to remove object " + base.getName() + ":" +
 				   result.toString());
 		  }
 
@@ -290,17 +288,17 @@ public class GanymedeExpirationTask implements Runnable {
 
 		if (!ReturnVal.didSucceed(retVal))
 		  {
-		    Ganymede.debug("Expiration task was not able to remove object " + 
+		    Ganymede.debug("Expiration task was not able to remove object " +
 				   base.getName() + ":" + result.toString());
 		  }
 		else
 		  {
-		    Ganymede.debug("Expiration task deleted object " + 
+		    Ganymede.debug("Expiration task deleted object " +
 				   base.getName() + ":" + result.toString());
 		  }
 	      }
 	  }
-	
+
 	retVal = mySession.commitTransaction();
 
 	if (!ReturnVal.didSucceed(retVal))
@@ -342,7 +340,7 @@ public class GanymedeExpirationTask implements Runnable {
 	if (started && !finished)
 	  {
 	    // we'll get here if this task's thread is stopped early
-	    
+
 	    Ganymede.debug("Expiration Task: Forced to terminate early, aborting transaction");
 
 	    if (mySession != null)
