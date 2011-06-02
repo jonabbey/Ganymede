@@ -46,6 +46,8 @@
 
 package arlut.csd.ganymede.server;
 
+import arlut.csd.Util.StringUtils;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                 GanymedeUncaughtExceptionHandler
@@ -112,6 +114,23 @@ public class GanymedeUncaughtExceptionHandler implements Thread.UncaughtExceptio
 	      {
 		return;
 	      }
+	  }
+      }
+
+    if (!StringUtils.isEmpty(Ganymede.bugReportAddressProperty))
+      {
+	try
+	  {
+	    StringBuffer bugReport = new StringBuffer();
+
+	    bugReport.append("\nSERVER ERROR DETECTED:\nexception trace == \"");
+	    bugReport.append(Ganymede.stackTrace(ex));
+	    bugReport.append("\"\n");
+
+	    Ganymede.internalSession.sendMail(Ganymede.bugReportAddressProperty, "Ganymede Server Bug Report", bugReport);
+	  }
+	catch (Throwable ex2)
+	  {
 	  }
       }
 
