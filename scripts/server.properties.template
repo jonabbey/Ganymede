@@ -2,7 +2,7 @@
 # ganymede.properties
 #
 # This file specifies basic configuration information for the Ganymede
-# server and admin console.  
+# server and admin console.
 #
 # Further configuration information is stored in the Ganymede
 # database.
@@ -290,6 +290,17 @@ ganymede.helpbase=http://www.arlut.utexas.edu/~mulvaney/ganymede/
 # accelerate the process of searching through the log file.
 
 ganymede.loghelper=/var/ganymede/bin/logscan.pl
+
+
+# ganymede.bugsaddress
+#
+# If this property is set, a copy of any bugs reported by clients or
+# uncaught exceptions generated on the server will be sent to this
+# address.
+#
+# User by server
+
+ganymede.bugsaddress=
 
 
 # ganymede.builder.backups
