@@ -102,6 +102,7 @@ public class GanymedeExpirationTask implements Runnable {
   public void run()
   {
     GanymedeSession mySession = null;
+    DBSession myDBSession = null;
     boolean started = false;
     boolean finished = false;
     Thread currentThread = java.lang.Thread.currentThread();
@@ -123,6 +124,7 @@ public class GanymedeExpirationTask implements Runnable {
 	try
 	  {
 	    mySession = new GanymedeSession("expiration");
+	    myDBSession = mySession.getSession();
 	  }
 	catch (RemoteException ex)
 	  {
@@ -219,15 +221,32 @@ public class GanymedeExpirationTask implements Runnable {
 				   result.toString());
 		  }
 
-		retVal = mySession.inactivate_db_object(invid);
+		String checkpointKey = "inactivating " + invid.toString();
+
+		myDBSession.checkpoint(checkpointKey);
+
+		try
+		  {
+		    retVal = mySession.inactivate_db_object(invid);
+		  }
+		catch (Throwable ex)
+		  {
+		    myDBSession.rollback(checkpointKey);
+
+		    throw new RuntimeException(ex);
+		  }
 
 		if (!ReturnVal.didSucceed(retVal))
 		  {
+		    myDBSession.rollback(checkpointKey);
+
 		    Ganymede.debug("Expiration task was not able to inactivate object " +
 				   base.getName() + ":" + result.toString());
 		  }
 		else
 		  {
+		    myDBSession.popCheckpoint(checkpointKey);
+
 		    Ganymede.debug("Expiration task inactivated object " +
 				   base.getName() + ":" + result.toString());
 		  }
@@ -284,15 +303,32 @@ public class GanymedeExpirationTask implements Runnable {
 				   result.toString());
 		  }
 
-		retVal = mySession.remove_db_object(invid);
+		String checkpointKey = "removing " + invid.toString();
+
+		myDBSession.checkpoint(checkpointKey);
+
+		try
+		  {
+		    retVal = mySession.remove_db_object(invid);
+		  }
+		catch (Throwable ex)
+		  {
+		    myDBSession.rollback(checkpointKey);
+
+		    throw new RuntimeException(ex);
+		  }
 
 		if (!ReturnVal.didSucceed(retVal))
 		  {
+		    myDBSession.rollback(checkpointKey);
+
 		    Ganymede.debug("Expiration task was not able to remove object " +
 				   base.getName() + ":" + result.toString());
 		  }
 		else
 		  {
+		    myDBSession.popCheckpoint(checkpointKey);
+
 		    Ganymede.debug("Expiration task deleted object " +
 				   base.getName() + ":" + result.toString());
 		  }
