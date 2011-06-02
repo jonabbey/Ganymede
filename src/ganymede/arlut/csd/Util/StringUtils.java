@@ -11,7 +11,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -71,6 +71,16 @@ public class StringUtils {
       }
 
     return inputString;
+  }
+
+  /**
+   * Returns true if inputString is null or equal to the empty string
+   * or contains nothing but whitespace.
+   */
+
+  public static boolean isEmpty(String inputString)
+  {
+    return inputString == null || inputString.trim().length() == 0;
   }
 
   /**
