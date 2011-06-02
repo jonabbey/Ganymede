@@ -79,6 +79,7 @@ import java.util.Vector;
 import Qsmtp.Qsmtp;
 import arlut.csd.Util.RandomUtils;
 import arlut.csd.Util.TranslationService;
+import arlut.csd.Util.StringUtils;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.WordWrap;
 import arlut.csd.Util.booleanSemaphore;
@@ -2486,9 +2487,15 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     // If the server has been told to not send out any emails, then just bail
     // out.
+
     if (Ganymede.suppressEmail)
       {
       	return;
+      }
+
+    if (StringUtils.isEmpty(address))
+      {
+	return;
       }
     
     checklogin();
