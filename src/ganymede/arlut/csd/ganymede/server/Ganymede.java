@@ -19,7 +19,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -226,21 +226,20 @@ public class Ganymede {
   public static GanymedeScheduler scheduler;
 
   /**
-   * <p>The Jython debug console server.</p>
+   * <p>The Jython debug console server, if the telnet option is
+   * specified on the command line.</p>
    */
   
   public static JythonServer jythonServer;
 
   /**
-   * Random access password quality check dictionary.
+   * <p>Random access password quality check dictionary.</p>
    */
 
   public static Packer crackLibPacker;
 
   /**
-   *
-   * The Ganymede object store.
-   * 
+   * <p>The Ganymede object store.</p>
    */
 
   public static DBStore db;
@@ -272,11 +271,11 @@ public class Ganymede {
   public static BaseListTransport baseTransport = null;
 
   /**
-   * The Thread that we have registered to handle cleanup if we get a
-   * kill/quit signal.
+   * <p>The Thread that we have registered to handle cleanup if we get a
+   * kill/quit signal.</p>
    *
-   * This is public so that the GanymedeServer class can de-register
-   * this thread at shutdown time to avoid recursion on exit().
+   * <p>This is public so that the GanymedeServer class can de-register
+   * this thread at shutdown time to avoid recursion on exit().</p>
    */
 
   public static Thread signalHandlingThread = null;
