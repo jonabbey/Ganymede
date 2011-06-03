@@ -6,7 +6,6 @@
 
    Created: 10 April 2009
 
-
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
 
    -----------------------------------------------------------------------
@@ -75,7 +74,16 @@ class FoxtrotAdapter {
   {
     if (useFoxtrot == null)
       {
-	useFoxtrot = Boolean.valueOf(glogin.getConfigBoolean("enable.foxtrot", true));
+	String version = System.getProperty("java.version");
+
+	if (version.matches("^1.[56]"))
+	  {
+	    useFoxtrot = Boolean.valueOf(glogin.getConfigBoolean("enable.foxtrot", true));
+	  }
+	else
+	  {
+	    useFoxtrot = Boolean.valueOf(false);
+	  }
       }
 
     if (useFoxtrot)
