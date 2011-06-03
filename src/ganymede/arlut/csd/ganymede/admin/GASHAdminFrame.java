@@ -1190,8 +1190,10 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 	splitterPane.setDividerLocation(dividerLoc);
       }
 
-    invalidate();
-    validateTree();
+    // these break things on JDK 7
+    //
+    //    invalidate();
+    //    validateTree();
 
     setVisible(true);
   }
