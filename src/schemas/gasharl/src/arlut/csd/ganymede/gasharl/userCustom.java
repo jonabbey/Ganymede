@@ -438,18 +438,18 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
-   * This method provides a pre-commit hook that runs after the user
+   * <p>This method provides a pre-commit hook that runs after the user
    * has hit commit but before the system has established write locks
-   * for the commit.
+   * for the commit.</p>
    *
-   * The intended purpose of this hook is to allow objects that
+   * <p>The intended purpose of this hook is to allow objects that
    * dynamically maintain hidden label fields to update those fields
-   * from the contents of the object's other fields at commit time.
+   * from the contents of the object's other fields at commit time.</p>
    *
-   * This method runs in a checkpointed context.  If this method fails
+   * <p>This method runs in a checkpointed context.  If this method fails
    * in any operation, you should return a ReturnVal with a failure
    * dialog encoded, and the transaction's commit will be blocked and
-   * a dialog explaining the problem will be presented to the user.
+   * a dialog explaining the problem will be presented to the user.</p>
    */
 
   public ReturnVal preCommitHook()
@@ -518,6 +518,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	String username = (String) getFieldValueLocal(userSchema.USERNAME);
 	String badge = (String) getFieldValueLocal(userSchema.BADGE);
+
+	// if we have a SQL exception thrown, we'll catch and log it,
+	// but we won't block user creation / edit.
 
 	try
 	  {
