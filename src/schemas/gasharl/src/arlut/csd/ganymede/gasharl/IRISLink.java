@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -581,6 +581,51 @@ public class IRISLink {
       }
 
     return false;
+  }
+
+  public static boolean isRegisteredBadgeNumber(String badge)
+  {
+    Connection myConn = null;
+
+    try
+      {
+	myConn = getConnection();
+
+	String queryString = "select BADGE_NUMBER from HR_EMPLOYEES_GA_VW where BADGE_NUMBER = ?";
+	PreparedStatement queryName = myConn.prepareStatement(queryString);
+
+	queryName.setString(1, badge);
+
+	ResultSet rs = queryName.executeQuery();
+
+	try
+	  {
+	    return rs.next();
+	  }
+	finally
+	  {
+	    rs.close();
+	  }
+      }
+    catch (SQLException ex)
+      {
+	rethrowException(ex);
+
+	// the compiler doesn't realize that rethrowException()
+	// always throws an exception..
+
+	return false;
+      }
+    finally
+      {
+	try
+	  {
+	    myConn.close();
+	  }
+	catch (SQLException ex)
+	  {
+	  }
+      }
   }
 
   public static void main(String args[])
