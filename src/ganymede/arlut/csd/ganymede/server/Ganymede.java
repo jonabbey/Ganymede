@@ -1037,9 +1037,14 @@ public class Ganymede {
 
   static public void logError(Throwable ex)
   {
-    ex.printStackTrace();
-
-    GanymedeAdmin.logAppend(stackTrace(ex));
+    if (defaultHandler != null)
+      {
+	defaultHandler.reportException(ex);
+      }
+    else
+      {
+	ex.printStackTrace();
+      }
   }
 
   /**
@@ -1050,11 +1055,16 @@ public class Ganymede {
 
   static public void logError(Throwable ex, String contextMsg)
   {
-    System.err.println(contextMsg);
+    if (defaultHandler != null)
+      {
+	defaultHandler.reportException(contextMsg, ex);
+      }
+    else
+      {
+	System.err.println(contextMsg);
 
-    ex.printStackTrace();
-
-    GanymedeAdmin.logAppend(contextMsg + stackTrace(ex));
+	ex.printStackTrace();
+      }
   }
 
   /**
