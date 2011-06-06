@@ -11,7 +11,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -55,17 +55,17 @@ import arlut.csd.Util.StringUtils;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class is used to provide the default uncaught exception
+ * <p>This class is used to provide the default uncaught exception
  * handler for the Ganymede server.  With an object of this class
  * bound as the system's default Thread.UncaughtExceptionHandler, any
  * exceptions which lead to thread death on the server can be properly
- * logged and reported.
+ * logged and reported.</p>
  *
- * GanymedeUncaughtExceptionHandler requires Java 5 to function, but
- * we don't want to make the Ganymede code base depend on Java 5
- * yet.  As such, we require this class to handle its own
- * initialization and registration as our default
- * UncaughtExceptionHandler.
+ * <p>GanymedeUncaughtExceptionHandler requires Java 5 to function,
+ * but we don't want to make the Ganymede code base depend on Java 5
+ * yet.  As such, the Ganymede server's startup sequence uses Java
+ * Reflection to create and register this handler if we are using an
+ * appropriate version of Java.</p>
  *
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
@@ -73,13 +73,13 @@ import arlut.csd.Util.StringUtils;
 public class GanymedeUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
 
   /**
-   * We call this static method through Java Reflection in the
+   * <p>We call this static method through Java Reflection in the
    * Ganymede server startup path.  That allows the Ganymede server
    * startup to dynamically decide whether
    * GanymedeUncaughtExceptionHandler was compiled or not, without
    * making the compilation of arlut.csd.ganymede.server.Ganymede
    * itself dependent on whether or not this class was compiled at
-   * build time.
+   * build time.</p>
    */
 
   public static void setup()
