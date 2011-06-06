@@ -174,6 +174,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   private boolean amChangingExpireDate = false;
 
+  /**
+   * Private flag used to allow us to return an error dialog the first
+   * time we detect an HR/IRIS problem.  Once we've presented an HR
+   * error to the admin, we'll set this flag and disregard the problem
+   * if the admin hits commit again in the client without changing
+   * anything.
+   */
+
   private boolean IRISWarningGiven = false;
 
   /**
@@ -513,6 +521,20 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	try
 	  {
+	    if (!IRISLink.isRegisteredBadgeNumber(badge))
+	      {
+		if (!IRISWarningGiven)
+		  {
+		    IRISWarningGiven = true;
+
+		    return ReturnVal.merge(retVal, Ganymede.createErrorDialog("Warning: Badge number not in HR database",
+									      "The " + username + " userobject is currently registered as having badge number " +
+									      badge + ", which is not registered in the HR database.\n\n" +
+									      "You should either correct the badge number or contact HR to find out why the badge " +
+									      "is not properly recorded in HR's database."));
+		  }
+	      }
+
 	    if (!IRISLink.okayToUseName(username, badge))
 	      {
 		String badgeConflict = IRISLink.findHistoricalBadge(username);
@@ -521,6 +543,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		if (!IRISWarningGiven)
 		  {
 		    IRISWarningGiven = true;
+
 		    return ReturnVal.merge(retVal, Ganymede.createErrorDialog("Warning: Historical username conflict",
 									     "The '" + username +
 									     "' user object (with badge id '" + badge + "') conflicts with an earlier '" + username +
