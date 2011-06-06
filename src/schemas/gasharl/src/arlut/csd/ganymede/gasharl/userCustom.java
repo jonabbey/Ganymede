@@ -531,7 +531,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		    IRISWarningGiven = true;
 
 		    return ReturnVal.merge(retVal, Ganymede.createErrorDialog("Warning: Badge number not in HR database",
-									      "The " + username + " userobject is currently registered as having badge number " +
+									      "The " + username + " user object is currently registered as having badge number " +
 									      badge + ", which is not registered in the HR database.\n\n" +
 									      "You should either correct the badge number or contact HR to find out why the badge " +
 									      "is not properly recorded in HR's database."));
