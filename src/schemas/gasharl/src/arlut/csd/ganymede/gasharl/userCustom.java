@@ -3,15 +3,15 @@
    userCustom.java
 
    This file is a management class for user objects in Ganymede.
-   
+
    Created: 30 July 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2011
    The University of Texas at Austin
 
@@ -125,7 +125,7 @@ import arlut.csd.ganymede.server.adminPersonaCustom;
  */
 
 public class userCustom extends DBEditObject implements SchemaConstants, userSchema {
-  
+
   static final boolean debug = false;
 
   static QueryResult shellChoices = new QueryResult();
@@ -230,7 +230,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * is called.</p>
    *
    * <p>This method is responsible for filling in any default
-   * values that can be calculated from the 
+   * values that can be calculated from the
    * {@link arlut.csd.ganymede.server.DBSession DBSession}
    * associated with the editset defined in this DBEditObject.</p>
    *
@@ -250,7 +250,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * so it is the responsibility of this method to handle any checkpointing
    * needed.</p>
    *
-   * <p>This method should be overridden in subclasses.</p> 
+   * <p>This method should be overridden in subclasses.</p>
    */
 
   public ReturnVal initializeNewObject()
@@ -313,7 +313,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	int count = 0;
 	uidVal = new Integer(rand.nextInt(31767) + lowUID);
-    
+
 	while (!namespace.reserve(getEditSet(), uidVal) && count < 30000)
 	  {
 	    uidVal = new Integer(rand.nextInt(31767) + lowUID);
@@ -324,13 +324,13 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    // we've been looping too long, maybe there's no
 	    // uid's free?  let's do an exhaustive search
-	
+
 	    uidVal = new Integer(lowUID);
-	
+
 	    while (!namespace.reserve(getEditSet(), uidVal))
 	      {
 		uidVal = new Integer(uidVal.intValue() + 1);
-	    
+
 		if (uidVal.intValue() > 32767)
 		  {
 		    throw new RuntimeException("Couldn't find an allocatable uid through random search");
@@ -361,7 +361,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
 
 	// create a volume entry for the user.
-    
+
 	InvidDBField invf = (InvidDBField) getField(userSchema.VOLUMES);
 
 	try
@@ -371,16 +371,16 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	catch (GanyPermissionsException ex)
 	  {
 	    return Ganymede.createErrorDialog("permissions", "permissions error creating embedded object" + ex);
-					      
+
 	  }
-    
+
 	if ((retVal == null) || (!retVal.didSucceed()))
 	  {
 	    return retVal;
 	  }
-    
+
 	Invid invid = retVal.getInvid();
-    
+
 	if (invid != null)
 	  {
 	    // find the auto.home.default map, if we can.
@@ -389,24 +389,24 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 								   new QueryDataNode(QueryDataNode.EQUALS,
 										     "auto.home.default"),
 								   false));
-	
+
 	    // if we found auto.home.default, set the new volume entry map
 	    // field to point to auto.home.default.
-    
+
 	    if (results != null && results.size() == 1)
 	      {
 		Result objid = (Result) results.elementAt(0);
-	
+
 		DBEditObject eObj = getSession().editDBObject(invid);
 		invf = (InvidDBField) eObj.getField(mapEntrySchema.MAP);
-	
+
 		retVal = invf.setValueLocal(objid.getInvid());
 
 		if (retVal != null && !retVal.didSucceed())
 		  {
 		    return retVal;
 		  }
-	
+
 		// we want the permissions system to reject edit privs
 		// on this now.. by setting permCache to null, we allow
 		// the mapEntryCustom permOverride method to get a chance
@@ -503,7 +503,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	//
 	// If null, we'll just return early and let DBEditSet call
 	// checkRequiredFields() on this later to report the error.
-	
+
 	return null;
       }
 
@@ -597,7 +597,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    titleString = "External Email Credentials Set For User " + this.getLabel();
 
-	    messageString = "User account " + this.getLabel() + 
+	    messageString = "User account " + this.getLabel() +
 	      " has been granted access to laboratory email from outside the internal ARL:UT network.\n\n" +
 	      "In order to read and send mail from outside the laboratory, you will need to configure your external email client " +
 	      "to send outgoing email through smail.arlut.utexas.edu using TLS-encrypted SMTP on port 25 or port 587, and to " +
@@ -605,7 +605,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      "You will need to specify the following randomly assigned user name and password for both services:\n\n" +
 	      "Username: " + mailUsername + "\n" +
 	      "Password: " + mailPassword;
-	    
+
 	    if (expireString != null)
 	      {
 		messageString = messageString + "\n\n" + expireString;
@@ -621,7 +621,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      {
 		titleString = "External Email Credentials Changed For User " + this.getLabel();
 
-		messageString = "The external mail credentials for user account " + this.getLabel() + 
+		messageString = "The external mail credentials for user account " + this.getLabel() +
 		  " have been changed.\n\n" +
 		  "In order to continue to read and send mail from outside the laboratory, you will need to configure your external email client " +
 		  "to send outgoing email through smail.arlut.utexas.edu using TLS-encrypted SMTP on port 25 or port 587, and to " +
@@ -663,7 +663,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     ReturnVal retVal = null;
     InvidDBField volumeMapEntries = (InvidDBField) getField(userSchema.VOLUMES);
     Vector values = volumeMapEntries.getValuesLocal();
-    
+
     for (int i = 0; i < values.size(); i++)
       {
 	Invid entryInvid = (Invid) values.elementAt(i);
@@ -907,7 +907,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	if (retVal != null && retVal.getDialog() != null)
 	  {
 	    resultBuf.append(retVal.getDialog().getText());
-	
+
 	    problem = true;
 	  }
 
@@ -918,7 +918,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// to set.
 
 	Invid category = (Invid) origObj.getFieldValueLocal(userSchema.CATEGORY);
-	
+
 	if (session.getGSession().viewObjectLabel(category).equals("normal"))
 	  {
 	    try
@@ -930,7 +930,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		return Ganymede.createErrorDialog("permissions", "permissions error setting category" + ex);
 	      }
 	  }
-    
+
 	if (debug)
 	  {
 	    System.err.println("User " + origObj.getLabel() + " cloned, working on embeddeds");
@@ -984,7 +984,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		  }
 
 		resultBuf.append(tmpVal.getDialog().getText());
-	    
+
 		problem = true;
 	      }
 	  }
@@ -1024,7 +1024,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 			  }
 
 			resultBuf.append(tmpVal.getDialog().getText());
-		    
+
 			problem = true;
 		      }
 		    continue;
@@ -1050,7 +1050,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		      }
 
 		    resultBuf.append(tmpVal.getDialog().getText());
-	    
+
 		    problem = true;
 		  }
 	      }
@@ -1063,7 +1063,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    retVal.setDialog(new JDialogBuff("Possible Clone Problems", resultBuf.toString(),
 					     "Ok", null, "ok.gif"));
 	  }
-    
+
 	return retVal;
       }
     catch (NotLoggedInException ex)
@@ -1197,9 +1197,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
   /**
    * <p>This method is used to control whether or not it is acceptable to
-   * make a link to the given field in this 
+   * make a link to the given field in this
    * {@link arlut.csd.ganymede.server.DBObject DBObject} type when the
-   * user only has editing access for the source 
+   * user only has editing access for the source
    * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField} and not
    * the target.</p>
    *
@@ -1208,7 +1208,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * to allow a link based on what field of what object wants to link
    * to it.</P>
    *
-   * <p>By default, the 3 variants of the DBEditObject anonymousLinkOK() 
+   * <p>By default, the 3 variants of the DBEditObject anonymousLinkOK()
    * method are chained together, so that the customizer can choose
    * which level of detail he is interested in.
    * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField}'s
@@ -1234,7 +1234,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   {
     // if they can edit the group, they can put us in it.. the
     // gasharl schema specifies the mandatory type for the other
-    // end of the GROUPLIST field's link, so we don't have to 
+    // end of the GROUPLIST field's link, so we don't have to
     // check that here
 
     if (targetFieldID == userSchema.GROUPLIST)
@@ -1317,7 +1317,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    // we're PSEUDOSTATIC, so we need to get ahold of the internal session
 	    // so we can look up objects
-	    
+
 	    DBObject category = internalSession().getSession().viewDBObject(catInvid);
 
 	    needIdentifier = category.isSet(userCategorySchema.SSREQUIRED);
@@ -1395,7 +1395,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
 
     categoryName = categoryObj.getLabel();
-    
+
     if (categoryObj.isSet(userCategorySchema.EXPIRE))
       {
 	if (!object.isDefined(SchemaConstants.ExpirationField) &&
@@ -1468,7 +1468,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
             try
               {
-                qr = gSession.query("select object from 'User' where 'Badge' == '" + StringUtils.escape(badge) + 
+                qr = gSession.query("select object from 'User' where 'Badge' == '" + StringUtils.escape(badge) +
                                     "' and (not 'Username' == '" + StringUtils.escape(myUsername) +
                                     "') and ('Account Category' == 'normal') and (not 'Removal Date' defined)");
               }
@@ -1587,7 +1587,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * a wizard to the client to customize the inactivation logic.
    *
    * @see #commitPhase1()
-   * @see #commitPhase2() 
+   * @see #commitPhase2()
    */
 
   public ReturnVal inactivate(String ckp_label)
@@ -1601,7 +1601,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     StringDBField stringfield;
     PasswordDBField passfield;
     DateDBField date;
-    Calendar cal = Calendar.getInstance(); 
+    Calendar cal = Calendar.getInstance();
     Date time;
 
     /* -- */
@@ -1631,17 +1631,17 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	if (false)
 	  {
 	    // set the shell to /bin/false
-	    
+
 	    stringfield = (StringDBField) getField(LOGINSHELL);
 	    retVal = stringfield.setValueLocal("/bin/false");
-	    
+
 	    if (retVal != null && !retVal.didSucceed())
 	      {
 		if (calledByWizard)
 		  {
 		    finalizeInactivate(false, ckp_label);
 		  }
-		
+
 		return retVal;
 	      }
 	  }
@@ -1651,11 +1651,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	if (forward != null && !forward.equals(""))
 	  {
 	    stringfield = (StringDBField) getField(EMAILTARGET);
-	
+
 	    while (stringfield.size() > 0)
 	      {
 		retVal = stringfield.deleteElementLocal(0);
-		
+
 		if (retVal != null && !retVal.didSucceed())
 		  {
 		    if (calledByWizard)
@@ -1740,7 +1740,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
 	catch (RemoteException ex)
 	  {
-	    throw new RuntimeException("oops, userCustom couldn't create wizard for remote ex " + ex); 
+	    throw new RuntimeException("oops, userCustom couldn't create wizard for remote ex " + ex);
 	  }
 
 	if (debug)
@@ -1798,19 +1798,19 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    System.err.println("userCustom: creating reactivation wizard");
 	  }
-	
+
 	theWiz = new userReactivateWizard(this.gSession, this, ckp_label);
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("oops, userCustom couldn't create wizard for remote ex " + ex); 
+	throw new RuntimeException("oops, userCustom couldn't create wizard for remote ex " + ex);
       }
 
     if (debug)
       {
 	System.err.println("userCustom: returning reactivation wizard");
       }
-    
+
     return theWiz.respond(null);
   }
 
@@ -1819,7 +1819,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * obtaining the necessary information from the client on a
    * reactivate operation.  We then do the actual work to reactivate
    * the user in this method.
-   * 
+   *
    * @see arlut.csd.ganymede.gasharl.userReactivateWizard
    */
 
@@ -1847,7 +1847,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    passfield = (PasswordDBField) getField(userSchema.PASSWORD);
 	    retVal = passfield.setPlainTextPass(reactivateWizard.password);
-	    
+
 	    if (retVal != null && !retVal.didSucceed())
 	      {
 		return retVal;
@@ -1864,7 +1864,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	if (reactivateWizard.shell != null)
 	  {
 	    stringfield = (StringDBField) getField(LOGINSHELL);
-	    
+
 	    try
 	      {
 		retVal = stringfield.setValue(reactivateWizard.shell);
@@ -1873,7 +1873,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      {
 		return Ganymede.createErrorDialog("permissions", "permissions error setting shell during reactivation" + ex);
 	      }
-	    
+
 	    if (retVal != null && !retVal.didSucceed())
 	      {
 		return retVal;
@@ -1885,11 +1885,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	if (reactivateWizard.forward != null && !reactivateWizard.forward.equals(""))
 	  {
 	    stringfield = (StringDBField) getField(EMAILTARGET);
-	
+
 	    while (stringfield.size() > 0)
 	      {
 		retVal = stringfield.deleteElementLocal(0);
-		
+
 		if (retVal != null && !retVal.didSucceed())
 		  {
 		    return retVal;
@@ -2094,7 +2094,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	typeResult.addRow("Exchange");
 	typeResult.addRow("Other");
 	return typeResult;
-	
+
       case SIGNATURE:			// signature alias
 
 	QueryResult result = new QueryResult();
@@ -2134,7 +2134,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
 
 	return result;
-	
+
       default:
 	return super.obtainChoiceList(field);
       }
@@ -2150,14 +2150,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     if (groupChoices == null)
       {
 	groupChoices = new QueryResult();
-	
+
 	Vector invids = getFieldValuesLocal(GROUPLIST); // groups list
 	Invid invid;
-	
+
 	for (int i = 0; i < invids.size(); i++)
 	  {
 	    invid = (Invid) invids.elementAt(i);
-	    
+
 	    // must be editable because the client cares
 
 	    groupChoices.addRow(invid, gSession.viewObjectLabel(invid), true);
@@ -2185,19 +2185,19 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    Query query = new Query("Shell Choice", null, false);
 
 	    // internalQuery doesn't care if the query has its filtered bit set
-	    
+
 	    if (debug)
 	      {
 		System.err.println("userCustom - issuing query");
 	      }
 
 	    Vector results = internalSession().internalQuery(query);
-	    
+
 	    if (debug)
 	      {
 		System.err.println("userCustom - processing query results");
 	      }
-	
+
 	    for (int i = 0; i < results.size(); i++)
 	      {
 		shellChoices.addRow(null, results.elementAt(i).toString(), false); // no invid
@@ -2317,7 +2317,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    DBObject category = internalSession().getSession().viewDBObject(catInvid);
 
 	    Integer maxDays = (Integer) category.getFieldValueLocal(userCategorySchema.LIMIT);
-	
+
 	    cal.add(Calendar.DATE, maxDays.intValue());
 	  }
 	catch (NullPointerException ex)
@@ -2399,7 +2399,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    if (newUsername != null)
 	      {
 		String expected = homedir + (String) newUsername;
-		    
+
 		if (!dir.equals(expected))
 		  {
 		    return Ganymede.createErrorDialog("Schema Error",
@@ -2435,7 +2435,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		// method
 
 		ReturnVal result;
-		
+
 		amChangingExpireDate = true;
 
 		try
@@ -2446,7 +2446,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		  {
 		    amChangingExpireDate = false;
 		  }
-		
+
 		if (result != null)
 		  {
 		    System.err.println("UserCustom: setValueLocal on PASSWORDCHANGETIME field failed: " + result);
@@ -2459,7 +2459,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
 
 	ReturnVal result = ReturnVal.success();
-	    
+
 	result.addRescanField(this.getInvid(), userSchema.PASSWORDCHANGETIME);
 
 	return result;
@@ -2492,11 +2492,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	try
 	  {
 	    Invid catInvid = (Invid) this.getFieldValueLocal(userSchema.CATEGORY);
-	    
+
 	    DBObject category = internalSession().getSession().viewDBObject(catInvid);
-	    
+
 	    Boolean expDateRequired = (Boolean) category.getFieldValueLocal(userCategorySchema.EXPIRE);
-	    
+
 	    if (expDateRequired.booleanValue())
 	      {
 		return Ganymede.createErrorDialog("Schema Error",
@@ -2506,7 +2506,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    else
 	      {
 		// ok, then
-		
+
 		return null;
 	      }
 	  }
@@ -2563,7 +2563,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 		// if the signature alias was the user's name, we'll want
 		// to continue that.
-		
+
 		if (oldName.equals((String) sf.getValueLocal()))
 		  {
 		    sf.setValueLocal(value); // set the signature alias to the user's new name
@@ -2625,9 +2625,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      {
 		sf.addElementLocal(value + mailsuffix);
 	      }
-	
+
 	    inv = (InvidDBField) getField(PERSONAE);
-	
+
 	    if (inv == null)
 	      {
 		return null;	// success
@@ -2763,7 +2763,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     userHomeGroupDelWizard groupWizard = null;
     userRenameWizard renameWizard = null;
     ReturnVal result;
-    
+
     /* -- */
 
     // something's changed, forget that we've given a warning about
@@ -2775,7 +2775,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     if (debug)
       {
-	System.err.println("userCustom ** entering wizardHook, field = " + 
+	System.err.println("userCustom ** entering wizardHook, field = " +
 			   field.getName() + ", op= " + operation);
       }
 
@@ -2855,7 +2855,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    // extra to pass back to the client.
 
 	    result = ReturnVal.success();
-	    
+
 	    result.addRescanField(this.getInvid(), userSchema.SIGNATURE);
 
 	    return result;
@@ -2894,7 +2894,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 		if (debug)
 		  {
-		    System.err.println("userCustom: deleting group element " + 
+		    System.err.println("userCustom: deleting group element " +
 				       gSession.viewObjectLabel(delVal));
 		  }
 
@@ -2906,8 +2906,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 		    if (debug)
 		      {
-			System.err.println("userCustom: I don't think " + 
-					   gSession.viewObjectLabel(delVal) + 
+			System.err.println("userCustom: I don't think " +
+					   gSession.viewObjectLabel(delVal) +
 					   " is the home group");
 		      }
 
@@ -2917,18 +2917,18 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		    return result;
 		  }
 
-		if (gSession.isWizardActive() && 
+		if (gSession.isWizardActive() &&
 		    gSession.getWizard() instanceof userHomeGroupDelWizard)
 		  {
 		    groupWizard = (userHomeGroupDelWizard) gSession.getWizard();
-		
+
 		    if (groupWizard.getState() == groupWizard.DONE)
 		      {
 			// ok, assume the wizard has taken care of getting everything prepped and
 			// approved for us.  An active wizard has approved the operation
-		
+
 			groupWizard.unregister();
-		
+
 			return null;
 		      }
 		    else
@@ -2937,10 +2937,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 			  {
 			    System.err.println("userCustom.wizardHook(): bad object");
 			  }
-		    
+
 			if (groupWizard.getState() != groupWizard.DONE)
 			  {
-			    System.err.println("userCustom.wizardHook(): bad state: " + 
+			    System.err.println("userCustom.wizardHook(): bad state: " +
 					       groupWizard.getState());
 			  }
 
@@ -2951,7 +2951,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 							  "a user object with an active wizard.");
 		      }
 		  }
-		else if (gSession.isWizardActive() && 
+		else if (gSession.isWizardActive() &&
 			 !(gSession.getWizard() instanceof userHomeGroupDelWizard))
 		  {
 		    return Ganymede.createErrorDialog("User Object Error",
@@ -2977,7 +2977,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		// that wizard.getStartDialog() returns will have the success code
 		// set to false, so whatever triggered us will prematurely exit,
 		// returning the wizard's dialog.
-	    
+
 		return groupWizard.respond(null);
 
 	      case DELELEMENTS:
@@ -3006,11 +3006,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	if (field.getID() == CATEGORY)
 	  {
-	    if (gSession.isWizardActive() && 
+	    if (gSession.isWizardActive() &&
 		gSession.getWizard() instanceof userCategoryWizard)
 	      {
 		userCategoryWizard uw = (userCategoryWizard) gSession.getWizard();
-		
+
 		if (uw.getState() == uw.DONE)
 		  {
 		    // ok, assume the wizard has taken care of getting everything prepped and
@@ -3024,7 +3024,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      {
 		if (param1 != null || !isDeleting())
 		  {
-		    return new userCategoryWizard(getGSession(), this, 
+		    return new userCategoryWizard(getGSession(), this,
 						  (Invid) getFieldValueLocal(userSchema.CATEGORY),
 						  (Invid) param1).respond(null);
 		  }
@@ -3048,7 +3048,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	// ok, we're doing a user rename.. check to see if we need to do a
 	// wizard
-    
+
 	// If this is a newly created user, we won't pester them about setting
 	// or changing the user name field.
 
@@ -3087,7 +3087,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		// ok, assume the wizard has taken care of getting
 		// everything prepped and approved for us.  An active
 		// wizard has approved the operation
-		
+
 		renameWizard.unregister();
 
 		// note that we don't have to return the rescan fields
@@ -3096,7 +3096,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		// here because the wizard task-completion code went ahead
 		// and called setValue on the user's name.. we'll trust
 		// that code to return the rescan indicators.
-		
+
 		return null;
 	      }
 	    else
@@ -3118,7 +3118,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 		if (renameWizard.getState() != renameWizard.DONE)
 		  {
-		    System.err.println("userCustom.wizardHook(): bad state: " + 
+		    System.err.println("userCustom.wizardHook(): bad state: " +
 				       renameWizard.getState());
 		  }
 
@@ -3162,7 +3162,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      {
 		throw new RuntimeException("Couldn't create userWizard " + ex.getMessage());
 	      }
-	
+
 	    // if we get here, the wizard was able to register itself.. go ahead
 	    // and return the initial dialog for the wizard.  The ReturnVal code
 	    // that wizard.respond() returns will have the success code
@@ -3193,7 +3193,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * Ganymede server, the process invokation should be placed here,
    * rather than in commitPhase1().<br><br>
    *
-   * Subclasses that override this method may wish to make this method 
+   * Subclasses that override this method may wish to make this method
    * synchronized.
    *
    * @see arlut.csd.ganymede.server.DBEditSet
@@ -3218,7 +3218,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       case DELETING:
 	deleteUserExternals();
 	break;
-	
+
       case EDITING:
 
 	// did the user's name change?
@@ -3353,7 +3353,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    if (createFilename == null)
 	      {
-		Ganymede.debug("userCustom.createUserExternals(): Couldn't find " + 
+		Ganymede.debug("userCustom.createUserExternals(): Couldn't find " +
 			       "ganymede.builder.scriptlocation property");
 		return;
 	      }
@@ -3365,7 +3365,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    if (debug)
 	      {
-		System.err.println("userCustom: createUserExternals: createFilename = " + 
+		System.err.println("userCustom: createUserExternals: createFilename = " +
 				   createFilename);
 	      }
 
@@ -3379,8 +3379,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		// we'll call our external script with the following
 		//
 		// parameters: <volumename/volume_directory> <username> <user id> <group id> <mapname> <owner>
-		
-		String execLine = createFilename + " " + volName + " " + 
+
+		String execLine = createFilename + " " + volName + " " +
 		  getLabel() + " " + id + " " + gid + " " + mapName + " " + ownerName;
 
 		if (debug)
@@ -3657,9 +3657,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      {
 		// make sure we've got the path separator at the end of
 		// deleteFilename, add our script name
-	    
+
 		deleteFilename = PathComplete.completePath(deleteFilename) + "scripts/user_deleter";
-	    
+
 		deleteHandler = new File(deleteFilename);
 	      }
 	    else
@@ -3696,8 +3696,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 		    if (result != 0)
 		      {
-			Ganymede.debug("Couldn't handle externals for deleting user " + name + 
-				       "\n" + deleteFilename + 
+			Ganymede.debug("Couldn't handle externals for deleting user " + name +
+				       "\n" + deleteFilename +
 				       " returned a non-zero result: " + result);
 		      }
 		  }
@@ -3783,7 +3783,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 		mapName = mapEntry.getOriginalMapName();
 		volumeId = mapEntry.getOriginalVolumeInvid();
-	    
+
 		oldVolumes.addElement(volumeId);
 		oldEntryMap.put(mapName, mapEntryInvid);
 		oldMapNames.addElement(mapName);
@@ -3817,7 +3817,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 		mapName = mapEntry.getMapName();
 		volumeId = mapEntry.getVolumeInvid();
-	    
+
 		newVolumes.addElement(volumeId);
 		newEntryMap.put(mapName, mapEntryInvid);
 		newMapNames.addElement(mapName);
@@ -3849,7 +3849,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    System.err.println("Checking map " + mapName + " for a volume change");
 	  }
-	
+
 	Invid oldMapEntryInvid = (Invid) oldEntryMap.get(mapName);
 	Invid newMapEntryInvid = (Invid) newEntryMap.get(mapName);
 
@@ -3957,13 +3957,13 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     /* -- */
 
     volumeObj = getSession().viewDBObject(oldVolume, true);
-    
+
     oldVolName = volumeObj.getLabel();
     oldVolPath = (String) volumeObj.getFieldValueLocal(volumeSchema.PATH);
     oldSysInvid = (Invid) volumeObj.getFieldValueLocal(volumeSchema.HOST);
     objects.addElement(oldSysInvid);
     sysObj = getSession().viewDBObject(oldSysInvid, true);
-    oldSysName = sysObj.getLabel();    
+    oldSysName = sysObj.getLabel();
 
     volumeObj = getSession().viewDBObject(newVolume);
 
@@ -3972,7 +3972,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     newSysInvid = (Invid) volumeObj.getFieldValueLocal(volumeSchema.HOST);
     objects.addElement(newSysInvid);
     sysObj = getSession().viewDBObject(newSysInvid);
-    newSysName = sysObj.getLabel();    
+    newSysName = sysObj.getLabel();
 
     Set<String> addresses = DBLog.calculateOwnerAddresses(objects, getSession());
 
@@ -4008,7 +4008,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     buffer.append("\n\n");
     buffer.append("Thanks for your cooperation.\nYour friend,\n\tGanymede.\n");
 
-    editset.logMail(addresses, 
+    editset.logMail(addresses,
 		    "User home directory on map " + mapName + " moved",
 		    buffer.toString());
   }
@@ -4047,9 +4047,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      {
 		// make sure we've got the path separator at the end of
 		// renameFilename, add our script name
-	    
+
 		renameFilename = PathComplete.completePath(renameFilename) + "scripts/directory_namer";
-	    
+
 		renameHandler = new File(renameFilename);
 	      }
 	    else
@@ -4086,8 +4086,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 		    if (result != 0)
 		      {
-			Ganymede.debug("Couldn't handle externals for renaming user " + orig + 
-				       " to " + newname + "\n" + renameFilename + 
+			Ganymede.debug("Couldn't handle externals for renaming user " + orig +
+				       " to " + newname + "\n" + renameFilename +
 				       " returned a non-zero result: " + result);
 		      }
 		    else
@@ -4097,17 +4097,17 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		  }
 		catch (InterruptedException ex)
 		  {
-		    Ganymede.debug("Couldn't handle externals for renaming user " + orig + 
-				   " to " + 
-				   newname + "\n" + 
+		    Ganymede.debug("Couldn't handle externals for renaming user " + orig +
+				   " to " +
+				   newname + "\n" +
 				   ex.getMessage());
 		  }
 	      }
 	    catch (IOException ex)
 	      {
-		Ganymede.debug("Couldn't handle externals for renaming user " + orig + 
-			       " to " + 
-			       newname + "\n" + 
+		Ganymede.debug("Couldn't handle externals for renaming user " + orig +
+			       " to " +
+			       newname + "\n" +
 			       ex.getMessage());
 	      }
 	  }
