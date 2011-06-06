@@ -66,13 +66,13 @@ import arlut.csd.ganymede.server.Ganymede;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class uses JDBC to connect to ARL:UT's Oracle databases to
+ * <p>This class uses JDBC to connect to ARL:UT's Oracle databases to
  * pull data from IRIS, so that we can do verifications for unique
  * user id over historical time, pull biographical details from the HR
- * databases, and etc.
+ * databases, and etc.</p>
  *
- * This class is obviously very specific to the ARL:UT environment,
- * and I don't imagine it would ever be of use to outside parties.
+ * <p>This class is obviously very specific to the ARL:UT environment,
+ * and I don't imagine it would ever be of use to outside parties.</p>
  *
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  */
@@ -262,16 +262,16 @@ public class IRISLink {
   }
 
   /**
-   * This method returns a badge code for the given username, if that
+   * <p>This method returns a badge code for the given username, if that
    * username is either currently in use or was ever in use over the
-   * period covered by the IRIS database record.
+   * period covered by the IRIS database record.</p>
    *
-   * We expect that truly old user names will eventually be aged out
+   * <p>We expect that truly old user names will eventually be aged out
    * of the database, but we want to avoid re-using usernames for at
-   * least 5 years.
+   * least 5 years.</p>
    *
-   * If the username was not found in the database, a null value will
-   * be returned.
+   * <p>If the username was not found in the database, a null value will
+   * be returned.</p>
    */
 
   public static String findHistoricalBadge(String username)
@@ -347,17 +347,17 @@ public class IRISLink {
   }
 
   /**
-   * This method returns a username for the given badge code, if that
+   * <p>This method returns a username for the given badge code, if that
    * badge code is on record in the IRIS database and has a network id
-   * (a Ganymede username) associated with it.
+   * (a Ganymede username) associated with it.</p>
    *
-   * We expect that truly old user names will eventually be aged out
+   * <p>We expect that truly old user names will eventually be aged out
    * of the database, but we want to avoid re-using usernames for at
-   * least 5 years.
+   * least 5 years.</p>
    *
-   * If the badge code was not found in the database, or if no network
+   * <p>If the badge code was not found in the database, or if no network
    * id was retained for that badge code, a null value will be
-   * returned.
+   * returned.</p>
    */
 
   public static String findHistoricalUsername(String badge)
@@ -413,11 +413,11 @@ public class IRISLink {
   }
 
   /**
-   * This method returns a human readable name for the employee who is
-   * associated with the given username in the IRIS database.
+   * <p>This method returns a human readable name for the employee who is
+   * associated with the given username in the IRIS database.</p>
    *
-   * If the username was not found in the database, a null value will
-   * be returned.
+   * <p>If the username was not found in the database, a null value will
+   * be returned.</p>
    */
 
   public static String findHistoricalEmployeeName(String username)
