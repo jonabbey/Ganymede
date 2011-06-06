@@ -8,9 +8,9 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2011
    The University of Texas at Austin
 
@@ -73,26 +73,47 @@ import arlut.csd.Util.StringUtils;
 public class GanymedeUncaughtExceptionHandler implements Thread.UncaughtExceptionHandler {
 
   /**
-   * <p>We call this static method through Java Reflection in the
-   * Ganymede server startup path.  That allows the Ganymede server
-   * startup to dynamically decide whether
-   * GanymedeUncaughtExceptionHandler was compiled or not, without
-   * making the compilation of arlut.csd.ganymede.server.Ganymede
-   * itself dependent on whether or not this class was compiled at
-   * build time.</p>
+   * <p>The entrypoint used by Thread.UncaughtExceptionHandler</p>
    */
-
-  public static void setup()
-  {
-    Thread.setDefaultUncaughtExceptionHandler(new GanymedeUncaughtExceptionHandler());
-  }
-
-  // ---
 
   public void uncaughtException(Thread t, Throwable ex)
   {
+    this.reportException(t, null, ex);
+  }
+
+  /**
+   * <p>Used to log and report the exception passed.</p>
+   */
+
+  public void reportException(Throwable ex)
+  {
+    this.reportException(Thread.currentThread(), null, ex);
+  }
+
+  /**
+   * <p>Used to log and report the exception passed with the context
+   * message contextMesg.</p>
+   */
+
+  public void reportException(String contextMesg, Throwable ex)
+  {
+    this.reportException(Thread.currentThread(), contextMesg, ex);
+  }
+
+  /**
+   * <p>Used to report an exception ex on thread t with context
+   * message contextMesg.</p>
+   *
+   * <p>If reportException() somehow caused the exception passed in,
+   * we will not re-process it in full, but instead will simply print
+   * it to stderr in an attempt to avoid perseveration on the
+   * exception.</p>
+   */
+
+  public void reportException(Thread t, String contextMesg, Throwable ex)
+  {
     // We need to make sure that we didn't somehow cause the exception
-    // we're responding to by calling Ganymede.logError().
+    // we're responding.
     //
     // If we detect that this method previously participated in
     // throwing this exception, we'll just print it out and return,
@@ -134,6 +155,19 @@ public class GanymedeUncaughtExceptionHandler implements Thread.UncaughtExceptio
 	  }
       }
 
-    Ganymede.logError(ex);
+    String mesg;
+
+    if (contextMesg != null)
+      {
+	mesg = contextMesg + "\n\n" + Ganymede.stackTrace(ex);
+      }
+    else
+      {
+	mesg = Ganymede.stackTrace(ex);
+      }
+
+    GanymedeAdmin.logAppend(mesg);
+
+    System.err.println(mesg);
   }
 }

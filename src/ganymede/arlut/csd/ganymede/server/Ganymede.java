@@ -400,6 +400,14 @@ public class Ganymede {
 
   private static Hashtable upgradeClassMap = null;
 
+  /**
+   * <p>Uncaught exception handler in use on the Ganymede server.
+   * Used to log exceptions and send details about them to the email
+   * addresses in the bugReportAddressProperty, if defined.</p>
+   */
+
+  private static GanymedeUncaughtExceptionHandler defaultHandler = null;
+
   /* -- */
 
   /**
@@ -1624,48 +1632,9 @@ public class Ganymede {
 
   private static void setupUncaughtExceptionHandler()
   {
-    // we do this via Reflection so that this class won't have a
-    // static dependency on a class which can only be compiled/loaded
-    // on a system running Java 5.
-    
-    try
-      {
-	Class handlerClass = Class.forName("arlut.csd.ganymede.server.GanymedeUncaughtExceptionHandler");
-	Method setupMethod = handlerClass.getMethod("setup", new Class[0]);
-	setupMethod.invoke(null, (Object[]) null);
+    Ganymede.defaultHandler = new GanymedeUncaughtExceptionHandler();
 
-	System.err.println("GanymedeUncaughtExceptionHandler initialized");
-      }
-    catch (ClassNotFoundException ex)
-      {
-	System.err.println("GanymedeUncaughtExceptionHandler not present");
-	return;
-      }
-    catch (LinkageError ex)
-      {
-	System.err.println("GanymedeUncaughtExceptionHandler not supported");
-	return;
-      }
-    catch (IllegalAccessException ex)
-      {
-	System.err.println("IllegalAccessException loading GanymedeUncaughtExceptionHandler");
-	return;
-      }
-    catch (InvocationTargetException ex)
-      {
-	System.err.println("InvocationTargetException loading GanymedeUncaughtExceptionHandler");
-	return;
-      }
-    catch (NoSuchMethodException ex)
-      {
-	System.err.println("NoSuchMethodException loading GanymedeUncaughtExceptionHandler");
-	return;
-      }
-    catch (SecurityException ex)
-      {
-	System.err.println("SecurityException loading GanymedeUncaughtExceptionHandler");
-	return;
-      }
+    Thread.setDefaultUncaughtExceptionHandler(Ganymede.defaultHandler);
   }
 
   /**
