@@ -480,11 +480,6 @@ public class IRISLink {
   {
     Connection myConn = null;
 
-    while (badge.length() < 5)
-      {
-	badge = "0" + badge;
-      }
-
     try
       {
 	myConn = getConnection();
@@ -492,7 +487,7 @@ public class IRISLink {
 	String queryString = "select ARL_PHONE from HR_EMPLOYEES_GA_VW where BADGE_NUMBER = ?";
 	PreparedStatement queryName = myConn.prepareStatement(queryString);
 
-	queryName.setString(1, badge);
+	queryName.setString(1, bufBadge(badge));
 
 	ResultSet rs = queryName.executeQuery();
 
@@ -594,7 +589,7 @@ public class IRISLink {
 	String queryString = "select BADGE_NUMBER from HR_EMPLOYEES_GA_VW where BADGE_NUMBER = ?";
 	PreparedStatement queryName = myConn.prepareStatement(queryString);
 
-	queryName.setString(1, badge);
+	queryName.setString(1, bufBadge(badge));
 
 	ResultSet rs = queryName.executeQuery();
 
@@ -626,6 +621,24 @@ public class IRISLink {
 	  {
 	  }
       }
+  }
+
+  /**
+   * <p>Badge numbers in IRIS are five characters with zero
+   * prefixing.</p>
+   *
+   * <p>This method does the zero fill to expand the badge to five
+   * characters.</p>
+   */
+
+  public static String bufBadge(String badge)
+  {
+    while (badge.length() < 5)
+      {
+	badge = "0" + badge;
+      }
+
+    return badge;
   }
 
   public static void main(String args[])
