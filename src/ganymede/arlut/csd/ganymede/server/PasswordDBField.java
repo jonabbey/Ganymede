@@ -1522,10 +1522,10 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /** 
-   * This server-side only method returns the Apache md5crypt()-encrypted
-   * hashed password text.
+   * <p>This server-side only method returns the Apache md5crypt()-encrypted
+   * hashed password text.</p>
    *
-   * This method is never meant to be available remotely. 
+   * <p>This method is never meant to be available remotely.</p>
    */
 
   public String getApacheMD5CryptText()
@@ -1679,6 +1679,8 @@ public class PasswordDBField extends DBField implements pass_field {
    *
    * <p>See <a href="http://people.redhat.com/drepper/sha-crypt.html">http://people.redhat.com/drepper/sha-crypt.html</a>
    * for full details of the hash format this method is expecting.</p>
+   *
+   * <p>This method is never meant to be available remotely.</p>
    */
 
   public String getShaUnixCryptText()
@@ -1718,13 +1720,15 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /** 
-   * <p>Method to obtain the SALT for a stored crypted password.  If
-   * the client is going to submit a pre-crypted password for
-   * comparison via matchCryptText(), it must be salted by the salt
-   * returned by this method.</p>
+   * <p>Method to obtain the SALT for a stored (traditional Unix)
+   * crypted password.  If the client is going to submit a pre-crypted
+   * password for comparison via matchCryptText(), it must be salted
+   * by the salt returned by this method.</p>
    * 
    * <p>If the password is not stored in crypt() form, null will be
    * returned.</p>
+   *
+   * <p>This method is never meant to be available remotely.</p>
    */
 
   public String getSalt()
@@ -1747,6 +1751,8 @@ public class PasswordDBField extends DBField implements pass_field {
    *
    * <p>If the password is not stored in md5crypt() form,
    * null will be returned.</p>
+   *
+   * <p>This method is never meant to be available remotely.</p>
    */
 
   public String getMD5Salt()
@@ -1790,6 +1796,8 @@ public class PasswordDBField extends DBField implements pass_field {
    *
    * <p>If the password is not stored in apacheMd5crypt() form,
    * null will be returned.</p>
+   *
+   * <p>This method is never meant to be available remotely.</p>
    */
 
   public String getApacheMD5Salt()
