@@ -2724,7 +2724,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (settingShaUnixCrypt)
       {
-	if (!ShaUnixCryptText.startsWith("$5$") && !ShaUnixCryptText.startsWith("$6$"))
+	if (!Sha256Crypt.verifyHashTextFormat(shaUnixCryptText) && !Sha512Crypt.verifyHashTextFormat(shaUnixCryptText))
 	  {
 	    // "Server: Error in PasswordDBField.setAllHashes()"
 	    // "The hash text passed to setShaUnixCryptPass(), "{0}", is not a well-formed, SHA Unix Crypt hash text"
