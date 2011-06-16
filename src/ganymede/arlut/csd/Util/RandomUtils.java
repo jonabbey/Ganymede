@@ -71,12 +71,12 @@ public class RandomUtils {
   private static final String charsetC = "23456789abcdefghijkmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
   /**
-   * This method returns a random 32 bit hex string, used to ensure
-   * that a string including it is random.
+   * <p>This method returns a random 32 bit hex string, used to ensure
+   * that a string including it is random.</p>
    *
-   * The random number generator for this method is low security, and
+   * <p>The random number generator for this method is low security, and
    * should not be used for cryptographic purposes where
-   * unpredictability is paramount.
+   * unpredictability is paramount.</p>
    */
 
   public static String getRandomHex()
@@ -85,15 +85,15 @@ public class RandomUtils {
   }
 
   /**
-   * This method takes a string, adds a random salt to it, and returns
-   * it.
+   * <p>This method takes a string, adds a random salt to it, and returns
+   * it.</p>
    *
-   * The random number generator for this method is low security, and
+   * <p>The random number generator for this method is low security, and
    * should not be used for cryptographic purposes where
-   * unpredictability is paramount.
+   * unpredictability is paramount.</p>
    *
-   * Generally, salts need not be unpredictable, as long as they are
-   * not often repeated.
+   * <p>Generally, salts need not be unpredictable, as long as they are
+   * not often repeated.</p>
    */
 
   public static String getSaltedString(String in)
