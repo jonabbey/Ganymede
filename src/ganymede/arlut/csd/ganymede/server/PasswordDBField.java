@@ -1731,7 +1731,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * <p>This method is never meant to be available remotely.</p>
    */
 
-  public String getSalt()
+  private String getSalt()
   {
     if (cryptedPass != null)
       {
@@ -1745,9 +1745,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   /** 
    * <p>Method to obtain the SALT for a stored OpenBSD-style
-   * md5crypt()'ed password.  If the client is going to submit a
-   * pre-crypted password for comparison via matchMD5CryptText(), it
-   * must be salted by the salt returned by this method.</p>
+   * md5crypt()'ed password.</p>
    *
    * <p>If the password is not stored in md5crypt() form,
    * null will be returned.</p>
@@ -1755,7 +1753,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * <p>This method is never meant to be available remotely.</p>
    */
 
-  public String getMD5Salt()
+  private String getMD5Salt()
   {
     if (getFieldDef().isMD5Crypted() && md5CryptPass != null)
       {
@@ -1789,10 +1787,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   /** 
    * <p>Method to obtain the SALT for a stored Apache-style
-   * md5crypt()'ed password.  If the client is going to submit a
-   * pre-crypted Apache password for comparison via
-   * matchMD5CryptText(), it must be salted by the salt returned by
-   * this method.</p>
+   * md5crypt()'ed password.</p>
    *
    * <p>If the password is not stored in apacheMd5crypt() form,
    * null will be returned.</p>
@@ -1800,7 +1795,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * <p>This method is never meant to be available remotely.</p>
    */
 
-  public String getApacheMD5Salt()
+  private String getApacheMD5Salt()
   {
     if (getFieldDef().isApacheMD5Crypted() && apacheMd5CryptPass != null)
       {
