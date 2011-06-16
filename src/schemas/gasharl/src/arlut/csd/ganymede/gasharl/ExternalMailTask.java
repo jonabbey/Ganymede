@@ -197,14 +197,14 @@ public class ExternalMailTask implements Runnable {
   }
 
   /**
-  * <p>Checks the users external account expiration date</p>
-  *
-  * <ul>
-  * <li>If 1 month before, we assign a new set of credentials, and save old ones.</li>
-  * <li>If 1 day before, we send a warning letter.</li>
-  * <li>If expired, we remove old ones, and reset exp date, 6 months ahead.</li>
-  * </ul>
-  */
+   * <p>Checks the users external account expiration date</p>
+   *
+   * <ul>
+   * <li>If 1 month before, we assign a new set of credentials, and save old ones.</li>
+   * <li>If 1 day before, we send a warning letter.</li>
+   * <li>If expired, we remove old ones, and reset exp date, 6 months ahead.</li>
+   * </ul>
+   */
 
   private void checkExpiringCredentials() throws InterruptedException, NotLoggedInException
   {
@@ -386,7 +386,6 @@ public class ExternalMailTask implements Runnable {
 
     Ganymede.log.sendMail(null, titleString, messageString, DBLog.MailMode.USERS, objVect);
   }
-
 
   /**
    * <p>Clear out old credentials and reset the expiration date.</p>
