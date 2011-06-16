@@ -273,14 +273,10 @@ public class ExternalMailTask implements Runnable {
 	    continue;
 	  }
 
-	// on the expiration day, we remove old credentials.
+	// on or after the expiration date, we clear the old
+	// credentials and assign a new expiration date in the future.
 
-	lowerBound.setTime(currentTime);
-	lowerBound.add(Calendar.DATE, -1);
-
-	upperBound.setTime(currentTime);
-
-	if (mailExpDate.after(lowerBound.getTime()) && mailExpDate.before(upperBound.getTime()))
+	if (mailExpDate.before(currentTime))
 	  {
 	    clearOldCredentials(object);
 	    continue;
