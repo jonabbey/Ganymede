@@ -362,6 +362,11 @@ public final class Sha512Crypt
       }
   }
 
+  /**
+   * <p>Returns true if sha512CryptText is a valid Sha512Crypt hashtext,
+   * false if not.</p>
+   */
+
   public static final boolean verifyHashTextFormat(String sha512CryptText)
   {
     if (!sha512CryptText.startsWith(sha512_salt_prefix))

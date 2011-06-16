@@ -349,6 +349,11 @@ public final class Sha256Crypt
       }
   }
 
+  /**
+   * <p>Returns true if sha256CryptText is a valid Sha256Crypt hashtext,
+   * false if not.</p>
+   */
+
   public static final boolean verifyHashTextFormat(String sha256CryptText)
   {
     if (!sha256CryptText.startsWith(sha256_salt_prefix))
