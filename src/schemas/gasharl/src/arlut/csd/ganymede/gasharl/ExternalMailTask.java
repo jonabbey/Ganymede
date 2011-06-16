@@ -13,7 +13,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -52,6 +52,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.GregorianCalendar;
+import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
@@ -82,7 +83,6 @@ import arlut.csd.Util.RandomUtils;
 ------------------------------------------------------------------------------*/
 
 /**
- *
  * This task is run nightly to check all user accounts in Ganymede
  * for their External Mail expiration time.
  *
@@ -96,8 +96,8 @@ public class ExternalMailTask implements Runnable {
 
   /* -- */
 
-  GanymedeSession mySession = null;
-  Thread currentThread = null;
+  private GanymedeSession mySession = null;
+  private Thread currentThread = null;
 
   /**
    *
@@ -143,7 +143,7 @@ public class ExternalMailTask implements Runnable {
 
 	ReturnVal retVal = mySession.openTransaction(ExternalMailTask.name);
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    Ganymede.debug("ExternalMail Task: Couldn't open transaction");
 	    return;
@@ -157,7 +157,7 @@ public class ExternalMailTask implements Runnable {
 
 	retVal = mySession.commitTransaction();
 
-	if (retVal != null && !retVal.didSucceed())
+	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    // if doNormalProcessing is true, the
 	    // transaction was not cleared, but was
@@ -197,18 +197,18 @@ public class ExternalMailTask implements Runnable {
   }
 
   /**
-  * Checks the users external account expiration date
-  * If 1 month before, we assign a new set of credentials, and save old ones.
-  * If 1 day before, we send a warning letter.
-  * If expired, we remove old ones, and reset exp date, 6 months ahead.
+  * <p>Checks the users external account expiration date</p>
+  *
+  * <ul>
+  * <li>If 1 month before, we assign a new set of credentials, and save old ones.</li>
+  * <li>If 1 day before, we send a warning letter.</li>
+  * <li>If expired, we remove old ones, and reset exp date, 6 months ahead.</li>
+  * </ul>
   */
 
   private void checkExpiringCredentials() throws InterruptedException, NotLoggedInException
   {
     Query q;
-    Vector results;
-    Result result;
-    Invid invid;
     DBObject object;
     Date currentTime = new Date();
     Calendar lowerBound = new GregorianCalendar();
@@ -225,24 +225,16 @@ public class ExternalMailTask implements Runnable {
     
     q = new Query(SchemaConstants.UserBase, matchNode, false);
     
-    results = mySession.internalQuery(q);
-    
-    en = results.elements();
-    
-    while (en.hasMoreElements())
+    for (Result result: mySession.internalQuery(q))
       {
 	if (currentThread.isInterrupted())
 	  {
 	    throw new InterruptedException("scheduler ordering shutdown");
 	  }
 	    
-	result = (Result) en.nextElement();
+	object = mySession.getSession().viewDBObject(result.getInvid());
 
-	invid = result.getInvid();
-
-	object = mySession.getSession().viewDBObject(invid);
-
-	if (object != null && object.isInactivated())
+	if (object == null || object.isInactivated())
 	  {
 	    continue;
 	  }
@@ -306,7 +298,7 @@ public class ExternalMailTask implements Runnable {
   {
     Vector objVect = new Vector();
 
-    objVect.addElement(userObject.getInvid());
+    objVect.add(userObject.getInvid());
 
     String mailUsername = (String) userObject.getFieldValueLocal(userSchema.MAILUSER);
     PasswordDBField mailPasswordField = (PasswordDBField) userObject.getField(userSchema.MAILPASSWORD2);
@@ -331,8 +323,9 @@ public class ExternalMailTask implements Runnable {
 
 
   /**
-   * <p>Clear out old credentials and reset the expiration date
-   * send email to the user's and admin groups' email addresses.</p>
+   * <p>Clear out old credentials and reset the expiration date.</p>
+   *
+   * <p>Send email to the user's and admin groups' email addresses.</p>
    */
 
   private ReturnVal clearOldCredentials(DBObject userObject)
@@ -355,7 +348,7 @@ public class ExternalMailTask implements Runnable {
 	Calendar myCal = new GregorianCalendar();
 	myCal.add(Calendar.DATE, 168); // 24 weeks from today.
 
-	result = ReturnVal.merge(result, mailExpDateField.setValueLocal(myCal.getTime()));
+	result = mailExpDateField.setValueLocal(myCal.getTime());
 
 	if (!ReturnVal.didSucceed(result))
 	  {
@@ -378,7 +371,7 @@ public class ExternalMailTask implements Runnable {
 
 	Vector objVect = new Vector();
 
-	objVect.addElement(userObject.getInvid());
+	objVect.add(userObject.getInvid());
 
 	String mailUsername = (String) userObject.getFieldValueLocal(userSchema.MAILUSER);
 	PasswordDBField newPasswordField = (PasswordDBField) userObject.getField(userSchema.MAILPASSWORD2);
