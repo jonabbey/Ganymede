@@ -97,23 +97,6 @@ public interface pass_field extends db_field {
   boolean allowed(char c) throws RemoteException;
 
   /**
-   * <p>Returns true if the password stored in this field is hash-crypted
-   * using the traditional Unix Crypt algorithm.</p>
-   *
-   * <p>NB: This method is part of the pass_field client API for the
-   * PasswordDBField class, but it only returns true if the server is
-   * holding a traditional Unix crypt hash.  We don't have comparable
-   * methods for other hash formats, and the client could always query
-   * the field definition using the DBObjectBase base_field remote
-   * API, in any case.  We should probably ditch this method from the
-   * pass_field rmi interface.</p>
-   *
-   * @deprecated
-   */
-
-  boolean crypted() throws RemoteException;
-
-  /**
    * <p>Authenticates a provided plaintext password against the stored
    * contents of this password field.</p>
    *
