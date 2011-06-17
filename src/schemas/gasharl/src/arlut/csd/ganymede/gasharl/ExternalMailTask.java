@@ -246,7 +246,9 @@ public class ExternalMailTask implements Runnable {
 	    continue;
 	  }
 
-	// four weeks before expiration, assign new credentials.
+	// four weeks before expiration, assign new credentials and
+	// send mail about that.  the old credentials are kept and
+	// both are usable until the old ones are actually expired.
 
 	lowerBound.setTime(currentTime);
 	lowerBound.add(Calendar.DATE, 27);
@@ -285,9 +287,15 @@ public class ExternalMailTask implements Runnable {
   }
 
   /**
-   * <p>Assigns a new set of random external credentials, Email is
-   * sent from server at commit time by the userCustom.preCommitHook()
-   * method.</p>
+   * <p>Assigns a new set of random external credentials and triggers
+   * email describing the change to the user.
+   *
+   * <p>Note that the password text is held in a PasswordDBField, and
+   * so would not ordinarily be sent over email through Ganymede's
+   * normal transaction email mechanism.  The userCustom class
+   * controlling the gasharl User object contains custom logic to
+   * describe the credential change and the reason for it in the
+   * userCustom.preCommitHook() method.</p>
    */
 
   private ReturnVal assignNewCredentials(DBObject userObject)
@@ -306,13 +314,11 @@ public class ExternalMailTask implements Runnable {
 	StringDBField usernameField = (StringDBField) editUserObject.getField(userSchema.MAILUSER);
 	PasswordDBField passwordField = (PasswordDBField) editUserObject.getField(userSchema.MAILPASSWORD2);
 
-	if (editUserObject.isDefined(userSchema.MAILUSER)
-            && editUserObject.isDefined(userSchema.MAILPASSWORD2))
+	if (editUserObject.isDefined(userSchema.MAILUSER) &&
+	    editUserObject.isDefined(userSchema.MAILPASSWORD2))
 	  {
-	    StringDBField oldUsernameField = (StringDBField)
-	      editUserObject.getField(userSchema.OLDMAILUSER);
-	    PasswordDBField oldPasswordField = (PasswordDBField)
-	      editUserObject.getField(userSchema.OLDMAILPASSWORD2);
+	    StringDBField oldUsernameField = (StringDBField) editUserObject.getField(userSchema.OLDMAILUSER);
+	    PasswordDBField oldPasswordField = (PasswordDBField) editUserObject.getField(userSchema.OLDMAILPASSWORD2);
 
 	    // Copy the (now deprecated) values to the
 	    // oldUsernameField and oldPasswordField fields
@@ -336,16 +342,15 @@ public class ExternalMailTask implements Runnable {
 	  }
 
 	// Set new values.
-	result = ReturnVal.merge(result,
-				 usernameField.setValueLocal(RandomUtils.getRandomUsername()));
+
+	result = ReturnVal.merge(result, usernameField.setValueLocal(RandomUtils.getRandomUsername()));
 
 	if (!ReturnVal.didSucceed(result))
 	  {
 	    return result;
 	  }
 
-	result = ReturnVal.merge(result,
-                   passwordField.setPlainTextPass(RandomUtils.getRandomPassword(20)));
+	result = ReturnVal.merge(result, passwordField.setPlainTextPass(RandomUtils.getRandomPassword(20)));
 
 	return result;
       }
