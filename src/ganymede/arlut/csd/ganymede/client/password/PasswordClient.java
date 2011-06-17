@@ -2,17 +2,18 @@
 
    PasswordClient.java
 
-   The core of a gui/text password changing client for Ganymede.
-   
+   This class provides both the core of Ganymede password changing
+   clients and a command line client.
+
    Created: 28 January 1998
 
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2010
+
+   Copyright (C) 1996 - 2011
    The University of Texas at Austin
 
    Contact information
@@ -73,10 +74,17 @@ import arlut.csd.ganymede.rmi.pass_field;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * <p>The core of a user password changing applet / application, whether
+ * command line or GUI.</p>
+ *
+ * <p>This class can be invoked from the command line to act as an
+ * interactive CLI password change client.</p>
+ */
+
 public class PasswordClient implements ClientListener {
 
   final static boolean debug = false;
-  static String url;
 
   /**
    * TranslationService object for handling string localization in
@@ -85,16 +93,20 @@ public class PasswordClient implements ClientListener {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.password.PasswordClient");
 
+  /**
+   * URL of the Ganymede server's RMI port to connect to.
+   */
+
+  private static String url;
+
   // ---
 
   /**
-   *
-   * A ClientBase object forms the core of any Ganymede
+   * <p>A ClientBase object forms the core of any Ganymede
    * client.  It does the work to get us connected and
    * logged into the server, and serves as a reference
    * point for the server to talk to if something
-   * unusual happens.
-   *
+   * unusual happens.</p>
    */
 
   ClientBase client = null;
@@ -107,15 +119,15 @@ public class PasswordClient implements ClientListener {
   }
 
   /**
+   * <p>This method actually does the work of logging into the server,
+   * changing the password, committing the transaction, and
+   * disconnecting.</p>
    *
-   * This method actually does the work of logging into the server,
-   * changing the password, committing the transaction, and disconnecting.
-   *
-   * There are three basic steps involved in changing the password.
+   * <p>There are three basic steps involved in changing the password.
    * First, the client must log on to the system, getting a handle on
    * the Session object.  Next, we get a handle on the password field
    * of the user object, and change the value.  Finally, we commit the
-   * transaction.
+   * transaction.</p>
    */
 
   public boolean changePassword(String username, String oldPassword, String newPassword)
@@ -144,12 +156,14 @@ public class PasswordClient implements ClientListener {
       {
 	// First we need a referrence to a Session object.  This is
 	// accomplished through the ClientBase's login method.
+
 	session = client.login(username, oldPassword);
 
 	// If the username/password combination doesn't match, then
 	// the session object will be null.  For the purposes of this
 	// client, it is suficient to just return false and require
 	// the user to rerun the password client if the session is null.
+
 	if (session == null)
 	  {
 	    if (debug)
@@ -157,7 +171,7 @@ public class PasswordClient implements ClientListener {
 		System.out.println(" logged in, looking for :" + username + ":");
 	      }
 
-            // "Wrong password."	    
+            // "Wrong password."
 	    error(ts.l("changePassword.wrong_pass"));
 	    return false;
 	  }
@@ -167,7 +181,7 @@ public class PasswordClient implements ClientListener {
 	// tranaction.
 
 	session.openTransaction("PasswordClient");
-	
+
 	// In order to change the password, we must first get a handle
 	// on the user object.  This is accomplished through the
 	// server's Query engine.
@@ -175,118 +189,97 @@ public class PasswordClient implements ClientListener {
 	QueryResult results = session.query(new Query(SchemaConstants.UserBase,
 						      new QueryDataNode(SchemaConstants.UserUserName,
 									QueryDataNode.EQUALS, username)));
-	
-	if (results != null && results.size() == 1)
+
+	if (results == null)
+	  {
+	    // "No user {0} found, can''t change password."
+	    System.out.println(ts.l("changePassword.no_such_user", username));
+
+	    return false;
+	  }
+	else if (results.size() != 1)
+	  {
+	    System.out.println("Error, found multiple matching user records.. can't happen?");
+
+	    return false;
+	  }
+
+	if (debug)
+	  {
+	    System.out.println("Changing password");
+	  }
+
+	// Invid's are id numbers for objects, the basic way to
+	// referrencing objects in the server.
+
+	Invid invid = results.getInvid(0);
+
+	// To edit the object, we must check out the user through
+	// the Session object.
+
+	ReturnVal retVal = session.edit_db_object(invid);
+	db_object user = (db_object) retVal.getObject();
+
+	// If edit_db_object returns a null object, it usually
+	// means someone else is editing the object.  It could
+	// also mean that the user doesn't have sufficient
+	// permission to edit the object.
+
+	if (user == null)
+	  {
+	    // "Could not get handle on user object.  Someone else might be editing it."
+	    error(ts.l("changePassword.locked"));
+	    session.abortTransaction();
+	    return false;
+	  }
+
+	// pass_field is a subclass of db_field, which represents
+	// the fields in each object.  We need a referrence to the
+	// user's password field, so we can change it.
+
+	pass_field pass = (pass_field)user.getField(SchemaConstants.UserPassword);
+
+	// Changes to objects on the server return a ReturnVal.
+	// ReturnVal contains information about the change just
+	// made, including a list of fields that may have changed
+	// as a result of this change, or dialogs prompting the
+	// user for more information.
+
+	// For the purposes of this application, we don't care
+	// about the extra stuff in ReturnVal; we only want to
+	// know if the password change worked or not.
+
+	ReturnVal returnValue = pass.setPlainTextPass(newPassword);
+
+	if (!ReturnVal.didSucceed(returnValue))
 	  {
 	    if (debug)
 	      {
-		System.out.println(" Changing password");
+		error("It didn't work.");
 	      }
-	    
-	    // Invid's are id numbers for objects, the basic way to
-	    // referrencing objects in the server.
-	    Invid invid = results.getInvid(0);
-	    
-	    // To edit the object, we must check out the user through
-	    // the Session object.
 
-	    ReturnVal retVal = session.edit_db_object(invid);
-	    db_object user = (db_object) retVal.getObject(); 
+	    String resultText = returnValue.getDialogText();
 
-	    // If edit_db_object returns a null object, it usually
-	    // means someone else is editing the object.  It could
-	    // also mean that the user doesn't have sufficient
-	    // permission to edit the object.
-
-	    if (user == null)
+	    if (resultText != null && !resultText.equals(""))
 	      {
-                // "Could not get handle on user object.  Someone else might be editing it."
-		error(ts.l("changePassword.locked"));
-		session.abortTransaction();
-		client.disconnect();
-		return false;
+		System.err.println(resultText);
 	      }
 
-	    // pass_field is a subclass of db_field, which represents
-	    // the fields in each object.  We need a referrence to the
-	    // user's password field, so we can change it.
-	    pass_field pass = (pass_field)user.getField(SchemaConstants.UserPassword);
-	    
-	    // Changes to objects on the server return a ReturnVal.
-	    // ReturnVal contains information about the change just
-	    // made, including a list of fields that may have changed
-	    // as a result of this change, or dialogs prompting the
-	    // user for more information.
-
-	    // For the purposes of this application, we don't care
-	    // about the extra stuff in ReturnVal; we only want to
-	    // know if the password change worked or not.
-	    ReturnVal returnValue = pass.setPlainTextPass(newPassword);
-
-	    // A null value means success.
-	    if (returnValue == null)
-	      {
-		if (debug)
-		  {
-		    error("It worked, returnValue is null");
-		  }
-	      }
-	    // If ReturnVal is not null, the didSucceed() boolean is
-	    // set to indicate failure or success.
-	    else if (returnValue.didSucceed())
-	      {
-		if (debug)
-		  {
-		    error("returnValue is not null, but it did suceed.");
-		  }
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    error("It didn't work.");
-		  }
-		
-		client.disconnect();
-
-		String resultText = returnValue.getDialogText();
-
-		if (resultText != null && !resultText.equals(""))
-		  {
-		    System.err.println(resultText);
-		  }
-
-		return false;
-	      }
-	  }
-	else
-	  {
-	    if (results == null)
-	      {
-                // "No user {0} found, can''t change password."
-		System.out.println(ts.l("changePassword.no_such_user", username));
-	      }
-	    else
-	      {
-		System.out.println("Error, found multiple matching user records.. can't happen?");
-	      }
-	    
-	    client.disconnect();
 	    return false;
 	  }
 
 	// After making changes to the database, the session changes
 	// must be committed.  This also returns a ReturnVal.
+
 	ReturnVal rv = session.commitTransaction();
-	
-	if (rv == null || rv.didSucceed())
+
+	if (ReturnVal.didSucceed(rv))
 	  {
 	    if (debug)
 	      {
 		System.out.println("It worked.");
 	      }
-	    
-	    client.disconnect();
+
 	    return true;
 	  }
 	else
@@ -298,16 +291,25 @@ public class PasswordClient implements ClientListener {
       {
 	error("Caught remote exception in authenticate: " + ex);
       }
-    
+    finally
+      {
+	try
+	  {
+	    client.disconnect();
+	  }
+	catch (RemoteException ex)
+	  {
+	  }
+      }
+
     return false;
   }
-  
+
   /**
+   * <p>Send output to this.</p>
    *
-   * Send output to this.  
-   *
-   * This just prints out the message, but could be directed to a
-   * dialog or something later.
+   * <p>This just prints out the message, but could be directed to a
+   * dialog or something later.</p>
    */
 
   public void error(String message)
@@ -324,15 +326,13 @@ public class PasswordClient implements ClientListener {
   // ***
 
   /**
+   * <p>Called when the server forces a disconnect.</p>
    *
-   * Called when the server forces a disconnect.<br><br>
-   *
-   * Call getMessage() on the ClientEvent to get the
-   * reason for the disconnect.
+   * <p>Call getMessage() on the ClientEvent to get the reason for the
+   * disconnect.</p>
    *
    * @see arlut.csd.ganymede.client.ClientListener
    * @see arlut.csd.ganymede.client.ClientEvent
-   *
    */
 
   public void disconnected(ClientEvent e)
@@ -342,17 +342,14 @@ public class PasswordClient implements ClientListener {
   }
 
   /**
+   * <p>Called when the ClientBase needs to report something to the
+   * client.  The client is expected to then put up a dialog or do
+   * whatever else is appropriate.</p>
    *
-   * Called when the ClientBase needs to report something
-   * to the client.  The client is expected to then put
-   * up a dialog or do whatever else is appropriate.<br><br>
-   *
-   * Call getMessage() on the ClientEvent to get the
-   * message.
+   * <p>Call getMessage() on the ClientEvent to get the message.</p>
    *
    * @see arlut.csd.ganymede.client.ClientListener
    * @see arlut.csd.ganymede.client.ClientEvent
-   *
    */
 
   public void messageReceived(ClientEvent e)
@@ -362,12 +359,10 @@ public class PasswordClient implements ClientListener {
   }
 
   /**
-   *
-   * If this class is run from the command line, it will act as a
-   * text-mode password client.
-   *
+   * <p>If this class is run from the command line, it will act as a
+   * text-mode password client.</p>
    */
-  
+
   public static void main(String argv[])
   {
     PasswordClient client = null;
@@ -377,6 +372,7 @@ public class PasswordClient implements ClientListener {
     if (argv.length != 2)
       {
         // "Wrong number of command line parameters: required parameters are <properties> <user>"
+
 	System.err.println(ts.l("main.args_error"));
 	System.exit(0);
       }
@@ -386,7 +382,7 @@ public class PasswordClient implements ClientListener {
     loadProperties(argv[0]);
 
     /* RMI initialization stuff. */
-      
+
     /* This causes problems in Java 1.2.
 
        System.setSecurityManager(new RMISecurityManager());*/
@@ -400,7 +396,7 @@ public class PasswordClient implements ClientListener {
     catch (Exception ex)
       {
 	ex.printStackTrace();
-	throw new RuntimeException("Couldn't connect to authentication server.. " + 
+	throw new RuntimeException("Couldn't connect to authentication server.. " +
 				   ex.getMessage());
       }
 
@@ -452,13 +448,13 @@ public class PasswordClient implements ClientListener {
               }
 
 	    System.out.println();
-	    
+
 	    if (verify.equals(newPassword))
 	      {
 		break;
 	      }
 
-            // "Passwords do not match.  Try again."	    
+            // "Passwords do not match.  Try again."
 	    System.out.println(ts.l("main.no_match"));
 	  } while (true);
       }
@@ -484,6 +480,11 @@ public class PasswordClient implements ClientListener {
 
     System.exit(0);
   }
+
+  /**
+   * <p>Load the properties file that we use to identify the Ganymede
+   * server and port for the command line client.</p>
+   */
 
   private static boolean loadProperties(String filename)
   {
@@ -520,7 +521,7 @@ public class PasswordClient implements ClientListener {
       }
 
     serverhost = props.getProperty("ganymede.serverhost");
-    
+
     int registryPortProperty = 1099;
 
     String registryPort = props.getProperty("ganymede.registryPort");

@@ -10,9 +10,9 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2011
    The University of Texas at Austin
 
@@ -212,7 +212,7 @@ public class PasswordDBField extends DBField implements pass_field {
   /**
    * Samba md4 Unicode hash, for WinNT/2k clients. Good for
    * validating up to 2^64 bits of plaintext.. effectively indefinite
-   * in extent 
+   * in extent
    */
 
   private String ntHash;
@@ -277,7 +277,7 @@ public class PasswordDBField extends DBField implements pass_field {
     receive(in, definition);
   }
 
-  /** 
+  /**
    * <p>No-value constructor.  Allows the construction of a
    * 'non-initialized' field, for use where the {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} definition
@@ -298,7 +298,7 @@ public class PasswordDBField extends DBField implements pass_field {
       {
 	this.history = new passwordHistoryArchive(definition.getHistoryDepth());
       }
-    
+
     value = null;
   }
 
@@ -513,8 +513,8 @@ public class PasswordDBField extends DBField implements pass_field {
     return (streq(cryptedPass, origP.cryptedPass) &&
 	    streq(md5CryptPass, origP.md5CryptPass) &&
 	    streq(apacheMd5CryptPass, origP.apacheMd5CryptPass) &&
-	    streq(uncryptedPass, origP.uncryptedPass) && 
-	    streq(lanHash, origP.lanHash) && 
+	    streq(uncryptedPass, origP.uncryptedPass) &&
+	    streq(lanHash, origP.lanHash) &&
 	    streq(ntHash, origP.ntHash) &&
 	    streq(bCryptPass, origP.bCryptPass) &&
 	    streq(sshaHash, origP.sshaHash) &&
@@ -567,7 +567,7 @@ public class PasswordDBField extends DBField implements pass_field {
 					      ts.l("copyFieldTo.no_read", this.getName(), owner.getLabel()));
 	  }
       }
-	
+
     if (!target.isEditable(local))
       {
 	// "Error Copying Password Field"
@@ -666,7 +666,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
 	ntHash = getNTUNICODECryptText();
 	wrote_hash = emitHelper(out, ntHash, wrote_hash);
-      } 
+      }
     else
       {
 	out.writeUTF("");
@@ -918,7 +918,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	    if ((Ganymede.db.isAtRev(2,19) && Ganymede.db.journalLoading) || definition.isHistoryChecked())
 	      {
 		int count = in.readInt();
-		    
+
 		history = new passwordHistoryArchive(definition.getHistoryDepth(), count, in);
 	      }
 	  }
@@ -969,7 +969,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // note that even though we test for >= 1.16, we won't get to this point
     // if we are using the >= 2.1 logic
-	
+
     if (Ganymede.db.isAtLeast(1,16))
       {
 	if (definition.isMD5Crypted())
@@ -992,7 +992,7 @@ public class PasswordDBField extends DBField implements pass_field {
   private String readUTF(DataInput in) throws IOException
   {
     String val = in.readUTF();
-    
+
     if (val.equals(""))
       {
 	return null;
@@ -1039,8 +1039,8 @@ public class PasswordDBField extends DBField implements pass_field {
 
 	return;
       }
-    
-    if (uncryptedPass != null && 
+
+    if (uncryptedPass != null &&
 	(dump.doDumpPlaintext() ||
 	 (cryptedPass == null &&
 	  md5CryptPass == null &&
@@ -1058,7 +1058,7 @@ public class PasswordDBField extends DBField implements pass_field {
       {
 	dump.attribute("crypt", cryptedPass);
       }
-	
+
     if (md5CryptPass != null)
       {
 	dump.attribute("md5crypt", md5CryptPass);
@@ -1115,7 +1115,7 @@ public class PasswordDBField extends DBField implements pass_field {
     return null;
   }
 
-  /** 
+  /**
    * <po>Returns an Object carrying the value held in this field.</p>
    *
    * <p>This is intended to be used within the Ganymede server, it bypasses
@@ -1145,11 +1145,11 @@ public class PasswordDBField extends DBField implements pass_field {
    * this password field.</p>
    *
    * <p>This method avoids checking permissions because it is used on
-   * the server side only and because it is involved in the 
+   * the server side only and because it is involved in the
    * {@link arlut.csd.ganymede.server.DBObject#getLabel() getLabel()}
-   * logic for {@link arlut.csd.ganymede.server.DBObject DBObject}, 
+   * logic for {@link arlut.csd.ganymede.server.DBObject DBObject},
    * which is invoked from {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
-   * {@link arlut.csd.ganymede.server.GanymedeSession#getPerm(arlut.csd.ganymede.server.DBObject) getPerm()} 
+   * {@link arlut.csd.ganymede.server.GanymedeSession#getPerm(arlut.csd.ganymede.server.DBObject) getPerm()}
    * method.</p>
    *
    * <p>If this method checked permissions and the getPerm() method
@@ -1175,12 +1175,12 @@ public class PasswordDBField extends DBField implements pass_field {
 	  {
 	    result.append("md5crypt ");
 	  }
-	
+
 	if (apacheMd5CryptPass != null)
 	  {
 	    result.append("apachemd5crypt ");
 	  }
-	
+
 	if (lanHash != null)
 	  {
 	    result.append("lanman ");
@@ -1264,7 +1264,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
   // ****
   //
-  // pass_field methods 
+  // pass_field methods
   //
   // ****
 
@@ -1338,7 +1338,7 @@ public class PasswordDBField extends DBField implements pass_field {
       {
 	return false;
       }
-    
+
     return true;
   }
 
@@ -1376,7 +1376,7 @@ public class PasswordDBField extends DBField implements pass_field {
     boolean success = false;
 
     /* -- */
-    
+
     if (plaintext == null || !this.isDefined())
       {
 	return false;
@@ -1485,7 +1485,7 @@ public class PasswordDBField extends DBField implements pass_field {
       }
   }
 
-  /** 
+  /**
    * <p>This server-side only method returns the md5crypt()-encrypted
    * hashed password text.</p>
    *
@@ -1511,7 +1511,7 @@ public class PasswordDBField extends DBField implements pass_field {
       }
   }
 
-  /** 
+  /**
    * <p>This server-side only method returns the Apache md5crypt()-encrypted
    * hashed password text.</p>
    *
@@ -1537,7 +1537,7 @@ public class PasswordDBField extends DBField implements pass_field {
       }
   }
 
-  /** 
+  /**
    * <p>This server-side only method returns the LANMAN-compatible
    * password hash of the password data held in this field.</p>
    *
@@ -1563,7 +1563,7 @@ public class PasswordDBField extends DBField implements pass_field {
       }
   }
 
-  /** 
+  /**
    * <p>This server-side only method returns the Windows NT 4
    * SP3-compatible md4/Unicode password hash of the password data
    * held in this field.</p>
@@ -1590,7 +1590,7 @@ public class PasswordDBField extends DBField implements pass_field {
       }
   }
 
-  /** 
+  /**
    * <p>This server-side only method returns the Netscape SSHA (salted
    * SHA) LDAP hash of the password data held in this field.</p>
    *
@@ -1616,7 +1616,7 @@ public class PasswordDBField extends DBField implements pass_field {
       }
   }
 
-  /** 
+  /**
    * <p>This server-side only method returns the OpenBSD BCrypt hash text
    * of the password data held in this field, generating the hash text
    * from scratch if it is not contained in the local bCryptPass
@@ -1644,7 +1644,7 @@ public class PasswordDBField extends DBField implements pass_field {
       }
   }
 
-  /** 
+  /**
    * <p>This server-side only method returns the Sha Unix Crypt hash text
    * of the password data held in this field, generating the hash text
    * from scratch if it is not contained in the local shaUnixCrypt
@@ -1709,12 +1709,12 @@ public class PasswordDBField extends DBField implements pass_field {
     return uncryptedPass;
   }
 
-  /** 
+  /**
    * <p>Method to obtain the SALT for a stored (traditional Unix)
    * crypted password.  If the client is going to submit a pre-crypted
    * password for comparison via matchCryptText(), it must be salted
    * by the salt returned by this method.</p>
-   * 
+   *
    * <p>If the password is not stored in crypt() form, null will be
    * returned.</p>
    *
@@ -1733,7 +1733,7 @@ public class PasswordDBField extends DBField implements pass_field {
       }
   }
 
-  /** 
+  /**
    * <p>Method to obtain the SALT for a stored OpenBSD-style
    * md5crypt()'ed password.</p>
    *
@@ -1754,9 +1754,9 @@ public class PasswordDBField extends DBField implements pass_field {
 	  {
 	    salt = salt.substring(magic.length());
 	  }
-	
+
 	/* It stops at the first '$', max 8 chars */
-	
+
 	if (salt.indexOf('$') != -1)
 	  {
 	    salt = salt.substring(0, salt.indexOf('$'));
@@ -1775,7 +1775,7 @@ public class PasswordDBField extends DBField implements pass_field {
       }
   }
 
-  /** 
+  /**
    * <p>Method to obtain the SALT for a stored Apache-style
    * md5crypt()'ed password.</p>
    *
@@ -1796,9 +1796,9 @@ public class PasswordDBField extends DBField implements pass_field {
 	  {
 	    salt = salt.substring(magic.length());
 	  }
-	
+
 	/* It stops at the first '$', max 8 chars */
-	
+
 	if (salt.indexOf('$') != -1)
 	  {
 	    salt = salt.substring(0, salt.indexOf('$'));
@@ -1827,7 +1827,7 @@ public class PasswordDBField extends DBField implements pass_field {
     throw new IllegalArgumentException(ts.l("setValue.invalid_call"));
   }
 
-  /** 
+  /**
    * <p>This method is used to set the password for this field,
    * crypting it in various ways if this password field is stored
    * crypted.</p>
@@ -1840,7 +1840,7 @@ public class PasswordDBField extends DBField implements pass_field {
     return setPlainTextPass(plaintext, false, false);
   }
 
-  /** 
+  /**
    * <p>Set the plain text password for this field.</p>
    *
    * <p>If this field is configured to create and retain other hash
@@ -1851,7 +1851,7 @@ public class PasswordDBField extends DBField implements pass_field {
    *
    * @param plaintext The crypt text to load into this PasswordDBField
    * @param local If true, permission checking is skipped
-   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited. 
+   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited.
    */
 
   public synchronized ReturnVal setPlainTextPass(String plaintext, boolean local, boolean noWizards)
@@ -1873,14 +1873,14 @@ public class PasswordDBField extends DBField implements pass_field {
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
-	
+
 	retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
 							 DBEditObject.SETPASSPLAIN,
 							 plaintext,
 							 null));
 
 	// if a wizard intercedes, we are going to let it take the ball.
-	
+
 	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
@@ -1961,7 +1961,7 @@ public class PasswordDBField extends DBField implements pass_field {
    *
    * @param text The crypt text to load into this PasswordDBField
    * @param local If true, permission checking is skipped
-   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited. 
+   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited.
    */
 
   public ReturnVal setCryptPass(String text, boolean local, boolean noWizards)
@@ -1992,11 +1992,11 @@ public class PasswordDBField extends DBField implements pass_field {
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
-	
+
 	retVal = eObj.wizardHook(this, DBEditObject.SETPASSCRYPT, text, null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
-	
+
 	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
@@ -2009,7 +2009,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (ReturnVal.didSucceed(retVal))
       {
-	// whenever the crypt password is directly set, we lose 
+	// whenever the crypt password is directly set, we lose
 	// plaintext and alternate hashes
 
 	clear_stored();
@@ -2067,7 +2067,7 @@ public class PasswordDBField extends DBField implements pass_field {
    *
    * @param text The crypt text to load into this PasswordDBField
    * @param local If true, permission checking is skipped
-   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited. 
+   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited.
    */
 
   public ReturnVal setMD5CryptedPass(String text, boolean local, boolean noWizards)
@@ -2106,11 +2106,11 @@ public class PasswordDBField extends DBField implements pass_field {
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
-	
+
 	retVal = eObj.wizardHook(this, DBEditObject.SETPASSMD5, text, null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
-	
+
 	if (ReturnVal.wizardHandled(retVal))
 	  {
 	    return retVal;
@@ -2123,7 +2123,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (ReturnVal.didSucceed(retVal))
       {
-	// whenever the md5CryptPass password is directly set, we lose 
+	// whenever the md5CryptPass password is directly set, we lose
 	// plaintext and alternate hashes
 
 	clear_stored();
@@ -2183,7 +2183,7 @@ public class PasswordDBField extends DBField implements pass_field {
    *
    * @param text The crypt text to load into this PasswordDBField
    * @param local If true, permission checking is skipped
-   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited. 
+   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited.
    */
 
   public ReturnVal setApacheMD5CryptedPass(String text, boolean local, boolean noWizards)
@@ -2222,7 +2222,7 @@ public class PasswordDBField extends DBField implements pass_field {
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
-	
+
 	retVal = eObj.wizardHook(this, DBEditObject.SETPASSAPACHEMD5, text, null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
@@ -2239,7 +2239,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (ReturnVal.didSucceed(retVal))
       {
-	// whenever the apacheMd5CryptPass password is directly set, we lose 
+	// whenever the apacheMd5CryptPass password is directly set, we lose
 	// plaintext and alternate hashes
 
 	clear_stored();
@@ -2300,7 +2300,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * @param LANMAN  The LANMAN hash text to load into this PasswordDBField
    * @param NTUnicodeMD4  The NTUnicodeMD4 hash text to load into this PasswordDBField
    * @param local If true, permission checking is skipped
-   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited. 
+   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited.
    */
 
   public ReturnVal setWinCryptedPass(String LANMAN, String NTUnicodeMD4, boolean local, boolean noWizards)
@@ -2348,7 +2348,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (ReturnVal.didSucceed(retVal))
       {
-	// whenever the windows hashes are set directly, we lose 
+	// whenever the windows hashes are set directly, we lose
 	// plaintext and alternate hashes
 
 	clear_stored();
@@ -2415,7 +2415,7 @@ public class PasswordDBField extends DBField implements pass_field {
    *
    * @param text The crypt text to load into this PasswordDBField
    * @param local If true, permission checking is skipped
-   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited. 
+   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited.
    */
 
   public ReturnVal setSSHAPass(String text, boolean local, boolean noWizards)
@@ -2454,7 +2454,7 @@ public class PasswordDBField extends DBField implements pass_field {
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
-	
+
 	retVal = eObj.wizardHook(this, DBEditObject.SETPASSSSHA, text, null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
@@ -2565,7 +2565,7 @@ public class PasswordDBField extends DBField implements pass_field {
    *
    * @param hashText The crypt text to load into this PasswordDBField
    * @param local If true, permission checking is skipped
-   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited. 
+   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited.
    */
 
   public ReturnVal setShaUnixCryptPass(String hashText, boolean local, boolean noWizards)
@@ -2605,7 +2605,7 @@ public class PasswordDBField extends DBField implements pass_field {
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
 	// Wizard check
-	
+
 	retVal = eObj.wizardHook(this, DBEditObject.SETPASS_SHAUNIXCRYPT, hashText, null);
 
 	// if a wizard intercedes, we are going to let it take the ball.
@@ -2667,7 +2667,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * <p>Not exported for access by remote clients.</p>
    *
    * @param local If true, permission checking is skipped
-   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited. 
+   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited.
    */
 
   public ReturnVal setAllHashes(String crypt,
@@ -2678,7 +2678,7 @@ public class PasswordDBField extends DBField implements pass_field {
 				String SSHAText,
 				String ShaUnixCryptText,
 				String bCryptText,
-				boolean local, 
+				boolean local,
 				boolean noWizards)
   {
     ReturnVal retVal = null;
@@ -2874,7 +2874,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (ReturnVal.didSucceed(retVal))
       {
-	// whenever the hashes are set directly, we lose 
+	// whenever the hashes are set directly, we lose
 	// plaintext and alternate hashes
 
 	clear_stored();
@@ -2928,7 +2928,7 @@ public class PasswordDBField extends DBField implements pass_field {
 	  }
       }
 
-    return retVal;    
+    return retVal;
   }
 
   // ****
@@ -2950,7 +2950,7 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     DBEditObject eObj;
     String s;
-    
+
     /* -- */
 
     if (!isEditable(true))
@@ -2995,11 +2995,11 @@ public class PasswordDBField extends DBField implements pass_field {
 	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
 					  ts.l("verifyNewValue.too_short", Integer.valueOf(this.minSize())));
       }
-    
+
     if (allowedChars() != null)
       {
 	String okChars = allowedChars();
-	
+
 	for (int i = 0; i < s.length(); i++)
 	  {
 	    if (okChars.indexOf(s.charAt(i)) == -1)
@@ -3012,11 +3012,11 @@ public class PasswordDBField extends DBField implements pass_field {
 	      }
 	  }
       }
-    
+
     if (disallowedChars() != null)
       {
 	String badChars = disallowedChars();
-	
+
 	for (int i = 0; i < s.length(); i++)
 	  {
 	    if (badChars.indexOf(s.charAt(i)) != -1)
