@@ -69,6 +69,7 @@ import arlut.csd.ganymede.server.DateDBField;
 import arlut.csd.ganymede.server.DBEditObject;
 import arlut.csd.ganymede.server.DBObject;
 import arlut.csd.ganymede.server.DBLog;
+import arlut.csd.ganymede.server.DBSession;
 import arlut.csd.ganymede.server.Ganymede;
 import arlut.csd.ganymede.server.GanymedeServer;
 import arlut.csd.ganymede.server.GanymedeSession;
@@ -97,6 +98,7 @@ public class ExternalMailTask implements Runnable {
   /* -- */
 
   private GanymedeSession mySession = null;
+  private DBSession myDBSession = null;
   private Thread currentThread = null;
 
   /**
@@ -130,6 +132,7 @@ public class ExternalMailTask implements Runnable {
 	try
 	  {
 	    mySession = new GanymedeSession("ExternalMailTask");
+	    myDBSession = mySession.getSession();
 	  }
 	catch (RemoteException ex)
 	  {
@@ -232,7 +235,7 @@ public class ExternalMailTask implements Runnable {
 	    throw new InterruptedException("scheduler ordering shutdown");
 	  }
 
-	object = mySession.getSession().viewDBObject(result.getInvid());
+	object = myDBSession.viewDBObject(result.getInvid());
 
 	if (object == null || object.isInactivated())
 	  {
@@ -258,7 +261,22 @@ public class ExternalMailTask implements Runnable {
 
 	if (mailExpDate.after(lowerBound.getTime()) && mailExpDate.before(upperBound.getTime()))
 	  {
-	    assignNewCredentials(object);
+	    String ckpLabel = "credentialing" + object.getInvid();
+
+	    myDBSession.checkpoint(ckpLabel);
+
+	    ReturnVal retVal = assignNewCredentials(object);
+
+	    if (ReturnVal.didSucceed(retVal))
+	      {
+		myDBSession.popCheckpoint(ckpLabel);
+	      }
+	    else
+	      {
+		Ganymede.debug("External Mail Task failure in assignNewCredentials(" + object.getLabel() + ")\n" + retVal.getDialogText());
+		myDBSession.rollback(ckpLabel);
+	      }
+
 	    continue;
 	  }
 
@@ -280,7 +298,22 @@ public class ExternalMailTask implements Runnable {
 
 	if (mailExpDate.before(currentTime))
 	  {
-	    clearOldCredentials(object);
+	    String ckpLabel = "clearing" + object.getInvid();
+
+	    myDBSession.checkpoint(ckpLabel);
+
+	    ReturnVal retVal = clearOldCredentials(object);
+
+	    if (ReturnVal.didSucceed(retVal))
+	      {
+		myDBSession.popCheckpoint(ckpLabel);
+	      }
+	    else
+	      {
+		Ganymede.debug("External Mail Task failure in clearOldCredentials(" + object.getLabel() + ")\n" + retVal.getDialogText());
+		myDBSession.rollback(ckpLabel);
+	      }
+
 	    continue;
 	  }
       }
@@ -314,17 +347,47 @@ public class ExternalMailTask implements Runnable {
 	StringDBField usernameField = (StringDBField) editUserObject.getField(userSchema.MAILUSER);
 	PasswordDBField passwordField = (PasswordDBField) editUserObject.getField(userSchema.MAILPASSWORD2);
 
+	String username = null;
+	String password = null;
+
+	// if we already have MAILUSER and MAILPASSWORD2 fields set,
+	// we'll need to remember those values for later
+
 	if (editUserObject.isDefined(userSchema.MAILUSER) &&
 	    editUserObject.isDefined(userSchema.MAILPASSWORD2))
+	  {
+	    username = (String) usernameField.getValueLocal();
+	    password = passwordField.getPlainText();
+	  }
+
+	// Set new values.
+
+	result = usernameField.setValueLocal(RandomUtils.getRandomUsername());
+
+	if (!ReturnVal.didSucceed(result))
+	  {
+	    return result;
+	  }
+
+	result = ReturnVal.merge(result, passwordField.setPlainTextPass(RandomUtils.getRandomPassword(20)));
+
+	if (!ReturnVal.didSucceed(result))
+	  {
+	    return result;
+	  }
+
+	// if we had MAILUSER and MAILPASSWORD2 set when we entered,
+	// we'll load those old values into the OLDMAILUSER and
+	// OLDMAILPASSWORD2 fields for use during the interval between
+	// assigning new credentials and revoking the old ones
+
+	if (username != null && password != null)
 	  {
 	    StringDBField oldUsernameField = (StringDBField) editUserObject.getField(userSchema.OLDMAILUSER);
 	    PasswordDBField oldPasswordField = (PasswordDBField) editUserObject.getField(userSchema.OLDMAILPASSWORD2);
 
 	    // Copy the (now deprecated) values to the
 	    // oldUsernameField and oldPasswordField fields
-
-	    String username = (String) usernameField.getValueLocal();
-	    String password = passwordField.getPlainText();
 
 	    result = ReturnVal.merge(result, oldUsernameField.setValueLocal(username));
 
@@ -334,23 +397,7 @@ public class ExternalMailTask implements Runnable {
 	      }
 
 	    result = ReturnVal.merge(result, oldPasswordField.setPlainTextPass(password));
-
-	    if (!ReturnVal.didSucceed(result))
-	      {
-		return result;
-	      }
 	  }
-
-	// Set new values.
-
-	result = ReturnVal.merge(result, usernameField.setValueLocal(RandomUtils.getRandomUsername()));
-
-	if (!ReturnVal.didSucceed(result))
-	  {
-	    return result;
-	  }
-
-	result = ReturnVal.merge(result, passwordField.setPlainTextPass(RandomUtils.getRandomPassword(20)));
 
 	return result;
       }
