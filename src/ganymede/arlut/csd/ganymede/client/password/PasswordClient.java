@@ -49,9 +49,11 @@
 
 package arlut.csd.ganymede.client.password;
 
+import java.io.Console;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.util.Properties;
 
@@ -406,62 +408,37 @@ public class PasswordClient implements ClientListener {
 
     // get old password, new password
 
-    String oldPassword = null, newPassword = null;
+    Console cons = System.console();
+    PrintWriter out = cons.writer();
 
-    try
+    String oldPassword = null;
+    String newPassword = null;
+    String verifyPassword = null;
+
+    // Get the old password
+
+    // "Old password:"
+    oldPassword = new String(cons.readPassword("[%s]", ts.l("main.old_pass_prompt")));
+
+    // Get the new password.  Loop until the password is entered
+    // correctly twice.
+
+    do
       {
-	// WARNING - This client won't hide the user's text.  When we
-	// use this client, we wrap it in a shell script that calls
-	// "stty -echo" before starting the client.
+	// "New password:"
+	newPassword = new String(cons.readPassword("[%s]", ts.l("main.new_pass_prompt")));
 
-	// Get the old password
+	// "Verify:"
+	verifyPassword = new String(cons.readPassword("[%s]", ts.l("main.verify_prompt")));
 
-        // "Old password:"
-	System.out.print(ts.l("main.old_pass_prompt"));
-	oldPassword = in.readLine();
-	System.out.println();
-
-	String verify = null;
-
-	// Get the new password.  Loop until the password is entered
-	// correctly twice.
-	do
+	if (verifyPassword.equals(newPassword))
 	  {
-            // "New password:"
-	    System.out.print(ts.l("main.new_pass_prompt"));
-	    newPassword = in.readLine();
+	    break;
+	  }
 
-            if (newPassword == null)
-              {
-                throw new IOException("EOF");
-              }
-
-	    System.out.println();
-
-            // "Verify:"
-	    System.out.print(ts.l("main.verify_prompt"));
-	    verify = in.readLine();
-
-            if (verify == null)
-              {
-                throw new IOException("EOF");
-              }
-
-	    System.out.println();
-
-	    if (verify.equals(newPassword))
-	      {
-		break;
-	      }
-
-            // "Passwords do not match.  Try again."
-	    System.out.println(ts.l("main.no_match"));
-	  } while (true);
-      }
-    catch (java.io.IOException ex)
-      {
-	throw new RuntimeException("Exception getting input: " + ex);
-      }
+	// "Passwords do not match.  Try again."
+	out.println(ts.l("main.no_match"));
+      } while (true);
 
     // Now change the password with the passwordClient.
 
@@ -470,12 +447,12 @@ public class PasswordClient implements ClientListener {
     if (success)
       {
         // "Successfully changed password."
-	System.out.println(ts.l("main.success"));
+	out.println(ts.l("main.success"));
       }
     else
       {
         // "Password change failed."
-	System.out.println(ts.l("main.fail"));
+	out.println(ts.l("main.fail"));
       }
 
     System.exit(0);
