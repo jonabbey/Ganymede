@@ -402,60 +402,61 @@ public class PasswordClient implements ClientListener {
 				   ex.getMessage());
       }
 
-    // Get the passwords from standard in
-
-    java.io.BufferedReader in = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
-
-    // get old password, new password
-
-    Console cons = System.console();
-    PrintWriter out = cons.writer();
-
-    String oldPassword = null;
-    String newPassword = null;
-    String verifyPassword = null;
-
-    // Get the old password
-
-    // "Old password:"
-    oldPassword = new String(cons.readPassword("[%s]", ts.l("main.old_pass_prompt")));
-
-    // Get the new password.  Loop until the password is entered
-    // correctly twice.
-
-    do
+    try
       {
-	// "New password:"
-	newPassword = new String(cons.readPassword("[%s]", ts.l("main.new_pass_prompt")));
+	// get old password, new password
 
-	// "Verify:"
-	verifyPassword = new String(cons.readPassword("[%s]", ts.l("main.verify_prompt")));
+	Console cons = System.console();
+	PrintWriter out = cons.writer();
 
-	if (verifyPassword.equals(newPassword))
+	String oldPassword = null;
+	String newPassword = null;
+	String verifyPassword = null;
+
+	// Get the old password
+
+	// "Old password:"
+	oldPassword = new String(cons.readPassword("[%s]", ts.l("main.old_pass_prompt")));
+
+	// Get the new password.  Loop until the password is entered
+	// correctly twice.
+
+	do
 	  {
-	    break;
+	    // "New password:"
+	    newPassword = new String(cons.readPassword("[%s]", ts.l("main.new_pass_prompt")));
+
+	    // "Verify:"
+	    verifyPassword = new String(cons.readPassword("[%s]", ts.l("main.verify_prompt")));
+
+	    if (verifyPassword.equals(newPassword))
+	      {
+		break;
+	      }
+
+	    // "Passwords do not match.  Try again."
+	    out.println(ts.l("main.no_match"));
+	  } while (true);
+
+	// Now change the password with the passwordClient.
+
+	boolean success = client.changePassword(argv[1], oldPassword, newPassword);
+
+	if (success)
+	  {
+	    // "Successfully changed password."
+	    out.println(ts.l("main.success"));
 	  }
-
-	// "Passwords do not match.  Try again."
-	out.println(ts.l("main.no_match"));
-      } while (true);
-
-    // Now change the password with the passwordClient.
-
-    boolean success = client.changePassword(argv[1], oldPassword, newPassword);
-
-    if (success)
-      {
-        // "Successfully changed password."
-	out.println(ts.l("main.success"));
+	else
+	  {
+	    // "Password change failed."
+	    out.println(ts.l("main.fail"));
+	  }
       }
-    else
+    finally
       {
-        // "Password change failed."
-	out.println(ts.l("main.fail"));
+	System.exit(0);
       }
-
-    System.exit(0);
   }
 
   /**
