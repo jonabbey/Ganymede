@@ -357,7 +357,7 @@ public class PasswordClient implements ClientListener {
   public void messageReceived(ClientEvent e)
   {
     // "Server: {0}"
-    error(ts.l("messageReceived", e.getMessage()));
+    //    error(ts.l("messageReceived", e.getMessage()));
   }
 
   /**
