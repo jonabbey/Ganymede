@@ -416,7 +416,7 @@ public class PasswordClient implements ClientListener {
 	// Get the old password
 
 	// "Old password:"
-	oldPassword = new String(cons.readPassword("[%s]", ts.l("main.old_pass_prompt")));
+	oldPassword = new String(cons.readPassword("%s ", ts.l("main.old_pass_prompt")));
 
 	// Get the new password.  Loop until the password is entered
 	// correctly twice.
@@ -424,10 +424,10 @@ public class PasswordClient implements ClientListener {
 	do
 	  {
 	    // "New password:"
-	    newPassword = new String(cons.readPassword("[%s]", ts.l("main.new_pass_prompt")));
+	    newPassword = new String(cons.readPassword("%s ", ts.l("main.new_pass_prompt")));
 
 	    // "Verify:"
-	    verifyPassword = new String(cons.readPassword("[%s]", ts.l("main.verify_prompt")));
+	    verifyPassword = new String(cons.readPassword("%s ", ts.l("main.verify_prompt")));
 
 	    if (verifyPassword.equals(newPassword))
 	      {
