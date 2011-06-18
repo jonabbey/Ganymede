@@ -15,7 +15,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -75,10 +75,14 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * The core of a client.  Provides all the logic necessary to
- * establish a connection to the server and get logged in.
+ * <p>The communications core of a client.  Provides all the logic
+ * necessary to establish a connection to the server and get logged
+ * in.</p>
  *
- * @version $Id$
+ * <p>The ClientBase is also responsible for retrieving asynchronous
+ * messages from the server and passing them to the client through the
+ * {@link arlut.csd.ganymede.client.ClientListener} interface.</p>
+ *
  * @author Mike Mulvaney
  */
 
