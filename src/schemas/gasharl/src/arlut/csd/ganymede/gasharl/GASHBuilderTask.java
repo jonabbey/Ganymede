@@ -4668,11 +4668,15 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 primaryUser = getLabel(primaryUserInvid);
               }
 
-	    IPstring = ((IPDBField) interfaceObj.getField(interfaceSchema.ADDRESS)).getValueString();
-
-	    MACstring = ((StringDBField) interfaceObj.getField(interfaceSchema.ETHERNETINFO)).getValueString();
-
-	    MACstring = MACstring.replace('-',':');
+	    try
+	      {
+		IPstring = ((IPDBField) interfaceObj.getField(interfaceSchema.ADDRESS)).getValueString();
+		MACstring = ((StringDBField) interfaceObj.getField(interfaceSchema.ETHERNETINFO)).getValueString();
+		MACstring = MACstring.replace('-',':');
+	      }
+	    catch (NullPointerException ex)
+	      {
+	      }
 
             if (IPstring == null || MACstring == null)
               {
