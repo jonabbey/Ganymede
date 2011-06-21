@@ -476,9 +476,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 	fieldAry = new DBField[original.fieldAry.length];
 
-	// put any defined fields into the object we're going
-	// to commit back into our DBStore
-	
 	for (int i = 0; i < original.fieldAry.length; i++)
 	  {
 	    fieldAry[i] = original.fieldAry[i].getCopy(this);
@@ -489,11 +486,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   *
-   * This method makes the fields in this object remotely accessible.
+   * <p>This method makes the fields in this object remotely accessible.
    * Used by GanymedeSession when it provides a DBObject to the
-   * client.
-   *  
+   * client.</p>
    */
 
   public final void exportFields()
@@ -526,11 +521,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 
   /**
-   *
-   * This method pulls the fields in this object from remote accessibility through
+   * <p>This method pulls the fields in this object from remote accessibility through
    * RMI, possibly improving our security posture and reducing the memory loading
-   * on the RMI system.
-   *  
+   * on the RMI system.</p>
    */
 
   public final void unexportFields()

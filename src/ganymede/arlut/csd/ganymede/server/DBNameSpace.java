@@ -13,7 +13,7 @@
 	    
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -68,13 +68,13 @@ import arlut.csd.ganymede.rmi.NameSpace;
 ------------------------------------------------------------------------------*/
 
 /**
- * DBNameSpaces are the objects used to manage unique value
+ * <p>DBNameSpaces are the objects used to manage unique value
  * tracking in {@link arlut.csd.ganymede.server.DBField DBFields} that are
  * unique value constrained.  DBNameSpace is smart enough to
  * coordinate unique value allocation and management during object
- * editing across concurrent transactions.
+ * editing across concurrent transactions.</p>
  *
- * In general, transactions in Ganymede are not able to affect each other
+ * <p>In general, transactions in Ganymede are not able to affect each other
  * at all, save through the acquisition of exclusive editing locks on
  * invidivual objects, and through the atomic acquisition of values
  * for unique value constrained DBFields.  Once a transaction allocates
@@ -89,9 +89,9 @@ import arlut.csd.ganymede.rmi.NameSpace;
  * commit()}, {@link arlut.csd.ganymede.server.DBNameSpace#abort(arlut.csd.ganymede.server.DBEditSet)
  * abort()}, or {@link arlut.csd.ganymede.server.DBNameSpace#rollback(arlut.csd.ganymede.server.DBEditSet,
  * java.lang.String) rollback()}
- * methods.
+ * methods.</p>
  *
- * In order to perform this unique value management, DBNameSpace
+ * <p>In order to perform this unique value management, DBNameSpace
  * maintains a private Hashtable, {@link
  * arlut.csd.ganymede.server.DBNameSpace#uniqueHash uniqueHash}, that
  * associates the allocated vales in the namespace with {@link
@@ -103,14 +103,14 @@ import arlut.csd.ganymede.rmi.NameSpace;
  * logic takes advantage of this to do optimized, hashed look-ups of
  * values for unique value constrained fields to locate objects in the
  * database rather than having to iterate over all objects of a given
- * type to find a particular match.
+ * type to find a particular match.</p>
  *
- * DBNameSpaces may be defined in the server's schema editor to be
+ * <p>DBNameSpaces may be defined in the server's schema editor to be
  * either case sensitive or case insensitive.  The DBNameSpace class
  * uses the {@link arlut.csd.ganymede.server.GHashtable GHashtable}
  * class to handle the representational issues in the unique value
  * hash for this, as well as for things like IP address
- * representation.
+ * representation.</p>
  */
 
 public final class DBNameSpace implements NameSpace {

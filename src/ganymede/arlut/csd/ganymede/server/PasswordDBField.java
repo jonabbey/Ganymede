@@ -113,13 +113,17 @@ import arlut.csd.ganymede.rmi.pass_field;
  * </ul>
  *
  * <p>There are no methods provided to allow remote access to password
- * information..  server-side code must locally access call methods to
- * get access to stored password information.  Generally, even in that
- * case, only hashed password information will be available.  If this
- * password field was configured to store only hashed passwords by way
- * of its {@link arlut.csd.ganymede.server.DBObjectBaseField
- * DBObjectBaseField}, this password field will never emit() the
- * plaintext to disk.</p>
+ * information..  server-side code must locally call methods to get
+ * access to stored password information.  Even in that case, only
+ * hashed password information will generally be available, though the
+ * schema can be configured to have password fields maintain plaintext
+ * (necessary for sync'ing to Kerberos based systems like Active
+ * Directory).</p>
+ *
+ * <p> If this password field is configured to store only hashed
+ * passwords by way of its {@link
+ * arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField},
+ * this password field will never emit() the plaintext to disk.</p>
  *
  * <p>In such cases, only the hash text password information will be
  * retained on disk for user authentication.  The plaintext of the
@@ -1105,9 +1109,11 @@ public class PasswordDBField extends DBField implements pass_field {
   /**
    * <p>Standard {@link arlut.csd.ganymede.rmi.db_field db_field}
    * method to retrieve the value of this field.  Because we are
-   * holding sensitive password information, this method always
-   * returns null.. we don't want to make password values available to
-   * a remote client under any circumstances.</p>
+   * holding sensitive password information, this method always throws
+   * an IllegalAccessException.. we don't want to make password values
+   * available to a remote client under any circumstances.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public Object getValue()
@@ -1819,6 +1825,8 @@ public class PasswordDBField extends DBField implements pass_field {
 
   /**
    * <p>Not supported for PasswordDBField.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public ReturnVal setValue(Object value, boolean local, boolean noWizards)
