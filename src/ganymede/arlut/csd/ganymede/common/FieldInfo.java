@@ -119,7 +119,15 @@ public class FieldInfo implements java.io.Serializable {
 
 	if (field instanceof PasswordDBField)
 	  {
-	    value = field.getValueString(); // this doesn't check permissions!
+	    // n.b. getValueString() returns a description of what
+	    // types of password encodings are present in the password
+	    // field, but doesn't return any actual plain or hashtext
+	    //
+	    // getValueString() is actually not part of the db_field
+	    // interface, as it is a server-side only method, so we
+	    // have to cast.
+
+	    value = ((PasswordDBField) field).getValueString();
 	  }
 	else if (!field.isVector())
 	  {

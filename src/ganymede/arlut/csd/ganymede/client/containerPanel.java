@@ -1462,7 +1462,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    // reset the combo box.
 
 	    Invid currentValue = (Invid) invf.getValue();
-	    String currentLabel = invf.getValueString();
+	    String currentLabel = gc.getSession().viewObjectLabel(currentValue);
 	    listHandle currentValueHandle = new listHandle(currentLabel, currentValue);
 	    listHandle currentHandle = null;
 

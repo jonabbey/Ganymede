@@ -124,20 +124,6 @@ public interface db_field extends java.rmi.Remote {
   short getType() throws RemoteException;
 
   /**
-   * Returns a String representing the value of this field.
-   */
-
-  String getValueString() throws RemoteException;
-
-  /**
-   * Returns a String representing a reversible encoding of the
-   * value of this field.  Each field type will have its own encoding,
-   * suitable for embedding in a DumpResult.
-   */
-
-  String getEncodingString() throws RemoteException;
-
-  /**
    * Returns true if this field has a value associated
    * with it, or false if it is an unfilled 'placeholder'.
    */
