@@ -14,17 +14,18 @@
 
 package org.mindrot;
 
+import java.io.UnsupportedEncodingException;
 import java.security.SecureRandom;
 
 /**
  * BCrypt implements OpenBSD-style Blowfish password hashing using
- * the scheme describes in "A Future-Adaptable Password Scheme" by
+ * the scheme described in "A Future-Adaptable Password Scheme" by
  * Niels Provos and David Mazieres.
  * <p>
  * This password hashing system tries to thwart off-line password
  * cracking using a computationally-intensive hashing algorithm,
  * based on Bruce Schneier's Blowfish cipher. The work factor of
- * the algorithm is parametised, so it can be increased as
+ * the algorithm is parameterised, so it can be increased as
  * computers get faster.
  * <p>
  * Usage is really simple. To hash a password for the first time,
@@ -57,11 +58,11 @@ import java.security.SecureRandom;
  * 10, and the valid range is 4 to 31.
  *
  * @author Damien Miller
- * @version 0.1
+ * @version 0.2
  */
 public class BCrypt {
 	// BCrypt parameters
-	private static int GENSALT_DEFAULT_LOG2_ROUNDS = 10;
+	private static final int GENSALT_DEFAULT_LOG2_ROUNDS = 10;
 	private static final int BCRYPT_SALT_LEN = 16;
 
 	// Blowfish parameters
@@ -653,13 +654,14 @@ public class BCrypt {
 
 		if (salt.charAt(0) != '$' || salt.charAt(1) != '2')
 			throw new IllegalArgumentException ("Invalid salt version");
-		if (salt.charAt(1) != '$') {
+		if (salt.charAt(2) == '$')
+			off = 3;
+		else {
 			minor = salt.charAt(2);
 			if (minor != 'a' || salt.charAt(3) != '$')
 				throw new IllegalArgumentException ("Invalid salt revision");
 			off = 4;
-		} else
-			off = 3;
+		}
 
 		// Extract number of rounds
 		if (salt.charAt(off + 2) > '$')
@@ -667,7 +669,12 @@ public class BCrypt {
 		rounds = Integer.parseInt(salt.substring(off, off + 2));
 
 		real_salt = salt.substring(off + 3, off + 25);
-		passwordb = (password + (minor >= 'a' ? "\000" : "")).getBytes();
+		try {
+			passwordb = (password + (minor >= 'a' ? "\000" : "")).getBytes("UTF-8");
+		} catch (UnsupportedEncodingException uee) {
+			throw new AssertionError("UTF-8 is not supported");
+		}
+
 		saltb = decode_base64(real_salt, BCRYPT_SALT_LEN);
 
 		B = new BCrypt();
@@ -692,12 +699,12 @@ public class BCrypt {
 	 * @param log_rounds	the log2 of the number of rounds of
 	 * hashing to apply - the work factor therefore increases as
 	 * 2**log_rounds.
+	 * @param random		an instance of SecureRandom to use
 	 * @return	an encoded salt value
 	 */
-	public static String gensalt(int log_rounds) {
+	public static String gensalt(int log_rounds, SecureRandom random) {
 		StringBuffer rs = new StringBuffer();
 		byte rnd[] = new byte[BCRYPT_SALT_LEN];
-		SecureRandom random = new SecureRandom();
 
 		random.nextBytes(rnd);
 
@@ -708,6 +715,17 @@ public class BCrypt {
 		rs.append("$");
 		rs.append(encode_base64(rnd, rnd.length));
 		return rs.toString();
+	}
+
+	/**
+	 * Generate a salt for use with the BCrypt.hashpw() method
+	 * @param log_rounds	the log2 of the number of rounds of
+	 * hashing to apply - the work factor therefore increases as
+	 * 2**log_rounds.
+	 * @return	an encoded salt value
+	 */
+	public static String gensalt(int log_rounds) {
+		return gensalt(log_rounds, new SecureRandom());
 	}
 
 	/**
