@@ -2859,7 +2859,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
 		try
 		  {
-		    PrintWriter pfcanonical = openOutFile(path + "pfknown_canonical", "gasharl");
+		    PrintWriter pfcanonical = openOutFile(path + "pfrecipient_canonical", "gasharl");
 
 		    try
 		      {
