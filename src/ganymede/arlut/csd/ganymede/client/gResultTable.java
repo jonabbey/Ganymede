@@ -280,7 +280,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
 	if (debug)
 	  {
-	    System.out.println("columnNames "+i+" value is:"+columnNames[i]+"*");
+	    System.out.println("columnNames " + i + " value is:" + columnNames[i] + "*");
 	  }
 
 	used[i] = false;
