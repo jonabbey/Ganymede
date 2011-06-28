@@ -2857,47 +2857,56 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
               {
                 PrintWriter pfknownu = openOutFile(path + "pfknown_users", "gasharl");
 
-                try
-                  {
-                    writeHashTransport(pftransport);
-                    writeHashKnownuser(pfknownu);
+		try
+		  {
+		    PrintWriter pfcanonical = openOutFile(path + "pfknown_canonical", "gasharl");
 
-                    for (DBObject user: getObjects(SchemaConstants.UserBase))
-                      {
-                        writeHashGenerics(user, pfgenerics);
-                        writeHashUserAlias(user, pfmalias);
-                      }
-    
-                    // mail lists
-    
-                    for (DBObject group: getObjects(emailListSchema.BASE))
-                      {
-                        writeHashGroupAlias(group, pfmalias);
-                      }
-    
-                    // emailable account groups
-    
-                    for (DBObject group: getObjects(groupSchema.BASE))
-                      {
-                        writeHashAccountGroupAlias(group, pfmalias);
-                      }
-    
-                    // emailable user netgroups
-    
-                    for (DBObject group: getObjects(userNetgroupSchema.BASE))
-                      {
-                        writeHashUserNetgroupAlias(group, pfmalias);
-                      }
-    
-                    // external mail addresses
-    
-                    for (DBObject external: getObjects(emailRedirectSchema.BASE))
-                      {
-                        writeHashExternalAlias(external, pfmalias);
-                      }
+		    try
+		      {
+			writeHashTransport(pftransport);
+			writeHashKnownuser(pfknownu, pfcanonical);
 
-                    success = true;
-                  }
+			for (DBObject user: getObjects(SchemaConstants.UserBase))
+			  {
+			    writeHashGenerics(user, pfgenerics);
+			    writeHashUserAlias(user, pfmalias);
+			  }
+    
+			// mail lists
+    
+			for (DBObject group: getObjects(emailListSchema.BASE))
+			  {
+			    writeHashGroupAlias(group, pfmalias);
+			  }
+    
+			// emailable account groups
+    
+			for (DBObject group: getObjects(groupSchema.BASE))
+			  {
+			    writeHashAccountGroupAlias(group, pfmalias);
+			  }
+    
+			// emailable user netgroups
+    
+			for (DBObject group: getObjects(userNetgroupSchema.BASE))
+			  {
+			    writeHashUserNetgroupAlias(group, pfmalias);
+			  }
+    
+			// external mail addresses
+    
+			for (DBObject external: getObjects(emailRedirectSchema.BASE))
+			  {
+			    writeHashExternalAlias(external, pfmalias);
+			  }
+
+			success = true;
+		      }
+		    finally
+		      {
+			pfcanonical.close();
+		      }
+		  }
                 finally
                   {
                     pfknownu.close();
@@ -3520,7 +3529,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    * jgs
    */
 
-  private void writeHashKnownuser(PrintWriter writer)
+  private void writeHashKnownuser(PrintWriter writer, PrintWriter writer2)
   {
     Set<String> set = new CaseInsensitiveSet();
 
@@ -3660,6 +3669,21 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         writer.print(account);
         writer.println("@arlut.utexas.edu OK");
+      }
+
+    //
+    //	once more, w/ feeling:
+    //  /^user@.*\.arlut\.utexas\.edu$/	user@arlut.utexas.edu
+    //
+
+    for (String account: set)
+      {
+        writer2.print("/^");
+        writer2.print(account);
+        writer2.print("@.*\\.arlut\\.utexas\\.edu$/");
+        writer2.print("\t");
+        writer2.print(account);
+        writer2.println("@arlut.utexas.edu");
       }
 
     return;
