@@ -586,15 +586,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    mailPassword = "";	// shouldn't need this
 	  }
 
-	Date mailExpireDate = null;
-
-	if (isDefined(userSchema.MAILEXPDATE))
-	  {
-	    mailExpireDate = (Date) getFieldValueLocal(userSchema.MAILEXPDATE);
-
-	    expireString = "These credentials will expire on " + mailExpireDate.toString() + ".  You will be assigned new credentials for " +
-	      "your external mail access four weeks before these credentials expire.";
-	  }
+	Date mailExpireDate = (Date) getFieldValueLocal(userSchema.MAILEXPDATE);
 
 	if (originalObject == null || !originalObject.isDefined(userSchema.MAILUSER) || !originalObject.isDefined(userSchema.MAILPASSWORD2))
 	  {
@@ -602,40 +594,75 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    messageString = "User account " + this.getLabel() +
 	      " has been granted access to laboratory email from outside the internal ARL:UT network.\n\n" +
+
 	      "In order to read and send mail from outside the laboratory, you will need to configure your external email client " +
 	      "to send outgoing email through smail.arlut.utexas.edu using TLS-encrypted SMTP on port 25 or port 587, and to " +
 	      "read incoming mail from mailboxes.arlut.utexas.edu via IMAP over SSL.\n\n" +
+
 	      "You will need to specify the following randomly assigned user name and password for both services:\n\n" +
+
 	      "Username: " + mailUsername + "\n" +
 	      "Password: " + mailPassword;
 
-	    if (expireString != null)
+	    if (isDefined(userSchema.MAILEXPDATE))
 	      {
-		messageString = messageString + "\n\n" + expireString;
+		messageString = messageString + "\n\nThese credentials will expire on " + mailExpireDate.toString() +
+		  ".  You will be assigned new credentials for your external mail access four weeks before these credentials expire.";
 	      }
 	  }
 	else
 	  {
+	    PasswordDBField myOldPasswordField = (PasswordDBField) this.getField(userSchema.OLDMAILPASSWORD2);
+	    String myOldPassword = myOldPasswordField.getPlainText();
+
 	    PasswordDBField oldMailPasswordField = (PasswordDBField) originalObject.getField(userSchema.MAILPASSWORD2);
 	    String oldPassword = oldMailPasswordField.getPlainText();
 
 	    if (!mailUsername.equals(originalObject.getFieldValueLocal(userSchema.MAILUSER)) ||
 		!mailPassword.equals(oldPassword))
 	      {
-		titleString = "External Email Credentials Changed For User " + this.getLabel();
-
-		messageString = "The external mail credentials for user account " + this.getLabel() +
-		  " have been changed.\n\n" +
-		  "In order to continue to read and send mail from outside the laboratory, you will need to configure your external email client " +
-		  "to send outgoing email through smail.arlut.utexas.edu using TLS-encrypted SMTP on port 25 or port 587, and to " +
-		  "read incoming mail from mailboxes.arlut.utexas.edu via IMAP over SSL.\n\n" +
-		  "You will need to specify the following randomly assigned user name and password for both services:\n\n" +
-		  "Username: " + mailUsername + "\n" +
-		  "Password: " + mailPassword;
-
-		if (expireString != null)
+		if (this.getGSession().getSessionName().equals("ExternalMailTask") && myOldPassword.equals(oldPassword))
 		  {
-		    messageString = messageString + "\n\n" + expireString;
+		    // we're processing a credentials renewal by ExternalMailTask
+
+		    titleString = "New Email Credentials Created For User " + this.getLabel();
+
+		    messageString = "The current external mail credentials for user account " + this.getLabel() +
+		      " are due to expire in four weeks.\n\n" +
+
+		      "New external email credentials have been prepared for you:\n\n" +
+
+		      "Username: " + mailUsername + "\n" +
+		      "Password: " + mailPassword + "\n\n" +
+
+		      "These credentials are now active on your account, and should be entered into any email client " +
+		      "that you use outside of the laboratory's internal network.\n\n" +
+
+		      "Your current external email credentials will continue to function for one month, after " +
+		      "which time they will be removed from your account.";
+		  }
+		else
+		  {
+		    titleString = "External Email Credentials Changed For User " + this.getLabel();
+
+		    messageString = "The external mail credentials for user account " + this.getLabel() +
+		      " have been changed.\n\n" +
+
+		      "In order to continue to read and send mail from outside the laboratory, you will need to configure your external email client " +
+		      "to send outgoing email through smail.arlut.utexas.edu using TLS-encrypted SMTP on port 25 or port 587, and to " +
+		      "read incoming mail from mailboxes.arlut.utexas.edu via IMAP over SSL.\n\n" +
+
+		      "You will need to specify the following randomly assigned user name and password for both services:\n\n" +
+
+		      "Username: " + mailUsername + "\n" +
+		      "Password: " + mailPassword;
+
+
+		    if (isDefined(userSchema.MAILEXPDATE))
+		      {
+			messageString = messageString + "\n\nThese credentials will expire on " + mailExpireDate.toString() +
+			  ".  You will be assigned new credentials for your external mail access four weeks before these credentials expire.";
+		      }
 		  }
 	      }
 	  }
