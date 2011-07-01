@@ -62,12 +62,12 @@ import org.mindrot.BCrypt;
 
 import arlut.csd.Util.TranslationService;
 
-import arlut.csd.crypto.jcrypt;
 import arlut.csd.crypto.MD5Crypt;
 import arlut.csd.crypto.Sha256Crypt;
 import arlut.csd.crypto.Sha512Crypt;
-import arlut.csd.crypto.smbencrypt;
 import arlut.csd.crypto.SSHA;
+import arlut.csd.crypto.jcrypt;
+import arlut.csd.crypto.smbencrypt;
 
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.pass_field;
@@ -102,14 +102,14 @@ import arlut.csd.ganymede.rmi.pass_field;
  *
  * <ul>
  * <li>Traditional Unix Crypt()</li>
- * <li>OpenBSD-style md5Crypt</li>
- * <li>OpenBSD-style md5Crypt, as modified for use with Apache</li>
- * <li>OpenBSD-style BCrypt</li>
+ * <li>OpenBSD-style md5Crypt ($1$ prefix)</li>
+ * <li>OpenBSD-style md5Crypt, as modified for use with Apache ($apr1$ prefix)</li>
+ * <li>OpenBSD-style BCrypt ($2a$ prefix)(</li>
  * <li>Traditional LAN Manager hash</li>
  * <li>Windows NT Unicode Hash algorithm</li>
  * <li>SSHA, Salted SHA-1 hash, as used in OpenLDAP</li>
- * <li>Sha Unix Crypt, SHA256 and SHA512 based scalable hash
- * algorithm, supported in Linux starting with glibc version 2.7.</li>
+ * <li>SHA Crypt, SHA256 and SHA512 based scalable hash
+ * algorithm, supported in Linux starting with glibc version 2.7. ($5$ and $6$ prefixes)</li>
  * </ul>
  *
  * <p>There are no methods provided to allow remote access to password
@@ -166,9 +166,11 @@ public class PasswordDBField extends DBField implements pass_field {
   private String cryptedPass;
 
   /**
-   * The complex md5crypt()'ed password, as in OpenBSD, FreeBSD,
+   * <p>The complex md5crypt()'ed password, as in OpenBSD, FreeBSD,
    * Linux PAM, etc.  Good for validating indefinite length
-   * strings.
+   * strings.</p>
+   *
+   * <p>Algorithm by Paul-Hennig Kamp.  Uses a $1$ prefix.</p>
    */
 
   private String md5CryptPass;
@@ -177,46 +179,53 @@ public class PasswordDBField extends DBField implements pass_field {
    * <p>The complex bCrypted password, as in OpenBSD. Very high,
    * scalable security.</p>
    *
-   * <p>This hash format can have a very large digest size, a large salt,
-   * and a very significant computational cost, which makes this hash
-   * the most resistant to brute force attacks.</p>
+   * <p>This hash format can have a very large digest size, a large
+   * salt, and a very significant computational cost, which makes this
+   * hash (along with Ulrich Drepper's SHA-CRYPT) one of the
+   * most resistant to brute force attacks.</p>
+   *
+   * <p>Algorithm by Neils Provos and the Blowfish creators.  Uses a
+   * $2a$ prefix.</p>
    */
 
   private String bCryptPass;
 
   /**
-   * The complex md5crypt()'ed password, with the magic string used
+   * <p>The complex md5crypt()'ed password, with the magic string used
    * by Apache for their htpasswd file format.  Good for validating
-   * indefinite length strings.
+   * indefinite length strings.</p>
+   *
+   * <p>Variant of Paul-Hennig Kamps's algorithm.  Uses a $apr1$
+   * prefix.</p>
    */
 
   private String apacheMd5CryptPass;
 
   /**
-   * Plaintext password.. will never be saved to disk if we have
+   * <p>Plaintext password.. will never be saved to disk if we have
    * another hash format available to validate, unless this field has
    * been specifically configured to always save plaintext to disk in
    * the schema editor.  See {@link
    * arlut.csd.ganymede.server.DBObjectBaseField#isPlainText()} for more
-   * detail.
+   * detail.</p>
    */
 
   private String uncryptedPass;
 
   /**
-   * Samba LANMAN hash, for Win95 clients.  Only good for
+   * <p>Samba LANMAN hash, for Win95 clients.  Only good for
    * validating the first 14 characters of a plaintext.  This hash is
    * actually incredibly, mind-crushingly weak.. weaker than
    * traditional Unix crypt, even.  If you're basing your password
-   * security on this hash still, you're in trouble.
+   * security on this hash still, you're in trouble.</p>
    */
 
   private String lanHash;
 
   /**
-   * Samba md4 Unicode hash, for WinNT/2k clients. Good for
+   * <p>Samba md4 Unicode hash, for WinNT/2k clients. Good for
    * validating up to 2^64 bits of plaintext.. effectively indefinite
-   * in extent
+   * in extent</p>
    */
 
   private String ntHash;
@@ -240,8 +249,8 @@ public class PasswordDBField extends DBField implements pass_field {
   private String sshaHash;
 
   /**
-   * <p>Password hashed using the SHA Unix Crypt algorithm published by
-   * Ulrich Drepper at</p>
+   * <p>Password hashed using the SHA Unix Crypt algorithm published
+   * by Ulrich Drepper at</p>
    *
    * <p><a href="http://people.redhat.com/drepper/sha-crypt.html">http://people.redhat.com/drepper/sha-crypt.html</a></p>
    *
@@ -249,15 +258,16 @@ public class PasswordDBField extends DBField implements pass_field {
    * Sha256Crypt or Sha512Crypt variants of the SHA Unix Crypt
    * algorithm described at the above URL.</p>
    *
-   * <p>This hash format can have a very large digest size, a large salt,
-   * and a very significant computational cost, which makes this hash
-   * the most resistant to brute force attacks.</p>
+   * <p>This hash format can have a very large digest size, a large
+   * salt, and a very significant computational cost, which makes this
+   * hash (along with Niels Provos's bCrypt) one of the most resistant
+   * to brute force attacks.</p>
    */
 
   private String shaUnixCrypt;
 
   /**
-   * <p>History archive of previous password hashes, and the dates that
+   * <p>History archive of previous password hashes and the dates that
    * the previous passwords were committed into the database.</p>
    *
    * <p>This variable will only be non-null if the DBObjectBaseField
