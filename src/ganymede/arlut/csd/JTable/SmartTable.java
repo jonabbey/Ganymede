@@ -214,11 +214,12 @@ public class SmartTable extends JPanel implements ActionListener
   }
 
   /**
-   * Add right click menus for header, and row
+   * Add right click menus for header, and row.
+   *
    * @param rowMenu popup menu passed in from parent, actionListener added here
    */
 
-  public void addPopupMenus(JPopupMenu rowMenu)
+  private void addPopupMenus(JPopupMenu rowMenu)
   {
     JPopupMenu headerMenu = new JPopupMenu();
 
