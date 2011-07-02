@@ -294,7 +294,7 @@ public class SmartTable extends JPanel implements ActionListener
 		  }
 
 		table.removeColumn(table.getColumnModel().getColumn(remember_col2));
-		fixTableColumns();
+		calcResizeMode();
 	      }
 	    else if (event.getSource() == optimizeColWidMI)
 	      {
@@ -321,10 +321,11 @@ public class SmartTable extends JPanel implements ActionListener
   }
 
   /**
-   * Optimize the columnWidths on start
+   * Modify the table autoresize mode according to whether there is
+   * room for all the columns or not.
    */
 
-  public void fixTableColumns()
+  public void calcResizeMode()
   {
     int colCount = table.getColumnCount();
 
@@ -735,7 +736,7 @@ public class SmartTable extends JPanel implements ActionListener
   {
     public void componentResized(ComponentEvent e)
     {
-      fixTableColumns();
+      calcResizeMode();
     }
 
     public void componentMoved(ComponentEvent e)
@@ -767,7 +768,7 @@ public class SmartTable extends JPanel implements ActionListener
   {
     public void ancestorAdded(AncestorEvent e)
     {
-      fixTableColumns();
+      calcResizeMode();
     }
 
     public void ancestorMoved(AncestorEvent e)

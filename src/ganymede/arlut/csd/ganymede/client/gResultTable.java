@@ -340,7 +340,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     validate(); // needed after refresh results.
 
-    sTable.fixTableColumns();
+    sTable.calcResizeMode();
 
     // "Query Complete."
     setStatus(ts.l("loadResults.complete_status"));
