@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -159,7 +159,16 @@ public class SmartTable extends JPanel implements ActionListener
 
   /* -- */
 
-  public SmartTable(JPopupMenu rowMenu, String[] columnValues, rowSelectCallback callback)
+  /**
+   * SmartTable constructor
+   *
+   * @param columnValues The name of the columns to be held in the table.
+   * @param rowMenu A popup menu to associate with each row of the table.
+   * @param callback The arl.csd.JTable-specific rowSelectCallback listener that receives
+   * notification of events on the table rows.
+   */
+
+  public SmartTable(String[] columnValues, JPopupMenu rowMenu, rowSelectCallback callback)
   {
     if (debug)
       {

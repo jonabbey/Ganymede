@@ -291,7 +291,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     // header can sort and remove columns, the columns must be defined before creating the table, the
     // data cells may be filled in later.  this is for the callback functions
 
-    sTable = new SmartTable(rowMenu, columnNames, this);
+    sTable = new SmartTable(columnNames, rowMenu, this);
     getContentPane().add(sTable);
 
     // Now Read in all the result lines.
