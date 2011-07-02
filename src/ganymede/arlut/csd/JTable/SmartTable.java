@@ -532,38 +532,13 @@ public class SmartTable extends JPanel implements ActionListener
    * size adjusted.</p>
    */
 
-  private void reflowColumn(int modelIndex)
+  private void reflowColumn(TableColumn column)
   {
-    if (modelIndex == -1)
+    if (column == null)
       {
 	return;
       }
 
-    Class colClass = myModel.getColumnClass(modelIndex);
-
-    if (colClass != Date.class)
-      {
-	TableColumnModel cmodel = table.getColumnModel();
-
-	try
-	  {
-	    int physPos = myModel.getPhysicalColumnPos(modelIndex);
-
-	    cmodel.getColumn(myModel.getPhysicalColumnPos(modelIndex)).setCellRenderer(new TextAreaRenderer());
-	  }
-	catch (IndexOutOfBoundsException ex)
-	  {
-	  }
-      }
-  }
-
-  /**
-   * <p>Regenerate the cell renderer for a column after it has been
-   * size adjusted.</p>
-   */
-
-  private void reflowColumn(TableColumn column)
-  {
     if (myModel.getColumnClass(column.getModelIndex()) != Date.class)
       {
 	column.setCellRenderer(new TextAreaRenderer());
@@ -682,7 +657,8 @@ public class SmartTable extends JPanel implements ActionListener
   ----------------------------------------------------------------------------*/
 
   /**
-   * The listener class for the table column model.
+   * <p>A TableColumnModelListener that takes care of reflowing columns
+   * when they have been resized.</p>
    */
 
   public class ColumnReflowListener implements TableColumnModelListener
@@ -695,11 +671,8 @@ public class SmartTable extends JPanel implements ActionListener
     {
       TableColumn tc = table.getTableHeader().getResizingColumn();
 
-      if (tc != null)
-	{
-	  reflowColumn(tc);
-	  reflowColumn(getNextModelIndex(tc.getModelIndex()));
-	}
+      reflowColumn(tc);
+      reflowColumn(getNextColumn(tc));
     }
 
     /**
@@ -707,8 +680,13 @@ public class SmartTable extends JPanel implements ActionListener
      * right of colIndex.
      */
 
-    private int getNextModelIndex(int colIndex)
+    private TableColumn getNextColumn(TableColumn col)
     {
+      if (col == null)
+	{
+	  return null;
+	}
+
       TableColumnModel colModel = table.getTableHeader().getColumnModel();
 
       // get list of columns in physical order.
@@ -717,16 +695,16 @@ public class SmartTable extends JPanel implements ActionListener
 
       while (columns.hasMoreElements())
 	{
-	  if (columns.nextElement().getModelIndex() == colIndex)
+	  if (columns.nextElement() == col)
 	    {
 	      if (columns.hasMoreElements())
 		{
-		  return columns.nextElement().getModelIndex();
+		  return columns.nextElement();
 		}
 	    }
 	}
 
-      return -1;
+      return null;
     }
 
     public void columnMoved(TableColumnModelEvent e)
@@ -1052,37 +1030,6 @@ public class SmartTable extends JPanel implements ActionListener
 	}
 
       System.out.println("--------------------------");
-    }
-
-    /**
-     * <p>Gets a physical column's position number from a TableModel
-     * column index.</p>
-     *
-     * <p>Needed because colums can be physically slid around by the
-     * user, while the TableModel column indexes do not change.</p>
-     *
-     * @returns The physical index of TableModel column colIndex
-     * @throws IndexOutOfBoundsException if colIndex is out of range
-     */
-
-    public int getPhysicalColumnPos(int colIndex)
-    {
-      int i = 0;
-      Enumeration columns = table.getTableHeader().getColumnModel().getColumns();
-
-      while (columns.hasMoreElements())
-	{
-	  TableColumn col = (TableColumn) columns.nextElement();
-
-	  if (col.getModelIndex() == colIndex)
-	    {
-	      return i;
-	    }
-
-	  i++;
-	}
-
-      throw new IndexOutOfBoundsException();
     }
   }
 
