@@ -388,7 +388,7 @@ public class SmartTable extends JPanel implements ActionListener
       {
 	TableColumn col = columns.nextElement();
 
-	setColumnTextWrap(col);
+	rewrapColumn(col);
       }
 
     /*
@@ -531,29 +531,23 @@ public class SmartTable extends JPanel implements ActionListener
   }
 
   /**
-   * Turn on text wrapping if the column is not a Date class.
-   * this appears to be using physical instead of Index position.
+   * <p>Regenerate the cell renderer for a column after it has been
+   * size adjusted.</p>
    */
 
-  private void setColumnTextWrap(int colIndex)
+  private void rewrapColumn(int modelIndex)
   {
-    String colClass = myModel.getColumnClass(colIndex).toString();
+    Class colClass = myModel.getColumnClass(modelIndex);
 
-    if (debug)
-      {
-	System.err.println("setColumnTextWrap(" + colIndex + ") = " + colClass);
-      }
-
-    if (!colClass.equals("class java.util.Date"))
+    if (colClass != Date.class)
       {
 	TableColumnModel cmodel = table.getColumnModel();
-	TextAreaRenderer textAreaRenderer = new TextAreaRenderer();
 
 	try
 	  {
-	    int physPos = myModel.getPhysicalColumnPos(colIndex);
+	    int physPos = myModel.getPhysicalColumnPos(modelIndex);
 
-	    cmodel.getColumn(physPos).setCellRenderer(textAreaRenderer);
+	    cmodel.getColumn(myModel.getPhysicalColumnPos(modelIndex)).setCellRenderer(new TextAreaRenderer());
 	  }
 	catch (IndexOutOfBoundsException ex)
 	  {
@@ -562,26 +556,15 @@ public class SmartTable extends JPanel implements ActionListener
   }
 
   /**
-   * Turn on text wrapping if the column is not a Date class.
-   * this appears to be using physical instead of Index position.
+   * <p>Regenerate the cell renderer for a column after it has been
+   * size adjusted.</p>
    */
 
-  private void setColumnTextWrap(TableColumn column)
+  private void rewrapColumn(TableColumn column)
   {
-    int colIndex = column.getModelIndex();
-    String colClass = myModel.getColumnClass(colIndex).toString();
-
-    if (debug)
+    if (myModel.getColumnClass(column.getModelIndex()) != Date.class)
       {
-	System.err.println("setColumnTextWrap(" + column + ") = " + colClass);
-      }
-
-    if (!colClass.equals("class java.util.Date"))
-      {
-	TableColumnModel cmodel = table.getColumnModel();
-	TextAreaRenderer textAreaRenderer = new TextAreaRenderer();
-
-	column.setCellRenderer(textAreaRenderer);
+	column.setCellRenderer(new TextAreaRenderer());
       }
   }
 
@@ -713,13 +696,13 @@ public class SmartTable extends JPanel implements ActionListener
       if (tc != null)
 	{
 	  int colIndex = tc.getModelIndex();
-	  int colIndex2 = getNextColumnIndex(colIndex);
+	  int colIndex2 = getNextModelIndex(colIndex);
 
-	  setColumnTextWrap(colIndex);
+	  rewrapColumn(colIndex);
 
 	  if (colIndex2 != -1)
 	    {
-	      setColumnTextWrap(colIndex2);
+	      rewrapColumn(colIndex2);
 	    }
 	}
     }
@@ -729,7 +712,7 @@ public class SmartTable extends JPanel implements ActionListener
      * columns are moved, their indexes remain the same.
      */
 
-    private int getNextColumnIndex(int colIndex)
+    private int getNextModelIndex(int colIndex)
     {
       TableColumnModel colModel = table.getTableHeader().getColumnModel();
 
