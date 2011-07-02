@@ -1,7 +1,7 @@
 /*
    SmartTable.java
 
-   This Module encapsulates user interactions with a Jtable, including
+   This Module encapsulates user interactions with a JTable, including
    right click menus to sort and remove columns
 
    Created: 14 December 2005
@@ -118,7 +118,7 @@ public class SmartTable extends JPanel implements ActionListener
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.JTable.SmartTable");
 
   /**
-   * Date pattern for rendering dates in the table.
+   * Localized date pattern for rendering dates in the table.
    */
 
   static final String datePattern = SmartTable.ts.l("getTableCellRendererComponent.datePattern"); // "M/d/yyyy"
@@ -358,13 +358,11 @@ public class SmartTable extends JPanel implements ActionListener
   }
 
   /**
-   *
-   * This method will go through all of the columns and optimize
+   * <p>This method will go through all of the columns and optimize
    * the pole placement to minimize wasted space and provide a decent
-   * balance of row and column sizes.
+   * balance of row and column sizes.</p>
    *
-   * Somehow.
-   *
+   * <p>Somehow.</p>
    */
 
   public synchronized void optimizeCols()
@@ -978,7 +976,10 @@ public class SmartTable extends JPanel implements ActionListener
       return columnNames[col];
     }
 
-    // pass in and set entire array of column names, or column headers
+    /**
+     * pass in and set entire array of column names, or column headers
+     */
+
     public void setColumnNames(int columnCnt, String[] columns)
     {
       columnNames = columns;
@@ -1085,11 +1086,11 @@ public class SmartTable extends JPanel implements ActionListener
     }
 
     /**
-     * Gets a physical column's position number from a TableModel
-     * column index.
+     * <p>Gets a physical column's position number from a TableModel
+     * column index.</p>
      *
-     * Needed because colums can be physically slid around by the
-     * user, while the TableModel column indexes do not change.
+     * <p>Needed because colums can be physically slid around by the
+     * user, while the TableModel column indexes do not change.</p>
      *
      * @returns The physical index of TableModel column colIndex
      * @throws IndexOutOfBoundsException if colIndex is out of range
