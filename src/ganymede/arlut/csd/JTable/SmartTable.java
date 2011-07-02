@@ -235,16 +235,11 @@ public class SmartTable extends JPanel implements ActionListener
 
     if (rowMenu != null)
       {
-	Component elements[];
-	JMenuItem temp;
-
-	elements = rowMenu.getComponents();
-
-	for (int i = 0; i < elements.length; i++)
+	for (Component element: rowMenu.getComponents())
 	  {
-	    if (elements[i] instanceof JMenuItem)
+	    if (element instanceof JMenuItem)
 	      {
-		temp = (JMenuItem) elements[i];
+		JMenuItem temp = (JMenuItem) element;
 
 		// if there is a listener already, dont add another
 		// one
@@ -743,11 +738,10 @@ public class SmartTable extends JPanel implements ActionListener
       Enumeration e2 = colModel.getColumns();
       int i = 0;
       int colIndex2 = -1;
-      TableColumn tc2 = null;
 
       while (e2.hasMoreElements() && colIndex2 != colIndex)
 	{
-	  tc2 = (TableColumn)e2.nextElement();
+	  TableColumn tc2 = (TableColumn)e2.nextElement();
 	  colIndex2 = tc2.getModelIndex();
 
 	  i++;
@@ -755,7 +749,7 @@ public class SmartTable extends JPanel implements ActionListener
 
       if (e2.hasMoreElements())
 	{
-	  tc2 = (TableColumn)e2.nextElement();
+	  TableColumn tc2 = (TableColumn)e2.nextElement();
 	  colIndex2 = tc2.getModelIndex();
 
 	  return colIndex2;
@@ -772,6 +766,7 @@ public class SmartTable extends JPanel implements ActionListener
 
     public void columnRemoved(TableColumnModelEvent e)
     {
+      return;
     }
 
     public void columnSelectionChanged(ListSelectionEvent e)
