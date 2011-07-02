@@ -99,7 +99,8 @@ import arlut.csd.Util.TranslationService;
  * in a table form.</p>
  *
  * <p>This window is created when {@link arlut.csd.ganymede.client.windowPanel windowPanel}'s
- * {@link arlut.csd.ganymede.client.windowPanel#addTableWindow(arlut.csd.ganymede.rmi.Session,arlut.csd.ganymede.common.Query,arlut.csd.ganymede.common.DumpResult) addTableWindow}
+ * {@link arlut.csd.ganymede.client.windowPanel#addTableWindow(arlut.csd.ganymede.rmi.Session,
+ * arlut.csd.ganymede.common.Query,arlut.csd.ganymede.common.DumpResult) addTableWindow}
  * method is called.</p>
  *
  * <p>Note that windowPanel's addTableWindow method is called from
@@ -107,12 +108,14 @@ import arlut.csd.Util.TranslationService;
  * which spawns a separate thread in which the query is performed and
  * the gResultTable window is created.</p>
  *
- * <p>Constructors for this class take a {@link arlut.csd.ganymede.common.Query Query} object
- * describing the query that this table was generated from, and a
- * {@link arlut.csd.ganymede.common.DumpResult DumpResult} object actually containing the dump
- * results from the Ganymede server.  gResultTable can resubmit the dump query to the
- * server if the user chooses to refresh the query, but normally the dump query
- * is performed by gclient.</p>
+ * <p>Constructors for this class take a {@link
+ * arlut.csd.ganymede.common.Query Query} object describing the query
+ * that this table was generated from, and a {@link
+ * arlut.csd.ganymede.common.DumpResult DumpResult} object actually
+ * containing the dump results from the Ganymede server.  gResultTable
+ * can resubmit the dump query to the server if the user chooses to
+ * refresh the query, but normally the dump query is performed by
+ * gclient.</p>
  *
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
@@ -145,8 +148,8 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   // ---
 
   /**
-   * Reference to the desktop pane containing the client's internal windows.  Used to access
-   * some GUI resources.
+   * Reference to the desktop pane containing the client's internal
+   * windows.  Used to access some GUI resources.
    */
 
   windowPanel wp;
@@ -257,33 +260,56 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	queryType = ts.l("loadResults.unknown_query_type");   // "<unknown>"
       }
 
-    // "Query: [{0}] results: {1,num,#} entries"
     int rows = results.resultSize();
+    Vector headerVect = results.getHeaders();
+
+    // calculate which columns are not used, so we can exclude them
+
+    boolean used[] = new boolean[headerVect.size()];
+    int colsUsed = 0;
+
+    for (int j = 0; j < headerVect.size(); j++)
+      {
+	used[j] = false;
+
+	for (int i = 0; !used[j] && i < rows; i++)
+	  {
+	    Object x = results.getResult(i, j);
+
+	    if (x != null && !x.toString().equals(""))
+	      {
+		used[j] = true;
+		colsUsed++;
+	      }
+	  }
+      }
+
+    // "Query: [{0}] results: {1,num,#} entries"
     wp.setWindowTitle(this, ts.l("loadResults.window_title", queryType, Integer.valueOf(rows)));
     wp.updateWindowMenu();
 
-
-    Vector headerVect = results.getHeaders();
-    String[] columnNames = new String[headerVect.size()];
-    used = new boolean[headerVect.size()];
-
     if (debug)
       {
-	System.err.println("gResultTable: " + headerVect.size() + " headers returned by query");
+	System.err.println("gResultTable: " + headerVect.size() + " headers returned by query, " + colsUsed + " in use.");
       }
 
-    // Get all Column Names now
+    String[] columnNames = new String[colsUsed];
 
-    for (int i=0; i < headerVect.size(); i++)
+    // Get all used Column Names now
+
+    for (int j=0, k=0; j < headerVect.size(); j++)
       {
-	columnNames[i] = (String) headerVect.elementAt(i);
-
-	if (debug)
+	if (used[j])
 	  {
-	    System.out.println("columnNames " + i + " value is:" + columnNames[i] + "*");
-	  }
+	    columnNames[k] = (String) headerVect.elementAt(j);
 
-	used[i] = false;
+	    if (debug)
+	      {
+		System.out.println("columnNames " + k + " value is:" + columnNames[k] + "*");
+	      }
+
+	    k++;
+	  }
       }
 
     // Pass our SmartTable the results set, and a text Row menu
@@ -297,30 +323,18 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     // Now Read in all the result lines.
     for (int i=0; i < rows; i++)
       {
-	// Save invid to refer to later, as it is the key field.
 	Invid invid = results.getInvid(i);
 	sTable.newRow(invid);
 
-	for (int j=0; j < headerVect.size(); j++)
+	for (int j=0, k=0; j < headerVect.size(); j++)
 	  {
-	    Object cellResult = results.getResult(i, j);
-	    sTable.setCellValue(invid, j, cellResult);
-
-	    if (!used[j] && cellResult != null && !cellResult.toString().equals(""))
+	    if (used[j])
 	      {
-		used[j] = true;
+		Object cellResult = results.getResult(i, j);
+		sTable.setCellValue(invid, k, cellResult);
+
+		k++;
 	      }
-	  }
-      }
-
-    // Removing empty columns, we have to do this backwards so that we don't
-    // change the index of a column we'll later delete
-
-    for (int i = used.length-1; i >= 0 ; i--)
-      {
-	if (!used[i])
-	  {
-	      sTable.table.removeColumn(sTable.table.getColumnModel().getColumn(i));
 	  }
       }
 
@@ -757,9 +771,8 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   StringBuffer generateHTMLRep()
   {
     StringBuffer result = new StringBuffer();
-    JTable table = sTable.table;
-    int colcount = table.getColumnCount();
-    int size = table.getRowCount();
+    int colcount = sTable.getColumnCount();
+    int size = sTable.getRowCount();
     String cellText;
     String date = (new Date()).toString();
 
@@ -787,7 +800,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     for (int i = 0; i < colcount; i++)
       {
 	result.append("<th>");
-	result.append(table.getColumnName(i));
+	result.append(sTable.getColumnName(i));
 	result.append("</th>\n");
       }
 
@@ -801,7 +814,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 	  {
 	    result.append("<td>");
 
-	    Object value = table.getValueAt(i, j);
+	    Object value = sTable.getValueAt(i, j);
 
 	    if (value != null)
 	      {
@@ -828,9 +841,8 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   StringBuffer generateTextRep(char sepChar)
   {
     StringBuffer result = new StringBuffer();
-    JTable table = sTable.table;
-    int colcount = table.getColumnCount();
-    int size = table.getRowCount();
+    int colcount = sTable.getColumnCount();
+    int size = sTable.getRowCount();
     String cellText;
 
     // we just have to hope that the table isn't going to
@@ -849,7 +861,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 		result.append(sepChar);
 	      }
 
-	    Object value = table.getValueAt(i, j);
+	    Object value = sTable.getValueAt(i, j);
 
 	    if (value != null)
 	      {

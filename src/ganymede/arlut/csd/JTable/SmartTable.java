@@ -129,7 +129,7 @@ public class SmartTable extends JPanel implements ActionListener
    * The GUI table component.
    */
 
-  public JTable table = null;
+  private JTable table = null;
   private MyTableModel myModel;
   private TableSorter sorter = null;
 
@@ -257,6 +257,26 @@ public class SmartTable extends JPanel implements ActionListener
       }
 
     table.addMouseListener(new PopupListener(this,rowMenu));
+  }
+
+  public int getColumnCount()
+  {
+    return myModel.getColumnCount();
+  }
+
+  public String getColumnName(int j)
+  {
+    return myModel.getColumnName(j);
+  }
+
+  public int getRowCount()
+  {
+    return myModel.getRowCount();
+  }
+
+  public Object getValueAt(int i, int j)
+  {
+    return myModel.getValueAt(i, j);
   }
 
   /**
