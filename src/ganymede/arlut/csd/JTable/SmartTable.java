@@ -385,7 +385,7 @@ public class SmartTable extends JPanel implements ActionListener
       {
 	TableColumn col = columns.nextElement();
 
-	rewrapColumn(col);
+	reflowColumn(col);
       }
 
     /*
@@ -532,7 +532,7 @@ public class SmartTable extends JPanel implements ActionListener
    * size adjusted.</p>
    */
 
-  private void rewrapColumn(int modelIndex)
+  private void reflowColumn(int modelIndex)
   {
     if (modelIndex == -1)
       {
@@ -562,7 +562,7 @@ public class SmartTable extends JPanel implements ActionListener
    * size adjusted.</p>
    */
 
-  private void rewrapColumn(TableColumn column)
+  private void reflowColumn(TableColumn column)
   {
     if (myModel.getColumnClass(column.getModelIndex()) != Date.class)
       {
@@ -697,8 +697,8 @@ public class SmartTable extends JPanel implements ActionListener
 
       if (tc != null)
 	{
-	  rewrapColumn(tc);
-	  rewrapColumn(getNextModelIndex(tc.getModelIndex()));
+	  reflowColumn(tc);
+	  reflowColumn(getNextModelIndex(tc.getModelIndex()));
 	}
     }
 
