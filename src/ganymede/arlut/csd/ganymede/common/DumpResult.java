@@ -5,16 +5,16 @@
    This class is a serializable dump result object, which conveys
    results from a dump operation along with methods that can be
    used to extract the results  out of the dump.
-   
+
    Created: 25 September 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -64,39 +64,39 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class is a serializable transport object, used to transmit the results
+ * <p>This class is a serializable transport object, used to transmit the results
  * of a data dump query to the client.  DumpResult objects are created by the
- * {@link arlut.csd.ganymede.server.DumpResultBuilder DumpResultBuilder} factory class.
+ * {@link arlut.csd.ganymede.server.DumpResultBuilder DumpResultBuilder} factory class.</p>
  *
- * The way it works is that DumpResultBuilder creates the
+ * <p>The way it works is that DumpResultBuilder creates the
  * DumpResult objects, which is transmitted through RMI to the client.
  * The client can then call the various accessor methods to access the
- * serialized query results.
+ * serialized query results.</p>
  *
- * DumpResult encodes a list of field headers by name, a list of field types
+ * <p>DumpResult encodes a list of field headers by name, a list of field types
  * encoded as {@link java.lang.Short Shorts} coded with the
  * values enumerated in the {@link arlut.csd.ganymede.common.FieldType FieldType}
  * interface, and a list of object rows, each of which contains a Vector of
- * encoded field values.
+ * encoded field values.</p>
  *
- * Field values are encoded as follows:
+ * <p>Field values are encoded as follows:</p>
  *
- * Date fields as {@link java.util.Date Date} objects
- * Float fields as {@link java.lang.Double Double} objects
- * Numeric fields as {@link java.lang.Integer Integer} objects
- * <br/>
- * And Strings for everything else.
+ * <p>Date fields as {@link java.util.Date Date} objects<br/>
+ * Float fields as {@link java.lang.Double Double} objects<br/>
+ * Numeric fields as {@link java.lang.Integer Integer} objects<br/></p>
  *
- * The GUI client uses this object to generate its query result tables..
+ * <p>And Strings for everything else.</p>
  *
- * Later Note:
+ * <p>The GUI client uses this object to generate its query result tables.</p>
  *
- *  Yes, I know how utterly horrifying this is.  It's something I did
- *  very early on during development, and it worked well for high
- *  speed data dumping, so I just kept it.  Mea culpa, mea maxima
- *  culpa.
+ * <p>Later Note:</p>
  *
- *  Yet, it works.
+ * <p>Yes, I know how utterly horrifying this is.  It's something I did
+ * very early on during development, and it worked well for high
+ * speed data dumping, so I just kept it.  Mea culpa, mea maxima
+ * culpa.</pp>
+ *
+ * <p>Yet, it works.</p>
  */
 
 public class DumpResult implements java.io.Serializable, List {
@@ -105,7 +105,7 @@ public class DumpResult implements java.io.Serializable, List {
 
   static final long serialVersionUID = 8688161796723967714L;
 
-  // --
+  // ---
 
   // for transport
 
@@ -131,12 +131,12 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   * This method can be called on the client to obtain a {@link
+   * <p>This method can be called on the client to obtain a {@link
    * java.util.Vector Vector} of field names, used to generate the
-   * list of column headers in the GUI client.
+   * list of column headers in the GUI client.</p>
    *
-   * Note: The Vector returned is "live", and should not be modified
-   * by the caller, at the risk of surprising behavior.
+   * <p>Note: The Vector returned is "live", and should not be modified
+   * by the caller, at the risk of surprising behavior.</p>
    */
 
   public synchronized Vector getHeaders()
@@ -157,13 +157,13 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   * This method can be called on the client to obtain an independent
+   * <p>This method can be called on the client to obtain an independent
    * Vector of {@link arlut.csd.ganymede.common.DumpResultCol
    * DumpResultCol} objects, which define the field name, field id,
-   * and field type for each column in this DumpResult.
+   * and field type for each column in this DumpResult.</p>
    *
-   * Note: The Vector returned is "live", and should not be modified
-   * by the caller, at the risk of surprising behavior.
+   * <p>Note: The Vector returned is "live", and should not be modified
+   * by the caller, at the risk of surprising behavior.</p>
    */
 
   public Vector getHeaderObjects()
@@ -174,7 +174,8 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   * Returns the name of the field encoded in column col of the DumpResult.
+   * <p>Returns the name of the field encoded in column col of the
+   * DumpResult.</p>
    */
 
   public String getFieldName(int col)
@@ -187,8 +188,8 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   * Returns the field code for the field encoded in column col of the
-   * DumpResult.
+   * <p>Returns the field code for the field encoded in column col of the
+   * DumpResult.</p>
    */
 
   public short getFieldId(int col)
@@ -201,12 +202,12 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   * Returns the field type for the field encoded in column col of the
-   * DumpResult.
+   * <p>Returns the field type for the field encoded in column col of the
+   * DumpResult.</p>
    *
-   * The field type returned is to be interpreted according to the
+   * <p>The field type returned is to be interpreted according to the
    * values enumerated in the {@link
-   * arlut.csd.ganymede.common.FieldType FieldType} interface.
+   * arlut.csd.ganymede.common.FieldType FieldType} interface.</p>
    */
 
   public short getFieldType(int col)
@@ -219,13 +220,13 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   * This method can be called on the client to obtain a {@link
+   * <p>This method can be called on the client to obtain a {@link
    * java.util.Vector Vector} of {@link arlut.csd.ganymede.common.Invid
    * Invids}, identifying the objects that are being returned in the
-   * DumpResult.
+   * DumpResult.</p>
    *
-   * Note: The Vector returned is "live", and should not be modified
-   * by the caller, at the risk of surprising behavior.
+   * <p>Note: The Vector returned is "live", and should not be modified
+   * by the caller, at the risk of surprising behavior.</p>
    */
 
   public Vector getInvids()
@@ -236,9 +237,9 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   * This method can be called on the client to obtain the object
+   * <p>This method can be called on the client to obtain the object
    * identifier {@link arlut.csd.ganymede.common.Invid Invid} for a
-   * given result row.
+   * given result row.</p>
    */
 
   public Invid getInvid(int row)
@@ -249,14 +250,14 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   * This method can be called on the client to obtain a {@link
+   * <p>This method can be called on the client to obtain a {@link
    * java.util.Vector Vector} of Vectors, each of which contains
    * the data values returned for each object, in field order matching
    * the field names and types returned by {@link arlut.csd.ganymede.common.DumpResult#getHeaders getHeaders()}
-   * and {@link arlut.csd.ganymede.common.DumpResult#getHeaderObjects getHeaderObjects()}.
+   * and {@link arlut.csd.ganymede.common.DumpResult#getHeaderObjects getHeaderObjects()}.</p>
    *
-   * Note: The Vector returned is "live", and should not be modified
-   * by the caller, at the risk of surprising behavior.
+   * <p>Note: The Vector returned is "live", and should not be modified
+   * by the caller, at the risk of surprising behavior.</p>
    */
 
   public Vector getRows()
@@ -267,15 +268,15 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   * This method can be called on the client to obtain a {@link
+   * <p>This method can be called on the client to obtain a {@link
    * java.util.Vector Vector} containing the data values returned for
    * the object at row <i>row</i>, in field order matching the field
    * names and types returned by {@link
    * arlut.csd.ganymede.common.DumpResult#getHeaders getHeaders()} and
    * {@link arlut.csd.ganymede.common.DumpResult#getHeaderObjects
-   * getHeaderObjects()}.
+   * getHeaderObjects()}.</p>
    */
-  
+
   public Vector getFieldRow(int rowNumber)
   {
     checkBuffer();
@@ -284,7 +285,7 @@ public class DumpResult implements java.io.Serializable, List {
     Vector row = new Vector(headerObjects.size());
     Iterator iter;
     String currentHeader;
-    
+
     for (iter = headerObjects.iterator(); iter.hasNext();)
       {
       	currentHeader = ((DumpResultCol) iter.next()).getName();
@@ -295,12 +296,12 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   * This method can be called on the client to obtain an Object
+   * <p>This method can be called on the client to obtain an Object
    * encoding the result value for the <i>col</i>th field in the
    * <i>row</i>th object.  These Objects may be a {@link java.lang.Double Double}
    * for Float fields, an {@link java.lang.Integer Integer} for Numeric fields,
    * a {@link java.util.Date Date} for Date fields, or a String for other
-   * fields.
+   * fields.</p>
    */
 
   public Object getResult(int row, int col)
@@ -311,8 +312,8 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   * This method can be called on the client to determine the
-   * number of objects encoded in this DumpResult.
+   * <p>This method can be called on the client to determine the
+   * number of objects encoded in this DumpResult.</p>
    */
 
   public int resultSize()
@@ -323,8 +324,8 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   * This method takes care of deserializing the StringBuffer we
-   * contain, to crack out the data we are interested in conveying.
+   * <p>This method takes care of deserializing the StringBuffer we
+   * contain, to crack out the data we are interested in conveying.</p>
    */
 
   private synchronized void checkBuffer()
@@ -353,7 +354,7 @@ public class DumpResult implements java.io.Serializable, List {
       {
 	System.err.println("*** unpacking buffer");
       }
-    
+
     while (chars[index] != '\n')
       {
         String fieldName;
@@ -454,12 +455,12 @@ public class DumpResult implements java.io.Serializable, List {
 	  {
 	    // if we have a backslashed character, take the backslashed char
 	    // as a literal
-	    
+
 	    if (chars[index] == '\n')
 	      {
 		throw new RuntimeException("parse error in row");
 	      }
-	    
+
 	    tempString.append(chars[index++]);
 	  }
 
@@ -525,7 +526,7 @@ public class DumpResult implements java.io.Serializable, List {
 		      }
 		  }
 		break;
-		
+
 	      case FieldType.NUMERIC:
 
 		if (tempString.toString().equals("null") ||
@@ -541,14 +542,14 @@ public class DumpResult implements java.io.Serializable, List {
 		      }
 		    catch (NumberFormatException ex)
 		      {
-			throw new RuntimeException("couldn't parse numeric encoding for string *" + 
+			throw new RuntimeException("couldn't parse numeric encoding for string *" +
 						   tempString.toString() + "* :" + ex);
 		      }
 		  }
 		break;
 
  	      case FieldType.FLOAT:
- 
+
  		if (tempString.toString().equals("null") ||
  		    tempString.toString().equals(""))
  		  {
@@ -562,7 +563,7 @@ public class DumpResult implements java.io.Serializable, List {
  		      }
  		    catch (NumberFormatException ex)
  		      {
- 			throw new RuntimeException("couldn't parse float encoding for string *" + 
+ 			throw new RuntimeException("couldn't parse float encoding for string *" +
  						   tempString.toString() + "* :" + ex);
  		      }
  		  }
@@ -572,7 +573,7 @@ public class DumpResult implements java.io.Serializable, List {
 		rowMap.put(currentHeader, tempString.toString());
 	      }
 	  }
-	
+
 	rows.addElement(rowMap);
 
 	index++; // skip newline
@@ -582,12 +583,10 @@ public class DumpResult implements java.io.Serializable, List {
   }
 
   /**
-   *
-   * This method breaks apart the data structures held
+   * <p>This method breaks apart the data structures held
    * by this DumpResult.. it is intended to speed garbage
    * collection when the contents of this DumpResult buffer
-   * have been processed and are no longer needed on the client.
-   *
+   * have been processed and are no longer needed on the client.</p>
    */
 
   public void dissociate()
@@ -619,222 +618,255 @@ public class DumpResult implements java.io.Serializable, List {
 
   /* ------------------------------------------------------------------------
    * This is the start of the List interface implementation
-   * 
+   *
    */
-  
-  /* This is a no-op since a DumpResult is immutable.
-   * 
+
+  /**
+   * This is a no-op since a DumpResult is immutable.
+   *
    * @see java.util.List#add(int, java.lang.Object)
    */
+
   public void add(int index, Object element)
   {
     throw new UnsupportedOperationException();
   }
-  
-  /* This is a no-op since a DumpResult is immutable.
-   * 
+
+  /**
+   * This is a no-op since a DumpResult is immutable.
+   *
    * @see java.util.Collection#add(java.lang.Object)
    */
+
   public boolean add(Object o)
   {
     throw new UnsupportedOperationException();
   }
-  
-  /* This is a no-op since DumpResult is immutable.
-   * 
+
+  /**
+   * This is a no-op since DumpResult is immutable.
+   *
    * @see java.util.Collection#addAll(java.util.Collection)
    */
+
   public boolean addAll(Collection c)
   {
     throw new UnsupportedOperationException();
   }
-  
-  /* This is a no-op since DumpResult is immutable.
-   * 
+
+  /**
+   *  This is a no-op since DumpResult is immutable.
+   *
    * @see java.util.List#addAll(int, java.util.Collection)
    */
+
   public boolean addAll(int index, Collection c)
   {
     throw new UnsupportedOperationException();
   }
-  
-  /* This is a no-op since DumpResult is immutable.
-   * 
+
+  /**
+   * This is a no-op since DumpResult is immutable.
+   *
    * @see java.util.Collection#clear()
    */
+
   public void clear()
   {
     throw new UnsupportedOperationException();
   }
-  
-  /* 
+
+  /**
    * @see java.util.Collection#contains(java.lang.Object)
    */
+
   public boolean contains(Object o)
   {
     checkBuffer();
 
     return rows.contains(o);
   }
-  
-  /* 
+
+  /**
    * @see java.util.Collection#containsAll(java.util.Collection)
    */
+
   public boolean containsAll(Collection c)
   {
     checkBuffer();
 
     return rows.containsAll(c);
   }
-  
-  /* 
+
+  /**
    * @see java.util.List#get(int)
    */
+
   public Object get(int index)
   {
     checkBuffer();
 
     return rows.get(index);
   }
-  
-  /* 
+
+  /**
    * @see java.util.List#indexOf(java.lang.Object)
    */
+
   public int indexOf(Object o)
   {
     checkBuffer();
 
     return rows.indexOf(o);
   }
-  
-  /* 
+
+  /**
    * @see java.util.Collection#isEmpty()
    */
+
   public boolean isEmpty()
   {
     checkBuffer();
 
     return rows.isEmpty();
   }
-  
-  /* 
+
+  /**
    * @see java.util.Collection#iterator()
    */
+
   public Iterator iterator()
   {
     checkBuffer();
 
     return rows.iterator();
   }
-  
-  /* 
+
+  /**
    * @see java.util.List#lastIndexOf(java.lang.Object)
    */
+
   public int lastIndexOf(Object o)
   {
     checkBuffer();
 
     return rows.lastIndexOf(o);
   }
-  
-  /* 
+
+  /**
    * @see java.util.List#listIterator()
    */
+
   public ListIterator listIterator()
   {
     checkBuffer();
 
     return rows.listIterator();
   }
-  
-  /* 
+
+  /**
    * @see java.util.List#listIterator(int)
    */
+
   public ListIterator listIterator(int index)
   {
     checkBuffer();
 
     return rows.listIterator(index);
   }
-  
-  /* This is a no-op since DumpResult is immutable.
-   * 
+
+  /**
+   * This is a no-op since DumpResult is immutable.
+   *
    * @see java.util.List#remove(int)
    */
+
   public Object remove(int index)
   {
     throw new UnsupportedOperationException();
   }
-  
-  /* This is a no-op since DumpResult is immutable.
+
+  /**
+   * This is a no-op since DumpResult is immutable.
    *
    * @see java.util.Collection#remove(java.lang.Object)
    */
+
   public boolean remove(Object o)
   {
     throw new UnsupportedOperationException();
   }
-  
-  /* This is a no-op since DumpResult is immutable.
-   * 
+
+  /**
+   * This is a no-op since DumpResult is immutable.
+   *
    * @see java.util.Collection#removeAll(java.util.Collection)
    */
+
   public boolean removeAll(Collection c)
   {
     throw new UnsupportedOperationException();
   }
-  
-  /* This is a no-op since DumpResult is immutable.
-   * 
+
+  /**
+   * This is a no-op since DumpResult is immutable.
+   *
    * @see java.util.Collection#retainAll(java.util.Collection)
    */
+
   public boolean retainAll(Collection c)
   {
     throw new UnsupportedOperationException();
   }
-  
-  /* This is a no-op since DumpResult is immutable.
-   * 
+
+  /**
+   * This is a no-op since DumpResult is immutable.
+   *
    * @see java.util.List#set(int, java.lang.Object)
    */
+
   public Object set(int index, Object element)
   {
     throw new UnsupportedOperationException();
   }
-  
-  /* 
+
+  /**
    * @see java.util.Collection#size()
    */
+
   public int size()
   {
     checkBuffer();
 
     return rows.size();
   }
-  
-  /* 
+
+  /**
    * @see java.util.List#subList(int, int)
    */
+
   public List subList(int fromIndex, int toIndex)
   {
     checkBuffer();
 
     return rows.subList(fromIndex, toIndex);
   }
-  
-  /* 
+
+  /**
    * @see java.util.Collection#toArray()
    */
+
   public Object[] toArray()
   {
     checkBuffer();
 
     return rows.toArray();
   }
-  
-  /* 
+
+  /**
    * @see java.util.Collection#toArray(java.lang.Object[])
    */
+
   public Object[] toArray(Object[] a)
   {
     checkBuffer();
