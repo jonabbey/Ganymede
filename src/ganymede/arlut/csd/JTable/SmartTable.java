@@ -708,8 +708,8 @@ public class SmartTable extends JPanel implements ActionListener
     }
 
     /**
-     * Get the next physical columns index number. Needed for when
-     * columns are moved, their indexes remain the same.
+     * Get the TableModel index number for the visible column to the
+     * right of colIndex.
      */
 
     private int getNextModelIndex(int colIndex)
@@ -718,29 +718,20 @@ public class SmartTable extends JPanel implements ActionListener
 
       // get list of columns in physical order.
 
-      Enumeration e2 = colModel.getColumns();
-      int i = 0;
-      int colIndex2 = -1;
+      Enumeration<TableColumn> columns = colModel.getColumns();
 
-      while (e2.hasMoreElements() && colIndex2 != colIndex)
+      while (columns.hasMoreElements())
 	{
-	  TableColumn tc2 = (TableColumn)e2.nextElement();
-	  colIndex2 = tc2.getModelIndex();
-
-	  i++;
+	  if (columns.nextElement().getModelIndex() == colIndex)
+	    {
+	      if (columns.hasMoreElements())
+		{
+		  return columns.nextElement().getModelIndex();
+		}
+	    }
 	}
 
-      if (e2.hasMoreElements())
-	{
-	  TableColumn tc2 = (TableColumn)e2.nextElement();
-	  colIndex2 = tc2.getModelIndex();
-
-	  return colIndex2;
-	}
-      else
-	{
-	  return -1;
-	}
+      return -1;
     }
 
     public void columnMoved(TableColumnModelEvent e)
