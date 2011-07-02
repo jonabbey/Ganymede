@@ -930,7 +930,12 @@ public class SmartTable extends JPanel implements ActionListener
   class MyTableModel extends AbstractTableModel
   {
     private final boolean DEBUG = true;
-    public Vector rows; // vector of rowHandle objects, holds actual data cells
+
+    /**
+     * Vector of rowHandle objects, holds actual data cells
+     */
+
+    public Vector<rowHandler> rows;
     private String[] columnNames;
     private Class[] columnClasses;
 
@@ -938,7 +943,7 @@ public class SmartTable extends JPanel implements ActionListener
 
     public MyTableModel(String[] columnValues)
     {
-      rows = new Vector();
+      rows = new Vector<rowHandler>();
       columnNames = columnValues;
       columnClasses = new Class[columnValues.length];
     }
@@ -1031,7 +1036,7 @@ public class SmartTable extends JPanel implements ActionListener
 
     public rowHandler getRowHandler(int row)
     {
-      return (rowHandler) rows.elementAt(row);
+      return rows.get(row);
     }
 
     /**
