@@ -199,12 +199,9 @@ public class SmartTable extends JPanel implements ActionListener
     // Sort Function Call Here - default first field ASC
     sorter.setSortingStatus(0, 1);
 
-    // If a column size is changed, turn on text-wrapping for that and
-    // next column.
+    // We're going to reflow columns whenever they are resized
 
-    JTableHeader header = table.getTableHeader();
-    TableColumnModel colModel = header.getColumnModel();
-    colModel.addColumnModelListener(new myColModelListener());
+    table.getTableHeader().getColumnModel().addColumnModelListener(new ColumnReflowListener());
 
     JScrollPane scrollPane = new JScrollPane(table);
     this.add(scrollPane);
@@ -537,6 +534,11 @@ public class SmartTable extends JPanel implements ActionListener
 
   private void rewrapColumn(int modelIndex)
   {
+    if (modelIndex == -1)
+      {
+	return;
+      }
+
     Class colClass = myModel.getColumnClass(modelIndex);
 
     if (colClass != Date.class)
@@ -675,7 +677,7 @@ public class SmartTable extends JPanel implements ActionListener
 
   /*----------------------------------------------------------------------------
                                                                      inner class
-                                                              myColModelListener
+                                                            ColumnReflowListener
 
   ----------------------------------------------------------------------------*/
 
@@ -683,7 +685,7 @@ public class SmartTable extends JPanel implements ActionListener
    * The listener class for the table column model.
    */
 
-  public class myColModelListener implements TableColumnModelListener
+  public class ColumnReflowListener implements TableColumnModelListener
   {
     public void columnAdded(TableColumnModelEvent e)
     {
@@ -695,15 +697,8 @@ public class SmartTable extends JPanel implements ActionListener
 
       if (tc != null)
 	{
-	  int colIndex = tc.getModelIndex();
-	  int colIndex2 = getNextModelIndex(colIndex);
-
-	  rewrapColumn(colIndex);
-
-	  if (colIndex2 != -1)
-	    {
-	      rewrapColumn(colIndex2);
-	    }
+	  rewrapColumn(tc);
+	  rewrapColumn(getNextModelIndex(tc.getModelIndex()));
 	}
     }
 
