@@ -183,6 +183,7 @@ public class SmartTable extends JPanel implements ActionListener
     myModel = new MyTableModel(columnValues);
     sorter = new TableSorter(myModel);
     table = new JTable(sorter);
+    table.setTableHeader(new MyJTableHeader(table.getColumnModel()));
     sorter.setTableHeader(table.getTableHeader());
     table.setPreferredScrollableViewportSize(new Dimension(500, 70));
 
@@ -1195,5 +1196,31 @@ class rowHandler
   {
     cells = new Object[columns];
     this.key = key;
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                  MyJTableHeader
+
+------------------------------------------------------------------------------*/
+
+/**
+ * Interceptor class to prevent right-clicks from dragging columns in
+ * our SmartTable.
+ */
+
+class MyJTableHeader extends JTableHeader
+{
+  public MyJTableHeader(TableColumnModel model)
+  {
+    super(model);
+  }
+
+  protected void processMouseEvent(MouseEvent e)
+  {
+    setReorderingAllowed(!e.isPopupTrigger());
+
+    super.processMouseEvent(e);
   }
 }
