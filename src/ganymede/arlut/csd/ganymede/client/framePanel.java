@@ -2,17 +2,17 @@
 
    framePanel.java
 
-   The individual frames in the windowPanel.
-   
+   The individual Ganymede Object view/edit frames in the windowPanel.
+
    Created: 4 September 1997
 
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -105,17 +105,17 @@ import arlut.csd.ganymede.rmi.string_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * An internal client window displaying and/or editing a particular database
- * object from the Ganymede server. A framePanel is a JInternalFrame which contains a
- * tabbed pane which incorporates a
+ * <p>An internal client window displaying and/or editing a particular
+ * database object from the Ganymede server. A framePanel is a
+ * JInternalFrame which contains a tabbed pane which incorporates a
  * {@link arlut.csd.ganymede.client.containerPanel containerPanel} for
  * viewing/editing a server-side database object, as well as several
- * auxiliary panes such as an
- * {@link arlut.csd.ganymede.client.ownerPanel ownerPanel},
- * {@link arlut.csd.ganymede.client.historyPanel historyPanel}, and other
- * panels as appropriate for specific object types.
+ * auxiliary panes such as an {@link
+ * arlut.csd.ganymede.client.ownerPanel ownerPanel}, {@link
+ * arlut.csd.ganymede.client.historyPanel historyPanel}, and other
+ * panels as appropriate for specific object types.</p>
  *
- * @author Michael Mulvaney 
+ * @author Michael Mulvaney
  */
 
 public class framePanel extends JInternalFrame implements ChangeListener, ActionListener,
@@ -136,7 +136,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
   // ---
 
-  /**  
+  /**
    * This will be loaded from gclient anyway.
    */
 
@@ -180,7 +180,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
    * progressBar is contained in the progressPanel, which will be
    * removed when the general panel is finished loading.
    */
-  
+
   JProgressBar
     progressBar;
 
@@ -196,10 +196,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
    * The tabbed pane holding our various panels.
    */
 
-  JTabbedPane 
+  JTabbedPane
     pane;
 
-  /** 
+  /**
    * <p>A vector of {@link arlut.csd.ganymede.client.containerPanel}s,
    * used to allow the gclient to refresh containerPanels on demand,
    * and to allow the gclient to order any containerPanels contained
@@ -325,9 +325,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	debug = wp.gc.debug;
       }
 
-    // "Building window."    
+    // "Building window."
     setStatus(ts.l("init.building_window_status"), 1);
-    
+
     // Window properties
 
     setMaximizable(true);
@@ -347,7 +347,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       This came around in JDK 1.2/Swing 1.1.1.. bug parade #4176136,
       but the use of a VetoableChangeListener still works just fine,
       so we'll stick with this implementation.
-      
+
       */
 
     this.addVetoableChangeListener(this);
@@ -357,7 +357,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     progressBar = new JProgressBar();
     progressPanel.add(new JLabel(ts.l("init.loading_label"))); // "Loading..."
     progressPanel.add(progressBar);
-    
+
     setContentPane(progressPanel);
 
     load();
@@ -394,7 +394,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	// windowPanel wants to know if framePanel is changed
 
 	addInternalFrameListener(getWindowPanel());
-    
+
 	// Now setup the framePanel layout
 
 	pane = new JTabbedPane();
@@ -416,7 +416,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	  {
 	    gc.processExceptionRethrow(rx);
 	  }
-	
+
 	// loop over the field templates and identify the
 	// server-defined tabs
 
@@ -459,7 +459,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 			newTab = new serverTab(this, pane, template.getTabName());
 			newTab.setInfoVector(infoVector);
 			newTab.addToPane(tabList);
-			
+
 			oldTab = newTab;
 		      }
 		  }
@@ -495,7 +495,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	//
 	// Note that the supergash OwnerBase does not get an
 	// objects_owned panel.
-    
+
 	try
 	  {
 	    if (id == SchemaConstants.OwnerBase)
@@ -514,7 +514,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	    else if (id == SchemaConstants.UserBase)
 	      {
 		invid_field persona_field = (invid_field)getObject().getField(SchemaConstants.UserAdminPersonae);
-	     
+
 		// If the field is null, then this must be a view-only
 		// object with no persona field defined (because
 		// editable objects always have all valid fields
@@ -550,7 +550,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	  {
 	    exp_field = (date_field)getObject().getField(SchemaConstants.ExpirationField);
 	    rem_field = (date_field)getObject().getField(SchemaConstants.RemovalField);
-	  
+
 	    expiration_Editable = editable && exp_field.isEditable();
 	    removal_Editable = editable && rem_field.isEditable();
 
@@ -578,7 +578,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
 	owner_tab = new ownerTab(this, pane, ts.l("load.owner_tab"));	// "Owner"
 	owner_tab.addToPane(tabList);
-   
+
 	// Add the notes panel
 
 	if (stopped.isSet())
@@ -611,7 +611,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	((clientTab) tabList.elementAt(0)).showTab();
 
 	setContentPane(pane);
-    
+
 	setJMenuBar(createMenuBar(editable));
 
 	pane.invalidate();
@@ -637,12 +637,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     return editable;
   }
-  
+
   /**
    * This method returns true if the window is in the middle of closing,
    * which only happens if it has been approved by vetoableChange.
    */
-  
+
   public boolean isApprovedForClosing()
   {
     return closingApproved;
@@ -653,7 +653,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
    *
    * If the invid has not been loaded, this method will load it first.
    *
-   * @return The invid of the object in this frame panel.  
+   * @return The invid of the object in this frame panel.
    */
 
   public Invid getObjectInvid()
@@ -679,7 +679,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
    *
    * If the invid has not been loaded, this method will load it first.
    *
-   * @return The name of the type of the object in this frame panel.  
+   * @return The name of the type of the object in this frame panel.
    */
 
   public String getObjectTypeName()
@@ -759,7 +759,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	gc.showErrorMessage(ts.l("sendMail.no_recipient_msg"));
 	return;
       }
-    
+
     body = encodeObjectToStringBuffer(showHistory, showTransactions, startDate);
 
     if (debug)
@@ -858,7 +858,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	    // path in our preferences all that much.
 	  }
       }
-    
+
     if (file.exists())
       {
 	// "Warning"
@@ -908,7 +908,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
    * Generates a String representation of this object for save() and sendMail().
    */
 
-  private StringBuffer encodeObjectToStringBuffer(boolean showHistory, boolean showTransactions, 
+  private StringBuffer encodeObjectToStringBuffer(boolean showHistory, boolean showTransactions,
 						  Date startDate)
   {
     StringBuffer buffer = null;
@@ -937,7 +937,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
 	try
 	  {
-	    buffer.append(gc.getSession().viewObjectHistory(getObjectInvid(), 
+	    buffer.append(gc.getSession().viewObjectHistory(getObjectInvid(),
 							    startDate, showTransactions).toString());
 	  }
 	catch (Exception rx)
@@ -959,7 +959,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   JMenuBar createMenuBar(boolean editable)
   {
     JMenuBar menuBar = new JMenuBar();
-    
+
     // "Object"
     JMenu fileM = new JMenu(ts.l("createMenuBar.object_menu"));
 
@@ -1061,7 +1061,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	      {
 		setRemovalMI.setMnemonic((int) ts.l("createMenuBar.object_menu_4_key_optional").charAt(0)); // "v"
 	      }
-	    
+
 	    if (ts.hasPattern("createMenuBar.object_menu_4_tip_optional"))
 	      {
 		// "Set a date for this object to be removed from the database"
@@ -1086,7 +1086,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	  {
 	    editObjMI.setMnemonic((int) ts.l("createMenuBar.object_menu_5_key_optional").charAt(0)); // "e"
 	  }
-	    
+
 	if (ts.hasPattern("createMenuBar.object_menu_5_tip_optional"))
 	  {
 	    editObjMI.setToolTipText(ts.l("createMenuBar.object_menu_5_tip_optional"));
@@ -1107,7 +1107,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	      {
 		inactObjMI.setMnemonic((int) ts.l("createMenuBar.object_menu_6_key_optional").charAt(0)); // "i"
 	      }
-	    
+
 	    if (ts.hasPattern("createMenuBar.object_menu_6_tip_optional"))
 	      {
 		inactObjMI.setToolTipText(ts.l("createMenuBar.object_menu_6_tip_optional"));
@@ -1120,12 +1120,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
 	// "Delete this {0}"
 	JMenuItem delObjMI = new JMenuItem(ts.l("createMenuBar.object_menu_7", typeName));
-	
+
 	if (ts.hasPattern("createMenuBar.object_menu_7_key_optional"))
 	  {
 	    delObjMI.setMnemonic((int) ts.l("createMenuBar.object_menu_7_key_optional").charAt(0)); // "d"
 	  }
-	
+
 	if (ts.hasPattern("createMenuBar.object_menu_7_tip_optional"))
 	  {
 	    delObjMI.setToolTipText(ts.l("createMenuBar.object_menu_7_tip_optional"));
@@ -1137,12 +1137,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
 	// "Clone this {0}"
 	JMenuItem cloneObjMI = new JMenuItem(ts.l("createMenuBar.object_menu_8", typeName));
-	
+
 	if (ts.hasPattern("createMenuBar.object_menu_8_key_optional"))
 	  {
 	    cloneObjMI.setMnemonic((int) ts.l("createMenuBar.object_menu_8_key_optional").charAt(0)); // "c"
 	  }
-	
+
 	if (ts.hasPattern("createMenuBar.object_menu_8_tip_optional"))
 	  {
 	    cloneObjMI.setToolTipText(ts.l("createMenuBar.object_menu_8_tip_optional"));
@@ -1157,7 +1157,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       {
 	println("Returning menubar.");
       }
-    
+
     return menuBar;
   }
 
@@ -1179,10 +1179,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       {
 	println("Adding expiration tab");
       }
-    
+
     expiration_tab = new expirationRemovalTab(this, pane, ts.l("addExpirationDateTab.expiration_tab")); // "Expiration"
-    expiration_tab.setImageIcon(new ImageIcon((Image) PackageResources.getImageResource(this, 
-											"expire.gif", 
+    expiration_tab.setImageIcon(new ImageIcon((Image) PackageResources.getImageResource(this,
+											"expire.gif",
 											getClass())));
     expiration_tab.setPanelTitle(ts.l("addExpirationDateTab.panel_title")); // "Expiration date"
     expiration_tab.setDateField(exp_field);
@@ -1202,8 +1202,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       }
 
     removal_tab = new expirationRemovalTab(this, pane, ts.l("addRemovalDateTab.removal_tab")); // "Expiration"
-    removal_tab.setImageIcon(new ImageIcon((Image) PackageResources.getImageResource(this, 
-										     "expire.gif", 
+    removal_tab.setImageIcon(new ImageIcon((Image) PackageResources.getImageResource(this,
+										     "expire.gif",
 										     getClass())));
     removal_tab.setPanelTitle(ts.l("addRemovalDateTab.panel_title")); // "Expiration date"
     removal_tab.setDateField(rem_field);
@@ -1248,8 +1248,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 		    println("Setting notes test to *" + notesText + "*.");
 		  }
 
-		noteIcon = new ImageIcon((Image) PackageResources.getImageResource(this, 
-										   "note02.gif", 
+		noteIcon = new ImageIcon((Image) PackageResources.getImageResource(this,
+										   "note02.gif",
 										   getClass()));
 	      }
 	  }
@@ -1310,7 +1310,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       {
 	println("Menu item action: " + e.getActionCommand());
       }
-    
+
     if (e.getActionCommand().equals("save_obj"))
       {
 	if (debug)
@@ -1407,7 +1407,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     return result;
   }
-  
+
   String getObjectLabel()
   {
     String result = null;
@@ -1426,9 +1426,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
   /**
    * Use this instead of System.out.println, in case we want to direct
-   * that stuff somewhere else sometime.  Plus, it is easier to type.  
+   * that stuff somewhere else sometime.  Plus, it is easier to type.
    */
-  
+
   private void println(String s)
   {
     System.out.println(s);
@@ -1484,12 +1484,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     // Loop over each containerPanel in the framePanel window.. there
     // may be more than one due to embedded objects and multiple
     // server tabs
-    
+
     // we count down here so that we can handle things if the
     // cp.update*() call causes the count of containerPanels in this
     // frame to decrement (as if an embedded object panel's field is
     // made invisible) we'll be able to handle it.
-    
+
     // if the count of containerPanels increments during this
     // loop, we'll just not see the new panel(s), which is of
     // course just fine.
@@ -1506,10 +1506,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	if (debug)
 	  {
 	    System.out.println("gclient.handleReturnVal(): Checking containerPanel number " + i);
-	    System.out.println("\tcp.invid= " + cp.getObjectInvid() + 
+	    System.out.println("\tcp.invid= " + cp.getObjectInvid() +
 			       " lookng for: " + invid);
 	  }
-				
+
 	if (invid == null || cp.getObjectInvid().equals(invid))
 	  {
 	    if (debug)
@@ -1517,7 +1517,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 		System.out.println("  Found container panel for " + invid +
 				   ": " + cp.frame.getTitle());
 	      }
-			
+
 	    if (retVal == null || retVal.rescanAll(invid))
 	      {
 		cp.updateAll();
@@ -1560,12 +1560,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     // Loop over each containerPanel in the framePanel window.. there
     // may be more than one due to embedded objects and multiple
     // server tabs
-    
+
     // we count down here so that we can handle things if the
     // cp.update*() call causes the count of containerPanels in this
     // frame to decrement (as if an embedded object panel's field is
     // made invisible) we'll be able to handle it.
-    
+
     // if the count of containerPanels increments during this
     // loop, we'll just not see the new panel(s), which is of
     // course just fine.
@@ -1600,14 +1600,14 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       {
 	System.err.println("framePanel.internalFrameClosed(): frame closed");
       }
-    
+
     if (this.closed.set(true))
       {
 	if (debug)
 	  {
 	    System.err.println("framePanel.internalFrameClosed(): frame already closed, doing nothing.");
 	  }
-	
+
 	return;
       }
 
@@ -1615,21 +1615,21 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       {
 	System.err.println("framePanel.internalFrameClosed(): going invisible");
       }
-    
+
     if (debug)
       {
 	System.err.println("framePanel.internalFrameClosed(): disposing");
       }
-    
+
     this.cleanUp();
-    
+
     this.removeAll();
-    
+
     if (debug)
       {
 	System.err.println("framePanel.internalFrameClosed(): disposed");
       }
-    
+
     // finally, shut down any secondary windows and null out all
     // references to make sure that we don't cascade any leaks.. if
     // the load method is still going, we'll leave this alone and let
@@ -1697,7 +1697,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	if (!closingApproved && editable)
 	  {
 	    StringDialog okToKill;
-	    
+
 	    if (isCreating)
 	      {
 		// "Ok to discard {0}?"
@@ -1706,7 +1706,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 		// committing this transaction, this newly created
 		// object will be forgotten and abandoned on commit."
 
-		okToKill = new StringDialog(gclient.client, 
+		okToKill = new StringDialog(gclient.client,
 					    ts.l("vetoableChange.discard_title", getTitle()),
 					    ts.l("vetoableChange.discard_text"),
 					    ts.l("vetoableChange.discard_button"),
@@ -1714,7 +1714,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 					    gclient.client.getQuestionImage(), StandardDialog.ModalityType.DOCUMENT_MODAL);
 
 		Hashtable result = okToKill.showDialog();
-	    
+
 		if (result == null)
 		  {
 		    throw new PropertyVetoException("Cancelled", null);
@@ -1728,7 +1728,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 		// set closingApproved to true before we call
 		// deleteObject() so that the gclient class will
 		// consider this deletion approved.
-		
+
 		closingApproved = true;
 
 		gclient.client.deleteObject(getObjectInvid(), false);
@@ -1818,7 +1818,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
 	tabList = null;
       }
-    
+
     progressBar = null;
     progressPanel = null;
     personae_tab = null;
