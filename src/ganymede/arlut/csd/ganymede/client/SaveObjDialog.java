@@ -2,17 +2,18 @@
 
    SaveObjDialog.java
 
-   Dialog for saving or mailing a table from dialog.
-   
+   Dialog for saving or mailing information about a DBObject from the
+   Ganymede client, including optional history dump.
+
    Created: October 19, 1999
 
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -69,7 +70,6 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
-//import arlut.csd.JDataComponent.JdateField;
 import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
@@ -80,9 +80,9 @@ import arlut.csd.Util.TranslationService;
 
 ------------------------------------------------------------------------------*/
 
-/** 
- * Client dialog for saving or mailing an objects's status summary,
- * including optional history dump.
+/**
+ * <p>Client dialog for saving or mailing an objects's status summary,
+ * including optional history dump.</p>
  */
 
 public class SaveObjDialog extends StandardDialog implements ActionListener, ItemListener {
@@ -96,35 +96,35 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.SaveObjDialog");
 
-  Date startDate;
+  private Date startDate;
 
-  boolean
+  private boolean
     returnValue = false;
-  
-  GridBagLayout gbl = new GridBagLayout();
-  GridBagConstraints gbc = new GridBagConstraints();
 
-  JCheckBox showHistory, showTransactions;
+  private GridBagLayout gbl = new GridBagLayout();
+  private GridBagConstraints gbc = new GridBagConstraints();
+
+  private JCheckBox showHistory, showTransactions;
 
   // JdateField date;
 
-  JButton 
+  private JButton
     ok,
     cancel;
 
-  JTextField
+  private JTextField
     subject = new JTextField(20),
     recipients = new JTextField(20);
 
-  JComboBox
+  private JComboBox
     formats = null;
 
   // This is the panel that holds everything, layed out by gbl
 
-  JPanel 
+  private JPanel
     panel;
 
-  Image
+  private Image
     saveImage = arlut.csd.Util.PackageResources.getImageResource(this, "SaveDialog.gif", getClass());
 
   /* -- */
@@ -149,9 +149,9 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
     panel = new JPanel(gbl);
 
     gbc.insets = new Insets(6,6,6,6);
-    
+
     // on top the mail info
-    
+
     if (forMail)
       {
 	JPanel mailPanel = makeMailPanel();
@@ -185,9 +185,9 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
     gbc.fill = GridBagConstraints.BOTH;
     gbl.setConstraints(historyPanel, gbc);
     panel.add(historyPanel);
-    
+
     // and finally the ok/cancel buttons
-    
+
     JPanel buttonPanel = new JPanel();
 
     // "Mail"
@@ -216,10 +216,11 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
   }
 
   /**
-   * Show the dialog.
+   * <p>Show the dialog.</p>
    *
-   * Use this instead of calling setVisible(true) yourself.  You need to get the boolean
-   * return from this method, in order to know if the user pressed "Ok" or "Cancel".
+   * <p>Use this instead of calling setVisible(true) yourself.  You
+   * need to get the boolean return from this method, in order to know
+   * if the user pressed "Ok" or "Cancel".</p>
    *
    * @return True if user pressed "Ok".
    */
@@ -229,11 +230,6 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
     this.setLocationRelativeTo(getOwner());
 
     setVisible(true);
-
-    if (debug)
-      {
-	System.err.println("Returning " + returnValue);
-      }
 
     return returnValue;
   }
@@ -247,27 +243,34 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
     return showHistory.isSelected();
   }
 
+  /**
+   * True if we want to show complete transactions (including changes
+   * made to objects other than this one) in the history dump we
+   * include in our output.
+   */
+
   public boolean isShowTransactions()
   {
     return showTransactions.isSelected();
   }
 
   /**
-   * The start date for the history.  Makes sense only if isShowHistory() returns true.
+   * <p>The start date for the history.  Makes sense only if
+   * isShowHistory() returns true.</p>
    *
+   * <p>Not implemented in the current Dialog, returns null.</p>
    */
 
   public Date getStartDate()
   {
     return null;
-
-    //    return date.getDate();
   }
 
   /**
-   * String of recipients for the mail.
+   * <p>String of recipients for the mail.</p>
    *
-   * This is not formatted in any way, so you get whatever the user typed in.
+   * <p>This is not formatted in any way, so you get whatever the user
+   * typed in.</p>
    */
 
   public String getRecipients()
@@ -277,8 +280,8 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
 
   /**
    * Returns the text for the subject of the mail.
-   *
    */
+
   public String getSubject()
   {
     return subject.getText();
@@ -288,27 +291,17 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
   {
     if (e.getSource() == ok)
       {
-	if (debug)
-	  {
-	    System.err.println("ok");
-	  }
-
 	returnValue = true;
 	setVisible(false);
       }
     else if (e.getSource() == cancel)
       {
-	if (debug)
-	  {
-	    System.err.println("cancel");
-	  }
-
 	returnValue = false;
 	setVisible(false);
       }
   }
 
-  public JPanel makeMailPanel()
+  private JPanel makeMailPanel()
   {
     JPanel panel = new JPanel();
     GridBagLayout gbl = new GridBagLayout();
@@ -352,7 +345,7 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
 
     // add the subject field
 
-    gbc.gridx = 1;    
+    gbc.gridx = 1;
     gbc.gridy = 2;
     gbc.fill = GridBagConstraints.NONE;
     gbc.weightx = 0;
@@ -361,7 +354,7 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
     JLabel sub = new JLabel(ts.l("makeMailPanel.subject_label"));
     gbl.setConstraints(sub, gbc);
     panel.add(sub);
-    
+
     gbc.gridx = 2;
     gbc.gridy = 2;
     gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -373,7 +366,7 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
     return panel;
   }
 
-  public JPanel makeHistoryPanel()
+  private JPanel makeHistoryPanel()
   {
     JPanel panel = new JPanel();
     GridBagLayout gbl = new GridBagLayout();
@@ -384,7 +377,7 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
     // "Historical Information"
     panel.setBorder(BorderFactory.createTitledBorder(ts.l("makeHistoryPanel.border_title")));
     panel.setLayout(gbl);
-    
+
     gbc.insets = new Insets(4,4,4,4);
 
     gbc.anchor = GridBagConstraints.WEST;
@@ -404,13 +397,13 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
     gbc.gridy = 1;
     gbl.setConstraints(showTransactions, gbc);
     panel.add(showTransactions);
-    
+
     //    JLabel startDateL = new JLabel("Starting Date");
     //    gbc.gridx = 0;
     //    gbc.gridy = 2;
     //    gbl.setConstraints(startDateL, gbc);
     //    panel.add(startDateL);
-    //    
+    //
     //    date = new JdateField();
     //    gbc.gridx = 1;
     //    gbc.gridy = 2;
