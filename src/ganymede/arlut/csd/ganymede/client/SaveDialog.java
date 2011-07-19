@@ -282,8 +282,6 @@ public class SaveDialog extends JDialog implements ActionListener {
 
   public void setFormatChoices(Vector choices)
   {
-    //formats = new JComboBox(choices);
-
     if (!addedFormatChoice)
       {
 	addFormatChoiceButtons(choices);
@@ -299,7 +297,6 @@ public class SaveDialog extends JDialog implements ActionListener {
 
   public String getFormat()
   {
-    //return (String)formats.getSelectedItem();
     return formatPanel.getSelectedFormat();
   }
 
