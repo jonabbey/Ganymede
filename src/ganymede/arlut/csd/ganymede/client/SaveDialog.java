@@ -2,17 +2,18 @@
 
    SaveDialog.java
 
-   Dialog for saving or mailing a table from dialog.
-   
-   Created: ??
+   Dialog for saving or mailing the data in a gResultTable from the
+   Ganymede client.
+
+   Created: 30 March 2004
 
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -78,7 +79,8 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Client dialog for saving or mailing the results of a query operation.</p>
+ * <p>Dialog for saving or mailing the data in a gResultTable from the
+ * Ganymede client.</p>
  */
 
 public class SaveDialog extends JDialog implements ActionListener {
@@ -92,33 +94,35 @@ public class SaveDialog extends JDialog implements ActionListener {
 
   private static final boolean debug = false;
 
-  boolean
+  private boolean
     addedFormatChoice = false,
     returnValue = false;
-  
-  GridBagLayout gbl = new GridBagLayout();
-  GridBagConstraints gbc = new GridBagConstraints();
 
-  JButton 
+  private GridBagLayout gbl = new GridBagLayout();
+  private GridBagConstraints gbc = new GridBagConstraints();
+
+  private JButton
     ok,
     cancel;
 
-  JTextField
+  private JTextField
     subject = new JTextField(20),
     recipients = new JTextField(20);
 
-  JComboBox
+  private JComboBox
     formats = null;
 
-  // This is the panel that holds everything, layed out by gbl
+  /**
+   * This is the JPanel that holds everything, layed out by gbl.
+   */
 
-  JPanel 
+  private JPanel
     panel;
 
-  formatButtonPanel
+  private formatButtonPanel
     formatPanel;
 
-  Image
+  private Image
     saveImage = arlut.csd.Util.PackageResources.getImageResource(this, "SaveDialog.gif", getClass());
 
   /* -- */
@@ -142,7 +146,7 @@ public class SaveDialog extends JDialog implements ActionListener {
     panel = new JPanel(gbl);
 
     gbc.insets = new Insets(6,6,6,6);
-    
+
     gbc.gridwidth = 1;
     gbc.fill = GridBagConstraints.NONE;
 
@@ -248,9 +252,10 @@ public class SaveDialog extends JDialog implements ActionListener {
   }
 
   /**
-   * String of recipients for the mail.
+   * <p>String of recipients for the mail.</p>
    *
-   * This is not formatted in any way, so you get whatever the user typed in.
+   * <p>This is not formatted in any way, so you get whatever the user
+   * typed in.</p>
    */
 
   public String getRecipients()
@@ -260,8 +265,8 @@ public class SaveDialog extends JDialog implements ActionListener {
 
   /**
    * Returns the text for the subject of the mail.
-   *
    */
+
   public String getSubject()
   {
     return subject.getText();
@@ -274,6 +279,7 @@ public class SaveDialog extends JDialog implements ActionListener {
    *
    * <P>Usually we send in a Vector of strings like "HTML", "Plain text", etc.</p>
    */
+
   public void setFormatChoices(Vector choices)
   {
     //formats = new JComboBox(choices);
@@ -285,18 +291,18 @@ public class SaveDialog extends JDialog implements ActionListener {
   }
 
   /**
-   * Returns the choice of format.
+   * <p>Returns the choice of format.
    *
    * This will be one of the Strings in setFormatChoicse(), unless
-   * something went horribly awry.
+   * something went horribly awry.</p>
    */
+
   public String getFormat()
   {
     //return (String)formats.getSelectedItem();
     return formatPanel.getSelectedFormat();
   }
 
-  // This one adds the format choice.
   private void addFormatChoice()
   {
     gbc.gridy = 3;
@@ -319,6 +325,7 @@ public class SaveDialog extends JDialog implements ActionListener {
   }
 
   // This really just adds in a new formatButtonPanel
+
   private void addFormatChoiceButtons(Vector choices)
   {
     gbc.gridy = 3;
@@ -359,6 +366,12 @@ public class SaveDialog extends JDialog implements ActionListener {
   }
 }
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                               formatButtonPanel
+
+------------------------------------------------------------------------------*/
+
 /**
  * <p>Client panel that holds the choice of formats for
  * {@link arlut.csd.ganymede.client.SaveDialog SaveDialog}.</p>
@@ -373,15 +386,15 @@ class formatButtonPanel extends JPanel {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.formatButtonPanel");
 
-  Hashtable modelToLabel = new Hashtable();
+  private Hashtable modelToLabel = new Hashtable();
 
-  ButtonGroup
+  private ButtonGroup
     group = new ButtonGroup();
 
-  GridBagLayout
+  private GridBagLayout
     layout = new GridBagLayout();
 
-  GridBagConstraints
+  private GridBagConstraints
     constraints = new GridBagConstraints();
 
   formatButtonPanel(Vector choices)
