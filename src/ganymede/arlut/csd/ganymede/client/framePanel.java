@@ -56,6 +56,7 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyVetoException;
 import java.beans.VetoableChangeListener;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
@@ -91,12 +92,16 @@ import arlut.csd.ganymede.common.BaseDump;
 import arlut.csd.ganymede.common.FieldInfo;
 import arlut.csd.ganymede.common.FieldTemplate;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryDataNode;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.rmi.date_field;
 import arlut.csd.ganymede.rmi.db_object;
 import arlut.csd.ganymede.rmi.invid_field;
 import arlut.csd.ganymede.rmi.string_field;
+import arlut.csd.ganymede.rmi.FileTransmitter;
+import arlut.csd.ganymede.rmi.Session;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -902,6 +907,77 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     writer.close();
 
     gc.setNormalCursor();
+  }
+
+  /**
+   * Generates an XML representation of this object for save() and sendMail().
+   */
+
+  private StringBuffer encodeObjectToXML(boolean showHistory, boolean showTransactions,
+					 Date startDate)
+  {
+    Session session = gc.getSession();
+    StringBuffer buffer = null;
+
+    Query query = new Query(this.invid.getType(), new QueryDataNode((short) -2, QueryDataNode.EQUALS, this.invid), false);
+
+    try
+      {
+	ReturnVal retVal = session.runXMLQuery(query);
+
+	if (!ReturnVal.didSucceed(retVal))
+	  {
+	    return null;
+	  }
+
+	FileTransmitter transmitter = retVal.getFileTransmitter();
+
+	if (transmitter != null)
+	  {
+	    ByteArrayOutputStream outstream = new ByteArrayOutputStream();
+	    byte[] chunk = transmitter.getNextChunk();
+
+	    while (chunk != null)
+	      {
+		outstream.write(chunk, 0, chunk.length);
+		chunk = transmitter.getNextChunk();
+	      }
+
+	    transmitter.end();
+
+	    return new StringBuffer(outstream.toString());
+	  }
+      }
+    catch (Exception rx)
+      {
+	gc.processExceptionRethrow(rx);
+      }
+
+    if (showHistory)
+      {
+	if (showTransactions)
+	  {
+	    // "\nTransactional History:\n\n"
+	    buffer.append(ts.l("encodeObjectToStringBuffer.transaction_history_header"));
+	  }
+	else
+	  {
+	    // "\nHistory:\n\n"
+	    buffer.append(ts.l("encodeObjectToStringBuffer.history_header"));
+	  }
+
+	try
+	  {
+	    buffer.append(gc.getSession().viewObjectHistory(getObjectInvid(),
+							    startDate, showTransactions).toString());
+	  }
+	catch (Exception rx)
+	  {
+	    gc.processExceptionRethrow(rx);
+	  }
+      }
+
+    return buffer;
   }
 
   /**
