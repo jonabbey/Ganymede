@@ -7,10 +7,10 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -50,6 +50,11 @@ package arlut.csd.ganymede.common;
 
 ------------------------------------------------------------------------------*/
 
+/**
+ * Serializable QueryNode that can be used to compare a field against
+ * a query parameter.
+ */
+
 public class QueryDataNode extends QueryNode {
 
   static final long serialVersionUID = 1435603665496067800L;
@@ -71,7 +76,7 @@ public class QueryDataNode extends QueryNode {
   static public final byte LAST = 11;
 
   static public final byte FIRSTVECOP = 0;
-  
+
   static public final byte CONTAINS = 1;
   static public final byte LENGTHEQ = 4;
   static public final byte LENGTHGR = 5;
@@ -85,7 +90,7 @@ public class QueryDataNode extends QueryNode {
   static public final short INVIDVAL = -2;
   static public final short UNUSEDVAL = -99;
 
-  /* - */
+  // ---
 
   public String fieldname;
   public short fieldId;
@@ -94,14 +99,14 @@ public class QueryDataNode extends QueryNode {
   public Object value;
 
   /**
-   * We declare this as a transient generic so that the client doesn't
-   * have to have the class we're using on the server to handle
-   * regular expression matching.. we can choose to use either the gnu
-   * regular expression package or the 1.4 java.util.regex package,
-   * and the client won't care.
+   * <p>We declare this as a transient generic so that the client
+   * doesn't have to have the class we're using on the server to
+   * handle regular expression matching.. we can choose to use either
+   * the gnu regular expression package or the 1.4 java.util.regex
+   * package, and the client won't care.</p>
    *
-   * Also, transient because we don't want to transport the compiled
-   * pattern across RMI.
+   * <p>Also, transient because we don't want to transport the
+   * compiled pattern across RMI.</p>
    */
 
   public transient Object regularExpression = null;
@@ -109,11 +114,10 @@ public class QueryDataNode extends QueryNode {
   /* -- */
 
   /**
-   * Field comparison node constructor.
+   * <p>Field comparison node constructor.</p>
    *
-   * This constructor creates a query node that will be matched
-   * against a field in an object.
-   *
+   * <p>This constructor creates a query node that will be matched
+   * against a field in an object.</p>
    */
 
   public QueryDataNode(String fieldname, byte comparator, byte vecOp, Object value)
@@ -139,11 +143,10 @@ public class QueryDataNode extends QueryNode {
   }
 
   /**
-   * Field comparison node constructor.
+   * <p>Field comparison node constructor.</p>
    *
-   * This constructor creates a query node that will be matched
-   * against a field in an object.
-   *
+   * <p>This constructor creates a query node that will be matched
+   * against a field in an object.</p>
    */
 
   public QueryDataNode(String fieldname, byte comparator, Object value)
@@ -163,17 +166,16 @@ public class QueryDataNode extends QueryNode {
   }
 
   /**
-   * Field comparison node constructor.
+   * <p>Field comparison node constructor.</p>
    *
-   * This constructor creates a query node that will be matched
-   * against a field in an object.
+   * <p.This constructor creates a query node that will be matched
+   * against a field in an object.</p>
    *
-   * If fieldID == -1, the labels of objects in the database will be
-   * taken as the field for comparison's sake.
+   * <p.If fieldID == -1, the labels of objects in the database will be
+   * taken as the field for comparison's sake.</p>
    *
-   * If fieldID == -2, the Invid of objects in the database will be
-   * taken as the field for comparison's sake.
-   * 
+   * <p>If fieldID == -2, the Invid of objects in the database will be
+   * taken as the field for comparison's sake.</p>
    */
 
   public QueryDataNode(short fieldId, byte comparator, byte vecOp, Object value)
@@ -199,17 +201,16 @@ public class QueryDataNode extends QueryNode {
   }
 
   /**
-   * Field comparison node constructor.
+   * <p>Field comparison node constructor.</p>
    *
-   * This constructor creates a query node that will be matched
-   * against a field in an object.
+   * <p>This constructor creates a query node that will be matched
+   * against a field in an object.</p>
    *
-   * If fieldID == -1, the labels of objects in the database will be
-   * taken as the field for comparison's sake.
+   * <p>If fieldID == -1, the labels of objects in the database will be
+   * taken as the field for comparison's sake.</p>
    *
-   * If fieldID == -2, the Invid of objects in the database will be
-   * taken as the field for comparison's sake.
-   * 
+   * <p>If fieldID == -2, the Invid of objects in the database will be
+   * taken as the field for comparison's sake.</p>
    */
 
   public QueryDataNode(short fieldId, byte comparator, Object value)

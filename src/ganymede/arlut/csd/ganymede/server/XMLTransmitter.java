@@ -10,10 +10,10 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -142,14 +142,14 @@ public final class XMLTransmitter implements FileTransmitter {
 	      // dumpXML will close outpipe on any exception,
 	      // nothing we can productively do here, go
 	      // ahead and show it for debug purposes
-	      
+
 	      // "XML remote data/schema dump hit EOF.. client disconnected"
 	      System.err.println(ts.l("init.eof"));
 	    }
 	}}, ts.l("init.threadname")); // "Ganymede XMLSession Schema/Data Dump Thread"
-    
+
     // and set it running
-    
+
     dumpThread.start();
 
     Ganymede.rmi.publishObject(this);
@@ -216,7 +216,7 @@ public final class XMLTransmitter implements FileTransmitter {
 
 	      xmlOut.indentIn();
 	      xmlOut.endElementIndent("ganydata");
-	    
+
 	      xmlOut.indentIn();
 	      xmlOut.endElementIndent("ganymede");
 
@@ -251,20 +251,20 @@ public final class XMLTransmitter implements FileTransmitter {
 		}
 	    }
 	}}, ts.l("init.qthreadname")); // "Ganymede XML Query Thread"
-    
+
     // and set it running
-    
+
     dumpThread.start();
 
     Ganymede.rmi.publishObject(this);
   }
 
   /**
-   * This method pulls down the next sequence of bytes from the
+   * <p>This method pulls down the next sequence of bytes from the
    * FileTransmitter.  This method will block if necessary until the
-   * data is ready to be transmitted.
+   * data is ready to be transmitted.</p>
    *
-   * This method returns null on end of file.
+   * <p>This method returns null on end of file.</p>
    */
 
   public synchronized byte[] getNextChunk() throws RemoteException
@@ -358,7 +358,7 @@ public final class XMLTransmitter implements FileTransmitter {
    * This method is called to notify the FileTransmitter that no
    * more of the file will be pulled.
    */
-  
+
   public synchronized void end() throws RemoteException
   {
     eof = true;
