@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -71,19 +71,19 @@ import javax.swing.UIManager;
 public class StandardDialog extends JDialog {
 
   /**
-   * Enum that we're using to allow subclasses to tell us what type of
-   * modality, if any, they want to use.
+   * <p>Enum that we're using to allow subclasses to tell us what type of
+   * modality, if any, they want to use.</p>
    *
-   * We in turn will use either Java 1.5 or Java 1.6 based methods to
-   * tell our superclasses what modality to use.
+   * <p>We in turn will use either Java 1.5 or Java 1.6 based methods to
+   * tell our superclasses what modality to use.</p>
    *
-   * This is a hack so that we can operate successfully on Java 5
+   * <p>This is a hack so that we can operate successfully on Java 5
    * while taking advantage of the richer modality controls when
-   * running on Java 6.
+   * running on Java 6.</p>
    *
-   * The use of drop-down sheets requires the new modality controls on
+   * <p>The use of drop-down sheets requires the new modality controls on
    * Java 6 for Mac OS X, incidentally, which is motivating this whole
-   * class.
+   * class.</p>
    */
 
   public static enum ModalityType {
