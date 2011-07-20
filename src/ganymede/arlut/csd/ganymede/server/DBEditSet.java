@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -1574,7 +1574,7 @@ public class DBEditSet {
 		// This sync channel is configured to write to {1}, but this directory does not exist or is not writable.
 		//
 		// Transaction Cancelled."
-		
+
 		throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
 									  ts.l("commit_writeSyncChannels.no_sync_found", sync.getName(), sync.getDirectory())));
 	      }
@@ -1847,7 +1847,7 @@ public class DBEditSet {
 		try
 		  {
 		    DBObject parentObj = session.getContainingObj(eObj);
-		    
+
 		    // "{0} {1}''s {2} ''{3}'', <{4}> was modified.\n\n{5}"
 
 		    streamLogEvent("objectchanged",
@@ -2678,7 +2678,6 @@ class CommitFatalException extends CommitException {
     return retVal;
   }
 }
-
 
 /*------------------------------------------------------------------------------
                                                                            class
