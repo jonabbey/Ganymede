@@ -5,16 +5,16 @@
 
    This class is intended to serve as an efficient, garbage-collecting
    object cache for Invids on the Ganymede server.
-   
+
    Created: 7 January 2005
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -58,14 +58,14 @@ import java.lang.ref.ReferenceQueue;
 ------------------------------------------------------------------------------*/
 
 /**
- * This InvidPool class is used by the Invid class to provide an
+ * <p>This InvidPool class is used by the Invid class to provide an
  * Invid when given a short type number and an int object number.  By
  * using an InvidPool, the server will be able to reuse previously
- * created Invid's, much as the JVM can reuse interned strings.
+ * created Invids, much as the JVM can reuse interned strings.</p>
  *
- * InvidPool uses SoftReferences to permit automatic clean-up of the
+ * <p>InvidPool uses SoftReferences to permit automatic clean-up of the
  * pool when pooled Invids fall out of usage in the rest of the
- * Ganymede heap.
+ * Ganymede heap.</p>
  */
 
 public class InvidPool implements InvidAllocator {
@@ -73,6 +73,7 @@ public class InvidPool implements InvidAllocator {
   /**
    * The load factor used when none specified in constructor.
    */
+
   private static final float DEFAULT_LOAD_FACTOR = 0.75f;
 
   private InvidSlot[] table;
@@ -83,12 +84,14 @@ public class InvidPool implements InvidAllocator {
   private final float loadFactor;
 
   /**
-   * InvidSlot items are added to this queue when the garbage
+   * <p>InvidSlot items are added to this queue when the garbage
    * collector detects that the InvidSlot is no longer referenced by
-   * hard references in the Ganymede heap.
+   * hard references in the Ganymede heap.</p>
    */
 
   private final ReferenceQueue queue = new ReferenceQueue();
+
+  /* -- */
 
   public InvidPool(int initialCapacity, float loadFactor)
   {
@@ -100,12 +103,12 @@ public class InvidPool implements InvidAllocator {
 
     if (loadFactor <= 0 || Float.isNaN(loadFactor))
       {
-	throw new IllegalArgumentException("Illegal Load factor: "+
+	throw new IllegalArgumentException("Illegal Load factor: " +
 					   loadFactor);
       }
 
     table = new InvidSlot[initialCapacity];
-    
+
     this.loadFactor = loadFactor;
     this.floor = initialCapacity;
     threshold = (int) (initialCapacity * loadFactor);
@@ -122,17 +125,17 @@ public class InvidPool implements InvidAllocator {
   }
 
   /**
-   * This method takes the identifying elements of an Invid to be
+   * <p>This method takes the identifying elements of an Invid to be
    * found, and searches to find a suitable Invid object to return.
    * If one cannot found, null should be returned, in which case
    * {@link arlut.csd.ganymede.common.Invid#createInvid(short,int)
-   * createInvid} will synthesize and return a new one.
+   * createInvid} will synthesize and return a new one.</p>
    */
 
   public synchronized Invid findInvid(Invid newInvid)
   {
     expungeStaleEntries();
-    InvidSlot s = table[(newInvid.hashCode() & 0x7FFFFFFF) % table.length]; 
+    InvidSlot s = table[(newInvid.hashCode() & 0x7FFFFFFF) % table.length];
 
     while (s != null)
       {
@@ -150,9 +153,9 @@ public class InvidPool implements InvidAllocator {
   }
 
   /**
-   * This method takes the invid given and places in whatever storage
+   * <p>This method takes the invid given and places in whatever storage
    * mechanism is appropriate, if any, for findInvid() to later draw
-   * upon.
+   * upon.</p>
    */
 
   public synchronized void storeInvid(Invid newInvid)
@@ -193,10 +196,10 @@ public class InvidPool implements InvidAllocator {
   }
 
   /**
-   * This method iterates polls through the ReferenceQueue,
+   * <p>This method iterates polls through the ReferenceQueue,
    * identifying InvidSlots that reference Invids which are no longer
    * hard-referenced in the Ganymede heap and removing them from the
-   * hash table, thus freeing space in our pool.
+   * hash table, thus freeing space in our pool.</p>
    */
 
   private void expungeStaleEntries()
@@ -250,7 +253,7 @@ public class InvidPool implements InvidAllocator {
     for (int i = 0; i < table.length; i++)
       {
 	InvidSlot s = table[i];
-      
+
 	while (s != null)
 	  {
 	    InvidSlot next = s.next;
@@ -267,10 +270,16 @@ public class InvidPool implements InvidAllocator {
   }
 }
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                       InvidSlot
+
+------------------------------------------------------------------------------*/
+
 /**
- * This (non-public) class is used in the {@link
+ * <p>This (non-public) class is used in the {@link
  * arlut.csd.ganymede.common.InvidPool} to softly reference Invids
- * that we are storing for purposes of interning.
+ * that we are storing for purposes of interning.</p>
  */
 
 class InvidSlot extends SoftReference {
