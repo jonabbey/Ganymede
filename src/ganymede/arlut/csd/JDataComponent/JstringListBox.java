@@ -788,6 +788,8 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
    *
    */
 
+  @SuppressWarnings("deprecation")
+
   public Vector getSelectedHandles()
   {
     Vector v = new Vector();
