@@ -424,7 +424,6 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Jse
 
     // "Include Complete Transactions"
     showTransactions = new JCheckBox(ts.l("makeHistoryPanel.transaction_button"));
-    showTransactions.setEnabled(false);
     gbc.gridx = 0;
     gbc.gridy = 1;
     gbl.setConstraints(showTransactions, gbc);
