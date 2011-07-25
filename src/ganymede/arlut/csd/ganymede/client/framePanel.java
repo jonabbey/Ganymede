@@ -736,8 +736,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     // "Mail Object XML for {0} {1}"
     // "Object XML for {0} {1}"
-    dialog = new SaveObjDialog(gc, ts.l("mail_obj.mailobj_title", getObjectType(), getObjectLabel()),
-			       true, true, ts.l("mail_obj.mailobj_subject", getObjectType(), getObjectLabel()),
+    dialog = new SaveObjDialog(gc,
+			       ts.l("mail_obj.mailobj_title", getObjectType(), getObjectLabel()),
+			       false, true,
+			       ts.l("mail_obj.mailobj_subject", getObjectType(), getObjectLabel()),
 			       server_object);
 
     gc.setWaitCursor();
