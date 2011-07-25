@@ -394,17 +394,10 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Jse
 
     gbc.anchor = GridBagConstraints.WEST;
 
-    // "Include Complete Transactions"
-    showTransactions = new JCheckBox(ts.l("makeHistoryPanel.transaction_button"));
-    showTransactions.setEnabled(false);
+    // "Starting Date"
+    JLabel startDateL = new JLabel(ts.l("makeHistoryPanel.start_date"));
     gbc.gridx = 0;
     gbc.gridy = 0;
-    gbl.setConstraints(showTransactions, gbc);
-    panel.add(showTransactions);
-
-    JLabel startDateL = new JLabel("Starting Date");
-    gbc.gridx = 0;
-    gbc.gridy = 1;
     gbl.setConstraints(startDateL, gbc);
     panel.add(startDateL);
 
@@ -422,12 +415,20 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Jse
     catch (RemoteException ex)
       {
       }
-    
+
     date = new JdateField(creation_date, true, true, false, creation_date, new Date(), this);
     gbc.gridx = 1;
-    gbc.gridy = 1;
+    gbc.gridy = 0;
     gbl.setConstraints(date, gbc);
     panel.add(date);
+
+    // "Include Complete Transactions"
+    showTransactions = new JCheckBox(ts.l("makeHistoryPanel.transaction_button"));
+    showTransactions.setEnabled(false);
+    gbc.gridx = 0;
+    gbc.gridy = 1;
+    gbl.setConstraints(showTransactions, gbc);
+    panel.add(showTransactions);
 
     return panel;
   }
