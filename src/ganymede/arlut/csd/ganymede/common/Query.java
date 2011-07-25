@@ -6,16 +6,16 @@
 
    The Query class is serializable, in order to be passed over
    an RMI link.
-   
+
    Created: 21 October 1996
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -62,15 +62,14 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * The Query class is used to submit query requests to the GANYMEDE server,
+ * <p>The Query class is used to submit query requests to the GANYMEDE server,
  * both for complex database searches and for simple object listings.  A
  * Query class can fully specify a boolean search expression on any field
  * of any object type in the GANYMEDE database.  Each Query, however, can
- * only search one object type at a time.
+ * only search one object type at a time.</p>
  *
- * While providing support for arbitrarily complex queries, the Query
- * class also includes constructors for the simple "list object" case.
- *
+ * <p>While providing support for arbitrarily complex queries, the Query
+ * class also includes constructors for the simple "list object" case.</p>
  */
 
 public class Query implements java.io.Serializable {
@@ -80,60 +79,60 @@ public class Query implements java.io.Serializable {
   // ---
 
   /**
-   * The id of the object type that the queryNodes are looking
-   * to match on.
+   * <p>The id of the object type that the queryNodes are looking
+   * to match on.</p>
    *
-   * If this value is left at -1, objectName will be consulted
-   * instead.
+   * <p>If this value is left at -1, objectName will be consulted
+   * instead.</p>
    */
 
   public short objectType = -1;
 
   /**
-   * The name of the object type that the queryNodes are looking
-   * to match on.
+   * <p>The name of the object type that the queryNodes are looking
+   * to match on.</p>
    *
-   * This value is consulted only if objectType is left at -1.
+   * <p>This value is consulted only if objectType is left at -1.</p>
    */
 
   public String objectName = null;
 
   /**
-   * We want to be able to save a query on the server and re-issue it
+   * <p>We want to be able to save a query on the server and re-issue it
    * on behalf of the user.  If we are saved, the name to save under
-   * will be here.  We may or may not want it here.
+   * will be here.  We may or may not want it here.</p>
    *
-   * I don't believe anything in the server actually uses this yet.
+   * <p>I don't believe anything in the server actually uses this yet.</p>
    */
 
   public String saveName = null;
 
   /**
-   * The root of a graph of QueryNodes that encodes the desired
-   * search criteria.
+   * <p>The root of a graph of QueryNodes that encodes the desired
+   * search criteria.</p>
    */
 
   public QueryNode root;
 
   /**
-   * If true, this query will only be matched against objects in the
-   * database that the user has permission to edit.
+   * <p>If true, this query will only be matched against objects in the
+   * database that the user has permission to edit.</p>
    */
 
   public boolean editableOnly;
 
   /**
-   * If true, this query will only be matched against the subset of
+   * <p>If true, this query will only be matched against the subset of
    * objects in the database that the user has requested via
-   * the Session filter mechanism.
+   * the Session filter mechanism.</p>
    */
 
   public boolean filtered = false;
 
   /**
-   * A Set of field id's in Short form that the server will take into
+   * <p>A Set of field id's in Short form that the server will take into
    * account when returning a data dump.  If null, all default fields
-   * should be returned.
+   * should be returned.</p>
    */
 
   private Set<Short> permitSet = null;
@@ -141,13 +140,12 @@ public class Query implements java.io.Serializable {
   /* -- */
 
   /**
-   * Constructor for fully specified query (base by id)
+   * <p>Constructor for fully specified query (base by id)</p>
    *
    * @param objectType numeric object type code to search over
    * @param root       root node of a boolean logic tree to be processed in an in-order traversal
-   * @param editableOnly if true, the server will only return objects that the user's session 
+   * @param editableOnly if true, the server will only return objects that the user's session
    * currently has permission to edit
-   *
    */
 
   public Query(short objectType, QueryNode root, boolean editableOnly)
@@ -160,7 +158,7 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * Constructor for fully specified query (base by name)
+   * <p>Constructor for fully specified query (base by name)</p>
    *
    * @param objectName name of object type to query
    * @param root       root node of a boolean logic tree to be processed in an in-order traversal
@@ -169,7 +167,7 @@ public class Query implements java.io.Serializable {
    */
 
   public Query(String objectName, QueryNode root, boolean editableOnly)
-  {  
+  {
     this.objectName = objectName;
     this.root = root;
     this.editableOnly = editableOnly;
@@ -178,7 +176,7 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * Constructor to create a query returning only editable objects (base by id)
+   * <p>Constructor to create a query returning only editable objects (base by id)</p>
    *
    * @param objectType numeric object type code to search over
    * @param root       root node of a boolean logic tree to be processed in an in-order traversal
@@ -194,7 +192,7 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * Constructor to create a query returning only editable objects (base by name)
+   * <p>Constructor to create a query returning only editable objects (base by name)</p>
    *
    * @param objectName name of object type to query
    * @param root       root node of a boolean logic tree to be processed in an in-order traversal
@@ -210,7 +208,7 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * Constructor for a query to list all editable objects of the specified type.
+   * <p>Constructor for a query to list all editable objects of the specified type.</p>
    *
    * @param objectType numeric object type code to search over
    */
@@ -225,7 +223,7 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * Constructor for a query to list all editable objects of the specified type.
+   * <p>Constructor for a query to list all editable objects of the specified type.</p>
    *
    * @param objectName name of object type to query
    */
@@ -240,10 +238,9 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * This method determines whether the query engine
-   * will filter the query according to the current
-   * list of visible owner groups.  Queries by default
-   * are filtered.
+   * <p>This method determines whether the query engine will filter
+   * the query according to the current list of visible owner groups.
+   * Queries by default are filtered.</p>
    *
    * @param filtered If true, the query will be masked by ownership
    *
@@ -256,8 +253,8 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * This method resets the permitSet, allowing
-   * all fields to be returned by default.
+   * <p>This method resets the permitSet, allowing
+   * all fields to be returned by default.</p>
    */
 
   public synchronized void resetPermitSet()
@@ -266,8 +263,8 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * This method returns true if this Query is requesting a restricted
-   * set of fields.
+   * <p>This method returns true if this Query is requesting a restricted
+   * set of fields.</p>
    */
 
   public boolean hasPermitSet()
@@ -276,13 +273,13 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * This method adds a field identifier to the list of
-   * fields that may be returned.  Once this method
-   * is called with a field identifier, the query will
-   * only return fields that have been explicitly added.
+   * <p>This method adds a field identifier to the list of fields that
+   * may be returned.  Once this method is called with a field
+   * identifier, the query will only return fields that have been
+   * explicitly added.</p>
    *
-   * resetPermitSet() may be called to reset the
-   * list to the initial allow-all state.
+   * <p>resetPermitSet() may be called to reset the list to the
+   * initial allow-all state.</p>
    */
 
   public synchronized void addField(short id)
@@ -296,13 +293,13 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * This method adds a field identifier to the list of
-   * fields that may be returned.  Once this method
-   * is called with a field identifier, the query will
-   * only return fields that have been explicitly added.
+   * <p>This method adds a field identifier to the list of fields that
+   * may be returned.  Once this method is called with a field
+   * identifier, the query will only return fields that have been
+   * explicitly added.</p>
    *
-   * resetPermitSet() may be called to reset the
-   * list to the initial allow-all state.
+   * <p>resetPermitSet() may be called to reset the
+   * list to the initial allow-all state.</p>
    */
 
   public synchronized void removeField(short id)
@@ -316,8 +313,8 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * This method returns true if the field with the given id number
-   * should be returned.
+   * <p>This method returns true if the field with the given id number
+   * should be returned.</p>
    */
 
   public synchronized boolean returnField(short id)
@@ -331,8 +328,8 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * This method returns true if the field with the given id number
-   * should be returned.
+   * <p>This method returns true if the field with the given id number
+   * should be returned.</p>
    */
 
   public synchronized boolean returnField(Short value)
@@ -346,8 +343,8 @@ public class Query implements java.io.Serializable {
   }
 
   /**
-   * Returns a copy of the restricted list of fields that this Query
-   * wants to have returned.
+   * <p>Returns a copy of the restricted list of fields that this Query
+   * wants to have returned.</p>
    */
 
   public synchronized Set<Short> getFieldSet()
