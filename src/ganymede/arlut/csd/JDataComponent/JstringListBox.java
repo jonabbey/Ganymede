@@ -13,7 +13,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2010
    The University of Texas at Austin
 
    Contact information
@@ -54,7 +54,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
-import java.util.List;
 import java.util.Vector;
 import java.util.Comparator;
 
@@ -792,11 +791,11 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   public Vector getSelectedHandles()
   {
     Vector v = new Vector();
-    List values = getSelectedValuesList();
+    Object[] values = getSelectedValues();
     
-    for (Object val: values)
+    for (int i =0; i < values.length; i++)
       {
-	v.add(val);
+	v.addElement(values[i]);
       }
 
     return v;
