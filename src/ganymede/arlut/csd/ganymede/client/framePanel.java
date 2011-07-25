@@ -219,8 +219,9 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   private Vector containerPanels = new Vector();
 
   /**
-   * Vector of {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}s used
-   * by the save() and sendMail() methods to enumerate this object's fields.
+   * Vector of {@link arlut.csd.ganymede.common.FieldTemplate
+   * FieldTemplate}s used by the save() and save_history() methods to
+   * enumerate this object's fields.
    */
 
   Vector templates;
@@ -735,7 +736,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     // "Mail summary for {0} {1}"
     // "Status summary for {0} {1}"
     dialog = new SaveObjDialog(gc, ts.l("sendMail.saveobj_title", getObjectType(), getObjectLabel()),
-			       true, ts.l("sendMail.saveobj_subject", getObjectType(), getObjectLabel()));
+			       true, true, ts.l("sendMail.saveobj_subject", getObjectType(), getObjectLabel()),
+			       server_object);
 
     if (!dialog.showDialog())
       {
@@ -747,13 +749,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	return;
       }
 
-    showHistory = dialog.isShowHistory();
     showTransactions = dialog.isShowTransactions();
-
-    if (showHistory)
-      {
-	startDate = dialog.getStartDate();
-      }
+    startDate = dialog.getStartDate();
 
     subject = dialog.getSubject();
     address = dialog.getRecipients();
@@ -765,7 +762,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	return;
       }
 
-    body = encodeObjectToStringBuffer(showHistory, showTransactions, startDate);
+    body = encodeObjectToXML();
 
     if (debug)
       {
@@ -784,13 +781,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   }
 
   /**
-   * Saves a summary of this object to disk.  Only available if the Ganymede client
-   * was run as an application.
+   * Saves an XML summary of this object to disk.  Only available if
+   * the Ganymede client was run as an application.
    */
 
   public void save()
   {
-    SaveObjDialog dialog;
     JFileChooser chooser = new JFileChooser();
     int returnValue;
     Date startDate = null;
@@ -803,32 +799,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     /* -- */
 
-    // "Save summary for {0} {1}"
-    dialog = new SaveObjDialog(gc, ts.l("save.saveobj_title", getObjectType(), getObjectLabel()),
-			       false, null);
-
-    if (!dialog.showDialog())
-      {
-	if (debug)
-	  {
-	    System.out.println("dialog returned false, returning");
-	  }
-
-	return;
-      }
-
     gc.setWaitCursor();
 
-    showHistory = dialog.isShowHistory();
-    showTransactions = dialog.isShowTransactions();
-
-    if (showHistory)
-      {
-	startDate = dialog.getStartDate();
-      }
-
     chooser.setDialogType(JFileChooser.SAVE_DIALOG);
-    chooser.setDialogTitle(ts.l("save.file_dialog_title")); // "Save window as"
+    chooser.setDialogTitle(ts.l("save.file_dialog_title")); // "Save Object XML as"
 
     if (gclient.prefs != null)
       {
@@ -903,18 +877,150 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	return;
       }
 
-    writer.println(encodeObjectToStringBuffer(showHistory, showTransactions, startDate).toString());
+    writer.println(encodeObjectToXML());
     writer.close();
 
     gc.setNormalCursor();
   }
 
   /**
-   * Generates an XML representation of this object for save() and sendMail().
+   * Saves an XML summary of this object to disk.  Only available if
+   * the Ganymede client was run as an application.
    */
 
-  private StringBuffer encodeObjectToXML(boolean showHistory, boolean showTransactions,
-					 Date startDate)
+  public void save_history()
+  {
+    SaveObjDialog dialog;
+    JFileChooser chooser = new JFileChooser();
+    int returnValue;
+    Date startDate = null;
+    boolean showHistory = false;
+    boolean showTransactions = false;
+    File file;
+
+    FileOutputStream fos = null;
+    PrintWriter writer = null;
+
+    /* -- */
+
+    // "Save Object History for {0} {1}"
+    dialog = new SaveObjDialog(gc,
+			       ts.l("save_history.saveobj_title", getObjectType(), getObjectLabel()),
+			       true, false, null, server_object);
+
+    if (!dialog.showDialog())
+      {
+	if (debug)
+	  {
+	    System.out.println("dialog returned false, returning");
+	  }
+
+	return;
+      }
+
+    gc.setWaitCursor();
+
+    startDate = dialog.getStartDate();
+    showTransactions = dialog.isShowTransactions();
+
+    chooser.setDialogType(JFileChooser.SAVE_DIALOG);
+    chooser.setDialogTitle(ts.l("save_history.file_dialog_title")); // "Save Object History as"
+
+    if (gclient.prefs != null)
+      {
+	String defaultPath = gclient.prefs.get(OBJECT_SAVE, null);
+
+	if (defaultPath != null)
+	  {
+	    chooser.setCurrentDirectory(new File(defaultPath));
+	  }
+      }
+
+    returnValue = chooser.showDialog(gc, null);
+
+    if (!(returnValue == JFileChooser.APPROVE_OPTION))
+      {
+	return;
+      }
+
+    file = chooser.getSelectedFile();
+
+    File directory = chooser.getCurrentDirectory();
+
+    if (gclient.prefs != null)
+      {
+	try
+	  {
+	    gclient.prefs.put(OBJECT_SAVE, directory.getCanonicalPath());
+	  }
+	catch (java.io.IOException ex)
+	  {
+	    // we don't really care if we can't save the directory
+	    // path in our preferences all that much.
+	  }
+      }
+
+    if (file.exists())
+      {
+	// "Warning"
+	// "{0} already exists.  Are you sure you want to replace this file?"
+	// "Overwrite"
+	// "Cancel"
+	StringDialog d = new StringDialog(gc,
+					  ts.l("save.warning_title"),
+					  ts.l("save.conflict_warning", file.getName()),
+					  ts.l("save.overwrite_button"),
+					  ts.l("global.cancel"),
+					  null, StandardDialog.ModalityType.DOCUMENT_MODAL);
+	Hashtable result = d.showDialog();
+
+	if (result == null)
+	  {
+	    if (debug)
+	      {
+		System.out.println("The file exists, and I am backing out.");
+	      }
+
+	    return;
+	  }
+      }
+
+    try
+      {
+	fos = new FileOutputStream(file);
+        writer = new PrintWriter(fos);
+      }
+    catch (java.io.IOException e)
+      {
+	// "Save Error"
+	// "Could not open the file for writing:\n{0}"
+	gc.showErrorMessage(ts.l("save.io_error_title"),
+			    ts.l("save.io_error_text", e.toString()));
+	return;
+      }
+
+    try
+      {
+	writer.println(gc.getSession().viewObjectHistory(getObjectInvid(),
+							 startDate, showTransactions));
+      }
+    catch (RemoteException ex)
+      {
+	gc.processExceptionRethrow(ex, "Couldn't receive history from server.");
+      }
+    finally
+      {
+	writer.close();
+
+	gc.setNormalCursor();
+      }
+  }
+
+  /**
+   * Generates an XML representation of this object for save().
+   */
+
+  private StringBuffer encodeObjectToXML()
   {
     Session session = gc.getSession();
     StringBuffer buffer = null;
@@ -945,81 +1051,44 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
 	    transmitter.end();
 
-	    return new StringBuffer(outstream.toString());
+	    buffer = new StringBuffer(outstream.toString());
 	  }
       }
     catch (Exception rx)
       {
 	gc.processExceptionRethrow(rx);
-      }
-
-    if (showHistory)
-      {
-	if (showTransactions)
-	  {
-	    // "\nTransactional History:\n\n"
-	    buffer.append(ts.l("encodeObjectToStringBuffer.transaction_history_header"));
-	  }
-	else
-	  {
-	    // "\nHistory:\n\n"
-	    buffer.append(ts.l("encodeObjectToStringBuffer.history_header"));
-	  }
-
-	try
-	  {
-	    buffer.append(gc.getSession().viewObjectHistory(getObjectInvid(),
-							    startDate, showTransactions).toString());
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx);
-	  }
       }
 
     return buffer;
   }
 
   /**
-   * Generates a String representation of this object for save() and sendMail().
+   * Generates a String representation of this object's log history
    */
 
-  private StringBuffer encodeObjectToStringBuffer(boolean showHistory, boolean showTransactions,
-						  Date startDate)
+  private StringBuffer getHistory(boolean showTransactions, Date startDate)
   {
-    StringBuffer buffer = null;
+    StringBuffer buffer = new StringBuffer();
+
+    if (showTransactions)
+      {
+	// "\nTransactional History:\n\n"
+	buffer.append(ts.l("encodeObjectToStringBuffer.transaction_history_header"));
+      }
+    else
+      {
+	// "\nHistory:\n\n"
+	buffer.append(ts.l("encodeObjectToStringBuffer.history_header"));
+      }
 
     try
       {
-	buffer = getObject().getSummaryDescription();
+	buffer.append(gc.getSession().viewObjectHistory(getObjectInvid(),
+							startDate, showTransactions).toString());
       }
     catch (Exception rx)
       {
 	gc.processExceptionRethrow(rx);
-      }
-
-    if (showHistory)
-      {
-	if (showTransactions)
-	  {
-	    // "\nTransactional History:\n\n"
-	    buffer.append(ts.l("encodeObjectToStringBuffer.transaction_history_header"));
-	  }
-	else
-	  {
-	    // "\nHistory:\n\n"
-	    buffer.append(ts.l("encodeObjectToStringBuffer.history_header"));
-	  }
-
-	try
-	  {
-	    buffer.append(gc.getSession().viewObjectHistory(getObjectInvid(),
-							    startDate, showTransactions).toString());
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx);
-	  }
       }
 
     return buffer;
@@ -1048,7 +1117,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     if (!gc.isApplet())
       {
-	JMenuItem saveMI = new JMenuItem(ts.l("createMenuBar.object_menu_1"));  // "Save";
+	JMenuItem saveMI = new JMenuItem(ts.l("createMenuBar.object_menu_1"));  // "Save XML..";
 
 	saveMI.setActionCommand("save_obj");
 
@@ -1059,31 +1128,31 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
 	if (ts.hasPattern("createMenuBar.object_menu_1_tip_optional"))
 	  {
-	    // "Saves a text dump of this object''s state and history to disk"
+	    // "Saves an XML dump of this object''s state to disk"
 	    saveMI.setToolTipText(ts.l("createMenuBar.object_menu_1_tip_optional"));
 	  }
 
 	saveMI.addActionListener(this);
 	fileM.add(saveMI);
+
+	JMenuItem historyMI = new JMenuItem(ts.l("createMenuBar.object_menu_2")); // "Mail to..."
+
+	historyMI.setActionCommand("save_history");
+
+	if (ts.hasPattern("createMenuBar.object_menu_2_key_optional"))
+	  {
+	    historyMI.setMnemonic((int) ts.l("createMenuBar.object_menu_2_key_optional").charAt(0)); // "h"
+	  }
+
+	if (ts.hasPattern("createMenuBar.object_menu_2_tip_optional"))
+	  {
+	    // "Saves the history of this object to disk"
+	    historyMI.setToolTipText(ts.l("createMenuBar.object_menu_2_tip_optional"));
+	  }
+
+	historyMI.addActionListener(this);
+	fileM.add(historyMI);
       }
-
-    JMenuItem mailMI = new JMenuItem(ts.l("createMenuBar.object_menu_2")); // "Mail to..."
-
-    mailMI.setActionCommand("send_mail");
-
-    if (ts.hasPattern("createMenuBar.object_menu_2_key_optional"))
-      {
-	mailMI.setMnemonic((int) ts.l("createMenuBar.object_menu_2_key_optional").charAt(0)); // "m"
-      }
-
-    if (ts.hasPattern("createMenuBar.object_menu_2_tip_optional"))
-      {
-	// "Mails a text dump of this object''s state and history"
-	mailMI.setToolTipText(ts.l("createMenuBar.object_menu_2_tip_optional"));
-      }
-
-    mailMI.addActionListener(this);
-    fileM.add(mailMI);
 
     if (editable)
       {
@@ -1396,9 +1465,10 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
 	save();
       }
-    else if (e.getActionCommand().equals("send_mail"))
+    else if (e.getActionCommand().equals("save_history"))
       {
-	sendMail();
+	// XXX
+	save_history();
       }
     else if (e.getActionCommand().equals("set_expiration"))
       {

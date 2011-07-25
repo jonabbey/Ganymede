@@ -57,6 +57,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.rmi.RemoteException;
 import java.util.Date;
 
 import javax.swing.BorderFactory;
@@ -70,9 +71,16 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JTextField;
 
+import arlut.csd.JDataComponent.JValueObject;
+import arlut.csd.JDataComponent.JdateField;
+import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
+
+import arlut.csd.ganymede.common.SchemaConstants;
+import arlut.csd.ganymede.rmi.db_object;
+import arlut.csd.ganymede.rmi.date_field;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -85,7 +93,7 @@ import arlut.csd.Util.TranslationService;
  * representation and/or a history dump.</p>
  */
 
-public class SaveObjDialog extends StandardDialog implements ActionListener, ItemListener {
+public class SaveObjDialog extends StandardDialog implements ActionListener, JsetValueCallback {
 
   private static final boolean debug = false;
 
@@ -104,9 +112,11 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
   private GridBagLayout gbl = new GridBagLayout();
   private GridBagConstraints gbc = new GridBagConstraints();
 
-  private JCheckBox showHistory, showTransactions;
+  private JCheckBox showTransactions;
 
-  // JdateField date;
+  private JdateField date;
+
+  private db_object server_object;
 
   private JButton
     ok,
@@ -140,11 +150,14 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
    * @param forMail If true, the dialog will show the recipients field
    * and the ok button will say "mail".  Otherwise, it says "save".
    * @param mailSubj The default subject, if we are mailing
+   * @param object The server-side object we're saving data for.
    */
 
-  SaveObjDialog(Frame owner, String title, boolean historySave, boolean forMail, String mailSubj)
+  SaveObjDialog(Frame owner, String title, boolean historySave, boolean forMail, String mailSubj, db_object object)
   {
     super(owner, title, StandardDialog.ModalityType.DOCUMENT_MODAL);
+
+    this.server_object = object;
 
     panel = new JPanel(gbl);
 
@@ -238,15 +251,6 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
   }
 
   /**
-   * True if "Show History" was chosen.
-   */
-
-  public boolean isShowHistory()
-  {
-    return showHistory != null && showHistory.isSelected();
-  }
-
-  /**
    * True if we want to show complete transactions (including changes
    * made to objects other than this one) in the history dump we
    * include in our output.
@@ -260,13 +264,11 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
   /**
    * <p>The start date for the history.  Makes sense only if
    * isShowHistory() returns true.</p>
-   *
-   * <p>Not implemented in the current Dialog, returns null.</p>
    */
 
   public Date getStartDate()
   {
-    return null;
+    return startDate;
   }
 
   /**
@@ -302,6 +304,13 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
 	returnValue = false;
 	setVisible(false);
       }
+  }
+
+  public boolean setValuePerformed(JValueObject v)
+  {
+    this.startDate = (Date) v.getValue();
+
+    return true;
   }
 
   private JPanel makeMailPanel()
@@ -385,51 +394,41 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
 
     gbc.anchor = GridBagConstraints.WEST;
 
-    // "Attach Change Log"
-    showHistory = new JCheckBox(ts.l("makeHistoryPanel.attach_log_button"));
-    showHistory.addItemListener(this);
-    gbc.gridx = 0;
-    gbc.gridy = 0;
-    gbl.setConstraints(showHistory, gbc);
-    panel.add(showHistory);
-
     // "Include Complete Transactions"
     showTransactions = new JCheckBox(ts.l("makeHistoryPanel.transaction_button"));
     showTransactions.setEnabled(false);
     gbc.gridx = 0;
-    gbc.gridy = 1;
+    gbc.gridy = 0;
     gbl.setConstraints(showTransactions, gbc);
     panel.add(showTransactions);
 
-    //    JLabel startDateL = new JLabel("Starting Date");
-    //    gbc.gridx = 0;
-    //    gbc.gridy = 2;
-    //    gbl.setConstraints(startDateL, gbc);
-    //    panel.add(startDateL);
-    //
-    //    date = new JdateField();
-    //    gbc.gridx = 1;
-    //    gbc.gridy = 2;
-    //    gbl.setConstraints(date, gbc);
-    //    panel.add(date);
+    JLabel startDateL = new JLabel("Starting Date");
+    gbc.gridx = 0;
+    gbc.gridy = 1;
+    gbl.setConstraints(startDateL, gbc);
+    panel.add(startDateL);
+
+    Date creation_date = null;
+
+    try
+      {
+	date_field creation_date_field = (date_field) server_object.getField(SchemaConstants.CreationDateField);
+
+	if (creation_date_field != null)
+	  {
+	    creation_date = (Date) creation_date_field.getValue();
+	  }
+      }
+    catch (RemoteException ex)
+      {
+      }
+    
+    date = new JdateField(creation_date, true, true, false, creation_date, new Date(), this);
+    gbc.gridx = 1;
+    gbc.gridy = 1;
+    gbl.setConstraints(date, gbc);
+    panel.add(date);
 
     return panel;
   }
-
-  public void itemStateChanged(ItemEvent e)
-  {
-    if (e.getItemSelectable() == showHistory)
-      {
-	if (e.getStateChange() == ItemEvent.DESELECTED)
-	  {
-	    showTransactions.setSelected(false);
-	    showTransactions.setEnabled(false);
-	  }
-	else if (e.getStateChange() == ItemEvent.SELECTED)
-	  {
-	    showTransactions.setEnabled(true);
-	  }
-      }
-  }
 }
-

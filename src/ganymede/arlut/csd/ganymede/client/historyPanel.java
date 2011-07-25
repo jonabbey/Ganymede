@@ -439,7 +439,7 @@ class datesPanel extends JPanel {
   {
     if (debug)
       {
-	System.out.println("Creating notes panel");
+	System.out.println("Creating dates panel");
       }
 
     String creator = null;
