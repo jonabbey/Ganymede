@@ -81,8 +81,8 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Client dialog for saving or mailing an objects's status summary,
- * including optional history dump.</p>
+ * <p>Client dialog for saving or mailing an objects's XML
+ * representation and/or a history dump.</p>
  */
 
 public class SaveObjDialog extends StandardDialog implements ActionListener, ItemListener {
@@ -133,16 +133,16 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
    * Main Constructor.
    *
    * @param owner Parent frame
-   *
    * @param title The title for this dialog
-   *
+   * @param historySave If true, we're saving the history for an
+   * object.  If false, we're saving the XML for an object, and don't
+   * need to ask about the full transaction, etc.
    * @param forMail If true, the dialog will show the recipients field
    * and the ok button will say "mail".  Otherwise, it says "save".
-   *
    * @param mailSubj The default subject, if we are mailing
    */
 
-  SaveObjDialog(Frame owner, String title, boolean forMail, String mailSubj)
+  SaveObjDialog(Frame owner, String title, boolean historySave, boolean forMail, String mailSubj)
   {
     super(owner, title, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
@@ -175,16 +175,19 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
 	panel.add(sep);
       }
 
-    // next the history info
+    // next the history info, if we will have it.
 
-    JPanel historyPanel = makeHistoryPanel();
+    if (historySave)
+      {
+	JPanel historyPanel = makeHistoryPanel();
 
-    gbc.gridx = 0;
-    gbc.gridy = 2;
-    gbc.gridwidth = GridBagConstraints.REMAINDER;
-    gbc.fill = GridBagConstraints.BOTH;
-    gbl.setConstraints(historyPanel, gbc);
-    panel.add(historyPanel);
+	gbc.gridx = 0;
+	gbc.gridy = 2;
+	gbc.gridwidth = GridBagConstraints.REMAINDER;
+	gbc.fill = GridBagConstraints.BOTH;
+	gbl.setConstraints(historyPanel, gbc);
+	panel.add(historyPanel);
+      }
 
     // and finally the ok/cancel buttons
 
@@ -240,7 +243,7 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
 
   public boolean isShowHistory()
   {
-    return showHistory.isSelected();
+    return showHistory != null && showHistory.isSelected();
   }
 
   /**
@@ -251,7 +254,7 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Ite
 
   public boolean isShowTransactions()
   {
-    return showTransactions.isSelected();
+    return showTransactions != null && showTransactions.isSelected();
   }
 
   /**
