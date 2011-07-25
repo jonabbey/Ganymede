@@ -60,6 +60,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.Hashtable;
@@ -721,7 +722,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
    * or more email addresses.
    */
 
-  public void sendMail()
+  private void mail_obj()
   {
     SaveObjDialog dialog;
     boolean showHistory = false;
@@ -733,50 +734,136 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     /* -- */
 
-    // "Mail summary for {0} {1}"
-    // "Status summary for {0} {1}"
-    dialog = new SaveObjDialog(gc, ts.l("sendMail.saveobj_title", getObjectType(), getObjectLabel()),
-			       true, true, ts.l("sendMail.saveobj_subject", getObjectType(), getObjectLabel()),
+    // "Mail Object XML for {0} {1}"
+    // "Object XML for {0} {1}"
+    dialog = new SaveObjDialog(gc, ts.l("mail_obj.mailobj_title", getObjectType(), getObjectLabel()),
+			       true, true, ts.l("mail_obj.mailobj_subject", getObjectType(), getObjectLabel()),
 			       server_object);
 
-    if (!dialog.showDialog())
-      {
-	if (debug)
-	  {
-	    System.out.println("Dialog returned false, returning in sendMail()");
-	  }
-
-	return;
-      }
-
-    showTransactions = dialog.isShowTransactions();
-    startDate = dialog.getStartDate();
-
-    subject = dialog.getSubject();
-    address = dialog.getRecipients();
-
-    if ((address == null) || (address.equals("")))
-      {
-	// "You must specify at least one recipient."
-	gc.showErrorMessage(ts.l("sendMail.no_recipient_msg"));
-	return;
-      }
-
-    body = encodeObjectToXML();
-
-    if (debug)
-      {
-	System.out.println("Mailing: \nTo: " + address + "\n\n" + body.toString());
-      }
+    gc.setWaitCursor();
 
     try
       {
-	gc.getSession().sendMail(address, subject, body);
+	if (!dialog.showDialog())
+	  {
+	    return;
+	  }
+
+	showTransactions = dialog.isShowTransactions();
+	startDate = dialog.getStartDate();
+
+	subject = dialog.getSubject();
+	address = dialog.getRecipients();
+
+	if ((address == null) || (address.equals("")))
+	  {
+	    // "You must specify at least one recipient."
+	    gc.showErrorMessage(ts.l("mail_obj.no_recipient_msg"));
+	    return;
+	  }
+
+	body = encodeObjectToXML();
+
+	if (debug)
+	  {
+	    System.out.println("Mailing: \nTo: " + address + "\n\n" + body.toString());
+	  }
+
+	try
+	  {
+	    gc.getSession().sendMail(address, subject, body);
+	  }
+	catch (Exception rx)
+	  {
+	    // "Sending Mail"
+	    gc.processExceptionRethrow(rx, ts.l("mail_obj.error_rethrow"));
+	  }
       }
-    catch (Exception rx)
+    finally
       {
-	// "Sending Mail"
-	gc.processExceptionRethrow(rx, ts.l("sendMail.error_rethrow"));
+	gc.setNormalCursor();
+      }
+  }
+
+  /**
+   * Sends email containing log information concerning this object.
+   */
+
+  private void mail_history()
+  {
+    SaveObjDialog dialog;
+    boolean showHistory = false;
+    boolean showTransactions = false;
+    Date startDate = null;
+    String address;
+    String subject;
+    StringBuffer body;
+
+    /* -- */
+
+    // "Mail History for {0} {1}"
+    // "Object History for {0} {1}"
+    dialog = new SaveObjDialog(gc, ts.l("mail_history.dialog_title", getObjectType(), getObjectLabel()),
+			       true, true, ts.l("mail_history.mail_subject", getObjectType(), getObjectLabel()),
+			       server_object);
+
+    gc.setWaitCursor();
+
+    try
+      {
+	if (!dialog.showDialog())
+	  {
+	    return;
+	  }
+
+	showTransactions = dialog.isShowTransactions();
+	startDate = dialog.getStartDate();
+
+	subject = dialog.getSubject();
+	address = dialog.getRecipients();
+
+	if ((address == null) || (address.equals("")))
+	  {
+	    // "You must specify at least one recipient."
+	    gc.showErrorMessage(ts.l("mail_obj.no_recipient_msg"));
+	    return;
+	  }
+
+	StringWriter writer = null;
+	PrintWriter pWriter = null;
+
+	writer = new StringWriter();
+	pWriter = new PrintWriter(writer);
+
+	try
+	  {
+	    pWriter.println(gc.getSession().viewObjectHistory(getObjectInvid(),
+							      startDate, showTransactions));
+	  }
+	catch (RemoteException ex)
+	  {
+	    gc.processExceptionRethrow(ex, "Couldn't receive history from server.");
+	  }
+	finally
+	  {
+	    pWriter.close();
+	  }
+
+	body = new StringBuffer(writer.toString());
+
+	try
+	  {
+	    gc.getSession().sendMail(address, subject, body);
+	  }
+	catch (Exception rx)
+	  {
+	    // "Sending Mail"
+	    gc.processExceptionRethrow(rx, ts.l("mail_obj.error_rethrow"));
+	  }
+      }
+    finally
+      {
+	gc.setNormalCursor();
       }
   }
 
@@ -785,7 +872,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
    * the Ganymede client was run as an application.
    */
 
-  public void save()
+  private void save()
   {
     JFileChooser chooser = new JFileChooser();
     int returnValue;
@@ -801,91 +888,97 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     gc.setWaitCursor();
 
-    chooser.setDialogType(JFileChooser.SAVE_DIALOG);
-    chooser.setDialogTitle(ts.l("save.file_dialog_title")); // "Save Object XML as"
-
-    if (gclient.prefs != null)
-      {
-	String defaultPath = gclient.prefs.get(OBJECT_SAVE, null);
-
-	if (defaultPath != null)
-	  {
-	    chooser.setCurrentDirectory(new File(defaultPath));
-	  }
-      }
-
-    returnValue = chooser.showDialog(gc, null);
-
-    if (!(returnValue == JFileChooser.APPROVE_OPTION))
-      {
-	return;
-      }
-
-    file = chooser.getSelectedFile();
-
-    File directory = chooser.getCurrentDirectory();
-
-    if (gclient.prefs != null)
-      {
-	try
-	  {
-	    gclient.prefs.put(OBJECT_SAVE, directory.getCanonicalPath());
-	  }
-	catch (java.io.IOException ex)
-	  {
-	    // we don't really care if we can't save the directory
-	    // path in our preferences all that much.
-	  }
-      }
-
-    if (file.exists())
-      {
-	// "Warning"
-	// "{0} already exists.  Are you sure you want to replace this file?"
-	// "Overwrite"
-	// "Cancel"
-	StringDialog d = new StringDialog(gc,
-					  ts.l("save.warning_title"),
-					  ts.l("save.conflict_warning", file.getName()),
-					  ts.l("save.overwrite_button"),
-					  ts.l("global.cancel"),
-					  null, StandardDialog.ModalityType.DOCUMENT_MODAL);
-	Hashtable result = d.showDialog();
-
-	if (result == null)
-	  {
-	    if (debug)
-	      {
-		System.out.println("The file exists, and I am backing out.");
-	      }
-
-	    return;
-	  }
-      }
-
     try
       {
-	fos = new FileOutputStream(file);
-        writer = new PrintWriter(fos);
+	chooser.setDialogType(JFileChooser.SAVE_DIALOG);
+	chooser.setDialogTitle(ts.l("save.file_dialog_title")); // "Save Object XML as"
+
+	if (gclient.prefs != null)
+	  {
+	    String defaultPath = gclient.prefs.get(OBJECT_SAVE, null);
+
+	    if (defaultPath != null)
+	      {
+		chooser.setCurrentDirectory(new File(defaultPath));
+	      }
+	  }
+
+	returnValue = chooser.showDialog(gc, null);
+
+	if (!(returnValue == JFileChooser.APPROVE_OPTION))
+	  {
+	    return;
+	  }
+
+	file = chooser.getSelectedFile();
+
+	File directory = chooser.getCurrentDirectory();
+
+	if (gclient.prefs != null)
+	  {
+	    try
+	      {
+		gclient.prefs.put(OBJECT_SAVE, directory.getCanonicalPath());
+	      }
+	    catch (java.io.IOException ex)
+	      {
+		// we don't really care if we can't save the directory
+		// path in our preferences all that much.
+	      }
+	  }
+
+	if (file.exists())
+	  {
+	    // "Warning"
+	    // "{0} already exists.  Are you sure you want to replace this file?"
+	    // "Overwrite"
+	    // "Cancel"
+	    StringDialog d = new StringDialog(gc,
+					      ts.l("save.warning_title"),
+					      ts.l("save.conflict_warning", file.getName()),
+					      ts.l("save.overwrite_button"),
+					      ts.l("global.cancel"),
+					      null, StandardDialog.ModalityType.DOCUMENT_MODAL);
+	    Hashtable result = d.showDialog();
+
+	    if (result == null)
+	      {
+		if (debug)
+		  {
+		    System.out.println("The file exists, and I am backing out.");
+		  }
+
+		return;
+	      }
+	  }
+
+	try
+	  {
+	    fos = new FileOutputStream(file);
+	    writer = new PrintWriter(fos);
+	  }
+	catch (java.io.IOException e)
+	  {
+	    // "Save Error"
+	    // "Could not open the file for writing:\n{0}"
+	    gc.showErrorMessage(ts.l("save.io_error_title"),
+				ts.l("save.io_error_text", e.toString()));
+	    return;
+	  }
+
+	writer.println(encodeObjectToXML());
+	writer.close();
       }
-    catch (java.io.IOException e)
+    finally
       {
-	// "Save Error"
-	// "Could not open the file for writing:\n{0}"
-	gc.showErrorMessage(ts.l("save.io_error_title"),
-			    ts.l("save.io_error_text", e.toString()));
-	return;
+	gc.setNormalCursor();
       }
-
-    writer.println(encodeObjectToXML());
-    writer.close();
-
-    gc.setNormalCursor();
   }
 
   /**
-   * Saves an XML summary of this object to disk.  Only available if
-   * the Ganymede client was run as an application.
+   * Saves a text file containing log information concerning this
+   * object to disk.  Only available if the Ganymede client was run as
+   * an application.
    */
 
   public void save_history()
@@ -1017,7 +1110,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   }
 
   /**
-   * Generates an XML representation of this object for save().
+   * Generates an XML representation of this object for save()/mail().
    */
 
   private StringBuffer encodeObjectToXML()
@@ -1115,7 +1208,45 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     menuBar.add(fileM);
 
-    if (!gc.isApplet())
+    if (gc.isApplet())
+      {
+	JMenuItem mailXmlMI = new JMenuItem(ts.l("createMenuBar.object_menu_1a"));  // "Mail XML..";
+
+	mailXmlMI.setActionCommand("mail_obj");
+
+	if (ts.hasPattern("createMenuBar.object_menu_1a_key_optional"))
+	  {
+	    mailXmlMI.setMnemonic((int) ts.l("createMenuBar.object_menu_1_key_optional").charAt(0)); // "m"
+	  }
+
+	if (ts.hasPattern("createMenuBar.object_menu_1a_tip_optional"))
+	  {
+	    // "Mails an XML dump of this object''s state"
+	    mailXmlMI.setToolTipText(ts.l("createMenuBar.object_menu_1a_tip_optional"));
+	  }
+
+	mailXmlMI.addActionListener(this);
+	fileM.add(mailXmlMI);
+
+	JMenuItem mailHistoryMI = new JMenuItem(ts.l("createMenuBar.object_menu_2a")); // "Mail History.."
+
+	mailHistoryMI.setActionCommand("mail_history");
+
+	if (ts.hasPattern("createMenuBar.object_menu_2_key_optional"))
+	  {
+	    mailHistoryMI.setMnemonic((int) ts.l("createMenuBar.object_menu_2a_key_optional").charAt(0)); // "h"
+	  }
+
+	if (ts.hasPattern("createMenuBar.object_menu_2_tip_optional"))
+	  {
+	    // "Mails the history of this object"
+	    mailHistoryMI.setToolTipText(ts.l("createMenuBar.object_menu_2a_tip_optional"));
+	  }
+
+	mailHistoryMI.addActionListener(this);
+	fileM.add(mailHistoryMI);
+      }
+    else
       {
 	JMenuItem saveMI = new JMenuItem(ts.l("createMenuBar.object_menu_1"));  // "Save XML..";
 
@@ -1135,7 +1266,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 	saveMI.addActionListener(this);
 	fileM.add(saveMI);
 
-	JMenuItem historyMI = new JMenuItem(ts.l("createMenuBar.object_menu_2")); // "Mail to..."
+	JMenuItem historyMI = new JMenuItem(ts.l("createMenuBar.object_menu_2")); // "Save History.."
 
 	historyMI.setActionCommand("save_history");
 
@@ -1467,8 +1598,15 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       }
     else if (e.getActionCommand().equals("save_history"))
       {
-	// XXX
 	save_history();
+      }
+    else if (e.getActionCommand().equals("mail_obj"))
+      {
+	mail_obj();
+      }
+    else if (e.getActionCommand().equals("mail_history"))
+      {
+	mail_history();
       }
     else if (e.getActionCommand().equals("set_expiration"))
       {
