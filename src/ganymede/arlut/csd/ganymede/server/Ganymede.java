@@ -1636,8 +1636,9 @@ public class Ganymede {
   }
 
   /**
-   * Sets up our default UncaughtExceptionHandler, if we're running
-   * on Java 1.5 or later.
+   * <p>Sets up our default UncaughtExceptionHandler.</p>
+   *
+   * <p>This method introduces a dependency on Java 1.5 or later.</p>
    */
 
   private static void setupUncaughtExceptionHandler()
