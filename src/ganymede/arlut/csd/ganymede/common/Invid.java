@@ -62,7 +62,7 @@ import java.io.IOException;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p.An Invid is an immutable object id (an INVariant ID) in the
+ * <p>An Invid is an immutable object id (an INVariant ID) in the
  * Ganymede system.  All objects created in the database have a unique
  * and permanent Invid that identify the object's type and identity.
  * Because of these properties, the Invid can be used as a persistent
