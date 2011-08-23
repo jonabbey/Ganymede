@@ -4620,14 +4620,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
-   *
    * <p>Writes out one or more lines that maps I.P. addresses to MAC addresses,
    * system names, room of the system, and usernames (if any).</p>
    *
    * <p>Format:</p>
    *
    * <code>129.116.224.12|01:02:03:04:05:06|sysname|room|username</code>
-   *
    */
 
   private void writeSysDataLine(DBObject object, PrintWriter writer)
@@ -4707,7 +4705,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 continue;
               }
 
-	    ownerString = ((InvidDBField) object.getField(SchemaConstants.OwnerListField)).getValueString();
+	    try
+	      {
+		ownerString = ((InvidDBField) object.getField(SchemaConstants.OwnerListField)).getValueString();
+	      }
+	    catch (Exception ex)
+	      {
+		ownerString = null;
+	      }
 
             result.append(IPstring);
             result.append("|");
