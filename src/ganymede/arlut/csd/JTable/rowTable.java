@@ -1140,39 +1140,14 @@ class rowSorter {
     p2 = y;
     result = null;
 
-    //    int count1, count2;
-    //
-    //    count1 = 1;
-    //    count2 = 1;
-    //
-    //    node = u;
-    //
-    //    while (node.next() != null)
-    //      {
-    //	node = node.next();
-    //	count1++;
-    //      }
-    //
-    //    node = y;
-    //
-    //    while (node.next() != null)
-    //      {
-    //	node = node.next();
-    //	count2++;
-    //      }
-
-    //    System.err.println("Merging chains: u [" + count1 + "], y [" + count2 + "]");
-
     if (compare(p1, p2) <= 0)
       {
-	//	System.err.println("Starting chain on p1 " + p1.element.elementAt(column).text);
 	result = p1;
 	p1 = p1.next();
 	result.setNext(null);
       }
     else
       {
-	//	System.err.println("Starting chain on p2 " + p1.element.elementAt(column).text);
 	result = p2;
 	p2 = p2.next();
 	result.setNext(null);
@@ -1224,20 +1199,6 @@ class rowSorter {
 	node = node.next();
       }
 
-    //    System.err.println("Finished merge process");
-
-    //    count1 = 1;
-
-    //    node = result;
-
-    //    while (node.next() != null)
-    //      {
-    //	node = node.next();
-    //	count1++;
-    //      }
-
-    //    System.err.println("Chains merged: total length = [" + count1 + "]");
-
     return result;
   }
 
@@ -1250,7 +1211,7 @@ class rowSorter {
 
     mergeRecs = new Vector();
     
-    //    System.err.println("Creating mergeRecs");
+    // System.err.println("Creating mergeRecs");
 
     for (int i = 0; i < parent.rows.size(); i++)
       {
@@ -1258,11 +1219,11 @@ class rowSorter {
 					  (rowHandle)parent.crossref.elementAt(i)));
       }
 
-    //    System.err.println("Sorting from element " + 0 + " to " + (mergeRecs.size()-1));
+    // System.err.println("Sorting from element " + 0 + " to " + (mergeRecs.size()-1));
     
     mergeRec result = rmsort(0, mergeRecs.size()-1);
 
-    //    System.err.println("Toplevel sorted, fixing crossrefs");
+    //  System.err.println("Toplevel sorted, fixing crossrefs");
 
     for (int i = 0; i < parent.rows.size(); i++)
       {
@@ -1297,10 +1258,7 @@ class rowHandle {
   public rowHandle(rowTable parent, Object key)
   {
     parent.addRow(false);	// don't repaint table
-    rownum = parent.rows.size() - 1; // we always add the new row to the end
-
-    // System.err.println("New rowHandle created, key = " + key + ", num = " + rownum);
-
+    rownum = parent.rows.size() - 1;
     this.key = key;
 
     // crossref's index for RowHash element should be same as
