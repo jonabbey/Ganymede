@@ -1155,45 +1155,21 @@ class rowSorter {
 
     node = result;
     
-    while ((p1 != null) || (p2 != null))
+    while (p1 != null || p2 != null)
       {
-	//	if ((p1 != null) && (p2 != null))
-	//	  {
-	//	    System.err.println("Looping : " + p1.element.elementAt(column).text + " and " +
-	//			       p2.element.elementAt(column).text);
-	//	  }
-
-	if (p1 == null)
+	if (p1 == null || compare(p1,p2) > 0)
 	  {
-	    //	    System.err.println("Force Linking p2: " + p2.element.elementAt(column).text);
 	    px = p2.next();
 	    node.setNext(p2);
 	    p2.setNext(null);
 	    p2 = px;
-	  }
-	else if (p2 == null)
-	  {
-	    //	    System.err.println("Force Linking p1: " + p1.element.elementAt(column).text);
-	    px = p1.next();
-	    node.setNext(p1);
-	    p1.setNext(null);
-	    p1 = px;
-	  }
-	else if (compare(p1,p2) <= 0)
-	  {
-	    //	    System.err.println("Linking p1: " + p1.element.elementAt(column).text);
-	    px = p1.next();
-	    node.setNext(p1);
-	    p1.setNext(null);
-	    p1 = px;
 	  }
 	else
 	  {
-	    //	    System.err.println("Linking p2: " + p2.element.elementAt(column).text);
-	    px = p2.next();
-	    node.setNext(p2);
-	    p2.setNext(null);
-	    p2 = px;
+	    px = p1.next();
+	    node.setNext(p1);
+	    p1.setNext(null);
+	    p1 = px;
 	  }
 
 	node = node.next();
