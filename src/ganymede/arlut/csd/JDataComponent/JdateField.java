@@ -85,9 +85,9 @@ import arlut.csd.Util.TranslationService;
 
 /**
  * <p>This class defines a Date/Time GUI component that ties into the
- * {@link arlut.csd.ganymede.csd.JDataComponent.JsetValueCallback}
- * interface that the Ganymede clients use internally to receive
- * higher level GUI events.</p>
+ * {@link arlut.csd.JDataComponent.JsetValueCallback} interface that
+ * the Ganymede clients use internally to receive higher level GUI
+ * events.</p>
  */
 
 public class JdateField extends JPanel implements ActionListener, FocusListener
