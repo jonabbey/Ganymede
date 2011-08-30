@@ -8,10 +8,10 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -93,17 +93,17 @@ import arlut.csd.ganymede.rmi.Server;
 ------------------------------------------------------------------------------*/
 
 /**
- * Ganymede GUI admin console.
+ * <p>Ganymede GUI admin console.</p>
  *
- * GASHAdmin is a dual-mode (applet/application) GUI app for monitoring and
+ * <p>GASHAdmin is a dual-mode (applet/application) GUI app for monitoring and
  * controlling the Ganymede server.  In addition to monitoring users and tasks
  * on the Ganymede server, the admin console includes a full-functioned
- * {@link arlut.csd.ganymede.admin.GASHSchema schema editor}.
+ * {@link arlut.csd.ganymede.admin.GASHSchema schema editor}.</p>
  *
- * GASHAdmin connects to a running
- * {@link arlut.csd.ganymede.server.GanymedeServer GanymedeServer} using the 
+ * <p>GASHAdmin connects to a running
+ * {@link arlut.csd.ganymede.server.GanymedeServer GanymedeServer} using the
  * {@link arlut.csd.ganymede.server.GanymedeServer#admin(java.lang.String, java.lang.String) admin()}
- * method.
+ * method.</p>
  */
 
 public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMISSLClientListener {
@@ -111,23 +111,23 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   static final boolean debug = false;
 
   /**
-   * TranslationService object for handling string localization in
-   * the Ganymede admin console.
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede admin console.</p>
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.admin.GASHAdmin");
 
   /**
-   * If this boolean is set to true, when the Ganymede admin console
+   * <p>If this boolean is set to true, when the Ganymede admin console
    * is run as an application, the login box will hide itself away
-   * when the admin console's main frame is up.
+   * when the admin console's main frame is up.</p>
    *
-   * Unfortunately, I don't think that it's generally possible to
+   * <p>Unfortunately, I don't think that it's generally possible to
    * duplicate this sort of behavior when running the admin console as
    * an applet, so it may be confusing to some to enable this
-   * behavior.
+   * behavior.</p>
    *
-   * I'm enabling it. - JDA 29 September 2005
+   * <p>I'm enabling it. - JDA 29 September 2005</p>
    */
 
   public static final boolean hideLoginWhenApplication = true;
@@ -135,7 +135,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   public static String
     properties_file = null;
 
-  /** 
+  /**
    * Client-side properties loaded from the command line or from the
    * web page which contains the definition for glogin as an applet.
    */
@@ -252,18 +252,18 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   }
 
   /**
-   * Returns a configuration String from a property file or applet
+   * <p>Returns a configuration String from a property file or applet
    * parameter element, depending on whether the Ganymede client is
-   * being run as an application or as an applet.
+   * being run as an application or as an applet.</p>
    *
-   * If GASHAdmin is being run as an application, the static variable
+   * <p>If GASHAdmin is being run as an application, the static variable
    * WeAreApplet must be set to false, and properties_file should be
    * set to point to the Ganymede property file on disk before
-   * getConfigString() is called.
+   * getConfigString() is called.</p>
    *
-   * If GASHAdmin is being run as an applet, the static variable
+   * <p>If GASHAdmin is being run as an applet, the static variable
    * my_login must be set to point to the singleton glogin object
-   * before getConfigString() is called.
+   * before getConfigString() is called.</p>
    */
 
   static public String getConfigString(String configKey)
@@ -335,18 +335,18 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   }
 
   /**
-   * Returns a configuration Integer from a property file or applet
+   * <p>Returns a configuration Integer from a property file or applet
    * parameter element, depending on whether the Ganymede client is
-   * being run as an application or as an applet.
+   * being run as an application or as an applet.</p>
    *
-   * If GASHAdmin is being run as an application, the static variable
+   * <p>If GASHAdmin is being run as an application, the static variable
    * WeAreApplet must be set to false, and properties_file should be
    * set to point to the Ganymede property file on disk before
-   * getConfigInteger() is called.
+   * getConfigInteger() is called.</p>
    *
-   * If GASHAdmin is being run as an applet, the static variable
+   * <p>If GASHAdmin is being run as an applet, the static variable
    * my_login must be set to point to the singleton glogin object
-   * before getConfigInteger() is called.
+   * before getConfigInteger() is called.</p>
    *
    * @throws NumberFormatException if the config value returned for
    * configKey is not a number.
@@ -358,20 +358,20 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   }
 
   /**
-   * Returns a configuration boolean from a property file or applet
+   * <p>Returns a configuration boolean from a property file or applet
    * parameter element, depending on whether the Ganymede client is
-   * being run as an application or as an applet.
+   * being run as an application or as an applet.</p>
    *
-   * If GASHAdmin is being run as an application, the static variable
+   * <p>If GASHAdmin is being run as an application, the static variable
    * WeAreApplet must be set to false, and properties_file should be
    * set to point to the Ganymede property file on disk before
-   * getConfigBoolean() is called.
+   * getConfigBoolean() is called.</p>
    *
-   * If GASHAdmin is being run as an applet, the static variable
+   * <p>If GASHAdmin is being run as an applet, the static variable
    * my_login must be set to point to the singleton glogin object
-   * before getConfigBoolean() is called.
+   * before getConfigBoolean() is called.</p>
    *
-   * @returns defaultValue if there is no property or applet parameter
+   * @return defaultValue if there is no property or applet parameter
    * matching configKey, else returns true if the property/parameter
    * for configKey is equal to "true".
    */
@@ -408,7 +408,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   }
 
   // ---
-  
+
   // Our primary constructor.  This will always be called, either from
   // main(), above, or by the environment building our applet.
 
@@ -555,7 +555,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
     gbc.weightx = 0.0;
     gbl.setConstraints(ul, gbc);
     panel.add(ul);
-    
+
     username = new JTextField(15);
     gbc.gridx = 1;
     gbc.fill = GridBagConstraints.HORIZONTAL;
@@ -585,7 +585,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
     gbl.setConstraints(password, gbc);
     panel.add(password);
-    
+
     gbc.gridx = 0;
     gbc.gridy = 4;
     gbc.ipady = 0;
@@ -613,17 +613,17 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
 	buttonPanel.add(quitButton, "East");
       }
-   
+
     return panel;
   }
 
   /**
-   * This will be executed in the thread that tries to connect to the
+   * <p>This will be executed in the thread that tries to connect to the
    * server.  The thread will terminate after a connection to the
-   * server has been made.
+   * server has been made.</p>
    */
 
-  public void run() 
+  public void run()
   {
     int try_number = 0;
 
@@ -646,7 +646,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 	    try
 	      {
 		Remote obj = Naming.lookup(GASHAdmin.server_url);
-		
+
 		if (obj instanceof Server)
 		  {
 		    server = (Server) obj;
@@ -660,20 +660,20 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 	      {
 		connectError = ex.getMessage();
 	      }
-	    
-	    try 
+
+	    try
 	      {
 		spindex++;
-		
+
 		if (spindex >= spinAry.length)
 		  {
 		    spindex = 0;
 		  }
-		
+
 		try
 		  {
 		    final GASHAdmin localLoginBox = this;
-		    
+
 		    SwingUtilities.invokeAndWait(new Runnable()
 		      {
 			public void run()
@@ -686,16 +686,16 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 		  {
 		    ex.printStackTrace();
 		  }
-		
+
 		// Wait for 1/4 sec before retrying to connect to server
-		
+
 		Thread.sleep(250);
 	      }
-	    catch (InterruptedException e) 
+	    catch (InterruptedException e)
 	      {
 	      }
 	  }
-	
+
 	if (connected.isSet())
 	  {
 	    if (isSSL() && !ssl_logo)
@@ -704,7 +704,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 		this.ssl_logo = true;
 	      }
 
-	    SwingUtilities.invokeLater(new Runnable() 
+	    SwingUtilities.invokeLater(new Runnable()
 	      {
 		public void run()
 		{
@@ -721,7 +721,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
 		  username.setEnabled(true);
 		  password.setEnabled(true);
-		  
+
 		  username.requestFocus();
 		  invalidate();
 		  validate();
@@ -736,15 +736,15 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 			     ts.l("global.loginErrorOKButton"), // "Ok"
 			     null,
 			     getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
-	    
-	    SwingUtilities.invokeLater(new Runnable() 
+
+	    SwingUtilities.invokeLater(new Runnable()
 	      {
 		public void run()
 		{
 		  loginButton.setText(ts.l("run.connectButton")); // "Connect"
 		  username.setEnabled(false);
 		  password.setEnabled(false);
-		  
+
 		  username.requestFocus();
 		  invalidate();
 		  validate();
@@ -787,7 +787,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 	  {
 	    adminDispatch = new GASHAdminDispatch(server);
 
-	    if (!adminDispatch.connect(username.getText(), 
+	    if (!adminDispatch.connect(username.getText(),
 				       new String(password.getPassword())))
 	      {
 		return;
@@ -816,9 +816,9 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 			     ts.l("actionPerformed.loginErrorTitle"),
 			     ts.l("actionPerformed.loginErrorMsg", ex.getMessage()),
 			     ts.l("actionPerformed.loginErrorOKButton"),
-			     null, 
+			     null,
 			     getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
-	    
+
 	    password.setText("");
 	    return;
 	  }
@@ -838,7 +838,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 	frame = new GASHAdminFrame(ts.l("global.consoleTitle"), this, debugFilename, adminDispatch); // "Ganymede Admin Console"
 
 	hideLoginBox();
-	
+
 	// Now that the frame is completely initialized, tell the
 	// GASHAdminDispatch to start polling the server for updates
 
@@ -873,11 +873,11 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   }
 
   /**
-   * This method is called when an RMI SSL client socket is created on the
-   * Ganymede client.
+   * <p>This method is called when an RMI SSL client socket is created on the
+   * Ganymede client.</p>
    *
-   * This method implements the {@link arlut.csd.ganymede.common.RMISSLClientListener}
-   * interface.
+   * <p>This method implements the {@link arlut.csd.ganymede.common.RMISSLClientListener}
+   * interface.</p>
    */
 
   public void notifySSLClient(String host, int port, String cipherSuite)
@@ -886,10 +886,10 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   }
 
   /**
-   * Loads and returns the error Image for use in client dialogs.
-   * 
-   * Once the image is loaded, it is cached for future calls to 
-   * getErrorImage().
+   * <p>Loads and returns the error Image for use in client dialogs.</p>
+   *
+   * <p>Once the image is loaded, it is cached for future calls to
+   * getErrorImage().</p>
    */
 
   public final Image getErrorImage()
@@ -898,7 +898,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
       {
 	errorImage = PackageResources.getImageResource(this, "error.gif", getClass());
       }
-    
+
     return errorImage;
   }
 
@@ -933,7 +933,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
 /**
  * JFrame subclass which is used to hold the {@link
- * arlut.csd.ganymede.admin.GASHAdmin GASHAdmin} applet when the Ganymede 
+ * arlut.csd.ganymede.admin.GASHAdmin GASHAdmin} applet when the Ganymede
  * admin console is run as an application rather than an applet.
  */
 
@@ -943,7 +943,7 @@ class GASHAdminLoginFrame extends JFrame {
   GASHAdmin adminLogin;
 
   /* -- */
-  
+
   public GASHAdminLoginFrame(String title, GASHAdmin adminLogin)
   {
     super(title);
@@ -951,7 +951,7 @@ class GASHAdminLoginFrame extends JFrame {
     enableEvents(AWTEvent.WINDOW_EVENT_MASK);
   }
 
-  protected void processWindowEvent(WindowEvent e) 
+  protected void processWindowEvent(WindowEvent e)
   {
     // Since this frame holds the admin console's login box, we want
     // to be sure not to close it unless the admin console is already
