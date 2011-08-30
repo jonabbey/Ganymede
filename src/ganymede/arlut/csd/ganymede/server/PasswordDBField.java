@@ -104,7 +104,7 @@ import arlut.csd.ganymede.rmi.pass_field;
  * <li>Traditional Unix Crypt()</li>
  * <li>OpenBSD-style md5Crypt ($1$ prefix)</li>
  * <li>OpenBSD-style md5Crypt, as modified for use with Apache ($apr1$ prefix)</li>
- * <li>OpenBSD-style BCrypt ($2a$ prefix)(</li>
+ * <li>OpenBSD-style BCrypt ($2a$ prefix)</li>
  * <li>Traditional LAN Manager hash</li>
  * <li>Windows NT Unicode Hash algorithm</li>
  * <li>SSHA, Salted SHA-1 hash, as used in OpenLDAP</li>
