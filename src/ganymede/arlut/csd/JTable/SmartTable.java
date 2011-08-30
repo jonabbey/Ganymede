@@ -100,10 +100,10 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * Extending upon the JTable, adding the ability to Sort Columns with
+ * <p>Extending upon the JTable, adding the ability to Sort Columns with
  * the TableSorter Class, Adding Right click context menu's for the
  * header row and the data rows.  Re-created a Optimize Column Widths
- * with the TextAreaRenderer class to make each cell a TextArea.
+ * with the TextAreaRenderer class to make each cell a TextArea.</p>
  */
 
 public class SmartTable extends JPanel implements ActionListener
@@ -613,7 +613,7 @@ public class SmartTable extends JPanel implements ActionListener
    *
    * @param key key to the row of the cell to be changed
    * @param col column of the cell to be changed
-   * @param data A piece of data to be held with this cell, will be used for sorting
+   * @param value A piece of data to be held with this cell, will be used for sorting
    */
 
   public final void setCellValue(Object key, int col, Object value)
@@ -760,9 +760,9 @@ public class SmartTable extends JPanel implements ActionListener
   ----------------------------------------------------------------------------*/
 
   /**
-   * Class to assist with FixTable Columns, allowing it to be called
+   * <p>Class to assist with FixTable Columns, allowing it to be called
    * AFTER the table is drawn, to get in the correct Table and Panel
-   * size to match with
+   * size to match with</p>
    */
 
   class SmartTableAncestorListener implements AncestorListener
@@ -954,7 +954,7 @@ public class SmartTable extends JPanel implements ActionListener
      *
      * @param key key to the row of the cell to be changed
      * @param col column of the cell to be changed
-     * @param data A piece of data to be held with this cell, will be used for sorting
+     * @param value A piece of data to be held with this cell, will be used for sorting
      */
 
     public final void setCellValue(Object key, int col, Object value)
