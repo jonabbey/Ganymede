@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -297,7 +297,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
    * @param object an individual object from the server to show
    * in this window
    * @param editable if true, the object will be presented as editable
-   * @param objectType Used for the title of the new window
    * @param originalWindow If not null, a framePanel that we are going to be replacing
    * with a new window.  Used to replace a view window with an edit window, or to refresh
    * a view window.

@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
 
    Copyright (C) 1996-2011
@@ -324,7 +324,7 @@ public final class DBNameSpace implements NameSpace {
    * Turns case sensitivity on/off.  If b is true, case will be
    * disregarded in comparing entries in namespace managed fields.
    *
-   * @see arlut.csd.ganymede.rmi.NameSpace 
+   * @see arlut.csd.ganymede.rmi.NameSpace
    */
 
   public synchronized void setInsensitive(boolean b)
@@ -380,14 +380,14 @@ public final class DBNameSpace implements NameSpace {
    * process() method to rectify the namespace during server
    * start-up.
    */
-  
+
   public synchronized void removeHandle(Object value)
   {
     uniqueHash.remove(value);
   }
 
   /**
-   * This method allows the namespace to be used as a unique valued 
+   * This method allows the namespace to be used as a unique valued
    * search index.
    *
    * Note that this lookup is case sensitive or not according to the case
@@ -396,7 +396,7 @@ public final class DBNameSpace implements NameSpace {
    * different capitalization.
    *
    * As well, this method is really probably only useful in the context of
-   * a DBReadLock, but we're not doing anything to enforce this requirement 
+   * a DBReadLock, but we're not doing anything to enforce this requirement
    * at this point.
    *
    * @param value The value to search for in the namespace hash.
@@ -425,7 +425,7 @@ public final class DBNameSpace implements NameSpace {
    * different capitalization.
    *
    * As well, this method is really probably useful in the context of
-   * a DBReadLock, but we're not doing anything to enforce this requirement 
+   * a DBReadLock, but we're not doing anything to enforce this requirement
    * at this point.
    *
    * @param value The value to search for in the namespace hash.
@@ -453,14 +453,14 @@ public final class DBNameSpace implements NameSpace {
    * persistent version from the DBStore, or null if the value sought
    * has been cleared from use in the objects being edited by the
    * transaction.
-   *   
+   *
    * Note that this lookup is case sensitive or not according to the case
    * sensitivity of this DBNameSpace.  If this DBNameSpace is case insensitive,
    * the DBField returned may contain the value (if value is a String) with
    * different capitalization.
    *
    * As well, this method is really probably useful in the context of
-   * a DBReadLock, but we're not doing anything to enforce this requirement 
+   * a DBReadLock, but we're not doing anything to enforce this requirement
    * at this point.
    *
    * @param session The GanymedeSession to use to lookup the containing object..
@@ -502,7 +502,7 @@ public final class DBNameSpace implements NameSpace {
    * @param editSet The transaction claiming the unique value <value>
    * @param value The unique value that transaction editset is attempting to claim
    *
-   * @return true if the value could be reserved in the given editSet.  
+   * @return true if the value could be reserved in the given editSet.
    */
 
   public boolean reserve(DBEditSet editSet, Object value)
@@ -515,7 +515,7 @@ public final class DBNameSpace implements NameSpace {
       }
 
     DBNameSpaceHandle handle;
-    
+
     /* -- */
 
     // Is this value already taken?
@@ -681,7 +681,7 @@ public final class DBNameSpace implements NameSpace {
       }
 
     DBNameSpaceHandle handle;
-    
+
     /* -- */
 
     if (!uniqueHash.containsKey(value))
@@ -946,7 +946,7 @@ public final class DBNameSpace implements NameSpace {
 
     Object value;
     Vector elementsToRemove = new Vector();
-    DBNameSpaceTransaction tRecord; 
+    DBNameSpaceTransaction tRecord;
     DBNameSpaceCkPoint point;
     DBNameSpaceEditingHandle handle;
     Enumeration en;
@@ -1029,7 +1029,7 @@ public final class DBNameSpace implements NameSpace {
     tRecord = getTransactionRecord(editSet);
 
     en = tRecord.getReservedEnum();
-    
+
     while (en.hasMoreElements())
       {
 	value = en.nextElement();
@@ -1147,7 +1147,7 @@ public final class DBNameSpace implements NameSpace {
 
     tRecord.cleanup();
     transactions.remove(editSet);
-  }  
+  }
 
   /**
    * Method to revert an editSet's namespace modifications to its
@@ -1565,7 +1565,7 @@ public final class DBNameSpace implements NameSpace {
 
 	  return;
 	}
-    
+
       reservedValues.remove(value);
     }
 
@@ -1628,7 +1628,7 @@ public final class DBNameSpace implements NameSpace {
 
       return point;
     }
-    
+
     public NamedStack getCheckpointStack()
     {
       return checkpointStack;
@@ -1926,7 +1926,7 @@ class DBNameSpaceHandle implements Cloneable {
 	  {
 	    return null;
 	  }
-	
+
 	return (DBField) _obj.getField(persistentFieldId);
       }
     else

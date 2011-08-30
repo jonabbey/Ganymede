@@ -3,17 +3,17 @@
    notesPanel.java
 
    The frame containing the notes panel
-   
+
    Created: 4 September 1997
 
 
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2005
+
+   Copyright (C) 1996 - 2011
    The University of Texas at Austin
 
    Contact information
@@ -69,16 +69,22 @@ import arlut.csd.ganymede.rmi.string_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * Notes panel for use in {@link arlut.csd.ganymede.client.framePanel framePanel}'s
- * in the client's display.  This panel is only created when a user clicks on
+ * <p>Notes panel for use in {@link arlut.csd.ganymede.client.framePanel framePanel}'s
+ * in the client's display.</p>
+ *
+ * <p>This panel is only created when a user clicks on
  * a Notes tab in a viewed or edited object window in the client.  Unlike most
  * GUI components in the client that are connected to database fields on the server,
- * the notesPanel doesn't automatically update the server on focus loss.  Instead,
- * notesPanel currently depends on gclient's 
- * {@link arlut.csd.ganymede.client.gclient#commitTransaction() commitTransaction()}
- * method to poll all notesPanels open and active for their contents.  This really
- * should be changed, as it means that currently an edit object window which is
- * manually closed will not have its notes field updated on transaction commit.
+ * the notesPanel doesn't automatically update the server on focus loss.</p>
+ *
+ * <p>Instead,
+ * notesPanel currently depends on {@link arlut.csd.ganymede.client.gclient}'s
+ * {@link arlut.csd.ganymede.client.gclient#commitTransaction(boolean) commitTransaction()}
+ * method to poll all notesPanels open and active for their contents.</p>
+ *
+ * <p>This really should be changed, as it means that currently an
+ * edit object window which is manually closed will not have its notes
+ * field updated on transaction commit.</p>
  */
 
 public class notesPanel extends JPanel implements KeyListener {
@@ -91,11 +97,11 @@ public class notesPanel extends JPanel implements KeyListener {
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.notesPanel");
 
   boolean debug = false;
-  
+
   JTextArea
     notesArea;
 
-  framePanel 
+  framePanel
     fp;
 
   string_field
@@ -113,19 +119,19 @@ public class notesPanel extends JPanel implements KeyListener {
       {
 	System.out.println("Creating notes panel");
       }
-      
+
     this.fp = fp;
     this.notes_field = notes_field;
 
     setBorder(fp.wp.emptyBorder5);
-      
+
     setLayout(new BorderLayout());
-    
+
     notesArea = new JTextArea();
     EmptyBorder eb = fp.wp.emptyBorder5;
     TitledBorder tb = new TitledBorder(ts.l("init.notes_title")); // "Notes"
     notesArea.setBorder(new CompoundBorder(tb,eb));
-    
+
     local_editable = editable;
 
     if (local_editable)
@@ -148,10 +154,10 @@ public class notesPanel extends JPanel implements KeyListener {
       {
 	notesArea.addKeyListener(this);
       }
-    
+
     JScrollPane notesScroll = new JScrollPane(notesArea);
     add(BorderLayout.CENTER, notesScroll);
-    
+
     if (notes_field != null)
       {
 	try
@@ -209,7 +215,7 @@ public class notesPanel extends JPanel implements KeyListener {
     fp.gc.somethingChanged();
     notesArea.removeKeyListener(this);
   }
-  
+
   public void keyReleased(KeyEvent e) {}
   public void keyTyped(KeyEvent e) {}
 

@@ -709,9 +709,6 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
    * Called when a row is unselected in the table
    *
    * @param key Hash key for the unselected row
-   * @param endSelected false if the callback should assume that the final
-   *                    state of the system due to the user's present
-   *                    action will have no row selected
    */
 
   public void rowDoubleSelected(Object key)
@@ -722,8 +719,9 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
    * Called when a row is unselected in the table
    *
    * @param key Hash key for the row on which the popup menu item was performed
-   * @param event the original ActionEvent from the popupmenu.
-   *              See event.getSource() to identify the menu item performed.
+   * @param endSelected false if the callback should assume that the final
+   *                    state of the system due to the user's present
+   *                    action will have no row selected
    */
 
   public void rowUnSelected(Object key, boolean endSelected)
@@ -733,6 +731,10 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   /**
    * This function is called from inside SmartTable via the right
    * click row menus, then passed back up to main client
+   *
+   * @param key Hash key for the row on which the popup menu item was performed
+   * @param event the original ActionEvent from the popupmenu.
+   *              See event.getSource() to identify the menu item performed.
    */
 
   public void rowMenuPerformed(Object key, java.awt.event.ActionEvent event)

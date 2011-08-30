@@ -14,7 +14,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -451,7 +451,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
    * must be set to point to the singleton glogin object before
    * getConfigBoolean() is called.</p>
    *
-   * @returns defaultValue if there is no property or applet parameter
+   * @return defaultValue if there is no property or applet parameter
    * matching configKey, else returns true if the property/parameter
    * for configKey is equal to "true".
    */

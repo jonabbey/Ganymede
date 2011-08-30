@@ -11,7 +11,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -1124,12 +1124,12 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	setAccelerator(cutMI, ts.l("createMenuBar.edit_menu_0_mac_accelerator_optional")); // "X"
 	cutMI.addActionListener(this);
 	editMenu.add(cutMI);
-	
+
 	copyMI = new JMenuItem(ts.l("createMenuBar.edit_menu_1")); // "Copy"
 	setAccelerator(copyMI, ts.l("createMenuBar.edit_menu_1_mac_accelerator_optional")); // "C"
 	copyMI.addActionListener(this);
 	editMenu.add(copyMI);
-	
+
 	pasteMI = new JMenuItem(ts.l("createMenuBar.edit_menu_2")); // "Paste"
 	setAccelerator(pasteMI, ts.l("createMenuBar.edit_menu_2_mac_accelerator_optional")); // "V"
 	pasteMI.addActionListener(this);
@@ -2007,10 +2007,10 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   }
 
   /**
-   * This method is called to update the client's display of the
-   * number of users concurrently logged into the server.
+   * <p>This method is called to update the client's display of the
+   * number of users concurrently logged into the server.</p>
    *
-   * @param status The number of users logged into the Ganymede server
+   * @param loginCount The number of users logged into the Ganymede server
    */
 
   public final void setLoginCount(int loginCount)
