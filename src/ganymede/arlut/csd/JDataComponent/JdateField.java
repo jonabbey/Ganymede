@@ -374,10 +374,10 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
   }
 
   /**
-   * Sets the calendar date of this JdateField, keeping the time of
-   * day previously set.
+   * <p>Sets the calendar date of this JdateField, keeping the time of
+   * day previously set.</p>
    *
-   * Calling this method does not trigger the callback.
+   * <p>Calling this method does not trigger the callback.</p>
    *
    * @param date The Date to load into this JdateField.
    */
@@ -416,10 +416,10 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
   }
 
   /**
-   * Sets the time of day for this JdateField, keeping the calendar
-   * date previously set.
+   * <p>Sets the time of day for this JdateField, keeping the calendar
+   * date previously set.</p>
    *
-   * Calling this method does not trigger the callback.
+   * <p>Calling this method does not trigger the callback.</p>
    *
    * @param timeStr The string to extract time of day from.
    */
