@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -84,8 +84,10 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class defines a Date/Time GUI component that ties into the
- * JsetValueCallback that the Ganymede clients use internally.
+ * <p>This class defines a Date/Time GUI component that ties into the
+ * {@link arlut.csd.ganymede.csd.JDataComponent.JsetValueCallback}
+ * interface that the Ganymede clients use internally to receive
+ * higher level GUI events.</p>
  */
 
 public class JdateField extends JPanel implements ActionListener, FocusListener
@@ -457,11 +459,11 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
   }
 
   /**
-   * Sets the date and time value of this JdateField.
+   * <p>Sets the date and time value of this JdateField.</p>
    *
-   * Calling this method does not trigger the callback.
+   * <p>Calling this method does not trigger the callback.</p>
    *
-   * @paramd date The Date to extract the calendar date and time of
+   * @param date The Date to extract the calendar date and time of
    * day from.
    */
 
