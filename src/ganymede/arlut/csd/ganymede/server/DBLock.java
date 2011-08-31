@@ -99,13 +99,23 @@ import java.util.Vector;
  * synchronization is critical for the proper functioning of the
  * DBLock system.</p>
  * 
- * <p>There is currently no support for handling timeouts, and locks
- * can persist indefinitely.  However, the {@link
- * arlut.csd.ganymede.server.GanymedeSession GanymedeSession} will be
- * notified by RMI via the {@link
- * arlut.csd.ganymede.server.GanymedeSession#unreferenced()} method
- * that the client has died, and will properly clean up any locks held
- * by the client.</p>
+ * <p>There is currently no intrinsic support for handling timeouts
+ * within the DBLock class hierarchy, and locks can persist
+ * indefinitely.</p>
+ *
+ * <p>However, the {@link arlut.csd.ganymede.server.GanymedeSession
+ * GanymedeSession} will be notified by RMI via the {@link
+ * arlut.csd.ganymede.server.GanymedeSession#unreferenced()} method if
+ * the client dies and by the scheduled {@link
+ * arlut.csd.ganymede.server.timeOutTask} in conjunction with the
+ * server's {@link
+ * arlut.csd.ganymede.server.GanymedeServer#clearIdleSessions()}
+ * method if the client goes idle for too long.</p>
+ *
+ * <p>In either case, the client's GanymedeSession will force all
+ * locks held by the client to {@link
+ * arlut.csd.ganymede.server.DBLock#abort()}, thus releasing the
+ * locks.</p>
  */
 
 public abstract class DBLock {
