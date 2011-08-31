@@ -13,7 +13,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -65,13 +65,15 @@ import java.util.Vector;
  * <p>Threads wishing to read from, dump, or update object bases in the
  * DBStore must be in possession of an established DBLock.</p>
  *
- * <p>The general scheme is that any number of readers and/or dumpers can
- * read from an object base simultaneously.  If a DBWriteLock to
- * establish on an object base, all active readers are allowed to
- * complete their reading, but no new read lock may be established
- * until the writer has a chance to get in and make its update and
- * then signals completion by calling release().  Writers are given
- * priority in the DBLock queue over readers.</p>
+ * <p>The general scheme is that any number of readers and/or dumpers
+ * can read from an object base simultaneously.  Once a DBWriteLock
+ * calls {@link
+ * arlut.csd.ganymede.server.DBLock#establish(java.lang.Object)} on an
+ * object base, all active readers are allowed to complete their
+ * reading, but no new read lock may be established until the writer
+ * has a chance to get in and make its update and then signals
+ * completion by calling release().  Writers are given priority in the
+ * DBLock queue over readers.</p>
  * 
  * <p>Similarly, if there are a number of writer locks queued up for
  * update access to a DBObjectBase in the DBStore when a thread
