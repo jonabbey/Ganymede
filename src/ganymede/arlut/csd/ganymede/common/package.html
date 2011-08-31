@@ -1,0 +1,26 @@
+<html>
+<body>
+<p>Classes and interfaces that are used in common among the Ganymede
+server, client, and admin console.</p>
+
+<p>Almost all of the classes in this package implement the {@link
+java.io.Serializable} interface so that they can be passed as data
+transport objects over RMI between the Ganymede server, client, and
+admin console.</p>
+
+<p>Others, such as the {@link arlut.csd.ganymede.common.windowSizer}
+class, are not serializable, but instead are intended to be used by
+code in multiple other Ganymede packages.  In the case of windowSizer,
+it is used in both the admin console and the Swing gui client.</p>
+
+<p>In addition to the classes in this package, there are a handful of
+interfaces that provide constants which are used across the server,
+client, and admin console.</p>
+
+<p>While data transport objects are defined in this package, the
+remote interfaces defining supported remote method calls are defined
+in the objects can be passed via serialization {@link
+arlut.csd.ganymede.rmi} package.</p>
+
+</body>
+</html>
