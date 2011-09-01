@@ -161,7 +161,7 @@ public final class DBStore implements JythonMap {
    * after id_string
    */
 
-  static final byte minor_version = 21;
+  static final byte minor_version = 23;
 
   /**
    * Enable/disable debug in the DBStore methods
@@ -376,7 +376,7 @@ public final class DBStore implements JythonMap {
 
   /**
    * This method returns true if the disk file being loaded by this DBStore
-   * has a version number greater than major.minor.
+   * has a version number greater than or equal to major.minor.
    */
 
   public boolean isAtLeast(int major, int minor)
@@ -479,8 +479,11 @@ public final class DBStore implements JythonMap {
     short baseCount, namespaceCount;
     int invidPoolSize;
     String file_id;
+    Boolean debug = true;
 
     /* -- */
+
+    System.err.println("JAMES DEBUG LOADING THE DBSTORE NOW!!!!!");
 
     loading = true;
 
@@ -495,7 +498,6 @@ public final class DBStore implements JythonMap {
 	try
 	  {
 	    file_id = in.readUTF();
-	    
 	    if (!file_id.equals(id_string))
 	      {
 		System.err.println(ts.l("load.versionfail", filename));
@@ -705,6 +707,7 @@ public final class DBStore implements JythonMap {
 	  }
       }
 
+    // TODO BREAKOUT FUNCTION
     if (loadJournal)
       {
 	try 
@@ -714,9 +717,7 @@ public final class DBStore implements JythonMap {
 	catch (IOException ex)
 	  {
 	    // what do we really want to do here?
-
 	    Ganymede.logError(ex);
-
 	    throw new RuntimeException("couldn't initialize journal:" + ex.getMessage());
 	  }
 
@@ -732,7 +733,6 @@ public final class DBStore implements JythonMap {
 		    // state, print out a warning.  we'll still
 		    // continue to do everything we normally would,
 		    // however.
-
 		    System.err.println("\nError, couldn't load entire journal.. " +
 				       "final transaction in journal not processed.\n");
 		  }
@@ -745,37 +745,48 @@ public final class DBStore implements JythonMap {
 		  {
 		    base.updateIterationSet();
 		  }
-
-		// go ahead and consolidate the journal into the DBStore
-		// before we really get under way.
-
-		// Notice that we are going to archive a copy of the
-		// existing db file each time we start up the server
-		
-		if (!journal.isClean())
-		  {
-		    dump(filename, true, true);
-		  }
 	      }
 	    catch (IOException ex)
 	      {
 		// what do we really want to do here?
-
 		Ganymede.logError(ex);
 		throw new RuntimeException("couldn't load journal");
-	      }
-	    catch (InterruptedException ex)
-	      {
-		// we got interrupted while waiting to lock
-		// the database.. unlikely in the extreme here.
-
-		Ganymede.logError(ex);
-		throw new RuntimeException("couldn't dump journal");
 	      }
 	    finally
 	      {
 		journalLoading = false;
 	      }
+	  }
+      }
+    
+    // go ahead and consolidate the journal into the DBStore
+    // before we really get under way.
+    // Or if the old DB version does not match the new
+    // Notice that we are going to archive a copy of the
+    // existing db file.
+    System.err.println("JAMES DEBUG DBStore, dumping now cause versions dont match: "
+		       +major_version+","+minor_version+" "+file_major+","+file_minor);	    
+    if (!isAtRev(major_version, minor_version) || !journal.isClean())
+      {
+	// James
+	try
+	  {	    
+	    System.err.println("DBStore, dumping now cause journal not clean or versions dont match: "
+			       +major_version+","+minor_version+" "+file_major+","+file_minor);	    
+	    dump(filename, true, true);
+	  }
+	catch (IOException ex)
+	  {
+	    // what do we really want to do here?
+	    Ganymede.logError(ex);
+	    throw new RuntimeException("couldn't load journal");
+	  }
+	catch (InterruptedException ex)
+	  {
+	    // we got interrupted while waiting to lock
+	    // the database.. unlikely in the extreme here.
+	    Ganymede.logError(ex);
+	    throw new RuntimeException("couldn't dump journal");
 	  }
       }
 

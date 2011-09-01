@@ -572,11 +572,9 @@ public class Ganymede {
       }
 
     // register our default UncaughtExceptionHandler
-
     setupUncaughtExceptionHandler();
 
     // create the database 
-
     // "Creating DBStore structures"
     debug(ts.l("main.info_creating_dbstore"));
 
@@ -595,8 +593,8 @@ public class Ganymede {
       }
     else
       {
-	// no database on disk.. create a new one, along with a new
-	// journal
+	// TODO BREAKOUT FUNC
+	// no database on disk.. create a new one, along with a new journal
 
 	// but first, let's make sure there is no journal left alone
 	// without a ganymede.db file..
@@ -640,7 +638,6 @@ public class Ganymede {
 	catch (IOException ex)
 	  {
 	    // what do we really want to do here?
-
 	    // "couldn''t initialize journal"
 	    throw new RuntimeException(ts.l("main.error_no_init_journal"));
 	  }

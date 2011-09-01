@@ -99,7 +99,8 @@ import arlut.csd.ganymede.rmi.db_field;
 
 public class DBJournal implements ObjectStatus {
 
-  static boolean debug = false;
+  static boolean debug = true;
+  static DBStore store = null;
 
   public static void setDebug(boolean val)
   {
@@ -115,7 +116,7 @@ public class DBJournal implements ObjectStatus {
 
   static final String id_string = "GJournal";
   static final short major_version = 2;
-  static final short minor_version = 2;
+  static final short minor_version = 3;
 
   static final String OPENTRANS = "open";
   static final String CLOSETRANS = "close";
@@ -129,12 +130,14 @@ public class DBJournal implements ObjectStatus {
 
   String filename;
   RandomAccessFile jFile = null;
-  DBStore store = null;
   boolean dirty = false;	// dirty is true if the journal has any
 				// transactions written out
 
   short file_major_version = -1;
   short file_minor_version = -1;
+
+  short file_dbstore_major_version = -1;
+  short file_dbstore_minor_version = -1;
 
   int transactionsInJournal = 0;
 
@@ -147,6 +150,8 @@ public class DBJournal implements ObjectStatus {
     out.writeUTF(DBJournal.id_string);
     out.writeShort(DBJournal.major_version);
     out.writeShort(DBJournal.minor_version);
+    out.writeShort(store.major_version);
+    out.writeShort(store.minor_version);
     out.writeLong(System.currentTimeMillis());
   }
 
@@ -425,17 +430,14 @@ public class DBJournal implements ObjectStatus {
     DBObject obj;
     String status = null;
     int nextTransactionNumber = 0;
-
     /* - */
 
     entries = new Vector();
 
     // skip past the journal header block
-
     readHeaders();
 
     // start reading and applying the changes
-
     try
       {
 	while (true)
@@ -459,32 +461,29 @@ public class DBJournal implements ObjectStatus {
 		  }
 	      }
 	    
-	    // "Reading transaction time"
-	    status = ts.l("load.readingtime");
-
 	    EOFok = false;
 
+	    // "Reading transaction time"
+	    status = ts.l("load.readingtime");
 	    transaction_time = jFile.readLong();
 	    transactionDate = new Date(transaction_time);
+
+	    System.err.println(ts.l("load.showtime", transactionDate));
 
 	    if (isAtLeast(2,1))
 	      {
 		nextTransactionNumber = jFile.readInt();
 		Ganymede.db.updateTransactionNumber(nextTransactionNumber);
+		if (debug)
+		  {
+		    System.err.println("nextTransactionNumber:"+nextTransactionNumber);
+		  }
 	      }
 
 	    // "Reading object count"
 	    status = ts.l("load.readingobjcount");
 
-	    //	    if (debug)
-	    //	      {
-
-	    System.err.println(ts.l("load.showtime", transactionDate));
-
-	    //	      }
-
 	    // read object information
-
 	    object_count = jFile.readInt();
 
 	    if (debug)
@@ -503,19 +502,16 @@ public class DBJournal implements ObjectStatus {
 
 		// "Reading operation code for object {0}"
 		status = ts.l("load.readingopcode", iObj);
-
 		operation = jFile.readByte();
 
 		// "Reading object type for object {0}"
 		status = ts.l("load.readingtype", iObj);
-
 		obj_type = jFile.readShort();
 		base = (DBObjectBase) store.objectBases.get(Short.valueOf(obj_type));
 
 		switch (operation)
 		  {
-		  case CREATE:
-		
+		  case CREATE:		
 		    // "Reading created object {0}"
 		    status = ts.l("load.readingcreated", iObj);
 
@@ -525,64 +521,45 @@ public class DBJournal implements ObjectStatus {
 		      {
 			// "Create: {0}"
 			System.err.println(ts.l("load.create", obj.getInvid()));
-
 			printObject(obj);
 		      }
 
 		    entries.addElement(new JournalEntry(base, obj.getID(), obj));
-
 		    break;
 
 		  case EDIT:
-
 		    // "Reading edited object {0}"
 		    status = ts.l("load.readingedited", iObj);
 
 		    DBObjectDeltaRec delta = new DBObjectDeltaRec(jFile);
-
 		    DBObject original = DBStore.viewDBObject(delta.invid);
 
 		    obj = delta.applyDelta(original);
 
 		    // we have to do the delta.toString() after we apply the delta so that
 		    // the scalarValue fields get parented
-
 		    if (debug)
 		      {
 			// "Delta read:\n\t{0}\n"
-			System.err.println(ts.l("load.deltaread", StringUtils.replaceStr(delta.toString(),"\n","\n\t")));
+			System.err.println("\n"+ts.l("load.deltaread", StringUtils.replaceStr(delta.toString(),"\n","\n\t")));
 
 			// "DBJournal.load(): original object, before delta edit:"
 			System.err.println(ts.l("load.original"));
-
 			printObject(original);
-		      }
 
-		    if (!base.containsKey(obj.getID()))
-		      {
-			// "DBJournal.load(): modified object in the journal does not previously exist in DBStore."
-			System.err.println(ts.l("load.oddmod"));
-		      }
-
-		    if (debug)
-		      {
 			// "DBJournal.load(): object after delta edit:"
 			System.err.println(ts.l("load.postdelta"));
-
 			printObject(obj);
 		      }
 
 		    entries.addElement(new JournalEntry(base, obj.getID(), obj));
-
 		    break;
 
 		  case DELETE:
-
 		    // "Reading deleted object {0}"
 		    status = ts.l("load.readingdeleted", iObj);
 
 		    obj_id = jFile.readShort();
-
 		    if (debug)
 		      {
 			// "Delete: {0}:{1}"
@@ -597,8 +574,15 @@ public class DBJournal implements ObjectStatus {
 	    // "Reading close transaction information"
 	    status = ts.l("load.readingclosed");
 
-	    if ((jFile.readUTF().compareTo(CLOSETRANS) != 0) || 
-		(jFile.readLong() != transaction_time))
+
+	    String closeDebug = jFile.readUTF();
+	    Long transTimeDebug = jFile.readLong();
+	    System.err.println("closeDebug and transTimeDebug:"+ closeDebug +"*"+ transTimeDebug.toString()+"* transaction_time:"+transaction_time);
+
+	    //if ((jFile.readUTF().compareTo(CLOSETRANS) != 0) || 
+	    //	(jFile.readLong() != transaction_time))
+	    if ((closeDebug.compareTo(CLOSETRANS) != 0) || 
+		(transTimeDebug != transaction_time))
 	      {
 		// "Transaction close timestamp mismatch"
 		throw new IOException(ts.l("load.badclosed"));
@@ -977,11 +961,36 @@ public class DBJournal implements ObjectStatus {
     file_major_version = jFile.readShort();
     file_minor_version = jFile.readShort();
 
+    System.err.println("journal major minor version:"+file_major_version+","+file_minor_version);
+
+    // James DEBUG
+    // At version 2,3: Fail if DBStore version greater than equal 2/22 and DBJournal <= 2/2, cause we changed Journal after this.
+    if (store.isAtLeast(2,23) && isLessThan(2,3))
+      {
+	// "Error, journal version mismatch.. wrong file type?"
+	throw new RuntimeException("Mismatch Version between DBStore and DBJournal. ");
+      }
+
+
     if ((file_major_version > DBJournal.major_version) ||
 	(file_major_version == DBJournal.major_version && file_minor_version > minor_version))
       {
 	// "Error, journal version mismatch.. wrong file type?"
 	throw new RuntimeException(ts.l("readHeaders.badversion"));
+      }
+
+    // At journal version 2,3 we save the dbversion in the headers also.
+    if (isAtLeast(2,3))
+      {
+	file_dbstore_major_version = jFile.readShort();
+	file_dbstore_minor_version = jFile.readShort();
+
+	System.err.println("file dbstore major minor version:"+file_dbstore_major_version+","+file_dbstore_minor_version);
+
+	if (file_dbstore_major_version != store.file_major || file_dbstore_minor_version != store.file_minor)
+	  {
+	    throw new RuntimeException("DBStore and file version do not match. ");
+	  }	
       }
 
     if (debug)
@@ -997,10 +1006,8 @@ public class DBJournal implements ObjectStatus {
 
   private void printObject(DBObject obj)
   {
-    String objectStr = obj.getPrintString();
-    
-    objectStr = StringUtils.replaceStr(objectStr, "\n", "\n\t");
-    
+    String objectStr = obj.getPrintString();    
+    objectStr = StringUtils.replaceStr(objectStr, "\n", "\n\t");    
     System.err.println("\t" + objectStr);
   }
 }
@@ -1038,11 +1045,8 @@ class JournalEntry {
 
   void process(DBStore store)
   {
-    DBObjectBaseField
-      definition;
-
-    DBObject 
-      oldObject;
+    DBObjectBaseField definition;
+    DBObject oldObject;
 
     /* -- */
 
