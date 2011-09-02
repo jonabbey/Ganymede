@@ -1,5 +1,4 @@
 /*
-
    Ganymede.java
 
    Server main module
@@ -180,11 +179,24 @@ public class Ganymede {
   public static boolean suppressEmail = false;
 
   /**
+   * <p>If started with this, start Jython server on this port</p>
+   */
+  public static String portString = null;
+    
+  /**
    * <p>We keep the server's start time for display in the
    * admin console.</p>
    */
 
   public static Date startTime = new Date();
+
+  /**
+   * <p>If the server is started with propFilename on
+   * the command line, the properties will be loaded
+   * from this file.</p>
+   */
+
+  public static String propFilename = null;
 
   /**
    * <p>If the server is started with debug=&lt;filename&gt; on
@@ -281,7 +293,6 @@ public class Ganymede {
   public static Thread signalHandlingThread = null;
 
   // properties from the ganymede.properties file
-  
   public static String dbFilename = null;
   public static String journalProperty = null;
   public static String logProperty = null;
@@ -415,36 +426,131 @@ public class Ganymede {
    * The Ganymede server start point.
    *
    */
-
   public static void main(String argv[]) 
   {
     File dataFile;
-    String propFilename = null;
-    String useDirectory = null;
 
     /* -- */
-
     System.setProperty("java.awt.headless", "true");
+
+    // Check command line args, leave if not correct. 
+    if (!checkArgs(argv))
+	{
+	  return;
+	}
+
+    if (!loadProperties(propFilename))
+      {
+	// "Error, couldn''t successfully load properties from file {0}."
+	System.err.println(ts.l("main.error_propload", propFilename));
+	return;
+      }
+    else
+      {
+	// "Ganymede server: loaded properties successfully from {0}"
+	System.out.println(ts.l("main.ok_propload", propFilename));
+      }
+
+    // If we are going to use CrackLib, make sure our password
+    // dictionary exists, creating it if necessary.
+    initializeCrackLib();
+
+    // Create our GanymedeRMIManager to handle RMI exports.  We need
+    // to create this before creating our DBStore, as some of the
+    // components of DBStore are to be made accessible through RMI
+    startRMIManager();
+
+    // register our default UncaughtExceptionHandler
+    setupUncaughtExceptionHandler();
+
+    // create the database 
+    // "Creating DBStore structures"
+    debug(ts.l("main.info_creating_dbstore"));
+
+    db = new DBStore();	      
+
+    // Load the database
+    dataFile = new File(dbFilename);
+    
+    if (dataFile.exists())
+      {
+	// "Loading DBStore contents"
+	debug(ts.l("main.info_loading_dbstore"));
+	db.load(dbFilename);
+      }
+    else
+      {
+	// No database on disk.. create a new one, along with a new journal
+	createNewDataFile();
+      }
+
+    // Create a GanymedeServer object to support the logging
+    // code... the GanymedeServer's main purpose (to allow logins)
+    // won't come into play until we bind the server object into the
+    // RMI registry.
+    createGanymedeServer();
+    
+    // Create the internal GanymedeSession that we use for system
+    // database maintenance
+    createGanymedeSession();
+
+    // Set up the log.
+    startLog();
+
+    // Create and start the background scheduler
+    startScheduler();
+
+    // Take care of any startup-time database modifications
+    startupHook();
+
+    // Bind the GanymedeServer object in the RMI registry so clients
+    // and admin consoles can connect to us.
+    bindGanymedeRMI();
+
+    // St this point clients can log in to the server.. the RMI system
+    // will spawn threads as necessary to handle RMI client activity..
+    // the main thread has nothing left to do and can go ahead and
+    // terminate here.
+    
+    // "Setup and bound server object OK"
+    debug(ts.l("main.info_setup_okay"));
+
+    // if we've been given a telnet port on the command line, set up a
+    // Jython console interpreter that implementers can telnet to for debug.
+    startJythonServer();
+
+    // register a thread to respond if the server gets ctrl-C, kill, etc.
+    registerKillHandler();
+
+    debug("\n--------------------------------------------------------------------------------");
+    // "Ganymede Server Ready."
+    debug(ts.l("main.info_ready"));
+    debug("--------------------------------------------------------------------------------\n");
+  }
+
+  /**
+   *  TODO ME
+   */
+  private static boolean checkArgs(String argv[])
+  {
+    String useDirectory = null;
 
     // If the "usedirectory" option is set, then use the supplied
     // directory name as the base path to the properties file (which
     // is assumed to be "ganymede.properties" and the debug log
     // (assumed to be debug.log).
-
     useDirectory = ParseArgs.getArg("usedirectory", argv);
-
+    
     if (useDirectory != null)
       {
         String fileSeparator = System.getProperty("file.separator");
-        
 	propFilename = useDirectory + fileSeparator + "ganymede.properties";
-        
 	if (ParseArgs.switchExists("logrmi", argv))
 	  {
 	    debugFilename = useDirectory + fileSeparator + "debug.log";
 	  }
       }
-
+    
     if (ParseArgs.getArg("properties", argv) != null)
       {
 	propFilename = ParseArgs.getArg("properties", argv);
@@ -462,7 +568,7 @@ public class Ganymede {
 
 	// "Usage: java arlut.csd.ganymede.server.Ganymede\n properties = [-usedirectory=<server directory>|<property file>] [-resetadmin] [debug = <rmi debug file>]"
         System.err.println(ts.l("main.cmd_line_usage"));
-        return;
+        return false;
       }
 
     if (ParseArgs.switchExists("nossl", argv))
@@ -479,1170 +585,12 @@ public class Ganymede {
       }
 
     resetadmin = ParseArgs.switchExists("resetadmin", argv);
-
     allowMagicImport = ParseArgs.switchExists("magic_import", argv);
-
     forcelocalhost = ParseArgs.switchExists("forcelocalhost", argv);
+    suppressEmail = ParseArgs.switchExists("suppressEmail", argv);
+    portString = ParseArgs.getArg("telnet", argv);    
 
-    if (!loadProperties(propFilename))
-      {
-	// "Error, couldn''t successfully load properties from file {0}."
-	System.err.println(ts.l("main.error_propload", propFilename));
-
-	return;
-      }
-    else
-      {
-	// "Ganymede server: loaded properties successfully from {0}"
-	System.out.println(ts.l("main.ok_propload", propFilename));
-      }
-
-    // If we are going to use CrackLib, make sure our password
-    // dictionary exists, creating it if necessary.
-
-    if (cracklibEnabled)
-      {
-	// "CrackLib enabled for password quality checking."
-	System.err.println(ts.l("main.cracklibEnabled"));
-
-	try
-	  {
-	    initializeCrackLib();
-	  }
-	catch (IOException ex)
-	  {
-	    ex.printStackTrace();
-
-	    // "CrackLib disabled, no internal password quality checking available."
-	    System.err.println(ts.l("main.cracklibDisabled"));
-	  }
-      }
-    else
-      {
-	// "CrackLib disabled, no internal password quality checking available."
-	System.err.println(ts.l("main.cracklibDisabled"));
-      }
-    
-    // Create our GanymedeRMIManager to handle RMI exports.  We need
-    // to create this before creating our DBStore, as some of the
-    // components of DBStore are to be made accessible through RMI
-
-    Ganymede.rmi = new GanymedeRMIManager(publishedObjectPortProperty, useSSL);
-
-   /* Start up the RMI registry thread. */
-
-    try
-      {
-        Ganymede.rmi.startRMIRegistry(registryPortProperty);
-      }
-    catch (RemoteException ex)
-      {
-	// "Error, couln''t start the RMI registry."
-        System.err.println(ts.l("main.error_starting_rmiregistry"));
-
-        throw new RuntimeException(ex.getMessage());
-      }    
-    
-    // if debug=<filename> was specified on the command line, tell the
-    // RMI system to log RMI calls and exceptions that occur in
-    // response to RMI calls.
-
-    if (debugFilename != null)
-      {
-	// RMI Logging to {0}
-	System.err.println(ts.l("main.info_rmilogging", debugFilename));
-
-	try
-	  {
-	    RemoteServer.setLog(new FileOutputStream(debugFilename));
-	  }
-	catch (IOException ex)
-	  {
-	    // "Couldn''t open RMI debug log: {0}"
-	    System.err.println(ts.l("main.error_fail_debug", ex.toString()));
-	  }
-      }
-    else
-      {
-	// Make RMI log any exceptions thrown in response to client calls
-	// to stderr.. XXX not sure this should always be done if the debug
-	// file is not specified on the command line XXX
-
-	System.getProperties().setProperty("sun.rmi.server.exceptionTrace", "true");
-      }
-
-    // register our default UncaughtExceptionHandler
-    setupUncaughtExceptionHandler();
-
-    // create the database 
-    // "Creating DBStore structures"
-    debug(ts.l("main.info_creating_dbstore"));
-
-    db = new DBStore();		// And how can this be!?  For he IS the kwizatch-haderach!!
-
-    // load the database
-
-    dataFile = new File(dbFilename);
-    
-    if (dataFile.exists())
-      {
-	// "Loading DBStore contents"
-	debug(ts.l("main.info_loading_dbstore"));
-
-	db.load(dbFilename, true);
-      }
-    else
-      {
-	// TODO BREAKOUT FUNC
-	// no database on disk.. create a new one, along with a new journal
-
-	// but first, let's make sure there is no journal left alone
-	// without a ganymede.db file..
-
-	dataFile = new File(Ganymede.journalProperty);
-
-	if (dataFile.exists())
-	  {
-	    // ***
-	    // *** Error, I found an orphan journal ({0}), but no matching database file ({1}) to go with it.
-	    // ***
-	    // *** You need either to restore the {1} file, or to remove the {0} file.
-	    // ***
-	    debug(ts.l("main.orphan_journal", Ganymede.journalProperty, dbFilename));
-
-	    // "Shutting down."
-	    Ganymede.debug("\n" + ts.l("main.info_shutting_down") + "\n");
-
-	    System.exit(1);
-	  }
-
-	firstrun = true;
-
-	Invid.setAllocator(new InvidPool());
-
-	// "No DBStore exists under filename {0}, not loading"
-	debug(ts.l("main.info_new_dbstore", dbFilename));
-
-	// "Initializing new schema"
-	debug(ts.l("main.info_initializing_schema"));
-
-	db.initializeSchema();
-
-	// "Template schema created."
-	debug(ts.l("main.info_created_schema"));
-
-	try 
-	  {
-	    db.journal = new DBJournal(db, Ganymede.journalProperty);
-	  }
-	catch (IOException ex)
-	  {
-	    // what do we really want to do here?
-	    // "couldn''t initialize journal"
-	    throw new RuntimeException(ts.l("main.error_no_init_journal"));
-	  }
-
-	// create the database objects required for the server's operation
-
-	// "Creating mandatory database objects"
-	debug(ts.l("main.info_creating_mandatory"));
-
-	db.initializeObjects();
-
-	// "Mandatory database objects created."
-	debug(ts.l("main.info_created_mandatory"));
-
-	firstrun = false;
-      }
-
-    // Java 2 makes it a real pain to change out security
-    // managers.. since we don't need to do classfile transfer from
-    // the client (since all clients should use
-    // arlut.csd.ganymede.client.ClientBase), we just don't bother
-    // with it.
-
-    if (false)
-      {
-	// "Initializing Security Manager"
-	debug(ts.l("main.info_init_security"));
-
-	System.setSecurityManager(new RMISecurityManager());
-      }
-    else
-      {
-	// "Not Initializing RMI Security Manager.. not supporting classfile transfer"
-	debug(ts.l("main.info_no_security"));
-      }
-
-    // Create a GanymedeServer object to support the logging
-    // code... the GanymedeServer's main purpose (to allow logins)
-    // won't come into play until we bind the server object into the
-    // RMI registry.
-
-    try
-      {
-	// "Creating GanymedeServer object"
-	debug(ts.l("main.info_creating_server"));
-
-	server = new GanymedeServer();
-      }
-    catch (Exception ex)
-      {
-	// "Couldn''t create GanymedeServer: "
-	debug(ts.l("main.error_fail_server") + Ganymede.stackTrace(ex));
-
-	throw new RuntimeException(ex.getMessage());
-      }
-
-    // create the internal GanymedeSession that we use for system
-    // database maintenance
-
-    try
-      {
-	// "Creating internal Ganymede Session"
-	debug(ts.l("main.info_creating_def_session"));
-
-	internalSession = new GanymedeSession();
-	internalSession.enableWizards(false);
-	internalSession.enableOversight(false);
-
-	// "Creating master BaseListTransport object"
-	debug(ts.l("main.info_creating_baselist_trans"));
-
-	Ganymede.baseTransport = Ganymede.internalSession.getBaseList();
-      }
-    catch (RemoteException ex)
-      {
-	throw new RuntimeException(ts.l("main.error_fail_session") + ex);
-      }
-
-    // -- set up the log --
-    
-    // First, we check to see if there is a designated mail host. If
-    // not, then we automatically turn off the sending of emails.
-    //
-    // Likewise, suppressEmail is the email command line "master
-    // switch". If it's set to true, then we won't actually send any
-    // emails out.
-     
-    if (mailHostProperty == null || mailHostProperty.equals("") ||
-	ParseArgs.switchExists("suppressEmail", argv))
-      {
-      	suppressEmail = true;
-      }
-
-    try
-      {
-	if (mailLogProperty != null && !mailLogProperty.equals(""))
-	  {
-	    log = new DBLog(new DBLogFileController(logProperty), 
-			    new DBLogFileController(mailLogProperty), 
-			    internalSession,
-			    suppressEmail);
-	  }
-	else
-	  {
-	    log = new DBLog(new DBLogFileController(logProperty), 
-			    null,
-			    internalSession,
-			    suppressEmail);
-	  }
-      }
-    catch (IOException ex)
-      {
-	ex.printStackTrace();
-
-	// "Couldn''t initialize log file"
-	throw new RuntimeException(ts.l("main.error_log_file"));
-      }
-
-    // log our restart
-
-    String startMesg;
-
-    if (debugFilename != null)
-      {
-	// "Server startup - Debug mode"
-	startMesg = ts.l("main.info_debug_start");
-      }
-    else
-      {
-	// "Server startup - Not in Debug mode"
-	startMesg = ts.l("main.info_nodebug_start");
-      }
-
-    log.logSystemEvent(new DBLogEvent("restart",
-				      startMesg,
-				      null,
-				      null,
-				      null,
-				      null));
-
-    // Create the background scheduler
-
-    scheduler = new GanymedeScheduler(true);
-
-    // set the background scheduler running on its own thread
-
-    scheduler.start();
-
-    // and install the tasks and sync channels listed in the database
-
-    try
-      {
-	registerTasks();
-	registerSyncChannels();
-
-	// there is a very, very small chance that an abnormal
-	// termination might have left some xml bits in the sync
-	// channels for a transaction that ultimately could not be
-	// processed.  We check for that here, and clean up any
-	// remaining bits if we find them.
-
-	DBJournalTransaction incompleteTransaction = db.journal.getIncompleteTransaction();
-
-	if (incompleteTransaction != null)
-	  {
-	    for (scheduleHandle handle: scheduler.getTasksByClass(SyncRunner.class))
-	      {
-		SyncRunner channel = (SyncRunner) handle.task;
-
-		try
-		  {
-		    channel.unSync(incompleteTransaction);
-		  }
-		catch (IOException ex)
-		  {
-		    // what can we do?  keep clearing them out as best we
-		    // can
-
-		    ex.printStackTrace();
-		  }
-	      }
-
-	    db.journal.clearIncompleteTransaction();
-	  }
-      }
-    catch (NotLoggedInException ex)
-      {
-	// "Mysterious not logged in exception: "
-	throw new Error(ts.l("main.error_myst_nologged") + ex.getMessage());
-      }
-
-    // take care of any startup-time database modifications
-
-    try
-      {
-	startupHook();
-      }
-    catch (NotLoggedInException ex)
-      {
-	// "Mysterious not logged in exception: "
-	throw new Error(ts.l("main.error_myst_nologged") + ex.getMessage());
-      }
-
-    // Bind the GanymedeServer object in the RMI registry so clients
-    // and admin consoles can connect to us.
-
-    try
-      {
-	// "Binding GanymedeServer in RMI Registry"
-	debug(ts.l("main.info_binding_registry"));
-
-	String hostname = null;
-
-	if (!java.net.InetAddress.getLocalHost().getHostAddress().equals("127.0.0.1"))
-	  {
-	    hostname = java.net.InetAddress.getLocalHost().getHostName();
-	  }
-	else
-	  {
-	    // we don't want to bind to a system name that will
-	    // resolve to 127.0.0.1, or else otherwise the rmiregistry
-	    // will attempt to report our address as loopback, which
-	    // won't do anyone any good
-
-	    // try to use the name specified in our ganymede.properties file
-
-	    if (serverHostProperty != null && !serverHostProperty.equals(""))
-	      {
-		hostname = serverHostProperty;
-
-		if (java.net.InetAddress.getByName(hostname).getHostAddress().equals("127.0.0.1"))
-		  {
-		    // nope, give up
-
-		    if (forcelocalhost)
-		      {
-			Ganymede.debug("\n** " + ts.l("main.warning") + " **\n");
-		      }
-		    else
-		      {
-			Ganymede.debug("\n** " + ts.l("main.error") + " **\n");
-		      }
-
-		    // "Both the system hostname ({0}) and the
-		    // ganymede.serverhost definition ({1}) resolve to
-		    // the 127.0.0.1 loopback address"
-
-		    Ganymede.debug(ts.l("main.error_loopback",
-					java.net.InetAddress.getLocalHost().getHostName(),
-					serverHostProperty));
-		    Ganymede.debug("\n");
-
-		    // "The Ganymede server must have an externally
-		    // accessible IP address or else clients \
-		    // will not be able to communicate with the
-		    // Ganymede server from other than localhost."
-
-		    Ganymede.debug(ts.l("main.error_loopback_explain"));
-
-		    if (!forcelocalhost)
-		      {
-			// "If you really want to be only usable for
-			// localhost, edit the runServer script to use
-			// the -forcelocalhost option"
-
-			Ganymede.debug(ts.l("main.error_loopback_explain2"));
-
-			// "Shutting down."
-
-			Ganymede.debug("\n" + ts.l("main.info_shutting_down") + "\n");
-
-			GanymedeServer.shutdown();
-
-			System.exit(1);
-		      }
-		  }
-		else
-		  {
-		    // "Avoiding loopback {0} definition, binding to {1}"
-		    Ganymede.debug(ts.l("main.info_avoiding_loopback",
-					java.net.InetAddress.getLocalHost().getHostName(),
-					hostname));
-		  }
-	      }
-	  }
-
-	// tell the RMI registry where to find the server
-
-	Naming.bind("rmi://" + hostname + ":" + registryPortProperty + "/ganymede.server", 
-		      server);
-      }
-    catch (RuntimeException ex)
-      {
-	// We're catching RuntimeException separately to placate
-	// FindBugs.
-
-	// "Couldn''t establish server binding: "
-	debug(ts.l("main.error_no_binding") + ex);
-
-	throw ex;
-      }
-    catch (Exception ex)
-      {
-	// "Couldn''t establish server binding: "
-	debug(ts.l("main.error_no_binding") + ex);
-
-	throw new RuntimeException(ex);
-      }
-
-    // at this point clients can log in to the server.. the RMI system
-    // will spawn threads as necessary to handle RMI client activity..
-    // the main thread has nothing left to do and can go ahead and
-    // terminate here.
-
-    // wa-la
-
-    if (debug)
-      {
-	// "Setup and bound server object OK"
-	debug(ts.l("main.info_setup_okay"));
-      }
-
-    // if we've been given a telnet port on the command line, set up a
-    // Jython console interpreter that implementers can telnet to for debug.
-
-    String portString = ParseArgs.getArg("telnet", argv);
-    
-    if (portString != null)
-      {
-	try
-	  {
-	    int portNumber = Integer.parseInt(portString);
-	    
-	    jythonServer = new JythonServer();
-	    jythonServer.run(portNumber);
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    // "Could not start telnet console, {0} is not a valid port number."
-	    debug(ts.l("main.badport", portString));
-	  }
-      }
-
-    // register a thread to respond if the server gets ctrl-C, kill,
-    // etc.
-
-    Ganymede.signalHandlingThread = new Thread(new Runnable() {
-        public void run() {
-          try
-            {
-              GanymedeServer.shutdown();
-            }
-          finally
-            {
-              java.lang.Runtime.getRuntime().halt(1);
-            }
-        }
-      }, ts.l("main.signalCatchThread"));  // "Ganymede ctrl-C handling thread"
-
-    java.lang.Runtime.getRuntime().addShutdownHook(Ganymede.signalHandlingThread);
-
-    debug("\n--------------------------------------------------------------------------------");
-
-    // "Ganymede Server Ready."
-    debug(ts.l("main.info_ready"));
-
-    debug("--------------------------------------------------------------------------------\n");
-  }
-
-  // debug routine
-
-  /**
-   *
-   * This is a convenience method used by server-side code to send
-   * debug output to stderr and to any attached admin consoles.
-   *
-   */
-
-  static public void debug(String string)
-  {
-    if (debug)
-      {
-	System.err.println(string);
-      }
-
-    GanymedeAdmin.logAppend(string);
-  }
-
-  /**
-   * This is a convenience method used by server-side code to send
-   * error logging output to stderr, to any attached admin consoles,
-   * and to the registered bugReportAddressProperty.
-   */
-
-  static public void logError(Throwable ex)
-  {
-    if (defaultHandler != null)
-      {
-	defaultHandler.reportException(ex);
-      }
-    else
-      {
-	ex.printStackTrace();
-      }
-  }
-
-  /**
-   * This is a convenience method used by server-side code to send
-   * error logging output to stderr, to any attached admin consoles,
-   * and to the registered bugReportAddressProperty.
-   */
-
-  static public void logError(Throwable ex, String contextMsg)
-  {
-    if (defaultHandler != null)
-      {
-	defaultHandler.reportException(contextMsg, ex);
-      }
-    else
-      {
-	System.err.println(contextMsg);
-
-	ex.printStackTrace();
-      }
-  }
-
-  /**
-   * This is a convenience method used by the server to get a
-   * stack trace from a throwable object in String form.
-   */
-
-  static public String stackTrace(Throwable thing)
-  {
-    StringWriter stringTarget = new StringWriter();
-    PrintWriter writer = new PrintWriter(stringTarget);
-    
-    thing.printStackTrace(writer);
-    writer.close();
-
-    return stringTarget.toString();
-  }
-
-  /**
-   * This is a convenience method used by the server to generate a
-   * stack trace print from a server code.
-   */
-
-  static public void printCallStack()
-  {
-    try
-      {
-	throw new RuntimeException("TRACE");
-      }
-    catch (RuntimeException ex)
-      {
-	ex.printStackTrace();
-      }
-  }
-
-  /**
-   * <p>This is a convenience method to allow arbitrary Ganymede code
-   * to generate a stack trace on the server's log and admin
-   * consoles.</p>
-   */
-
-  static public void logAssert(String string)
-  {
-    try
-      {
-	throw new RuntimeException("ASSERT: " + string);
-      }
-    catch (RuntimeException ex)
-      {
-	Ganymede.debug(Ganymede.stackTrace(ex));
-      }
-  }
-
-  /**
-   * This is a convenience method used by the server to return a
-   * standard informative dialog.
-   */
-
-  static public ReturnVal createInfoDialog(String title, String body)
-  {
-    ReturnVal retVal = new ReturnVal(true,true); // success ok, doNormalProcessing ok
-    retVal.setDialog(new JDialogBuff(title,
-				     body,
-				     Ganymede.OK,
-				     null,
-				     "ok.gif"));
-
-    if (logInfoDialogs)
-      {
-	System.err.println(ts.l("createInfoDialog.log_info", body));
-      }
-
-    return retVal;
-  }
-
-  /**
-   * This is a convenience method used by the server to return a
-   * standard error dialog.
-   */
-
-  static public ReturnVal createErrorDialog(String title, String body)
-  {
-    ReturnVal retVal = new ReturnVal(false);
-    retVal.setDialog(new JDialogBuff(title,
-				     body,
-				     Ganymede.OK,
-				     null,
-				     "error.gif"));
-
-    if (logErrorDialogs)
-      {
-	System.err.println(ts.l("createErrorDialog.log_error", body));
-      }
-
-    return retVal;
-  }
-
-  /**
-   * <p>This is a convenience method used by the server to return a
-   * standard error dialog without a custom title.  This is primarily
-   * useful for returning errors from {@link
-   * arlut.csd.ganymede.server.GanymedeXMLSession} in which the errors
-   * will be reported through a purely textual interface, but may be
-   * used anywhere where a default title is acceptable.</p>
-   */
-
-  static public ReturnVal createErrorDialog(String body)
-  {
-    ReturnVal retVal = new ReturnVal(false);
-    retVal.setDialog(new JDialogBuff(ts.l("createErrorDialog.default_title"),
-				     body,
-				     Ganymede.OK,
-				     null,
-				     "error.gif"));
-
-    if (logErrorDialogs)
-      {
-	System.err.println(ts.l("createErrorDialog.log_error", body));
-      }
-
-    return retVal;
-  }
-
-  /**
-   * This is a convenience method used by the server to return a
-   * very standard error dialog.
-   *
-   * The Exception parameter is ignored for now, so that this method
-   * can do something with it later if necessary without having to go
-   * through all the code which calls this method.
-   */
-
-  static public ReturnVal loginError(Exception ex)
-  {
-    return Ganymede.createErrorDialog(ts.l("loginError.error"),
-				      ts.l("loginError.explain"));
-  }
-
-  /**
-   * <p>This method is provided to allow us to hook in creation of new
-   * objects with specified invid's that the server code references.</p>
-   *
-   * <p>It's intended for use during server development as we evolve
-   * the schema.</p>
-   */
-
-  static public void startupHook() throws NotLoggedInException
-  {
-    Invid supergashinvid = Invid.createInvid(SchemaConstants.PersonaBase,
-					     SchemaConstants.PersonaSupergashObj);
-    DBObject v_object;
-    DBEditObject e_object;
-
-    PasswordDBField p;
-     
-    /* -- */
-
-    // check to make sure the datastructures for supergash in the
-    // ganymede.db file are set.
-
-    Ganymede.db.initializeObjects();
-
-    // and reset the password if we need to
-
-    if (resetadmin && Ganymede.defaultrootpassProperty != null && !Ganymede.defaultrootpassProperty.trim().equals(""))
-      {
-	// check to see if we need to reset the password to match our
-	// properties file
-
-	v_object = DBStore.viewDBObject(supergashinvid);
-	p = (PasswordDBField) v_object.getField(SchemaConstants.PersonaPasswordField);
-
-	if (p == null || !p.matchPlainText(Ganymede.defaultrootpassProperty))
-	  {
-	    System.out.println(ts.l("startupHook.resetting"));
-
-	    internalSession.openTransaction("Ganymede startupHook");
-
-	    e_object = (DBEditObject) internalSession.session.editDBObject(supergashinvid);
-
-	    if (e_object == null)
-	      {
-		throw new RuntimeException(ts.l("startupHook.no_supergash", rootname));
-	      }
-
-	    p = (PasswordDBField) e_object.getField(SchemaConstants.PersonaPasswordField);
-	    ReturnVal retVal = p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
-	    
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		throw new RuntimeException(ts.l("startupHook.failed_reset", rootname));
-	      }
-
-	    System.out.println(ts.l("startupHook.password_reset", rootname));
-
-	    retVal = internalSession.commitTransaction();
-
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		// if doNormalProcessing is true, the
-		// transaction was not cleared, but was
-		// left open for a re-try.  Abort it.
-		
-		if (retVal.doNormalProcessing)
-		  {
-		    internalSession.abortTransaction();
-		  }
-	      }
-	  }
-      }
-
-    // At DBStore 2.11, we added a hidden label field for objectEvent
-    // objects.  We'll edit any old ones here and fix up their labels
-
-    if (true || Ganymede.db.isLessThan(2,11))
-      {
-	boolean success = true;
-	List<DBObject> objects = internalSession.getObjects(SchemaConstants.ObjectEventBase);
-
-	if (objects.size() > 0)
-	  {
-	    internalSession.openTransaction("Ganymede objectEvent fixup hook");
-
-	    try
-	      {
-		for (DBObject object: objects)
-		  {
-		    StringDBField labelField = (StringDBField) object.getField(SchemaConstants.ObjectEventLabel);
-
-		    if (labelField == null)
-		      {
-			objectEventCustom objectEventObj = (objectEventCustom) internalSession.session.editDBObject(object.getInvid());
-
-			if (objectEventObj != null)
-			  {
-			    ReturnVal retVal = objectEventObj.updateLabel((String) objectEventObj.getFieldValueLocal(SchemaConstants.ObjectEventObjectName),
-									  (String) objectEventObj.getFieldValueLocal(SchemaConstants.ObjectEventToken));
-
-			    if (!ReturnVal.didSucceed(retVal))
-			      {
-				success = false;
-			      }
-			  }
-		      }
-		  }
-
-		if (success)
-		  {
-		    internalSession.commitTransaction();
-		  }
-		else
-		  {
-		    internalSession.abortTransaction();
-		  }
-	      }
-	    catch (Throwable ex)
-	      {
-		internalSession.abortTransaction();
-	      }
-	  }
-      }
-  }
-
-
-  /**
-   * <p>At DBStore version 2.7, we changed the package name for our
-   * built-in task classes.  This method creates a private Hashtable,
-   * {@link arlut.csd.ganymede.server.Ganymede#upgradeClassMap}, which holds
-   * a mapping of old class names to new ones for the built-in classes.</p>
-   */
-
-  static synchronized private void prepClassMap()
-  {
-    if (upgradeClassMap == null)
-      {
-        upgradeClassMap = new Hashtable();
-        upgradeClassMap.put("arlut.csd.ganymede.dumpAndArchiveTask", "arlut.csd.ganymede.server.dumpAndArchiveTask");
-        upgradeClassMap.put("arlut.csd.ganymede.dumpTask", "arlut.csd.ganymede.server.dumpTask");
-        upgradeClassMap.put("arlut.csd.ganymede.GanymedeExpirationTask", "arlut.csd.ganymede.server.GanymedeExpirationTask");
-        upgradeClassMap.put("arlut.csd.ganymede.GanymedeValidationTask", "arlut.csd.ganymede.server.GanymedeValidationTask");
-        upgradeClassMap.put("arlut.csd.ganymede.GanymedeWarningTask", "arlut.csd.ganymede.server.GanymedeWarningTask");
-      }
-  }
-
-  /**
-   * This method scans the database for valid task entries and adds
-   * them to the scheduler.
-   */
-
-  static private void registerTasks() throws NotLoggedInException
-  {
-    List<DBObject> objects = internalSession.getObjects(SchemaConstants.TaskBase);
-
-    /* -- */
-
-    if (objects != null)
-      {
-	if (objects.size() == 0)
-	  {
-	    System.err.println(ts.l("registerTasks.empty_builders"));
-	  }
-
-	for (DBObject object: objects)
-	  {
-	    // At DBStore version 2.7, we changed the package name for
-	    // our built-in task classes.  If loaded an older file and
-	    // we recognize one of the built-in task class names, go
-	    // ahead and rewrite it, hacking down into the
-	    // StringDBField in a most naughty way.
-
-	    if (Ganymede.db.isLessThan(2,7))
-	      {
-		prepClassMap();
-
-		StringDBField taskClassStrF = (StringDBField) object.getField(SchemaConstants.TaskClass);
-
-		if (taskClassStrF != null)
-		  {
-		    String taskClassStr = (String) taskClassStrF.value;
-
-		    if (upgradeClassMap.containsKey(taskClassStr))
-		      {
-			String newClassName = (String) upgradeClassMap.get(taskClassStr);
-
-			// "Rewriting old system task class {0} as {1}"
-			System.err.println(ts.l("registerTasks.rewritingClass", taskClassStr, newClassName));
-
-			// and here's where we force the value into place
-
-			taskClassStrF.value = newClassName.intern();
-		      }
-		  }
-	      }
-
-	    if (debug)
-	      {
-		System.err.println(ts.l("registerTasks.processing_task", object.toString()));
-	      }
-
-	    scheduler.registerTaskObject(object);
-	  }
-      }
-    else
-      {
-	System.err.println(ts.l("registerTasks.empty_tasks"));
-      }
-
-    // register background time-out task
-
-    scheduler.addPeriodicAction(new Date(System.currentTimeMillis() + 60000),
-				1,
-				new timeOutTask(),
-				ts.l("registerTasks.idle_task"));
-
-    // register background memory status updater task
-
-    scheduler.addPeriodicAction(new Date(System.currentTimeMillis() + 60000),
-				1,
-				new memoryStatusTask(),
-				ts.l("registerTasks.memory_status_task"));
-
-    // register garbage collection task without any schedule for
-    // execution.. this is so that the admin can launch it from the
-    // admin console
-
-    scheduler.addActionOnDemand(new gcTask(),
-				ts.l("registerTasks.gc_task"));
-
-    // likewise the GanymedeValidationTask
-
-    scheduler.addActionOnDemand(new GanymedeValidationTask(),
-				ts.l("registerTasks.validation_task"));
-  }
-
-  /**
-   * This method schedules all registered builder tasks and Sync
-   * Runners for execution.  This method will be called when a user
-   * commits a transaction.  If a given task is already running, the
-   * scheduler will make a note that it needs to be rescheduled on
-   * completion.
-   */
-
-  static void runBuilderTasks()
-  {
-    for (scheduleHandle handle: scheduler.getTasksByType(scheduleHandle.TaskType.BUILDER))
-      {
-	scheduler.demandTask(handle.getName());
-      }
-
-    for (scheduleHandle handle: scheduler.getTasksByClass(SyncRunner.class))
-      {
-	SyncRunner runner = (SyncRunner) handle.task;
-
-	if (runner.isIncremental() || runner.isFullState())
-	  {
-	    scheduler.demandTask(handle.getName());
-	  }
-      }
-  }
-
-  /**
-   * This method schedules all registered builder tasks for
-   * execution, with an option set that will cause all builder tasks
-   * to consider object bases as changed since the last build, thus
-   * triggering a full external rebuild.
-   */
-
-  static void forceBuilderTasks()
-  {
-    String[] options = {"forcebuild"};
-
-    for (scheduleHandle handle: scheduler.getTasksByType(scheduleHandle.TaskType.BUILDER))
-      {
-	scheduler.demandTask(handle.getName(), options);
-      }
-
-    // XXX do we want to do something about forcing sync channels
-    // here?
-  }
-
-  /**
-   * This method scans the database for valid SyncChannel entries and
-   * adds them to the scheduler.
-   */
-
-  static private void registerSyncChannels() throws NotLoggedInException
-  {
-    List<DBObject> objects = internalSession.getObjects(SchemaConstants.SyncChannelBase);
-
-    /* -- */
-
-    if (objects != null)
-      {
-	if (objects.size() == 0)
-	  {
-	    System.err.println(ts.l("registerSyncChannels.no_syncs"));
-	  }
-
-	for (DBObject object: objects)
-	  {
-	    SyncRunner runner = new SyncRunner(object);
-
-	    if (debug)
-	      {
-		System.err.println(ts.l("registerSyncChannels.processing_sync", runner.toString()));
-	      }
-
-	    registerSyncChannel(runner);
-	  }
-      }
-    else
-      {
-	System.err.println(ts.l("registerSyncChannels.no_syncs"));
-      }
-  }
-
-  /**
-   * <p>This method links the given SyncRunner object into the list of
-   * registered Sync Channels used at transaction commit time, and
-   * makes it available for the scheduler to run.</p>
-   */
-
-  static void registerSyncChannel(SyncRunner channel)
-  {
-    if (debug)
-      {
-	System.err.println(ts.l("registerSyncChannel.debug_register", channel.getName()));
-      }
-
-    scheduleHandle handle = Ganymede.scheduler.addActionOnDemand(channel, channel.getName());
-
-    channel.setScheduleHandle(handle);
-  }
-
-  /**
-   * <p>This method unlinks the named SyncRunner object from the list
-   * of registered Sync Channels used at transaction commit time, and
-   * removes it from the Ganymede scheduler.</p>
-   */
-
-  static void unregisterSyncChannel(String channelName)
-  {
-    if (debug)
-      {
-	System.err.println(ts.l("unregisterSyncChannel.debug_unregister", channelName));
-      }
-
-    Ganymede.scheduler.unregisterTask(channelName);
-  }
-
-  /**
-   * <p>This method returns a reference to a SyncRunner registered in
-   * the Ganymede scheduler.  It does not remove the SyncRunner from
-   * the scheduler, nor do anything other than return a reference to
-   * it.</p>
-   *
-   * <p>In particular, it is not guaranteed that the SyncRunner
-   * returned is not currently running.</p>
-   */
-
-  static SyncRunner getSyncChannel(String channelName)
-  {
-    return (SyncRunner) Ganymede.scheduler.getTask(channelName);
-  }
-
-  /**
-   * Make sure that we have our random access crack lib dictionary
-   * available to us.
-   */
-
-  static void initializeCrackLib() throws IOException
-  {
-    File crackData = new File(cracklibDirectoryProperty, "cracklib_dict.pwd");
-    File crackIndex = new File(cracklibDirectoryProperty, "cracklib_dict.pwi");
-    File crackHash = new File(cracklibDirectoryProperty, "cracklib_dict.hwm");
-
-    String pathPrefix = cracklibDirectoryProperty + File.separator + "cracklib_dict";
-
-    if (crackData.isFile() && crackData.canRead() &&
-	crackIndex.isFile() && crackIndex.canRead() &&
-	crackHash.isFile() && crackHash.canRead())
-      {
-	// "Loading crack lib dictionary from {0}."
-	System.err.println(ts.l("initializeCrackLib.loading_dictionary", pathPrefix));
-
-	crackLibPacker = new Packer(pathPrefix, "r");
-      }
-    else
-      {
-	// "Creating random access crack lib dictionary {0}."
-	System.err.println(ts.l("initializeCrackLib.creating_dictionary", pathPrefix));
-
-	Packer.make(PackageResources.getPackageResourceAsStream("words", org.solinger.cracklib.CrackLib.class),
-		    pathPrefix,
-		    false);
-
-	// "Loading crack lib dictionary from {0}."
-	System.err.println(ts.l("initializeCrackLib.loading_dictionary", pathPrefix));
-
-	crackLibPacker = new Packer(pathPrefix, "r");
-      }
-  }
-
-  /**
-   * </P>This method is called by the GanymedeBuilderTask base class to
-   * record that the server is processing a build.</P>
-   */
-
-  static void updateBuildStatus()
-  {
-    int p1 = GanymedeBuilderTask.getPhase1Count();
-    int p2 = GanymedeBuilderTask.getPhase2Count();
-
-    // phase 1 can have the database locked, so show that
-    // for preference
-
-    if (p1 > 0)
-      {
-	GanymedeServer.sendMessageToRemoteSessions(ClientMessage.BUILDSTATUS, "building");
-      }
-    else if (p2 > 0)
-      {
-	GanymedeServer.sendMessageToRemoteSessions(ClientMessage.BUILDSTATUS, "building2");
-      }
-    else
-      {
-	GanymedeServer.sendMessageToRemoteSessions(ClientMessage.BUILDSTATUS, "idle");
-      }
-  }
-
-  /**
-   * <p>Sets up our default UncaughtExceptionHandler.</p>
-   *
-   * <p>This method introduces a dependency on Java 1.5 or later.</p>
-   */
-
-  private static void setupUncaughtExceptionHandler()
-  {
-    Ganymede.defaultHandler = new GanymedeUncaughtExceptionHandler();
-
-    Thread.setDefaultUncaughtExceptionHandler(Ganymede.defaultHandler);
+    return true;
   }
 
   /**
@@ -1954,5 +902,1091 @@ public class Ganymede {
       }
 
     return success;
+  }
+
+  /**
+   * Make sure that we have our random access crack lib dictionary
+   * available to us.
+   */
+
+  static void initializeCrackLib() 
+  {
+    if (!cracklibEnabled)
+      {
+	// "CrackLib disabled, no internal password quality checking available."
+	System.err.println(ts.l("main.cracklibDisabled"));
+	return;
+      }
+
+    // "CrackLib enabled for password quality checking."
+    System.err.println(ts.l("main.cracklibEnabled"));
+
+    try
+      {
+	File crackData = new File(cracklibDirectoryProperty, "cracklib_dict.pwd");
+	File crackIndex = new File(cracklibDirectoryProperty, "cracklib_dict.pwi");
+	File crackHash = new File(cracklibDirectoryProperty, "cracklib_dict.hwm");	
+	String pathPrefix = cracklibDirectoryProperty + File.separator + "cracklib_dict";
+	
+	if (crackData.isFile() && crackData.canRead() &&
+	    crackIndex.isFile() && crackIndex.canRead() &&
+	    crackHash.isFile() && crackHash.canRead())
+	  {
+	    // "Loading crack lib dictionary from {0}."
+	    System.err.println(ts.l("initializeCrackLib.loading_dictionary", pathPrefix));	    
+	    crackLibPacker = new Packer(pathPrefix, "r");
+	  }
+	else
+	  {
+	    // "Creating random access crack lib dictionary {0}."
+	    System.err.println(ts.l("initializeCrackLib.creating_dictionary", pathPrefix));	    
+	    Packer.make(PackageResources.getPackageResourceAsStream("words", org.solinger.cracklib.CrackLib.class),
+			pathPrefix,
+			false);
+	    
+	    // "Loading crack lib dictionary from {0}."
+	    System.err.println(ts.l("initializeCrackLib.loading_dictionary", pathPrefix));	    
+	    crackLibPacker = new Packer(pathPrefix, "r");
+	  }
+      }
+    catch (IOException ex)
+      {
+	ex.printStackTrace();
+	// "CrackLib disabled, no internal password quality checking available."
+	System.err.println(ts.l("main.cracklibDisabled"));
+      }
+  }
+  
+  /**
+   * Create our GanymedeRMIManager to handle RMI exports. 
+   * and start it up.
+   */
+  static private void startRMIManager()
+  {
+    // Create our GanymedeRMIManager to handle RMI exports.  We need
+    // to create this before creating our DBStore, as some of the
+    // components of DBStore are to be made accessible through RMI
+    Ganymede.rmi = new GanymedeRMIManager(publishedObjectPortProperty, useSSL);
+
+    // Start up the RMI registry thread. 
+    try
+      {
+        Ganymede.rmi.startRMIRegistry(registryPortProperty);
+      }
+    catch (RemoteException ex)
+      {
+	// "Error, couln''t start the RMI registry."
+        System.err.println(ts.l("main.error_starting_rmiregistry"));
+        throw new RuntimeException(ex.getMessage());
+      }    
+    
+    // if debug=<filename> was specified on the command line, tell the
+    // RMI system to log RMI calls and exceptions that occur in
+    // response to RMI calls.
+    if (debugFilename != null)
+      {
+	// RMI Logging to {0}
+	System.err.println(ts.l("main.info_rmilogging", debugFilename));
+
+	try
+	  {
+	    RemoteServer.setLog(new FileOutputStream(debugFilename));
+	  }
+	catch (IOException ex)
+	  {
+	    // "Couldn''t open RMI debug log: {0}"
+	    System.err.println(ts.l("main.error_fail_debug", ex.toString()));
+	  }
+      }
+    else
+      {
+	// Make RMI log any exceptions thrown in response to client calls
+	// to stderr.. XXX not sure this should always be done if the debug
+	// file is not specified on the command line XXX
+	System.getProperties().setProperty("sun.rmi.server.exceptionTrace", "true");
+      }
+  }
+  
+  /**
+   * <p>Sets up our default UncaughtExceptionHandler.</p>
+   *
+   * <p>This method introduces a dependency on Java 1.5 or later.</p>
+   */
+
+  private static void setupUncaughtExceptionHandler()
+  {
+    Ganymede.defaultHandler = new GanymedeUncaughtExceptionHandler();
+
+    Thread.setDefaultUncaughtExceptionHandler(Ganymede.defaultHandler);
+  }
+
+  /**
+   *
+   * JAMES QUESTION - this doesnt actually write out DB file does it???
+   *
+   *  No database exists on disk.. create a new one, along with a new journal
+   *  but first, let's make sure there is no journal left alone
+   *  without a ganymede.db file.
+   *
+   */
+  public static void createNewDataFile() 
+  {
+    File journalFile = new File(Ganymede.journalProperty);
+
+    if (journalFile.exists())
+      {
+	// ***
+	// *** Error, I found an orphan journal ({0}), but no matching database file ({1}) to go with it.
+	// ***
+	// *** You need either to restore the {1} file, or to remove the {0} file.
+	// ***
+	debug(ts.l("main.orphan_journal", Ganymede.journalProperty, dbFilename));
+	
+	// "Shutting down."
+	Ganymede.debug("\n" + ts.l("main.info_shutting_down") + "\n");
+	
+	System.exit(1);
+      }
+    
+    firstrun = true;
+
+    Invid.setAllocator(new InvidPool());
+
+    // "No DBStore exists under filename {0}, not loading"
+    debug(ts.l("main.info_new_dbstore", dbFilename));
+    
+    // "Initializing new schema"
+    debug(ts.l("main.info_initializing_schema"));    
+    db.initializeSchema();    
+    // "Template schema created."
+    debug(ts.l("main.info_created_schema"));
+    
+    try 
+      {
+	db.journal = new DBJournal(db, Ganymede.journalProperty);
+      }
+    catch (IOException ex)
+      {
+	// what do we really want to do here?
+	// "couldn''t initialize journal"
+	throw new RuntimeException(ts.l("main.error_no_init_journal"));
+      }
+    
+    // create the database objects required for the server's operation
+    // "Creating mandatory database objects"
+    debug(ts.l("main.info_creating_mandatory"));
+    db.initializeObjects();
+    // "Mandatory database objects created."
+    debug(ts.l("main.info_created_mandatory"));
+    
+    firstrun = false;
+
+    // TODO DUMP HERE???  does somewhere in there.... check that.
+  }
+
+  /** TODO
+   *
+   */
+    // Create a GanymedeServer object to support the logging
+    // code... the GanymedeServer's main purpose (to allow logins)
+    // won't come into play until we bind the server object into the
+    // RMI registry.
+  private static void createGanymedeServer()
+  {
+    try
+      {
+	// "Creating GanymedeServer object"
+	debug(ts.l("main.info_creating_server"));
+	server = new GanymedeServer();
+      }
+    catch (Exception ex)
+      {
+	// "Couldn''t create GanymedeServer: "
+	debug(ts.l("main.error_fail_server") + Ganymede.stackTrace(ex));
+	throw new RuntimeException(ex.getMessage());
+      }
+  }
+
+  /** TODO
+   *
+   */
+  static private void createGanymedeSession()
+  {
+    // create the internal GanymedeSession that we use for system
+    // database maintenance
+    try
+      {
+	// "Creating internal Ganymede Session"
+	debug(ts.l("main.info_creating_def_session"));
+
+	internalSession = new GanymedeSession();
+	internalSession.enableWizards(false);
+	internalSession.enableOversight(false);
+
+	// "Creating master BaseListTransport object"
+	debug(ts.l("main.info_creating_baselist_trans"));
+
+	Ganymede.baseTransport = Ganymede.internalSession.getBaseList();
+      }
+    catch (RemoteException ex)
+      {
+	throw new RuntimeException(ts.l("main.error_fail_session") + ex);
+      }
+  }
+
+  /** TODO
+   *
+   */
+  static private void startLog()
+  {    
+    // First, we check to see if there is a designated mail host. If
+    // not, then we automatically turn off the sending of emails.
+    //
+    // Likewise, suppressEmail is the email command line "master
+    // switch". If it's set to true, then we won't actually send any
+    // emails out.
+    if (mailHostProperty == null || mailHostProperty.equals(""))
+      {
+      	suppressEmail = true;
+      }
+
+    try
+      {
+	if (mailLogProperty != null && !mailLogProperty.equals(""))
+	  {
+	    log = new DBLog(new DBLogFileController(logProperty), 
+			    new DBLogFileController(mailLogProperty), 
+			    internalSession,
+			    suppressEmail);
+	  }
+	else
+	  {
+	    log = new DBLog(new DBLogFileController(logProperty), 
+			    null,
+			    internalSession,
+			    suppressEmail);
+	  }
+      }
+    catch (IOException ex)
+      {
+	ex.printStackTrace();
+
+	// "Couldn''t initialize log file"
+	throw new RuntimeException(ts.l("main.error_log_file"));
+      }
+
+    // log our restart
+    String startMesg;
+
+    if (debugFilename != null)
+      {
+	// "Server startup - Debug mode"
+	startMesg = ts.l("main.info_debug_start");
+      }
+    else
+      {
+	// "Server startup - Not in Debug mode"
+	startMesg = ts.l("main.info_nodebug_start");
+      }
+
+    log.logSystemEvent(new DBLogEvent("restart",
+				      startMesg,
+				      null,
+				      null,
+				      null,
+				      null));
+  }
+
+  /**
+   * TODO 
+  */
+  static private void startScheduler()
+  {
+    // Create the background scheduler
+    scheduler = new GanymedeScheduler(true);
+
+    // set the background scheduler running on its own thread
+    scheduler.start();
+
+    // and install the tasks and sync channels listed in the database
+    try
+      {
+	registerTasks();
+	registerSyncChannels();
+
+	// there is a very, very small chance that an abnormal
+	// termination might have left some xml bits in the sync
+	// channels for a transaction that ultimately could not be
+	// processed.  We check for that here, and clean up any
+	// remaining bits if we find them.
+	DBJournalTransaction incompleteTransaction = db.journal.getIncompleteTransaction();
+
+	if (incompleteTransaction != null)
+	  {
+	    for (scheduleHandle handle: scheduler.getTasksByClass(SyncRunner.class))
+	      {
+		SyncRunner channel = (SyncRunner) handle.task;
+
+		try
+		  {
+		    channel.unSync(incompleteTransaction);
+		  }
+		catch (IOException ex)
+		  {
+		    // what can we do?  keep clearing them out as best we
+		    // can
+
+		    ex.printStackTrace();
+		  }
+	      }
+
+	    db.journal.clearIncompleteTransaction();
+	  }
+      }
+    catch (NotLoggedInException ex)
+      {
+	// "Mysterious not logged in exception: "
+	throw new Error(ts.l("main.error_myst_nologged") + ex.getMessage());
+      }
+    }
+
+  /**
+   * <p>This method is provided to allow us to hook in creation of new
+   * objects with specified invid's that the server code references.</p>
+   *
+   * <p>It's intended for use during server development as we evolve
+   * the schema.</p>
+   */
+
+  static private void startupHook()
+  { 
+    // check to make sure the datastructures for supergash in the
+    // ganymede.db file are set.
+    Ganymede.db.initializeObjects();
+
+    try
+      {
+	// and reset the password if we need to.
+	if (resetadmin && Ganymede.defaultrootpassProperty != null && !Ganymede.defaultrootpassProperty.trim().equals(""))
+	  {
+	    resetAdminPassword();
+	  }
+	
+	// At DBStore 2.11, we added a hidden label field for objectEvent
+	// objects.  We'll edit any old ones here and fix up their labels
+	if (Ganymede.db.isLessThan(2,11))
+	  {
+	    AddLabelUpdate();
+	  }
+      }
+    catch (NotLoggedInException ex)
+      {
+	// "Mysterious not logged in exception: "
+	throw new Error(ts.l("main.error_myst_nologged") + ex.getMessage());
+      }
+  }
+  
+  /**
+  * Bind the GanymedeServer object in the RMI registry so clients
+  * and admin consoles can connect to us.
+  */
+  public static void bindGanymedeRMI()
+  {
+    try
+      {
+	// "Binding GanymedeServer in RMI Registry"
+	debug(ts.l("main.info_binding_registry"));
+	
+	String hostname = null;
+	
+	if (!java.net.InetAddress.getLocalHost().getHostAddress().equals("127.0.0.1"))
+	  {
+	    hostname = java.net.InetAddress.getLocalHost().getHostName();
+	  }
+	else
+	  {
+	    // we don't want to bind to a system name that will
+	    // resolve to 127.0.0.1, or else otherwise the rmiregistry
+	    // will attempt to report our address as loopback, which
+	    // won't do anyone any good
+	    
+	    // try to use the name specified in our ganymede.properties File
+	    if (serverHostProperty != null && !serverHostProperty.equals(""))
+	      {
+		hostname = serverHostProperty;
+		
+		if (java.net.InetAddress.getByName(hostname).getHostAddress().equals("127.0.0.1"))
+		  {
+		    // nope, give up		    
+		    if (forcelocalhost)
+		      {
+			Ganymede.debug("\n** " + ts.l("main.warning") + " **\n");
+		      }
+		    else
+		      {
+			Ganymede.debug("\n** " + ts.l("main.error") + " **\n");
+		      }
+
+		    // "Both the system hostname ({0}) and the
+		    // ganymede.serverhost definition ({1}) resolve to
+		    // the 127.0.0.1 loopback address"
+		    Ganymede.debug(ts.l("main.error_loopback",
+					java.net.InetAddress.getLocalHost().getHostName(),
+					serverHostProperty));
+		    Ganymede.debug("\n");
+
+		    // "The Ganymede server must have an externally
+		    // accessible IP address or else clients \
+		    // will not be able to communicate with the
+		    // Ganymede server from other than localhost."
+		    Ganymede.debug(ts.l("main.error_loopback_explain"));
+
+		    if (!forcelocalhost)
+		      {
+			// "If you really want to be only usable for
+			// localhost, edit the runServer script to use
+			// the -forcelocalhost option"
+			Ganymede.debug(ts.l("main.error_loopback_explain2"));
+
+			// "Shutting down."
+			Ganymede.debug("\n" + ts.l("main.info_shutting_down") + "\n");
+
+			GanymedeServer.shutdown();
+			System.exit(1);
+		      }
+		  }
+		else
+		  {
+		    // "Avoiding loopback {0} definition, binding to {1}"
+		    Ganymede.debug(ts.l("main.info_avoiding_loopback",
+					java.net.InetAddress.getLocalHost().getHostName(),
+					hostname));
+		  }
+	      }
+	  }
+
+	// tell the RMI registry where to find the server
+	Naming.bind("rmi://" + hostname + ":" + registryPortProperty + "/ganymede.server", 
+		      server);
+      }
+    catch (RuntimeException ex)
+      {
+	// We're catching RuntimeException separately to placate
+	// FindBugs.
+	// "Couldn''t establish server binding: "
+	debug(ts.l("main.error_no_binding") + ex);
+	throw ex;
+      }
+    catch (Exception ex)
+      {
+	// "Couldn''t establish server binding: "
+	debug(ts.l("main.error_no_binding") + ex);
+	throw new RuntimeException(ex);
+      }
+  }
+
+  /**
+   * If we've been given a telnet port on the command line, set up a
+   * Jython console interpreter that implementers can telnet to for debug.
+   */
+  static private void startJythonServer()
+  {
+    if (portString != null)
+      {
+	try
+	  {
+	    int portNumber = Integer.parseInt(portString);	    
+	    jythonServer = new JythonServer();
+	    jythonServer.run(portNumber);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    // "Could not start telnet console, {0} is not a valid port number."
+	    debug(ts.l("main.badport", portString));
+	  }
+      }
+  }
+
+  /**
+   * register a thread to respond if the server gets ctrl-C, kill, etc.
+   */
+  static private void registerKillHandler()
+  {
+    Ganymede.signalHandlingThread = new Thread(new Runnable() {
+        public void run() {
+          try
+            {
+              GanymedeServer.shutdown();
+            }
+          finally
+            {
+              java.lang.Runtime.getRuntime().halt(1);
+            }
+        }
+      }, ts.l("main.signalCatchThread"));  // "Ganymede ctrl-C handling thread"
+
+    java.lang.Runtime.getRuntime().addShutdownHook(Ganymede.signalHandlingThread);
+  }
+
+  // Debug routine
+  /**
+   *
+   * This is a convenience method used by server-side code to send
+   * debug output to stderr and to any attached admin consoles.
+   *
+   */
+  static public void debug(String string)
+  {
+    if (debug)
+      {
+	System.err.println(string);
+      }
+
+    GanymedeAdmin.logAppend(string);
+  }
+
+  /**
+   * This is a convenience method used by server-side code to send
+   * error logging output to stderr, to any attached admin consoles,
+   * and to the registered bugReportAddressProperty.
+   */
+
+  static public void logError(Throwable ex)
+  {
+    if (defaultHandler != null)
+      {
+	defaultHandler.reportException(ex);
+      }
+    else
+      {
+	ex.printStackTrace();
+      }
+  }
+
+  /**
+   * This is a convenience method used by server-side code to send
+   * error logging output to stderr, to any attached admin consoles,
+   * and to the registered bugReportAddressProperty.
+   */
+
+  static public void logError(Throwable ex, String contextMsg)
+  {
+    if (defaultHandler != null)
+      {
+	defaultHandler.reportException(contextMsg, ex);
+      }
+    else
+      {
+	System.err.println(contextMsg);
+
+	ex.printStackTrace();
+      }
+  }
+
+  /**
+   * This is a convenience method used by the server to get a
+   * stack trace from a throwable object in String form.
+   */
+
+  static public String stackTrace(Throwable thing)
+  {
+    StringWriter stringTarget = new StringWriter();
+    PrintWriter writer = new PrintWriter(stringTarget);
+    
+    thing.printStackTrace(writer);
+    writer.close();
+
+    return stringTarget.toString();
+  }
+
+  /**
+   * This is a convenience method used by the server to generate a
+   * stack trace print from a server code.
+   */
+
+  static public void printCallStack()
+  {
+    try
+      {
+	throw new RuntimeException("TRACE");
+      }
+    catch (RuntimeException ex)
+      {
+	ex.printStackTrace();
+      }
+  }
+
+  /**
+   * <p>This is a convenience method to allow arbitrary Ganymede code
+   * to generate a stack trace on the server's log and admin
+   * consoles.</p>
+   */
+
+  static public void logAssert(String string)
+  {
+    try
+      {
+	throw new RuntimeException("ASSERT: " + string);
+      }
+    catch (RuntimeException ex)
+      {
+	Ganymede.debug(Ganymede.stackTrace(ex));
+      }
+  }
+
+  /**
+   * This is a convenience method used by the server to return a
+   * standard informative dialog.
+   */
+
+  static public ReturnVal createInfoDialog(String title, String body)
+  {
+    ReturnVal retVal = new ReturnVal(true,true); // success ok, doNormalProcessing ok
+    retVal.setDialog(new JDialogBuff(title,
+				     body,
+				     Ganymede.OK,
+				     null,
+				     "ok.gif"));
+
+    if (logInfoDialogs)
+      {
+	System.err.println(ts.l("createInfoDialog.log_info", body));
+      }
+
+    return retVal;
+  }
+
+  /**
+   * This is a convenience method used by the server to return a
+   * standard error dialog.
+   */
+
+  static public ReturnVal createErrorDialog(String title, String body)
+  {
+    ReturnVal retVal = new ReturnVal(false);
+    retVal.setDialog(new JDialogBuff(title,
+				     body,
+				     Ganymede.OK,
+				     null,
+				     "error.gif"));
+
+    if (logErrorDialogs)
+      {
+	System.err.println(ts.l("createErrorDialog.log_error", body));
+      }
+
+    return retVal;
+  }
+
+  /**
+   * <p>This is a convenience method used by the server to return a
+   * standard error dialog without a custom title.  This is primarily
+   * useful for returning errors from {@link
+   * arlut.csd.ganymede.server.GanymedeXMLSession} in which the errors
+   * will be reported through a purely textual interface, but may be
+   * used anywhere where a default title is acceptable.</p>
+   */
+
+  static public ReturnVal createErrorDialog(String body)
+  {
+    ReturnVal retVal = new ReturnVal(false);
+    retVal.setDialog(new JDialogBuff(ts.l("createErrorDialog.default_title"),
+				     body,
+				     Ganymede.OK,
+				     null,
+				     "error.gif"));
+
+    if (logErrorDialogs)
+      {
+	System.err.println(ts.l("createErrorDialog.log_error", body));
+      }
+
+    return retVal;
+  }
+
+  /**
+   * This is a convenience method used by the server to return a
+   * very standard error dialog.
+   *
+   * The Exception parameter is ignored for now, so that this method
+   * can do something with it later if necessary without having to go
+   * through all the code which calls this method.
+   */
+
+  static public ReturnVal loginError(Exception ex)
+  {
+    return Ganymede.createErrorDialog(ts.l("loginError.error"),
+				      ts.l("loginError.explain"));
+  }
+
+  /**
+   * Reset the password to match our properties file because we have a -resetadmin command line argument.
+   */
+  static private void resetAdminPassword() throws NotLoggedInException
+  {
+    Invid supergashinvid = Invid.createInvid(SchemaConstants.PersonaBase,
+					     SchemaConstants.PersonaSupergashObj);
+    DBObject v_object;
+    DBEditObject e_object;
+    PasswordDBField p;
+    /* -- */
+
+    v_object = DBStore.viewDBObject(supergashinvid);
+    p = (PasswordDBField) v_object.getField(SchemaConstants.PersonaPasswordField);
+    
+    if (p == null || !p.matchPlainText(Ganymede.defaultrootpassProperty))
+      {
+	System.out.println(ts.l("startupHook.resetting"));
+	internalSession.openTransaction("Ganymede startupHook");
+	
+	e_object = (DBEditObject) internalSession.session.editDBObject(supergashinvid);
+	
+	if (e_object == null)
+	  {
+	    throw new RuntimeException(ts.l("startupHook.no_supergash", rootname));
+	  }
+	
+	p = (PasswordDBField) e_object.getField(SchemaConstants.PersonaPasswordField);
+	ReturnVal retVal = p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
+	
+	if (!ReturnVal.didSucceed(retVal))
+	  {
+	    throw new RuntimeException(ts.l("startupHook.failed_reset", rootname));
+	  }
+	
+	System.out.println(ts.l("startupHook.password_reset", rootname));
+	
+	retVal = internalSession.commitTransaction();
+	
+	if (!ReturnVal.didSucceed(retVal))
+	  {
+	    // if doNormalProcessing is true, the
+	    // transaction was not cleared, but was
+	    // left open for a re-try.  Abort it.  
+	    if (retVal.doNormalProcessing)
+	      {
+		internalSession.abortTransaction();
+	      }
+	  }
+      }
+  }
+  
+  /**
+   * At DBStore 2.11, we added a hidden label field for objectEvent
+   * objects.  We'll edit any old ones here and fix up their labels
+  */
+  static private void AddLabelUpdate() throws NotLoggedInException
+  {
+    boolean success = true;
+    List<DBObject> objects = internalSession.getObjects(SchemaConstants.ObjectEventBase);
+    
+    if (objects.size() > 0)
+      {
+	internalSession.openTransaction("Ganymede objectEvent fixup hook");
+	
+	try
+	  {
+	    for (DBObject object: objects)
+	      {
+		StringDBField labelField = (StringDBField) object.getField(SchemaConstants.ObjectEventLabel);
+		
+		if (labelField == null)
+		  {
+		    objectEventCustom objectEventObj = (objectEventCustom) internalSession.session.editDBObject(object.getInvid());
+		    
+		    if (objectEventObj != null)
+		      {
+			ReturnVal retVal = objectEventObj.updateLabel((String) objectEventObj.getFieldValueLocal(SchemaConstants.ObjectEventObjectName),
+								      (String) objectEventObj.getFieldValueLocal(SchemaConstants.ObjectEventToken));
+			
+			if (!ReturnVal.didSucceed(retVal))
+			  {
+			    success = false;
+			  }
+		      }
+		  }
+	      }
+	    
+	    if (success)
+	      {
+		internalSession.commitTransaction();
+	      }
+	    else
+	      {
+		internalSession.abortTransaction();
+	      }
+	  }
+	catch (Throwable ex)
+	  {
+	    internalSession.abortTransaction();
+	  }
+      }
+  }
+
+  /**
+   * <p>At DBStore version 2.7, we changed the package name for our
+   * built-in task classes.  This method creates a private Hashtable,
+   * {@link arlut.csd.ganymede.server.Ganymede#upgradeClassMap}, which holds
+   * a mapping of old class names to new ones for the built-in classes.</p>
+   */
+
+  static synchronized private void prepClassMap()
+  {
+    if (upgradeClassMap == null)
+      {
+        upgradeClassMap = new Hashtable();
+        upgradeClassMap.put("arlut.csd.ganymede.dumpAndArchiveTask", "arlut.csd.ganymede.server.dumpAndArchiveTask");
+        upgradeClassMap.put("arlut.csd.ganymede.dumpTask", "arlut.csd.ganymede.server.dumpTask");
+        upgradeClassMap.put("arlut.csd.ganymede.GanymedeExpirationTask", "arlut.csd.ganymede.server.GanymedeExpirationTask");
+        upgradeClassMap.put("arlut.csd.ganymede.GanymedeValidationTask", "arlut.csd.ganymede.server.GanymedeValidationTask");
+        upgradeClassMap.put("arlut.csd.ganymede.GanymedeWarningTask", "arlut.csd.ganymede.server.GanymedeWarningTask");
+      }
+  }
+
+  /**
+   * This method scans the database for valid task entries and adds
+   * them to the scheduler.
+   */
+
+  static private void registerTasks() throws NotLoggedInException
+  {
+    List<DBObject> objects = internalSession.getObjects(SchemaConstants.TaskBase);
+
+    /* -- */
+
+    if (objects != null)
+      {
+	if (objects.size() == 0)
+	  {
+	    System.err.println(ts.l("registerTasks.empty_builders"));
+	  }
+
+	for (DBObject object: objects)
+	  {
+	    // At DBStore version 2.7, we changed the package name for
+	    // our built-in task classes.  If loaded an older file and
+	    // we recognize one of the built-in task class names, go
+	    // ahead and rewrite it, hacking down into the
+	    // StringDBField in a most naughty way.
+
+	    if (Ganymede.db.isLessThan(2,7))
+	      {
+		prepClassMap();
+
+		StringDBField taskClassStrF = (StringDBField) object.getField(SchemaConstants.TaskClass);
+
+		if (taskClassStrF != null)
+		  {
+		    String taskClassStr = (String) taskClassStrF.value;
+
+		    if (upgradeClassMap.containsKey(taskClassStr))
+		      {
+			String newClassName = (String) upgradeClassMap.get(taskClassStr);
+
+			// "Rewriting old system task class {0} as {1}"
+			System.err.println(ts.l("registerTasks.rewritingClass", taskClassStr, newClassName));
+
+			// and here's where we force the value into place
+
+			taskClassStrF.value = newClassName.intern();
+		      }
+		  }
+	      }
+
+	    if (debug)
+	      {
+		System.err.println(ts.l("registerTasks.processing_task", object.toString()));
+	      }
+
+	    scheduler.registerTaskObject(object);
+	  }
+      }
+    else
+      {
+	System.err.println(ts.l("registerTasks.empty_tasks"));
+      }
+
+    // register background time-out task
+
+    scheduler.addPeriodicAction(new Date(System.currentTimeMillis() + 60000),
+				1,
+				new timeOutTask(),
+				ts.l("registerTasks.idle_task"));
+
+    // register background memory status updater task
+
+    scheduler.addPeriodicAction(new Date(System.currentTimeMillis() + 60000),
+				1,
+				new memoryStatusTask(),
+				ts.l("registerTasks.memory_status_task"));
+
+    // register garbage collection task without any schedule for
+    // execution.. this is so that the admin can launch it from the
+    // admin console
+    scheduler.addActionOnDemand(new gcTask(),
+				ts.l("registerTasks.gc_task"));
+
+    // likewise the GanymedeValidationTask
+    scheduler.addActionOnDemand(new GanymedeValidationTask(),
+				ts.l("registerTasks.validation_task"));
+  }
+
+  /**
+   * This method schedules all registered builder tasks and Sync
+   * Runners for execution.  This method will be called when a user
+   * commits a transaction.  If a given task is already running, the
+   * scheduler will make a note that it needs to be rescheduled on
+   * completion.
+   */
+
+  static void runBuilderTasks()
+  {
+    for (scheduleHandle handle: scheduler.getTasksByType(scheduleHandle.TaskType.BUILDER))
+      {
+	scheduler.demandTask(handle.getName());
+      }
+
+    for (scheduleHandle handle: scheduler.getTasksByClass(SyncRunner.class))
+      {
+	SyncRunner runner = (SyncRunner) handle.task;
+
+	if (runner.isIncremental() || runner.isFullState())
+	  {
+	    scheduler.demandTask(handle.getName());
+	  }
+      }
+  }
+
+  /**
+   * This method schedules all registered builder tasks for
+   * execution, with an option set that will cause all builder tasks
+   * to consider object bases as changed since the last build, thus
+   * triggering a full external rebuild.
+   */
+
+  static void forceBuilderTasks()
+  {
+    String[] options = {"forcebuild"};
+
+    for (scheduleHandle handle: scheduler.getTasksByType(scheduleHandle.TaskType.BUILDER))
+      {
+	scheduler.demandTask(handle.getName(), options);
+      }
+
+    // XXX do we want to do something about forcing sync channels
+    // here?
+  }
+
+  /**
+   * This method scans the database for valid SyncChannel entries and
+   * adds them to the scheduler.
+   */
+
+  static private void registerSyncChannels() throws NotLoggedInException
+  {
+    List<DBObject> objects = internalSession.getObjects(SchemaConstants.SyncChannelBase);
+
+    /* -- */
+
+    if (objects != null)
+      {
+	if (objects.size() == 0)
+	  {
+	    System.err.println(ts.l("registerSyncChannels.no_syncs"));
+	  }
+
+	for (DBObject object: objects)
+	  {
+	    SyncRunner runner = new SyncRunner(object);
+
+	    if (debug)
+	      {
+		System.err.println(ts.l("registerSyncChannels.processing_sync", runner.toString()));
+	      }
+
+	    registerSyncChannel(runner);
+	  }
+      }
+    else
+      {
+	System.err.println(ts.l("registerSyncChannels.no_syncs"));
+      }
+  }
+
+  /**
+   * <p>This method links the given SyncRunner object into the list of
+   * registered Sync Channels used at transaction commit time, and
+   * makes it available for the scheduler to run.</p>
+   */
+
+  static void registerSyncChannel(SyncRunner channel)
+  {
+    if (debug)
+      {
+	System.err.println(ts.l("registerSyncChannel.debug_register", channel.getName()));
+      }
+
+    scheduleHandle handle = Ganymede.scheduler.addActionOnDemand(channel, channel.getName());
+
+    channel.setScheduleHandle(handle);
+  }
+
+  /**
+   * <p>This method unlinks the named SyncRunner object from the list
+   * of registered Sync Channels used at transaction commit time, and
+   * removes it from the Ganymede scheduler.</p>
+   */
+
+  static void unregisterSyncChannel(String channelName)
+  {
+    if (debug)
+      {
+	System.err.println(ts.l("unregisterSyncChannel.debug_unregister", channelName));
+      }
+
+    Ganymede.scheduler.unregisterTask(channelName);
+  }
+
+  /**
+   * <p>This method returns a reference to a SyncRunner registered in
+   * the Ganymede scheduler.  It does not remove the SyncRunner from
+   * the scheduler, nor do anything other than return a reference to
+   * it.</p>
+   *
+   * <p>In particular, it is not guaranteed that the SyncRunner
+   * returned is not currently running.</p>
+   */
+
+  static SyncRunner getSyncChannel(String channelName)
+  {
+    return (SyncRunner) Ganymede.scheduler.getTask(channelName);
+  }
+
+
+  /**
+   * </P>This method is called by the GanymedeBuilderTask base class to
+   * record that the server is processing a build.</P>
+   */
+
+  static void updateBuildStatus()
+  {
+    int p1 = GanymedeBuilderTask.getPhase1Count();
+    int p2 = GanymedeBuilderTask.getPhase2Count();
+
+    // phase 1 can have the database locked, so show that
+    // for preference
+
+    if (p1 > 0)
+      {
+	GanymedeServer.sendMessageToRemoteSessions(ClientMessage.BUILDSTATUS, "building");
+      }
+    else if (p2 > 0)
+      {
+	GanymedeServer.sendMessageToRemoteSessions(ClientMessage.BUILDSTATUS, "building2");
+      }
+    else
+      {
+	GanymedeServer.sendMessageToRemoteSessions(ClientMessage.BUILDSTATUS, "idle");
+      }
   }
 }
