@@ -347,7 +347,7 @@ public final class DBStore implements JythonMap {
     objectBases = new Hashtable<Short, DBObjectBase>(20); // default 
     aSymLinkTracker = new DBLinkTracker();
     nameSpaces = new Vector<DBNameSpace>();
-
+  
     try
       {
 	rootCategory = new DBBaseCategory(this, ts.l("init.rootcategory"));  // "Categories"
@@ -463,11 +463,9 @@ public final class DBStore implements JythonMap {
     int invidPoolSize;
     String file_id;
     
-    debug = true; // JAMES
+    debug = false;
 
     /* -- */
-
-    System.err.println("JAMES DEBUG LOADING THE DBSTORE NOW!!!!!");
 
     loading = true;
 
@@ -515,6 +513,7 @@ public final class DBStore implements JythonMap {
 
 	// at version 2.8, we started tracking monotonic transaction
 	// id numbers
+
 	if (this.isAtLeast(2, 8))
 	  {
 	    transactionNumber = in.readInt();
@@ -522,6 +521,7 @@ public final class DBStore implements JythonMap {
 
 	// at version 2.9, we started recording the size of our invid
 	// pool
+
 	if (this.isAtLeast(2, 9))
 	  {
 	    invidPoolSize = in.readInt();
@@ -541,6 +541,7 @@ public final class DBStore implements JythonMap {
 	  }
 
 	// read in the namespace definitions
+
 	namespaceCount = in.readShort();
 
 	// "DBStore.load(): loading {0,number,#} namespaces"
@@ -565,6 +566,7 @@ public final class DBStore implements JythonMap {
 	
 	// previous to 2.0, we wrote out the DBObjectBase structures
 	// to ganymede.db as a separate step from the category loading
+
 	if (isLessThan(2,0))
 	  {
 	    baseCount = in.readShort();
@@ -580,6 +582,7 @@ public final class DBStore implements JythonMap {
 	      }
 
 	    // Actually read in the object bases
+
 	    for (short i = 0; i < baseCount; i++)
 	      {
 		tempBase = new DBObjectBase(in, this);
@@ -592,6 +595,7 @@ public final class DBStore implements JythonMap {
 	    // handling an old file that might not have the categories
 	    // in display order.  This code is intended to fall out of
 	    // use.
+
 	    rootCategory.resort();
 	  }
 
@@ -601,6 +605,7 @@ public final class DBStore implements JythonMap {
 
 	// make sure that we have the new object bases and fields
 	// that have come into use since Ganymede 1.0.12.
+
 	verifySchema2_0();
 
 	// make sure that all object bases have namespace-constrained
@@ -609,6 +614,7 @@ public final class DBStore implements JythonMap {
 	// in any way.  So we just warn the admin and hope that they
 	// start up the schema editor so that we can force them to fix
 	// it.
+
 	if (!verify_label_fields())
 	  {
 	    /*
@@ -660,8 +666,8 @@ public final class DBStore implements JythonMap {
 	  }
       }
 
-    // JAMES
     // Load the current Journal file.
+
     loadJournal();
     
     // go ahead and consolidate the journal into the DBStore
@@ -669,11 +675,10 @@ public final class DBStore implements JythonMap {
     // Or if the old DB version does not match the new
     // Notice that we are going to archive a copy of the
     // existing db file.
-    System.err.println("JAMES DEBUG DBStore, dumping now cause versions dont match: "
+    debug("DEBUG DBStore, dumping now cause versions dont match: "
 		       +major_version+","+minor_version+" "+file_major+","+file_minor);	    
     if (!isAtRev(major_version, minor_version) || !journal.isClean())
       {
-	// James
 	try
 	  {	    
 	    System.err.println("DBStore, dumping now cause journal not clean or versions dont match: "
@@ -683,6 +688,7 @@ public final class DBStore implements JythonMap {
 	catch (IOException ex)
 	  {
 	    // what do we really want to do here?
+
 	    Ganymede.logError(ex);
 	    throw new RuntimeException("couldn't load journal");
 	  }
@@ -690,6 +696,7 @@ public final class DBStore implements JythonMap {
 	  {
 	    // we got interrupted while waiting to lock
 	    // the database.. unlikely in the extreme here.
+
 	    Ganymede.logError(ex);
 	    throw new RuntimeException("couldn't dump journal");
 	  }
@@ -712,6 +719,7 @@ public final class DBStore implements JythonMap {
     catch (IOException ex)
       {
 	// what do we really want to do here?
+
 	Ganymede.logError(ex);
 	throw new RuntimeException("couldn't initialize journal:" + ex.getMessage());
       }
@@ -735,6 +743,7 @@ public final class DBStore implements JythonMap {
 	    // update the DBObjectBase iterationSets, since the journal
 	    // loading bypasses the transaction mechanism where this is
 	    // normally done	    
+
 	    for (DBObjectBase base: objectBases.values())
 	      {
 		base.updateIterationSet();
@@ -743,6 +752,7 @@ public final class DBStore implements JythonMap {
 	catch (IOException ex)
 	  {
 	    // what do we really want to do here?
+
 	    Ganymede.logError(ex);
 	    throw new RuntimeException("couldn't load journal");
 	  }
@@ -801,6 +811,7 @@ public final class DBStore implements JythonMap {
     debug("DBStore: dump lock established");
     
     // Move the old version of the file to a backup    
+
     try
       {
 	dbFile = new File(filename);
@@ -853,11 +864,13 @@ public final class DBStore implements JythonMap {
 	debug("DBStore: writing new db");
 
 	// and dump the whole thing to ganymede.db.new
+
 	outStream = new FileOutputStream(filename + ".new");
 	bufStream = new BufferedOutputStream(outStream);
 	out = new DataOutputStream(bufStream);
 
 	// okay, then!  let's get started!
+
 	out.writeUTF(id_string);
 	out.writeByte(major_version);
 	out.writeByte(minor_version);
@@ -884,6 +897,7 @@ public final class DBStore implements JythonMap {
 	  {
 	    // ok, we've successfully dumped to ganymede.db.new.. move
 	    // the old file to ganymede.db.bak
+
 	    if (!dbFile.renameTo(new File(filename + ".bak")))
 	      {
 		throw new IOException("Couldn't rename " + filename + " to " + filename + ".bak");
@@ -1645,12 +1659,15 @@ public final class DBStore implements JythonMap {
 	b.setLabelField(SchemaConstants.OwnerNameField);
 
 	// link in the class we specified
+
 	b.createHook();
 
 	// and link in the base to this DBStore
+
 	setBase(b);
 
 	// create persona base
+
 	b = new DBObjectBase(this, false);
 	b.setName("Admin Persona");
 	b.setClassInfo("arlut.csd.ganymede.server.adminPersonaCustom", null);
@@ -1741,12 +1758,15 @@ public final class DBStore implements JythonMap {
 	b.setLabelField(SchemaConstants.PersonaLabelField);
 
 	// link in the class we specified
+
 	b.createHook();
 
 	// and link in the base to this DBStore
+
 	setBase(b);
 
 	// create Role base
+
 	b = new DBObjectBase(this, false);
 	b.setName("Role");
 	b.setClassInfo("arlut.csd.ganymede.server.permCustom", null);
@@ -1796,12 +1816,15 @@ public final class DBStore implements JythonMap {
 	b.setLabelField(SchemaConstants.RoleName);
 
 	// link in the class we specified
+
 	b.createHook();
 
 	// and link in the base to this DBStore
+
 	setBase(b);
 
 	// create System Events base
+
 	DBBaseCategory eventCategory = new DBBaseCategory(this, "Events", adminCategory);
 	adminCategory.addNodeAfter(eventCategory, null);
 
@@ -1869,12 +1892,15 @@ public final class DBStore implements JythonMap {
 	b.setLabelField(SchemaConstants.EventToken);
     
 	// link in the class we specified
+
 	b.createHook();
 
 	// and link in the base to this DBStore
+
 	setBase(b);
 
 	// create Object Events base
+
 	b = new DBObjectBase(this, false);
 	b.setName("Object Event");
 	b.setClassInfo("arlut.csd.ganymede.server.objectEventCustom", null);
@@ -1953,15 +1979,19 @@ public final class DBStore implements JythonMap {
 	b.addFieldToEnd(bf);
 
 	// set the label field
+
 	b.setLabelField(SchemaConstants.ObjectEventLabel);
 
 	// link in the class we specified
+
 	b.createHook();
 
 	// and link in the base to this DBStore
+
 	setBase(b);
 
 	// create user base
+
 	DBBaseCategory userCategory = new DBBaseCategory(this, "User-Level Objects", rootCategory);
 	rootCategory.addNodeAfter(userCategory, null);
 
