@@ -3074,8 +3074,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   }
 
   /**
-   * private helper method to instantiate a password field in this
-   * container panel
+   * <p>Private helper method to instantiate a password field in this
+   * container panel.</p>
    *
    * @param field Remote reference to database field to be associated with a gui component
    * @param fieldInfo Downloaded value and status information for this field

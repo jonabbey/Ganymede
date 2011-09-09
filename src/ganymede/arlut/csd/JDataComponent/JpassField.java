@@ -3,14 +3,13 @@
    
    Created: 22 July 1997
 
-
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -61,6 +60,10 @@ import javax.swing.JPanel;
 /**
  * <p>JpassField is the composite two-field GUI component used for entering
  * passwords in the Ganymede client.</p>
+ *
+ * <p>This component uses a pair of {@link
+ * arlut.csd.JDataComponent.JpasswordField} objects to prompt the user
+ * to enter and then re-enter their password when entering a password change.</p>
  */
 
 public class JpassField extends JPanel implements JsetValueCallback {

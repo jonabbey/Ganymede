@@ -1,10 +1,9 @@
-
 /*
    JpasswordField.java
 
+   This class defines a password input field object.
 
    Created: 12 Jul 1996
-
 
    Module By: Navin Manohar
 
@@ -12,7 +11,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -59,11 +58,11 @@ import javax.swing.JPasswordField;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class defines an entry field that is capable of handling
- * strings.  It is also possible to restrict the characters which are
- * accepted by this gui component.  Furthermore, the maximum size of
- * the string that can be entered into this JstringField can be
- * preset.</p>
+ * <p>This class defines a single-entry field that is capable of handling
+ * password strings.  It is also possible to restrict the characters
+ * which are accepted by this gui component.  Furthermore, the maximum
+ * size of the string that can be entered into this JstringField can
+ * be preset.</p>
  */
 
 public class JpasswordField extends JPasswordField implements FocusListener {
