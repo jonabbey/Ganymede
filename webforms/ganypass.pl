@@ -19,17 +19,18 @@ use CGI::Carp qw/fatalsToBrowser/;
 
 #####################################################################
 
+$minlength = 8;
 
 $tmpdir = "/tmp";
 $pass_advice = "<table><td>
 <p>Characteristics of good passwords:</p>
 
 <ul>
-    <li>easy to remember;</li>
-    <li>8 characters long (fewer are cracked more easily, more are ignored);</li>
-    <li>not easily generated from a dictionary;</li>
-    <li>contain at least one punctuation character.</li>
-    <li>contain uppercase, lowercase, and numeric characters;</li>
+    <li>easy to remember</li>
+    <li>$minlength characters long</li>
+    <li>not easily generated from a dictionary</li>
+    <li>contain at least one punctuation character</li>
+    <li>contain uppercase, lowercase, and numeric characters</li>
 </ul>
 </td></table>";
 
@@ -284,50 +285,105 @@ notifying you of the success of your password change request.</p>
     </table>
     </center>
 
-    <center>
-      <form method="post" action="$my_url" name="former">
-        <table width="60%" bgcolor="#ccffcc" border="1" cellpadding="2">
-          <tr bgcolor="#663366">
-            <td colspan="2" align="center">
-              <big><font color="#ffffcc">Ganymede Password Changer</font></big>
-            </td>
-          </tr>
-
-          <tr>
-            <td align="right"><b>Username</b></td>
-            <td><input type="text" name="user"></td>
-          </tr>
-
-          <tr>
-            <td align="right"><b>Old Password</b></td>
-            <td><input type="password" name="old_pass"></td>
-          </tr>
-
-          <tr>
-            <td align="right"><b>New Password</b></td>
-            <td><input type="password" name="new_pass"></td>
-          </tr>
-
-          <tr>
-            <td align="right"><b>Verify New Password</b></td>
-            <td><input type="password" name="verify"></td>
-          </tr>
-
-          <tr>
-	    <td colspan="2" align="center"><input type="button" value="submit" onClick="VerifyForm(document.former)"/></td>
-          </tr>
-
-          <tr bgcolor="#663366">
-            <td colspan="2">&nbsp;</td>
-          </tr>
-
-        </table>
-      </form>
-    </center>
-
 ENDDEFAULT
 
+print_form();
+
 print_tail();
+}
+
+######################################################################
+#
+#                                                        print_form
+#
+######################################################################
+
+sub print_form
+{
+  $minstrlen = length("$minlength");
+  $semispaces = "&nbsp;&nbsp;&nbsp;" . ("&nbsp;" x $minstrlen);
+  $spaces = ("&nbsp;" x $minstrlen) . $semispaces;
+
+  print <<ENDHTML
+  <script type="text/javascript">
+  var minlen = $minlength;
+
+  function create_limiteron(formName, elementName) {
+      return function()
+      {
+	  var len1 = document.getElementById(formName).value.length;
+
+	  if (len1 > minlen) {
+	      document.getElementById(elementName).innerHTML = len1 + "$semispaces";
+	  }
+	  else {
+	      if (len1 < 10 && minlen >= 10) {
+		  document.getElementById(elementName).innerHTML = "&nbsp;" + len1 + " / " + minlen;
+	      } else {
+		  document.getElementById(elementName).innerHTML = len1 + " / " + minlen;
+	      }
+	  }
+      }
+  }
+
+  function create_limiteroff(elementName) {
+      return function()
+      {
+	  document.getElementById(elementName).innerHTML = "$spaces";
+      }
+  }
+
+  var limiter = create_limiteron("new_pass", "counter");
+  var limiterOff = create_limiteroff("counter");
+  var limiter2 = create_limiteron("verify", "counter2");
+  var limiterOff2 = create_limiteroff("counter2");
+
+  </script>
+
+    <center>
+      <form method="post" action="$my_url" name="former">
+	<table width="60%" bgcolor="#ccffcc" border="1" cellpadding="2">
+	  <tr bgcolor="#663366">
+	    <td colspan="2" align="center">
+	      <big><font color="ffffcc">Ganymede Password Changer</font></big>
+	    </td>
+	  </tr>
+
+	  <tr>
+	    <td align="right"><b>Username?</b></td>
+	    <td><input type="text" name="user"></td>
+	  </tr>
+
+	  <tr>
+	    <td align=right><b>Old Password?</b></td>
+	    <td><input type="password" name="old_pass"></td>
+	  </tr>
+
+	  <tr>
+	    <td align=right><b>New Password?</b> </td>
+	    <td><input type="password" id="new_pass" name="new_pass" onKeyDown=limiter() onKeyUp=limiter() onFocus=limiter() onBlur=limiterOff()> 
+                <pre style="display:inline"><div id="counter" style=display:inline>$spaces</div></pre> </td>
+	  </tr>
+
+	  <tr>
+	    <td align=right><b>Verify New Password</b></td>
+	    <td><input type="password" id="verify" name="verify" onKeyDown=limiter2() onKeyUp=limiter2() onFocus=limiter2() onBlur=limiterOff2()> 
+                <pre style="display:inline"><div id="counter2" style=display:inline>$spaces</div></pre> </td>
+	  </tr>
+
+	  <tr>
+	    <td colspan="2" align="center"><input type="button" value="submit" onClick="VerifyForm(document.former)"></td>
+	  </tr>
+
+	  <tr bgcolor="#663366">
+	    <td colspan="2">&nbsp;</td>
+	  </tr>
+
+	</table>
+      </form>
+    </center>
+ENDHTML
+
 }
 
 ######################################################################
