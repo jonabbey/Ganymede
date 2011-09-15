@@ -482,7 +482,7 @@ public class Ganymede {
     // "Creating DBStore structures"
     debug(ts.l("main.info_creating_dbstore"));
 
-    db = new DBStore();		// And how can this be!?  For he IS the kwizatch-haderach!!
+    db = new DBStore();	// And how can this be!?  For he IS the kwizatch-haderach!!
 
     // Load the database
 
@@ -529,11 +529,11 @@ public class Ganymede {
   }
 
   /**
-   * <p>Checks any command line arguments passed in.
+   * <p>Checks any command line arguments passed in.</p>
    *
-   * @param argv - command line arguments.</p>
+   * @param argv - command line arguments.
    *
-   * <p> Returns false if a required parameter is missing, true otherwise. </p>
+   * @return false if a required parameter is missing, true otherwise.
    */
 
   static private boolean checkArgs(String argv[])
@@ -551,6 +551,7 @@ public class Ganymede {
       {
         String fileSeparator = System.getProperty("file.separator");
 	propFilename = useDirectory + fileSeparator + "ganymede.properties";
+
 	if (ParseArgs.switchExists("logrmi", argv))
 	  {
 	    debugFilename = useDirectory + fileSeparator + "debug.log";
@@ -1034,7 +1035,7 @@ public class Ganymede {
   /**
    *  <p>No database exists on disk.. create a new journal file
    *  but first, let's make sure there is no journal left alone
-   *  without a db file.  Does not write out a db file here. </p>
+   *  without a db file.  Does not write out a db file here.</p>
    */
 
   static public void createNewDB()
@@ -1096,7 +1097,7 @@ public class Ganymede {
    * <p>Create a GanymedeServer object to support the logging
    * code... the GanymedeServer's main purpose (to allow logins)
    * won't come into play until we bind the server object into the
-   * RMI registry. </p>
+   * RMI registry.</p>
    */
 
   static private void createGanymedeServer()
@@ -1117,7 +1118,7 @@ public class Ganymede {
 
   /**
    * <p>Create the internal GanymedeSession that we use for system
-   * database maintenance</p>
+   * database maintenance and general operations.</p>
    */
 
   static private void createGanymedeSession()
@@ -1209,8 +1210,9 @@ public class Ganymede {
   }
 
   /**
-   * <p>Creates a background scheduler, and registers the tasks and sync channels for it.</p>
-  */
+   * <p>Creates a background scheduler, and registers the tasks and
+   * sync channels for it.</p>
+   */
 
   static private void startScheduler()
   {
@@ -1312,9 +1314,9 @@ public class Ganymede {
   }
 
   /**
-  * <p>Bind the GanymedeServer object in the RMI registry so clients
-  * and admin consoles can connect to us. </p>
-  */
+   * <p>Bind the GanymedeServer object in the RMI registry so clients
+   * and admin consoles can connect to us.</p>
+   */
 
   static public void bindGanymedeRMI()
   {
@@ -1438,7 +1440,8 @@ public class Ganymede {
   }
 
   /**
-   * <p>Register a thread to respond if the server gets ctrl-C, kill, etc. </p>
+   * <p>Register a thread to respond if the server hits ctrl-C on the
+   * server's stdin or sends a SIGQUIT signal, etc.</p>
    */
 
   static private void registerKillHandler()
@@ -1459,11 +1462,11 @@ public class Ganymede {
     java.lang.Runtime.getRuntime().addShutdownHook(signalHandlingThread);
   }
 
-  // Debug routine
   /**
    * <p>This is a convenience method used by server-side code to send
-   * debug output to stderr and to any attached admin consoles. </p>
+   * debug output to stderr and to any attached admin consoles.</p>
    */
+
   static public void debug(String string)
   {
     if (debug)
@@ -1706,8 +1709,8 @@ public class Ganymede {
 
   /**
    * <p> At DBStore 2.11, we added a hidden label field for objectEvent
-   * objects.  We'll edit any old ones here and fix up their labels. </p>
-  */
+   * objects.  We'll edit any old ones here and fix up their labels.</p>
+   */
 
   static private void AddLabelUpdate() throws NotLoggedInException
   {
@@ -1875,7 +1878,7 @@ public class Ganymede {
    * Runners for execution.  This method will be called when a user
    * commits a transaction.  If a given task is already running, the
    * scheduler will make a note that it needs to be rescheduled on
-   * completion. </p>
+   * completion.</p>
    */
 
   static public void runBuilderTasks()
@@ -1900,7 +1903,7 @@ public class Ganymede {
    * <p>This method schedules all registered builder tasks for
    * execution, with an option set that will cause all builder tasks
    * to consider object bases as changed since the last build, thus
-   * triggering a full external rebuild. </p>
+   * triggering a full external rebuild.</p>
    */
 
   static public void forceBuilderTasks()
@@ -1918,7 +1921,7 @@ public class Ganymede {
 
   /**
    * <p>This method scans the database for valid SyncChannel entries and
-   * adds them to the scheduler. </p>
+   * adds them to the scheduler.</p>
    */
 
   static private void registerSyncChannels() throws NotLoggedInException
