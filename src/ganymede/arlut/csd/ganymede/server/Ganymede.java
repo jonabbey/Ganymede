@@ -312,8 +312,8 @@ public class Ganymede {
 
   static public String dbFilename = null;
   static public String journalProperty = null;
-  static public String logProperty = null;
-  static public String mailLogProperty = null;
+  static private String logProperty = null;
+  static private String mailLogProperty = null;
   static public String serverHostProperty = null;
   static public String rootname = null;
   static public String defaultrootpassProperty = null;
@@ -325,15 +325,15 @@ public class Ganymede {
   static public String monitornameProperty = null;
   static public String defaultmonitorpassProperty = null;
   static public String messageDirectoryProperty = null;
-  static public String schemaDirectoryProperty = null;
-  static public int    registryPortProperty = 1099;
-  static public int    publishedObjectPortProperty = 55555;
+  static private String schemaDirectoryProperty = null;
+  static public int registryPortProperty = 1099;
+  static private int publishedObjectPortProperty = 55555;
   static public String logHelperProperty = null;
   static public boolean softtimeout = false;
-  static public boolean cracklibEnabled = false;
-  static public String cracklibDirectoryProperty = null;
   static public int timeoutIdleNoObjs = 15;
   static public int timeoutIdleWithObjs = 20;
+  static private boolean cracklibEnabled = false;
+  static private String cracklibDirectoryProperty = null;
 
   /**
    * <p>If the ganymede.bugaddress property is set, that string will
