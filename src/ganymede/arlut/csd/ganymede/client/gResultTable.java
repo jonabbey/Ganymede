@@ -139,7 +139,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
   static final String
     tab_option = ts.l("global.tab_option"), // "Tab separated ASCII"
-    csv_option = ts.l("global.csv_option"), // "Comma separated ASCII"
+    csv_option = ts.l("global.csv_option"), // "CSV File"
     html_option = ts.l("global.html_option"), // "HTML"
     xml_option = ts.l("global.xml_option");  // "Ganymede XML File"
 
