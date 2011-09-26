@@ -533,7 +533,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
       }
     else if (format.equals(csv_option))
       {
-	report = generateTextRep(',');
+	report = generateCSV();
       }
     else if (format.equals(tab_option))
       {
@@ -836,6 +836,50 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   }
 
   /**
+   * This method generates a CSV representation of the table's
+   * contents, one line per row of the table.
+   */
+
+  StringBuffer generateCSV()
+  {
+    StringBuffer result = new StringBuffer();
+    int colcount = sTable.getColumnCount();
+    int size = sTable.getRowCount();
+    String cellText;
+
+    // we just have to hope that the table isn't going to
+    // change while we're creating things.  There's actually
+    // a possibility for problems here, since the user is
+    // free to mess with the table while we work, but since
+    // we are likely to be dispatched from the GUI thread,
+    // this may not be an issue.
+
+    for (int i = 0; i < size; i++)
+      {
+	for (int j = 0; j < colcount; j++)
+	  {
+	    if (j > 0)
+	      {
+		result.append(",");
+	      }
+
+	    Object value = sTable.getValueAt(i, j);
+
+	    if (value != null)
+	      {
+		cellText = escapeCSV(value.toString());
+		result.append(cellText);
+	      }
+	  }
+
+	result.append("\n");
+      }
+
+    return result;
+  }
+
+
+  /**
    * This method generates a sepChar-separated dump of the table's
    * contents, one line per row of the table.
    */
@@ -953,6 +997,49 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     return buffer.toString();
   }
+
+  /**
+   * This helper method makes a field string safe to emit to a CSV
+   * file.
+   */
+
+  String escapeCSV(String string)
+  {
+    char[] chars;
+    StringBuilder buffer = new StringBuilder();
+
+    boolean surround_with_quotes = false;
+    chars = string.toCharArray();
+
+    for (int j = 0; j < chars.length; j++)
+      {
+	if (chars[j] == '"')
+	  {
+	    buffer.append("\"\"");
+	    continue;
+	  }
+	else if (chars[j] == '\n')
+	  {
+	    surround_with_quotes = true;
+	  }
+	else if (chars[j] == ',')
+	  {
+	    surround_with_quotes = true;
+	  }
+
+	buffer.append(chars[j]);
+      }
+
+    if (surround_with_quotes)
+      {
+	return "\"" + buffer.toString() + "\"";
+      }
+    else
+      {
+	return buffer.toString();
+      }
+  }
+
 
   /**
    * This helper method makes a field string safe to emit
