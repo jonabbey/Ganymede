@@ -16,7 +16,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -1331,25 +1331,28 @@ public class GanymedeServer implements Server {
 
 	// log our shutdown and close the log
 
-	Ganymede.log.logSystemEvent(new DBLogEvent("shutdown",
-						   ts.l("shutdown.logevent"),
-						   null,
-						   null,
-						   null,
-						   null));
-
-	System.err.println();
-
-        // "Server completing shutdown.. waiting for log thread to complete."
-	System.err.println(ts.l("shutdown.closinglog"));
-
-	try
+	if (Ganymede.log != null)
 	  {
-	    Ganymede.log.close(); // this will block until the mail queue drains
-	  }
-	catch (IOException ex)
-	  {
-	    System.err.println(ts.l("shutdown.logIOException", ex.toString()));
+	    Ganymede.log.logSystemEvent(new DBLogEvent("shutdown",
+						       ts.l("shutdown.logevent"),
+						       null,
+						       null,
+						       null,
+						       null));
+
+	    System.err.println();
+
+	    // "Server completing shutdown.. waiting for log thread to complete."
+	    System.err.println(ts.l("shutdown.closinglog"));
+
+	    try
+	      {
+		Ganymede.log.close(); // this will block until the mail queue drains
+	      }
+	    catch (IOException ex)
+	      {
+		System.err.println(ts.l("shutdown.logIOException", ex.toString()));
+	      }
 	  }
       }
     catch (Exception ex)

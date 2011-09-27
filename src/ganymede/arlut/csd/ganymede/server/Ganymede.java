@@ -488,7 +488,7 @@ public class Ganymede {
 
 	createGanymedeServer();
 	createGanymedeSession();
-	startLog();		// XXX we start the log after we create the server, but server shutdown will attempt to shutdown the log as well! XXX
+	startLog();
 	startScheduler();
 
 	// Take care of any startup-time database modifications
