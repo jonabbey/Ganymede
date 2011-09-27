@@ -206,6 +206,12 @@ public class xmlfield implements FieldType {
 
     if (fieldDef.getType() == FieldType.BOOLEAN)
       {
+	if (openElement.isEmpty())
+	  {
+	    value = null;
+	    return;
+	  }
+
 	nextItem = owner.xSession.getNextItem();
 
 	if (nextItem.matchesClose(elementName))
@@ -229,6 +235,12 @@ public class xmlfield implements FieldType {
       }
     else if (fieldDef.getType() == FieldType.NUMERIC)
       {
+	if (openElement.isEmpty())
+	  {
+	    value = null;
+	    return;
+	  }
+
 	nextItem = owner.xSession.getNextItem();
 
 	if (nextItem.matchesClose(elementName))
@@ -257,6 +269,12 @@ public class xmlfield implements FieldType {
       }
     else if (fieldDef.getType() == FieldType.DATE)
       {
+	if (openElement.isEmpty())
+	  {
+	    value = null;
+	    return;
+	  }
+
 	nextItem = owner.xSession.getNextItem();
 
 	if (nextItem.matchesClose(elementName))
@@ -295,6 +313,12 @@ public class xmlfield implements FieldType {
       {
 	if (!fieldDef.isArray())
 	  {
+	    if (openElement.isEmpty())
+	      {
+		value = null;
+		return;
+	      }
+
 	    nextItem = owner.xSession.reader.peekNextItem();
 
 	    if (nextItem.matchesClose(elementName))
@@ -349,6 +373,12 @@ public class xmlfield implements FieldType {
       {
 	if (!fieldDef.isArray())
 	  {
+	    if (openElement.isEmpty())
+	      {
+		value = null;
+		return;
+	      }
+
 	    nextItem = owner.xSession.getNextItem();
 	   
 	    if (nextItem.matchesClose(elementName))
@@ -423,6 +453,12 @@ public class xmlfield implements FieldType {
       }
     else if (fieldDef.getType() == FieldType.PASSWORD)
       {
+	if (openElement.isEmpty())
+	  {
+	    value = null;
+	    return;
+	  }
+
 	nextItem = owner.xSession.getNextItem();
 
 	if (nextItem.matchesClose(elementName))
@@ -1135,6 +1171,11 @@ public class xmlfield implements FieldType {
 	    xPassword xp = (xPassword) value;
 	    PasswordDBField field = (PasswordDBField) owner.objref.getField(fieldDef.getID());
 
+	    if (xp == null)
+	      {
+		return field.setUndefined(false);
+	      }
+
 	    // set anything we can.. note that if we transmit null for
 	    // any of the password hash options, it will null the
 	    // password out entirely, so we don't want to transmit a
@@ -1164,6 +1205,11 @@ public class xmlfield implements FieldType {
 		// scalar invid fields are never embedded/editInPlace
 
 		xInvid invidValue = (xInvid) value;
+
+		if (invidValue == null)
+		  {
+		    return owner.objref.setFieldValue(fieldDef.getID(), null);
+		  }
 
 		return owner.objref.setFieldValue(fieldDef.getID(), invidValue.getInvid());
 	      }
