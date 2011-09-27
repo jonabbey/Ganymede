@@ -10,9 +10,9 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2011
    The University of Texas at Austin
 
@@ -98,9 +98,9 @@ import com.jclark.xml.output.UTF8XMLWriter;
 /**
  * <p>DBStore is the main Ganymede database class. DBStore is responsible for
  * actually handling the Ganymede database, and manages
- * database loads and dumps, locking (in conjunction with 
+ * database loads and dumps, locking (in conjunction with
  * {@link arlut.csd.ganymede.server.DBSession DBSession} and
- * {@link arlut.csd.ganymede.server.DBLock DBLock}), 
+ * {@link arlut.csd.ganymede.server.DBLock DBLock}),
  * the {@link arlut.csd.ganymede.server.DBJournal journal}, and schema dumping.</p>
  *
  * <p>The DBStore class holds the server's namespace and schema
@@ -136,7 +136,7 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * {@link arlut.csd.ganymede.server.DBField DBField}), assume that there is usually
  * an associated GanymedeSession to be consulted for permissions and the like.</p>
  *
- * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 public final class DBStore implements JythonMap {
@@ -253,30 +253,30 @@ public final class DBStore implements JythonMap {
     All of the following should only be modified/accessed
     in a critical section synchronized on the DBStore object.
    */
-  
+
   /**
    * hash mapping object type to DBObjectBase's
    */
-	
+
   Hashtable<Short,DBObjectBase> objectBases;
 
-  /** 
+  /**
    * Tracks invids which point to specific objects via asymmetric
    * links in the Ganymede persistent data store.
    */
 
   DBLinkTracker aSymLinkTracker;
 
-  /** 
+  /**
    * A collection of {@link arlut.csd.ganymede.server.DBNameSpace
-   * DBNameSpaces} registered in this DBStore.  
+   * DBNameSpaces} registered in this DBStore.
    */
 
   Vector<DBNameSpace> nameSpaces;
 
-  /** 
+  /**
    * if true, {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
-   * set methods will be enabled 
+   * set methods will be enabled
    */
 
   private boolean loading = false;
@@ -344,10 +344,10 @@ public final class DBStore implements JythonMap {
   {
     debug = Ganymede.debug;
 
-    objectBases = new Hashtable<Short, DBObjectBase>(20); // default 
+    objectBases = new Hashtable<Short, DBObjectBase>(20); // default
     aSymLinkTracker = new DBLinkTracker();
     nameSpaces = new Vector<DBNameSpace>();
-  
+
     try
       {
 	rootCategory = new DBBaseCategory(this, ts.l("init.rootcategory"));  // "Categories"
@@ -381,7 +381,7 @@ public final class DBStore implements JythonMap {
 
   public boolean isAtLeast(int major, int minor)
   {
-    return (this.file_major > major || 
+    return (this.file_major > major ||
 	    (this.file_major == major && this.file_minor >= minor));
   }
 
@@ -392,7 +392,7 @@ public final class DBStore implements JythonMap {
 
   public boolean isLessThan(int major, int minor)
   {
-    return (this.file_major < major || 
+    return (this.file_major < major ||
 	    (this.file_major == major && this.file_minor < minor));
   }
 
@@ -462,7 +462,7 @@ public final class DBStore implements JythonMap {
     short baseCount, namespaceCount;
     int invidPoolSize;
     String file_id;
-    
+
     debug = false;
 
     /* -- */
@@ -555,7 +555,6 @@ public final class DBStore implements JythonMap {
 	// "DBStore.load(): loading category definitions"
 	debug(ts.l("load.categories"));
 
-
 	DBField.fieldCount = 0;
 	DBObject.objectCount = 0;
 
@@ -563,14 +562,15 @@ public final class DBStore implements JythonMap {
 	  {
 	    rootCategory = new DBBaseCategory(this, in);
 	  }
-	
+
 	// previous to 2.0, we wrote out the DBObjectBase structures
 	// to ganymede.db as a separate step from the category loading
 
 	if (isLessThan(2,0))
 	  {
 	    baseCount = in.readShort();
-	    debug("DBStore load(): loading " + baseCount + " bases");	     
+
+	    debug("DBStore load(): loading " + baseCount + " bases");
 
 	    if (baseCount > 0)
 	      {
@@ -669,20 +669,19 @@ public final class DBStore implements JythonMap {
     // Load the current Journal file.
 
     loadJournal();
-    
+
     // go ahead and consolidate the journal into the DBStore
     // before we really get under way.
     // Or if the old DB version does not match the new
     // Notice that we are going to archive a copy of the
     // existing db file.
-    debug("DEBUG DBStore, dumping now cause versions dont match: "
-		       +major_version+","+minor_version+" "+file_major+","+file_minor);	    
+
     if (!isAtRev(major_version, minor_version) || !journal.isClean())
       {
 	try
-	  {	    
-	    System.err.println("DBStore, dumping now cause journal not clean or versions dont match: "
-			       +major_version+","+minor_version+" "+file_major+","+file_minor);	    
+	  {
+	    Ganymede.debug("Coalescing DBJournal.");
+
 	    dump(filename, true, true);
 	  }
 	catch (IOException ex)
@@ -712,7 +711,7 @@ public final class DBStore implements JythonMap {
    */
   public synchronized void loadJournal()
   {
-    try 
+    try
       {
 	journal = new DBJournal(this, Ganymede.journalProperty);
       }
@@ -723,13 +722,13 @@ public final class DBStore implements JythonMap {
 	Ganymede.logError(ex);
 	throw new RuntimeException("couldn't initialize journal:" + ex.getMessage());
       }
-    
+
     if (!journal.isClean())
       {
 	try
 	  {
 	    journalLoading = true;
-	    
+
 	    if (!journal.load())
 	      {
 		// if the journal wasn't in a totally consistent
@@ -739,10 +738,10 @@ public final class DBStore implements JythonMap {
 		System.err.println("\nError, couldn't load entire journal.. " +
 				   "final transaction in journal not processed.\n");
 	      }
-	    
+
 	    // update the DBObjectBase iterationSets, since the journal
 	    // loading bypasses the transaction mechanism where this is
-	    // normally done	    
+	    // normally done
 
 	    for (DBObjectBase base: objectBases.values())
 	      {
@@ -762,7 +761,7 @@ public final class DBStore implements JythonMap {
 	  }
       }
   }
-  
+
 
   /**
    * <p>Dumps the database to disk</p>
@@ -771,7 +770,7 @@ public final class DBStore implements JythonMap {
    * dump method will be suspended until there are no threads performing update
    * writes to the in-memory database.  In practice this will likely never be
    * a long interval.  Note that this method *will* dump the database, even
-   * if no changes have been made.  You should check the DBStore journal's 
+   * if no changes have been made.  You should check the DBStore journal's
    * isClean() method to determine whether or not a dump is really needed,
    * if you're not sure.</p>
    *
@@ -797,20 +796,20 @@ public final class DBStore implements JythonMap {
     FileOutputStream outStream = null;
     BufferedOutputStream bufStream = null;
     DataOutputStream out = null;
-    
+
     short namespaceCount;
     DBDumpLock lock = null;
     DBNameSpace ns;
-    
+
     /* -- */
-    
+
     debug("DBStore: Dumping");
     lock = new DBDumpLock(this);
     debug("DBStore: establishing dump lock");
-    lock.establish("System");	// wait until we get our lock 
+    lock.establish("System");	// wait until we get our lock
     debug("DBStore: dump lock established");
-    
-    // Move the old version of the file to a backup    
+
+    // Move the old version of the file to a backup
 
     try
       {
@@ -831,14 +830,14 @@ public final class DBStore implements JythonMap {
 
 		if (!directory.isDirectory())
 		  {
-		    throw new IOException("Error, couldn't find output directory to backup: " + 
+		    throw new IOException("Error, couldn't find output directory to backup: " +
 					  directoryName);
 		  }
 
                 String oldDirName = directoryName + File.separator + "old";
 
 		File oldDirectory = new File(oldDirName);
-		    
+
 		if (!oldDirectory.exists())
 		  {
 		    if (!oldDirectory.mkdir())
@@ -847,7 +846,7 @@ public final class DBStore implements JythonMap {
                       }
 		  }
 
-		DateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss", 
+		DateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss",
 							    java.util.Locale.US);
 		String label = formatter.format(new Date());
 
@@ -923,7 +922,7 @@ public final class DBStore implements JythonMap {
     catch (IOException ex)
       {
 	System.err.println("DBStore error dumping to " + filename);
-	
+
 	throw ex;
       }
     finally
@@ -946,7 +945,7 @@ public final class DBStore implements JythonMap {
 	  {
 	    bufStream.close();
 	  }
-	   
+
 	if (outStream != null)
 	  {
 	    outStream.close();
@@ -958,12 +957,12 @@ public final class DBStore implements JythonMap {
     // worry about the journal.. if it isn't truncated properly
     // somebody can just remove it and ganymede will recover
     // ok.
-    
+
     if (journal != null)
       {
 	journal.reset();	// ** sync **
       }
-    
+
     GanymedeAdmin.updateLastDump(new Date());
 
     if (Ganymede.log != null)
@@ -984,7 +983,7 @@ public final class DBStore implements JythonMap {
    * dump method will be suspended until there are no threads performing update
    * writes to the in-memory database.  In practice this will likely never be
    * a long interval.  Note that this method *will* dump the database, even
-   * if no changes have been made.  You should check the DBStore journal's 
+   * if no changes have been made.  You should check the DBStore journal's
    * isClean() method to determine whether or not a dump is really needed,
    * if you're not sure.</p>
    *
@@ -1010,7 +1009,7 @@ public final class DBStore implements JythonMap {
    * @see arlut.csd.ganymede.server.DBJournal
    */
 
-  public void dumpXML(String filename, boolean dumpDataObjects, boolean dumpSchema, 
+  public void dumpXML(String filename, boolean dumpDataObjects, boolean dumpSchema,
 		      String syncChannel, boolean includeHistory, boolean includeOid) throws IOException
   {
     FileOutputStream outStream = null;
@@ -1069,14 +1068,14 @@ public final class DBStore implements JythonMap {
 				   boolean includeHistory, boolean includeOid) throws IOException
   {
     XMLDumpContext xmlOut = null;
-    
+
     DBDumpLock lock = null;
     DBNameSpace ns;
     SyncRunner syncConstraint = null;
     boolean includePlaintext = false;
 
     /* -- */
-    
+
     debug("DBStore: Dumping XML");
 
     try
@@ -1102,7 +1101,7 @@ public final class DBStore implements JythonMap {
 
 	try
 	  {
-	    lock.establish("System");	// wait until we get our lock 
+	    lock.establish("System");	// wait until we get our lock
 	  }
 	catch (InterruptedException ex)
 	  {
@@ -1119,7 +1118,7 @@ public final class DBStore implements JythonMap {
 	if (dumpDataObjects && !dumpSchema && syncChannel != null)
 	  {
 	    syncConstraint = Ganymede.getSyncChannel(syncChannel);
-	    
+
 	    if (syncConstraint == null)
 	      {
 		// "No such sync channel defined: {0}"
@@ -1145,9 +1144,9 @@ public final class DBStore implements JythonMap {
 	  {
 	    System.err.println("DBStore.dumpXML(): created XMLDumpContext");
 	  }
-	    
+
 	// start writing
-	    
+
 	xmlOut.startElement("ganymede");
 	xmlOut.attribute("major", Integer.toString(GanymedeXMLSession.majorVersion));
 	xmlOut.attribute("minor", Integer.toString(GanymedeXMLSession.minorVersion));
@@ -1170,7 +1169,7 @@ public final class DBStore implements JythonMap {
 	      {
 		continue;
 	      }
-		
+
 	    for (DBObject x: base.getObjects())
 	      {
 		if (xmlOut.mayInclude(x))
@@ -1201,7 +1200,7 @@ public final class DBStore implements JythonMap {
 	  {
 	    lock.release();
 	  }
-	    
+
 	if (xmlOut != null)
 	  {
 	    try
@@ -1213,7 +1212,7 @@ public final class DBStore implements JythonMap {
 		Ganymede.logError(ex);
 	      }
 	  }
-	
+
 	if (outStream != null)
 	  {
 	    try
@@ -1235,32 +1234,32 @@ public final class DBStore implements JythonMap {
   public synchronized void dumpSchemaXML(XMLDumpContext xmlOut) throws IOException
   {
     xmlOut.startElementIndent("ganyschema");
-	    
+
     xmlOut.indentOut();
     xmlOut.startElementIndent("namespaces");
-	    
+
     xmlOut.indentOut();
-	    
+
     for (DBNameSpace ns: nameSpaces)
       {
 	ns.emitXML(xmlOut);
       }
-	    
+
     xmlOut.indentIn();
     xmlOut.endElementIndent("namespaces");
-	    
+
     // write out our category tree
-	    
+
     xmlOut.skipLine();
-	    
+
     xmlOut.startElementIndent("object_type_definitions");
-	    
+
     xmlOut.indentOut();
     rootCategory.emitXML(xmlOut);
-	    
+
     xmlOut.indentIn();
     xmlOut.endElementIndent("object_type_definitions");
-	    
+
     xmlOut.indentIn();
     xmlOut.endElementIndent("ganyschema");
   }
@@ -1283,7 +1282,7 @@ public final class DBStore implements JythonMap {
 	    result.add(base.getName());
 	  }
       }
-    
+
     return result;
   }
 
@@ -1300,7 +1299,7 @@ public final class DBStore implements JythonMap {
       {
 	result = new Vector<DBObjectBase>(objectBases.values());
       }
-    
+
     return result;
   }
 
@@ -1461,7 +1460,7 @@ public final class DBStore implements JythonMap {
 	      }
 	  }
       }
-	
+
     return null;
   }
 
@@ -1472,7 +1471,7 @@ public final class DBStore implements JythonMap {
 
   public synchronized CategoryNode getCategoryNode(String pathName)
   {
-    DBBaseCategory 
+    DBBaseCategory
       bc;
 
     int
@@ -1486,16 +1485,16 @@ public final class DBStore implements JythonMap {
       }
 
     // System.err.println("DBStore.getCategory(): searching for " + pathName);
-    
+
     StringReader reader = new StringReader(pathName);
     StreamTokenizer tokens = new StreamTokenizer(reader);
-    
+
     tokens.wordChars(Integer.MIN_VALUE, Integer.MAX_VALUE);
     tokens.ordinaryChar('/');
-    
+
     tokens.slashSlashComments(false);
     tokens.slashStarComments(false);
-    
+
     try
       {
 	tok = tokens.nextToken();
@@ -1521,7 +1520,7 @@ public final class DBStore implements JythonMap {
 	  {
 	    // note that slashes are the only non-word token we
 	    // should ever get, so they are implicitly separators.
-	    
+
 	    if (tok == StreamTokenizer.TT_WORD)
 	      {
 		// System.err.println("DBStore.getCategory(): Looking for node " + tokens.sval);
@@ -1541,7 +1540,7 @@ public final class DBStore implements JythonMap {
 		    throw new RuntimeException("Found unknown/null thing in category tree.." + cn.toString());
 		  }
 	      }
-	    
+
 	    tok = tokens.nextToken();
 	  }
       }
@@ -1549,7 +1548,7 @@ public final class DBStore implements JythonMap {
       {
 	throw new RuntimeException("parse error in getCategory: " + ex);
       }
-    
+
     return bc;
   }
 
@@ -1559,7 +1558,7 @@ public final class DBStore implements JythonMap {
    * mandatory Ganymede object types, registering their customization
    * classes, defining fields, and all the rest.</p>
    *
-   * <p>Note that we don't go through a 
+   * <p>Note that we don't go through a
    * {@link arlut.csd.ganymede.server.DBSchemaEdit DBSchemaEdit}
    * here, we just initialize the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}/
    * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField} structures
@@ -1583,7 +1582,7 @@ public final class DBStore implements JythonMap {
 
 	ns = new DBNameSpace("ownerbase", true);
 	nameSpaces.addElement(ns);
-	
+
 	ns = new DBNameSpace("username", true);
 	nameSpaces.addElement(ns);
 
@@ -1890,7 +1889,7 @@ public final class DBStore implements JythonMap {
 	b.addFieldToEnd(bf);
 
 	b.setLabelField(SchemaConstants.EventToken);
-    
+
 	// link in the class we specified
 
 	b.createHook();
@@ -2032,7 +2031,7 @@ public final class DBStore implements JythonMap {
 	b.addFieldToEnd(bf);
 
 	b.setLabelField(SchemaConstants.UserUserName);
-    
+
 	setBase(b);
 
 	// create Task Base
@@ -2547,16 +2546,16 @@ public final class DBStore implements JythonMap {
 	if (!exists(session, supergash))
 	  {
 	    System.err.println("Creating supergash persona object");
-	
+
 	    retVal = session.createDBObject(SchemaConstants.PersonaBase, supergash, null);
-	
+
 	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		throw new RuntimeException("Couldn't create supergash admin persona.");
 	      }
-	
+
 	    eObj = (DBEditObject) retVal.getObject();
-	
+
 	    // set the user visible name
 
 	    s = (StringDBField) eObj.getField(SchemaConstants.PersonaNameField);
@@ -2576,10 +2575,10 @@ public final class DBStore implements JythonMap {
 
 	    p = (PasswordDBField) eObj.getField(SchemaConstants.PersonaPasswordField);
 	    p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
-	
+
 	    b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminConsole);
 	    b.setValueLocal(Boolean.TRUE);
-	
+
 	    b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminPower);
 	    b.setValueLocal(Boolean.TRUE);
 	  }
@@ -2597,16 +2596,16 @@ public final class DBStore implements JythonMap {
 		s = (StringDBField) eObj.getField(SchemaConstants.PersonaNameField);
 		s.setValueLocal(Ganymede.rootname);
 	      }
-        
+
 	    if (Ganymede.resetadmin)
 	      {
 		p = (PasswordDBField) eObj.getField(SchemaConstants.PersonaPasswordField);
 		p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
 	      }
-	
+
 	    b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminConsole);
 	    b.setValueLocal(Boolean.TRUE);
-	
+
 	    b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminPower);
 	    b.setValueLocal(Boolean.TRUE);
 	  }
@@ -2625,25 +2624,25 @@ public final class DBStore implements JythonMap {
 
 	// make sure the monitor object exists if the properties file defines one
 
-	if (!exists(session, monitor) && Ganymede.monitornameProperty != null && 
+	if (!exists(session, monitor) && Ganymede.monitornameProperty != null &&
 	    Ganymede.defaultmonitorpassProperty != null)
 	  {
 	    System.err.println("Creating monitor persona");
-	
+
 	    retVal = session.createDBObject(SchemaConstants.PersonaBase, monitor, null);
 
 	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		throw new RuntimeException("Couldn't create monitor admin persona.");
 	      }
-	
+
 	    if (Ganymede.monitornameProperty == null)
 	      {
 		throw new NullPointerException("monitor name property not loaded, can't initialize monitor account");
 	      }
 
 	    eObj = (DBEditObject) retVal.getObject();
-	
+
 	    s = (StringDBField) eObj.getField(SchemaConstants.PersonaNameField);
 	    s.setValueLocal(Ganymede.monitornameProperty);
 
@@ -2660,9 +2659,9 @@ public final class DBStore implements JythonMap {
 	      }
 
 	    //	    s.setValueLocal(Ganymede.monitornameProperty);
-    
+
 	    p = (PasswordDBField) eObj.getField(SchemaConstants.PersonaPasswordField);
-	
+
 	    if (Ganymede.defaultmonitorpassProperty != null)
 	      {
 		p.setPlainTextPass(Ganymede.defaultmonitorpassProperty); // default monitor password
@@ -2693,12 +2692,12 @@ public final class DBStore implements JythonMap {
 	      }
 
 	    eObj = (DBEditObject) retVal.getObject();
-	
+
 	    s = (StringDBField) eObj.getField(SchemaConstants.RoleName);
 	    s.setValueLocal("Default");
-	
+
 	    // what can users do with objects they own?  Includes users themselves
-	
+
 	    pm = (PermissionMatrixDBField) eObj.getField(SchemaConstants.RoleMatrix);
 
 	    // view self, nothing else
@@ -2708,24 +2707,24 @@ public final class DBStore implements JythonMap {
 
 	createSysEventObj(session, "abnormallogout", "Unusual Logout", null, false);
 
-	createSysEventObj(session, "adminconnect", "Admin Console Attached", 
+	createSysEventObj(session, "adminconnect", "Admin Console Attached",
 			  "Admin Console Attached", false);
 
-	createSysEventObj(session, "admindisconnect", "Admin Console Disconnected", 
+	createSysEventObj(session, "admindisconnect", "Admin Console Disconnected",
 			  "Admin Console Disconnected", false);
 
-	createSysEventObj(session, "badpass", "Failed login attempt", 
+	createSysEventObj(session, "badpass", "Failed login attempt",
 			  "Bad username and/or password", true);
 
-	createSysEventObj(session, "deleteobject", "Object Deleted", 
+	createSysEventObj(session, "deleteobject", "Object Deleted",
 			  "This object has been deleted.", true);
 
 	createSysEventObj(session, "dump", "Database Dump", "Database Dump", false);
 
-	createSysEventObj(session, "expirationwarn", "Expiration Warning", 
+	createSysEventObj(session, "expirationwarn", "Expiration Warning",
 			  "This object is going to expire soon.", false);
 
-	createSysEventObj(session, "expirenotify", "Expiration Notification", 
+	createSysEventObj(session, "expirenotify", "Expiration Notification",
 			  "This object has been expired.", false);
 
         createSysEventObj(session, "externalerror", "Error Running External Process",
@@ -2736,7 +2735,7 @@ public final class DBStore implements JythonMap {
 
 	createSysEventObj(session, "goodlogin", "Successful login", null, false);
 
-	createSysEventObj(session, "inactivateobject", "Object Inactivation", 
+	createSysEventObj(session, "inactivateobject", "Object Inactivation",
 			  "This object has been inactivated", true);
 
 	createSysEventObj(session, "journalreset", "Journal File Reset", "Journal file reset", false);
@@ -2747,7 +2746,7 @@ public final class DBStore implements JythonMap {
 
 	createSysEventObj(session, "objectcreated", "Object Created", "Object Created", true);
 
-	createSysEventObj(session, "reactivateobject", "Object Reactivation", 
+	createSysEventObj(session, "reactivateobject", "Object Reactivation",
 			  "This object has been reactivated", true);
 
 	createSysEventObj(session, "removalwarn", "Removal Warning", "This object is going to be removed", false);
@@ -2756,15 +2755,15 @@ public final class DBStore implements JythonMap {
 
 	createSysEventObj(session, "restart", "Server Restarted", "The Ganymede server was restarted", false);
 
-	createSysEventObj(session, "shutdown", "Server shutdown", 
+	createSysEventObj(session, "shutdown", "Server shutdown",
 			  "The Ganymede server was cleanly shut down", false);
 
 	// Create the start transaction oBject.  This object is
 	// consulted by the DBLog class to guide how mail should be
 	// handled for transaction logs.
 
-	DBEditObject transactionEvent = createSysEventObj(session, 
-							  "starttransaction", 
+	DBEditObject transactionEvent = createSysEventObj(session,
+							  "starttransaction",
 							  "transaction start", null, false);
 
 	if (transactionEvent != null)
@@ -2772,7 +2771,7 @@ public final class DBStore implements JythonMap {
 	    transactionEvent.setFieldValueLocal(SchemaConstants.EventMailBoolean, Boolean.TRUE);
 	    transactionEvent.setFieldValueLocal(SchemaConstants.EventMailToSelf, Boolean.TRUE);
 	    transactionEvent.setFieldValueLocal(SchemaConstants.EventMailOwners, Boolean.TRUE);
-	    transactionEvent.setFieldValueLocal(SchemaConstants.NotesField, 
+	    transactionEvent.setFieldValueLocal(SchemaConstants.NotesField,
 						"This system event object is consulted to determine whether " +
 						"mail should be sent\nout when a transaction is committed.\n\n" +
 						"If the 'Event Mail' checkbox is set to false, no transaction log " +
@@ -2840,10 +2839,10 @@ public final class DBStore implements JythonMap {
    * Convenience method for initializeObjects().
    */
 
-  private DBEditObject createSysEventObj(DBSession session, 
+  private DBEditObject createSysEventObj(DBSession session,
 					 String token, String name, String description,
 					 boolean ccAdmin)
-				 
+
   {
     DBEditObject eO = null;
     ReturnVal retVal;
@@ -2888,7 +2887,7 @@ public final class DBStore implements JythonMap {
     if (description != null)
       {
 	retVal = eO.setFieldValueLocal(SchemaConstants.EventDescription, description);
-	
+
 	if (!ReturnVal.didSucceed(retVal))
 	  {
 	    throw new RuntimeException("Error, could not set description system event object " + token);
@@ -2928,7 +2927,7 @@ public final class DBStore implements JythonMap {
 
     if (objectsCheckedOut < 0)
       {
-	throw new RuntimeException("Objects checked out has gone negative"); 
+	throw new RuntimeException("Objects checked out has gone negative");
       }
   }
 
@@ -2953,7 +2952,7 @@ public final class DBStore implements JythonMap {
   /* *************************************************************************
    *
    * The following methods are for Jython/Map support
-   * 
+   *
    * For this object, the Map interface allows for indexing based on either
    * the name or the type ID of a DBObjectBase. Indexing by type id, however,
    * is only supported for "direct" access to the Map; the type id numbers
@@ -2969,12 +2968,12 @@ public final class DBStore implements JythonMap {
   {
     return keySet().contains(key);
   }
-  
+
   public boolean has_key(Object key)
   {
     return containsKey(key);
   }
-  
+
   public boolean containsValue(Object value)
   {
     return getBases().contains(value);
@@ -2991,7 +2990,7 @@ public final class DBStore implements JythonMap {
 	    entrySet.add(new Entry(base));
 	  }
       }
-    
+
     return entrySet;
   }
 
@@ -3020,12 +3019,12 @@ public final class DBStore implements JythonMap {
   {
     return keySet();
   }
-  
+
   public List items()
   {
     List list = new ArrayList();
     Object[] tuple;
-    
+
     for (DBObjectBase base: objectBases.values())
       {
         tuple = new Object[2];
@@ -3033,10 +3032,10 @@ public final class DBStore implements JythonMap {
         tuple[1] = base;
         list.add(tuple);
       }
-    
+
     return list;
   }
-  
+
   public int size()
   {
     return getBaseNameList().size();
@@ -3051,22 +3050,22 @@ public final class DBStore implements JythonMap {
   {
     return keySet().toString();
   }
-  
+
   /**
-   * Implements key/value pairs for use in a 
+   * Implements key/value pairs for use in a
    * {@link java.util.Map}'s {@link java.util.Map#entrySet()} method.
    */
 
   static class Entry implements Map.Entry
   {
     Object key, value;
-    
+
     public Entry( DBObjectBase base )
     {
       key = base.getName();
       value = base;
     }
-    
+
     public Object getKey()
     {
       return key;
@@ -3083,31 +3082,31 @@ public final class DBStore implements JythonMap {
     }
   }
 
-  /* 
+  /*
    * These methods are are no-ops since we don't want this object
    * messed with via the Map interface.
    */
-    
+
   public Object put(Object key, Object value)
   {
     return null;
   }
-  
+
   public void putAll(Map t)
   {
     return;
   }
-  
+
   public Object remove(Object key)
   {
     return null;
   }
-  
+
   public void clear()
   {
     return;
   }
-  
+
   public boolean isEmpty()
   {
     return getBaseNameList().isEmpty();

@@ -12,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -891,13 +891,15 @@ public class DBJournal implements ObjectStatus {
 
     debug("Journal file major minor version:"+file_major_version+","+file_minor_version);
 
-    // At version 2,3: Fail if DBStore version greater than equal 2/22 and DBJournal <= 2/2, cause we changed Journal after this.
+    // At version 2,3: Fail if DBStore version greater than equal 2/22
+    // and DBJournal <= 2/2, because we changed the structure of the
+    // DBJournal file after this.
+
     if (store.isAtLeast(2,23) && isLessThan(2,3))
       {
 	// "Error, journal version mismatch.. wrong file type?"
 	throw new RuntimeException("Mismatch Version between DBStore and DBJournal. ");
       }
-
 
     if ((file_major_version > DBJournal.major_version) ||
 	(file_major_version == DBJournal.major_version && file_minor_version > minor_version))
@@ -907,12 +909,12 @@ public class DBJournal implements ObjectStatus {
       }
 
     // At journal version 2,3 we save the dbversion in the headers also.
+
     if (isAtLeast(2,3))
       {
 	file_dbstore_major_version = jFile.readShort();
 	file_dbstore_minor_version = jFile.readShort();
 
-	debug("file dbstore major minor version:"+file_dbstore_major_version+","+file_dbstore_minor_version);
 	if (file_dbstore_major_version != store.file_major || file_dbstore_minor_version != store.file_minor)
 	  {
 	    throw new RuntimeException("DBStore and Journal file versions do not match. ");
