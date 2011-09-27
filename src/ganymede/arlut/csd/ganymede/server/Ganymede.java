@@ -1060,6 +1060,7 @@ public class Ganymede {
     // "Initializing new schema"
     debug(ts.l("main.info_initializing_schema"));
     db.initializeSchema();
+
     // "Template schema created."
     debug(ts.l("main.info_created_schema"));
 
@@ -1080,6 +1081,7 @@ public class Ganymede {
     // "Creating mandatory database objects"
     debug(ts.l("main.info_creating_mandatory"));
     db.initializeObjects();
+
     // "Mandatory database objects created."
     debug(ts.l("main.info_created_mandatory"));
 
@@ -1274,12 +1276,6 @@ public class Ganymede {
     // db file are set.
 
     db.initializeObjects();
-  /** - notice - JAMES QUESTION.... ?
-   * Creates required objects when a new database is created
-   * from scratch, or if a pre-existing but damaged database file
-   * is loaded..
-   */
-
 
     try
       {
@@ -1372,8 +1368,6 @@ public class Ganymede {
 
 			// "Shutting down."
 			debug("\n" + ts.l("main.info_shutting_down") + "\n");
-
-			GanymedeServer.shutdown();
 
 			throw new GanymedeSilentStartupException();
 		      }
