@@ -138,36 +138,48 @@ public class GanymedeUncaughtExceptionHandler implements Thread.UncaughtExceptio
 	  }
       }
 
-    if (!StringUtils.isEmpty(Ganymede.bugReportAddressProperty))
-      {
-	try
-	  {
-	    StringBuffer bugReport = new StringBuffer();
-
-	    bugReport.append("\nSERVER ERROR DETECTED:\nexception trace == \"");
-	    bugReport.append(Ganymede.stackTrace(ex));
-	    bugReport.append("\"\n");
-
-	    Ganymede.internalSession.sendMail(Ganymede.bugReportAddressProperty, "Ganymede Server Bug Report", bugReport);
-	  }
-	catch (Throwable ex2)
-	  {
-	  }
-      }
-
-    String mesg;
+    String mesg = null;
+    String trace = Ganymede.stackTrace(ex);
 
     if (contextMesg != null)
       {
-	mesg = contextMesg + "\n\n" + Ganymede.stackTrace(ex);
+	mesg = contextMesg + "\n\n" + trace;
       }
     else
       {
-	mesg = Ganymede.stackTrace(ex);
+	mesg = trace;
       }
 
-    GanymedeAdmin.logAppend(mesg);
+    try
+      {
+	// everything here may fail if the server hasn't proceeded far
+	// enough in startup.
 
-    System.err.println(mesg);
+	if (!StringUtils.isEmpty(Ganymede.bugReportAddressProperty))
+	  {
+	    try
+	      {
+		StringBuffer bugReport = new StringBuffer();
+
+		bugReport.append("\nSERVER ERROR DETECTED:\nexception trace == \"");
+		bugReport.append(trace);
+		bugReport.append("\"\n");
+
+		Ganymede.internalSession.sendMail(Ganymede.bugReportAddressProperty, "Ganymede Server Bug Report", bugReport);
+	      }
+	    catch (Throwable ex2)
+	      {
+	      }
+	  }
+
+	GanymedeAdmin.logAppend(mesg);
+      }
+    catch (Throwable th)
+      {
+      }
+    finally
+      {
+	System.err.println(mesg);
+      }
   }
 }

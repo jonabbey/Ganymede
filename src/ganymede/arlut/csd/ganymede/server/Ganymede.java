@@ -1,5 +1,4 @@
 /*
-
    Ganymede.java
 
    Server main module
@@ -16,9 +15,9 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2011
    The University of Texas at Austin
 
@@ -99,23 +98,26 @@ import arlut.csd.ganymede.rmi.Server;
 
 ------------------------------------------------------------------------------*/
 
-/** 
+/**
  * <p>This class is the main server module, providing the static
  * main() method executed to start the server.  This class is never
  * instantiated, but instead provides a bunch of static variables and
  * convenience methods in addition to the main() start method.</p>
  *
- * <p>When started, the Ganymede server creates a 
- * {@link arlut.csd.ganymede.server.DBStore DBStore} object, which in turn
- * creates and loads a set of {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
- * objects, one for each type of object held in the ganymede.db file.  Each
- * DBObjectBase contains {@link arlut.csd.ganymede.server.DBObject DBObject}
- * objects which hold the {@link arlut.csd.ganymede.server.DBField DBField}'s
- * which ultimately hold the actual data from the database.</p>
+ * <p>When started, the Ganymede server creates a {@link
+ * arlut.csd.ganymede.server.DBStore DBStore} object, which in turn
+ * creates and loads a set of {@link
+ * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects, one
+ * for each type of object held in the ganymede.db file.  Each
+ * DBObjectBase contains {@link arlut.csd.ganymede.server.DBObject
+ * DBObject} objects which hold the {@link
+ * arlut.csd.ganymede.server.DBField DBField}'s which ultimately hold
+ * the actual data from the database.</p>
  *
- * <p>The ganymede.db file may define a number of task classes that are to
- * be run by the server at defined times.  The server's main() method starts
- * a background {@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}
+ * <p>The ganymede.db file may define a number of task classes that
+ * are to be run by the server at defined times.  The server's main()
+ * method starts a background {@link
+ * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}
  * thread to handle background tasks.</p>
  *
  * <p>When the database has been loaded from disk, the main() method
@@ -123,8 +125,9 @@ import arlut.csd.ganymede.rmi.Server;
  * object.  GanymedeServer implements the {@link arlut.csd.ganymede.rmi.Server
  * Server} RMI remote interface, and is published in the RMI registry.</p>
  *
- * <p>Clients and admin consoles may then connect to the published GanymedeServer
- * object via RMI to establish a connection to the server.</p>
+ * <p>Clients and admin consoles may then connect to the published
+ * GanymedeServer object via RMI to establish a connection to the
+ * server.</p>
  *
  * <p>The GanymedeServer's {@link
  * arlut.csd.ganymede.rmi.Server#login(java.lang.String username,
@@ -152,39 +155,61 @@ import arlut.csd.ganymede.rmi.Server;
  * arlut.csd.ganymede.server.DBNameSpace DBNameSpace}, and {@link
  * arlut.csd.ganymede.server.DBJournal DBJournal}).</p>
  *
- * <p>All client permissions and communications are handled by the GanymedeSession class.</p> 
+ * <p>All client permissions and communications are handled by the
+ * GanymedeSession class.</p>
  */
 
 public class Ganymede {
 
-  public static boolean debug = true;
+  static public boolean debug = true;
+
+  /**
+   * <p>TranslationService object for handling string localization in
+   * the Ganymede server.</p>
+   */
+
+  static public TranslationService ts =
+    TranslationService.getTranslationService("arlut.csd.ganymede.server.Ganymede");
 
   /**
    * <p>If true, Ganymede.createErrorDialog() will print the
    * content of error dialogs to the server's stderr.</p>
    */
 
-  public static boolean logErrorDialogs = true;
+  static public boolean logErrorDialogs = true;
 
   /**
    * <p>If true, Ganymede.createInfoDialog() will print the
    * content of info dialogs to the server's stderr.</p>
    */
 
-  public static boolean logInfoDialogs = true;
-  
+  static public boolean logInfoDialogs = true;
+
   /**
    * <p>If true, the DBLog class will not send out any email.</p>
    */
-  
-  public static boolean suppressEmail = false;
+
+  static public boolean suppressEmail = false;
+
+  /**
+   * <p>If started with this, start Jython server on this port</p>
+   */
+  static public String portString = null;
 
   /**
    * <p>We keep the server's start time for display in the
    * admin console.</p>
    */
 
-  public static Date startTime = new Date();
+  static public Date startTime = new Date();
+
+  /**
+   * <p>If the server is started with propFilename on
+   * the command line, the properties will be loaded
+   * from this file.</p>
+   */
+
+  static public String propFilename = null;
 
   /**
    * <p>If the server is started with debug=&lt;filename&gt; on
@@ -192,7 +217,7 @@ public class Ganymede {
    * of the file to write our RMI debug log to.</p>
    */
 
-  public static String debugFilename = null;
+  static public String debugFilename = null;
 
   /**
    * <p>This object is responsible for handling all of the RMI
@@ -201,7 +226,7 @@ public class Ganymede {
    * or may not be exported on a fixed port.</p>
    */
 
-  public static GanymedeRMIManager rmi = null;
+  static public GanymedeRMIManager rmi = null;
 
   /**
    * <p>Once the server is started and able to accept RMI clients,
@@ -209,66 +234,68 @@ public class Ganymede {
    * talk to in order to login to the server.</p>
    */
 
-  public static GanymedeServer server;
+  static public GanymedeServer server;
 
   /**
-   * <p>A number of operations in the Ganymede server require 'root' 
+   * <p>A number of operations in the Ganymede server require 'root'
    * access to the database.  This GanymedeSession object is provided
    * for system database operations.</p>
    */
 
-  public static GanymedeSession internalSession;
+  static public GanymedeSession internalSession;
 
   /**
    * <p>The background task scheduler.</p>
    */
 
-  public static GanymedeScheduler scheduler;
+  static public GanymedeScheduler scheduler;
 
   /**
    * <p>The Jython debug console server, if the telnet option is
    * specified on the command line.</p>
    */
-  
-  public static JythonServer jythonServer;
+
+  static public JythonServer jythonServer;
 
   /**
    * <p>Random access password quality check dictionary.</p>
    */
 
-  public static Packer crackLibPacker;
+  static public Packer crackLibPacker;
 
   /**
    * <p>The Ganymede object store.</p>
    */
 
-  public static DBStore db;
+  static public DBStore db;
 
   /**
    * <p>This object provides access to the Ganymede log file, providing
    * logging, email, and search services.</p>
    */
 
-  public static DBLog log = null;
+  static public DBLog log = null;
 
   /**
    * <p>A cached reference to a master category tree serialization
    * object.  Initialized the first time a user logs on to the server,
    * and re-initialized when the schema is edited.  This object is
-   * provided to clients when they call 
-   * {@link arlut.csd.ganymede.server.GanymedeSession#getCategoryTree() GanymedeSession.getCategoryTree()}.</p>
+   * provided to clients when they call {@link
+   * arlut.csd.ganymede.server.GanymedeSession#getCategoryTree()
+   * GanymedeSession.getCategoryTree()}.</p>
    */
 
-  public static CategoryTransport catTransport = null;
+  static public CategoryTransport catTransport = null;
 
   /**
    * <p>A cached reference to a master base list serialization object.
    * Initialized on server start up and re-initialized when the schema
    * is edited.  This object is provided to clients when they call
-   * {@link arlut.csd.ganymede.server.GanymedeSession#getBaseList() GanymedeSession.getBaseList()}.</p>
+   * {@link arlut.csd.ganymede.server.GanymedeSession#getBaseList()
+   * GanymedeSession.getBaseList()}.</p>
    */
 
-  public static BaseListTransport baseTransport = null;
+  static public BaseListTransport baseTransport = null;
 
   /**
    * <p>The Thread that we have registered to handle cleanup if we get a
@@ -278,34 +305,35 @@ public class Ganymede {
    * this thread at shutdown time to avoid recursion on exit().</p>
    */
 
-  public static Thread signalHandlingThread = null;
+  static public Thread signalHandlingThread = null;
 
-  // properties from the ganymede.properties file
-  
-  public static String dbFilename = null;
-  public static String journalProperty = null;
-  public static String logProperty = null;
-  public static String mailLogProperty = null;
-  public static String serverHostProperty = null;
-  public static String rootname = null;
-  public static String defaultrootpassProperty = null;
-  public static String mailHostProperty = null;
-  public static String returnaddrProperty = null;
-  public static String subjectPrefixProperty = null;
-  public static String signatureFileProperty = null;
-  public static String helpbaseProperty = null;
-  public static String monitornameProperty = null;
-  public static String defaultmonitorpassProperty = null;
-  public static String messageDirectoryProperty = null;
-  public static String schemaDirectoryProperty = null;
-  public static int    registryPortProperty = 1099;
-  public static int    publishedObjectPortProperty = 55555;
-  public static String logHelperProperty = null;
-  public static boolean softtimeout = false;
-  public static boolean cracklibEnabled = false;
-  public static String cracklibDirectoryProperty = null;
-  public static int timeoutIdleNoObjs = 15;
-  public static int timeoutIdleWithObjs = 20;
+  // properties from the ganymede.properties file with their default
+  // values
+
+  static public String dbFilename = null;
+  static public String journalProperty = null;
+  static private String logProperty = null;
+  static private String mailLogProperty = null;
+  static public String serverHostProperty = null;
+  static public String rootname = null;
+  static public String defaultrootpassProperty = null;
+  static public String mailHostProperty = null;
+  static public String returnaddrProperty = null;
+  static public String subjectPrefixProperty = null;
+  static public String signatureFileProperty = null;
+  static public String helpbaseProperty = null;
+  static public String monitornameProperty = null;
+  static public String defaultmonitorpassProperty = null;
+  static public String messageDirectoryProperty = null;
+  static private String schemaDirectoryProperty = null;
+  static public int registryPortProperty = 1099;
+  static private int publishedObjectPortProperty = 55555;
+  static public String logHelperProperty = null;
+  static public boolean softtimeout = false;
+  static public int timeoutIdleNoObjs = 15;
+  static public int timeoutIdleWithObjs = 20;
+  static private boolean cracklibEnabled = false;
+  static private String cracklibDirectoryProperty = null;
 
   /**
    * <p>If the ganymede.bugaddress property is set, that string will
@@ -313,25 +341,26 @@ public class Ganymede {
    * send bug traces encountered by the Ganymede system.</p>
    *
    * <p>This system is used primarily by the client at this writing,
-   * through the {@link arlut.csd.ganymede.server.GanymedeSession#reportClientBug(java.lang.String, java.lang.String)}
-   * method.</p>
+   * through the {@link
+   * arlut.csd.ganymede.server.GanymedeSession#reportClientBug(java.lang.String,
+   * java.lang.String)} method.</p>
    *
    * <p>If this property string is null or empty, client bugs will not
    * be emailed, but they will be written to the server's standard
    * error stream.</p>
    */
 
-  public static String bugReportAddressProperty = null;
+  static public String bugReportAddressProperty = null;
 
   /**
-   * If the Ganymede server is started with the -magic_import command
+   * <p>If the Ganymede server is started with the -magic_import command
    * line flag, this field will be set to true and the server will
    * allow invids, creation timestamps, creator info, last
    * modification timestamps and last modification information to be
-   * injected into objects loaded from the xmlclient.
+   * injected into objects loaded from the xmlclient.</p>
    */
 
-  public static boolean allowMagicImport = false;
+  static public boolean allowMagicImport = false;
 
   /**
    * <p>If the server is started with the -resetadmin command line flag,
@@ -340,26 +369,25 @@ public class Ganymede {
    * ganymede.properties file.</p>
    */
 
-  public static boolean resetadmin = false;
+  static public boolean resetadmin = false;
 
-  /** 
+  /**
    * <p>This flag is true if the server was started with no
-   * pre-existing ganymede.db file.  This will be true when the server
-   * code is run from a schema kit's runDirectLoader script.  If true,
-   * the {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
-   * class will not worry about not finding the default permissions
-   * role in the database.</p> 
+   * pre-existing ganymede.db file.  If true, the {@link
+   * arlut.csd.ganymede.server.GanymedeSession GanymedeSession} class
+   * will not worry about not finding the default permissions role in
+   * the database.</p>
    */
 
-  public static boolean firstrun = false;
+  static public boolean firstrun = false;
 
-  /** 
+  /**
    * <p>This flag is true if the server was started with a -forcelocalhost
    * command line argument, which will allow the server to run even if
    * it will only be accessible to localhost.</p>
    */
 
-  public static boolean forcelocalhost = false;
+  static public boolean forcelocalhost = false;
 
   /**
    * <p>This flag is set true unless the server was started with a
@@ -369,25 +397,18 @@ public class Ganymede {
    * the Ganymede build process's genkeys ant target.</p>
    */
 
-  private static boolean useSSL = true;
+  static private boolean useSSL = true;
 
   /**
-   * <p>TranslationService object for handling string localization in the Ganymede
-   * server.</p>
-   */
-
-  public static TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.Ganymede");
-
-  /**
-   * Default localized "Ok" string, usable by server-side Ganymede code which prepares
-   * dialogs.
+   * <p>Default localized "Ok" string, usable by server-side Ganymede
+   * code which prepares dialogs. </p>
    */
 
   public final static String OK = ts.l("global.ok");
 
   /**
-   * Default localized "Cancel" string, usable by server-side Ganymede code which prepares
-   * dialogs.
+   * <p>Default localized "Cancel" string, usable by server-side
+   * Ganymede code which prepares dialogs. </p>
    */
 
   public final static String CANCEL = ts.l("global.cancel");
@@ -398,7 +419,7 @@ public class Ganymede {
    * ganymede.db file at task registration time.</p>
    */
 
-  private static Hashtable upgradeClassMap = null;
+  static private Hashtable upgradeClassMap = null;
 
   /**
    * <p>Uncaught exception handler in use on the Ganymede server.
@@ -406,25 +427,113 @@ public class Ganymede {
    * addresses in the bugReportAddressProperty, if defined.</p>
    */
 
-  private static GanymedeUncaughtExceptionHandler defaultHandler = null;
+  static private GanymedeUncaughtExceptionHandler defaultHandler = null;
 
   /* -- */
 
   /**
+   * <p>The Ganymede server start point.</p>
    *
-   * The Ganymede server start point.
-   *
+   * @param argv - command line arguments.
    */
 
-  public static void main(String argv[]) 
+  static public void main(String argv[])
   {
     File dataFile;
-    String propFilename = null;
-    String useDirectory = null;
 
     /* -- */
 
     System.setProperty("java.awt.headless", "true");
+
+    setupUncaughtExceptionHandler();
+
+    try
+      {
+	checkArgs(argv);
+
+	loadProperties(propFilename);
+
+	// If we are going to use CrackLib, make sure our password
+	// dictionary exists, creating it if necessary.
+
+	initializeCrackLib();
+
+	// Create our GanymedeRMIManager to handle RMI exports.  We need
+	// to create this before creating our DBStore, as some of the
+	// components of DBStore are to be made accessible through RMI
+
+	startRMIManager();
+
+	// "Creating DBStore structures"
+	debug(ts.l("main.info_creating_dbstore"));
+
+	db = new DBStore();	// And how can this be!?  For he IS the kwizatch-haderach!!
+
+	// Load the database
+
+	dataFile = new File(dbFilename);
+
+	if (dataFile.exists())
+	  {
+	    // "Loading DBStore contents"
+	    debug(ts.l("main.info_loading_dbstore"));
+	    db.load(dbFilename);
+	  }
+	else
+	  {
+	    // No database on disk.. create a new one, along with a new journal
+
+	    createNewDB();
+	  }
+
+	createGanymedeServer();
+	createGanymedeSession();
+	startLog();
+	startScheduler();
+
+	// Take care of any startup-time database modifications
+
+	startupHook();
+	bindGanymedeRMI();
+
+	// At this point clients can log in to the server.. the RMI system
+	// will spawn threads as necessary to handle RMI client activity..
+	// the main thread has nothing left to do and can go ahead and
+	// terminate here.
+
+	// "Setup and bound server object OK"
+
+	debug(ts.l("main.info_setup_okay"));
+	startJythonServer();
+	registerKillHandler();
+
+	// "Ganymede Server Ready."
+	debug("\n--------------------------------------------------------------------------------");
+	debug(ts.l("main.info_ready"));
+	debug("--------------------------------------------------------------------------------\n");
+      }
+    catch (GanymedeStartupException ex)
+      {
+	if (Ganymede.server != null)
+	  {
+	    GanymedeServer.shutdown();
+	  }
+
+	ex.process();
+      }
+  }
+
+  /**
+   * <p>Checks any command line arguments passed in.</p>
+   *
+   * @param argv - command line arguments.
+   *
+   * @throw GanymedeStartupException if a required parameter is missing.
+   */
+
+  static private void checkArgs(String argv[]) throws GanymedeStartupException
+  {
+    String useDirectory = null;
 
     // If the "usedirectory" option is set, then use the supplied
     // directory name as the base path to the properties file (which
@@ -436,9 +545,8 @@ public class Ganymede {
     if (useDirectory != null)
       {
         String fileSeparator = System.getProperty("file.separator");
-        
 	propFilename = useDirectory + fileSeparator + "ganymede.properties";
-        
+
 	if (ParseArgs.switchExists("logrmi", argv))
 	  {
 	    debugFilename = useDirectory + fileSeparator + "debug.log";
@@ -449,7 +557,7 @@ public class Ganymede {
       {
 	propFilename = ParseArgs.getArg("properties", argv);
       }
-    
+
     if (ParseArgs.getArg("logrmi", argv) != null)
       {
 	debugFilename = ParseArgs.getArg("logrmi", argv);
@@ -462,7 +570,8 @@ public class Ganymede {
 
 	// "Usage: java arlut.csd.ganymede.server.Ganymede\n properties = [-usedirectory=<server directory>|<property file>] [-resetadmin] [debug = <rmi debug file>]"
         System.err.println(ts.l("main.cmd_line_usage"));
-        return;
+
+        throw new GanymedeSilentStartupException();
       }
 
     if (ParseArgs.switchExists("nossl", argv))
@@ -479,70 +588,406 @@ public class Ganymede {
       }
 
     resetadmin = ParseArgs.switchExists("resetadmin", argv);
-
     allowMagicImport = ParseArgs.switchExists("magic_import", argv);
-
     forcelocalhost = ParseArgs.switchExists("forcelocalhost", argv);
+    suppressEmail = ParseArgs.switchExists("suppressEmail", argv);
+    portString = ParseArgs.getArg("telnet", argv);
 
-    if (!loadProperties(propFilename))
+    return;
+  }
+
+  /**
+   * <p>This method loads properties from the ganymede.properties
+   * file.</p>
+   *
+   * @throw GanymedeStartupException If all necessary properties could
+   * not be loaded.
+   */
+
+  static public void loadProperties(String filename) throws GanymedeStartupException
+  {
+    Properties props = new Properties(System.getProperties());
+    FileInputStream fis = null;
+    BufferedInputStream bis = null;
+
+    /* -- */
+
+    // "Ganymede server: loading properties from {0}"
+    System.out.println(ts.l("loadProperties.propload", filename));
+
+    try
       {
-	// "Error, couldn''t successfully load properties from file {0}."
-	System.err.println(ts.l("main.error_propload", propFilename));
-
-	return;
+	fis = new FileInputStream(filename);
+	bis = new BufferedInputStream(fis);
+	props.load(bis);
       }
-    else
+    catch (IOException ex)
       {
-	// "Ganymede server: loaded properties successfully from {0}"
-	System.out.println(ts.l("main.ok_propload", propFilename));
+	throw new GanymedeStartupException(ts.l("loadProperties.nopropfile", filename));
       }
-
-    // If we are going to use CrackLib, make sure our password
-    // dictionary exists, creating it if necessary.
-
-    if (cracklibEnabled)
+    finally
       {
-	// "CrackLib enabled for password quality checking."
-	System.err.println(ts.l("main.cracklibEnabled"));
+	// don't wait for GC to close the file descriptors
 
 	try
 	  {
-	    initializeCrackLib();
+	    if (bis != null)
+	      {
+		bis.close();
+	      }
 	  }
 	catch (IOException ex)
 	  {
-	    ex.printStackTrace();
-
-	    // "CrackLib disabled, no internal password quality checking available."
-	    System.err.println(ts.l("main.cracklibDisabled"));
 	  }
+
+	try
+	  {
+	    if (fis != null)
+	      {
+		fis.close();
+	      }
+	  }
+	catch (IOException ex)
+	  {
+	  }
+      }
+
+    // make the combined properties file accessible throughout our server code.
+
+    System.setProperties(props);
+
+    dbFilename = System.getProperty("ganymede.database");
+    journalProperty = System.getProperty("ganymede.journal");
+    logProperty = System.getProperty("ganymede.log");
+    mailLogProperty = System.getProperty("ganymede.maillog");
+    serverHostProperty = System.getProperty("ganymede.serverhost");
+    rootname = System.getProperty("ganymede.rootname");
+    defaultrootpassProperty = System.getProperty("ganymede.defaultrootpass");
+    mailHostProperty = System.getProperty("ganymede.mailhost");
+    signatureFileProperty = System.getProperty("ganymede.signaturefile");
+    returnaddrProperty = System.getProperty("ganymede.returnaddr");
+    subjectPrefixProperty = System.getProperty("ganymede.subjectprefix");
+    helpbaseProperty = System.getProperty("ganymede.helpbase");
+    monitornameProperty = System.getProperty("ganymede.monitorname");
+    defaultmonitorpassProperty = System.getProperty("ganymede.defaultmonitorpass");
+    messageDirectoryProperty = System.getProperty("ganymede.messageDirectory");
+    schemaDirectoryProperty = System.getProperty("ganymede.schemaDirectory");
+    logHelperProperty = System.getProperty("ganymede.loghelper");
+    bugReportAddressProperty = System.getProperty("ganymede.bugsaddress");
+
+    String cracklibEnabledString = System.getProperty("ganymede.usecracklib");
+
+    if (cracklibEnabledString != null && cracklibEnabledString.equalsIgnoreCase("true"))
+      {
+	cracklibDirectoryProperty = System.getProperty("ganymede.cracklibDirectory");
+
+	if (cracklibDirectoryProperty == null)
+	  {
+	    // "No ganymede.cracklibDirectory property specified, can''t enable cracklib processing."
+	    throw new GanymedeStartupException(ts.l("loadProperties.no_cracklib_dir"));
+	  }
+	else
+	  {
+	    File cracklibDir = new File(cracklibDirectoryProperty);
+
+	    if (!cracklibDir.isDirectory() || !cracklibDir.canWrite() || !cracklibDir.canRead())
+	      {
+		// "No usable directory matching the ganymede.cracklibDirectory property ({0}) exists,
+		// can''t enable cracklib processing."
+		throw new GanymedeStartupException(ts.l("loadProperties.bad_cracklib_dir", cracklibDirectoryProperty));
+	      }
+	    else
+	      {
+		cracklibEnabled = true;
+	      }
+	  }
+      }
+
+    String softtimeoutString = System.getProperty("ganymede.softtimeout");
+
+    if (softtimeoutString != null && softtimeoutString.equalsIgnoreCase("true"))
+      {
+	softtimeout = true;
+      }
+
+    String timeoutIdleNoObjsString = System.getProperty("ganymede.timeoutIdleNoObjs");
+
+    if (timeoutIdleNoObjsString != null)
+      {
+	try
+	  {
+	    timeoutIdleNoObjs = java.lang.Integer.parseInt(timeoutIdleNoObjsString);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    throw new GanymedeStartupException(ts.l("loadProperties.no_parse_timeoutIdleNoObjs", timeoutIdleNoObjsString));
+	  }
+      }
+
+    String timeoutIdleWithObjsString = System.getProperty("ganymede.timeoutIdleWithObjs");
+
+    if (timeoutIdleWithObjsString != null)
+      {
+	try
+	  {
+	    timeoutIdleWithObjs = java.lang.Integer.parseInt(timeoutIdleNoObjsString);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    throw new GanymedeStartupException(ts.l("loadProperties.no_parse_timeoutIdleWithObjs",
+						    timeoutIdleWithObjsString));
+	  }
+      }
+
+    if (dbFilename == null)
+      {
+	// "Couldn''t get the ganymede.database property"
+	throw new GanymedeStartupException(ts.l("loadProperties.no_db"));
+      }
+
+    if (journalProperty == null)
+      {
+	// "Couldn''t get the ganymede.journal property"
+	throw new GanymedeStartupException(ts.l("loadProperties.no_journal"));
+      }
+
+    if (logProperty == null)
+      {
+	// "Couldn''t get the ganymede.log property"
+	throw new GanymedeStartupException(ts.l("loadProperties.no_log"));
+      }
+
+    if (serverHostProperty == null)
+      {
+	// "Couldn''t get the ganymede.serverhost property"
+	throw new GanymedeStartupException(ts.l("loadProperties.no_server_host"));
+      }
+
+    if (rootname == null)
+      {
+	// "Couldn''t get the ganymede.rootname property"
+	throw new GanymedeStartupException(ts.l("loadProperties.no_root_name"));
+      }
+
+    // we don't care if we don't get the mailHostProperty, since
+    // we don't require that the server be able to send out mail.
+
+    if (mailHostProperty == null ||
+	mailHostProperty.equals(""))
+      {
+	// "***\n*** Email Sending disabled by use of -suppressEmail command line switch or by lack of ganymede.mailhost property ***\n***"
+	System.err.println(ts.l("loadProperties.no_mail_host"));
+      }
+
+    if (returnaddrProperty == null)
+      {
+	// "Couldn''t get the ganymede.returnaddr return email address property"
+	throw new GanymedeStartupException(ts.l("loadProperties.no_email_addr"));
+      }
+
+    // if the subjectPrefixProperty is not defined or if it does not begin and
+    // end with single quote marks, use a default prefix
+
+    if ((subjectPrefixProperty == null) ||
+	(subjectPrefixProperty.charAt(0) != '\'' ||
+	 subjectPrefixProperty.charAt(subjectPrefixProperty.length()-1) != '\''))
+      {
+	subjectPrefixProperty = "Ganymede: ";
       }
     else
       {
+	subjectPrefixProperty = subjectPrefixProperty.substring(1, subjectPrefixProperty.length()-1);
+      }
+
+    if (signatureFileProperty == null)
+      {
+	// "Couldn''t get the ganymede.signaturefile property"
+	throw new GanymedeStartupException(ts.l("loadProperties.no_sig"));
+      }
+
+    if (helpbaseProperty == null || helpbaseProperty.equals(""))
+      {
+	// "Couldn''t get the ganymede.helpbase property.. setting to null"
+	throw new GanymedeStartupException(ts.l("loadProperties.no_help_base"));
+      }
+
+    if (monitornameProperty == null)
+      {
+	// "Couldn''t get the ganymede.monitorname property."
+	throw new GanymedeStartupException(ts.l("loadProperties.no_monitor_name"));
+      }
+
+    if (defaultmonitorpassProperty == null)
+      {
+	// not a failure condition
+
+	// "Couldn''t get the ganymede.defaultmonitorpassw property.. may have problems if initializing a new db"
+	System.err.println(ts.l("loadProperties.no_monitor_pass"));
+      }
+
+    // get the registry port number
+
+    String registryPort = System.getProperty("ganymede.registryPort");
+
+    if (registryPort != null)
+      {
+	try
+	  {
+	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    // "Couldn''t get a valid registry port number from the ganymede.registryPort property: {0}"
+	    throw new GanymedeStartupException(ts.l("loadProperties.no_registry_port", registryPort));
+	  }
+      }
+
+    // get the published object port number
+
+    String publishedObjectPort = System.getProperty("ganymede.publishedObjectPort");
+
+    if (publishedObjectPort != null)
+      {
+	try
+	  {
+	    publishedObjectPortProperty = java.lang.Integer.parseInt(publishedObjectPort);
+	  }
+	catch (NumberFormatException ex)
+	  {
+	    // "Couldn''t get a valid published object port number from ganymede.publishedObjectPort property: {0}"
+	    throw new GanymedeStartupException(ts.l("loadProperties.no_object_port", publishedObjectPort));
+	  }
+      }
+
+    // if the main ganymede.properties file has a
+    // schemaDirectory property, load in the properties from
+    // the schema's properties file.
+
+    if (schemaDirectoryProperty != null && !schemaDirectoryProperty.equals(""))
+      {
+	try
+	  {
+	    String propName = arlut.csd.Util.PathComplete.completePath(schemaDirectoryProperty) +
+	      "schema.properties";
+
+	    // "Attempting to read schema properties: {0}"
+	    System.err.println(ts.l("loadProperties.reading_schema_props", propName));
+
+	    fis = new FileInputStream(propName);
+	    bis = new BufferedInputStream(fis);
+	    props.load(bis);
+	  }
+	catch (IOException ex)
+	  {
+	  }
+	finally
+	  {
+	    // don't wait for GC to close the file descriptors
+
+	    try
+	      {
+		if (bis != null)
+		  {
+		    bis.close();
+		  }
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+
+	    try
+	      {
+		if (fis != null)
+		  {
+		    fis.close();
+		  }
+	      }
+	    catch (IOException ex)
+	      {
+	      }
+	  }
+      }
+  }
+
+  /**
+   * <p>Make sure that we have our random access crack lib dictionary
+   * available to us. </p>
+   */
+
+  static private void initializeCrackLib()
+  {
+    if (!cracklibEnabled)
+      {
+	// "CrackLib disabled, no internal password quality checking available."
+	System.err.println(ts.l("main.cracklibDisabled"));
+	return;
+      }
+
+    // "CrackLib enabled for password quality checking."
+    System.err.println(ts.l("main.cracklibEnabled"));
+
+    try
+      {
+	File crackData = new File(cracklibDirectoryProperty, "cracklib_dict.pwd");
+	File crackIndex = new File(cracklibDirectoryProperty, "cracklib_dict.pwi");
+	File crackHash = new File(cracklibDirectoryProperty, "cracklib_dict.hwm");
+	String pathPrefix = cracklibDirectoryProperty + File.separator + "cracklib_dict";
+
+	if (crackData.isFile() && crackData.canRead() &&
+	    crackIndex.isFile() && crackIndex.canRead() &&
+	    crackHash.isFile() && crackHash.canRead())
+	  {
+	    // "Loading crack lib dictionary from {0}."
+	    System.err.println(ts.l("initializeCrackLib.loading_dictionary", pathPrefix));
+	    crackLibPacker = new Packer(pathPrefix, "r");
+	  }
+	else
+	  {
+	    // "Creating random access crack lib dictionary {0}."
+	    System.err.println(ts.l("initializeCrackLib.creating_dictionary", pathPrefix));
+	    Packer.make(PackageResources.getPackageResourceAsStream("words", org.solinger.cracklib.CrackLib.class),
+			pathPrefix,
+			false);
+
+	    // "Loading crack lib dictionary from {0}."
+	    System.err.println(ts.l("initializeCrackLib.loading_dictionary", pathPrefix));
+	    crackLibPacker = new Packer(pathPrefix, "r");
+	  }
+      }
+    catch (IOException ex)
+      {
+	ex.printStackTrace();
 	// "CrackLib disabled, no internal password quality checking available."
 	System.err.println(ts.l("main.cracklibDisabled"));
       }
-    
+  }
+
+  /**
+   * <p>Create our GanymedeRMIManager to handle RMI exports.
+   * and start it up. </p>
+   */
+
+  static private void startRMIManager()
+  {
     // Create our GanymedeRMIManager to handle RMI exports.  We need
     // to create this before creating our DBStore, as some of the
     // components of DBStore are to be made accessible through RMI
 
-    Ganymede.rmi = new GanymedeRMIManager(publishedObjectPortProperty, useSSL);
+    rmi = new GanymedeRMIManager(publishedObjectPortProperty, useSSL);
 
-   /* Start up the RMI registry thread. */
+    // Start up the RMI registry thread.
 
     try
       {
-        Ganymede.rmi.startRMIRegistry(registryPortProperty);
+        rmi.startRMIRegistry(registryPortProperty);
       }
     catch (RemoteException ex)
       {
 	// "Error, couln''t start the RMI registry."
         System.err.println(ts.l("main.error_starting_rmiregistry"));
-
         throw new RuntimeException(ex.getMessage());
-      }    
-    
+      }
+
     // if debug=<filename> was specified on the command line, tell the
     // RMI system to log RMI calls and exceptions that occur in
     // response to RMI calls.
@@ -570,166 +1015,140 @@ public class Ganymede {
 
 	System.getProperties().setProperty("sun.rmi.server.exceptionTrace", "true");
       }
+  }
 
-    // register our default UncaughtExceptionHandler
+  /**
+   * <p>Sets up our default UncaughtExceptionHandler.</p>
+   *
+   * <p>This method introduces a dependency on Java 1.5 or later.</p>
+   */
 
-    setupUncaughtExceptionHandler();
+  static private void setupUncaughtExceptionHandler()
+  {
+    defaultHandler = new GanymedeUncaughtExceptionHandler();
 
-    // create the database 
+    Thread.setDefaultUncaughtExceptionHandler(defaultHandler);
+  }
 
-    // "Creating DBStore structures"
-    debug(ts.l("main.info_creating_dbstore"));
+  /**
+   *  <p>No database exists on disk.. create a new journal file
+   *  but first, let's make sure there is no journal left alone
+   *  without a db file.  Does not write out a db file here.</p>
+   */
 
-    db = new DBStore();		// And how can this be!?  For he IS the kwizatch-haderach!!
+  static public void createNewDB() throws GanymedeStartupException
+  {
+    File journalFile = new File(journalProperty);
 
-    // load the database
-
-    dataFile = new File(dbFilename);
-    
-    if (dataFile.exists())
+    if (journalFile.exists())
       {
-	// "Loading DBStore contents"
-	debug(ts.l("main.info_loading_dbstore"));
-
-	db.load(dbFilename, true);
-      }
-    else
-      {
-	// no database on disk.. create a new one, along with a new
-	// journal
-
-	// but first, let's make sure there is no journal left alone
-	// without a ganymede.db file..
-
-	dataFile = new File(Ganymede.journalProperty);
-
-	if (dataFile.exists())
-	  {
-	    // ***
-	    // *** Error, I found an orphan journal ({0}), but no matching database file ({1}) to go with it.
-	    // ***
-	    // *** You need either to restore the {1} file, or to remove the {0} file.
-	    // ***
-	    debug(ts.l("main.orphan_journal", Ganymede.journalProperty, dbFilename));
-
-	    // "Shutting down."
-	    Ganymede.debug("\n" + ts.l("main.info_shutting_down") + "\n");
-
-	    System.exit(1);
-	  }
-
-	firstrun = true;
-
-	Invid.setAllocator(new InvidPool());
-
-	// "No DBStore exists under filename {0}, not loading"
-	debug(ts.l("main.info_new_dbstore", dbFilename));
-
-	// "Initializing new schema"
-	debug(ts.l("main.info_initializing_schema"));
-
-	db.initializeSchema();
-
-	// "Template schema created."
-	debug(ts.l("main.info_created_schema"));
-
-	try 
-	  {
-	    db.journal = new DBJournal(db, Ganymede.journalProperty);
-	  }
-	catch (IOException ex)
-	  {
-	    // what do we really want to do here?
-
-	    // "couldn''t initialize journal"
-	    throw new RuntimeException(ts.l("main.error_no_init_journal"));
-	  }
-
-	// create the database objects required for the server's operation
-
-	// "Creating mandatory database objects"
-	debug(ts.l("main.info_creating_mandatory"));
-
-	db.initializeObjects();
-
-	// "Mandatory database objects created."
-	debug(ts.l("main.info_created_mandatory"));
-
-	firstrun = false;
+	// ***
+	// *** Error, I found an orphan journal ({0}), but no matching database file ({1}) to go with it.
+	// ***
+	// *** You need either to restore the {1} file, or to remove the {0} file.
+	// ***
+	throw new GanymedeSilentStartupException(ts.l("main.orphan_journal", journalProperty, dbFilename));
       }
 
-    // Java 2 makes it a real pain to change out security
-    // managers.. since we don't need to do classfile transfer from
-    // the client (since all clients should use
-    // arlut.csd.ganymede.client.ClientBase), we just don't bother
-    // with it.
+    firstrun = true;
 
-    if (false)
-      {
-	// "Initializing Security Manager"
-	debug(ts.l("main.info_init_security"));
+    Invid.setAllocator(new InvidPool());
 
-	System.setSecurityManager(new RMISecurityManager());
-      }
-    else
-      {
-	// "Not Initializing RMI Security Manager.. not supporting classfile transfer"
-	debug(ts.l("main.info_no_security"));
-      }
+    // "No DBStore exists under filename {0}, not loading"
+    debug(ts.l("main.info_new_dbstore", dbFilename));
 
-    // Create a GanymedeServer object to support the logging
-    // code... the GanymedeServer's main purpose (to allow logins)
-    // won't come into play until we bind the server object into the
-    // RMI registry.
+    // "Initializing new schema"
+    debug(ts.l("main.info_initializing_schema"));
+    db.initializeSchema();
+    // "Template schema created."
+    debug(ts.l("main.info_created_schema"));
 
     try
       {
-	// "Creating GanymedeServer object"
-	debug(ts.l("main.info_creating_server"));
+	db.journal = new DBJournal(db, journalProperty);
+      }
+    catch (IOException ex)
+      {
+	// what do we really want to do here?
 
+	// "couldn''t initialize journal"
+	throw new RuntimeException(ts.l("main.error_no_init_journal"));
+      }
+
+    // create the database objects required for the server's operation
+
+    // "Creating mandatory database objects"
+    debug(ts.l("main.info_creating_mandatory"));
+    db.initializeObjects();
+    // "Mandatory database objects created."
+    debug(ts.l("main.info_created_mandatory"));
+
+    firstrun = false;
+  }
+
+  /**
+   * <p>Create a GanymedeServer object to support the logging
+   * code... the GanymedeServer's main purpose (to allow logins)
+   * won't come into play until we bind the server object into the
+   * RMI registry.</p>
+   */
+
+  static private void createGanymedeServer() throws GanymedeStartupException
+  {
+    try
+      {
+	// "Creating GanymedeServer object"
+	debug(ts.l("createGanymedeServer.info_creating_server"));
 	server = new GanymedeServer();
       }
     catch (Exception ex)
       {
 	// "Couldn''t create GanymedeServer: "
-	debug(ts.l("main.error_fail_server") + Ganymede.stackTrace(ex));
-
-	throw new RuntimeException(ex.getMessage());
+	throw new GanymedeStartupException(ts.l("createGanymedeServer.error_fail_server") + stackTrace(ex));
       }
+  }
 
-    // create the internal GanymedeSession that we use for system
-    // database maintenance
+  /**
+   * <p>Create the internal GanymedeSession that we use for system
+   * database maintenance and general operations.</p>
+   */
 
+  static private void createGanymedeSession() throws GanymedeStartupException
+  {
     try
       {
 	// "Creating internal Ganymede Session"
-	debug(ts.l("main.info_creating_def_session"));
+	debug(ts.l("createGanymedeSession.info_creating_def_session"));
 
 	internalSession = new GanymedeSession();
 	internalSession.enableWizards(false);
 	internalSession.enableOversight(false);
 
 	// "Creating master BaseListTransport object"
-	debug(ts.l("main.info_creating_baselist_trans"));
+	debug(ts.l("createGanymedeSession.info_creating_baselist_trans"));
 
-	Ganymede.baseTransport = Ganymede.internalSession.getBaseList();
+	baseTransport = internalSession.getBaseList();
       }
-    catch (RemoteException ex)
+    catch (Exception ex)
       {
-	throw new RuntimeException(ts.l("main.error_fail_session") + ex);
+	throw new GanymedeStartupException(ts.l("createGanymedeSession.error_fail_session") + ex);
       }
+  }
 
-    // -- set up the log --
-    
+  /**
+   * Creates the DBLog and sets options on it.
+   */
+
+  static private void startLog() throws GanymedeStartupException
+  {
     // First, we check to see if there is a designated mail host. If
     // not, then we automatically turn off the sending of emails.
     //
     // Likewise, suppressEmail is the email command line "master
     // switch". If it's set to true, then we won't actually send any
     // emails out.
-     
-    if (mailHostProperty == null || mailHostProperty.equals("") ||
-	ParseArgs.switchExists("suppressEmail", argv))
+
+    if (mailHostProperty == null || mailHostProperty.equals(""))
       {
       	suppressEmail = true;
       }
@@ -738,14 +1157,14 @@ public class Ganymede {
       {
 	if (mailLogProperty != null && !mailLogProperty.equals(""))
 	  {
-	    log = new DBLog(new DBLogFileController(logProperty), 
-			    new DBLogFileController(mailLogProperty), 
+	    log = new DBLog(new DBLogFileController(logProperty),
+			    new DBLogFileController(mailLogProperty),
 			    internalSession,
 			    suppressEmail);
 	  }
 	else
 	  {
-	    log = new DBLog(new DBLogFileController(logProperty), 
+	    log = new DBLog(new DBLogFileController(logProperty),
 			    null,
 			    internalSession,
 			    suppressEmail);
@@ -756,7 +1175,7 @@ public class Ganymede {
 	ex.printStackTrace();
 
 	// "Couldn''t initialize log file"
-	throw new RuntimeException(ts.l("main.error_log_file"));
+	throw new GanymedeStartupException(ts.l("main.error_log_file"));
       }
 
     // log our restart
@@ -780,7 +1199,15 @@ public class Ganymede {
 				      null,
 				      null,
 				      null));
+  }
 
+  /**
+   * <p>Creates a background scheduler, and registers the tasks and
+   * sync channels for it.</p>
+   */
+
+  static private void startScheduler() throws GanymedeStartupException
+  {
     // Create the background scheduler
 
     scheduler = new GanymedeScheduler(true);
@@ -829,24 +1256,62 @@ public class Ganymede {
     catch (NotLoggedInException ex)
       {
 	// "Mysterious not logged in exception: "
-	throw new Error(ts.l("main.error_myst_nologged") + ex.getMessage());
+	throw new GanymedeStartupException(ts.l("main.error_myst_nologged") + ex.getMessage());
       }
+    }
 
-    // take care of any startup-time database modifications
+  /**
+   * <p>This method is provided to allow us to hook in creation of new
+   * objects with specified invid's that the server code references.</p>
+   *
+   * <p>It's intended for use during server development as we evolve
+   * the schema.</p>
+   */
+
+  static private void startupHook()
+  {
+    // check to make sure the datastructures for supergash in the
+    // db file are set.
+
+    db.initializeObjects();
+  /** - notice - JAMES QUESTION.... ?
+   * Creates required objects when a new database is created
+   * from scratch, or if a pre-existing but damaged database file
+   * is loaded..
+   */
+
 
     try
       {
-	startupHook();
+	// and reset the password if we need to.
+
+	if (resetadmin && defaultrootpassProperty != null && !defaultrootpassProperty.trim().equals(""))
+	  {
+	    resetAdminPassword();
+	  }
+
+	// At DBStore 2.11, we added a hidden label field for objectEvent
+	// objects.  We'll edit any old ones here and fix up their labels
+
+	if (db.isLessThan(2,11))
+	  {
+	    AddLabelUpdate();
+	  }
       }
     catch (NotLoggedInException ex)
       {
 	// "Mysterious not logged in exception: "
 	throw new Error(ts.l("main.error_myst_nologged") + ex.getMessage());
       }
+  }
 
-    // Bind the GanymedeServer object in the RMI registry so clients
-    // and admin consoles can connect to us.
+  /**
+   * <p>Bind the GanymedeServer object in the RMI registry so clients
+   * and admin consoles can connect to us.</p>
+   */
 
+  static public void bindGanymedeRMI() throws GanymedeStartupException
+  {
     try
       {
 	// "Binding GanymedeServer in RMI Registry"
@@ -865,7 +1330,7 @@ public class Ganymede {
 	    // will attempt to report our address as loopback, which
 	    // won't do anyone any good
 
-	    // try to use the name specified in our ganymede.properties file
+	    // try to use the name specified in our ganymede.properties File
 
 	    if (serverHostProperty != null && !serverHostProperty.equals(""))
 	      {
@@ -877,50 +1342,46 @@ public class Ganymede {
 
 		    if (forcelocalhost)
 		      {
-			Ganymede.debug("\n** " + ts.l("main.warning") + " **\n");
+			debug("\n** " + ts.l("main.warning") + " **\n");
 		      }
 		    else
 		      {
-			Ganymede.debug("\n** " + ts.l("main.error") + " **\n");
+			debug("\n** " + ts.l("main.error") + " **\n");
 		      }
 
 		    // "Both the system hostname ({0}) and the
 		    // ganymede.serverhost definition ({1}) resolve to
 		    // the 127.0.0.1 loopback address"
-
-		    Ganymede.debug(ts.l("main.error_loopback",
+		    debug(ts.l("main.error_loopback",
 					java.net.InetAddress.getLocalHost().getHostName(),
 					serverHostProperty));
-		    Ganymede.debug("\n");
+		    debug("\n");
 
 		    // "The Ganymede server must have an externally
 		    // accessible IP address or else clients \
 		    // will not be able to communicate with the
 		    // Ganymede server from other than localhost."
-
-		    Ganymede.debug(ts.l("main.error_loopback_explain"));
+		    debug(ts.l("main.error_loopback_explain"));
 
 		    if (!forcelocalhost)
 		      {
 			// "If you really want to be only usable for
 			// localhost, edit the runServer script to use
 			// the -forcelocalhost option"
-
-			Ganymede.debug(ts.l("main.error_loopback_explain2"));
+			debug(ts.l("main.error_loopback_explain2"));
 
 			// "Shutting down."
-
-			Ganymede.debug("\n" + ts.l("main.info_shutting_down") + "\n");
+			debug("\n" + ts.l("main.info_shutting_down") + "\n");
 
 			GanymedeServer.shutdown();
 
-			System.exit(1);
+			throw new GanymedeSilentStartupException();
 		      }
 		  }
 		else
 		  {
 		    // "Avoiding loopback {0} definition, binding to {1}"
-		    Ganymede.debug(ts.l("main.info_avoiding_loopback",
+		    debug(ts.l("main.info_avoiding_loopback",
 					java.net.InetAddress.getLocalHost().getHostName(),
 					hostname));
 		  }
@@ -929,51 +1390,35 @@ public class Ganymede {
 
 	// tell the RMI registry where to find the server
 
-	Naming.bind("rmi://" + hostname + ":" + registryPortProperty + "/ganymede.server", 
+	Naming.bind("rmi://" + hostname + ":" + registryPortProperty + "/ganymede.server",
 		      server);
       }
     catch (RuntimeException ex)
       {
 	// We're catching RuntimeException separately to placate
 	// FindBugs.
-
 	// "Couldn''t establish server binding: "
-	debug(ts.l("main.error_no_binding") + ex);
-
-	throw ex;
+	throw new GanymedeStartupException(ts.l("main.error_no_binding") + ex);
       }
     catch (Exception ex)
       {
 	// "Couldn''t establish server binding: "
-	debug(ts.l("main.error_no_binding") + ex);
-
-	throw new RuntimeException(ex);
+	throw new GanymedeStartupException(ts.l("main.error_no_binding") + ex);
       }
+  }
 
-    // at this point clients can log in to the server.. the RMI system
-    // will spawn threads as necessary to handle RMI client activity..
-    // the main thread has nothing left to do and can go ahead and
-    // terminate here.
+  /**
+   * <p> If we've been given a telnet port on the command line, set up a
+   * Jython console interpreter that implementers can telnet to for debug.</p>
+   */
 
-    // wa-la
-
-    if (debug)
-      {
-	// "Setup and bound server object OK"
-	debug(ts.l("main.info_setup_okay"));
-      }
-
-    // if we've been given a telnet port on the command line, set up a
-    // Jython console interpreter that implementers can telnet to for debug.
-
-    String portString = ParseArgs.getArg("telnet", argv);
-    
+  static private void startJythonServer()
+  {
     if (portString != null)
       {
 	try
 	  {
 	    int portNumber = Integer.parseInt(portString);
-	    
 	    jythonServer = new JythonServer();
 	    jythonServer.run(portNumber);
 	  }
@@ -983,11 +1428,16 @@ public class Ganymede {
 	    debug(ts.l("main.badport", portString));
 	  }
       }
+  }
 
-    // register a thread to respond if the server gets ctrl-C, kill,
-    // etc.
+  /**
+   * <p>Register a thread to respond if the server hits ctrl-C on the
+   * server's stdin or sends a SIGQUIT signal, etc.</p>
+   */
 
-    Ganymede.signalHandlingThread = new Thread(new Runnable() {
+  static private void registerKillHandler()
+  {
+    signalHandlingThread = new Thread(new Runnable() {
         public void run() {
           try
             {
@@ -1000,23 +1450,12 @@ public class Ganymede {
         }
       }, ts.l("main.signalCatchThread"));  // "Ganymede ctrl-C handling thread"
 
-    java.lang.Runtime.getRuntime().addShutdownHook(Ganymede.signalHandlingThread);
-
-    debug("\n--------------------------------------------------------------------------------");
-
-    // "Ganymede Server Ready."
-    debug(ts.l("main.info_ready"));
-
-    debug("--------------------------------------------------------------------------------\n");
+    java.lang.Runtime.getRuntime().addShutdownHook(signalHandlingThread);
   }
 
-  // debug routine
-
   /**
-   *
-   * This is a convenience method used by server-side code to send
-   * debug output to stderr and to any attached admin consoles.
-   *
+   * <p>This is a convenience method used by server-side code to send
+   * debug output to stderr and to any attached admin consoles.</p>
    */
 
   static public void debug(String string)
@@ -1030,9 +1469,9 @@ public class Ganymede {
   }
 
   /**
-   * This is a convenience method used by server-side code to send
+   * <p>This is a convenience method used by server-side code to send
    * error logging output to stderr, to any attached admin consoles,
-   * and to the registered bugReportAddressProperty.
+   * and to the registered bugReportAddressProperty.</p>
    */
 
   static public void logError(Throwable ex)
@@ -1048,9 +1487,9 @@ public class Ganymede {
   }
 
   /**
-   * This is a convenience method used by server-side code to send
+   * <p>This is a convenience method used by server-side code to send
    * error logging output to stderr, to any attached admin consoles,
-   * and to the registered bugReportAddressProperty.
+   * and to the registered bugReportAddressProperty. </p>
    */
 
   static public void logError(Throwable ex, String contextMsg)
@@ -1068,15 +1507,15 @@ public class Ganymede {
   }
 
   /**
-   * This is a convenience method used by the server to get a
-   * stack trace from a throwable object in String form.
+   * <p>This is a convenience method used by the server to get a
+   * stack trace from a throwable object in String form. </p>
    */
 
   static public String stackTrace(Throwable thing)
   {
     StringWriter stringTarget = new StringWriter();
     PrintWriter writer = new PrintWriter(stringTarget);
-    
+
     thing.printStackTrace(writer);
     writer.close();
 
@@ -1084,8 +1523,8 @@ public class Ganymede {
   }
 
   /**
-   * This is a convenience method used by the server to generate a
-   * stack trace print from a server code.
+   * <p>This is a convenience method used by the server to generate a
+   * stack trace print from a server code. </p>
    */
 
   static public void printCallStack()
@@ -1114,13 +1553,13 @@ public class Ganymede {
       }
     catch (RuntimeException ex)
       {
-	Ganymede.debug(Ganymede.stackTrace(ex));
+	debug(stackTrace(ex));
       }
   }
 
   /**
-   * This is a convenience method used by the server to return a
-   * standard informative dialog.
+   * <p>This is a convenience method used by the server to return a
+   * standard informative dialog.</p>
    */
 
   static public ReturnVal createInfoDialog(String title, String body)
@@ -1128,7 +1567,7 @@ public class Ganymede {
     ReturnVal retVal = new ReturnVal(true,true); // success ok, doNormalProcessing ok
     retVal.setDialog(new JDialogBuff(title,
 				     body,
-				     Ganymede.OK,
+				     OK,
 				     null,
 				     "ok.gif"));
 
@@ -1141,8 +1580,8 @@ public class Ganymede {
   }
 
   /**
-   * This is a convenience method used by the server to return a
-   * standard error dialog.
+   * <p>This is a convenience method used by the server to return a
+   * standard error dialog.</p>
    */
 
   static public ReturnVal createErrorDialog(String title, String body)
@@ -1150,7 +1589,7 @@ public class Ganymede {
     ReturnVal retVal = new ReturnVal(false);
     retVal.setDialog(new JDialogBuff(title,
 				     body,
-				     Ganymede.OK,
+				     OK,
 				     null,
 				     "error.gif"));
 
@@ -1176,7 +1615,7 @@ public class Ganymede {
     ReturnVal retVal = new ReturnVal(false);
     retVal.setDialog(new JDialogBuff(ts.l("createErrorDialog.default_title"),
 				     body,
-				     Ganymede.OK,
+				     OK,
 				     null,
 				     "error.gif"));
 
@@ -1189,138 +1628,69 @@ public class Ganymede {
   }
 
   /**
-   * This is a convenience method used by the server to return a
-   * very standard error dialog.
+   * <p>This is a convenience method used by the server to return a
+   * very standard error dialog.</p>
    *
-   * The Exception parameter is ignored for now, so that this method
+   * <p>The Exception parameter is ignored for now, so that this method
    * can do something with it later if necessary without having to go
-   * through all the code which calls this method.
+   * through all the code which calls this method.</p>
    */
 
   static public ReturnVal loginError(Exception ex)
   {
-    return Ganymede.createErrorDialog(ts.l("loginError.error"),
+    return createErrorDialog(ts.l("loginError.error"),
 				      ts.l("loginError.explain"));
   }
 
   /**
-   * <p>This method is provided to allow us to hook in creation of new
-   * objects with specified invid's that the server code references.</p>
-   *
-   * <p>It's intended for use during server development as we evolve
-   * the schema.</p>
+   * <p>Reset the password to match our properties file because we have a
+   * -resetadmin command line argument. </p>
    */
 
-  static public void startupHook() throws NotLoggedInException
+  static private void resetAdminPassword() throws NotLoggedInException
   {
     Invid supergashinvid = Invid.createInvid(SchemaConstants.PersonaBase,
 					     SchemaConstants.PersonaSupergashObj);
     DBObject v_object;
     DBEditObject e_object;
-
     PasswordDBField p;
-     
+
     /* -- */
 
-    // check to make sure the datastructures for supergash in the
-    // ganymede.db file are set.
+    v_object = DBStore.viewDBObject(supergashinvid);
+    p = (PasswordDBField) v_object.getField(SchemaConstants.PersonaPasswordField);
 
-    Ganymede.db.initializeObjects();
-
-    // and reset the password if we need to
-
-    if (resetadmin && Ganymede.defaultrootpassProperty != null && !Ganymede.defaultrootpassProperty.trim().equals(""))
+    if (p == null || !p.matchPlainText(defaultrootpassProperty))
       {
-	// check to see if we need to reset the password to match our
-	// properties file
+	System.out.println(ts.l("startupHook.resetting"));
+	internalSession.openTransaction("Ganymede startupHook");
 
-	v_object = DBStore.viewDBObject(supergashinvid);
-	p = (PasswordDBField) v_object.getField(SchemaConstants.PersonaPasswordField);
+	e_object = (DBEditObject) internalSession.session.editDBObject(supergashinvid);
 
-	if (p == null || !p.matchPlainText(Ganymede.defaultrootpassProperty))
+	if (e_object == null)
 	  {
-	    System.out.println(ts.l("startupHook.resetting"));
-
-	    internalSession.openTransaction("Ganymede startupHook");
-
-	    e_object = (DBEditObject) internalSession.session.editDBObject(supergashinvid);
-
-	    if (e_object == null)
-	      {
-		throw new RuntimeException(ts.l("startupHook.no_supergash", rootname));
-	      }
-
-	    p = (PasswordDBField) e_object.getField(SchemaConstants.PersonaPasswordField);
-	    ReturnVal retVal = p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
-	    
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		throw new RuntimeException(ts.l("startupHook.failed_reset", rootname));
-	      }
-
-	    System.out.println(ts.l("startupHook.password_reset", rootname));
-
-	    retVal = internalSession.commitTransaction();
-
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		// if doNormalProcessing is true, the
-		// transaction was not cleared, but was
-		// left open for a re-try.  Abort it.
-		
-		if (retVal.doNormalProcessing)
-		  {
-		    internalSession.abortTransaction();
-		  }
-	      }
+	    throw new RuntimeException(ts.l("startupHook.no_supergash", rootname));
 	  }
-      }
 
-    // At DBStore 2.11, we added a hidden label field for objectEvent
-    // objects.  We'll edit any old ones here and fix up their labels
+	p = (PasswordDBField) e_object.getField(SchemaConstants.PersonaPasswordField);
+	ReturnVal retVal = p.setPlainTextPass(defaultrootpassProperty); // default supergash password
 
-    if (true || Ganymede.db.isLessThan(2,11))
-      {
-	boolean success = true;
-	List<DBObject> objects = internalSession.getObjects(SchemaConstants.ObjectEventBase);
-
-	if (objects.size() > 0)
+	if (!ReturnVal.didSucceed(retVal))
 	  {
-	    internalSession.openTransaction("Ganymede objectEvent fixup hook");
+	    throw new RuntimeException(ts.l("startupHook.failed_reset", rootname));
+	  }
 
-	    try
-	      {
-		for (DBObject object: objects)
-		  {
-		    StringDBField labelField = (StringDBField) object.getField(SchemaConstants.ObjectEventLabel);
+	System.out.println(ts.l("startupHook.password_reset", rootname));
 
-		    if (labelField == null)
-		      {
-			objectEventCustom objectEventObj = (objectEventCustom) internalSession.session.editDBObject(object.getInvid());
+	retVal = internalSession.commitTransaction();
 
-			if (objectEventObj != null)
-			  {
-			    ReturnVal retVal = objectEventObj.updateLabel((String) objectEventObj.getFieldValueLocal(SchemaConstants.ObjectEventObjectName),
-									  (String) objectEventObj.getFieldValueLocal(SchemaConstants.ObjectEventToken));
+	if (!ReturnVal.didSucceed(retVal))
+	  {
+	    // if doNormalProcessing is true, the
+	    // transaction was not cleared, but was
+	    // left open for a re-try.  Abort it.
 
-			    if (!ReturnVal.didSucceed(retVal))
-			      {
-				success = false;
-			      }
-			  }
-		      }
-		  }
-
-		if (success)
-		  {
-		    internalSession.commitTransaction();
-		  }
-		else
-		  {
-		    internalSession.abortTransaction();
-		  }
-	      }
-	    catch (Throwable ex)
+	    if (retVal.doNormalProcessing)
 	      {
 		internalSession.abortTransaction();
 	      }
@@ -1328,6 +1698,62 @@ public class Ganymede {
       }
   }
 
+  /**
+   * <p> At DBStore 2.11, we added a hidden label field for objectEvent
+   * objects.  We'll edit any old ones here and fix up their labels.</p>
+   */
+
+  static private void AddLabelUpdate() throws NotLoggedInException
+  {
+    boolean success = true;
+    List<DBObject> objects = internalSession.getObjects(SchemaConstants.ObjectEventBase);
+
+    if (objects.size() <= 0)
+      {
+	return;
+      }
+
+    internalSession.openTransaction("Ganymede objectEvent fixup hook");
+
+    try
+      {
+	for (DBObject object: objects)
+	  {
+	    StringDBField labelField = (StringDBField) object.getField(SchemaConstants.ObjectEventLabel);
+
+	    if (labelField == null)
+	      {
+		objectEventCustom objectEventObj = (objectEventCustom)
+		  internalSession.session.editDBObject(object.getInvid());
+
+		if (objectEventObj != null)
+		  {
+		    ReturnVal retVal = objectEventObj.updateLabel(
+				(String) objectEventObj.getFieldValueLocal(SchemaConstants.ObjectEventObjectName),
+				(String) objectEventObj.getFieldValueLocal(SchemaConstants.ObjectEventToken));
+
+		    if (!ReturnVal.didSucceed(retVal))
+		      {
+			success = false;
+		      }
+		  }
+	      }
+	  }
+
+	if (success)
+	  {
+	    internalSession.commitTransaction();
+	  }
+	else
+	  {
+	    internalSession.abortTransaction();
+	  }
+      }
+    catch (Throwable ex)
+      {
+	internalSession.abortTransaction();
+      }
+  }
 
   /**
    * <p>At DBStore version 2.7, we changed the package name for our
@@ -1375,7 +1801,7 @@ public class Ganymede {
 	    // ahead and rewrite it, hacking down into the
 	    // StringDBField in a most naughty way.
 
-	    if (Ganymede.db.isLessThan(2,7))
+	    if (db.isLessThan(2,7))
 	      {
 		prepClassMap();
 
@@ -1427,8 +1853,7 @@ public class Ganymede {
 				ts.l("registerTasks.memory_status_task"));
 
     // register garbage collection task without any schedule for
-    // execution.. this is so that the admin can launch it from the
-    // admin console
+    // execution.. this is so that the admin can launch it from theadmin console
 
     scheduler.addActionOnDemand(new gcTask(),
 				ts.l("registerTasks.gc_task"));
@@ -1440,14 +1865,14 @@ public class Ganymede {
   }
 
   /**
-   * This method schedules all registered builder tasks and Sync
+   * <p>This method schedules all registered builder tasks and Sync
    * Runners for execution.  This method will be called when a user
    * commits a transaction.  If a given task is already running, the
    * scheduler will make a note that it needs to be rescheduled on
-   * completion.
+   * completion.</p>
    */
 
-  static void runBuilderTasks()
+  static public void runBuilderTasks()
   {
     for (scheduleHandle handle: scheduler.getTasksByType(scheduleHandle.TaskType.BUILDER))
       {
@@ -1466,13 +1891,13 @@ public class Ganymede {
   }
 
   /**
-   * This method schedules all registered builder tasks for
+   * <p>This method schedules all registered builder tasks for
    * execution, with an option set that will cause all builder tasks
    * to consider object bases as changed since the last build, thus
-   * triggering a full external rebuild.
+   * triggering a full external rebuild.</p>
    */
 
-  static void forceBuilderTasks()
+  static public void forceBuilderTasks()
   {
     String[] options = {"forcebuild"};
 
@@ -1486,8 +1911,8 @@ public class Ganymede {
   }
 
   /**
-   * This method scans the database for valid SyncChannel entries and
-   * adds them to the scheduler.
+   * <p>This method scans the database for valid SyncChannel entries and
+   * adds them to the scheduler.</p>
    */
 
   static private void registerSyncChannels() throws NotLoggedInException
@@ -1527,14 +1952,14 @@ public class Ganymede {
    * makes it available for the scheduler to run.</p>
    */
 
-  static void registerSyncChannel(SyncRunner channel)
+  static public void registerSyncChannel(SyncRunner channel)
   {
     if (debug)
       {
 	System.err.println(ts.l("registerSyncChannel.debug_register", channel.getName()));
       }
 
-    scheduleHandle handle = Ganymede.scheduler.addActionOnDemand(channel, channel.getName());
+    scheduleHandle handle = scheduler.addActionOnDemand(channel, channel.getName());
 
     channel.setScheduleHandle(handle);
   }
@@ -1545,14 +1970,14 @@ public class Ganymede {
    * removes it from the Ganymede scheduler.</p>
    */
 
-  static void unregisterSyncChannel(String channelName)
+  static public void unregisterSyncChannel(String channelName)
   {
     if (debug)
       {
 	System.err.println(ts.l("unregisterSyncChannel.debug_unregister", channelName));
       }
 
-    Ganymede.scheduler.unregisterTask(channelName);
+    scheduler.unregisterTask(channelName);
   }
 
   /**
@@ -1565,47 +1990,9 @@ public class Ganymede {
    * returned is not currently running.</p>
    */
 
-  static SyncRunner getSyncChannel(String channelName)
+  static public SyncRunner getSyncChannel(String channelName)
   {
-    return (SyncRunner) Ganymede.scheduler.getTask(channelName);
-  }
-
-  /**
-   * Make sure that we have our random access crack lib dictionary
-   * available to us.
-   */
-
-  static void initializeCrackLib() throws IOException
-  {
-    File crackData = new File(cracklibDirectoryProperty, "cracklib_dict.pwd");
-    File crackIndex = new File(cracklibDirectoryProperty, "cracklib_dict.pwi");
-    File crackHash = new File(cracklibDirectoryProperty, "cracklib_dict.hwm");
-
-    String pathPrefix = cracklibDirectoryProperty + File.separator + "cracklib_dict";
-
-    if (crackData.isFile() && crackData.canRead() &&
-	crackIndex.isFile() && crackIndex.canRead() &&
-	crackHash.isFile() && crackHash.canRead())
-      {
-	// "Loading crack lib dictionary from {0}."
-	System.err.println(ts.l("initializeCrackLib.loading_dictionary", pathPrefix));
-
-	crackLibPacker = new Packer(pathPrefix, "r");
-      }
-    else
-      {
-	// "Creating random access crack lib dictionary {0}."
-	System.err.println(ts.l("initializeCrackLib.creating_dictionary", pathPrefix));
-
-	Packer.make(PackageResources.getPackageResourceAsStream("words", org.solinger.cracklib.CrackLib.class),
-		    pathPrefix,
-		    false);
-
-	// "Loading crack lib dictionary from {0}."
-	System.err.println(ts.l("initializeCrackLib.loading_dictionary", pathPrefix));
-
-	crackLibPacker = new Packer(pathPrefix, "r");
-      }
+    return (SyncRunner) scheduler.getTask(channelName);
   }
 
   /**
@@ -1613,7 +2000,7 @@ public class Ganymede {
    * record that the server is processing a build.</P>
    */
 
-  static void updateBuildStatus()
+  static public void updateBuildStatus()
   {
     int p1 = GanymedeBuilderTask.getPhase1Count();
     int p2 = GanymedeBuilderTask.getPhase2Count();
@@ -1634,328 +2021,84 @@ public class Ganymede {
 	GanymedeServer.sendMessageToRemoteSessions(ClientMessage.BUILDSTATUS, "idle");
       }
   }
+}
 
-  /**
-   * <p>Sets up our default UncaughtExceptionHandler.</p>
-   *
-   * <p>This method introduces a dependency on Java 1.5 or later.</p>
-   */
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                        GanymedeStartupException
 
-  private static void setupUncaughtExceptionHandler()
+------------------------------------------------------------------------------*/
+
+/**
+ * <p>This is a Ganymede-specific Exception that can be thrown during
+ * the server's start up processing.</p>
+ */
+
+class GanymedeStartupException extends Exception {
+
+  public GanymedeStartupException()
   {
-    Ganymede.defaultHandler = new GanymedeUncaughtExceptionHandler();
+  }
 
-    Thread.setDefaultUncaughtExceptionHandler(Ganymede.defaultHandler);
+  public GanymedeStartupException(String mesg)
+  {
+    super(mesg);
   }
 
   /**
-   * <p>This method loads properties from the ganymede.properties
-   * file.</p>
-   *
-   * <p>This method is public so that loader code linked with the
-   * Ganymede server code can initialize the properties without
-   * going through Ganymede.main().</p>
+   * This method is called to handle error processing logic for this
+   * GanymedeStartupException.
    */
 
-  public static boolean loadProperties(String filename)
+  public void process()
   {
-    Properties props = new Properties(System.getProperties());
-    FileInputStream fis = null;
-    BufferedInputStream bis = null;
-    boolean success = true;
+    this.printStackTrace();
 
-    /* -- */
+    // "Shutting down."
+    Ganymede.debug("\n" + Ganymede.ts.l("main.info_shutting_down") + "\n");
 
-    try
-      {    
-	fis = new FileInputStream(filename);
-	bis = new BufferedInputStream(fis);
-	props.load(bis);
-      }
-    catch (IOException ex)
+    System.exit(1);
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                  GanymedeSilentStartupException
+
+------------------------------------------------------------------------------*/
+
+/**
+ * <p>This is a Ganymede-specific Exception that can be thrown during
+ * the server's start up processing, and which will cause the server
+ * to terminate without displaying any message to the console.</p>
+ */
+
+class GanymedeSilentStartupException extends GanymedeStartupException {
+
+  public GanymedeSilentStartupException()
+  {
+  }
+
+  public GanymedeSilentStartupException(String mesg)
+  {
+    super(mesg);
+  }
+
+  /**
+   * <p>This method is called to handle error processing logic for
+   * this GanymedeSilentStartupException.</p>
+   *
+   * <p>If we have been given a message, we'll print that to stderr,
+   * otherwise processing will be completely silent.</p>
+   */
+
+  public void process()
+  {
+    if (getMessage() != null)
       {
-	return false;
-      }
-    finally
-      {
-	// don't wait for GC to close the file descriptors
-
-	try
-	  {
-	    if (bis != null)
-	      {
-		bis.close();
-	      }
-	  }
-	catch (IOException ex)
-	  {
-	  }
-
-	try
-	  {
-	    if (fis != null)
-	      {
-		fis.close();
-	      }
-	  }
-	catch (IOException ex)
-	  {
-	  }
+	System.err.println(getMessage());
       }
 
-    // make the combined properties file accessible throughout our server
-    // code.
-
-    System.setProperties(props);
-
-    dbFilename = System.getProperty("ganymede.database");
-    journalProperty = System.getProperty("ganymede.journal");
-    logProperty = System.getProperty("ganymede.log");
-    mailLogProperty = System.getProperty("ganymede.maillog");
-    serverHostProperty = System.getProperty("ganymede.serverhost");
-    rootname = System.getProperty("ganymede.rootname");
-    defaultrootpassProperty = System.getProperty("ganymede.defaultrootpass");
-    mailHostProperty = System.getProperty("ganymede.mailhost");
-    signatureFileProperty = System.getProperty("ganymede.signaturefile");
-    returnaddrProperty = System.getProperty("ganymede.returnaddr");
-    subjectPrefixProperty = System.getProperty("ganymede.subjectprefix");
-    helpbaseProperty = System.getProperty("ganymede.helpbase");
-    monitornameProperty = System.getProperty("ganymede.monitorname");
-    defaultmonitorpassProperty = System.getProperty("ganymede.defaultmonitorpass");
-    messageDirectoryProperty = System.getProperty("ganymede.messageDirectory");
-    schemaDirectoryProperty = System.getProperty("ganymede.schemaDirectory");
-    logHelperProperty = System.getProperty("ganymede.loghelper");
-    bugReportAddressProperty = System.getProperty("ganymede.bugsaddress");
-
-    String cracklibEnabledString = System.getProperty("ganymede.usecracklib");
-
-    if (cracklibEnabledString != null && cracklibEnabledString.equalsIgnoreCase("true"))
-      {
-	cracklibDirectoryProperty = System.getProperty("ganymede.cracklibDirectory");
-
-	if (cracklibDirectoryProperty == null)
-	  {
-	    // "No ganymede.cracklibDirectory property specified, can''t enable cracklib processing."
-	    System.err.println(ts.l("loadProperties.no_cracklib_dir"));
-
-	    success = false;
-	  }
-	else
-	  {
-	    File cracklibDir = new File(cracklibDirectoryProperty);
-
-	    if (!cracklibDir.isDirectory() || !cracklibDir.canWrite() || !cracklibDir.canRead())
-	      {
-		// "No usable directory matching the ganymede.cracklibDirectory property ({0}) exists, can''t enable cracklib processing."
-		System.err.println(ts.l("loadProperties.bad_cracklib_dir", cracklibDirectoryProperty));
-		success = false;
-	      }
-	    else
-	      {
-		cracklibEnabled = true;
-	      }
-	  }
-      }
-
-    String softtimeoutString = System.getProperty("ganymede.softtimeout");
-
-    if (softtimeoutString != null && softtimeoutString.equalsIgnoreCase("true"))
-      {
-	softtimeout = true;
-      }
-
-    String timeoutIdleNoObjsString = System.getProperty("ganymede.timeoutIdleNoObjs");
-
-    if (timeoutIdleNoObjsString != null)
-      {
-	try
-	  {
-	    timeoutIdleNoObjs = java.lang.Integer.parseInt(timeoutIdleNoObjsString);
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    System.err.println(ts.l("loadProperties.no_parse_timeoutIdleNoObjs", timeoutIdleNoObjsString));
-	  }
-      }
-
-    String timeoutIdleWithObjsString = System.getProperty("ganymede.timeoutIdleWithObjs");
-
-    if (timeoutIdleWithObjsString != null)
-      {
-	try
-	  {
-	    timeoutIdleWithObjs = java.lang.Integer.parseInt(timeoutIdleNoObjsString);
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    System.err.println(ts.l("loadProperties.no_parse_timeoutIdleWithObjs",
-				    timeoutIdleWithObjsString));
-	  }
-      }
-
-    if (dbFilename == null)
-      {
-	System.err.println(ts.l("loadProperties.no_db"));
-	success = false;
-      }
-
-    if (journalProperty == null)
-      {
-	System.err.println(ts.l("loadProperties.no_journal"));
-	success = false;
-      }
-
-    if (logProperty == null)
-      {
-	System.err.println(ts.l("loadProperties.no_log"));
-	success = false;
-      }
-
-    if (serverHostProperty == null)
-      {
-	System.err.println(ts.l("loadProperties.no_server_host"));
-	success = false;
-      }
-
-    if (rootname == null)
-      {
-	System.err.println(ts.l("loadProperties.no_root_name"));
-	success = false;
-      }
-
-    // we don't care if we don't get the defaultrootpassProperty,
-    // since we don't require the user to keep their password in the
-    // server's properties file unless they want to reset it
-
-    if (mailHostProperty == null ||
-        mailHostProperty.equals(""))
-      {
-	System.err.println(ts.l("loadProperties.no_mail_host"));
-      }
-
-    if (returnaddrProperty == null)
-      {
-	System.err.println(ts.l("loadProperties.no_email_addr"));
-	success = false;
-      }
-
-    // if the subjectPrefixProperty is not defined or if it does not begin and
-    // end with single quote marks, use a default prefix
-
-    if ((subjectPrefixProperty == null) ||
-	(subjectPrefixProperty.charAt(0) != '\'' ||
-	 subjectPrefixProperty.charAt(subjectPrefixProperty.length()-1) != '\''))
-      {
-	subjectPrefixProperty = "Ganymede: ";
-      }
-    else
-      {
-	subjectPrefixProperty = subjectPrefixProperty.substring(1, subjectPrefixProperty.length()-1);
-      }
-
-    if (signatureFileProperty == null)
-      {
-	System.err.println(ts.l("loadProperties.no_sig"));
-	success = false;
-      }
-
-    if (helpbaseProperty == null || helpbaseProperty.equals(""))
-      {
-	System.err.println(ts.l("loadProperties.no_help_base"));
-	helpbaseProperty = null;
-      }
-
-    if (monitornameProperty == null)
-      {
-	System.err.println(ts.l("loadProperties.no_monitor_name"));
-	success = false;
-      }
-
-    if (defaultmonitorpassProperty == null)
-      {
-	System.err.println(ts.l("loadProperties.no_monitor_pass"));
-      }
-
-    // get the registry port number
-
-    String registryPort = System.getProperty("ganymede.registryPort");
-
-    if (registryPort != null)
-      {
-	try
-	  {
-	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    System.err.println(ts.l("loadProperties.no_registry_port", registryPort));
-	  }
-      }
-
-    // get the published object port number
-
-    String publishedObjectPort = System.getProperty("ganymede.publishedObjectPort");
-
-    if (publishedObjectPort != null)
-      {
-	try
-	  {
-	    publishedObjectPortProperty = java.lang.Integer.parseInt(publishedObjectPort);
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    System.err.println(ts.l("loadProperties.no_object_port", publishedObjectPort));
-	  }
-      }
-
-    // if the main ganymede.properties file has a
-    // ganymede.schemaDirectory property, load in the properties from
-    // the schema's properties file.
-
-    if (schemaDirectoryProperty != null && !schemaDirectoryProperty.equals(""))
-      {
-	try
-	  {
-	    String propName = arlut.csd.Util.PathComplete.completePath(schemaDirectoryProperty) + 
-	      "schema.properties";
-
-	    System.err.println(ts.l("loadProperties.reading_schema_props", propName));
-
-	    fis = new FileInputStream(propName);
-	    bis = new BufferedInputStream(fis);
-	    props.load(bis);
-	  }
-	catch (IOException ex)
-	  {
-	  }
-	finally
-	  {
-	    // don't wait for GC to close the file descriptors
-
-	    try
-	      {
-		if (bis != null)
-		  {
-		    bis.close();
-		  }
-	      }
-	    catch (IOException ex)
-	      {
-	      }
-
-	    try
-	      {
-		if (fis != null)
-		  {
-		    fis.close();
-		  }
-	      }
-	    catch (IOException ex)
-	      {
-	      }
-	  }
-      }
-
-    return success;
+    System.exit(1);
   }
 }
