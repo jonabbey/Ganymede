@@ -99,7 +99,7 @@ import arlut.csd.ganymede.rmi.db_field;
 
 public class DBJournal implements ObjectStatus {
 
-  static boolean debug = true;
+  static boolean debug = false;
   static DBStore store = null;
 
   public static void setDebug(boolean val)
@@ -501,6 +501,7 @@ public class DBJournal implements ObjectStatus {
 
 		    // we have to do the delta.toString() after we apply the delta so that
 		    // the scalarValue fields get parented
+
 		    if (debug)
 		      {
 			// "Delta read:\n\t{0}\n"
@@ -706,6 +707,7 @@ public class DBJournal implements ObjectStatus {
 		    System.err.println(ts.l("writeTransaction.creating"));
 		    printObject(eObj);
 		  }
+
 		break;
 		
 	      case EDITING:
@@ -720,7 +722,6 @@ public class DBJournal implements ObjectStatus {
 		    // "Wrote object edit record:\n\t{0}"
 		    System.err.print(ts.l("writeTransaction.wroteobjedit",
 					  StringUtils.replaceStr(delta.toString(),"\n","\n\t")));		    
-		    //		    printObject(eObj);
 		  }
 		
 		break;
@@ -741,6 +742,7 @@ public class DBJournal implements ObjectStatus {
 		    System.err.println(ts.l("writeTransaction.dropping"));		    
 		    printObject(eObj);
 		  }
+
 		break;
 	      }
 	  }
@@ -940,13 +942,11 @@ public class DBJournal implements ObjectStatus {
     System.err.println("\t" + objectStr);
   }
 
-  // debug routine
   /**
-   *
    * This is a convenience method used by server-side code to send
    * debug output to stderr and to any attached admin consoles.
-   *
    */
+
   static public void debug(String string)
   {
     if (debug)
@@ -1153,14 +1153,11 @@ class JournalEntry {
       }
   }
 
-
-  // debug routine
   /**
-   *
    * This is a convenience method used by server-side code to send
    * debug output to stderr and to any attached admin consoles.
-   *
    */
+
   static public void debug(String string)
   {
     if (debug)
