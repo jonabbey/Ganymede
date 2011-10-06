@@ -1279,6 +1279,11 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     return windowMenu;
   }
 
+  /**
+   * Causes the window with the given title selected and brought to
+   * the front.
+   */
+
   public void showWindow(String title)
   {
     Object obj = windowList.get(title);
@@ -1294,6 +1299,35 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     else if (debug)
       {
 	System.err.println("Hmm, don't know what kind of window this is:" + obj);
+      }
+  }
+
+  /**
+   * Causes the editable object window for Invid objInvid to be
+   * selected and brought to the front.
+   */
+
+  public void showWindow(Invid objInvid)
+  {
+    Object ary[];
+
+    synchronized (windowList)
+      {
+	ary = windowList.values().toArray();
+      }
+
+    for (int i = 0; i < ary.length; i++)
+      {
+	if (ary[i] instanceof framePanel)
+	  {
+	    framePanel fp = (framePanel) ary[i];
+
+	    if (fp.isEditable() && fp.getObjectInvid().equals(objInvid))
+	      {
+		setSelectedWindow(fp);
+		return;
+	      }
+	  }
       }
   }
 
