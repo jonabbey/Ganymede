@@ -1350,7 +1350,7 @@ public class DBEditSet {
 	// put a reference to the object that tripped us up so that
 	// the client can bring the problematic window forward.
 
-	retVal.setErrorType(ErrorTypeEnum.MISSINGFIELDS);
+	retVal.setErrorType(ErrorTypeEnum.SHOWOBJECT);
 	retVal.setInvid(eObj.getInvid());
 
 	// let DBSession/the client know they can retry things.

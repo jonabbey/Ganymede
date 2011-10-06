@@ -2665,7 +2665,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
       {
 	while ((retVal != null) && (retVal.getDialog() != null))
 	  {
-	    if (retVal.getErrorType() == ErrorTypeEnum.MISSINGFIELDS)
+	    if (retVal.getErrorType() == ErrorTypeEnum.SHOWOBJECT)
 	      {
 		Invid objInvid = retVal.getInvid();
 		wp.showWindow(objInvid);

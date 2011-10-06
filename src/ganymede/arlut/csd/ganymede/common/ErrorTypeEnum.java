@@ -56,8 +56,10 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This Enum is used to label certain types of error conditions that
- * can be transmitted by a ReturnVal from the server to the client</p>
+ * <p>This Enum is used to label certain types of error conditions
+ * that can be transmitted by a {@link
+ * arlut.csd.ganymede.common.ReturnVal} from the server to the
+ * client</p>
  *
  * <p>As a Java 5 enum, this class is inherently serializable, and the
  * Ganymede server's RMI API involves the transmission of ErrorTypeEnum
@@ -74,15 +76,15 @@ public enum ErrorTypeEnum {
   UNSPECIFIED,
 
   /**
-   * <p>If a ReturnVal's error type is MISSINGFIELDS, that signifies
-   * that the client should call {@link
+   * <p>If a ReturnVal's error type is SHOWOBJECT, that signifies that
+   * the client should call {@link
    * arlut.csd.ganymede.common.ReturnVal#getInvid()} to identify the
-   * object that is missing one or more fields.  The client will
-   * respond to this by bringing any create or edit window on that
-   * object to the front so the user knows which object the error
-   * relates to, even if the object is not complete enough to have a
-   * label.</p>
+   * object that should be brought to the front before showing the
+   * error dialog encoded in the ReturnVal.  The client will respond
+   * to this by bringing any create or edit window on that object to
+   * the front so the user knows which object the error relates to,
+   * even if the object is not complete enough to have a label.</p>
    */
 
-  MISSINGFIELDS;
+  SHOWOBJECT;
 }
