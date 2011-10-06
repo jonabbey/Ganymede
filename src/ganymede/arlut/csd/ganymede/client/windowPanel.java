@@ -95,19 +95,18 @@ import arlut.csd.ganymede.rmi.invid_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * windowPanel is the top level panel containing and controlling the
+ * <p>windowPanel is the top level panel containing and controlling the
  * internal {@link arlut.csd.ganymede.client.framePanel} and
  * {@link arlut.csd.ganymede.client.gResultTable gResultTable} windows
- * that are displayed in reaction to actions taken by the user.
+ * that are displayed in reaction to actions taken by the user.</p>
  *
- * windowPanel is responsible for adding these windows, and maintaining
- * the window list in the menubar.
+ * <p>windowPanel is responsible for adding these windows, and maintaining
+ * the window list in the menubar.</p>
  *
- * windowPanel is also responsible for displaying and removing the
+ * <p>windowPanel is also responsible for displaying and removing the
  * internal 'guy working' status window that lets the user know the client
- * hasn't frozen up when it is processing a query request.
+ * hasn't frozen up when it is processing a query request.</p>
  *
- * @version $Id$
  * @author Mike Mulvaney
  */
 
@@ -139,11 +138,12 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     gc;
 
   /**
-   * Used to keep track of multiple 'guy working' internal wait windows
-   * if we have multiple threads waiting for query results from the server.
+   * <p>Used to keep track of multiple 'guy working' internal wait
+   * windows if we have multiple threads waiting for query results
+   * from the server.</p>
    *
-   * This hashtable maps Runnable objects (objects downloading query results
-   * in their own threads) to JInternalFrame's.
+   * <p>This hashtable maps Runnable objects (objects downloading
+   * query results in their own threads) to JInternalFrame's.</p>
    */
 
   Hashtable waitWindowHash = new Hashtable();
@@ -261,9 +261,9 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   * Returns an image used as a generic "wait" image.
+   * <p>Returns an image used as a generic "wait" image.</p>
    *
-   * Currently returns the men-at-work image.
+   * <p>Currently returns the men-at-work image.</p>
    */
 
   public Image getWaitImage()
@@ -528,13 +528,13 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   * This method returns a localized string for a framePanel title,
+   * <p>This method returns a localized string for a framePanel title,
    * according to the operation being performed on the object and its
-   * type.
+   * type.</p>
    *
-   * It is used in addWindow() to set a window's initial title, and by
+   * <p>It is used in addWindow() to set a window's initial title, and by
    * framePanel to handle relabeling an object whose label field has been
-   * altered.
+   * altered.</p>
    */
 
   public String getWindowTitle(boolean editable, boolean newlyCreated, String objectType, String object_label)
@@ -941,10 +941,10 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   * Closes all windows that are open for editing.
+   * <p>Closes all windows that are open for editing.</p>
    *
-   * This should be called by the parent when the transaction is canceled, to get rid of
-   * windows that might confuse the user.
+   * <p>This should be called by the parent when the transaction is
+   * canceled, to get rid of windows that might confuse the user.</p>
    */
 
   public void closeEditables()
@@ -988,10 +988,10 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   * Closes all windows that show a view onto the given Invid
+   * <p>Closes all windows that show a view onto the given Invid</p>
    *
-   * This should be called by the parent when the transaction is
-   * canceled, to get rid of windows viewing deleted objects.
+   * <p>This should be called by the parent when the transaction is
+   * canceled, to get rid of windows viewing deleted objects.</p>
    */
 
   public void closeInvidWindows(Invid invid)
@@ -1097,11 +1097,9 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   *
    * This method attempts to close an internal window in the client,
    * as identified by title.  This method will not close windows (as
    * for newly created objects) that are not set to be closeable.
-   *
    */
 
   public void closeWindow(String title)
@@ -1147,15 +1145,15 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   * This method handles the generation and setting of a unique
+   * <p>This method handles the generation and setting of a unique
    * window title for a window that we are displaying.  The titles for
    * all windows are tracked in windowPanel's windowList, and this
    * method takes care of updating windowList as necessary with the
-   * new title.
+   * new title.</p>
    *
-   * This method can also be used to change a pre-existing window's
-   * title, in which case the old title is removed from the windowList in favor
-   * of the new one.
+   * <p>This method can also be used to change a pre-existing window's
+   * title, in which case the old title is removed from the windowList
+   * in favor of the new one.</p>
    */
 
   public String setWindowTitle(JInternalFrame frame, String proposedTitle)
@@ -1326,22 +1324,22 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   }
 
   /**
-   * This method takes an {@link arlut.csd.ganymede.common.Invid}
+   * <p>This method takes an {@link arlut.csd.ganymede.common.Invid}
    * and a {@link arlut.csd.ganymede.common.ReturnVal} that encode
    * field refresh information, and update any open windows with the
-   * appropriate information.
+   * appropriate information.</p>
    *
-   * If invid is set, the only windows which will be refreshed are
+   * <p>If invid is set, the only windows which will be refreshed are
    * those that are presenting that object for display or editing.  If
-   * it is null, all object windows will be refreshed.
+   * it is null, all object windows will be refreshed.</p>
    *
-   * The retVal parameter can hold a list of fields that need to be
+   * <p>The retVal parameter can hold a list of fields that need to be
    * refreshed, or an encoding that forces a refresh of all fields.  If
    * the retVal parameter is null, all fields on all windows that
-   * match the invid parameter will be refreshed.
+   * match the invid parameter will be refreshed.</p>
    *
-   * If both invid and retVal are null, all fields in all object windows
-   * will be refreshed.
+   * <p>If both invid and retVal are null, all fields in all object windows
+   * will be refreshed.</p>
    */
 
   public void refreshObjectWindows(Invid invid, ReturnVal retVal)
