@@ -4,16 +4,16 @@
 
    This class is a serializable return code that is returned from
    most Ganymede server operations that need to pass back some
-   sort of status information to the client.  
-   
+   sort of status information to the client.
+
    Created: 27 January 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2010
    The University of Texas at Austin
 
@@ -401,6 +401,14 @@ public final class ReturnVal implements java.io.Serializable {
   Invid newObjectInvid = null;
 
   /**
+   * <p>An enum that is used to indicate if this ReturnVal represents
+   * a specific type of error that the client will respond to in a
+   * special way.
+   */
+
+  private ErrorTypeEnum errorType = ErrorTypeEnum.UNSPECIFIED;
+
+  /**
    * <p>A remote handle to an RMI reference of various kinds ({@link arlut.csd.ganymede.rmi.db_object db_object},
    * {@link arlut.csd.ganymede.rmi.Session Session}, {@link arlut.csd.ganymede.rmi.XMLSession XMLSession})
    * on the server returned for use by the client.</p>
@@ -496,6 +504,19 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
+   * <p>Returns the type of error condition represented by this
+   * ReturnVal.  Generally this will be ErrorTypeEnum.UNSPECIFIED, but
+   * certain types of error conditions will be marked with some other
+   * ErrorTypeEnum value so that the client will know to treat it
+   * specially.</p>
+   */
+
+  public ErrorTypeEnum getErrorType()
+  {
+    return errorType;
+  }
+
+  /**
    * <p>This method is used to get an Invid that the server
    * wants to return to the client.  Used particularly for
    * {@link arlut.csd.ganymede.rmi.invid_field#createNewEmbedded() invid_field.createNewEmbedded()}.
@@ -510,14 +531,14 @@ public final class ReturnVal implements java.io.Serializable {
     return newObjectInvid;
   }
 
-  /** 
+  /**
    * <p>This method is used to get a remote {@link
    * arlut.csd.ganymede.rmi.db_object db_object} reference that the server
    * wants to return to the client.  Used particularly for
    * Session.create_db_object() / Session.edit_db_object(), or null if
    * no db_object was returned.</p>
    *
-   * @see arlut.csd.ganymede.rmi.Session 
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public db_object getObject()
@@ -525,7 +546,7 @@ public final class ReturnVal implements java.io.Serializable {
     return (db_object) remoteObjectRef;
   }
 
-  /** 
+  /**
    * <p>This method is used to get a remote {@link
    * arlut.csd.ganymede.rmi.Session Session} reference that the server
    * wants to return to the client.  Used to return the results
@@ -538,7 +559,7 @@ public final class ReturnVal implements java.io.Serializable {
     return (Session) remoteObjectRef;
   }
 
-  /** 
+  /**
    * <p>This method is used to get a remote {@link
    * arlut.csd.ganymede.rmi.XMLSession XMLSession} reference that the server
    * wants to return to the client.  Used to return the results
@@ -551,7 +572,7 @@ public final class ReturnVal implements java.io.Serializable {
     return (XMLSession) remoteObjectRef;
   }
 
-  /** 
+  /**
    * <p>This method is used to get a remote {@link
    * arlut.csd.ganymede.rmi.FileTransmitter FileTransmitter} reference that the server
    * wants to return to the client.  Used to provide XML dump results
@@ -564,7 +585,7 @@ public final class ReturnVal implements java.io.Serializable {
     return (FileTransmitter) remoteObjectRef;
   }
 
-  /** 
+  /**
    * <p>This method is used to get a remote {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} reference that the
    * server wants to return to the admin console.  Used to return the
@@ -596,12 +617,12 @@ public final class ReturnVal implements java.io.Serializable {
    * a the text of any encoded dialog box describing the problem.  This
    * method is intended for text-mode clients that do not support the
    * full callback/wizard features that the
-   * {@link arlut.csd.JDialog.JDialogBuff JDialogBuff} 
+   * {@link arlut.csd.JDialog.JDialogBuff JDialogBuff}
    * class supports.</p>
    *
    * <p>This method (or getDialog() for GUI clients) should be checked
    * after all calls to the server that return non-null ReturnVal
-   * objects.</p> 
+   * objects.</p>
    */
 
   public String getDialogText()
@@ -686,7 +707,7 @@ public final class ReturnVal implements java.io.Serializable {
 
   /**
    * <p>This method returns true if the server is requesting that all
-   * fields in the object referenced by the client's preceding call 
+   * fields in the object referenced by the client's preceding call
    * to the server be reprocessed.</p>
    */
 
@@ -712,7 +733,7 @@ public final class ReturnVal implements java.io.Serializable {
    * provided an explicit list of fields that need to be reprocessed,
    * or null if all or no fields need to be processed.</p>
    */
-  
+
   public Vector<Short> getRescanList(Invid objID)
   {
     if (!doRescan())
@@ -791,7 +812,7 @@ public final class ReturnVal implements java.io.Serializable {
    * @param original The HashMap to put the results into.. this method
    * will put into original the Union of the field rescan information
    * specified in original and the rescan information held in buffer.
-   *  
+   *
    * @return A reference to original.
    */
 
@@ -1039,7 +1060,7 @@ public final class ReturnVal implements java.io.Serializable {
 
 	rescanList.append(invid.toString());
 	rescanList.append("|");
-	
+
 	if (fields == all)
 	  {
 	    rescanList.append("all|");
@@ -1075,6 +1096,18 @@ public final class ReturnVal implements java.io.Serializable {
   public ReturnVal setSuccess(boolean didSucceed)
   {
     this.success = didSucceed;
+
+    return this;
+  }
+
+  /**
+   * <p>Sets the type of error that this ReturnVal is representing to
+   * the client.</p>
+   */
+
+  public ReturnVal setErrorType(ErrorTypeEnum val)
+  {
+    this.errorType = val;
 
     return this;
   }
@@ -1149,9 +1182,9 @@ public final class ReturnVal implements java.io.Serializable {
     return this;
   }
 
-  /** 
+  /**
    * <p>This method attaches a remote reference to a
-   * {@link arlut.csd.ganymede.rmi.Ganymediator} 
+   * {@link arlut.csd.ganymede.rmi.Ganymediator}
    * wizard-handler to this ReturnVal for extraction by the client.</p>
    *
    * <p>For use on the server-side.</p>
@@ -1191,7 +1224,7 @@ public final class ReturnVal implements java.io.Serializable {
 
   public ReturnVal setErrorText(String title, String body)
   {
-    this.dialog = new JDialogBuff(title, body, 
+    this.dialog = new JDialogBuff(title, body,
 				  ts.l("setErrorText.ok"),
 				  null,
 				  "error.gif");
@@ -1226,7 +1259,7 @@ public final class ReturnVal implements java.io.Serializable {
 
   public ReturnVal setInfoText(String title, String body)
   {
-    this.dialog = new JDialogBuff(title, body, 
+    this.dialog = new JDialogBuff(title, body,
 				  ts.l("setInfoText.ok"),
 				  null,
 				  "ok.gif");
@@ -1264,13 +1297,13 @@ public final class ReturnVal implements java.io.Serializable {
     return this;
   }
 
-  /** 
+  /**
    * <p>This method is used to set a {@link
    * arlut.csd.ganymede.rmi.db_object db_object} reference that the client
    * can retrieve from us in those cases where a method on the server
    * really does need to return a db_object _and_ a return val.</p>
    *
-   * <p>For use on the server-side.</p> 
+   * <p>For use on the server-side.</p>
    */
 
   public ReturnVal setObject(db_object object)
@@ -1280,12 +1313,12 @@ public final class ReturnVal implements java.io.Serializable {
     return this;
   }
 
-  /** 
+  /**
    * <p>This method is used to set a {@link
    * arlut.csd.ganymede.rmi.Session Session} reference that the client
    * can retrieve from us at login time.</p>
    *
-   * <p>For use on the server-side.</p> 
+   * <p>For use on the server-side.</p>
    */
 
   public ReturnVal setSession(Session session)
@@ -1295,12 +1328,12 @@ public final class ReturnVal implements java.io.Serializable {
     return this;
   }
 
-  /** 
+  /**
    * <p>This method is used to set a {@link
    * arlut.csd.ganymede.rmi.XMLSession XMLSession} reference that the client
    * can retrieve from us at login time.</p>
    *
-   * <p>For use on the server-side.</p> 
+   * <p>For use on the server-side.</p>
    */
 
   public ReturnVal setXMLSession(XMLSession session)
@@ -1310,12 +1343,12 @@ public final class ReturnVal implements java.io.Serializable {
     return this;
   }
 
-  /** 
+  /**
    * <p>This method is used to set a {@link
    * arlut.csd.ganymede.rmi.FileTransmitter FileTransmitter} reference that the client
    * can retrieve from us.</p>
    *
-   * <p>For use on the server-side.</p> 
+   * <p>For use on the server-side.</p>
    */
 
   public ReturnVal setFileTransmitter(FileTransmitter transmitter)
@@ -1325,12 +1358,12 @@ public final class ReturnVal implements java.io.Serializable {
     return this;
   }
 
-  /** 
+  /**
    * <p>This method is used to set a {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} reference that the
    * admin console can retrieve from us at console connect time.</p>
    *
-   * <p>For use on the server-side.</p> 
+   * <p>For use on the server-side.</p>
    */
 
   public ReturnVal setAdminSession(adminSession session)
@@ -1456,7 +1489,8 @@ public final class ReturnVal implements java.io.Serializable {
   {
     if ((success != retVal.success) ||
 	(doNormalProcessing != retVal.doNormalProcessing) ||
-	(newObjectInvid != null) || 
+	(errorType != retVal.errorType) ||
+	(newObjectInvid != null) ||
 	(newLabel != null) ||
 	(retVal.newObjectInvid != null) ||
 	(retVal.newLabel != null) ||
