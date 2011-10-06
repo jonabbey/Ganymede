@@ -1071,6 +1071,9 @@ public class DBEditSet {
 
                 if (!ReturnVal.didSucceed(retVal))
                   {
+		    retVal.setErrorType(ErrorTypeEnum.SHOWOBJECT);
+		    retVal.setInvid(eObj.getInvid());
+
                     throw new CommitNonFatalException(retVal);
                   }
               }
@@ -1263,6 +1266,9 @@ public class DBEditSet {
 
 	if (!ReturnVal.didSucceed(retVal))
 	  {
+	    retVal.setErrorType(ErrorTypeEnum.SHOWOBJECT);
+	    retVal.setInvid(eObj.getInvid());
+
 	    eObj.release(false);
 
 	    for (DBEditObject eObj2: committedObjects)
