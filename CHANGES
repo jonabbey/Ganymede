@@ -1,12 +1,12 @@
 Ganymede Release 2.0
-6 January 2011
+6 October 2011
 CHANGES
 
 ---------------------------------------------
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: 6 January 2011
+RELEASE DATE: 6 October 2011
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -225,7 +225,7 @@ an object to be deleted in the client then viewed in an empty state
 through the use of the query result table pop-up menu.  Now, all
 checks against an object being already marked as deleted are done at
 the proper place, rather than being done in the tree response code.
-                                                                                                                                                             
+
 Also, I fixed bugzilla bug #14, which caused the title of query
 windows not to be properly updated when a transaction is committed and
 the query windows are refreshed, possibly with a different number of
@@ -613,9 +613,9 @@ target, before setting up a sync channel to transmits deltas as they
 are committed to Ganymede.
 
 Use is simple, just type
-                                                                                                                                                             
+
         xmlclient -dumpdata sync=Systems > systems.xml
-                                                                                                                                                             
+
 and Ganymede will dump out all data that fits the Systems Sync Channel
 constraint.
 
@@ -813,7 +813,7 @@ When running as an applet (using the 'native' or 'plugin' mode from
 the Ganymede web launcher), the applet window stays up still, of
 course.
 
-47. [CLIENT, ADMIN CONSOLE] Application Mode with Java Web Launch 
+47. [CLIENT, ADMIN CONSOLE] Application Mode with Java Web Launch
 
 In order to take advantage of the previous change, I've changed the
 JNLP launch files for the Ganymede client and admin console so that
@@ -948,7 +948,7 @@ This has been fixed by a change to the InvidDBField.bind() method.
 I created a handful of static factory methods on the DBField class,
 and modified a lot of classes to use these factory methods, rather
 than to repetitively have their own switch statements on the set of
-field types defined.  Now, adding a new DBField subtype is (almost!) 
+field types defined.  Now, adding a new DBField subtype is (almost!)
 as easy as editing a few static factory methods at the top of DBField,
 rather than having to edit a scattered collection of internal Ganymede
 code modules.
@@ -1817,6 +1817,158 @@ The PasswordDBField class in the server now understands the OpenBSD
 bcrypt hash format, in addition to SHA Unix Crypt and all the rest
 already supported.
 
+126. [SERVER] Admins are now allowed to give objects away
+
+Previously, admins in one owner group were not allowed to give an
+owner group they did not belong to possession of an object.
+
+Now, ownerCustom is tweaked to allow an admin in one Owner Group to
+add another Owner Group to an object's Owner List field, and then take
+his Owner Group out of the Owner List, thereby transferring
+responsibility of the object away from his group.
+
+The new 'ganymede.allowdonations' property can be used to control this
+behavior.  If the property is set to 'true', admins will be able to
+give away objects.  Otherwise, not.
+
+127. [CLIENT, SERVER] Object metadata fields can now be sent to Sync Channels
+
+The standard object metadata fields (creator, creation date, last
+modifier, last mod date) can now be selected for output to an XML Sync
+Channel.
+
+128. [CLIENT] Improved Sync Channel field editor
+
+The client's sync channel field editor now better represents the valid
+options for a full state Sync Channel.
+
+129. [SERVER] Added checkpoint / rollback to GanymedeExpirationTask
+
+The GanymedeExpirationTask was not previously protecting its
+activities with a checkpoint / rollback pair, so a failure to
+inactivate or remove any object scheduled for expiration/removal would
+block all other expirations / removals during that run of the task.
+
+The GanymedeExpirationTask now uses checkpoint / rollback for each
+object that it attempts to inactivate or remove, so a problem in one
+object won't prevent other objects from being properly processed.
+
+130. [SERVER] Added support for emailing uncaught exceptions
+
+The GanymedeUncaughtExceptionHandler will now send email to the
+addresses listed in the ganymede.bugsaddress property if an uncaught
+exception is handled.
+
+131. [SERVER, CLIENT] JDK 7 Compatibility, JDK 1.4 Incompatibility
+
+I made calls to FoxTrot, etc., conditional on the version of Java
+being run so as to make the client work properly under JDK 7.
+
+I took out some logic that was in place to handle running on JDK 1.4,
+which is now officially dead and gone.
+
+132. [SERVER, RMI, CLIENT] Removed the 'isCrypted' method from pass_field, PasswordDBField.
+
+The isCrypted() method was increasingly useless as it only checked for
+the presence of a traditional Unix triple-DES crypt hash.
+
+There are better ways to query a pass_field's supported hash types
+using the BaseField remote interface, anyway.
+
+133 [SERVER, RMI] **security** Removed getValueString() from db_field interface
+
+Removed getValueString, getEncodingString from remote db_field interface.
+
+These methods made it possible for users remotely logged into the Ganymede
+server to access information that was meant to be hidden from them.  In
+order for the user to access restricted information, the user would have
+to have permission to get a read-only or editable copy of a Ganymede
+database object via GanymedeSession.view_db_object() or edit_db_object().
+
+Once they had access to such an object, they were able to call getValueString()
+or getEncodingString() on any field in the object, even if those fields
+were not meant to be readable by the user.
+
+This did not put password data at risk because PasswordDBFields have never
+returned plain or hashtext via either of these methods.  It could reveal
+Strings from fields that were not meant to be visible to the user.
+
+In order to have taken advantage of this vulnerability, users would have
+had to have built a custom client that abused these methods.  Not a trivial
+matter, but not impossible either.
+
+134. [CLIENT] The client now only supports saving / mailing  object information in XML
+
+The client now has support for using the Ganymede XML format when
+saving or mailing object data.  This is exposed to the user by an item
+in the per-window 'Object' menu.
+
+The old ad-hoc ASCII formatting used when saving / mailing data has
+been removed.
+
+135. [CGI] The password CGI shows the password characters entered count.
+
+The Perl CGI script that handles password changes for end users now
+uses JavaScript to provide a dynamic display of the number of
+characters entered / the number of characters required so that users
+don't have to count the characters in their passwords themselves.
+
+136. [CLIENT] Improved CSV generation from the query result table
+
+The query result table now emits a more standard version of a CSV file
+when you save query results in that format.
+
+137. [XML] Fixed XML parsing of empty fields
+
+The XML parser in the Ganymede server now properly handles empty field
+elements (e.g., <Password/> or <Password></Password>) and treats them
+as a directive to delete the field.
+
+This only works in scalar fields.  Array fields will still require you
+to do something like this: <Groups><set></set></Groups> to clear all
+members of the field.
+
+138. [SERVER] Added versioning of Ganymede journal files for reliability
+
+The Ganymede server was not previously able to identify the case where
+a ganymede.db file on disk was paired with a journal file from an
+incompatible version of Ganymede.
+
+The journal file now contains version information, and the Ganymede
+server verifies that the journal file matches the version of thd
+ganymede.db file on startup.
+
+139. [SERVER] Internal cleanup in Ganymede startup sequence
+
+The arlut.csd.ganymede.server.Ganymede class has had its main() method
+considerably cleaned up, with the server's startup logic broken into
+several discrete methods.
+
+This is to improve the readability and maintainability of the server
+code.
+
+In addition, the server is now more resilient to errors that can arise
+during certain portions of the startup process.
+
+140. [SERVER, CLIENT] Show object windows causing problems at commit.
+
+The Ganymede client will now make visible and select a window editing
+an object if that object is missing fields or otherwise failed to
+validate at commit time.
+
+Previously, it was possible to have a partially filled out object in
+the background (or iconified) in the client, and it wasn't always
+clear which object caused the problem if something was broken at
+commit time.
+
+This was especially the case if an object had not been filed out at
+all, in which case it would not have a recognizable label that could
+be presented to the user to identify the problem object.
+
+Now, when the user hits commit in the client and there is a problem,
+the object edit or create window that contains the problem will be
+brought to his attention.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
@@ -2130,10 +2282,10 @@ http://java.sun.com/docs/hotspot/gc/ for complete details.
 You can now hit enter after typing a search value in the query box and
 the query will be submitted for you.  This should save people from
 having to mouse down to the 'submit' button for each query.  You will
-still need to manually mouse down to the 'add choices' box if you want  
+still need to manually mouse down to the 'add choices' box if you want
 to add an additional search constraint.  In addition, if a query
-returns no results, you'll now have the option to pop the query box 
-right back up, revise your query, and resubmit. 
+returns no results, you'll now have the option to pop the query box
+right back up, revise your query, and resubmit.
 
 The GUI widget used for changing passwords in Ganymede will now
 provide a quick dialog box telling you that you didn't type the
@@ -2172,7 +2324,7 @@ there may be a noticeable decrease in the time taken when a new object
 is created, as the owner group list calculation code is far more
 efficient now.
 
-13. [SERVER] Tweaked object creation ownership behavior 
+13. [SERVER] Tweaked object creation ownership behavior
 
 Previously, the Ganymede server would complain any time someone tried
 to create an object with more than one default owner selected.
@@ -2254,13 +2406,13 @@ Plaintext is never saved on disk unless the password field is
 specifically configured to do so in the Ganymede schema.  Things like
 sync'ing passwords to Windows NT which require plaintext passwords
 have to obtain them from temporary storage in the Ganymede server.
- 
+
 Formerly, whenever a user logged into Ganymede, Ganymede would
 temporarily acquire and retain the plaintext used to login to Ganymede
 in RAM only.  This plaintext could then be passed to Windows NT for
 synchronization.  In this way, users would not necessarily have to
 change their passwords in order for their account to be sync'ed.
- 
+
 Unfortunately, it turns out that the password identity validation is
 not perfect.  A UNIX password hashed using the traditional Unix
 crypt() routine is only significant to 8 characters.  If a user logged
@@ -2273,7 +2425,7 @@ restarted, and the plaintext password information was lost.  Worse,
 such carelessly entered passwords could get propagated to our Windows
 NT domain controller in their erroneous form, and Windows NT's
 password hashing is significant to 14 characters.
- 
+
 This is not a reasonable or tenable situation, so the passive
 plaintext password capture logic has been disabled.
 
@@ -2372,32 +2524,32 @@ other editing, something like the following would be logged:
 
  objectchanged
  -------------
- 
+
  I.P. Network ATL - Outgoing Inet Access Only, <267:96> was modified.
- 
+
  Fields changed:
- 
+
  Records
         Deleted: [10.5.16.132  - 08:00:20:9a:16:f2]
- 
+
  objectchanged
  -------------
- 
+
  I.P. Network ADG/OMG - Outgoing Inet Access Only, <267:79> was modified.
- 
+
  Fields changed:
- 
+
  Records
         Added: [10.5.16.132  - 08:00:20:9a:16:f2]
- 
+
  objectchanged
  -------------
- 
+
  System corona's Embedded System Interface, '[10.5.16.132  -
  08:00:20:9a:16:f2]',  <265:970> was modified.
- 
+
  Fields changed:
- 
+
  I.P. Address
         Old: 10.8.16.186
         New: 10.5.16.132
@@ -2420,32 +2572,32 @@ sequence look like this:
 
  objectchanged
  -------------
- 
+
  I.P. Network ATL - Outgoing Inet Access Only, <267:96> was modified.
- 
+
  Fields changed:
- 
+
  Records
         Deleted: [10.8.16.186  - 8-0-20-9a-16-f2]
- 
+
  objectchanged
  -------------
- 
+
  I.P. Network ADG/OMG - Outgoing Inet Access Only, <267:79> was modified.
- 
+
  Fields changed:
- 
+
  Records
         Added: [10.5.16.132  - 08:00:20:9a:16:f2]
- 
+
  objectchanged
  -------------
- 
+
  System corona's Embedded System Interface, '[10.5.16.132  -
  08:00:20:9a:16:f2]',  <265:970> was modified.
- 
+
  Fields changed:
- 
+
  I.P. Address
         Old: 10.8.16.186
         New: 10.5.16.132
@@ -3296,7 +3448,7 @@ client was working in the background to bring up the MOTD dialog.
 
 This was a result of the HTML messageDialog class used for the MOTD,
 Credits, and 'About Ganymede' dialogs being configured to lock out any
-other GUI interactions until those dialogs were released.  
+other GUI interactions until those dialogs were released.
 
 I don't think there was ever any compelling reason to make these
 dialogs modal, so I have made them not be so.  There's now a small
@@ -3821,7 +3973,7 @@ problems.
 
 When a user or admin console logs into the Ganymede server, the server
 will now do a reverse DNS lookup to get the fully qualified name of
-the system that the user is logging in from.  
+the system that the user is logging in from.
 
 The admin console will show the fully qualified domain name for
 attached clients.
@@ -4142,7 +4294,7 @@ This one's embarassing.  A long time ago I heavily tuned and optimized
 the Ganymede server's database hash structures.  A job well done, I
 said to myself.  Unfortunately, the DBSession.viewDBObject() method
 which everything in the server actually uses to pull objects out of
-the server was doing some extremely dumb things.  
+the server was doing some extremely dumb things.
 
 In particular, before ever looking in the highly optimized database
 structures, viewDBObject() looked to see if the object being sought
@@ -5392,7 +5544,7 @@ create would fail in an ungraceful manner, resulting in the server
 thinking that the user had a negative number of objects checked out,
 and getting very confused.
 
-The DBSession createDBObject() code now does a transaction checkpoint 
+The DBSession createDBObject() code now does a transaction checkpoint
 before attempting to place the newly created object in the proper
 owner groups.  If one of the owner groups turns out to be unavailable,
 the object create will fail and the transaction will be rolled back.
@@ -5971,11 +6123,11 @@ derived from a gash or gasharl ganymede.schema may find that they need
 to use the permissions editor to correct problems in the GASH Admin
 Role object's permissions bits.
 
-5. [SERVER] Changes to permissions fields now descriptively logged 
+5. [SERVER] Changes to permissions fields now descriptively logged
 
 If an administrator makes changes to the permission bits in a Role
 object, the server's log will now record the precise changes, which
-will be visible in the Role object's history panel.  
+will be visible in the Role object's history panel.
 
 The history recorded may be a bit deceptive in the case where a field
 which previously had no explicit field-level permissions set has them
@@ -5992,7 +6144,7 @@ Added getFieldName(short) to DBObject, db_object.
 7. [ADMIN CONSOLE] Fixed admin console
 
 The admin console now works properly in a browser, and properly
-initializes under all conditions.  
+initializes under all conditions.
 
 The magic incantation to get the Ganymede Admin console to find the
 arlut/csd/ganymede/GanymedeServer_Stub.class file was to include the
@@ -6113,7 +6265,7 @@ to stdout,
 OK\n
 
 which is to be read by rpc.yppasswdd to signal success.  If
-there are any problems, these will be described in a 
+there are any problems, these will be described in a
 report to stdout, which rpc.yppasswdd will take as a failure
 signal.
 
@@ -6140,7 +6292,7 @@ EXECUTING: src/server/build
 EXCECUTING: src/classes/buildJar
   ERROR     :  sync_tree: command not found
   FILE FIXED: src/classes/buildJar
-  PREV LINE :  sync_tree 
+  PREV LINE :  sync_tree
   NEW LINE  :  ./sync_tree
 
 Reported by Andy Johnson (andyjohnson@engineer.com).
@@ -6316,7 +6468,7 @@ Previously, the builder tasks ran the build scripts in the out
 directory, which wasn't really compatible with the decision in 0.97 to
 have the build tasks archive the output files written by the build
 tasks.  Now the build scripts are expected to be located by default
-in the directory about out, which allows the zip archives to be 
+in the directory about out, which allows the zip archives to be
 cleanly made.
 
 There is still some confusion here.. in theory, you can have multiple
@@ -6529,7 +6681,7 @@ having to edit code.
 
 The downside to this is that the server will not have the 'standard'
 tasks scheduled unless the ganymede.db file you are using has the
-tasks registered.  
+tasks registered.
 
 Most importantly, the change from Builder Task to Task object types is
 an incompatible change from 0.96 and previous releases.  You will need
@@ -7262,7 +7414,7 @@ releases and try to make this a bit better when we can.
 Previously, the list of choices provided when one edited an invid
 field only listed the set of objects that could be directly edited,
 and did not take into account the DBEditObject anonymousLinkOK()
-method that can provide for an exception to the normal editability 
+method that can provide for an exception to the normal editability
 determination.  Now, objects that can be linked by virtue of the
 remote object type's anonymousLinkOK() method will also be shown
 in the client's list of possible choices.
@@ -7526,7 +7678,7 @@ RELEASE DATE: August 27, 1998
 
 1. [CLIENT] View-only StringSelectors are double width
 
-The StringSelector GUI components are now twice as wide as before 
+The StringSelector GUI components are now twice as wide as before
 when they are not being edited.  That is, the single StringSelector
 panel will expand to take up the space that would have been given
 to the list of choices in an editing context.
@@ -8211,7 +8363,7 @@ were made in this regard:
   1. Single IP address and DNS record per interface
   2. Rooms are bound to a list of networks, and the interface objects
      for each system provide a list of IP network choices from the
-     room the system is placed in. 
+     room the system is placed in.
 
  In addition, the GASHBuilderTask now emits an aliases_info file for
 the first time.  In theory, you should be able to plug an installation
@@ -8247,7 +8399,7 @@ types that have fields in other object types pointing to them.
 11. [CLIENT/ADMIN CONSOLE] Put in some work-arounds for bug in Swing 1.0.2
 
  There is a significant bug in the JComboBox code in Swing 1.0.2.. see
-bug #4132528 in the Javasoft Bug Parade at 
+bug #4132528 in the Javasoft Bug Parade at
 http://developer.javasoft.com/developer/bugParade/bugs/4132528.html.
 
  We put a few workarounds in the code, but there may still be times
@@ -8388,7 +8540,7 @@ creating users with the GASH schema.
 
 2. [CLIENT] Queries Were Not Attached To Tree Nodes Before Loading.
 
- In the client, if a user tried to issue a query on an object base 
+ In the client, if a user tried to issue a query on an object base
 folder in the tree prior to opening the folder, a null query would
 be issued, and no results would come back.
 
