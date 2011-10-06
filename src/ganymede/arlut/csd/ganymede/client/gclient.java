@@ -128,6 +128,7 @@ import arlut.csd.ganymede.common.CatTreeNode;
 import arlut.csd.ganymede.common.CategoryDump;
 import arlut.csd.ganymede.common.CategoryTransport;
 import arlut.csd.ganymede.common.DumpResult;
+import arlut.csd.ganymede.common.ErrorTypeEnum;
 import arlut.csd.ganymede.common.FieldTemplate;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.InvidPool;
@@ -2664,6 +2665,12 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
       {
 	while ((retVal != null) && (retVal.getDialog() != null))
 	  {
+	    if (retVal.getErrorType() == ErrorTypeEnum.MISSINGFIELDS)
+	      {
+		Invid objInvid = retVal.getInvid();
+		wp.showWindow(objInvid);
+	      }
+
 	    if (debug)
 	      {
 		System.err.println("gclient.handleReturnVal(): retrieving dialog");
@@ -5123,7 +5130,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 	    retVal = handleReturnVal(retVal);
 	  }
 
-	succeeded = ((retVal == null) || retVal.didSucceed());
+	succeeded = ReturnVal.didSucceed(retVal);
 
 	// if we succeed, we clean up.  If we don't,
 	// retVal.doNormalProcessing can be false, in which case the
