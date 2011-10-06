@@ -66,6 +66,7 @@ import java.util.Vector;
 import arlut.csd.Util.NamedStack;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
+import arlut.csd.ganymede.common.ErrorTypeEnum;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.ObjectStatus;
 import arlut.csd.ganymede.common.ReturnVal;
@@ -1345,6 +1346,12 @@ public class DBEditSet {
 
 	retVal = Ganymede.createErrorDialog(ts.l("commit_checkObjectMissingFields.missing_fields"),
 					    errorBuf.toString());
+
+	// put a reference to the object that tripped us up so that
+	// the client can bring the problematic window forward.
+
+	retVal.setErrorType(ErrorTypeEnum.MISSINGFIELDS);
+	retVal.setInvid(eObj.getInvid());
 
 	// let DBSession/the client know they can retry things.
 
