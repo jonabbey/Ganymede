@@ -6,14 +6,13 @@
 
    Created: 10 October 1997
 
-
    Module By: Mike Mulvaney, Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -111,7 +110,6 @@ import arlut.csd.Util.VectorUtils;
  * @see JstringListBox
  * @see JsetValueCallback
  *
- * @version $Id$
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
@@ -136,7 +134,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     remove;
 
   JstringListBox
-    in, 
+    in,
     out = null;
 
   JPanel
@@ -154,7 +152,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   JButton
     addCustom;
 
-  JstringField 
+  JstringField
     custom = null;
 
   Container
@@ -174,14 +172,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   /* -- */
 
   /**
-   *
    * Fully specified Constructor for StringSelector
    *
    * @param parent AWT container that the StringSelector will be contained in.
    * @param editable If false, this string selector is for display only
    * @param canChoose Choice must be made from vector of choices
    * @param mustChoose Vector of choices is available
-   *
    */
 
   public StringSelector(Container parent, boolean editable, boolean canChoose,
@@ -191,14 +187,14 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       {
 	System.err.println("-Adding new StringSelector-");
       }
-    
+
     setBorder(new javax.swing.border.EtchedBorder());
 
     this.parent = parent;
     this.editable = editable;
     this.canChoose = canChoose;
     this.mustChoose = mustChoose;
-    
+
     setLayout(new BorderLayout());
 
     // lists holds the outPanel and inPanel.
@@ -287,7 +283,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	add.setOpaque(true);
 	add.setActionCommand("Add");
 	add.addActionListener(this);
-	
+
 	outPanel.setBorder(bborder);
 	outPanel.setLayout(new BorderLayout());
 	outPanel.add("Center", new JScrollPane(out));
@@ -311,7 +307,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       {
 	custom = new JstringField();
 	custom.setBorder(new EmptyBorder(new Insets(0,0,0,4)));
-	custom.addActionListener(new ActionListener() 
+	custom.addActionListener(new ActionListener()
 				 {
 				   public void actionPerformed(ActionEvent e)
 				     {
@@ -340,15 +336,15 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	    custom.getDocument().addDocumentListener(new DocumentListener()
 						     {
 						       public void changedUpdate(DocumentEvent x) {}
-						       public void insertUpdate(DocumentEvent x) 
+						       public void insertUpdate(DocumentEvent x)
 							 {
 							   if (x.getDocument().getLength() > 0)
 							     {
 							       addCustom.setEnabled(true);
 							     }
 							 }
-						       
-						       public void removeUpdate(DocumentEvent x) 
+
+						       public void removeUpdate(DocumentEvent x)
 							 {
 							   if (x.getDocument().getLength() == 0)
 							     {
@@ -363,6 +359,30 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	if (mustChoose)
 	  {
+	    // XXX
+	    //
+	    // Need to radically rework this keyadapter so it
+	    // behaves better with autocomplete.. we'll need it to
+	    // function in such a way that it doesn't stop being
+	    // involved as soon as the autocomplete is performed.  If
+	    // the user continues typing characters that match the
+	    // autocomplete, nothing should happen other than
+	    // advancing the cursor so that it remains after the last
+	    // character they typed.
+	    //
+	    // if the user uses the cursor keys to move the cursor
+	    // manually, we will 'freeze' the autocomplete entry and
+	    // let them do normal processing.  We'll also want to do
+	    // this if the mouse is used to set the cursor position.
+	    //
+	    // If the user hits a non-cursor key that doesn't match
+	    // the autocomplete (AND we're not in mustChoose mode?),
+	    // we should erase the remainder of the autocomplete match
+	    // and let the user type whatever they want at that
+	    // point... ?
+	    //
+	    // XXX
+
 	    custom.addKeyListener(new KeyAdapter()
 				  {
 				    public void keyReleased(KeyEvent ke)
@@ -371,7 +391,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 					String curVal;
 
 					curVal = custom.getText();
-    
+
 					if (curVal != null)
 					  {
 					    curLen = curVal.length();
@@ -672,7 +692,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   {
     this.setVisibleRowCount(numRows, true);
   }
-    
+
   /**
    * This method adjusts the number of rows shown in this
    * StringSelector.  If refresh is true, the StringSelector will be
@@ -742,7 +762,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
   /**
    * <p>Returns a Vector of Strings corresponding to the currently
-   * selected members.</p> 
+   * selected members.</p>
    */
 
   public Vector getChosenStrings()
@@ -761,18 +781,16 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	result.addElement(handle.toString());
       }
-    
+
     return result;
   }
 
   // ActionListener methods -------------------------------------------------
 
   /**
-   *
-   * This method handles events from the Add and Remove
-   * buttons, and from hitting enter/loss of focus in the
-   * custom JstringField.
-   *
+   * This method handles events from the Add and Remove buttons, and
+   * from hitting enter and/or from loss of focus in the custom
+   * JstringField.
    */
 
   public void actionPerformed(ActionEvent e)
@@ -858,7 +876,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	      }
 
 	    return true;
-	  }	
+	  }
       }
     else if (o.getSource() == in)
       {
@@ -888,7 +906,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	      {
 		out.clearSelection();
 	      }
-	    
+
 	    return true;
 	  }
       }
@@ -910,7 +928,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	  }
       }
     else
-      {	
+      {
 	if (!editable)
 	  {
 	    return false;
@@ -920,9 +938,9 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	  {
 	    System.err.println("set value in stringSelector");
 	  }
-	
+
 	System.err.println("Unknown object generated setValuePerformed in stringSelector.");
-	
+
 	return false;
       }
 
@@ -955,7 +973,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	System.err.println("Error.. got addItem with outSelected == null");
 	return;
       }
-    
+
     if (handles.size() > 1)
       {
 	if (my_callback != null)
@@ -1060,7 +1078,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   * <p>This method moves one or more selected items from the in list to the out list.</p>
+   * <p>This method moves one or more selected items from the in list
+   * to the out list.</p>
    */
 
   private void removeItems()
@@ -1134,7 +1153,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 	    try
 	      {
-		ok = my_callback.setValuePerformed(new JDeleteValueObject(this, 
+		ok = my_callback.setValuePerformed(new JDeleteValueObject(this,
 									  ((listHandle)handles.elementAt(0)).getObject()));
 	      }
 	    catch (RemoteException rx)
@@ -1234,7 +1253,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
    * <p>This method is the opposite of
    * {@link arlut.csd.JDataComponent.StringSelector#putItemIn(arlut.csd.JDataComponent.listHandle) putItemIn}.</p>
    */
-  
+
   private void takeItemOut(listHandle item)
   {
     if (debug)
@@ -1303,26 +1322,26 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
         System.err.println("addNewString(\"" + inputText + "\")");
       }
 
-    if (out != null && mustChoose) 
-      {	    
+    if (out != null && mustChoose)
+      {
 	// Check to see if it is in there
 
 	if (debug)
 	  {
 	    System.err.println("Checking to see if this is a viable option");
 	  }
-	    
-	if (out.containsLabel(inputText)) 
+
+	if (out.containsLabel(inputText))
 	  {
 	    out.setSelectedLabel(inputText);
 	    listHandle handle = out.getSelectedHandle();
-	    
+
 	    boolean ok;
-	    
+
 	    if (my_callback != null)
 	      {
 		ok = false;
-		
+
 		try
 		  {
 		    ok = my_callback.setValuePerformed(new JAddValueObject(this, handle.getObject()));
@@ -1336,7 +1355,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	      {
 		ok = true;
 	      }
-	    
+
 	    if (ok)
 	      {
 		if (replacingValue)
@@ -1382,9 +1401,9 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	  {
 	    out.setSelectedLabel(inputText);
 	    listHandle handle = out.getSelectedHandle();
-		
+
 	    boolean ok;
-		
+
 	    if (my_callback != null)
 	      {
 		ok = false;
@@ -1416,9 +1435,9 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 		putItemIn(handle);
 		custom.setText("");
-	      }	
+	      }
 	  }
-	else 
+	else
 	  {
 	    // Not in the out box, send up the String as-is, with no attached data
 
@@ -1426,7 +1445,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
               {
                 System.err.println("addNewString() -- stand alone");
               }
-		
+
 	    boolean ok;
 
 	    if (my_callback != null)
@@ -1446,7 +1465,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	      {
 		ok = true;
 	      }
-		
+
 	    if (ok)
 	      {
 		if (replacingValue)
@@ -1479,7 +1498,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 		  }
 	      }
 	  }
-	    
+
 	validate();
       }
 
@@ -1555,15 +1574,15 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   * This method is intended to be called if the setValuePerformed()
-   * callback that we call out to decides that it wants to ignore what
-   * we requested and alter the value of the server field in some
-   * other way.
+   * <p>This method is intended to be called if the
+   * setValuePerformed() callback that we call out to decides that it
+   * wants to ignore what we requested and alter the value of the
+   * server field in some other way.</p>
    *
-   * If this method is called during the time that we are calling an
-   * external setValuePerformed(), we'll make a note of it so that the
-   * appropriate code above won't try to do a graphical update with
-   * bad data.
+   * <p>If this method is called during the time that we are calling
+   * an external setValuePerformed(), we'll make a note of it so that
+   * the appropriate code above won't try to do a graphical update
+   * with bad data.</p>
    */
 
   public void substituteValueByCallBack(JsetValueCallback callback)
@@ -1583,7 +1602,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   public static void main(String[] args) {
     /*try {
       UIManager.setLookAndFeel( UIManager.getCrossPlatformLookAndFeelClassName() );
-    } 
+    }
     catch (Exception e) { }*/
 
     JFrame frame = new JFrame("SwingApplication");
@@ -1596,23 +1615,23 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 	v2.addElement( Integer.toString( 20-i ) );
       }
 
-    StringSelector ss = new StringSelector( frame, 
-					    true, 
-					    true, 
+    StringSelector ss = new StringSelector( frame,
+					    true,
+					    true,
 					    true);
 
     ss.update(v1, true, null, v2, true, null);
-	
+
     frame.getContentPane().add(ss, BorderLayout.CENTER);
 
-    frame.addWindowListener(new WindowAdapter() 
+    frame.addWindowListener(new WindowAdapter()
     {
-      public void windowClosing(WindowEvent e) 
+      public void windowClosing(WindowEvent e)
       {
         System.exit(0);
       }
     });
-    
+
     frame.pack();
     frame.setVisible(true);
   }
