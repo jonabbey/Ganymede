@@ -6,14 +6,13 @@
 
    Created: 25 October 2004
 
-
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2011
    The University of Texas at Austin.
 
    Contact information
@@ -56,10 +55,9 @@ import java.awt.*;
 ------------------------------------------------------------------------------*/
 
 /**
+ * <p>Subclass of JValueObject that represents a simple value set
+ * operation</p>
  *
- * <p>Subclass of JValueObject that represents a simple value set operation</p>
- *   
- * @version $Revision$ $Date$ $Name:  $
  * @author Jonathan Abbey
  */
 
@@ -77,7 +75,8 @@ public class JSetValueObject extends JValueObject {
   }
 
   /**
-   * Returns the arlut.csd.JDataComponent GUI component that originated this message.
+   * Returns the arlut.csd.JDataComponent GUI component that
+   * originated this message.
    */
 
   public Component getSource()
@@ -86,12 +85,12 @@ public class JSetValueObject extends JValueObject {
   }
 
   /**
-   * This method is intended to allow re-sourcing of the component for
-   * this object, so that a component generating a callback can be
+   * <p>This method is intended to allow re-sourcing of the component
+   * for this object, so that a component generating a callback can be
    * wrapped in higher level components whose identity is known to the
-   * ultimate client of the component.
+   * ultimate client of the component.</p>
    *
-   * See JpopUpCalendar for an example of the use of this method.
+   * <p>See JpopUpCalendar for an example of the use of this method.</p>
    */
 
   public void setSource(Component newSource)
@@ -100,11 +99,12 @@ public class JSetValueObject extends JValueObject {
   }
 
   /**
-   * Returns an auxiliary value.  Used for passing information about pop-up menu items, but may
-   * be used for different purposes if needed.
+   * <p>Returns an auxiliary value.  Used for passing information
+   * about pop-up menu items, but may be used for different purposes
+   * if needed.</p>
    */
 
-  public Object getParameter() 
+  public Object getParameter()
   {
     return null;
   }
@@ -113,7 +113,7 @@ public class JSetValueObject extends JValueObject {
    * Returns the index of an item operated on in a vector component.
    */
 
-  public int getIndex() 
+  public int getIndex()
   {
     return -1;
   }
@@ -122,7 +122,7 @@ public class JSetValueObject extends JValueObject {
    * Returns the index of an item operated on in a vector component.
    */
 
-  public int getIndex2() 
+  public int getIndex2()
   {
     return -1;
   }
@@ -131,16 +131,14 @@ public class JSetValueObject extends JValueObject {
    * Returns the value of the object being affected by this message.
    */
 
-  public Object getValue() 
+  public Object getValue()
   {
     return value;
   }
 
   /**
-   *
    * Method to get a human-readable description of the event carried
    * by this object
-   * 
    */
 
   public String toString()

@@ -3,17 +3,16 @@
 
    JentryField serves as an abstract base class for all Fields that
    use textfields.  The subclasses of this class should be used.
-   
-   Created: 12 Jul 1996
 
+   Created: 12 Jul 1996
 
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -88,16 +87,17 @@ abstract public class JentryField extends JTextField implements FocusListener, A
   public boolean allowCallback = false;
 
   /**
-   * True if this JentryField is in the process of programmatically
+   * <p>True if this JentryField is in the process of programmatically
    * loading text.  If it is, we will not bother validating input
    * characters against our filters.  Normally, of course, the
    * JentryDocument automatically filters out any character-inserting
-   * keystrokes that the server has requested we filter.
+   * keystrokes that the server has requested we filter.</p>
    *
-   * Any JentryField subclasses that provide programmatic data setting
-   * methods should set this variable to true during the course of the
-   * data setting, preferably in a try.. finally block so that
-   * loadingText is guaranteed to be set false when it is done.
+   * <p>Any JentryField subclasses that provide programmatic data
+   * setting methods should set this variable to true during the
+   * course of the data setting, preferably in a try.. finally block
+   * so that loadingText is guaranteed to be set false when it is
+   * done.</p>
    */
 
   protected boolean loadingText = false;
@@ -111,7 +111,7 @@ abstract public class JentryField extends JTextField implements FocusListener, A
   // Constructors //
   //////////////////
 
-  public JentryField(int columns) 
+  public JentryField(int columns)
   {
     super(columns);
     setEditable(true);
@@ -131,8 +131,7 @@ abstract public class JentryField extends JTextField implements FocusListener, A
   ///////////////////
 
   /**
-   *  sets the parent of this component for callback purposes
-   *
+   * Sets the parent of this component for callback purposes
    */
 
   public void setCallback(JsetValueCallback parent)
@@ -141,7 +140,7 @@ abstract public class JentryField extends JTextField implements FocusListener, A
       {
 	throw new IllegalArgumentException("Invalid Parameter: parent cannot be null");
       }
-    
+
     my_parent = parent;
 
     allowCallback = true;
@@ -153,24 +152,25 @@ abstract public class JentryField extends JTextField implements FocusListener, A
   }
 
   /**
-   * sendCallback is called when focus is lost, or when we are otherwise
-   * triggered.
+   * <p>sendCallback is called when focus is lost, or when we are
+   * otherwise triggered.</p>
    *
-   * @return -1 on change rejected, 0 on no change required, 1 on change approved
+   * @return -1 on change rejected, 0 on no change required, 1 on
+   * change approved
    */
 
   public abstract int sendCallback();
 
   /**
-   * Returns true if this JentryField is in the process of
+   * <p>Returns true if this JentryField is in the process of
    * programmatically setting the text.  While isLoading() returns
    * true, the JentryDocument that filters input into this field will
-   * let all characters be set.
+   * let all characters be set.</p>
    *
-   * The purpose of this is so that this GUI field will not reject
+   * <p>The purpose of this is so that this GUI field will not reject
    * data that was previously loaded into the matching Ganymede
    * database field, even if it was in violation of the current
-   * constraints.
+   * constraints.</p>
    */
 
   public boolean isLoading()
@@ -179,9 +179,9 @@ abstract public class JentryField extends JTextField implements FocusListener, A
   }
 
   /**
-   * Stub function that is overriden in subclasses of JentryField.  The
-   * JentryDocument object for this field will use this method to
-   * allow or disallow the character ch from being added.
+   * <p>Stub function that is overriden in subclasses of JentryField.
+   * The JentryDocument object for this field will use this method to
+   * allow or disallow the character ch from being added.</p>
    */
 
   public boolean isAllowed(char ch)
@@ -195,9 +195,9 @@ abstract public class JentryField extends JTextField implements FocusListener, A
   }
 
   /**
-   * Returns the maximum acceptable size of this field
+   * <p>Returns the maximum acceptable size of this field</p>
    *
-   * If no max size has been set, will return -1.
+   * <p>If no max size has been set, will return -1.</p>
    */
 
   public int getMaxStringSize()
@@ -206,7 +206,7 @@ abstract public class JentryField extends JTextField implements FocusListener, A
   }
 
   /**
-   * returns the current size of the contents of this gui field
+   * <p>Returns the current size of the contents of this gui field</p>
    */
 
   public int getLength()
@@ -251,7 +251,7 @@ abstract public class JentryField extends JTextField implements FocusListener, A
 	    System.err.println("enter approved");
 	  }
 
-	notifier.actionPerformed(e);	
+	notifier.actionPerformed(e);
       }
   }
 }
@@ -306,7 +306,7 @@ class JentryDocument extends PlainDocument {
 	    char c = str.charAt(i);
 
 	    if (!field.isAllowed(c) ||
-		(field.getMaxStringSize() != -1 && 
+		(field.getMaxStringSize() != -1 &&
 		 field.getMaxStringSize() - field.getLength() <= 0))
 	      {
 		if (debug)

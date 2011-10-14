@@ -6,17 +6,16 @@
    accepted by this gui component.  Furthermore, the maximum size of
    the string that can be entered into this JstringField can be
    preset.
-   
-   Created: 12 Jul 1996
 
+   Created: 12 Jul 1996
 
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -61,10 +60,10 @@ import java.rmi.RemoteException;
 
 /**
  * <p>This class defines an entry field that is capable of handling
- *    strings.  It is also possible to restrict the characters which
- *    are accepted by this gui component.  Furthermore, the maximum
- *    size of the string that can be entered into this JstringField can
- *    be preset.</p>
+ * strings.  It is also possible to restrict the characters which are
+ * accepted by this gui component.  Furthermore, the maximum size of
+ * the string that can be entered into this JstringField can be
+ * preset.</p>
  */
 
 public class JstringField extends JentryField {
@@ -75,7 +74,7 @@ public class JstringField extends JentryField {
   public static int DEFAULT_SIZE = 4096;
 
   // ---
-  
+
   private int size = DEFAULT_SIZE;
 
   private String value = null;
@@ -93,7 +92,7 @@ public class JstringField extends JentryField {
 
   /**
    * Base constructor for JstringField
-   * 
+   *
    * @param columns number of colums in the JstringField
    * @param is_editable true if this JstringField is editable
    */
@@ -106,14 +105,14 @@ public class JstringField extends JentryField {
 		      String disallowed)
   {
     super(columns);
-    
+
     if (maxstrlen <= 0)
       {
 	throw new IllegalArgumentException("Invalid Parameter: maximum string size is negative or zero");
       }
 
     size = maxstrlen;
-    
+
     setEditable(is_editable);  // will this JstringField be editable or not?
 
     if (allowed != null)
@@ -126,7 +125,7 @@ public class JstringField extends JentryField {
 	setDisallowedChars(disallowed);
       }
   }
-  
+
   /**
    * Constructor which uses default fonts,no parent,
    * default column size, and default foregound/background
@@ -144,8 +143,6 @@ public class JstringField extends JentryField {
 
   /**
    * Simple constructor.
-   *
-   *
    */
 
   public JstringField(int cols, boolean is_editable)
@@ -158,15 +155,14 @@ public class JstringField extends JentryField {
   }
 
   /**
-    * Constructor that allows for the creation of a JstringField
-    * that knows about its parent.
-    *
-    * @param cols number of colums in the JstringField
-    * @param callback An interface for the container within which this
-    * JstringField is typically contained.  The JstringField will
-    * call this interface to pass change notifications.
-    *
-    */
+   * Constructor that allows for the creation of a JstringField
+   * that knows about its parent.
+   *
+   * @param cols number of colums in the JstringField
+   * @param callback An interface for the container within which this
+   * JstringField is typically contained.  The JstringField will
+   * call this interface to pass change notifications.
+   */
 
   public JstringField(int cols,
 		      int maxstrlen,
@@ -180,7 +176,7 @@ public class JstringField extends JentryField {
 
     setCallback(callback);
   }
-  
+
  /************************************************************/
  // JstringField methods
 
@@ -201,7 +197,7 @@ public class JstringField extends JentryField {
     boolean editable = isEditable();
     setEditable(true);
 
-    if (str == null) 
+    if (str == null)
       {
 	if (debug)
 	  {
@@ -209,10 +205,10 @@ public class JstringField extends JentryField {
 	  }
 
 	value = "";
-	
+
 	super.setText("");
       }
-    else 
+    else
       {
 	// XXX  verifyValue(str);
 
@@ -239,9 +235,11 @@ public class JstringField extends JentryField {
   }
 
   /**
-   * <p>Checks the entire string str for compliance with this field's constraints.
+   * <p>Checks the entire string str for compliance with this field's
+   * constraints.</p>
    *
-   * Throws an IllegalArgumentException if the provided string is not acceptable.
+   * <p>Throws an IllegalArgumentException if the provided string is
+   * not acceptable.</p>
    */
 
   private void verifyValue(String str)
@@ -250,33 +248,33 @@ public class JstringField extends JentryField {
       {
 	throw new IllegalArgumentException("string too long");
       }
-    
+
     for (int i = 0; i < str.length(); i++)
       {
 	if (!isAllowed(str.charAt(i)))
 	  {
-	    throw new IllegalArgumentException("invalid char in string (\"" + str + "\") : '" + 
+	    throw new IllegalArgumentException("invalid char in string (\"" + str + "\") : '" +
 					       str.charAt(i) + "'");
 	  }
       }
   }
 
   /**
-   *
-   * Return the string contained in this field, whether it has been validated
-   * in a callback or not.
-   *
+   * <p>Return the string contained in this field, whether it has been
+   * validated in a callback or not.</p>
    */
 
-  public String getValue() 
+  public String getValue()
   {
     return getText();
   }
 
   /**
-   *  returns the character located at position n in the JstringField value
+   * <p>Returns the character located at position n in the
+   * JstringField value</p>
    *
-   * @param n position in the JstringField value from which to retrieve character
+   * @param n position in the JstringField value from which to
+   * retrieve character
    */
 
   public char getCharAt(int n)
@@ -285,9 +283,11 @@ public class JstringField extends JentryField {
   }
 
   /**
-   *  assigns a set of characters which are valid within the JstringField
+   * <p>Assigns a set of characters which are valid within the
+   * JstringField</p>
    *
-   * @param s each character in this string will be considered an allowed character
+   * @param s each character in this string will be considered an
+   * allowed character
    */
 
   public void setAllowedChars(String s)
@@ -296,16 +296,18 @@ public class JstringField extends JentryField {
       {
 	this.allowedChars = s;
       }
-    else 
+    else
       {
 	this.allowedChars = null;
       }
   }
- 
+
   /**
-   *  assigns a set of characters which are invalid within the JstringField
+   * <p>Assigns a set of characters which are invalid within the
+   * JstringField</p>
    *
-   * @param s each character in this string will be considered a disallowed character
+   * @param s each character in this string will be considered a
+   * disallowed character
    */
 
   public void setDisallowedChars(String s)
@@ -314,14 +316,14 @@ public class JstringField extends JentryField {
       {
  	this.disallowedChars = s;
       }
-    else 
+    else
       {
  	this.disallowedChars = null;
       }
   }
 
   /**
-   *   returns the set of allowed characters as a String object
+   *  Returns the set of allowed characters as a String object
    */
 
   public String getAllowedChars()
@@ -330,7 +332,7 @@ public class JstringField extends JentryField {
   }
 
   /**
-   *  returns the set of disallowed characters as a String object
+   * Returns the set of disallowed characters as a String object
    */
 
   public String getDisallowedChars()
@@ -339,7 +341,8 @@ public class JstringField extends JentryField {
   }
 
   /**
-   * returns the maximum size of the string that can be placed in this JstringField
+   * Returns the maximum size of the string that can be placed in this
+   * JstringField
    */
 
   public int getMaxStringSize()
@@ -348,7 +351,7 @@ public class JstringField extends JentryField {
   }
 
   /**
-   * returns the current size of the contents of this gui field
+   * Returns the current size of the contents of this gui field
    */
 
   public int getLength()
@@ -366,10 +369,11 @@ public class JstringField extends JentryField {
   }
 
   /**
-   * determines whether a given character is valid or invalid for a JstringField
+   * <p>Determines whether a given character is valid or invalid for a
+   * JstringField</p>
    *
-   * The JentryDocument object for this field will use this method to
-   * allow or disallow the character ch from being added.
+   * <p>The JentryDocument object for this field will use this method
+   * to allow or disallow the character ch from being added.</p>
    *
    * @param ch the character which is being tested for its validity
    */
@@ -393,7 +397,7 @@ public class JstringField extends JentryField {
 	    return false;
 	  }
       }
-    
+
     if (allowedChars != null)
       {
 	if (allowedChars.indexOf(ch) == -1)
@@ -401,17 +405,18 @@ public class JstringField extends JentryField {
 	    return false;
 	  }
       }
-    
+
     return true;
   }
 
   /**
-   * sendCallback is called when focus is lost, or when we are otherwise
+   * <p>sendCallback is called when focus is lost, or when we are otherwise
    * triggered.  A true value will be returned if the value change was
    * approved and performed, or false if not.  If the value did not change,
-   * this method will also return false.
+   * this method will also return false.</p>
    *
-   * @return -1 on change rejected, 0 on no change required, 1 on change approved
+   * @return -1 on change rejected, 0 on no change required, 1 on
+   * change approved
    */
 
   public int sendCallback()
@@ -422,7 +427,7 @@ public class JstringField extends JentryField {
 	  {
 	    return -1;
 	  }
-	
+
 	processingCallback = true;
       }
 
@@ -434,9 +439,9 @@ public class JstringField extends JentryField {
 
 	// if nothing in the JstringField has changed,
 	// we don't need to worry about this event.
-    
+
 	str = getText();
-    
+
 	if ((value != null && value.equals(str)) || (value == null && (str == null || str.equals(""))))
 	  {
 	    return 0;
@@ -444,8 +449,8 @@ public class JstringField extends JentryField {
 
 	/* we don't need to check the string for validity, since it was checked
 	   on a character by character basis on entry by our superclass. */
-	
-	try 
+
+	try
 	  {
 	    if (!allowCallback || my_parent.setValuePerformed(new JSetValueObject(this, str)))
 	      {
@@ -515,13 +520,13 @@ public class JstringField extends JentryField {
   }
 
   /**
-   * This method is intended to be called if the setValuePerformed()
-   * callback that we call out to decides that it wants to substitute
-   * a replacement value for the value that we asked to have
-   * validated.
+   * <p>This method is intended to be called if the
+   * setValuePerformed() callback that we call out to decides that it
+   * wants to substitute a replacement value for the value that we
+   * asked to have validated.</p>
    *
-   * This is used to allow the server to reformat/canonicalize data
-   * that we passed to it.
+   * <p>This is used to allow the server to reformat/canonicalize data
+   * that we passed to it.</p>
    */
 
   public void substituteValueByCallBack(JsetValueCallback callback, String replacementValue)
