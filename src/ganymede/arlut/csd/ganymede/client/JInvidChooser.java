@@ -80,7 +80,6 @@ import arlut.csd.Util.TranslationService;
 /**
  * A GUI component for choosing an Invid for a scalar invid_field.
  *
- * @version $Id$
  * @author Jonathan Abbey
  */
 
