@@ -3,16 +3,16 @@
    JInvidChooser.java
 
    A fancy custom JComboBox thing for Scalar Invid fields.
-   
+
    Created: 26 October 1999
 
    Module By: Michael Mulvaney, Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -102,8 +102,8 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 
   containerPanel
     cp;
-  
-  private short 
+
+  private short
     type;
 
   private boolean
@@ -118,7 +118,6 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   /* -- */
 
   /**
-   *
    * @param parent The general or embedded object panel that contains us
    * @param objectType object type number, used to support creating a new
    * object by the use of the 'new' button if enabled.
@@ -182,7 +181,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
       {
 	if (!lh.toString().equals(editor.theField.getText()))
 	  {
-	    System.err.println("JInvidChooser: " + lh.toString() + " does not equal " + 
+	    System.err.println("JInvidChooser: " + lh.toString() + " does not equal " +
 			       editor.theField.getText());
 	    return null;
 	  }
@@ -192,12 +191,12 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   }
 
   /**
-   * Set the allowNone bit.
+   * <p>Set the allowNone bit.</p>
    *
-   * If allowNone is true, then &lt;none&gt; will remain as a choice in the
-   * chooser.  If it is false, &lt;none&gt; will only be included in the
-   * beginning if nothing is set; it will be removed as soon as
-   * anything is chosen.
+   * <p>If allowNone is true, then &lt;none&gt; will remain as a
+   * choice in the chooser.  If it is false, &lt;none&gt; will only be
+   * included in the beginning if nothing is set; it will be removed
+   * as soon as anything is chosen.</p>
    */
 
   public void setAllowNone(boolean allow)
@@ -281,12 +280,12 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   }
 
   /**
-   * Get the allowNone bit.
+   * <p>Get the allowNone bit.</p>
    *
-   * If allowNone is true, then &lt;none&gt; will remain as a choice in the
-   * chooser.  If it is false, &lt;none&gt; will only be included in the
-   * beginning if nothing is set; it will be removed as soon as
-   * anything is chosen.
+   * <p>If allowNone is true, then &lt;none&gt; will remain as a
+   * choice in the chooser.  If it is false, &lt;none&gt; will only be
+   * included in the beginning if nothing is set; it will be removed
+   * as soon as anything is chosen.</p>
    */
 
   public boolean isAllowNone()
@@ -321,7 +320,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
       }
   }
 
-  public void setSelectedItem(Object o) 
+  public void setSelectedItem(Object o)
   {
     if (o == null && isAllowNone())
       {
@@ -334,9 +333,9 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   }
 
   /**
-   *
    * ItemListener method
    *
+   * @see java.awt.event.ItemListener
    */
 
   public void itemStateChanged(ItemEvent e)
@@ -347,7 +346,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
       {
 	return;
       }
-    
+
     if (debug)
       {
 	System.err.println("JInvidChooser.itemStateChanged(" + e.toString() + ")");
@@ -357,9 +356,9 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   }
 
   /**
-   *
    * ActionListener method
    *
+   * @see java.awt.event.ActionListener
    */
 
   public void actionPerformed(ActionEvent e)
@@ -371,7 +370,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 	if (lh != null)
 	  {
 	    Invid invid = (Invid) lh.getObject();
-	
+
 	    if (invid == null)
 	      {
 		/* XXX I don't think this can ever occur.. */
@@ -386,7 +385,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 	  }
       }
   }
-  
+
   private final void  showErrorMessage(String message) {
     cp.getgclient().showErrorMessage(message);
   }
@@ -477,14 +476,14 @@ class JInvidChooserFieldEditor extends KeyAdapter implements ComboBoxEditor, Act
   }
 
   /**
-   * Tap into the text field's key release to see if
+   * <p>Tap into the text field's key release to see if
    * we can complete the user's selection.  Note that
    * we are doing this without synchronizing on the text
    * field's own user interface.. to do this properly, we might
    * ought to be doing this with a document model on the text
    * field, but this works ok.  Since we're keying on key release,
    * we can expect to be called after the text field has processed
-   * the key press.
+   * the key press.</p>
    */
 
   public void keyReleased(KeyEvent ke)
@@ -496,7 +495,7 @@ class JInvidChooserFieldEditor extends KeyAdapter implements ComboBoxEditor, Act
     /* -- */
 
     curVal = theField.getText();
-    
+
     if (curVal != null)
       {
 	curLen = curVal.length();
@@ -532,7 +531,7 @@ class JInvidChooserFieldEditor extends KeyAdapter implements ComboBoxEditor, Act
 	int matching = 0;
 	String matchingItem = null;
 	int matchingIndex = -1;
-	
+
 	for (int i = 0; i < max; i++)
 	  {
 	    item = box.getItemAt(i).toString();
@@ -546,7 +545,7 @@ class JInvidChooserFieldEditor extends KeyAdapter implements ComboBoxEditor, Act
 		lastGoodIndex = i;
 
 		chooser.cp.gc.setWaitCursor();
-	    
+
 		try
 		  {
 		    box.setSelectedIndex(lastGoodIndex);
@@ -579,7 +578,7 @@ class JInvidChooserFieldEditor extends KeyAdapter implements ComboBoxEditor, Act
 	    setItem(matchingItem); // will set lastGoodString
 
 	    chooser.cp.gc.setWaitCursor();
-	    
+
 	    try
 	      {
 		box.setSelectedIndex(lastGoodIndex);
