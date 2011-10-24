@@ -448,8 +448,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 					      {
 						out.setSelectedLabel(matchingItem, true);
 						custom.setText(matchingItem);
-						custom.setCaretPosition(curLen);
-						custom.select(curLen, matchingItem.length());
+						custom.moveCaretPosition(curLen); // move the caret to select the text
 						return;
 					      }
 					  }
