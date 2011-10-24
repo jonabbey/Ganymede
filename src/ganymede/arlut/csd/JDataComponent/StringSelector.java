@@ -390,7 +390,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 					int curLen;
 					String curVal;
 
-					curVal = custom.getText();
+					curVal = custom.getText().substring(0, custom.getCaretPosition());
 
 					if (curVal != null)
 					  {
@@ -448,6 +448,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 					      {
 						out.setSelectedLabel(matchingItem, true);
 						custom.setText(matchingItem);
+						custom.setCaretPosition(curLen);
 						custom.select(curLen, matchingItem.length());
 						return;
 					      }
