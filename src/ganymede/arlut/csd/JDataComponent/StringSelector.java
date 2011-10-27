@@ -403,16 +403,14 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
 					int keyCode = ke.getKeyCode();
 
-					switch (keyCode)
+					if (keyCode == KeyEvent.VK_DELETE || keyCode == KeyEvent.VK_BACK_SPACE)
 					  {
-					  case KeyEvent.VK_UP:
-					  case KeyEvent.VK_DOWN:
-					  case KeyEvent.VK_LEFT:
-					  case KeyEvent.VK_RIGHT:
-					  case KeyEvent.VK_SHIFT:
+					    custom.select(custom.getCaretPosition(), custom.getCaretPosition());
+					    return;
+					  }
 
-					  case KeyEvent.VK_DELETE:
-					  case KeyEvent.VK_BACK_SPACE:
+					if (ke.isActionKey() || ke.getKeyChar() == KeyEvent.CHAR_UNDEFINED)
+					  {
 					    return;
 					  }
 
