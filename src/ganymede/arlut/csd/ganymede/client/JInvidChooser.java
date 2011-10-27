@@ -515,6 +515,7 @@ class JInvidChooserFieldEditor extends KeyAdapter implements ComboBoxEditor, Act
       case KeyEvent.VK_LEFT:
       case KeyEvent.VK_RIGHT:
       case KeyEvent.VK_SHIFT:
+	return;
 
       case KeyEvent.VK_DELETE:
       case KeyEvent.VK_BACK_SPACE:
