@@ -1656,7 +1656,9 @@ public class Ganymede {
 
     if (p == null || !p.matchPlainText(defaultrootpassProperty))
       {
-	System.out.println(ts.l("startupHook.resetting"));
+	// "Resetting supergash password."
+	System.err.println(ts.l("startupHook.resetting"));
+
 	internalSession.openTransaction("Ganymede startupHook");
 
 	e_object = (DBEditObject) internalSession.session.editDBObject(supergashinvid);
