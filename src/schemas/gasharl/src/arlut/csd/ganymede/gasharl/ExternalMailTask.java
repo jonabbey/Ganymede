@@ -111,10 +111,6 @@ public class ExternalMailTask implements Runnable {
 
   public void run()
   {
-    boolean transactionOpen = false;
-
-    /* -- */
-
     currentThread = java.lang.Thread.currentThread();
 
     Ganymede.debug("External Mail Task: Starting");
@@ -152,8 +148,6 @@ public class ExternalMailTask implements Runnable {
 	    return;
 	  }
 
-	transactionOpen = true;
-
 	// do the stuff
 
 	checkExpiringCredentials();
@@ -179,8 +173,6 @@ public class ExternalMailTask implements Runnable {
 	  {
 	    Ganymede.debug("ExternalMail Task: Transaction committed");
 	  }
-
-	transactionOpen = false;
       }
     catch (InterruptedException ex)
       {
@@ -190,7 +182,7 @@ public class ExternalMailTask implements Runnable {
       }
     finally
       {
-	if (transactionOpen)
+	if (myDBSession.isTransactionOpen())
 	  {
 	    Ganymede.debug("ExternalMail Task: Forced to terminate early, aborting transaction");
 	  }
