@@ -2659,6 +2659,139 @@ public class PasswordDBField extends DBField implements pass_field {
   }
 
   /**
+   * <p>This method is used to set a pre-crypted BCrypt password for
+   * this field.</p>
+   *
+   * <p>This method will return an error code if this password field
+   * is not configured to store BCrypt hashed password text.</p>
+   *
+   * <p>The hashText submitted to this method must match one of the
+   * following two formats:</p>
+   *
+   * <pre>
+   * $2$&lt;2 digit cost parameter&gt;$&lt;22 characters of salt followed immediately by 31 characters of hash text, encoded in non-standard base 64&gt;
+   * $2a$&lt;2 digit cost parameter&gt;$&lt;22 characters of salt followed immediately by 31 characters of hash text, encoded in non-standard base 64&gt;
+   * </pre>
+   *
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.pass_field
+   */
+
+  public ReturnVal setBCryptPass(String hashText)
+  {
+    return setBCryptPass(hashText, false, false);
+  }
+
+  /**
+   * <p>This method is used to set a pre-crypted BCrypt password for
+   * this field.</p>
+   *
+   * <p>This method will return an error code if this password field
+   * is not configured to store BCrypt hashed password text.</p>
+   *
+   * <p>The hashText submitted to this method must match one of the
+   * following two formats:</p>
+   *
+   * <pre>
+   * $2$&lt;2 digit cost parameter&gt;$&lt;22 characters of salt followed immediately by 31 characters of hash text, encoded in non-standard base 64&gt;
+   * $2a$&lt;2 digit cost parameter&gt;$&lt;22 characters of salt followed immediately by 31 characters of hash text, encoded in non-standard base 64&gt;
+   * </pre>
+   *
+   * <p>Note
+   *
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
+   *
+   * <p>Not exported for access by remote clients.</p>
+   *
+   * @param hashText The crypt text to load into this PasswordDBField
+   * @param local If true, permission checking is skipped
+   * @param noWizards If true, the wizardHook() call on the containing DBEditObject will be inhibited.
+   */
+
+  public ReturnVal setBCryptPass(String hashText, boolean local, boolean noWizards)
+  {
+    ReturnVal retVal = null;
+    DBEditObject eObj;
+
+    /* -- */
+
+    if (!isEditable(local))
+      {
+	// "Password Field Error"
+	// "Don''t have permission to edit field {0} in object {1}."
+	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+					  ts.l("global.perm_error_text", this.getName(), owner.getLabel()));
+      }
+
+    if (!getFieldDef().isBCrypted())
+      {
+	// "Server: Error in PasswordDBField.setBCryptPass()"
+	// "Password field not configured to accept bCrypt hashed password strings."
+	return Ganymede.createErrorDialog(ts.l("setBCryptPass.error_title"),
+					  ts.l("setBCryptPass.error_text"));
+      }
+
+    if (!BCrypt.verifyHashTextFormat(hashText))
+      {
+	// "Server: Error in PasswordDBField.setBCryptPass()"
+	// "The hash text passed to setBCryptPass(), "{0}", is
+	// not a well-formed, bCrypt hash text"
+	return Ganymede.createErrorDialog(ts.l("setShaUnixCryptPass.error_title"),
+					  ts.l("setShaUnixCryptPass.format_error", this.getName()));
+      }
+
+    eObj = (DBEditObject) owner;
+
+    if (!noWizards && !local && eObj.getGSession().enableOversight)
+      {
+	// Wizard check
+
+	retVal = eObj.wizardHook(this, DBEditObject.SETPASS_BCRYPT, hashText, null);
+
+	// if a wizard intercedes, we are going to let it take the ball.
+
+	if (ReturnVal.wizardHandled(retVal))
+	  {
+	    return retVal;
+	  }
+      }
+
+    // call finalizeSetValue to allow for chained reactions
+
+    retVal = ReturnVal.merge(retVal, ((DBEditObject)owner).finalizeSetValue(this, null));
+
+    if (ReturnVal.didSucceed(retVal))
+      {
+	// whenever the BCrypt password is directly set, we lose
+	// plaintext and alternate hashes
+
+	clear_stored();
+
+	if ((hashText == null) || (hashText.equals("")))
+	  {
+	    bCryptPass = null;
+	  }
+	else
+	  {
+	    bCryptPass = hashText;
+	  }
+      }
+
+    return retVal;
+  }
+
+  /**
    * <p>This method is used to force all known hashes into this password
    * field.  Ganymede does no verifications to insure that all of these
    * hashes really match the same password, so caveat emptor.  If any of

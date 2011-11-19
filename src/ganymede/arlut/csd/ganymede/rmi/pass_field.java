@@ -12,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2011
    The University of Texas at Austin
 
    Contact information
@@ -247,4 +247,29 @@ public interface pass_field extends db_field {
    */
 
   ReturnVal setShaUnixCryptPass(String hashText) throws RemoteException;
+
+  /**
+   * <p>This method is used to set a pre-crypted BCrypt password for
+   * this field.</p>
+   *
+   * <p>This method will return an error code if this password field
+   * is not configured to store BCrypt hashed password text.</p>
+   *
+   * <p>The hashText submitted to this method must match one of the
+   * following two formats:</p>
+   *
+   * <pre>
+   * $2$&lt;2 digit cost parameter&gt;$&lt;22 characters of salt followed immediately by 31 characters of hash text, encoded in non-standard base 64&gt;
+   * $2a$&lt;2 digit cost parameter&gt;$&lt;22 characters of salt followed immediately by 31 characters of hash text, encoded in non-standard base 64&gt;
+   * </pre>
+   *
+   * <p>When this method is called, all other data for this password
+   * field are cleared.  Any plaintext held by the field is erased,
+   * and any other stored hash formats are deleted.  If the field is
+   * configured to create and retain other hash formats, it will do so
+   * opportunistically if the user successfully logs into Ganymede
+   * using the password stored in this field.</p>
+   */
+
+  ReturnVal setBCryptPass(String hashText) throws RemoteException;
 }
