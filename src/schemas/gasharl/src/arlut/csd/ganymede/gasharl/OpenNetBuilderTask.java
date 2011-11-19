@@ -61,7 +61,6 @@ import java.util.Vector;
 import arlut.csd.Util.FileOps;
 import arlut.csd.Util.NullWriter;
 import arlut.csd.Util.PathComplete;
-import arlut.csd.Util.SharedStringBuffer;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.SchemaConstants;
@@ -97,7 +96,6 @@ public class OpenNetBuilderTask extends GanymedeBuilderTask {
   // ---
 
   private Date now = null;
-  private SharedStringBuffer result = new SharedStringBuffer();
 
   /* -- */
 
@@ -369,9 +367,9 @@ public class OpenNetBuilderTask extends GanymedeBuilderTask {
 
     boolean inactivated = false;
 
-    /* -- */
+    StringBuffer result = new StringBuffer();
 
-    result.setLength(0);
+    /* -- */
 
     username = (String) object.getFieldValueLocal(SchemaConstants.UserUserName);
 
@@ -496,9 +494,9 @@ public class OpenNetBuilderTask extends GanymedeBuilderTask {
     String contract;
     String description;
 
-    /* -- */
+    StringBuffer result = new StringBuffer();
 
-    result.setLength(0);
+    /* -- */
 
     groupname = (String) object.getFieldValueLocal(groupSchema.GROUPNAME);
 
