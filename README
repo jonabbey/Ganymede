@@ -1,12 +1,13 @@
 Ganymede Release 2.0
-22 November 2010
+15 December 2011
 README
 
 ---------------------------------------------
 
 Greetings.  Ganymede is a Java-based network directory management
 software system we at the Computer Science Division of ARL:UT have
-been developing since 1995.
+been developing since 1995.  It is licensed under the GNU General
+Public License (GPL), version 2.
 
 This release includes:
 
