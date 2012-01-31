@@ -3269,6 +3269,65 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   }
 
   /**
+   * <p>This method provides a hook that can be used by subclasses of
+   * DBEditObject to return a list of attribute names and attribute
+   * values to include when writing out &lt;invid&gt; elements to a
+   * sync channel during transactional sync'ing.</p>
+   *
+   * <p>The point of this is to allow DBEditObject subclasses to
+   * inject additional data into a transactional sync record so that
+   * external sync channel service code can have enough information to
+   * identify a relationship that was made or broken within the
+   * tranaction.</p>
+   *
+   * <p>The array returned should have an even number of values.  The
+   * first value should be an attribute name, the second should be
+   * the value for that attribute name, the third should be another
+   * attribute name, and etc.</p>
+   *
+   * <p>It is an error to return an attribute name that conflicts with
+   * the set pre-defined for use with the &lt;invid&gt; XML element.
+   * This includes <code>type</code>, <code>num</code>, <code>id</code>,
+   * and <code>oid</code>.</p>
+   *
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   *
+   * @param invid The Invid that is to be written out.
+   * @param sourceObj The object that contains the Invid to be written out.
+   * @param targetObj The object that the invid resolves to.
+   * @param syncChannel The name of the Sync Channel that this Invid is being written to.
+   * @param forceOriginal If true and the foreign sync keys are being
+   * generated in a transactional context (as in the incremental Sync
+   * Channel writes), getForeignSyncKeys() will attempt to resolve the
+   * extra attributes against the original version of the object targeted
+   * by invid.
+   */
+
+  public String[] getForeignSyncKeys(Invid invid, DBObject sourceObj, DBObject targetObj,
+				     String syncChannel, boolean forceOriginal)
+  {
+    // we only want to include gids in our group invid objects if
+    // we're syncing to one of our active directory sync channels.
+    //
+    // we do this so that we can manage the primaryGIDNumber field in
+    // the rfc 2307 attribute list.
+
+    if (syncChannel == null || !syncChannel.contains("AD Sync Channel"))
+      {
+	return null;
+      }
+
+    if (invid.getType() != groupSchema.BASE || !targetObj.isDefined(groupSchema.GID))
+      {
+	return null;
+      }
+
+    return new String[] {"gid", (String) targetObj.getFieldValueLocal(groupSchema.GID)};
+  }
+
+  /**
    *
    * This method runs from userCustom's commitPhase2() and runs an external
    * script that can create the user's home directory, and anything else
