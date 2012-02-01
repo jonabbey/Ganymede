@@ -3324,6 +3324,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	return null;
       }
 
+    if (forceOriginal && targetObj instanceof DBEditObject)
+      {
+	targetObj = ((DBEditObject) targetObj).getOriginal();
+      }
+
     return new String[] {"gid", String.valueOf(targetObj.getFieldValueLocal(groupSchema.GID))};
   }
 
