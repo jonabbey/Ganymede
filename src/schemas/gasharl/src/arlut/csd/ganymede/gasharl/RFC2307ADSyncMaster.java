@@ -91,7 +91,7 @@ public class RFC2307ADSyncMaster implements arlut.csd.ganymede.server.SyncMaster
 
     if (eObj.getTypeID() == SchemaConstants.UserBase)
       {
-        if (eObj.isDefined(userSchema.HOMEGROUP) || eObj.getOriginal() != null && eObj.getOriginal().isDefined(userSchema.HOMEGROUP))
+        if (book.has(eObj.getInvid(), userSchema.HOMEGROUP))
           {
             Invid group = (Invid) eObj.getFieldValueLocal(userSchema.HOMEGROUP);
 
@@ -115,7 +115,7 @@ public class RFC2307ADSyncMaster implements arlut.csd.ganymede.server.SyncMaster
 
     if (eObj.getTypeID() == groupSchema.BASE)
       {
-	if (eObj.isDefined(groupSchema.GID) || eObj.getOriginal() != null && eObj.getOriginal().isDefined(groupSchema.GID))
+	if (book.has(eObj.getInvid(), groupSchema.GID))
 	  {
 	    // we're changing our group id.. make sure we include sync
 	    // information for all user objects that have this group as
