@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2012
    The University of Texas at Austin
 
    Contact information
@@ -582,7 +582,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	if (mailPassword == null)
 	  {
-	    mailPassword = "";	// shouldn't need this
+	    mailPassword = "";	// shouldn't need this if MAILPASSWORD2 is configured properly
 	  }
 
 	Date mailExpireDate = (Date) getFieldValueLocal(userSchema.MAILEXPDATE);
@@ -611,15 +611,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
 	else
 	  {
-	    PasswordDBField myOldPasswordField = (PasswordDBField) this.getField(userSchema.OLDMAILPASSWORD2);
-	    String myOldPassword = myOldPasswordField.getPlainText();
-
 	    PasswordDBField oldMailPasswordField = (PasswordDBField) originalObject.getField(userSchema.MAILPASSWORD2);
 	    String oldPassword = oldMailPasswordField.getPlainText();
 
 	    if (!mailUsername.equals(originalObject.getFieldValueLocal(userSchema.MAILUSER)) ||
 		!mailPassword.equals(oldPassword))
 	      {
+		PasswordDBField myOldPasswordField = (PasswordDBField) this.getField(userSchema.OLDMAILPASSWORD2);
+		String myOldPassword = myOldPasswordField != null ? myOldPasswordField.getPlainText(): "";
+
 		if (this.getGSession().getSessionName().equals("ExternalMailTask") && myOldPassword.equals(oldPassword))
 		  {
 		    // we're processing a credentials renewal by ExternalMailTask
