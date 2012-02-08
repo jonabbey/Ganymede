@@ -2,17 +2,17 @@
    JLabelPanel.java
 
    This class defines a JPanel that contains stacked, labeled items.
-   
+
    Created: 19 August 2004
 
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
 
    Contact information
@@ -55,7 +55,7 @@ import java.awt.Insets;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Map;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -64,13 +64,14 @@ import java.util.Iterator;
 ------------------------------------------------------------------------------*/
 
 /**
- * This panel contains labeled GUI components in a vertical stack orientation.
- * Each GUI component may be made visible or invisible at will.
+ * <p>This panel contains labeled GUI components in a vertical stack
+ * orientation.  Each GUI component may be made visible or invisible
+ * at will.</p>
  *
- * All methods on a constructed JLabelPanel object should be called on the
- * GUI thread once the JLabelPanel has been added to a GUI container.
+ * <p>All methods on a constructed JLabelPanel object should be called
+ * on the GUI thread once the JLabelPanel has been added to a GUI
+ * container.</p>
  *
- * @version $Id$
  * @author Jonathan Abbey
  */
 
@@ -81,7 +82,7 @@ public class JLabelPanel extends JPanel {
   private GridBagLayout gbl;
   private GridBagConstraints gbc;
   private int row = 0;
-  private HashMap rowHash;
+  private Map<Component, JLabel> rowHash;
   private Font font = null;
   private float size = 0.0F;
   private int style = 0;
@@ -135,11 +136,11 @@ public class JLabelPanel extends JPanel {
     gPanel.setLayout(gbl);
 
     bPanel.add("West", gPanel);
-    
+
     add("North", bPanel);
 
     row = 0;
-    rowHash = new HashMap();
+    rowHash = new HashMap<Component, JLabel>();
   }
 
   /**
@@ -173,7 +174,7 @@ public class JLabelPanel extends JPanel {
       }
 
     enforceFixedSize = tf;
-    
+
     if (!enforceFixedSize)
       {
 	gPanel.remove(spacer);
@@ -319,7 +320,7 @@ public class JLabelPanel extends JPanel {
       }
 
     this.font = this.font.deriveFont(style);
-    
+
     setFont(this.font);
   }
 
@@ -353,13 +354,10 @@ public class JLabelPanel extends JPanel {
 	return;
       }
 
-    Iterator it = rowHash.values().iterator();
-
     int maxSize = 0;
 
-    while (it.hasNext())
+    for (JLabel label: rowHash.values())
       {
-	JLabel label = (JLabel) it.next();
 	label.setFont(font);
 	label.invalidate();
 
@@ -561,14 +559,16 @@ public class JLabelPanel extends JPanel {
 
   /**
    * For making a given row visible or invisible.  If b is set to
+  /**
+   * <p>For making a given row visible or invisible.  If b is set to
    * true, the given row will be made visible, if it is set to false,
    * the given row (and its label) will be made invisible, and the
    * JLabelPanel will pull any rows beneath it up to fill in the
-   * space.
+   * space.</p>
    *
-   * Note that if a setFixedSizeLabelCells(true) call has been made
+   * <p>Note that if a setFixedSizeLabelCells(true) call has been made
    * on this JLabelPanel, making a row invisible will not cause the
-   * horizontal positioning of the second, field column to shift.
+   * horizontal positioning of the second, field column to shift.</p>
    */
 
   public synchronized void setRowVisible(Component comp, boolean b)
@@ -578,7 +578,7 @@ public class JLabelPanel extends JPanel {
 	this.setup();
       }
 
-    Component label = (Component) rowHash.get(comp);
+    JLabel label = rowHash.get(comp);
 
     comp.setVisible(b);
 
@@ -602,7 +602,7 @@ public class JLabelPanel extends JPanel {
 
     gPanel.remove(comp);
 
-    Component label = (Component) rowHash.get(comp);
+    JLabel label = rowHash.get(comp);
 
     if (label != null)
       {
@@ -639,7 +639,7 @@ public class JLabelPanel extends JPanel {
 
     gbl = null;
     gbc = null;
-    
+
     spacer = null;
   }
 }
