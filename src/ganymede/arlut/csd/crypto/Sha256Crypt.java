@@ -25,7 +25,7 @@
 
    This Java Port is  
 
-     Copyright (c) 2008-2010 The University of Texas at Austin.
+     Copyright (c) 2008-2012 The University of Texas at Austin.
 
      All rights reserved.
 
