@@ -177,9 +177,9 @@ Christian Hammers - Submitted a compatibility patch to Sha256Crypt and
 --
 
 The Java implementation of the standard UNIX crypt() function was
-converted from C by John Dumas, jdumas@zgs.com, whose code can be
-found at http://208.223.9.21/jfd/crypt.html.  jcrypt is included in
-Ganymede by permission of the author.
+converted from C by John Dumas, johnfdumas@gmail.com, whose code can
+be found at http://www.vulcanware.com/java_jcrypt/index.html.  jcrypt
+is included in Ganymede by permission of the author.
 
 --
 
