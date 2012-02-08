@@ -558,7 +558,19 @@ public class JLabelPanel extends JPanel {
   }
 
   /**
-   * For making a given row visible or invisible.  If b is set to
+   * <p>For changing the number of columns the Component comp spans in
+   * the JLabelPanel.  Used to allow embedded object vector panels to
+   * grow past the 2nd column boundary when expanded.</p>
+   */
+
+  public synchronized void changeColumnContentWidth(Component comp, int colwidth)
+  {
+    gbc = gbl.getConstraints(comp);
+    gbc.gridwidth = colwidth;
+    gbl.setConstraints(comp, gbc);
+    gPanel.validate();
+  }
+
   /**
    * <p>For making a given row visible or invisible.  If b is set to
    * true, the given row will be made visible, if it is set to false,
