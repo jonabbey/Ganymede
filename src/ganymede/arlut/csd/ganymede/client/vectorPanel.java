@@ -227,8 +227,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   FieldTemplate
     template;
 
-  private int openElementCount = 0;
-
   /* -- */
 
   /**
@@ -1034,44 +1032,6 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     else if (debug)
       {
 	System.err.println("vectorPanel.refresh(): skipped fullRefresh");
-      }
-  }
-
-  /**
-   * <p>Called by elementWrapper.open() to increment the count of open
-   * elements.</p>
-   *
-   * <p>If the count goes from 0 to non-zero, we'll signal our
-   * containerPanel to allow us to stretch into the third column for
-   * our horizontal growth.</p>
-   */
-
-  public synchronized void openElement()
-  {
-    if (openElementCount++ == 0)
-      {
-	container.openElement(this);
-      }
-  }
-
-  /**
-   * <p>Called by elementWrapper.open() to decrement the count of open
-   * elements.</p>
-   *
-   * <p>If the count goes from non-zero to 0, we'll signal our
-   * containerPanel to shrink us back into the second column only.</p>
-   */
-
-  public synchronized void closeElement()
-  {
-    if (--openElementCount == 0)
-      {
-	container.closeElement(this);
-      }
-
-    if (openElementCount < 0)
-      {
-	openElementCount = 0;
       }
   }
 

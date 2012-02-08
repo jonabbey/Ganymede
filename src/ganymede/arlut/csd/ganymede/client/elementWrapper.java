@@ -362,8 +362,6 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     // "Close this element"
     expand.setToolTipText(ts.l("global.shrink_tooltip"));
     expanded = true;
-
-    vp.openElement();
   }
 
   /**
@@ -379,8 +377,6 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     // "Expand this element"
     expand.setToolTipText(ts.l("global.expand_tooltip"));
     expanded = false;
-
-    vp.closeElement();
   }
 
   /**

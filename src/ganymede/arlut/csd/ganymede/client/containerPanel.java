@@ -2843,7 +2843,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     associateFieldId(fieldInfo, vp);
 
-    contentsPanel.addFillRow(fieldTemplate.getName(), vp, 2);
+    contentsPanel.addFillRow(fieldTemplate.getName(), vp, 3);
     contentsPanel.setRowVisible(vp, fieldInfo.isVisible());
   }
 
@@ -2862,26 +2862,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       }
 
     ++vectorElementsAdded;
-  }
-
-  /**
-   * Allows the passed vectorPanel to expand horizontally into a third
-   * column in our containerPanel.
-   */
-
-  public void openElement(vectorPanel panel)
-  {
-    contentsPanel.changeColumnContentWidth(panel, 3);
-  }
-
-  /**
-   * Allows the passed vectorPanel to expand horizontally into a third
-   * column in our containerPanel.
-   */
-
-  public void closeElement(vectorPanel panel)
-  {
-    contentsPanel.changeColumnContentWidth(panel, 2);
   }
 
   /**
