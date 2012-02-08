@@ -12,7 +12,7 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2012
    The University of Texas at Austin
 
    Contact information
@@ -2816,8 +2816,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     /* -- */
 
-    boolean debug = true;
-
     if (debug)
       {
 	if (isEditInPlace)
@@ -2845,7 +2843,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     associateFieldId(fieldInfo, vp);
 
-    contentsPanel.addFillRow(fieldTemplate.getName(), vp, 1);
+    contentsPanel.addFillRow(fieldTemplate.getName(), vp, 2);
     contentsPanel.setRowVisible(vp, fieldInfo.isVisible());
   }
 
@@ -2864,6 +2862,26 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       }
     
     ++vectorElementsAdded;
+  }
+
+  /**
+   * Allows the passed vectorPanel to expand horizontally into a third
+   * column in our containerPanel.
+   */
+
+  public void openElement(vectorPanel panel)
+  {
+    contentsPanel.changeColumnContentWidth(panel, 3);
+  }
+
+  /**
+   * Allows the passed vectorPanel to expand horizontally into a third
+   * column in our containerPanel.
+   */
+
+  public void closeElement(vectorPanel panel)
+  {
+    contentsPanel.changeColumnContentWidth(panel, 2);
   }
 
   /**
