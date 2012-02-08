@@ -62,7 +62,7 @@ import java.security.SecureRandom;
  * <p>Original sources at http://code.google.com/p/jbcrypt/</p>
  *
  * @author Damien Miller
- * @version 0.2
+ * @version 0.3
  */
 
 public class BCrypt {
