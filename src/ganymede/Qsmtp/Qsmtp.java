@@ -32,7 +32,7 @@ Version History:
                 Also, yanked out the debug code.  It annoyed me.
 1.11 12/27/97 - Forgot to flush(), println used to do that for me...
 
--- 
+--
 
 Modifications by Jonathan Abbey (jonabbey@arlut.utexas.edu):
 
@@ -81,25 +81,25 @@ import java.util.Random;
 ------------------------------------------------------------------------------*/
 
 /**
- * SMTP mailer class, used to send email messages (with optional HTML MIME
+ * <p>SMTP mailer class, used to send email messages (with optional HTML MIME
  * attachments) through direct TCP/IP communication with Internet SMTP mail
- * servers.
+ * servers.</p>
  *
- * The Qsmtp constructors take an address for a SMTP mail server, and all 
+ * <p>The Qsmtp constructors take an address for a SMTP mail server, and all
  * messages subsequently sent out by the Qsmtp object are handled by
- * that SMTP server.
+ * that SMTP server.</p>
  *
- * Once created, a Qsmtp object can be used to send any number of messages
- * through that mail server.  Each call to 
- * {@link Qsmtp#sendmsg(java.lang.String, java.util.List, java.lang.String, 
+ * <p>Once created, a Qsmtp object can be used to send any number of messages
+ * through that mail server.  Each call to
+ * {@link Qsmtp#sendmsg(java.lang.String, java.util.List, java.lang.String,
  * java.lang.String) sendmsg} or
- * {@link Qsmtp#sendHTMLmsg(java.lang.String, java.util.List, java.lang.String, 
+ * {@link Qsmtp#sendHTMLmsg(java.lang.String, java.util.List, java.lang.String,
  * java.lang.String, java.lang.String, java.lang.String) sendHTMLmsg} opens a
  * separate SMTP connection to the designated mail server and transmits a
- * single message.
+ * single message.</p>
  *
- * Because this class opens a socket to a potentially remote TCP/IP server,
- * this class may not function properly when used within an applet.
+ * <p>Because this class opens a socket to a potentially remote TCP/IP server,
+ * this class may not function properly when used within an applet.</p>
  */
 
 public class Qsmtp implements Runnable {
@@ -116,7 +116,7 @@ public class Qsmtp implements Runnable {
 
   static public String formatDate(Date date)
   {
-    DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", 
+    DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z",
 						java.util.Locale.US);
     return formatter.format(date);
   }
@@ -155,19 +155,19 @@ public class Qsmtp implements Runnable {
     this.port = port;
   }
 
-  /** 
-   * <P>After this method is called, all further sendmsg() calls will
+  /**
+   * <p>After this method is called, all further sendmsg() calls will
    * not directly send mail themselves, but will rather queue the mail
-   * for sending by a back-ground thread.</P>
+   * for sending by a back-ground thread.</p>
    *
-   * <P>One result of this is that after this is called, the sendmsg()
+   * <p>One result of this is that after this is called, the sendmsg()
    * methods will never throw Protcol or IO Exceptions, and no
-   * success/failure results will be returned.</P> 
+   * success/failure results will be returned.</p>
    *
-   * <P>If this method is called while an previous background thread
+   * <p>If this method is called while an previous background thread
    * that was ordered to stop by stopThreaded() is still shutting
    * down, this method will block until the old background thread
-   * dies and the new background thread can be established.</P>
+   * dies and the new background thread can be established.</p>
    */
 
   public synchronized void goThreaded()
@@ -194,8 +194,8 @@ public class Qsmtp implements Runnable {
   }
 
   /**
-   * <P>Calling this method turns off the background thread and
-   * returns Qsmtp to normal blocking operation.</P>
+   * <p>Calling this method turns off the background thread and
+   * returns Qsmtp to normal blocking operation.</p>
    */
 
   public synchronized void stopThreaded()
@@ -218,7 +218,7 @@ public class Qsmtp implements Runnable {
 	  {
 	    System.err.println("Qsmtp.stopThreaded() - waking background thread");
 	  }
-	
+
 	synchronized (queuedMessages)
 	  {
 	    queuedMessages.notifyAll();
@@ -278,7 +278,7 @@ public class Qsmtp implements Runnable {
   }
 
   /**
-   * <P>Sends a plain ASCII mail message</P>
+   * <p>Sends a plain ASCII mail message</p>
    *
    * @param from_address Who is sending this message?
    * @param to_addresses List of string addresses to send this message to
@@ -296,7 +296,7 @@ public class Qsmtp implements Runnable {
   }
 
   /**
-   * <P>Sends a message with a MIME-attached HTML message</P>
+   * <p>Sends a message with a MIME-attached HTML message</p>
    *
    * <p>In a perfect world, we'd do a generic MIME-capable mail system here, but
    * as it is, we only support HTML.</p>
@@ -327,7 +327,7 @@ public class Qsmtp implements Runnable {
     MIMEheaders.add("Content-Type: multipart/mixed; boundary=\"" + separator + "\"");
 
     buffer.append("This is a multi-part message in MIME format.\n");
-    
+
     if (textBody != null)
       {
 	buffer.append("--");
@@ -344,7 +344,7 @@ public class Qsmtp implements Runnable {
 	buffer.append(separator);
 	buffer.append("\nContent-Type: text/html; charset=us-ascii\n");
 	buffer.append("Content-Transfer-Encoding: 7bit\n");
-	
+
 	if (htmlFilename != null && !htmlFilename.equals(""))
 	  {
 	    buffer.append("Content-Disposition: inline; filename=\"");
@@ -378,8 +378,8 @@ public class Qsmtp implements Runnable {
   }
 
   /**
-   * <P>Sends a mail message with some custom-specified envelope headers.  Used
-   * internally by the other Qsmtp sendmsg and sendHTMLmsg methods.</P>
+   * <p>Sends a mail message with some custom-specified envelope headers.  Used
+   * internally by the other Qsmtp sendmsg and sendHTMLmsg methods.</p>
    *
    * @param from_address Who is sending this message?
    * @param to_addresses List of string addresses to send this message to
@@ -417,7 +417,7 @@ public class Qsmtp implements Runnable {
   }
 
   /**
-   * <P>Main worker routine for the background thread which handles mail-outs.</P>
+   * <p>Main worker routine for the background thread which handles mail-outs.</p>
    */
 
   public void run()
@@ -528,7 +528,7 @@ public class Qsmtp implements Runnable {
   }
 
   /**
-   * <P>This method handles the actual mail-out</P>
+   * <p>This method handles the actual mail-out</p>
    *
    * @return false if any problems occurred during transmission which
    * should necessitate a retry of the message transmission, true
@@ -566,7 +566,7 @@ public class Qsmtp implements Runnable {
       {
         local = InetAddress.getLocalHost();
       }
-    catch (UnknownHostException ioe) 
+    catch (UnknownHostException ioe)
       {
         System.err.println("No local IP address found - is your network up?");
         ioe.printStackTrace();  // get it into our log
@@ -597,16 +597,16 @@ public class Qsmtp implements Runnable {
 
             rstr = scanLine(reply);
 
-            if (!rstr.startsWith("220")) 
+            if (!rstr.startsWith("220"))
               {
                 throw new ProtocolException(rstr);
               }
 
-            while (rstr.indexOf('-') == 3) 
+            while (rstr.indexOf('-') == 3)
               {
                 rstr = scanLine(reply);
 
-                if (!rstr.startsWith("220")) 
+                if (!rstr.startsWith("220"))
                   {
                     throw new ProtocolException(rstr);
                   }
@@ -620,7 +620,7 @@ public class Qsmtp implements Runnable {
 
             rstr = scanLine(reply);
 
-            if (!rstr.startsWith("250")) 
+            if (!rstr.startsWith("250"))
               {
                 throw new ProtocolException(rstr);
               }
@@ -632,7 +632,7 @@ public class Qsmtp implements Runnable {
 
             rstr = scanLine(reply);
 
-            if (!rstr.startsWith("250")) 
+            if (!rstr.startsWith("250"))
               {
                 throw new ProtocolException(rstr);
               }
@@ -648,7 +648,7 @@ public class Qsmtp implements Runnable {
 
                 rstr = scanLine(reply);
 
-                if (!rstr.startsWith("250")) 
+                if (!rstr.startsWith("250"))
                   {
                     // don't throw an exception here.. we're in a loop and
                     // we want to get the mail sent to others.
@@ -678,7 +678,7 @@ public class Qsmtp implements Runnable {
 
             rstr = scanLine(reply);
 
-            if (!rstr.startsWith("354")) 
+            if (!rstr.startsWith("354"))
               {
                 throw new ProtocolException(rstr);
               }
@@ -702,9 +702,9 @@ public class Qsmtp implements Runnable {
             send.print(EOL);
             send.print("Subject: " + subject);
             send.print(EOL);
-    
+
             // Create Date - we'll cheat by assuming that local clock is right
-    
+
             Date today_date = new Date();
             send.print("Date: " + formatDate(today_date));
             send.print(EOL);
@@ -737,7 +737,7 @@ public class Qsmtp implements Runnable {
             send.print(".");
             send.print(EOL);
             send.flush();
-    
+
             rstr = scanLine(reply);
 
             try
@@ -846,12 +846,12 @@ public class Qsmtp implements Runnable {
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Data-holding object used by the Qsmtp class to queue messages for mailing
- * on a separate thread.</P>
+ * <p>Data-holding object used by the Qsmtp class to queue messages for mailing
+ * on a separate thread.</p>
  */
 
 class messageObject {
-  
+
   String from_address;
   List<String> to_addresses;
   String subject;
@@ -860,7 +860,7 @@ class messageObject {
 
   /* -- */
 
-  messageObject(String from_address, List<String> to_addresses, 
+  messageObject(String from_address, List<String> to_addresses,
 		String subject, String message,
 		List<String> extraHeaders)
   {
