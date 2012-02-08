@@ -260,6 +260,8 @@ license:
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
+Damien has his current JBCrypt code online, see http://code.google.com/p/jbcrypt/
+
 --
 
 The Ganymede server uses James Clark's excellent XMLWriter class

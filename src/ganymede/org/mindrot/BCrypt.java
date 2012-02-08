@@ -11,6 +11,8 @@
 // WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 // ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 // OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+//
+// Original sources at http://code.google.com/p/jbcrypt/
 
 package org.mindrot;
 
@@ -56,6 +58,8 @@ import java.security.SecureRandom;
  * <p>The amount of work increases exponentially (2**log_rounds), so
  * each increment is twice as much work. The default log_rounds is 10,
  * and the valid range is 4 to 31.</p>
+ *
+ * <p>Original sources at http://code.google.com/p/jbcrypt/</p>
  *
  * @author Damien Miller
  * @version 0.2
