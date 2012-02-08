@@ -2816,6 +2816,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     /* -- */
 
+    boolean debug = true;
+
     if (debug)
       {
 	if (isEditInPlace)
@@ -2843,7 +2845,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     associateFieldId(fieldInfo, vp);
 
-    contentsPanel.addWideFillComponent(vp, 4);
+    contentsPanel.addFillRow(fieldTemplate.getName(), vp, 1);
     contentsPanel.setRowVisible(vp, fieldInfo.isVisible());
   }
 
