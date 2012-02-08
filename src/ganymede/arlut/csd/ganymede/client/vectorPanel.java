@@ -269,32 +269,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     
     setLayout(new BorderLayout());
 
-    // Set up the titled border
-    //
-    // The titled border should say "field.name(): Vector".  For example,
-    // "Systems: Vector"  The titledBorder surrounds the entire vectorPanel,
-    // separating it from the rest of the components.
-
-    EmptyBorder eb = (EmptyBorder)BorderFactory.createEmptyBorder(10,10,10,10);
-    TitledBorder tb;
-
+    // "Add {0}" button.
     name = template.getName();
-
-    if (name == null)
-      {
-	// "Untitled Vector"
-	tb = BorderFactory.createTitledBorder(ts.l("init.untitled_vector"));
-      }
-    else
-      {
-	// "{0}: Vector"
-	tb = BorderFactory.createTitledBorder(ts.l("init.titled_vector", name));
-      }
-
-    CompoundBorder cb = BorderFactory.createCompoundBorder(tb,eb);
-    setBorder(cb);
-
-    // "Add {0}"
     addB = new JButton(ts.l("init.add_button", name));
 
     // Set up pop up menu
@@ -302,6 +278,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
     // The popup menu appears when the right mouse button is clicked inside the
     // TitledBorder but outside of the elementWrappers.  It basically presents a
     // menu with either "expand" or "close" options.
+
+    // NOTE: This does not work in windows or certain version, works on Jon's but not James's computer!!!
 
     popupMenu = new JPopupMenu();
 
