@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-14 April 2011
+8 February 2012
 CREDITS
 
 ---------------------------------------------
@@ -171,6 +171,8 @@ Martin Vogt - bug reports
 Steve Lemons - bug reports
 Fredrik.A.Bergman@ericsson.com - many excellect bug reports for Ganymede 2.0
 Stefan Bier - Ganymede 2.0 bug reports, patches, German localization
+Christian Hammers - Submitted a compatibility patch to Sha256Crypt and
+                    Sha512Crypt for better glibc compatibility.
 
 --
 
