@@ -294,7 +294,7 @@ public final class Sha512Crypt
 
     buffer = new StringBuilder(sha512_salt_prefix);
 
-    if (include_round_count)
+    if (include_round_count || rounds != ROUNDS_DEFAULT)
       {
 	buffer.append(sha512_rounds_prefix);
 	buffer.append(rounds);

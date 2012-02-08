@@ -292,7 +292,7 @@ public final class Sha256Crypt
 
     buffer = new StringBuilder(sha256_salt_prefix);
 
-    if (include_round_count)
+    if (include_round_count || rounds != ROUNDS_DEFAULT)
       {
 	buffer.append(sha256_rounds_prefix);
 	buffer.append(rounds);
