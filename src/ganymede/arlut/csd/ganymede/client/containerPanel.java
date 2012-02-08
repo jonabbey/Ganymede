@@ -9,9 +9,9 @@
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2012
    The University of Texas at Austin
 
@@ -196,7 +196,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   windowPanel winP;
 
   /**
-   * The window we are contained in, may be null if we are embedded in a 
+   * The window we are contained in, may be null if we are embedded in a
    * {@link arlut.csd.ganymede.client.vectorPanel vectorPanel}.
    */
 
@@ -351,7 +351,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
   public containerPanel(db_object    object,
 			Invid        invid,
-			boolean      editable, 
+			boolean      editable,
 			gclient      gc,
 			windowPanel  window,
 			framePanel   frame,
@@ -360,7 +360,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     this(object, invid, editable, gc, window, frame, null, true, context);
   }
 
-  /** 
+  /**
    * Constructor with default values for loadNow set to true, and
    * isCreating set to false.
    *
@@ -377,15 +377,15 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * @param frame    framePanel holding this containerPanel
    * @param progressBar JProgressBar to be updated, can be null
    * @param context An object that can be provided to identify the context in
-   * which this containerPanel is being created.  
+   * which this containerPanel is being created.
    */
 
-  public containerPanel(db_object object, 
+  public containerPanel(db_object object,
 			Invid invid,
-			boolean editable, 
-			gclient gc, 
-			windowPanel window, 
-			framePanel frame, 
+			boolean editable,
+			gclient gc,
+			windowPanel window,
+			framePanel frame,
 			JProgressBar progressBar,
 			Object context)
   {
@@ -438,9 +438,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * @param window   windowPanel containing this containerPanel
    * @param progressBar JProgressBar to be updated, can be null
    * @param loadNow  If true, container panel will be loaded immediately
-   * @param isCreating  
+   * @param isCreating
    * @param context An object that can be provided to identify the context in
-   * which this containerPanel is being created.  
+   * which this containerPanel is being created.
    */
 
   public containerPanel(db_object object,
@@ -529,14 +529,14 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * constructor, but we defer loading when we are placed in a vector
    * panel hierarchy.
    */
-  
-  public void load() 
+
+  public void load()
   {
     loading = true;
 
     int infoSize;
 
-    FieldInfo 
+    FieldInfo
       fieldInfo = null;
 
     FieldTemplate
@@ -556,7 +556,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       {
 	println("Loading container panel");
       }
-    
+
     try
       {
 	// if we are a top-level container panel in a general pane
@@ -576,7 +576,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  {
 	    println("Getting list of fields");
 	  }
-    
+
 	type = invid.getType();
 
 	setProgressBar(1);
@@ -624,7 +624,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		gc.processExceptionRethrow(rx);
 	      }
 	  }
-	    
+
 	if (infoVector.size() == 0)
 	  {
 	    printErr("No field info in getFieldInfoVector()");
@@ -635,7 +635,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	// method during our loops
 
 	infoSize = infoVector.size();
-			
+
 	// now we know how many fields are actually present in this
 	// object, we can set the max size of the progress bar (plus
 	// how many elements in each vector panel.)
@@ -668,14 +668,14 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	      }
 
 	    progressBar.setMaximum(totalSize);
-	    progressBar.setValue(3);	   
+	    progressBar.setValue(3);
 	  }
 
 	if (debug)
 	  {
 	    println("Entering big loop");
 	  }
-      
+
 	for (int i = 0; i < infoSize; i++)
 	  {
 	    // let the gclient interrupt us
@@ -686,29 +686,29 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	      }
 
 	    setProgressBar(i + 3 + vectorElementsAdded);
-		
+
 	    try
 	      {
 		fieldInfo = (FieldInfo) infoVector.elementAt(i);
 		ID = fieldInfo.getID();
 		fieldTemplate = findtemplate(ID);
-		
+
 		if (fieldTemplate == null)
 		  {
-		    throw new RuntimeException("Could not find the template for this field: " + 
+		    throw new RuntimeException("Could not find the template for this field: " +
 					       fieldInfo.getField());
 		  }
 
 		// Skip some fields.  custom panels hold the built ins, and a few others.
 
 		// If we are a persona panel, hide the associated user field.
-		    
+
 		if ((ID == SchemaConstants.BackLinksField)
-		    || ((type == SchemaConstants.UserBase) && 
+		    || ((type == SchemaConstants.UserBase) &&
 			(ID == SchemaConstants.UserAdminPersonae))
-		    || ((ID == SchemaConstants.ContainerField) && 
+		    || ((ID == SchemaConstants.ContainerField) &&
 			object.isEmbedded())
-		    || (isPersonaPanel && 
+		    || (isPersonaPanel &&
 			(type == SchemaConstants.PersonaBase) &&
 			(ID == SchemaConstants.PersonaAssocUser)))
 		  {
@@ -746,7 +746,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		gc.processExceptionRethrow(ex);
 	      }
 	  }
-    
+
 	if (debug)
 	  {
 	    println("Done with loop");
@@ -761,12 +761,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  {
 	    return;
 	  }
-	
+
 	// If update(Vector) was called during the load, then any
 	// fields to be updated were added to the updatesWhileLoading
 	// vector.  So call update with that vector now, if it has any
 	// size.
-	
+
 	synchronized (updatesWhileLoading)
 	  {
 	    if (updatesWhileLoading.size() > 0)
@@ -775,7 +775,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		  {
 		    println("Calling update with the updatesWhileLoading vector.");
 		  }
-		
+
 		update(updatesWhileLoading);
 	      }
 	  }
@@ -830,7 +830,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     return gc;
   }
 
-  /** 
+  /**
    * Use this to print stuff out, so we know it is from the containerPanel
    */
 
@@ -886,7 +886,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
   /**
    * This method returns false when the containerPanel loading has
-   * been interupted.  The vectorPanel checks this.  
+   * been interupted.  The vectorPanel checks this.
    */
 
   public boolean keepLoading()
@@ -894,7 +894,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     return !frame.isStopped();
   }
 
-  /** 
+  /**
    * Goes through all the components and checks to see if they should
    * be visible, and updates their contents.
    *
@@ -925,15 +925,15 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     try
       {
 	en = objectHash.keys();
-	
+
 	while (en.hasMoreElements())
 	  {
 	    updateComponent((Component)en.nextElement());
 	  }
-	
+
 	invalidate();
 	frame.validate();
-	
+
       }
     finally
       {
@@ -941,12 +941,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  {
 	    println("Done updating container panel");
 	  }
-	
+
 	gc.setNormalCursor();
       }
   }
 
-  /** 
+  /**
    * Goes through all the components and checks to see if any of them
    * are Invid fields that contain a reference to invid.
    *
@@ -988,7 +988,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  {
 	    println("Done updating container panel");
 	  }
-	
+
 	gc.setNormalCursor();
       }
   }
@@ -1057,7 +1057,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    // If we are not loading yet, then we don't need to worry
 	    // about keeping track of the fields.  They will current when
 	    // they are first loaded.
-	    
+
 	    if (loading)
 	      {
 		for (int i = 0; i < fields.size(); i++)
@@ -1065,7 +1065,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		    updatesWhileLoading.addElement(fields.elementAt(i));
 		  }
 	      }
-	    
+
 	    return;
 	  }
       }
@@ -1110,7 +1110,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		    println("Could not find this component: ID = " + fieldID);
 		  }
 	      }
-	    else 
+	    else
 	      {
 		updateComponent(c);
 	      }
@@ -1156,10 +1156,10 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 	if (debug)
 	  {
-	    println("Updating " + field.getName() + " " + comp); 
+	    println("Updating " + field.getName() + " " + comp);
 	  }
 
-	// if the field is not visible, just hide it and 
+	// if the field is not visible, just hide it and
 	// return.. otherwise, set it visible and update
 	// the value and choices for the field
 
@@ -1168,9 +1168,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    contentsPanel.setRowVisible(comp, false);
 	    return;
 	  }
-	
+
 	contentsPanel.setRowVisible(comp, true);
-	
+
 	if (comp instanceof JstringField)
 	  {
 	    if (comp.equals(currentlyChangingComponent))
@@ -1244,7 +1244,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		// the server apparently triggered a refresh of the field
 		// that we are processing a callback from.  the
 		// JfloatField has specific support for this, etc.
- 
+
 		((JfloatField)comp).substituteValueByCallBack(this, value);
 	      }
 	    else
@@ -1303,14 +1303,14 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		  {
 		    println("key = " + key);
 		  }
-		  
+
 		if (gc.cachedLists.containsList(key))
 		  {
 		    if (debug)
 		      {
 			println("key in there, using cached list");
 		      }
-		      
+
 		    labels = gc.cachedLists.getLabels(key, false);
 		  }
 		else
@@ -1319,12 +1319,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		      {
 			println("JComboBox contents not cached, downloading stringfield choices.");
 		      }
-		      
+
 		    QueryResult choicesV = sf.choices();
 
 		    // if we got a null result, assume we have no choices,
 		    // otherwise we're going to cache this result
-		      
+
 		    if (choicesV == null)
 		      {
 			labels = new Vector();
@@ -1392,7 +1392,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	      {
 		println("Updating the InvidChooser.");
 	      }
-	      
+
 	    // First we need to rebuild the list of choices
 
 	    Vector choiceHandles = null;
@@ -1400,14 +1400,14 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 	    // if our choices key is null, we're not going to use a cached copy..
 	    // pull down a new list of choices for this field.
-	      
+
 	    if (key == null)
 	      {
 		if (debug)
 		  {
 		    println("key is null, getting new copy, not caching.");
 		  }
-		
+
 		QueryResult qr = invf.choices();
 
 		if (qr == null)
@@ -1425,14 +1425,14 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		  {
 		    println("key = " + key);
 		  }
-		  
+
 		if (gc.cachedLists.containsList(key))
 		  {
 		    if (debug)
 		      {
 			println("key in there, using cached list");
 		      }
-		      
+
 		    choiceHandles = gc.cachedLists.getListHandles(key, false); // pre-sorted
 		  }
 		else
@@ -1441,12 +1441,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		      {
 			println("JInvidChooser contents not cached, downloading invid field choices.");
 		      }
-		      
+
 		    QueryResult choicesV = invf.choices();
 
 		    // if we got a null result, assume we have no choices
 		    // otherwise, we're going to cache this result
-		      
+
 		    if (choicesV == null)
 		      {
 			choiceHandles = new Vector();
@@ -1492,28 +1492,28 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 	    if (currentHandle == null && currentValue != null)
 	      {
-		VecSortInsert inserter = new VecSortInsert(new Comparator() 
+		VecSortInsert inserter = new VecSortInsert(new Comparator()
 							   {
-							     public int compare(Object o_a, Object o_b) 
+							     public int compare(Object o_a, Object o_b)
 							       {
 								 listHandle a, b;
-	  
+
 								 a = (listHandle) o_a;
 								 b = (listHandle) o_b;
 								 int compResult = 0;
-	  
+
 								 compResult = a.toString().compareToIgnoreCase(b.toString());
-	  
+
 								 if (compResult < 0)
 								   {
 								     return -1;
 								   }
 								 else if (compResult > 0)
-								   { 
+								   {
 								     return 1;
-								   } 
+								   }
 								 else
-								   { 
+								   {
 								     return 0;
 								   }
 							       }
@@ -1626,7 +1626,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		((JIPField)comp).setValue(bytes);
 	      }
 	  }
-	else 
+	else
 	  {
 	    printErr("field of unknown type: " + comp);
 	  }
@@ -1660,7 +1660,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     if (ss.isEditable())
       {
 	key = field.choicesKey();
-	
+
 	if (key == null)
 	  {
 	    QueryResult qr = field.choices();
@@ -1678,7 +1678,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		  {
 		    println("key in there, using cached list");
 		  }
-	    
+
 		available = gc.cachedLists.getListHandles(key, false);
 	      }
 	    else
@@ -1687,12 +1687,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		  {
 		    println("list for updateStringStringSelector() not loaded, downloading a new one.");
 		  }
-	    
+
 		QueryResult choicesV = field.choices();
-	    
+
 		// if we got a null result, assume we have no choices
 		// otherwise, we're going to cache this result
-	    
+
 		if (choicesV == null)
 		  {
 		    available = new Vector();
@@ -1734,7 +1734,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     if (ss.isEditable())
       {
 	key = field.choicesKey();
-    
+
 	if (key == null)
 	  {
 	    QueryResult qr = field.choices();
@@ -1752,7 +1752,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		  {
 		    println("key in there, using cached list");
 		  }
-	    
+
 		available = gc.cachedLists.getListHandles(key, false);
 	      }
 	    else
@@ -1761,12 +1761,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		  {
 		    println("list for updateInvidStringSelector() not loaded, downloading a new one.");
 		  }
-	    
+
 		QueryResult choicesV = field.choices();
-	    
+
 		// if we got a null result, assume we have no choices
 		// otherwise, we're going to cache this result
-	    
+
 		if (choicesV == null)
 		  {
 		    available = new Vector();
@@ -1779,7 +1779,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	      }
 	  }
       }
-    
+
     QueryResult res = field.encodedValues();
 
     if (res != null)
@@ -1908,7 +1908,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    // number of conditions, that we need to check.
 
 	    // First, are we being given a menu operation from StringSelector?
-	
+
 	    if (v instanceof JParameterValueObject)
 	      {
 		if (debug)
@@ -1926,7 +1926,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		      }
 
 		    Invid invid = (Invid) v.getValue();
-		    
+
 		    gc.editObject(invid);
 
 		    return true;
@@ -1939,7 +1939,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		      }
 
 		    Invid invid = (Invid) v.getValue();
-		    
+
 		    gc.viewObject(invid);
 
 		    return true;
@@ -2070,7 +2070,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	      {
 		println("didSucceed: Returning true.");
 	      }
-	    
+
 	    gc.somethingChanged();
 	    return true;
 	  }
@@ -2080,7 +2080,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	      {
 		println("didSucceed: Returning false.");
 	      }
-	    
+
 	    return false;
 	  }
       }
@@ -2138,7 +2138,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     try
       {
 	newValue = cb.isSelected();
-	
+
 	try
 	  {
 	    returnValue = field.setValue(Boolean.valueOf(newValue));
@@ -2147,8 +2147,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  {
 	    gc.processExceptionRethrow(rx, "Could not set field value: ");
 	  }
-      
-	
+
+
 	// Handle any wizards or error dialogs resulting from the
 	// field.setValue()
 
@@ -2169,13 +2169,13 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    // We need to turn off ourselves as an action listener
 	    // while we flip this back, so we don't go through this
 	    // method again.
-	
+
 	    cb.removeActionListener(this);
-	
+
 	    cb.setSelected(!newValue);
-	
+
 	    // and we re-enable event notification
-	
+
 	    cb.addActionListener(this);
 	  }
       }
@@ -2241,7 +2241,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     if (field == null)
       {
 	field = (db_field) invidChooserHash.get(cb);
-	
+
 	if (field == null)
 	  {
 	    throw new RuntimeException("Whoa, null field for a JComboBox: " + e);
@@ -2276,7 +2276,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
 	    returnValue = field.setValue(lh.getObject());
 	  }
-	else 
+	else
 	  {
 	    throw new RuntimeException("Unknown type from JComboBox: " + newValue);
 	  }
@@ -2310,7 +2310,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    // turn off callbacks
 
 	    cb.removeItemListener(this);
-	    
+
 	    if (oldValue == null)
 	      {
 		cb.setSelectedItem(null);
@@ -2324,9 +2324,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		listHandle lh = new listHandle(gc.getSession().viewObjectLabel((Invid) oldValue), oldValue);
 		cb.setSelectedItem(lh);
 	      }
-	    
+
 	    // turn callbacks back on
-	    
+
 	    cb.addItemListener(this);
 	  }
       }
@@ -2341,8 +2341,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * is the top-level field component adding method.
    */
 
-  private void addFieldComponent(db_field field, 
-				 FieldInfo fieldInfo, 
+  private void addFieldComponent(db_field field,
+				 FieldInfo fieldInfo,
 				 FieldTemplate fieldTemplate) throws RemoteException
   {
     short fieldType;
@@ -2392,15 +2392,15 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  case -1:
 	    printErr("**** Could not get field information");
 	    break;
-		      
+
 	  case FieldType.STRING:
 	    addStringField((string_field) field, fieldInfo, fieldTemplate);
 	    break;
-		      
+
 	  case FieldType.PASSWORD:
 	    addPasswordField((pass_field) field, fieldInfo, fieldTemplate);
 	    break;
-		      
+
 	  case FieldType.NUMERIC:
 	    addNumericField(field, fieldInfo, fieldTemplate);
 	    break;
@@ -2412,11 +2412,11 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  case FieldType.DATE:
 	    addDateField(field, fieldInfo, fieldTemplate);
 	    break;
-		      
+
 	  case FieldType.BOOLEAN:
 	    addBooleanField(field, fieldInfo, fieldTemplate);
 	    break;
-		      
+
 	  case FieldType.PERMISSIONMATRIX:
 	    addPermissionField(field, fieldInfo, fieldTemplate);
 	    break;
@@ -2424,7 +2424,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
           case FieldType.FIELDOPTIONS:
             addFieldOptionsField(field, fieldInfo, fieldTemplate);
             break;
-		      
+
 	  case FieldType.INVID:
 	    addInvidField((invid_field)field, fieldInfo, fieldTemplate);
 	    break;
@@ -2432,7 +2432,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  case FieldType.IP:
 	    addIPField((ip_field) field, fieldInfo, fieldTemplate);
 	    break;
-		      
+
 	  default:
 	    JLabel label = new JLabel("(Unknown)Field type ID = " + fieldType);
 	    contentsPanel.addRow(fieldTemplate.getName(), label);
@@ -2447,7 +2447,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    *
    */
 
-  private void addStringVector(string_field field, 
+  private void addStringVector(string_field field,
 			       FieldInfo fieldInfo,
 			       FieldTemplate fieldTemplate) throws RemoteException
   {
@@ -2468,7 +2468,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     if (editable && fieldInfo.isEditable())
       {
 	QueryResult qr = null;
-	
+
 	if (debug)
 	  {
 	    println("Getting choicesKey()");
@@ -2497,7 +2497,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		list = gc.cachedLists.getList(id);
 	      }
 	    else
-	      {	
+	      {
 		if (debug)
 		  {
 		    println("Getting QueryResult now");
@@ -2512,7 +2512,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		  }
 	      }
 	  }
-    
+
 	if (!keepLoading())
 	  {
 	    if (debug)
@@ -2541,7 +2541,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    ss.setCallback(this);
 
 	    String comment = fieldTemplate.getComment();
-	    
+
 	    if (comment != null && !comment.equals(""))
 	      {
 		ss.setToolTipText(comment);
@@ -2569,7 +2569,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    ss.setCallback(this);
 
 	    String comment = fieldTemplate.getComment();
-	    
+
 	    if (comment != null && !comment.equals(""))
 	      {
 		ss.setToolTipText(comment);
@@ -2596,7 +2596,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
         registerComponent(ss, field, fieldTemplate);
 
 	String comment = fieldTemplate.getComment();
-	    
+
 	if (comment != null && !comment.equals(""))
 	  {
 	    ss.setToolTipText(comment);
@@ -2614,8 +2614,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * container panel
    */
 
-  private void addInvidVector(invid_field field, 
-			      FieldInfo fieldInfo, 
+  private void addInvidVector(invid_field field,
+			      FieldInfo fieldInfo,
 			      FieldTemplate fieldTemplate) throws RemoteException
   {
     Vector
@@ -2675,7 +2675,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		choiceHandles = choices.getListHandles(false, true);
 	      }
 	    else
-	      { 
+	      {
 		if (debug)
 		  {
 		    println("choices is null");
@@ -2738,19 +2738,19 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		if (debug_persona)
 		  {
 		    System.out.println();
-		    
+
 		    for (int i = 0; i < choiceHandles.size(); i++)
 		      {
 			println(" choices: " + (listHandle)choiceHandles.elementAt(i));
 		      }
-		    
+
 		    System.out.println();
 		  }
 	      }
 	  }
       }
     else
-      { 
+      {
 	if (debug)
 	  {
 	    println("Not editable, not downloading choices");
@@ -2763,7 +2763,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     JMenuItem editO = new JMenuItem(edit_action);
     invidTablePopup.add(viewO);
     invidTablePopup.add(editO);
-    
+
     JPopupMenu invidTablePopup2 = new JPopupMenu();
     JMenuItem viewO2 = new JMenuItem(view_action);
     JMenuItem editO2 = new JMenuItem(edit_action);
@@ -2775,8 +2775,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	println("Creating StringSelector");
       }
 
-    StringSelector ss = new StringSelector(this, 
-					   editable && fieldInfo.isEditable(), 
+    StringSelector ss = new StringSelector(this,
+					   editable && fieldInfo.isEditable(),
 					   true, true);
 
     ss.setMinimumRowCount(3);
@@ -2787,11 +2787,11 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     ss.setPopups(invidTablePopup, invidTablePopup2);
 
     registerComponent(ss, field, fieldTemplate);
-    
+
     ss.setCallback(this);
 
     String comment = fieldTemplate.getComment();
-	    
+
     if (comment != null && !comment.equals(""))
       {
 	ss.setToolTipText(comment);
@@ -2808,8 +2808,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * container panel
    */
 
-  private void addVectorPanel(db_field field, 
-			      FieldInfo fieldInfo, 
+  private void addVectorPanel(db_field field,
+			      FieldInfo fieldInfo,
 			      FieldTemplate fieldTemplate) throws RemoteException
   {
     boolean isEditInPlace = fieldTemplate.isEditInPlace();
@@ -2828,14 +2828,14 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  }
       }
 
-    vectorPanel vp = new vectorPanel(field, fieldTemplate, winP, editable && fieldInfo.isEditable(), 
+    vectorPanel vp = new vectorPanel(field, fieldTemplate, winP, editable && fieldInfo.isEditable(),
 				     isEditInPlace, this, isCreating);
     vectorPanelList.addElement(vp);
 
     registerComponent(vp, field, fieldTemplate);
 
     String comment = fieldTemplate.getComment();
-	    
+
     if (comment != null && !comment.equals(""))
       {
 	vp.setToolTipText(comment);
@@ -2860,7 +2860,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       {
 	progressBar.setValue(progressBar.getValue() + 1);
       }
-    
+
     ++vectorElementsAdded;
   }
 
@@ -2893,7 +2893,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * @param fieldTemplate Downloaded static field type information for this field
    */
 
-  private void addStringField(string_field field, FieldInfo fieldInfo, 
+  private void addStringField(string_field field, FieldInfo fieldInfo,
 			      FieldTemplate fieldTemplate) throws RemoteException
   {
     objectList
@@ -2913,7 +2913,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  {
 	    println("You can choose");
 	  }
-	    
+
 	Vector choices = null;
 
 	Object key = field.choicesKey();
@@ -2933,14 +2933,14 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	      {
 		println("key = " + key);
 	      }
-		
+
 	    if (gc.cachedLists.containsList(key))
 	      {
 		if (debug)
 		  {
 		    println("key in there, using cached list");
 		  }
-		
+
 		list = gc.cachedLists.getList(key);
 	      }
 	    else
@@ -2949,16 +2949,16 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 		  {
 		    println("Choice list for addStringField not cached, downloading a new one.");
 		  }
-		
+
 		gc.cachedLists.putList(key, field.choices());
 		list = gc.cachedLists.getList(key);
 	      }
 
 	    choices = list.getLabels(false);
-	  }    
+	  }
 
 	String currentChoice = (String) fieldInfo.getValue();
-	    
+
 	JComboBox combo = new JComboBox(choices);
 	combo.setKeySelectionManager(new TimedKeySelectionManager());
 
@@ -2975,7 +2975,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    throw new RuntimeException(rx);
 	  }
 
-	combo.setEditable(!mustChoose); 
+	combo.setEditable(!mustChoose);
 
 	if (currentChoice == null)
 	  {
@@ -2992,7 +2992,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	    if (debug)
 	      {
 		println("Setting current value: " + currentChoice);
-	      }	  
+	      }
 
 	    try
 	      {
@@ -3021,7 +3021,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  }
 
 	associateFieldId(fieldInfo, combo);
-	    
+
 	contentsPanel.addFillRow(fieldTemplate.getName(), combo, 1);
 	contentsPanel.setRowVisible(combo, fieldInfo.isVisible());
       }
@@ -3034,7 +3034,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	sa.setAllowedChars(fieldTemplate.getOKChars());
 	sa.setDisallowedChars(fieldTemplate.getBadChars());
 	sa.setText((String)fieldInfo.getValue());
-	    			
+
 	if (editable && fieldInfo.isEditable())
 	  {
 	    sa.setCallback(this);
@@ -3069,9 +3069,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 			      this);
 
         registerComponent(sf, field, fieldTemplate);
-			      
+
 	sf.setText((String)fieldInfo.getValue());
-	    			
+
 	if (editable && fieldInfo.isEditable())
 	  {
 	    sf.setCallback(this);
@@ -3102,8 +3102,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * @param fieldTemplate Downloaded static field type information for this field
    */
 
-  private void addPasswordField(pass_field field, 
-				FieldInfo fieldInfo, 
+  private void addPasswordField(pass_field field,
+				FieldInfo fieldInfo,
 				FieldTemplate fieldTemplate) throws RemoteException
   {
     JstringField sf;
@@ -3115,7 +3115,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	JpassField pf = new JpassField(gc, 10, 8, editable && fieldInfo.isEditable());
 
         registerComponent(pf, field, fieldTemplate);
-			
+
 	if (editable && fieldInfo.isEditable())
 	  {
 	    pf.setCallback(this);
@@ -3144,20 +3144,20 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 			      null);
 
         registerComponent(sf, field, fieldTemplate);
-			  
+
 	// the server won't give us an unencrypted password, we're clear here
-			  
+
 	sf.setText((String)fieldInfo.getValue());
-		      
+
 	sf.setEditable(false);
-	
+
 	String comment = fieldTemplate.getComment();
-	
+
 	if (comment != null && !comment.equals(""))
 	  {
 	    sf.setToolTipText(comment);
 	  }
-	
+
 	associateFieldId(fieldInfo, sf);
 
 	contentsPanel.addFillRow(fieldTemplate.getName(), sf, 1);
@@ -3174,19 +3174,19 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * @param fieldTemplate Downloaded static field type information for this field
    */
 
-  private void addNumericField(db_field field, 
-			       FieldInfo fieldInfo, 
+  private void addNumericField(db_field field,
+			       FieldInfo fieldInfo,
 			       FieldTemplate fieldTemplate) throws RemoteException
   {
     if (debug)
       {
 	println("Adding numeric field");
       }
-      
+
     JnumberField nf = new JnumberField();
 
     registerComponent(nf, field, fieldTemplate);
-		      
+
     Integer value = (Integer)fieldInfo.getValue();
 
     if (value != null)
@@ -3223,37 +3223,37 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     * @param fieldInfo Downloaded value and status information for this field
     * @param fieldTemplate Downloaded static field type information for this field
     */
- 
-  private void addFloatField(db_field field, 
- 			     FieldInfo fieldInfo, 
+
+  private void addFloatField(db_field field,
+ 			     FieldInfo fieldInfo,
  			     FieldTemplate fieldTemplate) throws RemoteException
   {
     if (debug)
       {
  	println("Adding float field");
       }
-    
+
     JfloatField nf = new JfloatField();
 
     registerComponent(nf, field, fieldTemplate);
- 		      
+
     Double value = (Double)fieldInfo.getValue();
- 
+
     if (value != null)
       {
  	nf.setValue(value.doubleValue());
       }
-    
+
     if (editable && fieldInfo.isEditable())
       {
  	nf.setCallback(this);
       }
- 
+
     nf.setEditable(editable && fieldInfo.isEditable());
     nf.setColumns(FIELDWIDTH);
- 
+
     String comment = fieldTemplate.getComment();
- 
+
     if (comment != null && !comment.equals(""))
       {
  	nf.setToolTipText(comment);
@@ -3274,8 +3274,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * @param fieldTemplate Downloaded static field type information for this field
    */
 
-  private void addDateField(db_field field, 
-			    FieldInfo fieldInfo, 
+  private void addDateField(db_field field,
+			    FieldInfo fieldInfo,
 			    FieldTemplate fieldTemplate) throws RemoteException
   {
     boolean enabled = editable && fieldInfo.isEditable();
@@ -3322,7 +3322,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * @param fieldTemplate Downloaded static field type information for this field
    */
 
-  private void addBooleanField(db_field field, FieldInfo fieldInfo, 
+  private void addBooleanField(db_field field, FieldInfo fieldInfo,
 			       FieldTemplate fieldTemplate) throws RemoteException
   {
     JCheckBox cb = new JCheckBox();
@@ -3451,8 +3451,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * @param fieldTemplate Downloaded static field type information for this field
    */
 
-  private void addInvidField(invid_field field, 
-			     FieldInfo fieldInfo, 
+  private void addInvidField(invid_field field,
+			     FieldInfo fieldInfo,
 			     FieldTemplate fieldTemplate) throws RemoteException
   {
     objectList list;
@@ -3463,17 +3463,17 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       {
 	println("addInvidField(" + fieldTemplate.getName() + ")");
       }
-    
+
     if (fieldTemplate.isEditInPlace())
       {
 	// this should never happen
-	
+
 	if (debug)
 	  {
 	    println("Hey, " + fieldTemplate.getName() +
 		    " is edit in place but not a vector, what gives?");
 	  }
-	
+
 	JLabel errorLabel = new JLabel("edit in place non-vector");
 
 	contentsPanel.addFillRow(fieldTemplate.getName(), errorLabel);
@@ -3496,7 +3496,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
           }
 
         final Invid thisInvid = (Invid) fieldInfo.getValue();
-	    
+
         String label = (String) gc.getSession().viewObjectLabel(thisInvid);
 
         if (label == null)
@@ -3579,13 +3579,13 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
         currentChoiceLabel = gc.getSession().viewObjectLabel(currentChoice);
 	println("Current choice is : " + currentChoice + ", " + currentChoiceLabel);
       }
-	
+
     listHandle currentListHandle = null;
     listHandle noneHandle = new listHandle(ts.l("global.none"), null); // "<none>"
     boolean found = false;
     JInvidChooser combo;
     boolean mustChoose = false;
-	
+
     try
       {
 	mustChoose = field.mustChoose();
@@ -3596,10 +3596,10 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       }
 
     // Find currentListHandle
-    
+
     // Make sure the current choice is in the chooser, if there is
     // a current choice.
-    
+
     if (currentChoice != null)
       {
 	for (int j = 0; j < choices.size(); j++)
@@ -3651,7 +3651,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     combo.setMaximumRowCount(12);
     combo.setMaximumSize(new Dimension(Integer.MAX_VALUE, 20));
     combo.setVisible(true);
-    
+
     if (currentChoice != null)
       {
 	if (debug)
@@ -3678,26 +3678,26 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	  }
 
 	combo.setSelectedItem(noneHandle);
-      }	  
+      }
 
     if (editable && fieldInfo.isEditable())
       {
 	combo.addItemListener(this); // register callback
       }
-    
+
     combo.setAllowNone(!mustChoose);
 
     // We get the itemStateChanged straight from the JComboBox in the
     // JInvidChooser, so we need to save an association between the
     // combobox and the field
-    
-    invidChooserHash.put(combo.getCombo(), field); 
-    
+
+    invidChooserHash.put(combo.getCombo(), field);
+
     // The update method still need to be able to find the field from
     // the JInvidChooser, so we save it in objectHash, too.
 
     registerComponent(combo, field, fieldTemplate);
-    
+
     if (debug)
       {
 	println("Adding to panel");
@@ -3722,11 +3722,11 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    *
    * @param field Remote reference to database field to be associated with a gui component
    * @param fieldInfo Downloaded value and status information for this field
-   * @param fieldTemplate Downloaded static field type information for this field 
+   * @param fieldTemplate Downloaded static field type information for this field
    */
 
-  private void addIPField(ip_field field, 
-			  FieldInfo fieldInfo, 
+  private void addIPField(ip_field field,
+			  FieldInfo fieldInfo,
 			  FieldTemplate fieldTemplate) throws RemoteException
   {
     JIPField
@@ -3753,14 +3753,14 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       }
 
     registerComponent(ipf, field, fieldTemplate);
-    
+
     bytes = (Byte[]) fieldInfo.getValue();
 
 	if (bytes != null)
 	  {
 	    ipf.setValue(bytes);
 	  }
-	
+
     ipf.setCallback(this);
 
     String comment = fieldTemplate.getComment();
@@ -3771,7 +3771,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
       }
 
     associateFieldId(fieldInfo, ipf);
-		
+
     contentsPanel.addFillRow(fieldTemplate.getName(), ipf, 1);
     contentsPanel.setRowVisible(ipf, fieldInfo.isVisible());
   }
@@ -3807,7 +3807,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     invid = null;
     winP = null;
     frame = null;
-    
+
     if (updatesWhileLoading != null)
       {
 	updatesWhileLoading.setSize(0);

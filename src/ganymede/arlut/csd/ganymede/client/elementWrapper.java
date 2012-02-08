@@ -6,15 +6,15 @@
    the vector.  It contains plus and minus buttons that will allow a
    component to be deleted or a component to be added to the vector
    being displayed.
-   
+
    Created: 16 October 1997
 
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996 - 2012
    The University of Texas at Austin
 
@@ -93,30 +93,30 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.elementWrapper");
-  
+
   boolean debug = false;
 
   // class variables
 
   private Component my_component = null;
-  
-  JPanel 
+
+  JPanel
     buttonPanel;
 
-  JLabel 
+  JLabel
     title;
 
   String
     titleText;
 
-  JButton 
+  JButton
     expand,
     remove;
 
   vectorPanel
     vp;
 
-  boolean 
+  boolean
     editable,
     expanded = false,
     loaded = false;
@@ -132,7 +132,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
   public elementWrapper(String titleText, Component comp, vectorPanel parent, boolean editable)
   {
-    if (comp == null) 
+    if (comp == null)
       {
 	throw new IllegalArgumentException("Error: Component parameter is null");
       }
@@ -148,9 +148,9 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
       {
 	System.err.println("Adding new elementWrapper");
       }
-    
+
     setLayout(new BorderLayout());
-      
+
     buttonPanel = new JPanel();
     buttonPanel.setOpaque(true);
 
@@ -193,7 +193,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	    // "Component"
 	    title = new JLabel(ts.l("init.default_label"));
 	  }
-	
+
 	title.setForeground(Color.white);
 	title.addMouseListener(this);
 
@@ -207,7 +207,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 	expand.setFocusPainted(false);
 	expand.addActionListener(this);
 	expand.setContentAreaFilled(false);
-	
+
 	buttonPanel.add("West", expand);
 	buttonPanel.add("Center", title);
 
@@ -233,7 +233,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
     add("North",buttonPanel);
   }
-  
+
   public void setIndex(int index)
   {
     this.index = index;
@@ -242,7 +242,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     title.setText(ts.l("setIndex.element_pattern", Integer.valueOf(index+1), titleText));
   }
 
-  public Component getComponent() 
+  public Component getComponent()
   {
     return my_component;
   }
@@ -263,7 +263,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
       {
 	return getObjectInvid();
       }
-    
+
     if (my_component instanceof JIPField)
       {
 	return ((JIPField) my_component).getValue();
@@ -372,7 +372,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
   public void close()
   {
-    my_component.setVisible(false);	
+    my_component.setVisible(false);
     expand.setIcon(vp.wp.closeIcon);
     expand.setPressedIcon(vp.wp.closePressedIcon);
 
@@ -386,7 +386,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   /**
    * Toggle the elementWrapper open/closed.
    *
-   * If the elementWrapper is open, this will close it.  If it is closed, this will open it.  
+   * If the elementWrapper is open, this will close it.  If it is closed, this will open it.
    */
 
   public void toggle()
@@ -420,14 +420,14 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
     vp.wp.getgclient().setNormalCursor();
   }
 
-  public void actionPerformed(ActionEvent evt) 
+  public void actionPerformed(ActionEvent evt)
   {
     if (debug)
       {
 	System.err.println("Action performed: " + evt.getActionCommand());
       }
 
-    if (evt.getSource() == remove) 
+    if (evt.getSource() == remove)
       {
 	JValueObject v = new JSetValueObject(this,"remove");
 	vp.setValuePerformed(v);
