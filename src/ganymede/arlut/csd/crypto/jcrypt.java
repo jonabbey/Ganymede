@@ -5,8 +5,8 @@
  *
  * Based upon C source code written by Eric Young, eay@psych.uq.oz.au
  *
- * Java version by John Dumas, jdumas@zeh.com.
- * See http://208.223.9.21/jfd/crypt.html
+ * Java version by John Dumas, johnfdumas@gmail.com
+ * See http://www.vulcanware.com/java_jcrypt/index.html
  *
  * Distributed with Ganymede by permission of the author
  *
