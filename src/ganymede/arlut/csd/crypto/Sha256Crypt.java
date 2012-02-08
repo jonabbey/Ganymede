@@ -127,6 +127,7 @@ public final class Sha256Crypt
     int cnt, cnt2;
     int rounds = ROUNDS_DEFAULT;  // Default number of rounds.
     StringBuilder buffer;
+    boolean include_round_count = false;
 
     /* -- */
 
@@ -143,6 +144,15 @@ public final class Sha256Crypt
 	    int srounds = Integer.valueOf(num).intValue();
 	    saltStr = saltStr.substring(saltStr.indexOf('$')+1);
 	    rounds = Math.max(ROUNDS_MIN, Math.min(srounds, ROUNDS_MAX));
+	    include_round_count = true;
+	  }
+
+	// gnu libc's crypt(3) implementation allows the salt to end
+	// in $ which is then ignored.
+
+	if (saltStr.endsWith("$"))
+	  {
+	    saltStr = saltStr.substring(0, saltStr.length() - 1);
 	  }
 
 	if (saltStr.length() > SALT_LEN_MAX)
@@ -282,7 +292,7 @@ public final class Sha256Crypt
 
     buffer = new StringBuilder(sha256_salt_prefix);
 
-    if (rounds != 5000)
+    if (include_round_count)
       {
 	buffer.append(sha256_rounds_prefix);
 	buffer.append(rounds);
