@@ -110,7 +110,7 @@ public class RFC2307ADSyncMaster implements arlut.csd.ganymede.server.SyncMaster
 
 	if (book.has(eObj.getInvid(), userSchema.PORTALPIN))
 	  {
-	    book.add(eOgj.getInvid(), userSchema.PASSWORD);
+	    book.add(eObj.getInvid(), userSchema.PASSWORD);
 	  }
       }
 
