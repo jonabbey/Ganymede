@@ -107,6 +107,11 @@ public class RFC2307ADSyncMaster implements arlut.csd.ganymede.server.SyncMaster
 
             book.add(group, groupSchema.GID);
           }
+
+	if (book.has(eObj.getInvid(), userSchema.PORTALPIN))
+	  {
+	    book.add(eOgj.getInvid(), userSchema.PASSWORD);
+	  }
       }
 
     // likewise, whenever we write out a group whose gid is changing,
