@@ -108,9 +108,16 @@ public class RFC2307ADSyncMaster implements arlut.csd.ganymede.server.SyncMaster
             book.add(group, groupSchema.GID);
           }
 
+	// if either the portal pin or password has changed, send them
+	// both out.
+
 	if (book.has(eObj.getInvid(), userSchema.PORTALPIN))
 	  {
 	    book.add(eObj.getInvid(), userSchema.PASSWORD);
+	  }
+	else if (book.has(eObj.getInvid(), userSchema.PASSWORD))
+	  {
+	    book.add(eObj.getInvid(), userSchema.PORTALPIN);
 	  }
       }
 
