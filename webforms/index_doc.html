@@ -22,8 +22,8 @@
 	      <font face="Arial, Helvetica" color="ffffcc">
 	      <center>
 		<b>Please select
-		  <font color="ccffcc"> Client Type </font> 
-		  and 
+		  <font color="ccffcc"> Client Type </font>
+		  and
 		  <font color="ccffcc"> Java Virtual Machine </font>
 		</b>
 	      </center>
@@ -33,7 +33,7 @@
 	  <tr>
 	    <td>
 	      <center>
-		<font face="Arial, Helvetica">	    
+		<font face="Arial, Helvetica">
 		  <SELECT NAME="client" onChange="UpdateText()">
 		    <OPTION value="Standard Client" SELECTED>Standard Client
 		    <OPTION value="Admin Console">Admin Console
@@ -42,10 +42,9 @@
 	    </font>
 	    </td>
 	    <td>
-	      <font face="Arial, Helvetica">	    
+	      <font face="Arial, Helvetica">
 		<INPUT NAME="JVM" TYPE=radio VALUE="WebStart" CHECKED>Java Web Start<br>
 		<INPUT NAME="JVM" TYPE=radio VALUE="Native">Native
-		<INPUT NAME="JVM" TYPE=radio VALUE="Java Plugin">Java Plug In
 	      </font>
 	    </td>
 	  </tr>
@@ -58,7 +57,7 @@
 		</font>
 	      </center>
 	    </td>
-	    
+
 	  </tr>
 	  <tr>
 	    <td colspan="2" bgcolor="#663366">&nbsp;</td>
@@ -75,10 +74,8 @@
 
                 <p>If Java Web Start does not work for you, the
                 'Native' option should, at least on any sort of modern
-                web browser.  If you have a very old version of
-                Netscape or IE, you might try 'Java Plug In' as a last
-                resort.  If that doesn't work, check to make sure your
-                system has Java 5 (JDK1.5) or better installed.</p>
+                web browser.  If that doesn't work, check to make sure
+                your system has Java 6 or better installed.</p>
 
 	    </font>
 	    </td>
@@ -92,7 +89,7 @@
 		<tr>
 		  <td>
 		    <font face = "Arial, Helvetica">
-		      Ganymede Documentation: 
+		      Ganymede Documentation:
 		    </font>
 		  </td>
 		  <td>
@@ -104,19 +101,19 @@
 		<tr>
 		  <td>
 		    <font face = "Arial, Helvetica">
-		      Plug-in Download: 
+		      Plug-in Download:
 		    </font>
 		  </td>
 		  <td>
 		    <font face = "Arial, Helvetica">
-		      <a href="http://java.sun.com/j2se/" target="_blank">Download Java</a>
+		      <a href="http://www.oracle.com/technetwork/java/javase/downloads/index.html" target="_blank">Download Java</a>
 		    </font>
 		  </td>
 		</tr>
 		<tr>
 		  <td>
 		    <font face = "Arial, Helvetica">
-		      Home: 
+		      Home:
 		    </font>
 		  </td>
 		  <td>
@@ -128,7 +125,7 @@
 		<tr>
 		  <td>
 		    <font face = "Arial, Helvetica">
-		      Author: 
+		      Author:
 		    </font>
 		  </td>
 		  <td>
@@ -140,7 +137,7 @@
 		<tr>
 		  <td>
 		    <font face = "Arial, Helvetica">
-		      List: 
+		      List:
 		    </font>
 		  </td>
 		  <td>
@@ -152,15 +149,15 @@
 	      </table>
 
 	    </td>
-	  </tr> 
+	  </tr>
 	</table>
 
       </center>
     </FORM>
 
-    <SCRIPT LANGUAGE="JavaScript"> 
+    <SCRIPT LANGUAGE="JavaScript">
       <!-- Start script hiding
-      // Probably ways to optimize/refine this code... haven't done much JavaScript :-) 
+      // Probably ways to optimize/refine this code... haven't done much JavaScript :-)
 
       var clientElt   = document.FORM.client;
       var goButnElt   = document.FORM.go;
@@ -171,9 +168,9 @@
       function UpdateText() {
         var client = "";
         client = clientElt.options[clientElt.selectedIndex].value;
-        goButnElt.value = "Start " + client;      
+        goButnElt.value = "Start " + client;
       }
-      
+
       // Open a new window and load the appropriate applet html
       //
       function login() {
@@ -187,29 +184,25 @@
 
         // Get selected client
         clientSel = clientElt.options[clientElt.selectedIndex].value;
-  
-        if (clientSel == "Standard Client") { 
+
+        if (clientSel == "Standard Client") {
           URLhead = "client";
-        } 
+        }
         else {
-          if (clientSel == "Admin Console") { 
+          if (clientSel == "Admin Console") {
             URLhead = "console";
-          } 
+          }
         }
 
         // Get checked JVM
-        for (i=0; i < (jvmElt.length); i++) { 
+        for (i=0; i < (jvmElt.length); i++) {
           if (jvmElt[i].checked) {
             jvmSel = jvmElt[i].value;
             break;
           }
         }
-      
-        if (jvmSel == "Java Plugin") { 
-          URLtail = "_plugin";
-          URLsuffix = ".html";
-        }
-        else if (jvmSel == "Native") { 
+
+	if (jvmSel == "Native") {
             URLtail = "_native";
             URLsuffix = ".html";
           }
