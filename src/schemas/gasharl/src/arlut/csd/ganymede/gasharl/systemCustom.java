@@ -537,6 +537,11 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
   public Invid findMatchingNet(Byte[] address)
   {
+    if (netsToChooseFrom.size() == 0)
+      {
+	netsToChooseFrom = getAvailableNets();
+      }
+
     for (int i = 0; i < netsToChooseFrom.size(); i++)
       {
 	ObjectHandle handle = (ObjectHandle) netsToChooseFrom.elementAt(i);
