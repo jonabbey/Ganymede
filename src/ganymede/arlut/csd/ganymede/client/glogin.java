@@ -804,7 +804,17 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 		  passwd.setEnabled(true);
 		  username.paintImmediately(username.getVisibleRect());
 		  passwd.paintImmediately(passwd.getVisibleRect());
-		  username.requestFocus();
+
+		  String pre_username = username.getText();
+
+		  if (pre_username != null && !pre_username.equals(""))
+		    {
+		      passwd.requestFocus();
+		    }
+		  else
+		    {
+		      username.requestFocus();
+		    }
 
 		  invalidate();
 		  validate();
