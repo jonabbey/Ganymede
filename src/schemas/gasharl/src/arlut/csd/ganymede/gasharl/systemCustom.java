@@ -196,10 +196,10 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   {
     super(objectBase, invid, editset);
 
-        if (getGSession().enableOversight && getGSession().enableWizards)
-	  {
-	    initializeNets(false);
-	  }
+    if (getGSession().enableOversight)
+      {
+	initializeNets(false);
+      }
   }
 
   /**
@@ -213,7 +213,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   {
     super(original, editset);
 
-    if (getGSession().enableOversight && getGSession().enableWizards)
+    if (getGSession().enableOversight)
       {
     	initializeNets(false);
       }
