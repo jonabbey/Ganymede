@@ -47,11 +47,18 @@
 
 package arlut.csd.ganymede.gasharl;
 
+import java.util.Vector;
+
 import arlut.csd.ganymede.common.FieldBook;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.Query;
+import arlut.csd.ganymede.common.QueryDataNode;
+import arlut.csd.ganymede.common.QueryDeRefNode;
+import arlut.csd.ganymede.common.Result;
 import arlut.csd.ganymede.common.SchemaConstants;
 
 import arlut.csd.ganymede.server.DBEditObject;
+import arlut.csd.ganymede.server.GanymedeSession;
 
 /*------------------------------------------------------------------------------
 								           class
@@ -89,6 +96,58 @@ public class ADSyncMaster implements arlut.csd.ganymede.server.SyncMaster {
 	      }
 
 	    book.add(exchangeStore, exchangeStoreSchema.EXCHANGEMDB);
+	  }
+      }
+
+    // whenever we write out a delta record for a user object that
+    // includes a change to the homegroup field, we need to make sure
+    // we include the target group and its GID field so that our sync
+    // software can put the GID of that group into the posixAccount
+    // object's rfc2307.bis gidNumber attribute.
+
+    if (eObj.getTypeID() == SchemaConstants.UserBase)
+      {
+        if (book.has(eObj.getInvid(), userSchema.HOMEGROUP))
+          {
+            Invid group = (Invid) eObj.getFieldValueLocal(userSchema.HOMEGROUP);
+
+	    // If the edited version of the eObj does not have a valid
+	    // homegroup target, we will put the pre-transaction home
+	    // group target object and GID into the sync file,
+	    // otherwise we'll just put the new one.
+
+            if (group == null)
+              {
+                group = (Invid) eObj.getOriginal().getFieldValueLocal(userSchema.HOMEGROUP);
+              }
+
+            book.add(group, groupSchema.GID);
+          }
+      }
+
+    // likewise, whenever we write out a group whose gid is changing,
+    // make sure we include all user objects and homegroup fields that
+    // pointed to the group being changed.
+
+    if (eObj.getTypeID() == groupSchema.BASE)
+      {
+	if (book.has(eObj.getInvid(), groupSchema.GID))
+	  {
+	    // we're changing our group id.. make sure we include sync
+	    // information for all user objects that have this group as
+	    // their old or new homegroup target.
+
+	    GanymedeSession querySession = eObj.getGSession();
+
+	    QueryDataNode matchingGroupNode = new QueryDataNode(QueryDataNode.INVIDVAL, QueryDataNode.EQUALS, eObj.getInvid());
+	    QueryDeRefNode matchingUsers = new QueryDeRefNode(userSchema.HOMEGROUP, matchingGroupNode);
+
+	    Vector<Result> results = querySession.internalQuery(new Query(SchemaConstants.UserBase, matchingUsers, false));
+
+	    for (Result result: results)
+	      {
+		book.add(result.getInvid(), userSchema.HOMEGROUP);
+	      }
 	  }
       }
   }
