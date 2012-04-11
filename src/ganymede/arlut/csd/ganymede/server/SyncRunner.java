@@ -16,8 +16,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -73,6 +75,7 @@ import java.rmi.RemoteException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
@@ -263,7 +266,7 @@ public class SyncRunner implements Runnable {
    */
 
   public enum SyncType
-  { 
+  {
     /**
      * The SyncRunner is not triggered automatically, but may be
      * manually fired from the admin console, or used for filtering
@@ -617,7 +620,7 @@ public class SyncRunner implements Runnable {
   {
     if (!this.active.isSet())
       {
-        return;
+	return;
       }
 
     XMLDumpContext xmlOut = null;
@@ -690,7 +693,7 @@ public class SyncRunner implements Runnable {
 			      }
 			    else if (!mayInclude(invid.getType()))
 			      {
-				Ganymede.debug("Hey, SyncRunner says we may not include objects of type " + invid);			    
+				Ganymede.debug("Hey, SyncRunner says we may not include objects of type " + invid);
 			      }
 			  }
 
@@ -775,12 +778,12 @@ public class SyncRunner implements Runnable {
 		      {
 			if (!type.equals(invid.getType()))
 			  {
-			    continue;	// skip
+			    continue;   // skip
 			  }
 
 			if (transaction.isEditingObject(invid) && mayInclude(invid.getType()))
 			  {
-			    continue;	// skip, we handled this in the delta section
+			    continue;   // skip, we handled this in the delta section
 			  }
 
 			DBObject refObject = transaction.getSession().viewDBObject(invid);
@@ -798,7 +801,7 @@ public class SyncRunner implements Runnable {
 		xmlOut.indentIn();
 		xmlOut.endElementIndent("transaction");
 		xmlOut.skipLine();
-		xmlOut.close();		// close() automatically flushes before closing
+		xmlOut.close();         // close() automatically flushes before closing
 		xmlOut = null;
 
 		needBuild.set(true);
@@ -864,9 +867,9 @@ public class SyncRunner implements Runnable {
 	Ganymede.debug(ts.l("unSync.deleting", this.getName(), syncFile.getPath()));
 
 	if (!syncFile.delete())
-          {
-            throw new IOException("Could not delete " + syncFile.getPath());
-          }
+	  {
+	    throw new IOException("Could not delete " + syncFile.getPath());
+	  }
       }
 
     this.transactionNumber = transRecord.getTransactionNumber() - 1;
@@ -1523,7 +1526,7 @@ public class SyncRunner implements Runnable {
 
 	    if (session != null)
 	      {
-		session.logout();	// will clear the dump lock
+		session.logout();       // will clear the dump lock
 		session = null;
 		lock = null;
 	      }
@@ -1645,26 +1648,26 @@ public class SyncRunner implements Runnable {
 
     if (resultCode != 0)
       {
-        String path = "";
+	String path = "";
 
-        try
-          {
-            path = file.getCanonicalPath();
-          }
-        catch (IOException ex)
-          {
-            path = this.serviceProgram;
-          }
+	try
+	  {
+	    path = file.getCanonicalPath();
+	  }
+	catch (IOException ex)
+	  {
+	    path = this.serviceProgram;
+	  }
 
-        // Error encountered running sync script "{0}" for the "{1}" Sync Channel.
-        //
-        // I got a result code of {2} when I tried to run it.
+	// Error encountered running sync script "{0}" for the "{1}" Sync Channel.
+	//
+	// I got a result code of {2} when I tried to run it.
 
-        String message = ts.l("runFullStateService.externalerror", path, this.getName(), Integer.valueOf(resultCode));
+	String message = ts.l("runFullStateService.externalerror", path, this.getName(), Integer.valueOf(resultCode));
 
-        DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
+	DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
 
-        Ganymede.log.logSystemEvent(event);
+	Ganymede.log.logSystemEvent(event);
       }
   }
 
@@ -1703,21 +1706,21 @@ public class SyncRunner implements Runnable {
 
     if (shutdownState != null)
       {
-        // "Refusing to run Sync Channel {0}, due to shutdown condition: {1}"
-        Ganymede.debug(ts.l("runIncremental.shutting_down", this.getName(), shutdownState));
-        return;
+	// "Refusing to run Sync Channel {0}, due to shutdown condition: {1}"
+	Ganymede.debug(ts.l("runIncremental.shutting_down", this.getName(), shutdownState));
+	return;
       }
 
     try
       {
-        GanymedeBuilderTask.incPhase2(true); // so that the client sees the phase 2 icon rolling
+	GanymedeBuilderTask.incPhase2(true); // so that the client sees the phase 2 icon rolling
 
 	// "SyncRunner {0} running"
 	Ganymede.debug(ts.l("runIncremental.running", myName));
 
 	if (getServiceProgram() != null)
 	  {
-            int resultCode = -999;  // a resultCode of 0 is success
+	    int resultCode = -999;  // a resultCode of 0 is success
 
 	    file = new File(getServiceProgram());
 
@@ -1744,31 +1747,31 @@ public class SyncRunner implements Runnable {
 		Ganymede.debug(ts.l("runIncremental.nonesuch", myServiceProgram, myName));
 	      }
 
-            if (resultCode != 0)
-              {
-                String scriptPath = "";
+	    if (resultCode != 0)
+	      {
+		String scriptPath = "";
 
-                try
-                  {
-                    scriptPath = file.getCanonicalPath();
-                  }
-                catch (IOException ex)
-                  {
-                    scriptPath = getServiceProgram();
-                  }
+		try
+		  {
+		    scriptPath = file.getCanonicalPath();
+		  }
+		catch (IOException ex)
+		  {
+		    scriptPath = getServiceProgram();
+		  }
 
-                // Error encountered running sync script "{0}" for the "{1}" Sync Channel.
-                //
-                // I got a result code of {2} when I tried to run it.
+		// Error encountered running sync script "{0}" for the "{1}" Sync Channel.
+		//
+		// I got a result code of {2} when I tried to run it.
 		//
 		// Queue size is {3}.
 
-                String message = ts.l("runIncremental.externalerror", scriptPath, this.getName(), Integer.valueOf(resultCode), Integer.valueOf(getQueueSize()));
+		String message = ts.l("runIncremental.externalerror", scriptPath, this.getName(), Integer.valueOf(resultCode), Integer.valueOf(getQueueSize()));
 
-                DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
+		DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
 
-                Ganymede.log.logSystemEvent(event);
-              }
+		Ganymede.log.logSystemEvent(event);
+	      }
 	  }
 	else
 	  {
@@ -1778,8 +1781,8 @@ public class SyncRunner implements Runnable {
       }
     finally
       {
-        // decrement first, so that we won't lose if the less critical
-        // GanymedeBuilderTask.decPhase2() throws an exception
+	// decrement first, so that we won't lose if the less critical
+	// GanymedeBuilderTask.decPhase2() throws an exception
 
 	GanymedeServer.shutdownSemaphore.decrement();
 	GanymedeBuilderTask.decPhase2(true);
