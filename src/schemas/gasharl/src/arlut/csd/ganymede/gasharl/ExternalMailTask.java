@@ -414,9 +414,9 @@ public class ExternalMailTask implements Runnable {
     PasswordDBField mailPasswordField = (PasswordDBField) userObject.getField(userSchema.MAILPASSWORD2);
     String mailPassword = mailPasswordField.getPlainText();
 
-    String titleString = "External Email Credentials Expiring Very Soon For User " + userObject.getLabel();
+    String titleString = "Old External Email Credentials Expiring Very Soon For User " + userObject.getLabel();
 
-    String messageString = "The old external email credentials for User account " + userObject.getLabel() + " will be expiring within 24 hours. \n" +
+    String messageString = "The old external email credentials for user account " + userObject.getLabel() + " will be expiring within 24 hours. \n" +
       "You have been granted access to laboratory email from outside the internal ARL:UT network.\n\n" +
       "In order to send mail from outside the laboratory, you will need to configure your external email client " +
       "to send mail through smail.arlut.utexas.edu using TLS-encrypted SMTP.\n\n" +
