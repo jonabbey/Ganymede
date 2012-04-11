@@ -56,6 +56,10 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+import java.util.ArrayList;
+import java.util.List;
+
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                          FileOps
@@ -306,6 +310,120 @@ public class FileOps {
     finally
       {
         FileOps.cleanupProcess(p);
+      }
+  }
+
+  /**
+   * <p>This method is used to run an external process line for the
+   * Ganymede server.  This method waits until the external command
+   * completes before returning, and all file handles opened to
+   * communicate with the process will be closed before returning.</p>
+   *
+   * @return a List comprising the Integer result code, the String
+   * stdout text, and the String Stderr text.
+   */
+
+  public static List runCaptureOutputProcess(String[] cmdArgs) throws IOException, InterruptedException
+  {
+    Process p = java.lang.Runtime.getRuntime().exec(cmdArgs);
+
+    return runCaptureOutputProcess(p);
+  }
+
+  /**
+   * <p>This method is used to run an external process line for the
+   * Ganymede server.  This method waits until the external command
+   * completes before returning, and all file handles opened to
+   * communicate with the process will be closed before returning.</p>
+   *
+   * @return a List comprising the Integer result code, the String
+   * stdout text, and the String Stderr text.
+   */
+
+  public static List runCaptureOutputProcess(String commandLine) throws IOException, InterruptedException
+  {
+    Process p = java.lang.Runtime.getRuntime().exec(commandLine);
+
+    return runCaptureOutputProcess(p);
+  }
+
+  /**
+   * <p>This method is used to run an external process line for the
+   * Ganymede server.  This method waits until the external command
+   * completes before returning, and all file handles opened to
+   * communicate with the process will be closed before returning.</p>
+   *
+   * @return a List comprising the Integer result code, the String
+   * stdout text, and the String Stderr text.
+   */
+
+  private static List runCaptureOutputProcess(Process p) throws IOException, InterruptedException
+  {
+    InputStream iStream = p.getInputStream();
+    InputStream eStream = p.getErrorStream();
+
+    StringBuffer stdoutBuffer = new StringBuffer();
+    StringBuffer stderrBuffer = new StringBuffer();
+
+    byte[] buffer = new byte[4096];
+
+    int result_code = 0;
+
+    try
+      {
+        while (true)
+          {
+            try
+              {
+                result_code = p.exitValue();
+              }
+            catch (IllegalThreadStateException ex)
+              {
+                while (iStream.available() > 0 || eStream.available() > 0)
+                  {
+                    try
+                      {
+                        int count = (int) Math.min(buffer.length, iStream.available());
+                        stdoutBuffer.append(new String(buffer, 0, iStream.read(buffer, 0, count)));
+                      }
+                    catch (IOException exc)
+                      {
+                        // so we couldn't eat the bytes, what else can we do?
+                      }
+
+                    try
+                      {
+                        int count = (int) Math.min(buffer.length, eStream.available());
+                        stderrBuffer.append(new String(buffer, 0, eStream.read(buffer, 0, count)));
+                      }
+                    catch (IOException exc)
+                      {
+                        // screw you, copper
+                      }
+                  }
+              }
+
+            try
+              {
+                Thread.currentThread().sleep(100);      // 100 milliseconds
+              }
+            catch (InterruptedException ex)
+              {
+                // screw you, copper
+              }
+          }
+      }
+    finally
+      {
+        FileOps.cleanupProcess(p);
+
+        List resultList = new ArrayList(3);
+
+        resultList.add(new Integer(result_code));
+        resultList.add(stdoutBuffer.toString());
+        resultList.add(stderrBuffer.toString());
+
+        return resultList;
       }
   }
 
