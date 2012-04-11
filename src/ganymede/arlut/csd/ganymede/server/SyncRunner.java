@@ -1682,6 +1682,7 @@ public class SyncRunner implements Runnable {
     String invocation[];
     String shutdownState = null;
     File file;
+    List results = null;
 
     /* -- */
 
@@ -1720,15 +1721,13 @@ public class SyncRunner implements Runnable {
 
 	if (getServiceProgram() != null)
 	  {
-	    int resultCode = -999;  // a resultCode of 0 is success
-
 	    file = new File(getServiceProgram());
 
 	    if (file.exists())
 	      {
 		try
 		  {
-		    resultCode = FileOps.runProcess(invocation);
+		    results = FileOps.runCaptureOutputProcess(invocation);
 		  }
 		catch (IOException ex)
 		  {
@@ -1747,7 +1746,7 @@ public class SyncRunner implements Runnable {
 		Ganymede.debug(ts.l("runIncremental.nonesuch", myServiceProgram, myName));
 	      }
 
-	    if (resultCode != 0)
+	    if (results != null && ((Integer) results.get(0)).intValue() != 0)
 	      {
 		String scriptPath = "";
 
@@ -1765,8 +1764,10 @@ public class SyncRunner implements Runnable {
 		// I got a result code of {2} when I tried to run it.
 		//
 		// Queue size is {3}.
+		//
+		// {4}
 
-		String message = ts.l("runIncremental.externalerror", scriptPath, this.getName(), Integer.valueOf(resultCode), Integer.valueOf(getQueueSize()));
+		String message = ts.l("runIncremental.externalerror", scriptPath, this.getName(), results.get(0), Integer.valueOf(getQueueSize()), (String) results.get(2));
 
 		DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
 
