@@ -368,15 +368,40 @@ public class FileOps {
 
     byte[] buffer = new byte[4096];
 
+    boolean done = false;
     int result_code = 0;
 
     try
       {
-        while (true)
+        while (!done)
           {
+	    while (iStream.available() > 0 || eStream.available() > 0)
+	      {
+		try
+		  {
+		    int count = (int) Math.min(buffer.length, iStream.available());
+		    stdoutBuffer.append(new String(buffer, 0, iStream.read(buffer, 0, count)));
+		  }
+		catch (IOException exc)
+		  {
+		    // so we couldn't eat the bytes, what else can we do?
+		  }
+
+		try
+		  {
+		    int count = (int) Math.min(buffer.length, eStream.available());
+		    stderrBuffer.append(new String(buffer, 0, eStream.read(buffer, 0, count)));
+		  }
+		catch (IOException exc)
+		  {
+		    // screw you, copper
+		  }
+	      }
+
             try
               {
                 result_code = p.exitValue();
+		done = true;
               }
             catch (IllegalThreadStateException ex)
               {
