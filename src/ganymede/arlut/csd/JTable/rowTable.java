@@ -1204,10 +1204,14 @@ class rowSorter {
       {
 	if (p1 == null || compare(p1,p2) > 0)
 	  {
-	    px = p2.next();
 	    node.setNext(p2);
-	    p2.setNext(null);
-	    p2 = px;
+
+	    if (p2 != null)
+	      {
+		px = p2.next();
+		p2.setNext(null);
+		p2 = px;
+	      }
 	  }
 	else
 	  {
