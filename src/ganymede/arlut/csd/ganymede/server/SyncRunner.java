@@ -1760,8 +1760,10 @@ public class SyncRunner implements Runnable {
                 // Error encountered running sync script "{0}" for the "{1}" Sync Channel.
                 //
                 // I got a result code of {2} when I tried to run it.
+		//
+		// Queue size is {3}.
 
-                String message = ts.l("runIncremental.externalerror", scriptPath, this.getName(), Integer.valueOf(resultCode));
+                String message = ts.l("runIncremental.externalerror", scriptPath, this.getName(), Integer.valueOf(resultCode), Integer.valueOf(getQueueSize()));
 
                 DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
 
