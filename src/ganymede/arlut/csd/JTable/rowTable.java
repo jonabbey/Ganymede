@@ -974,13 +974,43 @@ class rowSorter {
 
 	if (forward)
 	  {
-	    one = a.element.elementAt(column).text;
-	    two = b.element.elementAt(column).text;
+	    try
+	      {
+		one = a.element.elementAt(column).text;
+	      }
+	    catch (NullPointerException ex)
+	      {
+		one = null;
+	      }
+
+	    try
+	      {
+		two = b.element.elementAt(column).text;
+	      }
+	    catch (NullPointerException ex)
+	      {
+		two = null;
+	      }
 	  }
 	else
 	  {
-	    two = a.element.elementAt(column).text;
-	    one = b.element.elementAt(column).text;
+	    try
+	      {
+		one = b.element.elementAt(column).text;
+	      }
+	    catch (NullPointerException ex)
+	      {
+		one = null;
+	      }
+
+	    try
+	      {
+		two = a.element.elementAt(column).text;
+	      }
+	    catch (NullPointerException ex)
+	      {
+		two = null;
+	      }
 	  }
 
 	// null is always lesser
@@ -1001,7 +1031,7 @@ class rowSorter {
 	    return 1;
 	  }
 
-	// okay, not null.
+	// okay, neither null.
 	
 	return one.compareToIgnoreCase(two);
       }
