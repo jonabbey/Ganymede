@@ -4,17 +4,17 @@
 
    This utility class provides a number of static methods for doing
    file operations.
-   
+
    Created: 2 December 2000
 
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2012
    The University of Texas at Austin
 
    Contact information
@@ -63,17 +63,15 @@ import java.io.IOException;
 ------------------------------------------------------------------------------*/
 
 /**
- *
  * This utility class provides a number of static methods for doing
  * file operations.
- *
  */
 
 public class FileOps {
 
   /**
-   *
-   *
+   * Copies a file named inputFileName to the location outputFileName
+   * in an operating system independent fashion.
    */
 
   public static boolean copyFile(String inputFileName, String outputFileName) throws IOException
@@ -82,7 +80,7 @@ public class FileOps {
 
     if (outFile.exists())
       {
-	throw new IllegalArgumentException("Error, copyFile called with a pre-existing target");
+        throw new IllegalArgumentException("Error, copyFile called with a pre-existing target");
       }
 
     BufferedInputStream inStream = new BufferedInputStream(new FileInputStream(inputFileName));
@@ -94,27 +92,27 @@ public class FileOps {
 
     try
       {
-	length = inStream.read(buffer);
-	
-	while (length != -1)
-	  {
-	    outStream.write(buffer, 0, length);
-	    length = inStream.read(buffer);
-	  }
+        length = inStream.read(buffer);
+
+        while (length != -1)
+          {
+            outStream.write(buffer, 0, length);
+            length = inStream.read(buffer);
+          }
       }
     finally
       {
-	outStream.close();
-	inStream.close();
+        outStream.close();
+        inStream.close();
 
-	if (length == -1)
-	  {
-	    return true;
-	  }
-	else
-	  {
-	    return false;
-	  }
+        if (length == -1)
+          {
+            return true;
+          }
+        else
+          {
+            return false;
+          }
       }
   }
 
@@ -137,59 +135,59 @@ public class FileOps {
 
     if (!file.isDirectory())
       {
-	throw new IOException("Error, deleteDirectory called on non-directory " + directoryName);
+        throw new IOException("Error, deleteDirectory called on non-directory " + directoryName);
       }
 
     filenames = file.list();
 
     if (filenames == null)
       {
-	return success;
+        return success;
       }
 
     directoryName = PathComplete.completePath(directoryName);
 
     for (int i = 0; i < filenames.length; i++)
       {
-	File subfile = new File(directoryName, filenames[i]);
+        File subfile = new File(directoryName, filenames[i]);
 
-	if (subfile.isDirectory())
-	  {
-	    try
-	      {
-		if (!deleteDirectory(directoryName + filenames[i]))
-		  {
-		    success = false;
-		  }
-	      }
-	    catch (IOException ex)
-	      {
-		ex.printStackTrace();
-		success = false;
-	      }
-	  }
-	else
-	  {
-	    try
-	      {
-		if (!deleteFile(directoryName + filenames[i]))
-		  {
-		    success = false;
-		  }
-	      }
-	    catch (IOException ex)
-	      {
-		ex.printStackTrace();
-		success = false;
-	      }
-	  }
+        if (subfile.isDirectory())
+          {
+            try
+              {
+                if (!deleteDirectory(directoryName + filenames[i]))
+                  {
+                    success = false;
+                  }
+              }
+            catch (IOException ex)
+              {
+                ex.printStackTrace();
+                success = false;
+              }
+          }
+        else
+          {
+            try
+              {
+                if (!deleteFile(directoryName + filenames[i]))
+                  {
+                    success = false;
+                  }
+              }
+            catch (IOException ex)
+              {
+                ex.printStackTrace();
+                success = false;
+              }
+          }
       }
 
     // all sub files should be deleted, delete the directory
 
     if (success)
       {
-	return file.delete();
+        return file.delete();
       }
     else
       {
@@ -198,10 +196,10 @@ public class FileOps {
   }
 
   /**
-   * <P>This method is used to run an external process line for the
+   * <p>This method is used to run an external process line for the
    * Ganymede server.  This method waits until the external command
    * completes before returning, and all file handles opened to
-   * communicate with the process will be closed before returning.</P>
+   * communicate with the process will be closed before returning.</p>
    *
    * <p>While this method is waiting for the process to exit, it will
    * spin on the stdout and stderr from the process, consuming and
@@ -217,10 +215,10 @@ public class FileOps {
   }
 
   /**
-   * <P>This method is used to run an external process line for the
+   * <p>This method is used to run an external process line for the
    * Ganymede server.  This method waits until the external command
    * completes before returning, and all file handles opened to
-   * communicate with the process will be closed before returning.</P>
+   * communicate with the process will be closed before returning.</p>
    *
    * <p>While this method is waiting for the process to exit, it will
    * spin on the stdout and stderr from the process, consuming and
@@ -236,10 +234,10 @@ public class FileOps {
   }
 
   /**
-   * <P>This method is used to run an external process line for the
+   * <p>This method is used to run an external process line for the
    * Ganymede server.  This method waits until the external command
    * completes before returning, and all file handles opened to
-   * communicate with the process will be closed before returning.</P>
+   * communicate with the process will be closed before returning.</p>
    *
    * <p>While this method is waiting for the process to exit, it will
    * spin on the stdout and stderr from the process, consuming and
@@ -256,58 +254,58 @@ public class FileOps {
 
     try
       {
- 	while (true)
-	  {
-	    // this bletcherousness is so that we can consume anything
-	    // the sub process writes to its stdout or stderr, rather
-	    // than allowing the subprocess to block waiting in vain
-	    // for us to read from it.
+        while (true)
+          {
+            // this bletcherousness is so that we can consume anything
+            // the sub process writes to its stdout or stderr, rather
+            // than allowing the subprocess to block waiting in vain
+            // for us to read from it.
 
-	    // really if we see anything coming from subprocesses
-	    // here, it means that somebody didn't properly do
-	    // redirection on their sync stuff.
+            // really if we see anything coming from subprocesses
+            // here, it means that somebody didn't properly do
+            // redirection on their sync stuff.
 
-	    try
-	      {
-		return p.exitValue();
-	      }
-	    catch (IllegalThreadStateException ex)
-	      {
-		while (iStream.available() > 0 || eStream.available() > 0)
-		  {
-		    try
-		      {
-			iStream.read(buffer, 0, (int) Math.min(buffer.length, iStream.available()));
-		      }
-		    catch (IOException exc)
-		      {
-			// so we couldn't eat the bytes, what else can we do?
-		      }
-		    
-		    try
-		      {
-			eStream.read(buffer, 0, (int) Math.min(buffer.length, eStream.available()));
-		      }
-		    catch (IOException exc)
-		      {
-			// screw you, copper
-		      }
-		  }
-	      }
+            try
+              {
+                return p.exitValue();
+              }
+            catch (IllegalThreadStateException ex)
+              {
+                while (iStream.available() > 0 || eStream.available() > 0)
+                  {
+                    try
+                      {
+                        iStream.read(buffer, 0, (int) Math.min(buffer.length, iStream.available()));
+                      }
+                    catch (IOException exc)
+                      {
+                        // so we couldn't eat the bytes, what else can we do?
+                      }
 
-	    try
-	      {
-		Thread.currentThread().sleep(100);	// 100 milliseconds
-	      }
-	    catch (InterruptedException ex)
-	      {
-		// screw you, copper
-	      }
-	  }
+                    try
+                      {
+                        eStream.read(buffer, 0, (int) Math.min(buffer.length, eStream.available()));
+                      }
+                    catch (IOException exc)
+                      {
+                        // screw you, copper
+                      }
+                  }
+              }
+
+            try
+              {
+                Thread.currentThread().sleep(100);      // 100 milliseconds
+              }
+            catch (InterruptedException ex)
+              {
+                // screw you, copper
+              }
+          }
       }
     finally
       {
-	FileOps.cleanupProcess(p);
+        FileOps.cleanupProcess(p);
       }
   }
 
@@ -317,12 +315,12 @@ public class FileOps {
    * fact that Process keeps its file descriptors open by default
    * until Garbage Collection.</p>
    */
-  
+
   public static void cleanupProcess(Process p)
   {
     try
       {
-	p.getInputStream().close();
+        p.getInputStream().close();
       }
     catch (NullPointerException ex)
       {
@@ -330,10 +328,10 @@ public class FileOps {
     catch (IOException ex)
       {
       }
-    
+
     try
       {
-	p.getOutputStream().close();
+        p.getOutputStream().close();
       }
     catch (NullPointerException ex)
       {
@@ -341,10 +339,10 @@ public class FileOps {
     catch (IOException ex)
       {
       }
-    
+
     try
       {
-	p.getErrorStream().close();
+        p.getErrorStream().close();
       }
     catch (NullPointerException ex)
       {
@@ -352,7 +350,7 @@ public class FileOps {
     catch (IOException ex)
       {
       }
-    
+
     p.destroy();
   }
 
@@ -368,7 +366,7 @@ public class FileOps {
 
     /*
       File x = new File(args[0]);
-      
+
       try
       {
       if (x.isDirectory())
@@ -399,14 +397,14 @@ public class FileOps {
       ex.printStackTrace();
       }
     */
-      
+
      if (result)
       {
-	System.exit(0);
+        System.exit(0);
       }
     else
       {
-	System.exit(1);
+        System.exit(1);
       }
   }
 }
