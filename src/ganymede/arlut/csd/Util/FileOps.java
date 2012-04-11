@@ -366,8 +366,6 @@ public class FileOps {
     StringBuffer stdoutBuffer = new StringBuffer();
     StringBuffer stderrBuffer = new StringBuffer();
 
-    byte[] buffer = new byte[4096];
-
     boolean done = false;
     int result_code = 0;
 
@@ -375,28 +373,7 @@ public class FileOps {
       {
         while (!done)
           {
-	    while (iStream.available() > 0 || eStream.available() > 0)
-	      {
-		try
-		  {
-		    int count = (int) Math.min(buffer.length, iStream.available());
-		    stdoutBuffer.append(new String(buffer, 0, iStream.read(buffer, 0, count)));
-		  }
-		catch (IOException exc)
-		  {
-		    // so we couldn't eat the bytes, what else can we do?
-		  }
-
-		try
-		  {
-		    int count = (int) Math.min(buffer.length, eStream.available());
-		    stderrBuffer.append(new String(buffer, 0, eStream.read(buffer, 0, count)));
-		  }
-		catch (IOException exc)
-		  {
-		    // screw you, copper
-		  }
-	      }
+	    slurpStreams(iStream, eStream, stdoutBuffer, stderrBuffer);
 
             try
               {
@@ -405,28 +382,7 @@ public class FileOps {
               }
             catch (IllegalThreadStateException ex)
               {
-                while (iStream.available() > 0 || eStream.available() > 0)
-                  {
-                    try
-                      {
-                        int count = (int) Math.min(buffer.length, iStream.available());
-                        stdoutBuffer.append(new String(buffer, 0, iStream.read(buffer, 0, count)));
-                      }
-                    catch (IOException exc)
-                      {
-                        // so we couldn't eat the bytes, what else can we do?
-                      }
-
-                    try
-                      {
-                        int count = (int) Math.min(buffer.length, eStream.available());
-                        stderrBuffer.append(new String(buffer, 0, eStream.read(buffer, 0, count)));
-                      }
-                    catch (IOException exc)
-                      {
-                        // screw you, copper
-                      }
-                  }
+		slurpStreams(iStream, eStream, stdoutBuffer, stderrBuffer);
               }
 
             try
@@ -441,6 +397,8 @@ public class FileOps {
       }
     finally
       {
+	slurpStreams(iStream, eStream, stdoutBuffer, stderrBuffer);
+
         FileOps.cleanupProcess(p);
 
         List resultList = new ArrayList(3);
@@ -450,6 +408,46 @@ public class FileOps {
         resultList.add(stderrBuffer.toString());
 
         return resultList;
+      }
+  }
+
+  /**
+   * Read everything we can from the passed stdout and stderr streams,
+   * copy the data into outBuffer and errBuffer.
+   */
+
+  private static void slurpStreams(InputStream outStream, InputStream errStream, StringBuffer outBuffer, StringBuffer errBuffer)
+  {
+    byte[] buffer = new byte[4096];
+
+    try
+      {
+	while (outStream.available() > 0 || errStream.available() > 0)
+	  {
+	    try
+	      {
+		int count = (int) Math.min(buffer.length, outStream.available());
+		outBuffer.append(new String(buffer, 0, outStream.read(buffer, 0, count)));
+	      }
+	    catch (IOException exc)
+	      {
+		// so we couldn't eat the bytes, what else can we do?
+	      }
+
+	    try
+	      {
+		int count = (int) Math.min(buffer.length, errStream.available());
+		errBuffer.append(new String(buffer, 0, errStream.read(buffer, 0, count)));
+	      }
+	    catch (IOException exc)
+	      {
+		// screw you, copper
+	      }
+	  }
+      }
+    catch (IOException ex)
+      {
+	// shrug
       }
   }
 
