@@ -74,6 +74,8 @@ import java.util.List;
 
 public class FileOps {
 
+  private static int MAXSIZE = 0xFFFFF; // 16 megabytes
+
   /**
    * Copies a file named inputFileName to the location outputFileName
    * in an operating system independent fashion.
@@ -427,7 +429,15 @@ public class FileOps {
 	    try
 	      {
 		int count = (int) Math.min(buffer.length, outStream.available());
-		outBuffer.append(new String(buffer, 0, outStream.read(buffer, 0, count)));
+
+		if (outBuffer.length() < MAXSIZE)
+		  {
+		    outBuffer.append(new String(buffer, 0, outStream.read(buffer, 0, count)));
+		  }
+		else
+		  {
+		    outStream.read(buffer, 0, count);
+		  }
 	      }
 	    catch (IOException exc)
 	      {
@@ -437,7 +447,15 @@ public class FileOps {
 	    try
 	      {
 		int count = (int) Math.min(buffer.length, errStream.available());
-		errBuffer.append(new String(buffer, 0, errStream.read(buffer, 0, count)));
+
+		if (errBuffer.length() < MAXSIZE)
+		  {
+		    errBuffer.append(new String(buffer, 0, errStream.read(buffer, 0, count)));
+		  }
+		else
+		  {
+		    errStream.read(buffer, 0, count);
+		  }
 	      }
 	    catch (IOException exc)
 	      {
