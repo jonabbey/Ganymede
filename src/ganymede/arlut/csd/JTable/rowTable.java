@@ -943,8 +943,23 @@ class rowSorter {
   {
     Object Adata, Bdata;
 
-    Adata = a.element.elementAt(column).getData();
-    Bdata = b.element.elementAt(column).getData();
+    try
+      {
+	Adata = a.element.elementAt(column).getData();
+      }
+    catch (NullPointerException ex)
+      {
+	Adata = null;
+      }
+
+    try
+      {
+	Bdata = b.element.elementAt(column).getData();
+      }
+    catch (NullPointerException ex)
+      {
+	Bdata = null;
+      }
 
     // Adata and/or Bdata will be null if we are just comparing
     // strings, rather than the attached integer or date values for
