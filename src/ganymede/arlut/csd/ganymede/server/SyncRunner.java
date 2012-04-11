@@ -1746,7 +1746,7 @@ public class SyncRunner implements Runnable {
 		Ganymede.debug(ts.l("runIncremental.nonesuch", myServiceProgram, myName));
 	      }
 
-	    if (results != null && ((Integer) results.get(0)).intValue() != 0)
+	    if (results == null || ((Integer) results.get(0)).intValue() != 0)
 	      {
 		String scriptPath = "";
 
@@ -1759,15 +1759,32 @@ public class SyncRunner implements Runnable {
 		    scriptPath = getServiceProgram();
 		  }
 
-		// Error encountered running sync script "{0}" for the "{1}" Sync Channel.
-		//
-		// I got a result code of {2} when I tried to run it.
-		//
-		// Queue size is {3}.
-		//
-		// {4}
+		String message = "";
 
-		String message = ts.l("runIncremental.externalerror", scriptPath, this.getName(), results.get(0), Integer.valueOf(getQueueSize()), (String) results.get(2));
+		if (results == null)
+		  {
+		    // Error encountered running sync script "{0}" for the "{1}" Sync Channel.
+		    //
+		    // I got a result code of {2} when I tried to run it.
+		    //
+		    // Queue size is {3}.
+		    //
+		    // {4}
+
+		    message = ts.l("runIncremental.externalerror", scriptPath, this.getName(), -999, Integer.valueOf(getQueueSize()), "");
+		  }
+		else
+		  {
+		    // Error encountered running sync script "{0}" for the "{1}" Sync Channel.
+		    //
+		    // I got a result code of {2} when I tried to run it.
+		    //
+		    // Queue size is {3}.
+		    //
+		    // {4}
+
+		    message = ts.l("runIncremental.externalerror", scriptPath, this.getName(), results.get(0), Integer.valueOf(getQueueSize()), (String) results.get(2));
+		  }
 
 		DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
 
