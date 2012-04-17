@@ -943,8 +943,23 @@ class rowSorter {
   {
     Object Adata, Bdata;
 
-    Adata = a.element.elementAt(column).getData();
-    Bdata = b.element.elementAt(column).getData();
+    try
+      {
+	Adata = a.element.elementAt(column).getData();
+      }
+    catch (NullPointerException ex)
+      {
+	Adata = null;
+      }
+
+    try
+      {
+	Bdata = b.element.elementAt(column).getData();
+      }
+    catch (NullPointerException ex)
+      {
+	Bdata = null;
+      }
 
     // Adata and/or Bdata will be null if we are just comparing
     // strings, rather than the attached integer or date values for
@@ -959,13 +974,43 @@ class rowSorter {
 
 	if (forward)
 	  {
-	    one = a.element.elementAt(column).text;
-	    two = b.element.elementAt(column).text;
+	    try
+	      {
+		one = a.element.elementAt(column).text;
+	      }
+	    catch (NullPointerException ex)
+	      {
+		one = null;
+	      }
+
+	    try
+	      {
+		two = b.element.elementAt(column).text;
+	      }
+	    catch (NullPointerException ex)
+	      {
+		two = null;
+	      }
 	  }
 	else
 	  {
-	    two = a.element.elementAt(column).text;
-	    one = b.element.elementAt(column).text;
+	    try
+	      {
+		one = b.element.elementAt(column).text;
+	      }
+	    catch (NullPointerException ex)
+	      {
+		one = null;
+	      }
+
+	    try
+	      {
+		two = a.element.elementAt(column).text;
+	      }
+	    catch (NullPointerException ex)
+	      {
+		two = null;
+	      }
 	  }
 
 	// null is always lesser
@@ -986,7 +1031,7 @@ class rowSorter {
 	    return 1;
 	  }
 
-	// okay, not null.
+	// okay, neither null.
 	
 	return one.compareToIgnoreCase(two);
       }
@@ -1159,10 +1204,14 @@ class rowSorter {
       {
 	if (p1 == null || compare(p1,p2) > 0)
 	  {
-	    px = p2.next();
 	    node.setNext(p2);
-	    p2.setNext(null);
-	    p2 = px;
+
+	    if (p2 != null)
+	      {
+		px = p2.next();
+		p2.setNext(null);
+		p2 = px;
+	      }
 	  }
 	else
 	  {
