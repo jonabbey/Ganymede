@@ -5579,7 +5579,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	  }
       }
 
-    boolean result = recursePersonasMatch(owners, new Vector());
+    boolean result = queryEngine.recursePersonasMatch(owners, new Vector());
 
     if (showit)
       {
@@ -5587,100 +5587,6 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
     
     return result;
-  }
-
-  /**
-   * Recursive helper method for personaMatch.. this method does a
-   * depth first search up the owner tree for each Invid contained in
-   * the invids Vector to see if personaInvid is a member of any of
-   * the containing owner groups.
-   *
-   * @param owners A vector of invids pointing to OwnerBase objects
-   * @param alreadySeen A vector of owner group Invid's that have
-   * already been checked.  (For infinite loop avoidance).
-   *
-   * @return true if a match is found
-   */
-
-  private boolean recursePersonasMatch(Vector owners, Vector alreadySeen)
-  {
-    // *** It is critical that this method not modify the owners parameter passed
-    // *** in, as it is 'live' in a DBField.
-
-    if (owners == null)
-      {
-	return false;
-      }
-
-    for (int i = 0; i < owners.size(); i++)
-      {
-	if (recursePersonaMatch((Invid) owners.elementAt(i), alreadySeen))
-	  {
-	    return true;
-	  }
-      }
-    
-    return false;
-  }
-
-  /**
-   * Recursive helper method for personaMatch.. this method does a
-   * depth first search up the owner tree for the owner Invid to
-   * see if personaInvid is a member of any of the containing owner groups.
-   *
-   * @param owner An Invid pointing to an OwnerBase object
-   * @param alreadySeen A vector of owner group Invid's that have
-   * already been checked.  (For infinite loop avoidance).
-   *
-   * @return true if a match is found
-   */
-
-  private boolean recursePersonaMatch(Invid owner, Vector alreadySeen)
-  {
-    DBObject ownerObj;
-    InvidDBField inf;
-
-    /* -- */
-
-    if (owner == null)
-      {
-	throw new IllegalArgumentException("Null owner passed to recursePersonaMatch");
-      }
-
-    if (alreadySeen.contains(owner))
-      {
-	return false;
-      }
-    else
-      {
-	alreadySeen.addElement(owner);
-      }
-    
-    ownerObj = session.viewDBObject(owner);
-    
-    inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerMembersField);
-    
-    if (inf != null)
-      {
-	if (inf.getValuesLocal().contains(personaInvid))
-	  {
-	    return true;
-	  }
-      }
-    
-    // didn't find, recurse up
-    
-    inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerListField);
-    
-    if (inf != null)
-      {
-	if (recursePersonasMatch(inf.getValuesLocal(), alreadySeen))
-	  {
-	    return true;
-	  }
-      }
-
-    return false;
   }
 
   /**
@@ -5743,7 +5649,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 		// owners value passed in.  Otherwise, we'd have to
 		// clone the results from getValuesLocal().
 		
-		if (recursePersonasMatch(inf.getValuesLocal(), new Vector()))
+		if (queryEngine.recursePersonasMatch(inf.getValuesLocal(), new Vector()))
 		  {
 		    found = true;
 		  }
