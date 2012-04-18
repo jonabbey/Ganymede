@@ -343,7 +343,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * datastore with permission and transaction awareness.
    */
 
-  QueryEngine queryEngine;
+  DBQueryEngine queryEngine;
 
   /**
    * A GanymedeSession can have a single wizard active.  If this variable
@@ -605,7 +605,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     username = sessionLabel;
     clienthost = sessionLabel;
     session = new DBSession(Ganymede.db, this, sessionLabel);
-    queryEngine = new QueryEngine(this, session);
+    queryEngine = new DBQueryEngine(this, session);
 
     supergashMode = true;
     beforeversupergash = true;
@@ -744,7 +744,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     // set up our QueryEngine
 
-    queryEngine = new QueryEngine(this, session);
+    queryEngine = new DBQueryEngine(this, session);
 
     // and we're done
 
