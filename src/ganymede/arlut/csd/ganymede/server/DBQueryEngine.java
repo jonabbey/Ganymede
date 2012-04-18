@@ -102,7 +102,7 @@ public class QueryEngine {
    * the Ganymede server.
    */
 
-  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.QueryEngine");
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBQueryEngine");
 
   // ---
 
