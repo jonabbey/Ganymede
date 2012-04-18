@@ -863,9 +863,9 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * <p>This method is called by a background thread on the server, and 
-   * knocks this user off if they are a remote user who has been inactive
-   * for a long time.</p>
+   * <p>This method is called by a background thread on the server,
+   * and knocks this user off if they are a remote user who has been
+   * inactive for a long time.</p>
    *
    * <p>Note that this method is not synchronized, to avoid
    * nested-monitor deadlock by the timeOutTask between a
@@ -1346,12 +1346,12 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method is used to allow the client to retrieve messages like
-   * the motd from the server.  The client can specify that it only
-   * wants to see a message if it has changed since the user last
+   * <p>This method is used to allow the client to retrieve messages
+   * like the motd from the server.  The client can specify that it
+   * only wants to see a message if it has changed since the user last
    * logged out.  This is intended to support a message of the day
    * type functionality.  The server will not necessarily remember the
-   * last log out across server restart.
+   * last log out across server restart.</p>
    *
    * @param key A string, like "motd", indicating what message to retrieve.
    * @param onlyShowIfNew If true, the message will only be returned if
@@ -1382,12 +1382,12 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method is used to allow the client to retrieve messages like
+   * <p>This method is used to allow the client to retrieve messages like
    * the motd from the server.  The client can specify that it only
    * wants to see a message if it has changed since the user last
    * logged out.  This is intended to support a message of the day
    * type functionality.  The server will not necessarily remember the
-   * last log out across server restart.
+   * last log out across server restart.</p>
    *
    * @param key A string, like "motd", indicating what message to retrieve.
    * @param onlyShowIfNew If true, the message will only be returned if
@@ -1500,8 +1500,8 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method returns a list of personae names available
-   * to the user logged in.
+   * <p>This method returns a list of personae names available to the
+   * user logged in.</p>
    *
    * @see arlut.csd.ganymede.rmi.Session
    */
@@ -1753,8 +1753,8 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method may be used to set the owner groups of any objects
-   * created hereafter.
+   * <p>This method may be used to set the owner groups of any objects
+   * created hereafter.</p>
    *
    * @param ownerInvids a Vector of Invid objects pointing to
    * ownergroup objects.
@@ -1876,9 +1876,10 @@ final public class GanymedeSession implements Session, Unreferenced {
   //  Database operations
 
   /**
-   * This method returns a list of remote references to the Ganymede
-   * object type definitions.  This method will throws a RuntimeException
-   * if it is called when the server is in schemaEditMode.
+   * <p>This method returns a list of remote references to the
+   * Ganymede object type definitions.  This method will throws a
+   * RuntimeException if it is called when the server is in
+   * schemaEditMode.</p>
    *
    * @deprecated Superseded by the more efficient getBaseList()
    * 
@@ -1912,7 +1913,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * Returns the root of the category tree on the server
+   * <p>Returns the root of the category tree on the server</p>
    *
    * @deprecated Superseded by the more efficient getCategoryTree()
    *
@@ -1930,9 +1931,9 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * Returns a serialized representation of the basic category
-   * and base structure on the server.  The returned CategoryTransport
-   * will include only object types that are editable by the user.
+   * <p>Returns a serialized representation of the basic category and
+   * base structure on the server.  The returned CategoryTransport
+   * will include only object types that are editable by the user.</p>
    *
    * @see arlut.csd.ganymede.rmi.Category
    * @see arlut.csd.ganymede.rmi.Session
@@ -2399,8 +2400,8 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method causes all changes made by the client to be thrown out
-   * by the database, and the transaction is closed.
+   * <p>This method causes all changes made by the client to be thrown
+   * out by the database, and the transaction is closed.</p>
    *
    * @return a ReturnVal object if the transaction could not be aborted,
    *         or null if there were no problems
@@ -2977,9 +2978,10 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * Server-side method for doing object listing with support for DBObject's
-   * {@link arlut.csd.ganymede.server.DBObject#lookupLabel(arlut.csd.ganymede.server.DBObject) lookupLabel}
-   * method.
+   * <p>Server-side method for doing object listing with support for
+   * DBObject's {@link
+   * arlut.csd.ganymede.server.DBObject#lookupLabel(arlut.csd.ganymede.server.DBObject)
+   * lookupLabel} method.</p>
    *
    * @param query The query to be performed
    * @param perspectiveObject There are occasions when the server will want to do internal
@@ -2997,10 +2999,10 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method provides the hook for doing all manner of internal
+   * <p>This method provides the hook for doing all manner of internal
    * object listing for the Ganymede database.  This method will not
    * take into account any optional owner filtering, but it will honor
-   * the editableOnly flag in the Query.
+   * the editableOnly flag in the Query.</p>
    *
    * @return A Vector of {@link arlut.csd.ganymede.common.Result Result} objects
    */
@@ -3011,10 +3013,10 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method is intended as a lightweight way of returning the
+   * <p>This method is intended as a lightweight way of returning the
    * current label of the specified invid.  No locking is done,
    * and the label returned will be viewed through the context
-   * of the current transaction, if any.
+   * of the current transaction, if any.</p>
    *
    * @see arlut.csd.ganymede.rmi.Session
    */ 
@@ -3039,10 +3041,10 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /** 
-   * This method is intended as a lightweight way of returning a
+   * <p>This method is intended as a lightweight way of returning a
    * handy description of the type and label of the specified invid.
    * No locking is done, and the label returned will be viewed through
-   * the context of the current transaction, if any. 
+   * the context of the current transaction, if any.</p>
    */
 
   public String describe(Invid invid)
@@ -3058,8 +3060,9 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method returns a multi-line string containing excerpts from
-   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.
+   * <p>This method returns a multi-line string containing excerpts
+   * from the Ganymede log relating to &lt;invid&gt;, since time
+   * &lt;since&gt;.</p>
    *
    * @param invid The invid identifier for the object whose history is sought
    * @param since Report events since this time, or all events if this is null.
@@ -3073,8 +3076,9 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method returns a multi-line string containing excerpts from
-   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.
+   * <p>This method returns a multi-line string containing excerpts
+   * from the Ganymede log relating to &lt;invid&gt;, since time
+   * &lt;since&gt;.</p>
    *
    * @param invid The invid identifier for the object whose history is sought
    * @param since Report events since this time, or all events if this is null.
@@ -3090,8 +3094,8 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method returns a multi-line string containing excerpts from
-   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.
+   * <p>This method returns a multi-line string containing excerpts from
+   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.</p>
    *
    * @param invid The invid identifier for the object whose history is sought
    * @param since Report events since this time, or all events if this is null.
@@ -3174,8 +3178,9 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method returns a multi-line string containing excerpts from
-   * the Ganymede log relating to &lt;invid&gt;, since time &lt;since&gt;.
+   * <p>This method returns a multi-line string containing excerpts
+   * from the Ganymede log relating to &lt;invid&gt;, since time
+   * &lt;since&gt;.</p>
    *
    * @param invid The invid identifier for the admin Persona whose history is sought
    * @param since Report events since this date, or all events if this is null.
@@ -4078,12 +4083,13 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method is called by the XML client to initiate a dump of
+   * <p>This method is called by the XML client to initiate a dump of
    * Ganymede objects in XML format matching the GanyQL search
    * criteria specified in the queryString.  The ReturnVal returned
    * will, if the operation is approved, contain a reference to an RMI
    * FileTransmitter interface, which can be iteratively called by the
-   * XML client to pull pieces of the transmission down in sequence.
+   * XML client to pull pieces of the transmission down in
+   * sequence.</p>
    */
 
   public synchronized ReturnVal runXMLQuery(String queryString) throws NotLoggedInException, GanyParseException
@@ -4116,12 +4122,13 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method is called by the XML client to initiate a dump of
+   * <p>This method is called by the XML client to initiate a dump of
    * Ganymede objects in XML format matching the search criteria
    * specified in the query object.  The ReturnVal returned will, if
    * the operation is approved, contain a reference to an RMI
    * FileTransmitter interface, which can be iteratively called by the
-   * XML client to pull pieces of the transmission down in sequence.
+   * XML client to pull pieces of the transmission down in
+   * sequence.</p>
    */
 
   public synchronized ReturnVal runXMLQuery(Query query) throws NotLoggedInException, GanyParseException
@@ -4220,10 +4227,9 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * Private server-side helper method used to pass a {@link
+   * <p>Private server-side helper method used to pass a {@link
    * arlut.csd.ganymede.rmi.FileTransmitter FileTransmitter} reference
-   * back that can be called to pull pieces of an XML
-   * transmission.
+   * back that can be called to pull pieces of an XML transmission.</p>
    */
 
   private ReturnVal getXML(boolean sendData, boolean sendSchema, String syncChannel, boolean includeHistory, boolean includeOid) throws NotLoggedInException
@@ -4265,8 +4271,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    ****************************************************************************/
 
   /**
-   * Convenience method to get access to this session's UserBase
-   * instance.
+   * <p>Convenience method to get access to this session's UserBase
+   * instance.</p>
    */
 
   DBObject getUser()
@@ -4381,7 +4387,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * Convenience method to get access to this session's user invid.
+   * <p>Convenience method to get access to this session's user invid.</p>
    */
 
   public Invid getUserInvid()
@@ -4390,7 +4396,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * Convenience method to get access to this session's persona invid.
+   * <p>Convenience method to get access to this session's persona invid.</p>
    */
 
   public Invid getPersonaInvid()
@@ -4403,7 +4409,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   // **
 
   /**
-   * This method finds the ultimate owner of an embedded object
+   * <p>This method finds the ultimate owner of an embedded object</p>
    */
 
   DBObject getContainingObj(DBObject object)
@@ -4412,13 +4418,13 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method takes the administrator's current
+   * <p>This method takes the administrator's current
    * persona, considers the owner groups the administrator
    * is a member of, checks to see if the object is owned
    * by that group, and determines the appropriate permission
    * bits for the object.  getPerm() will OR any proprietary
    * ownership bits with the default permissions to give
-   * an appopriate result.
+   * an appopriate result.</p>
    */
 
   public PermEntry getPerm(DBObject object)
@@ -4928,8 +4934,8 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This convenience method resets defaultPerms from the default
-   * permission object in the Ganymede database.
+   * <p>This convenience method resets defaultPerms from the default
+   * permission object in the Ganymede database.</p>
    */
 
   private void resetDefaultPerms()
@@ -5363,10 +5369,10 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method gives access to the DBObject for the administrator's
+   * <p>This method gives access to the DBObject for the administrator's
    * persona record, if any.  This is used by
    * {@link arlut.csd.ganymede.server.DBSession DBSession} to get the
-   * label for the administrator for record keeping.
+   * label for the administrator for record keeping.</p>
    */
   
   public DBObject getPersona()
@@ -5375,11 +5381,11 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method returns a reference to the 
+   * <p>This method returns a reference to the
    * {@link arlut.csd.ganymede.server.DBSession DBSession} object encapsulated
    * by this GanymedeSession object.  This is intended to be used by
    * subclasses of {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}
-   * that might not necessarily be in the arlut.csd.ganymede package.
+   * that might not necessarily be in the arlut.csd.ganymede package.</p>
    */
 
   public DBSession getSession()
@@ -5394,8 +5400,8 @@ final public class GanymedeSession implements Session, Unreferenced {
   //
 
   /**
-   * Returns true if a wizard is currently interacting
-   * with the user.
+   * <p>Returns true if a wizard is currently interacting
+   * with the user.</p>
    *
    * @see arlut.csd.ganymede.server.GanymediatorWizard
    */
@@ -5406,8 +5412,8 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * Returns true if a particular wizard is currently
-   * interacting with the user.
+   * <p>Returns true if a particular wizard is currently interacting
+   * with the user.</p>
    *
    * @see arlut.csd.ganymede.server.GanymediatorWizard
    */
@@ -5418,8 +5424,8 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * Returns the active wizard, if any, for
-   * this GanymedeSession.
+   * <p>Returns the active wizard, if any, for this
+   * GanymedeSession.</p>
    *
    * @see arlut.csd.ganymede.server.GanymediatorWizard
    */
@@ -5474,9 +5480,9 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * Returns true if the active persona has some sort of
+   * <p>Returns true if the active persona has some sort of
    * owner/access relationship with the object in question through
-   * its list of owner groups.
+   * its list of owner groups.</p>
    */
 
   public boolean personaMatch(DBObject obj)
@@ -5590,11 +5596,11 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This helper method iterates through the owners
-   * vector and checks to see if the current personaInvid is a
-   * member of all of the groups through either direct membership
-   * or through membership of an owning group.  This method 
-   * depends on recursePersonasMatch().
+   * <p>This helper method iterates through the owners vector and
+   * checks to see if the current personaInvid is a member of all of
+   * the groups through either direct membership or through membership
+   * of an owning group.  This method depends on
+   * recursePersonasMatch().</p>
    */
 
   private boolean isMemberAll(Vector owners)
@@ -5666,10 +5672,10 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method returns true if the visibility filter vector allows
-   * visibility of the object in question.  The visibility vector
-   * works by direct ownership identity (i.e., no recursing up), so
-   * it's a simple loop-di-loop.
+   * <p>This method returns true if the visibility filter vector
+   * allows visibility of the object in question.  The visibility
+   * vector works by direct ownership identity (i.e., no recursing
+   * up), so it's a simple loop-di-loop.</p>
    */
 
   private boolean filterMatch(DBObject obj)
@@ -5821,9 +5827,9 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This private method is called by all methods in
-   * GanymedeSession that require the client to be logged
-   * in to operate.
+   * <p>This private method is called by all methods in
+   * GanymedeSession that require the client to be logged in to
+   * operate.</p>
    */
 
   void checklogin() throws NotLoggedInException
