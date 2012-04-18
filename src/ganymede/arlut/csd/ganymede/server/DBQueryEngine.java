@@ -1,6 +1,6 @@
 /*
 
-   QueryEngine.java
+   DBQueryEngine.java
 
    Contains the Query processing engine for the Ganymede Server.
 
@@ -75,7 +75,7 @@ import java.util.Vector;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                     QueryEngine
+                                                                   DBQueryEngine
 
 ------------------------------------------------------------------------------*/
 
@@ -83,8 +83,9 @@ import java.util.Vector;
  * <p>Query processing engine for the Ganymede Server.</p>
  *
  * <p>Each GanymedeSession logged into the Ganymede Server will have
- * its own QueryEngine attached, which does permission and transaction
- * aware querying and dumping operations for the session.</p>
+ * its own DBQueryEngine attached, which does permission and
+ * transaction aware querying and dumping operations for the
+ * session.</p>
  *
  * <p>This class does not synchronize.  All synchronization should be
  * performed in the GanymedeSession methods which call methods in this
@@ -93,7 +94,7 @@ import java.util.Vector;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-public class QueryEngine {
+public class DBQueryEngine {
 
   static final boolean debug = false;
 
@@ -122,7 +123,7 @@ public class QueryEngine {
 
   /* -- */
 
-  public QueryEngine(GanymedeSession gSession, DBSession session)
+  public DBQueryEngine(GanymedeSession gSession, DBSession session)
   {
     this.gSession = gSession;
     this.session = session;
