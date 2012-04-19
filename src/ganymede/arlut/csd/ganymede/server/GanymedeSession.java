@@ -345,6 +345,12 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   private DBQueryEngine queryEngine;
 
+  /**
+   * Our DBPermissionManager object.  DBPermissionManager manages our
+   * access privileges.
+   */
+
+  private DBPermissionManager permManager;
 
   /**
    * A GanymedeSession can have a single wizard active.  If this variable
@@ -607,6 +613,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     clienthost = sessionLabel;
     session = new DBSession(Ganymede.db, this, sessionLabel);
     queryEngine = new DBQueryEngine(this, session);
+    permManager = new DBPermissionManager(this);
 
     supergashMode = true;
     beforeversupergash = true;
@@ -1572,167 +1579,55 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();		// this resets lastAction
 
-    /* - */
-
-    DBObject 
-      user,
-      personaObject = null;
-
-    InvidDBField inv;
-    Invid invid;
-    PasswordDBField pdbf;
+    boolean success = false;
 
     /* -- */
 
-    user = getUser();
-
-    if (user == null)
+    if (getUser() == null)
       {
+	// this session is not associated with a user in the ganymede
+	// datastore.. we don't support persona changing in such
+	// GanymedeSessions.
+
 	return false;
       }
 
-    // if they are selecting their base username, go ahead and clear
-    // out the persona privs and return true
-
-    if (user.getLabel().equals(newPersona))
+    if (getUser().getLabel().equals(newPersona) && timedout)
       {
-	// if we've timed out, one of two things might be happening
-	// here.  if the client gave us a password, they may be
-	// revalidating their login for end-user access.
-	// 
+	// if we've timed out and we're switching to our base user
+	// privileges, one of two things might be happening here.  if
+	// the client gave us a password, they may be revalidating
+	// their login for end-user access.
+	//
 	// if they gave us no password, the client is itself
 	// downshifting to the non-privileged level.
 
-	if (timedout && password != null)
-	  {
-	    // "User {0} attempting to re-authenticate non-privileged login after being timed out."
-	    Ganymede.debug(ts.l("selectPersona.attempting_timecheck", this.username));
-
-	    pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
-	    
-	    if (pdbf != null && pdbf.matchPlainText(password))
-	      {
-		timedout = false;
-	      }
-	    else
-	      {
-		// "User {0} failed to re-authenticate a login that timed out."
-		Ganymede.debug(ts.l("selectPersona.failed_timecheck", this.username));
-		return false;
-	      }
-	  }
-	else
+	if (password == null)
 	  {
 	    // "User {0}''s privileged login as {1} timed out.  Downshifting to non-privileged access."
 	    Ganymede.debug(ts.l("selectPersona.giving_up", this.username, this.personaName));
 	  }
-
-	// the GUI client will close transactions first, but since we
-	// might not be working on behalf of the GUI client, let's
-	// make sure
-
-	if (session.editSet != null)
-	  {
-	    String description = session.editSet.description;
-	    boolean interactive = session.editSet.isInteractive();
-
-	    // close the existing transaction
-
-	    abortTransaction();
-
-	    // open a new one with the same description and
-	    // interactivity
-
-	    openTransaction(description, interactive);
-	  }
-
-	personaObject = null;
-	this.personaInvid = null;
-	this.personaName = null;
-	updatePerms(true);
-	this.visibilityFilterInvids = null;
-	this.userInfo = null;	// null our admin console cache
-	this.username = user.getLabel(); // in case they logged in directly as an admin account
-	setLastEvent("selectPersona: " + newPersona);
-	return true;
-      }
-
-    // ok, we need to find out persona they are trying to switch to
-
-    inv = (InvidDBField) user.getField(SchemaConstants.UserAdminPersonae);
-
-    // it's okay to loop on this field since we should be looking at a
-    // DBObject and not a DBEditObject
-
-    for (int i = 0; i < inv.size(); i++)
-      {
-	invid = (Invid) inv.getElementLocal(i);
-
-	// it's okay to use the faster viewDBObject() here, because we
-	// are always going to be doing this for internal purposes
-
-	personaObject = session.viewDBObject(invid);
-
-	if (!personaObject.getLabel().equals(newPersona))
-	  {
-	    personaObject = null;
-	  }
 	else
 	  {
-	    break;
+	    // "User {0} attempting to re-authenticate non-privileged login after being timed out."
+	    Ganymede.debug(ts.l("selectPersona.attempting_timecheck", this.username));
 	  }
       }
 
-    if (personaObject == null)
+    success = permManager.selectPersona(newPersona, password);
+
+    if (success)
       {
-	// "Couldn''t find persona {0} for user: {1}"
-	Ganymede.debug(ts.l("selectPersona.no_persona", newPersona, this.username));
+	timedout = false;
+      }
+    else if (timedout)
+      {
+	// "User {0} failed to re-authenticate a login that timed out."
+	Ganymede.debug(ts.l("selectPersona.failed_timecheck", this.username));
 	return false;
       }
 
-    pdbf = (PasswordDBField) personaObject.getField(SchemaConstants.PersonaPasswordField);
-    
-    if (pdbf != null && pdbf.matchPlainText(password))
-      {
-	// "User {0} switched to persona {1}."
-	Ganymede.debug(ts.l("selectPersona.switched", this.username, newPersona));
-
-	this.personaName = personaObject.getLabel();
-
-	if (timedout)
-	  {
-	    timedout = false;
-	  }
-
-	// the GUI client will close transactions first, but since we
-	// might not be working on behalf of the GUI client, let's
-	// make sure
-
-	if (session.editSet != null)
-	  {
-	    String description = session.editSet.description;
-	    boolean interactive = session.editSet.isInteractive();
-
-	    // close the existing transaction
-
-	    abortTransaction();
-
-	    // open a new one with the same description and
-	    // interactivity
-
-	    openTransaction(description, interactive);
-	  }
-
-	this.personaInvid = personaObject.getInvid();
-	updatePerms(true);
-	this.userInfo = null;	// null our admin console cache
-	this.username = user.getLabel(); // in case they logged in directly as an admin account
-	this.visibilityFilterInvids = null;
-	setLastEvent("selectPersona: " + newPersona);
-	return true;
-      }
-
-    return false;
+    return success;
   }
 
   /**
