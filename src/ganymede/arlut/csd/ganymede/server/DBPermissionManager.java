@@ -347,6 +347,70 @@ public class DBPermissionManager {
   }
 
   /**
+   * <p>Returns a Vector of Invids containing user and persona Invids
+   * for the GanymedeSession that this DBPermissionManager is attached
+   * to.</p>
+   */
+
+  public Vector<Invid> getIdentityInvids()
+  {
+    Vector<Invid> ids = new Vector<Invid>();
+
+    if (userInvid != null)
+      {
+	ids.addElement(userInvid);
+      }
+
+    if (personaInvid != null)
+      {
+	ids.addElement(personaInvid);
+      }
+
+    return ids;
+  }
+
+  /**
+   * <p>Returns the email address that should be used in the 'From:'
+   * field of mail sent by the GanymedeSession which owns this
+   * DBPermissionManager.
+   */
+
+  public String getIdentityReturnAddress()
+  {
+    String returnAddr;
+
+    // do we have a real user name, or a persona name?
+
+    if (username.equals(Ganymede.rootname))
+      {
+	// supergash.. use the default return address
+
+	returnAddr = Ganymede.returnaddrProperty;
+      }
+    else
+      {
+	if (username.indexOf(':') == -1)
+	  {
+	    // real username, save it as is
+
+	    returnAddr = username;
+	  }
+	else
+	  {
+	    // persona, extract the user's name out of it
+	    returnAddr = username.substring(0, username.indexOf(':'));
+	  }
+
+	String mailsuffix = System.getProperty("ganymede.defaultmailsuffix");
+
+	if (mailsuffix != null)
+	  {
+	    returnAddr += mailsuffix;
+	  }
+      }
+  }
+
+  /**
    * <p>This method returns a list of personae names available to the
    * user logged in.</p>
    */
