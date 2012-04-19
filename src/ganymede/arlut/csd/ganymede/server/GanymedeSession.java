@@ -989,21 +989,6 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     if (loggedInSemaphore.isSet())
       {
-	// Construct a vector of invid's to place in the log entry we
-	// are about to create.  This lets us search the log easily.
-
-	Vector objects = new Vector();
-	    
-	if (userInvid != null)
-	  {
-	    objects.addElement(userInvid);
-	  }
-		
-	if (personaInvid != null)
-	  {
-	    objects.addElement(personaInvid);
-	  }
-		
 	if (Ganymede.log != null)
 	  {
 	    // "Abnormal termination for username: {0}\n\n{1}"
@@ -1011,7 +996,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 						       ts.l("forceOff.log_event", username, reason),
 						       userInvid,
 						       username,
-						       objects,
+						       permManager.getIdentityInvids(),
 						       null));
 	  }
 
@@ -1187,28 +1172,13 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	    if (!forced_off)
 	      {
-		// Construct a vector of invid's to place in the log entry we
-		// are about to create.  This lets us search the log easily.
-
-		Vector objects = new Vector();
-
-		if (userInvid != null)
-		  {
-		    objects.addElement(userInvid);
-		  }
-
-		if (personaInvid != null)
-		  {
-		    objects.addElement(personaInvid);
-		  }
-
 		if (Ganymede.log != null)
 		  {
 		    Ganymede.log.logSystemEvent(new DBLogEvent("normallogout",
 							       ts.l("logout.normal_event", username),
 							       userInvid,
 							       username,
-							       objects,
+							       permManager.getIdentityInvids(),
 							       null));
 		  }
 	      }
@@ -2378,8 +2348,6 @@ final public class GanymedeSession implements Session, Unreferenced {
     /* - */
 
     Qsmtp mailer;
-    String returnAddr;
-    String mailsuffix;
     StringBuilder signature = new StringBuilder();
     Vector addresses = new Vector();
     StringTokenizer tokens = new StringTokenizer(address, ", ", false);
@@ -2395,26 +2363,6 @@ final public class GanymedeSession implements Session, Unreferenced {
             addresses.addElement(tokens.nextToken());
           }
 
-        // do we have a real user name, or a persona name?
-
-        if (username.equals(Ganymede.rootname))
-          {
-            // supergash.. use the default return address
-
-            returnAddr = Ganymede.returnaddrProperty;
-          }
-        else
-          {
-            returnAddr = this.username;
-
-            mailsuffix = System.getProperty("ganymede.defaultmailsuffix");
-
-            if (mailsuffix != null)
-              {
-                returnAddr += mailsuffix;
-              }
-          }
-
         // create the signature
 
         // "This message was sent by {0}, who is running the Ganymede client on {1}."
@@ -2426,7 +2374,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
         try
           {
-            mailer.sendmsg(returnAddr,
+            mailer.sendmsg(permManager.getIdentityReturnAddress(),
                            addresses,
                            "Ganymede: " + subject,
                            body.toString());
@@ -2478,8 +2426,6 @@ final public class GanymedeSession implements Session, Unreferenced {
     /* - */
 
     Qsmtp mailer;
-    String returnAddr;
-    String mailsuffix;
     StringBuilder asciiContent = new StringBuilder();
     StringBuilder signature = new StringBuilder();
     Vector addresses = new Vector();
@@ -2494,36 +2440,6 @@ final public class GanymedeSession implements Session, Unreferenced {
         while (tokens.hasMoreElements())
           {
             addresses.addElement(tokens.nextToken());
-          }
-
-        // do we have a real user name, or a persona name?
-
-        if (username.equals(Ganymede.rootname))
-          {
-            // supergash.. use the default return address
-
-            returnAddr = Ganymede.returnaddrProperty;
-          }
-        else
-          {
-            if (username.indexOf(':') == -1)
-              {
-                // real username, save it as is
-
-                returnAddr = username;
-              }
-            else
-              {
-                // persona, extract the user's name out of it
-                returnAddr = username.substring(0, username.indexOf(':'));
-              }
-    
-            mailsuffix = System.getProperty("ganymede.defaultmailsuffix");
-
-            if (mailsuffix != null)
-              {
-                returnAddr += mailsuffix;
-              }
           }
 
         // create the signature
@@ -2543,7 +2459,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
         try
           {
-            mailer.sendHTMLmsg(returnAddr,
+            mailer.sendHTMLmsg(permManager.getIdentityReturnAddress(),
                                addresses,
                                "Ganymede: " + subject,
                                (HTMLbody != null) ? HTMLbody.toString(): null,
