@@ -338,12 +338,13 @@ final public class GanymedeSession implements Session, Unreferenced {
   DBSession session;
 
   /**
-   * Our QueryEngine object.  QueryEngine has all the routines for
+   * Our DBQueryEngine object.  DBQueryEngine has all the routines for
    * doing all of this GanymedeSession's queries on the Ganymede
    * datastore with permission and transaction awareness.
    */
 
-  DBQueryEngine queryEngine;
+  private DBQueryEngine queryEngine;
+
 
   /**
    * A GanymedeSession can have a single wizard active.  If this variable
