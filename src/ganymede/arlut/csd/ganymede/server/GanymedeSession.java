@@ -191,6 +191,8 @@ final public class GanymedeSession implements Session, Unreferenced {
   /**
    * if this session is on the GanymedeServer's lSemaphore, this boolean
    * will be true.
+   *
+   * XXX wtf? figure out and document XXX
    */
 
   boolean semaphoreLocked = false;
@@ -569,9 +571,9 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method is used by the server to increment the admin
+   * <p>This method is used by the server to increment the admin
    * console's display of the number of objects this user session has
-   * checked out and/or created.
+   * checked out and/or created.</p>
    */
 
   public synchronized void checkOut()
@@ -583,9 +585,9 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method is used by the server to decrement the admin
+   * <p>This method is used by the server to decrement the admin
    * console's display of the number of objects this user session has
-   * checked out and/or created.
+   * checked out and/or created.</p>
    */
 
   public synchronized void checkIn()
@@ -1071,7 +1073,6 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>Oversight is enabled by default.</p>
    *
    * @param val If true, oversight will be enabled.
-   * 
    */
 
   public void enableOversight(boolean val)
@@ -1919,6 +1920,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @param subject The subject of this mail, will have 'Ganymede:' prepended
    * by the server.
    * @param body The content of the message.
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public void sendMail(String address, String subject, StringBuffer body) throws NotLoggedInException
@@ -2003,12 +2006,14 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @param body The plain-ASCII content of the message, or null if none.
    * @param HTMLbody The HTML content of the message, or null if none.
    *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public void sendHTMLMail(String address, String subject, StringBuffer body, StringBuffer HTMLbody) throws NotLoggedInException
   {
     // If the server has been told to not send out any emails, then just bail
     // out.
+
     if (Ganymede.suppressEmail)
       {
       	return;
@@ -2090,6 +2095,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @param exceptionReport A string holding any stack trace
    * information that might be helpful for the server to log or
    * transmit to a developer.
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public void reportClientBug(String clientIdentifier, String exceptionReport) throws NotLoggedInException
@@ -2119,6 +2126,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    *
    * @param clientIdentifier A string identifying any information
    * about the client that the client feels like providing.
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public void reportClientVersion(String clientIdentifier) throws NotLoggedInException
@@ -2249,6 +2258,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * Invid that has objectName attached to the same namespace as the
    * label field for the object type sought, even if the Invid is of a
    * different object type.
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized Invid findLabeledObject(String objectName, short type, boolean allowAliases) throws NotLoggedInException
@@ -2484,6 +2495,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @param before Report events occuring on or before this time
    * @param fullTransactions If false, only events directly involving the requested
    * object will be included in the result buffer.
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public StringBuffer viewObjectHistory(Invid invid, Date since, Date before, boolean fullTransactions) throws NotLoggedInException
@@ -2658,6 +2671,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * DBObject in question, so this method is very heavyweight.</p>
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized ReturnVal view_db_object(Invid invid) throws NotLoggedInException
@@ -2742,6 +2757,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * or {@link arlut.csd.ganymede.server.GanymedeSession#abortTransaction() abortTransaction()}.</p>
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized ReturnVal edit_db_object(Invid invid) throws NotLoggedInException
@@ -3257,11 +3274,11 @@ final public class GanymedeSession implements Session, Unreferenced {
    * change in status will not be visible to other sessions until this session calls 
    * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
    *
-   * @see arlut.csd.ganymede.rmi.Session
-   *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized ReturnVal reactivate_db_object(Invid invid) throws NotLoggedInException
@@ -3441,6 +3458,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * FileTransmitter interface, which can be iteratively called by the
    * XML client to pull pieces of the transmission down in
    * sequence.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized ReturnVal runXMLQuery(String queryString) throws NotLoggedInException, GanyParseException
@@ -3480,6 +3499,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * FileTransmitter interface, which can be iteratively called by the
    * XML client to pull pieces of the transmission down in
    * sequence.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized ReturnVal runXMLQuery(Query query) throws NotLoggedInException, GanyParseException
@@ -3518,6 +3539,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    *
    * <p>This method is only available to a supergash-privileged
    * GanymedeSession.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public ReturnVal getSchemaXML() throws NotLoggedInException
@@ -3545,6 +3568,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @param includeOid If true, the objects written out to the xml
    * stream will include an "oid" attribute which contains the precise
    * Invid of the object.
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public ReturnVal getDataXML(String syncChannel, boolean includeHistory, boolean includeOid) throws NotLoggedInException
@@ -3570,6 +3595,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @param includeOid If true, the objects written out to the xml
    * stream will include an "oid" attribute which contains the precise
    * Invid of the object.
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public ReturnVal getXMLDump(boolean includeHistory, boolean includeOid) throws NotLoggedInException
