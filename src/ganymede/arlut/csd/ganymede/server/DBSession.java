@@ -49,7 +49,10 @@
 
 package arlut.csd.ganymede.server;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 import arlut.csd.Util.RandomUtils;
@@ -1213,6 +1216,101 @@ final public class DBSession {
       }
 
     return localObj;
+  }
+
+  /**
+   * <p>This is a method to allow code in the server to quickly and
+   * safely get a full list of objects in an object base.</p>
+   *
+   * <p>This is only a server-side method.  getObjects() does
+   * not do anything to check access permissions.</p>
+   *
+   * <p>It is the responsiblity of the code that gets a List
+   * back from this method not to modify the List returned
+   * in any way, as it may be shared by other threads.</p>
+   *
+   * <p>Any objects returned by getObjects() will reflect the
+   * state of that object in this session's transaction, if a
+   * transaction is open.</p>
+   *
+   * @return a List of DBObject references.
+   */
+
+  public synchronized List<DBObject> getTransactionalObjects(short baseid)
+  {
+    DBObjectBase base;
+
+    /* -- */
+
+    base = Ganymede.db.getObjectBase(baseid);
+
+    if (base == null)
+      {
+	try
+	  {
+	    throw new RuntimeException(ts.l("getObjects.no_base", Integer.valueOf(baseid)));
+	  }
+	catch (RuntimeException ex)
+	  {
+	    Ganymede.debug(Ganymede.stackTrace(ex));
+	    return null;
+	  }
+      }
+
+    if (!isTransactionOpen())
+      {
+	// return a snapshot reference to the base's iteration set
+
+	return base.getIterationSet();
+      }
+    else
+      {
+	List<DBObject> iterationSet;
+	Map<Invid, DBEditObject> objects;
+
+	// grab a snapshot reference to the vector of objects
+	// checked into the database
+
+	iterationSet = base.getIterationSet();
+
+	// grab a snapshot copy of the objects checked out in this transaction
+
+	objects = editSet.getObjectHashClone();
+
+	// and generate our list
+
+	List<DBObject> results = new ArrayList<DBObject>(iterationSet.size());
+
+	for (DBObject obj: iterationSet)
+	  {
+	    if (objects.containsKey(obj.getInvid()))
+	      {
+		results.add(objects.get(obj.getInvid()));
+	      }
+	    else
+	      {
+		results.add(obj);
+	      }
+	  }
+
+	// drop our reference to the iterationSet
+
+	iterationSet = null;
+
+	// we've recorded any objects that are in the database.. now
+	// look to see if there are any objects that are newly created
+	// in our transaction's object list and add them as well.
+
+	for (DBEditObject eObj: objects.values())
+	  {
+	    if ((eObj.getStatus() == ObjectStatus.CREATING) && (eObj.getTypeID()==baseid))
+	      {
+		results.add(eObj);
+	      }
+	  }
+
+	return results;
+      }
   }
 
   /**

@@ -1704,7 +1704,7 @@ public class Ganymede {
   static private void AddLabelUpdate() throws NotLoggedInException
   {
     boolean success = true;
-    List<DBObject> objects = internalSession.getObjects(SchemaConstants.ObjectEventBase);
+    List<DBObject> objects = internalSession.getSession().getTransactionalObjects(SchemaConstants.ObjectEventBase);
 
     if (objects.size() <= 0)
       {
@@ -1780,7 +1780,7 @@ public class Ganymede {
 
   static private void registerTasks() throws NotLoggedInException
   {
-    List<DBObject> objects = internalSession.getObjects(SchemaConstants.TaskBase);
+    List<DBObject> objects = internalSession.getSession().getTransactionalObjects(SchemaConstants.TaskBase);
 
     /* -- */
 
@@ -1915,7 +1915,7 @@ public class Ganymede {
 
   static private void registerSyncChannels() throws NotLoggedInException
   {
-    List<DBObject> objects = internalSession.getObjects(SchemaConstants.SyncChannelBase);
+    List<DBObject> objects = internalSession.getSession().getTransactionalObjects(SchemaConstants.SyncChannelBase);
 
     /* -- */
 
