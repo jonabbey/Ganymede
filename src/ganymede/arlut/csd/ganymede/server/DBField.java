@@ -907,7 +907,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * {@link arlut.csd.ganymede.server.DBObject#getLabel() getLabel()}
    * logic for {@link arlut.csd.ganymede.server.DBObject DBObject}, 
    * which is invoked from {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
-   * {@link arlut.csd.ganymede.server.GanymedeSession#getPerm(arlut.csd.ganymede.server.DBObject) getPerm()} 
+   * {@link arlut.csd.ganymede.server.DBPermissionManager#getPerm(arlut.csd.ganymede.server.DBObject) getPerm()}
    * method.</p>
    *
    * <p>If this method checked permissions and the getPerm() method
@@ -3532,14 +3532,14 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 	 return true; // we don't know who is looking at us, assume it's a server-local access
        }
 
-     PermEntry pe = gSession.getPerm(owner, getID());
+     PermEntry pe = gSession.getPermManager().getPerm(owner, getID());
 
      // if there is no permission explicitly recorded for the field,
      // inherit from the object as a whole
 
      if (pe == null)
        {
-	 pe = gSession.getPerm(owner);
+	 pe = gSession.getPermManager().getPerm(owner);
        }
 
      if (pe == null)

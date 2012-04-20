@@ -168,7 +168,7 @@ public class DBQueryEngine {
             continue;
           }
 
-        perm = gSession.getPerm(obj);
+        perm = gSession.getPermManager().getPerm(obj);
 
         if (!perm.isVisible())
           {
@@ -456,7 +456,7 @@ public class DBQueryEngine {
 
     if (debug)
       {
-        Ganymede.debug("dump(): " + gSession.getPersonaLabel() + " : got read lock");
+        Ganymede.debug("dump(): " + gSession.getPermManager().getIdentity() + " : got read lock");
       }
 
     // search for the invid's matching the given query
@@ -475,8 +475,8 @@ public class DBQueryEngine {
     for (DBObjectBaseField field: base.getFields())
       {
         if (query.returnField(field.getKey()) &&
-            (gSession.isSuperGash() ||
-             gSession.getPerm(base.getTypeID(), field.getID(), true).isVisible()))
+            (gSession.getPermManager().isSuperGash() ||
+             gSession.getPermManager().getPerm(base.getTypeID(), field.getID(), true).isVisible()))
           {
             fieldDefs.addElement(field);
           }
@@ -920,7 +920,8 @@ public class DBQueryEngine {
 
     if (debug)
       {
-        System.err.println("Query: " + gSession.getPersonaLabel() + " : opening read lock on " + VectorUtils.vectorString(baseLock));
+        System.err.println("Query: " + gSession.getPermManager().getIdentity() +
+			   " : opening read lock on " + VectorUtils.vectorString(baseLock));
       }
 
     // okay.. now we want to lock the database, handle the search, and
@@ -966,7 +967,8 @@ public class DBQueryEngine {
           {
             if (debug)
               {
-                System.err.println("Query: " + gSession.getPersonaLabel() + " : got read lock");
+                System.err.println("Query: " +
+				   gSession.getPermManager().getIdentity() + " : got read lock");
               }
 
             it = base.getObjects().iterator();
@@ -975,7 +977,8 @@ public class DBQueryEngine {
           {
             if (debug)
               {
-                System.err.println("Query: " + gSession.getPersonaLabel() +
+                System.err.println("Query: " +
+				   gSession.getPermManager().getIdentity() +
                                    " : skipping read lock, iterating over iterationSet snapshot");
               }
 
@@ -1021,7 +1024,8 @@ public class DBQueryEngine {
 
         if (debug)
           {
-            System.err.println("Query: " + gSession.getPersonaLabel() + " : completed query over primary hash.");
+            System.err.println("Query: " +
+			       gSession.getPermManager().getIdentity() + " : completed query over primary hash.");
           }
 
         // find any objects created or being edited in the current
@@ -1043,7 +1047,8 @@ public class DBQueryEngine {
           {
             if (debug)
               {
-                System.err.println("Query: " + gSession.getPersonaLabel() +
+                System.err.println("Query: " +
+				   gSession.getPermManager().getIdentity() +
                                    " : scanning intratransaction objects");
               }
 
@@ -1084,14 +1089,16 @@ public class DBQueryEngine {
 
             if (debug)
               {
-                System.err.println("Query: " + gSession.getPersonaLabel() +
+                System.err.println("Query: " +
+				   gSession.getPermManager().getIdentity() +
                                    " : completed scanning intratransaction objects");
               }
           }
 
         if (debug)
           {
-            Ganymede.debug("Query: " + gSession.getPersonaLabel() + ", object type " +
+            Ganymede.debug("Query: " +
+			   gSession.getPermManager().getIdentity() + ", object type " +
                            base.getName() + " completed");
           }
 
@@ -1156,7 +1163,7 @@ public class DBQueryEngine {
           }
       }
 
-    if (gSession.isSuperGash())
+    if (gSession.getPermManager().isSuperGash())
       {
         // we'll report it as editable
 
@@ -1164,7 +1171,7 @@ public class DBQueryEngine {
       }
     else
       {
-        perm = gSession.getPerm(obj);
+        perm = gSession.getPermManager().getPerm(obj);
 
         if (perm == null)
           {
@@ -1186,17 +1193,19 @@ public class DBQueryEngine {
       {
         if (perspectiveObject == null)
           {
-            Ganymede.debug("Query: " + gSession.getPersonaLabel() + " : adding element " +
+            Ganymede.debug("Query: " +
+			   gSession.getPermManager().getIdentity() + " : adding element " +
                            obj.getLabel() + ", invid: " + obj.getInvid());
           }
         else
           {
-            Ganymede.debug("Query: " + gSession.getPersonaLabel() + " : adding element " +
+            Ganymede.debug("Query: " +
+			   gSession.getPermManager().getIdentity() + " : adding element " +
                            perspectiveObject.lookupLabel(obj) + ", invid: " + obj.getInvid());
           }
       }
 
-    if (internal || !query.filtered || filterMatch(obj))
+    if (internal || !query.filtered || gSession.getPermManager().filterMatch(obj))
       {
         if (debug)
           {

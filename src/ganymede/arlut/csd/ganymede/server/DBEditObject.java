@@ -1204,31 +1204,12 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     // our default behavior is that objects that can be inactivated
     // should not be deleted except by supergash
 
-    if (this.canBeInactivated())
+    if (this.canBeInactivated() && !session.getGSession().getPermManager().isSuperGash())
       {
-	GanymedeSession myMaster = session.getGSession();
-
-	/* -- */
-
-	if (myMaster == null)
-	  {
-	    // hm, not an end-user.. let it go
-
-	    return null;
-	  }
-
-	// only supergash can delete users.. everyone else can only
-	// inactivate.
-
-	if (myMaster.isSuperGash())
-	  {
-	    return null;
-	  }
-
-	return new ReturnVal(false);
+	return ReturnVal.failure();
       }
 
-    return null;
+    return null;		// success
   }
 
   /**
@@ -1290,7 +1271,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	gSession = (GanymedeSession) session;
 
-	return gSession.getPerm(getTypeID(), true).isCreatable(); // *sync* GanymedeSession
+	return gSession.getPermManager().getPerm(getTypeID(), true).isCreatable(); // *sync* GanymedeSession
       }
 
     // note that we are going ahead and returning false here, as
@@ -1599,7 +1580,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public boolean instantiateNewField(short fieldID)
   {
-    return gSession.getPerm(getTypeID(), fieldID, true).isCreatable(); // *sync* GanymedeSession
+    return gSession.getPermManager().getPerm(getTypeID(), fieldID, true).isCreatable(); // *sync* GanymedeSession
   }
 
   /**
@@ -2658,10 +2639,12 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	    // "{0} {1} has been inactivated.\n\nThe object is due to be removed from the database at {2}.\n\n"
 	    editset.logEvent(new DBLogEvent("inactivateobject",
-					    ts.l("finalizeInactivate.removeSet", getTypeName(), getLabel(), getFieldValueLocal(SchemaConstants.RemovalField).toString()),
-					    (gSession.personaInvid == null ?
-					     gSession.userInvid : gSession.personaInvid),
-					    gSession.getMyUserName(),
+					    ts.l("finalizeInactivate.removeSet",
+						 getTypeName(),
+						 getLabel(),
+						 getFieldValueLocal(SchemaConstants.RemovalField).toString()),
+					    gSession.getPermManager().getIdentityInvid(),
+					    gSession.getPermManager().getIdentity(),
 					    invids,
 					    getEmailTargets(this)));
 	  }
@@ -2674,9 +2657,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	    // "{0} {1} has been inactivated.\n\nThe object has no removal date set.\n\n"
 	    editset.logEvent(new DBLogEvent("inactivateobject",
 					    ts.l("finalizeInactivate.noRemove", getTypeName(), getLabel()),
-					    (gSession.personaInvid == null ?
-					     gSession.userInvid : gSession.personaInvid),
-					    gSession.getMyUserName(),
+					    gSession.getPermManager().getIdentityInvid(),
+					    gSession.getPermManager().getIdentity(),
 					    invids,
 					    getEmailTargets(this)));
 	  }
@@ -2762,9 +2744,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	// "{0} {1} has been reactivated.\n\n"
 	editset.logEvent(new DBLogEvent("reactivateobject",
 					ts.l("finalizeReactivate.message", getTypeName(), getLabel()),
-					(gSession.personaInvid == null ?
-					 gSession.userInvid : gSession.personaInvid),
-					gSession.getMyUserName(),
+					gSession.getPermManager().getIdentityInvid(),
+					gSession.getPermManager().getIdentity(),
 					invids,
 					getEmailTargets(this)));
 
@@ -3222,7 +3203,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
       }
     else
       {
-	if (local || getGSession().getPerm(remobj).isEditable())
+	if (local || getGSession().getPermManager().getPerm(remobj).isEditable())
 	  {
 	    oldRef = (DBEditObject) session.editDBObject(remote);
 	  }

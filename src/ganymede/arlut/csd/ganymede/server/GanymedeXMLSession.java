@@ -1085,7 +1085,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    return false;
 	  }
 
-	if (!session.isSuperGash())
+	if (!session.getPermManager().isSuperGash())
 	  {
 	    // "Skipping <ganyschema> element.. not logged in with supergash privileges."
 	    err.println(ts.l("processSchema.bad_permissions"));

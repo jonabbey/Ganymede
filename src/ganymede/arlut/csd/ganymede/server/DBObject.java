@@ -239,22 +239,27 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   protected PermEntry[] permCacheAry;
 
   /**
-   *
-   * if this object is being edited or removed, this points
+   * If this object is being edited or removed, this points
    * to the DBEditObject copy that is being edited.  If
    * this object is not being edited, this field will be null,
    * and we are available for someone to edit.
-   *
    */
 
   DBEditObject shadowObject;	
 
   /**
-   * if this object is being viewed by a particular
+   * If this object is being viewed by a particular
    * Ganymede Session, we record that here.
    */
 
   protected GanymedeSession gSession;
+
+  /**
+   * If thisobject is being viewed in a particular permissions
+   * context, we record the permManager here.
+   */
+
+  protected DBPermissionManager permManager;
 
   /** 
    * A fixed copy of our Invid, so that we don't have to create
@@ -280,6 +285,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   public DBObject()
   {
     gSession = null;
+    permManager = null;
   }
 
   /**
@@ -304,6 +310,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     myInvid = Invid.createInvid(objectBase.getTypeID(), 0);
     gSession = null;
+    permManager = null;
   }
 
   /**
@@ -319,6 +326,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     this(objectBase);
     myInvid = Invid.createInvid(objectBase.getTypeID(), id);
     gSession = null;
+    permManager = null;
   }
 
   /**
@@ -339,6 +347,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     shadowObject = null;
     receive(in, journalProcessing);
     gSession = null;
+    permManager = null;
 
     DBObject.objectCount++;
   }
@@ -442,6 +451,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       }
 
     gSession = null;
+    permManager = null;
   }
 
   /**
@@ -485,6 +495,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       }
 
     this.gSession = gSession;
+    this.permManager = gSession.getPermManager();
   }
 
   /**
@@ -687,7 +698,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
-    if (gSession == null)
+    if (permManager == null)
       {
 	return PermEntry.fullPerms; // assume supergash if we have no session
       }
@@ -711,11 +722,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (result == null)
       {
-	result = gSession.getPerm(this, fieldcode);
+	result = permManager.getPerm(this, fieldcode);
 
 	if (result == null)
 	  {
-	    result = gSession.getPerm(this);
+	    result = permManager.getPerm(this);
 	  }
       }
 
@@ -846,6 +857,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   /**
    * Get access to the field that serves as this object's label.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public db_field getLabelField()
@@ -856,6 +869,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   /**
    * Get access to the field id for the field that serves as this
    * object's label.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public short getLabelFieldID()
@@ -1644,7 +1659,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @param id The field code for the desired field of this object.
    *
    * @see arlut.csd.ganymede.rmi.db_object
-   *
    */
 
   public final db_field getField(short id)
@@ -1669,6 +1683,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <P>Returns the name of a field from this object.</P>
    *
    * @param id The field code for the desired field of this object.
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final String getFieldName(short id)
@@ -1687,6 +1703,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>This method returns the short field id code for the named
    * field, if the field is present in this object, or -1 if the
    * field could not be found.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final short getFieldId(String fieldname)
@@ -2031,6 +2049,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * client to retrieve a picture representating this object.</p>
    *
    * <p>Intended to be used for users, primarily.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public String getImageURL()
@@ -2163,7 +2183,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     return f.getValueLocal();
   }
-
 
   /**
    * <P>This helper method is for use on the server, so that custom
@@ -2983,13 +3002,15 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>This method calls
    * {@link arlut.csd.ganymede.server.DBObject#appendObjectInfo(java.lang.StringBuffer,
    * java.lang.String, boolean) appendObjectInfo} to do most of its work.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public StringBuffer getSummaryDescription()
   {
     StringBuffer result = new StringBuffer();
 
-    if (gSession != null && !gSession.getPerm(this).isVisible())
+    if (permManager != null && !permManager.getPerm(this).isVisible())
       {
 	return result;
       }

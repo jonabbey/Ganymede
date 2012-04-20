@@ -1622,28 +1622,7 @@ final public class DBSession {
 
   public String getID()
   {
-    String result = "";
-    DBObject obj;
-
-    /* -- */
-
-    obj = GSession.getPersona();
-
-    if (obj != null)
-      {
-	result = obj.getLabel();
-      }
-    else
-      {
-	obj = GSession.getUser();
-
-	if (obj != null)
-	  {
-	    result = obj.getLabel();
-	  }
-      }
-
-    return result;
+    return GSession.getPermManager().getIdentity();
   }
 
   /**

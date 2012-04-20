@@ -604,8 +604,8 @@ public class DBBaseCategory implements Category, CategoryNode {
 		DBObjectBase base = (DBObjectBase) node;
 
 		if (session == null ||
-		    (hideNonEditables && session.getPerm(base.getTypeID(), true).isEditable()) ||
-		    (!hideNonEditables && session.getPerm(base.getTypeID(), true).isVisible()))
+		    (hideNonEditables && session.getPermManager().getPerm(base.getTypeID(), true).isEditable()) ||
+		    (!hideNonEditables && session.getPermManager().getPerm(base.getTypeID(), true).isVisible()))
 		  {
 		    base.addBaseToTransport(transport, session);
 		  }
@@ -660,7 +660,7 @@ public class DBBaseCategory implements Category, CategoryNode {
 	      {
 		DBObjectBase base = (DBObjectBase) node;
 
-		if (session.getPerm(base.getTypeID(), true).isEditable())
+		if (session.getPermManager().getPerm(base.getTypeID(), true).isEditable())
 		  {
 		    result = true;
 		  }
@@ -708,7 +708,7 @@ public class DBBaseCategory implements Category, CategoryNode {
 	      {
 		DBObjectBase base = (DBObjectBase) node;
 
-		if (session.getPerm(base.getTypeID(), true).isVisible())
+		if (session.getPermManager().getPerm(base.getTypeID(), true).isVisible())
 		  {
 		    result = true;
 		  }

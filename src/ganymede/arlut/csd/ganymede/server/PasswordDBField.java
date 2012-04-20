@@ -3193,7 +3193,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
 	    if (cracklibCheck != null)
 	      {
-		if (getFieldDef().hasCracklibCheckException() && getGSession().isSuperGash())
+		if (getFieldDef().hasCracklibCheckException() && getGSession().getPermManager().isSuperGash())
 		  {
 		    // "Password Quality Problem"
 		    // "The password fails quality checking.\nThe checker reported the following problem:\n{0}"
@@ -3223,7 +3223,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
 	    if (previousDate != null)
 	      {
-		if (getFieldDef().hasHistoryCheckException() && getGSession().isSuperGash())
+		if (getFieldDef().hasHistoryCheckException() && getGSession().getPermManager().isSuperGash())
 		  {
 		    // "Password Used Before"
 		    // "This password has been used too recently with this account.\n\nIt was last used with this account at {0, time} on {0, date, full}."

@@ -151,7 +151,7 @@ public class GanymedeValidationTask implements Runnable {
 
 	    base = (DBObjectBase) baseEnum.nextElement();
 
-	    objects = mySession.getObjects(base.getTypeID());
+	    objects = mySession.getSession().getTransactionalObjects(base.getTypeID());
 	    
 	    if (debug)
 	      {
@@ -255,11 +255,6 @@ public class GanymedeValidationTask implements Runnable {
       {
 	// "GanymedeValidationTask interrupted by GanymedeScheduler, validation incomplete."
 	Ganymede.debug(ts.l("run.interrupted_explanation"));
-      }
-    catch (NotLoggedInException ex)
-      {
-	// "Mysterious not logged in exception: {0}"
-	Ganymede.debug(ts.l("run.mysterious_nologin", Ganymede.stackTrace(ex)));
       }
     finally
       {

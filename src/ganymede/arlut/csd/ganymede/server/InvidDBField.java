@@ -1188,7 +1188,7 @@ public final class InvidDBField extends DBField implements invid_field {
           }
         else
           {
-            if (anonymous || getGSession().getPerm(remobj).isEditable())
+            if (anonymous || getGSession().getPermManager().getPerm(remobj).isEditable())
               {
                 oldRef = (DBEditObject) session.editDBObject(oldRemote);
               }
@@ -1360,7 +1360,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-        if (anonymous2 || getGSession().getPerm(remobj).isEditable())
+        if (anonymous2 || getGSession().getPermManager().getPerm(remobj).isEditable())
           {
             newRef = (DBEditObject) session.editDBObject(newRemote);
           }
@@ -1650,7 +1650,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-	if (anonymous || getGSession().getPerm(remobj).isEditable())
+	if (anonymous || getGSession().getPermManager().getPerm(remobj).isEditable())
 	  {
 	    oldRef = (DBEditObject) session.editDBObject(remote);
 

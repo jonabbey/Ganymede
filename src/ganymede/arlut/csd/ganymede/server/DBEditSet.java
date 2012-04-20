@@ -339,7 +339,7 @@ public class DBEditSet {
 	return null;
       }
 
-    return gSession.getPersonaLabel();
+    return gSession.getPermManager().getIdentity();
   }
 
   /**
@@ -1813,14 +1813,8 @@ public class DBEditSet {
 
     if (getGSession() != null)
       {
-	responsibleInvid = getGSession().personaInvid;
-
-	if (responsibleInvid == null)
-	  {
-	    responsibleInvid = getGSession().userInvid;
-	  }
-
-	responsibleName = getGSession().getPersonaLabel();
+	responsibleInvid = getGSession().getPermManager().getIdentityInvid();
+	responsibleName = getGSession().getPermManager().getIdentity();
       }
     else
       {
@@ -2193,13 +2187,8 @@ public class DBEditSet {
 
     if (getGSession() != null)
       {
-	responsibleName = getGSession().getPersonaLabel();
-	responsibleInvid = getGSession().getPersonaInvid();
-
-	if (responsibleInvid == null)
-	  {
-	    responsibleInvid = getGSession().getUserInvid();
-	  }
+	responsibleName = getGSession().getPermManager().getIdentity();
+	responsibleInvid = getGSession().getPermManager().getIdentityInvid();
       }
     else
       {

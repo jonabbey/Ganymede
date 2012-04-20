@@ -202,7 +202,7 @@ public class DumpResultBuilder {
 
 	// make sure we have permission to see this field
 
-	if (owner != null && !owner.getPerm(object, fieldDef.getID()).isVisible())
+	if (owner != null && !owner.getPermManager().getPerm(object, fieldDef.getID()).isVisible())
 	  {
 	    // nope, no permission, just terminate this field and
 	    // continue

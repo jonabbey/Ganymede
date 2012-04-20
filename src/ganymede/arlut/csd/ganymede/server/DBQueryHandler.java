@@ -72,17 +72,17 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class is the query processing engine for the Ganymede database.  Static
- * methods in this class are used to test a query tree against an individual object
- * in the database.</P>
+ * <p>This class is the core query processing engine for the Ganymede
+ * database.  Static methods in this class are used to test a query
+ * tree against an individual object in the database.</p>
  *
- * <P>The {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
+ * <p>The {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
  * {@link arlut.csd.ganymede.server.GanymedeSession#queryDispatch(arlut.csd.ganymede.common.Query,
  * boolean, boolean, arlut.csd.ganymede.server.DBLock, arlut.csd.ganymede.server.DBEditObject)
  * queryDispatch()}
  * method contains most of the query engine's
  * logic (including namespace-indexed query optimization).  This class is just
- * responsible for applying a recursive QueryNode tree to a particular object.</P>
+ * responsible for applying a recursive QueryNode tree to a particular object.</p>
  *
  * @see arlut.csd.ganymede.common.QueryNode
  * @see arlut.csd.ganymede.common.Query
@@ -236,7 +236,7 @@ public class DBQueryHandler {
 		    // link, rather than chase it into a
 		    // NullPointerException.
 
-		    if (derefObj == null || !session.getPerm(derefObj).isVisible())
+		    if (derefObj == null || !session.getPermManager().getPerm(derefObj).isVisible())
 		      {
 			continue;
 		      }
@@ -259,7 +259,7 @@ public class DBQueryHandler {
 		//
 		// as above
 
-		if (derefObj == null || !session.getPerm(derefObj).isVisible())
+		if (derefObj == null || !session.getPermManager().getPerm(derefObj).isVisible())
 		  {
 		    return false;
 		  }
