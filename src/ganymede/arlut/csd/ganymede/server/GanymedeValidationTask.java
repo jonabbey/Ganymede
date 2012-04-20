@@ -4,17 +4,19 @@
 
    This class goes through all objects in the database and checks to
    make sure all required fields are set in all objects.
-   
+
    Created: 26 January 1999
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
