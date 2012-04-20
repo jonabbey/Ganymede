@@ -524,52 +524,6 @@ public class DBQueryEngine {
   }
 
   /**
-   * <p>This method applies this GanymedeSession's current owner filter
-   * to the given QueryResult &lt;qr&gt; and returns a QueryResult
-   * with any object handles that are not matched by the filter
-   * stripped.</p>
-   *
-   * <p>If the submitted QueryResult &lt;qr&gt; is null, filterQueryResult()
-   * will itself return null.</p>
-   *
-   * <p>NB: This method requires no external synchronization</p>
-   */
-
-  public QueryResult filterQueryResult(QueryResult qr)
-  {
-    if (qr == null)
-      {
-        return null;
-      }
-
-    QueryResult result = new QueryResult(qr.isForTransport());
-    ObjectHandle handle;
-
-    /* -- */
-
-    Vector handles = qr.getHandles();
-
-    for (int i = 0; i < handles.size(); i++)
-      {
-        handle = (ObjectHandle) handles.elementAt(i);
-
-        Invid invid = handle.getInvid();
-
-        if (invid != null)
-          {
-            DBObject obj = session.viewDBObject(invid);
-
-            if (filterMatch(obj))
-              {
-                result.addRow(handle);
-              }
-          }
-      }
-
-    return result;
-  }
-
-  /**
    * <p>This method provides the hook for doing all manner of simple
    * object listing for the Ganymede database.</p>
    *
@@ -1244,67 +1198,5 @@ public class DBQueryEngine {
                           perm.isEditable());
           }
       }
-  }
-
-  /**
-   * <p>This method returns true if the visibility filter vector allows
-   * visibility of the object in question.  The visibility vector
-   * works by direct ownership identity (i.e., no recursing up), so
-   * it's a simple loop-di-loop.</p>
-   */
-
-  private boolean filterMatch(DBObject obj)
-  {
-    Vector owners;
-    InvidDBField inf;
-    Invid tmpInvid;
-
-    /* -- */
-
-    if (obj == null)
-      {
-        return false;
-      }
-
-    if (gSession.visibilityFilterInvids == null || gSession.visibilityFilterInvids.size() == 0)
-      {
-        return true;            // no visibility restriction, go for it
-      }
-
-    inf = (InvidDBField) obj.getField(SchemaConstants.OwnerListField);
-
-    if (inf == null)
-      {
-        return false;   // we have a restriction, but the object is only owned by supergash.. nope.
-      }
-
-    owners = inf.getValuesLocal();
-
-    // *** Caution!  getValuesLocal() does not clone the field's contents..
-    //
-    // DO NOT modify owners here!
-
-    if (owners == null)
-      {
-        return false;   // we shouldn't get here, but we don't really care either
-      }
-
-    // we've got the owners for this object.. now, is there any match between our
-    // visibilityFilterInvids and the owners of this object?
-
-    for (int i = 0; i < gSession.visibilityFilterInvids.size(); i++)
-      {
-        tmpInvid = (Invid) gSession.visibilityFilterInvids.elementAt(i);
-
-        for (int j = 0; j < owners.size(); j++)
-          {
-            if (tmpInvid.equals((Invid)owners.elementAt(j)))
-              {
-                return true;
-              }
-          }
-      }
-
-    return false;
   }
 }
