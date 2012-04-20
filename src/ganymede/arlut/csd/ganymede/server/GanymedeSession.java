@@ -1452,15 +1452,6 @@ final public class GanymedeSession implements Session, Unreferenced {
 	  {
 	    System.err.println("getCategoryTree(): generated custom category tree");
 	  }
-
-	if (false)
-	  {
-	    System.err.println("%%% Printing PersonaPerms");
-	    PermissionMatrixDBField.debugdump(personaPerms);
-
-	    System.err.println("%%% Printing DefaultPerms");
-	    PermissionMatrixDBField.debugdump(defaultPerms);
-	  }
 	
 	return transport;
       }
