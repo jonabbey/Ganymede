@@ -1248,7 +1248,7 @@ final public class DBSession {
       {
 	try
 	  {
-	    throw new RuntimeException(ts.l("getObjects.no_base", Integer.valueOf(baseid)));
+	    throw new RuntimeException(ts.l("getTransactionalObjects.no_base", Integer.valueOf(baseid)));
 	  }
 	catch (RuntimeException ex)
 	  {
