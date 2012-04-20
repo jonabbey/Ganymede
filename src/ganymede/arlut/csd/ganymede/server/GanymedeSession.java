@@ -1741,60 +1741,15 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   //  Database operations
 
-  /**
-   * <p>This method returns a list of remote references to the
-   * Ganymede object type definitions.  This method will throws a
-   * RuntimeException if it is called when the server is in
-   * schemaEditMode.</p>
    *
-   * @deprecated Superseded by the more efficient getBaseList()
-   * 
    * @see arlut.csd.ganymede.rmi.Session
    */
 
-  public Vector getTypes() throws NotLoggedInException
   {
     checklogin();
 
-    /* - */
-
-    Enumeration en;
-    Vector result = new Vector();
-
-    /* -- */
-
-    en = Ganymede.db.objectBases.elements();
-
-    while (en.hasMoreElements())
-      {
-	DBObjectBase base = (DBObjectBase) en.nextElement();
-	
-	if (getPerm(base.getTypeID(), true).isVisible())
-	  {
-	    result.addElement(base);
-	  }
-      }
-
-    return result;
   }
 
-  /**
-   * <p>Returns the root of the category tree on the server</p>
-   *
-   * @deprecated Superseded by the more efficient getCategoryTree()
-   *
-   * @see arlut.csd.ganymede.rmi.Category
-   * @see arlut.csd.ganymede.rmi.Session
-   */
-
-  public Category getRootCategory() throws NotLoggedInException
-  {
-    checklogin();
-
-    /* - */
-
-    return Ganymede.db.rootCategory;
-  }
 
   /**
    * <p>Returns a serialized representation of the basic category and

@@ -242,34 +242,11 @@ public interface Session extends Remote {
    * <p>Calling this method with ownerInvids set to null will turn off the filtering.</p>
    *
    * @param ownerInvids a Vector of Invid objects pointing to ownergroup objects.
-   *
    */
 
   ReturnVal        filterQueries(Vector ownerInvids) throws RemoteException;
 
   //  Database operations
-
-  /**
-   * <p>List types of objects stored and manipulated through the Ganymede server.</p>
-   *
-   * <p>This method returns a vector of Base remote references.</p>
-   *
-   * @deprecated Superseded by the more efficient getBaseList()
-   *
-   * @see arlut.csd.ganymede.rmi.Base
-   */
-
-  Vector      getTypes() throws RemoteException;
-
-  /**
-   * <p>Returns the root of the category tree on the server</p>
-   *
-   * @deprecated Superseded by the more efficient getCategoryTree()
-   *
-   * @see arlut.csd.ganymede.rmi.Category
-   */
-
-  Category    getRootCategory() throws RemoteException;
 
   /**
    * <p>Returns a serialized representation of the basic category
