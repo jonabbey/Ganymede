@@ -65,8 +65,11 @@ import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.BaseListTransport;
 import arlut.csd.ganymede.common.CategoryTransport;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.ObjectHandle;
 import arlut.csd.ganymede.common.PermEntry;
 import arlut.csd.ganymede.common.PermMatrix;
+import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.Result;
 import arlut.csd.ganymede.common.ReturnVal;
@@ -215,7 +218,7 @@ public class DBPermissionManager {
    * defaultPerms}.</p>
    */
 
-  private PermMatrix personaPerms;
+  PermMatrix personaPerms;
 
   /**
    * <p>This variable stores the permission bits that are applicable
@@ -230,7 +233,7 @@ public class DBPermissionManager {
    * that apply to the current persona.</p>
    */
 
-  private PermMatrix defaultPerms;
+  PermMatrix defaultPerms;
 
   /**
    * <p>This variable stores the permission bits that are applicable
@@ -242,7 +245,7 @@ public class DBPermissionManager {
    * delegatableDefaultPerms}.</p>
    */
 
-  private PermMatrix delegatablePersonaPerms;
+  PermMatrix delegatablePersonaPerms;
 
   /**
    * <p>This variable stores the permission bits that are applicable to
@@ -259,7 +262,7 @@ public class DBPermissionManager {
    * that apply to the current persona.</p>
    */
 
-  private PermMatrix delegatableDefaultPerms;
+  PermMatrix delegatableDefaultPerms;
 
   /**
    * <p>A reference to the Ganymede {@link
@@ -306,7 +309,52 @@ public class DBPermissionManager {
     setSession(gSession.getSession());
   }
 
-  public void setSession(DBSession session)
+  public DBPermissionManager configureInternalSession(String sessionLabel)
+  {
+    sessionName = sessionLabel;
+    username = sessionLabel;
+
+    supergashMode = true;
+    beforeversupergash = true;
+
+    updatePerms(true);
+
+    return this;
+  }
+
+  public DBPermissionManager configureClientSession(String loginName, DBObject userObject, DBObject personaObject)
+  {
+    if (userObject != null)
+      {
+	userInvid = userObject.getInvid();
+	username = userObject.getLabel();
+      }
+    else
+      {
+	userInvid = null;
+      }
+
+    if (personaObject != null)
+      {
+	personaInvid = personaObject.getInvid();
+	personaName = personaObject.getLabel();
+
+	if (username == null)
+	  {
+	    username = personaName; // for supergash, monitor
+	  }
+      }
+    else
+      {
+	personaInvid = null;	// shouldn't happen
+      }
+
+    updatePerms(true);
+
+    return this;
+  }
+
+  private void setSession(DBSession session)
   {
     this.session = session;
   }
@@ -317,6 +365,26 @@ public class DBPermissionManager {
   }
 
   /**
+   * Returns true if the session has any kind of privileges beyond the
+   * default end-user privileges.
+   */
+
+  public boolean isPrivileged()
+  {
+    return personaName != null || isSuperGash();
+  }
+
+  /**
+   * Returns true if the session is a standard user with currently
+   * elevated privileges.
+   */
+
+  public boolean isElevated()
+  {
+    return userInvid != null;
+  }
+
+  /**
    * <p>This method returns the name of the user that is logged into
    * this session.</p>
    *
@@ -324,9 +392,69 @@ public class DBPermissionManager {
    * well, even though technically supergash isn't a user.</p>
    */
 
-  public String getMyUserName()
+  public String getUserName()
   {
-    return this.username;
+    return username;
+  }
+
+  /**
+   * <p>Convenience method to get access to this session's user invid.</p>
+   */
+
+  public Invid getUserInvid()
+  {
+    return userInvid;
+  }
+
+  /**
+   * <p>Convenience method to get access to this session's UserBase
+   * instance.</p>
+   */
+
+  public DBObject getUser()
+  {
+    if (userInvid != null)
+      {
+	// okay to use session.viewDBObject() here, because getUser()
+	// is only used for internal purposes, and we don't need or
+	// want to do permissions checking
+
+	return session.viewDBObject(userInvid);
+      }
+
+    return null;
+  }
+
+  /**
+   * <p>This method returns the name of the persona who is active.
+   * May be null or empty if we have an end-user who is logged in with
+   * no elevated persona privileges.</p>
+   */
+
+  public String getPersonaName()
+  {
+    return personaName;
+  }
+
+  /**
+   * <p>Convenience method to get access to this session's persona invid.</p>
+   */
+
+  public Invid getPersonaInvid()
+  {
+    return personaInvid;
+  }
+
+  /**
+   * <p>This method gives access to the DBObject for the administrator's
+   * persona record, if any.  This is used by
+   * {@link arlut.csd.ganymede.server.DBSession DBSession} to get the
+   * label for the administrator for record keeping.</p>
+   */
+
+  public DBObject getPersona()
+  {
+    return personaObj;
   }
 
   /**
@@ -334,7 +462,7 @@ public class DBPermissionManager {
    * raw user name if no persona privileges have been assumed.</p>
    */
 
-  public String getPersonaLabel()
+  public String getIdentity()
   {
     if (personaName == null || personaName.equals(""))
       {
@@ -344,6 +472,22 @@ public class DBPermissionManager {
       {
         return personaName;
       }
+  }
+
+  /**
+   * <p>This method returns the Invid of the user who logged in, or
+   * the non-user-linked persona (supergash, monitor) if there was no
+   * underlying user attached to the persona.</p>
+   */
+
+  public Invid getIdentityInvid()
+  {
+    if (userInvid != null)
+      {
+	return userInvid;
+      }
+
+    return personaInvid;
   }
 
   /**
@@ -408,6 +552,8 @@ public class DBPermissionManager {
 	    returnAddr += mailsuffix;
 	  }
       }
+
+    return returnAddr;
   }
 
   /**
@@ -415,7 +561,7 @@ public class DBPermissionManager {
    * user logged in.</p>
    */
 
-  public Vector getPersonae()
+  public Vector getAvailablePersonae()
   {
     DBObject user;
     Vector results;
@@ -456,16 +602,6 @@ public class DBPermissionManager {
     results.addElement(user.getLabel()); // add their 'end-user' persona
 
     return results;
-  }
-
-  /**
-   * <p>This method returns the persona name for the user, or null if
-   * the session is non-privileged.</p>
-   */
-
-  public synchronized String getActivePersonaName()
-  {
-    return personaName;
   }
 
   /**
@@ -519,22 +655,32 @@ public class DBPermissionManager {
 
 	    // close the existing transaction
 
-	    abortTransaction();
+	    try
+	      {
+		gSession.abortTransaction();
 
-	    // open a new one with the same description and
-	    // interactivity
+		// open a new one with the same description and
+		// interactivity
 
-	    openTransaction(description, interactive);
+		gSession.openTransaction(description, interactive);
+	      }
+	    catch (NotLoggedInException ex)
+	      {
+		throw new RuntimeException(ex);
+	      }
 	  }
 
 	personaObject = null;
 	this.personaInvid = null;
 	this.personaName = null;
-	updatePerms(true);
 	this.visibilityFilterInvids = null;
-	this.userInfo = null;	// null our admin console cache
 	this.username = user.getLabel(); // in case they logged in directly as an admin account
-	setLastEvent("selectPersona: " + newPersona);
+
+	updatePerms(true);
+
+	gSession.userInfo = null;	// null our admin console cache
+	gSession.setLastEvent("selectPersona: " + newPersona);
+
 	return true;
       }
 
@@ -580,11 +726,6 @@ public class DBPermissionManager {
 
 	this.personaName = personaObject.getLabel();
 
-	if (timedout)
-	  {
-	    timedout = false;
-	  }
-
 	// the GUI client will close transactions first, but since we
 	// might not be working on behalf of the GUI client, let's
 	// make sure
@@ -594,22 +735,31 @@ public class DBPermissionManager {
 	    String description = session.editSet.description;
 	    boolean interactive = session.editSet.isInteractive();
 
-	    // close the existing transaction
+	    try
+	      {
+		// close the existing transaction
 
-	    abortTransaction();
+		gSession.abortTransaction();
 
-	    // open a new one with the same description and
-	    // interactivity
+		// open a new one with the same description and
+		// interactivity
 
-	    openTransaction(description, interactive);
+		gSession.openTransaction(description, interactive);
+	      }
+	    catch (NotLoggedInException ex)
+	      {
+		throw new RuntimeException(ex);
+	      }
 	  }
 
 	this.personaInvid = personaObject.getInvid();
-	updatePerms(true);
-	this.userInfo = null;	// null our admin console cache
 	this.username = user.getLabel(); // in case they logged in directly as an admin account
 	this.visibilityFilterInvids = null;
-	setLastEvent("selectPersona: " + newPersona);
+
+	updatePerms(true);
+
+	gSession.userInfo = null;	// null our admin console cache
+	gSession.setLastEvent("selectPersona: " + newPersona);
 	return true;
       }
 
@@ -623,12 +773,9 @@ public class DBPermissionManager {
    * is, the list includes all the owner groups in the current persona
    * along with all of the owner groups those owner groups own, and so
    * on.</p>
-   *
-   * <p>NB: GanymedeSession methods which call getOwnerGroups() should
-   * synchronize on GanymedeSession.</p>
    */
 
-  public QueryResult getOwnerGroups()
+  public QueryResult getAvailableOwnerGroups()
   {
     Query q;
     QueryResult result = new QueryResult();
@@ -638,7 +785,7 @@ public class DBPermissionManager {
 
     /* -- */
 
-    if (gSession.getPersonaInvid() == null)
+    if (!isPrivileged())
       {
         return result;          // End users don't have any owner group access
       }
@@ -646,11 +793,18 @@ public class DBPermissionManager {
     q = new Query(SchemaConstants.OwnerBase);
     q.setFiltered(false);
 
-    fullOwnerList = query(q);
+    try
+      {
+	fullOwnerList = gSession.query(q);
+      }
+    catch (NotLoggedInException ex)
+      {
+	throw new RuntimeException(ex);
+      }
 
     // if we're in supergash mode, return a complete list of owner groups
 
-    if (gSession.isSuperGash())
+    if (isSuperGash())
       {
         return fullOwnerList;
       }
@@ -738,8 +892,56 @@ public class DBPermissionManager {
     else
       {
 	newObjectOwnerInvids = tmpInvids;
-	setLastEvent("setDefaultOwner");
+	gSession.setLastEvent("setDefaultOwner");
 	return null;
+      }
+  }
+
+  /**
+   * <p>Returns a Vector of Invids of the owner groups that should be
+   * made owners of a newly created object by the GanymedeSession
+   * owned by this DBPermissionManager.</p>
+   *
+   * <p>If an admin has authority over more than one owner group and
+   * they have not previously specified the collection of owner groups
+   * that they want to assign to new objects, we'll just pick the
+   * first one in the list.</p>
+   */
+
+  public Vector<Invid> getNewOwnerInvids()
+  {
+    if (newObjectOwnerInvids != null)
+      {
+	return newObjectOwnerInvids;
+      }
+    else
+      {
+	Vector<Invid> ownerInvids = new Vector<Invid>();
+
+	// supergash is allowed to create objects with no owners,
+	// so we won't worry about what supergash might try to do.
+
+	if (!isSuperGash())
+	  {
+	    QueryResult ownerList = getAvailableOwnerGroups();
+
+	    if (ownerList.size() > 0)
+	      {
+		// If we're interactive, the client really should hav
+		// helped us out by prompting the user for their
+		// preferred default owner list, but if we are talking
+		// to a custom client, this might not be the case, in
+		// which case we'll just pick the first owner group we
+		// can put it into and put it there.
+		//
+		// The client can always manually set the owner group
+		// in a created object after we return it, of course.
+
+		ownerInvids.addElement(ownerList.getInvid(0));
+	      }
+	  }
+
+	return ownerInvids;
       }
   }
 
@@ -780,43 +982,12 @@ public class DBPermissionManager {
     else
       {
 	visibilityFilterInvids = ownerInvids;
-	setLastEvent("filterQueries");
+	gSession.setLastEvent("filterQueries");
 	return null;
       }
   }
 
   //  Database operations
-
-  /**
-   * <p>This method returns a list of remote references to the
-   * Ganymede object type definitions.  This method will throws a
-   * RuntimeException if it is called when the server is in
-   * schemaEditMode.</p>
-   *
-   * @deprecated Superseded by the more efficient getBaseList()
-   */
-
-  public Vector getTypes()
-  {
-    Enumeration en;
-    Vector result = new Vector();
-
-    /* -- */
-
-    en = Ganymede.db.objectBases.elements();
-
-    while (en.hasMoreElements())
-      {
-	DBObjectBase base = (DBObjectBase) en.nextElement();
-
-	if (getPerm(base.getTypeID(), true).isVisible())
-	  {
-	    result.addElement(base);
-	  }
-      }
-
-    return result;
-  }
 
   /**
    * <p>Returns a serialized representation of the basic category
@@ -861,7 +1032,7 @@ public class DBPermissionManager {
       {
 	// not in supergash mode.. download a subset of the category tree to the user
 
-	CategoryTransport transport = Ganymede.db.rootCategory.getTransport(this, hideNonEditables);
+	CategoryTransport transport = Ganymede.db.rootCategory.getTransport(gSession, hideNonEditables);
 
 	if (debug)
 	  {
@@ -954,7 +1125,7 @@ public class DBPermissionManager {
 	    while (bases.hasMoreElements())
 	      {
 		base = (DBObjectBase) bases.nextElement();
-		base.addBaseToTransport(transport, this);
+		base.addBaseToTransport(transport, gSession);
 	      }
 	  }
 
@@ -963,55 +1134,49 @@ public class DBPermissionManager {
   }
 
   /**
-   * <p>This method applies this DBPermissionManager's current owner filter
+   * <p>This method applies this GanymedeSession's current owner filter
    * to the given QueryResult &lt;qr&gt; and returns a QueryResult
    * with any object handles that are not matched by the filter
    * stripped.</p>
    *
    * <p>If the submitted QueryResult &lt;qr&gt; is null, filterQueryResult()
    * will itself return null.</p>
+   *
+   * <p>NB: This method requires no external synchronization</p>
    */
 
   public QueryResult filterQueryResult(QueryResult qr)
   {
-    return queryEngine.filterQueryResult(qr);
-  }
-
-  /**
-   * <p>Convenience method to get access to this session's UserBase
-   * instance.</p>
-   */
-
-  public DBObject getUser()
-  {
-    if (userInvid != null)
+    if (qr == null)
       {
-	// okay to use session.viewDBObject() here, because getUser()
-	// is only used for internal purposes, and we don't need or
-	// want to do permissions checking
-
-	return session.viewDBObject(userInvid);
+        return null;
       }
 
-    return null;
-  }
+    QueryResult result = new QueryResult(qr.isForTransport());
+    ObjectHandle handle;
 
-  /**
-   * <p>Convenience method to get access to this session's user invid.</p>
-   */
+    /* -- */
 
-  public Invid getUserInvid()
-  {
-    return userInvid;
-  }
+    Vector handles = qr.getHandles();
 
-  /**
-   * <p>Convenience method to get access to this session's persona invid.</p>
-   */
+    for (int i = 0; i < handles.size(); i++)
+      {
+        handle = (ObjectHandle) handles.elementAt(i);
 
-  public Invid getPersonaInvid()
-  {
-    return personaInvid;
+        Invid invid = handle.getInvid();
+
+        if (invid != null)
+          {
+            DBObject obj = session.viewDBObject(invid);
+
+            if (filterMatch(obj))
+              {
+                result.addRow(handle);
+              }
+          }
+      }
+
+    return result;
   }
 
   // **
@@ -1066,7 +1231,7 @@ public class DBPermissionManager {
 
     // does this object type have an override?
 
-    result = object.getBase().getObjectHook().permOverride(this, object);
+    result = object.getBase().getObjectHook().permOverride(gSession, object);
 
     if (result != null)
       {
@@ -1080,7 +1245,7 @@ public class DBPermissionManager {
 
     // no override.. do we have an expansion?
 
-    result = object.getBase().getObjectHook().permExpand(this, object);
+    result = object.getBase().getObjectHook().permExpand(gSession, object);
 
     if (result == null)
       {
@@ -1102,7 +1267,7 @@ public class DBPermissionManager {
     // whether the custom logic for this object type wants to grant
     // ownership of this object.
 
-    if (!useSelfPerm && object.getBase().getObjectHook().grantOwnership(this, object))
+    if (!useSelfPerm && object.getBase().getObjectHook().grantOwnership(gSession, object))
       {
 	if (doDebug)
 	  {
@@ -1240,18 +1405,18 @@ public class DBPermissionManager {
     // custom plug-in class.. all of these objectHook calls will
     // return null if there is no customization
 
-    overrideFieldPerm = objectHook.permOverride(this, object, fieldId);
+    overrideFieldPerm = objectHook.permOverride(gSession, object, fieldId);
 
     if (overrideFieldPerm == null)
       {
-	expandFieldPerm = objectHook.permExpand(this, object, fieldId);
+	expandFieldPerm = objectHook.permExpand(gSession, object, fieldId);
       }
 
-    overrideObjPerm = objectHook.permOverride(this, object);
+    overrideObjPerm = objectHook.permOverride(gSession, object);
 
     if (overrideObjPerm == null)
       {
-	expandObjPerm = objectHook.permExpand(this, object);
+	expandObjPerm = objectHook.permExpand(gSession, object);
       }
 
     // make sure we have personaPerms up to date
@@ -1263,8 +1428,8 @@ public class DBPermissionManager {
     DBObject containingObj = getContainingObj(object);
 
     if ((userInvid != null && userInvid.equals(containingObj.getInvid())) ||
-	objectHook.grantOwnership(this, object) ||
-	objectHook.grantOwnership(this, containingObj) ||
+	objectHook.grantOwnership(gSession, object) ||
+	objectHook.grantOwnership(gSession, containingObj) ||
 	personaMatch(containingObj))
       {
 	if (permsdebug)
@@ -1979,18 +2144,6 @@ public class DBPermissionManager {
   }
 
   /**
-   * <p>This method gives access to the DBObject for the administrator's
-   * persona record, if any.  This is used by
-   * {@link arlut.csd.ganymede.server.DBSession DBSession} to get the
-   * label for the administrator for record keeping.</p>
-   */
-
-  public DBObject getPersona()
-  {
-    return personaObj;
-  }
-
-  /**
    * <p>Recursive helper method for personaMatch.. this method does a
    * depth first search up the owner tree for each Invid contained in
    * the invids Vector to see if the gSession's personaInvid is a
@@ -2064,7 +2217,7 @@ public class DBPermissionManager {
 
     if (inf != null)
       {
-        if (inf.getValuesLocal().contains(gSession.getPersonaInvid()))
+        if (inf.getValuesLocal().contains(getPersonaInvid()))
           {
             return true;
           }
@@ -2191,7 +2344,7 @@ public class DBPermissionManager {
 	  }
       }
 
-    boolean result = queryEngine.recursePersonasMatch(owners, new Vector());
+    boolean result = recursePersonasMatch(owners, new Vector());
 
     if (showit)
       {
@@ -2261,7 +2414,7 @@ public class DBPermissionManager {
 		// owners value passed in.  Otherwise, we'd have to
 		// clone the results from getValuesLocal().
 
-		if (queryEngine.recursePersonasMatch(inf.getValuesLocal(), new Vector()))
+		if (recursePersonasMatch(inf.getValuesLocal(), new Vector()))
 		  {
 		    found = true;
 		  }
@@ -2284,7 +2437,7 @@ public class DBPermissionManager {
    * up), so it's a simple loop-di-loop.</p>
    */
 
-  private boolean filterMatch(DBObject obj)
+  public boolean filterMatch(DBObject obj)
   {
     Vector owners;
     InvidDBField inf;
