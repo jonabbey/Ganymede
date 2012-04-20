@@ -144,6 +144,17 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
+   * static factory method for returning a ReturnVal indicating simple
+   * failure.  Because setter methods may be made on the ReturnVal
+   * that we return, we'll create a new one each time.
+   */
+
+  static final public ReturnVal failure()
+  {
+    return new ReturnVal(false);
+  }
+
+  /**
    * Simple static helper method that Ganymede code can use to verify
    * that a ReturnVal-returning operation did succeed.
    */
