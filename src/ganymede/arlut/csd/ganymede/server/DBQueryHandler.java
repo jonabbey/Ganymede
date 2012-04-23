@@ -483,11 +483,6 @@ public class DBQueryHandler {
 		  {
 		    i1 = (Invid) n.value;
 
-		    if (i1 == null)
-		      {
-			return false;
-		      }
-
 		    if (n.arrayOp == QueryDataNode.NONE)
 		      {
 			if (debug)
