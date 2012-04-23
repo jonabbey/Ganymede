@@ -536,7 +536,7 @@ public class StringDialog extends StandardDialog implements ActionListener, Wind
 		  }
 		else
 		  {
-		    currentDate = null;
+		    throw new NullPointerException();
 		  }
 	      }
 
