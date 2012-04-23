@@ -489,7 +489,7 @@ public class DBLog {
 	  }
 	else
 	  {
-	    // "DBLog.mailNotify(): Skipping mailout event ({0}) due to mail being disabled at startup."
+	    // "DBLog.mailNotify(): Skipping logging mailout event ({0}) to disk due to mail logging being disabled at startup."
 	    Ganymede.debug(ts.l("mailNotify.no_mail", title));
 	  }
       }
