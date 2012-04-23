@@ -2979,8 +2979,6 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     DBObject newObj;
     ReturnVal retVal = null;
-    QueryResult ownerList = null;
-    boolean randomOwner = false;
     Vector ownerInvids = null;
 
     /* -- */
@@ -3052,19 +3050,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     setLastEvent("create " + newObj.getTypeName());
 
-    if (randomOwner)
-      {
-        // "Warning, picked an Owner Group at random"
-        // "Warning: randomly selected owner group {1} to place new {0} object in."
-        retVal = Ganymede.createInfoDialog(ts.l("create_db_object.random"),
-                                           ts.l("create_db_object.random_text",
-                                                newObj.getTypeName(),
-                                                viewObjectLabel(ownerList.getInvid(0))));
-      }
-    else
-      {
-        retVal = new ReturnVal(true);
-      }
+    retVal = ReturnVal.success();
 
     if (this.exportObjects)
       {
