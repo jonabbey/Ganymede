@@ -405,7 +405,7 @@ public class FileOps {
 
         List resultList = new ArrayList(3);
 
-        resultList.add(new Integer(result_code));
+        resultList.add(Integer.valueOf(result_code));
         resultList.add(stdoutBuffer.toString());
         resultList.add(stderrBuffer.toString());
 
