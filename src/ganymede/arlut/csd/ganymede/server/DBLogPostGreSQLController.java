@@ -568,14 +568,17 @@ public class DBLogPostGreSQLController implements DBLogController {
       {
         try
           {
-            rs.close();
+	    if (rs != null)
+	      {
+		rs.close();
 
-            Statement st = rs.getStatement();
+		Statement st = rs.getStatement();
 
-            if (st != null)
-              {
-                st.close();
-              }
+		if (st != null)
+		  {
+		    st.close();
+		  }
+	      }
           }
         catch (SQLException ex)
           {
