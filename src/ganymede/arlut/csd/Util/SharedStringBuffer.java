@@ -337,7 +337,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
   {
     if (str == null) 
       {
-	str = String.valueOf(str);
+	str = String.valueOf(str); // It's okay FindBugs, we're changing to "null"
       }
 
     int len = str.length();
