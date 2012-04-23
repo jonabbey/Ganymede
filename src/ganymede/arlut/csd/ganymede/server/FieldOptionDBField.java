@@ -823,18 +823,9 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     for (Map.Entry<String, SyncPrefEnum> entry: matrix.entrySet())
       {
-	if (isBase(entry.getKey()))
-	  {	
-	    result.append(decodeBaseName(entry.getKey()) + " " + decodeFieldName(entry.getKey()) +
-			  " -- " + entry.getValue());
-	    result.append("\n");
-	  }
-	else
-	  {
-	    result.append(decodeBaseName(entry.getKey()) + " " + decodeFieldName(entry.getKey()) +
-			  " -- " + entry.getValue());
-	    result.append("\n");
-	  }
+	result.append(decodeBaseName(entry.getKey()) + " " + decodeFieldName(entry.getKey()) +
+		      " -- " + entry.getValue());
+	result.append("\n");
       }
 
     return result.toString();
