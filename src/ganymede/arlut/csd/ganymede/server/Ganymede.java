@@ -170,7 +170,7 @@ public class Ganymede {
    * the Ganymede server.</p>
    */
 
-  static public TranslationService ts =
+  static final public TranslationService ts =
     TranslationService.getTranslationService("arlut.csd.ganymede.server.Ganymede");
 
   /**
