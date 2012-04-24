@@ -402,21 +402,13 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public GanymedeSession(String sessionLabel) throws RemoteException
   {
-    // handle the server login semaphore for this session
-
-    // if we are attempting to start a builder session, we'll proceed
-    // even if the server is waiting to handle a deferred shutdown.
-
-    // otherwise, if we are not starting one of the master internal
-    // sessions (either Ganymede.internalSession or
-    // GanymedeServer.loginSession), we'll want to increment the login
-    // semaphore to make sure we are allowing logins and to keep the
-    // server up to date
-
-    String disabledMessage = GanymedeServer.lSemaphore.checkEnabled();
-
     if (sessionLabel.startsWith("builder:"))
       {
+	// if we are attempting to start a builder session, we'll proceed
+	// even if the server is waiting to handle a deferred shutdown.
+
+	String disabledMessage = GanymedeServer.lSemaphore.checkEnabled();
+
 	if (disabledMessage != null && !disabledMessage.equals("shutdown"))
 	  {
 	    // "Couldn''t create {0} GanymedeSession.. semaphore disabled: {1}"
@@ -428,6 +420,12 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
     else if (!sessionLabel.equals("internal"))
       {
+	// otherwise, if we are not starting one of the master internal
+	// sessions (either Ganymede.internalSession or
+	// GanymedeServer.loginSession), we'll want to increment the login
+	// semaphore to make sure we are allowing logins and to keep the
+	// server up to date
+
         String error = GanymedeServer.lSemaphore.increment();
 
         if (error != null)
