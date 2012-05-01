@@ -16,8 +16,10 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -494,7 +496,7 @@ public class GanymedeServer implements Server {
 							      directSession, clientIsRemote);
 
 		// "{0} logged in from {1}"
-		Ganymede.debug(ts.l("processLogin.loggedin", session.getMyUserName(), session.clienthost));
+		Ganymede.debug(ts.l("processLogin.loggedin", session.getMyUserName(), session.getClientHostName()));
 
 		Vector objects = new Vector();
 
@@ -510,7 +512,7 @@ public class GanymedeServer implements Server {
 		if (Ganymede.log != null)
 		  {
 		    Ganymede.log.logSystemEvent(new DBLogEvent("normallogin",
-							       ts.l("processLogin.logevent", clientName, session.clienthost),
+							       ts.l("processLogin.logevent", clientName, session.getClientHostName()),
 							       null,
 							       clientName,
 							       objects,

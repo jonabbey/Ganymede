@@ -220,13 +220,13 @@ final public class GanymedeSession implements Session, Unreferenced {
    * non-privileged username
    */
 
-  boolean timedout = false;
+  private boolean timedout = false;
 
   /**
    * A count of how many objects this session has currently checked out.
    */
 
-  int objectsCheckedOut = 0;
+  private int objectsCheckedOut = 0;
 
   /**
    * This variable tracks whether or not the client desires to have
@@ -254,7 +254,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * by the admin console code.
    */
 
-  Date connecttime;
+  private Date connecttime;
 
   /** 
    * The time of the user's last top-level operation.. Used to
@@ -281,7 +281,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * The DNS name for the client's host
    */
 
-  String clienthost;
+  private String clienthost;
 
   /**
    * The current status message for this client.  The 

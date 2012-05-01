@@ -1225,7 +1225,7 @@ public final class InvidDBField extends DBField implements invid_field {
                     if (editing.gSession != null)
                       {
                         edit_username = editing.gSession.getMyUserName();
-                        edit_hostname = editing.gSession.clienthost;
+                        edit_hostname = editing.gSession.getClientHostName();
 
                         // "InvidDBField.bind(): Couldn''t unlink from old reference"
                         // "Field {0} could not be unlinked from the {1} {2} object, which is busy being edited by {3} on system {4}"
@@ -1393,7 +1393,7 @@ public final class InvidDBField extends DBField implements invid_field {
                 if (editing.gSession != null)
                   {
                     edit_username = editing.gSession.getMyUserName();
-                    edit_hostname = editing.gSession.clienthost;
+                    edit_hostname = editing.gSession.getClientHostName();
 
                     // "InvidDBField.bind(): Couldn''t link to new reference"
                     // "Field {0} could not be linked to the {1} {2} object, which is busy being edited by {3} on system {4}."
