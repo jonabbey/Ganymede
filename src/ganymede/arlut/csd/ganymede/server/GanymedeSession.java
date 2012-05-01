@@ -999,7 +999,16 @@ final public class GanymedeSession implements Session, Unreferenced {
 	  {
 	    if (semaphoreLocked)
 	      {
-		GanymedeServer.lSemaphore.decrement();
+		try
+		  {
+		    GanymedeServer.lSemaphore.decrement();
+		  }
+		catch (IllegalArgumentException ex)
+		  {
+		    Ganymede.logError(ex);
+		  }
+
+		semaphoreLocked = false;
 	      }
 
 	    // if we are the last user logged in and the server is in
