@@ -144,19 +144,16 @@ public class DBQueryEngine {
    * @param invidVector Vector of Invid's to get the status for.
    */
 
-  public QueryResult queryInvids(Vector invidVector)
+  public QueryResult queryInvids(Vector<Invid> invidVector)
   {
     QueryResult result = new QueryResult(true); // for transport
     DBObject obj;
-    Invid invid;
     PermEntry perm;
 
     /* -- */
 
-    for (int i = 0; i < invidVector.size(); i++)
+    for (Invid invid: invidVector)
       {
-        invid = (Invid) invidVector.elementAt(i);
-
         // the DBSession.viewDBObject() will look in the
         // current DBEditSet, if any, to find the version of
         // the object as it exists in the current transaction.
@@ -478,7 +475,7 @@ public class DBQueryEngine {
             (gSession.getPermManager().isSuperGash() ||
              gSession.getPermManager().getPerm(base.getTypeID(), field.getID(), true).isVisible()))
           {
-            fieldDefs.addElement(field);
+            fieldDefs.add(field);
           }
       }
 
@@ -490,14 +487,8 @@ public class DBQueryEngine {
 
     if (temp_result != null)
       {
-        Invid invid;
-
-        Vector invids = temp_result.getInvids();
-
-        for (int i = 0; i < invids.size(); i++)
+	for (Invid invid: temp_result.getInvids())
           {
-            invid = (Invid) invids.elementAt(i);
-
             if (debug)
               {
                 System.err.print(".");
@@ -599,8 +590,6 @@ public class DBQueryEngine {
   {
     Vector<Result> result = new Vector<Result>();
     QueryResult internalResult = queryDispatch(query, true, false, null, null);
-    Invid key;
-    String val;
 
     /* -- */
 
@@ -608,8 +597,8 @@ public class DBQueryEngine {
       {
         for (int i = 0; i < internalResult.size(); i++)
           {
-            key = (Invid) internalResult.getInvid(i);
-            val = (String) internalResult.getLabel(i);
+            Invid key = internalResult.getInvid(i);
+            String val = internalResult.getLabel(i);
 
             result.add(new Result(key, val));
           }
@@ -865,9 +854,9 @@ public class DBQueryEngine {
     // to lock by traversing over any QueryDeRefNodes in the QueryNode
     // tree.
 
-    Vector baseLock = new Vector();
+    Vector<DBObjectBase> baseLock = new Vector<DBObjectBase>();
 
-    baseLock.addElement(base);
+    baseLock.add(base);
 
     // lock the containing base as well, if it differs.. this will
     // keep things consistent
