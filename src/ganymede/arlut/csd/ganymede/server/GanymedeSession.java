@@ -2084,8 +2084,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @see arlut.csd.ganymede.rmi.Session
    */
 
-  public String viewObjectLabel(Invid invid)
+  public String viewObjectLabel(Invid invid) throws NotLoggedInException
   {
+    checklogin();
+
     // We don't check permissions here, as we use session.viewDBObject().
 
     // We have made the command decision that finding the label for an
@@ -2093,14 +2095,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // session.viewDBObject() here makes this a much more lightweight
     // operation.
 
-    try
-      {
-	return session.viewDBObject(invid).getLabel();
-      }
-    catch (NullPointerException ex)
-      {
-	return null;
-      }
+    return session.getObjectLabel(invid);
   }
 
   /**

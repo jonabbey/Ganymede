@@ -1279,7 +1279,7 @@ public class DBLog {
     // looking up the object name can be pricey, so we wait until we
     // know we probably need to do it, here
 
-    String objectName = transSession.getGSession().viewObjectLabel(objectInvid);
+    String objectName = transSession.getGSession().getSession().getObjectLabel(objectInvid);
 
     // okay, we have some users interested in getting notified about this
     // object event..
@@ -1987,7 +1987,7 @@ public class DBLog {
 	if (debug)
 	  {
 	    System.err.println("DBLog.calculateOwnerAddresses(): processing owner group " +
-			       session.getGSession().viewObjectLabel(ownerInvid));
+			       session.getGSession().getSession().getObjectLabel(ownerInvid));
 	  }
 
 	addresses.addAll(ownerCustom.getAddresses(ownerInvid, session));

@@ -1734,6 +1734,22 @@ final public class DBSession {
   }
 
   /**
+   * <p>Returns the label of a given Invid in this session.</p>
+   */
+
+  public String getObjectLabel(Invid invid)
+  {
+    try
+      {
+	return viewObjectDB(invid).getLabel();
+      }
+    catch (NullPointerException ex)
+      {
+	return null;
+      }
+  }
+
+  /**
    * This method is intended as a lightweight way of returning a
    * handy description of the type and label of the specified invid.
    * No locking is done, and the label returned will be viewed through

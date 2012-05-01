@@ -67,7 +67,6 @@ import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.XMLUtils;
 import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
-import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ObjectStatus;
 import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.ReturnVal;
@@ -4111,7 +4110,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (o instanceof Invid)
 	  {
-	    System.err.print(Ganymede.internalSession.viewObjectLabel((Invid) o));
+	    System.err.print(Ganymede.internalSession.getSession().getObjectLabel((Invid) o));
 	  }
 	else
 	  {
@@ -4172,7 +4171,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		if (!qr.containsInvid(inv))
 		  {
-		    String invLabel = Ganymede.internalSession.viewObjectLabel(inv);
+		    String invLabel = Ganymede.internalSession.getSession().getObjectLabel(inv);
 
 		    if (invLabel == null)
 		      {
