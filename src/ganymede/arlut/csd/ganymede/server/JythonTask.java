@@ -13,11 +13,13 @@
    Module By: Deepak Giridharagopal <deepak@arlut.utexas.edu>
 
    -----------------------------------------------------------------------
-      
+
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -156,7 +158,7 @@ public class JythonTask implements Runnable {
   {
     if (taskDefObjInvid != null)
       {
-        DBObject taskDefObj = Ganymede.internalSession.session.viewDBObject(taskDefObjInvid);
+        DBObject taskDefObj = Ganymede.internalSession.getSession().viewDBObject(taskDefObjInvid);
         
         Vector options = taskDefObj.getFieldValuesLocal(SchemaConstants.TaskOptionStrings);
 

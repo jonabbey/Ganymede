@@ -1663,7 +1663,7 @@ public class Ganymede {
 
 	internalSession.openTransaction("Ganymede startupHook");
 
-	e_object = (DBEditObject) internalSession.session.editDBObject(supergashinvid);
+	e_object = (DBEditObject) internalSession.getSession().editDBObject(supergashinvid);
 
 	if (e_object == null)
 	  {
@@ -1722,7 +1722,7 @@ public class Ganymede {
 	    if (labelField == null)
 	      {
 		objectEventCustom objectEventObj = (objectEventCustom)
-		  internalSession.session.editDBObject(object.getInvid());
+		  internalSession.getSession().editDBObject(object.getInvid());
 
 		if (objectEventObj != null)
 		  {

@@ -5,17 +5,19 @@
    This class goes through all objects in the database and sends
    out any warnings for objects that are going to expire within
    a whole number of weeks in the future.
-   
+
    Created: 4 February 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -246,7 +248,7 @@ public class GanymedeWarningTask implements Runnable {
 				     base.getName(), mySession.viewObjectLabel(invid), Integer.valueOf(i+1));
 		      }
 
-		    obj = mySession.session.viewDBObject(invid);
+		    obj = mySession.getSession().viewDBObject(invid);
 
                     if (!objectHook.reactToExpirationWarning(obj, 7 * i))
                       {
@@ -320,7 +322,7 @@ public class GanymedeWarningTask implements Runnable {
 				     base.getName(), mySession.viewObjectLabel(invid), Integer.valueOf(i+1));
 		      }
 
-                    obj = mySession.session.viewDBObject(invid);
+                    obj = mySession.getSession().viewDBObject(invid);
 
                     if (!objectHook.reactToRemovalWarning(obj, 7 * i))
                       {
@@ -395,7 +397,7 @@ public class GanymedeWarningTask implements Runnable {
 		tempString.setLength(0);
 		tempString.append(title);
 		
-		obj = mySession.session.viewDBObject(invid);
+		obj = mySession.getSession().viewDBObject(invid);
 
 		tempString.append(getExpirationWarningMesg(obj));
 		    
@@ -451,7 +453,7 @@ public class GanymedeWarningTask implements Runnable {
 		// "** {0} {1} will be removed within the next 24 hours! **"
 		title = ts.l("run.remove_real_soon_now", base.getName(), mySession.viewObjectLabel(invid));
 
-		obj = mySession.session.viewDBObject(invid);
+		obj = mySession.getSession().viewDBObject(invid);
 		Date actionDate = (Date) obj.getFieldValueLocal(SchemaConstants.RemovalField);
 
 		tempString.setLength(0);

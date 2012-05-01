@@ -13,8 +13,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -2517,7 +2519,7 @@ public final class DBStore implements JythonMap {
 	throw new Error("RMI system could not initialize GanymedeSession");
       }
 
-    session = gSession.session;
+    session = gSession.getSession();
     session.openTransaction("DBStore bootstrap initialization");
 
     try

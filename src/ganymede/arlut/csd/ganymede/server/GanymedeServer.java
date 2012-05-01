@@ -363,7 +363,7 @@ public class GanymedeServer implements Server {
 
 	    for (int i = 0; !found && results != null && (i < results.size()); i++)
 	      {
-		user = loginSession.session.viewDBObject(((Result) results.elementAt(i)).getInvid());
+		user = loginSession.getSession().viewDBObject(((Result) results.elementAt(i)).getInvid());
 	
 		pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
 	
@@ -431,7 +431,7 @@ public class GanymedeServer implements Server {
 
 		for (int i = 0; !found && (i < results.size()); i++)
 		  {
-		    persona = loginSession.session.viewDBObject(((Result) results.elementAt(i)).getInvid());
+		    persona = loginSession.getSession().viewDBObject(((Result) results.elementAt(i)).getInvid());
 	    
 		    pdbf = (PasswordDBField) persona.getField(SchemaConstants.PersonaPasswordField);
 
@@ -470,7 +470,7 @@ public class GanymedeServer implements Server {
 
 		    if (results.size() == 1)
 		      {
-			user = loginSession.session.viewDBObject(((Result) results.elementAt(0)).getInvid());
+			user = loginSession.getSession().viewDBObject(((Result) results.elementAt(0)).getInvid());
 
 			// recanonicalize
 
@@ -1118,7 +1118,7 @@ public class GanymedeServer implements Server {
       	return 0;
       }
     
-    obj = loginSession.session.viewDBObject(((Result) results.elementAt(0)).getInvid());
+    obj = loginSession.getSession().viewDBObject(((Result) results.elementAt(0)).getInvid());
     pdbf = (PasswordDBField) obj.getField(SchemaConstants.PersonaPasswordField);
 	    
     if (pdbf != null && pdbf.matchPlainText(clientPass))
@@ -1419,7 +1419,7 @@ public class GanymedeServer implements Server {
     //
     // XXX
 
-    DBSession session = Ganymede.internalSession.session;
+    DBSession session = Ganymede.internalSession.getSession();
 
     /* -- */
 
@@ -1573,7 +1573,7 @@ public class GanymedeServer implements Server {
     //
     // XXX
 
-    DBSession session = Ganymede.internalSession.session;
+    DBSession session = Ganymede.internalSession.getSession();
 
     /* -- */
     

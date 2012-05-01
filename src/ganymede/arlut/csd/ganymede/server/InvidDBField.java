@@ -678,7 +678,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	 * it was cleared..
 	 */
 
-	DBObject objectRef = gsession.session.viewDBObject(invid);
+	DBObject objectRef = gsession.getSession().viewDBObject(invid);
 
 	if (objectRef != null && (objectRef instanceof DBEditObject))
 	  {

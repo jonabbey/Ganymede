@@ -211,6 +211,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public boolean enableOversight = true;
 
+  // --
+
   /**
    * Async responder for sending async messages to the client.
    */
@@ -310,14 +312,14 @@ final public class GanymedeSession implements Session, Unreferenced {
   private String lastEvent = null;
 
   /**
-   * Our DBSession object.  DBSession is the generic DBStore access
+   * <p>Our DBSession object.  DBSession is the generic DBStore access
    * layer.  A GanymedeSession is layered on top of a DBSession to
    * provide access control and remote access via RMI.  The DBSession
    * object is accessible to server-side code only and provides
-   * transaction support.
+   * transaction support.</p>
    */
 
-  DBSession session;
+  private DBSession session;
 
   /**
    * Our DBQueryEngine object.  DBQueryEngine has all the routines for
