@@ -229,11 +229,15 @@ final public class GanymedeSession implements Session, Unreferenced {
   private int objectsCheckedOut = 0;
 
   /**
-   * This variable tracks whether or not the client desires to have
+   * <p>This variable tracks whether or not the client desires to have
    * wizards presented.  If this is false, custom plug-in code
    * for the object types stored in the
    * {@link arlut.csd.ganymede.server.DBStore DBStore} may either
-   * refuse certain operations or will resort to taking a default action.
+   * refuse certain operations or will resort to taking a default action.</p>
+   *
+   * <p>Note: this variable should be private with an accessor, but
+   * end-user custom code has been written which uses this, so we have
+   * to keep it public.</p>
    */
   
   public boolean enableWizards = true;
@@ -245,6 +249,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    *
    * <p>This variable is not intended ever to be available to the client,
    * but should only be set by local server code.</p>
+   *
+   * <p>Note: this variable should be private with an accessor, but
+   * end-user custom code has been written which uses this, so we have
+   * to keep it public.</p>
    */
   
   public boolean enableOversight = true;
