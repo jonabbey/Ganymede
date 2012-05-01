@@ -1018,6 +1018,8 @@ public class DBPermissionManager {
   {
     if (supergashMode)
       {
+	// XXX CACHE WARNING! XXX
+
 	// All sessions with supergash privileges can use the cached
 	// full category tree transport object.. we'll build it here
 	// if we need to.

@@ -1465,45 +1465,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
-    /* - */
-
-    if (permManager.isSuperGash())
-      {
-	// XXX CACHE WARNING! XXX
-
-	// All sessions with supergash privileges can use the cached
-	// full category tree transport object.. we'll build it here
-	// if we need to.
-
-	if (Ganymede.catTransport == null)
-	  {
-	    // pass Ganymede.internalSession so that the master
-	    // CategoryTransport object will correctly grant
-	    // object creation privs for all object types
-
-	    Ganymede.catTransport = Ganymede.db.rootCategory.getTransport(Ganymede.internalSession, true);
-	  }
-
-	if (debug)
-	  {
-	    System.err.println("getCategoryTree(): returning system's complete category tree");
-	  }
-
-	return Ganymede.catTransport;
-      }
-    else
-      {
-	// not in supergash mode.. download a subset of the category tree to the user
-
-	CategoryTransport transport = Ganymede.db.rootCategory.getTransport(this, hideNonEditables);
-
-	if (debug)
-	  {
-	    System.err.println("getCategoryTree(): generated custom category tree");
-	  }
-	
-	return transport;
-      }
+    return getPermManager().getCategoryTree(hideNonEditables);
   }
 
   /**
@@ -1525,71 +1487,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
-    /* - */
-
-    if (permManager.isSuperGash())
-      {
-	if (Ganymede.baseTransport != null)
-	  {
-	    return Ganymede.baseTransport;
-	  }
-	else
-	  {
-	    Enumeration bases;
-	    DBObjectBase base;
-
-	    BaseListTransport transport = new BaseListTransport();
-
-	    // *sync* on DBStore, this GanymedeSession
-
-	    // we sync on Ganymede.db to make sure that no one adds or deletes
-	    // any object bases while we're creating our BaseListTransport.
-	    // We could use the loginSemaphore, but that would be a bit heavy
-	    // for our purposes here.
-	    
-	    synchronized (Ganymede.db)
-	      {
-		bases = Ganymede.db.objectBases.elements();
-		
-		while (bases.hasMoreElements())
-		  {
-		    base = (DBObjectBase) bases.nextElement();
-		    base.addBaseToTransport(transport, null);
-		  }
-	      }
-
-	    Ganymede.baseTransport = transport;
-
-	    return transport;
-	  }
-      }
-    else
-      {
-	Enumeration bases;
-	DBObjectBase base;
-
-	BaseListTransport transport = new BaseListTransport();
-
-	// *sync* on DBStore, this GanymedeSession
-
-	// we sync on Ganymede.db to make sure that no one adds or deletes
-	// any object bases while we're creating our BaseListTransport.
-	// We could use the loginSemaphore, but that would be a bit heavy
-	// for our purposes here.
-
-	synchronized (Ganymede.db)
-	  {
-	    bases = Ganymede.db.objectBases.elements();
-
-	    while (bases.hasMoreElements())
-	      {
-		base = (DBObjectBase) bases.nextElement();
-		base.addBaseToTransport(transport, this);
-	      }
-	  }
-
-	return transport;
-      }
+    return getPermManager().getBaseList();
   }
 
   /**
