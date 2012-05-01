@@ -349,14 +349,14 @@ final public class GanymedeSession implements Session, Unreferenced {
    * server when the console is updated.
    */
 
-  AdminEntry userInfo = null;
+  private AdminEntry userInfo = null;
 
   /**
    * If true, this GanymedeSession will export its objects and fields for
    * direct access via RMI.
    */
 
-  boolean exportObjects = false;
+  private boolean exportObjects = false;
 
   /**
    * If this session is being driven by a GanymedeXMLSession, this reference
@@ -601,7 +601,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   public synchronized void checkOut()
   {
     objectsCheckedOut++;
-    this.userInfo = null;	// clear admin console info cache
+    resetAdminEntry();		// clear admin console info cache
 
     GanymedeAdmin.refreshUsers();
   }
@@ -629,7 +629,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	  }
       }
 
-    this.userInfo = null;	// clear admin console info cache
+    resetAdminEntry();	// clear admin console info cache
 
     GanymedeAdmin.refreshUsers();
   }
@@ -665,6 +665,17 @@ final public class GanymedeSession implements Session, Unreferenced {
     // something useful
 
     return info;
+  }
+
+  /**
+   * <p>Clears the cached AdminEntry data for this session so that the
+   * next getAdminEntry() call will generate a new AdminEntry value
+   * rather than returning a cached one.</p>
+   */
+
+  public void resetAdminEntry()
+  {
+    this.userInfo = null;
   }
 
   /** 
@@ -3881,7 +3892,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
 
     this.lastEvent = text;
-    this.userInfo = null;
+    resetAdminEntry();
     GanymedeAdmin.refreshUsers();
   }
 

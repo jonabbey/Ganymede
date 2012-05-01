@@ -678,7 +678,7 @@ public class DBPermissionManager {
 
 	updatePerms(true);
 
-	gSession.userInfo = null;	// null our admin console cache
+	gSession.resetAdminEntry(); // null our admin console cache
 	gSession.setLastEvent("selectPersona: " + newPersona);
 
 	return true;
@@ -758,7 +758,7 @@ public class DBPermissionManager {
 
 	updatePerms(true);
 
-	gSession.userInfo = null;	// null our admin console cache
+	gSession.resetAdminEntry(); // null our admin console cache
 	gSession.setLastEvent("selectPersona: " + newPersona);
 	return true;
       }
