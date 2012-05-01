@@ -298,7 +298,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * updates the admin consoles.
    */
 
-  String status = null;
+  private String status = null;
 
   /**
    * Description of the last action recorded for this client.  The
@@ -307,7 +307,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * this String when it updates the admin consoles.
    */
 
-  String lastEvent = null;
+  private String lastEvent = null;
 
   /**
    * Our DBSession object.  DBSession is the generic DBStore access
@@ -370,7 +370,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * can forcibly unexport them at logout time.
    */
 
-  ArrayList exported = new ArrayList();
+  private ArrayList exported = new ArrayList();
 
   /* -- */
 
