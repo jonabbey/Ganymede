@@ -1221,6 +1221,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public CategoryTransport getCategoryTree() throws NotLoggedInException
   {
+    checklogin();
+
     return this.getCategoryTree(true);
   }
 
@@ -1331,6 +1333,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public ReturnVal openTransaction(String describe) throws NotLoggedInException
   {
+    checklogin();
+
     return this.openTransaction(describe, true);
   }
 
@@ -1427,6 +1431,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public ReturnVal commitTransaction() throws NotLoggedInException
   {
+    checklogin();
+
     return commitTransaction(false);
   }
 
@@ -1465,6 +1471,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public synchronized ReturnVal commitTransaction(boolean abortOnFail) throws NotLoggedInException
   {
+    checklogin();
+
     return commitTransaction(abortOnFail, null);
   }
 
@@ -1643,6 +1651,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public void sendMail(String address, String subject, StringBuffer body) throws NotLoggedInException
   {
+    checklogin();
+
     // If the server has been told to not send out any emails, then just bail
     // out.
 
@@ -1655,8 +1665,6 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
 	return;
       }
-
-    checklogin();
 
     /* - */
 
@@ -1728,6 +1736,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public void sendHTMLMail(String address, String subject, StringBuffer body, StringBuffer HTMLbody) throws NotLoggedInException
   {
+    checklogin();
+
     // If the server has been told to not send out any emails, then just bail
     // out.
 
@@ -1735,8 +1745,6 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
       	return;
       }
-
-    checklogin();
 
     /* - */
 
@@ -1952,6 +1960,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public Invid findLabeledObject(String objectName, short type) throws NotLoggedInException
   {
+    checklogin();
+
     return this.findLabeledObject(objectName, type, false);
   }
 
@@ -1974,6 +1984,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public Invid findLabeledObject(String objectName, String objectType) throws NotLoggedInException
   {
+    checklogin();
+
     return this.findLabeledObject(objectName, objectType, false);
   }
 
@@ -2027,6 +2039,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public Invid findLabeledObject(String objectName, String objectType, boolean allowAliases) throws NotLoggedInException
   {
+    checklogin();
+
     DBObjectBase base = Ganymede.db.getObjectBase(objectType);
 
     if (base == null)
@@ -2035,7 +2049,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	throw new RuntimeException(ts.l("global.no_such_object_type", objectType));
       }
 
-    return this.findLabeledObject(objectName, base.getTypeID(), allowAliases); // checks login
+    return this.findLabeledObject(objectName, base.getTypeID(), allowAliases);
   }
 
   /**
@@ -2112,7 +2126,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public StringBuffer viewObjectHistory(Invid invid, Date since) throws NotLoggedInException
   {
-    return viewObjectHistory(invid, since, null, true); // checks login
+    checklogin();
+
+    return viewObjectHistory(invid, since, null, true);
   }
 
   /**
@@ -2130,7 +2146,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public StringBuffer viewObjectHistory(Invid invid, Date since, boolean fullTransactions) throws NotLoggedInException
   {
-    return viewObjectHistory(invid, since, null, fullTransactions); // checks login
+    checklogin();
+
+    return viewObjectHistory(invid, since, null, fullTransactions);
   }
 
   /**
@@ -2148,10 +2166,6 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public StringBuffer viewObjectHistory(Invid invid, Date since, Date before, boolean fullTransactions) throws NotLoggedInException
   {
-    DBObject obj;
-
-    /* -- */
-
     checklogin();
 
     if (invid == null)
@@ -2170,7 +2184,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // to verify the user's permissions to view the history, so we'll
     // have to return null
 
-    obj = session.viewDBObject(invid);
+    DBObject obj = session.viewDBObject(invid);
 
     if (obj == null)
       {
@@ -2235,10 +2249,6 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public StringBuffer viewAdminHistory(Invid invid, Date since) throws NotLoggedInException
   {
-    DBObject obj;
-
-    /* -- */
-
     checklogin();
 
     if (invid == null)
@@ -2255,7 +2265,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     // we do our own permissions checking, so we can use session.viewDBObject().
 
-    obj = session.viewDBObject(invid);
+    DBObject obj = session.viewDBObject(invid);
 
     if (obj == null)
       {
@@ -2324,18 +2334,12 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public synchronized ReturnVal view_db_object(Invid invid) throws NotLoggedInException
   {
-    ReturnVal result;
-    db_object objref;
-    DBObject obj;
-
-    /* -- */
-
     checklogin();
 
     // we'll let a NullPointerException be thrown if we were given a null
     // Invid.
 
-    obj = session.viewDBObject(invid);
+    DBObject obj = session.viewDBObject(invid);
 
     if (obj == null)
       {
@@ -2365,9 +2369,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 	// directly manipulate the DBEditObject in the transaction
 	// to get around permission enforcement.
 
-	objref = new DBObject(obj, this);
+	db_object objref = new DBObject(obj, this);
 
-	result = new ReturnVal(true); // success
+	ReturnVal result = new ReturnVal(true); // success
 
 	result.setInvid(((DBObject) objref).getInvid());
 
@@ -2410,15 +2414,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public synchronized ReturnVal edit_db_object(Invid invid) throws NotLoggedInException
   {
-    ReturnVal result;
-    db_object objref = null;
-    DBObject obj;
-
-    /* -- */
-
     checklogin();
 
-    obj = session.viewDBObject(invid);
+    DBObject obj = session.viewDBObject(invid);
 
     if (obj == null)
       {
@@ -2447,6 +2445,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    setLastEvent("edit " + obj.getTypeName() + ":" + obj.getLabel());
 	  }
 
+	db_object objref = null;
+
 	try
           {
             objref = session.editDBObject(invid);
@@ -2461,7 +2461,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	if (objref != null)
 	  {
-	    result = new ReturnVal(true);
+	    ReturnVal result = new ReturnVal(true);
 	    result.setInvid(((DBObject) objref).getInvid());
 
 	    if (this.exportObjects)
@@ -2543,7 +2543,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public ReturnVal create_db_object(short type) throws NotLoggedInException
   {
-    return this.create_db_object(type, false, null); // checks login
+    checklogin();
+
+    return this.create_db_object(type, false, null);
   }
 
   /**
@@ -2568,6 +2570,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public ReturnVal create_db_object(String objectType) throws NotLoggedInException
   {
+    checklogin();
+
     DBObjectBase base = Ganymede.db.getObjectBase(objectType);
 
     if (base == null)
@@ -2576,7 +2580,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	return Ganymede.createErrorDialog(ts.l("global.no_such_object_type", objectType));
       }
 
-    return this.create_db_object(base.getTypeID()); // checks login
+    return this.create_db_object(base.getTypeID());
   }
 
   /**
@@ -2599,14 +2603,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public synchronized ReturnVal clone_db_object(Invid invid) throws NotLoggedInException
   {
-    DBObject vObj;
-    DBEditObject newObj;
-    ReturnVal retVal;
-    boolean checkpointed = false;
-
-    /* -- */
-
     checklogin();
+
+    boolean checkpointed = false;
 
     if (invid == null)
       {
@@ -2614,14 +2613,14 @@ final public class GanymedeSession implements Session, Unreferenced {
 					  ts.l("clone_db_object.clone_error_text"));
       }
 
-    retVal = view_db_object(invid); // get a copy customized for per-field visibility
+    ReturnVal retVal = view_db_object(invid); // get a copy customized for per-field visibility
 
     if (!ReturnVal.didSucceed(retVal))
       {
 	return retVal;
       }
 
-    vObj = (DBObject) retVal.getObject();
+    DBObject vObj = (DBObject) retVal.getObject();
 
     DBEditObject objectHook = Ganymede.db.getObjectBase(invid.getType()).getObjectHook();
 
@@ -2647,7 +2646,7 @@ final public class GanymedeSession implements Session, Unreferenced {
             return retVal;
           }
 
-        newObj = (DBEditObject) retVal.getObject();
+        DBEditObject newObj = (DBEditObject) retVal.getObject();
 
         // the merge operation will do the right thing here and
         // preserve the encoded object and invid in the retVal for our
@@ -2694,14 +2693,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public synchronized ReturnVal inactivate_db_object(Invid invid) throws NotLoggedInException
   {
-    DBObject vObj;
-    DBEditObject eObj;
-
-    /* -- */
-
     checklogin();
 
-    vObj = session.viewDBObject(invid);
+    DBObject vObj = session.viewDBObject(invid);
 
     if (vObj == null)
       {
@@ -2732,7 +2726,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     ReturnVal result = edit_db_object(invid); // *sync* DBSession DBObject
 
-    eObj = (DBEditObject) result.getObject();
+    DBEditObject eObj = (DBEditObject) result.getObject();
 
     if (eObj == null)
       {
@@ -2776,14 +2770,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public synchronized ReturnVal reactivate_db_object(Invid invid) throws NotLoggedInException
   {
-    DBObject vObj;
-    DBEditObject eObj;
-
-    /* -- */
-
     checklogin();
 
-    vObj = session.viewDBObject(invid);
+    DBObject vObj = session.viewDBObject(invid);
 
     if (vObj == null)
       {
@@ -2811,7 +2800,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     ReturnVal result = edit_db_object(invid); // *sync* DBSession DBObject
 
-    eObj = (DBEditObject) result.getObject();
+    DBEditObject eObj = (DBEditObject) result.getObject();
 
     if (eObj == null)
       {
@@ -3038,6 +3027,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public ReturnVal getSchemaXML() throws NotLoggedInException
   {
+    checklogin();
+
     return this.getXML(false, true, null, false, false);
   }
 
@@ -3067,6 +3058,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public ReturnVal getDataXML(String syncChannel, boolean includeHistory, boolean includeOid) throws NotLoggedInException
   {
+    checklogin();
+
     Ganymede.debug("GanymedeSession.getDataXML(" + syncChannel + ")");
     return this.getXML(true, false, syncChannel, includeHistory, includeOid);
   }
@@ -3094,6 +3087,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public ReturnVal getXMLDump(boolean includeHistory, boolean includeOid) throws NotLoggedInException
   {
+    checklogin();
+
     return this.getXML(true, true, null, includeHistory, includeOid);
   }
 
