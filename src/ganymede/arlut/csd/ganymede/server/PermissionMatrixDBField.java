@@ -1469,7 +1469,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     
     if (getID() == SchemaConstants.RoleMatrix)
       {
-	if (owner.gSession.getPermManager().personaPerms == null)
+	if (owner.gSession.getPermManager().getPersonaPerms() == null)
 	  {
 	    return false;
 	  }
@@ -1478,11 +1478,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
 	if (fieldID < 0)
 	  {
-	    adminPriv = (PermEntry) owner.gSession.getPermManager().delegatablePersonaPerms.getPerm(baseID);
+	    adminPriv = (PermEntry) owner.gSession.getPermManager().getDelegatablePersonaPerms().getPerm(baseID);
 	  }
 	else
 	  {
-	    adminPriv = (PermEntry) owner.gSession.getPermManager().delegatablePersonaPerms.getPerm(baseID, fieldID);
+	    adminPriv = (PermEntry) owner.gSession.getPermManager().getDelegatablePersonaPerms().getPerm(baseID, fieldID);
 	  }
 
 	// the adminPriv should have all the bits set that we are seeking to set
@@ -1491,7 +1491,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       }
     else if (getID() == SchemaConstants.RoleDefaultMatrix)
       {
-	if (owner.gSession.getPermManager().defaultPerms == null)
+	if (owner.gSession.getPermManager().getDefaultPerms() == null)
 	  {
 	    return false;
 	  }
@@ -1500,11 +1500,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
 	if (fieldID < 0)
 	  {
-	    adminPriv = (PermEntry) owner.gSession.getPermManager().delegatableDefaultPerms.getPerm(baseID);
+	    adminPriv = (PermEntry) owner.gSession.getPermManager().getDelegatableDefaultPerms().getPerm(baseID);
 	  }
 	else
 	  {
-	    adminPriv = (PermEntry) owner.gSession.getPermManager().delegatableDefaultPerms.getPerm(baseID, fieldID);
+	    adminPriv = (PermEntry) owner.gSession.getPermManager().getDelegatableDefaultPerms().getPerm(baseID, fieldID);
 	  }
 
 	// the adminPriv should have all the bits set that we are seeking to set

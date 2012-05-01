@@ -218,7 +218,7 @@ public class DBPermissionManager {
    * defaultPerms}.</p>
    */
 
-  PermMatrix personaPerms;
+  private PermMatrix personaPerms;
 
   /**
    * <p>This variable stores the permission bits that are applicable
@@ -233,7 +233,7 @@ public class DBPermissionManager {
    * that apply to the current persona.</p>
    */
 
-  PermMatrix defaultPerms;
+  private PermMatrix defaultPerms;
 
   /**
    * <p>This variable stores the permission bits that are applicable
@@ -245,7 +245,7 @@ public class DBPermissionManager {
    * delegatableDefaultPerms}.</p>
    */
 
-  PermMatrix delegatablePersonaPerms;
+  private PermMatrix delegatablePersonaPerms;
 
   /**
    * <p>This variable stores the permission bits that are applicable to
@@ -262,7 +262,7 @@ public class DBPermissionManager {
    * that apply to the current persona.</p>
    */
 
-  PermMatrix delegatableDefaultPerms;
+  private PermMatrix delegatableDefaultPerms;
 
   /**
    * <p>A reference to the Ganymede {@link
@@ -602,6 +602,26 @@ public class DBPermissionManager {
     results.addElement(user.getLabel()); // add their 'end-user' persona
 
     return results;
+  }
+
+  public PermMatrix getPersonaPerms()
+  {
+    return personaPerms;
+  }
+
+  public PermMatrix getDefaultPerms()
+  {
+    return defaultPerms;
+  }
+
+  public PermMatrix getDelegatablePersonaPerms()
+  {
+    return delegatablePersonaPerms;
+  }
+
+  public PermMatrix getDelegatableDefaultPerms()
+  {
+    return delegatableDefaultPerms;
   }
 
   /**
