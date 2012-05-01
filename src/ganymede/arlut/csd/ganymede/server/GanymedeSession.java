@@ -566,340 +566,6 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   //************************************************************
   //
-  // Non-remote methods (for server-side code)
-  //
-  //************************************************************
-
-  public void setXSession(GanymedeXMLSession xSession)
-  {
-    this.xSession = xSession;
-  }
-
-  public GanymedeXMLSession getXSession()
-  {
-    return xSession;
-  }
-
-  public boolean isXMLSession()
-  {
-    return xSession != null;
-  }
-
-  public boolean isLoggedIn()
-  {
-    return loggedInSemaphore.isSet();
-  }
-
-  /**
-   * <p>This method is used by the server to increment the admin
-   * console's display of the number of objects this user session has
-   * checked out and/or created.</p>
-   */
-
-  public synchronized void checkOut()
-  {
-    objectsCheckedOut++;
-    resetAdminEntry();		// clear admin console info cache
-
-    GanymedeAdmin.refreshUsers();
-  }
-
-  /**
-   * <p>This method is used by the server to decrement the admin
-   * console's display of the number of objects this user session has
-   * checked out and/or created.</p>
-   */
-
-  public synchronized void checkIn()
-  {
-    objectsCheckedOut--;
-
-    if (objectsCheckedOut < 0)
-      {
-	try
-	  {
-	    // "Ganymede session for {0} has a checkIn() cause objectsCheckedOut to go negative"
-	    throw new RuntimeException(ts.l("checkIn.exception", sessionName));
-	  }
-	catch (RuntimeException ex)
-	  {
-	    Ganymede.debug(Ganymede.stackTrace(ex));
-	  }
-      }
-
-    resetAdminEntry();	// clear admin console info cache
-
-    GanymedeAdmin.refreshUsers();
-  }
-
-  /**
-   * <p>This method is used to generate a serializable
-   * {@link arlut.csd.ganymede.common.AdminEntry AdminEntry}
-   * object summarizing this GanymedeSession's state for
-   * the admin console.</p>
-   *
-   * <p>Used by code in
-   * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin}.</p>
-   */
-
-  public AdminEntry getAdminEntry()
-  {
-    AdminEntry info = userInfo;
-
-    if (info == null)
-      {
-	info = new AdminEntry(sessionName,
-			      permManager.getIdentity(),
-			      clienthost,
-			      (status == null) ? "" : status,
-			      connecttime.toString(),
-			      (lastEvent == null) ? "" : lastEvent,
-			      objectsCheckedOut);
-	userInfo = info;
-      }
-
-    // userInfo might have been set null again by another
-    // thread.. return the local variable to insure we return
-    // something useful
-
-    return info;
-  }
-
-  /**
-   * <p>Clears the cached AdminEntry data for this session so that the
-   * next getAdminEntry() call will generate a new AdminEntry value
-   * rather than returning a cached one.</p>
-   */
-
-  public void resetAdminEntry()
-  {
-    this.userInfo = null;
-  }
-
-  /**
-   * This method used to be used to flag an error condition that the
-   * client could then call getLastError() to look up.  It has
-   * been deprecated from that usage, and now simply logs the error.
-   */
-
-  void setLastError(String error)
-  {
-    Ganymede.debug("GanymedeSession [" + sessionName + "]: setLastError (" + error + ")");
-  }
-
-  /**
-   * <p>This method is called by a background thread on the server,
-   * and knocks this user off if they are a remote user who has been
-   * inactive for a long time.</p>
-   *
-   * <p>Note that this method is not synchronized, to avoid
-   * nested-monitor deadlock by the timeOutTask between a
-   * GanymedeSession object and the GanymedeServer object.</p>
-   */
-
-  void timeCheck()
-  {
-    if (!remoteClient)
-      {
-	return;			// server-local session, we won't time it out
-      }
-
-    if (!loggedInSemaphore.isSet())
-      {
-	return;
-      }
-
-    long millisIdle = 0;
-
-    synchronized (lastActionTime)
-      {
-        millisIdle = System.currentTimeMillis() - lastActionTime.getTime();
-      }
-
-    int minutesIdle = (int) (millisIdle / 60000);
-
-    if (Ganymede.softtimeout)
-      {
-	// we don't time out users logged in without admin privileges in softtimeout
-
-	if (!permManager.isPrivileged())
-	  {
-	    return;
-	  }
-
-	// if the time has come to kick the user off, we'll send him a
-	// signal telling him to drop down to non-privileged.  If the
-	// sendMessage() call throws an exception for some reason,
-	// we'll log that.
-
-	try
-	  {
-	    if ((minutesIdle > Ganymede.timeoutIdleNoObjs && objectsCheckedOut == 0) ||
-		minutesIdle > Ganymede.timeoutIdleWithObjs)
-	      {
-		// if we've got a non-user based admin (i.e.,
-		// supergash) logged in, we can't force them
-		// non-privileged, so we'll skip sending the timeout
-		// message and just wait another couple of minutes for
-		// the forceoff.
-
-		if (permManager.isElevated())
-		  {
-		    // "Sending a timeout message to {0}"
-		    System.err.println(ts.l("timeCheck.sending", this.toString()));
-
-		    timedout = true;
-
-		    // sending this message to the client should cause it
-		    // to set persona back to the unprivileged state,
-		    // coincidentally resetting the lastActionTime in the
-		    // process.
-
-		    sendMessage(ClientMessage.SOFTTIMEOUT, null);
-		  }
-	      }
-	  }
-	catch (Throwable ex)
-	  {
-	    // "Throwable condition caught while trying to send a timeout message to {0}:\n\n{1}"
-	    Ganymede.debug(ts.l("timeCheck.caught_throwable", this.toString(), Ganymede.stackTrace(ex)));
-	  }
-	finally
-	  {
-	    // we give the client two minutes to respond to the
-	    // SOFTTIMEOUT message, then we get mean.
-
-	    if (minutesIdle > (Ganymede.timeoutIdleNoObjs + 2) && objectsCheckedOut == 0)
-	      {
-		forceOff(ts.l("timeCheck.forceOffNoObjs", Integer.valueOf(Ganymede.timeoutIdleNoObjs)));
-	      }
-	    else if (minutesIdle > (Ganymede.timeoutIdleWithObjs + 2))
-	      {
-		forceOff(ts.l("timeCheck.forceOffWithObjs", Integer.valueOf(Ganymede.timeoutIdleWithObjs)));
-	      }
-	  }
-
-	return;
-      }
-
-    if (minutesIdle > Ganymede.timeoutIdleNoObjs && objectsCheckedOut == 0)
-      {
-	forceOff(ts.l("timeCheck.forceOffNoObjs", Integer.valueOf(Ganymede.timeoutIdleNoObjs)));
-      }
-    else if (minutesIdle > Ganymede.timeoutIdleWithObjs)
-      {
-	forceOff(ts.l("timeCheck.forceOffWithObjs", Integer.valueOf(Ganymede.timeoutIdleWithObjs)));
-      }
-  }
-
-  /**
-   * <p>If the server decides this person needs to get off (if the user
-   * times out, is forced off by an admin, or if the server is going
-   * down), it will call this method to knock them off.</p>
-   *
-   * <p>Note that this method is not synchronized, to avoid the possibility
-   * of deadlocking the admin console in the case of a deadlocked
-   * GanymedeSession.</p>
-   */
-
-  void forceOff(String reason)
-  {
-    if (loggedInSemaphore.isSet())
-      {
-	if (Ganymede.log != null)
-	  {
-	    // "Abnormal termination for username: {0}\n\n{1}"
-	    Ganymede.log.logSystemEvent(new DBLogEvent("abnormallogout",
-						       ts.l("forceOff.log_event", permManager.getUserName(), reason),
-						       permManager.getUserInvid(),
-						       permManager.getUserName(),
-						       permManager.getIdentityInvids(),
-						       null));
-	  }
-
-	// "Forcing {0} off for {1}."
-	Ganymede.debug(ts.l("forceOff.forcing", permManager.getUserName(), reason));
-
-	if (asyncPort != null)
-	  {
-	    try
-	      {
-		asyncPort.shutdown(reason);
-	      }
-	    catch (RemoteException ex)
-	      {
-	      }
-	  }
-
-	logout(true);		// keep logout from logging a normal logout
-      }
-  }
-
-  /**
-   * <p>This method is used to send an asynchronous message
-   * to the client.  It is used to update the clients so they
-   * know when a build is being processed.</p>
-   *
-   * <p>See {@link arlut.csd.ganymede.common.ClientMessage ClientMessage}
-   * for the list of acceptable client message types.</p>
-   */
-
-  void sendMessage(int type, String message)
-  {
-    if (type < ClientMessage.FIRST || type > ClientMessage.LAST)
-      {
-	throw new IllegalArgumentException(ts.l("sendMessage.exception"));
-      }
-
-    if (asyncPort != null)
-      {
-	try
-	  {
-	    asyncPort.sendMessage(type, message);	// async proxy
-	  }
-	catch (RemoteException ex)
-	  {
-	  }
-      }
-  }
-
-  /**
-   * <p>This method is called when the Java RMI system detects that this
-   * remote object is no longer referenced by any remote objects.</p>
-   *
-   * <p>This method handles abnormal logouts and time outs for us.  By
-   * default, the 1.1 RMI time-out is 10 minutes.</p>
-   *
-   * <p>The RMI timeout can be modified by setting the system property
-   * sun.rmi.transport.proxy.connectTimeout.</p>
-   *
-   * @see java.rmi.server.Unreferenced
-   */
-
-  public void unreferenced()
-  {
-    /* the xmlclient may well drop reference to us (the
-       GanymedeSession), as all it really cares about is the
-       GanymedeXMLSession..  if we have an xSession reference, assume
-       that all is well.. the GanymedeXMLSession has its own
-       unreferenced method that can handle dead xml clients, after
-       all.
-    */
-
-    if (xSession != null)
-      {
-	return;
-      }
-
-    if (loggedInSemaphore.isSet())
-      {
-	// "Network connection to the Ganymede client process has been lost."
-	forceOff(ts.l("unreferenced.reason"));
-      }
-  }
-
-  //************************************************************
-  //
   // All methods from this point on are part of the Server remote
   // interface, and can be called by the client via RMI.
   //
@@ -3109,6 +2775,150 @@ final public class GanymedeSession implements Session, Unreferenced {
    ****************************************************************************/
 
   /**
+   * <p>This private method is called by all methods in
+   * GanymedeSession that require the client to be logged in to
+   * operate.</p>
+   */
+
+  void checklogin() throws NotLoggedInException
+  {
+    if (!isLoggedIn())
+      {
+	throw new NotLoggedInException();
+      }
+
+    synchronized (lastActionTime)
+      {
+        lastActionTime.setTime(System.currentTimeMillis());
+      }
+  }
+
+  public boolean isLoggedIn()
+  {
+    return loggedInSemaphore.isSet();
+  }
+
+  /**
+   * <p>Convenience method to get access to this session's UserBase
+   * instance.</p>
+   */
+
+  DBObject getUser()
+  {
+    return permManager.getUser();
+  }
+
+  /**
+   * <p>This method returns the identification string that the server
+   * has assigned to the user.</p>
+   *
+   * <p>Note: a server-side version of getMyUserName() that doesn't
+   * call checklogin().</p>
+   */
+
+  public String getUserName()
+  {
+    return permManager.getUserName();
+  }
+
+  /**
+   * This method returns the unique name of this session.
+   */
+
+  public String getSessionName()
+  {
+    return this.sessionName;
+  }
+
+  /**
+   * This method returns the name of the system that the client
+   * is connected from.
+   */
+
+  public String getClientHostName()
+  {
+    return this.clienthost;
+  }
+
+  public boolean isXMLSession()
+  {
+    return xSession != null;
+  }
+
+  public GanymedeXMLSession getXSession()
+  {
+    return xSession;
+  }
+
+  public void setXSession(GanymedeXMLSession xSession)
+  {
+    this.xSession = xSession;
+  }
+
+  /**
+   * <p>This method returns a reference to the {@link
+   * arlut.csd.ganymede.server.DBSession DBSession} object
+   * encapsulated by this GanymedeSession object.  This is intended to
+   * be used by server-side code that wants to carry out certain
+   * operations without involving permissions checking.</p>
+   */
+
+  public DBSession getSession()
+  {
+    return session;
+  }
+
+  /**
+   * <p>This method returns a reference to the {@link
+   * arlut.csd.ganymede.server.DBPermissionManager
+   * DBPermissionManager} object encapsulated by this GanymedeSession
+   * object.  This is intended to be used by subclasses of {@link
+   * arlut.csd.ganymede.server.DBEditObject DBEditObject} that might
+   * not necessarily be in the arlut.csd.ganymede package.</p>
+   */
+
+  public DBPermissionManager getPermManager()
+  {
+    return permManager;
+  }
+
+  /**
+   * <p>This method is used to allow local server-side code to request
+   * that no oversight be maintained over changes made to the server
+   * through this GanymedeSession.</p>
+   *
+   * <p>This is intended <b>only</b> for trusted code that does its own
+   * checking and validation on changes made to the database.  If
+   * oversight is turned off, no wizard code will be called, and the
+   * required field logic will be bypassed.  Extreme care must
+   * be used in disabling oversight, and oversight should only be
+   * turned off for direct loading and other situations where there
+   * won't be multi-user use, to avoid breaking constraints that
+   * custom plug-ins count on.</p>
+   *
+   * <p>Oversight is enabled by default.</p>
+   *
+   * <p>Generally this is only used for doing bulk loads via XML or
+   * the like.</p>
+   *
+   * @param val If true, oversight will be enabled.
+   */
+
+  public void enableOversight(boolean val)
+  {
+    this.enableOversight = val;
+  }
+
+  /**
+   * <p>This method finds the ultimate owner of an embedded object</p>
+   */
+
+  DBObject getContainingObj(DBObject object)
+  {
+    return session.getContainingObj(object);
+  }
+
+  /**
    * <p>Log out this session.  After this method is called, no other
    * methods may be called on this session object.</p>
    *
@@ -3263,30 +3073,6 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	permManager = null;
       }
-  }
-
-  /**
-   * <p>This method is used to allow local server-side code to request
-   * that no oversight be maintained over changes made to the server
-   * through this GanymedeSession.</p>
-   *
-   * <p>This is intended <b>only</b> for trusted code that does its own
-   * checking and validation on changes made to the database.  If
-   * oversight is turned off, no wizard code will be called, and the
-   * required field logic will be bypassed.  Extreme care must
-   * be used in disabling oversight, and oversight should only be
-   * turned off for direct loading and other situations where there
-   * won't be multi-user use, to avoid breaking constraints that
-   * custom plug-ins count on.</p>
-   *
-   * <p>Oversight is enabled by default.</p>
-   *
-   * @param val If true, oversight will be enabled.
-   */
-
-  public void enableOversight(boolean val)
-  {
-    this.enableOversight = val;
   }
 
   /**
@@ -3534,97 +3320,6 @@ final public class GanymedeSession implements Session, Unreferenced {
     return retVal;
   }
 
-  /**
-   * This method returns the name of the system that the client
-   * is connected from.
-   */
-
-  public String getClientHostName()
-  {
-    return this.clienthost;
-  }
-
-  /**
-   * This method provides a handy description of this session.
-   */
-
-  public String toString()
-  {
-    return "GanymedeSession [" + permManager.getUserName() + "," + permManager.getPersonaName() + "]";
-  }
-
-  /**
-   * <p>Convenience method to get access to this session's UserBase
-   * instance.</p>
-   */
-
-  DBObject getUser()
-  {
-    return permManager.getUser();
-  }
-
-  // **
-  // the following are the non-exported permissions management
-  // **
-
-  /**
-   * <p>This method finds the ultimate owner of an embedded object</p>
-   */
-
-  DBObject getContainingObj(DBObject object)
-  {
-    return session.getContainingObj(object);
-  }
-
-  /**
-   * <p>This method returns a reference to the
-   * {@link arlut.csd.ganymede.server.DBSession DBSession} object encapsulated
-   * by this GanymedeSession object.  This is intended to be used by
-   * subclasses of {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}
-   * that might not necessarily be in the arlut.csd.ganymede package.</p>
-   */
-
-  public DBSession getSession()
-  {
-    return session;
-  }
-
-  /**
-   * This method returns the unique name of this session.
-   */
-
-  public String getSessionName()
-  {
-    return this.sessionName;
-  }
-
-  /**
-   * <p>This method returns the identification string that the server
-   * has assigned to the user.</p>
-   *
-   * <p>Note: a server-side version of getMyUserName() that doesn't
-   * call checklogin().</p>
-   */
-
-  public String getUserName()
-  {
-    return permManager.getUserName();
-  }
-
-  /**
-   * <p>This method returns a reference to the {@link
-   * arlut.csd.ganymede.server.DBPermissionManager
-   * DBPermissionManager} object encapsulated by this GanymedeSession
-   * object.  This is intended to be used by subclasses of {@link
-   * arlut.csd.ganymede.server.DBEditObject DBEditObject} that might
-   * not necessarily be in the arlut.csd.ganymede package.</p>
-   */
-
-  public DBPermissionManager getPermManager()
-  {
-    return permManager;
-  }
-
   //
   //
   // Wizard management functions
@@ -3744,7 +3439,6 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
   }
 
-
   /**
    * <p>Unexport all exported objects, preventing any further RMI
    * calls from reaching them (for security's sake) and possibly
@@ -3805,21 +3499,319 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * <p>This private method is called by all methods in
-   * GanymedeSession that require the client to be logged in to
-   * operate.</p>
+   * <p>This method is used by the server to increment the admin
+   * console's display of the number of objects this user session has
+   * checked out and/or created.</p>
    */
 
-  void checklogin() throws NotLoggedInException
+  public synchronized void checkOut()
   {
+    objectsCheckedOut++;
+    resetAdminEntry();		// clear admin console info cache
+
+    GanymedeAdmin.refreshUsers();
+  }
+
+  /**
+   * <p>This method is used by the server to decrement the admin
+   * console's display of the number of objects this user session has
+   * checked out and/or created.</p>
+   */
+
+  public synchronized void checkIn()
+  {
+    objectsCheckedOut--;
+
+    if (objectsCheckedOut < 0)
+      {
+	try
+	  {
+	    // "Ganymede session for {0} has a checkIn() cause objectsCheckedOut to go negative"
+	    throw new RuntimeException(ts.l("checkIn.exception", sessionName));
+	  }
+	catch (RuntimeException ex)
+	  {
+	    Ganymede.debug(Ganymede.stackTrace(ex));
+	  }
+      }
+
+    resetAdminEntry();	// clear admin console info cache
+
+    GanymedeAdmin.refreshUsers();
+  }
+
+  /**
+   * <p>This method is used to generate a serializable
+   * {@link arlut.csd.ganymede.common.AdminEntry AdminEntry}
+   * object summarizing this GanymedeSession's state for
+   * the admin console.</p>
+   *
+   * <p>Used by code in
+   * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin}.</p>
+   */
+
+  public AdminEntry getAdminEntry()
+  {
+    AdminEntry info = userInfo;
+
+    if (info == null)
+      {
+	info = new AdminEntry(sessionName,
+			      permManager.getIdentity(),
+			      clienthost,
+			      (status == null) ? "" : status,
+			      connecttime.toString(),
+			      (lastEvent == null) ? "" : lastEvent,
+			      objectsCheckedOut);
+	userInfo = info;
+      }
+
+    // userInfo might have been set null again by another
+    // thread.. return the local variable to insure we return
+    // something useful
+
+    return info;
+  }
+
+  /**
+   * <p>Clears the cached AdminEntry data for this session so that the
+   * next getAdminEntry() call will generate a new AdminEntry value
+   * rather than returning a cached one.</p>
+   */
+
+  public void resetAdminEntry()
+  {
+    this.userInfo = null;
+  }
+
+  /**
+   * This method used to be used to flag an error condition that the
+   * client could then call getLastError() to look up.  It has
+   * been deprecated from that usage, and now simply logs the error.
+   */
+
+  void setLastError(String error)
+  {
+    Ganymede.debug("GanymedeSession [" + sessionName + "]: setLastError (" + error + ")");
+  }
+
+  /**
+   * <p>This method is called by a background thread on the server,
+   * and knocks this user off if they are a remote user who has been
+   * inactive for a long time.</p>
+   *
+   * <p>Note that this method is not synchronized, to avoid
+   * nested-monitor deadlock by the timeOutTask between a
+   * GanymedeSession object and the GanymedeServer object.</p>
+   */
+
+  void timeCheck()
+  {
+    if (!remoteClient)
+      {
+	return;			// server-local session, we won't time it out
+      }
+
     if (!loggedInSemaphore.isSet())
       {
-	throw new NotLoggedInException();
+	return;
       }
+
+    long millisIdle = 0;
 
     synchronized (lastActionTime)
       {
-        lastActionTime.setTime(System.currentTimeMillis());
+        millisIdle = System.currentTimeMillis() - lastActionTime.getTime();
       }
+
+    int minutesIdle = (int) (millisIdle / 60000);
+
+    if (Ganymede.softtimeout)
+      {
+	// we don't time out users logged in without admin privileges in softtimeout
+
+	if (!permManager.isPrivileged())
+	  {
+	    return;
+	  }
+
+	// if the time has come to kick the user off, we'll send him a
+	// signal telling him to drop down to non-privileged.  If the
+	// sendMessage() call throws an exception for some reason,
+	// we'll log that.
+
+	try
+	  {
+	    if ((minutesIdle > Ganymede.timeoutIdleNoObjs && objectsCheckedOut == 0) ||
+		minutesIdle > Ganymede.timeoutIdleWithObjs)
+	      {
+		// if we've got a non-user based admin (i.e.,
+		// supergash) logged in, we can't force them
+		// non-privileged, so we'll skip sending the timeout
+		// message and just wait another couple of minutes for
+		// the forceoff.
+
+		if (permManager.isElevated())
+		  {
+		    // "Sending a timeout message to {0}"
+		    System.err.println(ts.l("timeCheck.sending", this.toString()));
+
+		    timedout = true;
+
+		    // sending this message to the client should cause it
+		    // to set persona back to the unprivileged state,
+		    // coincidentally resetting the lastActionTime in the
+		    // process.
+
+		    sendMessage(ClientMessage.SOFTTIMEOUT, null);
+		  }
+	      }
+	  }
+	catch (Throwable ex)
+	  {
+	    // "Throwable condition caught while trying to send a timeout message to {0}:\n\n{1}"
+	    Ganymede.debug(ts.l("timeCheck.caught_throwable", this.toString(), Ganymede.stackTrace(ex)));
+	  }
+	finally
+	  {
+	    // we give the client two minutes to respond to the
+	    // SOFTTIMEOUT message, then we get mean.
+
+	    if (minutesIdle > (Ganymede.timeoutIdleNoObjs + 2) && objectsCheckedOut == 0)
+	      {
+		forceOff(ts.l("timeCheck.forceOffNoObjs", Integer.valueOf(Ganymede.timeoutIdleNoObjs)));
+	      }
+	    else if (minutesIdle > (Ganymede.timeoutIdleWithObjs + 2))
+	      {
+		forceOff(ts.l("timeCheck.forceOffWithObjs", Integer.valueOf(Ganymede.timeoutIdleWithObjs)));
+	      }
+	  }
+
+	return;
+      }
+
+    if (minutesIdle > Ganymede.timeoutIdleNoObjs && objectsCheckedOut == 0)
+      {
+	forceOff(ts.l("timeCheck.forceOffNoObjs", Integer.valueOf(Ganymede.timeoutIdleNoObjs)));
+      }
+    else if (minutesIdle > Ganymede.timeoutIdleWithObjs)
+      {
+	forceOff(ts.l("timeCheck.forceOffWithObjs", Integer.valueOf(Ganymede.timeoutIdleWithObjs)));
+      }
+  }
+
+  /**
+   * <p>If the server decides this person needs to get off (if the user
+   * times out, is forced off by an admin, or if the server is going
+   * down), it will call this method to knock them off.</p>
+   *
+   * <p>Note that this method is not synchronized, to avoid the possibility
+   * of deadlocking the admin console in the case of a deadlocked
+   * GanymedeSession.</p>
+   */
+
+  void forceOff(String reason)
+  {
+    if (loggedInSemaphore.isSet())
+      {
+	if (Ganymede.log != null)
+	  {
+	    // "Abnormal termination for username: {0}\n\n{1}"
+	    Ganymede.log.logSystemEvent(new DBLogEvent("abnormallogout",
+						       ts.l("forceOff.log_event", permManager.getUserName(), reason),
+						       permManager.getUserInvid(),
+						       permManager.getUserName(),
+						       permManager.getIdentityInvids(),
+						       null));
+	  }
+
+	// "Forcing {0} off for {1}."
+	Ganymede.debug(ts.l("forceOff.forcing", permManager.getUserName(), reason));
+
+	if (asyncPort != null)
+	  {
+	    try
+	      {
+		asyncPort.shutdown(reason);
+	      }
+	    catch (RemoteException ex)
+	      {
+	      }
+	  }
+
+	logout(true);		// keep logout from logging a normal logout
+      }
+  }
+
+  /**
+   * <p>This method is used to send an asynchronous message
+   * to the client.  It is used to update the clients so they
+   * know when a build is being processed.</p>
+   *
+   * <p>See {@link arlut.csd.ganymede.common.ClientMessage ClientMessage}
+   * for the list of acceptable client message types.</p>
+   */
+
+  void sendMessage(int type, String message)
+  {
+    if (type < ClientMessage.FIRST || type > ClientMessage.LAST)
+      {
+	throw new IllegalArgumentException(ts.l("sendMessage.exception"));
+      }
+
+    if (asyncPort != null)
+      {
+	try
+	  {
+	    asyncPort.sendMessage(type, message);	// async proxy
+	  }
+	catch (RemoteException ex)
+	  {
+	  }
+      }
+  }
+
+  /**
+   * <p>This method is called when the Java RMI system detects that this
+   * remote object is no longer referenced by any remote objects.</p>
+   *
+   * <p>This method handles abnormal logouts and time outs for us.  By
+   * default, the 1.1 RMI time-out is 10 minutes.</p>
+   *
+   * <p>The RMI timeout can be modified by setting the system property
+   * sun.rmi.transport.proxy.connectTimeout.</p>
+   *
+   * @see java.rmi.server.Unreferenced
+   */
+
+  public void unreferenced()
+  {
+    /* the xmlclient may well drop reference to us (the
+       GanymedeSession), as all it really cares about is the
+       GanymedeXMLSession..  if we have an xSession reference, assume
+       that all is well.. the GanymedeXMLSession has its own
+       unreferenced method that can handle dead xml clients, after
+       all.
+    */
+
+    if (xSession != null)
+      {
+	return;
+      }
+
+    if (loggedInSemaphore.isSet())
+      {
+	// "Network connection to the Ganymede client process has been lost."
+	forceOff(ts.l("unreferenced.reason"));
+      }
+  }
+
+  /**
+   * This method provides a handy description of this session.
+   */
+
+  public String toString()
+  {
+    return "GanymedeSession [" + permManager.getUserName() + "," + permManager.getPersonaName() + "]";
   }
 }
