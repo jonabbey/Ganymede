@@ -305,8 +305,7 @@ public class DBPermissionManager {
   public DBPermissionManager(GanymedeSession gSession)
   {
     this.gSession = gSession;
-
-    setSession(gSession.getSession());
+    this.session = gSession.getSession();
   }
 
   public DBPermissionManager configureInternalSession(String sessionLabel)
@@ -352,11 +351,6 @@ public class DBPermissionManager {
     updatePerms(true);
 
     return this;
-  }
-
-  private void setSession(DBSession session)
-  {
-    this.session = session;
   }
 
   public boolean isSuperGash()
