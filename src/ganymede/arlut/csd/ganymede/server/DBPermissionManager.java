@@ -2311,7 +2311,7 @@ public class DBPermissionManager {
 	  }
       }
 
-    boolean result = recursePersonasMatch(owners, new Vector());
+    boolean result = recursePersonasMatch(owners, new Vector<Invid>());
 
     if (showit)
       {
@@ -2378,7 +2378,7 @@ public class DBPermissionManager {
 		// owners value passed in.  Otherwise, we'd have to
 		// clone the results from getValuesLocal().
 
-		if (recursePersonasMatch(inf.getValuesLocal(), new Vector()))
+		if (recursePersonasMatch(inf.getValuesLocal(), new Vector<Invid>()))
 		  {
 		    found = true;
 		  }
