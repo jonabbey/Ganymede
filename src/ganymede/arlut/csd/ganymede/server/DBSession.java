@@ -1741,7 +1741,7 @@ final public class DBSession {
   {
     try
       {
-	return viewObjectDB(invid).getLabel();
+	return viewDBObject(invid).getLabel();
       }
     catch (NullPointerException ex)
       {

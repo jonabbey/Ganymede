@@ -1833,12 +1833,12 @@ public class GanymedeServer implements Server {
 	    if (!ReturnVal.didSucceed(retVal))
 	      {
 		// "Couldn''t delete object {0}"
-		Ganymede.debug(ts.l("sweepEmbeddedObjects.delete_failure", gSession.viewObjectLabel(objInvid)));
+		Ganymede.debug(ts.l("sweepEmbeddedObjects.delete_failure", gSession.getSession().getObjectLabel(objInvid)));
 	      }
 	    else
 	      {
 		// "Deleted object {0}"
-		Ganymede.debug(ts.l("sweepEmbeddedObjects.delete_ok", gSession.viewObjectLabel(objInvid)));
+		Ganymede.debug(ts.l("sweepEmbeddedObjects.delete_ok", gSession.getSession().getObjectLabel(objInvid)));
 	      }
 	  }
 

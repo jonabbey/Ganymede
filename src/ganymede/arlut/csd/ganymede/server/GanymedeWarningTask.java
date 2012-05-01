@@ -239,13 +239,13 @@ public class GanymedeWarningTask implements Runnable {
 		      {
 			// "{0} {1} expires in one week"
 			title = ts.l("run.expire_one_week_email_subj",
-				     base.getName(), mySession.viewObjectLabel(invid));
+				     base.getName(), mySession.getSession().getObjectLabel(invid));
 		      }
 		    else
 		      {
 			// "{0} {1} expires in {2,num,#} weeks"
 			title = ts.l("run.expire_multi_week_email_subj",
-				     base.getName(), mySession.viewObjectLabel(invid), Integer.valueOf(i+1));
+				     base.getName(), mySession.getSession().getObjectLabel(invid), Integer.valueOf(i+1));
 		      }
 
 		    obj = mySession.getSession().viewDBObject(invid);
@@ -313,13 +313,13 @@ public class GanymedeWarningTask implements Runnable {
 		      {
 			// "{0} {1} will be removed in one week"
 			title = ts.l("run.remove_one_week_email_subj",
-				     base.getName(), mySession.viewObjectLabel(invid));
+				     base.getName(), mySession.getSession().getObjectLabel(invid));
 		      }
 		    else
 		      {
 			// "{0} {1} will be removed in {2,num,#} weeks"
 			title = ts.l("run.remove_multi_week_email_subj",
-				     base.getName(), mySession.viewObjectLabel(invid), Integer.valueOf(i+1));
+				     base.getName(), mySession.getSession().getObjectLabel(invid), Integer.valueOf(i+1));
 		      }
 
                     obj = mySession.getSession().viewDBObject(invid);
@@ -392,7 +392,7 @@ public class GanymedeWarningTask implements Runnable {
 		invid = result.getInvid();
 
 		// "** {0} {1} expires within 24 hours **"
-		title = ts.l("run.expire_real_soon_now", base.getName(), mySession.viewObjectLabel(invid));
+		title = ts.l("run.expire_real_soon_now", base.getName(), mySession.getSession().getObjectLabel(invid));
 
 		tempString.setLength(0);
 		tempString.append(title);
@@ -451,7 +451,7 @@ public class GanymedeWarningTask implements Runnable {
 		invid = result.getInvid();
 
 		// "** {0} {1} will be removed within the next 24 hours! **"
-		title = ts.l("run.remove_real_soon_now", base.getName(), mySession.viewObjectLabel(invid));
+		title = ts.l("run.remove_real_soon_now", base.getName(), mySession.getSession().getObjectLabel(invid));
 
 		obj = mySession.getSession().viewDBObject(invid);
 		Date actionDate = (Date) obj.getFieldValueLocal(SchemaConstants.RemovalField);

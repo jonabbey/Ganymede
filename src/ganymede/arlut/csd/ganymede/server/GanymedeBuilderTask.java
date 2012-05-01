@@ -887,7 +887,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   protected final String getLabel(Invid invid)
   {
-    return session.viewObjectLabel(invid);
+    return session.getSession().getObjectLabel(invid);
   }
 
   /**

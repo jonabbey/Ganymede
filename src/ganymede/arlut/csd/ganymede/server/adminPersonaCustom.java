@@ -3,17 +3,19 @@
    adminPersonaCustom.java
 
    This file is a management class for admin personae objects in Ganymede.
-   
+
    Created: 8 October 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -76,7 +78,7 @@ import arlut.csd.Util.TranslationService;
  */
 
 public class adminPersonaCustom extends DBEditObject implements SchemaConstants {
-  
+
   static final boolean debug = false;
 
   /**
@@ -201,14 +203,14 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 	String adminName = object.getLabel();
 
 	int colondex = adminName.indexOf(':');
-	
+
 	if (colondex == -1)
 	  {
 	    // supergash?
 
 	    return null;
 	  }
-    
+
 	address = adminName.substring(0, colondex);
       }
 
@@ -227,7 +229,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
    * label and does our namespace checks for us.  We do this in
    * finalizeSetValue() so that this operation is always done, even
    * if our GanymedeSession's enableOversight is set to false.
-   * 
+   *
    */
 
   public ReturnVal finalizeSetValue(DBField field, Object value)
@@ -308,7 +310,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     if (newName == null)
       {
-	newName = this.getGSession().viewObjectLabel(userInvid);
+	newName = this.getGSession().getSession().getObjectLabel(userInvid);
       }
 
     if (debug)
@@ -353,14 +355,14 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
    *
    * This method will provide a reasonable default for targetted
    * invid fields.
-   * 
+   *
    */
 
   public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (debug)
       {
-	System.err.println("Entering adminPersona obtainChoiceList for field " + 
+	System.err.println("Entering adminPersona obtainChoiceList for field " +
 			   field.getName());
       }
 
@@ -374,7 +376,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 	System.err.println("Returning adminPersona restricted list");
       }
 
-    if (field.isEditable() && (field instanceof InvidDBField) && 
+    if (field.isEditable() && (field instanceof InvidDBField) &&
 	!field.isEditInPlace())
       {
 	DBObjectBaseField fieldDef;
@@ -383,7 +385,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 	/* -- */
 
 	fieldDef = field.getFieldDef();
-	
+
 	baseId = fieldDef.getTargetBase();
 
 	if (baseId < 0)
@@ -457,7 +459,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     if ((roles != null && roles.size() != 0) || (ownerSets != null && ownerSets.contains(supergashOwner))) {
       return null;
-    } 
+    }
 
     // "Persona object "{0}" is incomplete. Personas must either have
     // a role defined or be a member of the supergash owner set."
@@ -514,7 +516,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
    * an exception will be thrown.
    *
    * To be overridden in DBEditObject subclasses.
-   * 
+   *
    * <b>*PSEUDOSTATIC*</b>
    *
    */
