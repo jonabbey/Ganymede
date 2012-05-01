@@ -4,16 +4,16 @@
 
    Convenience methods for working with Lists.. provides efficient
    Union, Intersection, and Difference methods.
-   
+
    Created: 21 July 1998
 
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Directory Directory Management System
- 
+
    Copyright (C) 1996-2012
    The University of Texas at Austin
 
@@ -125,7 +125,7 @@ public class VectorUtils {
 	  {
 	    workSet.addAll(vectA);
 	  }
-    
+
 	if (vectB != null)
 	  {
 	    workSet.addAll(vectB);
@@ -157,7 +157,7 @@ public class VectorUtils {
 
   /**
    * Returns true if vectA and vectB have any elements in
-   * common. 
+   * common.
    */
 
   public static <E> boolean overlaps(List<E> vectA, List<E> vectB)
@@ -172,7 +172,7 @@ public class VectorUtils {
 	Set<E> workSet = new HashSet<E>(vectA.size());
 
 	workSet.addAll(vectA);
-	
+
 	for (int i = 0; i < vectB.size(); i++)
 	  {
 	    if (workSet.contains(vectB.get(i)))
@@ -181,7 +181,7 @@ public class VectorUtils {
 	      }
 	  }
       }
-    else 
+    else
       {
 	if (vectA.size() > vectB.size())
 	  {
@@ -229,7 +229,7 @@ public class VectorUtils {
       {
 	workSetA.addAll(vectA);
       }
-    
+
     if (vectB != null)
       {
 	workSetB.addAll(vectB);
@@ -320,7 +320,7 @@ public class VectorUtils {
   }
 
   /**
-   * This method returns a Vector of items that appeared in the 
+   * This method returns a Vector of items that appeared in the
    * vector parameter more than once.
    *
    * If no duplicates are found or if vector is null, this method
@@ -493,7 +493,7 @@ public class VectorUtils {
 	    oldindex = index + 1;
 	  }
       }
-    
+
     return results;
   }
 
@@ -513,7 +513,7 @@ public class VectorUtils {
     boolean foundSep = false;
 
     /* -- */
-    
+
     // find the next separator
 
     for (int i = 0; i < sepAry.length; i++)
@@ -556,7 +556,7 @@ public class VectorUtils {
     // String testString = "jon, beth   ross,,,darren,anna";
 
     String testString = "jon, beth   ross,,,darren,anna,,,,,";
-    
+
     Vector results = stringVector(testString, ", ");
 
     for (int i = 0; i < results.size(); i++)

@@ -7,15 +7,15 @@
    published to the net for client logins via RMI.  As such, the
    GanymedeServer object is the first Ganymede code that a client will
    directly interact with.
-   
+
    Created: 17 January 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2012
    The University of Texas at Austin
 
@@ -205,7 +205,7 @@ public class GanymedeServer implements Server {
     loginSession = new GanymedeSession(); // supergash
 
     Ganymede.rmi.publishObject(this);
-  } 
+  }
 
   /**
    * <p>Simple RMI ping test method.. this method is here so that the
@@ -219,7 +219,7 @@ public class GanymedeServer implements Server {
     return true;
   }
 
-  /** 
+  /**
    * <p>Client login method.  Establishes a {@link
    * arlut.csd.ganymede.server.GanymedeSession GanymedeSession} object in the
    * server for the client, and returns a serializable {@link
@@ -235,7 +235,7 @@ public class GanymedeServer implements Server {
    * the GanymedeServer object for statistics and for the admin
    * console's monitoring support.</p>
    *
-   * @see arlut.csd.ganymede.rmi.Server 
+   * @see arlut.csd.ganymede.rmi.Server
    */
 
   public ReturnVal login(String username, String password) throws RemoteException
@@ -243,7 +243,7 @@ public class GanymedeServer implements Server {
     return processLogin(username, password, true, true);
   }
 
-  /** 
+  /**
    * <p>XML Client login method.  Establishes a {@link
    * arlut.csd.ganymede.server.GanymedeXMLSession GanymedeXMLSession} object
    * in the server for the client, and returns a serializable {@link
@@ -260,7 +260,7 @@ public class GanymedeServer implements Server {
    * GanymedeServer object for statistics and for the admin console's
    * monitoring support.</p>
    *
-   * @see arlut.csd.ganymede.rmi.Server 
+   * @see arlut.csd.ganymede.rmi.Server
    */
 
   public ReturnVal xmlLogin(String username, String password) throws RemoteException
@@ -280,7 +280,7 @@ public class GanymedeServer implements Server {
       }
 
     GanymedeXMLSession xSession = new GanymedeXMLSession(mySession);
- 
+
     // spawn the GanymedeXMLSession's background parser thread
 
     xSession.start();
@@ -309,7 +309,7 @@ public class GanymedeServer implements Server {
    * with user timeouts and the like.
    */
 
-  private ReturnVal processLogin(String clientName, String clientPass, 
+  private ReturnVal processLogin(String clientName, String clientPass,
 				 boolean directSession, boolean clientIsRemote) throws RemoteException
   {
     String clienthost = null;
@@ -349,7 +349,7 @@ public class GanymedeServer implements Server {
 	    // things cleanly..  we do a case insensitive match
 	    // against user/persona name later on, but we want to have
 	    // a canonical name to track multiple logins with.
-    
+
 	    clientName = clientName.toLowerCase();
 
 	    root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.NOCASEEQ, clientName);
@@ -364,9 +364,9 @@ public class GanymedeServer implements Server {
 	    for (int i = 0; !found && results != null && (i < results.size()); i++)
 	      {
 		user = loginSession.getSession().viewDBObject(((Result) results.elementAt(i)).getInvid());
-	
+
 		pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
-	
+
 		if (pdbf != null && pdbf.matchPlainText(clientPass))
 		  {
 		    found = true;
@@ -403,9 +403,9 @@ public class GanymedeServer implements Server {
 		// be 'supergash', which could be confused with the
 		// supergash account.
 
-		root = new QueryOrNode(new QueryDataNode(SchemaConstants.PersonaLabelField, 
+		root = new QueryOrNode(new QueryDataNode(SchemaConstants.PersonaLabelField,
 							 QueryDataNode.NOCASEEQ, clientName),
-				       new QueryAndNode(new QueryDataNode(SchemaConstants.PersonaNameField, 
+				       new QueryAndNode(new QueryDataNode(SchemaConstants.PersonaNameField,
 									  QueryDataNode.NOCASEEQ, clientName),
 							new QueryNotNode(new QueryDataNode(SchemaConstants.PersonaAssocUser,
 											   QueryDataNode.DEFINED, null))));
@@ -432,7 +432,7 @@ public class GanymedeServer implements Server {
 		for (int i = 0; !found && (i < results.size()); i++)
 		  {
 		    persona = loginSession.getSession().viewDBObject(((Result) results.elementAt(i)).getInvid());
-	    
+
 		    pdbf = (PasswordDBField) persona.getField(SchemaConstants.PersonaPasswordField);
 
 		    if (pdbf == null)
@@ -452,20 +452,20 @@ public class GanymedeServer implements Server {
 				found = true;
 			      }
 			  }
-		      } 
-		  } 
-	
+		      }
+		  }
+
 		// okay, if the user logged in directly to his persona
 		// (broccol:GASH Admin, etc.), try to find his base user
 		// account.
-	
+
 		if (found && clientName.indexOf(':') != -1)
 		  {
 		    String userName = clientName.substring(0, clientName.indexOf(':'));
-	    
+
 		    root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.EQUALS, userName);
 		    userQuery = new Query(SchemaConstants.UserBase, root, false);
-	    
+
 		    results = loginSession.internalQuery(userQuery);
 
 		    if (results.size() == 1)
@@ -492,7 +492,7 @@ public class GanymedeServer implements Server {
 		// adding itself to our sessions Vector.
 
 		GanymedeSession session = new GanymedeSession(clientName,
-							      user, persona, 
+							      user, persona,
 							      directSession, clientIsRemote);
 
 		// "{0} logged in from {1}"
@@ -677,11 +677,11 @@ public class GanymedeServer implements Server {
     synchronized (sessions)
       {
 	entries = new Vector(sessions.size());
-	
+
 	for (int i = 0; i < sessions.size(); i++)
 	  {
 	    session = (GanymedeSession) GanymedeServer.sessions.elementAt(i);
-	    
+
 	    if (session.isLoggedIn())
 	      {
 		entries.addElement(session.getAdminEntry());
@@ -819,7 +819,7 @@ public class GanymedeServer implements Server {
 	    username = temp + "[" + i + "]";
 	    i++;
 	  }
-	
+
 	activeUsers.put(username, username);
       }
 
@@ -847,7 +847,7 @@ public class GanymedeServer implements Server {
 	    Thread deathThread = new Thread(new Runnable() {
 	      public void run() {
 		// sleep for 5 seconds to let our last client disconnect
-		
+
 		try
 		  {
 		    java.lang.Thread.currentThread().sleep(5000);
@@ -865,7 +865,7 @@ public class GanymedeServer implements Server {
       }
   }
 
-  /** 
+  /**
    * <p>This method retrieves a message from a specified directory in
    * the Ganymede installation and passes it back as a StringBuffer.
    * Used by the Ganymede server to pass motd information to the
@@ -1016,7 +1016,7 @@ public class GanymedeServer implements Server {
     try
       {
 	String ipAddress = UnicastRemoteObject.getClientHost();
-	
+
 	try
 	  {
 	    java.net.InetAddress addr = java.net.InetAddress.getByName(ipAddress);
@@ -1033,7 +1033,7 @@ public class GanymedeServer implements Server {
       }
 
     validationResult = validateAdminUser(clientName, clientPass);
-    
+
     if (validationResult == 0)
       {
 	if (Ganymede.log != null)
@@ -1045,11 +1045,11 @@ public class GanymedeServer implements Server {
 						       null,
 						       null));
 	  }
-	
+
 	return Ganymede.createErrorDialog(ts.l("admin.badlogin"),
 					  ts.l("admin.baduserpass"));
       }
-      
+
     if (validationResult == 1)
       {
       	fullprivs = false;
@@ -1091,7 +1091,7 @@ public class GanymedeServer implements Server {
   /**
    * This method determines whether the specified username/password combination
    * is valid.
-   * 
+   *
    * @param clientName The username
    * @param clientPass The password
    * @return 0 if the login fails,
@@ -1117,10 +1117,10 @@ public class GanymedeServer implements Server {
       {
       	return 0;
       }
-    
+
     obj = loginSession.getSession().viewDBObject(((Result) results.elementAt(0)).getInvid());
     pdbf = (PasswordDBField) obj.getField(SchemaConstants.PersonaPasswordField);
-	    
+
     if (pdbf != null && pdbf.matchPlainText(clientPass))
       {
         // Are we the One True Amazing Supergash Root User Person? He
@@ -1166,7 +1166,7 @@ public class GanymedeServer implements Server {
       	return 0;
       }
   }
-  
+
   /**
    * <p>This method is used by the
    * {@link arlut.csd.ganymede.server.GanymedeAdmin#shutdown(boolean) shutdown()}
@@ -1322,12 +1322,12 @@ public class GanymedeServer implements Server {
 	Ganymede.debug(ts.l("shutdown.consoles"));
 
 	GanymedeAdmin.closeAllConsoles(ts.l("shutdown.byeconsoles"));
-	
+
 	// disconnect the Jython server
-  
+
 	/*
 	Ganymede.debug(ts.l("shutdown.jython"));
-	
+
 	Ganymede.jythonServer.shutdown();
 	*/
 
@@ -1411,7 +1411,7 @@ public class GanymedeServer implements Server {
       swept = false;
 
     // XXX
-    // 
+    //
     // it's safe to use Ganymede.internalSession's DBSession here only
     // because we don't call the synchronized viewDBObject method on
     // it unless and until we are granted the DBDumpLock, and because
@@ -1471,7 +1471,7 @@ public class GanymedeServer implements Server {
 			    // clear out the invid's held in this field pending
 			    // successful lookup
 
-			    iField.value = new Vector(); 
+			    iField.value = new Vector();
 
 			    for (Invid invid: tempVector)
 			      {
@@ -1565,7 +1565,7 @@ public class GanymedeServer implements Server {
       ok = true;
 
     // XXX
-    // 
+    //
     // it's safe to use Ganymede.internalSession's DBSession here only
     // because we don't call the synchronized viewDBObject method on
     // it unless and until we are granted the DBDumpLock, and because
@@ -1576,7 +1576,7 @@ public class GanymedeServer implements Server {
     DBSession session = Ganymede.internalSession.getSession();
 
     /* -- */
-    
+
     DBDumpLock lock = new DBDumpLock(Ganymede.db);
 
     try
@@ -1609,16 +1609,16 @@ public class GanymedeServer implements Server {
 		    for (int i = 0; i < object.fieldAry.length; i++)
 		      {
 			field = object.fieldAry[i];
-			
+
 			// we only care about invid fields
-			
+
 			if (field == null || !(field instanceof InvidDBField))
 			  {
 			    continue;
 			  }
-			
+
 			iField = (InvidDBField) field;
-			
+
 			if (!iField.test(session, (base.getName() + ":" + object.getLabel())))
 			  {
 			    ok = false;
@@ -1648,7 +1648,7 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   * <p>This method is used for testing.  This method sweeps 
+   * <p>This method is used for testing.  This method sweeps
    * through all embedded objects in the (loaded) database, and
    * checks to make sure that they all have valid containing objects.</p>
    *
@@ -1662,7 +1662,7 @@ public class GanymedeServer implements Server {
       ok = true;
 
     // XXX
-    // 
+    //
     // it's safe to use Ganymede.internalSession's DBSession here only
     // because we don't call the synchronized viewDBObject method on
     // it unless and until we are granted the DBDumpLock, and because
@@ -1673,7 +1673,7 @@ public class GanymedeServer implements Server {
     GanymedeSession gSession = Ganymede.internalSession;
 
     /* -- */
-    
+
     DBDumpLock lock = new DBDumpLock(Ganymede.db);
 
     try
@@ -1701,7 +1701,7 @@ public class GanymedeServer implements Server {
 	    // loop over the objects in this base
 
 	    Ganymede.debug(ts.l("checkEmbeddedObjects.checking", base.getName()));
-	
+
 	    for (DBObject object: base.getObjects())
 	      {
 		try
@@ -1728,7 +1728,7 @@ public class GanymedeServer implements Server {
 
   /**
    * <p>This method is used for fixing the server if it somehow leaks
-   * embedded objects..  This method sweeps 
+   * embedded objects..  This method sweeps
    * through all embedded objects in the (loaded) database, and
    * deletes any that do not have valid containing objects.</p>
    */
@@ -1738,7 +1738,7 @@ public class GanymedeServer implements Server {
     Vector invidsToDelete = new Vector();
 
     // XXX
-    // 
+    //
     // it's safe to use Ganymede.internalSession's DBSession here only
     // because we don't call the synchronized viewDBObject method on
     // it unless and until we are granted the DBDumpLock, and because
@@ -1749,7 +1749,7 @@ public class GanymedeServer implements Server {
     GanymedeSession gSession = Ganymede.internalSession;
 
     /* -- */
-    
+
     DBDumpLock lock = new DBDumpLock(Ganymede.db);
 
     try
@@ -1823,7 +1823,7 @@ public class GanymedeServer implements Server {
 	// whole transaction will fail, no rollbacks.
 
 	gSession.openTransaction("embedded object sweep", false); // non-interactive
-    
+
 	for (int i = 0; i < invidsToDelete.size(); i++)
 	  {
 	    Invid objInvid = (Invid) invidsToDelete.elementAt(i);

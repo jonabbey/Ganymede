@@ -3,7 +3,7 @@
    DBQueryHandler.java
 
    This is the core query processing engine for the Ganymede database.
-   
+
    Created: 10 July 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
@@ -11,7 +11,7 @@
    -----------------------------------------------------------------------
 
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2012
    The University of Texas at Austin
 
@@ -144,7 +144,7 @@ public class DBQueryHandler {
     Object value = null;
     Vector values = null;
     int intval;
-    
+
     /* -- */
 
     try				// wheee, sloppy
@@ -161,7 +161,7 @@ public class DBQueryHandler {
 
 	if (qN instanceof QueryAndNode)
 	  {
-	    return (nodeMatch(session, ((QueryAndNode)qN).child1, obj) && 
+	    return (nodeMatch(session, ((QueryAndNode)qN).child1, obj) &&
 		    nodeMatch(session, ((QueryAndNode)qN).child2, obj));
 	  }
 
@@ -174,7 +174,7 @@ public class DBQueryHandler {
 	if (qN instanceof QueryDeRefNode)
 	  {
 	    InvidDBField invidField = null;
-	    
+
 	    /* - */
 
 	    QueryDeRefNode n = (QueryDeRefNode) qN;
@@ -187,7 +187,7 @@ public class DBQueryHandler {
 		  }
 		else if (n.fieldId != -1)
 		  {
-		    invidField = (InvidDBField) obj.getField(n.fieldId);		    
+		    invidField = (InvidDBField) obj.getField(n.fieldId);
 		  }
 		else
 		  {
@@ -294,7 +294,7 @@ public class DBQueryHandler {
 	    if (n.fieldId == -1)
 	      {
 		value = obj.getLabel();
-		
+
 		if (debug)
 		  {
 		    System.err.println("Doing comparison against object label: " + value);
@@ -319,7 +319,7 @@ public class DBQueryHandler {
 		      {
 			return false;
 		      }
-		    
+
 		    if (field.isVector())
 		      {
 			values = field.getValuesLocal();
@@ -400,7 +400,7 @@ public class DBQueryHandler {
 		  }
 
 		return (values.size() < intval);
-	      
+
 	      case QueryDataNode.LENGTHLEEQ:
 
 		if (!field.isVector())
@@ -415,8 +415,8 @@ public class DBQueryHandler {
 		    System.err.println("Comparing vector field size: " + values.size() + " <= " + intval + "?");
 		  }
 
-		return (values.size() <= intval);	      
-		
+		return (values.size() <= intval);
+
 	      case QueryDataNode.LENGTHGREQ:
 
 		if (!field.isVector())
@@ -431,7 +431,7 @@ public class DBQueryHandler {
 		    System.err.println("Comparing vector field size: " + values.size() + " >= " + intval + "?");
 		  }
 
-		return (values.size() >= intval);		
+		return (values.size() >= intval);
 	      }
 
 	    // At this point, all of the pure vector-field (read: length related) operations
@@ -442,12 +442,12 @@ public class DBQueryHandler {
 	      {
 	      	n.arrayOp = QueryDataNode.CONTAINS;
 	      }
-	    
+
 	    // okay.  Now we check each field type
 
 	    if (n.value instanceof String &&
 		(((value != null) && value instanceof String) ||
-		((values != null) && (values.size() > 0) && 
+		((values != null) && (values.size() > 0) &&
 		 (values.elementAt(0) instanceof String)))) // assume type consistent array
 	      {
 		// Compare a string value or regexp against a string field
@@ -533,7 +533,7 @@ public class DBQueryHandler {
 		  }
 	      }
 
-	    // The client can pass us a String for invid comparisons.. we need to 
+	    // The client can pass us a String for invid comparisons.. we need to
 	    // turn Invid's in the field we're looking at to Strings for the
 	    // compare.
 
@@ -556,24 +556,24 @@ public class DBQueryHandler {
 		  {
 		    s1 = (String) n.value;
 		    s2 = (String) session.viewObjectLabel((Invid)value);
-		    
+
 		    return compareString(n, s1, s2);
 		  }
 		else if (n.arrayOp == QueryDataNode.CONTAINS)
 		  {
 		    s1 = (String) n.value;
-		    
+
 		    /* -- */
-		    
+
 		    if (debug)
 		      {
 			System.err.println("Doing a vector string/invid compare against value/regexp " + s1);
 		      }
-		    
+
 		    for (int i = 0; i < values.size(); i++)
 		      {
 			s2 = session.viewObjectLabel((Invid) values.elementAt(i));
-			
+
 			if (compareString(n, s1, s2))
 			  {
 			    return true;
@@ -609,7 +609,7 @@ public class DBQueryHandler {
 		  {
 		    s1 = (String) n.value;
 		    Byte[] ipBytes = (Byte[]) value;
-		   
+
 		    if (ipBytes.length == 4)
 		      {
 			s2 = IPDBField.genIPV4string(ipBytes);
@@ -618,7 +618,7 @@ public class DBQueryHandler {
 		      {
 			s2 = IPDBField.genIPV6string(ipBytes);
 		      }
-		    
+
 		    if (debug)
 		      {
 			System.err.println("Comparison: " + n + ", string check = " + s2);
@@ -629,14 +629,14 @@ public class DBQueryHandler {
 		else if (n.arrayOp == QueryDataNode.CONTAINS)
 		  {
 		    s1 = (String) n.value;
-		    
+
 		    /* -- */
-		    
+
 		    if (debug)
 		      {
 			System.err.println("Doing a vector string/ip address compare against value/regexp " + s1);
 		      }
-		    
+
 		    for (int i = 0; i < values.size(); i++)
 		      {
 			Byte[] ipBytes = (Byte[]) values.elementAt(i);
@@ -649,7 +649,7 @@ public class DBQueryHandler {
 			  {
 			    s2 = IPDBField.genIPV6string(ipBytes);
 			  }
-			
+
 			if (compareString(n, s1, s2))
 			  {
 			    return true;
@@ -681,7 +681,7 @@ public class DBQueryHandler {
 		  {
 		    fBytes = (Byte[]) value;
 		    oBytes = (Byte[]) n.value;
-		    
+
 		    if (n.comparator == QueryDataNode.EQUALS)
 		      {
 			return compareIPs(fBytes, oBytes);
@@ -704,11 +704,11 @@ public class DBQueryHandler {
 		    if (n.comparator == n.EQUALS)
 		      {
 			oBytes = (Byte[]) n.value;
-			
+
 			switch (n.arrayOp)
 			  {
 			  case QueryDataNode.CONTAINS:
-			    
+
 			    for (int i = 0; i < values.size(); i++)
 			      {
 				if (compareIPs(oBytes, ((Byte[]) values.elementAt(i))))
@@ -716,11 +716,11 @@ public class DBQueryHandler {
 				    return true;
 				  }
 			      }
-			    
+
 			    return false;
-			    
+
 			  default:
-			    
+
 			    return false;
 			  }
 		      }
@@ -889,7 +889,7 @@ public class DBQueryHandler {
     switch (n.arrayOp)
       {
       case QueryDataNode.CONTAINS:
-	
+
 	for (int i = 0; i < values.size(); i++)
 	  {
 	    if (compareString(n, queryValue, (String) values.elementAt(i)))
@@ -901,13 +901,13 @@ public class DBQueryHandler {
 	return false;
 
       default:
-	
+
 	return false;
       }
   }
 
   /**
-   * string1 is the query value provided by the client, string2 is the 
+   * string1 is the query value provided by the client, string2 is the
    * value we are testing.
    */
 
@@ -942,7 +942,7 @@ public class DBQueryHandler {
 	      {
 		return false;
 	      }
-	    
+
 	    try
 	      {
 		n.regularExpression = java.util.regex.Pattern.compile(n.value.toString());
@@ -958,14 +958,14 @@ public class DBQueryHandler {
 		System.err.println("DBQueryHandler: regexp built successfully: " + n.regularExpression);
 	      }
 	  }
-	
+
 	java.util.regex.Pattern regexp = (java.util.regex.Pattern) n.regularExpression;
-	
+
 	if (debug)
 	  {
 	    System.err.println("DBQueryHandler: Trying to match regexp against " + string2);
 	  }
-	
+
 	return regexp.matcher(string2).find();
 
       case QueryDataNode.NOCASEMATCHES:
@@ -981,7 +981,7 @@ public class DBQueryHandler {
 	      {
 		return false;
 	      }
-	    
+
 	    try
 	      {
 		n.regularExpression = java.util.regex.Pattern.compile(n.value.toString(), java.util.regex.Pattern.CASE_INSENSITIVE);
@@ -991,20 +991,20 @@ public class DBQueryHandler {
 		// "Error, invalid pattern matching regular expression provided.  The Regular Expression parser reported the following error:\n{0}"
 		throw new RegexpException(ts.l("compareString.bad_regexp", ex.getMessage()));
 	      }
-	    
+
 	    if (debug)
 	      {
 		System.err.println("DBQueryHandler: case insensitive regexp built successfully: " + n.regularExpression);
 	      }
 	  }
-	
+
 	java.util.regex.Pattern nocaseregexp = (java.util.regex.Pattern) n.regularExpression;
-	
+
 	if (debug)
 	  {
 	    System.err.println("DBQueryHandler: Trying to match case insensitive regexp against " + string2);
 	  }
-	
+
 	return nocaseregexp.matcher(string2).find();
 
       case QueryDataNode.EQUALS:
@@ -1090,7 +1090,7 @@ public class DBQueryHandler {
   // helpers
 
   /**
-   * IP address values are encoded as byte arrays in the Ganymede server.. this 
+   * IP address values are encoded as byte arrays in the Ganymede server.. this
    * method is used to compare two IP address values for equality.
    */
 
@@ -1109,13 +1109,13 @@ public class DBQueryHandler {
 		return false;
 	      }
 	  }
-	
+
 	return true;
       }
   }
 
   /**
-   * IP address values are encoded as byte arrays in the Ganymede server.. this 
+   * IP address values are encoded as byte arrays in the Ganymede server.. this
    * method is used to compare two IP address values for a prefix relationship.
    *
    * @return Returns true if param1 begins with param2.
@@ -1140,15 +1140,15 @@ public class DBQueryHandler {
 		return false;
 	      }
 	  }
-	
+
 	return true;
       }
   }
 
   /**
-   * IP address values are encoded as byte arrays in the Ganymede server.. this 
+   * IP address values are encoded as byte arrays in the Ganymede server.. this
    * method is used to compare two IP address values for a suffix relationship.
-   *   
+   *
    * @return Returns true if param1 ends with param2.
    */
 
@@ -1164,7 +1164,7 @@ public class DBQueryHandler {
       }
     else
       {
-	for (int i = (param1.length - 1), j = (suffix.length - 1); 
+	for (int i = (param1.length - 1), j = (suffix.length - 1);
 	     j >= 0;
 	     i--, j--)
 	  {
@@ -1173,7 +1173,7 @@ public class DBQueryHandler {
 		return false;
 	      }
 	  }
-	
+
 	return true;
       }
   }

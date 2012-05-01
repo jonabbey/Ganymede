@@ -14,8 +14,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -423,7 +425,7 @@ public class QueryResult implements java.io.Serializable {
     if (nonEditable)
       {
         Vector<String> myLabelList = new Vector<String>();
-            
+
         for (int i = 0; i < handles.size(); i++)
           {
             myLabelList.addElement(((ObjectHandle) handles.elementAt(i)).getLabel());
@@ -436,7 +438,7 @@ public class QueryResult implements java.io.Serializable {
         if (labelList == null)
           {
             labelList = new Vector<String>();
-            
+
             for (int i = 0; i < handles.size(); i++)
               {
                 labelList.addElement(((ObjectHandle) handles.elementAt(i)).getLabel());

@@ -5,15 +5,15 @@
    This class provides a template for code to be attached to the server to
    handle propagating data from the Ganymede object store into the wide
    world, via NIS, DNS, NIS+, LDAP, JNDI, JDBC, X, Y, Z, etc.
-   
+
    Created: 17 February 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2012
    The University of Texas at Austin
 
@@ -321,7 +321,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * is responsible for setting up the environment for a builder task to
    * operate under, and for actually invoking the builder method.
    */
-    
+
   public final void run(Object options[])
   {
     String label = null;
@@ -378,7 +378,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	    // start at builder:0 and work our way up as we go along
 	    // during the server's lifetime
 
-	    synchronized (GanymedeBuilderTask.class) 
+	    synchronized (GanymedeBuilderTask.class)
 	      {
 		// "builder: {0,number,#}"
 		label = ts.l("run.label_pattern", Integer.valueOf(id++));
@@ -446,7 +446,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 		lock = null;
 	      }
 	  }
-	
+
 	if (currentThread.isInterrupted())
 	  {
 	    // "Builder task {0} interrupted, not doing network build."
@@ -469,7 +469,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
                     Ganymede.debug(ts.l("run.shutting_down", this.getClass().getName(), shutdownState));
                     return;
                   }
-		
+
 		try
 		  {
 		    this.builderPhase2();
@@ -515,9 +515,9 @@ public abstract class GanymedeBuilderTask implements Runnable {
 		lock = null;
 	      }
 	  }
-	
+
 	// and again, just in case
-	
+
 	optionsCache = null;
       }
   }
@@ -561,12 +561,12 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
             return false;
           }
-	
+
 	if (base.getTimeStamp() == null)
 	  {
 	    return false;
 	  }
-	else 
+	else
 	  {
 	    return base.getTimeStamp().after(oldLastRunTime);
 	  }
@@ -655,7 +655,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
         return false;
       }
-	
+
     // if the base in question hasn't changed at all since our last
     // build, we don't need to worry about looking at the individual
     // fields.
@@ -1050,7 +1050,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * <p>then a call to getOptionValue() with 'buildPath', of any capitalization,
    * as the parameter will return '/var/ganymede/schema/NT'.</p>
    *
-   * <p>Any other parameter provided to getOptionValue() will cause null to 
+   * <p>Any other parameter provided to getOptionValue() will cause null to
    * be returned.</p>
    */
 
@@ -1217,8 +1217,8 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	    if (file.exists())
 	      {
 		Date oldTime = new Date(file.lastModified());
-		
-		DateFormat formatter = new SimpleDateFormat("yyyy_MM_dd-HH:mm:ss", 
+
+		DateFormat formatter = new SimpleDateFormat("yyyy_MM_dd-HH:mm:ss",
 							    java.util.Locale.US);
 
 		String label = formatter.format(oldTime);
@@ -1268,7 +1268,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   //
   // static methods
-  // 
+  //
 
   private static synchronized void incBusy(String path)
   {
@@ -1310,7 +1310,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	    // path any more
 
 	    String zipName = oldBackUpDirectory + ".zip";
-	    
+
 	    try
 	      {
 		if (zipIt.zipDirectory(oldBackUpDirectory, zipName))
@@ -1358,7 +1358,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
 	    return;
 	  }
-	
+
 	basePath = PathComplete.completePath(basePath);
       }
 
@@ -1415,7 +1415,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	// and now our roll over time
 
 	cal.add(Calendar.DATE, 1);
-	
+
 	Date tomorrowMidnight = cal.getTime();
 	rolloverTime = tomorrowMidnight.getTime();
 
@@ -1423,7 +1423,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	// sweep through the backup directory and zip up any directories
 	// that match our pattern for day directories, before we create
 	// one for today's date
-	
+
 	if (firstRun)
 	  {
 	    try
@@ -1445,7 +1445,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	currentBackUpDirectory = basePath + File.separator + formatter.format(todayMidnight);
 
 	File newDirectory = new File(currentBackUpDirectory);
-	
+
 	if (!newDirectory.exists())
 	  {
 	    if (!newDirectory.mkdir())
@@ -1456,7 +1456,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
       }
 
     // if we haven't zipped up our old directory, do that
-    
+
     if (oldBackUpDirectory != null)
       {
 	try
@@ -1464,10 +1464,10 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	    if (busyCount(oldBackUpDirectory) == 0)
 	      {
 		String zipName = oldBackUpDirectory + ".zip";
-		
+
 		// "GanymedeBuilderTask.openBackupDirectory(): trying to zip {0}."
 		Ganymede.debug(ts.l("openBackupDirectory.zipping", oldBackUpDirectory));
-		
+
 		if (zipIt.zipDirectory(oldBackUpDirectory, zipName))
 		  {
 		    // "GanymedeBuilderTask.openBackupDirectory(): zipped {0}."
@@ -1477,11 +1477,11 @@ public abstract class GanymedeBuilderTask implements Runnable {
 		else
 		  {
 		    File dirFile = new File(oldBackUpDirectory);
-		    
+
 		    if (dirFile.canRead())
 		      {
 			String[] list = dirFile.list();
-			
+
 			if (list == null || list.length == 0)
 			  {
 			    // "GanymedeBuilderTask.openBackupDirectory(): directory {0} is empty, deleting it."
@@ -1637,11 +1637,11 @@ public abstract class GanymedeBuilderTask implements Runnable {
 		    else
 		      {
 			File dirFile = new File(dirName);
-			
+
 			if (dirFile.canRead())
 			  {
 			    String[] list = dirFile.list();
-			
+
 			    if (list == null || list.length == 0)
 			      {
 				// "GanymedeBuilderTask.cleanBackupDirectory(): directory {0} is empty, deleting it."
@@ -1676,7 +1676,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * hack to support proper updating of the client's status icon on
    * client connect.
    */
-  
+
   public static int getPhase1Count()
   {
     return phase1Count;

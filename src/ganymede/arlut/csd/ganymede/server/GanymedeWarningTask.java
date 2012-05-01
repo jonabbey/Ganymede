@@ -74,7 +74,7 @@ import arlut.csd.ganymede.common.SchemaConstants;
 /**
  * This is a Ganymede server task, for use with the {@link
  * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}.
- * 
+ *
  * The standard GanymedeWarningTask class scans through all objects in
  * the database and mails out warnings for those objects that are
  * going to expire on this day one, two, or three weeks in the future,
@@ -109,7 +109,7 @@ public class GanymedeWarningTask implements Runnable {
   public GanymedeWarningTask()
   {
   }
-  
+
   /**
    *
    * Just Do It (tm)
@@ -152,7 +152,7 @@ public class GanymedeWarningTask implements Runnable {
 	    Ganymede.debug("Warning Task: Couldn't establish session");
 	    return;
 	  }
-	
+
 	started = true;
 
 	Query q;
@@ -212,12 +212,12 @@ public class GanymedeWarningTask implements Runnable {
 		  }
 
                 objectHook = base.getObjectHook();
-	    
+
 		if (currentThread.isInterrupted())
 		  {
 		    throw new InterruptedException("scheduler ordering shutdown");
 		  }
-	    
+
 		q = new Query(base.getTypeID(), expireNode, false);
 
 		results = mySession.internalQuery(q);
@@ -256,7 +256,7 @@ public class GanymedeWarningTask implements Runnable {
                         tempString.append(title);
 
                         tempString.append(getExpirationWarningMesg(obj));
-		    
+
                         objects.setSize(0);
                         objects.addElement(invid);
 
@@ -291,7 +291,7 @@ public class GanymedeWarningTask implements Runnable {
 		  }
 
                 objectHook = base.getObjectHook();
-	    
+
 		q = new Query(base.getTypeID(), removeNode, false);
 
 		results = mySession.internalQuery(q);
@@ -332,7 +332,7 @@ public class GanymedeWarningTask implements Runnable {
                         tempString.append(title);
                         // "\n\nRemoval scheduled to take place on or after {0,date}."
                         tempString.append(ts.l("run.removal_scheduled", actionDate));
-		    
+
                         objects.setSize(0);
                         objects.addElement(invid);
 
@@ -350,16 +350,16 @@ public class GanymedeWarningTask implements Runnable {
 	cal2.setTime(loTime);
 	cal2.add(Calendar.DATE, 1);
 	hiTime = cal2.getTime();
-	
+
 	expireNode = new QueryAndNode(new QueryDataNode(SchemaConstants.ExpirationField,
 							QueryDataNode.GREATEQ,
 							loTime),
 				      new QueryDataNode(SchemaConstants.ExpirationField,
 							QueryDataNode.LESSEQ,
 							hiTime));
-	
+
 	baseEnum = Ganymede.db.objectBases.elements();
-	
+
 	while (baseEnum.hasMoreElements())
 	  {
 	    if (currentThread.isInterrupted())
@@ -368,14 +368,14 @@ public class GanymedeWarningTask implements Runnable {
 	      }
 
 	    base = (DBObjectBase) baseEnum.nextElement();
-	    
+
 	    if (base.isEmbedded())
 	      {
 		continue;
 	      }
-	    
+
 	    q = new Query(base.getTypeID(), expireNode, false);
-	    
+
 	    results = mySession.internalQuery(q);
 
 	    en = results.elements();
@@ -386,9 +386,9 @@ public class GanymedeWarningTask implements Runnable {
 		  {
 		    throw new InterruptedException("scheduler ordering shutdown");
 		  }
-		
+
 		result = (Result) en.nextElement();
-		
+
 		invid = result.getInvid();
 
 		// "** {0} {1} expires within 24 hours **"
@@ -396,14 +396,14 @@ public class GanymedeWarningTask implements Runnable {
 
 		tempString.setLength(0);
 		tempString.append(title);
-		
+
 		obj = mySession.getSession().viewDBObject(invid);
 
 		tempString.append(getExpirationWarningMesg(obj));
-		    
+
 		objects.setSize(0);
 		objects.addElement(invid);
-		
+
 		sendMail("expirationwarn", title, tempString.toString(), objects);
 	      }
 	  }
@@ -416,9 +416,9 @@ public class GanymedeWarningTask implements Runnable {
 				      new QueryDataNode(SchemaConstants.RemovalField,
 							QueryDataNode.LESSEQ,
 							hiTime));
-	
+
 	baseEnum = Ganymede.db.objectBases.elements();
-	
+
 	while (baseEnum.hasMoreElements())
 	  {
 	    if (currentThread.isInterrupted())
@@ -427,12 +427,12 @@ public class GanymedeWarningTask implements Runnable {
 	      }
 
 	    base = (DBObjectBase) baseEnum.nextElement();
-	    
+
 	    if (base.isEmbedded())
 	      {
 		continue;
 	      }
-	    
+
 	    q = new Query(base.getTypeID(), removeNode, false);
 
 	    results = mySession.internalQuery(q);
@@ -461,14 +461,14 @@ public class GanymedeWarningTask implements Runnable {
 
 		// "\n\nRemoval scheduled to take place on or after {0,date}."
 		tempString.append(ts.l("run.removal_scheduled", actionDate));
-		    
+
 		objects.setSize(0);
 		objects.addElement(invid);
 
 		sendMail("removalwarn", title, tempString.toString(), objects);
 	      }
 	  }
-	
+
 	mySession.logout();
 
 	finished = true;
@@ -506,12 +506,12 @@ public class GanymedeWarningTask implements Runnable {
     /* -- */
 
     // create a log event
-		    
+
     event = new DBLogEvent(type, description, null, null, invids, null);
 
     // we've already put the description in the event, don't need
     // to provide a separate description string to mailNotify
-    
+
     Ganymede.log.mailNotify(title, null, event, DBLog.MailMode.BOTH, null);
 
     // Ganymede.debug(description);
