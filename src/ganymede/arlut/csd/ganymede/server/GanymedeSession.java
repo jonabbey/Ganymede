@@ -1045,8 +1045,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @see arlut.csd.ganymede.rmi.Session
    */
 
-  public String getMyUserName()
+  public String getMyUserName() throws NotLoggedInException
   {
+    checklogin();
+
     return permManager.getUserName();
   }
 
@@ -3592,6 +3594,19 @@ final public class GanymedeSession implements Session, Unreferenced {
   public String getSessionName()
   {
     return this.sessionName;
+  }
+
+  /**
+   * <p>This method returns the identification string that the server
+   * has assigned to the user.</p>
+   *
+   * <p>Note: a server-side version of getMyUserName() that doesn't
+   * call checklogin().</p>
+   */
+
+  public String getUserName()
+  {
+    return permManager.getUserName();
   }
 
   /**

@@ -2738,12 +2738,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	if (retVal.getDialog() != null)
 	  {
 	    // "GanymedeXMLSession Error: couldn''t open transaction {0}: {1}"
-	    err.println(ts.l("integrateXMLTransaction.failed_open_msg", session.getMyUserName(), retVal.getDialog().getText()));
+	    err.println(ts.l("integrateXMLTransaction.failed_open_msg", session.getUserName(), retVal.getDialog().getText()));
 	  }
 	else
 	  {
 	    // "GanymedeXMLSession Error: couldn''t open transaction {0}."
-	    err.println(ts.l("integrateXMLTransaction.failed_open_no_msg", session.getMyUserName()));
+	    err.println(ts.l("integrateXMLTransaction.failed_open_no_msg", session.getUserName()));
 	  }
 
 	return false;

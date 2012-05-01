@@ -496,7 +496,7 @@ public class GanymedeServer implements Server {
 							      directSession, clientIsRemote);
 
 		// "{0} logged in from {1}"
-		Ganymede.debug(ts.l("processLogin.loggedin", session.getMyUserName(), session.getClientHostName()));
+		Ganymede.debug(ts.l("processLogin.loggedin", session.getUserName(), session.getClientHostName()));
 
 		Vector objects = new Vector();
 
@@ -623,7 +623,7 @@ public class GanymedeServer implements Server {
   {
     synchronized (sessions)
       {
-        sendMessageToRemoteSessions(ClientMessage.LOGIN, ts.l("addRemoteUser.logged_in", session.getMyUserName()));
+        sendMessageToRemoteSessions(ClientMessage.LOGIN, ts.l("addRemoteUser.logged_in", session.getUserName()));
 
         // we send the above message before adding the user to the
         // sessions Vector so that the user doesn't get bothered with
@@ -655,7 +655,7 @@ public class GanymedeServer implements Server {
         // they won't receive the log out message that we'll send to
         // the other clients
 
-        sendMessageToRemoteSessions(ClientMessage.LOGOUT, ts.l("removeRemoteUser.logged_out", session.getMyUserName()));
+        sendMessageToRemoteSessions(ClientMessage.LOGOUT, ts.l("removeRemoteUser.logged_out", session.getUserName()));
         sendMessageToRemoteSessions(ClientMessage.LOGINCOUNT, Integer.toString(sessions.size()));
       }
   }
