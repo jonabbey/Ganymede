@@ -1,7 +1,7 @@
 /*
 
    GanymedeSession.java
- 
+
    This class is the heart of the Ganymede server.
 
    Each client logged on to the server will hold a reference to a unique
@@ -18,7 +18,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
 
    Copyright (C) 1996-2012
@@ -141,7 +141,7 @@ import arlut.csd.ganymede.rmi.db_object;
  * method, the client is considered to be authenticated, and may make
  * as many Session calls as it likes, until the GanymedeSession's
  * {@link arlut.csd.ganymede.server.GanymedeSession#logout() logout()} method
- * is called.  If the client dies or loses its network connection to 
+ * is called.  If the client dies or loses its network connection to
  * the Ganymede server for more than 10 minutes, the RMI system will
  * automatically call GanymedeSession's
  * {@link arlut.csd.ganymede.server.GanymedeSession#unreferenced() unreferenced()}
@@ -159,8 +159,8 @@ import arlut.csd.ganymede.rmi.db_object;
  *
  * <p>Most methods in this class are synchronized to avoid race condition
  * security holes between the persona change logic and the actual operations.</p>
- * 
- * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
+ *
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 final public class GanymedeSession implements Session, Unreferenced {
@@ -261,7 +261,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   private Date connecttime;
 
-  /** 
+  /**
    * The time of the user's last top-level operation.. Used to
    * provide guidance on time-outs.  Updated whenever checklogin()
    * is called.
@@ -289,7 +289,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   private String clienthost;
 
   /**
-   * The current status message for this client.  The 
+   * The current status message for this client.  The
    * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} code
    * that manages the admin consoles will consult this String when it
    * updates the admin consoles.
@@ -383,7 +383,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * currently using a single, synchronized GanymedeSession object.. this
    * mean that only one user at a time can currently be processed for
    * login. 8-(</p>
-   * 
+   *
    * <p>Internal sessions, as created by this constructor, have full
    * privileges to do any possible operation.</p>
    */
@@ -405,7 +405,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * currently using a single, synchronized GanymedeSession object.. this
    * mean that only one user at a time can currently be processed for
    * login. 8-(</p>
-   * 
+   *
    * <p>Internal sessions, as created by this constructor, have full
    * privileges to do any possible operation.</p>
    */
@@ -477,7 +477,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    *
    * @param loginName The name for the user logging in
    * @param userObject The user record for this login
-   * @param personaObject The user's initial admin persona 
+   * @param personaObject The user's initial admin persona
    * @param exportObjects If true, we'll export any viewed or edited objects for
    * direct RMI access.  We don't need to do this is we're being driven by a server-side
    * {@link arlut.csd.ganymede.server.GanymedeXMLSession}, for instance.
@@ -488,8 +488,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    *
    * @see arlut.csd.ganymede.rmi.Server#login(java.lang.String, java.lang.String)
    */
-  
-  public GanymedeSession(String loginName, DBObject userObject, 
+
+  public GanymedeSession(String loginName, DBObject userObject,
 			 DBObject personaObject, boolean exportObjects,
 			 boolean clientIsRemote) throws RemoteException
   {
@@ -675,7 +675,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     this.userInfo = null;
   }
 
-  /** 
+  /**
    * This method used to be used to flag an error condition that the
    * client could then call getLastError() to look up.  It has
    * been deprecated from that usage, and now simply logs the error.
@@ -746,7 +746,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 		  {
 		    // "Sending a timeout message to {0}"
 		    System.err.println(ts.l("timeCheck.sending", this.toString()));
-		
+
 		    timedout = true;
 
 		    // sending this message to the client should cause it
@@ -797,7 +797,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * down), it will call this method to knock them off.</p>
    *
    * <p>Note that this method is not synchronized, to avoid the possibility
-   * of deadlocking the admin console in the case of a deadlocked 
+   * of deadlocking the admin console in the case of a deadlocked
    * GanymedeSession.</p>
    */
 
@@ -935,7 +935,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // Obviously we want to prevent the deadlock in the first place,
     // but this will help keep hapless admins on the console from
     // locking their console trying to kill deadlocked users.
-    
+
     if (!loggedInSemaphore.set(false))
       {
 	return;
@@ -1014,11 +1014,11 @@ final public class GanymedeSession implements Session, Unreferenced {
 	      }
 
 	    // Update the server's records, refresh the admin consoles.
-	    
+
 	    GanymedeServer.removeRemoteUser(this);
 
 	    // update the admin consoles
-	    
+
 	    GanymedeAdmin.refreshUsers();
 	  }
 	finally
@@ -1041,7 +1041,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    // deferred shutdown mode, clearActiveUser() will shut the
 	    // server down, so the rest of of the stuff below may not
 	    // happen
-	    
+
 	    GanymedeServer.clearActiveUser(sessionName);
 
 	    // help the garbage collector
@@ -1177,7 +1177,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @return A StringBuffer containing the message, if found, or null if no
    * message exists for the key, or if onlyShowIfNew was set and the message
    * was not new.
-   *   
+   *
    */
 
   public StringBuffer getMessageHTML(String key, boolean onlyShowIfNew)
@@ -1442,7 +1442,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>This method is synchronized to avoid any possible deadlock
    * between DBStore and GanymedeSession, as the CategoryTransport
    * constructor calls other synchronized methods on GanymedeSession.</p>
-   * 
+   *
    * @param hideNonEditables If true, the CategoryTransport returned
    * will only include those object types that are editable by the
    * client.
@@ -1495,7 +1495,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     checklogin();
 
     /* - */
-    
+
     DBObjectBase base = Ganymede.db.getObjectBase(baseName);
     return base.getFieldTemplateVector();
   }
@@ -1515,7 +1515,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     checklogin();
 
     /* - */
-    
+
     DBObjectBase base = Ganymede.db.getObjectBase(baseId);
     return base.getFieldTemplateVector();
   }
@@ -1532,7 +1532,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @param describe An optional string containing a comment to be
    * stored in the modification history for objects modified by this
    * transaction.
-   * 
+   *
    * @see arlut.csd.ganymede.rmi.Session
    *
    * @return A ReturnVal indicating success or failure.  May
@@ -1557,7 +1557,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @param describe An optional string containing a comment to be
    * stored in the modification history for objects modified by this
    * transaction.
-   * 
+   *
    * @see arlut.csd.ganymede.rmi.Session
    *
    * @return A ReturnVal indicating success or failure.  May
@@ -1632,8 +1632,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    *         If the transaction was forcibly terminated due to a major error,
    *         the doNormalProcessing flag in the returned ReturnVal will be
    *         set to false.
-   * 
-   * @see arlut.csd.ganymede.rmi.Session 
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public ReturnVal commitTransaction() throws NotLoggedInException
@@ -1661,17 +1661,17 @@ final public class GanymedeSession implements Session, Unreferenced {
    *
    * <p>This method is synchronized to avoid nested-monitor deadlock in
    * {@link arlut.csd.ganymede.server.DBSession#commitTransaction() DBSession.commitTransaction()}.</p>
-   * 
+   *
    * @param abortOnFail If true, the transaction will be aborted if it
    * could not be committed successfully.
    *
    * @return a ReturnVal object if the transaction could not be committed,
    *         or null if there were no problems.  If the transaction was
-   *         forcibly terminated due to a major error, the 
+   *         forcibly terminated due to a major error, the
    *         doNormalProcessing flag in the returned ReturnVal will be
    *         set to false.
    *
-   * @see arlut.csd.ganymede.rmi.Session 
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized ReturnVal commitTransaction(boolean abortOnFail) throws NotLoggedInException
@@ -1707,11 +1707,11 @@ final public class GanymedeSession implements Session, Unreferenced {
    *
    * @return a ReturnVal object if the transaction could not be committed,
    *         or null if there were no problems.  If the transaction was
-   *         forcibly terminated due to a major error, the 
+   *         forcibly terminated due to a major error, the
    *         doNormalProcessing flag in the returned ReturnVal will be
    *         set to false.
    *
-   * @see arlut.csd.ganymede.rmi.Session 
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized ReturnVal commitTransaction(boolean abortOnFail, String comment) throws NotLoggedInException
@@ -1748,7 +1748,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	if (isWizardActive())
 	  {
 	    getWizard().unregister();
-	    
+
 	    // and just in case unregister() was overridden
 
 	    if (this.wizard != null)
@@ -1811,7 +1811,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     if (isWizardActive())
       {
 	getWizard().unregister();
-	    
+
 	// and just in case unregister() was overridden
 
 	if (this.wizard != null)
@@ -1822,7 +1822,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     unexportObjects(false);
 
-    ReturnVal retVal = session.abortTransaction(); // *sync* DBSession 
+    ReturnVal retVal = session.abortTransaction(); // *sync* DBSession
 
     // "User {0} cancelled transaction."
     GanymedeServer.sendMessageToRemoteSessions(ClientMessage.ABORTNOTIFY,
@@ -1866,7 +1866,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
 	return;
       }
-    
+
     checklogin();
 
     /* - */
@@ -1946,7 +1946,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
       	return;
       }
-    
+
     checklogin();
 
     /* - */
@@ -2199,7 +2199,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   /**
    * <p>This method provides the hook for doing a
-   * fast database dump to a string form.  The 
+   * fast database dump to a string form.  The
    * {@link arlut.csd.ganymede.common.DumpResult DumpResult}
    * returned comprises a formatted dump of all visible
    * fields and objects that match the given query.</p>
@@ -2219,13 +2219,13 @@ final public class GanymedeSession implements Session, Unreferenced {
   public synchronized DumpResult dump(String queryString) throws NotLoggedInException, GanyParseException
   {
     checklogin();
-    
+
     return queryEngine.dump(queryString);
   }
 
   /**
    * <p>This method provides the hook for doing a
-   * fast database dump to a string form.  The 
+   * fast database dump to a string form.  The
    * {@link arlut.csd.ganymede.common.DumpResult DumpResult}
    * returned comprises a formatted dump of all visible
    * fields and objects that match the given query.</p>
@@ -2270,7 +2270,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>This method may not be called from a DBEditObject's
    * commitPhase1/2() methods without risking deadlock.</p>
    *
-   * @see arlut.csd.ganymede.rmi.Session 
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized QueryResult query(String queryString) throws NotLoggedInException, GanyParseException
@@ -2288,7 +2288,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>This method may not be called from a DBEditObject's
    * commitPhase1/2() methods without risking deadlock.</p>
    *
-   * @see arlut.csd.ganymede.rmi.Session 
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized QueryResult query(Query query) throws NotLoggedInException
@@ -2307,7 +2307,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @param query The query to be performed
    * @param perspectiveObject There are occasions when the server will want to do internal
    * querying in which the label of an object matching the query criteria is synthesized
-   * for use in a particular context.  If non-null, perspectiveObject's 
+   * for use in a particular context.  If non-null, perspectiveObject's
    * {@link arlut.csd.ganymede.server.DBObject#lookupLabel(arlut.csd.ganymede.server.DBObject) lookupLabel}
    * method will be used to generate the label for a result entry.
    */
@@ -2340,7 +2340,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * of the current transaction, if any.</p>
    *
    * @see arlut.csd.ganymede.rmi.Session
-   */ 
+   */
 
   public String viewObjectLabel(Invid invid)
   {
@@ -2361,7 +2361,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
   }
 
-  /** 
+  /**
    * <p>This method is intended as a lightweight way of returning a
    * handy description of the type and label of the specified invid.
    * No locking is done, and the label returned will be viewed through
@@ -2376,7 +2376,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // invid is not something we need to guard against.  Using
     // session.viewDBObject() here makes this a much more lightweight
     // operation.
-    
+
     return session.describe(invid);
   }
 
@@ -2497,7 +2497,7 @@ final public class GanymedeSession implements Session, Unreferenced {
         before = new Date(lastModDate.getTime() + 10000);
       }
 
-    return Ganymede.log.retrieveHistory(invid, since, before, false, fullTransactions, false); // *sync* DBLog 
+    return Ganymede.log.retrieveHistory(invid, since, before, false, fullTransactions, false); // *sync* DBLog
   }
 
   /**
@@ -2680,7 +2680,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>Keep in mind that only one GanymedeSession can have a particular
    * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} checked out for
    * editing at a time.  Once checked out, the object will be unavailable
-   * to any other sessions until this session calls 
+   * to any other sessions until this session calls
    * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}
    * or {@link arlut.csd.ganymede.server.GanymedeSession#abortTransaction() abortTransaction()}.</p>
    *
@@ -2813,7 +2813,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>Keep in mind that only one GanymedeSession can have a particular
    * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} checked out for
    * editing at a time.  Once created, the object will be unavailable
-   * to any other sessions until this session calls 
+   * to any other sessions until this session calls
    * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
    *
    * @param objectType The kind of object to create.
@@ -2846,7 +2846,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>Keep in mind that only one GanymedeSession can have a particular
    * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} checked out for
    * editing at a time.  Once created, the object will be unavailable
-   * to any other sessions until this session calls 
+   * to any other sessions until this session calls
    * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
    *
    * @param type The kind of object to create.
@@ -2871,7 +2871,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>Keep in mind that only one GanymedeSession can have a particular
    * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} checked out for
    * editing at a time.  Once created, the object will be unavailable
-   * to any other sessions until this session calls 
+   * to any other sessions until this session calls
    * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
    *
    * @param type The kind of object to create.
@@ -2896,7 +2896,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>Keep in mind that only one GanymedeSession can have a particular
    * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} checked out for
    * editing at a time.  Once created, the object will be unavailable
-   * to any other sessions until this session calls 
+   * to any other sessions until this session calls
    * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
    *
    * @param type The kind of object to create.
@@ -2921,11 +2921,11 @@ final public class GanymedeSession implements Session, Unreferenced {
     /* -- */
 
     checklogin();
-    
+
     if (!permManager.getPerm(type, true).isCreatable())
       {
 	DBObjectBase base = Ganymede.db.getObjectBase(type);
-	
+
 	String error;
 
 	if (base == null)
@@ -2946,7 +2946,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // if embedded is true, this code was called from
     // DBEditObject.createNewEmbeddedObject(), and we don't need to
     // worry about setting ownership, etc.
-    
+
     if (!embedded)
       {
 	ownerInvids = permManager.getNewOwnerInvids();
@@ -2996,7 +2996,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     retVal.setInvid(newObj.getInvid());
     retVal.setObject(newObj);
-	    
+
     return retVal;
   }
 
@@ -3014,7 +3014,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * invid type of object.</p>
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
-   *    
+   *
    * @see arlut.csd.ganymede.rmi.Session
    */
 
@@ -3041,7 +3041,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
 	return retVal;
       }
-    
+
     vObj = (DBObject) retVal.getObject();
 
     DBEditObject objectHook = Ganymede.db.getObjectBase(invid.getType()).getObjectHook();
@@ -3062,7 +3062,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     try
       {
         retVal = create_db_object(invid.getType());
-    
+
         if (!ReturnVal.didSucceed(retVal))
           {
             return retVal;
@@ -3098,7 +3098,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>Inactivate an object in the database</p>
    *
    * <p>This method must be called within a transactional context.  The object's
-   * change in status will not be visible to other sessions until this session calls 
+   * change in status will not be visible to other sessions until this session calls
    * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
    *
    * <p>Objects inactivated will typically be altered to reflect their inactive
@@ -3173,7 +3173,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // note!  DBEditObject's finalizeInactivate() method does the
     // event logging
 
-    return session.inactivateDBObject(eObj); // *sync* DBSession 
+    return session.inactivateDBObject(eObj); // *sync* DBSession
   }
 
   /**
@@ -3185,7 +3185,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * however.</p>
    *
    * <p>This method must be called within a transactional context.  The object's
-   * change in status will not be visible to other sessions until this session calls 
+   * change in status will not be visible to other sessions until this session calls
    * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
    *
    * @return A ReturnVal indicating success or failure.  May
@@ -3262,7 +3262,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * in a dialog being returned in the ReturnVal.</p>
    *
    * <p>This method must be called within a transactional context.  The object's
-   * removal will not be visible to other sessions until this session calls 
+   * removal will not be visible to other sessions until this session calls
    * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
    *
    * @return a ReturnVal object if the object could not be inactivated,
@@ -3314,10 +3314,10 @@ final public class GanymedeSession implements Session, Unreferenced {
     // deletion, we'll assume the user can go ahead and delete/drop
     // it.
 
-    boolean okToRemove = ((vObj instanceof DBEditObject) && 
+    boolean okToRemove = ((vObj instanceof DBEditObject) &&
 			  ((DBEditObject) vObj).getStatus() != ObjectStatus.EDITING);
 
-    if (!okToRemove) 
+    if (!okToRemove)
       {
 	if (!permManager.getPerm(vObj).isDeletable())
 	  {
@@ -3348,7 +3348,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	      }
 
 	    // otherwise, generic refusal
-	    
+
 	    return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
 					      ts.l("remove_db_object.deletion_refused",
 						   vObj.getTypeName(),
@@ -3360,7 +3360,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     // we do logging of the object deletion in DBEditSet.commit() when
     // the transaction commits
-    
+
     return session.deleteDBObject(invid);
   }
 
