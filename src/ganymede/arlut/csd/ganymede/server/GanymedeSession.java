@@ -341,7 +341,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * a wizard to interact with the user.
    */
 
-  GanymediatorWizard wizard = null;
+  private GanymediatorWizard wizard = null;
 
   /**
    * This variable caches the {@link arlut.csd.ganymede.common.AdminEntry AdminEntry}
