@@ -1989,7 +1989,7 @@ public class DBLog {
 	    System.err.println("DBLog.calculateOwnerAddresses(): processing owner group " +
 			       session.getGSession().viewObjectLabel(ownerInvid));
 	  }
-	
+
 	addresses.addAll(ownerCustom.getAddresses(ownerInvid, session));
       }
 
@@ -2066,7 +2066,7 @@ public class DBLog {
     for (int mode = 0; mode < 3; mode++)
       {
 	boolean declared_action = false;
-	
+
 	// group by type
 
 	for (String type: types)
