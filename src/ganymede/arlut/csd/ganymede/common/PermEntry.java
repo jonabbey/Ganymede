@@ -3,17 +3,19 @@
    PermEntry.java
 
    This class holds the basic per-object / per-field access control bits.
-   
+
    Created: 27 June 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -168,7 +170,7 @@ public class PermEntry implements java.io.Serializable {
     /* -- */
 
     entrySize = in.readShort();
-    
+
     // we'll only worry about entrySize if we add perm bools later
 
     visible = in.readBoolean();
@@ -186,7 +188,7 @@ public class PermEntry implements java.io.Serializable {
 
     return getPermEntry(visible, editable, create, delete);
   }
-  
+
   // ---
 
   private boolean visible;
@@ -198,7 +200,7 @@ public class PermEntry implements java.io.Serializable {
   // are deserialized, so we can use indexSet to differentiate
   // between index being zero because we have no permissions and
   // index being zero because of deserialization
-   
+
   private transient byte index;
   private transient boolean indexSet;
 
@@ -254,8 +256,8 @@ public class PermEntry implements java.io.Serializable {
 
     pe = (PermEntry) obj;
 
-    return ((visible == pe.visible) && 
-	    (editable == pe.editable) && 
+    return ((visible == pe.visible) &&
+	    (editable == pe.editable) &&
 	    (create == pe.create) &&
 	    (delete == pe.delete));
   }
@@ -269,14 +271,19 @@ public class PermEntry implements java.io.Serializable {
     out.writeBoolean(delete);
   }
 
-  public void receive(DataInput in) throws IOException
+  /**
+   * <p>Private so only static method on PermEntry can call this to
+   * modify the PermEntry's internal state.</p>
+   */
+
+  private void receive(DataInput in) throws IOException
   {
     short entrySize;
 
     /* -- */
 
     entrySize = in.readShort();
-    
+
     // we'll only worry about entrySize if we add perm bools later
 
     visible = in.readBoolean();
@@ -297,12 +304,10 @@ public class PermEntry implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method returns true if the this entry in a
+   * <p>This method returns true if the this entry in a
    * {@link arlut.csd.ganymede.common.PermMatrix PermMatrix} is granted
-   * visibility privilege.
-   *
-   */ 
+   * visibility privilege.</p>
+   */
 
   public boolean isVisible()
   {
@@ -310,12 +315,10 @@ public class PermEntry implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method returns true if the this entry in a
+   * <p>This method returns true if the this entry in a
    * {@link arlut.csd.ganymede.common.PermMatrix PermMatrix} is granted
-   * editing privilege.
-   *
-   */ 
+   * editing privilege.</p>
+   */
 
   public boolean isEditable()
   {
@@ -323,12 +326,10 @@ public class PermEntry implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method returns true if the this entry in a 
+   * <p>This method returns true if the this entry in a
    * {@link arlut.csd.ganymede.common.PermMatrix PermMatrix} is granted
-   * creation privilege.
-   *
-   */ 
+   * creation privilege.</p>
+   */
 
   public boolean isCreatable()
   {
@@ -336,12 +337,10 @@ public class PermEntry implements java.io.Serializable {
   }
 
   /**
-   *
-   * This method returns true if the this entry in a
+   * <p>This method returns true if the this entry in a
    * {@link arlut.csd.ganymede.common.PermMatrix PermMatrix} is granted
-   * deletion privilege.
-   *
-   */ 
+   * deletion privilege.</p>
+   */
 
   public boolean isDeletable()
   {
@@ -405,8 +404,9 @@ public class PermEntry implements java.io.Serializable {
   }
 
   /**
-   * <P>This method returns a textual description
-   * of the changes between this PermEntry and &lt;p&gt;</P> */
+   * <p>This method returns a textual description of the changes
+   * between this PermEntry and &lt;p&gt;</p>
+   */
 
   public final String difference(PermEntry p)
   {
