@@ -909,9 +909,6 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>Log out this session.  After this method is called, no other
    * methods may be called on this session object.</p>
    *
-   * <p>This method is partially synchronized, to avoid locking up
-   * the admin console if this user's session has become deadlocked.</p>
-   *
    * @see arlut.csd.ganymede.rmi.Session
    */
 
@@ -940,8 +937,8 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method is used to tell the client where to look
-   * to access the Ganymede help document tree.
+   * <p>This method is used to tell the client where to look
+   * to access the Ganymede help document tree.</p>
    *
    * @see arlut.csd.ganymede.rmi.Session
    */
@@ -1821,6 +1818,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public void reportClientBug(String clientIdentifier, String exceptionReport) throws NotLoggedInException
   {
+    checklogin();
+
     StringBuffer report = new StringBuffer();
 
     // "\nCLIENT ERROR DETECTED:\nuser == "{0}"\nhost == "{1}"\nclient id string == "{2}"\nexception trace == "{3}"\n"
@@ -1852,6 +1851,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public void reportClientVersion(String clientIdentifier) throws NotLoggedInException
   {
+    checklogin();
+
     StringBuffer report = new StringBuffer();
 
     // "\nClient Version Report:\nuser == "{0}"\nhost == "{1}"\nclient id string == "{2}"
@@ -2034,7 +2035,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	throw new RuntimeException(ts.l("global.no_such_object_type", objectType));
       }
 
-    return this.findLabeledObject(objectName, base.getTypeID(), allowAliases);
+    return this.findLabeledObject(objectName, base.getTypeID(), allowAliases); // checks login
   }
 
   /**
@@ -2111,7 +2112,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public StringBuffer viewObjectHistory(Invid invid, Date since) throws NotLoggedInException
   {
-    return viewObjectHistory(invid, since, null, true);
+    return viewObjectHistory(invid, since, null, true); // checks login
   }
 
   /**
@@ -2129,7 +2130,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public StringBuffer viewObjectHistory(Invid invid, Date since, boolean fullTransactions) throws NotLoggedInException
   {
-    return viewObjectHistory(invid, since, null, fullTransactions);
+    return viewObjectHistory(invid, since, null, fullTransactions); // checks login
   }
 
   /**
@@ -2413,7 +2414,6 @@ final public class GanymedeSession implements Session, Unreferenced {
     db_object objref = null;
     DBObject obj;
 
-
     /* -- */
 
     checklogin();
@@ -2543,7 +2543,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public ReturnVal create_db_object(short type) throws NotLoggedInException
   {
-    return this.create_db_object(type, false, null);
+    return this.create_db_object(type, false, null); // checks login
   }
 
   /**
@@ -2576,7 +2576,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	return Ganymede.createErrorDialog(ts.l("global.no_such_object_type", objectType));
       }
 
-    return this.create_db_object(base.getTypeID());
+    return this.create_db_object(base.getTypeID()); // checks login
   }
 
   /**
