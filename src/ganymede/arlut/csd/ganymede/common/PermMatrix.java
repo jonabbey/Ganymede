@@ -48,8 +48,10 @@
 package arlut.csd.ganymede.common;
 
 import java.rmi.RemoteException;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Map;
 
 import arlut.csd.ganymede.rmi.Base;
 import arlut.csd.ganymede.rmi.BaseField;
@@ -98,30 +100,57 @@ public class PermMatrix implements java.io.Serializable {
 
   // ---
 
-  public Hashtable matrix;
+  private Hashtable<String, PermEntry> matrix;
 
   /* -- */
 
   public PermMatrix()
   {
-    matrix = new Hashtable();
+    matrix = new Hashtable<String, PermEntry>();
   }
 
-  public PermMatrix(Hashtable orig)
+  public PermMatrix(Hashtable<String, PermEntry> orig)
   {
     if (orig == null)
       {
-	this.matrix = new Hashtable();
+	this.matrix = new Hashtable<String, PermEntry>();
       }
     else
       {
-	this.matrix = (Hashtable) orig.clone();
+	this.matrix = (Hashtable<String, PermEntry>) orig.clone();
       }
   }
 
   public PermMatrix(PermMatrix orig)
   {
-    this.matrix = (Hashtable) orig.matrix.clone();
+    this.matrix = (Hashtable<String, PermEntry>) orig.matrix.clone();
+  }
+
+  /**
+   * <p>Returns a read-only view of the underlying Hashtable we're
+   * using to keep our permissions data.</p>
+   *
+   * <p>Used by {@link
+   * arlut.csd.ganymede.server.PermissionMatrixDBField} to provide
+   * debug dumping of our contents in a server context.</p>
+   */
+
+  public Map<String, PermEntry> getMatrix()
+  {
+    return Collections.unmodifiableMap(matrix);
+  }
+
+  /**
+   * <p>Returns a copy of the internal Hashtable containing
+   * our permission matrix map.</p>
+   *
+   * <p>Used by {@link arlut.csd.ganymede.server.PermMatrixCkPoint}
+   * class.</p>
+   */
+
+  public Hashtable<String, PermEntry> getMatrixClone()
+  {
+    return (Hashtable<String, PermEntry>) matrix.clone();
   }
 
   /**
@@ -131,7 +160,7 @@ public class PermMatrix implements java.io.Serializable {
    * would.</P>
    */
 
-  public PermMatrix union(Hashtable orig)
+  public PermMatrix union(Hashtable<String, PermEntry> orig)
   {
     return union(new PermMatrix(orig));	// this will cause a redundant copy, but who cares?
   }
@@ -154,9 +183,7 @@ public class PermMatrix implements java.io.Serializable {
   public synchronized PermMatrix union(PermMatrix orig)
   {
     PermMatrix result;
-    Enumeration en;
     PermEntry entry1, entry2, entry3;
-    Object key;
 
     /* -- */
 
@@ -175,14 +202,10 @@ public class PermMatrix implements java.io.Serializable {
     // put the union of that and the matching entry already in result
     // into result.
 
-    en = this.matrix.keys();
-
-    while (en.hasMoreElements())
+    for (String key: this.matrix.keySet())
       {
-	key = en.nextElement();
-
-	entry1 = (PermEntry) this.matrix.get(key);
-	entry2 = (PermEntry) orig.matrix.get(key);
+	entry1 = this.matrix.get(key);
+	entry2 = orig.matrix.get(key);
 
 	if (entry2 != null)
 	  {
@@ -192,7 +215,7 @@ public class PermMatrix implements java.io.Serializable {
 	  {
 	    // okay, orig didn't have any entry for key
 
-	    if (!isBasePerm((String)key))
+	    if (!isBasePerm(key))
 	      {
 		// We are union'ing a field entry.. since orig doesn't
 		// contain an explicit record for this field while our
@@ -201,7 +224,7 @@ public class PermMatrix implements java.io.Serializable {
 		// this will serve to maintain the permission inheritance
 		// issues
 
-		entry3 = (PermEntry) orig.matrix.get(baseEntry((String)key));
+		entry3 = orig.matrix.get(baseEntry(key));
 
 		// union will handle a null entry3
 
@@ -223,14 +246,10 @@ public class PermMatrix implements java.io.Serializable {
 
     // loop over the orig values for completeness
 
-    en = orig.matrix.keys();
-
-    while (en.hasMoreElements())
+    for (String key: orig.matrix.keySet())
       {
-	key = en.nextElement();
-
-	entry1 = (PermEntry) orig.matrix.get(key);
-	entry2 = (PermEntry) this.matrix.get(key);
+	entry1 = orig.matrix.get(key);
+	entry2 = this.matrix.get(key);
 
 	if (entry2 != null)
 	  {
@@ -238,7 +257,7 @@ public class PermMatrix implements java.io.Serializable {
 	  }
 	else
 	  {
-	    if (!isBasePerm((String)key))
+	    if (!isBasePerm(key))
 	      {
 		// the orig matrix has a field entry that we didn't
 		// have a match for in this.matrix.. we need to check
@@ -246,7 +265,7 @@ public class PermMatrix implements java.io.Serializable {
 		// base that we need to union in to reflect the default
 		// base -> field inheritance
 
-		entry3 = (PermEntry) this.matrix.get(baseEntry((String)key));
+		entry3 = this.matrix.get(baseEntry(key));
 
 		// union will handle a null entry3
 
@@ -274,7 +293,7 @@ public class PermMatrix implements java.io.Serializable {
 
   public PermEntry getPerm(short baseID, short fieldID)
   {
-    return (PermEntry) matrix.get(matrixEntry(baseID, fieldID));
+    return matrix.get(matrixEntry(baseID, fieldID));
   }
 
   /**
@@ -286,7 +305,7 @@ public class PermMatrix implements java.io.Serializable {
 
   public PermEntry getPerm(short baseID)
   {
-    return (PermEntry) matrix.get(matrixEntry(baseID));
+    return matrix.get(matrixEntry(baseID));
   }
 
   /**
@@ -319,7 +338,7 @@ public class PermMatrix implements java.io.Serializable {
   {
     try
       {
-	return (PermEntry) matrix.get(matrixEntry(base.getTypeID()));
+	return matrix.get(matrixEntry(base.getTypeID()));
       }
     catch (RemoteException ex)
       {
@@ -453,6 +472,8 @@ public class PermMatrix implements java.io.Serializable {
       }
     catch (Throwable ex)
       {
+	// the client will get a ClassNotFoundException on PermissionMatrixDBField.
+
 	return super.toString();
       }
   }

@@ -378,7 +378,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   static public void debugdump(PermMatrix matrix)
   {
-    debugdump(matrix.matrix);
+    debugdump(matrix.getMatrix());
   }
 
   /**
@@ -386,7 +386,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * contents held in matrix.
    */
 
-  static private void debugdump(Hashtable matrix)
+  static private void debugdump(Map<String, PermEntry> matrix)
   {
     System.err.println(debugdecode(matrix));
   }
@@ -396,56 +396,45 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * output.
    */
 
-  static public String debugdecode(Hashtable matrix)
+  static public String debugdecode(Map<String, PermEntry> matrix)
   {
     StringBuilder result = new StringBuilder();
     Enumeration en;
-    String key;
     PermEntry entry;
     String basename;
-    Hashtable baseHash = new Hashtable();
-    Vector vec;
+    Hashtable<String, Vector<String>> baseHash = new Hashtable<String, Vector<String>>();
+    Vector<String> vec;
 
     /* -- */
 
     result.append("PermMatrix DebugDump\n");
 
-    en = matrix.keys();
-
-    while (en.hasMoreElements())
+    for (String key: matrix.keySet())
       {
-	key = (String) en.nextElement();
-
-	entry = (PermEntry) matrix.get(key);
+	entry = matrix.get(key);
 
 	basename = decodeBaseName(key);
 
 	if (baseHash.containsKey(basename))
 	  {
-	    vec = (Vector) baseHash.get(basename);
+	    vec = baseHash.get(basename);
 	  }
 	else
 	  {
-	    vec = new Vector();
+	    vec = new Vector<String>();
 	    baseHash.put(basename, vec);
 	  }
 
-	vec.addElement(decodeFieldName(key) + " -- " + entry.toString());
+	vec.add(decodeFieldName(key) + " -- " + entry.toString());
       }
 
-    en = baseHash.keys();
-
-    while (en.hasMoreElements())
+    for (String key: baseHash.keySet())
       {
-	key = (String) en.nextElement();
+	vec = baseHash.get(key);
 
-	//	result.append("\nBase - " + key + "\n");
-
-	vec = (Vector) baseHash.get(key);
-
-	for (int i = 0; i < vec.size(); i++)
+	for (String val: vec)
 	  {
-	    result.append(key + ":" + vec.elementAt(i) + "\n");
+	    result.append(key + ":" + val + "\n");
 	  }
 
 	result.append("\n");
