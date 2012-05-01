@@ -921,163 +921,6 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * <p>Log out this session.  After this method is called, no other
-   * methods may be called on this session object.</p>
-   *
-   * <p>This method is partially synchronized, to avoid locking up
-   * the admin console if this user's session has become deadlocked.</p>
-   */
-
-  public void logout(boolean forced_off)
-  {
-    // This method is not synchronized to help stave off threads
-    // piling up trying to kill off a user which is deadlocked.
-
-    // Obviously we want to prevent the deadlock in the first place,
-    // but this will help keep hapless admins on the console from
-    // locking their console trying to kill deadlocked users.
-
-    if (!loggedInSemaphore.set(false))
-      {
-	return;
-      }
-
-    // we do want to synchronize on our session for this part, so that
-    // the user won't be logged off while they are doing a transaction
-    // commit, or the like.
-
-    synchronized (this)
-      {
-	// we'll do all of our active cleanup in a try clause, so we
-	// can wipe out references to aid GC in a finally clause
-
-	try
-	  {
-	    if (!remoteClient)
-	      {
-		// We don't need to update GanymedeServer's lists for internal sessions
-
-		session.logout();	// *sync* DBSession
-		return;
-	      }
-
-	    //	Ganymede.debug("User " + username + " logging off");
-
-	    if (this.asyncPort != null)
-	      {
-		this.asyncPort.shutdown();
-		this.asyncPort = null;
-	      }
-
-	    // logout the client, abort any DBSession transaction going
-
-	    session.logout();	// *sync* DBSession
-
-	    // if we have DBObjects left exported through RMI, make
-	    // them inaccesible
-
-	    unexportObjects(true);
-
-	    // if we ourselves were exported, unexport
-
-	    if (remoteClient)
-	      {
-		Ganymede.rmi.unpublishObject(this, true);
-	      }
-
-	    // if we weren't forced off, do normal logout logging
-
-	    if (!forced_off)
-	      {
-		if (Ganymede.log != null)
-		  {
-		    Ganymede.log.logSystemEvent(new DBLogEvent("normallogout",
-							       ts.l("logout.normal_event", permManager.getUserName()),
-							       permManager.getUserInvid(),
-							       permManager.getUserName(),
-							       permManager.getIdentityInvids(),
-							       null));
-		  }
-	      }
-	    else
-	      {
-		// if we are forced off, and we're running under a
-		// GanymedeXMLSession, tell the GanymedeXMLSession to
-		// kick off
-
-		// if we're not forced off, then presumably the
-		// GanymedeXMLSession triggered the logout.
-
-		if (xSession != null)
-		  {
-		    xSession.abort();
-		  }
-	      }
-
-	    // Update the server's records, refresh the admin consoles.
-
-	    GanymedeServer.removeRemoteUser(this);
-
-	    // update the admin consoles
-
-	    GanymedeAdmin.refreshUsers();
-	  }
-	finally
-	  {
-	    if (semaphoreLocked)
-	      {
-		try
-		  {
-		    GanymedeServer.lSemaphore.decrement();
-		  }
-		catch (IllegalArgumentException ex)
-		  {
-		    Ganymede.logError(ex);
-		  }
-
-		semaphoreLocked = false;
-	      }
-
-	    // if we are the last user logged in and the server is in
-	    // deferred shutdown mode, clearActiveUser() will shut the
-	    // server down, so the rest of of the stuff below may not
-	    // happen
-
-	    GanymedeServer.clearActiveUser(sessionName);
-
-	    // help the garbage collector
-
-	    connecttime = null;
-	    clienthost = null;
-	    status = null;
-	    lastEvent = null;
-	    session = null;
-	    queryEngine = null;
-
-	    wizard = null;
-	    userInfo = null;
-	    xSession = null;
-	  }
-
-	// guess we're still running.  Remember the last time this
-	// user logged out for the motd-display check
-
-	if (permManager.getUserInvid() != null)
-	  {
-	    GanymedeServer.userLogOuts.put(permManager.getUserInvid(), new Date());
-	  }
-	else
-	  {
-	    GanymedeServer.userLogOuts.put(permManager.getPersonaInvid(), new Date());
-	  }
-
-	Ganymede.debug(ts.l("logout.logged_off", permManager.getUserName()));
-
-	permManager = null;
-      }
-  }
-
-  /**
    * <p>This method is used to allow a client to request that wizards
    * not be provided in response to actions by the client.  This
    * is intended to allow non-interactive or non-gui clients to
@@ -1094,30 +937,6 @@ final public class GanymedeSession implements Session, Unreferenced {
   public void enableWizards(boolean val)
   {
     this.enableWizards = val;
-  }
-
-  /**
-   * <p>This method is used to allow local server-side code to request
-   * that no oversight be maintained over changes made to the server
-   * through this GanymedeSession.</p>
-   *
-   * <p>This is intended <b>only</b> for trusted code that does its own
-   * checking and validation on changes made to the database.  If
-   * oversight is turned off, no wizard code will be called, and the
-   * required field logic will be bypassed.  Extreme care must
-   * be used in disabling oversight, and oversight should only be
-   * turned off for direct loading and other situations where there
-   * won't be multi-user use, to avoid breaking constraints that
-   * custom plug-ins count on.</p>
-   *
-   * <p>Oversight is enabled by default.</p>
-   *
-   * @param val If true, oversight will be enabled.
-   */
-
-  public void enableOversight(boolean val)
-  {
-    this.enableOversight = val;
   }
 
   /**
@@ -1215,34 +1034,6 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     asyncPort = new serverClientAsyncResponder();
     return (ClientAsyncResponder) asyncPort;
-  }
-
-  /**
-   * This method returns the unique name of this session.
-   */
-
-  public String getSessionName()
-  {
-    return this.sessionName;
-  }
-
-  /**
-   * This method returns the name of the system that the client
-   * is connected from.
-   */
-
-  public String getClientHostName()
-  {
-    return this.clienthost;
-  }
-
-  /**
-   * This method provides a handy description of this session.
-   */
-
-  public String toString()
-  {
-    return "GanymedeSession [" + permManager.getUserName() + "," + permManager.getPersonaName() + "]";
   }
 
   /**
@@ -2073,132 +1864,6 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * <p>This method allows the client to get a status update on a
-   * specific list of invids.</p>
-   *
-   * <p>If any of the invids are not currently defined in the server, or
-   * if the client doesn't have permission to view any of the invids,
-   * those invids' status will not be included in the returned
-   * QueryResult.</p>
-   *
-   * @param invidVector Vector of Invid's to get the status for.
-   *
-   * @see arlut.csd.ganymede.rmi.Session
-   */
-
-  public synchronized QueryResult queryInvids(Vector invidVector) throws NotLoggedInException
-  {
-    checklogin();
-
-    return queryEngine.queryInvids(invidVector);
-  }
-
-  /**
-   * <p>Returns an Invid for an object of a specified type and name, or
-   * null if no such object could be found.</p>
-   *
-   * <p>If the user does not have permission to view the object, null will
-   * be returned even if an object by that name does exist.</p>
-   *
-   * <p>This method uses the GanymedeSession query() apparatus, and
-   * may not be called from a DBEditObject's commitPhase1/2() methods
-   * without risking deadlock.</p>
-   *
-   * @param objectName Label for the object to lookup
-   * @param objectType Name of the object type
-   *
-   * @see arlut.csd.ganymede.rmi.Session
-   */
-
-  public Invid findLabeledObject(String objectName, String objectType) throws NotLoggedInException
-  {
-    return this.findLabeledObject(objectName, objectType, false);
-  }
-
-  /**
-   * <p>Returns an Invid for an object of a specified type and name, or
-   * null if no such object could be found.</p>
-   *
-   * <p>If the user does not have permission to view the object, null will
-   * be returned even if an object by that name does exist.</p>
-   *
-   * <p>This method uses the GanymedeSession query() apparatus, and
-   * may not be called from a DBEditObject's commitPhase1/2() methods
-   * without risking deadlock.</p>
-   *
-   * @param objectName Label for an object
-   * @param type Object type id number
-   *
-   * @see arlut.csd.ganymede.rmi.Session
-   */
-
-  public Invid findLabeledObject(String objectName, short type) throws NotLoggedInException
-  {
-    return this.findLabeledObject(objectName, type, false);
-  }
-
-  /**
-   * <p>Returns an Invid for an object of a specified type and name, or
-   * null if no such object could be found.</p>
-   *
-   * <p>If the user does not have permission to view the object, null will
-   * be returned even if an object by that name does exist.</p>
-   *
-   * <p>This method uses the GanymedeSession query() apparatus, and
-   * may not be called from a DBEditObject's commitPhase1/2() methods
-   * without risking deadlock.</p>
-   *
-   * @param objectName Label for the object to lookup
-   * @param objectType Name of the object type
-   * @param allowAliases If true, findLabeledObject will return an
-   * Invid that has name attached to the same namespace as the label
-   * field for the object type sought.
-   *
-   * @see arlut.csd.ganymede.rmi.Session
-   */
-
-  public Invid findLabeledObject(String objectName, String objectType, boolean allowAliases) throws NotLoggedInException
-  {
-    DBObjectBase base = Ganymede.db.getObjectBase(objectType);
-
-    if (base == null)
-      {
-	// "Error, "{0}" is not a valid object type in this Ganymede server."
-	throw new RuntimeException(ts.l("global.no_such_object_type", objectType));
-      }
-
-    return this.findLabeledObject(objectName, base.getTypeID(), allowAliases);
-  }
-
-  /**
-   * <p>Returns an Invid for an object of a specified type and name, or
-   * null if no such object could be found.</p>
-   *
-   * <p>If the user does not have permission to view the object, null will
-   * be returned even if an object by that name does exist.</p>
-   *
-   * <p>This method uses the GanymedeSession query() apparatus, and
-   * may not be called from a DBEditObject's commitPhase1/2() methods
-   * without risking deadlock.</p>
-   *
-   * @param objectName Label for an object
-   * @param type Object type id number.
-   * @param allowAliases If true, findLabeledObject will return an
-   * Invid that has objectName attached to the same namespace as the
-   * label field for the object type sought, even if the Invid is of a
-   * different object type.
-   *
-   * @see arlut.csd.ganymede.rmi.Session
-   */
-
-  public synchronized Invid findLabeledObject(String objectName, short type, boolean allowAliases) throws NotLoggedInException
-  {
-    checklogin();
-
-    return queryEngine.findLabeledObject(objectName, type, allowAliases);
-  }
-
-  /**
    * <p>This method provides the hook for doing a
    * fast database dump to a string form.  The
    * {@link arlut.csd.ganymede.common.DumpResult DumpResult}
@@ -2247,18 +1912,129 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * <p>This method applies this GanymedeSession's current owner filter
-   * to the given QueryResult &lt;qr&gt; and returns a QueryResult
-   * with any object handles that are not matched by the filter
-   * stripped.</p>
+   * <p>This method allows the client to get a status update on a
+   * specific list of invids.</p>
    *
-   * <p>If the submitted QueryResult &lt;qr&gt; is null, filterQueryResult()
-   * will itself return null.</p>
+   * <p>If any of the invids are not currently defined in the server, or
+   * if the client doesn't have permission to view any of the invids,
+   * those invids' status will not be included in the returned
+   * QueryResult.</p>
+   *
+   * @param invidVector Vector of Invid's to get the status for.
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
-  public QueryResult filterQueryResult(QueryResult qr)
+  public synchronized QueryResult queryInvids(Vector<Invid> invidVector) throws NotLoggedInException
   {
-    return permManager.filterQueryResult(qr);
+    checklogin();
+
+    return queryEngine.queryInvids(invidVector);
+  }
+
+  /**
+   * <p>Returns an Invid for an object of a specified type and name, or
+   * null if no such object could be found.</p>
+   *
+   * <p>If the user does not have permission to view the object, null will
+   * be returned even if an object by that name does exist.</p>
+   *
+   * <p>This method uses the GanymedeSession query() apparatus, and
+   * may not be called from a DBEditObject's commitPhase1/2() methods
+   * without risking deadlock.</p>
+   *
+   * @param objectName Label for an object
+   * @param type Object type id number
+   *
+   * @see arlut.csd.ganymede.rmi.Session
+   */
+
+  public Invid findLabeledObject(String objectName, short type) throws NotLoggedInException
+  {
+    return this.findLabeledObject(objectName, type, false);
+  }
+
+  /**
+   * <p>Returns an Invid for an object of a specified type and name, or
+   * null if no such object could be found.</p>
+   *
+   * <p>If the user does not have permission to view the object, null will
+   * be returned even if an object by that name does exist.</p>
+   *
+   * <p>This method uses the GanymedeSession query() apparatus, and
+   * may not be called from a DBEditObject's commitPhase1/2() methods
+   * without risking deadlock.</p>
+   *
+   * @param objectName Label for the object to lookup
+   * @param objectType Name of the object type
+   *
+   * @see arlut.csd.ganymede.rmi.Session
+   */
+
+  public Invid findLabeledObject(String objectName, String objectType) throws NotLoggedInException
+  {
+    return this.findLabeledObject(objectName, objectType, false);
+  }
+
+  /**
+   * <p>Returns an Invid for an object of a specified type and name, or
+   * null if no such object could be found.</p>
+   *
+   * <p>If the user does not have permission to view the object, null will
+   * be returned even if an object by that name does exist.</p>
+   *
+   * <p>This method uses the GanymedeSession query() apparatus, and
+   * may not be called from a DBEditObject's commitPhase1/2() methods
+   * without risking deadlock.</p>
+   *
+   * @param objectName Label for an object
+   * @param type Object type id number.
+   * @param allowAliases If true, findLabeledObject will return an
+   * Invid that has objectName attached to the same namespace as the
+   * label field for the object type sought, even if the Invid is of a
+   * different object type.
+   *
+   * @see arlut.csd.ganymede.rmi.Session
+   */
+
+  public synchronized Invid findLabeledObject(String objectName, short type, boolean allowAliases) throws NotLoggedInException
+  {
+    checklogin();
+
+    return queryEngine.findLabeledObject(objectName, type, allowAliases);
+  }
+
+  /**
+   * <p>Returns an Invid for an object of a specified type and name, or
+   * null if no such object could be found.</p>
+   *
+   * <p>If the user does not have permission to view the object, null will
+   * be returned even if an object by that name does exist.</p>
+   *
+   * <p>This method uses the GanymedeSession query() apparatus, and
+   * may not be called from a DBEditObject's commitPhase1/2() methods
+   * without risking deadlock.</p>
+   *
+   * @param objectName Label for the object to lookup
+   * @param objectType Name of the object type
+   * @param allowAliases If true, findLabeledObject will return an
+   * Invid that has name attached to the same namespace as the label
+   * field for the object type sought.
+   *
+   * @see arlut.csd.ganymede.rmi.Session
+   */
+
+  public Invid findLabeledObject(String objectName, String objectType, boolean allowAliases) throws NotLoggedInException
+  {
+    DBObjectBase base = Ganymede.db.getObjectBase(objectType);
+
+    if (base == null)
+      {
+	// "Error, "{0}" is not a valid object type in this Ganymede server."
+	throw new RuntimeException(ts.l("global.no_such_object_type", objectType));
+      }
+
+    return this.findLabeledObject(objectName, base.getTypeID(), allowAliases);
   }
 
   /**
@@ -2300,41 +2076,6 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * <p>Server-side method for doing object listing with support for
-   * DBObject's {@link
-   * arlut.csd.ganymede.server.DBObject#lookupLabel(arlut.csd.ganymede.server.DBObject)
-   * lookupLabel} method.</p>
-   *
-   * @param query The query to be performed
-   * @param perspectiveObject There are occasions when the server will want to do internal
-   * querying in which the label of an object matching the query criteria is synthesized
-   * for use in a particular context.  If non-null, perspectiveObject's
-   * {@link arlut.csd.ganymede.server.DBObject#lookupLabel(arlut.csd.ganymede.server.DBObject) lookupLabel}
-   * method will be used to generate the label for a result entry.
-   */
-
-  public synchronized QueryResult query(Query query, DBEditObject perspectiveObject) throws NotLoggedInException
-  {
-    checklogin();
-
-    return queryEngine.query(query, perspectiveObject);
-  }
-
-  /**
-   * <p>This method provides the hook for doing all manner of internal
-   * object listing for the Ganymede database.  This method will not
-   * take into account any optional owner filtering, but it will honor
-   * the editableOnly flag in the Query.</p>
-   *
-   * @return A Vector of {@link arlut.csd.ganymede.common.Result Result} objects
-   */
-
-  public synchronized Vector<Result> internalQuery(Query query)
-  {
-    return queryEngine.internalQuery(query);
-  }
-
-  /**
    * <p>This method is intended as a lightweight way of returning the
    * current label of the specified invid.  No locking is done,
    * and the label returned will be viewed through the context
@@ -2360,25 +2101,6 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
 	return null;
       }
-  }
-
-  /**
-   * <p>This method is intended as a lightweight way of returning a
-   * handy description of the type and label of the specified invid.
-   * No locking is done, and the label returned will be viewed through
-   * the context of the current transaction, if any.</p>
-   */
-
-  public String describe(Invid invid)
-  {
-    // We don't check permissions here.
-    //
-    // We have made the command decision that finding the label for an
-    // invid is not something we need to guard against.  Using
-    // session.viewDBObject() here makes this a much more lightweight
-    // operation.
-
-    return session.describe(invid);
   }
 
   /**
@@ -2817,39 +2539,6 @@ final public class GanymedeSession implements Session, Unreferenced {
    * to any other sessions until this session calls
    * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
    *
-   * @param objectType The kind of object to create.
-   *
-   * @return A ReturnVal carrying an object reference and/or error dialog
-   *
-   * @see arlut.csd.ganymede.rmi.Session
-   */
-
-  public ReturnVal create_db_object(String objectType) throws NotLoggedInException
-  {
-    DBObjectBase base = Ganymede.db.getObjectBase(objectType);
-
-    if (base == null)
-      {
-	// "Error, "{0}" is not a valid object type in this Ganymede server."
-	return Ganymede.createErrorDialog(ts.l("global.no_such_object_type", objectType));
-      }
-
-    return this.create_db_object(base.getTypeID());
-  }
-
-  /**
-   * <p>Create a new object of the given type.  The ReturnVal
-   * returned will carry a db_object reference, which can be obtained
-   * by the client calling ReturnVal.getObject().  If the object
-   * could not be checked out for editing for some reason, the ReturnVal
-   * will carry an encoded error dialog for the client to display.</p>
-   *
-   * <p>Keep in mind that only one GanymedeSession can have a particular
-   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} checked out for
-   * editing at a time.  Once created, the object will be unavailable
-   * to any other sessions until this session calls
-   * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
-   *
    * @param type The kind of object to create.
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
@@ -2875,130 +2564,24 @@ final public class GanymedeSession implements Session, Unreferenced {
    * to any other sessions until this session calls
    * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
    *
-   * @param type The kind of object to create.
-   * @param embedded If true, assume the object created is embedded and
-   * does not need to have owners set.
+   * @param objectType The kind of object to create.
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
-  public ReturnVal create_db_object(short type, boolean embedded) throws NotLoggedInException
+  public ReturnVal create_db_object(String objectType) throws NotLoggedInException
   {
-    return this.create_db_object(type, embedded, null);
-  }
+    DBObjectBase base = Ganymede.db.getObjectBase(objectType);
 
-  /**
-   * <p>Create a new object of the given type.  The ReturnVal
-   * returned will carry a db_object reference, which can be obtained
-   * by the client calling ReturnVal.getObject().  If the object
-   * could not be checked out for editing for some reason, the ReturnVal
-   * will carry an encoded error dialog for the client to display.</p>
-   *
-   * <p>Keep in mind that only one GanymedeSession can have a particular
-   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} checked out for
-   * editing at a time.  Once created, the object will be unavailable
-   * to any other sessions until this session calls
-   * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
-   *
-   * @param type The kind of object to create.
-   * @param embedded If true, assume the object created is embedded and
-   * does not need to have owners set.
-   * @param preferredInvid If not null, the created object will be
-   * given the preferredInvid.  This is only expected to be used by
-   * the GanymedeXMLSession if the -magic_import command line flag was
-   * given on the Ganymede server's startup.  If preferredInvid is
-   * null, the Invid id number will be automatically picked in
-   * monotonically increasing fashion.
-   *
-   * @return A ReturnVal carrying an object reference and/or error dialog
-   */
-
-  public synchronized ReturnVal create_db_object(short type, boolean embedded, Invid preferredInvid) throws NotLoggedInException
-  {
-    DBObject newObj;
-    ReturnVal retVal = null;
-    Vector ownerInvids = null;
-
-    /* -- */
-
-    checklogin();
-
-    if (!permManager.getPerm(type, true).isCreatable())
+    if (base == null)
       {
-	DBObjectBase base = Ganymede.db.getObjectBase(type);
-
-	String error;
-
-	if (base == null)
-	  {
-	    // "Permission to create object of *invalid* type {0} denied."
-	    error = ts.l("create_db_object.invalid_type", Integer.valueOf(type));
-	  }
-	else
-	  {
-	    // "Permission to create object of type {0} denied."
-	    error = ts.l("create_db_object.type_no_perm", base.getName());
-	  }
-
-	// "Can''t Create Object"
-	return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"), error);
+	// "Error, "{0}" is not a valid object type in this Ganymede server."
+	return Ganymede.createErrorDialog(ts.l("global.no_such_object_type", objectType));
       }
 
-    // if embedded is true, this code was called from
-    // DBEditObject.createNewEmbeddedObject(), and we don't need to
-    // worry about setting ownership, etc.
-
-    if (!embedded)
-      {
-	ownerInvids = permManager.getNewOwnerInvids();
-
-	if (!permManager.isSuperGash() && ownerInvids.size() == 0)
-	  {
-	    // "Can''t Create Object"
-	    // "Can''t create new object, no owner group to put it in."
-	    return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
-					      ts.l("create_db_object.no_owner_group"));
-	  }
-      }
-
-    // now create and process
-
-    try
-      {
-        retVal = session.createDBObject(type, preferredInvid, ownerInvids); // *sync* DBSession
-      }
-    catch (GanymedeManagementException ex)
-      {
-        // "Can''t Create Object"
-        // "Error loading custom class for this object."
-        return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
-                                          ts.l("create_db_object.custom_class_load_error_text"));
-      }
-
-    if (!ReturnVal.didSucceed(retVal))
-      {
-        // "Can''t Create Object"
-        // "Can't create new object, the operation was refused"
-        return ReturnVal.merge(Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
-                                                          ts.l("create_db_object.operation_refused")),
-                               retVal);
-      }
-
-    newObj = (DBObject) retVal.getObject();
-
-    setLastEvent("create " + newObj.getTypeName());
-
-    retVal = ReturnVal.success();
-
-    if (this.exportObjects)
-      {
-        exportObject(newObj);
-      }
-
-    retVal.setInvid(newObj.getInvid());
-    retVal.setObject(newObj);
-
-    return retVal;
+    return this.create_db_object(base.getTypeID());
   }
 
   /**
@@ -3519,6 +3102,402 @@ final public class GanymedeSession implements Session, Unreferenced {
     return this.getXML(true, true, null, includeHistory, includeOid);
   }
 
+  /****************************************************************************
+   *                                                                          *
+   * From here on down, the methods are not remotely accessible to the client,*
+   * but are instead for server-side use only.                                *
+   *                                                                          *
+   ****************************************************************************/
+
+  /**
+   * <p>Log out this session.  After this method is called, no other
+   * methods may be called on this session object.</p>
+   *
+   * <p>This method is partially synchronized, to avoid locking up
+   * the admin console if this user's session has become deadlocked.</p>
+   */
+
+  public void logout(boolean forced_off)
+  {
+    // This method is not synchronized to help stave off threads
+    // piling up trying to kill off a user which is deadlocked.
+
+    // Obviously we want to prevent the deadlock in the first place,
+    // but this will help keep hapless admins on the console from
+    // locking their console trying to kill deadlocked users.
+
+    if (!loggedInSemaphore.set(false))
+      {
+	return;
+      }
+
+    // we do want to synchronize on our session for this part, so that
+    // the user won't be logged off while they are doing a transaction
+    // commit, or the like.
+
+    synchronized (this)
+      {
+	// we'll do all of our active cleanup in a try clause, so we
+	// can wipe out references to aid GC in a finally clause
+
+	try
+	  {
+	    if (!remoteClient)
+	      {
+		// We don't need to update GanymedeServer's lists for internal sessions
+
+		session.logout();	// *sync* DBSession
+		return;
+	      }
+
+	    //	Ganymede.debug("User " + username + " logging off");
+
+	    if (this.asyncPort != null)
+	      {
+		this.asyncPort.shutdown();
+		this.asyncPort = null;
+	      }
+
+	    // logout the client, abort any DBSession transaction going
+
+	    session.logout();	// *sync* DBSession
+
+	    // if we have DBObjects left exported through RMI, make
+	    // them inaccesible
+
+	    unexportObjects(true);
+
+	    // if we ourselves were exported, unexport
+
+	    if (remoteClient)
+	      {
+		Ganymede.rmi.unpublishObject(this, true);
+	      }
+
+	    // if we weren't forced off, do normal logout logging
+
+	    if (!forced_off)
+	      {
+		if (Ganymede.log != null)
+		  {
+		    Ganymede.log.logSystemEvent(new DBLogEvent("normallogout",
+							       ts.l("logout.normal_event", permManager.getUserName()),
+							       permManager.getUserInvid(),
+							       permManager.getUserName(),
+							       permManager.getIdentityInvids(),
+							       null));
+		  }
+	      }
+	    else
+	      {
+		// if we are forced off, and we're running under a
+		// GanymedeXMLSession, tell the GanymedeXMLSession to
+		// kick off
+
+		// if we're not forced off, then presumably the
+		// GanymedeXMLSession triggered the logout.
+
+		if (xSession != null)
+		  {
+		    xSession.abort();
+		  }
+	      }
+
+	    // Update the server's records, refresh the admin consoles.
+
+	    GanymedeServer.removeRemoteUser(this);
+
+	    // update the admin consoles
+
+	    GanymedeAdmin.refreshUsers();
+	  }
+	finally
+	  {
+	    if (semaphoreLocked)
+	      {
+		try
+		  {
+		    GanymedeServer.lSemaphore.decrement();
+		  }
+		catch (IllegalArgumentException ex)
+		  {
+		    Ganymede.logError(ex);
+		  }
+
+		semaphoreLocked = false;
+	      }
+
+	    // if we are the last user logged in and the server is in
+	    // deferred shutdown mode, clearActiveUser() will shut the
+	    // server down, so the rest of of the stuff below may not
+	    // happen
+
+	    GanymedeServer.clearActiveUser(sessionName);
+
+	    // help the garbage collector
+
+	    connecttime = null;
+	    clienthost = null;
+	    status = null;
+	    lastEvent = null;
+	    session = null;
+	    queryEngine = null;
+
+	    wizard = null;
+	    userInfo = null;
+	    xSession = null;
+	  }
+
+	// guess we're still running.  Remember the last time this
+	// user logged out for the motd-display check
+
+	if (permManager.getUserInvid() != null)
+	  {
+	    GanymedeServer.userLogOuts.put(permManager.getUserInvid(), new Date());
+	  }
+	else
+	  {
+	    GanymedeServer.userLogOuts.put(permManager.getPersonaInvid(), new Date());
+	  }
+
+	Ganymede.debug(ts.l("logout.logged_off", permManager.getUserName()));
+
+	permManager = null;
+      }
+  }
+
+  /**
+   * <p>This method is used to allow local server-side code to request
+   * that no oversight be maintained over changes made to the server
+   * through this GanymedeSession.</p>
+   *
+   * <p>This is intended <b>only</b> for trusted code that does its own
+   * checking and validation on changes made to the database.  If
+   * oversight is turned off, no wizard code will be called, and the
+   * required field logic will be bypassed.  Extreme care must
+   * be used in disabling oversight, and oversight should only be
+   * turned off for direct loading and other situations where there
+   * won't be multi-user use, to avoid breaking constraints that
+   * custom plug-ins count on.</p>
+   *
+   * <p>Oversight is enabled by default.</p>
+   *
+   * @param val If true, oversight will be enabled.
+   */
+
+  public void enableOversight(boolean val)
+  {
+    this.enableOversight = val;
+  }
+
+  /**
+   * <p>This method applies this GanymedeSession's current owner filter
+   * to the given QueryResult &lt;qr&gt; and returns a QueryResult
+   * with any object handles that are not matched by the filter
+   * stripped.</p>
+   *
+   * <p>If the submitted QueryResult &lt;qr&gt; is null, filterQueryResult()
+   * will itself return null.</p>
+   */
+
+  public QueryResult filterQueryResult(QueryResult qr)
+  {
+    return permManager.filterQueryResult(qr);
+  }
+
+  /**
+   * <p>Server-side method for doing object listing with support for
+   * DBObject's {@link
+   * arlut.csd.ganymede.server.DBObject#lookupLabel(arlut.csd.ganymede.server.DBObject)
+   * lookupLabel} method.</p>
+   *
+   * @param query The query to be performed
+   * @param perspectiveObject There are occasions when the server will want to do internal
+   * querying in which the label of an object matching the query criteria is synthesized
+   * for use in a particular context.  If non-null, perspectiveObject's
+   * {@link arlut.csd.ganymede.server.DBObject#lookupLabel(arlut.csd.ganymede.server.DBObject) lookupLabel}
+   * method will be used to generate the label for a result entry.
+   */
+
+  public synchronized QueryResult query(Query query, DBEditObject perspectiveObject) throws NotLoggedInException
+  {
+    checklogin();
+
+    return queryEngine.query(query, perspectiveObject);
+  }
+
+  /**
+   * <p>This method provides the hook for doing all manner of internal
+   * object listing for the Ganymede database.  This method will not
+   * take into account any optional owner filtering, but it will honor
+   * the editableOnly flag in the Query.</p>
+   *
+   * @return A Vector of {@link arlut.csd.ganymede.common.Result Result} objects
+   */
+
+  public synchronized Vector<Result> internalQuery(Query query)
+  {
+    return queryEngine.internalQuery(query);
+  }
+
+  /**
+   * <p>This method is intended as a lightweight way of returning a
+   * handy description of the type and label of the specified invid.
+   * No locking is done, and the label returned will be viewed through
+   * the context of the current transaction, if any.</p>
+   */
+
+  public String describe(Invid invid)
+  {
+    // We don't check permissions here.
+    //
+    // We have made the command decision that finding the label for an
+    // invid is not something we need to guard against.  Using
+    // session.viewDBObject() here makes this a much more lightweight
+    // operation.
+
+    return session.describe(invid);
+  }
+
+  /**
+   * <p>Create a new object of the given type.  The ReturnVal
+   * returned will carry a db_object reference, which can be obtained
+   * by the client calling ReturnVal.getObject().  If the object
+   * could not be checked out for editing for some reason, the ReturnVal
+   * will carry an encoded error dialog for the client to display.</p>
+   *
+   * <p>Keep in mind that only one GanymedeSession can have a particular
+   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} checked out for
+   * editing at a time.  Once created, the object will be unavailable
+   * to any other sessions until this session calls
+   * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
+   *
+   * @param type The kind of object to create.
+   * @param embedded If true, assume the object created is embedded and
+   * does not need to have owners set.
+   *
+   * @return A ReturnVal carrying an object reference and/or error dialog
+   */
+
+  public ReturnVal create_db_object(short type, boolean embedded) throws NotLoggedInException
+  {
+    return this.create_db_object(type, embedded, null);
+  }
+
+  /**
+   * <p>Create a new object of the given type.  The ReturnVal
+   * returned will carry a db_object reference, which can be obtained
+   * by the client calling ReturnVal.getObject().  If the object
+   * could not be checked out for editing for some reason, the ReturnVal
+   * will carry an encoded error dialog for the client to display.</p>
+   *
+   * <p>Keep in mind that only one GanymedeSession can have a particular
+   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} checked out for
+   * editing at a time.  Once created, the object will be unavailable
+   * to any other sessions until this session calls
+   * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction() commitTransaction()}.</p>
+   *
+   * @param type The kind of object to create.
+   * @param embedded If true, assume the object created is embedded and
+   * does not need to have owners set.
+   * @param preferredInvid If not null, the created object will be
+   * given the preferredInvid.  This is only expected to be used by
+   * the GanymedeXMLSession if the -magic_import command line flag was
+   * given on the Ganymede server's startup.  If preferredInvid is
+   * null, the Invid id number will be automatically picked in
+   * monotonically increasing fashion.
+   *
+   * @return A ReturnVal carrying an object reference and/or error dialog
+   */
+
+  public synchronized ReturnVal create_db_object(short type, boolean embedded, Invid preferredInvid) throws NotLoggedInException
+  {
+    DBObject newObj;
+    ReturnVal retVal = null;
+    Vector ownerInvids = null;
+
+    /* -- */
+
+    checklogin();
+
+    if (!permManager.getPerm(type, true).isCreatable())
+      {
+	DBObjectBase base = Ganymede.db.getObjectBase(type);
+
+	String error;
+
+	if (base == null)
+	  {
+	    // "Permission to create object of *invalid* type {0} denied."
+	    error = ts.l("create_db_object.invalid_type", Integer.valueOf(type));
+	  }
+	else
+	  {
+	    // "Permission to create object of type {0} denied."
+	    error = ts.l("create_db_object.type_no_perm", base.getName());
+	  }
+
+	// "Can''t Create Object"
+	return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"), error);
+      }
+
+    // if embedded is true, this code was called from
+    // DBEditObject.createNewEmbeddedObject(), and we don't need to
+    // worry about setting ownership, etc.
+
+    if (!embedded)
+      {
+	ownerInvids = permManager.getNewOwnerInvids();
+
+	if (!permManager.isSuperGash() && ownerInvids.size() == 0)
+	  {
+	    // "Can''t Create Object"
+	    // "Can''t create new object, no owner group to put it in."
+	    return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
+					      ts.l("create_db_object.no_owner_group"));
+	  }
+      }
+
+    // now create and process
+
+    try
+      {
+        retVal = session.createDBObject(type, preferredInvid, ownerInvids); // *sync* DBSession
+      }
+    catch (GanymedeManagementException ex)
+      {
+        // "Can''t Create Object"
+        // "Error loading custom class for this object."
+        return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
+                                          ts.l("create_db_object.custom_class_load_error_text"));
+      }
+
+    if (!ReturnVal.didSucceed(retVal))
+      {
+        // "Can''t Create Object"
+        // "Can't create new object, the operation was refused"
+        return ReturnVal.merge(Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
+                                                          ts.l("create_db_object.operation_refused")),
+                               retVal);
+      }
+
+    newObj = (DBObject) retVal.getObject();
+
+    setLastEvent("create " + newObj.getTypeName());
+
+    retVal = ReturnVal.success();
+
+    if (this.exportObjects)
+      {
+        exportObject(newObj);
+      }
+
+    retVal.setInvid(newObj.getInvid());
+    retVal.setObject(newObj);
+
+    return retVal;
+  }
+
   /**
    * <p>Private server-side helper method used to pass a {@link
    * arlut.csd.ganymede.rmi.FileTransmitter FileTransmitter} reference
@@ -3529,7 +3508,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
-    if (sendData && !permManager.isSuperGash())
+    if (!permManager.isSuperGash())
       {
 	// "Permissions Error"
 	// "You do not have permissions to dump the server''s data with the xml client"
@@ -3556,12 +3535,24 @@ final public class GanymedeSession implements Session, Unreferenced {
     return retVal;
   }
 
-  /****************************************************************************
-   *                                                                          *
-   * From here on down, the methods are not remotely accessible to the client,*
-   * but are instead for server-side use only.                                *
-   *                                                                          *
-   ****************************************************************************/
+  /**
+   * This method returns the name of the system that the client
+   * is connected from.
+   */
+
+  public String getClientHostName()
+  {
+    return this.clienthost;
+  }
+
+  /**
+   * This method provides a handy description of this session.
+   */
+
+  public String toString()
+  {
+    return "GanymedeSession [" + permManager.getUserName() + "," + permManager.getPersonaName() + "]";
+  }
 
   /**
    * <p>Convenience method to get access to this session's UserBase
@@ -3597,6 +3588,15 @@ final public class GanymedeSession implements Session, Unreferenced {
   public DBSession getSession()
   {
     return session;
+  }
+
+  /**
+   * This method returns the unique name of this session.
+   */
+
+  public String getSessionName()
+  {
+    return this.sessionName;
   }
 
   /**
