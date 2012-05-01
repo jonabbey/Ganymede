@@ -377,7 +377,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * can forcibly unexport them at logout time.
    */
 
-  private ArrayList exported = new ArrayList();
+  private ArrayList<DBObject> exported = new ArrayList<DBObject>();
 
   /* -- */
 
@@ -3828,9 +3828,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     synchronized (exported)
       {
-	for (Iterator it = exported.iterator(); it.hasNext();)
+	for (DBObject exportedObject: exported)
 	  {
-	    if (object == it.next())
+	    if (exportedObject == object)
 	      {
 		return;
 	      }
