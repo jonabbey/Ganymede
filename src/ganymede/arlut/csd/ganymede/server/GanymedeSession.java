@@ -3406,6 +3406,12 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
   }
 
+  //
+  //
+  // RMI object publish/unpublish functions
+  //
+  //
+
   /**
    * <p>Export this object through RMI, so the client can make calls on it.</p>
    *
@@ -3480,23 +3486,11 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
   }
 
-  void setLastEvent(String text)
-  {
-    // if we are being driven by the xml client or by an otherwise
-    // internal session, we don't want to spam the admin console with
-    // status messages.  The serverAdminProxy class will limit
-    // excessive communications with the admin console, but no point
-    // in getting ourselves all worked up here.
-
-    if (!exportObjects)
-      {
-	return;
-      }
-
-    this.lastEvent = text;
-    resetAdminEntry();
-    GanymedeAdmin.refreshUsers();
-  }
+  //
+  //
+  // Admin console reporting functions
+  //
+  //
 
   /**
    * <p>This method is used by the server to increment the admin
@@ -3593,6 +3587,29 @@ final public class GanymedeSession implements Session, Unreferenced {
   void setLastError(String error)
   {
     Ganymede.debug("GanymedeSession [" + sessionName + "]: setLastError (" + error + ")");
+  }
+
+  /**
+   * <p>This method is used to report an action performed by the user
+   * to the admin consoles.</p>
+   */
+
+  void setLastEvent(String text)
+  {
+    // if we are being driven by the xml client or by an otherwise
+    // internal session, we don't want to spam the admin console with
+    // status messages.  The serverAdminProxy class will limit
+    // excessive communications with the admin console, but no point
+    // in getting ourselves all worked up here.
+
+    if (!exportObjects)
+      {
+	return;
+      }
+
+    this.lastEvent = text;
+    resetAdminEntry();
+    GanymedeAdmin.refreshUsers();
   }
 
   /**
