@@ -126,8 +126,14 @@ import arlut.csd.ganymede.rmi.db_object;
  * access schema information and database objects in the server.</p>
  *
  * <p>The GanymedeSession class provides query and editing services to
- * the client, tracks the client's status, and manages permissions.
- * Most of the actual database handling is done through a second,
+ * the client, tracks the client's status, and manages permissions.</p>
+ *
+ * <p>Permissions are managed through the contained {@link
+ * arlut.csd.ganymede.server.DBPermissionManager} instance, and
+ * querying services are handled by a {@link
+ * arlut.csd.ganymede.server.DBQueryEngine} instance.</p>
+ *
+ * <p>The actual data store handling is done through a second,
  * database-layer session object called a {@link
  * arlut.csd.ganymede.server.DBSession DBSession} that GanymedeSession
  * maintains for each user.  GanymedeSession methods like {@link
@@ -135,12 +141,12 @@ import arlut.csd.ganymede.rmi.db_object;
  * view_db_object()} and {@link
  * arlut.csd.ganymede.server.GanymedeSession#edit_db_object(arlut.csd.ganymede.common.Invid)
  * edit_db_object()} make calls on the DBSession to actually access
- * {@link arlut.csd.ganymede.server.DBObject DBObjects} in the Ganymede
- * database.  The client then receives a serialized {@link
- * arlut.csd.ganymede.common.ReturnVal ReturnVal} which may include a remote
- * {@link arlut.csd.ganymede.rmi.db_object db_object} reference so that
- * the client can directly talk to the DBObject or
- * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} over RMI.</p>
+ * {@link arlut.csd.ganymede.server.DBObject DBObjects} in the
+ * Ganymede database.  The client then receives a serialized {@link
+ * arlut.csd.ganymede.common.ReturnVal ReturnVal} which may include a
+ * remote {@link arlut.csd.ganymede.rmi.db_object db_object} reference
+ * so that the client can directly talk to the DBObject or {@link
+ * arlut.csd.ganymede.server.DBEditObject DBEditObject} over RMI.</p>
  *
  * <p>Once a GanymedeSession is created by the GanymedeServer's login()
  * method, the client is considered to be authenticated, and may make
