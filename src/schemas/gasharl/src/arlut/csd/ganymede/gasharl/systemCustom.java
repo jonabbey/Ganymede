@@ -12,8 +12,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -882,7 +884,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
     Invid userInvid = (Invid) object.getFieldValueLocal(systemSchema.PRIMARYUSER);
 
     if (userInvid != null &&
-	userInvid.equals(gSession.getUserInvid()))
+	userInvid.equals(gSession.getPermManager().getUserInvid()))
       {
 	return true;
       }

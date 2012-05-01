@@ -15,6 +15,8 @@
    Copyright (C) 1996-2012
    The University of Texas at Austin
 
+   Ganymede is a registered trademark of The University of Texas at Austin
+
    Contact information
 
    Author Email: ganymede_author@arlut.utexas.edu
@@ -2366,7 +2368,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	// if we are supergash or we are reacting to a password change
 	// cascade, don't restrict what the date can be set to.
 
-	if (mySession == null || mySession.isSuperGash() || amChangingExpireDate)
+	if (mySession == null || mySession.getPermManager().isSuperGash() || amChangingExpireDate)
 	  {
 	    return super.maxDate(field);
 	  }
@@ -3745,8 +3747,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
     finally
       {
-	Invid admin = getGSession().getPersonaInvid();
-	String adminName = getGSession().getMyUserName();
+	Invid admin = getGSession().getPermManager().getPersonaInvid();
+	String adminName = getGSession().getPermManager().getUserName();
 	List<Invid> objects = new ArrayList<Invid>();
 	objects.add(getInvid());
 
@@ -4143,8 +4145,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
     finally
       {
-	Invid admin = getGSession().getPersonaInvid();
-	String adminName = getGSession().getMyUserName();
+	Invid admin = getGSession().getPermManager().getPersonaInvid();
+	String adminName = getGSession().getPermManager().getUserName();
 	Vector objects = new Vector();
 	objects.addElement(getInvid());
 

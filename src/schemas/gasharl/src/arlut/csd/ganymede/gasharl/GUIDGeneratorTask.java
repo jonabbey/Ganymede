@@ -13,8 +13,10 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -198,7 +200,7 @@ public class GUIDGeneratorTask implements Runnable {
 
   public boolean createGUIDs() throws NotLoggedInException
   {
-    List<DBObject> users = mySession.getObjects(SchemaConstants.UserBase);
+    List<DBObject> users = mySession.getSession().getTransactionalObjects(SchemaConstants.UserBase);
     UUIDGenerator gen = UUIDGenerator.getInstance();
     EthernetAddress myAddress = new EthernetAddress("00:11:43:D5:F7:F8");
     boolean success = true;
@@ -243,7 +245,7 @@ public class GUIDGeneratorTask implements Runnable {
 	  }
       }
 
-    List<DBObject> groups = mySession.getObjects((short) 257);
+    List<DBObject> groups = mySession.getSession().getTransactionalObjects((short) 257);
 
     for (DBObject group: groups)
       {

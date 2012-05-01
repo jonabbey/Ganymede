@@ -4,17 +4,19 @@
 
    This task is used to validate/update phone numbers in the Ganymede
    user base.
-   
+
    Created: 29 June 2009
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -168,7 +170,7 @@ public class PhoneValidationTask implements Runnable {
 
   private void scanPhones() throws InterruptedException, NotLoggedInException
   {
-    List<DBObject> users = mySession.getObjects(SchemaConstants.UserBase);
+    List<DBObject> users = mySession.getSession().getTransactionalObjects(SchemaConstants.UserBase);
 
     for (DBObject user: users)
       {

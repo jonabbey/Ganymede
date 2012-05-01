@@ -13,8 +13,10 @@
 	    
    Ganymede Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -203,7 +205,7 @@ public class FixupLabelsTask implements Runnable {
 
   private boolean assignAutomounterLabels() throws InterruptedException, NotLoggedInException
   {
-    List<DBObject> users = mySession.getObjects(SchemaConstants.UserBase);
+    List<DBObject> users = mySession.getSession().getTransactionalObjects(SchemaConstants.UserBase);
 
     for (DBObject user: users)
       {
@@ -225,7 +227,7 @@ public class FixupLabelsTask implements Runnable {
 
   private boolean fixupInterfaceLabels() throws InterruptedException, NotLoggedInException
   {
-    List<DBObject> systems = mySession.getObjects(interfaceSchema.BASE);
+    List<DBObject> systems = mySession.getSession().getTransactionalObjects(interfaceSchema.BASE);
     
     for (DBObject system: systems)
       {

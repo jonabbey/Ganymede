@@ -4,17 +4,19 @@
 
    This task is a simple one-shot intended to strip all social security
    numbers out of the user base.
-   
+
    Created: 1 August 2003
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2010
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -199,7 +201,7 @@ public class KillSSTask implements Runnable {
 
   private boolean stripSS() throws InterruptedException, NotLoggedInException
   {
-    List<DBObject> users = mySession.getObjects(SchemaConstants.UserBase);
+    List<DBObject> users = mySession.getSession().getTransactionalObjects(SchemaConstants.UserBase);
     
     for (DBObject user: users)
       {
