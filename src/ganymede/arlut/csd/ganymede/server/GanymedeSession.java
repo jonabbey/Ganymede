@@ -189,13 +189,18 @@ final public class GanymedeSession implements Session, Unreferenced {
   private serverClientAsyncResponder asyncPort = null;
 
   /**
-   * if this session is on the GanymedeServer's lSemaphore, this boolean
-   * will be true.
+   * <p>This tracks whether this GanymedeSession counts as a 'login
+   * session' which increments {@link arlut.csd.ganymedes.server.GanymedeServer#lSemaphore}.</p>
    *
-   * XXX wtf? figure out and document XXX
+   * <p>If semaphoreLocked is true, that means that either the {@link
+   * arlut.csd.ganymedes.erver.GanymedeServer#processLogin(java.lang.String,java.lang.String,boolean,boolean)}
+   * method or the appropriate GanymedeSession constructor has caused
+   * the GanymedeServer lSemaphore counting semaphore to be
+   * incremented, and we'll need to make sure and decrement the
+   * semaphore when this GanymedeSession is shut down.</p>
    */
 
-  boolean semaphoreLocked = false;
+  private boolean semaphoreLocked = false;
 
   /**
    * If this flag is true, we're being used by a remote client
