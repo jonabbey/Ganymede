@@ -82,7 +82,6 @@ import Qsmtp.Qsmtp;
 import arlut.csd.Util.RandomUtils;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.StringUtils;
-import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.WordWrap;
 import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.ganymede.common.AdminEntry;
