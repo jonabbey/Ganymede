@@ -14,8 +14,10 @@
 	    
    Directory Directory Management System
  
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -78,7 +80,7 @@ public class VectorUtils {
    * vectA and/or vectB are null.
    */
 
-  public static Vector union(List vectA, List vectB)
+  public static <E> Vector<E> union(List<E> vectA, List<E> vectB)
   {
     int threshold = vectSize(vectA) + vectSize(vectB);
 
@@ -88,7 +90,7 @@ public class VectorUtils {
 
 	if (vectA != null)
 	  {
-	    for (Object obj: vectA)
+	    for (E obj: vectA)
 	      {
 		result.add(obj);
 	      }
@@ -96,7 +98,7 @@ public class VectorUtils {
 
 	if (vectB != null)
 	  {
-	    for (Object obj: vectB)
+	    for (E obj: vectB)
 	      {
 		if (!result.contains(obj))
 		  {
@@ -115,7 +117,7 @@ public class VectorUtils {
 	// temporary hashtable so that we have better scalability for
 	// item lookup.
 
-	Set workSet = new HashSet(vectSize(vectA) + vectSize(vectB));
+	Set<E> workSet = new HashSet<E>(vectSize(vectA) + vectSize(vectB));
 
 	/* -- */
 
@@ -138,7 +140,7 @@ public class VectorUtils {
    * already contain obj.
    */
 
-  public static void unionAdd(List vect, Object obj)
+  public static <E> void unionAdd(List<E> vect, E obj)
   {
     if (obj == null)
       {
@@ -158,7 +160,7 @@ public class VectorUtils {
    * common. 
    */
 
-  public static boolean overlaps(List vectA, List vectB)
+  public static <E> boolean overlaps(List<E> vectA, List<E> vectB)
   {
     if (vectA == null || vectB == null || vectA.size() == 0 || vectB.size() == 0)
       {
@@ -167,7 +169,7 @@ public class VectorUtils {
 
     if ((vectA.size() + vectB.size()) > 20)		// ass, again
       {
-	Set workSet = new HashSet(vectA.size());
+	Set<E> workSet = new HashSet<E>(vectA.size());
 
 	workSet.addAll(vectA);
 	
@@ -214,12 +216,12 @@ public class VectorUtils {
    * vectA and/or vectB are null.
    */
 
-  public static Vector intersection(List vectA, List vectB)
+  public static <E> Vector<E> intersection(List<E> vectA, List<E> vectB)
   {
-    Set
-      workSetA = new HashSet(),
-      workSetB = new HashSet(),
-      resultSet = new HashSet();
+    Set<E>
+      workSetA = new HashSet<E>(),
+      workSetB = new HashSet<E>(),
+      resultSet = new HashSet<E>();
 
     /* -- */
 
@@ -233,7 +235,7 @@ public class VectorUtils {
 	workSetB.addAll(vectB);
       }
 
-    for (Object item: workSetA)
+    for (E item: workSetA)
       {
 	if (workSetB.contains(item))
 	  {
@@ -241,7 +243,7 @@ public class VectorUtils {
 	  }
       }
 
-    for (Object item: workSetB)
+    for (E item: workSetB)
       {
 	if (workSetA.contains(item))
 	  {
@@ -260,9 +262,9 @@ public class VectorUtils {
    * vectA and/or vectB are null.
    */
 
-  public static Vector difference(List vectA, List vectB)
+  public static <E> Vector<E> difference(List<E> vectA, List<E> vectB)
   {
-    Vector result = new Vector();
+    Vector<E> result = new Vector<E>();
 
     /* -- */
 
@@ -273,12 +275,12 @@ public class VectorUtils {
 
     if (vectB == null)
       {
-	return new Vector(vectA);
+	return new Vector<E>(vectA);
       }
 
     if (vectA.size() + vectB.size() < 10) // ass
       {
-	for (Object item: vectA)
+	for (E item: vectA)
 	  {
 	    if (!vectB.contains(item))
 	      {
@@ -288,9 +290,9 @@ public class VectorUtils {
       }
     else
       {
-	Set workSet = new HashSet(vectB);
+	Set<E> workSet = new HashSet<E>(vectB);
 
-	for (Object item: vectA)
+	for (E item: vectA)
 	  {
 	    if (!workSet.contains(item))
 	      {
@@ -307,7 +309,7 @@ public class VectorUtils {
    * elements, in whatever order.
    */
 
-  public static boolean equalMembers(List vectA, List vectB)
+  public static <E> boolean equalMembers(List<E> vectA, List<E> vectB)
   {
     if (vectA.size() != vectB.size())
       {
@@ -325,7 +327,7 @@ public class VectorUtils {
    * returns null.
    */
 
-  public static Vector duplicates(List vector)
+  public static <E> Vector<E> duplicates(List<E> vector)
   {
     if (vector == null)
       {
@@ -362,18 +364,18 @@ public class VectorUtils {
    * vectA and/or vectB are null.
    */
 
-  public static Vector minus(List vectA, List vectB)
+  public static <E> Vector<E> minus(List<E> vectA, List<E> vectB)
   {
     if (vectA == null)
       {
-	return new Vector();	// empty
+	return new Vector<E>();	// empty
       }
 
-    Vector result = new Vector(vectA);
+    Vector<E> result = new Vector<E>(vectA);
 
     if (vectB != null)
       {
-	for (Object item: vectB)
+	for (E item: vectB)
 	  {
 	    result.remove(item);
 	  }
