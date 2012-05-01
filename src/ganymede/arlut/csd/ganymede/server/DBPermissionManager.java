@@ -51,7 +51,6 @@ package arlut.csd.ganymede.server;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -282,7 +281,7 @@ public class DBPermissionManager {
    * of ownergroups held here.</p>
    */
 
-  private Vector newObjectOwnerInvids = null;
+  private Vector<Invid> newObjectOwnerInvids = null;
 
   /**
    * <p>This variable is a vector of object references (Invid's) to the
@@ -294,7 +293,7 @@ public class DBPermissionManager {
    * user wants to restrict the visibility of objects for convenience.</p>
    */
 
-  private Vector visibilityFilterInvids = null;
+  private Vector<Invid> visibilityFilterInvids = null;
 
   /* -- */
 
@@ -496,12 +495,12 @@ public class DBPermissionManager {
 
     if (userInvid != null)
       {
-	ids.addElement(userInvid);
+	ids.add(userInvid);
       }
 
     if (personaInvid != null)
       {
-	ids.addElement(personaInvid);
+	ids.add(personaInvid);
       }
 
     return ids;
@@ -555,10 +554,10 @@ public class DBPermissionManager {
    * user logged in.</p>
    */
 
-  public Vector getAvailablePersonae()
+  public Vector<String> getAvailablePersonae()
   {
     DBObject user;
-    Vector results;
+    Vector<String> results;
     InvidDBField inv;
 
     /* -- */
@@ -570,7 +569,7 @@ public class DBPermissionManager {
 	return null;
       }
 
-    results = new Vector();
+    results = new Vector<String>();
 
     inv = (InvidDBField) user.getField(SchemaConstants.UserAdminPersonae);
 
@@ -585,7 +584,7 @@ public class DBPermissionManager {
 
 	    try
 	      {
-		results.addElement(session.viewDBObject(invid).getLabel());
+		results.add(session.viewDBObject(invid).getLabel());
 	      }
 	    catch (NullPointerException ex)
 	      {
@@ -593,7 +592,7 @@ public class DBPermissionManager {
 	  }
       }
 
-    results.addElement(user.getLabel()); // add their 'end-user' persona
+    results.add(user.getLabel()); // add their 'end-user' persona
 
     return results;
   }
@@ -794,7 +793,7 @@ public class DBPermissionManager {
     Query q;
     QueryResult result = new QueryResult();
     QueryResult fullOwnerList;
-    Vector alreadySeen = new Vector();
+    Vector<Invid> alreadySeen = new Vector<Invid>();
     Invid inv;
 
     /* -- */
@@ -827,7 +826,7 @@ public class DBPermissionManager {
 
     for (int i = 0; i < fullOwnerList.size(); i++)
       {
-        alreadySeen.removeAllElements();
+        alreadySeen.clear();
 
         inv = fullOwnerList.getInvid(i);
 
@@ -852,10 +851,9 @@ public class DBPermissionManager {
    * be provided.
    */
 
-  public synchronized ReturnVal setDefaultOwner(Vector ownerInvids)
+  public synchronized ReturnVal setDefaultOwner(Vector<Invid> ownerInvids)
   {
-    Vector tmpInvids;
-    Invid ownerInvidItem;
+    Vector<Invid> tmpInvids;
 
     /* -- */
 
@@ -865,12 +863,10 @@ public class DBPermissionManager {
 	return null;
       }
 
-    tmpInvids = new Vector();
+    tmpInvids = new Vector<Invid>();
 
-    for (int i = 0; i < ownerInvids.size(); i++)
+    for (Invid ownerInvidItem: ownerInvids)
       {
-	ownerInvidItem = (Invid) ownerInvids.elementAt(i);
-
 	// this check is actually redundant, as the InvidDBField link
 	// logic would catch such for us, but it makes a nice couplet
 	// with the getNum() check below, so I'll leave it here.
@@ -895,7 +891,7 @@ public class DBPermissionManager {
 	    continue;
 	  }
 
-	tmpInvids.addElement(ownerInvidItem);
+	tmpInvids.add(ownerInvidItem);
       }
 
     if (!supergashMode && !isMemberAll(tmpInvids))
@@ -951,7 +947,7 @@ public class DBPermissionManager {
 		// The client can always manually set the owner group
 		// in a created object after we return it, of course.
 
-		ownerInvids.addElement(ownerList.getInvid(0));
+		ownerInvids.add(ownerList.getInvid(0));
 	      }
 	  }
 
@@ -980,7 +976,7 @@ public class DBPermissionManager {
    * be provided.
    */
 
-  public synchronized ReturnVal filterQueries(Vector ownerInvids)
+  public synchronized ReturnVal filterQueries(Vector<Invid> ownerInvids)
   {
     if (ownerInvids == null || ownerInvids.size() == 0)
       {
@@ -1082,69 +1078,34 @@ public class DBPermissionManager {
 
   public synchronized BaseListTransport getBaseList()
   {
+    if (supergashMode && Ganymede.baseTransport != null)
+      {
+	return Ganymede.baseTransport;
+      }
+
+    BaseListTransport transport = new BaseListTransport();
+
+    // *sync* on DBStore, this GanymedeSession
+
+    // we sync on Ganymede.db to make sure that no one adds or deletes
+    // any object bases while we're creating our BaseListTransport.
+    // We could use the loginSemaphore, but that would be a bit heavy
+    // for our purposes here.
+
+    synchronized (Ganymede.db)
+      {
+	for (DBObjectBase base: Ganymede.db.objectBases.values())
+	  {
+	    base.addBaseToTransport(transport, null);
+	  }
+      }
+
     if (supergashMode)
       {
-	if (Ganymede.baseTransport != null)
-	  {
-	    return Ganymede.baseTransport;
-	  }
-	else
-	  {
-	    Enumeration bases;
-	    DBObjectBase base;
-
-	    BaseListTransport transport = new BaseListTransport();
-
-	    // *sync* on DBStore, this GanymedeSession
-
-	    // we sync on Ganymede.db to make sure that no one adds or deletes
-	    // any object bases while we're creating our BaseListTransport.
-	    // We could use the loginSemaphore, but that would be a bit heavy
-	    // for our purposes here.
-
-	    synchronized (Ganymede.db)
-	      {
-		bases = Ganymede.db.objectBases.elements();
-
-		while (bases.hasMoreElements())
-		  {
-		    base = (DBObjectBase) bases.nextElement();
-		    base.addBaseToTransport(transport, null);
-		  }
-	      }
-
-	    Ganymede.baseTransport = transport;
-
-	    return transport;
-	  }
+	Ganymede.baseTransport = transport;
       }
-    else
-      {
-	Enumeration bases;
-	DBObjectBase base;
 
-	BaseListTransport transport = new BaseListTransport();
-
-	// *sync* on DBStore, this GanymedeSession
-
-	// we sync on Ganymede.db to make sure that no one adds or deletes
-	// any object bases while we're creating our BaseListTransport.
-	// We could use the loginSemaphore, but that would be a bit heavy
-	// for our purposes here.
-
-	synchronized (Ganymede.db)
-	  {
-	    bases = Ganymede.db.objectBases.elements();
-
-	    while (bases.hasMoreElements())
-	      {
-		base = (DBObjectBase) bases.nextElement();
-		base.addBaseToTransport(transport, gSession);
-	      }
-	  }
-
-	return transport;
-      }
+    return transport;
   }
 
   /**
@@ -1167,16 +1128,13 @@ public class DBPermissionManager {
       }
 
     QueryResult result = new QueryResult(qr.isForTransport());
-    ObjectHandle handle;
 
     /* -- */
 
-    Vector handles = qr.getHandles();
+    Vector<ObjectHandle> handles = qr.getHandles();
 
-    for (int i = 0; i < handles.size(); i++)
+    for (ObjectHandle handle: handles)
       {
-        handle = (ObjectHandle) handles.elementAt(i);
-
         Invid invid = handle.getInvid();
 
         if (invid != null)
@@ -1954,11 +1912,10 @@ public class DBPermissionManager {
 	      }
 
 	    InvidDBField idbf = (InvidDBField) personaObj.getField(SchemaConstants.PersonaGroupsField);
-	    Invid inv;
 
 	    if (idbf != null)
 	      {
-		Vector vals = idbf.getValuesLocal();
+		Vector<Invid> vals = (Vector<Invid>) idbf.getValuesLocal();
 
 		// *** Caution!  getValuesLocal() does not clone the
 		// field's contents, and neither do we, for speed
@@ -1976,10 +1933,8 @@ public class DBPermissionManager {
 		// it's okay to loop on this field since we should be looking
 		// at a DBObject and not a DBEditObject
 
-		for (int i = 0; i < vals.size(); i++)
+		for (Invid inv: vals)
 		  {
-		    inv = (Invid) vals.elementAt(i);
-
 		    if (inv.getNum() == SchemaConstants.OwnerSupergash)
 		      {
 			supergashMode = true;
@@ -2026,7 +1981,7 @@ public class DBPermissionManager {
 
 		if (idbf != null)
 		  {
-		    Vector vals = idbf.getValuesLocal();
+		    Vector<Invid> vals = (Vector<Invid>) idbf.getValuesLocal();
 
 		    // *** Caution!  getValuesLocal() does not clone the field's contents..
 		    //
@@ -2041,10 +1996,8 @@ public class DBPermissionManager {
 		    // it's okay to loop on this field since we should be looking
 		    // at a DBObject and not a DBEditObject
 
-		    for (int i = 0; i < vals.size(); i++)
+		    for (Invid inv: vals)
 		      {
-			inv = (Invid) vals.elementAt(i);
-
 			pObj = session.viewDBObject(inv);
 
 			if (pObj != null)
@@ -2170,19 +2123,19 @@ public class DBPermissionManager {
    * @return true if a match is found
    */
 
-  public boolean recursePersonasMatch(Vector owners, Vector alreadySeen)
+  public boolean recursePersonasMatch(Vector<Invid> owners, Vector<Invid> alreadySeen)
   {
     // *** It is critical that this method not modify the owners parameter passed
-    // *** in, as it is 'live' in a DBField.
+    // *** in, as it may be 'live' in a DBField.
 
     if (owners == null)
       {
         return false;
       }
 
-    for (int i = 0; i < owners.size(); i++)
+    for (Invid owner: owners)
       {
-        if (recursePersonaMatch((Invid) owners.elementAt(i), alreadySeen))
+        if (recursePersonaMatch(owner, alreadySeen))
           {
             return true;
           }
@@ -2204,7 +2157,7 @@ public class DBPermissionManager {
    * @return true if a match is found
    */
 
-  public boolean recursePersonaMatch(Invid owner, Vector alreadySeen)
+  public boolean recursePersonaMatch(Invid owner, Vector<Invid> alreadySeen)
   {
     DBObject ownerObj;
     InvidDBField inf;
@@ -2222,7 +2175,7 @@ public class DBPermissionManager {
       }
     else
       {
-        alreadySeen.addElement(owner);
+        alreadySeen.add(owner);
       }
 
     ownerObj = session.viewDBObject(owner);
@@ -2243,7 +2196,7 @@ public class DBPermissionManager {
 
     if (inf != null)
       {
-        if (recursePersonasMatch(inf.getValuesLocal(), alreadySeen))
+        if (recursePersonasMatch((Vector<Invid>) inf.getValuesLocal(), alreadySeen))
           {
             return true;
           }
@@ -2260,7 +2213,7 @@ public class DBPermissionManager {
 
   public boolean personaMatch(DBObject obj)
   {
-    Vector owners;
+    Vector<Invid> owners;
     InvidDBField inf;
     boolean showit = false;
 
@@ -2276,7 +2229,7 @@ public class DBPermissionManager {
 
     if (inf == null)
       {
-	owners = new Vector();
+	owners = new Vector<Invid>();
       }
     else
       {
@@ -2285,7 +2238,7 @@ public class DBPermissionManager {
 	// actual vector held in the field, and if we were to change
 	// that, bad things would happen.
 
-	owners = (Vector) inf.getValuesLocal().clone();
+	owners = (Vector<Invid>) inf.getValuesLocal().clone();
       }
 
     // All owner group objects are considered to be self-owning.
@@ -2300,7 +2253,7 @@ public class DBPermissionManager {
 
 	if (!owners.contains(obj.getInvid()))
 	  {
-	    owners.addElement(obj.getInvid());
+	    owners.add(obj.getInvid());
 	  }
       }
 
@@ -2321,7 +2274,7 @@ public class DBPermissionManager {
 	  {
 	    if (permsdebug)
 	      {
-                Vector values = inf2.getValuesLocal();
+                Vector<Invid> values = (Vector<Invid>) inf2.getValuesLocal();
 
                 // *** Caution!  getValuesLocal() does not clone the field's contents..
                 //
@@ -2337,7 +2290,7 @@ public class DBPermissionManager {
 			System.err.print(", ");
 		      }
 
-		    System.err.print(values.elementAt(i));
+		    System.err.print(values.get(i));
 		  }
 
 		System.err.println();
@@ -2347,7 +2300,7 @@ public class DBPermissionManager {
 	    // the elements rather than just setting owners to the vector returned
 	    // by inf2.getValuesLocal() if owners is currently null.
 
-	    owners = arlut.csd.Util.VectorUtils.union(owners, inf2.getValuesLocal());
+	    owners = arlut.csd.Util.VectorUtils.union(owners, (Vector<Invid>) inf2.getValuesLocal());
 	  }
 	else
 	  {
@@ -2376,9 +2329,8 @@ public class DBPermissionManager {
    * recursePersonasMatch().</p>
    */
 
-  private boolean isMemberAll(Vector owners)
+  private boolean isMemberAll(Vector<Invid> owners)
   {
-    Invid owner;
     DBObject ownerObj;
     InvidDBField inf;
     boolean found;
@@ -2395,11 +2347,9 @@ public class DBPermissionManager {
     // directly or through being a member of a group that owns
     // one of these groups.
 
-    for (int i = 0; i < owners.size(); i++)
+    for (Invid owner: owners)
       {
 	found = false;	// yes, but what have you done for me _lately_?
-
-	owner = (Invid) owners.elementAt(i);
 
 	if (owner.getType() != SchemaConstants.OwnerBase)
 	  {
@@ -2453,9 +2403,8 @@ public class DBPermissionManager {
 
   public boolean filterMatch(DBObject obj)
   {
-    Vector owners;
+    Vector<Invid> owners;
     InvidDBField inf;
-    Invid tmpInvid;
 
     /* -- */
 
@@ -2476,7 +2425,7 @@ public class DBPermissionManager {
 	return false;   // we have a restriction, but the object is only owned by supergash.. nope.
       }
 
-    owners = inf.getValuesLocal();
+    owners = (Vector<Invid>) inf.getValuesLocal();
 
     // *** Caution!  getValuesLocal() does not clone the field's contents..
     //
@@ -2490,13 +2439,11 @@ public class DBPermissionManager {
     // we've got the owners for this object.. now, is there any match between our
     // visibilityFilterInvids and the owners of this object?
 
-    for (int i = 0; i < visibilityFilterInvids.size(); i++)
+    for (Invid tmpInvid: visibilityFilterInvids)
       {
-	tmpInvid = (Invid) visibilityFilterInvids.elementAt(i);
-
-	for (int j = 0; j < owners.size(); j++)
+	for (Invid secondInvid: owners)
 	  {
-	    if (tmpInvid.equals((Invid)owners.elementAt(j)))
+	    if (tmpInvid.equals(secondInvid))
 	      {
 		return true;
 	      }
