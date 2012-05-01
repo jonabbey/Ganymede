@@ -61,6 +61,7 @@ import java.util.Vector;
 import arlut.csd.ganymede.common.BaseListTransport;
 import arlut.csd.ganymede.common.CategoryTransport;
 import arlut.csd.ganymede.common.DumpResult;
+import arlut.csd.ganymede.common.FieldTemplate;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.QueryResult;
@@ -190,7 +191,7 @@ public interface Session extends Remote {
    * to the user logged in.</p>
    */
 
-  Vector      getPersonae() throws RemoteException;
+  Vector<String>      getPersonae() throws RemoteException;
 
   /**
    * <p>This method returns the persona name for the user, or null if
@@ -225,7 +226,7 @@ public interface Session extends Remote {
    * ownergroup objects.
    */
 
-  ReturnVal        setDefaultOwner(Vector ownerInvids) throws RemoteException;
+  ReturnVal        setDefaultOwner(Vector<Invid> ownerInvids) throws RemoteException;
 
   /**
    * <p>This method may be used to cause the server to pre-filter any object
@@ -244,7 +245,7 @@ public interface Session extends Remote {
    * @param ownerInvids a Vector of Invid objects pointing to ownergroup objects.
    */
 
-  ReturnVal        filterQueries(Vector ownerInvids) throws RemoteException;
+  ReturnVal        filterQueries(Vector<Invid> ownerInvids) throws RemoteException;
 
   //  Database operations
 
@@ -288,7 +289,7 @@ public interface Session extends Remote {
    * @see arlut.csd.ganymede.common.FieldTemplate
    */
 
-  Vector      getFieldTemplateVector(short baseId) throws RemoteException;
+  Vector<FieldTemplate>      getFieldTemplateVector(short baseId) throws RemoteException;
 
   /**
    * <p>Returns a vector of field definition templates, in display order.</p>
@@ -298,7 +299,7 @@ public interface Session extends Remote {
    * @see arlut.csd.ganymede.common.FieldTemplate
    */
 
-  Vector      getFieldTemplateVector(String baseName) throws RemoteException;
+  Vector<FieldTemplate>      getFieldTemplateVector(String baseName) throws RemoteException;
 
   /**
    * <p>This method call initiates a transaction on the server.  This
@@ -527,7 +528,7 @@ public interface Session extends Remote {
    * @param invidVector Vector of Invid's to get the status for.
    */
 
-  public QueryResult queryInvids(Vector invidVector) throws RemoteException;
+  public QueryResult queryInvids(Vector<Invid> invidVector) throws RemoteException;
 
   /**
    * <p>Returns an Invid for an object of a specified type and name, or

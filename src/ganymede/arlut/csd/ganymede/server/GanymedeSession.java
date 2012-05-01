@@ -84,6 +84,7 @@ import arlut.csd.ganymede.common.CategoryTransport;
 import arlut.csd.ganymede.common.ClientMessage;
 import arlut.csd.ganymede.common.GanyParseException;
 import arlut.csd.ganymede.common.DumpResult;
+import arlut.csd.ganymede.common.FieldTemplate;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ObjectHandle;
@@ -1382,7 +1383,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @see arlut.csd.ganymede.rmi.Session
    */
 
-  public synchronized ReturnVal setDefaultOwner(Vector ownerInvids) throws NotLoggedInException
+  public synchronized ReturnVal setDefaultOwner(Vector<Invid> ownerInvids) throws NotLoggedInException
   {
     checklogin();
 
@@ -1412,7 +1413,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @see arlut.csd.ganymede.rmi.Session
    */
 
-  public synchronized ReturnVal filterQueries(Vector ownerInvids) throws NotLoggedInException
+  public synchronized ReturnVal filterQueries(Vector<Invid> ownerInvids) throws NotLoggedInException
   {
     checklogin();
 
@@ -1490,13 +1491,13 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @see arlut.csd.ganymede.rmi.Session
    */
 
-  public Vector getFieldTemplateVector(String baseName) throws NotLoggedInException
+  public Vector<FieldTemplate> getFieldTemplateVector(short baseId) throws NotLoggedInException
   {
     checklogin();
 
     /* - */
 
-    DBObjectBase base = Ganymede.db.getObjectBase(baseName);
+    DBObjectBase base = Ganymede.db.getObjectBase(baseId);
     return base.getFieldTemplateVector();
   }
 
@@ -1510,13 +1511,13 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @see arlut.csd.ganymede.rmi.Session
    */
 
-  public Vector getFieldTemplateVector(short baseId) throws NotLoggedInException
+  public Vector<FieldTemplate> getFieldTemplateVector(String baseName) throws NotLoggedInException
   {
     checklogin();
 
     /* - */
 
-    DBObjectBase base = Ganymede.db.getObjectBase(baseId);
+    DBObjectBase base = Ganymede.db.getObjectBase(baseName);
     return base.getFieldTemplateVector();
   }
 
