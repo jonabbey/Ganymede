@@ -363,7 +363,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * will be non-null.
    */
 
-  GanymedeXMLSession xSession = null;
+  private GanymedeXMLSession xSession = null;
 
   /**
    * List of exported DBObjects (and DBEditObjects and subclasses thereof), so we
@@ -575,6 +575,16 @@ final public class GanymedeSession implements Session, Unreferenced {
   public void setXSession(GanymedeXMLSession xSession)
   {
     this.xSession = xSession;
+  }
+
+  public GanymedeXMLSession getXSession()
+  {
+    return xSession;
+  }
+
+  public boolean isXMLSession()
+  {
+    return xSession != null;
   }
 
   public boolean isLoggedIn()

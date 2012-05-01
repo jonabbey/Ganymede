@@ -280,7 +280,7 @@ public class DBEditSet {
     logEvents = Collections.synchronizedList(new ArrayList<DBLogEvent>());
     basesModified = new HashSet(dbStore.objectBases.size());
 
-    if (session.GSession != null && session.GSession.xSession != null && Ganymede.allowMagicImport)
+    if (session.GSession != null && session.GSession.isXMLSession() && Ganymede.allowMagicImport)
       {
 	this.allowXMLHistoryOverride = true;
       }
