@@ -924,9 +924,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	origKeys.add(key);
       }
 
-    Vector<String> keptKeys = (Vector<String>) arlut.csd.Util.VectorUtils.intersection(myKeys, origKeys);
-    Vector<String> newKeys = (Vector<String>) arlut.csd.Util.VectorUtils.difference(myKeys, keptKeys);
-    Vector<String> lostKeys = (Vector<String>) arlut.csd.Util.VectorUtils.difference(origKeys, keptKeys);
+    Vector<String> keptKeys = arlut.csd.Util.VectorUtils.intersection(myKeys, origKeys);
+    Vector<String> newKeys =  arlut.csd.Util.VectorUtils.difference(myKeys, keptKeys);
+    Vector<String> lostKeys = arlut.csd.Util.VectorUtils.difference(origKeys, keptKeys);
 
     for (String key: keptKeys)
       {
