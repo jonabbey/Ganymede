@@ -167,6 +167,11 @@ final public class NamedStack<E> {
     return stack.size();
   }
 
+  public void clear()
+  {
+    this.removeAllElements();
+  }
+
   public synchronized void removeAllElements()
   {
     stack.removeAllElements();
