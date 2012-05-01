@@ -515,7 +515,7 @@ public class DBEditSet {
    */
 
   public void logMail(Collection<String> addresses, String subject, String message,
-		      Invid admin, String adminName, Vector objects)
+		      Invid admin, String adminName, Vector<Invid> objects)
   {
     logEvents.add(new DBLogEvent(addresses, subject, message, admin, adminName, objects));
   }
@@ -545,9 +545,9 @@ public class DBEditSet {
 
   public void logMail(String toAddress, String subject, String message)
   {
-    Vector addresses = new Vector();
+    Vector<String> addresses = new Vector<String>();
 
-    addresses.addElement(toAddress);
+    addresses.add(toAddress);
 
     logEvents.add(new DBLogEvent(addresses, subject, message, null, null, null));
   }
@@ -604,8 +604,8 @@ public class DBEditSet {
    * @param objects A vector of invids of objects involved in the mail
    */
 
-  private void streamLogMail(Vector addresses, String subject, String message,
-			     Invid admin, String adminName, Vector objects)
+  private void streamLogMail(Vector<String> addresses, String subject, String message,
+			     Invid admin, String adminName, Vector<Invid> objects)
   {
     Ganymede.log.streamEvent(new DBLogEvent(addresses, subject, message, admin, adminName, objects), this);
   }
@@ -618,7 +618,7 @@ public class DBEditSet {
    * @param message The body of the message
    */
 
-  private void streamLogMail(Vector addresses, String subject, String message)
+  private void streamLogMail(Vector<String> addresses, String subject, String message)
   {
     Ganymede.log.streamEvent(new DBLogEvent(addresses, subject, message, null, null, null), this);
   }
@@ -1116,13 +1116,13 @@ public class DBEditSet {
 
   private final Vector<DBObjectBase> commit_lockBases() throws CommitNonFatalException
   {
-    Vector<DBObjectBase> baseSet = new Vector();
+    Vector<DBObjectBase> baseSet = new Vector<DBObjectBase>();
 
     /* -- */
 
     for (DBObjectBase base: basesModified)
       {
-	baseSet.addElement(base);
+	baseSet.add(base);
       }
 
     // and try to lock the bases down.
@@ -2551,7 +2551,7 @@ public class DBEditSet {
 
     if (checkpoints != null)
       {
-	checkpoints.removeAllElements();
+	checkpoints.clear();
 	checkpoints = null;
       }
 
