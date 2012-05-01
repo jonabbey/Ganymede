@@ -200,7 +200,7 @@ public final class DBNameSpace implements NameSpace {
    * DBNameSpaceTransaction} objects.
    */
 
-  private Hashtable transactions;
+  private Hashtable<DBEditSet, DBNameSpaceTransaction> transactions;
 
   /* -- */
 
@@ -217,7 +217,7 @@ public final class DBNameSpace implements NameSpace {
     this.caseInsensitive = caseInsensitive;
 
     uniqueHash = new GHashtable(DEFAULTSIZE, caseInsensitive);
-    transactions = new Hashtable(TRANSCOUNT);
+    transactions = new Hashtable<DBEditSet, DBNameSpaceTransaction>(TRANSCOUNT);
   }
 
   /**
@@ -229,7 +229,7 @@ public final class DBNameSpace implements NameSpace {
     receive(in);
 
     uniqueHash = new GHashtable(hashSize, caseInsensitive);
-    transactions = new Hashtable(TRANSCOUNT);
+    transactions = new Hashtable<DBEditSet, DBNameSpaceTransaction>(TRANSCOUNT);
   }
 
   /**
@@ -1490,7 +1490,7 @@ public final class DBNameSpace implements NameSpace {
 
   private synchronized DBNameSpaceTransaction getTransactionRecord(DBEditSet transaction)
   {
-    DBNameSpaceTransaction transRecord = (DBNameSpaceTransaction) transactions.get(transaction);
+    DBNameSpaceTransaction transRecord = transactions.get(transaction);
 
     if (transRecord == null)
       {
@@ -2135,55 +2135,55 @@ class DBNameSpaceEditingHandle extends DBNameSpaceHandle {
   // ---
 
   /**
-   * The DBNameSpaceHandle that this handle is replacing during value
+   * <p>The DBNameSpaceHandle that this handle is replacing during value
    * manipulation by a transaction.  If the transaction's namespace
    * manipulations are cancelled or rolled back, this handle will be
-   * take this editing handle's place in the namespace's uniqueHash.
+   * take this editing handle's place in the namespace's uniqueHash.</p>
    */
 
   private DBNameSpaceHandle original;
 
   /**
-   * If editingTransaction is null, that means that the field
+   * <p>If editingTransaction is null, that means that the field
    * containing the value tracked by this handle is 'checked in' to
-   * the datastore.
+   * the datastore.</p>
    *
-   * If editingTransaction is not null, a transaction has checked the
+   * <p>If editingTransaction is not null, a transaction has checked the
    * value tracked by this handle out for manipulation, and no other
    * transaction may mess with that value's binding until the first
-   * transaction has released this handle.
+   * transaction has released this handle.</p>
    */
 
   private DBEditSet editingTransaction;
 
   /**
-   * if this handle is currently being edited by an editset,
+   * <p>If this handle is currently being edited by an editset,
    * shadowField points to the field in the transaction that contains
    * this value.  If the transaction is committed, the DBField pointer
    * in shadowField will be transferred to persistentFieldInvid and
    * persistentFieldId.  If this value is not being manipulated by a
-   * transaction, shadowField will be equal to null.
+   * transaction, shadowField will be equal to null.</p>
    */
 
   private DBField shadowField;
 
   /**
-   * Non-interactive transactions need to be able to shuffle
+   * <p>Non-interactive transactions need to be able to shuffle
    * namespace values between two fields in the data store, even if
    * the operation to mark the unique value for association with a
    * second field is done before the operation to unlink the unique
-   * value from the persistently stored field is done.
+   * value from the persistently stored field is done.</p>
    *
-   * To support this, we have both shadowField and shadowFieldB,
+   * <p>To support this, we have both shadowField and shadowFieldB,
    * along the lines of the A-B-C values used in swapping values
-   * between two memory locations with the aid of a third.
+   * between two memory locations with the aid of a third.</p>
    *
-   * This is the 'B' shadowField because it is not a firm
+   * <p>This is the 'B' shadowField because it is not a firm
    * association, and cannot be one unless and until the original
    * persistent field that contains the constrained value is made to
    * release the value.  At the time the constrained value is released
    * from the earlier field, shadowField will be set to shadowFieldB,
-   * and shadowFieldB will be cleared.
+   * and shadowFieldB will be cleared.</p>
    */
 
   private DBField shadowFieldB;
@@ -2220,17 +2220,17 @@ class DBNameSpaceEditingHandle extends DBNameSpaceHandle {
   }
 
   /**
-   * This method creates a new editable DBNameSpaceEditingHandle that
-   * will revert to this handle if the DBEditSet is aborted.
+   * <p>This method creates a new editable DBNameSpaceEditingHandle
+   * that will revert to this handle if the DBEditSet is aborted.</p>
    *
-   * The checked out handle is returned with a null shadowField and
+   * <p>The checked out handle is returned with a null shadowField and
    * shadowFieldB, as would be appropriate if a user was unmarking a
-   * value in the namespace uniqueHash.
+   * value in the namespace uniqueHash.</p>
    *
-   * If the handle is being checked out by a non-interactive xmlclient
+   * <p>If the handle is being checked out by a non-interactive xmlclient
    * that needs to address the shadowFieldB member, it will need to be
    * sure to set the shadowField() to point to the appropriate field
-   * at check out time.
+   * at check out time.</p>
    */
 
   public DBNameSpaceEditingHandle checkout(DBEditSet editSet)
@@ -2343,17 +2343,17 @@ class DBNameSpaceEditingHandle extends DBNameSpaceHandle {
   }
 
   /**
-   * If this namespace-managed value is being edited in an active,
+   * <p>If this namespace-managed value is being edited in an active,
    * non-interactive Ganymede transaction, this method may be used to
    * set a pointer to the editable DBField which aspires to contain
-   * the constrained value in the active transaction.
+   * the constrained value in the active transaction.</p>
    *
-   * This is the 'B' shadowField because it is not a firm association,
-   * and cannot be one unless and until the original persistent field
-   * that contains the constrained value is made to release the value.
-   * At the time the constrained value is released from the earlier
-   * field, shadowField will be set to shadowFieldB, and shadowFieldB
-   * will be cleared.
+   * <p>This is the 'B' shadowField because it is not a firm
+   * association, and cannot be one unless and until the original
+   * persistent field that contains the constrained value is made to
+   * release the value.  At the time the constrained value is released
+   * from the earlier field, shadowField will be set to shadowFieldB,
+   * and shadowFieldB will be cleared.</p>
    */
 
   public void setShadowFieldB(DBField newShadow)
