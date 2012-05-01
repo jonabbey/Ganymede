@@ -58,6 +58,7 @@ import java.util.Vector;
 
 import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.QueryAndNode;
 import arlut.csd.ganymede.common.QueryDataNode;
@@ -469,7 +470,13 @@ public class GanymedeWarningTask implements Runnable {
 	      }
 	  }
 
-	mySession.logout();
+	try
+	  {
+	    mySession.logout();
+	  }
+	catch (NotLoggedInException ex)
+	  {
+	  }
 
 	finished = true;
       }
@@ -489,7 +496,13 @@ public class GanymedeWarningTask implements Runnable {
 
 	    if (mySession != null)
 	      {
-		mySession.logout();
+		try
+		  {
+		    mySession.logout();
+		  }
+		catch (NotLoggedInException ex)
+		  {
+		  }
 	      }
 	  }
 	else

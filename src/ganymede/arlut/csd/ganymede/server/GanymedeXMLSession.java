@@ -844,7 +844,14 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     if (session != null && session.isLoggedIn())
       {
-	session.logout();
+	try
+	  {
+	    session.logout();
+	  }
+	catch (NotLoggedInException ex)
+	  {
+	  }
+
 	session = null;
       }
   }
@@ -2208,7 +2215,13 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 	    err.println(ts.l("processData.aborted"));
 	  }
 
-	session.logout();
+	try
+	  {
+	    session.logout();
+	  }
+	catch (NotLoggedInException ex)
+	  {
+	  }
       }
   }
 

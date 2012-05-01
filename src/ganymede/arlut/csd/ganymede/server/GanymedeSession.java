@@ -912,8 +912,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @see arlut.csd.ganymede.rmi.Session
    */
 
-  public void logout()
+  public void logout() throws NotLoggedInException
   {
+    checklogin();
+
     this.logout(false);
   }
 

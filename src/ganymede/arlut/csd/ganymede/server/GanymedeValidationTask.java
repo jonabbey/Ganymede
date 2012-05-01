@@ -260,7 +260,13 @@ public class GanymedeValidationTask implements Runnable {
       {
 	if (mySession != null)
 	  {
-	    mySession.logout();
+	    try
+	      {
+		mySession.logout();
+	      }
+	    catch (NotLoggedInException ex)
+	      {
+	      }
 	  }
       }
   }

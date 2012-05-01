@@ -2794,24 +2794,35 @@ public final class DBStore implements JythonMap {
 	// if the DBSession commit failed, we won't get an automatic
 	// abort..  do that here.
 
-	if (!ReturnVal.didSucceed(retVal))
+	try
+	  {
+	    if (!ReturnVal.didSucceed(retVal))
+	      {
+		try
+		  {
+		    session.abortTransaction();
+		  }
+		catch (Throwable ex)
+		  {
+		    Ganymede.logError(ex);
+		  }
+		finally
+		  {
+		    success=true;	// true enough, anyway
+		  }
+	      }
+	  }
+	finally
 	  {
 	    try
 	      {
-		session.abortTransaction();
-	      }
-	    catch (Throwable ex)
-	      {
-		Ganymede.logError(ex);
-	      }
-	    finally
-	      {
-		success=true;	// true enough, anyway
 		gSession.logout();
+	      }
+	    catch (NotLoggedInException ex)
+	      {
 	      }
 	  }
 
-	gSession.logout();
 	success = true;
       }
     catch (Throwable ex)
@@ -2823,7 +2834,14 @@ public final class DBStore implements JythonMap {
 	if (!success)
 	  {
 	    session.abortTransaction();
-	    gSession.logout();
+
+	    try
+	      {
+		gSession.logout();
+	      }
+	    catch (NotLoggedInException ex)
+	      {
+	      }
 	  }
       }
   }
