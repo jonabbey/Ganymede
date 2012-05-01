@@ -2039,7 +2039,7 @@ public class DBPermissionManager {
 		    // DO NOT modify vals here!
 
 		    PermissionMatrixDBField pmdbf, pmdbf2;
-		    Hashtable pmdbfMatrix1 = null, pmdbfMatrix2 = null;
+		    Hashtable<String, PermEntry> pmdbfMatrix1 = null, pmdbfMatrix2 = null;
 		    DBObject pObj;
 
 		    /* -- */
@@ -2078,14 +2078,14 @@ public class DBPermissionManager {
 
 			    if (pmdbf != null)
 			      {
-				pmdbfMatrix1 = pmdbf.matrix;
+				pmdbfMatrix1 = pmdbf.getInnerMatrix();
 			      }
 
 			    pmdbf2 = (PermissionMatrixDBField) pObj.getField(SchemaConstants.RoleDefaultMatrix);
 
 			    if (pmdbf2 != null)
 			      {
-				pmdbfMatrix2 = pmdbf2.matrix;
+				pmdbfMatrix2 = pmdbf2.getInnerMatrix();
 			      }
 
 			    if (permsdebug)

@@ -54,8 +54,10 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.rmi.RemoteException;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.Vector;
 
 import arlut.csd.Util.TranslationService;
@@ -373,7 +375,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public void debugdump(PermissionMatrixDBField me)
   {
-    debugdump(me.matrix);
+    debugdump(me.getMatrix());
   }
 
   static public void debugdump(PermMatrix matrix)
@@ -445,7 +447,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   // ---
 
-  Hashtable matrix;
+  private Hashtable<String, PermEntry> matrix;
 
   /* -- */
 
@@ -492,11 +494,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public PermissionMatrixDBField(DBObject owner, PermissionMatrixDBField field)
   {
-    Object key;
-    PermEntry entry;
-
-    /* -- */
-
     value = null;
 
     if (debug)
@@ -506,15 +503,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     this.fieldcode = field.getID();
     this.owner = owner;
-    this.matrix = new Hashtable(field.matrix.size());
+    this.matrix = new Hashtable<String, PermEntry>(field.matrix.size());
 
-    Enumeration en = field.matrix.keys();
-
-    while (en.hasMoreElements())
+    for (String key: field.matrix.keySet())
       {
-	key = en.nextElement();
-
-	entry = (PermEntry) field.matrix.get(key);
+	PermEntry entry = field.matrix.get(key);
 
 	if (debug)
 	  {
@@ -556,8 +549,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   public synchronized boolean equals(Object obj)
   {
     PermissionMatrixDBField pmdb;
-    Enumeration keys;
-    String key;
     
     /* -- */
 
@@ -578,12 +569,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	return false;
       }
 
-    keys = matrix.keys();
-
-    while (keys.hasMoreElements())
+    for (String key: matrix.keySet())
       {
-	key = (String) keys.nextElement();
-
 	try
 	  {
 	    if (!(matrix.get(key).equals(pmdb.matrix.get(key))))
@@ -644,7 +631,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     // keys and values of the matrix are treated as immutable (they
     // are replaced, not changed in-place)
 
-    ((PermissionMatrixDBField) target).matrix = (Hashtable) this.matrix.clone();
+    ((PermissionMatrixDBField) target).matrix = (Hashtable<String, PermEntry>) this.matrix.clone();
 
     return null;
   }
@@ -704,12 +691,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   synchronized void emit(DataOutput out) throws IOException
   {
-    Enumeration keys;
-    PermEntry pe;
-    String key;
-
-    /* -- */
-
     if (debug)
       {
 	debugdump(matrix);
@@ -732,12 +713,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     out.writeInt(matrix.size());
 
-    keys = matrix.keys();
-
-    while (keys.hasMoreElements())
+    for (String key: matrix.keySet())
       {
-	key = (String) keys.nextElement();
-	pe = (PermEntry) matrix.get(key);
+	PermEntry pe = matrix.get(key);
 
 	out.writeUTF(key);
 	pe.emit(out);
@@ -756,11 +734,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     if (tableSize <= 0)
       {
-	matrix = new Hashtable();
+	matrix = new Hashtable<String, PermEntry>();
       }
     else
       {
-	matrix = new Hashtable(tableSize);
+	matrix = new Hashtable<String, PermEntry>(tableSize);
       }
     
     for (int i = 0; i < tableSize; i++)
@@ -779,34 +757,29 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   synchronized void emitXML(XMLDumpContext xmlOut, boolean writeSurroundContext) throws IOException
   {
     Enumeration en, enum2;
-    String key;
     PermEntry entry;
     String basename;
-    Hashtable baseHash = new Hashtable();
-    Hashtable innerTable;
+    Hashtable<String, Hashtable<String, PermEntry>> baseHash = new Hashtable<String, Hashtable<String, PermEntry>>();
+    Hashtable<String, PermEntry> innerTable;
 
     /* -- */
 
     // build up a hashtable structure so we get all the permission
     // entries grouped by base.
 
-    en = matrix.keys();
-
-    while (en.hasMoreElements())
+    for (String key: matrix.keySet())
       {
-	key = (String) en.nextElement();
-
-	entry = (PermEntry) matrix.get(key);
+	entry = matrix.get(key);
 
 	basename = decodeBaseName(key);
 
 	if (baseHash.containsKey(basename))
 	  {
-	    innerTable = (Hashtable) baseHash.get(basename);
+	    innerTable = baseHash.get(basename);
 	  }
 	else
 	  {
-	    innerTable = new Hashtable();
+	    innerTable = new Hashtable<String, PermEntry>();
 	    baseHash.put(basename, innerTable);
 	  }
 
@@ -822,14 +795,10 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     xmlOut.startElementIndent("permissions");
     xmlOut.indentOut();
 
-    en = baseHash.keys();
-
-    while (en.hasMoreElements())
+    for (String key: baseHash.keySet())
       {
-	key = (String) en.nextElement();
-
-	innerTable = (Hashtable) baseHash.get(key);
-	entry = (PermEntry) innerTable.get("[base]");
+	innerTable = baseHash.get(key);
+	entry = innerTable.get("[base]");
 
 	xmlOut.startElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(key));
 	xmlOut.indentOut();
@@ -839,18 +808,14 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	    xmlOut.attribute("perm", entry.getXMLCode());
 	  }
 
-	enum2 = innerTable.keys();
-
-	while (enum2.hasMoreElements())
+	for (String fieldKey: innerTable.keySet())
 	  {
-	    String fieldKey = (String) enum2.nextElement();
-
 	    if (fieldKey.equals("[base]"))
 	      {
 		continue;	// we've already wrote perms for the base
 	      }
 
-	    PermEntry fieldEntry = (PermEntry) innerTable.get(fieldKey);
+	    PermEntry fieldEntry = innerTable.get(fieldKey);
 
 	    xmlOut.startElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(fieldKey));
 	    xmlOut.attribute("perm", fieldEntry.getXMLCode());
@@ -874,19 +839,14 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   public synchronized String getValueString()
   {
     StringBuilder result = new StringBuilder();
-    PermEntry entry = null;
-    String key = null;
 
     /* -- */
 
     clean();
 
-    Enumeration en = matrix.keys();
-
-    while (en.hasMoreElements())
+    for (String key: matrix.keySet())
       {
-	key = (String) en.nextElement();
-	entry = (PermEntry) matrix.get(key);
+	PermEntry entry = matrix.get(key);
 
 	if (isBasePerm(key))
 	  {	
@@ -951,36 +911,27 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	return null;
       }
     
-    Vector myKeys = new Vector();
-    Vector origKeys = new Vector();
+    Vector<String> myKeys = new Vector<String>();
+    Vector<String> origKeys = new Vector<String>();
 
-    Enumeration en = matrix.keys();
-
-    while (en.hasMoreElements())
+    for (String key: matrix.keySet())
       {
-	myKeys.addElement(en.nextElement());
+	myKeys.add(key);
       }
 
-    en = origP.matrix.keys();
-
-    while (en.hasMoreElements())
+    for (String key: origP.matrix.keySet())
       {
-	origKeys.addElement(en.nextElement());
+	origKeys.add(key);
       }
 
-    PermEntry entryA = null;
-    PermEntry entryB = null;
+    Vector<String> keptKeys = (Vector<String>) arlut.csd.Util.VectorUtils.intersection(myKeys, origKeys);
+    Vector<String> newKeys = (Vector<String>) arlut.csd.Util.VectorUtils.difference(myKeys, keptKeys);
+    Vector<String> lostKeys = (Vector<String>) arlut.csd.Util.VectorUtils.difference(origKeys, keptKeys);
 
-    Vector keptKeys = arlut.csd.Util.VectorUtils.intersection(myKeys, origKeys);
-    Vector newKeys = arlut.csd.Util.VectorUtils.difference(myKeys, keptKeys);
-    Vector lostKeys = arlut.csd.Util.VectorUtils.difference(origKeys, keptKeys);
-
-    for (int i = 0; i < keptKeys.size(); i++)
+    for (String key: keptKeys)
       {
-	String key = (String) keptKeys.elementAt(i);
-
-	entryA = (PermEntry) matrix.get(key);
-	entryB = (PermEntry) origP.matrix.get(key);
+	PermEntry entryA = matrix.get(key);
+	PermEntry entryB = origP.matrix.get(key);
 
 	if (!entryA.equals(entryB))
 	  {
@@ -990,11 +941,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 	  }
       }
 
-    for (int i = 0; i < newKeys.size(); i++)
+    for (String key: newKeys)
       {
-	String key = (String) newKeys.elementAt(i);
-
-	entryA = (PermEntry) matrix.get(key);
+	PermEntry entryA = matrix.get(key);
 
 	// "{0} {1} -- {2}\n"
 	result.append(ts.l("getValueString.new_pattern",
@@ -1003,11 +952,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 			   entryA.difference(null)));
       }
 
-    for (int i = 0; i < lostKeys.size(); i++)
+    for (String key: lostKeys)
       {
-	String key = (String) lostKeys.elementAt(i);
-
-	entryB = (PermEntry) origP.matrix.get(key);
+	PermEntry entryB = origP.matrix.get(key);
 
 	// "{0} {1} -- {2}\n"
 	result.append(ts.l("getValueString.old_pattern",
@@ -1058,12 +1005,12 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     if (getID() == SchemaConstants.RoleMatrix)
       {
-	return owner.gSession.getPermManager().delegatablePersonaPerms;
+	return owner.gSession.getPermManager().getDelegatablePersonaPerms();
       }
 
     if (getID() == SchemaConstants.RoleDefaultMatrix)
       {
-	return owner.gSession.getPermManager().delegatableDefaultPerms;
+	return owner.gSession.getPermManager().getDelegatableDefaultPerms();
       }
 
     return null;
@@ -1080,7 +1027,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public PermEntry getPerm(short baseID, short fieldID)
   {
-    return (PermEntry) matrix.get(matrixEntry(baseID, fieldID));
+    return matrix.get(matrixEntry(baseID, fieldID));
   }
 
   /**
@@ -1093,7 +1040,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public PermEntry getPerm(short baseID)
   {
-    return (PermEntry) matrix.get(matrixEntry(baseID));
+    return matrix.get(matrixEntry(baseID));
   }
 
   /**
@@ -1108,8 +1055,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     try
       {
-	return (PermEntry) matrix.get(matrixEntry(base.getTypeID(), 
-						  field.getID()));
+	return matrix.get(matrixEntry(base.getTypeID(),
+				      field.getID()));
       }
     catch (RemoteException ex)
       {
@@ -1129,7 +1076,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     try
       {
-	return (PermEntry) matrix.get(matrixEntry(base.getTypeID()));
+	return matrix.get(matrixEntry(base.getTypeID()));
       }
     catch (RemoteException ex)
       {
@@ -1154,7 +1101,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     if (isEditable())
       {
 	matrix.clear();
-	matrix = new Hashtable();
+	matrix = new Hashtable<String, PermEntry>();
 	return null;
       }
     else
@@ -1316,18 +1263,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   private void clean()
   {
-    Enumeration keys;
-    PermEntry pe;
-    String key;
-
-    /* -- */
-
-    keys = matrix.keys();
-
-    while (keys.hasMoreElements())
+    for (String key: matrix.keySet())
       {
-	key = (String) keys.nextElement();
-	pe = (PermEntry) matrix.get(key);
+	PermEntry pe = matrix.get(key);
 
 	// If we have invalid entries, we're just going to throw them out,
 	// forget they even existed..  this is only remotely reasonable
@@ -1508,6 +1446,16 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   }
 
   /**
+   * <p>Server-side method used by DBPermissionManager to extract Map
+   * for PermMatrix creation.</p>
+   */
+
+  public Hashtable<String, PermEntry> getInnerMatrix()
+  {
+    return (Hashtable<String, PermEntry>) this.matrix.clone();
+  }
+
+  /**
    * This method does a dump to System.err of the permission
    * contents held in this field.
    */
@@ -1535,12 +1483,12 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
 class PermMatrixCkPoint {
 
-  Hashtable matrix;
+  Hashtable<String, PermEntry> matrix;
 
   /* -- */
 
   public PermMatrixCkPoint(PermissionMatrixDBField field)
   {
-    this.matrix = (Hashtable) field.matrix.clone();
+    this.matrix = field.getInnerMatrix();
   }
 }
