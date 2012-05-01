@@ -931,8 +931,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @see arlut.csd.ganymede.rmi.Session
    */
 
-  public void enableWizards(boolean val)
+  public void enableWizards(boolean val) throws NotLoggedInException
   {
+    checklogin();
+
     this.enableWizards = val;
   }
 
@@ -943,8 +945,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @see arlut.csd.ganymede.rmi.Session
    */
 
-  public String getHelpBase()
+  public String getHelpBase() throws NotLoggedInException
   {
+    checklogin();
+
     return Ganymede.helpbaseProperty;
   }
 
@@ -965,11 +969,11 @@ final public class GanymedeSession implements Session, Unreferenced {
    * was not new.
    */
 
-  public StringBuffer getMessage(String key, boolean onlyShowIfNew)
+  public StringBuffer getMessage(String key, boolean onlyShowIfNew) throws NotLoggedInException
   {
-    Invid invidToCompare = null;
+    checklogin();
 
-    /* -- */
+    Invid invidToCompare = null;
 
     if (onlyShowIfNew)
       {
@@ -994,14 +998,13 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @return A StringBuffer containing the message, if found, or null if no
    * message exists for the key, or if onlyShowIfNew was set and the message
    * was not new.
-   *
    */
 
-  public StringBuffer getMessageHTML(String key, boolean onlyShowIfNew)
+  public StringBuffer getMessageHTML(String key, boolean onlyShowIfNew) throws NotLoggedInException
   {
-    Invid invidToCompare = null;
+    checklogin();
 
-    /* -- */
+    Invid invidToCompare = null;
 
     if (onlyShowIfNew)
       {
@@ -1022,8 +1025,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    * is no message to send, and the client will poll for new messages.</p>
    */
 
-  public synchronized ClientAsyncResponder getAsyncPort() throws RemoteException
+  public synchronized ClientAsyncResponder getAsyncPort() throws NotLoggedInException, RemoteException
   {
+    checklogin();
+
     if (asyncPort != null)
       {
 	return asyncPort;
