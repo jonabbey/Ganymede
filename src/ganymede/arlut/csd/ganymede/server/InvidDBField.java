@@ -678,7 +678,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	 * it was cleared..
 	 */
 
-	DBObject objectRef = gsession.getSession().viewDBObject(invid);
+	DBObject objectRef = gsession.getDBSession().viewDBObject(invid);
 
 	if (objectRef != null && (objectRef instanceof DBEditObject))
 	  {
@@ -3898,7 +3898,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (gsession != null)
 	  {
-	    object = gsession.getSession().viewDBObject(invid);
+	    object = gsession.getDBSession().viewDBObject(invid);
 
 	    if (object == null)
 	      {
@@ -4111,7 +4111,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (o instanceof Invid)
 	  {
-	    System.err.print(Ganymede.internalSession.getSession().getObjectLabel((Invid) o));
+	    System.err.print(Ganymede.internalSession.getDBSession().getObjectLabel((Invid) o));
 	  }
 	else
 	  {
@@ -4172,7 +4172,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 		if (!qr.containsInvid(inv))
 		  {
-		    String invLabel = Ganymede.internalSession.getSession().getObjectLabel(inv);
+		    String invLabel = Ganymede.internalSession.getDBSession().getObjectLabel(inv);
 
 		    if (invLabel == null)
 		      {

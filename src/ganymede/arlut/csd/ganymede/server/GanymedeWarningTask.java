@@ -240,16 +240,16 @@ public class GanymedeWarningTask implements Runnable {
 		      {
 			// "{0} {1} expires in one week"
 			title = ts.l("run.expire_one_week_email_subj",
-				     base.getName(), mySession.getSession().getObjectLabel(invid));
+				     base.getName(), mySession.getDBSession().getObjectLabel(invid));
 		      }
 		    else
 		      {
 			// "{0} {1} expires in {2,num,#} weeks"
 			title = ts.l("run.expire_multi_week_email_subj",
-				     base.getName(), mySession.getSession().getObjectLabel(invid), Integer.valueOf(i+1));
+				     base.getName(), mySession.getDBSession().getObjectLabel(invid), Integer.valueOf(i+1));
 		      }
 
-		    obj = mySession.getSession().viewDBObject(invid);
+		    obj = mySession.getDBSession().viewDBObject(invid);
 
                     if (!objectHook.reactToExpirationWarning(obj, 7 * i))
                       {
@@ -314,16 +314,16 @@ public class GanymedeWarningTask implements Runnable {
 		      {
 			// "{0} {1} will be removed in one week"
 			title = ts.l("run.remove_one_week_email_subj",
-				     base.getName(), mySession.getSession().getObjectLabel(invid));
+				     base.getName(), mySession.getDBSession().getObjectLabel(invid));
 		      }
 		    else
 		      {
 			// "{0} {1} will be removed in {2,num,#} weeks"
 			title = ts.l("run.remove_multi_week_email_subj",
-				     base.getName(), mySession.getSession().getObjectLabel(invid), Integer.valueOf(i+1));
+				     base.getName(), mySession.getDBSession().getObjectLabel(invid), Integer.valueOf(i+1));
 		      }
 
-                    obj = mySession.getSession().viewDBObject(invid);
+                    obj = mySession.getDBSession().viewDBObject(invid);
 
                     if (!objectHook.reactToRemovalWarning(obj, 7 * i))
                       {
@@ -393,12 +393,12 @@ public class GanymedeWarningTask implements Runnable {
 		invid = result.getInvid();
 
 		// "** {0} {1} expires within 24 hours **"
-		title = ts.l("run.expire_real_soon_now", base.getName(), mySession.getSession().getObjectLabel(invid));
+		title = ts.l("run.expire_real_soon_now", base.getName(), mySession.getDBSession().getObjectLabel(invid));
 
 		tempString.setLength(0);
 		tempString.append(title);
 
-		obj = mySession.getSession().viewDBObject(invid);
+		obj = mySession.getDBSession().viewDBObject(invid);
 
 		tempString.append(getExpirationWarningMesg(obj));
 
@@ -452,9 +452,9 @@ public class GanymedeWarningTask implements Runnable {
 		invid = result.getInvid();
 
 		// "** {0} {1} will be removed within the next 24 hours! **"
-		title = ts.l("run.remove_real_soon_now", base.getName(), mySession.getSession().getObjectLabel(invid));
+		title = ts.l("run.remove_real_soon_now", base.getName(), mySession.getDBSession().getObjectLabel(invid));
 
-		obj = mySession.getSession().viewDBObject(invid);
+		obj = mySession.getDBSession().viewDBObject(invid);
 		Date actionDate = (Date) obj.getFieldValueLocal(SchemaConstants.RemovalField);
 
 		tempString.setLength(0);

@@ -13,11 +13,14 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -124,7 +127,7 @@ public class GanymedeExpirationTask implements Runnable {
 	try
 	  {
 	    mySession = new GanymedeSession("expiration");
-	    myDBSession = mySession.getSession();
+	    myDBSession = mySession.getDBSession();
 	  }
 	catch (RemoteException ex)
 	  {

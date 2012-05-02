@@ -1895,7 +1895,7 @@ class DBNameSpaceHandle implements Cloneable {
 
   public DBField getPersistentField(GanymedeSession gsession)
   {
-    return getPersistentField(gsession.getSession());
+    return getPersistentField(gsession.getDBSession());
   }
 
   /**
@@ -2273,7 +2273,7 @@ class DBNameSpaceEditingHandle extends DBNameSpaceHandle {
 
   public boolean isEditedByUs(GanymedeSession session)
   {
-    return session.getSession().getEditSet() == editingTransaction;
+    return session.getDBSession().getEditSet() == editingTransaction;
   }
 
   /**

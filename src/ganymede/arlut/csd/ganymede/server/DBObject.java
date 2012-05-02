@@ -755,7 +755,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     try
       {
-	return gSession.getSession();
+	return gSession.getDBSession();
       }
     catch (NullPointerException ex)
       {
@@ -2282,7 +2282,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       {
 	if (this.gSession != null)
 	  {
-	    session = this.gSession.getSession();
+	    session = this.gSession.getDBSession();
 	  }
       }
 

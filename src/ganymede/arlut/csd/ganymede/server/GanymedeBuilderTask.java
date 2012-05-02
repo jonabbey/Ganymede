@@ -21,6 +21,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -388,7 +389,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
 	    try
 	      {
-		lock = session.getSession().openDumpLock();
+		lock = session.getDBSession().openDumpLock();
 	      }
 	    catch (InterruptedException ex)
 	      {
@@ -885,7 +886,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   protected final DBObject getObject(Invid invid)
   {
-    return session.getSession().viewDBObject(invid);
+    return session.getDBSession().viewDBObject(invid);
   }
 
   /**
@@ -897,7 +898,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   protected final String getLabel(Invid invid)
   {
-    return session.getSession().getObjectLabel(invid);
+    return session.getDBSession().getObjectLabel(invid);
   }
 
   /**

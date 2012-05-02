@@ -1663,7 +1663,7 @@ public class Ganymede {
 
 	internalSession.openTransaction("Ganymede startupHook");
 
-	e_object = (DBEditObject) internalSession.getSession().editDBObject(supergashinvid);
+	e_object = (DBEditObject) internalSession.getDBSession().editDBObject(supergashinvid);
 
 	if (e_object == null)
 	  {
@@ -1704,7 +1704,7 @@ public class Ganymede {
   static private void AddLabelUpdate() throws NotLoggedInException
   {
     boolean success = true;
-    List<DBObject> objects = internalSession.getSession().getTransactionalObjects(SchemaConstants.ObjectEventBase);
+    List<DBObject> objects = internalSession.getDBSession().getTransactionalObjects(SchemaConstants.ObjectEventBase);
 
     if (objects.size() <= 0)
       {
@@ -1722,7 +1722,7 @@ public class Ganymede {
 	    if (labelField == null)
 	      {
 		objectEventCustom objectEventObj = (objectEventCustom)
-		  internalSession.getSession().editDBObject(object.getInvid());
+		  internalSession.getDBSession().editDBObject(object.getInvid());
 
 		if (objectEventObj != null)
 		  {
@@ -1780,7 +1780,7 @@ public class Ganymede {
 
   static private void registerTasks() throws NotLoggedInException
   {
-    List<DBObject> objects = internalSession.getSession().getTransactionalObjects(SchemaConstants.TaskBase);
+    List<DBObject> objects = internalSession.getDBSession().getTransactionalObjects(SchemaConstants.TaskBase);
 
     /* -- */
 
@@ -1915,7 +1915,7 @@ public class Ganymede {
 
   static private void registerSyncChannels() throws NotLoggedInException
   {
-    List<DBObject> objects = internalSession.getSession().getTransactionalObjects(SchemaConstants.SyncChannelBase);
+    List<DBObject> objects = internalSession.getDBSession().getTransactionalObjects(SchemaConstants.SyncChannelBase);
 
     /* -- */
 

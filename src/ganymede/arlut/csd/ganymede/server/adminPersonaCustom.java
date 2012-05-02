@@ -110,7 +110,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     if (session == null)
       {
-	session = Ganymede.internalSession.getSession();
+	session = Ganymede.internalSession.getDBSession();
       }
 
     admin = session.viewDBObject(adminInvid);
@@ -310,7 +310,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     if (newName == null)
       {
-	newName = this.getGSession().getSession().getObjectLabel(userInvid);
+	newName = this.getGSession().getDBSession().getObjectLabel(userInvid);
       }
 
     if (debug)

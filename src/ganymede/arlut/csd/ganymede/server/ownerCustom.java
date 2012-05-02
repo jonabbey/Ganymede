@@ -99,7 +99,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
     if (session == null)
       {
-	session = Ganymede.internalSession.getSession();
+	session = Ganymede.internalSession.getDBSession();
       }
 
     ownerGroup = session.viewDBObject(ownerInvid);
@@ -266,11 +266,11 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
     try
       {
-	session = object.getGSession().getSession();
+	session = object.getGSession().getDBSession();
       }
     catch (NullPointerException ex)
       {
-	session = Ganymede.internalSession.getSession();
+	session = Ganymede.internalSession.getDBSession();
       }
 
     if (cc != null && cc.booleanValue())

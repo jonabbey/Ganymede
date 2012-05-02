@@ -16,8 +16,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -923,7 +925,7 @@ public class DBLog {
     if (admin != null)
       {
 	returnAddr = adminPersonaCustom.convertAdminInvidToString(admin,
-								  gSession.getSession());
+								  gSession.getDBSession());
       }
 
     // if there was no email address registered for the admin persona,
@@ -1136,7 +1138,7 @@ public class DBLog {
 
 	if (event.admin != null)
 	  {
-	    name = adminPersonaCustom.convertAdminInvidToString(event.admin, gSession.getSession());
+	    name = adminPersonaCustom.convertAdminInvidToString(event.admin, gSession.getDBSession());
 	  }
 	else
 	  {
@@ -1167,7 +1169,7 @@ public class DBLog {
     if (event.admin != null)
       {
 	returnAddr = adminPersonaCustom.convertAdminInvidToString(event.admin,
-								  gSession.getSession());
+								  gSession.getDBSession());
       }
     else
       {
@@ -1279,7 +1281,7 @@ public class DBLog {
     // looking up the object name can be pricey, so we wait until we
     // know we probably need to do it, here
 
-    String objectName = transSession.getGSession().getSession().getObjectLabel(objectInvid);
+    String objectName = transSession.getGSession().getDBSession().getObjectLabel(objectInvid);
 
     // okay, we have some users interested in getting notified about this
     // object event..
@@ -1489,7 +1491,7 @@ public class DBLog {
     for (Result entry: eventCodeList)
       {
 	sysEventCodes.put(entry.toString(),
-			  new systemEventType(gSession.getSession().viewDBObject(entry.getInvid())));
+			  new systemEventType(gSession.getDBSession().viewDBObject(entry.getInvid())));
       }
 
     // remember when we updated our local cache
@@ -1578,7 +1580,7 @@ public class DBLog {
 
     for (Result entry: eventCodeList)
       {
-	objEventobj = (DBObject) gSession.getSession().viewDBObject(entry.getInvid());
+	objEventobj = (DBObject) gSession.getDBSession().viewDBObject(entry.getInvid());
 	objEventItem = new objectEventType(objEventobj);
 	objEventCodes.put(objEventItem.hashKey, objEventItem);
       }
@@ -1620,7 +1622,7 @@ public class DBLog {
 
     if (session == null)
       {
-        session = gSession.getSession();
+        session = gSession.getDBSession();
       }
 
     // if the DBLogEvent has aleady been processed by us, we don't
@@ -1780,7 +1782,7 @@ public class DBLog {
 
   public Set<String> calculateOwnerAddresses(List<Invid> objects, MailMode mode)
   {
-    return DBLog.calculateOwnerAddresses(objects, mode, gSession.getSession());
+    return DBLog.calculateOwnerAddresses(objects, mode, gSession.getDBSession());
   }
 
   //
@@ -1987,7 +1989,7 @@ public class DBLog {
 	if (debug)
 	  {
 	    System.err.println("DBLog.calculateOwnerAddresses(): processing owner group " +
-			       session.getGSession().getSession().getObjectLabel(ownerInvid));
+			       session.getGSession().getDBSession().getObjectLabel(ownerInvid));
 	  }
 
 	addresses.addAll(ownerCustom.getAddresses(ownerInvid, session));
