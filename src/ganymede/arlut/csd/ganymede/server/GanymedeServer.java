@@ -1851,13 +1851,7 @@ public class GanymedeServer implements Server {
       }
     finally
       {
-	try
-	  {
-	    gSession.logout();
-	  }
-	catch (NotLoggedInException ex)
-	  {
-	  }
+	gSession.logout();
       }
   }
 }

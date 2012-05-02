@@ -2814,13 +2814,7 @@ public final class DBStore implements JythonMap {
 	  }
 	finally
 	  {
-	    try
-	      {
-		gSession.logout();
-	      }
-	    catch (NotLoggedInException ex)
-	      {
-	      }
+	    gSession.logout();
 	  }
 
 	success = true;
@@ -2835,13 +2829,7 @@ public final class DBStore implements JythonMap {
 	  {
 	    session.abortTransaction();
 
-	    try
-	      {
-		gSession.logout();
-	      }
-	    catch (NotLoggedInException ex)
-	      {
-	      }
+	    gSession.logout();
 	  }
       }
   }

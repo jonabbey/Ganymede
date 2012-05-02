@@ -89,7 +89,7 @@ public class GanymedeValidationTask implements Runnable {
   public GanymedeValidationTask()
   {
   }
-  
+
   /**
    *
    * Just Do It (tm)
@@ -114,7 +114,7 @@ public class GanymedeValidationTask implements Runnable {
     Ganymede.debug(ts.l("run.starting"));
 
     String error = GanymedeServer.lSemaphore.checkEnabled();
-	
+
     if (error != null)
       {
 	// "Deferring validation task = semaphore disabled: {0}"
@@ -152,7 +152,7 @@ public class GanymedeValidationTask implements Runnable {
 	    base = (DBObjectBase) baseEnum.nextElement();
 
 	    objects = mySession.getDBSession().getTransactionalObjects(base.getTypeID());
-	    
+
 	    if (debug)
 	      {
 		// "Scanning base {0} for invalid objects"
@@ -185,7 +185,7 @@ public class GanymedeValidationTask implements Runnable {
 		    if (!ReturnVal.didSucceed(retVal))
 		      {
 			String dialogText = retVal.getDialogText();
-			
+
 			if (dialogText != null)
 			  {
 			    // {0}:{1} failed consistency check: {2}
@@ -196,7 +196,7 @@ public class GanymedeValidationTask implements Runnable {
 			    // {0}:{1} failed consistency check
 			    Ganymede.debug(ts.l("run.inconsistent_notext", base.getName(), object.getLabel()));
 			  }
-			
+
 			everythingsfine = false;
 		      }
 		  }
@@ -215,7 +215,7 @@ public class GanymedeValidationTask implements Runnable {
 		    if (!ReturnVal.didSucceed(retVal))
 		      {
 			String dialogText = retVal.getDialogText();
-			
+
 			if (dialogText != null)
 			  {
 			    // {0}:{1} failed field-level consistency check: {2}
@@ -226,7 +226,7 @@ public class GanymedeValidationTask implements Runnable {
 			    // {0}:{1} failed field-level consistency check
 			    Ganymede.debug(ts.l("run.field_inconsistent_notext", base.getName(), object.getLabel()));
 			  }
-			
+
 			everythingsfine = false;
 		      }
 		  }
@@ -260,13 +260,7 @@ public class GanymedeValidationTask implements Runnable {
       {
 	if (mySession != null)
 	  {
-	    try
-	      {
-		mySession.logout();
-	      }
-	    catch (NotLoggedInException ex)
-	      {
-	      }
+	    mySession.logout();
 	  }
       }
   }

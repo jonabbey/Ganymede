@@ -442,13 +442,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
 	    if (session != null)
 	      {
-		try
-		  {
-		    session.logout();	// will clear the dump lock
-		  }
-		catch (NotLoggedInException ex)
-		  {
-		  }
+		session.logout();	// will clear the dump lock
 
 		session = null;
 		lock = null;
@@ -516,9 +510,6 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	    try
 	      {
 		session.logout();	// this will clear the dump lock if need be.
-	      }
-	    catch (NotLoggedInException ex)
-	      {
 	      }
 	    finally
 	      {

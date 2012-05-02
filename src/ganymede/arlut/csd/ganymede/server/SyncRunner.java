@@ -1526,13 +1526,7 @@ public class SyncRunner implements Runnable {
 
 	    if (session != null)
 	      {
-		try
-		  {
-		    session.logout();       // will clear the dump lock
-		  }
-		catch (NotLoggedInException ex)
-		  {
-		  }
+		session.logout();       // will clear the dump lock
 
 		session = null;
 		lock = null;

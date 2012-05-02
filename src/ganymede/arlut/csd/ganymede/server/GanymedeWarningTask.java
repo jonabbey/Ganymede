@@ -470,13 +470,7 @@ public class GanymedeWarningTask implements Runnable {
 	      }
 	  }
 
-	try
-	  {
-	    mySession.logout();
-	  }
-	catch (NotLoggedInException ex)
-	  {
-	  }
+	mySession.logout();
 
 	finished = true;
       }
@@ -496,13 +490,7 @@ public class GanymedeWarningTask implements Runnable {
 
 	    if (mySession != null)
 	      {
-		try
-		  {
-		    mySession.logout();
-		  }
-		catch (NotLoggedInException ex)
-		  {
-		  }
+		mySession.logout();
 	      }
 	  }
 	else
