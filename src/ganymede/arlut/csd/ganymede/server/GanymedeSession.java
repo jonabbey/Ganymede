@@ -415,10 +415,11 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     if (sessionLabel.startsWith("builder:"))
       {
-	// if we are attempting to start a builder session, we'll proceed
-	// even if the server is waiting to handle a deferred shutdown.
-
 	String disabledMessage = GanymedeServer.lSemaphore.checkEnabled();
+
+	// if we are attempting to start a builder session, we'll
+	// proceed even if the server is waiting to handle a deferred
+	// shutdown.  Otherwise we'll abort.
 
 	if (disabledMessage != null && !disabledMessage.equals("shutdown"))
 	  {
@@ -494,8 +495,6 @@ final public class GanymedeSession implements Session, Unreferenced {
 			 DBObject personaObject, boolean exportObjects,
 			 boolean clientIsRemote) throws RemoteException
   {
-    // --
-
     // GanymedeServer will have already incremented our semaphore in
     // its login() method
 
@@ -564,10 +563,15 @@ final public class GanymedeSession implements Session, Unreferenced {
     GanymedeAdmin.refreshUsers();
   }
 
+  //
   //************************************************************
+  //
+  //
   //
   // All methods from this point on are part of the Server remote
   // interface, and can be called by the client via RMI.
+  //
+  //
   //
   //************************************************************
 
@@ -2778,9 +2782,20 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>This private method is called by all methods in
    * GanymedeSession that require the client to be logged in to
    * operate.</p>
+   *
+   * <p>NB: the {@link arlut.csd.ganymede.server.logout()} method
+   * unexports this GanymedeSession object so that we shouldn't have
+   * any more incoming RMI calls to worry about, but it's possible for
+   * RMI calls to be in flight and blocking on the GanymedeSession
+   * object monitor, so we do checklogin() as an additional protection
+   * in case of that kind of a race at logout time.</p>
+   *
+   * <p>checklogin() is also useful to make sure that server-side code
+   * doesn't try to use a GanymedeSession locally after the logout()
+   * method has been called.</p>
    */
 
-  void checklogin() throws NotLoggedInException
+  public void checklogin() throws NotLoggedInException
   {
     if (!isLoggedIn())
       {
@@ -2981,6 +2996,12 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    if (remoteClient)
 	      {
 		Ganymede.rmi.unpublishObject(this, true);
+
+		// from this point on, RMI remote calls to this
+		// GanymedeSession should fail, but we still have
+		// everything guarded by checklogin() in case there
+		// are incoming RMI calls blocking on the
+		// GanymedeSession object monitor.
 	      }
 
 	    // if we weren't forced off, do normal logout logging
