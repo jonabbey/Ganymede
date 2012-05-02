@@ -2191,7 +2191,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    // must be editable because the client cares
 
-	    groupChoices.addRow(invid, gSession.viewObjectLabel(invid), true);
+	    groupChoices.addRow(invid, gSession.getDBSession().getObjectLabel(invid), true);
 	  }
       }
   }
@@ -2926,7 +2926,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		if (debug)
 		  {
 		    System.err.println("userCustom: deleting group element " +
-				       gSession.viewObjectLabel(delVal));
+				       gSession.getDBSession().getObjectLabel(delVal));
 		  }
 
 		if (!delVal.equals(getFieldValueLocal(HOMEGROUP)))
@@ -2938,7 +2938,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		    if (debug)
 		      {
 			System.err.println("userCustom: I don't think " +
-					   gSession.viewObjectLabel(delVal) +
+					   gSession.getDBSession().getObjectLabel(delVal) +
 					   " is the home group");
 		      }
 

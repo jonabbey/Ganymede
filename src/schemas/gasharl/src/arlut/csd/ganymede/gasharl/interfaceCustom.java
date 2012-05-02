@@ -593,7 +593,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	  {
 	    return Ganymede.createErrorDialog("Network Full",
 					      "There are no more addresses available in the " +
-					      getGSession().viewObjectLabel((Invid) value) +
+					      getDBSession().getObjectLabel((Invid) value) +
 					      " network.");
 	  }
 

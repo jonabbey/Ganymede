@@ -410,12 +410,12 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
 
   String getMapName()
   {
-    return getGSession().viewObjectLabel((Invid) getFieldValueLocal(mapEntrySchema.MAP));
+    return getDBSession().getObjectLabel((Invid) getFieldValueLocal(mapEntrySchema.MAP));
   }
 
   String getOriginalMapName()
   {
-    return getGSession().viewObjectLabel((Invid) getOriginal().getFieldValueLocal(mapEntrySchema.MAP));
+    return getDBSession().getObjectLabel((Invid) getOriginal().getFieldValueLocal(mapEntrySchema.MAP));
   }
 
   Invid getMapInvid()
@@ -430,12 +430,12 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
 
   String getVolumeName()
   {
-    return getGSession().viewObjectLabel((Invid) getFieldValueLocal(mapEntrySchema.VOLUME));
+    return getDBSession().getObjectLabel((Invid) getFieldValueLocal(mapEntrySchema.VOLUME));
   }
 
   String getOriginalVolumeName()
   {
-    return getGSession().viewObjectLabel((Invid) getOriginal().getFieldValueLocal(mapEntrySchema.VOLUME));
+    return getDBSession().getObjectLabel((Invid) getOriginal().getFieldValueLocal(mapEntrySchema.VOLUME));
   }
 
   Invid getVolumeInvid()

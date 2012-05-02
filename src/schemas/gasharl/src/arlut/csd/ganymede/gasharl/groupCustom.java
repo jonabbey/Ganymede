@@ -459,7 +459,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
 	    if (gsession != null)
 	      {
-		names.addElement(gsession.viewObjectLabel(objId));
+		names.addElement(gsession.getDBSession().getObjectLabel(objId));
 	      }
 	    else
 	      {

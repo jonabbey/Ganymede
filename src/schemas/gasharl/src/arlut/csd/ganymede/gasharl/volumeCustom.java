@@ -248,11 +248,11 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 
 	if (editset != null)
 	  {
-	    mapName = editset.getSession().getGSession().viewObjectLabel(tmpInvid);
+	    mapName = editset.getDBSession().getObjectLabel(tmpInvid);
 	  }
 	else if (Ganymede.internalSession != null)
 	  {
-	    mapName = Ganymede.internalSession.viewObjectLabel(tmpInvid);
+	    mapName = Ganymede.internalSession.getDBSession().getObjectLabel(tmpInvid);
 	  }
 	else
 	  {
@@ -264,11 +264,11 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 
 	if (editset != null)
 	  {
-	    userName = editset.getSession().getGSession().viewObjectLabel(tmpInvid);
+	    userName = editset.getDBSession().getObjectLabel(tmpInvid);
 	  }
 	else if (Ganymede.internalSession != null)
 	  {
-	    userName = Ganymede.internalSession.viewObjectLabel(tmpInvid);
+	    userName = Ganymede.internalSession.getDBSession().getObjectLabel(tmpInvid);
 	  }
 	else
 	  {
@@ -369,7 +369,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 		  {
 		    return Ganymede.createErrorDialog("Couldn't remove map entry",
 						      "Couldn't remove map entry for " + 
-						      getGSession().viewObjectLabel(user) +
+						      getDBSession().getObjectLabel(user) +
 						      ", permissions denied to edit the user.");
 		  }
 
@@ -379,7 +379,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 		  {
 		    return Ganymede.createErrorDialog("Couldn't remove map entry",
 						      "Couldn't remove map entry for " + 
-						      getGSession().viewObjectLabel(user) +
+						      getDBSession().getObjectLabel(user) +
 						      ", couldn't access the volumes field in the user record.");
 		  }
 
@@ -398,7 +398,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 		catch (GanyPermissionsException ex)
 		  {
 		    retVal  = Ganymede.createErrorDialog("volumeCustom: Error",
-							 "Permissions error unlinking user " + getGSession().viewObjectLabel(user) +
+							 "Permissions error unlinking user " + getDBSession().getObjectLabel(user) +
 							 " from volume.");
 		  }
 

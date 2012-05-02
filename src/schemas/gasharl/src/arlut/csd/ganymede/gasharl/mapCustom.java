@@ -314,7 +314,7 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 		catch (GanyPermissionsException ex)
 		  {
 		    retVal = Ganymede.createErrorDialog("mapCustom: Error",
-							"Permissions error unlinking user " + getGSession().viewObjectLabel(user) +
+							"Permissions error unlinking user " + getDBSession().getObjectLabel(user) +
 							" from map.");
 		  }
 
@@ -361,11 +361,11 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 
 	if (editset != null)
 	  {
-	    userName = editset.getSession().getGSession().viewObjectLabel(tmpInvid);
+	    userName = editset.getDBSession().getObjectLabel(tmpInvid);
 	  }
 	else if (Ganymede.internalSession != null)
 	  {
-	    userName = Ganymede.internalSession.viewObjectLabel(tmpInvid);
+	    userName = Ganymede.internalSession.getDBSession().getObjectLabel(tmpInvid);
 	  }
 	else
 	  {
@@ -383,11 +383,11 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 
 	if (editset != null)
 	  {
-	    volName = editset.getSession().getGSession().viewObjectLabel(tmpInvid);
+	    volName = editset.getDBSession().getObjectLabel(tmpInvid);
 	  }
 	else if (Ganymede.internalSession != null)
 	  {
-	    volName = Ganymede.internalSession.viewObjectLabel(tmpInvid);
+	    volName = Ganymede.internalSession.getDBSession().getObjectLabel(tmpInvid);
 	  }
 	else
 	  {
