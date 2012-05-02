@@ -556,9 +556,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	  {
 	    field = fieldAry[i];
 
-	    // unexport can fail if the object has already been
-	    // unexported, or if it was never exported.  This should
-	    // never happen, but if it does, we'll log it.
+	    // unexport can fail (return false) if the object has
+	    // already been unexported, or if it was never exported,
+	    // but we don't care as long as it's not exported after
+	    // this point.
 
 	    Ganymede.rmi.unpublishObject(field, true);
 	  }
