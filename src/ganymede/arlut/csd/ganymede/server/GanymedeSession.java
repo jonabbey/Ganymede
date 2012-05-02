@@ -315,7 +315,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * transaction support.</p>
    */
 
-  private DBSession session;
+  private DBSession dbSession;
 
   /**
    * Our DBQueryEngine object.  DBQueryEngine has all the routines for
@@ -458,8 +458,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     this.exportObjects = false;
 
-    session = new DBSession(Ganymede.db, this, sessionLabel);
-    queryEngine = new DBQueryEngine(this, session);
+    dbSession = new DBSession(Ganymede.db, this, sessionLabel);
+    queryEngine = new DBQueryEngine(this, dbSession);
     permManager = new DBPermissionManager(this).configureInternalSession(sessionLabel);
   }
 
@@ -546,8 +546,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     // construct our DBSession
 
-    session = new DBSession(Ganymede.db, this, sessionName);
-    queryEngine = new DBQueryEngine(this, session);
+    dbSession = new DBSession(Ganymede.db, this, sessionName);
+    queryEngine = new DBQueryEngine(this, dbSession);
     permManager = new DBPermissionManager(this).configureClientSession(loginName, userObject, personaObject);
 
     // Let the GanymedeServer know that this session is now active for
@@ -1065,7 +1065,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	  }
       }
 
-    if (session.editSet != null)
+    if (dbSession.editSet != null)
       {
         // "Server: Error in openTransaction()"
         // "Error.. transaction already opened"
@@ -1075,7 +1075,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     /* - */
 
-    session.openTransaction(describe, interactive); // *sync* DBSession
+    dbSession.openTransaction(describe, interactive); // *sync* DBSession
 
     this.status = "Transaction: " + describe;
     setLastEvent("openTransaction");
@@ -1194,7 +1194,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
-    if (session.editSet == null)
+    if (dbSession.editSet == null)
       {
 	return Ganymede.createErrorDialog(ts.l("commitTransaction.error"),
 					  ts.l("commitTransaction.error_text"));
@@ -1214,7 +1214,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     this.status = "";
     setLastEvent("commitTransaction");
 
-    retVal = session.commitTransaction(comment); // *sync* DBSession DBEditSet
+    retVal = dbSession.commitTransaction(comment); // *sync* DBSession DBEditSet
 
     // if we succeeded, we'll schedule our
     // builder tasks to run
@@ -1274,7 +1274,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
-    if (session.editSet == null)
+    if (dbSession.editSet == null)
       {
 	throw new IllegalArgumentException(ts.l("abortTransaction.exception"));
       }
@@ -1298,7 +1298,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     unexportObjects(false);
 
-    ReturnVal retVal = session.abortTransaction(); // *sync* DBSession
+    ReturnVal retVal = dbSession.abortTransaction(); // *sync* DBSession
 
     // "User {0} cancelled transaction."
     GanymedeServer.sendMessageToRemoteSessions(ClientMessage.ABORTNOTIFY,
@@ -1789,7 +1789,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // session.viewDBObject() here makes this a much more lightweight
     // operation.
 
-    return session.getObjectLabel(invid);
+    return dbSession.getObjectLabel(invid);
   }
 
   /**
@@ -1863,7 +1863,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // to verify the user's permissions to view the history, so we'll
     // have to return null
 
-    DBObject obj = session.viewDBObject(invid);
+    DBObject obj = dbSession.viewDBObject(invid);
 
     if (obj == null)
       {
@@ -1942,9 +1942,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 	return null;
       }
 
-    // we do our own permissions checking, so we can use session.viewDBObject().
+    // we do our own permissions checking, so we can use dbSession.viewDBObject().
 
-    DBObject obj = session.viewDBObject(invid);
+    DBObject obj = dbSession.viewDBObject(invid);
 
     if (obj == null)
       {
@@ -2018,7 +2018,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // we'll let a NullPointerException be thrown if we were given a null
     // Invid.
 
-    DBObject obj = session.viewDBObject(invid);
+    DBObject obj = dbSession.viewDBObject(invid);
 
     if (obj == null)
       {
@@ -2095,7 +2095,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
-    DBObject obj = session.viewDBObject(invid);
+    DBObject obj = dbSession.viewDBObject(invid);
 
     if (obj == null)
       {
@@ -2128,7 +2128,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	try
           {
-            objref = session.editDBObject(invid);
+            objref = dbSession.editDBObject(invid);
           }
         catch (GanymedeManagementException ex)
           {
@@ -2303,7 +2303,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     DBEditObject objectHook = Ganymede.db.getObjectBase(invid.getType()).getObjectHook();
 
-    if (!objectHook.canClone(session, vObj))
+    if (!objectHook.canClone(dbSession, vObj))
       {
 	// "Cloning DENIED"
 	// "Cloning operation refused for {0} object {1}."
@@ -2313,7 +2313,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     String ckp = RandomUtils.getSaltedString("clone_db_object[" + invid.toString() + "]");
 
-    session.checkpoint(ckp);
+    dbSession.checkpoint(ckp);
     checkpointed = true;
 
     try
@@ -2332,11 +2332,11 @@ final public class GanymedeSession implements Session, Unreferenced {
         // pass-through to the client, so long as the cloneFromObject
         // method succeeds.
 
-        retVal = ReturnVal.merge(retVal, newObj.cloneFromObject(session, vObj, false));
+        retVal = ReturnVal.merge(retVal, newObj.cloneFromObject(dbSession, vObj, false));
 
         if (ReturnVal.didSucceed(retVal))
           {
-            session.popCheckpoint(ckp);
+            dbSession.popCheckpoint(ckp);
             checkpointed = false;
           }
 
@@ -2346,7 +2346,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         if (checkpointed)
           {
-            session.rollback(ckp);
+            dbSession.rollback(ckp);
           }
       }
   }
@@ -2374,7 +2374,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
-    DBObject vObj = session.viewDBObject(invid);
+    DBObject vObj = dbSession.viewDBObject(invid);
 
     if (vObj == null)
       {
@@ -2414,7 +2414,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 					       vObj.getTypeName(), vObj.getLabel()));
       }
 
-    if (!eObj.canBeInactivated() || !eObj.canInactivate(session, eObj))
+    if (!eObj.canBeInactivated() || !eObj.canInactivate(dbSession, eObj))
       {
 	return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
 					  ts.l("inactivate_db_object.not_inactivatable", eObj.getLabel()));
@@ -2425,7 +2425,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // note!  DBEditObject's finalizeInactivate() method does the
     // event logging
 
-    return session.inactivateDBObject(eObj); // *sync* DBSession
+    return dbSession.inactivateDBObject(eObj); // *sync* DBSession
   }
 
   /**
@@ -2451,7 +2451,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
-    DBObject vObj = session.viewDBObject(invid);
+    DBObject vObj = dbSession.viewDBObject(invid);
 
     if (vObj == null)
       {
@@ -2494,7 +2494,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // note!  DBEditObject's finalizeReactivate() method does the
     // event logging at transaction commit time
 
-    return session.reactivateDBObject(eObj); // *sync* DBSession, DBObject possible
+    return dbSession.reactivateDBObject(eObj); // *sync* DBSession, DBObject possible
   }
 
   /**
@@ -2549,7 +2549,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
 
     DBObjectBase objBase = Ganymede.db.getObjectBase(invid.getType());
-    DBObject vObj = session.viewDBObject(invid);
+    DBObject vObj = dbSession.viewDBObject(invid);
 
     if (vObj == null)
       {
@@ -2574,7 +2574,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 						   vObj.getLabel()));
 	  }
 
-	ReturnVal retVal = objBase.getObjectHook().canRemove(session, vObj);
+	ReturnVal retVal = objBase.getObjectHook().canRemove(dbSession, vObj);
 
 	if (retVal != null && !retVal.didSucceed())
 	  {
@@ -2608,7 +2608,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // we do logging of the object deletion in DBEditSet.commit() when
     // the transaction commits
 
-    return session.deleteDBObject(invid);
+    return dbSession.deleteDBObject(invid);
   }
 
   /**
@@ -2880,7 +2880,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public DBSession getDBSession()
   {
-    return session;
+    return dbSession;
   }
 
   /**
@@ -2897,7 +2897,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public DBSession getSession()
   {
-    return session;
+    return dbSession;
   }
 
   /**
@@ -2947,7 +2947,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   DBObject getContainingObj(DBObject object)
   {
-    return session.getContainingObj(object);
+    return dbSession.getContainingObj(object);
   }
 
   /**
@@ -2987,7 +2987,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	      {
 		// We don't need to update GanymedeServer's lists for internal sessions
 
-		session.logout();	// *sync* DBSession
+		dbSession.logout();	// *sync* DBSession
 		return;
 	      }
 
@@ -3001,7 +3001,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	    // logout the client, abort any DBSession transaction going
 
-	    session.logout();	// *sync* DBSession
+	    dbSession.logout();	// *sync* DBSession
 
 	    // if we have DBObjects left exported through RMI, make
 	    // them inaccesible
@@ -3087,7 +3087,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    clienthost = null;
 	    status = null;
 	    lastEvent = null;
-	    session = null;
+	    dbSession = null;
 	    queryEngine = null;
 
 	    wizard = null;
@@ -3179,7 +3179,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // session.viewDBObject() here makes this a much more lightweight
     // operation.
 
-    return session.describe(invid);
+    return dbSession.describe(invid);
   }
 
   /**
@@ -3285,7 +3285,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     try
       {
-        retVal = session.createDBObject(type, preferredInvid, ownerInvids); // *sync* DBSession
+        retVal = dbSession.createDBObject(type, preferredInvid, ownerInvids); // *sync* DBSession
       }
     catch (GanymedeManagementException ex)
       {

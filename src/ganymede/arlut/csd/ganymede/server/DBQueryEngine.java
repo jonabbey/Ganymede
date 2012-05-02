@@ -114,14 +114,14 @@ public class DBQueryEngine {
    * transaction-consistent objects associated with gSession.
    */
 
-  private DBSession session = null;
+  private DBSession dbSession = null;
 
   /* -- */
 
-  public DBQueryEngine(GanymedeSession gSession, DBSession session)
+  public DBQueryEngine(GanymedeSession gSession, DBSession dbSession)
   {
     this.gSession = gSession;
-    this.session = session;
+    this.dbSession = dbSession;
   }
 
   /**
@@ -153,7 +153,7 @@ public class DBQueryEngine {
         // current DBEditSet, if any, to find the version of
         // the object as it exists in the current transaction.
 
-        obj = session.viewDBObject(invid);
+        obj = dbSession.viewDBObject(invid);
 
         if (obj == null)
           {
@@ -497,7 +497,7 @@ public class DBQueryEngine {
             // because it would entail making exported duplicates of
             // all objects matching our query
 
-            resultBuilder.addRow(session.viewDBObject(invid), gSession);
+            resultBuilder.addRow(dbSession.viewDBObject(invid), gSession);
           }
       }
 
@@ -674,7 +674,7 @@ public class DBQueryEngine {
 
         if (node.fieldId == -2)
           {
-            DBObject resultobject = session.viewDBObject((Invid) node.value);
+            DBObject resultobject = dbSession.viewDBObject((Invid) node.value);
 
             addResultRow(resultobject, query, result, internal, perspectiveObject);
 
@@ -892,7 +892,7 @@ public class DBQueryEngine {
           {
             try
               {
-                rLock = session.openReadLock(baseLock); // *sync* DBSession DBStore
+                rLock = dbSession.openReadLock(baseLock); // *sync* DBSession DBStore
               }
             catch (InterruptedException ex)
               {
@@ -933,13 +933,13 @@ public class DBQueryEngine {
         // of a query, so we'll check that as well.
 
         while (gSession.isLoggedIn() &&
-               (rLock == null || session.isLocked(rLock)) && it.hasNext())
+               (rLock == null || dbSession.isLocked(rLock)) && it.hasNext())
           {
             obj = it.next();
 
             // if we're editing it, let's look at our version of it
 
-            if (obj.shadowObject != null && obj.shadowObject.getDBSession() == session)
+            if (obj.shadowObject != null && obj.shadowObject.getDBSession() == dbSession)
               {
                 obj = obj.shadowObject;
               }
@@ -955,7 +955,7 @@ public class DBQueryEngine {
             throw new RuntimeException(ts.l("queryDispatch.logged_out_exception"));
           }
 
-        if (rLock != null && !session.isLocked(rLock))
+        if (rLock != null && !dbSession.isLocked(rLock))
           {
             throw new RuntimeException(ts.l("queryDispatch.read_lock_exception"));
           }
@@ -981,7 +981,7 @@ public class DBQueryEngine {
         // objects that haven't yet been integrated into the object
         // tables, so we check our transaction's working set here.
 
-        if (session.isTransactionOpen()) // should be safe since we are sync'ed on GanymedeSession
+        if (dbSession.isTransactionOpen()) // should be safe since we are sync'ed on GanymedeSession
           {
             if (debug)
               {
@@ -990,7 +990,7 @@ public class DBQueryEngine {
                                    " : scanning intratransaction objects");
               }
 
-            DBEditObject transactionObjects[] = session.editSet.getObjectList();
+            DBEditObject transactionObjects[] = dbSession.editSet.getObjectList();
 
             for (int i = 0; i < transactionObjects.length; i++)
               {
@@ -1049,7 +1049,7 @@ public class DBQueryEngine {
 
         if (extantLock == null && rLock != null && rLock.isLocked())
           {
-            session.releaseLock(rLock); // *sync* DBSession DBStore
+            dbSession.releaseLock(rLock); // *sync* DBSession DBStore
           }
       }
   }
