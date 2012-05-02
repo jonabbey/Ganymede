@@ -398,7 +398,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	      {
 		Result objid = (Result) results.elementAt(0);
 
-		DBEditObject eObj = getSession().editDBObject(invid);
+		DBEditObject eObj = getDBSession().editDBObject(invid);
 		invf = (InvidDBField) eObj.getField(mapEntrySchema.MAP);
 
 		retVal = invf.setValueLocal(objid.getInvid());
@@ -699,7 +699,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	Invid entryInvid = (Invid) values.elementAt(i);
 
-	DBEditObject eObj = getSession().editDBObject(entryInvid);
+	DBEditObject eObj = getDBSession().editDBObject(entryInvid);
 
 	Invid mapInvid = (Invid) eObj.getFieldValueLocal(mapEntrySchema.MAP);
 
@@ -708,7 +708,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    return Ganymede.createErrorDialog("Can't commit transaction with an empty automounter map definition in user " + this.getLabel());
 	  }
 
-	DBObject mapObj = getSession().viewDBObject(mapInvid);
+	DBObject mapObj = getDBSession().viewDBObject(mapInvid);
 
 	String mapName = mapObj.getLabel();
 
@@ -1349,7 +1349,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    // we're PSEUDOSTATIC, so we need to get ahold of the internal session
 	    // so we can look up objects
 
-	    DBObject category = internalSession().getSession().viewDBObject(catInvid);
+	    DBObject category = internalSession().getDBSession().viewDBObject(catInvid);
 
 	    needIdentifier = category.isSet(userCategorySchema.SSREQUIRED);
 	  }
@@ -2345,7 +2345,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    Invid catInvid = (Invid) this.getFieldValueLocal(userSchema.CATEGORY);
 
-	    DBObject category = internalSession().getSession().viewDBObject(catInvid);
+	    DBObject category = internalSession().getDBSession().viewDBObject(catInvid);
 
 	    Integer maxDays = (Integer) category.getFieldValueLocal(userCategorySchema.LIMIT);
 
@@ -2524,7 +2524,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    Invid catInvid = (Invid) this.getFieldValueLocal(userSchema.CATEGORY);
 
-	    DBObject category = internalSession().getSession().viewDBObject(catInvid);
+	    DBObject category = internalSession().getDBSession().viewDBObject(catInvid);
 
 	    Boolean expDateRequired = (Boolean) category.getFieldValueLocal(userCategorySchema.EXPIRE);
 
@@ -2670,7 +2670,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	    for (int i = 0; i < personaeInvids.size(); i++)
 	      {
-		adminPersonaCustom adminObj = (adminPersonaCustom) session.editDBObject((Invid) personaeInvids.elementAt(i));
+		adminPersonaCustom adminObj = (adminPersonaCustom) getDBSession().editDBObject((Invid) personaeInvids.elementAt(i));
 
 		adminObj.refreshLabelField(null, null, (String) value);
 	      }
@@ -3325,14 +3325,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	return;
       }
 
-    DBObject entryObj = getSession().viewDBObject(entryInvid);
+    DBObject entryObj = getDBSession().viewDBObject(entryInvid);
 
     Invid volumeInvid = (Invid) entryObj.getFieldValueLocal(mapEntrySchema.VOLUME);
-    DBObject volumeObj = getSession().viewDBObject(volumeInvid);
+    DBObject volumeObj = getDBSession().viewDBObject(volumeInvid);
     String volName = (String) volumeObj.getFieldValueLocal(volumeSchema.LABEL);
 
     Invid mapInvid = (Invid) entryObj.getFieldValueLocal(mapEntrySchema.MAP);
-    DBObject mapObj = getSession().viewDBObject(mapInvid);
+    DBObject mapObj = getDBSession().viewDBObject(mapInvid);
     String mapName = mapObj.getLabel();
 
     Integer id = (Integer) getFieldValueLocal(userSchema.UID);
@@ -3345,7 +3345,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
 	Invid ownerOne = (Invid) ownerInvids.elementAt(0);
 
-	DBObject ownerObj = getSession().viewDBObject(ownerOne);
+	DBObject ownerObj = getDBSession().viewDBObject(ownerOne);
 	ownerName = ownerObj.getLabel();
 
 	// we want underscores to separate words, not spaces
@@ -3366,7 +3366,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	return;
       }
 
-    DBObject homeGroup = getSession().viewDBObject(homegroupInvid);
+    DBObject homeGroup = getDBSession().viewDBObject(homegroupInvid);
     Integer gid = (Integer) homeGroup.getFieldValueLocal(groupSchema.GID);
 
     boolean success = false;
@@ -3479,24 +3479,24 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     StringBuilder buffer = new StringBuilder();
 
-    DBObject entryObj = getSession().viewDBObject(entryInvid);
+    DBObject entryObj = getDBSession().viewDBObject(entryInvid);
 
     Invid mapInvid = (Invid) entryObj.getFieldValueLocal(mapEntrySchema.MAP);
-    DBObject mapObj = getSession().viewDBObject(mapInvid);
+    DBObject mapObj = getDBSession().viewDBObject(mapInvid);
     String mapName = mapObj.getLabel();
 
     Invid volumeInvid = (Invid) entryObj.getFieldValueLocal(mapEntrySchema.VOLUME);
-    DBObject volumeObj = getSession().viewDBObject(volumeInvid);
+    DBObject volumeObj = getDBSession().viewDBObject(volumeInvid);
     String volName = volumeObj.getLabel();
     String volPath = (String) volumeObj.getFieldValueLocal(volumeSchema.PATH);
 
     Invid sysInvid = (Invid) volumeObj.getFieldValueLocal(volumeSchema.HOST);
-    DBObject sysObj = getSession().viewDBObject(sysInvid);
+    DBObject sysObj = getDBSession().viewDBObject(sysInvid);
     String sysName = sysObj.getLabel();
 
     List<Invid> objects = new ArrayList<Invid>();
     objects.add(sysInvid);
-    Set<String> addresses = DBLog.calculateOwnerAddresses(objects, getSession());
+    Set<String> addresses = DBLog.calculateOwnerAddresses(objects, getDBSession());
 
     String subject = null;
 
@@ -3606,25 +3606,25 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     StringBuilder buffer = new StringBuilder();
 
-    DBObject entryObj = getSession().viewDBObject(entryInvid, true);
+    DBObject entryObj = getDBSession().viewDBObject(entryInvid, true);
 
     Invid mapInvid = (Invid) entryObj.getFieldValueLocal(mapEntrySchema.MAP);
-    DBObject mapObj = getSession().viewDBObject(mapInvid, true);
+    DBObject mapObj = getDBSession().viewDBObject(mapInvid, true);
 
     String mapName = mapObj.getLabel();
 
     Invid volumeInvid = (Invid) entryObj.getFieldValueLocal(mapEntrySchema.VOLUME);
-    DBObject volumeObj = getSession().viewDBObject(volumeInvid, true);
+    DBObject volumeObj = getDBSession().viewDBObject(volumeInvid, true);
     String volName = volumeObj.getLabel();
     String volPath = (String) volumeObj.getFieldValueLocal(volumeSchema.PATH);
 
     Invid sysInvid = (Invid) volumeObj.getFieldValueLocal(volumeSchema.HOST);
-    DBObject sysObj = getSession().viewDBObject(sysInvid, true);
+    DBObject sysObj = getDBSession().viewDBObject(sysInvid, true);
     String sysName = sysObj.getLabel();
 
     List<Invid> objects = new ArrayList<Invid>();
     objects.add(sysInvid);
-    Set<String> addresses = DBLog.calculateOwnerAddresses(objects, getSession());
+    Set<String> addresses = DBLog.calculateOwnerAddresses(objects, getDBSession());
 
     String subject = null;
 
@@ -3806,7 +3806,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  {
 	    mapEntryInvid = (Invid) oldEntries.elementAt(i);
 
-	    mapEntryObj = getSession().viewDBObject(mapEntryInvid);
+	    mapEntryObj = getDBSession().viewDBObject(mapEntryInvid);
 
 	    if (mapEntryObj instanceof mapEntryCustom)
 	      {
@@ -3840,7 +3840,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	for (int i = 0; i < newEntries.size(); i++)
 	  {
 	    mapEntryInvid = (Invid) newEntries.elementAt(i);
-	    mapEntryObj = getSession().viewDBObject(mapEntryInvid);
+	    mapEntryObj = getDBSession().viewDBObject(mapEntryInvid);
 
 	    if (mapEntryObj instanceof mapEntryCustom)
 	      {
@@ -3889,7 +3889,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	    // we know the map entry obj is an editing copy, don't
 	    // need to check here
 
-	    mapEntry = (mapEntryCustom) getSession().viewDBObject(oldMapEntryInvid);
+	    mapEntry = (mapEntryCustom) getDBSession().viewDBObject(oldMapEntryInvid);
 
 	    Invid oldVolInvid = mapEntry.getOriginalVolumeInvid();
 	    Invid newVolInvid = mapEntry.getVolumeInvid();
@@ -3987,25 +3987,25 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     /* -- */
 
-    volumeObj = getSession().viewDBObject(oldVolume, true);
+    volumeObj = getDBSession().viewDBObject(oldVolume, true);
 
     oldVolName = volumeObj.getLabel();
     oldVolPath = (String) volumeObj.getFieldValueLocal(volumeSchema.PATH);
     oldSysInvid = (Invid) volumeObj.getFieldValueLocal(volumeSchema.HOST);
     objects.addElement(oldSysInvid);
-    sysObj = getSession().viewDBObject(oldSysInvid, true);
+    sysObj = getDBSession().viewDBObject(oldSysInvid, true);
     oldSysName = sysObj.getLabel();
 
-    volumeObj = getSession().viewDBObject(newVolume);
+    volumeObj = getDBSession().viewDBObject(newVolume);
 
     newVolName = volumeObj.getLabel();
     newVolPath = (String) volumeObj.getFieldValueLocal(volumeSchema.PATH);
     newSysInvid = (Invid) volumeObj.getFieldValueLocal(volumeSchema.HOST);
     objects.addElement(newSysInvid);
-    sysObj = getSession().viewDBObject(newSysInvid);
+    sysObj = getDBSession().viewDBObject(newSysInvid);
     newSysName = sysObj.getLabel();
 
-    Set<String> addresses = DBLog.calculateOwnerAddresses(objects, getSession());
+    Set<String> addresses = DBLog.calculateOwnerAddresses(objects, getDBSession());
 
     buffer.append("Hi.  User ");
     buffer.append(getLabel());

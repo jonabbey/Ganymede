@@ -539,7 +539,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	  {
             ReturnVal retVal = new ReturnVal(true, true);
             retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
-            
+
 	    return retVal;
 	  }
 
@@ -548,7 +548,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
 	Byte[] address = (Byte[]) getFieldValueLocal(interfaceSchema.ADDRESS);
 
-	if (address != null && systemCustom.checkMatchingNet(getSession(), (Invid) value, address))
+	if (address != null && systemCustom.checkMatchingNet(getDBSession(), (Invid) value, address))
 	  {
 	    if (debug)
 	      {
@@ -637,7 +637,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 	    return null;
 	  }
 
-	if (systemCustom.checkMatchingNet(getSession(), netInvid, address))
+	if (systemCustom.checkMatchingNet(getDBSession(), netInvid, address))
 	  {
 	    // fine, no change to the network required
 
@@ -701,7 +701,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
 	if (sysInvid != null)
 	  {
-	    sysObj = (systemCustom) getSession().editDBObject(sysInvid);
+	    sysObj = (systemCustom) getDBSession().editDBObject(sysInvid);
 	  }
       }
 
@@ -978,7 +978,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     Byte[] address = (Byte[]) object.getFieldValueLocal(interfaceSchema.ADDRESS);
     Invid netInvid = (Invid) object.getFieldValueLocal(interfaceSchema.IPNET);
 
-    if (address != null && !systemCustom.checkMatchingNet(getSession(), netInvid, address))
+    if (address != null && !systemCustom.checkMatchingNet(getDBSession(), netInvid, address))
       {
 	return Ganymede.createErrorDialog("Bad IP Address", "Error, I.P. number/network mismatch in " + object.toString());
       }

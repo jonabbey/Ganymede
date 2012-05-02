@@ -305,7 +305,7 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
     QueryResult groupChoice = userObject.groupChoices;
 
     // find the group we're changing to, find the id, change it
-    
+
     boolean found = false;
 
     // we're going to check point here, so that we can undo things if
@@ -314,8 +314,8 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
     // InvidDBField logic does its own checkpointing, but we need
     // one that includes the two operations <<ensemble>>.
 
-    session.getSession().checkpoint(checkPointKey);
-    
+    session.getDBSession().checkpoint(checkPointKey);
+
     for (int i = 0; i < groupChoice.size(); i++)
       {
 	if (groupChoice.getLabel(i).equals(group))
@@ -389,8 +389,8 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
 
 	    // we succeeded, so pop off our checkpoint
 
-	    session.getSession().popCheckpoint(checkPointKey);
-	    
+	    session.getDBSession().popCheckpoint(checkPointKey);
+
 	    return retVal;
 	  }
 	else
@@ -398,7 +398,7 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
 	    // try to undo everything.. if we can, we'll go ahead
 	    // and return the failure report from invF.deleteElement()
 
-	    if (!session.getSession().rollback(checkPointKey))
+	    if (!session.getDBSession().rollback(checkPointKey))
 	      {
 		retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
 						    "Ran into a problem during home group deletion, and rollback failed");
@@ -411,7 +411,7 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
       {
 	// argh, failure with no explanation..
 
-	if (!session.getSession().rollback(checkPointKey))
+	if (!session.getDBSession().rollback(checkPointKey))
 	  {
 	    retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
 						"Ran into a problem during home group change, and rollback failed");

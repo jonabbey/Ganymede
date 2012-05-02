@@ -221,12 +221,12 @@ public class userCategoryWizard extends GanymediatorWizard {
 
     if (oldInvid != null)
       {
-	this.oldCategory = userObject.getSession().viewDBObject(oldInvid);
+	this.oldCategory = userObject.getDBSession().viewDBObject(oldInvid);
       }
 
     if (newInvid != null)
       {
-	this.newCategory = userObject.getSession().viewDBObject(newInvid);
+	this.newCategory = userObject.getDBSession().viewDBObject(newInvid);
       }
 
     if (oldCategory != null)

@@ -3,17 +3,19 @@
    dhcpNetworkCustom.java
 
    This file is a management class for DHCP Network objects in Ganymede.
-   
+
    Created: 10 October 2007
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -119,7 +121,7 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
    */
 
   public boolean fieldRequired(DBObject object, short fieldid)
-  {    
+  {
     switch (fieldid)
       {
         case dhcpNetworkSchema.NAME:
@@ -143,7 +145,7 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
 	    case dhcpNetworkSchema.NETWORK_NUMBER:
 	    case dhcpNetworkSchema.NETWORK_MASK:
 	      return true;
-	  }	
+	  }
       }
 
     return false;
@@ -161,7 +163,7 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
    * is called.
    *
    * This method is responsible for filling in any default
-   * values that can be calculated from the 
+   * values that can be calculated from the
    * {@link arlut.csd.ganymede.server.DBSession DBSession}
    * associated with the editset defined in this DBEditObject.
    *
@@ -181,7 +183,7 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
    * so it is the responsibility of this method to handle any checkpointing
    * needed.
    *
-   * This method should be overridden in subclasses. 
+   * This method should be overridden in subclasses.
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
@@ -212,7 +214,7 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
       {
 	return Ganymede.loginError(ex);
       }
-	*/    
+	*/
   }
 
   /**
@@ -263,7 +265,7 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
 	  {
 	    return retVal;
 	  }
-            
+
 	if (retVal.getDialog() != null)
 	  {
 	    resultBuf.append("\n\n");
@@ -318,15 +320,15 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
   {
     Vector newOnes = (Vector) newOptions.getValuesLocal().clone();
     Vector oldOnes = (Vector) oldOptions.getValuesLocal().clone();
-    
+
     DBObject origOption;
     DBEditObject workingOption;
     int i;
-    
+
     boolean problem = false;
     ReturnVal tmpVal;
     StringBuilder resultBuf = new StringBuilder();
-    
+
     try
       {
 	for (i = 0; i < newOnes.size(); i++)
@@ -334,18 +336,18 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
 	    workingOption = (DBEditObject) session.editDBObject((Invid) newOnes.elementAt(i));
 	    origOption = session.viewDBObject((Invid) oldOnes.elementAt(i));
 	    tmpVal = workingOption.cloneFromObject(session, origOption, local);
-	
+
 	    if (tmpVal != null && tmpVal.getDialog() != null)
 	      {
 		resultBuf.append("\n\n");
 		resultBuf.append(tmpVal.getDialog().getText());
-	    
+
 		problem = true;
 	      }
 	  }
-    
+
 	Invid newInvid;
-    
+
 	if (i < oldOnes.size())
 	  {
 	    for (; i < oldOnes.size(); i++)
@@ -359,30 +361,30 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
 		    tmpVal = Ganymede.createErrorDialog("permissions",
 							"permissions failure creating embedded option " + ex);
 		  }
-	    
+
 		if (!tmpVal.didSucceed())
 		  {
 		    if (tmpVal != null && tmpVal.getDialog() != null)
 		      {
 			resultBuf.append("\n\n");
 			resultBuf.append(tmpVal.getDialog().getText());
-		    
+
 			problem = true;
 		      }
 		    continue;
 		  }
-	    
+
 		newInvid = tmpVal.getInvid();
-	    
+
 		workingOption = (DBEditObject) session.editDBObject(newInvid);
 		origOption = session.viewDBObject((Invid) oldOnes.elementAt(i));
 		tmpVal = workingOption.cloneFromObject(session, origOption, local);
-	    
+
 		if (tmpVal != null && tmpVal.getDialog() != null)
 		  {
 		    resultBuf.append("\n\n");
 		    resultBuf.append(tmpVal.getDialog().getText());
-		
+
 		    problem = true;
 		  }
 	      }
@@ -392,9 +394,9 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
       {
 	return Ganymede.loginError(ex);
       }
-    
+
     ReturnVal retVal = new ReturnVal(true, !problem);
-    
+
     if (problem)
       {
 	retVal.setDialog(new JDialogBuff("Possible Clone Problems", resultBuf.toString(),
@@ -406,7 +408,7 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
 
   /**
    * Customization method to verify whether the user should be able to
-   * see a specific field in a given object.  Instances of 
+   * see a specific field in a given object.  Instances of
    * {@link arlut.csd.ganymede.server.DBField DBField} will
    * wind up calling up to here to let us override the normal visibility
    * process.
@@ -433,25 +435,25 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
 	     field.getID() == dhcpNetworkSchema.NETWORK_MASK ||
 	     field.getID() == dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS ||
 	     field.getID() == dhcpNetworkSchema.GUEST_RANGE ||
-	     field.getID() == dhcpNetworkSchema.GUEST_OPTIONS  
+	     field.getID() == dhcpNetworkSchema.GUEST_OPTIONS
 	     )
 	  {
 	    return false;
 	  }
       }
-    
+
     Boolean allow_registered_guests = (Boolean) field.getOwner().getFieldValueLocal(dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS);
 
     if (allow_registered_guests == null || !allow_registered_guests.booleanValue())
       {
 	if ( field.getID() == dhcpNetworkSchema.GUEST_RANGE ||
-	     field.getID() == dhcpNetworkSchema.GUEST_OPTIONS  
+	     field.getID() == dhcpNetworkSchema.GUEST_OPTIONS
 	     )
 	  {
 	    return false;
 	  }
       }
-    
+
     return super.canSeeField(session, field);
   }
 
@@ -472,22 +474,22 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
 	String name = (String) value;
 	if (name != null && name.equals("_GLOBAL_"))
 	  {
-	    getSession().checkpoint("clearing _global_ fields");
-	    
+	    getDBSession().checkpoint("clearing _global_ fields");
+
 	    try
 	      {
 		IPDBField network_number = (IPDBField) getField(dhcpNetworkSchema.NETWORK_NUMBER);
 		result = ReturnVal.merge(result, network_number.setValueLocal(null));
-		
+
 		IPDBField network_mask = (IPDBField) getField(dhcpNetworkSchema.NETWORK_MASK);
-		result = ReturnVal.merge(result, network_mask.setValueLocal(null));	
-		
+		result = ReturnVal.merge(result, network_mask.setValueLocal(null));
+
 		DBField allow_registered_guests = (DBField) getField(dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS);
 		result = ReturnVal.merge(result, allow_registered_guests.setValueLocal(false));
-		
+
 		StringDBField guest_range = (StringDBField) getField(dhcpNetworkSchema.GUEST_RANGE);
 		result = ReturnVal.merge(result, guest_range.setValueLocal(null));
-		
+
 		DBField guest_options = (DBField) getField(dhcpNetworkSchema.GUEST_OPTIONS);
 		try
 		  {
@@ -497,25 +499,25 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
 		  {
 		    return Ganymede.createErrorDialog("permissions", "permissions error deleting embedded object" + ex);
 		  }
-	      }	    
+	      }
 	    finally
 	      {
 		if (!ReturnVal.didSucceed(result))
 		  {
-		    getSession().rollback("clearing _global_ fields");
+		    getDBSession().rollback("clearing _global_ fields");
 		  }
 		else
 		  {
-		    getSession().popCheckpoint("clearing _global_ fields");
+		    getDBSession().popCheckpoint("clearing _global_ fields");
 		  }
-	      } 
-	  }	    
+	      }
+	  }
 
 	result.addRescanField(field.getOwner().getInvid(), dhcpNetworkSchema.NETWORK_NUMBER);
 	result.addRescanField(field.getOwner().getInvid(), dhcpNetworkSchema.NETWORK_MASK);
 	result.addRescanField(field.getOwner().getInvid(), dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS);
 	result.addRescanField(field.getOwner().getInvid(), dhcpNetworkSchema.GUEST_RANGE);
-	result.addRescanField(field.getOwner().getInvid(), dhcpNetworkSchema.GUEST_OPTIONS);	
+	result.addRescanField(field.getOwner().getInvid(), dhcpNetworkSchema.GUEST_OPTIONS);
 	return result;
       }
 
@@ -527,7 +529,7 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
 
 	if (value == null || Boolean.FALSE.equals(value))
 	  {
-	    getSession().checkpoint("clearing guest fields");
+	    getDBSession().checkpoint("clearing guest fields");
 
 	    try
 	      {
@@ -543,16 +545,16 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
 		  {
                     return Ganymede.createErrorDialog("permissions", "permissions error deleting embedded object" + ex);
 		  }
-	      }	    
+	      }
 	    finally
 	      {
 		if (!ReturnVal.didSucceed(result))
 		  {
-		    getSession().rollback("clearing guest fields");
+		    getDBSession().rollback("clearing guest fields");
 		  }
 		else
 		  {
-		    getSession().popCheckpoint("clearing guest fields");
+		    getDBSession().popCheckpoint("clearing guest fields");
 		  }
 	      }
 	  }
@@ -562,7 +564,7 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
 
 	return result;
       }
-    
+
     return null;
   }
 

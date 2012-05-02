@@ -176,7 +176,7 @@ public class IRISListTask implements Runnable {
   {
     boolean needCommit = false;
 
-    List<DBObject> lists = mySession.getSession().getTransactionalObjects(IRISListSchema.BASE);
+    List<DBObject> lists = mySession.getDBSession().getTransactionalObjects(IRISListSchema.BASE);
 
     for (DBObject list: lists)
       {

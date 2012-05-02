@@ -270,8 +270,8 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 						      "mapCustom.wizardHook(): deleteElement index out of range in entries field");
 		  }
 
-		DBObject vObj = getSession().viewDBObject(invid); // should be a mapEntry object
-	    
+		DBObject vObj = getDBSession().viewDBObject(invid); // should be a mapEntry object
+
 		// we need to get the user
 
 		Invid user = (Invid) vObj.getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
@@ -284,8 +284,8 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 		if (eObj == null)
 		  {
 		    return Ganymede.createErrorDialog("Couldn't remove map entry",
-						      "Couldn't remove map entry for " + 
-						      getGSession().viewObjectLabel(user) +
+						      "Couldn't remove map entry for " +
+						      getDBSession().getObjectLabel(user) +
 						      ", permissions denied to edit the user.");
 		  }
 
@@ -294,8 +294,8 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 		if (invf == null)
 		  {
 		    return Ganymede.createErrorDialog("Couldn't remove map entry",
-						      "Couldn't remove map entry for " + 
-						      getGSession().viewObjectLabel(user) +
+						      "Couldn't remove map entry for " +
+						      getDBSession().getObjectLabel(user) +
 						      ", couldn't access the volumes field in the user record.");
 		  }
 

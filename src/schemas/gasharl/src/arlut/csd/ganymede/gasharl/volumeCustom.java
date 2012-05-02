@@ -146,7 +146,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
     Invid hostInvid = (Invid) object.getFieldValueLocal(volumeSchema.HOST);
 
     if (hostInvid != null &&
-	gSession.getPermManager().personaMatch(gSession.getSession().viewDBObject(hostInvid)))
+	gSession.getPermManager().personaMatch(gSession.getDBSession().viewDBObject(hostInvid)))
       {
 	return true;
       }
@@ -336,7 +336,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 						  "volumeCustom.wizardHook(): deleteElement index out of range in entries field");
 	      }
 
-	    DBObject vObj = getSession().viewDBObject(invid); // should be a mapEntry object
+	    DBObject vObj = getDBSession().viewDBObject(invid); // should be a mapEntry object
 
 	    InvidDBField invf = (InvidDBField) vObj.getField(mapEntrySchema.MAP);
 

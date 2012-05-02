@@ -203,7 +203,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
       {
 	Invid primaryOwner = (Invid) owners.elementAt(0);
 
-	DBObject owner = getSession().viewDBObject(primaryOwner);
+	DBObject owner = getDBSession().viewDBObject(primaryOwner);
 
 	if (owner != null)
 	  {
@@ -773,18 +773,18 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 		    return null;
 		  }
 
-		if (!gSession.getSession().isInteractive())
+		if (!gSession.getDBSession().isInteractive())
 		  {
 		    // let it go for now, we'll verify at transaction commit if we have to
 
 		    return null;
 		  }
 
-		String username = gSession.viewObjectLabel(userInvid);
+		String username = gSession.getDBSession().getObjectLabel(userInvid);
 
 		return Ganymede.createErrorDialog("Group Validation Error",
-						  "Can't remove user " + username + " from group " + getLabel() 
-						  + "'s list of users, this user is using " + getLabel() + 
+						  "Can't remove user " + username + " from group " + getLabel()
+						  + "'s list of users, this user is using " + getLabel() +
 						  " as their home group.  Remove this user from the home users list first.");
 	      }
 	  }

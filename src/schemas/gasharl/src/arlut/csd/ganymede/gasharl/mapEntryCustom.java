@@ -242,13 +242,13 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
 
     for (int i = 0; i < entries.size(); i++)
       {
-	entry = getSession().viewDBObject((Invid) entries.elementAt(i));
+	entry = getDBSession().viewDBObject((Invid) entries.elementAt(i));
 
 	mapInvid = (Invid) entry.getFieldValueLocal(mapEntrySchema.MAP);
 
 	mapsToSkip.addElement(mapInvid);
       }
-    
+
     // ok, mapsToSkip has a list of invid's to skip in our choice list.
 
     QueryResult result = new QueryResult();
@@ -397,7 +397,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
   {
     Vector result;
     Invid userInvid = (Invid) getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
-    DBObject user = getSession().viewDBObject(userInvid);
+    DBObject user = getDBSession().viewDBObject(userInvid);
 
     result = (Vector) user.getFieldValuesLocal(userSchema.VOLUMES).clone();
     

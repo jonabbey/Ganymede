@@ -170,7 +170,7 @@ public class PhoneValidationTask implements Runnable {
 
   private void scanPhones() throws InterruptedException, NotLoggedInException
   {
-    List<DBObject> users = mySession.getSession().getTransactionalObjects(SchemaConstants.UserBase);
+    List<DBObject> users = mySession.getDBSession().getTransactionalObjects(SchemaConstants.UserBase);
 
     for (DBObject user: users)
       {

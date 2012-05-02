@@ -3,17 +3,19 @@
    emailListCustom.java
 
    Custom plug-in for managing fields in the email list object type.
-   
+
    Created: 16 February 1999
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -130,7 +132,7 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
    * subclasses for how this is to be used, if you have
    * them.</P>
    */
-  
+
   public String lookupLabel(DBObject object)
   {
     if (object.getTypeID() == SchemaConstants.UserBase)
@@ -145,7 +147,7 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
       }
 
     // mark email lists
-    
+
     if (object.getTypeID() == 274)
       {
 	return super.lookupLabel(object) + " (email list)";
@@ -170,7 +172,7 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
     if (object.getTypeID() == 275)
       {
 	Vector addresses = object.getFieldValuesLocal((short) 257);
-	
+
 	return super.lookupLabel(object) + " (" + VectorUtils.vectorString(addresses) + ")";
       }
 
@@ -230,7 +232,7 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
 	Query query1 = new Query(SchemaConstants.UserBase, null, false); // list all users
 
 	Query query2 = new Query((short) 275, null, false); // list all external email targets
-	
+
 	QueryNode root3 = new QueryNotNode(new QueryDataNode((short) -2, QueryDataNode.EQUALS, this.getInvid()));
 	Query query3 = new Query((short) 274, root3, false); // list all other email groups, but not ourselves
 
@@ -246,14 +248,14 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
 
         QueryNode root5 = new QueryDataNode(userNetgroupSchema.EMAILOK, QueryDataNode.DEFINED, null);
         Query query5 = new Query((short) 270, root4, false);
-	
-	QueryResult result = editset.getSession().getGSession().query(query1, this);
 
-	result.append(editset.getSession().getGSession().query(query2, this));
-	result.append(editset.getSession().getGSession().query(query3, this));
-	result.append(editset.getSession().getGSession().query(query4, this));
-	result.append(editset.getSession().getGSession().query(query5, this));
-	
+	QueryResult result = editset.getDBSession().getGSession().query(query1, this);
+
+	result.append(editset.getDBSession().getGSession().query(query2, this));
+	result.append(editset.getDBSession().getGSession().query(query3, this));
+	result.append(editset.getDBSession().getGSession().query(query4, this));
+	result.append(editset.getDBSession().getGSession().query(query5, this));
+
 	membersChoice = result;
       }
 
@@ -262,9 +264,9 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
 
   /**
    * <p>This method is used to control whether or not it is acceptable to
-   * make a link to the given field in this 
+   * make a link to the given field in this
    * {@link arlut.csd.ganymede.server.DBObject DBObject} type when the
-   * user only has editing access for the source 
+   * user only has editing access for the source
    * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField} and not
    * the target.</p>
    *
@@ -273,7 +275,7 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
    * to allow a link based on what field of what object wants to link
    * to it.</P>
    *
-   * <p>By default, the 3 variants of the DBEditObject anonymousLinkOK() 
+   * <p>By default, the 3 variants of the DBEditObject anonymousLinkOK()
    * method are chained together, so that the customizer can choose
    * which level of detail he is interested in.
    * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField}'s
@@ -366,7 +368,7 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
       }
 
     Vector newItemVect = new Vector();
-    
+
     newItemVect.addElement(value);
 
     return null;

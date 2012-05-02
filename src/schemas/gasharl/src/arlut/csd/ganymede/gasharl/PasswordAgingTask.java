@@ -4,17 +4,19 @@
 
    This task is run periodically to check all user accounts in Ganymede
    for their password expiration time.
-   
+
    Created: 14 June 2001
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -111,7 +113,7 @@ public class PasswordAgingTask implements Runnable {
     Ganymede.debug("Password Aging Task: Starting");
 
     String error = GanymedeServer.checkEnabled();
-	
+
     if (error != null)
       {
 	Ganymede.debug("Deferring password aging task - semaphore disabled: " + error);
@@ -140,7 +142,7 @@ public class PasswordAgingTask implements Runnable {
 	// later
 
 	mySession.enableOversight(false);
-	
+
 	ReturnVal retVal = mySession.openTransaction(PasswordAgingTask.name);
 
 	if (retVal != null && !retVal.didSucceed())
@@ -150,7 +152,7 @@ public class PasswordAgingTask implements Runnable {
 	  }
 
 	transactionOpen = true;
-	
+
 	// do the stuff
 
 	handlePasswords();
@@ -162,11 +164,11 @@ public class PasswordAgingTask implements Runnable {
 	    // if doNormalProcessing is true, the
 	    // transaction was not cleared, but was
 	    // left open for a re-try.  Abort it.
-	    
+
 	    if (retVal.doNormalProcessing)
 	      {
 		Ganymede.debug("PasswordAging Task: couldn't fully commit, trying to abort.");
-		
+
 		mySession.abortTransaction();
 	      }
 
@@ -212,25 +214,25 @@ public class PasswordAgingTask implements Runnable {
 						QueryDataNode.DEFINED,
 						null);
     /* -- */
-    
+
     q = new Query(SchemaConstants.UserBase, matchNode, false);
-    
+
     results = mySession.internalQuery(q);
-    
+
     en = results.elements();
-    
+
     while (en.hasMoreElements())
       {
 	if (currentThread.isInterrupted())
 	  {
 	    throw new InterruptedException("scheduler ordering shutdown");
 	  }
-	    
+
 	result = (Result) en.nextElement();
 
 	invid = result.getInvid();
 
-	object = mySession.getSession().viewDBObject(invid);
+	object = mySession.getDBSession().viewDBObject(invid);
 
 	if (object == null || object.isInactivated())
 	  {
@@ -366,12 +368,12 @@ public class PasswordAgingTask implements Runnable {
 
 	    if (retVal != null && !retVal.didSucceed())
 	      {
-		Ganymede.debug("PasswordAging task was not able to inactivate user " + 
+		Ganymede.debug("PasswordAging task was not able to inactivate user " +
 			       result.toString());
 	      }
 	    else
 	      {
-		Ganymede.debug("PasswordAging task inactivated user " + 
+		Ganymede.debug("PasswordAging task inactivated user " +
 			       result.toString());
 	      }
 	  }
@@ -393,7 +395,7 @@ public class PasswordAgingTask implements Runnable {
 
     String titleString = "Password Expiring Soon For User " + userObject.getLabel() + ", at " + passwordChangeTime;
 
-    String messageString = "The password for user account " + userObject.getLabel() + 
+    String messageString = "The password for user account " + userObject.getLabel() +
       " will expire soon.  You will need to change your password before " + passwordChangeTime +
       " or else your user account will be inactivated.\n\n" +
       "You can change your password online by visiting https://www.arlut.utexas.edu/password/\n\n" +
@@ -417,7 +419,7 @@ public class PasswordAgingTask implements Runnable {
 
     String titleString = "Password Expiring Very Soon For User " + userObject.getLabel() + ", at " + passwordChangeTime;
 
-    String messageString = "The password for user account " + userObject.getLabel() + 
+    String messageString = "The password for user account " + userObject.getLabel() +
       " will expire very soon.  The password for this user account will need to be changed before " + passwordChangeTime +
       " or else the account will be inactivated.\n\n" +
       "You can change your password online by visiting https://www.arlut.utexas.edu/password/\n\n" +
@@ -443,7 +445,7 @@ public class PasswordAgingTask implements Runnable {
 
     String titleString = "Password Has Expired For User " + userObject.getLabel() + "!!!";
 
-    String messageString = "The password for user account " + userObject.getLabel() + 
+    String messageString = "The password for user account " + userObject.getLabel() +
       " expired at " + passwordChangeTime + ".\n\nThe password for this user account *must* be changed immediately, or else" +
       " the account will be inactivated.  If this account is inactivated, extension of the password" +
       " expiration deadline will be impossible, and a new password will need to be chosen to re-enable" +

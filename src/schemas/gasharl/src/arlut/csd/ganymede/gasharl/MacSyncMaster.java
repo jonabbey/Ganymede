@@ -12,8 +12,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -81,7 +83,7 @@ public class MacSyncMaster implements SyncMaster {
 
   public synchronized void augment(FieldBook book, DBEditObject obj)
   {
-    this.session = obj.getSession();
+    this.session = obj.getDBSession();
 
     try
       {
@@ -167,7 +169,7 @@ public class MacSyncMaster implements SyncMaster {
 	Query query = new GanyQueryTransmuter().transmuteQueryString(queryString);
 
 	List<Result> results = gSession.internalQuery(query);
-	
+
 	for (Result result: results)
 	  {
 	    includeUser(book, session.viewDBObject(result.getInvid()));
@@ -198,7 +200,7 @@ public class MacSyncMaster implements SyncMaster {
 	Query query = new GanyQueryTransmuter().transmuteQueryString(queryString);
 
 	List<Result> results = gSession.internalQuery(query);
-	
+
 	for (Result result: results)
 	  {
 	    includeUser(book, session.viewDBObject(result.getInvid()));

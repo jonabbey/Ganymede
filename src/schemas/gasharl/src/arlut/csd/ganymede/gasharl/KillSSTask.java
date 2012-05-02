@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2012
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -107,7 +107,7 @@ public class KillSSTask implements Runnable {
     Ganymede.debug("KillSS Conversion Task: Starting");
 
     String error = GanymedeServer.checkEnabled();
-	
+
     if (error != null)
       {
 	Ganymede.debug("Deferring KillSS Conversion task - semaphore disabled: " + error);
@@ -133,7 +133,7 @@ public class KillSSTask implements Runnable {
 	// and we don't want forced required fields oversight..
 
 	mySession.enableOversight(false);
-	
+
 	ReturnVal retVal = mySession.openTransaction("KillSS conversion task");
 
 	if (retVal != null && !retVal.didSucceed())
@@ -143,7 +143,7 @@ public class KillSSTask implements Runnable {
 	  }
 
 	transactionOpen = true;
-	
+
 	// do the stuff
 
 	if (!stripSS())
@@ -201,8 +201,8 @@ public class KillSSTask implements Runnable {
 
   private boolean stripSS() throws InterruptedException, NotLoggedInException
   {
-    List<DBObject> users = mySession.getSession().getTransactionalObjects(SchemaConstants.UserBase);
-    
+    List<DBObject> users = mySession.getDBSession().getTransactionalObjects(SchemaConstants.UserBase);
+
     for (DBObject user: users)
       {
 	Invid invid = user.getInvid();

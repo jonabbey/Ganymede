@@ -5,10 +5,6 @@
    Custom plug-in for managing fields in the MailmanList object type.
 
    Created: 25 June 1999
-   Last Mod Date: $Date: 2004-12-01 01:53:51 -0600 (Wed, 01 Dec 2004) $
-   Last Revision Changed: $Rev: 5857 $
-   Last Changed By: $Author: broccol $
-   SVN URL: $HeadURL: http://tools.arlut.utexas.edu/svn/ganymede/trunk/ganymede/src/schemas/gasharl/src/arlut/csd/ganymede/gasharl/MailmanListCustom.java $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -16,8 +12,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -204,7 +202,7 @@ public class MailmanListCustom extends DBEditObject implements SchemaConstants, 
     // set a checkpoint so we can verify all the aliases
     // needed are not currently being used.
     String checkPointKey = "MailmanListAliases";
-    DBSession dbSession = getGSession().getSession();
+    DBSession dbSession = getGSession().getDBSession();
     dbSession.checkpoint(checkPointKey);
 
     try

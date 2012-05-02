@@ -200,7 +200,7 @@ public class GUIDGeneratorTask implements Runnable {
 
   public boolean createGUIDs() throws NotLoggedInException
   {
-    List<DBObject> users = mySession.getSession().getTransactionalObjects(SchemaConstants.UserBase);
+    List<DBObject> users = mySession.getDBSession().getTransactionalObjects(SchemaConstants.UserBase);
     UUIDGenerator gen = UUIDGenerator.getInstance();
     EthernetAddress myAddress = new EthernetAddress("00:11:43:D5:F7:F8");
     boolean success = true;
@@ -245,7 +245,7 @@ public class GUIDGeneratorTask implements Runnable {
 	  }
       }
 
-    List<DBObject> groups = mySession.getSession().getTransactionalObjects((short) 257);
+    List<DBObject> groups = mySession.getDBSession().getTransactionalObjects((short) 257);
 
     for (DBObject group: groups)
       {

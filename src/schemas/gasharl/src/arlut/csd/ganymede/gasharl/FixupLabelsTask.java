@@ -205,7 +205,7 @@ public class FixupLabelsTask implements Runnable {
 
   private boolean assignAutomounterLabels() throws InterruptedException, NotLoggedInException
   {
-    List<DBObject> users = mySession.getSession().getTransactionalObjects(SchemaConstants.UserBase);
+    List<DBObject> users = mySession.getDBSession().getTransactionalObjects(SchemaConstants.UserBase);
 
     for (DBObject user: users)
       {
@@ -227,7 +227,7 @@ public class FixupLabelsTask implements Runnable {
 
   private boolean fixupInterfaceLabels() throws InterruptedException, NotLoggedInException
   {
-    List<DBObject> systems = mySession.getSession().getTransactionalObjects(interfaceSchema.BASE);
+    List<DBObject> systems = mySession.getDBSession().getTransactionalObjects(interfaceSchema.BASE);
     
     for (DBObject system: systems)
       {

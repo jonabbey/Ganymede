@@ -545,7 +545,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
 	Invid netInvid = handle.getInvid();
 
-	if (checkMatchingNet(getSession(), netInvid, address))
+	if (checkMatchingNet(getDBSession(), netInvid, address))
 	  {
 	    return netInvid;
 	  }
@@ -613,7 +613,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
 	    Query netQuery = new Query((short) 267);
 
-	    QueryResult netsEditable = editset.getSession().getGSession().query(netQuery);
+	    QueryResult netsEditable = editset.getDBSession().getGSession().query(netQuery);
 
 	    netsToChooseFrom = netsEditable.getHandles();
 
@@ -622,7 +622,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	    for (int i = 0; i < interfaces.size(); i++)
 	      {
 		Invid interfaceInvid = (Invid) interfaces.elementAt(i);
-		DBObject interfaceObj = (DBObject) getSession().viewDBObject(interfaceInvid);
+		DBObject interfaceObj = (DBObject) getDBSession().viewDBObject(interfaceInvid);
 		Invid netInvid = (Invid) interfaceObj.getFieldValueLocal(interfaceSchema.IPNET);
 
 		if (netInvid == null)
@@ -631,7 +631,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 		    continue;
 		  }
 
-		DBObject netObj = (DBObject) getSession().viewDBObject(netInvid);
+		DBObject netObj = (DBObject) getDBSession().viewDBObject(netInvid);
 		String netLabel = netObj.getLabel();
 
 		// okay, is this network already in our choice list?
@@ -662,7 +662,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
 	if (systemTypeInvid != null)
 	  {
-	    DBObject systemTypeInfo = getSession().viewDBObject(systemTypeInvid);
+	    DBObject systemTypeInfo = getDBSession().viewDBObject(systemTypeInvid);
 
 	    if (systemTypeInfo != null)
 	      {
@@ -715,7 +715,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
 	    // internalQuery doesn't care if the query has its filtered bit set
 
-	    systemTypes = editset.getSession().getGSession().query(query);
+	    systemTypes = editset.getDBSession().getGSession().query(query);
 
 	    if (systemTypesStamp == null)
 	      {
@@ -766,7 +766,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	return null;
       }
 
-    DBObject netObj = getSession().viewDBObject(netInvid);
+    DBObject netObj = getDBSession().viewDBObject(netInvid);
 
     String rangeString = (String) netObj.getFieldValueLocal(networkSchema.ALLOCRANGE);
 
@@ -933,7 +933,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	    // we're PSEUDOSTATIC, so we need to get ahold of the
 	    // internal session so we can look up objects
 
-	    DBObject typeObject = internalSession().getSession().viewDBObject(systemType);
+	    DBObject typeObject = internalSession().getDBSession().viewDBObject(systemType);
 
 	    Boolean userRequired = (Boolean) typeObject.getFieldValueLocal(systemTypeSchema.USERREQ);
 
@@ -1069,7 +1069,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	if (debug)
 	  {
 	    System.err.println("systemCustom: system type changed to " +
-			       getGSession().viewObjectLabel((Invid) value));
+			       getDBSession().getObjectLabel((Invid) value));
 	  }
 
 	initializeNets(true);
@@ -1157,7 +1157,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	// allocation, we need to free that
 
 	interfaceCustom delInterface = (interfaceCustom)
-	  getSession().editDBObject((Invid) interfaces.elementAt(index));
+	  getDBSession().editDBObject((Invid) interfaces.elementAt(index));
 
 	Invid oldNet = (Invid) delInterface.getFieldValueLocal(interfaceSchema.IPNET);
 	Byte[] address = (Byte[]) delInterface.getFieldValueLocal(interfaceSchema.ADDRESS);
@@ -1195,7 +1195,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 	  }
 
 	interfaceCustom io = (interfaceCustom)
-	  getSession().editDBObject((Invid) interfaces.elementAt(indexToChange));
+	  getDBSession().editDBObject((Invid) interfaces.elementAt(indexToChange));
 
 	ReturnVal retVal = io.setFieldValueLocal(interfaceSchema.NAME, null);
 
