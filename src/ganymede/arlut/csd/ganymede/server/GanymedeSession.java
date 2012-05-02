@@ -2878,6 +2878,23 @@ final public class GanymedeSession implements Session, Unreferenced {
    * operations without involving permissions checking.</p>
    */
 
+  public DBSession getDBSession()
+  {
+    return session;
+  }
+
+  /**
+   * <p>This method returns a reference to the {@link
+   * arlut.csd.ganymede.server.DBSession DBSession} object
+   * encapsulated by this GanymedeSession object.  This is intended to
+   * be used by server-side code that wants to carry out certain
+   * operations without involving permissions checking.</p>
+   *
+   * <p>Note: getSession() is the original name of the method
+   * getDBSession(), and should be considered deprecated for new
+   * code.</p>
+   */
+
   public DBSession getSession()
   {
     return session;
