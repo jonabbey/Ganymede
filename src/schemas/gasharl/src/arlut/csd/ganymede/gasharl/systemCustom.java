@@ -316,7 +316,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
               {
                 return retVal;
               }
-            
+
             if (retVal.getDialog() != null)
               {
                 resultBuf.append("\n\n");
@@ -462,7 +462,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 		      {
 			resultBuf.append("\n\n");
 			resultBuf.append(tmpVal.getDialog().getText());
-                        
+
 			problem = true;
 		      }
 

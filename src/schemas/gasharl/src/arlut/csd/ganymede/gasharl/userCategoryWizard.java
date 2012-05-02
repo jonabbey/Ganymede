@@ -4,17 +4,19 @@
 
    A wizard to manage changes in the user object's user category
    field.
-   
+
    Created: 13 October 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -74,7 +76,7 @@ import arlut.csd.ganymede.server.GanymediatorWizard;
  * set and/or change a user category.
  *
  * @see arlut.csd.ganymede.common.ReturnVal
- * @see arlut.csd.ganymede.rmi.Ganymediator 
+ * @see arlut.csd.ganymede.rmi.Ganymediator
  */
 
 public class userCategoryWizard extends GanymediatorWizard {
@@ -95,11 +97,11 @@ public class userCategoryWizard extends GanymediatorWizard {
    * Keeps track of the state of the wizard.  Each time respond() is called,
    * state is checked to see what results from the user are expected and
    * what the appropriate dialogs or actions to perform in turn are.<br>
-   * 
+   *
    * state is also used by the userCustom object to make sure that
    * we have finished our interactions with the user when we tell the
    * user object to go ahead and remove the group.  <br>
-   * 
+   *
    * <pre>
    * Values:
    *         1 - Wizard has been initialized, initial explanatory dialog
@@ -206,8 +208,8 @@ public class userCategoryWizard extends GanymediatorWizard {
    *
    */
 
-  public userCategoryWizard(GanymedeSession session, 
-			    userCustom userObject, 
+  public userCategoryWizard(GanymedeSession session,
+			    userCustom userObject,
 			    Invid oldInvid,
 			    Invid newInvid) throws RemoteException
   {
@@ -369,7 +371,7 @@ public class userCategoryWizard extends GanymediatorWizard {
 
 	return null;
       }
-    
+
     if (oldCatInvid == null)
       {
 	tempBuffer.append("In order to put user ");

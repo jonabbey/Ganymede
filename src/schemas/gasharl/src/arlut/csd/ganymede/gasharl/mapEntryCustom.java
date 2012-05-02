@@ -3,17 +3,19 @@
    mapEntryCustom.java
 
    This file is a management class for Automounter map entry objects in Ganymede.
-   
+
    Created: 9 December 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -209,7 +211,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
    *
    * This method will provide a reasonable default for targetted
    * invid fields.
-   * 
+   *
    */
 
   public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
@@ -263,7 +265,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
 	    result.addRow(baseList.getObjectHandle(i));
 	  }
       }
-    
+
     return result;
   }
 
@@ -292,7 +294,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
 	return Ganymede.createErrorDialog("Error, auto.home.default is required",
 					  "Sorry, it is mandatory to have a directory entry on the auto.home.default map.");
       }
-  
+
     // ok, we want to go ahead and approve the operation, but we want
     // to cause the client to rescan the MAP field in all of our
     // siblings so that their choice list gets updated to not show
@@ -376,7 +378,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
    * an exception will be thrown.<br><br>
    *
    * To be overridden in DBEditObject subclasses.
-   * 
+   *
    * <b>*PSEUDOSTATIC*</b>
    *
    */
@@ -400,7 +402,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
     DBObject user = getDBSession().viewDBObject(userInvid);
 
     result = (Vector) user.getFieldValuesLocal(userSchema.VOLUMES).clone();
-    
+
     // we are not our own sibling.
 
     result.removeElement(getInvid());

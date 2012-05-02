@@ -4,17 +4,19 @@
 
    A wizard to handle the wizard interactions required when a user attempts
    to delete the group that they have selected for their default group.
-   
+
    Created: 29 January 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -81,12 +83,12 @@ import arlut.csd.ganymede.server.InvidDBField;
  * <br>See userSchema.java for a list of field definitions used by this wizard.<br>
  *
  * @see arlut.csd.ganymede.common.ReturnVal
- * @see arlut.csd.ganymede.rmi.Ganymediator 
+ * @see arlut.csd.ganymede.rmi.Ganymediator
  * @see arlut.csd.ganymede.gasharl.userSchema
  */
 
 public class userHomeGroupDelWizard extends GanymediatorWizard implements userSchema {
-  
+
   /**
    * The user-level session context that this wizard is acting in.  This
    * object is used to handle necessary checkpoint/rollback activity by
@@ -99,11 +101,11 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
    * Keeps track of the state of the wizard.  Each time respond() is called,
    * state is checked to see what results from the user are expected and
    * what the appropriate dialogs or actions to perform in turn are.<br>
-   * 
+   *
    * state is also used by the userCustom object to make sure that
    * we have finished our interactions with the user when we tell the
    * user object to go ahead and remove the group.  <br>
-   * 
+   *
    * <pre>
    * Values:
    *         1 - Wizard has been initialized, initial explanatory dialog
@@ -149,8 +151,8 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
    *
    */
 
-  public userHomeGroupDelWizard(GanymedeSession session, 
-				userCustom userObject, 
+  public userHomeGroupDelWizard(GanymedeSession session,
+				userCustom userObject,
 				Object param) throws RemoteException
   {
     super(session);		// register ourselves
@@ -198,9 +200,9 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
     /* -- */
 
     System.err.println("userHomeGroupDelWizard: creating home group deletion wizard");
-    
+
     userObject.updateGroupChoiceList();
-    
+
     if (userObject.groupChoices.size() == 1)
       {
 	buffer.append("Can't delete lone group for user ");
@@ -241,7 +243,7 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
 			"OK",
 			"Cancel",
 			"question.gif");
-    
+
     // get the list of choices, synthesize a list that contains every choice but
     // the one being deleted
 
@@ -254,9 +256,9 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
     Invid val = (Invid) userObject.getFieldValuesLocal(GROUPLIST).elementAt(index);
 
     // Make a list of all choices except the one being deleted
-    
+
     Vector choices = new Vector();
-    
+
     for (int i = 0; i < groupChoice.size(); i++)
       {
 	if (!groupChoice.getInvid(i).equals(val))
@@ -264,8 +266,8 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
 	    choices.addElement(groupChoice.getLabel(i));
 	  }
       }
-    
-    retVal.getDialog().addChoice("New Home Group", 
+
+    retVal.getDialog().addChoice("New Home Group",
 				 choices,
 				 (String) choices.elementAt(0));
 

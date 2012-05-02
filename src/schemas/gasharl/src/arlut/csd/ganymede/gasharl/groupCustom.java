@@ -3,17 +3,19 @@
    groupCustom.java
 
    This file is a management class for group objects in Ganymede.
-   
+
    Created: 30 July 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -86,7 +88,7 @@ import arlut.csd.ganymede.server.StringDBField;
 ------------------------------------------------------------------------------*/
 
 public class groupCustom extends DBEditObject implements SchemaConstants, groupSchema {
-  
+
   static final boolean debug = false;
   static final boolean debug2 = false;
 
@@ -136,7 +138,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
    * is called.</p>
    *
    * <p>This method is responsible for filling in any default
-   * values that can be calculated from the 
+   * values that can be calculated from the
    * {@link arlut.csd.ganymede.server.DBSession DBSession}
    * associated with the editset defined in this DBEditObject.</p>
    *
@@ -156,7 +158,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
    * so it is the responsibility of this method to handle any checkpointing
    * needed.</p>
    *
-   * <p>This method should be overridden in subclasses.</p> 
+   * <p>This method should be overridden in subclasses.</p>
    */
 
   public ReturnVal initializeNewObject()
@@ -284,7 +286,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
   /**
    *
    * Called when object is inactivated.  This will take care of users
-   * who have this group as the home group.  
+   * who have this group as the home group.
    *
    * Overides inactivate() in DBEditObject.
    */
@@ -313,25 +315,25 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 	    DateDBField date;
 	    Calendar cal = Calendar.getInstance();
 	    Date time;
-	    
+
 	    // make sure that the expiration date is cleared.. we're on
 	    // the removal track now.
-	    
+
 	    date = (DateDBField) getField(SchemaConstants.ExpirationField);
 	    retVal = date.setValueLocal(null);
-	    
+
 	    if (retVal != null && !retVal.didSucceed())
 	      {
 		super.finalizeInactivate(false, ckp_label);
 		return retVal;
 	      }
-	    
+
 	    // determine what will be the date 3 months from now
-	    
+
 	    time = new Date();
 	    cal.setTime(time);
 	    cal.add(Calendar.MONTH, 3);
-	    
+
 	    // and set the removal date
 	    if (debug)
 	      {
@@ -369,15 +371,15 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 		  {
 		    System.err.println("groupCustom.inactivate: Starting new groupInactivateWizard");
 		  }
-		
+
 		wiz = new groupInactivateWizard(this.gSession, this, ckp_label);
-		
+
 		return wiz.respond(null);
 	      }
 	    catch (RemoteException rx)
 	      {
 		throw new RuntimeException("Could not create groupInactivateWizard: " + rx);
-	      }	    
+	      }
 	  }
 	else
 	  {
@@ -404,7 +406,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
    * is required to be defined at commit time for a given object.<br><br>
    *
    * To be overridden in DBEditObject subclasses.
-   * 
+   *
    */
 
   public boolean fieldRequired(DBObject object, short fieldid)
@@ -469,7 +471,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
 	return Ganymede.createErrorDialog("Group Consistency Violation",
 					  "Error, the following users have group " + object.getLabel() + " listed as their home " +
-					  "group, but are not listed as normal members of the group:\n\n" + 
+					  "group, but are not listed as normal members of the group:\n\n" +
 					  VectorUtils.vectorString(names));
       }
 
@@ -490,7 +492,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
    * Ganymede server, the process invokation should be placed here,
    * rather than in commitPhase1().<br><br>
    *
-   * Subclasses that override this method may wish to make this method 
+   * Subclasses that override this method may wish to make this method
    * synchronized.
    *
    * @see arlut.csd.ganymede.server.DBEditSet
@@ -511,7 +513,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 	handleGroupDelete(original.getLabel());
 
 	break;
-	
+
       case EDITING:
 
 	String name = getLabel();
@@ -543,15 +545,15 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
 	if (debug)
 	  {
-	    System.out.println("Field name: " + field.getName() + 
+	    System.out.println("Field name: " + field.getName() +
 			       " Field typeDesc: " + field.getTypeDesc());
 	  }
 
 	if (field.getID() == HOMEUSERS) // from groupSchema
-	  {    
+	  {
 	    // What are they doing to the home users?
 
-	    switch (operation) 
+	    switch (operation)
 	      {
 	      case ADDELEMENT:
 	      case ADDELEMENTS:
@@ -584,7 +586,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 		  {
 		    print("HOMEUSERS field changing.");
 		  }
-	
+
 		Vector users = getFieldValuesLocal(HOMEUSERS);
 		int index = ((Integer) param1).intValue();
 		Invid userInvid = (Invid)users.elementAt(index);
@@ -611,7 +613,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 		      {
 			throw new RuntimeException("How come I can't talk to the server, when I AM the server? " + rx);
 		      }
-	      
+
 		    if (size == 2)
 		      {
 			// They belong to two groups: this one, and one other one.
@@ -620,8 +622,8 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 			try
 			  {
 			    db_field groupListField = user.getField(userSchema.GROUPLIST);
-			    Vector groupList = groupListField.getValues();    
-			
+			    Vector groupList = groupListField.getValues();
+
 			    for (int i = 0; i < groupList.size() ;i++)
 			      {
 				if (!this.equals(groupList.elementAt(i)))
@@ -632,10 +634,10 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 				      {
 					print("Found the other group, changing the user's home group.");
 				      }
-			      
+
 				    db_field homeGroup = user.getField(userSchema.HOMEGROUP);
 				    retVal = homeGroup.setValue(groupList.elementAt(i));
-				
+
 				    break;
 				  }
 			      }
@@ -652,14 +654,14 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 							  "This user has this group for a home group. " +
 							  " You cannot remove this user, since this is his only group.");
 		      }
-		    else 
+		    else
 		      {
 			return Ganymede.createErrorDialog("Group Change Failed",
 							  "This user has many groups to choose from. " +
 							  " You must choose one to be the home group, or turn wizards on.");
 		      }
 		  }
-  
+
 		// This calls for a wizard.  See if one is running already
 
 		if (gSession.isWizardActive() && gSession.getWizard() instanceof groupHomeGroupWizard)
@@ -672,7 +674,7 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 		    // We are already in this wizard, lets see where we are
 
 		    homeWizard = (groupHomeGroupWizard)gSession.getWizard();
-	      
+
 		    if (homeWizard.getState() == homeWizard.DONE)
 		      {
 			// Ok, the home wizard has done its deed, so get
@@ -697,12 +699,12 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 			  {
 			    print("bad object, group objects confused somehow.");
 			  }
-		    
+
 			if (homeWizard.getState() != homeWizard.DONE)
 			  {
 			    print(" bad state: " + homeWizard.getState());
 			  }
-		  
+
 			homeWizard.unregister(); // get rid of it, so it doesn't mess other stuff up
 			return Ganymede.createErrorDialog("Group object error",
 							  "The client is attempting to do an operation " +
@@ -716,19 +718,19 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 						      "The client is trying to change the group object " +
 						      "while other wizards are running around.");
 		  }
-	  
+
 		// Ok, if we get to here, then we need to start up a new wizard.
 		// The user is trying to remove someone out of the HOMEUSER field, which may cause problems.
-	    
+
 		try
 		  {
 		    if (debug)
 		      {
 			print("Starting up a new wizard");
 		      }
-		
+
 		    homeWizard = new groupHomeGroupWizard(this.gSession, this, userInvid);
-		
+
 		    return homeWizard.respond(null);
 		  }
 		catch (RemoteException rx)
@@ -832,9 +834,9 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
       {
 	// make sure we've got the path separator at the end of
 	// deleteFilename, add our script name
-	
+
 	deleteFilename = PathComplete.completePath(deleteFilename) + "/scripts/group_deleter";
-	
+
 	deleteHandler = new File(deleteFilename);
       }
     else
@@ -870,20 +872,20 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
 		if (result != 0)
 		  {
-		    Ganymede.debug("Couldn't handle externals for deleting group " + name + 
-				   "\n" + deleteFilename + 
+		    Ganymede.debug("Couldn't handle externals for deleting group " + name +
+				   "\n" + deleteFilename +
 				   " returned a non-zero result: " + result);
 		  }
 	      }
 	    catch (InterruptedException ex)
 	      {
-		Ganymede.debug("Couldn't handle externals for deleting group " + name + 
+		Ganymede.debug("Couldn't handle externals for deleting group " + name +
 			       ex.getMessage());
 	      }
 	  }
 	catch (IOException ex)
 	  {
-	    Ganymede.debug("Couldn't handle externals for deleting group " + name + 
+	    Ganymede.debug("Couldn't handle externals for deleting group " + name +
 			   ex.getMessage());
 	  }
       }
@@ -920,9 +922,9 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
       {
 	// make sure we've got the path separator at the end of
 	// renameFilename, add our script name
-	    
+
 	renameFilename = PathComplete.completePath(renameFilename) + "/scripts/group_namer";
-	    
+
 	renameHandler = new File(renameFilename);
       }
     else
@@ -958,24 +960,24 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
 		if (result != 0)
 		  {
-		    Ganymede.debug("Couldn't handle externals for renaming group " + orig + 
-				   " to " + newname + "\n" + renameFilename + 
+		    Ganymede.debug("Couldn't handle externals for renaming group " + orig +
+				   " to " + newname + "\n" + renameFilename +
 				   " returned a non-zero result: " + result);
 		  }
 	      }
 	    catch (InterruptedException ex)
 	      {
-		Ganymede.debug("Couldn't handle externals for renaming group " + orig + 
-			       " to " + 
-			       newname + "\n" + 
+		Ganymede.debug("Couldn't handle externals for renaming group " + orig +
+			       " to " +
+			       newname + "\n" +
 			       ex.getMessage());
 	      }
 	  }
 	catch (IOException ex)
 	  {
-	    Ganymede.debug("Couldn't handle externals for renaming group " + orig + 
-			   " to " + 
-			   newname + "\n" + 
+	    Ganymede.debug("Couldn't handle externals for renaming group " + orig +
+			   " to " +
+			   newname + "\n" +
 			   ex.getMessage());
 	  }
       }
