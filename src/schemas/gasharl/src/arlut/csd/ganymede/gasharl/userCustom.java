@@ -783,7 +783,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * <b>*PSEUDOSTATIC*</b>
    */
 
-  public boolean canSeeField(DBSession session, DBField field)
+  public boolean canSeeField(DBSession dbSession, DBField field)
   {
     short fieldid = field.getID();
 
@@ -807,7 +807,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
       }
 
-    return super.canSeeField(session, field);
+    return super.canSeeField(dbSession, field);
   }
 
   /**
@@ -849,7 +849,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean canCloneField(DBSession session, DBObject object, DBField field)
+  public boolean canCloneField(DBSession dbSession, DBObject object, DBField field)
   {
     short fieldid = field.getID();
 
@@ -875,7 +875,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     // by default, all custom fields are cloneable, so this call will
     // return true for all but the built-in fields.
 
-    return super.canCloneField(session, object, field);
+    return super.canCloneField(dbSession, object, field);
   }
 
   /**
@@ -908,7 +908,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * do.  If you need to make changes, try to chain your subclassed
    * method to this one via super.cloneFromObject().
    *
-   * @param session The DBSession that the new object is to be created in
+   * @param dbSession The DBSession that the new object is to be created in
    * @param origObj The object we are cloning
    * @param local If true, fields that have choice lists will not be checked against
    * those choice lists and read permissions for each field will not be consulted.
@@ -918,7 +918,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * else may carry a dialog with information on problems and a success flag.
    */
 
-  public ReturnVal cloneFromObject(DBSession session, DBObject origObj, boolean local)
+  public ReturnVal cloneFromObject(DBSession dbSession, DBObject origObj, boolean local)
   {
     try
       {
@@ -933,7 +933,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         // clone all of the fields that we don't inhibit in canCloneField().
 
-	ReturnVal retVal = super.cloneFromObject(session, origObj, local);
+	ReturnVal retVal = super.cloneFromObject(dbSession, origObj, local);
 
 	if (retVal != null && retVal.getDialog() != null)
 	  {
@@ -950,7 +950,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 	Invid category = (Invid) origObj.getFieldValueLocal(userSchema.CATEGORY);
 
-	if (session.getGSession().viewObjectLabel(category).equals("normal"))
+	if (dbSession.getObjectLabel(category).equals("normal"))
 	  {
 	    try
 	      {
@@ -997,15 +997,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 		System.err.println("User clone sub " + i);
 	      }
 
-	    workingVolume = (DBEditObject) session.editDBObject((Invid) newOnes.elementAt(i));
-	    origVolume = session.viewDBObject((Invid) oldOnes.elementAt(i));
+	    workingVolume = (DBEditObject) dbSession.editDBObject((Invid) newOnes.elementAt(i));
+	    origVolume = dbSession.viewDBObject((Invid) oldOnes.elementAt(i));
 
 	    if (debug)
 	      {
 		System.err.println("Attempting to clone user volume " + origVolume.getLabel());
 	      }
 
-	    tmpVal = workingVolume.cloneFromObject(session, origVolume, local);
+	    tmpVal = workingVolume.cloneFromObject(dbSession, origVolume, local);
 
 	    if (tmpVal != null && tmpVal.getDialog() != null)
 	      {
@@ -1063,15 +1063,15 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
 		newInvid = tmpVal.getInvid();
 
-		workingVolume = (DBEditObject) session.editDBObject(newInvid);
-		origVolume = session.viewDBObject((Invid) oldOnes.elementAt(i));
+		workingVolume = (DBEditObject) dbSession.editDBObject(newInvid);
+		origVolume = dbSession.viewDBObject((Invid) oldOnes.elementAt(i));
 
 		if (debug)
 		  {
 		    System.err.println("Attempting to clone user volume " + origVolume.getLabel());
 		  }
 
-		tmpVal = workingVolume.cloneFromObject(session, origVolume, local);
+		tmpVal = workingVolume.cloneFromObject(dbSession, origVolume, local);
 
 		if (tmpVal != null && tmpVal.getDialog() != null)
 		  {
@@ -1579,7 +1579,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    *
    */
 
-  public boolean canInactivate(DBSession session, DBEditObject object)
+  public boolean canInactivate(DBSession dbSession, DBEditObject object)
   {
     return true;
   }
@@ -2402,7 +2402,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   {
     InvidDBField inv;
     Vector personaeInvids;
-    DBSession session = editset.getSession();
     String oldName;
     StringDBField sf;
 
