@@ -2327,7 +2327,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	myQuery.setFiltered(false); // be sure not to filter the query
 
-	return getSession().getGSession().query(myQuery, this);
+	return getDBSession().getGSession().query(myQuery, this);
       }
 
     //    Ganymede.debug("DBEditObject: Returning null for choiceList for field: " + field.getName());
@@ -3064,7 +3064,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	System.err.println("Entering attemptAsymBackLinkClear() for object " + toString());
       }
 
-    Set<Invid> linkSources = Ganymede.db.aSymLinkTracker.getForwardLinkSources(getSession(), getInvid());
+    Set<Invid> linkSources = Ganymede.db.aSymLinkTracker.getForwardLinkSources(getDBSession(), getInvid());
 
     for (Invid remote: linkSources)
       {
@@ -3112,7 +3112,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
       oldRefField = null;
 
     DBSession
-      session = getSession();
+      session = getDBSession();
 
     ReturnVal
       retVal = ReturnVal.success();

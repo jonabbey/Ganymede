@@ -747,11 +747,30 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Returns the DBSession that this object is checked out in care of,
-   * or null if it is checked out from the persistent store.
+   * <p>Returns the DBSession that this object is checked out in care
+   * of, or null if it is checked out from the persistent store.</p>
+   *
+   * <p>Semi-deprecated.  Use getDBSession() instead for clarity.</p>
    */
 
   public final DBSession getSession()
+  {
+    try
+      {
+	return gSession.getDBSession();
+      }
+    catch (NullPointerException ex)
+      {
+	return null;
+      }
+  }
+
+  /**
+   * <p>Returns the DBSession that this object is checked out in care
+   * of, or null if it is checked out from the persistent store.</p>
+   */
+
+  public final DBSession getDBSession()
   {
     try
       {
@@ -2910,7 +2929,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public Vector getBackLinks()
   {
-    return new Vector(Ganymede.db.aSymLinkTracker.getForwardLinkSources(getSession(), getInvid()));
+    return new Vector(Ganymede.db.aSymLinkTracker.getForwardLinkSources(getDBSession(), getInvid()));
   }
 
   /**
