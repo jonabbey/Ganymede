@@ -129,7 +129,7 @@ import arlut.csd.ganymede.rmi.db_object;
  * on the server's {@link arlut.csd.ganymede.rmi.Session Session} remote interface.</p>
  *
  * <p>The DBStore contains a single read-only DBObject in its database for each Invid.
- * In order to change a DBObject, that DBObject must have its 
+ * In order to change a DBObject, that DBObject must have its
  * {@link arlut.csd.ganymede.server.DBObject#createShadow(arlut.csd.ganymede.server.DBEditSet) createShadow}
  * method called.  This is a synchronized method which attaches a new DBEditObject
  * to the DBObject.  Only one DBEditObject can be created from a single DBObject at
@@ -148,7 +148,7 @@ import arlut.csd.ganymede.rmi.db_object;
  * of DBObject, and contain all DBObjects of that type in turn.  The DBObjectBase
  * is responsible for making sure that each DBObject has its own unique Invid based
  * on the DBObjectBase's type id and a unique number for the individual DBObject.</p>
- * 
+ *
  * <p>In terms of type definition, the DBObjectBase object acts as a template for
  * objects of the type.  Each DBObjectBase contains a set of
  * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField} objects which
@@ -158,7 +158,7 @@ import arlut.csd.ganymede.rmi.db_object;
  * <p>In addition, each DBObjectBase can be linked to a custom DBEditObject subclass
  * that oversees all kinds of operations on DBObjects of this kind.  Custom
  * DBEditObject subclasses can define special logic for object creation, viewing,
- * and editing, including custom object linking logic, acceptable value constraints, 
+ * and editing, including custom object linking logic, acceptable value constraints,
  * and even step-by-step wizard dialog sequences to oversee certain kinds of
  * operations.</p>
  *
@@ -167,7 +167,7 @@ import arlut.csd.ganymede.rmi.db_object;
  * that this DBObject belongs to, a number of {@link arlut.csd.ganymede.server.StringDBField StringDBField}s
  * that contain information about the last admin to modify this DBObject,
  * {@link arlut.csd.ganymede.server.DateDBField DateDBField}s recording the creation and
- * last modification dates of this object, and so on.  See 
+ * last modification dates of this object, and so on.  See
  * {@link arlut.csd.ganymede.common.SchemaConstants SchemaConstants} for details on the
  * built-in field types.</p>
  *
@@ -245,7 +245,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * and we are available for someone to edit.
    */
 
-  DBEditObject shadowObject;	
+  DBEditObject shadowObject;
 
   /**
    * If this object is being viewed by a particular
@@ -261,14 +261,14 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   protected DBPermissionManager permManager;
 
-  /** 
+  /**
    * A fixed copy of our Invid, so that we don't have to create
    * new ones all the time when people call getInvid() on us.
    */
 
   Invid myInvid = null;
 
-  /** 
+  /**
    * used by the DBObjectTable logic
    */
 
@@ -364,7 +364,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.server.DBEditSet#commit(java.lang.String)
    * @see arlut.csd.ganymede.server.DBEditSet#release()
    */
-  
+
   DBObject(DBEditObject eObj)
   {
     DBField field;
@@ -389,7 +389,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	for (short i = 0; i < eObj.fieldAry.length; i++)
 	  {
 	    field = eObj.fieldAry[i];
-	    
+
 	    if (field != null && field.isDefined())
 	      {
 		count++;
@@ -398,15 +398,15 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 	// put any defined fields into the object we're going
 	// to commit back into our DBStore
-	
+
 	fieldAry = new DBField[count];
 
 	int j = 0;
-	
+
 	for (short i = 0; i < eObj.fieldAry.length; i++)
 	  {
 	    field = eObj.fieldAry[i];
-	    
+
 	    if (field != null && field.isDefined())
 	      {
 		// clean up any cached data the field was holding during
@@ -429,7 +429,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 		    ex.printStackTrace();
 		  }
-		
+
 		// Create a new copy and save it in the new DBObject.  We
 		// *must not* directly save the field from the DBEditObject,
 		// because that field has likely been RMI exported to a
@@ -440,7 +440,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		// letting the old field from the DBEditObject get locally
 		// garbage collected, we make it possible for all the RMI
 		// stuff to get garbage collected as well.
-		
+
 		// Making a copy here rather than saving a ref to the
 		// exported field makes a *huge* difference in overall
 		// memory usage on the Ganymede server.
@@ -526,7 +526,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	    // it happens.. the client will know about it
 	    // if we try to pass a non-exported object
 	    // back to it, anyway.
-	
+
 	    Ganymede.rmi.publishObject(field);
 	  }
       }
@@ -675,7 +675,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	// "Can''t find permissions for non-existent field "{0}""
 	throw new IllegalArgumentException(ts.l("getFieldPerm.nofield", fieldName));
       }
-    
+
     return this.getFieldPerm(f.getID());
   }
 
@@ -933,7 +933,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	if (count == 0)
 	  {
 	    // "**** Error: writing object with no fields: {0}"
-	    Ganymede.debug(ts.l("emit.nofields", 
+	    Ganymede.debug(ts.l("emit.nofields",
 				objectBase.getName() + " <" + getID() + ">"));
 	  }
 
@@ -968,17 +968,17 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   synchronized void receive(DataInput in, boolean journalProcessing) throws IOException
   {
-    DBField 
+    DBField
       tmp = null;
 
-    DBObjectBaseField 
+    DBObjectBaseField
       definition;
 
-    short 
+    short
       fieldcode,
       type;
 
-    int 
+    int
       tmp_count,
       upgradeSkipCount = 0;
 
@@ -1080,7 +1080,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	    if (tmp.isVector())
 	      {
 		// mark the elements in the vector in the namespace
-		// note that we don't use the namespace mark method here, 
+		// note that we don't use the namespace mark method here,
 		// because we are just setting up the namespace, not
 		// manipulating it in the context of an editset
 
@@ -1099,7 +1099,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 			  {
 			    ex.printStackTrace();
 			  }
-		      } 
+		      }
 
 		    definition.getNameSpace().receiveValue(tmp.key(j), tmp);
 		  }
@@ -1107,7 +1107,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	    else
 	      {
 		// mark the scalar value in the namespace
-		
+
 		if (definition.getNameSpace().containsKey(tmp.key()))
 		  {
 		    // "Non-unique value {0} detected in scalar field {1} which is constrained by namespace {2}"
@@ -1126,7 +1126,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		definition.getNameSpace().receiveValue(tmp.key(), tmp);
 	      }
 	  }
-	
+
 	// now add the field to our fields table
 
 	if (Ganymede.db.isAtLeast(2, 15))
@@ -1214,7 +1214,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>note: this is only used for editing pre-existing objects..
    * the code for creating new objects is in DBSession..  this method
    * might be better incorporated into DBSession as well.</p>
-   * 
+   *
    * @param editset The transaction to own this shadow.
    */
 
@@ -1320,7 +1320,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
 	  {
 	    field = retrieveField(fieldDef.getID());
-	    
+
 	    if (field != null)
 	      {
 		try
@@ -1789,7 +1789,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     return objectBase.canInactivate();
   }
-  
+
   /**
    * <p>Returns true if this object has been inactivated and is
    * pending deletion.</p>
@@ -1799,7 +1799,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public boolean isInactivated()
   {
-    return (objectBase.canInactivate() && 
+    return (objectBase.canInactivate() &&
 	    (getFieldValueLocal(SchemaConstants.RemovalField) != null));
   }
 
@@ -1835,7 +1835,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       {
 	// loop over the fields in display order (rather than the hash
 	// order in the fieldAry)
-	
+
 	Vector fieldTemplates = objectBase.getFieldTemplateVector();
 
 	for (int i = 0; i < fieldTemplates.size(); i++)
@@ -1925,7 +1925,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	// time when this method is called.  A reasonable assumption,
 	// as the objectbase field table is only altered when the
 	// schema is being edited.
-	
+
 	for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
 	  {
 	    try
@@ -1938,7 +1938,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		if (objectBase.getObjectHook().fieldRequired(this, fieldDef.getID()))
 		  {
 		    DBField field = retrieveField(fieldDef.getID());
-		    
+
 		    if (field == null || !field.isDefined())
 		      {
 			localFields.addElement(fieldDef.getName());
@@ -1975,7 +1975,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   public Date getRemovalDate()
   {
     DateDBField dbf = (DateDBField) getField(SchemaConstants.RemovalField);
-    
+
     if (dbf == null)
       {
 	return null;
@@ -2016,7 +2016,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   public Date getExpirationDate()
   {
     DateDBField dbf = (DateDBField) getField(SchemaConstants.ExpirationField);
-    
+
     if (dbf == null)
       {
 	return null;
@@ -2197,7 +2197,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * read-only and will grant all accesses, as it will have no notion of
    * what session or transaction owns it.  If you need to have access to the
    * object's fields be protected, use {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
-   * {@link arlut.csd.ganymede.server.GanymedeSession#view_db_object(arlut.csd.ganymede.common.Invid) 
+   * {@link arlut.csd.ganymede.server.GanymedeSession#view_db_object(arlut.csd.ganymede.common.Invid)
    * view_db_object()} method to get the object.</P>
    *
    * <P>This method will return null if the Invid provided does not
@@ -2223,7 +2223,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * read-only and will grant all accesses, as it will have no notion of
    * what session or transaction owns it.  If you need to have access to the
    * object's fields be protected, use {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
-   * {@link arlut.csd.ganymede.server.GanymedeSession#view_db_object(arlut.csd.ganymede.common.Invid) 
+   * {@link arlut.csd.ganymede.server.GanymedeSession#view_db_object(arlut.csd.ganymede.common.Invid)
    * view_db_object()} method to get the object.</P>
    *
    * <P>This method will return null if the Invid provided does not
@@ -2254,7 +2254,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * read-only and will grant all accesses, as it will have no notion of
    * what session or transaction owns it.  If you need to have access to the
    * object's fields be protected, use {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
-   * {@link arlut.csd.ganymede.server.GanymedeSession#view_db_object(arlut.csd.ganymede.common.Invid) 
+   * {@link arlut.csd.ganymede.server.GanymedeSession#view_db_object(arlut.csd.ganymede.common.Invid)
    * view_db_object()} method to get the object.</P>
    *
    * <P>This method will return null if the Invid provided does not
@@ -2597,10 +2597,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	  {
 	    // return the custom fields only, in display order
 
-	    for (DBObjectBaseField fieldDef: objectBase.getCustomFields())	    
+	    for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
 	      {
 		field = retrieveField(fieldDef.getID());
-		
+
 		if (field != null)
 		  {
 		    results.addElement(field);
@@ -2611,22 +2611,22 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	  {
 	    // first the display fields, in display order
 
-	    for (DBObjectBaseField fieldDef: objectBase.getCustomFields())	    
+	    for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
 	      {
 		field = retrieveField(fieldDef.getID());
-		
+
 		if (field != null)
 		  {
 		    results.addElement(field);
 		  }
 	      }
-	    
+
 	    // then tack on the built-in fields
-	    
+
 	    for (int i = 0; i < fieldAry.length; i++)
 	      {
 		field = fieldAry[i];
-		
+
 		if (field != null && field.isBuiltIn())
 		  {
 		    results.addElement(field);
@@ -2634,7 +2634,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	      }
 	  }
       }
-    
+
     return results;
   }
 
@@ -2746,7 +2746,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * subclasses for how this is to be used, if you have
    * them.</p>
    */
-  
+
   public String lookupLabel(DBObject object)
   {
     return object.getLabel();	// default
@@ -2812,12 +2812,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 	    for (int i = 0; i < oldAry.length; i++)
 	      {
 		field = oldAry[i];
-		
+
 		if (field == null)
 		  {
 		    continue;
 		  }
-		
+
 		if (newBase.getField(field.getID()) != null && field.isDefined())
 		  {
 		    saveField(field); // safe since we start with an empty fieldAry
@@ -2834,7 +2834,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * object is not embedded, or the containing object's
    * label cannot be determined, null will be returned.</p>
    */
-  
+
   public String getContainingLabel()
   {
     if (!isEmbedded())
@@ -2852,11 +2852,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     return field.getValueString();
   }
 
-  /** 
+  /**
    * <p>This method returns a Vector of Invids for objects that are
    * pointed to from this object by way of non-symmetric links.  These
    * are Invids that may need to be marked as non-deletable if this
-   * object is checked out by a DBEditSet.</p> 
+   * object is checked out by a DBEditSet.</p>
    */
 
   public Set<Invid> getASymmetricTargets()
@@ -2976,7 +2976,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>This server-side method returns a summary description of
    * this object, including a listing of all non-null fields and
    * their contents.</p>
-   * 
+   *
    * <p>This method calls
    * {@link arlut.csd.ganymede.server.DBObject#appendObjectInfo(java.lang.StringBuffer,
    * java.lang.String, boolean) appendObjectInfo} to do most of its work.</p>
@@ -2999,7 +2999,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * to view.  This method returns a StringBuffer to work around
    * problems with serializing large strings in early versions of the
    * JDK.</p>
-   * 
+   *
    * <p>This method calls
    * {@link arlut.csd.ganymede.server.DBObject#appendObjectInfo(java.lang.StringBuffer,
    * java.lang.String, boolean) appendObjectInfo} to do most of its work.</p>
@@ -3074,7 +3074,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		    buffer.append(j);
 		    buffer.append("]");
 		    buffer.append("\n");
-			
+
 		    Invid x = invField.value(j);
 
 		    DBObject remObj = null;
@@ -3085,7 +3085,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 			// viewing by a session, we'll use
 			// view_db_object() so that we don't
 			// reveal fields that should not be seen.
-			   
+
 			try
 			  {
 			    ReturnVal retVal = gSession.view_db_object(x);
@@ -3109,7 +3109,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		    if (remObj instanceof DBEditObject)
 		      {
 			DBEditObject eO = (DBEditObject) remObj;
-			    
+
 			if (eO.getStatus() == ObjectStatus.DELETING)
 			  {
 			    remObj = eO.getOriginal();
@@ -3138,11 +3138,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       {
 	// okay, got all the custom fields.. now we need to summarize all the
 	// built-in fields that were not listed in customFields.
-	
+
 	for (int i = 0; i < fieldAry.length; i++)
 	  {
 	    DBField field = fieldAry[i];
-	    
+
 	    if (field == null || !field.isBuiltIn() || !field.isDefined())
 	      {
 		continue;
@@ -3154,7 +3154,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 		  {
 		    buffer.append(prefix);
 		  }
-		
+
 		buffer.append(field.getName());
 		buffer.append(" : ");
 		buffer.append(field.getValueString());
@@ -3167,7 +3167,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   /**************************************************************************
    *
    * The following methods are for Jython/Map support
-   *    
+   *
    * For this object, the Map interface allows for indexing based on either
    * the name or the numeric ID of a DBField. Indexing by numeric id, however,
    * is only supported for "direct" access to the Map; the numeric id numbers
@@ -3181,7 +3181,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   /**
    * Part of the JythonMap interface.
    */
-  
+
   public boolean has_key(Object key)
   {
     return (retrieveField((String) key) != null);
@@ -3196,7 +3196,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     List list = new ArrayList();
     DBField field;
     Object[] tuple;
-    
+
     for (Iterator iter = getFieldVect().iterator(); iter.hasNext();)
       {
         field = (DBField) iter.next();
@@ -3205,8 +3205,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         tuple[1] = field;
         list.add(tuple);
       }
-    
-    return list;    
+
+    return list;
   }
 
   /**
@@ -3228,7 +3228,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   /**
    * Part of the JythonMap interface.
    */
-  
+
   public boolean containsKey(Object key)
   {
     return has_key(key);
@@ -3337,13 +3337,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   static class Entry implements Map.Entry
   {
     Object key, value;
-    
+
     public Entry( DBField obj )
     {
       key = obj.getName();
       value = obj;
     }
-    
+
     public Object getKey()
     {
       return key;
@@ -3358,9 +3358,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     {
       return null;
     }
-  }   
-  
-  /* 
+  }
+
+  /*
    * These methods are are no-ops since we don't want this object
    * messed with via the Map interface.
    */
@@ -3368,7 +3368,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   /**
    * Part of the JythonMap interface.
    */
-   
+
   public void clear()
   {
     return;

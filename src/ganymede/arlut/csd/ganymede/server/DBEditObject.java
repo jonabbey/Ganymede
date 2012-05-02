@@ -20,6 +20,7 @@
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -3404,7 +3405,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
         // we were consistent before (or newly created in an
         // inconsistent state), so complain
 
-        return retVal;	
+        return retVal;
       }
     else
       {
