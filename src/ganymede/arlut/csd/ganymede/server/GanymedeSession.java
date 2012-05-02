@@ -639,6 +639,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @return A StringBuffer containing the message, if found, or null if no
    * message exists for the key, or if onlyShowIfNew was set and the message
    * was not new.
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public StringBuffer getMessage(String key, boolean onlyShowIfNew) throws NotLoggedInException
@@ -670,6 +672,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @return A StringBuffer containing the message, if found, or null if no
    * message exists for the key, or if onlyShowIfNew was set and the message
    * was not new.
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public StringBuffer getMessageHTML(String key, boolean onlyShowIfNew) throws NotLoggedInException
@@ -695,6 +699,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * shutdown notification to the client, even if the client is behind a network
    * or personal system firewall.  The serverClientAsyncResponder blocks while there
    * is no message to send, and the client will poll for new messages.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized ClientAsyncResponder getAsyncPort() throws NotLoggedInException, RemoteException
@@ -1003,11 +1009,11 @@ final public class GanymedeSession implements Session, Unreferenced {
    * stored in the modification history for objects modified by this
    * transaction.
    *
-   * @see arlut.csd.ganymede.rmi.Session
-   *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public ReturnVal openTransaction(String describe) throws NotLoggedInException
@@ -1030,11 +1036,11 @@ final public class GanymedeSession implements Session, Unreferenced {
    * stored in the modification history for objects modified by this
    * transaction.
    *
-   * @see arlut.csd.ganymede.rmi.Session
-   *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @see arlut.csd.ganymede.rmi.Session
    */
 
   public synchronized ReturnVal openTransaction(String describe, boolean interactive) throws NotLoggedInException
