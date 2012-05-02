@@ -3511,11 +3511,10 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	    if (all || x instanceof DBEditObject)
 	      {
-		exported.remove(i);
-
-		Ganymede.rmi.unpublishObject((Remote) x, true); // go ahead and force
-
+		Ganymede.rmi.unpublishObject(x, true); // go ahead and force
 		x.unexportFields();
+
+		exported.remove(i);
 	      }
 	  }
       }
