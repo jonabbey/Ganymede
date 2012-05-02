@@ -12,8 +12,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -568,7 +570,7 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
 	    // "Searching for objects whose names begin with {0}."
 	    client.setStatus(ts.l("actionPerformed.searching_prefix_status", string));
 
-	    QueryDataNode node = new QueryDataNode(QueryDataNode.STARTSWITH, string);
+	    QueryDataNode node = new QueryDataNode(QueryDataNode.NOCASEMATCHES, "^" + string);
 	    QueryResult edit_query = client.session.query(new Query(baseID.shortValue(), node, editableOnly));
 
 	    Vector edit_invids = edit_query.getListHandles();
