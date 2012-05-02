@@ -3501,16 +3501,13 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   private void unexportObjects(boolean all)
   {
-    DBObject x;
-
-    /* -- */
-
     synchronized (exported)
       {
 	// count down from the top so we can remove things as we go
+
 	for (int i = exported.size()-1; i >= 0; i--)
 	  {
-	    x = (DBObject) exported.get(i);
+	    DBObject x = exported.get(i);
 
 	    if (all || x instanceof DBEditObject)
 	      {
