@@ -10,11 +10,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2011
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -147,7 +149,7 @@ public class DBDeletionManager {
     // always have no shadowObject, and the following check won't
     // complain, which is appropriate, since we are only interested in
     // blocking out other sessions
-    
+
     if (eObj != null &&
 	(eObj.getStatus() == DBEditObject.DROPPING ||
 	 eObj.getStatus() == DBEditObject.DELETING))
@@ -269,7 +271,7 @@ public class DBDeletionManager {
     for (Invid invid: invidSet)
       {
 	Set<DBSession> sessionSet = invids.get(invid);
-	
+
 	if (sessionSet.size() == 1)
 	  {
 	    invids.remove(invid);
@@ -404,7 +406,7 @@ public class DBDeletionManager {
     for (Invid invid: toRemove)
       {
 	Set<DBSession> sessionSet = invids.get(invid);
-	
+
 	if (sessionSet.size() == 1)
 	  {
 	    invids.remove(invid);
