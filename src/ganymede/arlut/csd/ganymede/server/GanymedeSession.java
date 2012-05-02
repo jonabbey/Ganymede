@@ -457,6 +457,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     loggedInSemaphore.set(true);
 
     this.exportObjects = false;
+    this.sessionName = sessionLabel;
 
     dbSession = new DBSession(Ganymede.db, this, sessionLabel);
     queryEngine = new DBQueryEngine(this, dbSession);
@@ -3000,11 +3001,6 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     synchronized (this)
       {
-	if (!loggedInSemaphore.set(false))
-	  {
-	    return;
-	  }
-
 	// we'll do all of our active cleanup in a try clause, so we
 	// can wipe out references to aid GC in a finally clause
 
