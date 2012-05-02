@@ -2777,12 +2777,17 @@ final public class GanymedeSession implements Session, Unreferenced {
     return this.getXML(true, true, null, includeHistory, includeOid);
   }
 
-  /****************************************************************************
-   *                                                                          *
-   * From here on down, the methods are not remotely accessible to the client,*
-   * but are instead for server-side use only.                                *
-   *                                                                          *
-   ****************************************************************************/
+  //
+  //************************************************************
+  //
+  //
+  //
+  // From here on down, the methods are not remotely accessible to the client,
+  // but are instead for server-side use only.
+  //
+  //
+  //
+  //************************************************************
 
   /**
    * <p>This private method is called by all methods in
