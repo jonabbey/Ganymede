@@ -495,7 +495,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       }
 
     this.gSession = gSession;
-    this.permManager = gSession.getPermManager();
+
+    if (gSession != null)
+      {
+	this.permManager = gSession.getPermManager();
+      }
   }
 
   /**
