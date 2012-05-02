@@ -289,9 +289,21 @@ public class DBEditSet {
   /**
    * <p>Method to return the DBSession handle owning this
    * transaction.</p>
+   *
+   * <p>Semi-deprecated.  Use getDBSession() instead for clarity.</p>
    */
 
   public DBSession getSession()
+  {
+    return session;
+  }
+
+  /**
+   * <p>Method to return the DBSession handle owning this
+   * transaction.</p>
+   */
+
+  public DBSession getDBSession()
   {
     return session;
   }

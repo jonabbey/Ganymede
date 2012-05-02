@@ -274,7 +274,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     original = null;
     this.editset = editset;
-    this.gSession = editset.getSession().getGSession();
+    this.gSession = editset.getDBSession().getGSession();
     commitSemaphore.set(false);
     stored = false;
     status = CREATING;
@@ -335,7 +335,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     /* -- */
 
     this.editset = editset;
-    this.gSession = editset.getSession().getGSession();
+    this.gSession = editset.getDBSession().getGSession();
 
     commitSemaphore.set(false);
     stored = true;
