@@ -158,7 +158,7 @@ public class JythonTask implements Runnable {
   {
     if (taskDefObjInvid != null)
       {
-        DBObject taskDefObj = Ganymede.internalSession.getSession().viewDBObject(taskDefObjInvid);
+        DBObject taskDefObj = Ganymede.internalSession.getDBSession().viewDBObject(taskDefObjInvid);
         
         Vector options = taskDefObj.getFieldValuesLocal(SchemaConstants.TaskOptionStrings);
 

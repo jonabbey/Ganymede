@@ -410,7 +410,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 	// note that the query we are submitting here *will* be filtered by the
 	// current visibilityFilterInvid field in GanymedeSession.
 
-	return editset.getSession().getGSession().query(new Query(baseId, root, true));
+	return editset.getDBSession().getGSession().query(new Query(baseId, root, true));
       }
 
     return null;

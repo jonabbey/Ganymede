@@ -108,7 +108,7 @@ public class DBPermissionManager {
    * The DBSession that lays under gSession.
    */
 
-  private DBSession session = null;
+  private DBSession dbSession = null;
 
   /**
    * A flag indicating whether the client has supergash priviliges.  We
@@ -298,7 +298,7 @@ public class DBPermissionManager {
   public DBPermissionManager(GanymedeSession gSession)
   {
     this.gSession = gSession;
-    this.session = gSession.getSession();
+    this.dbSession = gSession.getDBSession();
   }
 
   public DBPermissionManager configureInternalSession(String sessionLabel)
@@ -406,7 +406,7 @@ public class DBPermissionManager {
 	// is only used for internal purposes, and we don't need or
 	// want to do permissions checking
 
-	return session.viewDBObject(userInvid);
+	return dbSession.viewDBObject(userInvid);
       }
 
     return null;
@@ -578,7 +578,7 @@ public class DBPermissionManager {
 
 	    try
 	      {
-		results.add(session.viewDBObject(invid).getLabel());
+		results.add(dbSession.viewDBObject(invid).getLabel());
 	      }
 	    catch (NullPointerException ex)
 	      {
@@ -655,10 +655,10 @@ public class DBPermissionManager {
 	// might not be working on behalf of the GUI client, let's
 	// make sure
 
-	if (session.editSet != null)
+	if (dbSession.editSet != null)
 	  {
-	    String description = session.editSet.description;
-	    boolean interactive = session.editSet.isInteractive();
+	    String description = dbSession.editSet.description;
+	    boolean interactive = dbSession.editSet.isInteractive();
 
 	    // close the existing transaction
 
@@ -705,7 +705,7 @@ public class DBPermissionManager {
 	// it's okay to use the faster viewDBObject() here, because we
 	// are always going to be doing this for internal purposes
 
-	personaObject = session.viewDBObject(invid);
+	personaObject = dbSession.viewDBObject(invid);
 
 	if (!personaObject.getLabel().equals(newPersona))
 	  {
@@ -737,10 +737,10 @@ public class DBPermissionManager {
 	// might not be working on behalf of the GUI client, let's
 	// make sure
 
-	if (session.editSet != null)
+	if (dbSession.editSet != null)
 	  {
-	    String description = session.editSet.description;
-	    boolean interactive = session.editSet.isInteractive();
+	    String description = dbSession.editSet.description;
+	    boolean interactive = dbSession.editSet.isInteractive();
 
 	    try
 	      {
@@ -826,7 +826,7 @@ public class DBPermissionManager {
 
         if (recursePersonaMatch(inv, alreadySeen))
           {
-            result.addRow(inv, session.viewDBObject(inv).getLabel(), false);
+            result.addRow(inv, dbSession.viewDBObject(inv).getLabel(), false);
           }
       }
 
@@ -1135,7 +1135,7 @@ public class DBPermissionManager {
 
         if (invid != null)
           {
-            DBObject obj = session.viewDBObject(invid);
+            DBObject obj = dbSession.viewDBObject(invid);
 
             if (filterMatch(obj))
               {
@@ -1157,7 +1157,7 @@ public class DBPermissionManager {
 
   DBObject getContainingObj(DBObject object)
   {
-    return session.getContainingObj(object);
+    return dbSession.getContainingObj(object);
   }
 
   /**
@@ -1754,8 +1754,8 @@ public class DBPermissionManager {
 
     if (permTimeStamp == null || !permTimeStamp.before(permBase.getTimeStamp()))
       {
-	defaultObj = session.viewDBObject(SchemaConstants.RoleBase,
-					  SchemaConstants.RoleDefaultObj);
+	defaultObj = dbSession.viewDBObject(SchemaConstants.RoleBase,
+					    SchemaConstants.RoleDefaultObj);
 
 	if (defaultObj == null)
 	  {
@@ -1814,7 +1814,7 @@ public class DBPermissionManager {
 
     if (personaInvid != null)
       {
-	personaObj = session.viewDBObject(personaInvid);
+	personaObj = dbSession.viewDBObject(personaInvid);
 
 	// if this session is editing the personaObj at the moment,
 	// let's make a point of getting the version that isn't
@@ -1994,7 +1994,7 @@ public class DBPermissionManager {
 
 		    for (Invid inv: vals)
 		      {
-			pObj = session.viewDBObject(inv);
+			pObj = dbSession.viewDBObject(inv);
 
 			if (pObj != null)
 			  {
@@ -2174,7 +2174,7 @@ public class DBPermissionManager {
         alreadySeen.add(owner);
       }
 
-    ownerObj = session.viewDBObject(owner);
+    ownerObj = dbSession.viewDBObject(owner);
 
     inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerMembersField);
 
@@ -2353,7 +2353,7 @@ public class DBPermissionManager {
 	    return false;
 	  }
 
-	ownerObj = session.viewDBObject(owner);
+	ownerObj = dbSession.viewDBObject(owner);
 
 	inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerMembersField);
 

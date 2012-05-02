@@ -205,7 +205,7 @@ public final class XMLTransmitter implements FileTransmitter {
 	      xmlOut.startElementIndent("ganydata");
 	      xmlOut.indentOut();
 
-	      DBSession dbSession = mySession.getSession();
+	      DBSession dbSession = mySession.getDBSession();
 
 	      Vector invids = myRows.getInvids();
 

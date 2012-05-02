@@ -939,7 +939,7 @@ public class DBQueryEngine {
 
             // if we're editing it, let's look at our version of it
 
-            if (obj.shadowObject != null && obj.shadowObject.getSession() == session)
+            if (obj.shadowObject != null && obj.shadowObject.getDBSession() == session)
               {
                 obj = obj.shadowObject;
               }

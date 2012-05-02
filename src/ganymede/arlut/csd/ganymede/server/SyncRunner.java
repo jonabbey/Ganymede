@@ -708,7 +708,7 @@ public class SyncRunner implements Runnable {
 		      {
 			xmlOut = createXMLSync(transRecord);
 			xmlOut.setDeltaFieldBook(book);
-			xmlOut.setDBSession(transaction.getSession());
+			xmlOut.setDBSession(transaction.getDBSession());
 		      }
 
 		    switch (syncObject.getStatus())
@@ -766,7 +766,7 @@ public class SyncRunner implements Runnable {
 		  {
 		    xmlOut = createXMLSync(transRecord);
 		    xmlOut.setDeltaFieldBook(book);
-		    xmlOut.setDBSession(transaction.getSession());
+		    xmlOut.setDBSession(transaction.getDBSession());
 		  }
 
 		xmlOut.startElementIndent("context_objects");
@@ -786,7 +786,7 @@ public class SyncRunner implements Runnable {
 			    continue;   // skip, we handled this in the delta section
 			  }
 
-			DBObject refObject = transaction.getSession().viewDBObject(invid);
+			DBObject refObject = transaction.getDBSession().viewDBObject(invid);
 
 			refObject.emitXML(xmlOut);
 		      }
@@ -1496,7 +1496,7 @@ public class SyncRunner implements Runnable {
 
 	    try
 	      {
-		lock = session.getSession().openDumpLock();
+		lock = session.getDBSession().openDumpLock();
 	      }
 	    catch (InterruptedException ex)
 	      {

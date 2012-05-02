@@ -151,7 +151,7 @@ public class GanymedeValidationTask implements Runnable {
 
 	    base = (DBObjectBase) baseEnum.nextElement();
 
-	    objects = mySession.getSession().getTransactionalObjects(base.getTypeID());
+	    objects = mySession.getDBSession().getTransactionalObjects(base.getTypeID());
 	    
 	    if (debug)
 	      {

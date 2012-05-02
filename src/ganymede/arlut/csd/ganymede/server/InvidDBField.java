@@ -949,7 +949,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
 
     myParent = (DBEditObject) this.owner;
-    mySession = myParent.getSession();
+    mySession = myParent.getDBSession();
 
     targetField = getFieldDef().getTargetField();
 
@@ -1085,7 +1085,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
 
     eObj = (DBEditObject) this.owner;
-    session = eObj.getSession();
+    session = eObj.getDBSession();
 
     if (newRemote.equals(oldRemote))
       {
@@ -1099,7 +1099,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	    unlinkTarget(oldRemote);
 	  }
 
-	Ganymede.db.aSymLinkTracker.linkObject(getSession(), newRemote, getOwner().getInvid());
+	Ganymede.db.aSymLinkTracker.linkObject(getDBSession(), newRemote, getOwner().getInvid());
       }
 
     // If we're the container field in an embedded object, we're
@@ -1599,7 +1599,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
 
     eObj = (DBEditObject) this.owner;
-    session = eObj.getSession();
+    session = eObj.getDBSession();
 
     if (!getFieldDef().isSymmetric())
       {
@@ -2170,7 +2170,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		    continue;
 		  }
 
-		if (!Ganymede.db.aSymLinkTracker.linkExists(getSession(), myInvid, temp))
+		if (!Ganymede.db.aSymLinkTracker.linkExists(getDBSession(), myInvid, temp))
 		  {
 		    // "*** InvidDBField.test(): aSymLinkTracker doesn''t contain {0} for Invid {1} pointed to from {2} in field {3}"
 		    Ganymede.debug(ts.l("test.no_contains", myInvid, temp, objectName, getName()));
@@ -2295,7 +2295,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		result = false;
 	      }
 
-	    if (!Ganymede.db.aSymLinkTracker.linkExists(getSession(), myInvid, temp))
+	    if (!Ganymede.db.aSymLinkTracker.linkExists(getDBSession(), myInvid, temp))
 	      {
 		// "*** InvidDBField.test(): backpointer hash doesn''t contain {0} for Invid {1} pointed to from {2} in field {3}"
 		Ganymede.debug(ts.l("test.no_contains", myInvid, temp, objectName, getName()));
@@ -2479,7 +2479,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     checkkey = RandomUtils.getSaltedString("setValue[" + getName() + ":" + owner.getLabel() + "]");
 
-    eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
+    eObj.getDBSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
 
     checkpointed = true;
 
@@ -2514,7 +2514,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    // success!
 
-	    eObj.getSession().popCheckpoint(checkkey);
+	    eObj.getDBSession().popCheckpoint(checkkey);
 	    checkpointed = false;
           }
 
@@ -2524,7 +2524,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	if (checkpointed)
 	  {
-	    eObj.getSession().rollback(checkkey);
+	    eObj.getDBSession().rollback(checkkey);
 	  }
       }
   }
@@ -2642,7 +2642,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     checkkey = RandomUtils.getSaltedString("setElement[" + getName() + ":" + owner.getLabel() + "]");
 
-    eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpoint this transaction
+    eObj.getDBSession().checkpoint(checkkey); // may block if another thread has checkpoint this transaction
 
     checkpointed = true;
 
@@ -2670,7 +2670,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    // success!
 
-	    eObj.getSession().popCheckpoint(checkkey);
+	    eObj.getDBSession().popCheckpoint(checkkey);
 	    checkpointed = false;
 	  }
 
@@ -2680,7 +2680,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	if (checkpointed)
 	  {
-	    eObj.getSession().rollback(checkkey);
+	    eObj.getDBSession().rollback(checkkey);
 	  }
       }
   }
@@ -2795,7 +2795,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     checkkey = RandomUtils.getSaltedString("addElement[" + getName() + ":" + owner.getLabel() + "]");
 
-    eObj.getSession().checkpoint(checkkey); // may block if another thread has already checkpointed this transaction
+    eObj.getDBSession().checkpoint(checkkey); // may block if another thread has already checkpointed this transaction
 
     checkpointed = true;
 
@@ -2817,7 +2817,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	    // success!
 
-	    eObj.getSession().popCheckpoint(checkkey);
+	    eObj.getDBSession().popCheckpoint(checkkey);
 	    checkpointed = false;
 	  }
 
@@ -2827,7 +2827,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	if (checkpointed)
 	  {
-	    eObj.getSession().rollback(checkkey);
+	    eObj.getDBSession().rollback(checkkey);
 	  }
       }
   }
@@ -3058,7 +3058,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	System.err.println("InvidDBField.addElements(): checkpointing " + checkkey);
       }
 
-    eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
+    eObj.getDBSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
 
     if (debug)
       {
@@ -3223,7 +3223,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		System.err.println("InvidDBField.addElements(): popping checkpoint " + checkkey);
 	      }
 
-	    eObj.getSession().popCheckpoint(checkkey);
+	    eObj.getDBSession().popCheckpoint(checkkey);
 	  }
 	else
 	  {
@@ -3234,7 +3234,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		System.err.println("InvidDBField.addElements(): rolling back checkpoint " + checkkey);
 	      }
 
-	    eObj.getSession().rollback(checkkey);
+	    eObj.getDBSession().rollback(checkkey);
 	  }
       }
   }
@@ -3315,7 +3315,7 @@ public final class InvidDBField extends DBField implements invid_field {
     Vector values = getVectVal();
 
     DBEditObject eObj = (DBEditObject) owner;
-    DBSession session = eObj.getSession();
+    DBSession session = eObj.getDBSession();
 
     String ckp_label = RandomUtils.getSaltedString("addEmbed[" + eObj.getLabel() + "]");
 
@@ -3414,7 +3414,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	// record that we created this forward asymmetric link
 
-	Ganymede.db.aSymLinkTracker.linkObject(getSession(), embeddedObj.getInvid(), owner.getInvid());
+	Ganymede.db.aSymLinkTracker.linkObject(getDBSession(), embeddedObj.getInvid(), owner.getInvid());
 
         // now we need to initialize the new embedded object, since we
         // defer that activity for embedded objects until after we
@@ -3595,7 +3595,7 @@ public final class InvidDBField extends DBField implements invid_field {
     // so we can easily undo any changes that we make
     // if we have to return failure.
 
-    eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
+    eObj.getDBSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
 
     checkpointed = true;
 
@@ -3633,7 +3633,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		// DBEditObject.finalizeRemove() and
 		// attemptAsymBackLinkClear().
 
-		retVal = ReturnVal.merge(retVal, eObj.getSession().deleteDBObject(remote));
+		retVal = ReturnVal.merge(retVal, eObj.getDBSession().deleteDBObject(remote));
 
 		if (!ReturnVal.didSucceed(retVal))
 		  {
@@ -3648,7 +3648,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	    // success
 
 	    qr = null;	// Clear the cache to force the choices to be read again
-	    eObj.getSession().popCheckpoint(checkkey);
+	    eObj.getDBSession().popCheckpoint(checkkey);
 	    checkpointed = false;
 
 	    return retVal;
@@ -3677,7 +3677,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	if (checkpointed)
 	  {
-	    eObj.getSession().rollback(checkkey);
+	    eObj.getDBSession().rollback(checkkey);
 	  }
       }
   }
@@ -3759,7 +3759,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     checkkey = RandomUtils.getSaltedString("delElements[" + getName() + ":" + owner.getLabel() + "]");
 
-    eObj.getSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
+    eObj.getDBSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
 
     try
       {
@@ -3809,7 +3809,7 @@ public final class InvidDBField extends DBField implements invid_field {
 	      {
 		Invid remote = (Invid) valuesToDelete.elementAt(i);
 
-		retVal = ReturnVal.merge(retVal, eObj.getSession().deleteDBObject(remote));
+		retVal = ReturnVal.merge(retVal, eObj.getDBSession().deleteDBObject(remote));
 
 		if (!ReturnVal.didSucceed(retVal))
 		  {
@@ -3834,11 +3834,11 @@ public final class InvidDBField extends DBField implements invid_field {
       {
 	if (success)
 	  {
-	    eObj.getSession().popCheckpoint(checkkey);
+	    eObj.getDBSession().popCheckpoint(checkkey);
 	  }
 	else
 	  {
-	    eObj.getSession().rollback(checkkey);
+	    eObj.getDBSession().rollback(checkkey);
 	  }
       }
   }
@@ -4150,7 +4150,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
 	if (!local && mustChoose())
 	  {
-	    if (qr == null && eObj.getSession().isInteractive())
+	    if (qr == null && eObj.getDBSession().isInteractive())
 	      {
 		try
 		  {
@@ -4239,7 +4239,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (lastLink)
       {
-	Ganymede.db.aSymLinkTracker.unlinkObject(getSession(), target, owner.getInvid());
+	Ganymede.db.aSymLinkTracker.unlinkObject(getDBSession(), target, owner.getInvid());
       }
   }
 }

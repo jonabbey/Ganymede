@@ -160,7 +160,7 @@ public class DBDeletionManager {
 	// only reject if it's another session that has it marked for
 	// deletion
 
-	if (eObj.getSession() != session)
+	if (eObj.getDBSession() != session)
 	  {
 	    return false;
 	  }

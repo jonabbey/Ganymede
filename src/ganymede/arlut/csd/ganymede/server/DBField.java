@@ -746,15 +746,34 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * Returns the DBSession that this field is associated with or null
-   * if it is being viewed from the persistent store.
+   * <p>Returns the DBSession that this field is associated with or null
+   * if it is being viewed from the persistent store.</p>
+   *
+   * <p>Semi-deprecated.  Use getDBSession() instead for clarity.</p>
    */
 
   public final DBSession getSession()
   {
     try
       {
-	return owner.getSession();
+	return owner.getDBSession();
+      }
+    catch (NullPointerException ex)
+      {
+	return null;
+      }
+  }
+
+  /**
+   * <p>Returns the DBSession that this field is associated with or null
+   * if it is being viewed from the persistent store.</p>
+   */
+
+  public final DBSession getDBSession()
+  {
+    try
+      {
+	return owner.getDBSession();
       }
     catch (NullPointerException ex)
       {
@@ -772,7 +791,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     try
       {
-	return getSession().getGSession();
+	return getDBSession().getGSession();
       }
     catch (NullPointerException ex)
       {

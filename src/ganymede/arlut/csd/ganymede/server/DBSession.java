@@ -769,7 +769,7 @@ final public class DBSession {
 
 	DBEditObject shadow = obj.shadowObject;
 
-	if (shadow == null || shadow.getSession() != this)
+	if (shadow == null || shadow.getDBSession() != this)
 	  {
 	    return obj;
 	  }

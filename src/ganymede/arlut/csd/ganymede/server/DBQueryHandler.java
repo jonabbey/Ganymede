@@ -555,7 +555,7 @@ public class DBQueryHandler {
 		if (n.arrayOp == QueryDataNode.NONE)
 		  {
 		    s1 = (String) n.value;
-		    s2 = (String) session.getSession().getObjectLabel((Invid)value);
+		    s2 = (String) session.getDBSession().getObjectLabel((Invid)value);
 
 		    return compareString(n, s1, s2);
 		  }
@@ -572,7 +572,7 @@ public class DBQueryHandler {
 
 		    for (int i = 0; i < values.size(); i++)
 		      {
-			s2 = session.getSession().getObjectLabel((Invid) values.elementAt(i));
+			s2 = session.getDBSession().getObjectLabel((Invid) values.elementAt(i));
 
 			if (compareString(n, s1, s2))
 			  {

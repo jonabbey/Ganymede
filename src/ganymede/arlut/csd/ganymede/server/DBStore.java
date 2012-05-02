@@ -2519,7 +2519,7 @@ public final class DBStore implements JythonMap {
 	throw new Error("RMI system could not initialize GanymedeSession");
       }
 
-    session = gSession.getSession();
+    session = gSession.getDBSession();
     session.openTransaction("DBStore bootstrap initialization");
 
     try
