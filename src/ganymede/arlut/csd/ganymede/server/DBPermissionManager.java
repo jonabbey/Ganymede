@@ -512,7 +512,7 @@ public class DBPermissionManager {
 
     // do we have a real user name, or a persona name?
 
-    if (username.equals(Ganymede.rootname))
+    if (username.equals(Ganymede.rootname) || username.equals(":internal") || username.startsWith("builder:"))
       {
 	// supergash.. use the default return address
 

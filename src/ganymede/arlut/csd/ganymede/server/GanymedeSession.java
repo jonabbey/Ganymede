@@ -391,7 +391,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public GanymedeSession() throws RemoteException
   {
-    this("internal");
+    this(":internal");
   }
 
   /**
@@ -430,7 +430,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    throw new RuntimeException(ts.l("init.semaphore_error", disabledMessage));
 	  }
       }
-    else if (!sessionLabel.equals("internal"))
+    else if (!sessionLabel.equals(":internal"))
       {
 	// otherwise, if we are not starting one of the master internal
 	// sessions (either Ganymede.internalSession or
