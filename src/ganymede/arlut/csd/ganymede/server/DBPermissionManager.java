@@ -644,11 +644,14 @@ public class DBPermissionManager {
 
     if (user.getLabel().equals(newPersona))
       {
-	pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
-
-	if (pdbf == null || !pdbf.matchPlainText(password))
+	if (password != null)
 	  {
-	    return false;
+	    pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
+
+	    if (pdbf == null || !pdbf.matchPlainText(password))
+	      {
+		return false;
+	      }
 	  }
 
 	// the GUI client will close transactions first, but since we
