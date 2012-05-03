@@ -114,8 +114,9 @@ public class GanymedeServer implements Server {
   static GanymedeServer server = null;
 
   /**
-   * <p>Vector of {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
-   * objects for users that are logged into the Ganymede server remotely.</p>
+   * <p>Vector of {@link arlut.csd.ganymede.server.GanymedeSession
+   * GanymedeSession} objects for user sessions to be monitored by the
+   * admin console.</p>
    *
    * <p>Note that there may be GanymedeSession objects active that are
    * not listed in this sessions Vector; GanymedeSession objects used for

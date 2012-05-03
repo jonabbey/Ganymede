@@ -972,7 +972,12 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 	  }
       }
       
-    // and unlock the server
+    // and unlock the server.
+    //
+    // Notice that we are not doing anything to clear any internal
+    // GanymedeSessions like GanymedeServer.loginSession, because
+    // GanymedeSession isn't keeping any references to the old
+    // DBObjectBase / DBObjectBaseField definitions.
 
     GanymedeAdmin.setState(DBStore.normal_state); // "Normal Operation"
 
