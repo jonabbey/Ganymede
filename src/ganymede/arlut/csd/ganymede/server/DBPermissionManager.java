@@ -126,22 +126,24 @@ public class DBPermissionManager {
   private boolean beforeversupergash = false; // Be Forever Yamamoto
 
   /**
-   * The name of the user logged in.  If the person logged in is using
-   * supergash, username will be supergash, even though supergash
-   * isn't technically a user.
+   * <p>The name of the user logged in.  If the person logged in is
+   * using supergash, username will be supergash, even though
+   * supergash isn't technically a user.</p>
+   *
+   * <p>May be null if the containing GanymedeSession was created by
+   * an internal Ganymede task or process.</p>
    */
 
   private String username;
 
   /**
-   * <p>The unique name that the user is connected to the server
-   * under.. this may be &lt;username&gt;[2], &lt;username&gt;[3],
-   * etc., if the user is connected to the server multiple times.  The
-   * sessionName will be unique on the server at any given time.</p>
+   * <p>The name that the session is given.  This name will be unique
+   * on the server during its lifetime.  Especially useful if a user
+   * is logged into the server concurrently with more than one client.
+   * For such cases, the sessionName may be &lt;username&gt;[2],
+   * &lt;username&gt;[3], etc.</p>
    *
-   * <p>sessionName should never be null.  If a client logs in directly
-   * to a persona, sessionName will be that personaname plus an
-   * optional session integer.</p>
+   * <p>sessionName should never be null.</p>
    */
 
   private String sessionName;
@@ -301,10 +303,24 @@ public class DBPermissionManager {
     this.dbSession = gSession.getDBSession();
   }
 
+  /**
+   * Configures this DBPermissionManager for a privileged internal session.
+   *
+   * @param sessionLabel The name of this session, used for
+   * identifying the task or server component that is using our
+   * GanymedeSession to perform work in the server.  Must be unique
+   * during the lifetime of our containing GanymedeSession.  May not
+   * be null.
+   */
+
   public DBPermissionManager configureInternalSession(String sessionLabel)
   {
+    if (sessionLabel == null)
+      {
+	throw new IllegalArgumentException("sessionLabel may not be null");
+      }
+
     sessionName = sessionLabel;
-    username = sessionLabel;
 
     supergashMode = true;
     beforeversupergash = true;
@@ -314,8 +330,33 @@ public class DBPermissionManager {
     return this;
   }
 
-  public DBPermissionManager configureClientSession(String loginName, DBObject userObject, DBObject personaObject)
+  /**
+   * Configures this DBPermissionManager for a remote user session.
+   *
+   * @param userObject A DBObject describing the user logged in, or
+   * null if the user is logging in with a non-user-linked persona
+   * object (supergash, monitor, etc.)
+   *
+   * @param personaObject A DBObject describing the Admin Persona
+   * logged in.  May be null if the user is logged in only with his
+   * unprivileged end-user account.
+   *
+   * @param sessionLabel The name of this session, used for
+   * identifying the task or server component that is using our
+   * GanymedeSession to perform work in the server.  Must be unique
+   * during the lifetime of our containing GanymedeSession.  May not
+   * be null.
+   */
+
+  public DBPermissionManager configureClientSession(DBObject userObject, DBObject personaObject, String sessionLabel)
   {
+    if (sessionLabel == null)
+      {
+	throw new IllegalArgumentException("sessionLabel may not be null");
+      }
+
+    sessionName = sessionLabel;
+
     if (userObject != null)
       {
 	userInvid = userObject.getInvid();
@@ -373,10 +414,12 @@ public class DBPermissionManager {
 
   /**
    * <p>This method returns the name of the user that is logged into
-   * this session.</p>
+   * this session, or null if this session was created by a Ganymede
+   * server task or other internal process.</p>
    *
-   * <p>If supergash is using this session, this method will return supergash as
-   * well, even though technically supergash isn't a user.</p>
+   * <p>If supergash is using this session, this method will return
+   * supergash as well, even though technically supergash isn't a
+   * user.</p>
    */
 
   public String getUserName()
@@ -386,6 +429,9 @@ public class DBPermissionManager {
 
   /**
    * <p>Convenience method to get access to this session's user invid.</p>
+   *
+   * <p>May be null if supergash, monitor, or Ganymede server task or
+   * internal process is running the session.</p>
    */
 
   public Invid getUserInvid()
@@ -396,6 +442,9 @@ public class DBPermissionManager {
   /**
    * <p>Convenience method to get access to this session's UserBase
    * instance.</p>
+   *
+   * <p>May be null if supergash, monitor, or Ganymede server task or
+   * internal process is running the session.</p>
    */
 
   public DBObject getUser()
@@ -445,15 +494,59 @@ public class DBPermissionManager {
   }
 
   /**
-   * <p>This method returns the name of the persona who is active, or the
-   * raw user name if no persona privileges have been assumed.</p>
+   * <p>Returns the session name assigned to the GanymedeSession that
+   * owns us.  If our GanymedeSession is being accessed by a user
+   * client, getSessionName() will return a unique string to identify
+   * the specific session.  If we are an internal session, we may not
+   * bother.</p>
+   *
+   * <p>getSessionName() will never return a null value.</p>
+   */
+
+  public String getSessionName()
+  {
+    return sessionName;
+  }
+
+  /**
+   * <p>This method returns the name of the user who is active
+   * (including supergash or monitor for the non-user-linked
+   * personas), or the name of the internal Ganymede task or process
+   * that is running the session if no user is attached to this
+   * session.</p>
+   */
+
+  public String getBaseIdentity()
+  {
+    if (username != null && !username.equals(""))
+      {
+	return username;
+      }
+    else
+      {
+	return sessionName;
+      }
+  }
+
+  /**
+   * <p>This method returns the name of the persona who is active, the
+   * raw user name if no persona privileges have been assumed, or the
+   * name of the internal Ganymede task or process that is running the
+   * session if no user is attached to this session.</p>
    */
 
   public String getIdentity()
   {
     if (personaName == null || personaName.equals(""))
       {
-        return username;
+	if (username != null && !username.equals(""))
+	  {
+	    return username;
+	  }
+	else
+	  {
+	    return sessionName;
+	  }
       }
     else
       {
@@ -465,6 +558,9 @@ public class DBPermissionManager {
    * <p>This method returns the Invid of the user who logged in, or
    * the non-user-linked persona (supergash, monitor) if there was no
    * underlying user attached to the persona.</p>
+   *
+   * <p>May return null if this session is being run by a Ganymede
+   * server task or internal process.</p>
    */
 
   public Invid getIdentityInvid()
@@ -481,6 +577,9 @@ public class DBPermissionManager {
    * <p>Returns a Vector of Invids containing user and persona Invids
    * for the GanymedeSession that this DBPermissionManager is attached
    * to.</p>
+   *
+   * <p>May return an empty Vector if this session is being run by a
+   * Ganymede server task or internal process.</p>
    */
 
   public Vector<Invid> getIdentityInvids()
@@ -512,9 +611,9 @@ public class DBPermissionManager {
 
     // do we have a real user name, or a persona name?
 
-    if (username.equals(Ganymede.rootname) || username.equals(":internal") || username.startsWith("builder:"))
+    if (username == null || userObject == null)
       {
-	// supergash.. use the default return address
+	// local server process or supergash/monitor
 
 	returnAddr = Ganymede.returnaddrProperty;
       }

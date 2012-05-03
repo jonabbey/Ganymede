@@ -1804,7 +1804,7 @@ public class GanymedeServer implements Server {
 
     try
       {
-	gSession = new GanymedeSession("embeddedSweep");
+	gSession = new GanymedeSession(":embeddedSweep");
       }
     catch (RemoteException ex)
       {

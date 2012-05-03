@@ -1224,7 +1224,7 @@ public final class InvidDBField extends DBField implements invid_field {
                   {
                     if (editing.gSession != null)
                       {
-                        edit_username = editing.gSession.getUserName();
+                        edit_username = editing.gSession.getPermManager().getBaseIdentity();
                         edit_hostname = editing.gSession.getClientHostName();
 
                         // "InvidDBField.bind(): Couldn''t unlink from old reference"
@@ -1392,7 +1392,7 @@ public final class InvidDBField extends DBField implements invid_field {
               {
                 if (editing.gSession != null)
                   {
-                    edit_username = editing.gSession.getUserName();
+                    edit_username = editing.gSession.getPermManager().getBaseIdentity();
                     edit_hostname = editing.gSession.getClientHostName();
 
                     // "InvidDBField.bind(): Couldn''t link to new reference"
@@ -1673,7 +1673,7 @@ public final class InvidDBField extends DBField implements invid_field {
 		    String edit_username, edit_hostname;
 		    DBEditObject editing = remobj.shadowObject;
 
-		    edit_username = editing.gSession.getUserName();
+		    edit_username = editing.gSession.getPermManager().getBaseIdentity();
 		    edit_hostname = editing.gSession.getClientHostName();
 
 		    // "InvidDBField.unbind(): Couldn''t unlink from old reference"

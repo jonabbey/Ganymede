@@ -64,6 +64,7 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.Unreferenced;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -176,6 +177,13 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.GanymedeSession");
 
+  /**
+   * An incrementing number that we use during runtime to give each
+   * internal GanymedeSession its own session label.
+   */
+
+  static private AtomicInteger internalID = new AtomicInteger(0);
+
   // ---
 
   /**
@@ -271,20 +279,11 @@ final public class GanymedeSession implements Session, Unreferenced {
   private Date lastActionTime = new Date();
 
   /**
-   * <p>The unique name that the user is connected to the server
-   * under.. this may be &lt;username&gt;[2], &lt;username&gt;[3],
-   * etc., if the user is connected to the server multiple times.  The
-   * sessionName will be unique on the server at any given time.</p>
+   * <p>The DNS name or IP address name for the client's host.</p>
    *
-   * <p>sessionName should never be null.  If a client logs in directly
-   * to a persona, sessionName will be that personaname plus an
-   * optional session integer.</p>
-   */
-
-  private String sessionName;
-
-  /**
-   * The DNS name for the client's host
+   * <p>If this session is being run on behalf of a Ganymede server
+   * task or internal process, clienthost will be the DNS name that
+   * the server is running on.</p>
    */
 
   private String clienthost;
@@ -391,7 +390,11 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public GanymedeSession() throws RemoteException
   {
-    this(":internal");
+    // XXX note: this string must not be changed because the
+    // GanymedeSession constructor behaves in a special way
+    // for "internal: " session labels.
+
+    this("internal: " + internalID.incrementAndGet());
   }
 
   /**
@@ -409,11 +412,15 @@ final public class GanymedeSession implements Session, Unreferenced {
    *
    * <p>Internal sessions, as created by this constructor, have full
    * privileges to do any possible operation.</p>
+   *
+   * @param sessionLabel A name for this internal session.  There
+   * should not be two or more GanymedeSessions active concurrently
+   * with the same sessionLabel.
    */
 
   public GanymedeSession(String sessionLabel) throws RemoteException
   {
-    if (sessionLabel.startsWith("builder:"))
+    if (sessionLabel.startsWith("builder: ") || sessionLabel.startsWith("sync channel: "))
       {
 	String disabledMessage = GanymedeServer.lSemaphore.checkEnabled();
 
@@ -430,7 +437,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    throw new RuntimeException(ts.l("init.semaphore_error", disabledMessage));
 	  }
       }
-    else if (!sessionLabel.equals(":internal"))
+    else if (!sessionLabel.startsWith("internal: "))
       {
 	// otherwise, if we are not starting one of the master internal
 	// sessions (either Ganymede.internalSession or
@@ -457,7 +464,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     loggedInSemaphore.set(true);
 
     this.exportObjects = false;
-    this.sessionName = sessionLabel;
+    clienthost = Ganymede.serverHostProperty;
 
     dbSession = new DBSession(Ganymede.db, this, sessionLabel);
     queryEngine = new DBQueryEngine(this, dbSession);
@@ -518,7 +525,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     // find a unique name for this session
 
-    sessionName = GanymedeServer.registerActiveUser(loginName);
+    String sessionName = GanymedeServer.registerActiveUser(loginName);
 
     // find out where the user is coming from
 
@@ -538,7 +545,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
     catch (ServerNotActiveException ex)
       {
-	clienthost = "local (unknown)";
+	clienthost = "(unknown)";
       }
 
     // record our login time
@@ -549,7 +556,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     dbSession = new DBSession(Ganymede.db, this, sessionName);
     queryEngine = new DBQueryEngine(this, dbSession);
-    permManager = new DBPermissionManager(this).configureClientSession(loginName, userObject, personaObject);
+    permManager = new DBPermissionManager(this).configureClientSession(userObject, personaObject, sessionName);
 
     // Let the GanymedeServer know that this session is now active for
     // purposes of admin console updating.
@@ -731,6 +738,9 @@ final public class GanymedeSession implements Session, Unreferenced {
   /**
    * <p>This method returns the identification string that the server
    * has assigned to the user.</p>
+   *
+   * <p>May return null if this session is running on behalf of a
+   * Ganymede server task or internal process.</p>
    *
    * @see arlut.csd.ganymede.rmi.Session
    */
@@ -1383,8 +1393,16 @@ final public class GanymedeSession implements Session, Unreferenced {
 
         // create the signature
 
-        // "This message was sent by {0}, who is running the Ganymede client on {1}."
-        signature.append(ts.l("sendMail.signature", permManager.getUserName(), clienthost));
+	if (exportObjects)
+	  {
+	    // "This message was sent by {0}, who is running the Ganymede client on {1}."
+	    signature.append(ts.l("sendMail.signature", permManager.getUserName(), getClientHostName()));
+	  }
+	else
+	  {
+	    // "This message was sent by the {0} process, running inside the Ganymede server."
+	    signature.append(ts.l("sendMail.local_signature", permManager.getSessionName()));
+	  }
 
         body.append("\n--------------------------------------------------------------------------------\n");
         body.append(WordWrap.wrap(signature.toString(), 78, null));
@@ -1470,8 +1488,16 @@ final public class GanymedeSession implements Session, Unreferenced {
             asciiContent.append("\n\n");
           }
 
-        // "This message was sent by {0}, who is running the Ganymede client on {1}."
-        signature.append(ts.l("sendMail.signature", permManager.getUserName(), clienthost));
+	if (exportObjects)
+	  {
+	    // "This message was sent by {0}, who is running the Ganymede client on {1}."
+	    signature.append(ts.l("sendMail.signature", permManager.getUserName(), getClientHostName()));
+	  }
+	else
+	  {
+	    // "This message was sent by the {0} process, running inside the Ganymede server."
+	    signature.append(ts.l("sendMail.local_signature", permManager.getSessionName()));
+	  }
 
         asciiContent.append("\n--------------------------------------------------------------------------------\n");
         asciiContent.append(WordWrap.wrap(signature.toString(), 78, null));
@@ -1530,7 +1556,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // "\nCLIENT ERROR DETECTED:\nuser == "{0}"\nhost == "{1}"\nclient id string == "{2}"\nexception trace == "{3}"\n"
     report.append(ts.l("reportClientBug.logPattern",
 		       permManager.getIdentity(),
-		       clienthost,
+		       getClientHostName(),
 		       clientIdentifier,
 		       exceptionReport));
 
@@ -1563,7 +1589,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // "\nClient Version Report:\nuser == "{0}"\nhost == "{1}"\nclient id string == "{2}"
     report.append(ts.l("reportClientVersion.logPattern",
 		       permManager.getIdentity(),
-		       clienthost,
+		       getClientHostName(),
 		       clientIdentifier));
 
     Ganymede.debug(report.toString());
@@ -2183,7 +2209,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 		if (editing.gSession != null)
 		  {
 		    edit_username = editing.gSession.getPermManager().getUserName();
-		    edit_hostname = editing.gSession.clienthost;
+		    edit_hostname = editing.gSession.getClientHostName();
 
 		    // "Error, object already being edited"
 		    // "{0} [{1} - {2}] is already being edited by user {3} on host {4}"
@@ -2865,7 +2891,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public String getSessionName()
   {
-    return this.sessionName;
+    return permManager.getSessionName();
   }
 
   /**
@@ -3102,7 +3128,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    // server down, so the rest of of the stuff below may not
 	    // happen
 
-	    GanymedeServer.clearActiveUser(sessionName);
+	    GanymedeServer.clearActiveUser(getSessionName());
 
 	    // help the garbage collector
 
@@ -3578,7 +3604,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	try
 	  {
 	    // "Ganymede session for {0} has a checkIn() cause objectsCheckedOut to go negative"
-	    throw new RuntimeException(ts.l("checkIn.exception", sessionName));
+	    throw new RuntimeException(ts.l("checkIn.exception", getSessionName()));
 	  }
 	catch (RuntimeException ex)
 	  {
@@ -3607,9 +3633,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (info == null)
       {
-	info = new AdminEntry(sessionName,
+	info = new AdminEntry(getSessionName(),
 			      permManager.getIdentity(),
-			      clienthost,
+			      getClientHostName(),
 			      (status == null) ? "" : status,
 			      connecttime.toString(),
 			      (lastEvent == null) ? "" : lastEvent,
@@ -3643,7 +3669,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   void setLastError(String error)
   {
-    Ganymede.debug("GanymedeSession [" + sessionName + "]: setLastError (" + error + ")");
+    Ganymede.debug("GanymedeSession [" + getSessionName() + "]: setLastError (" + error + ")");
   }
 
   /**

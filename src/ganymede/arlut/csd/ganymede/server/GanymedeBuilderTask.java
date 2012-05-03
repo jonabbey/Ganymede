@@ -379,10 +379,13 @@ public abstract class GanymedeBuilderTask implements Runnable {
 	    // start at builder:0 and work our way up as we go along
 	    // during the server's lifetime
 
+	    // XXX note: this string must not be changed because the
+	    // GanymedeSession constructor behaves in a special way
+	    // for "builder:" and "sync channel:" session labels.
+
 	    synchronized (GanymedeBuilderTask.class)
 	      {
-		// "builder: {0,number,#}"
-		label = ts.l("run.label_pattern", Integer.valueOf(id++));
+		label = "builder: " + Integer.valueOf(id++);
 	      }
 
 	    session = new GanymedeSession(label);

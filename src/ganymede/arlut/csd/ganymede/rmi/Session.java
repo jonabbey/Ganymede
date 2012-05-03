@@ -182,6 +182,9 @@ public interface Session extends Remote {
   /**
    * <p>This method returns the identification string that the server
    * has assigned to the user.</p>
+   *
+   * <p>May return null if this session is running on behalf of a
+   * Ganymede server task or internal process.</p>
    */
 
   String      getMyUserName() throws RemoteException;

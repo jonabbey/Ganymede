@@ -1483,13 +1483,16 @@ public class SyncRunner implements Runnable {
 	  {
 	    // we need a unique label for our session so that multiple
 	    // builder tasks can have their own lock keys.. our label
-	    // will start at sync:0 and work our way up as we go along
-	    // during the server's lifetime
+	    // will start at sync channel:0 and work our way up as we
+	    // go along during the server's lifetime
+
+	    // XXX note: this string must not be changed because the
+	    // GanymedeSession constructor behaves in a special way
+	    // for "builder:" and "sync channel:" session labels.
 
 	    synchronized (SyncRunner.class)
 	      {
-		// "sync channel: {0,number,#}"
-		label = ts.l("runFullState.label_pattern", Integer.valueOf(id++));
+		label = "sync channel: " + Integer.valueOf(id++);
 	      }
 
 	    session = new GanymedeSession(label);
