@@ -216,24 +216,10 @@ final public class GanymedeSession implements Session, Unreferenced {
   private serverClientAsyncResponder asyncPort = null;
 
   /**
-   * <p>This tracks whether this GanymedeSession counts as a 'login
-   * session' which increments {@link arlut.csd.ganymedes.server.GanymedeServer#lSemaphore}.</p>
-   *
-   * <p>If semaphoreLocked is true, that means that either the {@link
-   * arlut.csd.ganymedes.erver.GanymedeServer#processLogin(java.lang.String,java.lang.String,boolean,boolean)}
-   * method or the appropriate GanymedeSession constructor has caused
-   * the GanymedeServer lSemaphore counting semaphore to be
-   * incremented, and we'll need to make sure and decrement the
-   * semaphore when this GanymedeSession is shut down.</p>
+   * If this flag is true, we're a user session.
    */
 
-  private boolean semaphoreLocked = false;
-
-  /**
-   * If this flag is true, we're being used by a remote client
-   */
-
-  private boolean remoteClient = false;
+  private boolean userSession = false;
 
   /**
    * If true, the user is currently logged in.
@@ -412,15 +398,15 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public GanymedeSession(String sessionName) throws RemoteException
   {
-    if (sessionName.startsWith("builder:") || sessionName.startsWith("sync channel:"))
+    String disabledMessage = GanymedeServer.lSemaphore.checkEnabled();
+
+    if (disabledMessage != null)
       {
-	String disabledMessage = GanymedeServer.lSemaphore.checkEnabled();
+	// we'll still run the builder / sync channels if we're
+	// waiting for a deferred shutdown
 
-	// if we are attempting to start a builder session, we'll
-	// proceed even if the server is waiting to handle a deferred
-	// shutdown.  Otherwise we'll abort.
-
-	if (disabledMessage != null && !disabledMessage.equals("shutdown"))
+	if ((!sessionName.startsWith("builder:") && !sessionName.startsWith("sync channel:")) ||
+	    !disabledMessage.equals("shutdown"))
 	  {
 	    // "Couldn''t create {0} GanymedeSession.. semaphore disabled: {1}"
 	    Ganymede.debug(ts.l("init.no_semaphore", sessionName, disabledMessage));
@@ -429,33 +415,10 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    throw new RuntimeException(ts.l("init.semaphore_error", disabledMessage));
 	  }
       }
-    else if (!sessionName.startsWith("internal:"))
-      {
-	// otherwise, if we are not starting one of the master internal
-	// sessions (either Ganymede.internalSession or
-	// GanymedeServer.loginSession), we'll want to increment the login
-	// semaphore to make sure we are allowing logins and to keep the
-	// server up to date
-
-        String error = GanymedeServer.lSemaphore.increment();
-
-        if (error != null)
-          {
-	    // "Couldn''t create {0} GanymedeSession.. semaphore disabled: {1}"
-            Ganymede.debug(ts.l("init.no_semaphore", sessionName, error));
-
-	    // "semaphore error: {0}"
-            throw new RuntimeException(ts.l("init.semaphore_error", error));
-          }
-
-	semaphoreLocked = true;
-      }
 
     // make sure our session name is unique for locking in builder tasks, etc.
 
-    sessionName = GanymedeServer.registerActiveInternalSessionName(sessionName);
-
-    // construct our DBSession
+    sessionName = GanymedeServer.registerInternalSessionName(sessionName);
 
     loggedInSemaphore.set(true);
 
@@ -468,51 +431,41 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * <p>Constructor used to create a server-side attachment for a Ganymede
-   * client.</p>
+   * <p>Constructor used to create a server-side attachment for a
+   * Ganymede user session.</p>
    *
    * <p>This constructor is called by the
    * {@link arlut.csd.ganymede.server server}
    * {@link arlut.csd.ganymede.rmi.Server#login(java.lang.String username, java.lang.String password) login()}
    * method.</p>
    *
-   * <p>A Client can log in either as an end-user or as a admin persona.  Typically,
-   * a client will log in with their end-user name and password, then use
-   * selectPersona to gain admin privileges.  The server may allow users to
-   * login directly with an admin persona (supergash, say), if so configured.</p>
+   * <p>A Client can log in either as an end-user or as a admin
+   * persona.  Typically, a client will log in with their end-user
+   * name and password, then use selectPersona to gain admin
+   * privileges.  The server may allow users to login directly with an
+   * admin persona (supergash, say), if so configured.</p>
    *
    * @param loginName The name for the user logging in
    * @param userObject The user record for this login
    * @param personaObject The user's initial admin persona
-   * @param exportObjects If true, we'll export any viewed or edited objects for
-   * direct RMI access.  We don't need to do this is we're being driven by a server-side
-   * {@link arlut.csd.ganymede.server.GanymedeXMLSession}, for instance.
-   * @param clientIsRemote If true, we're being driven remotely, either by a direct
-   * Ganymede client or by a remotely operated GanymedeXMLSession.  We'll set up an
-   * {@link arlut.csd.ganymede.server.serverClientAsyncResponder serverClientAsyncResponder},
-   * AKA an asyncPort, for the remote client to poll for async notifications.
+   * @param exportObjects If true, we'll export any viewed or edited
+   * objects for direct RMI access.  We don't need to do this is we're
+   * being driven by a server-side {@link
+   * arlut.csd.ganymede.server.GanymedeXMLSession}, for instance.
    *
    * @see arlut.csd.ganymede.rmi.Server#login(java.lang.String, java.lang.String)
    */
 
   public GanymedeSession(String loginName, DBObject userObject,
-			 DBObject personaObject, boolean exportObjects,
-			 boolean clientIsRemote) throws RemoteException
+			 DBObject personaObject, boolean exportObjects) throws RemoteException
   {
-    // GanymedeServer will have already incremented our semaphore in
-    // its login() method
-
-    semaphoreLocked = true;
-
-    // record whether we're being driven remotely
-
-    this.remoteClient = clientIsRemote;
+    this.userSession = true;
 
     // record whether we should export our objects
 
     this.exportObjects = exportObjects;
 
-    if (this.remoteClient)
+    if (this.exportObjects)
       {
 	asyncPort = new serverClientAsyncResponder();
 
@@ -521,7 +474,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     // find a unique name for this user session
 
-    String sessionName = GanymedeServer.registerActiveUserSessionName(loginName);
+    String sessionName = GanymedeServer.registerUserSessionName(loginName);
 
     // find out where the user is coming from
 
@@ -554,17 +507,12 @@ final public class GanymedeSession implements Session, Unreferenced {
     queryEngine = new DBQueryEngine(this, dbSession);
     permManager = new DBPermissionManager(this).configureClientSession(userObject, personaObject, sessionName);
 
-    // Let the GanymedeServer know that this session is now active for
-    // purposes of admin console updating.
-
-    GanymedeServer.addRemoteUser(this);
-
-    // update status, update the admin consoles
-
     loggedInSemaphore.set(true);
+
+    // set our initial status
+
     status = ts.l("init.loggedin");
     lastEvent = ts.l("init.loggedin");
-    GanymedeAdmin.refreshUsers();
   }
 
   //
@@ -3031,35 +2979,23 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	try
 	  {
-	    if (!remoteClient)
-	      {
-		// We don't need to update GanymedeServer's lists for internal sessions
-
-		dbSession.logout();	// *sync* DBSession
-		return;
-	      }
-
-	    //	Ganymede.debug("User " + username + " logging off");
-
-	    if (this.asyncPort != null)
-	      {
-		this.asyncPort.shutdown();
-		this.asyncPort = null;
-	      }
-
-	    // logout the client, abort any DBSession transaction going
+	    // Abort any DBSession going and tell it to flush its
+	    // state
 
 	    dbSession.logout();	// *sync* DBSession
 
-	    // if we have DBObjects left exported through RMI, make
-	    // them inaccesible
-
-	    unexportObjects(true);
-
-	    // if we ourselves were exported, unexport
-
-	    if (remoteClient)
+	    if (exportObjects)
 	      {
+		this.asyncPort.shutdown();
+		this.asyncPort = null;
+
+		// If we have DBObjects left exported through RMI, make
+		// them forcibly inaccesible
+
+		unexportObjects(true);
+
+		// if we ourselves were exported, unexport
+
 		Ganymede.rmi.unpublishObject(this, true);
 
 		// from this point on, RMI remote calls to this
@@ -3069,9 +3005,10 @@ final public class GanymedeSession implements Session, Unreferenced {
 		// GanymedeSession object monitor.
 	      }
 
-	    // if we weren't forced off, do normal logout logging
+	    // if we're a userSession and weren't forced off, do
+	    // normal logout logging
 
-	    if (!forced_off)
+	    if (userSession && !forced_off)
 	      {
 		if (Ganymede.log != null)
 		  {
@@ -3083,45 +3020,22 @@ final public class GanymedeSession implements Session, Unreferenced {
 							       null));
 		  }
 	      }
-	    else
+
+	    // if we are forced off, and we're running under a
+	    // GanymedeXMLSession, tell the GanymedeXMLSession to
+	    // kick off.
+	    //
+	    // if we're not forced off, then the GanymedeXMLSession
+	    // must be the one who triggered the logout and it should
+	    // be cleaning things up on its own.
+
+	    if (forced_off && xSession != null)
 	      {
-		// if we are forced off, and we're running under a
-		// GanymedeXMLSession, tell the GanymedeXMLSession to
-		// kick off
-
-		// if we're not forced off, then presumably the
-		// GanymedeXMLSession triggered the logout.
-
-		if (xSession != null)
-		  {
-		    xSession.abort();
-		  }
+		xSession.abort();
 	      }
-
-	    // Update the server's records, refresh the admin consoles.
-
-	    GanymedeServer.removeRemoteUser(this);
-
-	    // update the admin consoles
-
-	    GanymedeAdmin.refreshUsers();
 	  }
 	finally
 	  {
-	    if (semaphoreLocked)
-	      {
-		try
-		  {
-		    GanymedeServer.lSemaphore.decrement();
-		  }
-		catch (IllegalArgumentException ex)
-		  {
-		    Ganymede.logError(ex);
-		  }
-
-		semaphoreLocked = false;
-	      }
-
 	    // let go of our session name and let the server know that
 	    // it can shut the server down if it is deferred shutdown
 	    // mode and we were a user session.
@@ -3129,10 +3043,10 @@ final public class GanymedeSession implements Session, Unreferenced {
 	    GanymedeServer.clearSession(this);
 	  }
 
-	// guess we're still running.  Remember the last time this
-	// user logged out for the motd-display check
-
-	Ganymede.debug(ts.l("logout.logged_off", permManager.getUserName()));
+	if (userSession)
+	  {
+	    Ganymede.debug(ts.l("logout.logged_off", permManager.getUserName()));
+	  }
 
 	permManager = null;
       }
@@ -3683,7 +3597,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   void timeCheck()
   {
-    if (!remoteClient)
+    if (!userSession)
       {
 	return;			// server-local session, we won't time it out
       }

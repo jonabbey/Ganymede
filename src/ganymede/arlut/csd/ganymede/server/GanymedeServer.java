@@ -66,6 +66,7 @@ import java.util.Hashtable;
 import java.util.Vector;
 
 import arlut.csd.Util.TranslationService;
+import arlut.csd.ganymede.common.AdminEntry;
 import arlut.csd.ganymede.common.ClientMessage;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
@@ -196,22 +197,23 @@ public class GanymedeServer implements Server {
   /* -- */
 
   /**
-   *
    * GanymedeServer constructor.  We only want one server running
    * per invocation of Ganymede, so we'll check that here.
-   *
    */
 
   public GanymedeServer() throws RemoteException
   {
-    if (server == null)
+    synchronized (GanymedeServer.class)
       {
-	server = this;
-      }
-    else
-      {
-	Ganymede.debug(ts.l("init.multiserver"));
-	throw new RemoteException(ts.l("init.multiserver"));
+	if (server == null)
+	  {
+	    server = this;
+	  }
+	else
+	  {
+	    Ganymede.debug(ts.l("init.multiserver"));
+	    throw new RemoteException(ts.l("init.multiserver"));
+	  }
       }
 
     loginSession = new GanymedeSession(); // supergash
@@ -252,7 +254,7 @@ public class GanymedeServer implements Server {
 
   public ReturnVal login(String username, String password) throws RemoteException
   {
-    return processLogin(username, password, true, true);
+    return processLogin(username, password, true);
   }
 
   /**
@@ -277,7 +279,7 @@ public class GanymedeServer implements Server {
 
   public ReturnVal xmlLogin(String username, String password) throws RemoteException
   {
-    ReturnVal retVal = processLogin(username, password, false, true);
+    ReturnVal retVal = processLogin(username, password, false);
 
     if (!retVal.didSucceed())   // XXX processLogin never returns null
       {
@@ -317,12 +319,9 @@ public class GanymedeServer implements Server {
    * @param clientPass The password (in plaintext) to authenticate with
    * @param directSession If true, the GanymedeSession returned will export objects
    * created or referenced by the GanymedeSession for direct RMI access
-   * @param clientIsRemote If true, the GanymedeSession will set up for remote access,
-   * with user timeouts and the like.
    */
 
-  private ReturnVal processLogin(String clientName, String clientPass,
-				 boolean directSession, boolean clientIsRemote) throws RemoteException
+  private ReturnVal processLogin(String clientName, String clientPass, boolean directSession) throws RemoteException
   {
     String clienthost = null;
     boolean found = false;
@@ -499,13 +498,14 @@ public class GanymedeServer implements Server {
 
 	    if (found)
 	      {
-		// the GanymedeSession constructor calls
-		// registerActiveUser() on us, as well as directly
-		// adding itself to our sessions Vector.
+		// the GanymedeSession constructor calls one of the
+		// register session name methods on us
 
 		GanymedeSession session = new GanymedeSession(clientName,
 							      user, persona,
-							      directSession, clientIsRemote);
+							      directSession);
+
+		monitorUserSession(session);
 
 		// "{0} logged in from {1}"
 		Ganymede.debug(ts.l("processLogin.loggedin", session.getUserName(), session.getClientHostName()));
@@ -631,7 +631,7 @@ public class GanymedeServer implements Server {
    * Ganymede admin console.</p>
    */
 
-  public static void addRemoteUser(GanymedeSession session)
+  public static void monitorUserSession(GanymedeSession session)
   {
     synchronized (sessions)
       {
@@ -657,46 +657,46 @@ public class GanymedeServer implements Server {
    * Ganymede admin console.</p>
    */
 
-  public static void removeRemoteUser(GanymedeSession session)
+  public static void unmonitorUserSession(GanymedeSession session)
   {
     synchronized (sessions)
       {
-        sessions.removeElement(session);
+	if (sessions.remove(session))
+	  {
+	    // we just removed the session of the user who logged out, so
+	    // they won't receive the log out message that we'll send to
+	    // the other clients
 
-        // we just removed the session of the user who logged out, so
-        // they won't receive the log out message that we'll send to
-        // the other clients
-
-        sendMessageToRemoteSessions(ClientMessage.LOGOUT, ts.l("removeRemoteUser.logged_out", session.getUserName()));
-        sendMessageToRemoteSessions(ClientMessage.LOGINCOUNT, Integer.toString(sessions.size()));
+	    sendMessageToRemoteSessions(ClientMessage.LOGOUT, ts.l("removeRemoteUser.logged_out", session.getUserName()));
+	    sendMessageToRemoteSessions(ClientMessage.LOGINCOUNT, Integer.toString(sessions.size()));
+	  }
       }
+
+    // update the admin consoles
+
+    GanymedeAdmin.refreshUsers();
   }
 
   /**
    * <p>This method is used by the
    * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin}
    * refreshUsers() method to get a summary of the state of the
-   * remotely connected users.</p>
+   * monitored user sessions.</p>
    */
 
-  public static Vector getUserTable()
+  public static Vector<AdminEntry> getUserTable()
   {
-    GanymedeSession session;
-    Vector entries;
-
-    /* -- */
+    Vector<AdminEntry> entries = null;
 
     synchronized (sessions)
       {
-	entries = new Vector(sessions.size());
+	entries = new Vector<AdminEntry>(sessions.size());
 
-	for (int i = 0; i < sessions.size(); i++)
+	for (GanymedeSession session: sessions)
 	  {
-	    session = (GanymedeSession) GanymedeServer.sessions.elementAt(i);
-
 	    if (session.isLoggedIn())
 	      {
-		entries.addElement(session.getAdminEntry());
+		entries.add(session.getAdminEntry());
 	      }
 	  }
       }
@@ -814,12 +814,12 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   * <p>This method is used by GanymedeSession.login() to find a
-   * unique name for an internal session.  It is matched with
+   * <p>This method is used by GanymedeSession.login() to find and
+   * record a unique name for an internal session.  It is matched with
    * clearSession(), below.</p>
    */
 
-  static String registerActiveInternalSessionName(String sessionName)
+  static String registerInternalSessionName(String sessionName)
   {
     if (sessionName == null)
       {
@@ -844,12 +844,12 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   * <p>This method is used by GanymedeSession.login() to find a
-   * unique name for a user session.  It is matched with
+   * <p>This method is used by GanymedeSession.login() to find and
+   * record a unique name for a user session.  It is matched with
    * clearSession(), below.</p>
    */
 
-  static String registerActiveUserSessionName(String sessionName)
+  static String registerUserSessionName(String sessionName)
   {
     if (sessionName == null)
       {
@@ -882,11 +882,14 @@ public class GanymedeServer implements Server {
    * <p>If this server is in deferred shutdown mode and this is the
    * last logged in remote session, we'll proceed to shut-down.</p>
    *
-   * <p>It is matched with registerActiveRemoteSessionName(), above.</p>
+   * <p>Note that the session parameter must not have cleared its
+   * permManager reference before calling this method.</p>
    */
 
   static void clearSession(GanymedeSession session)
   {
+    boolean userSession = false;
+
     Invid userInvid = session.getPermManager().getUserInvid();
     String sessionName = session.getPermManager().getSessionName();
 
@@ -905,6 +908,8 @@ public class GanymedeServer implements Server {
 
 	if (activeUserSessionNames.remove(sessionName) != null)
 	  {
+	    userSession = true;
+
 	    // if we are in deferred shutdown mode and this was the last
 	    // remote user logged in, spin off a thread to shut the server
 	    // down
@@ -930,6 +935,20 @@ public class GanymedeServer implements Server {
 		deathThread.start();
 	      }
 	  }
+      }
+
+    if (userSession)
+      {
+	try
+	  {
+	    GanymedeServer.lSemaphore.decrement();
+	  }
+	catch (IllegalArgumentException ex)
+	  {
+	    Ganymede.logError(ex);
+	  }
+
+	unmonitorUserSession(session);
       }
   }
 

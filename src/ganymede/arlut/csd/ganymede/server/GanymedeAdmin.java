@@ -1477,7 +1477,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
       }
 
     // okay at this point we've asserted our interest in editing the
-    // schema and made sure that no one is logged in or can log in.
+    // schema and made sure that no user session is logged in or can log in.
     // Now we just need to make sure that we don't have any of the
     // bases locked by anything that is skipping the semaphore, such
     // as tasks.
