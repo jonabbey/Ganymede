@@ -245,8 +245,6 @@ public class SyncRunner implements Runnable {
 
   static final boolean debug = false;
 
-  private static int id = 0;
-
   /**
    * XML version major id
    */
@@ -1481,21 +1479,11 @@ public class SyncRunner implements Runnable {
 
 	try
 	  {
-	    // we need a unique label for our session so that multiple
-	    // builder tasks can have their own lock keys.. our label
-	    // will start at sync channel:0 and work our way up as we
-	    // go along during the server's lifetime
-
 	    // XXX note: this string must not be changed because the
 	    // GanymedeSession constructor behaves in a special way
 	    // for "builder:" and "sync channel:" session labels.
 
-	    synchronized (SyncRunner.class)
-	      {
-		label = "sync channel: " + Integer.valueOf(id++);
-	      }
-
-	    session = new GanymedeSession(label);
+	    session = new GanymedeSession("sync channel:");
 
 	    try
 	      {

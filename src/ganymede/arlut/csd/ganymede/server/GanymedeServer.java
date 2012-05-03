@@ -123,15 +123,27 @@ public class GanymedeServer implements Server {
    * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin}.</p>
    */
 
-  static private Vector sessions = new Vector();
+  static private Vector<GanymedeSession> sessions = new Vector<GanymedeSession>();
 
   /**
-   * <p>A hashtable mapping session names to identity.  Used by the login
-   * process to insure that each active remote session will be given a unique
-   * identifying name.</p>
+   * <p>A hashtable mapping session names to identity.  Used by the
+   * login process to insure that each active session will be given a
+   * unique identifying name.</p>
+   *
+   * <p>Will hold a superset of the keys in the activeUserSessionNames
+   * hash unless code is operating within a synchronized block on this
+   * hash.</p>
    */
 
-  static Hashtable activeUsers = new Hashtable();
+  static private Hashtable<String, String> activeSessionNames = new Hashtable<String, String>();
+
+  /**
+   * <p>A hashtable mapping user session names to identity.  Used by
+   * the login process to insure that each active user session will be
+   * given a unique identifying name.</p>
+   */
+
+  static private Hashtable<String, String> activeUserSessionNames = new Hashtable<String, String>();
 
   /**
    * <p>A hashtable mapping user Invids to a java.lang.Date object
@@ -143,7 +155,7 @@ public class GanymedeServer implements Server {
    * the motd.html file on their next login.</p>
    */
 
-  static Hashtable userLogOuts = new Hashtable();
+  static private Hashtable<Invid, Date> userLogOuts = new Hashtable<Invid, Date>();
 
   /**
    * <p>If true, the server is waiting for all users to disconnect
@@ -705,7 +717,6 @@ public class GanymedeServer implements Server {
     sendMessageToRemoteSessions(type, message, null);
   }
 
-
   /**
    * Used by the Ganymede server to transmit notifications to
    * connected clients.
@@ -732,8 +743,9 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   * This method is called by the {@link arlut.csd.ganymede.server.timeOutTask timeOutTask}
-   * scheduled task, and forces an idle time check on any users logged in.
+   * This method is called by the {@link
+   * arlut.csd.ganymede.server.timeOutTask timeOutTask} scheduled
+   * task, and forces an idle time check on any users logged in.
    */
 
   public void clearIdleSessions()
@@ -752,6 +764,12 @@ public class GanymedeServer implements Server {
       }
   }
 
+  /**
+   * <p>This method is called by the admin console via the {@link
+   * arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} class to
+   * kick all user sessions off of the server.</p>
+   */
+
   public void killAllUsers(String reason)
   {
     // clone the sessions Vector so any forceOff() won't disturb the
@@ -767,9 +785,9 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   * This method is called by the admin console via the {@link
+   * <p>This method is called by the admin console via the {@link
    * arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} class to
-   * kick a specific user session off of the server.
+   * kick a specific user session off of the server.</p>
    */
 
   public boolean killUser(String username, String reason)
@@ -796,71 +814,121 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   *
-   * This method is used by GanymedeSession.login() to find
-   * a unique name for a session.  It is matched with
-   * clearActiveUser(), below.
-   *
+   * <p>This method is used by GanymedeSession.login() to find a
+   * unique name for an internal session.  It is matched with
+   * clearSession(), below.</p>
    */
 
-  static String registerActiveUser(String username)
+  static String registerActiveInternalSessionName(String sessionName)
   {
-    String temp;
+    if (sessionName == null)
+      {
+	throw new IllegalArgumentException("invalid null sessionName");
+      }
+
+    String temp = sessionName;
     int i = 2;
 
-    /* -- */
-
-    temp = username;
-
-    synchronized (activeUsers)
+    synchronized (activeSessionNames)
       {
-	while (activeUsers.containsKey(username))
+	while (activeSessionNames.containsKey(sessionName))
 	  {
-	    username = temp + "[" + i + "]";
+	    sessionName = temp + "[" + i + "]";
 	    i++;
 	  }
 
-	activeUsers.put(username, username);
+	activeSessionNames.put(sessionName, sessionName);
       }
 
-    return username;
+    return sessionName;
   }
 
   /**
-   *
-   * This method is to handle user logout.  It is matched with
-   * registerActiveUser(), above.
-   *
+   * <p>This method is used by GanymedeSession.login() to find a
+   * unique name for a user session.  It is matched with
+   * clearSession(), below.</p>
    */
 
-  static void clearActiveUser(String username)
+  static String registerActiveUserSessionName(String sessionName)
   {
-    synchronized (activeUsers)
+    if (sessionName == null)
       {
-	activeUsers.remove(username);
+	throw new IllegalArgumentException("invalid null sessionName");
+      }
 
-	// if we are in deferred shutdown mode and this was the last
-	// user logged in, spin off a thread to shut the server down
+    String temp = sessionName;
+    int i = 2;
 
-	if (shutdown && activeUsers.size() == 0)
+    synchronized (activeSessionNames)
+      {
+	while (activeSessionNames.contains(sessionName))
 	  {
-	    Thread deathThread = new Thread(new Runnable() {
-	      public void run() {
-		// sleep for 5 seconds to let our last client disconnect
+	    sessionName = temp + "[" + i + "]";
+	    i++;
+	  }
 
-		try
-		  {
-		    java.lang.Thread.currentThread().sleep(5000);
-		  }
-		catch (InterruptedException ex)
-		  {
-		  }
+	activeSessionNames.put(sessionName, sessionName);
+	activeUserSessionNames.put(sessionName, sessionName);
+      }
 
-		GanymedeServer.shutdown();
+    return sessionName;
+  }
+
+  /**
+   * <p>This method handles clearing a remote session's session name
+   * from the activeSessionNames and activeRemoteSessionNames
+   * hashes.</p>
+   *
+   * <p>If this server is in deferred shutdown mode and this is the
+   * last logged in remote session, we'll proceed to shut-down.</p>
+   *
+   * <p>It is matched with registerActiveRemoteSessionName(), above.</p>
+   */
+
+  static void clearSession(GanymedeSession session)
+  {
+    Invid userInvid = session.getPermManager().getUserInvid();
+    String sessionName = session.getPermManager().getSessionName();
+
+    if (userInvid != null)
+      {
+	userLogOuts.put(userInvid, new Date());
+      }
+    else
+      {
+	userLogOuts.put(userInvid, new Date());
+      }
+
+    synchronized (activeSessionNames)
+      {
+	activeSessionNames.remove(sessionName);
+
+	if (activeUserSessionNames.remove(sessionName) != null)
+	  {
+	    // if we are in deferred shutdown mode and this was the last
+	    // remote user logged in, spin off a thread to shut the server
+	    // down
+
+	    if (shutdown && activeUserSessionNames.size() == 0)
+	      {
+		Thread deathThread = new Thread(new Runnable() {
+		    public void run() {
+		      // sleep for 5 seconds to let our last client disconnect
+
+		      try
+			{
+			  java.lang.Thread.currentThread().sleep(5000);
+			}
+		      catch (InterruptedException ex)
+			{
+			}
+
+		      GanymedeServer.shutdown();
+		    }
+		  }, ts.l("clearActiveUser.deathThread"));
+
+		deathThread.start();
 	      }
-	      }, ts.l("clearActiveUser.deathThread"));
-
-	    deathThread.start();
 	  }
       }
   }
@@ -1385,14 +1453,12 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   *
-   * This method is triggered from the admin console when the user
+   * <p>This method is triggered from the admin console when the user
    * runs an 'Invid Sweep'.  It is designed to scan through the
    * Ganymede datastore's reference fields and clean out any
-   * references found that point to non-existent objects.
+   * references found that point to non-existent objects.</p>
    *
    * @return true if there were any invalid invids in the database
-   *
    */
 
   public boolean sweepInvids()

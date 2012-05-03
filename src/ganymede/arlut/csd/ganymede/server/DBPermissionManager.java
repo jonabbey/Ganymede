@@ -137,13 +137,8 @@ public class DBPermissionManager {
   private String username;
 
   /**
-   * <p>The name that the session is given.  This name will be unique
-   * on the server during its lifetime.  Especially useful if a user
-   * is logged into the server concurrently with more than one client.
-   * For such cases, the sessionName may be &lt;username&gt;[2],
-   * &lt;username&gt;[3], etc.</p>
-   *
-   * <p>sessionName should never be null.</p>
+   * <p>The name that the session is given.  Must be non-null and
+   * unique among logged in sessions on the server.</p>
    */
 
   private String sessionName;
@@ -155,28 +150,6 @@ public class DBPermissionManager {
    */
 
   private Invid userInvid;
-
-  /**
-   * <p>Convenience persistent reference to the adminPersonae object
-   * base</p>
-   */
-
-  private DBObjectBase personaBase = null;
-
-  /**
-   * <p>When did we last check our persona permissions?</p>
-   */
-
-  private Date personaTimeStamp = null;
-
-  /**
-   * <p>A reference to our current persona object.  We save this so we
-   * can look up owner groups and what not more quickly.  An end-user
-   * logged in without any extra privileges will have a null
-   * personaObj value.</p>
-   */
-
-  private DBObject personaObj = null;
 
   /**
    * <p>The name of the current persona, of the form
@@ -192,6 +165,28 @@ public class DBPermissionManager {
    */
 
   private Invid personaInvid;
+
+  /**
+   * <p>A reference to our current persona object.  We save this so we
+   * can look up owner groups and what not more quickly.  An end-user
+   * logged in without any extra privileges will have a null
+   * personaObj value.</p>
+   */
+
+  private DBObject personaObj = null;
+
+  /**
+   * <p>Convenience persistent reference to the adminPersonae object
+   * base</p>
+   */
+
+  private DBObjectBase personaBase = null;
+
+  /**
+   * <p>When did we last check our persona permissions?</p>
+   */
+
+  private Date personaTimeStamp = null;
 
   /**
    * <p>Convenience persistent reference to the Permission Matrix object base</p>
@@ -306,21 +301,23 @@ public class DBPermissionManager {
   /**
    * Configures this DBPermissionManager for a privileged internal session.
    *
-   * @param sessionLabel The name of this session, used for
-   * identifying the task or server component that is using our
-   * GanymedeSession to perform work in the server.  Must be unique
-   * during the lifetime of our containing GanymedeSession.  May not
-   * be null.
+   * @param sessionName The name of this session, used for identifying
+   * the task or server component that is using our GanymedeSession to
+   * perform work in the server.  Must be unique among logged-in
+   * sessions on the server and may not be null.
    */
 
-  public DBPermissionManager configureInternalSession(String sessionLabel)
+  public DBPermissionManager configureInternalSession(String sessionName)
   {
-    if (sessionLabel == null)
+    if (sessionName == null)
       {
-	throw new IllegalArgumentException("sessionLabel may not be null");
+	throw new IllegalArgumentException("sessionName may not be null");
       }
 
-    sessionName = sessionLabel;
+    this.sessionName = sessionName;
+
+    username = null;
+    userInvid = null;
 
     supergashMode = true;
     beforeversupergash = true;
@@ -341,21 +338,20 @@ public class DBPermissionManager {
    * logged in.  May be null if the user is logged in only with his
    * unprivileged end-user account.
    *
-   * @param sessionLabel The name of this session, used for
+   * @param sessionName The name of this session, used for
    * identifying the task or server component that is using our
    * GanymedeSession to perform work in the server.  Must be unique
-   * during the lifetime of our containing GanymedeSession.  May not
-   * be null.
+   * among logged-in sessions in the server and may not be null.
    */
 
-  public DBPermissionManager configureClientSession(DBObject userObject, DBObject personaObject, String sessionLabel)
+  public DBPermissionManager configureClientSession(DBObject userObject, DBObject personaObject, String sessionName)
   {
-    if (sessionLabel == null)
+    if (sessionName == null)
       {
 	throw new IllegalArgumentException("sessionLabel may not be null");
       }
 
-    sessionName = sessionLabel;
+    this.sessionName = sessionName;
 
     if (userObject != null)
       {
@@ -495,10 +491,7 @@ public class DBPermissionManager {
 
   /**
    * <p>Returns the session name assigned to the GanymedeSession that
-   * owns us.  If our GanymedeSession is being accessed by a user
-   * client, getSessionName() will return a unique string to identify
-   * the specific session.  If we are an internal session, we may not
-   * bother.</p>
+   * owns us.  Must be unique among all logged in sessions.</p>
    *
    * <p>getSessionName() will never return a null value.</p>
    */
@@ -611,7 +604,7 @@ public class DBPermissionManager {
 
     // do we have a real user name, or a persona name?
 
-    if (username == null || userObject == null)
+    if (username == null || userInvid == null)
       {
 	// local server process or supergash/monitor
 

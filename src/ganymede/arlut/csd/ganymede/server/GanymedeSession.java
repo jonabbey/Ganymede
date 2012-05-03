@@ -64,7 +64,6 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.rmi.server.ServerNotActiveException;
 import java.rmi.server.Unreferenced;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -176,13 +175,6 @@ final public class GanymedeSession implements Session, Unreferenced {
    */
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.GanymedeSession");
-
-  /**
-   * An incrementing number that we use during runtime to give each
-   * internal GanymedeSession its own session label.
-   */
-
-  static private AtomicInteger internalID = new AtomicInteger(0);
 
   // ---
 
@@ -394,7 +386,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // GanymedeSession constructor behaves in a special way
     // for "internal: " session labels.
 
-    this("internal: " + internalID.incrementAndGet());
+    this("internal:");
   }
 
   /**
@@ -413,14 +405,14 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>Internal sessions, as created by this constructor, have full
    * privileges to do any possible operation.</p>
    *
-   * @param sessionLabel A name for this internal session.  There
+   * @param sessionName A name for this internal session.  There
    * should not be two or more GanymedeSessions active concurrently
-   * with the same sessionLabel.
+   * with the same sessionName.
    */
 
-  public GanymedeSession(String sessionLabel) throws RemoteException
+  public GanymedeSession(String sessionName) throws RemoteException
   {
-    if (sessionLabel.startsWith("builder: ") || sessionLabel.startsWith("sync channel: "))
+    if (sessionName.startsWith("builder:") || sessionName.startsWith("sync channel:"))
       {
 	String disabledMessage = GanymedeServer.lSemaphore.checkEnabled();
 
@@ -431,13 +423,13 @@ final public class GanymedeSession implements Session, Unreferenced {
 	if (disabledMessage != null && !disabledMessage.equals("shutdown"))
 	  {
 	    // "Couldn''t create {0} GanymedeSession.. semaphore disabled: {1}"
-	    Ganymede.debug(ts.l("init.no_semaphore", sessionLabel, disabledMessage));
+	    Ganymede.debug(ts.l("init.no_semaphore", sessionName, disabledMessage));
 
 	    // "semaphore error: {0}"
 	    throw new RuntimeException(ts.l("init.semaphore_error", disabledMessage));
 	  }
       }
-    else if (!sessionLabel.startsWith("internal: "))
+    else if (!sessionName.startsWith("internal:"))
       {
 	// otherwise, if we are not starting one of the master internal
 	// sessions (either Ganymede.internalSession or
@@ -450,7 +442,7 @@ final public class GanymedeSession implements Session, Unreferenced {
         if (error != null)
           {
 	    // "Couldn''t create {0} GanymedeSession.. semaphore disabled: {1}"
-            Ganymede.debug(ts.l("init.no_semaphore", sessionLabel, error));
+            Ganymede.debug(ts.l("init.no_semaphore", sessionName, error));
 
 	    // "semaphore error: {0}"
             throw new RuntimeException(ts.l("init.semaphore_error", error));
@@ -459,6 +451,10 @@ final public class GanymedeSession implements Session, Unreferenced {
 	semaphoreLocked = true;
       }
 
+    // make sure our session name is unique for locking in builder tasks, etc.
+
+    sessionName = GanymedeServer.registerActiveInternalSessionName(sessionName);
+
     // construct our DBSession
 
     loggedInSemaphore.set(true);
@@ -466,9 +462,9 @@ final public class GanymedeSession implements Session, Unreferenced {
     this.exportObjects = false;
     clienthost = Ganymede.serverHostProperty;
 
-    dbSession = new DBSession(Ganymede.db, this, sessionLabel);
+    dbSession = new DBSession(Ganymede.db, this, sessionName);
     queryEngine = new DBQueryEngine(this, dbSession);
-    permManager = new DBPermissionManager(this).configureInternalSession(sessionLabel);
+    permManager = new DBPermissionManager(this).configureInternalSession(sessionName);
   }
 
   /**
@@ -523,9 +519,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 	Ganymede.rmi.publishObject(this);
       }
 
-    // find a unique name for this session
+    // find a unique name for this user session
 
-    String sessionName = GanymedeServer.registerActiveUser(loginName);
+    String sessionName = GanymedeServer.registerActiveUserSessionName(loginName);
 
     // find out where the user is coming from
 
@@ -2886,7 +2882,10 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
-   * This method returns the unique name of this session.
+   * <p>This method returns the name of this session.  If this session is
+   * being driven by a remote client, this name will be unique among
+   * sessions on the server so that the admin console can distinguish
+   * among them.</p>
    */
 
   public String getSessionName()
@@ -3123,38 +3122,15 @@ final public class GanymedeSession implements Session, Unreferenced {
 		semaphoreLocked = false;
 	      }
 
-	    // if we are the last user logged in and the server is in
-	    // deferred shutdown mode, clearActiveUser() will shut the
-	    // server down, so the rest of of the stuff below may not
-	    // happen
+	    // let go of our session name and let the server know that
+	    // it can shut the server down if it is deferred shutdown
+	    // mode and we were a user session.
 
-	    GanymedeServer.clearActiveUser(getSessionName());
-
-	    // help the garbage collector
-
-	    connecttime = null;
-	    clienthost = null;
-	    status = null;
-	    lastEvent = null;
-	    dbSession = null;
-	    queryEngine = null;
-
-	    wizard = null;
-	    userInfo = null;
-	    xSession = null;
+	    GanymedeServer.clearSession(this);
 	  }
 
 	// guess we're still running.  Remember the last time this
 	// user logged out for the motd-display check
-
-	if (permManager.getUserInvid() != null)
-	  {
-	    GanymedeServer.userLogOuts.put(permManager.getUserInvid(), new Date());
-	  }
-	else
-	  {
-	    GanymedeServer.userLogOuts.put(permManager.getPersonaInvid(), new Date());
-	  }
 
 	Ganymede.debug(ts.l("logout.logged_off", permManager.getUserName()));
 

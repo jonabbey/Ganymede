@@ -170,7 +170,8 @@ final public class DBSession {
    *
    * @param store The DBStore database this session belongs to.
    * @param GSession The Ganymede session associated with this DBSession
-   * @param key An identifying key with meaning to whatever code is using arlut.csd.ganymede
+   * @param key An identifying key with meaning to whatever code is
+   * using arlut.csd.ganymede.  Must be unique for DBObjectBase locking.
    *
    */
 
