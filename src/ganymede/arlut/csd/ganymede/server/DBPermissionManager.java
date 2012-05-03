@@ -176,23 +176,10 @@ public class DBPermissionManager {
   private DBObject personaObj = null;
 
   /**
-   * <p>Convenience persistent reference to the adminPersonae object
-   * base</p>
-   */
-
-  private DBObjectBase personaBase = null;
-
-  /**
    * <p>When did we last check our persona permissions?</p>
    */
 
   private Date personaTimeStamp = null;
-
-  /**
-   * <p>Convenience persistent reference to the Permission Matrix object base</p>
-   */
-
-  private DBObjectBase permBase = null;
 
   /**
    * <p>When did we last update our local cache/summary of permissions records?</p>
@@ -1839,15 +1826,10 @@ public class DBPermissionManager {
 	  }
       }
 
-    if (permBase == null)
-      {
-	permBase = Ganymede.db.getObjectBase(SchemaConstants.RoleBase);
-      }
-
     // first, make sure we have a copy of our default role
     // DBObject.. permTimeStamp is used to track this.
 
-    if (permTimeStamp == null || !permTimeStamp.before(permBase.getTimeStamp()))
+    if (permTimeStamp == null || !permTimeStamp.before(Ganymede.db.getObjectBase(SchemaConstants.RoleBase).getTimeStamp()))
       {
 	defaultObj = dbSession.viewDBObject(SchemaConstants.RoleBase,
 					    SchemaConstants.RoleDefaultObj);
@@ -1882,15 +1864,10 @@ public class DBPermissionManager {
 	  }
       }
 
-    if (personaBase == null)
-      {
-	personaBase = Ganymede.db.getObjectBase(SchemaConstants.PersonaBase);
-      }
-
     // here's where we break out if nothing needs to be updated.. note
     // that we are testing personaTimeStamp here, not permTimeStamp.
 
-    if (personaTimeStamp != null && personaTimeStamp.after(personaBase.getTimeStamp()))
+    if (personaTimeStamp != null && personaTimeStamp.after(Ganymede.db.getObjectBase(SchemaConstants.PersonaBase).getTimeStamp()))
       {
 	return;
       }
