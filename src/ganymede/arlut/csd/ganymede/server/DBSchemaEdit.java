@@ -168,9 +168,8 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   /* -- */
 
   /**
-   * Constructor.  This constructor should only be called in
-   * a critical section synchronized on the primary 
-   * {@link arlut.csd.ganymede.server.DBStore DBStore} object.
+   * Constructor.  This constructor should only be called in a
+   * critical section synchronized on the Ganymede.db.lockSync object.
    */
 
   public DBSchemaEdit() throws RemoteException

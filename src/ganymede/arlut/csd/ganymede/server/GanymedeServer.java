@@ -167,7 +167,8 @@ public class GanymedeServer implements Server {
   static boolean shutdown = false;
 
   /**
-   * <p>Our handy, all purpose login semaphore</p>
+   * <p>Our handy, all purpose counting semaphore for managing user
+   * sessions.</p>
    */
 
   static loginSemaphore lSemaphore = new loginSemaphore();
@@ -938,17 +939,17 @@ public class GanymedeServer implements Server {
 	  }
       }
 
+    try
+      {
+	GanymedeServer.lSemaphore.decrement();
+      }
+    catch (IllegalArgumentException ex)
+      {
+	Ganymede.logError(ex);
+      }
+
     if (userSession)
       {
-	try
-	  {
-	    GanymedeServer.lSemaphore.decrement();
-	  }
-	catch (IllegalArgumentException ex)
-	  {
-	    Ganymede.logError(ex);
-	  }
-
 	unmonitorUserSession(session);
       }
   }

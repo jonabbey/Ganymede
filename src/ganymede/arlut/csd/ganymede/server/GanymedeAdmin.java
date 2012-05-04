@@ -1529,6 +1529,11 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 	try
 	  {
 	    DBSchemaEdit result = new DBSchemaEdit();
+
+	    // we've created our copy of all of our DBObjectBase and
+	    // DBObjectBaseField objects above.  We're going to return
+	    // and drop the synchronization on Ganymede.db.lockSync.
+
 	    return result;
 	  }
 	catch (RemoteException ex)
