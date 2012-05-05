@@ -368,10 +368,6 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public GanymedeSession() throws RemoteException
   {
-    // XXX note: this string must not be changed because the
-    // GanymedeSession constructor behaves in a special way
-    // for "internal: " session labels.
-
     this("internal:");
   }
 
