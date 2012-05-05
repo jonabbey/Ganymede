@@ -3,17 +3,19 @@
    DBSchemaEdit.java
 
    Server side interface for schema editing
-   
+
    Created: 17 April 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -163,7 +165,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
    * will replace store.rootCategory.
    */
 
-  DBBaseCategory rootCategory;	
+  DBBaseCategory rootCategory;
 
   /* -- */
 
@@ -189,7 +191,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
       }
 
     locked = true;
-    
+
     store = Ganymede.db;
 
     // make editable copies of the object bases
@@ -250,7 +252,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   public CategoryNode getCategoryNode(String pathName)
   {
-    DBBaseCategory 
+    DBBaseCategory
       bc;
 
     int
@@ -297,7 +299,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 	  {
 	    // note that slashes are the only non-word token we should
 	    // ever get, so they are implicitly separators.
-	    
+
 	    if (tok == StreamTokenizer.TT_WORD)
 	      {
 		CategoryNode cn = bc.getNode(tokens.sval);
@@ -311,7 +313,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 		    return cn;
 		  }
 	      }
-	    
+
 	    tok = tokens.nextToken();
 	  }
       }
@@ -444,14 +446,14 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
     return null;
   }
 
-  /** 
+  /**
    * This method creates a new {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} object and returns
    * a remote handle to it so that the admin client can set fields on
    * the base, set attributes, and generally make a nuisance of
    * itself.
    *
-   * @see arlut.csd.ganymede.rmi.SchemaEdit 
+   * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
 
   public synchronized Base createNewBase(Category category, boolean embedded, boolean lowRange)
@@ -487,7 +489,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
     return createNewBase(category, embedded, id);
   }
 
-  /** 
+  /**
    * This method creates a new {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} object and returns
    * a remote handle to it so that the admin client can set fields on
@@ -631,7 +633,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 	Ganymede.debug("deleteBase failure: already released/committed");
 	throw new RuntimeException("already released/committed");
       }
-    
+
     tmpBase = newBases.get(Short.valueOf(id));
 
     if (tmpBase.getObjectCount() > 0)
@@ -650,7 +652,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * This method returns an array of defined 
+   * This method returns an array of defined
    * {@link arlut.csd.ganymede.rmi.NameSpace NameSpace} objects.
    *
    * @see arlut.csd.ganymede.rmi.SchemaEdit
@@ -702,7 +704,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * <p>This method creates a new {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} 
+   * <p>This method creates a new {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace}
    * object and returns a remote handle
    * to it so that the admin client can set attributes on the DBNameSpace,
    * and generally make a nuisance of itself.</p>
@@ -760,7 +762,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
     for (index = 0; index < store.nameSpaces.size(); index++)
       {
 	ns = (DBNameSpace) store.nameSpaces.elementAt(index);
-	
+
 	if (ns.getName().equals(name))
 	  {
 	    break;
@@ -882,9 +884,9 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 	  }
 
       	// Clear the Jython class cache
-      
+
       	JythonEditObjectFactory.unloadAllURIs();
-	
+
 	// first the new object bases
 
 	for (DBObjectBase base: newBases.values())
@@ -970,7 +972,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 	    Ganymede.debug("DBSchemaEdit: retrying database dump");
 	  }
       }
-      
+
     // and unlock the server.
     //
     // Notice that we are not doing anything to clear any internal
@@ -1040,7 +1042,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
       }
 
     // unlock the server
-	
+
     Ganymede.debug("DBSchemaEdit: released");
 
     GanymedeAdmin.setState(DBStore.normal_state);
