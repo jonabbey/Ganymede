@@ -241,7 +241,6 @@ public abstract class GanymedeBuilderTask implements Runnable {
   private static long rollunderTime = 0;
   private static long rolloverTime = 0;
   private static boolean firstRun = true;
-  private static int id = 0;
 
   /**
    * Count of the number of builder tasks currently
@@ -325,7 +324,6 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   public final void run(Object options[])
   {
-    String label = null;
     Thread currentThread = java.lang.Thread.currentThread();
     boolean
       success1 = false;
@@ -374,21 +372,11 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
 	try
 	  {
-	    // we need a unique label for our session so that multiple
-	    // builder tasks can have their own lock keys.. our label will
-	    // start at builder:0 and work our way up as we go along
-	    // during the server's lifetime
-
 	    // XXX note: this string must not be changed because the
 	    // GanymedeSession constructor behaves in a special way
 	    // for "builder:" and "sync channel:" session labels.
 
-	    synchronized (GanymedeBuilderTask.class)
-	      {
-		label = "builder: " + Integer.valueOf(id++);
-	      }
-
-	    session = new GanymedeSession(label);
+	    session = new GanymedeSession("builder:");
 
 	    try
 	      {
