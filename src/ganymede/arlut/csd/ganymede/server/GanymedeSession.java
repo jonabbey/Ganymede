@@ -228,18 +228,18 @@ final public class GanymedeSession implements Session, Unreferenced {
   private booleanSemaphore loggedInSemaphore = new booleanSemaphore(false);
 
   /**
+   * A count of how many objects this session has currently checked out.
+   */
+
+  private int objectsCheckedOut = 0;
+
+  /**
    * If true, the user has had a soft timeout and needs to
    * re-authenticate with their password, even for their
    * non-privileged username
    */
 
   private boolean timedout = false;
-
-  /**
-   * A count of how many objects this session has currently checked out.
-   */
-
-  private int objectsCheckedOut = 0;
 
   /**
    * The time that this client initially connected to the server.  Used
