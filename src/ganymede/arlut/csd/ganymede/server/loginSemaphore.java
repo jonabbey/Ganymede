@@ -99,8 +99,8 @@ public final class loginSemaphore {
    * logged in goes to zero.  If false, disable will disable further increments,
    * but the disable call itself will not block until this time
    *
-   * @param millis If waitForZero is true, tells us about our blocking behavior..
-   * if millis &lt; 0, we will block as long as necessary.  if millis = 0, we will
+   * @param millis If waitForZero is true, millis controls our blocking behavior.
+   * If millis &lt; 0, we will block as long as necessary.  If millis == 0, we will
    * not block.  if millis &gt; 0, we will block no more than that number of milliseconds.
    *
    * @return returns null if the disable was successful, or else a descriptive string
