@@ -7,7 +7,6 @@
 
    Created: 21 July 1998
 
-
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -71,13 +70,13 @@ import java.util.Vector;
 public class VectorUtils {
 
   /**
-   * This method returns a Vector containing the union of the objects
+   * <p>This method returns a Vector containing the union of the objects
    * contained in vectA and vectB.  The resulting Vector will not
    * contain any duplicates, even if vectA or vectB themselves contain
-   * repeated items.
+   * repeated items.</p>
    *
-   * This method will always return a new, non-null Vector, even if
-   * vectA and/or vectB are null.
+   * <p>This method will always return a new, non-null Vector, even if
+   * vectA and/or vectB are null.</p>
    */
 
   public static <E> Vector<E> union(List<E> vectA, List<E> vectB)
@@ -136,8 +135,8 @@ public class VectorUtils {
   }
 
   /**
-   * This method adds obj to vect if and only if vect does not
-   * already contain obj.
+   * <p>This method adds obj to vect if and only if vect does not
+   * already contain obj.</p>
    */
 
   public static <E> void unionAdd(List<E> vect, E obj)
@@ -156,8 +155,8 @@ public class VectorUtils {
   }
 
   /**
-   * Returns true if vectA and vectB have any elements in
-   * common.
+   * <p>Returns true if vectA and vectB have any elements in
+   * common.</p>
    */
 
   public static <E> boolean overlaps(List<E> vectA, List<E> vectB)
@@ -209,11 +208,11 @@ public class VectorUtils {
   }
 
   /**
-   * This method returns a Vector containing the intersection of the
-   * objects contained in vectA and vectB.
+   * <p>This method returns a Vector containing the intersection of the
+   * objects contained in vectA and vectB.</p>
    *
-   * This method will always return a new, non-null Vector, even if
-   * vectA and/or vectB are null.
+   * <p>This method will always return a new, non-null Vector, even if
+   * vectA and/or vectB are null.</p>
    */
 
   public static <E> Vector<E> intersection(List<E> vectA, List<E> vectB)
@@ -255,11 +254,11 @@ public class VectorUtils {
   }
 
   /**
-   * This method returns a Vector containing the set of objects
-   * contained in vectA that are not contained in vectB.
+   * <p>This method returns a Vector containing the set of objects
+   * contained in vectA that are not contained in vectB.</p>
    *
-   * This method will always return a new, non-null Vector, even if
-   * vectA and/or vectB are null.
+   * <p>This method will always return a new, non-null Vector, even if
+   * vectA and/or vectB are null.</p>
    */
 
   public static <E> Vector<E> difference(List<E> vectA, List<E> vectB)
@@ -305,8 +304,8 @@ public class VectorUtils {
   }
 
   /**
-   * This method returns true if vectA and vectB contain the same
-   * elements, in whatever order.
+   * <p>This method returns true if vectA and vectB contain the same
+   * elements, in whatever order.</p>
    */
 
   public static <E> boolean equalMembers(List<E> vectA, List<E> vectB)
@@ -320,11 +319,11 @@ public class VectorUtils {
   }
 
   /**
-   * This method returns a Vector of items that appeared in the
-   * vector parameter more than once.
+   * <p>This method returns a Vector of items that appeared in the
+   * vector parameter more than once.</p>
    *
-   * If no duplicates are found or if vector is null, this method
-   * returns null.
+   * <p>If no duplicates are found or if vector is null, this method
+   * returns null.</p>
    */
 
   public static <E> Vector<E> duplicates(List<E> vector)
@@ -356,12 +355,12 @@ public class VectorUtils {
   }
 
   /**
-   * This method returns a Vector containing the elements of vectA minus
+   * <p>This method returns a Vector containing the elements of vectA minus
    * the elements of vectB.  If vectA has an element in the Vector 5 times
-   * and vectB has it 3 times, the result will have it two times.
+   * and vectB has it 3 times, the result will have it two times.</p>
    *
-   * This method will always return a new, non-null Vector, even if
-   * vectA and/or vectB are null.
+   * <p>This method will always return a new, non-null Vector, even if
+   * vectA and/or vectB are null.</p>
    */
 
   public static <E> Vector<E> minus(List<E> vectA, List<E> vectB)
@@ -385,8 +384,8 @@ public class VectorUtils {
   }
 
   /**
-   * This method returns a string containing all the elements in vec
-   * concatenated together, comma separated.
+   * <p>This method returns a string containing all the elements in vec
+   * concatenated together, comma separated.</p>
    */
 
   public static String vectorString(Collection vec)
@@ -395,8 +394,8 @@ public class VectorUtils {
   }
 
   /**
-   * This method returns a string containing all the elements in vec
-   * concatenated together, comma separated.
+   * <p>This method returns a string containing all the elements in vec
+   * concatenated together, comma separated.</p>
    */
 
   public static String vectorString(Collection vec, String separator)
@@ -426,17 +425,17 @@ public class VectorUtils {
   }
 
   /**
-   * This method takes a sepChars-separated string and converts it to
-   * a vector of fields.  i.e., "gomod,jonabbey" -> a vector whose
-   * elements are "gomod" and "jonabbey".
+   * <p>This method takes a sepChars-separated string and converts it to
+   * a vector of fields.  i.e., "gomod,jonabbey" -&gt; a vector whose
+   * elements are "gomod" and "jonabbey".</p>
    *
-   * NOTE: this method will omit 'degenerate' fields from the output
+   * <p>NOTE: this method will omit 'degenerate' fields from the output
    * vector.  That is, if input is "gomod,,,  jonabbey" and sepChars
    * is ", ", then the result vector will still only have "gomod"
    * and "jonabbey" as elements, even though one might wish to
    * explicitly know about the blanks between commas.  This method
    * is intended mostly for creating email list vectors, rather than
-   * general file-parsing vectors.
+   * general file-parsing vectors.</p>
    *
    * @param input the sepChars-separated string to test.
    *
@@ -498,12 +497,12 @@ public class VectorUtils {
   }
 
   /**
-   * findNextSep() takes a string, a starting position, and a string of
+   * <p>findNextSep() takes a string, a starting position, and a string of
    * characters to be considered field separators, and returns the
-   * first index after startDex whose char is in sepChars.
+   * first index after startDex whose char is in sepChars.</p>
    *
-   * If there are no chars in sepChars past startdex in input, findNextSep()
-   * returns -1.
+   * <p>If there are no chars in sepChars past startdex in input, findNextSep()
+   * returns -1.</p>
    */
 
   private static int findNextSep(String input, int startDex, String sepChars)
