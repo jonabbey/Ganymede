@@ -881,7 +881,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
 	      {
 		if (object.getGSession() == null)
 		  {
-		    results = Ganymede.internalSession.query(query);
+		    results = Ganymede.getInternalSession().query(query);
 		  }
 		else
 		  {

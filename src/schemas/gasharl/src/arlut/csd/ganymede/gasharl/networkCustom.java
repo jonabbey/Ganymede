@@ -362,9 +362,9 @@ public class networkCustom extends DBEditObject {
 	  {
 	    sysName = editset.getDBSession().getObjectLabel(tmpInvid);
 	  }
-	else if (Ganymede.internalSession != null)
+	else if (Ganymede.getInternalSession() != null)
 	  {
-	    sysName = Ganymede.internalSession.getDBSession().getObjectLabel(tmpInvid);
+	    sysName = Ganymede.getInternalSession().getDBSession().getObjectLabel(tmpInvid);
 	  }
 	else
 	  {

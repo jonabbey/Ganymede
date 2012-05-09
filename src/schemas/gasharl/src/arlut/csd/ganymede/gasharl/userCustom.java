@@ -1412,7 +1412,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       }
     else
       {
-        gSession = Ganymede.internalSession;
+        gSession = Ganymede.getInternalSession();
       }
 
     categoryObj = lookupInvid(category, false);

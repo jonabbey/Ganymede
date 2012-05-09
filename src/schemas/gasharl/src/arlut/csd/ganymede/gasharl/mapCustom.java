@@ -365,9 +365,9 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 	  {
 	    userName = editset.getDBSession().getObjectLabel(tmpInvid);
 	  }
-	else if (Ganymede.internalSession != null)
+	else if (Ganymede.getInternalSession() != null)
 	  {
-	    userName = Ganymede.internalSession.getDBSession().getObjectLabel(tmpInvid);
+	    userName = Ganymede.getInternalSession().getDBSession().getObjectLabel(tmpInvid);
 	  }
 	else
 	  {
@@ -387,9 +387,9 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 	  {
 	    volName = editset.getDBSession().getObjectLabel(tmpInvid);
 	  }
-	else if (Ganymede.internalSession != null)
+	else if (Ganymede.getInternalSession() != null)
 	  {
-	    volName = Ganymede.internalSession.getDBSession().getObjectLabel(tmpInvid);
+	    volName = Ganymede.getInternalSession().getDBSession().getObjectLabel(tmpInvid);
 	  }
 	else
 	  {
