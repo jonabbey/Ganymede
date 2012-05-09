@@ -85,7 +85,7 @@ public class VectorUtils {
 
     if (threshold < 10)		// I pulled 10 out of my ass
       {
-	Vector result = new Vector(threshold);
+	Vector<E> result = new Vector<E>(threshold);
 
 	if (vectA != null)
 	  {
@@ -130,7 +130,7 @@ public class VectorUtils {
 	    workSet.addAll(vectB);
 	  }
 
-	return new Vector(workSet);
+	return new Vector<E>(workSet);
       }
   }
 
@@ -250,7 +250,7 @@ public class VectorUtils {
 	  }
       }
 
-    return new Vector(resultSet);
+    return new Vector<E>(resultSet);
   }
 
   /**
@@ -310,12 +310,12 @@ public class VectorUtils {
 
   public static <E> boolean equalMembers(List<E> vectA, List<E> vectB)
   {
-    if (vectA.size() != vectB.size())
+    if (vectSize(vectA) != vectSize(vectB))
       {
 	return false;
       }
 
-    return intersection(vectA, vectB).size() == vectA.size();
+    return intersection(vectA, vectB).size() == vectSize(vectA);
   }
 
   /**
@@ -333,16 +333,16 @@ public class VectorUtils {
 	return null;
       }
 
-    Vector result = null;
-    Set found = new HashSet();
+    Vector<E> result = null;
+    Set<E> found = new HashSet<E>();
 
-    for (Object item: vector)
+    for (E item: vector)
       {
 	if (found.contains(item))
 	  {
 	    if (result == null)
 	      {
-		result = new Vector();
+		result = new Vector<E>();
 	      }
 
 	    unionAdd(result, item);
