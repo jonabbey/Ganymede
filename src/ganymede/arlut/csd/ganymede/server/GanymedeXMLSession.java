@@ -3402,7 +3402,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * This is a copy of the editSchema method from the GanymedeAdmin
+   * <p>This is a copy of the editSchema method from the GanymedeAdmin
    * class which has been modified so that it will assert a schema
    * edit lock without requiring that the login semaphore count be
    * zero.  This way we can get a DBSchemaEdit context that we can use
@@ -3410,7 +3410,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * GanymedeSession's semaphore increment.  This is safe to do only
    * because we know that the GanymedeXMLSession is single-threaded
    * and will not do any database activity while the schema is opened
-   * for editing.
+   * for editing.</p>
    *
    * @return null if the server could not be put into schema edit mode.
    */

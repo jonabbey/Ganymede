@@ -1994,8 +1994,8 @@ public class Ganymede {
   }
 
   /**
-   * </P>This method is called by the GanymedeBuilderTask base class to
-   * record that the server is processing a build.</P>
+   * <p>This method is called by the GanymedeBuilderTask base class to
+   * record that the server is processing a build.</p>
    */
 
   static public void updateBuildStatus()
