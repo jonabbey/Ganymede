@@ -3,17 +3,19 @@
    dhcpOptionCustom.java
 
    This file is a management class for DHCP Option objects in Ganymede.
-   
+
    Created: 8 October 2007
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2011
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -307,7 +309,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
 
   /**
    * <p>Customization method to verify whether the user should be able to
-   * see a specific field in a given object.  Instances of 
+   * see a specific field in a given object.  Instances of
    * {@link arlut.csd.ganymede.server.DBField DBField} will
    * wind up calling up to here to let us override the normal visibility
    * process.</p>
@@ -403,7 +405,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
 
   /**
    * <p>This method is used to control whether or not it is acceptable to
-   * make a link to the given field in this 
+   * make a link to the given field in this
    * {@link arlut.csd.ganymede.server.DBObject DBObject} type when the
    * user only has editing access for the source
    * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField} and not
@@ -510,7 +512,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
    * order to maintain a consistent view of the database.</p>
    *
    * <p>If server-local code has called
-   * {@link arlut.csd.ganymede.server.GanymedeSession#enableOversight(boolean) 
+   * {@link arlut.csd.ganymede.server.GanymedeSession#enableOversight(boolean)
    * enableOversight(false)},
    * this method will never be
    * called.  This mode of operation is intended only for initial
