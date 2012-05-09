@@ -4035,6 +4035,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   protected final GanymedeSession internalSession()
   {
-    return Ganymede.internalSession;
+    return Ganymede.getInternalSession();
   }
 }

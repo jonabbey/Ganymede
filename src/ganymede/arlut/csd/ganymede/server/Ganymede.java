@@ -2019,6 +2019,16 @@ public class Ganymede {
 	GanymedeServer.sendMessageToRemoteSessions(ClientMessage.BUILDSTATUS, "idle");
       }
   }
+
+  /**
+   * <p>Static accessor to return a GanymedeSession with supergash
+   * authority and both wizards and oversight turned off.</p>
+   */
+
+  static public GanymedeSession getInternalSession()
+  {
+    return Ganymede.internalSession;
+  }
 }
 
 /*------------------------------------------------------------------------------
