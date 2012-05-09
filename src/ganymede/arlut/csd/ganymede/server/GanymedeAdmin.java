@@ -1454,13 +1454,15 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
     // "entering editSchema"
     Ganymede.debug(ts.l("editSchema.entering"));
 
-    // synchronize on server so we don't get logins while we're checking
-    // things out
-
     try
       {
 	// "schema edit"
-	String semaphoreCondition = GanymedeServer.lSemaphore.disable(ts.l("editSchema.semaphore_token"), true, 0);
+	String token = ts.l("editSchema.semaphore_token");
+
+	// Check to see if the server is in its standard state with no
+	// user sessions on the lSemaphore, without blocking.
+
+	String semaphoreCondition = GanymedeServer.lSemaphore.disable(token, true, 0);
 
 	if (semaphoreCondition != null)
 	  {
