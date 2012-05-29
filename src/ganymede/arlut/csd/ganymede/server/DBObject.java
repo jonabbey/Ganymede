@@ -212,9 +212,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   /* - */
 
   /**
-   *
    * The type definition for this object.
-   *
    */
 
   protected DBObjectBase objectBase;
@@ -330,10 +328,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   *
-   * Read constructor.  Constructs an objectBase from a
-   * DataInput stream.
-   *
+   * <p>Read constructor.  Constructs an objectBase from a DataInput
+   * stream.</p>
    */
 
   DBObject(DBObjectBase objectBase, DataInput in, boolean journalProcessing) throws IOException
@@ -580,8 +576,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   *
-   * Returns the numeric id of the object in the objectBase
+   * <p>Returns the numeric id of the object in the objectBase</p>
    *
    * @see arlut.csd.ganymede.rmi.db_object
    */
@@ -592,9 +587,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   *
-   * Returns the invid of this object
-   * for the db_object remote interface
+   * <p>Returns the invid of this object for the db_object remote
+   * interface</p>
    *
    * @see arlut.csd.ganymede.rmi.db_object
    */
@@ -605,8 +599,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   *
-   * Returns the numeric id of the object's objectBase
+   * <p>Returns the numeric id of the object's objectBase</p>
    *
    * @see arlut.csd.ganymede.rmi.db_object
    */
@@ -617,8 +610,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   *
-   * Returns the name of the object's objectBase
+   * <p>Returns the name of the object's objectBase</p>
    *
    * @see arlut.csd.ganymede.rmi.db_object
    */
@@ -629,9 +621,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   *
-   * Returns the data dictionary for this object
-   *
+   * <p>Returns the data dictionary for this object</p>
    */
 
   public final DBObjectBase getBase()
@@ -640,11 +630,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   *
-   * Returns the field definition for the given field code, or
-   * null if that field code is not registered with this object
-   * type.
-   *
+   * <p>Returns the field definition for the given field code, or null
+   * if that field code is not registered with this object type.</p>
    */
 
   public final DBObjectBaseField getFieldDef(String fieldName)
@@ -653,11 +640,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   *
-   * Returns the field definition for the given field code, or
-   * null if that field code is not registered with this object
-   * type.
-   *
+   * <p>Returns the field definition for the given field code, or null
+   * if that field code is not registered with this object type.</p>
    */
 
   public final DBObjectBaseField getFieldDef(short fieldcode)
@@ -666,12 +650,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Returns the permission that apply to the given fieldName in this
-   * object.
+   * <p>Returns the permission that apply to the given fieldName in this
+   * object.</p>
    *
-   * If this object was not made in the context of a specific
+   * <p>If this object was not made in the context of a specific
    * GanymedeSession, full permissions will be given for access to the
-   * field.
+   * field.</p>
    */
 
   public final PermEntry getFieldPerm(String fieldName)
@@ -688,12 +672,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Returns the permission that apply to the field with the given
-   * fieldcode in this object.
+   * <p>Returns the permission that apply to the field with the given
+   * fieldcode in this object.</p>
    *
-   * If this object was not made in the context of a specific
+   * <p>If this object was not made in the context of a specific
    * GanymedeSession, full permissions will be given for access to the
-   * field.
+   * field.</p>
    */
 
   public final synchronized PermEntry getFieldPerm(short fieldcode)
@@ -791,10 +775,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   *
-   * Provide easy server-side access to this object's name in a String
-   * context for debug and non-critical output.
-   *
+   * <p>Provide easy server-side access to this object's name in a
+   * String context for debug and non-critical output.</p>
    */
 
   public String toString()
@@ -803,10 +785,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   *
-   * Simple equals test.. doesn't really test to see if things are
-   * value-equals, but rather identity equals.
-   *
+   * <p>Simple equals test.. doesn't really test to see if things are
+   * value-equals, but rather identity equals.</p>
    */
 
   public boolean equals(Object param)
@@ -827,12 +807,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Returns the primary label of this object.
+   * <p>Returns the primary label of this object.</p>
    *
-   * We don't synchronize getLabel(), as it is very, very frequently
-   * called from all over, and we don't want to chance deadlock.  getField()
-   * and getValueString() are both synchronized on subcomponents of DBObject,
-   * so this method should be adequately safe as written.
+   * <p>We don't synchronize getLabel(), as it is very, very
+   * frequently called from all over, and we don't want to chance
+   * deadlock.  getField() and getValueString() are both synchronized
+   * on subcomponents of DBObject, so this method should be adequately
+   * safe as written.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_object
    */
@@ -868,12 +849,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * If this object type is embedded, this method will return the
-   * desired display label for the embedded object.
+   * <p>If this object type is embedded, this method will return the
+   * desired display label for the embedded object.</p>
    *
-   * This label may not be the same as returned by getLabel(), which
-   * is guaranteed to be derived from a namespace constrained label
-   * field, suitable for use in the XML context.
+   * <p>This label may not be the same as returned by getLabel(),
+   * which is guaranteed to be derived from a namespace constrained
+   * label field, suitable for use in the XML context.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_object
    */
@@ -884,7 +865,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Get access to the field that serves as this object's label.
+   * <p>Get access to the field that serves as this object's
+   * label.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_object
    */
@@ -895,8 +877,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Get access to the field id for the field that serves as this
-   * object's label.
+   * <p>Get access to the field id for the field that serves as this
+   * object's label.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_object
    */
@@ -907,11 +889,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   *
-   * Returns true if this object is an embedded type.
+   * <p>Returns true if this object is an embedded type.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_object
-   *
    */
 
   public boolean isEmbedded()
@@ -1289,7 +1269,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @param editset The transaction owning this object's shadow.
    *
    * @see arlut.csd.ganymede.server.DBEditSet#release()
-   *
    */
 
   synchronized boolean clearShadow(DBEditSet editset)
@@ -1375,7 +1354,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   /**
    * <p>This method provides a Vector of DBFields contained in this
-   * object in a fashion that does not contribute to fieldAry threadlock.</p>
+   * object in a fashion that does not contribute to fieldAry
+   * threadlock.</p>
    */
 
   public final Vector<DBField> getFieldVect()
@@ -1395,11 +1375,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * This method adds a DBField to this object.  It is used when
+   * <p>This method adds a DBField to this object.  It is used when
    * loading journal entries that cause new fields to be added, and by
    * InvidDBField.bind(), when anonymously adding an InvidDBField to
    * an object that the user would not normally have needs to add a
-   * field after the fact.
+   * field after the fact.</p>
    */
 
   final synchronized void addField(DBField field)
@@ -1708,7 +1688,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <P>Returns the name of a field from this object.</P>
+   * <p>Returns the name of a field from this object.</p>
    *
    * @param id The field code for the desired field of this object.
    *
@@ -1831,15 +1811,15 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * This method examines all fields in the object and verifies that
-   * they satisfy the elementary value constraints specified in the
-   * Ganymede schema.
+   * <p>This method examines all fields in the object and verifies
+   * that they satisfy the elementary value constraints specified in
+   * the Ganymede schema.</p>
    *
-   * If any fields do not meet the field constraints, a ReturnVal will
-   * be returned with a free-form dialog describing the violations.
+   * <p>If any fields do not meet the field constraints, a ReturnVal will
+   * be returned with a free-form dialog describing the violations.</p>
    *
-   * If there are no field constraint violations, null will be
-   * returned.
+   * <p>If there are no field constraint violations, null will be
+   * returned.</p>
    */
 
   public final ReturnVal validateFieldIntegrity()
@@ -2213,22 +2193,22 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <P>This helper method is for use on the server, so that custom
+   * <p>This helper method is for use on the server, so that custom
    * code subclasses can call a simple method to look up an Invid and
    * get the appropriate DBObject, taking into account whether the
-   * lookup is being done within a transaction or no.</P>
+   * lookup is being done within a transaction or no.</p>
    *
-   * <P>Note that unless the object has been checked out by the current session,
+   * <p>Note that unless the object has been checked out by the current session,
    * this method will return access to the object as it is stored directly
    * in the main datastore hashes.  This means that the object will be
    * read-only and will grant all accesses, as it will have no notion of
    * what session or transaction owns it.  If you need to have access to the
    * object's fields be protected, use {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
    * {@link arlut.csd.ganymede.server.GanymedeSession#view_db_object(arlut.csd.ganymede.common.Invid)
-   * view_db_object()} method to get the object.</P>
+   * view_db_object()} method to get the object.</p>
    *
-   * <P>This method will return null if the Invid provided does not
-   * exist in the session or the persistent store.</P>
+   * <p>This method will return null if the Invid provided does not
+   * exist in the session or the persistent store.</p>
    *
    * @param target The Invid to retrieve.
    */
@@ -2239,22 +2219,22 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <P>This helper method is for use on the server, so that custom
+   * <p>This helper method is for use on the server, so that custom
    * code subclasses can call a simple method to look up an Invid and
    * get the appropriate DBObject, taking into account whether the
-   * lookup is being done within a transaction or no.</P>
+   * lookup is being done within a transaction or no.</p>
    *
-   * <P>Note that unless the object has been checked out by the current session,
+   * <p>Note that unless the object has been checked out by the current session,
    * this method will return access to the object as it is stored directly
    * in the main datastore hashes.  This means that the object will be
    * read-only and will grant all accesses, as it will have no notion of
    * what session or transaction owns it.  If you need to have access to the
    * object's fields be protected, use {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
    * {@link arlut.csd.ganymede.server.GanymedeSession#view_db_object(arlut.csd.ganymede.common.Invid)
-   * view_db_object()} method to get the object.</P>
+   * view_db_object()} method to get the object.</p>
    *
-   * <P>This method will return null if the Invid provided does not
-   * exist in the session or the persistent store.</P>
+   * <p>This method will return null if the Invid provided does not
+   * exist in the session or the persistent store.</p>
    *
    * @param target The Invid to retrieve.
    * @param forceOriginal If true and the lookup is being done in the
@@ -2270,22 +2250,22 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <P>This helper method is for use on the server, so that custom
+   * <p>This helper method is for use on the server, so that custom
    * code subclasses can call a simple method to look up an Invid and
    * get the appropriate DBObject, taking into account whether the
-   * lookup is being done within a transaction or no.</P>
+   * lookup is being done within a transaction or no.</p>
    *
-   * <P>Note that unless the object has been checked out by the current session,
+   * <p>Note that unless the object has been checked out by the current session,
    * this method will return access to the object as it is stored directly
    * in the main datastore hashes.  This means that the object will be
    * read-only and will grant all accesses, as it will have no notion of
    * what session or transaction owns it.  If you need to have access to the
    * object's fields be protected, use {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
    * {@link arlut.csd.ganymede.server.GanymedeSession#view_db_object(arlut.csd.ganymede.common.Invid)
-   * view_db_object()} method to get the object.</P>
+   * view_db_object()} method to get the object.</p>
    *
-   * <P>This method will return null if the Invid provided does not
-   * exist in the session or the persistent store.</P>
+   * <p>This method will return null if the Invid provided does not
+   * exist in the session or the persistent store.</p>
    *
    * @param target The Invid to retrieve.
    * @param forceOriginal If true and the lookup is being done in the
@@ -2341,13 +2321,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <P>This helper method is for use on the server, so that custom
+   * <p>This helper method is for use on the server, so that custom
    * code subclasses can call a simple method to look up an Invid and
    * get the appropriate label, taking into account whether the lookup
-   * is being done within a transaction or no.</P>
+   * is being done within a transaction or no.</p>
    *
-   * <P>This method will return null if the Invid provided does not
-   * exist in the session or the persistent store.</P>
+   * <p>This method will return null if the Invid provided does not
+   * exist in the session or the persistent store.</p>
    *
    * @param target The Invid whose label we want to retrieve.
    */
@@ -2358,13 +2338,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <P>This helper method is for use on the server, so that custom
+   * <p>This helper method is for use on the server, so that custom
    * code subclasses can call a simple method to look up an Invid and
    * get the appropriate label, taking into account whether the lookup
-   * is being done within a transaction or no.</P>
+   * is being done within a transaction or no.</p>
    *
-   * <P>This method will return null if the Invid provided does not
-   * exist in the session or the persistent store.</P>
+   * <p>This method will return null if the Invid provided does not
+   * exist in the session or the persistent store.</p>
    *
    * @param target The Invid whose label we want to retrieve.
    * @param forceOriginal If true and the lookup is being done in the
@@ -2392,10 +2372,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * For an embedded object, returns the Invid of the parent object
-   * which contains contains this embedded object.
+   * <p>For an embedded object, returns the Invid of the parent object
+   * which contains contains this embedded object.</p>
    *
-   * Otherwise, returns null.
+   * <p>Otherwise, returns null.</p>
    */
 
   public final Invid getParentInvid()
@@ -2409,10 +2389,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * For an embedded object, returns a reference to the object which
-   * contains this embedded object.
+   * <p>For an embedded object, returns a reference to the object
+   * which contains this embedded object.</p>
    *
-   * Otherwise, returns null.
+   * <p>Otherwise, returns null.</p>
    */
 
   public DBObject getParentObj()
@@ -2426,8 +2406,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Returns true if this object has a field named fieldName and if
-   * that object has a defined (i.e., non-empty) value set.
+   * <p>Returns true if this object has a field named fieldName and if
+   * that object has a defined (i.e., non-empty) value set.</p>
    */
 
   public boolean isDefined(String fieldName)
@@ -2436,9 +2416,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Returns true if this object has a field with a field id of
+   * <p>Returns true if this object has a field with a field id of
    * fieldID and if that object has a defined (i.e., non-empty) value
-   * set.
+   * set.</p>
    */
 
   public boolean isDefined(short fieldID)
@@ -2447,7 +2427,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Returns true if the given field is defined.
+   * <p>Returns true if the given field is defined.</p>
    */
 
   public boolean isDefined(DBField f)
@@ -2456,10 +2436,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <P>This method is for use on the server, so that custom code can call a simple
-   * method to test to see if a boolean field is defined and has a true value.</P>
+   * <p>This method is for use on the server, so that custom code can
+   * call a simple method to test to see if a boolean field is defined
+   * and has a true value.</p>
    *
-   * <P>An exception will be thrown if the field is not a boolean.</P>
+   * <p>An exception will be thrown if the field is not a boolean.</p>
    */
 
   public boolean isSet(String fieldName)
@@ -2468,10 +2449,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <P>This method is for use on the server, so that custom code can call a simple
-   * method to test to see if a boolean field is defined and has a true value.</P>
+   * <p>This method is for use on the server, so that custom code can
+   * call a simple method to test to see if a boolean field is defined
+   * and has a true value.</p>
    *
-   * <P>An exception will be thrown if the field is not a boolean.</P>
+   * <p>An exception will be thrown if the field is not a boolean.</p>
    */
 
   public boolean isSet(short fieldID)
@@ -2480,10 +2462,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <P>This method is for use on the server, so that custom code can call a simple
-   * method to test to see if a boolean field is defined and has a true value.</P>
+   * <p>This method is for use on the server, so that custom code can
+   * call a simple method to test to see if a boolean field is defined
+   * and has a true value.</p>
    *
-   * <P>An exception will be thrown if the field is not a boolean.</P>
+   * <p>An exception will be thrown if the field is not a boolean.</p>
    */
 
   private final boolean isSet(DBField f)
@@ -2666,13 +2649,14 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Shortcut method to retrieve a indexed value from a named vector
-   * field in this object.
+   * <p>Shortcut method to retrieve a indexed value from a named
+   * vector field in this object.</p>
    *
-   * Will throw IllegalArgumentException if called on a scalar field.
+   * <p>Will throw IllegalArgumentException if called on a scalar
+   * field.</p>
    *
-   * This method checks access permissions, and will throw GanyPermissionsException
-   * on an access violation.
+   * <p>This method checks access permissions, and will throw
+   * GanyPermissionsException on an access violation.</p>
    */
 
   public Object getFieldElement(String fieldName, int index) throws GanyPermissionsException
@@ -2681,13 +2665,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Shortcut method to retrieve a indexed value from a vector
-   * field in this object.
+   * <p>Shortcut method to retrieve a indexed value from a vector
+   * field in this object.</p>
    *
-   * Will throw IllegalArgumentException if called on a scalar field.
+   * <p>Will throw IllegalArgumentException if called on a scalar field.</p>
    *
-   * This method checks access permissions, and will throw GanyPermissionsException
-   * on an access violation.
+   * <p>This method checks access permissions, and will throw
+   * GanyPermissionsException on an access violation.</p>
    */
 
   public Object getFieldElement(short fieldID, int index) throws GanyPermissionsException
@@ -2696,13 +2680,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Shortcut method to retrieve a indexed value from a named vector
-   * field in this object.
+   * <p>Shortcut method to retrieve a indexed value from a named
+   * vector field in this object.</p>
    *
-   * Will throw IllegalArgumentException if called on a scalar field.
+   * <p>Will throw IllegalArgumentException if called on a scalar field.</p>
    *
-   * This method checks access permissions, and will throw GanyPermissionsException
-   * on an access violation.
+   * <p>This method checks access permissions, and will throw
+   * GanyPermissionsException on an access violation.</p>
    */
 
   public Object getFieldElement(DBField f, int index) throws GanyPermissionsException
@@ -2716,12 +2700,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Shortcut method to retrieve a indexed value from a named vector
-   * field in this object.
+   * <p>Shortcut method to retrieve a indexed value from a named
+   * vector field in this object.</p>
    *
-   * Will throw IllegalArgumentException if called on a scalar field.
+   * <p>Will throw IllegalArgumentException if called on a scalar
+   * field.</p>
    *
-   * This method does not check access permissions.
+   * <p>This method does not check access permissions.</p>
    */
 
   public Object getFieldElementLocal(String fieldName, int index)
@@ -2730,12 +2715,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Shortcut method to retrieve a indexed value from a vector
-   * field in this object.
+   * <p>Shortcut method to retrieve a indexed value from a vector
+   * field in this object.</p>
    *
-   * Will throw IllegalArgumentException if called on a scalar field.
+   * <p>Will throw IllegalArgumentException if called on a scalar
+   * field.</p>
    *
-   * This method does not check access permissions.
+   * <p>This method does not check access permissions.</p>
    */
 
   public Object getFieldElementLocal(short fieldID, int index)
@@ -2744,12 +2730,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Shortcut method to retrieve a indexed value from a vector
-   * field in this object.
+   * <p>Shortcut method to retrieve a indexed value from a vector
+   * field in this object.</p>
    *
-   * Will throw IllegalArgumentException if called on a scalar field.
+   * <p>Will throw IllegalArgumentException if called on a scalar
+   * field.</p>
    *
-   * This method does not check access permissions.
+   * <p>This method does not check access permissions.</p>
    */
 
   public Object getFieldElementLocal(DBField f, int index)
@@ -3262,10 +3249,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * This method only returns true if a DBField is passed in which
-   * is contained in this object, by object identity.
+   * <p>This method only returns true if a DBField is passed in which
+   * is contained in this object, by object identity.</p>
    *
-   * Part of the JythonMap interface.
+   * <p>Part of the JythonMap interface.</p>
    */
 
   public boolean containsValue(Object value)
@@ -3274,7 +3261,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Part of the JythonMap interface.
+   * <p>Part of the JythonMap interface.</p>
    */
 
   public Set entrySet()
@@ -3292,7 +3279,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Part of the JythonMap interface.
+   * <p>Part of the JythonMap interface.</p>
    */
 
   public Object get(Object key)
@@ -3318,7 +3305,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Part of the JythonMap interface.
+   * <p>Part of the JythonMap interface.</p>
    */
 
   public boolean isEmpty()
@@ -3327,7 +3314,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Part of the JythonMap interface.
+   * <p>Part of the JythonMap interface.</p>
    */
 
   public Set keySet()
@@ -3336,7 +3323,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Part of the JythonMap interface.
+   * <p>Part of the JythonMap interface.</p>
    */
 
   public int size()
@@ -3345,7 +3332,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Part of the JythonMap interface.
+   * <p>Part of the JythonMap interface.</p>
    */
 
   public Collection values()
@@ -3354,11 +3341,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * This is an embedded inner class within the
+   * <p>This is an embedded inner class within the
    * arlut.csd.ganymede.server.DBObject class.  It is used in the
-   * context of the Jython/Map support that Deepak added to DBObject.
+   * context of the Jython/Map support that Deepak added to
+   * DBObject.</p>
    *
-   * Part of the JythonMap interface.
+   * <p>Part of the JythonMap interface.</p>
    */
 
   static class Entry implements Map.Entry
@@ -3393,7 +3381,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    */
 
   /**
-   * Part of the JythonMap interface.
+   * <p>Part of the JythonMap interface.</p>
    */
 
   public void clear()
@@ -3402,7 +3390,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Part of the JythonMap interface.
+   * <p>Part of the JythonMap interface.</p>
    */
 
   public Object put(Object key, Object value)
@@ -3411,7 +3399,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Part of the JythonMap interface.
+   * <p>Part of the JythonMap interface.</p>
    */
 
   public void putAll(Map t)
@@ -3420,7 +3408,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * Part of the JythonMap interface.
+   * <p>Part of the JythonMap interface.</p>
    */
 
   public Object remove(Object key)
