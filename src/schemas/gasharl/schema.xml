@@ -1,3 +1,5 @@
+stty -echo; /opt/bin/java arlut.csd.ganymede.client.xmlclient properties=/home/broccol/ganymede-client/etc/ganymede.properties '-dumpSchema' 'username=broccol:supergash';SAVE=$?;stty echo;exit $SAVE
+
 <ganyschema>
   <namespaces>
     <namespace name="ownerbase" case-sensitive="false"/>
@@ -33,6 +35,7 @@
     <namespace name="dhcp_network" case-sensitive="false"/>
     <namespace name="smailusers" case-sensitive="false"/>
     <namespace name="ExchangeStore" case-sensitive="false"/>
+    <namespace name="portalou" case-sensitive="false"/>
   </namespaces>
 
   <object_type_definitions>
@@ -587,6 +590,21 @@ Limited to 16 for NFS.</comment>
             </fielddef>
             <fielddef name="Password_Expiration" id="275">
               <typedef type="date"/>
+            </fielddef>
+          </tab>
+          <tab name="Portal Zone">
+            <fielddef name="Portal_PIN" id="288">
+              <typedef type="password">
+                <minlength val="4"/>
+                <maxlength val="20"/>
+                <badchars val=",|:@"/>
+                <plaintext/>
+              </typedef>
+            </fielddef>
+            <fielddef name="Portal_OU" id="289">
+              <typedef type="invid">
+                <targetobject name="Portal_OU"/>
+              </typedef>
             </fielddef>
           </tab>
           <tab name="External Access">
@@ -1499,6 +1517,20 @@ if the client does not explicitly request it.</comment>
               <typedef type="invid">
                 <vector/>
                 <targetobject name="User"/>
+              </typedef>
+            </fielddef>
+          </tab>
+        </objectdef>
+        <objectdef name="Portal_OU" id="283">
+          <label fieldid="256"/>
+          <tab name="General">
+            <fielddef name="Name" id="256">
+              <typedef type="string">
+                <namespace val="portalou"/>
+              </typedef>
+            </fielddef>
+            <fielddef name="OU" id="257">
+              <typedef type="string">
               </typedef>
             </fielddef>
           </tab>
