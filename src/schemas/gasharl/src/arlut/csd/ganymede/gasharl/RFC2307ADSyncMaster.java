@@ -120,6 +120,24 @@ public class RFC2307ADSyncMaster implements arlut.csd.ganymede.server.SyncMaster
 	  {
 	    book.add(eObj.getInvid(), userSchema.PORTALPIN);
 	  }
+
+	// and if we have a portal ou set, include that information.
+
+	if (book.has(eObj.getInvid(), userSchema.PORTALOU))
+	  {
+	    Invid ou = (Invid) eObj.getFieldValueLocal(userSchema.PORTALOU);
+
+	    // we want to check the before state if the after state
+	    // doesn't have an ou set, else it wouldn't be in our book
+	    // at this point.
+
+	    if (ou == null)
+	      {
+		ou = (Invid) eObj.getOriginal().getFieldValueLocal(userSchema.PORTALOU);
+	      }
+
+	    book.add(ou, portalOuSchema.OU);
+	  }
       }
 
     // likewise, whenever we write out a group whose gid is changing,

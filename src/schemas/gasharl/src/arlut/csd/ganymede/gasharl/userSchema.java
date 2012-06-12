@@ -105,4 +105,5 @@ public interface userSchema {
   final static short EMAILACCOUNTTYPE=286;
   final static short EXCHANGESTORE=287;
   final static short PORTALPIN=288;
+  final static short PORTALOU=289;
 }
