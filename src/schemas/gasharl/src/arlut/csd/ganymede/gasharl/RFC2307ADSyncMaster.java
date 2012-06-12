@@ -75,10 +75,11 @@ import arlut.csd.ganymede.server.GanymedeSession;
 public class RFC2307ADSyncMaster implements arlut.csd.ganymede.server.SyncMaster {
 
   /**
-   * The augment() method optionally adds DBObject and DBField
+   * <p>The augment() method optionally adds DBObject and DBField
    * identifiers to the FieldBook book parameter if the SyncMaster
    * decides that the additional DBObject/DBFields need to be written
-   * to a delta sync channel in response to the changes made to obj.
+   * to a delta sync channel in response to the changes made to
+   * obj.</p>
    */
 
   public void augment(FieldBook book, DBEditObject eObj)
