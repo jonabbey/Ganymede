@@ -604,6 +604,7 @@ Limited to 16 for NFS.</comment>
             <fielddef name="Portal_OU" id="289">
               <typedef type="invid">
                 <targetobject name="Portal_OU"/>
+                <targetfield name="Members"/>
               </typedef>
             </fielddef>
           </tab>
@@ -1531,6 +1532,13 @@ if the client does not explicitly request it.</comment>
             </fielddef>
             <fielddef name="OU" id="257">
               <typedef type="string">
+              </typedef>
+            </fielddef>
+            <fielddef name="Members" id="258">
+              <typedef type="invid">
+                <vector/>
+                <targetobject name="User"/>
+                <targetfield name="Portal_OU"/>
               </typedef>
             </fielddef>
           </tab>
