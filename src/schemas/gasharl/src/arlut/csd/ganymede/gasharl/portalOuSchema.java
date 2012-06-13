@@ -65,4 +65,5 @@ public interface portalOuSchema {
 
   final static short NAME=256;
   final static short OU=257;
+  final static short MEMBERS=258;
 }
