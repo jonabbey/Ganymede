@@ -272,32 +272,32 @@ public class SyncRunner implements Runnable {
   // ---
 
   /**
-   * Enum of possible modalities for a SyncRunner
+   * <p>Enum of possible modalities for a SyncRunner</p>
    */
 
   public enum SyncType
   {
     /**
-     * The SyncRunner is not triggered automatically, but may be
+     * <p>The SyncRunner is not triggered automatically, but may be
      * manually fired from the admin console, or used for filtering
-     * the output of an xmlclient dump.
+     * the output of an xmlclient dump.</p>
      */
 
     MANUAL(0),
 
     /**
-     * The SyncRunner is triggered automatically, and writes out an
+     * <p>The SyncRunner is triggered automatically, and writes out an
      * XML file with before-and-after context describing a transaction
-     * that is committed in the Ganymede data store.
+     * that is committed in the Ganymede data store.</p>
      */
 
     INCREMENTAL(1),
 
 
     /**
-     * The SyncRunner is triggered automatically on Ganymede commits,
-     * and writes out a filtered set of all data, regardless of
-     * whether or not the data objects were modified recently.
+     * <p>The SyncRunner is triggered automatically on Ganymede
+     * commits, and writes out a filtered set of all data, regardless
+     * of whether or not the data objects were modified recently.</p>
      */
 
     FULLSTATE(2);
@@ -349,7 +349,7 @@ public class SyncRunner implements Runnable {
   private Map<String, SyncPrefEnum> matrix;
 
   /**
-   * Controls what type of Sync Channel we're handling.
+   * <p>Controls what type of Sync Channel we're handling.</p>
    */
 
   private SyncType mode;
@@ -365,49 +365,49 @@ public class SyncRunner implements Runnable {
   private booleanSemaphore needBuild = new booleanSemaphore(true);
 
   /**
-   * This semaphore controls whether or not this SyncRunner will
+   * <p>This semaphore controls whether or not this SyncRunner will
    * attempt to write out transactions.  This semaphore is disabled
-   * when this Sync Channel is disabled in the admin console.
+   * when this Sync Channel is disabled in the admin console.</p>
    */
 
   private booleanSemaphore active = new booleanSemaphore(true);
 
   /**
-   * If the Sync Channel object in the Ganymede server had a class
+   * <p>If the Sync Channel object in the Ganymede server had a class
    * name defined, and we can load it successfully, master will
    * contain a reference to the {@link
    * arlut.csd.ganymede.server.SyncMaster} used to provide
    * augmentation to the delta sync records produced by this
-   * SyncRunner.
+   * SyncRunner.</p>
    */
 
   private SyncMaster master;
 
   /**
-   * A reference to the scheduleHandle for this sync channel.  We use
-   * this handle to set the status for propagation to the admin
-   * console(s).
+   * <p>A reference to the scheduleHandle for this sync channel.  We
+   * use this handle to set the status for propagation to the admin
+   * console(s).</p>
    */
 
   private scheduleHandle handle;
 
   /**
-   * If we're an incremental sync channel, we'll track the size of
+   * <p>If we're an incremental sync channel, we'll track the size of
    * what we add to the queue during runs of the service program, so
    * we can determine whether the service program cleared the queue
-   * (minus the new entries) during its run.
+   * (minus the new entries) during its run.</p>
    */
 
   private int queueGrowthSize = 0;
 
   /**
-   * The lock object we're using for the queueGrowthSize management.
+   * <p>The lock object we're using for the queueGrowthSize management.</p>
    */
 
   private Object queueGrowthMonitor = new Object();
 
   /**
-   * A filter we use to find transaction files in the queue directory.
+   * <p>A filter we use to find transaction files in the queue directory.</p>
    */
 
   private QueueDirFilter dirFilter = new QueueDirFilter();
