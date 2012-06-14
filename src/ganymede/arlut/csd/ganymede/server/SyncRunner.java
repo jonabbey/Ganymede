@@ -92,13 +92,14 @@ import com.jclark.xml.output.UTF8XMLWriter;
 
 /**
  * <p>This class is used in the Ganymede server to handle Sync
- * Channel-style incremental synchronization.  Unlike the full-state
- * {@link arlut.csd.ganymede.server.GanymedeBuilderTask} system,
- * SyncRunner is not designed to be customized through subclassing.
- * Instead, all SyncRunner objects generate a common XML file format
- * for writing out synchronization data.  SyncRunner objects are
- * registered in the server for execution automatically when a
- * <code>Sync Channel</code> object (using the {@link
+ * Channel-style incremental and full-state synchronization.  Unlike
+ * the full-state {@link
+ * arlut.csd.ganymede.server.GanymedeBuilderTask} system, SyncRunner
+ * is not designed to be customized through subclassing.  Instead, all
+ * SyncRunner objects generate a common XML file format for writing
+ * out synchronization data.  SyncRunner objects are registered in the
+ * server for execution automatically when a <code>Sync Channel</code>
+ * object (using the {@link
  * arlut.csd.ganymede.server.syncChannelCustom} DBEditObject subclass
  * for management) is created in the Ganymede data store.  This
  * <code>Sync Channel</code> object provides all of the configuration
@@ -110,33 +111,38 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * SyncRunner synchronization is done in a split phase manner, in
  * which step 1 writes out data files and step 2 executes an external
  * script to process the files.  Unlike GanymedeBuilderTask,
- * SyncRunner's step 1 is done synchronously with transaction commit,
- * rather than being done on a best-effort basis at some point after
- * the transaction is committed.  Every time a transaction is
- * committed, the Ganymede server compares the objects involved in the
- * transaction against every registered <code>Sync Channel</code>
- * object.  If any of the objects or fields created, deleted, or
- * edited during the transaction matches against a Sync Channel's
- * so-called <code>Field Options</code> matrix of objects and fields
- * to sync, that Sync Channel will write an XML file to the directory
- * configured in the Sync Channel's <code>Queue Directory</code>
- * field.</p>
+ * SyncRunner's step 1 is typically done synchronously with
+ * transaction commit, rather than being done on a best-effort basis
+ * at some point after the transaction is committed.  Every time a
+ * transaction is committed, the Ganymede server compares the objects
+ * involved in the transaction against every registered <code>Sync
+ * Channel</code> object.  If any of the objects or fields created,
+ * deleted, or edited during the transaction matches against a Sync
+ * Channel's so-called <code>Field Options</code> matrix of objects
+ * and fields to sync, that Sync Channel will write an XML file to the
+ * directory configured in the Sync Channel's <code>Queue
+ * Directory</code> field.</p>
  *
- * <p>Each XML file that is created in a Sync Channel output directory
- * is given a unique filename, based on the number of transactions
- * committed by the Ganymede server since the server's database was
- * first initialized.  The first transaction committed is transaction
- * 0, the second is 1, and so forth.  These transaction numbers are
- * global in the Ganymede server.  Every time any transaction is
- * committed, the transaction number is incremented, whether or not
- * any Sync Channels match against the transaction.</p>
+ * <p>Sync Channels can be configured with three different operational
+ * modes.  These modes are incremental, full-state automatic, and
+ * manual full-state.</p>
  *
- * <p>These XML files are written out synchronously with the
- * transaction commit.  What this means is that the transaction is not
- * counted as successfully committed until all SyncRunners that match
- * against the transaction successfully write and flush their XML
- * files to the proper output directory.  If a problem prevents any of
- * the SyncRunners from successfully writing its XML files, the
+ * <p>For incremental Sync Channels, each XML file that is created in
+ * a Sync Channel output directory is given a unique filename, based
+ * on the number of transactions committed by the Ganymede server
+ * since the server's database was first initialized.  The first
+ * transaction committed is transaction 0, the second is 1, and so
+ * forth.  These transaction numbers are global in the Ganymede
+ * server.  Every time any transaction is committed, the transaction
+ * number is incremented, whether or not any Sync Channels match
+ * against the transaction.</p>
+ *
+ * <p>These incremental XML files are written out synchronously with
+ * the transaction commit.  What this means is that the transaction is
+ * not counted as successfully committed until all SyncRunners that
+ * match against the transaction successfully write and flush their
+ * XML files to the proper output directory.  If a problem prevents
+ * any of the SyncRunners from successfully writing its XML files, the
  * transaction will be aborted as if it never happened.  All of this
  * is done with proper ACID transactional guarantees.  The SyncRunner
  * implementation is designed so that the Ganymede server can be
@@ -146,19 +152,9 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * Channels and the journal, or it will not be recorded to any of
  * them.</p>
  *
- * <p>All of this behavior corresponds to the logic that is
- * implemented in the {@link
- * arlut.csd.ganymede.server.GanymedeBuilderTask#builderPhase1()}
- * method in the GanymedeBuilderTask class.  The SyncRunner equivalent
- * to the {@link
- * arlut.csd.ganymede.server.GanymedeBuilderTask#builderPhase2()}
- * method is provided by the <code>Service Program</code> specified in
- * the corresponding <code>Sync Channel</code> object in the Ganymede
- * data store.</p>
- *
- * <p>Whenever any transaction is successfully committed, each Sync
- * Runner is scheduled for execution by the {@link
- * arlut.csd.ganymede.server.GanymedeScheduler}.  When the Sync
+ * <p>Whenever any transaction is successfully committed, each
+ * incremental Sync Channel Runner is scheduled for execution by the
+ * {@link arlut.csd.ganymede.server.GanymedeScheduler}.  When the Sync
  * Runner's {@link arlut.csd.ganymede.server.SyncRunner#run()} method
  * is called, it runs its external <code>Service Program</code>,
  * passing the most recently committed transaction number as a single
@@ -175,36 +171,52 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * XML files that it finds with transaction numbers higher than that
  * passed to it on the command line.</p>
  *
- * <p>In this way, the Sync Channel system allows transactions to be
- * committed at a rapid rate, while allowing the <code>Service
- * Program</code> to take as little or as much time as is required to
- * process transactions.  The principle of back-to-back builds is very
- * much part of this Ganymede synchronization mechanism as well.</p>
+ * <p>In this way, the incremental Sync Channel system allows
+ * transactions to be committed at a rapid rate, while allowing the
+ * <code>Service Program</code> to take as little or as much time as
+ * is required to process transactions.  The principle of back-to-back
+ * builds is very much part of this Ganymede synchronization mechanism
+ * as well.</p>
  *
- * <p>Because the Sync Channel transaction files are generated while
- * the transaction is being committed, the Sync Channel writing code
- * has complete access to the before and after state of all objects in
- * the transaction.  This before and after information is incorporated
- * into each XML file, so that the external <code>Service
- * Program</code> has access to the change context in order to apply
- * the appropriate changes against the directory service target.</p>
+ * <p>Because the incremental Sync Channel transaction files are
+ * generated while the transaction is being committed, the Sync
+ * Channel writing code has complete access to the before and after
+ * state of all objects in the transaction.  This before and after
+ * information is incorporated into each XML file, so that the
+ * external <code>Service Program</code> has access to the change
+ * context in order to apply the appropriate changes against the
+ * directory service target.</p>
  *
- * <p>Because Sync Channel synchronization is based on applying
- * changes to a directory service target, it works best on directory
- * services that can be updated incrementally, like LDAP.  It is not
- * designed for systems that require full-state replacement in order
- * to make changes at all, such as NIS or classical DNS.  Even for
- * systems that can accept incremental changes, however, the use of
- * discrete deltas for Ganymede synchronization can be problematic.
- * If an XML transaction file cannot successfully be applied to a
- * directory service target, the Ganymede server has no way of knowing
- * this, because the Service Program is not run until sometime after
- * the transaction has been successfully committed.</p>
+ * <p>Full-state automatic sync channels, by contrast, work more like
+ * the GanymedeBuilderTask system.  When a transaction is committed
+ * that matches a full-state sync channel's Sync Channel object
+ * definition, the sync channel is scheduled for later execution in
+ * the Ganymede scheduler.  When the full-state sync channel is
+ * serviced by the scheduler, the full state of the system (as
+ * filtered by the requirements of the Sync Channel object at the time
+ * the scheduler runs) the XML file is generated and the service
+ * program is run immediately therafter.</p>
+ *
+ * <p>Incremental sync channels can be more efficient, as only changed
+ * data need be written to the Sync Channel, but not all types of data
+ * services can be supported with incremental synchronization.</p>
+ *
+ * <p>Because incremental synchronization is based on applying changes
+ * to a directory service target, it works best on directory services
+ * that can be updated incrementally, like LDAP.  It is not designed
+ * for systems that require full-state replacement in order to make
+ * changes at all, such as NIS or classical DNS.  Even for systems
+ * that can accept incremental changes, however, the use of discrete
+ * deltas for Ganymede synchronization can be problematic.  If an XML
+ * transaction file cannot successfully be applied to a directory
+ * service target, the Ganymede server has no way of knowing this,
+ * because the Service Program is not run until sometime after the
+ * transaction has been successfully committed.</p>
  *
  * <p>In order to cope with this, the Sync Channel system has
- * provisions for doing 'full-state' XML dumps as well.  You can do
- * this manually by using the Ganymede xmlclient.  The command you
- * want looks like</p>
+ * provisions for doing manual 'full-state' XML dumps as well. You
+ * can do this manually by using the Ganymede xmlclient.  The command
+ * you want looks like</p>
  *
  * <pre>
  *   xmlclient -dumpdata sync=Users > full_users_sync.xml
