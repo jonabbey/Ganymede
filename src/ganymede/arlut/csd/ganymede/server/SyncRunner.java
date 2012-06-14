@@ -526,10 +526,10 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * This method is used to enable or disable this sync channel's
+   * <p>This method is used to enable or disable this sync channel's
    * writing of transactions to disk.  Turning this channel's output
    * off may be useful when the sync channel's external service
-   * program is manually disabled in the admin console.
+   * program is manually disabled in the admin console.</p>
    */
 
   public void setActive(boolean state)
@@ -538,8 +538,8 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * Returns the name of the Sync Channel that this SyncRunner was
-   * configured from.
+   * <p>Returns the name of the Sync Channel that this SyncRunner was
+   * configured from.</p>
    */
 
   public String getName()
@@ -548,8 +548,8 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * Returns true if this SyncRunner is configured as a full state
-   * sync channel.
+   * <p>Returns true if this SyncRunner is configured as a full state
+   * sync channel.</p>
    */
 
   public boolean isFullState()
@@ -558,8 +558,8 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * Returns true if this SyncRunner is configured as an incremental
-   * sync channel.
+   * <p>Returns true if this SyncRunner is configured as an
+   * incremental sync channel.</p>
    */
 
   public boolean isIncremental()
@@ -568,8 +568,8 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * Returns the queue directory we'll write to if we're an
-   * incremental build channel.
+   * <p>Returns the queue directory we'll write to if we're an
+   * incremental build channel.</p>
    */
 
   public String getDirectory()
@@ -578,7 +578,7 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * Returns the file we'll write to for a full state build.
+   * <p>Returns the file we'll write to for a full state build.</p>
    */
 
   public String getFullStateFile()
@@ -587,8 +587,8 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * Returns the name of the external service program for this Sync
-   * Channel.
+   * <p>Returns the name of the external service program for this Sync
+   * Channel.</p>
    */
 
   public String getServiceProgram()
@@ -597,8 +597,8 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * Sets a reference to the scheduleHandle that this sync channel
-   * will use to communicate its status to the admin consoles.
+   * <p>Sets a reference to the scheduleHandle that this sync channel
+   * will use to communicate its status to the admin consoles.</p>
    */
 
   public void setScheduleHandle(scheduleHandle handle)
@@ -834,11 +834,11 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * This method checks this Full State SyncRunner against the objects
-   * involved in the provided transaction.  If this SyncRunner's Sync
-   * Channel definition matches against the transaction, a flag will
-   * be set causing a Full State build to be executed upon the next
-   * run of this Sync Runner.
+   * <p>This method checks this Full State SyncRunner against the
+   * objects involved in the provided transaction.  If this
+   * SyncRunner's Sync Channel definition matches against the
+   * transaction, a flag will be set causing a Full State build to be
+   * executed upon the next run of this Sync Runner.</p>
    *
    * @param transRecord A transaction description record describing the transaction we are checking
    * @param objectList An array of DBEditObjects that the transaction has checked out at commit time
@@ -927,9 +927,9 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * This method creates an initial internal FieldBook for this
+   * <p>This method creates an initial internal FieldBook for this
    * SyncRunner, based on the parameters defined in the Sync Channel
-   * DBObject that this SyncRunner is configured from.
+   * DBObject that this SyncRunner is configured from.</p>
    */
 
   private void initializeFieldBook(DBEditObject[] objectList, FieldBook book)
@@ -1420,7 +1420,7 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * This is the method that will run when the GanymedeScheduler
+   * <p>This is the method that will run when the GanymedeScheduler
    * schedules us for execution after a transaction commit.  If our
    * incremental flag is set to true, we'll consider ourselves as
    * servicing an incremental build, in which case we just call our
@@ -1429,7 +1429,7 @@ public class SyncRunner implements Runnable {
    * a {@link arlut.csd.ganymede.server.GanymedeBuilderTask}| and
    * write out a complete, filtered dump of the server's contents to
    * an XML file and then call the servicer with that file name as a
-   * command line argument.
+   * command line argument.</p>
    */
 
   public void run()
@@ -1461,7 +1461,7 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * This method handles running a full state XML build.
+   * <p>This method handles running a full state XML build.</p>
    */
 
   public void runFullState()
@@ -1562,10 +1562,10 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * This method writes out a full state XML dump to the fullStateFile
+   * <p>This method writes out a full state XML dump to the fullStateFile
    * registered in this SyncRunner.  It is run within the context of a
    * {@link arlut.csd.ganymede.server.DBDumpLock} asserted on the
-   * Ganymede {@link arlut.csd.ganymede.server.DBStore}.
+   * Ganymede {@link arlut.csd.ganymede.server.DBStore}.</p>
    */
 
   private void writeFullStateSync(GanymedeSession session) throws NotLoggedInException, RemoteException, IOException
@@ -1608,9 +1608,9 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * This method executes the external build, feeding the external
+   * <p>This method executes the external build, feeding the external
    * service script the name of the full state XML file that we dumped
-   * out.
+   * out.</p>
    */
 
   private void runFullStateService()
@@ -1676,7 +1676,7 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * This method handles running an incremental XML build.
+   * <p>This method handles running an incremental XML build.</p>
    */
 
   public void runIncremental()
@@ -1817,9 +1817,9 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * Performs a readdir loop on the queue directory for this sync
+   * <p>Performs a readdir loop on the queue directory for this sync
    * channel (if incremental) to see how many entries are currently in
-   * the queue.
+   * the queue.</p>
    */
 
   public int getQueueSize()
@@ -1837,7 +1837,7 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * Updates the queue status in the admin consoles
+   * <p>Updates the queue status in the admin consoles</p>
    */
 
   private void updateAdminConsole(boolean justRanQueue)
@@ -1911,8 +1911,8 @@ public class SyncRunner implements Runnable {
 ------------------------------------------------------------------------------*/
 
 /**
- * Filename pattern matcher for our incremental sync channel queue
- * files.
+ * <p>Filename pattern matcher for our incremental sync channel queue
+ * files.</p>
  */
 
 class QueueDirFilter implements java.io.FilenameFilter {
@@ -1937,11 +1937,11 @@ class QueueDirFilter implements java.io.FilenameFilter {
 ------------------------------------------------------------------------------*/
 
 /**
- * No-op SyncMaster class used in cases where no SyncMaster is defined
- * for a delta Sync Channel object.
+ * <p>No-op SyncMaster class used in cases where no SyncMaster is defined
+ * for a delta Sync Channel object.</p>
  *
- * By using a No-op Sync Master, we simplify the logic in the
- * SyncRunner's shouldInclude() method.
+ * <p>By using a No-op Sync Master, we simplify the logic in the
+ * SyncRunner's shouldInclude() method.</p>
  */
 
 class NoopSyncMaster implements SyncMaster {
@@ -1951,10 +1951,11 @@ class NoopSyncMaster implements SyncMaster {
   }
 
   /**
-   * The augment() method optionally adds DBObject and DBField
+   * <p>The augment() method optionally adds DBObject and DBField
    * identifiers to the FieldBook book parameter if the SyncMaster
    * decides that the additional DBObject/DBFields need to be written
-   * to a delta sync channel in response to the changes made to obj.
+   * to a delta sync channel in response to the changes made to
+   * obj.</p>
    */
 
   public void augment(FieldBook book, DBEditObject obj)
