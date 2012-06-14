@@ -1761,7 +1761,7 @@ public final class InvidDBField extends DBField implements invid_field {
     try
       {
 	// note that we only want to remove one instance of the invid
-	// pointing back to us.. we may have multiple fields on the
+	// pointing back to us.. we may have multiple fields on
 	// this object pointing to the remote, and we want to only
 	// clear one back pointer at a time.
 
