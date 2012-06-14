@@ -355,11 +355,11 @@ public class SyncRunner implements Runnable {
   private SyncType mode;
 
   /**
-   * This variable is true if we've seen a transaction that requires
-   * us to issue a build on the next run().
+   * <p>This variable is true if we've seen a transaction that
+   * requires us to issue a build on the next run().</p>
    *
-   * We set this to true on startup so that we will initiate a
-   * "catch-up" build on server startup, just in case.
+   * <p>We set this to true on startup so that we will initiate a
+   * "catch-up" build on server startup, just in case.</p>
    */
 
   private booleanSemaphore needBuild = new booleanSemaphore(true);
@@ -424,8 +424,8 @@ public class SyncRunner implements Runnable {
   }
 
   /**
-   * Configure this SyncRunner from the corresponding Ganymede Sync
-   * Channel DBObject.
+   * <p>Configure this SyncRunner from the corresponding Ganymede Sync
+   * Channel DBObject.</p>
    */
 
   private synchronized void updateInfo(DBObject syncChannel)
