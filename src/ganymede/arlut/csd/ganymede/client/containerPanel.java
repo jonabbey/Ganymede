@@ -3025,11 +3025,16 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 	sa.setAllowedChars(fieldTemplate.getOKChars());
 	sa.setDisallowedChars(fieldTemplate.getBadChars());
 	sa.setText((String)fieldInfo.getValue());
-	sa.getViewport().setViewPosition(new Point(0,0));
 
 	if (editable && fieldInfo.isEditable())
 	  {
 	    sa.setCallback(this);
+	  }
+	else
+	  {
+	    // make sure we show the start of the non-editable string
+
+	    sa.setCaretPosition(0);
 	  }
 
 	sa.setEditable(editable && fieldInfo.isEditable());
