@@ -95,7 +95,7 @@ public class JstringField extends JentryField {
   /**
    * Base constructor for JstringField
    *
-   * @param columns number of colums in the JstringField
+   * @param columns number of columns in the JstringField
    * @param is_editable true if this JstringField is editable
    */
 
