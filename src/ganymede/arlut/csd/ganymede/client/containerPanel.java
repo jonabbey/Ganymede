@@ -157,7 +157,13 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
   static final boolean debug = false;
   static final boolean debug_persona = false;
-  static final int FIELDWIDTH = 25;
+
+  /**
+   * Number of columns to size our string fields to, one of our
+   * primary references for our layout.
+   */
+
+  static final int FIELDWIDTH = 30;
 
   /**
    * TranslationService object for handling string localization in the
