@@ -149,6 +149,11 @@ public class JstringArea extends JScrollPane implements FocusListener {
     return textArea.getText();
   }
 
+  public void setCaretPosition(int pos)
+  {
+    textArea.setCaretPosition(pos);
+  }
+
   public void setAllowedChars(String s)
   {
     allowedChars = s;
