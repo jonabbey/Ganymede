@@ -164,7 +164,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * primary references for our layout.
    */
 
-  static final int FIELDWIDTH = 40;
+  static final int FIELDWIDTH = 35;
 
   /**
    * TranslationService object for handling string localization in the
