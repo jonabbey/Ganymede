@@ -72,12 +72,12 @@ import arlut.csd.ganymede.common.scheduleHandle;
 ------------------------------------------------------------------------------*/
 
 /**
- * Background task scheduler for the Ganymede server.  It is similar
+ * <p>Background task scheduler for the Ganymede server.  It is similar
  * in function and behavior to the UNIX cron facility, but is designed
  * to run arbitrary Java Runnable objects in separate threads within
- * the server.
+ * the server.</p>
  *
- * The Ganymede server's {@link
+ * <p>The Ganymede server's {@link
  * arlut.csd.ganymede.server.Ganymede#main(java.lang.String[]) main()}
  * routine creates a GanymedeScheduler at server start time.  Once
  * created and start()'ed, the server's GanymedeScheduler runs as an
@@ -88,26 +88,26 @@ import arlut.csd.ganymede.common.scheduleHandle;
  * spending most of its time waiting for something to happen, and
  * various scheduling methods being called interactively to change the
  * behavior of the run() method's on-going execution. (I.e., to
- * schedule new tasks or to change task scheduling)
+ * schedule new tasks or to change task scheduling)</p>
  *
- * The GanymedeScheduler tracks tasks by name.  Only one task with a
+ * <p>The GanymedeScheduler tracks tasks by name.  Only one task with a
  * given name may be registered with the scheduler at a time.
  * Registering a new task with a given name will cause the scheduler
- * to forget about an old task by the same name.
+ * to forget about an old task by the same name.</p>
  *
- * GanymedeScheduler is closely bound to the {@link
+ * <p>GanymedeScheduler is closely bound to the {@link
  * arlut.csd.ganymede.common.scheduleHandle scheduleHandle} and {@link
  * arlut.csd.ganymede.server.taskMonitor taskMonitor} classes.
  * Together, these three classes form a robust and flexible task
- * scheduling system.
+ * scheduling system.</p>
  *
- * The GanymedeScheduler supports updating the Ganymede admin
+ * <p>The GanymedeScheduler supports updating the Ganymede admin
  * console's task monitor display by way of the {@link
  * arlut.csd.ganymede.rmi.AdminAsyncResponder} interface.  Likewise,
  * the Ganymede server's admin console interface, {@link
  * arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin} supports
  * several remote methods that the admin console can call to affect
- * GanymedeScheduler.
+ * GanymedeScheduler.</p>
  *
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  */
@@ -186,8 +186,9 @@ public class GanymedeScheduler extends Thread {
   private boolean reportTasks;
 
   /**
-   * Constructor.  The GanymedeScheduler must be created and then
-   * started by calling start() on the constructed GanymedeScheduler.
+   * <p>Constructor.  The GanymedeScheduler must be created and then
+   * started by calling start() on the constructed
+   * GanymedeScheduler.</p>
    *
    * @param reportTasks if true, the scheduler will attempt to notify
    *                    the GanymedeAdmin class when tasks are scheduled
@@ -201,12 +202,12 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * This method is used to register a task
-   * {@link arlut.csd.ganymede.server.DBObject DBObject} record from
-   * the Ganymede database in this
-   * scheduler, loading the named Runnable class via the Java
-   * class loader and scheduling the Runnable for execution according
-   * to the parameters specified in the task object.
+   * <p>This method is used to register a task {@link
+   * arlut.csd.ganymede.server.DBObject DBObject} record from the
+   * Ganymede database in this scheduler, loading the named Runnable
+   * class via the Java class loader and scheduling the Runnable for
+   * execution according to the parameters specified in the task
+   * object.</p>
    */
 
   public synchronized void registerTaskObject(DBObject object)
@@ -386,12 +387,12 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * This method is used to add a task to the scheduler that will not
-   * be scheduled until specifically requested.
+   * <p>This method is used to add a task to the scheduler that will
+   * not be scheduled until specifically requested.</p>
    *
-   * If a task with the given name is already registered with the
+   * <p>If a task with the given name is already registered with the
    * scheduler, that task will be removed from the scheduling queue
-   * and registered anew as an on-demand task.
+   * and registered anew as an on-demand task.</p>
    *
    * @return A reference to the schedulers scheduleHandle for this
    * task.  Modify with extreme caution from outside the scheduler.
@@ -466,11 +467,12 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * This method is used to add an action to be run once, at a specific time.
+   * <p>This method is used to add an action to be run once, at a
+   * specific time.</p>
    *
-   * If a task with the given name is already registered with the
+   * <p>If a task with the given name is already registered with the
    * scheduler, that task will be removed from the scheduling queue
-   * and registered anew as a single-execution task.
+   * and registered anew as a single-execution task.</p>
    *
    * @return A reference to the schedulers scheduleHandle for this
    * task.  Modify with extreme caution from outside the scheduler.
@@ -520,11 +522,12 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * This method is used to add an action to be run every day at a specific time.
+   * <p>This method is used to add an action to be run every day at a
+   * specific time.</p>
    *
-   * If a task with the given name is already registered with the
+   * <p>If a task with the given name is already registered with the
    * scheduler, that task will be removed from the scheduling queue
-   * and registered anew as a periodic task.
+   * and registered anew as a periodic task.</p>
    *
    * @return A reference to the schedulers scheduleHandle for this
    * task.  Modify with extreme caution from outside the scheduler.
@@ -591,15 +594,15 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * This method is used to add an action to be run at a specific
-   * initial time, and every &lt;intervalMinutes&gt; thereafter.
+   * <p>This method is used to add an action to be run at a specific
+   * initial time, and every &lt;intervalMinutes&gt; thereafter.</p>
    *
-   * The scheduler will not reschedule a task until the last scheduled
-   * instance of the task has completed.
+   * <p>The scheduler will not reschedule a task until the last
+   * scheduled instance of the task has completed.</p>
    *
-   * If a task with the given name is already registered with the
+   * <p>If a task with the given name is already registered with the
    * scheduler, that task will be removed from the scheduling queue
-   * and registered anew as a periodic task.
+   * and registered anew as a periodic task.</p>
    *
    * @return A reference to the schedulers scheduleHandle for this
    * task.  Modify with extreme caution from outside the scheduler.
@@ -651,15 +654,16 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * This method unregisters the named task so that it can be
-   * rescheduled with different parameters, or simply removed.
+   * <p>This method unregisters the named task so that it can be
+   * rescheduled with different parameters, or simply removed.</p>
    *
-   * Note that this method will not prevent the scheduler's
-   * {@link arlut.csd.ganymede.server.GanymedeScheduler#run() run()} method from
-   * briefly waking up unnecessarily if the named task was the next scheduled to be
-   * executed.  Easier to have the run() method check to see if any
-   * tasks actually need to be run than to try and persuade the run()
-   * method not to wake up for the removed task.
+   * <p>Note that this method will not prevent the scheduler's {@link
+   * arlut.csd.ganymede.server.GanymedeScheduler#run() run()} method
+   * from briefly waking up unnecessarily if the named task was the
+   * next scheduled to be executed.  Easier to have the run() method
+   * check to see if any tasks actually need to be run than to try and
+   * persuade the run() method not to wake up for the removed
+   * task.</p>
    */
 
   public synchronized scheduleHandle unregisterTask(String name)
@@ -689,8 +693,8 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * This method is provided to allow an admin console to cause a registered
-   * task to be immediately spawned.
+   * <p>This method is provided to allow an admin console to cause a
+   * registered task to be immediately spawned.</p>
    *
    * @return true if the task is either currently running or was started,
    *         or false if the task could not be found in the list of currently
@@ -724,12 +728,14 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * This method is provided to allow the server to request that a task
-   * listed as being registered 'on-demand' be run as soon as possible.
+   * <p>This method is provided to allow the server to request that a
+   * task listed as being registered 'on-demand' be run as soon as
+   * possible.</p>
    *
-   * If the task is currently running, it will be flagged to run again
-   * as soon as the current run completes.  This is intended to support
-   * the need for the server to be able to do back-to-back nis/dns builds.
+   * <p>If the task is currently running, it will be flagged to run
+   * again as soon as the current run completes.  This is intended to
+   * support the need for the server to be able to do back-to-back
+   * nis/dns builds.</p>
    *
    * @return false if the task name could not be found on the on-demand
    *         or currently running lists.
@@ -741,12 +747,14 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * This method is provided to allow the server to request that a task
-   * listed as being registered 'on-demand' be run as soon as possible.
+   * <p>This method is provided to allow the server to request that a
+   * task listed as being registered 'on-demand' be run as soon as
+   * possible.</p>
    *
-   * If the task is currently running, it will be flagged to run again
-   * as soon as the current run completes.  This is intended to support
-   * the need for the server to be able to do back-to-back nis/dns builds.
+   * <p>If the task is currently running, it will be flagged to run
+   * again as soon as the current run completes.  This is intended to
+   * support the need for the server to be able to do back-to-back
+   * nis/dns builds.</p>
    *
    * @return false if the task name could not be found on the on-demand
    *         or currently running lists.
@@ -789,10 +797,10 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * This method is provided to allow an admin console to put an
-   * immediate halt to a running background task.  Calling this
-   * method will result in an interrupt being sent to the running
-   * background task.
+   * <p>This method is provided to allow an admin console to put an
+   * immediate halt to a running background task.  Calling this method
+   * will result in an interrupt being sent to the running background
+   * task.</p>
    *
    * @return true if the task was either not running, or was
    *         running and was told to stop.
@@ -822,11 +830,11 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * This method is provided to allow an admin console to specify
-   * that a task be suspended.  Suspended tasks will not be
-   * scheduled until later enabled.  If the task is currently running,
-   * it will not be interfered with, but the task will not be
-   * scheduled for execution in future until re-enabled.
+   * <p>This method is provided to allow an admin console to specify
+   * that a task be suspended.  Suspended tasks will not be scheduled
+   * until later enabled.  If the task is currently running, it will
+   * not be interfered with, but the task will not be scheduled for
+   * execution in future until re-enabled.</p>
    *
    * @return true if the task was found and disabled
    */
@@ -852,13 +860,12 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * This method is provided to allow an admin console to specify
-   * that a task be re-enabled after a suspension.
+   * <p>This method is provided to allow an admin console to specify
+   * that a task be re-enabled after a suspension.</p>
    *
-   * A re-enabled task will be scheduled for execution according
-   * to its original schedule, with any runtimes that would have
-   * been issued during the time the task was suspended simply
-   * skipped.
+   * <p>A re-enabled task will be scheduled for execution according to
+   * its original schedule, with any runtimes that would have been
+   * issued during the time the task was suspended simply skipped.</p>
    *
    * @return true if the task was found and enabled
    */
@@ -969,19 +976,20 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * This method is responsible for carrying out the scheduling
-   * work of this class on a background thread.
+   * <p>This method is responsible for carrying out the scheduling
+   * work of this class on a background thread.</p>
    *
-   * The basic logic is to wait until the next action is due to run,
-   * move the task from our scheduled list to our running list, and
-   * run it.  Other synchronized methods such as
-   * {@link arlut.csd.ganymede.server.GanymedeScheduler#runTask(arlut.csd.ganymede.common.scheduleHandle) runTask()},
-   * {@link arlut.csd.ganymede.server.GanymedeScheduler#scheduleTask(arlut.csd.ganymede.common.scheduleHandle) scheduleTask()},
-   * and
-   * {@link arlut.csd.ganymede.server.GanymedeScheduler#notifyCompletion(arlut.csd.ganymede.common.scheduleHandle) notifyCompletion()},
-   * may be called while this method is waiting for something to
-   * happen.  These methods modify the data structures that run()
-   * uses to determine its scheduling needs.
+   * <p>The basic logic is to wait until the next action is due to
+   * run, move the task from our scheduled list to our running list,
+   * and run it.  Other synchronized methods such as {@link
+   * arlut.csd.ganymede.server.GanymedeScheduler#runTask(arlut.csd.ganymede.common.scheduleHandle)
+   * runTask()}, {@link
+   * arlut.csd.ganymede.server.GanymedeScheduler#scheduleTask(arlut.csd.ganymede.common.scheduleHandle)
+   * scheduleTask()}, and {@link
+   * arlut.csd.ganymede.server.GanymedeScheduler#notifyCompletion(arlut.csd.ganymede.common.scheduleHandle)
+   * notifyCompletion()}, may be called while this method is waiting
+   * for something to happen.  These methods modify the data
+   * structures that run() uses to determine its scheduling needs.</p>
    */
 
   public synchronized void run()
@@ -1167,8 +1175,9 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * This private method is used by the GanymedeScheduler thread's main
-   * loop to put a task in the scheduled hash onto the run hash
+   * <p>This private method is used by the GanymedeScheduler thread's
+   * main loop to put a task in the scheduled hash onto the run
+   * hash</p>
    */
 
   private synchronized void runTask(scheduleHandle handle)
@@ -1188,11 +1197,11 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * This method is used by instances of
-   * {@link arlut.csd.ganymede.common.scheduleHandle scheduleHandle} to let the
-   * GanymedeScheduler thread know when their tasks have run to
-   * completion.  This method is responsible for rescheduling
-   * the task if it is a periodic task.
+   * <p>This method is used by instances of {@link
+   * arlut.csd.ganymede.common.scheduleHandle scheduleHandle} to let
+   * the GanymedeScheduler thread know when their tasks have run to
+   * completion.  This method is responsible for rescheduling the task
+   * if it is a periodic task.</p>
    */
 
   public synchronized void notifyCompletion(scheduleHandle handle)
@@ -1247,11 +1256,11 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * This private method takes a task that needs to be scheduled
+   * <p>This private method takes a task that needs to be scheduled
    * and adds it to the scheduler.  All scheduling additions or
    * changes are handled by this method.  This is the only method in
    * GanymedeScheduler that can notify the run() method that it may
-   * need to wake up early to handle a newly registered task.
+   * need to wake up early to handle a newly registered task.</p>
    */
 
   private synchronized void scheduleTask(scheduleHandle handle)
@@ -1284,10 +1293,10 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * This method is run when the GanymedeScheduler thread is
+   * <p>This method is run when the GanymedeScheduler thread is
    * terminated.  It kills off any background processes currently
    * running.  Those threads should have a finally clause that can
-   * handle abrupt termination.
+   * handle abrupt termination.</p>
    */
 
   private synchronized void cleanUp()
@@ -1314,9 +1323,9 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * This method is used to report to the Ganymede server (and thence
-   * the admin console(s) the status of background tasks scheduled
-   * and/or running.
+   * <p>This method is used to report to the Ganymede server (and
+   * thence the admin console(s) the status of background tasks
+   * scheduled and/or running.</p>
    */
 
   private synchronized void updateTaskInfo(boolean updateConsoles)
@@ -1366,8 +1375,9 @@ public class GanymedeScheduler extends Thread {
   }
 
   /**
-   * Returns a Vector of {@link arlut.csd.ganymede.common.scheduleHandle scheduleHandle}
-   * objects suitable for reporting to the admin console.
+   * <p>Returns a Vector of {@link
+   * arlut.csd.ganymede.common.scheduleHandle scheduleHandle} objects
+   * suitable for reporting to the admin console.</p>
    */
 
   synchronized Vector reportTaskInfo()
@@ -1392,9 +1402,10 @@ public class GanymedeScheduler extends Thread {
 ------------------------------------------------------------------------------*/
 
 /**
- * This class is used to produce test task objects for the {@link
- * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler} class.  It
- * print a message when it is run, then waits one second before returning.
+ * <p>This class is used to produce test task objects for the {@link
+ * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}
+ * class.  It print a message when it is run, then waits one second
+ * before returning.</p>
  */
 
 class sampleTask implements Runnable {
