@@ -4,17 +4,19 @@
 
    This class is designed to be run in a thread.. it allows the main server
    to register tasks to be run on a periodic basis.
-   
+
    Created: 26 January 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -144,17 +146,17 @@ public class GanymedeScheduler extends Thread {
     currentTime = new Date();
 
     scheduler.addTimedAction(currentTime,
-			     new sampleTask("sample task 1"), 
+			     new sampleTask("sample task 1"),
 			     "sample task 1");
 
     currentTime = new Date(currentTime.getTime() + 1000*60);
 
     scheduler.addPeriodicAction(currentTime, 1,
-				new sampleTask("sample task 2"), 
+				new sampleTask("sample task 2"),
 				"sample task 2");
 
     currentTime = new Date(currentTime.getTime() + 1000*60);
-    
+
     scheduler.addTimedAction(currentTime,
 			     new sampleTask("sample task 3"),
 			     "sample task 3");
@@ -162,7 +164,7 @@ public class GanymedeScheduler extends Thread {
     currentTime = new Date(currentTime.getTime() + 1000*60);
 
     scheduler.addPeriodicAction(currentTime, 1,
-				new sampleTask("sample task 4"), 
+				new sampleTask("sample task 4"),
 				"sample task 4");
   }
 
@@ -234,14 +236,14 @@ public class GanymedeScheduler extends Thread {
 	Ganymede.logError(ex, "GanymedeScheduler.registerTaskObject(): class definition could not be found");
 	return;
       }
-		
+
     Runnable task = null;
 
     // see if we can find a new-style constructor to take the Invid
     // parameter
 
     Constructor c = null;
-    
+
     try
       {
 	c = classdef.getConstructor(new Class[] {arlut.csd.ganymede.common.Invid.class});
@@ -250,7 +252,7 @@ public class GanymedeScheduler extends Thread {
       {
 	// oh, well
       }
-    
+
     if (c != null)
       {
 	try
@@ -281,7 +283,7 @@ public class GanymedeScheduler extends Thread {
 	    System.err.println("InstantiationException " + ex);
 	  }
       }
-    
+
     if (task == null)
       {
 	return;
@@ -319,7 +321,7 @@ public class GanymedeScheduler extends Thread {
     int periodCount = ((Integer) object.getFieldValueLocal(SchemaConstants.TaskPeriodCount)).intValue();
     Date periodAnchor = (Date) object.getFieldValueLocal(SchemaConstants.TaskPeriodAnchor);
     long periodInterval, anchorTime, nowTime, nextRunTime;
-    
+
     if (periodType.equals(minutes_str))
       {
 	periodMinutes = 1;
@@ -336,18 +338,18 @@ public class GanymedeScheduler extends Thread {
       {
 	periodMinutes = 10080;
       }
-    else 
+    else
       {
-	throw new RuntimeException("GanymedeScheduler Error.. can't register " + 
+	throw new RuntimeException("GanymedeScheduler Error.. can't register " +
 				   taskName + " with unknown period type.");
       }
-    
+
     periodMinutes *= periodCount;
-    
+
     periodInterval = periodMinutes * 60 * 1000L;
-    
+
     // we need to find the next moment to run the task with, using the periodAnchor
-    
+
     if (periodAnchor == null)
       {
 	anchorTime = System.currentTimeMillis();
@@ -477,7 +479,7 @@ public class GanymedeScheduler extends Thread {
    * best read-only.
    */
 
-  public synchronized scheduleHandle addTimedAction(Date time, 
+  public synchronized scheduleHandle addTimedAction(Date time,
 						    Runnable task,
 						    String name)
   {
@@ -531,7 +533,7 @@ public class GanymedeScheduler extends Thread {
    * best read-only.
    */
 
-  public synchronized scheduleHandle addDailyAction(int hour, int minute, 
+  public synchronized scheduleHandle addDailyAction(int hour, int minute,
 						    Runnable task, String name)
   {
     scheduleHandle handle;
@@ -607,7 +609,7 @@ public class GanymedeScheduler extends Thread {
    */
 
   public synchronized scheduleHandle addPeriodicAction(Date firstTime,
-						       int intervalMinutes, 
+						       int intervalMinutes,
 						       Runnable task,
 						       String name)
   {
@@ -670,7 +672,7 @@ public class GanymedeScheduler extends Thread {
       {
 	oldHandle = (scheduleHandle) currentlyScheduled.remove(name);
       }
-    
+
     if (onDemand.containsKey(name))
       {
 	oldHandle = (scheduleHandle) onDemand.remove(name);
@@ -690,7 +692,7 @@ public class GanymedeScheduler extends Thread {
    * This method is provided to allow an admin console to cause a registered
    * task to be immediately spawned.
    *
-   * @return true if the task is either currently running or was started, 
+   * @return true if the task is either currently running or was started,
    *         or false if the task could not be found in the list of currently
    *         registered tasks.
    */
@@ -785,7 +787,7 @@ public class GanymedeScheduler extends Thread {
 	return true;
       }
   }
-  
+
   /**
    * This method is provided to allow an admin console to put an
    * immediate halt to a running background task.  Calling this
@@ -995,7 +997,7 @@ public class GanymedeScheduler extends Thread {
 	  {
 	    Ganymede.debug("Ganymede Scheduler: scheduling task started");
 	  }
-	
+
 	while (true)
 	  {
 	    try
@@ -1005,12 +1007,12 @@ public class GanymedeScheduler extends Thread {
 		    Ganymede.debug("Scheduler interrupted");
 		    return;	// jump to finally, then return
 		  }
-		
+
 		if (debug)
 		  {
 		    System.err.println("Ganymede Scheduler at top of loop");
 		  }
-		
+
 		if (nextAction == null)
 		  {
 		    try
@@ -1024,7 +1026,7 @@ public class GanymedeScheduler extends Thread {
 			  {
 			    System.err.println("Ganymede Scheduler loop waiting for wakeup");
 			  }
-			
+
 			wait();	// scheduleTask() can wake us up here via notify()
 		      }
 		    catch (InterruptedException ex)
@@ -1032,7 +1034,7 @@ public class GanymedeScheduler extends Thread {
 			System.err.println("Scheduler interrupted");
 			return;	// jump to finally, then return
 		      }
-		    
+
 		    if (debug)
 		      {
 			System.err.println("*** snort?");
@@ -1041,11 +1043,11 @@ public class GanymedeScheduler extends Thread {
 		else
 		  {
 		    currentTime = System.currentTimeMillis();
-		    
+
 		    if (currentTime < nextAction.getTime())
 		      {
 			sleepTime = nextAction.getTime() - currentTime;
-			
+
 			if (sleepTime > 0)
 			  {
 			    try
@@ -1054,7 +1056,7 @@ public class GanymedeScheduler extends Thread {
 				  {
 				    System.err.println("Ganymede Scheduler loop hitting the snooze button");
 				  }
-				
+
 				wait(sleepTime);	// scheduleTask() can wake us up here via notify()
 			      }
 			    catch (InterruptedException ex)
@@ -1062,7 +1064,7 @@ public class GanymedeScheduler extends Thread {
 				System.err.println("Scheduler interrupted");
 				return; // jump to finally, then return
 			      }
-			    
+
 			    if (debug)
 			      {
 				System.err.println("Ganymede Scheduler loop waking from snooze");
@@ -1077,24 +1079,24 @@ public class GanymedeScheduler extends Thread {
 			    System.err.println("XX: Processing current actions");
 			  }
 		      }
-		    
+
 		    currentTime = System.currentTimeMillis();
-		    
+
 		    if (currentTime >= nextAction.getTime())
 		      {
 			Vector toRun = new Vector();
 			Date nextRun = null;
 			Enumeration en;
-			
+
 			en = currentlyScheduled.elements();
-			
+
 			// enum may be empty if the task that we woke ourselves
 			// up for was unregistered while we were sleeping
-			
+
 			while (en.hasMoreElements())
 			  {
 			    handle = (scheduleHandle) en.nextElement();
-			    
+
 			    if (handle.startTime.getTime() <= currentTime)
 			      {
 				toRun.addElement(handle);
@@ -1111,9 +1113,9 @@ public class GanymedeScheduler extends Thread {
 				  }
 			      }
 			  }
-			
+
 			nextAction = nextRun;
-			
+
 			for (int i = 0; i < toRun.size(); i++)
 			  {
 			    handle = (scheduleHandle) toRun.elementAt(i);
@@ -1122,7 +1124,7 @@ public class GanymedeScheduler extends Thread {
 			      {
 				System.err.println("Ganymede Scheduler loop running " + handle);
 			      }
-			    
+
 			    runTask(handle);
 			  }
 		      }
@@ -1148,7 +1150,7 @@ public class GanymedeScheduler extends Thread {
 	      }
 	  }
       }
-    finally 
+    finally
       {
 	if (logStuff)
 	  {
@@ -1218,10 +1220,10 @@ public class GanymedeScheduler extends Thread {
 	      {
 		if (logStuff && !(handle.task instanceof silentTask))
 		  {
-		    Ganymede.debug("Ganymede Scheduler: rescheduling task " + 
+		    Ganymede.debug("Ganymede Scheduler: rescheduling task " +
 				   handle.name + " for " + handle.startTime);
 		  }
-		
+
 		scheduleTask(handle);
 	      }
 	    else if (handle.startTime == null)
@@ -1239,17 +1241,17 @@ public class GanymedeScheduler extends Thread {
       }
     else
       {
-	Ganymede.debug("Ganymede Scheduler: confusion! Couldn't find task " + 
+	Ganymede.debug("Ganymede Scheduler: confusion! Couldn't find task " +
 		       handle.name + " on the runnng list");
       }
   }
 
-  /**  
+  /**
    * This private method takes a task that needs to be scheduled
    * and adds it to the scheduler.  All scheduling additions or
    * changes are handled by this method.  This is the only method in
    * GanymedeScheduler that can notify the run() method that it may
-   * need to wake up early to handle a newly registered task. 
+   * need to wake up early to handle a newly registered task.
    */
 
   private synchronized void scheduleTask(scheduleHandle handle)
@@ -1258,7 +1260,7 @@ public class GanymedeScheduler extends Thread {
 
     if (debug)
       {
-	System.err.println("Ganymede Scheduler: scheduled task " + handle.name + 
+	System.err.println("Ganymede Scheduler: scheduled task " + handle.name +
 			   " for initial execution at " + handle.startTime);
       }
 
@@ -1306,7 +1308,7 @@ public class GanymedeScheduler extends Thread {
     while (en.hasMoreElements())
       {
 	handle = (scheduleHandle) en.nextElement();
-	
+
 	handle.stop();
       }
   }
@@ -1336,7 +1338,7 @@ public class GanymedeScheduler extends Thread {
       {
 	VectorUtils.unionAdd(taskList, en.nextElement());
       }
-    
+
     en = currentlyRunning.elements();
     while (en.hasMoreElements())
       {
@@ -1352,7 +1354,7 @@ public class GanymedeScheduler extends Thread {
     taskListInitialized = true;
 
     if (reportTasks && updateConsoles)
-      {    
+      {
 	GanymedeAdmin.refreshTasks();
       }
 
