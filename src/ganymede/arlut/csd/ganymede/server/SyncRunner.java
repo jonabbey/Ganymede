@@ -953,10 +953,10 @@ public class SyncRunner implements Runnable {
 
 	    DBObject origObj = syncObject.getOriginal();
 
-	    // We know that checked-out DBEditObjects have a copy of all
-	    // defined fields, so we don't need to also loop over
-	    // origObj.getFieldVect() looking for fields that were deleted
-	    // from syncObject.
+	    // We know that checked-out DBEditObjects have a copy of
+	    // all defined fields, so we don't need to consult the
+	    // (possibly null) origObj reference looking for fields
+	    // that were deleted from syncObject.
 
 	    for (DBField memberField: syncObject.getFieldVect())
 	      {
@@ -1123,11 +1123,13 @@ public class SyncRunner implements Runnable {
 
     DBObject origObj = object.getOriginal();
 
-    Vector fieldCopies = object.getFieldVect();
+    // We know that checked-out DBEditObjects have a copy of
+    // all defined fields, so we don't need to consult the
+    // (possibly null) origObj reference looking for fields
+    // that were deleted from syncObject.
 
-    for (int i = 0; i < fieldCopies.size(); i++)
+    for (DBField memberField: object.getFieldVect())
       {
-	DBField memberField = (DBField) fieldCopies.elementAt(i);
 	DBField origField;
 
 	if (origObj == null)
