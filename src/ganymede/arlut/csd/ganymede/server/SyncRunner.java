@@ -517,9 +517,7 @@ public class SyncRunner implements Runnable {
 
   /**
    * <p>This method is used to enable or disable this sync channel's
-   * writing of transactions to disk.  Turning this channel's output
-   * off may be useful when the sync channel's external service
-   * program is manually disabled in the admin console.</p>
+   * writing of transactions to disk.</p>
    */
 
   public void setActive(boolean state)
@@ -610,12 +608,15 @@ public class SyncRunner implements Runnable {
    * SyncMaster class referenced by name in the SyncChannel DBObject
    * used to create this SyncRunners.</p>
    *
-   * @param transRecord A transaction description record describing the transaction we are writing
-   * @param objectList An array of DBEditObjects that the transaction has checked out at commit time
+   * @param transRecord A transaction description record describing
+   * the transaction we are writing
+   * @param objectList An array of DBEditObjects that the transaction
+   * has checked out at commit time
    * @param transaction The DBEditSet that is being committed.
    */
 
-  public void writeIncrementalSync(DBJournalTransaction transRecord, DBEditObject[] objectList,
+  public void writeIncrementalSync(DBJournalTransaction transRecord,
+				   DBEditObject[] objectList,
 				   DBEditSet transaction) throws IOException
   {
     if (!this.active.isSet())
@@ -830,8 +831,10 @@ public class SyncRunner implements Runnable {
    * transaction, a flag will be set causing a Full State build to be
    * executed upon the next run of this Sync Runner.</p>
    *
-   * @param transRecord A transaction description record describing the transaction we are checking
-   * @param objectList An array of DBEditObjects that the transaction has checked out at commit time
+   * @param transRecord A transaction description record describing
+   * the transaction we are checking
+   * @param objectList An array of DBEditObjects that the transaction
+   * has checked out at commit time
    * @param transaction The DBEditSet that is being committed.
    */
 
@@ -854,7 +857,8 @@ public class SyncRunner implements Runnable {
    * go back and erase the sync files that we did write out.  This method
    * is responsible for wielding the axe.</p>
    *
-   * @param transRecord A transaction description record describing the transaction we are clearing from this sync channel
+   * @param transRecord A transaction description record describing
+   * the transaction we are clearing from this sync channel
    */
 
   public void unSync(DBJournalTransaction transRecord) throws IOException
@@ -880,7 +884,8 @@ public class SyncRunner implements Runnable {
    * arlut.csd.ganymede.server.XMLDumpContext} that writeIncrementalSync() will
    * write to.</p>
    *
-   * @param transRecord A transaction description record describing the transaction we are writing
+   * @param transRecord A transaction description record describing
+   * the transaction we are writing
    */
 
   private XMLDumpContext createXMLSync(DBJournalTransaction transRecord) throws IOException
@@ -918,8 +923,9 @@ public class SyncRunner implements Runnable {
 
   /**
    * <p>This method creates an initial internal FieldBook for this
-   * SyncRunner, based on the parameters defined in the Sync Channel
-   * DBObject that this SyncRunner is configured from.</p>
+   * SyncRunner, based on the parameters defined in the incremental
+   * Sync Channel DBObject that this SyncRunner is configured
+   * from.</p>
    */
 
   private void initializeFieldBook(DBEditObject[] objectList, FieldBook book)
@@ -971,7 +977,8 @@ public class SyncRunner implements Runnable {
 		  {
 		    if (debug)
 		      {
-			Ganymede.debug("SyncRunner.initializeFieldBook(): Created field " + memberField + " in " + syncObject);
+			Ganymede.debug("SyncRunner.initializeFieldBook(): Created field " +
+				       memberField + " in " + syncObject);
 		      }
 
 		    SyncPrefEnum fieldOption = getOption(memberField);
@@ -989,7 +996,8 @@ public class SyncRunner implements Runnable {
 		  {
 		    if (debug)
 		      {
-			Ganymede.debug("SyncRunner.initializeFieldBook(): Deleted field " + memberField + " in " + syncObject);
+			Ganymede.debug("SyncRunner.initializeFieldBook(): Deleted field " +
+				       memberField + " in " + syncObject);
 		      }
 
 		    SyncPrefEnum fieldOption = getOption(memberField);
@@ -1007,7 +1015,8 @@ public class SyncRunner implements Runnable {
 		  {
 		    if (debug)
 		      {
-			Ganymede.debug("SyncRunner.initializeFieldBook(): Edited (maybe) field " + memberField + " in " + syncObject);
+			Ganymede.debug("SyncRunner.initializeFieldBook(): Edited (maybe) field " +
+				       memberField + " in " + syncObject);
 		      }
 
 		    // check to see if the field has changed and whether we
@@ -1026,11 +1035,13 @@ public class SyncRunner implements Runnable {
 		      {
 			if (memberField.hasChanged(origField))
 			  {
-			    Ganymede.debug("SyncRunner.initializeFieldBook(): Hey field " + memberField + " really did change compared to the original " + origField);
+			    Ganymede.debug("SyncRunner.initializeFieldBook(): Hey field " +
+					   memberField + " really did change compared to the original " + origField);
 			  }
 			else
 			  {
-			    Ganymede.debug("SyncRunner.initializeFieldBook(): Hey I don't think field " + memberField + " changed at all compared to the original " + origField);
+			    Ganymede.debug("SyncRunner.initializeFieldBook(): Hey I don't think field " +
+					   memberField + " changed at all compared to the original " + origField);
 			  }
 		      }
 
