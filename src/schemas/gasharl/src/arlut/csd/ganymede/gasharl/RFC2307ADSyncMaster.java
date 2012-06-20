@@ -165,5 +165,28 @@ public class RFC2307ADSyncMaster implements arlut.csd.ganymede.server.SyncMaster
 	      }
 	  }
       }
+
+    // and if we redefine the OU field in a portal ou object, we'll
+    // need to make sure that all user objects that are defined in
+    // that ou get written to our context section.
+
+    if (eObj.getTypeID() == portalOuSchema.BASE)
+      {
+	if (book.has(eObj.getInvid(), portalOuSchema.OU))
+	  {
+	    GanymedeSession querySession = eObj.getGSession();
+
+	    QueryDataNode matchingPortalOUNode = new QueryDataNode(QueryDataNode.INVIDVAL, QueryDataNode.EQUALS, eObj.getInvid());
+	    QueryDeRefNode matchingUsers = new QueryDeRefNode(userSchema.PORTALOU, matchingPortalOUNode);
+
+	    Vector<Result> results = querySession.internalQuery(new Query(SchemaConstants.UserBase, matchingUsers, false));
+
+	    for (Result result: results)
+	      {
+		book.add(result.getInvid(), userSchema.USERNAME);
+		book.add(result.getInvid(), userSchema.PORTALOU);
+	      }
+	  }
+      }
   }
 }
