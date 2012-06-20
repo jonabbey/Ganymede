@@ -829,7 +829,8 @@ public class SyncRunner implements Runnable {
    * objects involved in the provided transaction.  If this
    * SyncRunner's Sync Channel definition matches against the
    * transaction, a flag will be set causing a Full State build to be
-   * executed upon the next run of this Sync Runner.</p>
+   * executed upon the next run of this Sync Runner in the Ganymede
+   * scheduler.</p>
    *
    * @param transRecord A transaction description record describing
    * the transaction we are checking
@@ -1265,14 +1266,16 @@ public class SyncRunner implements Runnable {
 
 	if (debug)
 	  {
-	    Ganymede.debug("SyncRunner.shouldInclude(): But actually, we don't think that field " + newField + " changed in this transaction, so no.");
+	    Ganymede.debug("SyncRunner.shouldInclude(): But actually, we don't think that field " +
+			   newField + " changed in this transaction, so no.");
 	  }
       }
     else
       {
 	if (debug)
 	  {
-	    Ganymede.debug("SyncRunner.shouldInclude(): WTF?  fieldOption == " + fieldOption + " for field " + newField);
+	    Ganymede.debug("SyncRunner.shouldInclude(): WTF?  fieldOption == " +
+			   fieldOption + " for field " + newField);
 	  }
       }
 
