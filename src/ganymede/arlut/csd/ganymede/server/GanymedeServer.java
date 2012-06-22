@@ -516,11 +516,11 @@ public class GanymedeServer implements Server {
 
 		if (user != null)
 		  {
-		    objects.addElement(user.getInvid());
+		    objects.add(user.getInvid());
 		  }
 		else
 		  {
-		    objects.addElement(persona.getInvid());
+		    objects.add(persona.getInvid());
 		  }
 
 		if (Ganymede.log != null)
@@ -565,7 +565,7 @@ public class GanymedeServer implements Server {
 		  {
 		    Vector recipients = new Vector();
 
-		    //	    recipients.addElement(clientName); // this might well bounce.  C'est la vie.
+		    //	    recipients.add(clientName); // this might well bounce.  C'est la vie.
 
 		    Ganymede.log.logSystemEvent(new DBLogEvent("badpass",
 							       ts.l("processLogin.badlogevent", clientName, clienthost),
@@ -643,7 +643,7 @@ public class GanymedeServer implements Server {
         // sessions Vector so that the user doesn't get bothered with
         // a 'you logged in' message
 
-        sessions.addElement(session);
+        sessions.add(session);
 
         sendMessageToRemoteSessions(ClientMessage.LOGINCOUNT, Integer.toString(sessions.size()));
       }
@@ -1543,7 +1543,7 @@ public class GanymedeServer implements Server {
 			      {
 				if (session.viewDBObject(invid) != null)
 				  {
-				    iField.getVectVal().addElement(invid); // keep this invid
+				    iField.getVectVal().add(invid); // keep this invid
 				    vectorEmpty = false;
 				  }
 				else
