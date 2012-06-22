@@ -212,7 +212,7 @@ public class DBQueryHandler {
 
 		for (int i = 0; i < values.size(); i++)
 		  {
-		    Invid invid = (Invid) values.elementAt(i);
+		    Invid invid = (Invid) values.get(i);
 
 		    DBObject derefObj = DBStore.viewDBObject(invid);
 
@@ -448,7 +448,7 @@ public class DBQueryHandler {
 	    if (n.value instanceof String &&
 		(((value != null) && value instanceof String) ||
 		((values != null) && (values.size() > 0) &&
-		 (values.elementAt(0) instanceof String)))) // assume type consistent array
+		 (values.get(0) instanceof String)))) // assume type consistent array
 	      {
 		// Compare a string value or regexp against a string field
 
@@ -466,7 +466,7 @@ public class DBQueryHandler {
 
 	    if (n.value instanceof Invid &&
 		(((value != null) && value instanceof Invid) ||
-		((values != null) && (values.size() > 0) && (values.elementAt(0) instanceof Invid))))
+		((values != null) && (values.size() > 0) && (values.get(0) instanceof Invid))))
 	      {
 		Invid
 		  i1 = null,
@@ -507,7 +507,7 @@ public class DBQueryHandler {
 
 			    for (int i = 0; i < values.size(); i++)
 			      {
-				i2 = (Invid) values.elementAt(i);
+				i2 = (Invid) values.get(i);
 
 				if (i1.equals(i2))
 				  {
@@ -539,7 +539,7 @@ public class DBQueryHandler {
 
 	    if (n.value instanceof String &&
 		(((value != null) && value instanceof Invid) ||
-		((values != null) && (values.size() > 0) && (values.elementAt(0) instanceof Invid))))
+		((values != null) && (values.size() > 0) && (values.get(0) instanceof Invid))))
 	      {
 		String
 		  s1 = null,
@@ -572,7 +572,7 @@ public class DBQueryHandler {
 
 		    for (int i = 0; i < values.size(); i++)
 		      {
-			s2 = session.getDBSession().getObjectLabel((Invid) values.elementAt(i));
+			s2 = session.getDBSession().getObjectLabel((Invid) values.get(i));
 
 			if (compareString(n, s1, s2))
 			  {
@@ -592,7 +592,7 @@ public class DBQueryHandler {
 
 	    if (n.value instanceof String &&
 		(((value != null) && value instanceof Byte[]) ||
-		((values != null) && (values.size() > 0) && (values.elementAt(0) instanceof Byte[]))))
+		((values != null) && (values.size() > 0) && (values.get(0) instanceof Byte[]))))
 	      {
 		String
 		  s1 = null,
@@ -639,7 +639,7 @@ public class DBQueryHandler {
 
 		    for (int i = 0; i < values.size(); i++)
 		      {
-			Byte[] ipBytes = (Byte[]) values.elementAt(i);
+			Byte[] ipBytes = (Byte[]) values.get(i);
 
 			if (ipBytes.length == 4)
 			  {
@@ -711,7 +711,7 @@ public class DBQueryHandler {
 
 			    for (int i = 0; i < values.size(); i++)
 			      {
-				if (compareIPs(oBytes, ((Byte[]) values.elementAt(i))))
+				if (compareIPs(oBytes, ((Byte[]) values.get(i))))
 				  {
 				    return true;
 				  }
@@ -892,7 +892,7 @@ public class DBQueryHandler {
 
 	for (int i = 0; i < values.size(); i++)
 	  {
-	    if (compareString(n, queryValue, (String) values.elementAt(i)))
+	    if (compareString(n, queryValue, (String) values.get(i)))
 	      {
 		return true;
 	      }
