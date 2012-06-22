@@ -368,15 +368,15 @@ public class GanymedeServer implements Server {
 	    root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.NOCASEEQ, clientName);
 	    userQuery = new Query(SchemaConstants.UserBase, root, false);
 
-	    Vector results = loginSession.internalQuery(userQuery);
+	    Vector<Result> results = loginSession.internalQuery(userQuery);
 
 	    // results.size() really shouldn't be any larger than 1,
 	    // since we are doing a match on username and username is
 	    // managed by a namespace in the schema.
 
-	    for (int i = 0; !found && results != null && (i < results.size()); i++)
+	    for (Result result: results)
 	      {
-		user = loginSession.getDBSession().viewDBObject(((Result) results.elementAt(i)).getInvid());
+		user = loginSession.getDBSession().viewDBObject(result.getInvid());
 
 		pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
 
@@ -442,9 +442,9 @@ public class GanymedeServer implements Server {
 		// to just match against PersonaLabelField to avoid
 		// the possibility of ambiguous admin selection here.
 
-		for (int i = 0; !found && (i < results.size()); i++)
+		for (Result result: results)
 		  {
-		    persona = loginSession.getDBSession().viewDBObject(((Result) results.elementAt(i)).getInvid());
+		    persona = loginSession.getDBSession().viewDBObject(result.getInvid());
 
 		    pdbf = (PasswordDBField) persona.getField(SchemaConstants.PersonaPasswordField);
 
@@ -483,7 +483,7 @@ public class GanymedeServer implements Server {
 
 		    if (results.size() == 1)
 		      {
-			user = loginSession.getDBSession().viewDBObject(((Result) results.elementAt(0)).getInvid());
+			user = loginSession.getDBSession().viewDBObject(results.get(0).getInvid());
 
 			// recanonicalize
 
@@ -731,12 +731,10 @@ public class GanymedeServer implements Server {
 
   public static void sendMessageToRemoteSessions(int type, String message, GanymedeSession self)
   {
-    Vector sessionsCopy = (Vector) sessions.clone();
+    Vector<GanymedeSession> sessionsCopy = (Vector<GanymedeSession>) sessions.clone();
 
-    for (int i = 0; i < sessionsCopy.size(); i++)
+    for (GanymedeSession session: sessionsCopy)
       {
-	GanymedeSession session = (GanymedeSession) sessionsCopy.elementAt(i);
-
         if (session != self)
           {
             session.sendMessage(type, message);
@@ -757,11 +755,10 @@ public class GanymedeServer implements Server {
     // have to synchronize on sessions and risk nested monitor
     // deadlock
 
-    Vector sessionsCopy = (Vector) sessions.clone();
+    Vector<GanymedeSession> sessionsCopy = (Vector<GanymedeSession>) sessions.clone();
 
-    for (int i = 0; i < sessionsCopy.size(); i++)
+    for (GanymedeSession session: sessionsCopy)
       {
-	GanymedeSession session = (GanymedeSession) sessionsCopy.elementAt(i);
 	session.timeCheck();
       }
   }
@@ -777,11 +774,10 @@ public class GanymedeServer implements Server {
     // clone the sessions Vector so any forceOff() won't disturb the
     // loop
 
-    Vector sessionsCopy = (Vector) sessions.clone();
+    Vector<GanymedeSession> sessionsCopy = (Vector<GanymedeSession>) sessions.clone();
 
-    for (int i = 0; i < sessionsCopy.size(); i++)
+    for (GanymedeSession session: sessionsCopy)
       {
-	GanymedeSession session = (GanymedeSession) sessionsCopy.elementAt(i);
 	session.forceOff(reason);
       }
   }
@@ -800,10 +796,8 @@ public class GanymedeServer implements Server {
 
     synchronized (sessions)
       {
-	for (int i = 0; i < sessions.size(); i++)
+	for (GanymedeSession session: sessions)
 	  {
-	    GanymedeSession session = (GanymedeSession) sessions.elementAt(i);
-
 	    if (session.getSessionName().equals(username))
 	      {
 		session.forceOff(reason);
@@ -1199,7 +1193,7 @@ public class GanymedeServer implements Server {
 
     root = new QueryDataNode(SchemaConstants.PersonaLabelField, QueryDataNode.EQUALS, clientName);
     userQuery = new Query(SchemaConstants.PersonaBase, root, false);
-    Vector results = loginSession.internalQuery(userQuery);
+    Vector<Result> results = loginSession.internalQuery(userQuery);
 
     // If there is no admin persona with the given name, then bail
     if (results.size() == 0)
@@ -1207,7 +1201,7 @@ public class GanymedeServer implements Server {
       	return 0;
       }
 
-    obj = loginSession.getDBSession().viewDBObject(((Result) results.elementAt(0)).getInvid());
+    obj = loginSession.getDBSession().viewDBObject(results.get(0).getInvid());
     pdbf = (PasswordDBField) obj.getField(SchemaConstants.PersonaPasswordField);
 
     if (pdbf != null && pdbf.matchPlainText(clientPass))
@@ -1303,11 +1297,6 @@ public class GanymedeServer implements Server {
 
   public static ReturnVal shutdown()
   {
-    Vector tempList;
-    GanymedeSession temp;
-
-    /* -- */
-
     String semaphoreState = GanymedeServer.lSemaphore.checkEnabled();
 
     if (!"shutdown".equals(semaphoreState))
@@ -1384,20 +1373,18 @@ public class GanymedeServer implements Server {
 	// forceOff modifies GanymedeServer.sessions, so we need to
 	// copy our list before we iterate over it.
 
-	tempList = new Vector();
+	Vector<GanymedeSession> tempList = new Vector<GanymedeSession>();
 
 	synchronized (sessions)
 	  {
-	    for (int i = 0; i < sessions.size(); i++)
+	    for (GanymedeSession session: sessions)
 	      {
-		tempList.addElement(sessions.elementAt(i));
+		tempList.add(session);
 	      }
 	  }
 
-	for (int i = 0; i < tempList.size(); i++)
+	for (GanymedeSession temp: tempList)
 	  {
-	    temp = (GanymedeSession) tempList.elementAt(i);
-
             // "Server going down"
 	    temp.forceOff(ts.l("shutdown.clientNotification"));
 	  }
@@ -1484,13 +1471,7 @@ public class GanymedeServer implements Server {
 
   public boolean sweepInvids()
   {
-    DBField
-      field;
-
-    InvidDBField
-      iField;
-
-    Vector
+    Vector<Short>
       removeVector;
 
     boolean
@@ -1533,22 +1514,20 @@ public class GanymedeServer implements Server {
 
 	    for (DBObject object: base.getObjects())
 	      {
-		removeVector = new Vector();
+		removeVector = new Vector<Short>();
 
 		// loop 3: iterate over the fields present in this object
 
 		synchronized (object.fieldAry)
 		  {
-		    for (int i = 0; i < object.fieldAry.length; i++)
+		    for (DBField field: object.fieldAry)
 		      {
-			field = object.fieldAry[i];
-
 			if (field == null || !(field instanceof InvidDBField))
 			  {
 			    continue;	// only check invid fields
 			  }
 
-			iField = (InvidDBField) field;
+			InvidDBField iField = (InvidDBField) field;
 
 			if (iField.isVector())
 			  {
@@ -1584,7 +1563,7 @@ public class GanymedeServer implements Server {
 
 			    if (vectorEmpty)
 			      {
-				removeVector.addElement(Short.valueOf(iField.getID()));
+				removeVector.add(Short.valueOf(iField.getID()));
 			      }
 			  }
 			else
@@ -1594,7 +1573,7 @@ public class GanymedeServer implements Server {
 			    if (session.viewDBObject(invid) == null)
 			      {
 				swept = true;
-				removeVector.addElement(Short.valueOf(iField.getID()));
+				removeVector.add(Short.valueOf(iField.getID()));
 
 				Ganymede.debug(ts.l("sweepInvids.removing_scalar",
 						    invid.toString(),
@@ -1608,12 +1587,12 @@ public class GanymedeServer implements Server {
 
 		// need to remove undefined fields now
 
-		for (int i = 0; i < removeVector.size(); i++)
+		for (Short fieldID: removeVector)
 		  {
-		    object.clearField(((Short) removeVector.elementAt(i)).shortValue());
+		    object.clearField(fieldID.shortValue());
 
 		    Ganymede.debug(ts.l("sweepInvids.undefining",
-					removeVector.elementAt(i).toString(),
+					fieldID.toString(),
 					base.getName(),
 					object.getLabel()));
 		  }
@@ -1642,12 +1621,6 @@ public class GanymedeServer implements Server {
 
   public boolean checkInvids()
   {
-    DBField
-      field;
-
-    InvidDBField
-      iField;
-
     boolean
       ok = true;
 
@@ -1693,10 +1666,8 @@ public class GanymedeServer implements Server {
 	      {
 		synchronized (object.fieldAry)
 		  {
-		    for (int i = 0; i < object.fieldAry.length; i++)
+		    for (DBField field: object.fieldAry)
 		      {
-			field = object.fieldAry[i];
-
 			// we only care about invid fields
 
 			if (field == null || !(field instanceof InvidDBField))
@@ -1704,7 +1675,7 @@ public class GanymedeServer implements Server {
 			    continue;
 			  }
 
-			iField = (InvidDBField) field;
+			InvidDBField iField = (InvidDBField) field;
 
 			if (!iField.test(session, (base.getName() + ":" + object.getLabel())))
 			  {
@@ -1822,7 +1793,7 @@ public class GanymedeServer implements Server {
 
   public ReturnVal sweepEmbeddedObjects()
   {
-    Vector invidsToDelete = new Vector();
+    Vector<Invid> invidsToDelete = new Vector<Invid>();
 
     // XXX
     //
@@ -1870,7 +1841,7 @@ public class GanymedeServer implements Server {
 		  }
 		catch (IntegrityConstraintException ex)
 		  {
-		    invidsToDelete.addElement(object.getInvid());
+		    invidsToDelete.add(object.getInvid());
 		  }
 	      }
 	  }
@@ -1911,10 +1882,8 @@ public class GanymedeServer implements Server {
 
 	gSession.openTransaction("embedded object sweep", false); // non-interactive
 
-	for (int i = 0; i < invidsToDelete.size(); i++)
+	for (Invid objInvid: invidsToDelete)
 	  {
-	    Invid objInvid = (Invid) invidsToDelete.elementAt(i);
-
 	    ReturnVal retVal = session.deleteDBObject(objInvid);
 
 	    if (!ReturnVal.didSucceed(retVal))
