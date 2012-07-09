@@ -147,7 +147,7 @@ public class DBBaseCategory implements Category, CategoryNode {
    * {@link arlut.csd.ganymede.server.DBBaseCategory DBBaseCategory}.
    */
 
-  private Vector contents;
+  private Vector<CategoryNode> contents;
 
   /**
    * <p>In order to keep compatibility with versions 1.17 and previous of
@@ -206,7 +206,7 @@ public class DBBaseCategory implements Category, CategoryNode {
 	this.editor = parent.editor;
       }
 
-    contents = new Vector();
+    contents = new Vector<CategoryNode>();
 
     Ganymede.rmi.publishObject(this);
   }
@@ -235,7 +235,7 @@ public class DBBaseCategory implements Category, CategoryNode {
   public DBBaseCategory(DBStore store, DataInput in) throws RemoteException, IOException
   {
     this.store = store;
-    contents = new Vector();
+    contents = new Vector<CategoryNode>();
     receive(in, null);
 
     Ganymede.rmi.publishObject(this);
@@ -252,7 +252,7 @@ public class DBBaseCategory implements Category, CategoryNode {
   public DBBaseCategory(DBStore store, DataInput in, DBBaseCategory parent) throws RemoteException, IOException
   {
     this.store = store;
-    contents = new Vector();
+    contents = new Vector<CategoryNode>();
     receive(in, parent);
 
     Ganymede.rmi.publishObject(this);
@@ -269,7 +269,7 @@ public class DBBaseCategory implements Category, CategoryNode {
   {
     this.editor = editor;
     this.store = store;
-    contents = new Vector();
+    contents = new Vector<CategoryNode>();
 
     this.baseHash = baseHash;
 
@@ -290,8 +290,7 @@ public class DBBaseCategory implements Category, CategoryNode {
   private void recurseDown(DBBaseCategory category, Hashtable baseHash,
 			   DBSchemaEdit editor) throws RemoteException
   {
-    Vector children = category.getNodes();
-    CategoryNode node;
+    Vector<CategoryNode> children = category.getNodes();
     DBObjectBase oldBase, newBase;
     DBBaseCategory oldCategory, newCategory;
 
@@ -307,10 +306,8 @@ public class DBBaseCategory implements Category, CategoryNode {
 	  }
       }
 
-    for (int i = 0; i < children.size(); i++)
+    for (CategoryNode node: children)
       {
-	node = (CategoryNode) children.elementAt(i);
-
 	if (node instanceof DBObjectBase)
 	  {
 	    oldBase = (DBObjectBase) node;
@@ -360,16 +357,10 @@ public class DBBaseCategory implements Category, CategoryNode {
 
   public synchronized void clearEditor()
   {
-    CategoryNode node;
-
-    /* -- */
-
     this.editor = null;
 
-    for (int i = 0; i < contents.size(); i++)
+    for (CategoryNode node: contents)
       {
-	node = (CategoryNode) contents.elementAt(i);
-
 	if (node instanceof DBBaseCategory)
 	  {
 	    ((DBBaseCategory) node).clearEditor();
@@ -384,29 +375,23 @@ public class DBBaseCategory implements Category, CategoryNode {
 
   synchronized void emit(DataOutput out) throws IOException
   {
-    Object element;
-
-    /* -- */
-
     out.writeUTF(this.getPath());
     out.writeInt(contents.size());
 
-    for (int i = 0; i < contents.size(); i++)
+    for (CategoryNode node: contents)
       {
-	element = contents.elementAt(i);
-
 	// in DBStore 2.0 and later, we emit all bases during our
 	// DBBaseCategory dump.
 
-	if (element instanceof DBBaseCategory)
+	if (node instanceof DBBaseCategory)
 	  {
 	    out.writeBoolean(false); // it's a category
-	    ((DBBaseCategory) element).emit(out);
+	    ((DBBaseCategory) node).emit(out);
 	  }
-	else if (element instanceof DBObjectBase)
+	else if (node instanceof DBObjectBase)
 	  {
 	    out.writeBoolean(true); // it's a base
-	    ((DBObjectBase) element).emit(out, true);
+	    ((DBObjectBase) node).emit(out, true);
 	  }
       }
   }
@@ -514,17 +499,17 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     xmlOut.indentOut();
 
-    for (int i = 0; i < contents.size(); i++)
+    for (CategoryNode node: contents)
       {
-	if (contents.elementAt(i) instanceof DBBaseCategory)
+	if (node instanceof DBBaseCategory)
 	  {
-	    ((DBBaseCategory) contents.elementAt(i)).emitXML(xmlOut);
+	    ((DBBaseCategory) node).emitXML(xmlOut);
 
 	    xmlOut.skipLine();
 	  }
-	else if (contents.elementAt(i) instanceof DBObjectBase)
+	else if (node instanceof DBObjectBase)
 	  {
-	    ((DBObjectBase) contents.elementAt(i)).emitXML(xmlOut);
+	    ((DBObjectBase) node).emitXML(xmlOut);
 	  }
       }
 
@@ -581,8 +566,7 @@ public class DBBaseCategory implements Category, CategoryNode {
 
   private void addCategoryToTransport(CategoryTransport transport, GanymedeSession session, boolean hideNonEditables)
   {
-    Vector contents;
-    CategoryNode node;
+    Vector<CategoryNode> contents;
 
     /* -- */
 
@@ -595,10 +579,8 @@ public class DBBaseCategory implements Category, CategoryNode {
       {
 	transport.addChunk("<");
 
-	for (int i = 0; i < contents.size(); i++)
+	for (CategoryNode node: contents)
 	  {
-	    node = (CategoryNode) contents.elementAt(i);
-	    
 	    if (node instanceof DBObjectBase)
 	      {
 		DBObjectBase base = (DBObjectBase) node;
@@ -637,9 +619,7 @@ public class DBBaseCategory implements Category, CategoryNode {
 
   private boolean containsEditableBase(GanymedeSession session)
   {
-    Vector contents;
-    CategoryNode node;
-    boolean result = false;
+    Vector<CategoryNode> contents;
 
     /* -- */
 
@@ -650,31 +630,29 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     contents = getNodes();
 
-    if (contents.size() > 0)
+    for (CategoryNode node: contents)
       {
-	for (int i = 0; !result && i < contents.size(); i++)
+	if (node instanceof DBObjectBase)
 	  {
-	    node = (CategoryNode) contents.elementAt(i);
-	    
-	    if (node instanceof DBObjectBase)
-	      {
-		DBObjectBase base = (DBObjectBase) node;
+	    DBObjectBase base = (DBObjectBase) node;
 
-		if (session.getPermManager().getPerm(base.getTypeID(), true).isEditable())
-		  {
-		    result = true;
-		  }
+	    if (session.getPermManager().getPerm(base.getTypeID(), true).isEditable())
+	      {
+		return true;
 	      }
-	    else if (node instanceof DBBaseCategory)
-	      {
-		DBBaseCategory subCategory = (DBBaseCategory) node;
+	  }
+	else if (node instanceof DBBaseCategory)
+	  {
+	    DBBaseCategory subCategory = (DBBaseCategory) node;
 
-		result = subCategory.containsEditableBase(session);
+	    if (subCategory.containsEditableBase(session))
+	      {
+		return true;
 	      }
 	  }
       }
 
-    return result;
+    return false;
   }
 
   /**
@@ -685,8 +663,7 @@ public class DBBaseCategory implements Category, CategoryNode {
 
   private boolean containsVisibleBase(GanymedeSession session)
   {
-    Vector contents;
-    CategoryNode node;
+    Vector<CategoryNode> contents;
     boolean result = false;
 
     /* -- */
@@ -698,27 +675,22 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     contents = getNodes();
 
-    if (contents.size() > 0)
+    for (CategoryNode node: contents)
       {
-	for (int i = 0; !result && i < contents.size(); i++)
+	if (node instanceof DBObjectBase)
 	  {
-	    node = (CategoryNode) contents.elementAt(i);
-	    
-	    if (node instanceof DBObjectBase)
-	      {
-		DBObjectBase base = (DBObjectBase) node;
+	    DBObjectBase base = (DBObjectBase) node;
 
-		if (session.getPermManager().getPerm(base.getTypeID(), true).isVisible())
-		  {
-		    result = true;
-		  }
-	      }
-	    else if (node instanceof DBBaseCategory)
+	    if (session.getPermManager().getPerm(base.getTypeID(), true).isVisible())
 	      {
-		DBBaseCategory subCategory = (DBBaseCategory) node;
-
-		result = subCategory.containsVisibleBase(session);
+		result = true;
 	      }
+	  }
+	else if (node instanceof DBBaseCategory)
+	  {
+	    DBBaseCategory subCategory = (DBBaseCategory) node;
+
+	    result = subCategory.containsVisibleBase(session);
 	  }
       }
 
@@ -742,10 +714,8 @@ public class DBBaseCategory implements Category, CategoryNode {
       {
 	System.err.println("** Sorted category " + getPath());
 
-	for (int i = 0; i < contents.size(); i++)
+	for (CategoryNode x: contents)
 	  {
-	    Object x = contents.elementAt(i);
-
 	    if (x instanceof DBBaseCategory)
 	      {
 		System.err.print("Cat[" + ((DBBaseCategory) x).tmp_displayOrder);
@@ -761,10 +731,8 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     // re-sort subcategories
 
-    for (int i = 0; i < contents.size(); i++)
+    for (CategoryNode x: contents)
       {
-	Object x = contents.elementAt(i);
-
 	if (x instanceof DBBaseCategory)
 	  {
 	    ((DBBaseCategory) x).resort();
@@ -949,11 +917,6 @@ public class DBBaseCategory implements Category, CategoryNode {
 
   public synchronized void addNodeAfter(CategoryNode node, String prevNodeName)
   {
-    CategoryNode
-      cNode;
-
-    /* -- */
-
     if (node == null)
       {
 	throw new IllegalArgumentException("Can't add a null node, not even after " + prevNodeName);
@@ -987,10 +950,8 @@ public class DBBaseCategory implements Category, CategoryNode {
     //	System.err.println("DBBaseCategory.addNodeAfter(): searching to see if node is already in this category");
     //      }
 
-    for (int i = 0; i < contents.size(); i++)
+    for (CategoryNode cNode: contents)
       {
-	cNode = (CategoryNode) contents.elementAt(i);
-
 	try
 	  {
 	    if (cNode.getName().equals(node.getName()))
@@ -1018,7 +979,7 @@ public class DBBaseCategory implements Category, CategoryNode {
       {
 	for (int i = 0; i < contents.size(); i++)
 	  {
-	    cNode = (CategoryNode) contents.elementAt(i);
+	    CategoryNode cNode = contents.get(i);
 
 	    try
 	      {
@@ -1066,11 +1027,6 @@ public class DBBaseCategory implements Category, CategoryNode {
 
   public synchronized void addNodeBefore(CategoryNode node, String nextNodeName)
   {
-    CategoryNode
-      cNode;
-
-    /* -- */
-
     if (node == null)
       {
 	throw new IllegalArgumentException("Can't add a null node, not even before " + nextNodeName);
@@ -1104,10 +1060,8 @@ public class DBBaseCategory implements Category, CategoryNode {
     //	System.err.println("DBBaseCategory.addNodeBefore(): searching to see if node is already in this category");
     //      }
 
-    for (int i = 0; i < contents.size(); i++)
+    for (CategoryNode cNode: contents)
       {
-	cNode = (CategoryNode) contents.elementAt(i);
-
 	try
 	  {
 	    if (cNode.getName().equals(node.getName()))
@@ -1134,7 +1088,7 @@ public class DBBaseCategory implements Category, CategoryNode {
       {
 	for (int i = 0; i < contents.size(); i++)
 	  {
-	    cNode = (CategoryNode) contents.elementAt(i);
+	    CategoryNode cNode = (CategoryNode) contents.elementAt(i);
 
 	    try
 	      {
@@ -1468,14 +1422,8 @@ public class DBBaseCategory implements Category, CategoryNode {
 
   public CategoryNode getNode(String name)
   {
-    CategoryNode candidate;
-
-    /* -- */
-
-    for (int i = 0; i < contents.size(); i++)
+    for (CategoryNode candidate: contents)
       {
-	candidate = (CategoryNode) contents.elementAt(i);
-	
 	try
 	  {
 	    if (candidate.getName().equals(name))
@@ -1498,9 +1446,9 @@ public class DBBaseCategory implements Category, CategoryNode {
    * @see arlut.csd.ganymede.rmi.Category
    */
 
-  public synchronized Vector getNodes()
+  public synchronized Vector<CategoryNode> getNodes()
   {
-    return (Vector) contents.clone();
+    return (Vector<CategoryNode>) contents.clone();
   }
 
   /**
@@ -1607,14 +1555,8 @@ public class DBBaseCategory implements Category, CategoryNode {
 
   public synchronized boolean contains(String name)
   {
-    CategoryNode node;
-
-    /* -- */
-
-    for (int i = 0; i < contents.size(); i++)
+    for (CategoryNode node: contents)
       {
-	node = (CategoryNode) contents.elementAt(i);
-
 	try
 	  {
 	    if (node.getName().equals(name))
