@@ -103,7 +103,7 @@ import arlut.csd.ganymede.rmi.pass_field;
  * <p>Here are the hash algorithms supported by PasswordDBField:</p>
  *
  * <ul>
- * <li>Traditional Unix Crypt()</li>
+ * <li>Traditional DES-based Unix Crypt()</li>
  * <li>OpenBSD-style md5Crypt ($1$ prefix)</li>
  * <li>OpenBSD-style md5Crypt, as modified for use with Apache ($apr1$ prefix)</li>
  * <li>OpenBSD-style BCrypt ($2a$ prefix)</li>
