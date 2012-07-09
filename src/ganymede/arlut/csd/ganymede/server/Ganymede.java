@@ -955,6 +955,9 @@ public class Ganymede {
 	    System.err.println(ts.l("initializeCrackLib.loading_dictionary", pathPrefix));
 	    crackLibPacker = new Packer(pathPrefix, "r");
 	  }
+
+	// "Loaded {0} words from crack lib dictionary.
+	System.err.println(ts.l("initializeCrackLib.loaded_dictionary", crackLibPacker.size()));
       }
     catch (IOException ex)
       {
