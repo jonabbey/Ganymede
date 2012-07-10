@@ -893,10 +893,6 @@ public class GanymedeServer implements Server {
       {
 	userLogOuts.put(userInvid, new Date());
       }
-    else
-      {
-	userLogOuts.put(userInvid, new Date());
-      }
 
     synchronized (activeSessionNames)
       {
@@ -933,13 +929,16 @@ public class GanymedeServer implements Server {
 	  }
       }
 
-    try
+    if (session.isUserSession())
       {
-	GanymedeServer.lSemaphore.decrement();
-      }
-    catch (IllegalArgumentException ex)
-      {
-	Ganymede.logError(ex);
+	try
+	  {
+	    GanymedeServer.lSemaphore.decrement();
+	  }
+	catch (IllegalArgumentException ex)
+	  {
+	    Ganymede.logError(ex);
+	  }
       }
 
     if (userSession)

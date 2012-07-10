@@ -216,7 +216,8 @@ final public class GanymedeSession implements Session, Unreferenced {
   private serverClientAsyncResponder asyncPort = null;
 
   /**
-   * If this flag is true, we're a user session.
+   * If this flag is true, we're a user session, tracked by the
+   * Ganymede Server's loginSemaphore object.
    */
 
   private boolean userSession = false;
@@ -2800,6 +2801,17 @@ final public class GanymedeSession implements Session, Unreferenced {
   public boolean isLoggedIn()
   {
     return loggedInSemaphore.isSet();
+  }
+
+  /**
+   * <p>Returns true if this session is associated with a remote user
+   * and is being tracked by the GanymedeServer's counting login
+   * semaphore.</p>
+   */
+
+  public boolean isUserSession()
+  {
+    return this.userSession;
   }
 
   /**
