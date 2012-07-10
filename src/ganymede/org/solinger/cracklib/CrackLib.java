@@ -561,6 +561,8 @@ public class CrackLib {
 	return ts.l("fascistLook.needssymbol");
       }
 
+    // we want at least one uppercase and one lower case letter
+
     if (Rules.indexOf(password, 'l') == -1 ||
 	Rules.indexOf(password, 'u') == -1)
       {
