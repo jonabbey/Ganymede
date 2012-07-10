@@ -125,6 +125,10 @@ if ($query->param) {
                 $xml_output = "The new password you proposed was based on your username.\n\nYou must choose a password that can not be easily guessed from your account's name.";
 
                 $loggedin_ok = 1;
+	    } elsif ($xml_output =~ /punctuation/) {
+	      $xml_output = "Passwords must have at least one numeric, whitespace, or punctuation character.";
+
+	      $loggedin_ok = 1;
             } elsif ($xml_output =~ /It needs to be mixed case/) {
                 $xml_output = "Passwords must have at least one upper case and at least one lower case letter.";
 
