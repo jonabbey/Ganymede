@@ -561,8 +561,8 @@ public class CrackLib {
 	return ts.l("fascistLook.needssymbol");
       }
 
-    if(Rules.indexOf(password, 'l') == -1 ||
-       Rules.indexOf(password, 'u') == -1)
+    if (Rules.indexOf(password, 'l') == -1 ||
+	Rules.indexOf(password, 'u') == -1)
       {
 	// "It is too simplistic / too predictable."
 	return ts.l("fascistLook.complexity");
@@ -669,7 +669,7 @@ public class CrackLib {
 	      {
 		msg = fascistLook(p, args[2], args[3]);
 	      }
-	    else 
+	    else
 	      {
 		msg = fascistLook(p, args[2], null);
 	      }
