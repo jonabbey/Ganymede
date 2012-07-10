@@ -548,6 +548,26 @@ public class CrackLib {
 	return ts.l("fascistLook.notmixedcase");
       }
 
+    // check for character classes.. we require at least one
+    // punctuation, symbolic, numeric, or whitespace character, along
+    // with at least one upper and lower case letter.
+
+    if (!(Rules.indexOf(password, 'p') > -1 ||
+	  Rules.indexOf(password, 's') > -1 ||
+	  Rules.indexOf(password, 'd') > -1 ||
+	  Rules.indexOf(password, 'w') > -1))
+      {
+	// "It requires at least one punctuation, numeric, or whitespace character."
+	return ts.l("fascistLook.needssymbol");
+      }
+
+    if(Rules.indexOf(password, 'l') == -1 ||
+       Rules.indexOf(password, 'u') == -1)
+      {
+	// "It is too simplistic / too predictable."
+	return ts.l("fascistLook.complexity");
+      }
+
     // check for worrisome numbers and such
 
     if (Rules.pMatch("aadddddda", password))
@@ -572,6 +592,8 @@ public class CrackLib {
       }
 
     // check for dictionary/username matches
+
+    password = password.toLowerCase();
 
     if (p.size() == 0 && username == null)
       {
