@@ -549,8 +549,7 @@ public class CrackLib {
       }
 
     // check for character classes.. we require at least one
-    // punctuation, symbolic, numeric, or whitespace character, along
-    // with at least one upper and lower case letter.
+    // punctuation, symbolic, numeric, or whitespace character
 
     if (!(Rules.indexOf(password, 'p') > -1 ||
 	  Rules.indexOf(password, 's') > -1 ||
