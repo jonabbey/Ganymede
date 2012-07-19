@@ -3,17 +3,19 @@
    PersonaDialog.java
 
    A subclass of JDialog that allows switching among personas
-   
+
    Created: 17 February 1999
 
    Module By: Brian O'Mara
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -101,25 +103,25 @@ public class PersonaDialog extends StandardDialog implements ActionListener {
 
   // ---
 
-  Vector 
+  Vector
     personae;
 
   JButton
     login;
 
-  gclient 
+  gclient
     gc;
 
   private JPasswordField
     password;
 
-  ActionListener 
+  ActionListener
     personaListener;
 
-  ButtonGroup 
+  ButtonGroup
     personaGroupRB;
 
-  String 
+  String
     my_username,
     currentPersonaString,
     newPersona;
@@ -152,7 +154,7 @@ public class PersonaDialog extends StandardDialog implements ActionListener {
     JPanel pane = new JPanel(new BorderLayout());
     this.setContentPane(pane);
 
-    JPanel topPanel = new JPanel(new BorderLayout()); 
+    JPanel topPanel = new JPanel(new BorderLayout());
     JPanel buttonPanel = new JPanel();
 
     pane.add("Center", topPanel); // Personae go here.
@@ -211,21 +213,21 @@ public class PersonaDialog extends StandardDialog implements ActionListener {
     // "Password:\ "
     passPanel.add("West", new JLabel(ts.l("init.password_field")));
     passPanel.add("Center",password);
-    
+
     Box personaBox = Box.createVerticalBox();
     personaGroupRB = new ButtonGroup();
-    
+
     if (debug) { System.out.println("Adding persona stuff"); }
-    
+
     // Build up persona list as radiobutton group
-    
+
     for (int i= personae.size()-1;i >=0; i--)
       {
 	String p = (String)personae.elementAt(i);
 	JRadioButton rb = new JRadioButton(p);
 
-	// Note that all strings (incl actionCommand) should be _compared_ as 
-	// lowercase. Since there is a need for caps to be displayed (title, etc), 
+	// Note that all strings (incl actionCommand) should be _compared_ as
+	// lowercase. Since there is a need for caps to be displayed (title, etc),
 	// I didn't just convert to lowercase.
 
 	if (p.toLowerCase().equals(currentPersonaString.toLowerCase()))
@@ -233,7 +235,7 @@ public class PersonaDialog extends StandardDialog implements ActionListener {
 	    rb.doClick();
 	    // No actionListener yet, so just selects current username
 	  }
-	
+
 	rb.addActionListener(personaListener);
 	personaGroupRB.add(rb);
 	personaBox.add(rb);
@@ -254,13 +256,13 @@ public class PersonaDialog extends StandardDialog implements ActionListener {
   {
     // Hitting enter after typing pass is like clicking OK.
 
-    if (e.getSource() instanceof JPasswordField) 
+    if (e.getSource() instanceof JPasswordField)
       {
 	// do this so the PersonaListener gets it
 
 	login.doClick();
       }
-    else 
+    else
       {
 	// Clicking OK hides the dialog, as long as
 	// we aren't forcing a password
@@ -281,7 +283,7 @@ public class PersonaDialog extends StandardDialog implements ActionListener {
 
   // intercept window closure, make sure we're ok
 
-  protected void processWindowEvent(WindowEvent e) 
+  protected void processWindowEvent(WindowEvent e)
   {
     if (!requirePassword || changedOK)
       {
@@ -315,12 +317,12 @@ public class PersonaDialog extends StandardDialog implements ActionListener {
     this.setVisible(bool);
   }
 
-  public ButtonGroup getButtonGroup() 
+  public ButtonGroup getButtonGroup()
   {
     return personaGroupRB;
   }
 
-  String getPasswordField() 
+  String getPasswordField()
   {
     return new String(password.getPassword());
   }
@@ -328,14 +330,14 @@ public class PersonaDialog extends StandardDialog implements ActionListener {
   // updatePassField called when RadioButton is toggled.
   // Updates focus and textfield appropriately.
 
-  void updatePassField(String newPersona) 
+  void updatePassField(String newPersona)
   {
     this.newPersona = newPersona;
 
     // If still same persona or base user (no ":" in name) then disable password field
 
     if (!requirePassword &&
-	((newPersona.toLowerCase()).equals(currentPersonaString.toLowerCase()) || 
+	((newPersona.toLowerCase()).equals(currentPersonaString.toLowerCase()) ||
 	 (newPersona.indexOf(":") < 0)))
       {
 	password.setText("");
@@ -343,7 +345,7 @@ public class PersonaDialog extends StandardDialog implements ActionListener {
 	password.setBackground(Color.lightGray);
 	password.requestFocus();
       }
-    else 
+    else
       {
 	password.setText("");
 	password.setEditable(true);
@@ -351,8 +353,8 @@ public class PersonaDialog extends StandardDialog implements ActionListener {
 	password.requestFocus();
       }
   }
-  
-  // Access to most recent RButton selection. 
+
+  // Access to most recent RButton selection.
   String getNewPersona(){
     return newPersona;
   }
