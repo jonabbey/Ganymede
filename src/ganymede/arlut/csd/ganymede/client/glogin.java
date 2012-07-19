@@ -928,8 +928,11 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 	  {
 	  }
 
-	showLoginBox();
-	enableButtons(true);
+	if (!andQuit)
+	  {
+	    showLoginBox();
+	    enableButtons(true);
+	  }
       }
   }
 
