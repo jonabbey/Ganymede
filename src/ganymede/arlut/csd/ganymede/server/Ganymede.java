@@ -272,8 +272,8 @@ public class Ganymede {
   static public DBStore db;
 
   /**
-   * <p>This object provides access to the Ganymede log file, providing
-   * logging, email, and search services.</p>
+   * <p>This object provides access to the Ganymede log file,
+   * providing transaction logging, email, and search services.</p>
    */
 
   static public DBLog log = null;
@@ -490,7 +490,7 @@ public class Ganymede {
 
 	createGanymedeServer();
 	createGanymedeSession();
-	startLog();
+	startTransactionLog();
 	startScheduler();
 
 	// Take care of any startup-time database modifications
@@ -1146,7 +1146,7 @@ public class Ganymede {
    * Creates the DBLog and sets options on it.
    */
 
-  static private void startLog() throws GanymedeStartupException
+  static private void startTransactionLog() throws GanymedeStartupException
   {
     // First, we check to see if there is a designated mail host. If
     // not, then we automatically turn off the sending of emails.
