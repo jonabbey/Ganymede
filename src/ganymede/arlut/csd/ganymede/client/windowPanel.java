@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2012
    The University of Texas at Austin
 
    Contact information
@@ -125,6 +125,18 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
    */
 
   final static int topLayer = 0;
+
+  /**
+   * The maximum default width for new internal windows.
+   */
+
+  final static int maxDefaultWidth = 765;
+
+  /**
+   * The maximum default height for new internal windows.
+   */
+
+  final static int maxDefaultHeight = 500;
 
   // --
 
@@ -498,7 +510,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
           }
         else
           {
-            w.setBounds(0, 0, 765, 500);
+	    sizeWindow(w);
             placeWindow(w);
             w.setLayer(Integer.valueOf(topLayer));
 
@@ -563,6 +575,29 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 	// "View: {0} - {1}"
 	return ts.l("getWindowTitle.view_object_title", objectType, object_label);
       }
+  }
+
+  /**
+   * Sizes an internal window before it gets placed.
+   */
+
+  public void sizeWindow(JInternalFrame window)
+  {
+    Dimension d = this.getSize();
+    int defWidth = d.width - 40;
+    int defHeight = d.height - 40;
+
+    if (defWidth > maxDefaultWidth)
+      {
+	defWidth = maxDefaultWidth;
+      }
+
+    if (defHeight > maxDefaultHeight)
+      {
+	defHeight = maxDefaultHeight;
+      }
+
+    window.setBounds(0, 0, defWidth, defHeight);
   }
 
   /**
