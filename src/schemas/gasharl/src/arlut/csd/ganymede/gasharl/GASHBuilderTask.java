@@ -413,7 +413,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     if (baseChanged(systemSchema.BASE) || // system base
         baseChanged(networkSchema.BASE) || // I.P. Network base
         baseChanged(interfaceSchema.BASE) || // system interface base
-	baseChanged(roomsSchema.BASE))
+	baseChanged(roomSchema.BASE))
       {
         Ganymede.debug("Need to build DNS tables");
         writeSysFile();
