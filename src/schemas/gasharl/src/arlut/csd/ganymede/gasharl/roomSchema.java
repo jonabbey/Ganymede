@@ -3,16 +3,16 @@
    roomSchema.java
 
    An interface defining constants to be used by the room code.
-   
+
    Created: 15 May 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
 
    Contact information
@@ -65,6 +65,8 @@ public interface roomSchema {
   // current specs in the Ganymede schema file precisely.  If
   // you change the schema for the room, you'll want to change
   // this file to match.
+
+  final static short BASE=269;
 
   final static short ROOMNUMBER=256;
   final static short SYSTEMS=257;
