@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2012
    The University of Texas at Austin
 
    Contact information
@@ -2871,30 +2871,30 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 			    writeHashGenerics(user, pfgenerics);
 			    writeHashUserAlias(user, pfmalias);
 			  }
-    
+
 			// mail lists
-    
+
 			for (DBObject group: getObjects(emailListSchema.BASE))
 			  {
 			    writeHashGroupAlias(group, pfmalias);
 			  }
-    
+
 			// emailable account groups
-    
+
 			for (DBObject group: getObjects(groupSchema.BASE))
 			  {
 			    writeHashAccountGroupAlias(group, pfmalias);
 			  }
-    
+
 			// emailable user netgroups
-    
+
 			for (DBObject group: getObjects(userNetgroupSchema.BASE))
 			  {
 			    writeHashUserNetgroupAlias(group, pfmalias);
 			  }
-    
+
 			// external mail addresses
-    
+
 			for (DBObject external: getObjects(emailRedirectSchema.BASE))
 			  {
 			    writeHashExternalAlias(external, pfmalias);
@@ -3472,7 +3472,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
             for (String address: addresses)
               {
                 String host = getEmailHost(fixup(address));
-                
+
                 if (host.endsWith("arlut.utexas.edu"))
                   {
                     set.add(host);
@@ -5829,7 +5829,7 @@ class dhcp_entry {
   public boolean builtin;
   public int code;
   public boolean forced;
-  
+
   /* -- */
 
   public dhcp_entry(String name, String type, String value, boolean builtin, int code, boolean forced)
