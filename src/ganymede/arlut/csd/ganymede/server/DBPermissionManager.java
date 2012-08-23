@@ -623,6 +623,22 @@ public class DBPermissionManager {
   }
 
   /**
+   * <p>This method returns the Invid of the admin persona or user who
+   * is responsible for actions taken by the containing
+   * GanymedeSession.</p>
+   */
+
+  public Invid getResponsibleInvid()
+  {
+    if (personaInvid != null)
+      {
+	return personaInvid;
+      }
+
+    return userInvid;
+  }
+
+  /**
    * <p>This method returns a list of personae names available to the
    * user logged in.</p>
    */
