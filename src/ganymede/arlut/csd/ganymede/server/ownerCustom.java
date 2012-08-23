@@ -3,17 +3,19 @@
    ownerCustom.java
 
    This file is a management class for owner-group records in Ganymede.
-   
+
    Created: 9 December 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2011
+
+   Copyright (C) 1996 - 2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -83,10 +85,10 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
   static private Boolean _donateOK = null;
 
   /**
-   * <P>This method takes an {@link arlut.csd.ganymede.common.Invid Invid} for
+   * <p>This method takes an {@link arlut.csd.ganymede.common.Invid Invid} for
    * an Owner Group {@link arlut.csd.ganymede.server.DBObject DBObject}
    * and returns a Vector of Strings containing the list
-   * of email addresses for that owner group.</P>
+   * of email addresses for that owner group.</p>
    */
 
   static public Vector getAddresses(Invid ownerInvid, DBSession session)
@@ -108,10 +110,10 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
       {
 	if (debug)
 	  {
-	    System.err.println("getOwnerGroupAddresses(): Couldn't look up owner group " + 
+	    System.err.println("getOwnerGroupAddresses(): Couldn't look up owner group " +
 			       ownerInvid.toString());
 	  }
-	
+
 	return result;
       }
 
@@ -134,7 +136,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 	      {
 		adminInvid = (Invid) adminInvidList.elementAt(i);
 		adminAddr = adminPersonaCustom.convertAdminInvidToString(adminInvid, session);
-		
+
 		if (adminAddr != null)
 		  {
 		    adminList.addElement(adminAddr);
@@ -197,9 +199,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * Customization Constructor
-   *
    */
 
   public ownerCustom(DBObjectBase objectBase) throws RemoteException
@@ -208,9 +208,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * Create new object constructor
-   *
    */
 
   public ownerCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset) throws RemoteException
@@ -219,10 +217,8 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * Check-out constructor, used by DBObject.createShadow()
    * to pull out an object for editing.
-   *
    */
 
   public ownerCustom(DBObject original, DBEditSet editset) throws RemoteException
@@ -289,7 +285,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
       }
 
     set.addAll((List<String>) object.getFieldValuesLocal(SchemaConstants.OwnerExternalMail));
-    
+
     return new ArrayList<String>(set);
   }
 
@@ -303,7 +299,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
   {
     // We don't force a choice on the object owned field, because
     // it can point to anything.
-    
+
     if (field.getID() == SchemaConstants.OwnerObjectsOwned)
       {
 	return false;
