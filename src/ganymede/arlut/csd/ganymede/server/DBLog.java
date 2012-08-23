@@ -812,6 +812,8 @@ public class DBLog {
 
 	    sentTo.addAll(this.transactionControl.addressList);
 
+	    sentTo = cleanupAddresses(sentTo);
+
 	    // now we record in the event who we actually sent the
 	    // mail to, so it is logged properly
 
@@ -1064,8 +1066,10 @@ public class DBLog {
    * <P>This sends out system ("global") event mail to the appropriate
    * users, based on the system event record's flags.</P>
    *
-   * @return List of email addresses this event was sent to for
-   * system event notification
+   * @return List of email addresses this event was sent to for system
+   * event notification.  All email addresses in this List will have
+   * been normalized with the contents of the ganymede.defaultdomain
+   * property, if set.
    */
 
   private List<String> sendSysEventMail(DBLogEvent event, String transdescrip)
@@ -1178,7 +1182,7 @@ public class DBLog {
 
     // and now..
 
-    emailList.addAll(addressSet);
+    emailList.addAll(cleanupAddresses(addressSet));
 
     try
       {
@@ -1277,6 +1281,8 @@ public class DBLog {
       {
 	return Collections.emptyList();
       }
+
+    mailSet = cleanupAddresses(mailSet);
 
     // looking up the object name can be pricey, so we wait until we
     // know we probably need to do it, here
@@ -1662,6 +1668,8 @@ public class DBLog {
 	  }
       }
 
+    mailSet = cleanupAddresses(mailSet);
+
     event.setMailTargets(mailSet);
 
     // The DBLogEvent needs to remember that we've already expanded
@@ -1996,6 +2004,45 @@ public class DBLog {
       }
 
     return addresses;
+  }
+
+  /**
+   * <p>Takes a Set of email addresses and returns a Set of the same
+   * addresses after cleaning.</p>
+   *
+   * <p>Cleaning consists of making sure that any naked email
+   * addresses (i.e., without an @ sign or hostname) have the Ganymede
+   * server's default domain, if any, appended.  This may reduce the
+   * number of addresses in the resulting Set if the parameter Set had
+   * both naked and default domain variants of the same address.</p>
+   *
+   * <p>To set the default domain for a Ganymede server, set the
+   * 'ganymede.defaultdomain' property in the server's
+   * ganymede.properties file.</p>
+   */
+
+  public static Set<String> cleanupAddresses(Set<String> addresses)
+  {
+    if (Ganymede.defaultDomainProperty == null)
+      {
+	return addresses;
+      }
+
+    Set<String> results = new HashSet<String>();
+
+    for (String address: addresses)
+      {
+	if (address.indexOf('@') != -1)
+	  {
+	    results.add(address);
+	  }
+	else
+	  {
+	    results.add(address + "@" + Ganymede.defaultDomainProperty);
+	  }
+      }
+
+    return results;
   }
 
   /**
@@ -2575,6 +2622,8 @@ class systemEventType {
 	set.addAll((List<String>)strF.getValuesLocal());
       }
 
+    set = DBLog.cleanupAddresses(set);
+
     return new ArrayList<String>(set);
   }
 }
@@ -2675,6 +2724,8 @@ class objectEventType {
       {
 	set.addAll((List<String>)strF.getValuesLocal());
       }
+
+    set = DBLog.cleanupAddresses(set);
 
     return new ArrayList<String>(set);
   }
