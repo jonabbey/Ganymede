@@ -123,6 +123,13 @@ ganymede.messageDirectory=/home/broccol/gash2/code/arlut/csd/ganymede/db/text
 ganymede.mailhost=ns1.arlut.utexas.edu
 
 
+# ganymede.defaultdomain
+#
+# The email domain that should be appended to naked user names when
+# the Ganymede server sends email, if any.
+
+ganymede.defaultdomain=
+
 # ganymede.returnaddr
 #
 # What return email address will appear on system mail sent by the
