@@ -1,12 +1,12 @@
 Ganymede Release 2.0
-6 October 2011
+28 August 2012
 CHANGES
 
 ---------------------------------------------
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: 6 October 2011
+RELEASE DATE: 28 August 2012
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -1968,6 +1968,78 @@ be presented to the user to identify the problem object.
 Now, when the user hits commit in the client and there is a problem,
 the object edit or create window that contains the problem will be
 brought to his attention.
+
+141. [SERVER] Made server startup more robust
+
+The Ganymede server now properly survives a failure in the DBLog
+initialization logic.
+
+142. [CLIENT] Slimmed the GUI client's handling of embedded object panels
+
+Embedded object panels in the client are now slimmed down so that they
+fit inline with the rest of the components in a client panel, without
+having a title border around it.
+
+143. [SERVER] Added the ability for the server to capture stderr/stdout from build scripts
+
+The arlut.csd.Util.FileOps class now has a runCaptureOuputProcess()
+method which will run an external process and capture the output for
+logging and/or analysis, as appropriate.
+
+We now log whatever is written to the stderr stream during the
+execution of an incremental sync service program.
+
+144. [SERVER] Major refactoring of GanymedeSession class
+
+I have radically cleaned up the GanymedeSession class by breaking a
+lot of the functionality into the server's new DBPermissionManager and
+DBQueryEngine classes.
+
+During the process of accomplishing this, I've improved
+GanymedeSession's encapsulation a great deal, with almost all
+variables in GanymedeSession now being private with accessors added.
+
+All of the RMI-accessible Session methods in GanymedeSession are now
+grouped together and properly call checklogin() at method entry.
+
+145. [RMI] Removed deprecated methods from Session interface
+
+I have removed the long-deprecated getTypes() and getRootCategory()
+methods from the Session interface.
+
+146. [CLIENT] Made the object view/edit/delete object dialog case insensitive
+
+The view/edit/delete object dialog now does a case insensitive match
+when looking for exiting objects that prefix match the text in the
+label field.
+
+147. [SERVER] Fixed a long-standing memory pinning problem with schema editing
+
+The server no longer holds a reference to the outdated version of the
+persona base after a schema edit is performed.
+
+This was causing memory usage to stay inflated until a restart after
+editing the schema with the admin console.
+
+148. [CLIENT] Improved window size and text presentation in client.
+
+The Ganymede client now makes sure to show the beginning of text that
+is too big to fit in a standard-sized text field, rather than the end.
+
+The standard-sized text fields in the client are a bit bigger now.
+
+The Ganymede client will create slightly larger internal object
+windows to compensate, but now has logic which shrinks newly created
+object windows if the Ganymede client's main window is too small to
+fit its prefered size.
+
+149. [CLIENT] Closing the main client window now terminates the client
+
+Previously, closing the main client window when run as a command line
+or Java Web Start application caused the login window to appear again.
+
+The Ganymede client will now simply terminate when the main window is
+closed.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
