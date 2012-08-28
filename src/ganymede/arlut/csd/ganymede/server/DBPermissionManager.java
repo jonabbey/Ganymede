@@ -388,6 +388,11 @@ public class DBPermissionManager {
     return this;
   }
 
+  /**
+   * Returns true if the session is operating with unrestricted 'root'
+   * level privileges.
+   */
+
   public boolean isSuperGash()
   {
     return supergashMode;
@@ -641,9 +646,9 @@ public class DBPermissionManager {
   }
 
   /**
-   * <p>This method returns the Invid of the admin persona or user who
-   * is responsible for actions taken by the containing
-   * GanymedeSession.</p>
+   * <p>Returns the Invid of the admin persona (or user, if running
+   * with unelevated privileges) who is responsible for actions taken
+   * by the containing GanymedeSession.</p>
    */
 
   public Invid getResponsibleInvid()
@@ -1283,7 +1288,7 @@ public class DBPermissionManager {
    * by that group, and determines the appropriate permission
    * bits for the object.  getPerm() will OR any proprietary
    * ownership bits with the default permissions to give
-   * an appopriate result.</p>
+   * an appropriate result.</p>
    */
 
   public PermEntry getPerm(DBObject object)
