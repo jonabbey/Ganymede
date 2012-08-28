@@ -2276,6 +2276,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (invid == null)
       {
+	// "Client error"
+	// "Error, the client attempted to clone a null invid."
 	return Ganymede.createErrorDialog(ts.l("clone_db_object.clone_error"),
 					  ts.l("clone_db_object.clone_error_text"));
       }
@@ -2368,12 +2370,16 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
 	setLastError(ts.l("inactivate_db_object.error_text"));
 
+	// "Server: Error in inactivate_db_object()"
+	// "Can''t inactivate a non-existent object"
 	return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
 					  ts.l("inactivate_db_object.error_text"));
       }
 
     if (vObj.isInactivated())
       {
+	// "Server: Can''t inactivate an inactive object"
+	// "Error.. can''t inactivate {0} {1}, object is already inactivated"
 	return Ganymede.createErrorDialog(ts.l("inactivate_db_object.already_inactivated"),
 					  ts.l("inactivate_db_object.already_inactivated_text",
 					       vObj.getTypeName(),
@@ -2386,6 +2392,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 			  vObj.getTypeName(),
 			  vObj.getLabel()));
 
+	// "Server: Error in inactivate_db_object()"
+	// "Don''t have permission to inactivate {0} {1}"
 	return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
 					  ts.l("inactivate_db_object.permission_text",
 					       vObj.getTypeName(), vObj.getLabel()));
@@ -2397,6 +2405,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (eObj == null)
       {
+	// "Server: Error in inactivate_db_object()"
+	// "Couldn''t check out {0} {1} for inactivation"
 	return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
 					  ts.l("inactivate_db_object.no_checkout",
 					       vObj.getTypeName(), vObj.getLabel()));
@@ -2404,6 +2414,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (!eObj.canBeInactivated() || !eObj.canInactivate(dbSession, eObj))
       {
+	// "Server: Error in inactivate_db_object()"
+	// "Object {0} is not of a type that may be inactivated"
 	return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
 					  ts.l("inactivate_db_object.not_inactivatable", eObj.getLabel()));
       }
@@ -2443,12 +2455,16 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (vObj == null)
       {
+	// "Server: Error in reactivate_db_object()"
+	// "Can''t reactivate a non-existent object"
 	return Ganymede.createErrorDialog(ts.l("reactivate_db_object.error"),
 					  ts.l("reactivate_db_object.no_such"));
       }
 
     if (!vObj.isInactivated())
       {
+	// "Server: Error in reactivate_db_object()"
+	// "Error, can''t reactivate {0} {1}, object is not inactivated"
 	return Ganymede.createErrorDialog(ts.l("reactivate_db_object.error"),
 					  ts.l("reactivate_db_object.not_inactivated",
 					       vObj.getTypeName(),
@@ -2459,6 +2475,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (!permManager.getPerm(vObj).isDeletable())
       {
+	// "Server: Error in reactivate_db_object()"
+	// "You do not have permission to reactivate {0} {1}"
 	return Ganymede.createErrorDialog(ts.l("reactivate_db_object.error"),
 					  ts.l("reactivate_db_object.permission_text",
 					       vObj.getTypeName(),
@@ -2471,6 +2489,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (eObj == null)
       {
+	// "Server: Error in reactivate_db_object()"
+	// "Couldn''t check out {0} {1} for reactivation"
 	return Ganymede.createErrorDialog(ts.l("reactivate_db_object.error"),
 					  ts.l("reactivate_db_object.no_checkout",
 					       vObj.getTypeName(),
@@ -2518,6 +2538,8 @@ final public class GanymedeSession implements Session, Unreferenced {
     if ((invid.getType() == SchemaConstants.RoleBase) &&
 	(invid.getNum() == SchemaConstants.RoleDefaultObj))
       {
+	// "Server: Error in remove_db_object()"
+	// "Error.. can''t delete the default permissions definitions.  This object is critical to the proper functioning of the Ganymede server."
 	return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
 					  ts.l("remove_db_object.badobj1"));
       }
@@ -2525,6 +2547,8 @@ final public class GanymedeSession implements Session, Unreferenced {
     if ((invid.getType() == SchemaConstants.PersonaBase) &&
 	(invid.getNum() == SchemaConstants.PersonaSupergashObj))
       {
+	// "Server: Error in remove_db_object()"
+	// "Error.. can''t delete the {0} persona.  This object is critical to the proper functioning of the Ganymede server."
 	return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
 					  ts.l("remove_db_object.badobj2", Ganymede.rootname));
       }
@@ -2532,6 +2556,8 @@ final public class GanymedeSession implements Session, Unreferenced {
     if ((invid.getType() == SchemaConstants.OwnerBase) &&
 	(invid.getNum() == SchemaConstants.OwnerSupergash))
       {
+	// "Server: Error in remove_db_object()"
+	// "Error.. can''t delete the supergash owner group.  This object is critical to the proper functioning of the Ganymede server."
 	return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
 					  ts.l("remove_db_object.badobj3"));
       }
@@ -2541,6 +2567,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (vObj == null)
       {
+	// "Server: Error in remove_db_object()"
+	// "Can''t delete a non-existent object"
 	return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
 					  ts.l("remove_db_object.no_such"));
       }
@@ -2556,6 +2584,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
 	if (!permManager.getPerm(vObj).isDeletable())
 	  {
+	    // "Server: Error in remove_db_object()"
+	    // "You do not have permission to delete {0} {1}"
 	    return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
 					      ts.l("remove_db_object.permission_text",
 						   vObj.getTypeName(),
@@ -2576,6 +2606,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	    if (!permManager.isSuperGash() && objBase.getObjectHook().canBeInactivated())
 	      {
+		// "Server: Error in remove_db_object()"
+		// "You do not have permission to delete {0} {1}.\n\nOnly supergash-level admins can remove objects of this type, other admins must use inactivate."
 		return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
 						  ts.l("remove_db_object.must_inactivate",
 						       vObj.getTypeName(),
@@ -2584,6 +2616,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	    // otherwise, generic refusal
 
+	    // "Server: Error in remove_db_object()"
+	    // "Permission to delete {0} {1} has been refused by custom code"
 	    return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
 					      ts.l("remove_db_object.deletion_refused",
 						   vObj.getTypeName(),
@@ -2631,6 +2665,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
     catch (IOException ex)
       {
+	// "Error transmitting XML Query"
+	// "Exception caught trying to initialize XML query transmitter\n\n{0}"
 	return Ganymede.createErrorDialog(ts.l("runXMLQuery.transmitter_error"),
 					  ts.l("runXMLQuery.transmitter_error_msg", ex.getMessage()));
       }
@@ -2669,6 +2705,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
     catch (IOException ex)
       {
+	// "Error transmitting XML Query"
+	// "Exception caught trying to initialize XML query transmitter\n\n{0}"
 	return Ganymede.createErrorDialog(ts.l("runXMLQuery.transmitter_error"),
 					  ts.l("runXMLQuery.transmitter_error_msg", ex.getMessage()));
       }
@@ -3023,6 +3061,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	      {
 		if (Ganymede.log != null)
 		  {
+		    // "OK logout for username: {0}"
 		    Ganymede.log.logSystemEvent(new DBLogEvent("normallogout",
 							       ts.l("logout.normal_event", permManager.getUserName()),
 							       permManager.getUserInvid(),
@@ -3056,6 +3095,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	if (userSession)
 	  {
+	    // "{0} logged off"
 	    Ganymede.debug(ts.l("logout.logged_off", permManager.getUserName()));
 	  }
 
@@ -3680,10 +3720,12 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	    if (minutesIdle > (Ganymede.timeoutIdleNoObjs + 2) && objectsCheckedOut == 0)
 	      {
+		// "You have been idle for over {0,number,#} minutes with no transactions in progress.  You are being disconnected as a security precaution."
 		forceOff(ts.l("timeCheck.forceOffNoObjs", Integer.valueOf(Ganymede.timeoutIdleNoObjs)));
 	      }
 	    else if (minutesIdle > (Ganymede.timeoutIdleWithObjs + 2))
 	      {
+		// "You have been idle for over {0,number,#} minutes.  You are being disconnected as a security precaution."
 		forceOff(ts.l("timeCheck.forceOffWithObjs", Integer.valueOf(Ganymede.timeoutIdleWithObjs)));
 	      }
 	  }
@@ -3693,10 +3735,12 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (minutesIdle > Ganymede.timeoutIdleNoObjs && objectsCheckedOut == 0)
       {
+	// "You have been idle for over {0,number,#} minutes with no transactions in progress.  You are being disconnected as a security precaution."
 	forceOff(ts.l("timeCheck.forceOffNoObjs", Integer.valueOf(Ganymede.timeoutIdleNoObjs)));
       }
     else if (minutesIdle > Ganymede.timeoutIdleWithObjs)
       {
+	// "You have been idle for over {0,number,#} minutes.  You are being disconnected as a security precaution."
 	forceOff(ts.l("timeCheck.forceOffWithObjs", Integer.valueOf(Ganymede.timeoutIdleWithObjs)));
       }
   }
@@ -3757,6 +3801,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     if (type < ClientMessage.FIRST || type > ClientMessage.LAST)
       {
+	// "type out of range"
 	throw new IllegalArgumentException(ts.l("sendMessage.exception"));
       }
 
