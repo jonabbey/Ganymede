@@ -53,6 +53,7 @@ import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import arlut.csd.Util.booleanSemaphore;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.BaseListTransport;
@@ -273,6 +274,13 @@ public class DBPermissionManager {
 
   private Vector<Invid> visibilityFilterInvids = null;
 
+  /**
+   * <p>Boolean semaphore to control whether we have already been
+   * configured.</p>
+   */
+
+  private booleanSemaphore configured = new booleanSemaphore(false);
+
   /* -- */
 
   /**
@@ -299,6 +307,11 @@ public class DBPermissionManager {
     if (sessionName == null)
       {
 	throw new IllegalArgumentException("sessionName may not be null");
+      }
+
+    if (configured.set(true))
+      {
+	throw new IllegalStateException("Reconfiguring a DBPermissionManager is not allowed.");
       }
 
     this.sessionName = sessionName;
@@ -336,6 +349,11 @@ public class DBPermissionManager {
     if (sessionName == null)
       {
 	throw new IllegalArgumentException("sessionLabel may not be null");
+      }
+
+    if (configured.set(true))
+      {
+	throw new IllegalStateException("Reconfiguring a DBPermissionManager is not allowed.");
       }
 
     this.sessionName = sessionName;
@@ -1817,7 +1835,7 @@ public class DBPermissionManager {
    * called in this DBPermissionManager.
    */
 
-  public synchronized void updatePerms(boolean forceUpdate)
+  private synchronized void updatePerms(boolean forceUpdate)
   {
     PermissionMatrixDBField permField;
 
