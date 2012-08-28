@@ -2638,7 +2638,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	    invids.addElement(this.getInvid());
 
-	    // "{0} {1} has been inactivated.\n\nThe object is due to be removed from the database at {2}.\n\n"
+	    // "{0} {1} has been inactivated.\n\nThe object is due to be removed from the database at {2}."
 	    editset.logEvent(new DBLogEvent("inactivateobject",
 					    ts.l("finalizeInactivate.removeSet",
 						 getTypeName(),
@@ -2655,7 +2655,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
 	    invids.addElement(this.getInvid());
 
-	    // "{0} {1} has been inactivated.\n\nThe object has no removal date set.\n\n"
+	    // "{0} {1} has been inactivated.\n\nThe object has no removal date set."
 	    editset.logEvent(new DBLogEvent("inactivateobject",
 					    ts.l("finalizeInactivate.noRemove", getTypeName(), getLabel()),
 					    gSession.getPermManager().getIdentityInvid(),
