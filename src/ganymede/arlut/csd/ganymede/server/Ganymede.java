@@ -320,6 +320,7 @@ public class Ganymede {
   static public String rootname = null;
   static public String defaultrootpassProperty = null;
   static public String mailHostProperty = null;
+  static public String defaultDomainProperty = null;
   static public String returnaddrProperty = null;
   static public String subjectPrefixProperty = null;
   static public String signatureFileProperty = null;
@@ -666,6 +667,7 @@ public class Ganymede {
     rootname = System.getProperty("ganymede.rootname");
     defaultrootpassProperty = System.getProperty("ganymede.defaultrootpass");
     mailHostProperty = System.getProperty("ganymede.mailhost");
+    defaultDomainProperty = System.getProperty("ganymede.defaultdomain");
     signatureFileProperty = System.getProperty("ganymede.signaturefile");
     returnaddrProperty = System.getProperty("ganymede.returnaddr");
     subjectPrefixProperty = System.getProperty("ganymede.subjectprefix");
@@ -779,6 +781,17 @@ public class Ganymede {
       {
 	// "***\n*** Email Sending disabled by use of -suppressEmail command line switch or by lack of ganymede.mailhost property ***\n***"
 	System.err.println(ts.l("loadProperties.no_mail_host"));
+
+	mailHostProperty = null;
+      }
+
+    if (defaultDomainProperty == null ||
+	defaultDomainProperty.equals(""))
+      {
+	// "No ganymede.defaultdomain property set, won''t be able to normalize user email addresses when sending change mail."
+	System.err.println(ts.l("loadProperties.no_default_domain"));
+
+	defaultDomainProperty = null;
       }
 
     if (returnaddrProperty == null)

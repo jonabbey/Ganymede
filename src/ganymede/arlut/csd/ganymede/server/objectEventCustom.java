@@ -12,8 +12,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -74,10 +76,8 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.objectEventCustom");
 
   /**
-   *
    * We're going to present the user with a list of recommended event
    * names to choose from.
-   *
    */
 
   static QueryResult eventNames = null;
@@ -100,13 +100,11 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   // ---
 
   /**
-   *
    * Since object types can only be changed by the schema editor, we'll
    * cache the object type list for the duration of this object's being
    * edited.  We could even make this a static, but then we'd have to
    * have the DBSchemaEdit code know to clear it when the schema was
    * edited, which would be a hassle.
-   *
    */
 
   QueryResult objectTypeList = null;
@@ -114,9 +112,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   /* -- */
 
   /**
-   *
    * Customization Constructor
-   *
    */
 
   public objectEventCustom(DBObjectBase objectBase) throws RemoteException
@@ -125,9 +121,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * Create new object constructor
-   *
    */
 
   public objectEventCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset) throws RemoteException
@@ -136,10 +130,8 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * Check-out constructor, used by DBObject.createShadow()
    * to pull out an object for editing.
-   *
    */
 
   public objectEventCustom(DBObject original, DBEditSet editset) throws RemoteException
@@ -148,12 +140,10 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
+   * <p>Customization method to control whether a specified field is
+   * required to be defined at commit time for a given object.</p>
    *
-   * Customization method to control whether a specified field
-   * is required to be defined at commit time for a given object.
-   *
-   * To be overridden in DBEditObject subclasses.
-   *
+   * <p>To be overridden in DBEditObject subclasses.</p>
    */
 
   public boolean fieldRequired(DBObject object, short fieldid)
@@ -172,11 +162,9 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * This method provides a hook that a DBEditObject subclass
    * can use to indicate whether a given field can only
    * choose from a choice provided by obtainChoiceList()
-   *
    */
 
   public boolean mustChoose(DBField field)
@@ -198,13 +186,13 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   * This method provides a hook that can be used to generate
+   * <p>This method provides a hook that can be used to generate
    * choice lists for invid and string fields that provide
    * such.  String and Invid DBFields will call their owner's
-   * obtainChoiceList() method to get a list of valid choices.
+   * obtainChoiceList() method to get a list of valid choices.</p>
    *
-   * This method will provide a reasonable default for targetted
-   * invid fields.
+   * <p>This method will provide a reasonable default for targetted
+   * invid fields.</p>
    */
 
   public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
@@ -235,21 +223,20 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   * This method allows the DBEditObject to have executive approval
-   * of any scalar set operation, and to take any special actions
-   * in reaction to the set.. if this method returns true, the
-   * DBField that called us will proceed to make the change to
-   * it's value.  If this method returns false, the DBField
-   * that called us will not make the change, and the field
-   * will be left unchanged.
+   * <p>This method allows the DBEditObject to have executive approval
+   * of any scalar set operation, and to take any special actions in
+   * reaction to the set.. if this method returns true, the DBField
+   * that called us will proceed to make the change to it's value.  If
+   * this method returns false, the DBField that called us will not
+   * make the change, and the field will be left unchanged.</p>
    *
-   * The DBField that called us will take care of all possible checks
+   * <p>The DBField that called us will take care of all possible checks
    * on the operation (including a call to our own verifyNewValue()
    * method.  Under normal circumstances, we won't need to do anything
-   * here.
+   * here.</p>
    *
-   * If we do return false, we should set editset.setLastError to
-   * provide feedback to the client about what we disapproved of.
+   * <p>If we do return false, we should set editset.setLastError to
+   * provide feedback to the client about what we disapproved of.</p>
    */
 
   public ReturnVal finalizeSetValue(DBField field, Object value)
@@ -297,18 +284,20 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   * This method provides a pre-commit hook that runs after the user
-   * has hit commit but before the system has established write locks
-   * for the commit.
+   * <p>This method provides a pre-commit hook that runs after the
+   * user has hit commit but before the system has established write
+   * locks for the commit.</p>
    *
-   * The intended purpose of this hook is to allow objects that
+   * <p>The intended purpose of this hook is to allow objects that
    * dynamically maintain hidden label fields to update those fields
-   * from the contents of the object's other fields at commit time.
+   * from the contents of the object's other fields at commit
+   * time.</p>
    *
-   * This method runs in a checkpointed context.  If this method fails
-   * in any operation, you should return a ReturnVal with a failure
-   * dialog encoded, and the transaction's commit will be blocked and
-   * a dialog explaining the problem will be presented to the user.
+   * <p>This method runs in a checkpointed context.  If this method
+   * fails in any operation, you should return a ReturnVal with a
+   * failure dialog encoded, and the transaction's commit will be
+   * blocked and a dialog explaining the problem will be presented to
+   * the user.</p>
    */
 
   public ReturnVal preCommitHook()
@@ -355,19 +344,19 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   * Customization method to verify whether the user should be able to
-   * see a specific field in a given object.  Instances of DBField will
-   * wind up calling up to here to let us override the normal visibility
-   * process.
+   * <p>Customization method to verify whether the user should be able
+   * to see a specific field in a given object.  Instances of DBField
+   * will wind up calling up to here to let us override the normal
+   * visibility process.</p>
    *
-   * Note that it is permissible for session to be null, in which case
-   * this method will always return the default visiblity for the field
-   * in question.
+   * <p>Note that it is permissible for session to be null, in which
+   * case this method will always return the default visiblity for the
+   * field in question.</p>
    *
-   * If field is not from an object of the same base as this DBEditObject,
-   * an exception will be thrown.
+   * <p>If field is not from an object of the same base as this
+   * DBEditObject, an exception will be thrown.</p>
    *
-   * To be overridden in DBEditObject subclasses.
+   * <p>To be overridden in DBEditObject subclasses.</p>
    */
 
   public boolean canSeeField(DBSession session, DBField field)

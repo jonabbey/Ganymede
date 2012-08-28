@@ -2644,7 +2644,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 						 getTypeName(),
 						 getLabel(),
 						 getFieldValueLocal(SchemaConstants.RemovalField).toString()),
-					    gSession.getPermManager().getIdentityInvid(),
+					    gSession.getPermManager().getResponsibleInvid(),
 					    gSession.getPermManager().getIdentity(),
 					    invids,
 					    getEmailTargets(this)));
@@ -2658,7 +2658,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	    // "{0} {1} has been inactivated.\n\nThe object has no removal date set."
 	    editset.logEvent(new DBLogEvent("inactivateobject",
 					    ts.l("finalizeInactivate.noRemove", getTypeName(), getLabel()),
-					    gSession.getPermManager().getIdentityInvid(),
+					    gSession.getPermManager().getResponsibleInvid(),
 					    gSession.getPermManager().getIdentity(),
 					    invids,
 					    getEmailTargets(this)));
@@ -2745,7 +2745,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 	// "{0} {1} has been reactivated.\n\n"
 	editset.logEvent(new DBLogEvent("reactivateobject",
 					ts.l("finalizeReactivate.message", getTypeName(), getLabel()),
-					gSession.getPermManager().getIdentityInvid(),
+					gSession.getPermManager().getResponsibleInvid(),
 					gSession.getPermManager().getIdentity(),
 					invids,
 					getEmailTargets(this)));

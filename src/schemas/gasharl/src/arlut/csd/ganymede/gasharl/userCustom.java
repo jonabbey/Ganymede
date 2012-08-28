@@ -1127,7 +1127,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
    * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public Vector getEmailTargets(DBObject object)
+  public List<String> getEmailTargets(DBObject object)
   {
     // don't tell this user's email address if this user is in the process
     // of being created.  this will avoid causing email to be sent to
@@ -1142,7 +1142,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 	  }
       }
 
-    Vector x = new Vector();
+    Vector<String> x = new Vector<String>();
 
     x.add(object.getLabel());	// let our mail system handle routing.
 

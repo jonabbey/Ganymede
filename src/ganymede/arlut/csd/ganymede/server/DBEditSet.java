@@ -1825,7 +1825,7 @@ public class DBEditSet {
 
     if (getGSession() != null)
       {
-	responsibleInvid = getGSession().getPermManager().getIdentityInvid();
+	responsibleInvid = getGSession().getPermManager().getResponsibleInvid();
 	responsibleName = getGSession().getPermManager().getIdentity();
       }
     else
@@ -2200,7 +2200,7 @@ public class DBEditSet {
     if (getGSession() != null)
       {
 	responsibleName = getGSession().getPermManager().getIdentity();
-	responsibleInvid = getGSession().getPermManager().getIdentityInvid();
+	responsibleInvid = getGSession().getPermManager().getResponsibleInvid();
       }
     else
       {
