@@ -3100,6 +3100,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 	  }
 
 	permManager = null;
+	queryEngine = null;
       }
   }
 
