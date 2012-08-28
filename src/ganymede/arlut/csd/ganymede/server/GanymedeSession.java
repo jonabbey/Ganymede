@@ -2145,32 +2145,35 @@ final public class GanymedeSession implements Session, Unreferenced {
 
 	    DBEditObject editing = obj.shadowObject;
 
-	    if (editing != null)
+	    try
 	      {
-		if (editing.gSession != null)
-		  {
-		    edit_username = editing.gSession.getPermManager().getUserName();
-		    edit_hostname = editing.gSession.getClientHostName();
+		edit_username = editing.gSession.getPermManager().getUserName();
+		edit_hostname = editing.gSession.getClientHostName();
 
-		    // "Error, object already being edited"
-		    // "{0} [{1} - {2}] is already being edited by user {3} on host {4}"
-		    return Ganymede.createErrorDialog(ts.l("edit_db_object.already_editing"),
-						      ts.l("edit_db_object.already_editing_text",
-							   obj.getTypeName(),
-							   viewObjectLabel(invid),
-							   String.valueOf(invid),
-							   edit_username,
-							   edit_hostname));
-		  }
+		// "Error, object already being edited"
+		// "{0} [{1} - {2}] is already being edited by user {3} on host {4}"
+		return Ganymede.createErrorDialog(ts.l("edit_db_object.already_editing"),
+						  ts.l("edit_db_object.already_editing_text",
+						       obj.getTypeName(),
+						       viewObjectLabel(invid),
+						       String.valueOf(invid),
+						       edit_username,
+						       edit_hostname));
 	      }
+	    catch (NullPointerException ex)
+	      {
+		// We might hit a NullPointerException if the object
+		// was being edited by a transaction that has since
+		// committed.
 
-	    // "Error checking object out for editing"
-	    // "Error checking out {0} [{1} - {2}] for editing.\nPerhaps someone else was editing it?"
-	    return Ganymede.createErrorDialog(ts.l("edit_db_object.checking_out_error"),
-					      ts.l("edit_db_object.checking_out_error_text",
-						   obj.getTypeName(),
-						   viewObjectLabel(invid),
-						   String.valueOf(invid)));
+		// "Error checking object out for editing"
+		// "Error checking out {0} [{1} - {2}] for editing.\nPerhaps someone else was editing it?"
+		return Ganymede.createErrorDialog(ts.l("edit_db_object.checking_out_error"),
+						  ts.l("edit_db_object.checking_out_error_text",
+						       obj.getTypeName(),
+						       viewObjectLabel(invid),
+						       String.valueOf(invid)));
+	      }
 	  }
       }
     else
