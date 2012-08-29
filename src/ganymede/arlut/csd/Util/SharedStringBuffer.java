@@ -1,5 +1,5 @@
 /*
- * @(#)StringBuffer.java	1.35 98/04/22
+ * @(#)StringBuffer.java        1.35 98/04/22
  *
  * Copyright 1994-1997 by Sun Microsystems, Inc.,
  * 901 San Antonio Road, Palo Alto, California, 94303, U.S.A.
@@ -21,7 +21,7 @@ package arlut.csd.Util;
  * reusedStringBuffer's to be written out to disk without forcing a
  * duplication of the char array.
  *
- * @author	Arthur van Hoff, Jonathan Abbey (jonabbey@arlut.utexas.edu)
+ * @author      Arthur van Hoff, Jonathan Abbey (jonabbey@arlut.utexas.edu)
  * @see     java.io.ByteArrayOutputStream
  * @see     java.lang.String
  */
@@ -134,7 +134,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
   {
     if (minimumCapacity > value.length)
       {
-	expandCapacity(minimumCapacity);
+        expandCapacity(minimumCapacity);
       }
   }
 
@@ -152,9 +152,9 @@ public final class SharedStringBuffer implements java.io.Serializable {
 
     if (minimumCapacity > newCapacity) 
       {
-	newCapacity = minimumCapacity;
+        newCapacity = minimumCapacity;
       }
-	
+        
     char newValue[] = new char[newCapacity];
     System.arraycopy(value, 0, newValue, 0, count);
     value = newValue;
@@ -185,35 +185,35 @@ public final class SharedStringBuffer implements java.io.Serializable {
   {
     if (newLength < 0) 
       {
-	throw new StringIndexOutOfBoundsException(newLength);
+        throw new StringIndexOutOfBoundsException(newLength);
       }
-	
+        
     if (newLength > value.length) 
       {
-	expandCapacity(newLength);
+        expandCapacity(newLength);
       }
 
     if (newLength > count)
       {
-	for (; count < newLength; count++) 
-	  {
-	    value[count] = '\0';
-	  }
+        for (; count < newLength; count++) 
+          {
+            value[count] = '\0';
+          }
       } 
     else if (newLength == 0)
       {
-	// let's not keep a huge sized buffer around needlessly
+        // let's not keep a huge sized buffer around needlessly
 
-	if (value.length > 4096)
-	  {
-	    value = new char[DEFAULTSIZE];
-	  }
+        if (value.length > 4096)
+          {
+            value = new char[DEFAULTSIZE];
+          }
 
-	count = 0;
+        count = 0;
       }
     else
       {
-	count = newLength;
+        count = newLength;
       }
   }
 
@@ -237,7 +237,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
   {
     if ((index < 0) || (index >= count)) 
       {
-	throw new StringIndexOutOfBoundsException(index);
+        throw new StringIndexOutOfBoundsException(index);
       }
     return value[index];
   }
@@ -266,17 +266,17 @@ public final class SharedStringBuffer implements java.io.Serializable {
   {
     if ((srcBegin < 0) || (srcBegin >= count)) 
       {
-	throw new StringIndexOutOfBoundsException(srcBegin);
+        throw new StringIndexOutOfBoundsException(srcBegin);
       }
 
     if ((srcEnd < 0) || (srcEnd > count)) 
       {
-	throw new StringIndexOutOfBoundsException(srcEnd);
+        throw new StringIndexOutOfBoundsException(srcEnd);
       }
 
     if (srcBegin < srcEnd) 
       {
-	System.arraycopy(value, srcBegin, dst, dstBegin, srcEnd - srcBegin);
+        System.arraycopy(value, srcBegin, dst, dstBegin, srcEnd - srcBegin);
       }
   }
 
@@ -297,7 +297,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
   {
     if ((index < 0) || (index >= count)) 
       {
-	throw new StringIndexOutOfBoundsException(index);
+        throw new StringIndexOutOfBoundsException(index);
       }
     
     value[index] = ch;
@@ -337,7 +337,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
   {
     if (str == null) 
       {
-	str = String.valueOf(str); // It's okay FindBugs, we're changing to "null"
+        str = String.valueOf(str); // It's okay FindBugs, we're changing to "null"
       }
 
     int len = str.length();
@@ -345,7 +345,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
 
     if (newcount > value.length)
       {
-	expandCapacity(newcount);
+        expandCapacity(newcount);
       }
 
     str.getChars(0, len, value, count);
@@ -372,7 +372,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
 
     if (newcount > value.length)
       {
-	expandCapacity(newcount);
+        expandCapacity(newcount);
       }
     
     System.arraycopy(str, 0, value, count, len);
@@ -401,7 +401,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
 
     if (newcount > value.length)
       {
-	expandCapacity(newcount);
+        expandCapacity(newcount);
       }
 
     System.arraycopy(str, offset, value, count, len);
@@ -445,7 +445,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
 
     if (newcount > value.length)
       {
-	expandCapacity(newcount);
+        expandCapacity(newcount);
       }
 
     value[count++] = c;
@@ -577,7 +577,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
   {
     if ((offset < 0) || (offset > count)) 
       {
-	throw new StringIndexOutOfBoundsException();
+        throw new StringIndexOutOfBoundsException();
       }
 
     int len = str.length();
@@ -585,7 +585,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
 
     if (newcount > value.length)
       {
-	expandCapacity(newcount);
+        expandCapacity(newcount);
       }
     
     System.arraycopy(value, offset, value, offset + len, count - offset);
@@ -613,7 +613,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
   {
     if ((offset < 0) || (offset > count)) 
       {
-	throw new StringIndexOutOfBoundsException();
+        throw new StringIndexOutOfBoundsException();
       }
 
     int len = str.length;
@@ -621,7 +621,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
 
     if (newcount > value.length)
       {
-	expandCapacity(newcount);
+        expandCapacity(newcount);
       }
 
     System.arraycopy(value, offset, value, offset + len, count - offset);
@@ -682,7 +682,7 @@ public final class SharedStringBuffer implements java.io.Serializable {
 
     if (newcount > value.length)
       {
-	expandCapacity(newcount);
+        expandCapacity(newcount);
       }
 
     System.arraycopy(value, offset, value, offset + 1, count - offset);
@@ -812,9 +812,9 @@ public final class SharedStringBuffer implements java.io.Serializable {
 
     for (int j = (n-1) >> 1; j >= 0; --j) 
       {
-	char temp = value[j];
-	value[j] = value[n - j];
-	value[n - j] = temp;
+        char temp = value[j];
+        value[j] = value[n - j];
+        value[n - j] = temp;
       }
 
     return this;

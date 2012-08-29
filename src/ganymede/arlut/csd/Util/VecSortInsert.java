@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -84,24 +84,24 @@ public class VecSortInsert implements Comparator {
   public static final Comparator defaultComparator = new Comparator() 
     {
       public int compare(Object a, Object b) 
-	{
-	  int comp = 0;
-	  
-	  comp = a.toString().compareToIgnoreCase(b.toString());
-	  
-	  if (comp < 0)
-	    {
-	      return -1;
-	    }
-	  else if (comp > 0)
-	    { 
-	      return 1;
-	    } 
-	  else
-	    { 
-	      return 0;
-	    }
-	}
+        {
+          int comp = 0;
+          
+          comp = a.toString().compareToIgnoreCase(b.toString());
+          
+          if (comp < 0)
+            {
+              return -1;
+            }
+          else if (comp > 0)
+            { 
+              return 1;
+            } 
+          else
+            { 
+              return 0;
+            }
+        }
     };
 
   // debug rig
@@ -184,8 +184,8 @@ public class VecSortInsert implements Comparator {
   {
     for (int i = 0; i < vec.size(); i++)
       {
-	System.out.print(vec.elementAt(i));
-	System.out.print("  ");
+        System.out.print(vec.elementAt(i));
+        System.out.print("  ");
       }
 
     System.out.println();
@@ -195,32 +195,32 @@ public class VecSortInsert implements Comparator {
   {
     for (int i = 0; i < size; i++)
       {
-	if (i == low)
-	  {
-	    System.out.print("l");
-	  }
-	else
-	  {
-	    System.out.print(" ");
-	  }
+        if (i == low)
+          {
+            System.out.print("l");
+          }
+        else
+          {
+            System.out.print(" ");
+          }
 
-	if (i == med)
-	  {
-	    System.out.print("m");
-	  }
-	else
-	  {
-	    System.out.print(" ");
-	  }
+        if (i == med)
+          {
+            System.out.print("m");
+          }
+        else
+          {
+            System.out.print(" ");
+          }
 
-	if (i == high)
-	  {
-	    System.out.print("h");
-	  }
-	else
-	  {
-	    System.out.print(" ");
-	  }
+        if (i == high)
+          {
+            System.out.print("h");
+          }
+        else
+          {
+            System.out.print(" ");
+          }
       }
 
     System.out.println();
@@ -239,18 +239,18 @@ public class VecSortInsert implements Comparator {
 
     if (objects.size() == 0)
       {
-	if (debug)
-	  {
-	    System.err.println("Inserting " + element + " at 0 to start list");
-	  }
+        if (debug)
+          {
+            System.err.println("Inserting " + element + " at 0 to start list");
+          }
 
-	objects.addElement(element);
-	return;
+        objects.addElement(element);
+        return;
       }
 
     if (comparatorParam == null)
       {
-	myComparator = defaultComparator;
+        myComparator = defaultComparator;
       }
     else
       {
@@ -266,62 +266,62 @@ public class VecSortInsert implements Comparator {
 
     while (low < high)
       {
-	if (false)
-	  {
-	    printTest(objects.size(), low, mid, high);
-	  }
+        if (false)
+          {
+            printTest(objects.size(), low, mid, high);
+          }
 
-	if (myComparator.compare(element,objects.elementAt(mid)) < 0)
-	  {
-	    high = mid;
-	  }
-	else
-	  {
-	    low = mid + 1;
-	  }
+        if (myComparator.compare(element,objects.elementAt(mid)) < 0)
+          {
+            high = mid;
+          }
+        else
+          {
+            low = mid + 1;
+          }
 
-	mid = (low + high) / 2;
+        mid = (low + high) / 2;
       }
 
     if (false)
       {
-	printTest(objects.size(), low, mid, high);
+        printTest(objects.size(), low, mid, high);
       }
 
     if ((mid == objects.size()-1) && myComparator.compare(element, objects.elementAt(objects.size()-1)) > 0)
       {
-	if (debug)
-	  {
-	    System.err.println("Inserting " + element + " at " + mid + " (end) of " + objects.size());
-	  }
-	
-	objects.addElement(element);
+        if (debug)
+          {
+            System.err.println("Inserting " + element + " at " + mid + " (end) of " + objects.size());
+          }
+        
+        objects.addElement(element);
       }
     else
       {
-	if (debug)
-	  {
-	    System.err.println("Inserting " + element + " at " + mid + " in " + objects.size());
-	  }
-	
-	objects.insertElementAt(element, mid);
+        if (debug)
+          {
+            System.err.println("Inserting " + element + " at " + mid + " in " + objects.size());
+          }
+        
+        objects.insertElementAt(element, mid);
       }
 
     if (debug)
       {
-	for (int i = 0; i < objects.size(); i++)
-	  {
-	    if (i > 0)
-	      {
-		System.err.print(" ");
-	      }
+        for (int i = 0; i < objects.size(); i++)
+          {
+            if (i > 0)
+              {
+                System.err.print(" ");
+              }
 
-	    System.err.print(objects.elementAt(i));
-	  }
+            System.err.print(objects.elementAt(i));
+          }
 
-	System.err.println();
+        System.err.println();
 
-	//	printTest(objects.size(), low, mid, high);
+        //      printTest(objects.size(), low, mid, high);
       }
   }
 

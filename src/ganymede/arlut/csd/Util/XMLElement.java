@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -82,16 +82,16 @@ public class XMLElement extends XMLItem {
 
     if (atts != null)
       {
-	length = atts.getLength();
+        length = atts.getLength();
 
-	attrKeys = new String[length];
-	attrVals = new String[length];
+        attrKeys = new String[length];
+        attrVals = new String[length];
 
-	for (int i = 0; i < atts.getLength(); i++)
-	  {
-	    attrKeys[i] = atts.getLocalName(i);
-	    attrVals[i] = atts.getValue(i);
-	  }
+        for (int i = 0; i < atts.getLength(); i++)
+          {
+            attrKeys[i] = atts.getLocalName(i);
+            attrVals[i] = atts.getValue(i);
+          }
       }
   }
 
@@ -129,11 +129,11 @@ public class XMLElement extends XMLItem {
 
     if (children != null)
       {
-	for (int i = 0; i < children.length; i++)
-	  {
-	    children[i].dissolve();
-	    children[i] = null;
-	  }
+        for (int i = 0; i < children.length; i++)
+          {
+            children[i].dissolve();
+            children[i] = null;
+          }
       }
 
     children = null;
@@ -196,11 +196,11 @@ public class XMLElement extends XMLItem {
   {
     if (attrKeys == null)
       {
-	return 0;
+        return 0;
       }
     else
       {
-	return attrKeys.length;
+        return attrKeys.length;
       }
   }
 
@@ -234,15 +234,15 @@ public class XMLElement extends XMLItem {
   {
     if (attrKeys == null)
       {
-	return null;
+        return null;
       }
 
     for (int i = 0; i < attrKeys.length; i++)
       {
-	if (attrKeys[i].equals(name))
-	  {
-	    return attrVals[i];
-	  }
+        if (attrKeys[i].equals(name))
+          {
+            return attrVals[i];
+          }
       }
 
     return null;
@@ -260,19 +260,19 @@ public class XMLElement extends XMLItem {
   {
     if (attrKeys == null)
       {
-	return false;
+        return false;
       }
 
     for (int i = 0; i < attrKeys.length; i++)
       {
-	if (attrKeys[i].equals(name))
-	  {
-	    return (attrVals[i].equals("1") || 
-		    attrVals[i].equalsIgnoreCase("true") || 
-		    attrVals[i].equalsIgnoreCase("t") ||
-		    attrVals[i].equalsIgnoreCase("yes") ||
-		    attrVals[i].equalsIgnoreCase("y"));
-	  }
+        if (attrKeys[i].equals(name))
+          {
+            return (attrVals[i].equals("1") || 
+                    attrVals[i].equalsIgnoreCase("true") || 
+                    attrVals[i].equalsIgnoreCase("t") ||
+                    attrVals[i].equalsIgnoreCase("yes") ||
+                    attrVals[i].equalsIgnoreCase("y"));
+          }
       }
 
     return false;
@@ -289,22 +289,22 @@ public class XMLElement extends XMLItem {
   {
     if (attrKeys == null)
       {
-	return null;
+        return null;
       }
 
     for (int i = 0; i < attrKeys.length; i++)
       {
-	if (attrKeys[i].equals(name))
-	  {
-	    try
-	      {
-		return Integer.valueOf(attrVals[i]);
-	      }
-	    catch (NumberFormatException ex)
-	      {
-		return null;
-	      }
-	  }
+        if (attrKeys[i].equals(name))
+          {
+            try
+              {
+                return Integer.valueOf(attrVals[i]);
+              }
+            catch (NumberFormatException ex)
+              {
+                return null;
+              }
+          }
       }
 
     return null;
@@ -321,22 +321,22 @@ public class XMLElement extends XMLItem {
     
     if (attrKeys != null)
       {
-	for (int i = 0; i < attrKeys.length; i++)
-	  {
-	    buffer.append(" ");
+        for (int i = 0; i < attrKeys.length; i++)
+          {
+            buffer.append(" ");
 
-	    buffer.append(attrKeys[i]);
-	    buffer.append("=\"");
-	    buffer.append(attrVals[i]);
-	    buffer.append("\"");
-	  }
+            buffer.append(attrKeys[i]);
+            buffer.append("=\"");
+            buffer.append(attrVals[i]);
+            buffer.append("\"");
+          }
 
-	if (empty)
-	  {
-	    buffer.append("/");
-	  }
+        if (empty)
+          {
+            buffer.append("/");
+          }
 
-	buffer.append(">");
+        buffer.append(">");
       }
 
     return buffer.toString();
@@ -352,19 +352,19 @@ public class XMLElement extends XMLItem {
   {
     for (int i = 0; i < indentLevel; i++)
       {
-	System.err.print("  ");
+        System.err.print("  ");
       }
 
     System.err.println(this.toString());
 
     if (children != null)
       {
-	indentLevel++;
+        indentLevel++;
 
-	for (int i = 0; i < children.length; i++)
-	  {
-	    children[i].debugPrintTree(indentLevel);
-	  }
+        for (int i = 0; i < children.length; i++)
+          {
+            children[i].debugPrintTree(indentLevel);
+          }
       }
   }
 
@@ -378,7 +378,7 @@ public class XMLElement extends XMLItem {
   {
     for (int i = 0; i < indentLevel; i++)
       {
-	buffer.append("  ");
+        buffer.append("  ");
       }
 
     buffer.append(this.toString());
@@ -386,12 +386,12 @@ public class XMLElement extends XMLItem {
 
     if (children != null)
       {
-	indentLevel++;
+        indentLevel++;
 
-	for (int i = 0; i < children.length; i++)
-	  {
-	    children[i].getTreeString(buffer, indentLevel);
-	  }
+        for (int i = 0; i < children.length; i++)
+          {
+            children[i].getTreeString(buffer, indentLevel);
+          }
       }
   }
 }

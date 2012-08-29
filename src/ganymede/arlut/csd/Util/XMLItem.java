@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -269,7 +269,7 @@ public abstract class XMLItem {
   {
     for (int i = 0; i < indentLevel; i++)
       {
-	System.err.print("  ");
+        System.err.print("  ");
       }
 
     System.err.println(this.toString());
@@ -285,7 +285,7 @@ public abstract class XMLItem {
   {
     for (int i = 0; i < indentLevel; i++)
       {
-	buffer.append("  ");
+        buffer.append("  ");
       }
 
     buffer.append(this.toString());

@@ -79,20 +79,20 @@ public class XMLNameValidator {
   public static boolean isValidNameStartChar(int codePoint)
   {
     return (codePoint == ':' || codePoint == '_' ||
-	    (codePoint >= 'A' && codePoint <= 'Z') ||
-	    (codePoint >= 'a' && codePoint <= 'z') ||
-	    (codePoint >= 0xC0 && codePoint <= 0xD6) ||
-	    (codePoint >= 0xD8 && codePoint <= 0xF6) ||
-	    (codePoint >= 0xF8 && codePoint <= 0x2FF) ||
-	    (codePoint >= 0x370 && codePoint <= 0x37D) ||
-	    (codePoint >= 0x37F && codePoint <= 0x1FFF) ||
-	    (codePoint >= 0x200C && codePoint <= 0x200D) ||
-	    (codePoint >= 0x2070 && codePoint <= 0x218F) ||
-	    (codePoint >= 0x2C00 && codePoint <= 0x2FEF) ||
-	    (codePoint >= 0x3001 && codePoint <= 0xD7FF) ||
-	    (codePoint >= 0xF900 && codePoint <= 0xFDCF) ||
-	    (codePoint >= 0xFDF0 && codePoint <= 0xFFFD) ||
-	    (codePoint >= 0x10000 && codePoint <= 0xEFFFF));
+            (codePoint >= 'A' && codePoint <= 'Z') ||
+            (codePoint >= 'a' && codePoint <= 'z') ||
+            (codePoint >= 0xC0 && codePoint <= 0xD6) ||
+            (codePoint >= 0xD8 && codePoint <= 0xF6) ||
+            (codePoint >= 0xF8 && codePoint <= 0x2FF) ||
+            (codePoint >= 0x370 && codePoint <= 0x37D) ||
+            (codePoint >= 0x37F && codePoint <= 0x1FFF) ||
+            (codePoint >= 0x200C && codePoint <= 0x200D) ||
+            (codePoint >= 0x2070 && codePoint <= 0x218F) ||
+            (codePoint >= 0x2C00 && codePoint <= 0x2FEF) ||
+            (codePoint >= 0x3001 && codePoint <= 0xD7FF) ||
+            (codePoint >= 0xF900 && codePoint <= 0xFDCF) ||
+            (codePoint >= 0xFDF0 && codePoint <= 0xFFFD) ||
+            (codePoint >= 0x10000 && codePoint <= 0xEFFFF));
   }
 
   /**
@@ -104,11 +104,11 @@ public class XMLNameValidator {
   public static boolean isValidNameChar(int codePoint)
   {
     return (isValidNameStartChar(codePoint) ||
-	    codePoint == '-' || codePoint == '.' ||
-	    (codePoint >= '0' && codePoint <= '9') ||
-	    codePoint == 0xB7 ||
-	    (codePoint >= 0x300 && codePoint <= 0x36F) ||
-	    (codePoint >= 0x203F && codePoint <= 0x2040));
+            codePoint == '-' || codePoint == '.' ||
+            (codePoint >= '0' && codePoint <= '9') ||
+            codePoint == 0xB7 ||
+            (codePoint >= 0x300 && codePoint <= 0x36F) ||
+            (codePoint >= 0x203F && codePoint <= 0x2040));
   }
 
   /**
@@ -120,29 +120,29 @@ public class XMLNameValidator {
   {
     if (text == null || text.length() == 0)
       {
-	return false;
+        return false;
       }
 
     for (int offset = 0; offset < text.length();)
       {
-	int codePoint = text.codePointAt(offset);
+        int codePoint = text.codePointAt(offset);
 
-	if (offset == 0)
-	  {
-	    if (!XMLNameValidator.isValidNameStartChar(codePoint))
-	      {
-		return false;
-	      }
-	  }
-	else
-	  {
-	    if (!XMLNameValidator.isValidNameChar(codePoint))
-	      {
-		return false;
-	      }
-	  }
+        if (offset == 0)
+          {
+            if (!XMLNameValidator.isValidNameStartChar(codePoint))
+              {
+                return false;
+              }
+          }
+        else
+          {
+            if (!XMLNameValidator.isValidNameChar(codePoint))
+              {
+                return false;
+              }
+          }
 
-	offset += Character.charCount(codePoint);
+        offset += Character.charCount(codePoint);
       }
 
     return true;
@@ -164,39 +164,39 @@ public class XMLNameValidator {
   {
     if (text == null || text.length() == 0)
       {
-	return false;
+        return false;
       }
 
     for (int offset = 0; offset < text.length();)
       {
-	int codePoint = text.codePointAt(offset);
+        int codePoint = text.codePointAt(offset);
 
-	if (offset == 0)
-	  {
-	    if (codePoint == ' ' || codePoint == '_' || codePoint == ':')
-	      {
-		return false;
-	      }
+        if (offset == 0)
+          {
+            if (codePoint == ' ' || codePoint == '_' || codePoint == ':')
+              {
+                return false;
+              }
 
-	    if (!XMLNameValidator.isValidNameStartChar(codePoint))
-	      {
-		return false;
-	      }
-	  }
-	else
-	  {
-	    if (codePoint == '_' || codePoint == ':')
-	      {
-		return false;
-	      }
+            if (!XMLNameValidator.isValidNameStartChar(codePoint))
+              {
+                return false;
+              }
+          }
+        else
+          {
+            if (codePoint == '_' || codePoint == ':')
+              {
+                return false;
+              }
 
-	    if (codePoint != ' ' && !XMLNameValidator.isValidNameChar(codePoint))
-	      {
-		return false;
-	      }
-	  }
+            if (codePoint != ' ' && !XMLNameValidator.isValidNameChar(codePoint))
+              {
+                return false;
+              }
+          }
 
-	offset += Character.charCount(codePoint);
+        offset += Character.charCount(codePoint);
       }
 
     // XML names that begin with xml are reserved, so we don't want to
@@ -204,7 +204,7 @@ public class XMLNameValidator {
 
     if (text.startsWith("xml"))
       {
-	return false;
+        return false;
       }
 
     return true;

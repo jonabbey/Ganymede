@@ -12,7 +12,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -111,7 +111,7 @@ public class zipIt {
 
     if (targetFile.exists())
       {
-	throw new IOException("Error, target zip file " + zipFileName + " already exists.");
+        throw new IOException("Error, target zip file " + zipFileName + " already exists.");
       }
 
     directoryPath = PathComplete.completePath(directoryPath);
@@ -120,66 +120,66 @@ public class zipIt {
 
     if (!directory.isDirectory())
       {
-	throw new IOException("Error, couldn't find directory to zip.");
+        throw new IOException("Error, couldn't find directory to zip.");
       }
 
     String filenames[];
 
     if (includeZips)
       {
-	filenames = directory.list();
+        filenames = directory.list();
       }
     else
       {
-	filenames = directory.list(new FilenameFilter()
-				   {
-				     /**
-				      * <P>This method comprises the FileNameFilter body, and is used to avoid
-				      * zipping existing zip files into new backups.</P>
-				      */
-				     
-				     public boolean accept(File dir, String name)
-				       {
-					 if (name.endsWith(".zip") || (name.endsWith(".ZIP")))
-					   {
-					     return false;
-					   }
-					 
-					 return true;
-				       }
-				   });
+        filenames = directory.list(new FilenameFilter()
+                                   {
+                                     /**
+                                      * <P>This method comprises the FileNameFilter body, and is used to avoid
+                                      * zipping existing zip files into new backups.</P>
+                                      */
+                                     
+                                     public boolean accept(File dir, String name)
+                                       {
+                                         if (name.endsWith(".zip") || (name.endsWith(".ZIP")))
+                                           {
+                                             return false;
+                                           }
+                                         
+                                         return true;
+                                       }
+                                   });
       }
 
     if (filenames.length > 0)
       {
-	Vector filenameVect = new Vector();
+        Vector filenameVect = new Vector();
 
-	if (debug)
-	  {
-	    System.err.print("Zipping: ");
-	  }
+        if (debug)
+          {
+            System.err.print("Zipping: ");
+          }
 
-	for (int i = 0; i < filenames.length; i++)
-	  {
-	    if (debug)
-	      {
-		System.err.print(filenames[i]);
-		System.err.print(" ");
-	      }
+        for (int i = 0; i < filenames.length; i++)
+          {
+            if (debug)
+              {
+                System.err.print(filenames[i]);
+                System.err.print(" ");
+              }
 
-	    File testFile = new File(directoryPath + filenames[i]);
+            File testFile = new File(directoryPath + filenames[i]);
 
-	    if (!testFile.isDirectory())
-	      {
-		filenameVect.addElement(directoryPath + filenames[i]);
-	      }
-	  }
-	
-	if (filenameVect.size() > 0)
-	  {
-	    zipIt.createZipFile(zipFileName, filenameVect);
-	    return true;
-	  }
+            if (!testFile.isDirectory())
+              {
+                filenameVect.addElement(directoryPath + filenames[i]);
+              }
+          }
+        
+        if (filenameVect.size() > 0)
+          {
+            zipIt.createZipFile(zipFileName, filenameVect);
+            return true;
+          }
       }
 
     return false;
@@ -208,7 +208,7 @@ public class zipIt {
 
     for (int i = 0; i < fileNames.size(); i++)
       {
-	files.addElement(new File((String) fileNames.elementAt(i)));
+        files.addElement(new File((String) fileNames.elementAt(i)));
       }
 
     zipIt.createZipFile(outputFile, files);
@@ -232,21 +232,21 @@ public class zipIt {
 
     try
       {
-	for (int i = 0; i < files.size(); i++)
-	  {
-	    File inFile = (File) files.elementAt(i);
+        for (int i = 0; i < files.size(); i++)
+          {
+            File inFile = (File) files.elementAt(i);
 
-	    if (!inFile.exists() || inFile.isDirectory())
-	      {
-		continue;
-	      }
+            if (!inFile.exists() || inFile.isDirectory())
+              {
+                continue;
+              }
 
-	    addZipEntry(zipOut, inFile);
-	  }
+            addZipEntry(zipOut, inFile);
+          }
       }
     finally
       {
-	zipOut.close();
+        zipOut.close();
       }
   }
 
@@ -271,18 +271,18 @@ public class zipIt {
 
     try
       {
-	length = inStream.read(buffer);
-	
-	while (length != -1)
-	  {
-	    zipOut.write(buffer, 0, length);
-	    length = inStream.read(buffer);
-	  }
+        length = inStream.read(buffer);
+        
+        while (length != -1)
+          {
+            zipOut.write(buffer, 0, length);
+            length = inStream.read(buffer);
+          }
       }
     finally
       {
-	inStream.close();
-	zipOut.closeEntry();
+        inStream.close();
+        zipOut.closeEntry();
       }
   }
 
@@ -296,11 +296,11 @@ public class zipIt {
   {
     try
       {
-	zipIt.zipDirectory(args[0], args[1]);
+        zipIt.zipDirectory(args[0], args[1]);
       }
     catch (IOException ex)
       {
-	ex.printStackTrace();
+        ex.printStackTrace();
       }
 
     /*
@@ -309,16 +309,16 @@ public class zipIt {
 
     for (int i = 1; i < args.length; i++)
       {
-	inFiles.addElement(args[i]);
+        inFiles.addElement(args[i]);
       }
 
     try
       {
-	createZipFile(zipName, inFiles);
+        createZipFile(zipName, inFiles);
       }
     catch (IOException ex)
       {
-	throw new RuntimeException(ex.getMessage());
+        throw new RuntimeException(ex.getMessage());
       }
     */
   }

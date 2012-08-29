@@ -7,7 +7,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -81,21 +81,21 @@ public class BrowserLauncher {
   {
     if (desktopObject == null)
       {
-	try
-	  {
-	    desktopClass = Class.forName("java.awt.Desktop");
+        try
+          {
+            desktopClass = Class.forName("java.awt.Desktop");
 
-	    Method getDesktopMethod = desktopClass.getMethod("getDesktop", new Class [] {});
+            Method getDesktopMethod = desktopClass.getMethod("getDesktop", new Class [] {});
 
-	    desktopObject = getDesktopMethod.invoke(null, (Object[]) null);
-	  }
-	catch (RuntimeException ex)
-	  {
-	    // to make FindBugs happier
-	  }
-	catch (Exception ex)
-	  {
-	  }
+            desktopObject = getDesktopMethod.invoke(null, (Object[]) null);
+          }
+        catch (RuntimeException ex)
+          {
+            // to make FindBugs happier
+          }
+        catch (Exception ex)
+          {
+          }
       }
 
     return desktopObject != null;
@@ -112,26 +112,26 @@ public class BrowserLauncher {
   {
     if (!isWebBrowserSupported())
       {
-	return;
+        return;
       }
 
     URI urlObj = URI.create(url);
 
     try
       {
-	Method browseMethod = desktopClass.getMethod("browse", new Class [] {java.net.URI.class});
+        Method browseMethod = desktopClass.getMethod("browse", new Class [] {java.net.URI.class});
 
-	browseMethod.invoke(desktopObject, new Object [] {urlObj});
+        browseMethod.invoke(desktopObject, new Object [] {urlObj});
       }
     catch (RuntimeException ex)
       {
-	// catch RuntimeException separately to make FindBugs
-	// happier.. in fact, if we can't get the browser going on
-	// this platform, we don't really care all that much.
+        // catch RuntimeException separately to make FindBugs
+        // happier.. in fact, if we can't get the browser going on
+        // this platform, we don't really care all that much.
       }
     catch (Exception ex)
       {
-	// Ditto for any non-RuntimeExceptions.
+        // Ditto for any non-RuntimeExceptions.
       }
   }
 }

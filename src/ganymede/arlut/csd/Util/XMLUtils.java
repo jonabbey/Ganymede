@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -77,7 +77,7 @@ public class XMLUtils {
 
     for (int i = 0; i < indentLevel; i++)
       {
-	xmlOut.write("  ");
+        xmlOut.write("  ");
       }
   }
 
@@ -93,20 +93,20 @@ public class XMLUtils {
 
     for (int i = 0; i < name.length(); i++)
       {
-	char c = name.charAt(i);
+        char c = name.charAt(i);
 
-	if (c == '_')
-	  {
-	    buffer.append("__");
-	  }
-	else if (c == ' ')
-	  {
-	    buffer.append("_");
-	  }
-	else
-	  {
-	    buffer.append(c);
-	  }
+        if (c == '_')
+          {
+            buffer.append("__");
+          }
+        else if (c == ' ')
+          {
+            buffer.append("_");
+          }
+        else
+          {
+            buffer.append(c);
+          }
       }
 
     return buffer.toString();
@@ -125,7 +125,7 @@ public class XMLUtils {
   {
     if (name == null)
       {
-	return null;
+        return null;
       }
 
     StringBuilder buffer = new StringBuilder(name.length());
@@ -134,29 +134,29 @@ public class XMLUtils {
 
     while (i < name.length())
       {
-	char c = name.charAt(i);
+        char c = name.charAt(i);
 
-	if (c != '_')
-	  {
-	    buffer.append(c);
-	  }
-	else
-	  {
-	    if ((i + 1) < name.length())
-	      {
-		if (name.charAt(i+1) == '_')
-		  {
-		    buffer.append("_");
-		    i++;
-		  }
-		else
-		  {
-		    buffer.append(" ");
-		  }
-	      }
-	  }
+        if (c != '_')
+          {
+            buffer.append(c);
+          }
+        else
+          {
+            if ((i + 1) < name.length())
+              {
+                if (name.charAt(i+1) == '_')
+                  {
+                    buffer.append("_");
+                    i++;
+                  }
+                else
+                  {
+                    buffer.append(" ");
+                  }
+              }
+          }
 
-	i++;	
+        i++;    
       }
 
     return buffer.toString();

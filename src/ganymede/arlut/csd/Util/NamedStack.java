@@ -12,7 +12,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -112,12 +112,12 @@ final public class NamedStack<E> {
 
     if (i == -1)
       {
-	return null;
+        return null;
       }
 
     for (int j = stack.size()-1; j > i; j--)
       {
-	stack.pop();
+        stack.pop();
       }
 
     return stack.pop().getData();
@@ -132,7 +132,7 @@ final public class NamedStack<E> {
   {
     if (stack.size() == 0)
       {
-	return null;
+        return null;
       }
 
     return stack.pop().getData();
@@ -144,7 +144,7 @@ final public class NamedStack<E> {
 
     if (handle == null)
       {
-	return null;
+        return null;
       }
 
     return handle.getData();
@@ -156,7 +156,7 @@ final public class NamedStack<E> {
 
     if (handle == null)
       {
-	return null;
+        return null;
       }
 
     return handle.getName();
@@ -186,7 +186,7 @@ final public class NamedStack<E> {
   {
     if (stack.size() == 0)
       {
-	return null;
+        return null;
       }
 
     return stack.elementAt(stack.size()-1).getName();
@@ -201,7 +201,7 @@ final public class NamedStack<E> {
   {
     if (stack.size() == 0)
       {
-	return null;
+        return null;
       }
 
     return stack.elementAt(stack.size()-1).getData();
@@ -216,10 +216,10 @@ final public class NamedStack<E> {
   {
     for (int i = stack.size()-1; i >= 0; i--)
       {
-	if (stack.elementAt(i).getName().equals(name))
-	  {
-	    return i;
-	  }
+        if (stack.elementAt(i).getName().equals(name))
+          {
+            return i;
+          }
       }
 
     return -1;
@@ -238,14 +238,14 @@ final public class NamedStack<E> {
 
     for (int i = stack.size()-1; i >= 0; i--)
       {
-	NamedStackHandle handle = stack.elementAt(i);
-	
-	result.append(i);
-	result.append(" : ");
-	result.append(handle.getName());
-	result.append(" -- ");
-	result.append(handle.getData().toString());
-	result.append("\n");
+        NamedStackHandle handle = stack.elementAt(i);
+        
+        result.append(i);
+        result.append(" : ");
+        result.append(handle.getName());
+        result.append(" -- ");
+        result.append(handle.getData().toString());
+        result.append("\n");
       }
 
     return result.toString();
@@ -268,12 +268,12 @@ final class NamedStackHandle<E> {
   {
     if (name == null)
       {
-	throw new IllegalArgumentException("NamedStackHandle: null name");
+        throw new IllegalArgumentException("NamedStackHandle: null name");
       }
 
     if (data == null)
       {
-	throw new IllegalArgumentException("NamedStackHandle: null data");
+        throw new IllegalArgumentException("NamedStackHandle: null data");
       }
 
     this.name = name;

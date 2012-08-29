@@ -7,7 +7,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -89,29 +89,29 @@ public class CircleBuffer {
   {
     if (item == null)
       {
-	throw new IllegalArgumentException("no null's allowed");
+        throw new IllegalArgumentException("no null's allowed");
       }
 
     if (buf[firstSlot] != null && nextSlot == firstSlot)
       {
-	firstSlot++;
+        firstSlot++;
 
-	if (firstSlot == buf.length)
-	  {
-	    firstSlot = 0;
-	  }
+        if (firstSlot == buf.length)
+          {
+            firstSlot = 0;
+          }
       }
 
     buf[nextSlot++] = item;
 
     if (contents < buf.length)
       {
-	contents++;
+        contents++;
       }
 
     if (nextSlot == buf.length)
       {
-	nextSlot = 0;
+        nextSlot = 0;
       }
   }
 
@@ -126,7 +126,7 @@ public class CircleBuffer {
 
     if (buf[i] == null)
       {
-	return "";
+        return "";
       }
 
     // okay, we know there is at least one item in the buffer.. create
@@ -143,7 +143,7 @@ public class CircleBuffer {
 
     if (i == buf.length)
       {
-	i = 0;
+        i = 0;
       }
 
     // at this point, we have moved i to the slot following
@@ -151,17 +151,17 @@ public class CircleBuffer {
     
     while (i != nextSlot)
       {
-	sb.append(count++);
-	sb.append(":");
-	sb.append(buf[i].toString());
-	sb.append("\n");
+        sb.append(count++);
+        sb.append(":");
+        sb.append(buf[i].toString());
+        sb.append("\n");
 
-	i++;
+        i++;
 
-	if (i == buf.length)
-	  {
-	    i = 0;
-	  }
+        if (i == buf.length)
+          {
+            i = 0;
+          }
       }
 
     return sb.toString();

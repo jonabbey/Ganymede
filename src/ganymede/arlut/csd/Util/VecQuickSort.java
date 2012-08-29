@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -89,11 +89,11 @@ public class VecQuickSort implements Comparator {
 
     if (comparator == null)
       {
-	this.comparator = this;
+        this.comparator = this;
       }
     else
       {
-	this.comparator = comparator;
+        this.comparator = comparator;
       }
   }
 
@@ -105,14 +105,14 @@ public class VecQuickSort implements Comparator {
   {
     synchronized (objects)
       {
-	Object ary[] = objects.toArray();
+        Object ary[] = objects.toArray();
 
-	java.util.Arrays.sort(ary, this.comparator);
+        java.util.Arrays.sort(ary, this.comparator);
 
-	for (int i = 0; i < ary.length; i++)
-	  {
-	    objects.set(i, ary[i]);
-	  }
+        for (int i = 0; i < ary.length; i++)
+          {
+            objects.set(i, ary[i]);
+          }
       }
   }
 

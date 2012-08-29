@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -168,11 +168,11 @@ public class TranslationService {
   {
     if (locale != null)
       {
-	this.ourLocale = locale;
+        this.ourLocale = locale;
       }
     else
       {
-	this.ourLocale = Locale.getDefault();
+        this.ourLocale = Locale.getDefault();
       }
 
     this.resourceName = resourceName;
@@ -198,11 +198,11 @@ public class TranslationService {
 
     if (cols <= 0)
       {
-	wordWrapCols = 0;
+        wordWrapCols = 0;
       }
     else
       {
-	wordWrapCols = cols;
+        wordWrapCols = cols;
       }
 
     return old_value;
@@ -222,16 +222,16 @@ public class TranslationService {
 
     try
       {
-	pattern = bundle.getString(key);
+        pattern = bundle.getString(key);
       }
     catch (MissingResourceException ex)
       {
-	return false;
+        return false;
       }
 
     if (pattern.equals(""))
       {
-	return false;
+        return false;
       }
 
     return true;
@@ -255,11 +255,11 @@ public class TranslationService {
 
     try
       {
-	pattern = bundle.getString(key);
+        pattern = bundle.getString(key);
       }
     catch (MissingResourceException ex)
       {
-	return null;
+        return null;
       }
 
     // we don't actually need to use format with no template
@@ -295,11 +295,11 @@ public class TranslationService {
 
     try
       {
-	pattern = bundle.getString(key);
+        pattern = bundle.getString(key);
       }
     catch (MissingResourceException ex)
       {
-	return null;
+        return null;
       }
 
     return this.format(pattern, params);
@@ -333,7 +333,7 @@ public class TranslationService {
 
     if (wordWrapCols > 0 && result.length() > wordWrapCols)
       {
-	result = WordWrap.wrap(result, wordWrapCols);
+        result = WordWrap.wrap(result, wordWrapCols);
       }
 
     return result;

@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -75,23 +75,23 @@ public class PathComplete {
 
     if (separator == null)
       {
-	separator = System.getProperty("file.separator");
+        separator = System.getProperty("file.separator");
 
-	if (separator == null)
-	  {
-	    System.err.println("ERROR! PathComplete couldn't read file.separator system property.");
-	    System.err.println("PathComplete defaulting to UNIX separator");
-	    separator = "/";
-	  }
+        if (separator == null)
+          {
+            System.err.println("ERROR! PathComplete couldn't read file.separator system property.");
+            System.err.println("PathComplete defaulting to UNIX separator");
+            separator = "/";
+          }
       }
 
     if (!path.endsWith(separator))
       {
-	return path + separator;
+        return path + separator;
       }
     else
       {
-	return path;
+        return path;
       }
   }
 }

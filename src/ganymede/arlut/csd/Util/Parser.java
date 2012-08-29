@@ -14,7 +14,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -146,7 +146,7 @@ public class Parser {
   {
     while (!atEOL() && !atEOF())
       {
-	tokens.nextToken();
+        tokens.nextToken();
       }
   }
 
@@ -163,12 +163,12 @@ public class Parser {
 
     try
       {
-	return Integer.valueOf(nextBit).intValue();
+        return Integer.valueOf(nextBit).intValue();
       }
     catch (NumberFormatException ex)
       {
-	System.err.println("Parser.getNextInt(): couldn't turn '" + nextBit + "' to an Integer");
-	throw ex;
+        System.err.println("Parser.getNextInt(): couldn't turn '" + nextBit + "' to an Integer");
+        throw ex;
       }
   }
 
@@ -201,31 +201,31 @@ public class Parser {
 
     if (checkNextToken() == ':')
       {
-	tokens.nextToken();
+        tokens.nextToken();
       }
 
     while ((checkNextToken() != ':') && !EOLnext() && !EOFnext())
       {
-	if (checkNextToken() == ',')
-	  {
-	    tokens.nextToken();
-	    buffer.append(",");
-	  }
+        if (checkNextToken() == ',')
+          {
+            tokens.nextToken();
+            buffer.append(",");
+          }
 
-	// handle back-slashed colons
+        // handle back-slashed colons
 
-	if (checkNextToken() == '\\')
-	  {
-	    tokens.nextToken();
+        if (checkNextToken() == '\\')
+          {
+            tokens.nextToken();
 
-	    if (checkNextToken() == ':')
-	      {
-		tokens.nextToken();
-		buffer.append(":");
-	      }
-	  }
+            if (checkNextToken() == ':')
+              {
+                tokens.nextToken();
+                buffer.append(":");
+              }
+          }
 
-	buffer.append(getNextBit(tokens, false, true));
+        buffer.append(getNextBit(tokens, false, true));
       }
 
     return buffer.toString();
@@ -285,66 +285,66 @@ public class Parser {
 
     if (atEOL())
       {
-	tokens.nextToken();
+        tokens.nextToken();
       }
 
     if (atEOF())
       {
-	return "";
+        return "";
       }
 
     if (includeCommas)
       {
-	// make , just part of a word for parsing purposes
+        // make , just part of a word for parsing purposes
 
-	tokens.wordChars(',', ',');
+        tokens.wordChars(',', ',');
       }
 
     try
       {
-	// eat any leading :'s or ,'s
+        // eat any leading :'s or ,'s
 
-	if (!skipleading)
-	  {
-	    // skip only the single leading token
+        if (!skipleading)
+          {
+            // skip only the single leading token
 
-	    if (tokens.ttype == ':' || tokens.ttype == ',')
-	      {
-		tokens.nextToken();
-	      }
-	  }
-	else
-	  {
-	    // skip any leading colons and commas
+            if (tokens.ttype == ':' || tokens.ttype == ',')
+              {
+                tokens.nextToken();
+              }
+          }
+        else
+          {
+            // skip any leading colons and commas
 
-	    while (tokens.ttype == ':' || tokens.ttype == ',')
-	      {
-		tokens.nextToken();
-	      }
-	  }
+            while (tokens.ttype == ':' || tokens.ttype == ',')
+              {
+                tokens.nextToken();
+              }
+          }
 
-	if (tokens.ttype == StreamTokenizer.TT_WORD)
-	  {
-	    return tokens.sval;
-	  }
+        if (tokens.ttype == StreamTokenizer.TT_WORD)
+          {
+            return tokens.sval;
+          }
 
-	if (tokens.ttype == StreamTokenizer.TT_NUMBER)
-	  {
-	    result = Integer.toString((int) tokens.nval);
+        if (tokens.ttype == StreamTokenizer.TT_NUMBER)
+          {
+            result = Integer.toString((int) tokens.nval);
 
-	    return result;
-	  }
+            return result;
+          }
 
-	return null;
+        return null;
       }
     finally
       {
-	// turn , back into a separate token
+        // turn , back into a separate token
 
-	if (includeCommas)
-	  {
-	    tokens.ordinaryChar(',');
-	  }
+        if (includeCommas)
+          {
+            tokens.ordinaryChar(',');
+          }
       }
   }
 

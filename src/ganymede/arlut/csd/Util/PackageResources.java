@@ -13,7 +13,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -102,41 +102,41 @@ public class PackageResources {
 
     if (refClass != null)
       {
-	cl = refClass.getClassLoader();
-	strPackageName = refClass.getName();
-	i = strPackageName.lastIndexOf('.' );
+        cl = refClass.getClassLoader();
+        strPackageName = refClass.getName();
+        i = strPackageName.lastIndexOf('.' );
 
-	if (i == -1)
-	  {
-	    strPackageName = "";
-	  }
-	else
-	  {
-	    strPackageName = strPackageName.substring(0,i);
-	  }
+        if (i == -1)
+          {
+            strPackageName = "";
+          }
+        else
+          {
+            strPackageName = strPackageName.substring(0,i);
+          }
 
-	filePackageName = strPackageName.replace('.','/');
+        filePackageName = strPackageName.replace('.','/');
 
-	str = (filePackageName.length() > 0 ? filePackageName + "/" : "") + strResource;
+        str = (filePackageName.length() > 0 ? filePackageName + "/" : "") + strResource;
       }
     else
       {
-	cl = null;
-	str = strResource;
+        cl = null;
+        str = strResource;
       }
 
     if (debug)
       {
-	System.err.println("PackageResources: trying to get str " + str);
+        System.err.println("PackageResources: trying to get str " + str);
       }
 
     if (cl == null)
       {
-	url = ClassLoader.getSystemResource(str);
+        url = ClassLoader.getSystemResource(str);
       }
     else
       {
-	url = cl.getResource(str);
+        url = cl.getResource(str);
       }
 
     return url;
@@ -161,41 +161,41 @@ public class PackageResources {
 
     if (refClass != null)
       {
-	cl = refClass.getClassLoader();
-	strPackageName = refClass.getName();
-	i = strPackageName.lastIndexOf('.' );
+        cl = refClass.getClassLoader();
+        strPackageName = refClass.getName();
+        i = strPackageName.lastIndexOf('.' );
 
-	if (i == -1)
-	  {
-	    strPackageName = "";
-	  }
-	else
-	  {
-	    strPackageName = strPackageName.substring(0,i);
-	  }
+        if (i == -1)
+          {
+            strPackageName = "";
+          }
+        else
+          {
+            strPackageName = strPackageName.substring(0,i);
+          }
 
-	filePackageName = strPackageName.replace('.','/');
+        filePackageName = strPackageName.replace('.','/');
 
-	str = (filePackageName.length() > 0 ? filePackageName + "/" : "") + strResource;
+        str = (filePackageName.length() > 0 ? filePackageName + "/" : "") + strResource;
       }
     else
       {
-	cl = null;
-	str = strResource;
+        cl = null;
+        str = strResource;
       }
 
     if (debug)
       {
-	System.err.println("PackageResources: trying to get str " + str);
+        System.err.println("PackageResources: trying to get str " + str);
       }
     
     if (cl == null)
       {
-	stream = ClassLoader.getSystemResourceAsStream(str);
+        stream = ClassLoader.getSystemResourceAsStream(str);
       }
     else
       {
-	stream = cl.getResourceAsStream(str);
+        stream = cl.getResourceAsStream(str);
       }
     
     return stream;
@@ -237,58 +237,58 @@ public class PackageResources {
 
     if (context == null && !nevertryagain)
       {
-	ptr = comp;
-	
-	while (ptr != null && (!(ptr instanceof Applet)))
-	  {
-	    ptr = ptr.getParent();
-	  }
-	
-	if (ptr != null)
-	  {
-	    try
-	      {
-		context = ((Applet) ptr).getAppletContext();
-	      }
-	    catch (NullPointerException ex)
-	      {
-		context = null;
-		nevertryagain = true;
-	      }
-	  }
+        ptr = comp;
+        
+        while (ptr != null && (!(ptr instanceof Applet)))
+          {
+            ptr = ptr.getParent();
+          }
+        
+        if (ptr != null)
+          {
+            try
+              {
+                context = ((Applet) ptr).getAppletContext();
+              }
+            catch (NullPointerException ex)
+              {
+                context = null;
+                nevertryagain = true;
+              }
+          }
       }
 
     if (debug)
       {
-	System.err.println("PackageResources.getImageResouce(): Trying to fetch image from URL: " + url);
+        System.err.println("PackageResources.getImageResouce(): Trying to fetch image from URL: " + url);
       }
 
     try
       {
-	if (context != null)
-	  {
-	    image = context.getImage(url);
-	  }
-	else
-	  {
-	    image = Toolkit.getDefaultToolkit().getImage(url);
-	  }
+        if (context != null)
+          {
+            image = context.getImage(url);
+          }
+        else
+          {
+            image = Toolkit.getDefaultToolkit().getImage(url);
+          }
       }
     catch (NullPointerException ex)
       {
-	throw new RuntimeException("caught nullptr trying to load image, url = " + url);
+        throw new RuntimeException("caught nullptr trying to load image, url = " + url);
       }
 
     if (debug)
       {
-	System.err.println("PackageResources.getImageResouce(): Waiting for image.");
+        System.err.println("PackageResources.getImageResouce(): Waiting for image.");
       }
 
     waitForImage(comp, image);
 
     if (debug)
       {
-	System.err.println("PackageResources.getImageResouce(): Returning image.");
+        System.err.println("PackageResources.getImageResouce(): Returning image.");
       }
     
     return image;
@@ -301,18 +301,18 @@ public class PackageResources {
    */
 
   public static void waitForImage(Component component, 
-				  Image image) 
+                                  Image image) 
   {
     MediaTracker tracker = new MediaTracker(component);
 
     try 
       {
-	tracker.addImage(image, 0);
-	tracker.waitForID(0);
+        tracker.addImage(image, 0);
+        tracker.waitForID(0);
       }
     catch(InterruptedException e)
       {
-	throw new RuntimeException("waitForImage failed:" + e.getMessage());
+        throw new RuntimeException("waitForImage failed:" + e.getMessage());
       }
   }
 }

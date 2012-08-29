@@ -9,7 +9,7 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -118,13 +118,13 @@ public class booleanSemaphore implements java.io.Serializable {
   {
     while (state)
       {
-	try
-	  {
-	    wait();
-	  }
-	catch (InterruptedException ex)
-	  {
-	  }
+        try
+          {
+            wait();
+          }
+        catch (InterruptedException ex)
+          {
+          }
       }
   }
 
@@ -144,32 +144,32 @@ public class booleanSemaphore implements java.io.Serializable {
     long waitTime = millis;
     long startTime = System.currentTimeMillis();
     long timeSoFar = 0;
-	    
+            
     /* -- */
     
     while (state)
       {
-	// we already know from above that we have to wait, so
-	// we'll start the loop waiting
+        // we already know from above that we have to wait, so
+        // we'll start the loop waiting
 
-	try
-	  {
-	    wait(waitTime);
-	  }
-	catch (InterruptedException ex)
-	  {
-	  }
+        try
+          {
+            wait(waitTime);
+          }
+        catch (InterruptedException ex)
+          {
+          }
 
-	timeSoFar = System.currentTimeMillis() - startTime;
+        timeSoFar = System.currentTimeMillis() - startTime;
 
-	if (timeSoFar > millis)	// timed out
-	  {
-	    return state;
-	  }
-	else
-	  {
-	    waitTime = millis - timeSoFar;
-	  }
+        if (timeSoFar > millis) // timed out
+          {
+            return state;
+          }
+        else
+          {
+            waitTime = millis - timeSoFar;
+          }
       }
 
     return state;
@@ -187,13 +187,13 @@ public class booleanSemaphore implements java.io.Serializable {
   {
     while (!state)
       {
-	try
-	  {
-	    wait();
-	  }
-	catch (InterruptedException ex)
-	  {
-	  }
+        try
+          {
+            wait();
+          }
+        catch (InterruptedException ex)
+          {
+          }
       }
   }
 
@@ -213,32 +213,32 @@ public class booleanSemaphore implements java.io.Serializable {
     long waitTime = millis;
     long startTime = System.currentTimeMillis();
     long timeSoFar = 0;
-	    
+            
     /* -- */
     
     while (!state)
       {
-	// we already know from above that we have to wait, so
-	// we'll start the loop waiting
+        // we already know from above that we have to wait, so
+        // we'll start the loop waiting
 
-	try
-	  {
-	    wait(waitTime);
-	  }
-	catch (InterruptedException ex)
-	  {
-	  }
+        try
+          {
+            wait(waitTime);
+          }
+        catch (InterruptedException ex)
+          {
+          }
 
-	timeSoFar = System.currentTimeMillis() - startTime;
+        timeSoFar = System.currentTimeMillis() - startTime;
 
-	if (timeSoFar > millis)	// timed out
-	  {
-	    return state;
-	  }
-	else
-	  {
-	    waitTime = millis - timeSoFar;
-	  }
+        if (timeSoFar > millis) // timed out
+          {
+            return state;
+          }
+        else
+          {
+            waitTime = millis - timeSoFar;
+          }
       }
 
     return state;

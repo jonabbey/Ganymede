@@ -10,7 +10,7 @@
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -70,17 +70,17 @@ public class ParseArgs {
   {
     if (!argument.startsWith("-"))
       {
-	argument = "-" + argument;
+        argument = "-" + argument;
       }
     
     for (int i = 0; i < args.length; i++)
       {
-	if (args[i].toLowerCase().equals(argument.toLowerCase()))
-	  {
-	    return true;
-	  }
+        if (args[i].toLowerCase().equals(argument.toLowerCase()))
+          {
+            return true;
+          }
       }
-	
+        
     return false;
   }
 
@@ -98,24 +98,24 @@ public class ParseArgs {
   {
     if (argument.indexOf('=') != -1)
       {
-	throw new IllegalArgumentException("Error, = character passed into getArg(" + argument + ")");
+        throw new IllegalArgumentException("Error, = character passed into getArg(" + argument + ")");
       }
 
     for (int i = 0; i < args.length; i++)
       {
-	if (args[i].toLowerCase().startsWith(argument.toLowerCase()))
-	  {
-	    int index = args[i].indexOf("=");
+        if (args[i].toLowerCase().startsWith(argument.toLowerCase()))
+          {
+            int index = args[i].indexOf("=");
 
-	    if (index > 0)
-	      {
-		return decodeArg(args[i].substring(index + 1));
-	      }
-	    else
-	      {
-		return null;
-	      }
-	  }
+            if (index > 0)
+              {
+                return decodeArg(args[i].substring(index + 1));
+              }
+            else
+              {
+                return null;
+              }
+          }
       }
 
     return null;

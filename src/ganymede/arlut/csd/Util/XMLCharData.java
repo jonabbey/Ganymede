@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -109,14 +109,14 @@ public class XMLCharData extends XMLItem {
 
     if (nonEmpty == null)
       {
-	if (data.trim().length() != 0)
-	  {
-	    nonEmpty = Boolean.TRUE;
-	  }
-	else
-	  {
-	    nonEmpty = Boolean.FALSE;
-	  }
+        if (data.trim().length() != 0)
+          {
+            nonEmpty = Boolean.TRUE;
+          }
+        else
+          {
+            nonEmpty = Boolean.FALSE;
+          }
       }
 
     return nonEmpty.booleanValue();

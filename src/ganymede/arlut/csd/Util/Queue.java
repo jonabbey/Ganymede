@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Directory Directory Management System
  
    Copyright (C) 1996-2010
@@ -86,7 +86,7 @@ public class Queue extends java.util.Vector {
 
     if (len == 0)
       {
-	return null;
+        return null;
       }
 
     Object result = elementAt(len - 1);

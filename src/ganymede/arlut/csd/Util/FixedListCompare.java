@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -99,7 +99,7 @@ public class FixedListCompare implements Comparator {
   {
     if (debug)
       {
-	System.err.println("Comparing a=" + a + "(" + a.getClass() + "), b=" + b + "(" + b.getClass() + "):");
+        System.err.println("Comparing a=" + a + "(" + a.getClass() + "), b=" + b + "(" + b.getClass() + "):");
       }
 
     int ai = items.indexOf(a);
@@ -107,68 +107,68 @@ public class FixedListCompare implements Comparator {
 
     if (ai == -1 && bi == -1)
       {
-	if (debug)
-	  {
-	    System.err.println("\tCouldn't find either.");
-	  }
+        if (debug)
+          {
+            System.err.println("\tCouldn't find either.");
+          }
 
-	if (secondaryComparator == null)
-	  {
-	    return a.toString().compareTo(b.toString());
-	  }
-	else
-	  {
-	    return secondaryComparator.compare(a, b);
-	  }
+        if (secondaryComparator == null)
+          {
+            return a.toString().compareTo(b.toString());
+          }
+        else
+          {
+            return secondaryComparator.compare(a, b);
+          }
       }
     else if (ai == -1)
       {
-	if (debug)
-	  {
-	    System.err.println("\treturning 1");
-	  }
+        if (debug)
+          {
+            System.err.println("\treturning 1");
+          }
 
-	return 1;
+        return 1;
       }
     else if (bi == -1)
       {
-	if (debug)
-	  {
-	    System.err.println("\treturning -1");
-	  }
+        if (debug)
+          {
+            System.err.println("\treturning -1");
+          }
 
-	return -1;
+        return -1;
       }
     else
       {
-	if (ai == bi)
-	  {
-	    if (debug)
-	      {
-		System.err.println("\treturning 0");
-	      }
+        if (ai == bi)
+          {
+            if (debug)
+              {
+                System.err.println("\treturning 0");
+              }
 
-	    return 0;
-	  }
+            return 0;
+          }
 
-	if (ai < bi)
-	  {
-	    if (debug)
-	      {
-		System.err.println("\treturning -1");
-	      }
+        if (ai < bi)
+          {
+            if (debug)
+              {
+                System.err.println("\treturning -1");
+              }
 
-	    return -1;
-	  }
+            return -1;
+          }
 
-	// ai > bi
+        // ai > bi
 
-	if (debug)
-	  {
-	    System.err.println("\treturning 1");
-	  }
+        if (debug)
+          {
+            System.err.println("\treturning 1");
+          }
 
-	return 1;
+        return 1;
       }
   }
 }

@@ -112,8 +112,8 @@ public class RandomUtils {
 
     for (int i = 0; i < length; i++)
       {
-	int pos = secureRandomizer.nextInt(charset.length());
-	sb.append(charset.charAt(pos));
+        int pos = secureRandomizer.nextInt(charset.length());
+        sb.append(charset.charAt(pos));
       }
 
     return sb.toString();
@@ -146,24 +146,24 @@ public class RandomUtils {
   {
     for (int i = 0; i < 10; i++)
       {
-	String username = getRandomUsername();
-	String password = getRandomPassword(20);
+        String username = getRandomUsername();
+        String password = getRandomPassword(20);
 
-	System.out.println(username);
-	System.out.println(password);
-	System.out.println("");
+        System.out.println(username);
+        System.out.println(password);
+        System.out.println("");
 
-	try
-	  {
-	    // if you generate more than 1 time, you must
-	    // put the process to sleep for awhile
-	    // otherwise it will return the same random string
-	    Thread.sleep(100);
-	  }
-	catch (InterruptedException e)
-	  {
-	    e.printStackTrace();
-	  }
+        try
+          {
+            // if you generate more than 1 time, you must
+            // put the process to sleep for awhile
+            // otherwise it will return the same random string
+            Thread.sleep(100);
+          }
+        catch (InterruptedException e)
+          {
+            e.printStackTrace();
+          }
       }
   }
 }

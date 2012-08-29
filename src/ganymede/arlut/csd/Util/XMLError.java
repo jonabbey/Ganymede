@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -103,11 +103,11 @@ public class XMLError extends XMLItem {
   {
     if (fatal)
       {
-	return "XML Fatal Error: " + error + ":[" + lineNumber + "," + columnNumber + "]";
+        return "XML Fatal Error: " + error + ":[" + lineNumber + "," + columnNumber + "]";
       }
     else
       {
-	return "XML Error: " + error + ":[" + lineNumber + "," + columnNumber + "]";
+        return "XML Error: " + error + ":[" + lineNumber + "," + columnNumber + "]";
       }
   }
 }

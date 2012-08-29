@@ -8,7 +8,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -81,7 +81,7 @@ public class SVNVersion {
   {
     if (release_string != null)
       {
-	return release_string;
+        return release_string;
       }
 
     release_string = SVNVersion.parseRelease(SVN_release_name, SVN_release_date);
@@ -98,7 +98,7 @@ public class SVNVersion {
   {
     if (SVN_release_name.length () <= 9)
       {
-	return "version unknown" + " - " + SVN_release_date; 
+        return "version unknown" + " - " + SVN_release_date; 
       }
 
     String release_number = release_identifier;
@@ -122,37 +122,37 @@ public class SVNVersion {
       if (branch_match != -1)
         {
           try
-	    {
-	      release_number = release_name.substring(branch_match + 1, branch_match+10);
+            {
+              release_number = release_name.substring(branch_match + 1, branch_match+10);
 
-	      // convert XXXYYYZZZ style version number to x.y.z
-	
-	      // i.e., 001000008 to 1.0.8
-	
-	      String a = release_number.substring(0, 3);
-	      String b = release_number.substring(3, 6);
-	      String c = release_number.substring(6, 9);
+              // convert XXXYYYZZZ style version number to x.y.z
+        
+              // i.e., 001000008 to 1.0.8
+        
+              String a = release_number.substring(0, 3);
+              String b = release_number.substring(3, 6);
+              String c = release_number.substring(6, 9);
 
-	      int ia, ib, ic;
+              int ia, ib, ic;
 
-	      ia = Integer.parseInt(a);
-	      ib = Integer.parseInt(b);
-	      ic = Integer.parseInt(c);
+              ia = Integer.parseInt(a);
+              ib = Integer.parseInt(b);
+              ic = Integer.parseInt(c);
 
-	      release_number = ia + "." + ib + "." + ic;
-	    }
-	  catch (IndexOutOfBoundsException ex)
-	    {
-	      // we've got a format error, no worries, leave
-	      // release_number set to "version unknown".
-	    }
-	  catch (NumberFormatException ex)
-	    {
-	      // we weren't able to parse the numeric string, probably
-	      // we had a malformed ganymede path element in our SVN
-	      // HeadURL.. so we'll also leave our release_number set to
-	      // "version unknown".
-	    }
+              release_number = ia + "." + ib + "." + ic;
+            }
+          catch (IndexOutOfBoundsException ex)
+            {
+              // we've got a format error, no worries, leave
+              // release_number set to "version unknown".
+            }
+          catch (NumberFormatException ex)
+            {
+              // we weren't able to parse the numeric string, probably
+              // we had a malformed ganymede path element in our SVN
+              // HeadURL.. so we'll also leave our release_number set to
+              // "version unknown".
+            }
         }
     */
 

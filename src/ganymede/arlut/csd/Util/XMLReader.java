@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -219,7 +219,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 
     if (bufferSize < 20)
       {
-	bufferSize = 20;
+        bufferSize = 20;
       }
 
     this.bufferSize = bufferSize;
@@ -228,13 +228,13 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 
     if (false) // optimize for single processor
       {
-	this.highWaterMark = bufferSize - 5;
-	this.lowWaterMark = 5;
+        this.highWaterMark = bufferSize - 5;
+        this.lowWaterMark = 5;
       }
     else // optimize for multi-processor
       {
-	this.highWaterMark = 0;
-	this.lowWaterMark = bufferSize;
+        this.highWaterMark = 0;
+        this.lowWaterMark = bufferSize;
       }
 
     this.skipWhiteSpace = skipWhiteSpace;
@@ -258,7 +258,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
    */
 
   public XMLReader(PipedOutputStream sourcePipe, int bufferSize, 
-		   boolean skipWhiteSpace) throws IOException
+                   boolean skipWhiteSpace) throws IOException
   {
     this(sourcePipe, bufferSize, skipWhiteSpace, new PrintWriter(System.err));
   }
@@ -278,7 +278,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
    */
 
   public XMLReader(PipedOutputStream sourcePipe, int bufferSize, 
-		   boolean skipWhiteSpace, PrintWriter err) throws IOException
+                   boolean skipWhiteSpace, PrintWriter err) throws IOException
   {
     try
       {
@@ -328,72 +328,72 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 
     synchronized (buffer)
       {
-	while (!finished)
-	  {
-	    finished = true;	// assume we won't be seeing whitespace chars
+        while (!finished)
+          {
+            finished = true;    // assume we won't be seeing whitespace chars
 
-	    while (!done && pushback == null && bufferContents == 0)
-	      {
-		try
-		  {
-		    buffer.wait();
-		  }
-		catch (InterruptedException ex)
-		  {
-		    throw new RuntimeException("interrupted, can't wait for buffer to fill.");
-		  }
-	      }
+            while (!done && pushback == null && bufferContents == 0)
+              {
+                try
+                  {
+                    buffer.wait();
+                  }
+                catch (InterruptedException ex)
+                  {
+                    throw new RuntimeException("interrupted, can't wait for buffer to fill.");
+                  }
+              }
 
-	    if (debug && done)
-	      {
-		err.println("XMLReader.getNextItem(): pushback == " + String.valueOf(pushback));
-		err.println("XMLReader.getNextItem(): bufferContents == " + bufferContents);
-		err.flush();
-		return null;
-	      }
+            if (debug && done)
+              {
+                err.println("XMLReader.getNextItem(): pushback == " + String.valueOf(pushback));
+                err.println("XMLReader.getNextItem(): bufferContents == " + bufferContents);
+                err.flush();
+                return null;
+              }
 
-	    if (done && pushback == null && bufferContents == 0)
-	      {
-		return null;
-	      }
+            if (done && pushback == null && bufferContents == 0)
+              {
+                return null;
+              }
 
-	    if (pushback != null)
-	      {
-		value = pushback;
-		pushback = null;
-	      }
-	    else
-	      {
-		value = dequeue();
+            if (pushback != null)
+              {
+                value = pushback;
+                pushback = null;
+              }
+            else
+              {
+                value = dequeue();
 
-		// if we have drained the buffer below the low water
-		// mark, wake up the SAX parser thread and let it
-		// start filling us up again
+                // if we have drained the buffer below the low water
+                // mark, wake up the SAX parser thread and let it
+                // start filling us up again
 
-		if (bufferContents <= lowWaterMark)
-		  {
-		    buffer.notifyAll();
-		  }
-	      }
+                if (bufferContents <= lowWaterMark)
+                  {
+                    buffer.notifyAll();
+                  }
+              }
 
-	    if (skipWhiteSpaceChars)
-	      {
-		// if we are skipping all-whitespace XMLCharData, we'll set
-		// finished to false if containsNonWhitespace() returns false.
+            if (skipWhiteSpaceChars)
+              {
+                // if we are skipping all-whitespace XMLCharData, we'll set
+                // finished to false if containsNonWhitespace() returns false.
 
-		if (value instanceof XMLCharData)
-		  {
-		    finished = ((XMLCharData) value).containsNonWhitespace();
-		  }
-	      }
-	  }
+                if (value instanceof XMLCharData)
+                  {
+                    finished = ((XMLCharData) value).containsNonWhitespace();
+                  }
+              }
+          }
 
-	if (debug)
-	  {
-	    System.err.println("XMLReader.getNextItem() returning " + value);
-	  }
+        if (debug)
+          {
+            System.err.println("XMLReader.getNextItem() returning " + value);
+          }
 
-	return value;
+        return value;
       }
   }
 
@@ -437,59 +437,59 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 
     synchronized (buffer)
       {
-	while (!finished)
-	  {
-	    finished = true;	// unless we eat whitespace
+        while (!finished)
+          {
+            finished = true;    // unless we eat whitespace
 
-	    // wait until there's data to be had
+            // wait until there's data to be had
 
-	    while (!done && pushback == null && bufferContents == 0)
-	      {
-		try
-		  {
-		    buffer.wait();
-		  }
-		catch (InterruptedException ex)
-		  {
-		    throw new RuntimeException("interrupted, can't wait for buffer to fill.");
-		  }
-	      }
+            while (!done && pushback == null && bufferContents == 0)
+              {
+                try
+                  {
+                    buffer.wait();
+                  }
+                catch (InterruptedException ex)
+                  {
+                    throw new RuntimeException("interrupted, can't wait for buffer to fill.");
+                  }
+              }
 
-	    // if we're out of data and there will be no more, exit
+            // if we're out of data and there will be no more, exit
 
-	    if (done && pushback == null && bufferContents == 0)
-	      {
-		return null;
-	      }
+            if (done && pushback == null && bufferContents == 0)
+              {
+                return null;
+              }
 
-	    // identify the next value
+            // identify the next value
 
-	    if (pushback != null)
-	      {
-		value = pushback;
-	      }
-	    else
-	      {
-		value = buffer[dequeuePtr];
-	      }
+            if (pushback != null)
+              {
+                value = pushback;
+              }
+            else
+              {
+                value = buffer[dequeuePtr];
+              }
 
-	    if (skipWhiteSpaceChars)
-	      {
-		if ((value instanceof XMLCharData) &&
-		    !((XMLCharData) value).containsNonWhitespace())
-		  {
-		    getNextItem(false);	// consume the whitespace
-		    finished = false; // loop again
-		  }
-	      }
-	  }
+            if (skipWhiteSpaceChars)
+              {
+                if ((value instanceof XMLCharData) &&
+                    !((XMLCharData) value).containsNonWhitespace())
+                  {
+                    getNextItem(false); // consume the whitespace
+                    finished = false; // loop again
+                  }
+              }
+          }
 
-	if (debug)
-	  {
-	    System.err.println("XMLReader.peekNextItem() returning " + value);
-	  }
+        if (debug)
+          {
+            System.err.println("XMLReader.peekNextItem() returning " + value);
+          }
 
-	return value;
+        return value;
       }
   }
 
@@ -519,13 +519,13 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   {
     synchronized (buffer)
       {
-	if (pushback != null)
-	  {
-	    throw new RuntimeException("can't pushback.. buffer overflow");
-	  }
+        if (pushback != null)
+          {
+            throw new RuntimeException("can't pushback.. buffer overflow");
+          }
 
-	pushback = item;
-	buffer.notifyAll();	// in case we have multiple threads consuming
+        pushback = item;
+        buffer.notifyAll();     // in case we have multiple threads consuming
       }
   }
   
@@ -555,7 +555,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 
     if (!(openItem instanceof XMLElement))
       {
-	throw new IllegalArgumentException("getFollowingString() needs to be given an XMLElement.");
+        throw new IllegalArgumentException("getFollowingString() needs to be given an XMLElement.");
       }
 
     openElement = (XMLElement) openItem;
@@ -566,7 +566,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 
     if (openElement.isEmpty())
       {
-	return null;
+        return null;
       }
 
     // okay, we know there's something before we get to the close
@@ -577,14 +577,14 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 
     if (nextItem instanceof XMLCharData)
       {
-	if (skipWhiteSpace)
-	  {
-	    result = nextItem.getCleanString();
-	  }
-	else
-	  {
-	    result = nextItem.getString();
-	  }
+        if (skipWhiteSpace)
+          {
+            result = nextItem.getCleanString();
+          }
+        else
+          {
+            result = nextItem.getString();
+          }
       }
 
     // and get to the close tag, skipping over whatever gets in our
@@ -592,14 +592,14 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 
     while (nextItem != null && !nextItem.matchesClose(tagName))
       {
-	//err.println(">>> " + tagName + " seeking: " + nextItem);
-	nextItem = getNextItem(skipWhiteSpace);
+        //err.println(">>> " + tagName + " seeking: " + nextItem);
+        nextItem = getNextItem(skipWhiteSpace);
       }
     
     if (nextItem == null)
       {
-	IllegalArgumentException ex = new IllegalArgumentException("unexpected end of stream");
-	err.println(ex.getMessage());
+        IllegalArgumentException ex = new IllegalArgumentException("unexpected end of stream");
+        err.println(ex.getMessage());
       }
 
     return result;
@@ -716,51 +716,51 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 
     if (startingItem == null)
       {
-	startingItem = getNextItem(skipWhiteSpace);
+        startingItem = getNextItem(skipWhiteSpace);
       }
 
     if (!(startingItem instanceof XMLElement) || startingItem.isEmpty())
       {
-	return startingItem;
+        return startingItem;
       }
     
     List<XMLItem> children = new ArrayList<XMLItem>();
 
     while (true)
       {
-	nextItem = getNextTree(null, skipWhiteSpace);
+        nextItem = getNextTree(null, skipWhiteSpace);
 
-	// if we get an error or a pre-mature EOF, we just pass that up
+        // if we get an error or a pre-mature EOF, we just pass that up
 
-	if (nextItem instanceof XMLError || nextItem instanceof XMLEndDocument)
-	  {
-	    startingItem.dissolve();
-	    children = null;
-	    return nextItem;
-	  }
+        if (nextItem instanceof XMLError || nextItem instanceof XMLEndDocument)
+          {
+            startingItem.dissolve();
+            children = null;
+            return nextItem;
+          }
 
-	// if we find the matching close, bundle up the children and
-	// pass them up
+        // if we find the matching close, bundle up the children and
+        // pass them up
 
-	if (nextItem.matchesClose(startingItem.getName()))
-	  {
-	    if (children.size() > 0)
-	      {
-		XMLItem[] childrenAry = new XMLItem[children.size()];
-		
-		for (int i = 0; i < children.size(); i++)
-		  {
-		    childrenAry[i] = children.get(i);
-		  }
-		
-		startingItem.setChildren(childrenAry);
-	      }
+        if (nextItem.matchesClose(startingItem.getName()))
+          {
+            if (children.size() > 0)
+              {
+                XMLItem[] childrenAry = new XMLItem[children.size()];
+                
+                for (int i = 0; i < children.size(); i++)
+                  {
+                    childrenAry[i] = children.get(i);
+                  }
+                
+                startingItem.setChildren(childrenAry);
+              }
 
-	    return startingItem;
-	  }
+            return startingItem;
+          }
 
-	nextItem.setParent(startingItem);
-	children.add(nextItem);
+        nextItem.setParent(startingItem);
+        children.add(nextItem);
       }
   }
 
@@ -797,22 +797,22 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   {
     synchronized (buffer)
       {
-	done = true;
-	buffer.notifyAll();	// to wake up any sleepers if the buffer is full
+        done = true;
+        buffer.notifyAll();     // to wake up any sleepers if the buffer is full
       }
 
-    if (false)			// XXX debug XXX
+    if (false)                  // XXX debug XXX
       {
-	// bounce a runtime exception to get our stack trace
-	
-	try
-	  {
-	    throw new RuntimeException("XMLReader.close() called");
-	  }
-	catch (RuntimeException ex)
-	  {
-	    ex.printStackTrace();
-	  }
+        // bounce a runtime exception to get our stack trace
+        
+        try
+          {
+            throw new RuntimeException("XMLReader.close() called");
+          }
+        catch (RuntimeException ex)
+          {
+            ex.printStackTrace();
+          }
       }
   }
 
@@ -825,52 +825,52 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   {
     try
       {
-	parser.parse(inputSource, this);
+        parser.parse(inputSource, this);
       }
     catch (SAXException ex)
       {
-	if (!done)
-	  {
-	    // we don't want to bother printing out any content if
-	    // we've not got any content other than the
-	    // XMLStartDocument, so we'll gate on circleBuffer size >
-	    // 1
+        if (!done)
+          {
+            // we don't want to bother printing out any content if
+            // we've not got any content other than the
+            // XMLStartDocument, so we'll gate on circleBuffer size >
+            // 1
 
-	    if (circleBuffer.getSize() > 1)
-	      {
-		err.println("XMLReader parse error: " + ex.getMessage());
-		err.println("Leading context:");
-		err.println(circleBuffer.getContents());
-		err.flush();
-	      }
-	    
-	    return;
-	  }
+            if (circleBuffer.getSize() > 1)
+              {
+                err.println("XMLReader parse error: " + ex.getMessage());
+                err.println("Leading context:");
+                err.println(circleBuffer.getContents());
+                err.flush();
+              }
+            
+            return;
+          }
       }
     catch (IOException ex)
       {
-	// if we're done and we've been reading data through a pipe,
-	// we want to ignore the pipe broken error that the parser
-	// seems to insist on running up against.
+        // if we're done and we've been reading data through a pipe,
+        // we want to ignore the pipe broken error that the parser
+        // seems to insist on running up against.
 
-	if (!done)
-	  {
-	    err.println("XMLReader io error: " + ex.getMessage());
-	    err.println("Leading context:");
-	    err.println(circleBuffer.getContents());
-	    err.flush();
+        if (!done)
+          {
+            err.println("XMLReader io error: " + ex.getMessage());
+            err.println("Leading context:");
+            err.println(circleBuffer.getContents());
+            err.flush();
 
-	    throw new RuntimeException("XMLReader io error: " + ex.getMessage());
-	  }
+            throw new RuntimeException("XMLReader io error: " + ex.getMessage());
+          }
       }
     finally
       {
-	// we've got to the end and either used the circleBuffer or
-	// not.  clear our reference to make sure we don't get a
-	// lingering handle
+        // we've got to the end and either used the circleBuffer or
+        // not.  clear our reference to make sure we don't get a
+        // lingering handle
 
-	circleBuffer = null;
-	close();
+        circleBuffer = null;
+        close();
       }
   }
 
@@ -878,11 +878,11 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   {
     try
       {
-	enqueue(item);
+        enqueue(item);
       }
     catch (InterruptedException ex)
       {
-	throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
+        throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
       }
 
     // the buffer needs all xml items, since whitespace
@@ -892,21 +892,21 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 
     if (skipWhiteSpace)
       {
-	if (!(item instanceof XMLCharData))
-	  {
-	    circleBuffer.add(item);
-	  }
-	else
-	  {
-	    if (((XMLCharData) item).containsNonWhitespace())
-	      {
-		circleBuffer.add(item);
-	      }
-	  }
+        if (!(item instanceof XMLCharData))
+          {
+            circleBuffer.add(item);
+          }
+        else
+          {
+            if (((XMLCharData) item).containsNonWhitespace())
+              {
+                circleBuffer.add(item);
+              }
+          }
       }
     else
       {
-	circleBuffer.add(item);
+        circleBuffer.add(item);
       }
 
     // if we have filled the buffer above the
@@ -915,7 +915,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 
     if (bufferContents >= highWaterMark)
       {
-	buffer.notifyAll();
+        buffer.notifyAll();
       }
   }
 
@@ -932,10 +932,10 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   {
     if (halfElement != null)
       {
-	XMLItem _item = halfElement;
-	halfElement = null;
+        XMLItem _item = halfElement;
+        halfElement = null;
 
-	pourIntoBuffer(_item);
+        pourIntoBuffer(_item);
       }
   }
 
@@ -956,10 +956,10 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   {
     if (charBuffer.length() != 0)
       {
-	XMLItem _item = new XMLCharData(charBuffer.toString());
-	charBuffer.setLength(0);
+        XMLItem _item = new XMLCharData(charBuffer.toString());
+        charBuffer.setLength(0);
 
-	pourIntoBuffer(_item);
+        pourIntoBuffer(_item);
       }
   }
 
@@ -972,19 +972,19 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   {
     synchronized (buffer)
       {
-	while (bufferContents >= bufferSize)
-	  {
-	    buffer.wait();
-	  }
+        while (bufferContents >= bufferSize)
+          {
+            buffer.wait();
+          }
 
-	buffer[enqueuePtr] = item;
+        buffer[enqueuePtr] = item;
 
-	if (++enqueuePtr >= bufferSize)
-	  {
-	    enqueuePtr = 0;
-	  }
+        if (++enqueuePtr >= bufferSize)
+          {
+            enqueuePtr = 0;
+          }
 
-	bufferContents++;
+        bufferContents++;
       }
   }
 
@@ -997,17 +997,17 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   {
     synchronized (buffer)
       {
-	XMLItem result = buffer[dequeuePtr];
-	buffer[dequeuePtr] = null;
+        XMLItem result = buffer[dequeuePtr];
+        buffer[dequeuePtr] = null;
 
-	if (++dequeuePtr >= bufferSize)
-	  {
-	    dequeuePtr = 0;
-	  }
+        if (++dequeuePtr >= bufferSize)
+          {
+            dequeuePtr = 0;
+          }
 
-	bufferContents--;
-	
-	return result;
+        bufferContents--;
+        
+        return result;
       }
   }
 
@@ -1056,27 +1056,27 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   {
     synchronized (buffer)
       {
-	while (!done && bufferContents >= bufferSize)
-	  {
-	    try
-	      {
-		buffer.wait();
-	      }
-	    catch (InterruptedException ex)
-	      {
-		err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
-			    ex.getMessage());
-		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
-	      }
-	  }
+        while (!done && bufferContents >= bufferSize)
+          {
+            try
+              {
+                buffer.wait();
+              }
+            catch (InterruptedException ex)
+              {
+                err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
+                            ex.getMessage());
+                throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
+              }
+          }
 
-	if (done)
-	  {
-	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	    throw ex;
-	  }
-	
-	pourIntoBuffer(new XMLStartDocument());
+        if (done)
+          {
+            SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
+            throw ex;
+          }
+        
+        pourIntoBuffer(new XMLStartDocument());
       }
   }
 
@@ -1100,33 +1100,33 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 
     synchronized (buffer)
       {
-	while (!done && bufferContents >= bufferSize)
-	  {
-	    try
-	      {
-		buffer.wait();
-	      }
-	    catch (InterruptedException ex)
-	      {
-		err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
-			    ex.getMessage());
-		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
-	      }
-	  }
+        while (!done && bufferContents >= bufferSize)
+          {
+            try
+              {
+                buffer.wait();
+              }
+            catch (InterruptedException ex)
+              {
+                err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
+                            ex.getMessage());
+                throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
+              }
+          }
 
-	completeCharData();
-	completeElement();
+        completeCharData();
+        completeElement();
 
-	if (done)
-	  {
-	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	    throw ex;
-	  }
+        if (done)
+          {
+            SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
+            throw ex;
+          }
 
-	// we don't set done true here any more.. the finally in the run() method
-	// should take care of that
+        // we don't set done true here any more.. the finally in the run() method
+        // should take care of that
 
-	pourIntoBuffer(new XMLEndDocument());
+        pourIntoBuffer(new XMLEndDocument());
       }
   }
 
@@ -1199,32 +1199,32 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   {
     synchronized (buffer)
       {
-	while (!done && bufferContents >= bufferSize)
-	  {
-	    try
-	      {
-		buffer.wait();
-	      }
-	    catch (InterruptedException ex)
-	      {
-		err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
-			    ex.getMessage());
-		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
-	      }
-	  }
+        while (!done && bufferContents >= bufferSize)
+          {
+            try
+              {
+                buffer.wait();
+              }
+            catch (InterruptedException ex)
+              {
+                err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
+                            ex.getMessage());
+                throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
+              }
+          }
 
-	completeCharData();
-	completeElement();
+        completeCharData();
+        completeElement();
 
-	if (done)
-	  {
-	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	    throw ex;
-	  }
-	
-	halfElement = new XMLElement(qName, atts);
+        if (done)
+          {
+            SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
+            throw ex;
+          }
+        
+        halfElement = new XMLElement(qName, atts);
 
-	buffer.notifyAll();
+        buffer.notifyAll();
       }
   }
 
@@ -1254,38 +1254,38 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   {
     synchronized (buffer)
       {
-	while (!done && bufferContents >= bufferSize)
-	  {
-	    try
-	      {
-		buffer.wait();
-	      }
-	    catch (InterruptedException ex)
-	      {
-		err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
-			    ex.getMessage());
-		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
-	      }
-	  }
+        while (!done && bufferContents >= bufferSize)
+          {
+            try
+              {
+                buffer.wait();
+              }
+            catch (InterruptedException ex)
+              {
+                err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
+                            ex.getMessage());
+                throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
+              }
+          }
 
-	completeCharData();
+        completeCharData();
 
-	if (halfElement != null && halfElement.matches(qName))
-	  {
-	    halfElement.setEmpty();
-	    completeElement();
-	    return;
-	  }
+        if (halfElement != null && halfElement.matches(qName))
+          {
+            halfElement.setEmpty();
+            completeElement();
+            return;
+          }
 
-	completeElement();
-	
-	if (done)
-	  {
-	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	    throw ex;
-	  }
-	
-	pourIntoBuffer(new XMLCloseElement(qName));
+        completeElement();
+        
+        if (done)
+          {
+            SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
+            throw ex;
+          }
+        
+        pourIntoBuffer(new XMLCloseElement(qName));
       }
   }
 
@@ -1337,29 +1337,29 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   {
     synchronized (buffer)
       {
-	while (!done && bufferContents >= bufferSize)
-	  {
-	    try
-	      {
-		buffer.wait();
-	      }
-	    catch (InterruptedException ex)
-	      {
-		err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
-			    ex.getMessage());
-		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
-	      }
-	  }
+        while (!done && bufferContents >= bufferSize)
+          {
+            try
+              {
+                buffer.wait();
+              }
+            catch (InterruptedException ex)
+              {
+                err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
+                            ex.getMessage());
+                throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
+              }
+          }
 
-	completeElement();
+        completeElement();
 
-	if (done)
-	  {
- 	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	    throw ex;
-	  }
+        if (done)
+          {
+            SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
+            throw ex;
+          }
 
-	charBuffer.append(ch, start, length);
+        charBuffer.append(ch, start, length);
       }
   }
 
@@ -1393,30 +1393,30 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   {
     synchronized (buffer)
       {
-	while (!done && bufferContents >= bufferSize)
-	  {
-	    try
-	      {
-		buffer.wait();
-	      }
-	    catch (InterruptedException ex)
-	      {
-		err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
-			    ex.getMessage());
-		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
-	      }
-	  }
+        while (!done && bufferContents >= bufferSize)
+          {
+            try
+              {
+                buffer.wait();
+              }
+            catch (InterruptedException ex)
+              {
+                err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
+                            ex.getMessage());
+                throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
+              }
+          }
 
-	completeCharData();
-	completeElement();
+        completeCharData();
+        completeElement();
 
-	if (done)
-	  {
-	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	    throw ex;
-	  }
-	
-	pourIntoBuffer(new XMLCharData(ch, start, length));
+        if (done)
+          {
+            SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
+            throw ex;
+          }
+        
+        pourIntoBuffer(new XMLCharData(ch, start, length));
       }
   }
 
@@ -1442,30 +1442,30 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   {
     synchronized (buffer)
       {
-	while (!done && bufferContents >= bufferSize)
-	  {
-	    try
-	      {
-		buffer.wait();
-	      }
-	    catch (InterruptedException ex)
-	      {
-		err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
-			    ex.getMessage());
-		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
-	      }
-	  }
+        while (!done && bufferContents >= bufferSize)
+          {
+            try
+              {
+                buffer.wait();
+              }
+            catch (InterruptedException ex)
+              {
+                err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
+                            ex.getMessage());
+                throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
+              }
+          }
 
-	completeCharData();
-	completeElement();
+        completeCharData();
+        completeElement();
 
-	if (done)
-	  {
-	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	    throw ex;
-	  }
-	
-	pourIntoBuffer(new XMLWarning(exception, locator));
+        if (done)
+          {
+            SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
+            throw ex;
+          }
+        
+        pourIntoBuffer(new XMLWarning(exception, locator));
       }
   }
 
@@ -1496,31 +1496,31 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   {
     synchronized (buffer)
       {
-	while (!done && bufferContents >= bufferSize)
-	  {
-	    try
-	      {
-		buffer.wait();
-	      }
-	    catch (InterruptedException ex)
-	      {
-		err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
-			    ex.getMessage());
-		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
-	      }
-	  }
+        while (!done && bufferContents >= bufferSize)
+          {
+            try
+              {
+                buffer.wait();
+              }
+            catch (InterruptedException ex)
+              {
+                err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
+                            ex.getMessage());
+                throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
+              }
+          }
 
-	completeCharData();
-	completeElement();
+        completeCharData();
+        completeElement();
 
-	if (done)
-	  {
-	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	    throw ex;
-	  }
+        if (done)
+          {
+            SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
+            throw ex;
+          }
 
-	err.println("XML parsing error: " + exception.getMessage());
-	pourIntoBuffer(new XMLError(exception, locator, false));
+        err.println("XML parsing error: " + exception.getMessage());
+        pourIntoBuffer(new XMLError(exception, locator, false));
       }
   }
 
@@ -1549,32 +1549,32 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   {
     synchronized (buffer)
       {
-	while (!done && bufferContents >= bufferSize)
-	  {
-	    try
-	      {
-		buffer.wait();
-	      }
-	    catch (InterruptedException ex)
-	      {
-		err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
-			    ex.getMessage());
-		throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
-	      }
-	  }
+        while (!done && bufferContents >= bufferSize)
+          {
+            try
+              {
+                buffer.wait();
+              }
+            catch (InterruptedException ex)
+              {
+                err.println("XMLReader parse thread interrupted, can't wait for buffer to drain: " +
+                            ex.getMessage());
+                throw new SAXException("parse thread interrupted, can't wait for buffer to drain.");
+              }
+          }
 
-	completeCharData();
-	completeElement();
+        completeCharData();
+        completeElement();
 
-	if (done)
-	  {
-	    SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
-	    throw ex;
-	  }
-	
-	done = true;
-	err.println(exception.getMessage());
-	pourIntoBuffer(new XMLError(exception, locator, true));
+        if (done)
+          {
+            SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
+            throw ex;
+          }
+        
+        done = true;
+        err.println(exception.getMessage());
+        pourIntoBuffer(new XMLError(exception, locator, true));
       }
   }
 }

@@ -375,16 +375,16 @@ public class FileOps {
       {
         while (!done)
           {
-	    slurpStreams(iStream, eStream, stdoutBuffer, stderrBuffer);
+            slurpStreams(iStream, eStream, stdoutBuffer, stderrBuffer);
 
             try
               {
                 result_code = p.exitValue();
-		done = true;
+                done = true;
               }
             catch (IllegalThreadStateException ex)
               {
-		slurpStreams(iStream, eStream, stdoutBuffer, stderrBuffer);
+                slurpStreams(iStream, eStream, stdoutBuffer, stderrBuffer);
               }
 
             try
@@ -399,7 +399,7 @@ public class FileOps {
       }
     finally
       {
-	slurpStreams(iStream, eStream, stdoutBuffer, stderrBuffer);
+        slurpStreams(iStream, eStream, stdoutBuffer, stderrBuffer);
 
         FileOps.cleanupProcess(p);
 
@@ -424,48 +424,48 @@ public class FileOps {
 
     try
       {
-	while (outStream.available() > 0 || errStream.available() > 0)
-	  {
-	    try
-	      {
-		int count = (int) Math.min(buffer.length, outStream.available());
+        while (outStream.available() > 0 || errStream.available() > 0)
+          {
+            try
+              {
+                int count = (int) Math.min(buffer.length, outStream.available());
 
-		if (outBuffer.length() < MAXSIZE)
-		  {
-		    outBuffer.append(new String(buffer, 0, outStream.read(buffer, 0, count)));
-		  }
-		else
-		  {
-		    outStream.read(buffer, 0, count);
-		  }
-	      }
-	    catch (IOException exc)
-	      {
-		// so we couldn't eat the bytes, what else can we do?
-	      }
+                if (outBuffer.length() < MAXSIZE)
+                  {
+                    outBuffer.append(new String(buffer, 0, outStream.read(buffer, 0, count)));
+                  }
+                else
+                  {
+                    outStream.read(buffer, 0, count);
+                  }
+              }
+            catch (IOException exc)
+              {
+                // so we couldn't eat the bytes, what else can we do?
+              }
 
-	    try
-	      {
-		int count = (int) Math.min(buffer.length, errStream.available());
+            try
+              {
+                int count = (int) Math.min(buffer.length, errStream.available());
 
-		if (errBuffer.length() < MAXSIZE)
-		  {
-		    errBuffer.append(new String(buffer, 0, errStream.read(buffer, 0, count)));
-		  }
-		else
-		  {
-		    errStream.read(buffer, 0, count);
-		  }
-	      }
-	    catch (IOException exc)
-	      {
-		// screw you, copper
-	      }
-	  }
+                if (errBuffer.length() < MAXSIZE)
+                  {
+                    errBuffer.append(new String(buffer, 0, errStream.read(buffer, 0, count)));
+                  }
+                else
+                  {
+                    errStream.read(buffer, 0, count);
+                  }
+              }
+            catch (IOException exc)
+              {
+                // screw you, copper
+              }
+          }
       }
     catch (IOException ex)
       {
-	// shrug
+        // shrug
       }
   }
 

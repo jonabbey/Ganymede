@@ -83,54 +83,54 @@ public class VectorUtils {
   {
     int threshold = vectSize(vectA) + vectSize(vectB);
 
-    if (threshold < 10)		// I pulled 10 out of my ass
+    if (threshold < 10)         // I pulled 10 out of my ass
       {
-	Vector<E> result = new Vector<E>(threshold);
+        Vector<E> result = new Vector<E>(threshold);
 
-	if (vectA != null)
-	  {
-	    for (E obj: vectA)
-	      {
-		result.add(obj);
-	      }
-	  }
+        if (vectA != null)
+          {
+            for (E obj: vectA)
+              {
+                result.add(obj);
+              }
+          }
 
-	if (vectB != null)
-	  {
-	    for (E obj: vectB)
-	      {
-		if (!result.contains(obj))
-		  {
-		    result.add(obj);
-		  }
-	      }
-	  }
+        if (vectB != null)
+          {
+            for (E obj: vectB)
+              {
+                if (!result.contains(obj))
+                  {
+                    result.add(obj);
+                  }
+              }
+          }
 
-	result.trimToSize();
+        result.trimToSize();
 
-	return result;
+        return result;
       }
     else
       {
-	// If we have a big enough set of elements to union, use a
-	// temporary hashtable so that we have better scalability for
-	// item lookup.
+        // If we have a big enough set of elements to union, use a
+        // temporary hashtable so that we have better scalability for
+        // item lookup.
 
-	Set<E> workSet = new HashSet<E>(vectSize(vectA) + vectSize(vectB));
+        Set<E> workSet = new HashSet<E>(vectSize(vectA) + vectSize(vectB));
 
-	/* -- */
+        /* -- */
 
-	if (vectA != null)
-	  {
-	    workSet.addAll(vectA);
-	  }
+        if (vectA != null)
+          {
+            workSet.addAll(vectA);
+          }
 
-	if (vectB != null)
-	  {
-	    workSet.addAll(vectB);
-	  }
+        if (vectB != null)
+          {
+            workSet.addAll(vectB);
+          }
 
-	return new Vector<E>(workSet);
+        return new Vector<E>(workSet);
       }
   }
 
@@ -143,12 +143,12 @@ public class VectorUtils {
   {
     if (obj == null)
       {
-	return;
+        return;
       }
 
     if (vect.contains(obj))
       {
-	return;
+        return;
       }
 
     vect.add(obj);
@@ -163,45 +163,45 @@ public class VectorUtils {
   {
     if (vectA == null || vectB == null || vectA.size() == 0 || vectB.size() == 0)
       {
-	return false;
+        return false;
       }
 
-    if ((vectA.size() + vectB.size()) > 20)		// ass, again
+    if ((vectA.size() + vectB.size()) > 20)             // ass, again
       {
-	Set<E> workSet = new HashSet<E>(vectA.size());
+        Set<E> workSet = new HashSet<E>(vectA.size());
 
-	workSet.addAll(vectA);
+        workSet.addAll(vectA);
 
-	for (int i = 0; i < vectB.size(); i++)
-	  {
-	    if (workSet.contains(vectB.get(i)))
-	      {
-		return true;
-	      }
-	  }
+        for (int i = 0; i < vectB.size(); i++)
+          {
+            if (workSet.contains(vectB.get(i)))
+              {
+                return true;
+              }
+          }
       }
     else
       {
-	if (vectA.size() > vectB.size())
-	  {
-	    for (int i = 0; i < vectA.size(); i++)
-	      {
-		if (vectB.contains(vectA.get(i)))
-		  {
-		    return true;
-		  }
-	      }
-	  }
-	else
-	  {
-	    for (int i = 0; i < vectB.size(); i++)
-	      {
-		if (vectA.contains(vectB.get(i)))
-		  {
-		    return true;
-		  }
-	      }
-	  }
+        if (vectA.size() > vectB.size())
+          {
+            for (int i = 0; i < vectA.size(); i++)
+              {
+                if (vectB.contains(vectA.get(i)))
+                  {
+                    return true;
+                  }
+              }
+          }
+        else
+          {
+            for (int i = 0; i < vectB.size(); i++)
+              {
+                if (vectA.contains(vectB.get(i)))
+                  {
+                    return true;
+                  }
+              }
+          }
       }
 
     return false;
@@ -226,28 +226,28 @@ public class VectorUtils {
 
     if (vectA != null)
       {
-	workSetA.addAll(vectA);
+        workSetA.addAll(vectA);
       }
 
     if (vectB != null)
       {
-	workSetB.addAll(vectB);
+        workSetB.addAll(vectB);
       }
 
     for (E item: workSetA)
       {
-	if (workSetB.contains(item))
-	  {
-	    resultSet.add(item);
-	  }
+        if (workSetB.contains(item))
+          {
+            resultSet.add(item);
+          }
       }
 
     for (E item: workSetB)
       {
-	if (workSetA.contains(item))
-	  {
-	    resultSet.add(item);
-	  }
+        if (workSetA.contains(item))
+          {
+            resultSet.add(item);
+          }
       }
 
     return new Vector<E>(resultSet);
@@ -269,35 +269,35 @@ public class VectorUtils {
 
     if (vectA == null)
       {
-	return result;
+        return result;
       }
 
     if (vectB == null)
       {
-	return new Vector<E>(vectA);
+        return new Vector<E>(vectA);
       }
 
     if (vectA.size() + vectB.size() < 10) // ass
       {
-	for (E item: vectA)
-	  {
-	    if (!vectB.contains(item))
-	      {
-		result.add(item);
-	      }
-	  }
+        for (E item: vectA)
+          {
+            if (!vectB.contains(item))
+              {
+                result.add(item);
+              }
+          }
       }
     else
       {
-	Set<E> workSet = new HashSet<E>(vectB);
+        Set<E> workSet = new HashSet<E>(vectB);
 
-	for (E item: vectA)
-	  {
-	    if (!workSet.contains(item))
-	      {
-		result.add(item);
-	      }
-	  }
+        for (E item: vectA)
+          {
+            if (!workSet.contains(item))
+              {
+                result.add(item);
+              }
+          }
       }
 
     return result;
@@ -312,7 +312,7 @@ public class VectorUtils {
   {
     if (vectSize(vectA) != vectSize(vectB))
       {
-	return false;
+        return false;
       }
 
     return intersection(vectA, vectB).size() == vectSize(vectA);
@@ -330,7 +330,7 @@ public class VectorUtils {
   {
     if (vector == null)
       {
-	return null;
+        return null;
       }
 
     Vector<E> result = null;
@@ -338,17 +338,17 @@ public class VectorUtils {
 
     for (E item: vector)
       {
-	if (found.contains(item))
-	  {
-	    if (result == null)
-	      {
-		result = new Vector<E>();
-	      }
+        if (found.contains(item))
+          {
+            if (result == null)
+              {
+                result = new Vector<E>();
+              }
 
-	    unionAdd(result, item);
-	  }
+            unionAdd(result, item);
+          }
 
-	found.add(item);
+        found.add(item);
       }
 
     return result;
@@ -367,17 +367,17 @@ public class VectorUtils {
   {
     if (vectA == null)
       {
-	return new Vector<E>();	// empty
+        return new Vector<E>(); // empty
       }
 
     Vector<E> result = new Vector<E>(vectA);
 
     if (vectB != null)
       {
-	for (E item: vectB)
-	  {
-	    result.remove(item);
-	  }
+        for (E item: vectB)
+          {
+            result.remove(item);
+          }
       }
 
     return result;
@@ -402,7 +402,7 @@ public class VectorUtils {
   {
     if (vec == null)
       {
-	return "";
+        return "";
       }
 
     StringBuilder temp = new StringBuilder();
@@ -411,14 +411,14 @@ public class VectorUtils {
 
     for (Object elem: vec)
       {
-	if (!first)
-	  {
-	    temp.append(separator);
-	  }
+        if (!first)
+          {
+            temp.append(separator);
+          }
 
-	temp.append(elem);
+        temp.append(elem);
 
-	first = false;
+        first = false;
       }
 
     return temp.toString();
@@ -456,41 +456,41 @@ public class VectorUtils {
 
     while (index != -1)
       {
-	// skip any leading field-separator chars
+        // skip any leading field-separator chars
 
-	for (; oldindex < input.length(); oldindex++)
-	  {
-	    if (sepChars.indexOf(inputAry[oldindex]) == -1)
-	      {
-		break;
-	      }
-	  }
+        for (; oldindex < input.length(); oldindex++)
+          {
+            if (sepChars.indexOf(inputAry[oldindex]) == -1)
+              {
+                break;
+              }
+          }
 
-	if (oldindex == input.length())
-	  {
-	    break;
-	  }
+        if (oldindex == input.length())
+          {
+            break;
+          }
 
-	index = findNextSep(input, oldindex, sepChars);
+        index = findNextSep(input, oldindex, sepChars);
 
-	if (index == -1)
-	  {
-	    temp = input.substring(oldindex);
+        if (index == -1)
+          {
+            temp = input.substring(oldindex);
 
-	    // System.err.println("+ " + temp + " +");
+            // System.err.println("+ " + temp + " +");
 
-	    results.add(temp);
-	  }
-	else
-	  {
-	    temp = input.substring(oldindex, index);
+            results.add(temp);
+          }
+        else
+          {
+            temp = input.substring(oldindex, index);
 
-	    // System.err.println("* " + temp + " *");
+            // System.err.println("* " + temp + " *");
 
-	    results.add(temp);
+            results.add(temp);
 
-	    oldindex = index + 1;
-	  }
+            oldindex = index + 1;
+          }
       }
 
     return results;
@@ -517,22 +517,22 @@ public class VectorUtils {
 
     for (int i = 0; i < sepAry.length; i++)
       {
-	int tempdex = input.indexOf(sepAry[i], startDex);
+        int tempdex = input.indexOf(sepAry[i], startDex);
 
-	if (tempdex > -1 && tempdex <= currentIndex)
-	  {
-	    currentIndex = tempdex;
-	    foundSep = true;
-	  }
+        if (tempdex > -1 && tempdex <= currentIndex)
+          {
+            currentIndex = tempdex;
+            foundSep = true;
+          }
       }
 
     if (foundSep)
       {
-	return currentIndex;
+        return currentIndex;
       }
     else
       {
-	return -1;
+        return -1;
       }
   }
 
@@ -540,11 +540,11 @@ public class VectorUtils {
   {
     if (x == null)
       {
-	return 0;
+        return 0;
       }
     else
       {
-	return x.size();
+        return x.size();
       }
   }
 
@@ -560,7 +560,7 @@ public class VectorUtils {
 
     for (int i = 0; i < results.size(); i++)
       {
-	System.out.println(i + ": " + results.get(i));
+        System.out.println(i + ": " + results.get(i));
       }
   }
 }
