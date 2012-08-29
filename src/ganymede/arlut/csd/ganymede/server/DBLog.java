@@ -532,17 +532,19 @@ public class DBLog {
 
         if (type == null)
           {
-    	    message = event.description + "\n\n";
+            message = event.description;
           }
         else
           {
-    	    message = type.description + "\n\n" + event.description + "\n\n";
+            message = type.description + "\n\n" + event.description ;
           }
 
         if (description != null)
           {
-    	    message = message + description + "\n\n";
+            message = message + description;
           }
+
+	message = StringUtils.ensureEndsWith(message, "\n\n");
 
         message = arlut.csd.Util.WordWrap.wrap(message, 78);
 
@@ -1110,16 +1112,18 @@ public class DBLog {
 
     if (transdescrip != null && (!transdescrip.equals("null")))
       {
-	message = transdescrip + "\n\n" + type.description + "\n\n" + event.description + "\n\n";
+        message = transdescrip + "\n\n" + type.description + "\n\n" + event.description;
       }
     else if (type.description != null && (!type.description.equals("")))
       {
-	message = type.description + "\n\n" + event.description + "\n\n";
+        message = type.description + "\n\n" + event.description;
       }
     else
       {
-	message = event.description + "\n\n";
+        message = event.description;
       }
+
+    message = StringUtils.ensureEndsWith(message, "\n\n");
 
     message = arlut.csd.Util.WordWrap.wrap(message, 78);
 
@@ -2784,6 +2788,8 @@ class MailOut {
 
     description.append("\n\n");
     description.append(event.description);
+
+    StringUtils.ensureEndsWith(description, "\n\n");
 
     invids.addAll(event.getInvids());
   }
