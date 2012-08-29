@@ -70,18 +70,18 @@ class tableCol {
   baseTable rt;
   String header;
   tableAttr attr;
-  float origWidth;		// the basic width of a column.. needs to be multiplied by scalefact
+  float origWidth;              // the basic width of a column.. needs to be multiplied by scalefact
   int width;
   JPopupMenu menu;
 
   /* -- */
 
   public tableCol(baseTable rt, String header, float origWidth, tableAttr attr, 
-		  JPopupMenu menu)
+                  JPopupMenu menu)
   {
     if (rt == null && menu != null)
       {
-	throw new IllegalArgumentException("must define baseTable in col to attach popup menu.");
+        throw new IllegalArgumentException("must define baseTable in col to attach popup menu.");
       }
 
     this.rt = rt;
@@ -95,26 +95,26 @@ class tableCol {
 
     if (menu!= null)
       {
-	Component elements[];
-	JMenuItem temp;
+        Component elements[];
+        JMenuItem temp;
 
-	elements = menu.getComponents();
+        elements = menu.getComponents();
 
-	for (int i = 0; i < elements.length; i++)
-	  {
-	    if (elements[i] instanceof JMenuItem)
-	      {
-		temp = (JMenuItem) elements[i];
-		temp.addActionListener(rt);
-	      }
-	  }
+        for (int i = 0; i < elements.length; i++)
+          {
+            if (elements[i] instanceof JMenuItem)
+              {
+                temp = (JMenuItem) elements[i];
+                temp.addActionListener(rt);
+              }
+          }
 
-	rt.canvas.add(menu);
+        rt.canvas.add(menu);
       }
 
     if (this.attr != null)
       {
-	this.attr.calculateMetrics();
+        this.attr.calculateMetrics();
       }
 
     this.width = (int) origWidth;

@@ -172,7 +172,7 @@ public class SmartTable extends JPanel implements ActionListener
   {
     if (debug)
       {
-	System.err.println("DEBUG: SmartTable Constructor");
+        System.err.println("DEBUG: SmartTable Constructor");
       }
 
     this.setLayout(new BorderLayout());
@@ -233,21 +233,21 @@ public class SmartTable extends JPanel implements ActionListener
 
     if (rowMenu != null)
       {
-	for (Component element: rowMenu.getComponents())
-	  {
-	    if (element instanceof JMenuItem)
-	      {
-		JMenuItem temp = (JMenuItem) element;
+        for (Component element: rowMenu.getComponents())
+          {
+            if (element instanceof JMenuItem)
+              {
+                JMenuItem temp = (JMenuItem) element;
 
-		// if there is a listener already, dont add another
-		// one
+                // if there is a listener already, dont add another
+                // one
 
-		if (temp.getActionListeners().length == 0)
-		  {
-		    temp.addActionListener(this);
-		  }
-	      }
-	  }
+                if (temp.getActionListeners().length == 0)
+                  {
+                    temp.addActionListener(this);
+                  }
+              }
+          }
       }
 
     table.addMouseListener(new PopupListener(this,rowMenu));
@@ -282,42 +282,42 @@ public class SmartTable extends JPanel implements ActionListener
   {
     if (event.getSource() instanceof JMenuItem)
       {
-	JMenuItem eventSource = (JMenuItem) event.getSource();
-	Container parentContainer = eventSource.getParent();
+        JMenuItem eventSource = (JMenuItem) event.getSource();
+        Container parentContainer = eventSource.getParent();
 
-	if (parentContainer instanceof JPopupMenu)
-	  {
-	    if (event.getSource() == deleteColMI)
-	      {
-		if (debug)
-		  {
-		    System.out.println("mouseevent remove col:" + remember_col2 + "*");
-		  }
+        if (parentContainer instanceof JPopupMenu)
+          {
+            if (event.getSource() == deleteColMI)
+              {
+                if (debug)
+                  {
+                    System.out.println("mouseevent remove col:" + remember_col2 + "*");
+                  }
 
-		table.removeColumn(table.getColumnModel().getColumn(remember_col2));
-		calcResizeMode();
-	      }
-	    else if (event.getSource() == optimizeColWidMI)
-	      {
-		if (debug)
-		  {
-		    System.out.println("mouseevent optimize all columns ");
-		  }
+                table.removeColumn(table.getColumnModel().getColumn(remember_col2));
+                calcResizeMode();
+              }
+            else if (event.getSource() == optimizeColWidMI)
+              {
+                if (debug)
+                  {
+                    System.out.println("mouseevent optimize all columns ");
+                  }
 
-		optimizeCols();
-	      }
-	    else // pass back to parent to deal with Row menu actions
-	      {
-		Object key = getRowKey(sorter.modelIndex(remember_row)); // get real key from sorter model
+                optimizeCols();
+              }
+            else // pass back to parent to deal with Row menu actions
+              {
+                Object key = getRowKey(sorter.modelIndex(remember_row)); // get real key from sorter model
 
-		if (debug)
-		  {
-		    System.err.println("actionPerformed processing hash key: row=" + remember_row + ", invid=" + key);
-		  }
+                if (debug)
+                  {
+                    System.err.println("actionPerformed processing hash key: row=" + remember_row + ", invid=" + key);
+                  }
 
-		callback.rowMenuPerformed(key, event);
-	      }
-	  }
+                callback.rowMenuPerformed(key, event);
+              }
+          }
       }
   }
 
@@ -332,7 +332,7 @@ public class SmartTable extends JPanel implements ActionListener
 
     if (colCount == 0)
       {
-	return;
+        return;
       }
 
     // default width is 75, if not default, use getPreferredWidth()
@@ -343,11 +343,11 @@ public class SmartTable extends JPanel implements ActionListener
 
     if (colWidth*colCount < table.getParent().getWidth())
       {
-	table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_NEXT_COLUMN);
       }
     else
       {
-	table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
       }
   }
 
@@ -363,7 +363,7 @@ public class SmartTable extends JPanel implements ActionListener
   {
     if (debug)
       {
-	System.err.println("baseTable.optimizeCols(): entering");
+        System.err.println("baseTable.optimizeCols(): entering");
       }
 
     int nominalWidth[];
@@ -385,9 +385,9 @@ public class SmartTable extends JPanel implements ActionListener
 
     while (columns.hasMoreElements())
       {
-	TableColumn col = columns.nextElement();
+        TableColumn col = columns.nextElement();
 
-	reflowColumn(col);
+        reflowColumn(col);
       }
 
     /*
@@ -405,7 +405,7 @@ public class SmartTable extends JPanel implements ActionListener
 
     if (debug)
       {
-	System.err.println("this.getBounds().width = " + this.getBounds().width);
+        System.err.println("this.getBounds().width = " + this.getBounds().width);
       }
 
     nominalWidth = new int[table.getColumnCount()];
@@ -417,68 +417,68 @@ public class SmartTable extends JPanel implements ActionListener
 
     while (columns.hasMoreElements())
       {
-	TableColumn col = columns.nextElement();
-	i++;
+        TableColumn col = columns.nextElement();
+        i++;
 
-	if (debug)
-	  {
-	    System.err.println("Examining column " + i);
-	  }
+        if (debug)
+          {
+            System.err.println("Examining column " + i);
+          }
 
-	TextAreaRenderer renderer = (TextAreaRenderer) col.getCellRenderer();
+        TextAreaRenderer renderer = (TextAreaRenderer) col.getCellRenderer();
 
-	if (renderer == null)
-	  {
-	    continue;
-	  }
+        if (renderer == null)
+          {
+            continue;
+          }
 
-	nominalWidth[i] = 20;
+        nominalWidth[i] = 20;
 
-	for (int j = 0; j < myModel.getRowCount(); j++)
-	  {
-	    Object value = myModel.getValueAt(j, col.getModelIndex());
+        for (int j = 0; j < myModel.getRowCount(); j++)
+          {
+            Object value = myModel.getValueAt(j, col.getModelIndex());
 
-	    int localNW = renderer.getUnwrappedWidth(this.table, value) + 5;
+            int localNW = renderer.getUnwrappedWidth(this.table, value) + 5;
 
-	    if (localNW > nominalWidth[i])
-	      {
-		nominalWidth[i] = localNW;
-	      }
-	  }
+            if (localNW > nominalWidth[i])
+              {
+                nominalWidth[i] = localNW;
+              }
+          }
 
-	if (debug)
-	  {
-	    System.err.println();
-	  }
+        if (debug)
+          {
+            System.err.println();
+          }
 
-	// nominalWidth[i] is now the required width of this column
+        // nominalWidth[i] is now the required width of this column
 
-	if (debug)
-	  {
-	    System.err.println("Column " + i + " has nominalWidth of " + nominalWidth[i] +
-			       " and a cellWidth of " + col.getWidth());
-	  }
+        if (debug)
+          {
+            System.err.println("Column " + i + " has nominalWidth of " + nominalWidth[i] +
+                               " and a cellWidth of " + col.getWidth());
+          }
 
-	if (nominalWidth[i] < col.getWidth())
-	  {
-	    spareSpace += col.getWidth() - nominalWidth[i];
-	  }
-	else
-	  {
-	    totalOver += (float) nominalWidth[i] - col.getWidth();
-	  }
+        if (nominalWidth[i] < col.getWidth())
+          {
+            spareSpace += col.getWidth() - nominalWidth[i];
+          }
+        else
+          {
+            totalOver += (float) nominalWidth[i] - col.getWidth();
+          }
       }
 
     if (debug)
       {
-	System.err.println("spareSpace = " + spareSpace + ", totalOver = " + totalOver);
+        System.err.println("spareSpace = " + spareSpace + ", totalOver = " + totalOver);
       }
 
     redistribute = java.lang.Math.min(spareSpace, totalOver);
 
     if (debug)
       {
-	System.err.println("redistribute = " + redistribute);
+        System.err.println("redistribute = " + redistribute);
       }
 
     columns = table.getColumnModel().getColumns();
@@ -486,46 +486,46 @@ public class SmartTable extends JPanel implements ActionListener
 
     while (columns.hasMoreElements())
       {
-	TableColumn col = columns.nextElement();
-	i++;
+        TableColumn col = columns.nextElement();
+        i++;
 
-	// are we going to be actually doing some redistributing?
+        // are we going to be actually doing some redistributing?
 
-	if (redistribute > 1.0)
-	  {
-	    // Does this column have space to give?
+        if (redistribute > 1.0)
+          {
+            // Does this column have space to give?
 
-	    if (nominalWidth[i] < col.getWidth())
-	      {
-		percentSpace = (col.getWidth() - nominalWidth[i]) / spareSpace;
-		shrinkFactor = redistribute * percentSpace;
+            if (nominalWidth[i] < col.getWidth())
+              {
+                percentSpace = (col.getWidth() - nominalWidth[i]) / spareSpace;
+                shrinkFactor = redistribute * percentSpace;
 
-		if (debug)
-		  {
-		    System.err.println("Column " + i + ": percentSpace = " + percentSpace +
-				       " , reducing by " + shrinkFactor + ", new width = " +
-				       (col.getWidth() - shrinkFactor));
-		  }
+                if (debug)
+                  {
+                    System.err.println("Column " + i + ": percentSpace = " + percentSpace +
+                                       " , reducing by " + shrinkFactor + ", new width = " +
+                                       (col.getWidth() - shrinkFactor));
+                  }
 
-		col.setPreferredWidth((int) (col.getWidth() - shrinkFactor));
-	      }
-	    else // need to grow
-	      {
-		// what percentage of the overage goes to this col?
+                col.setPreferredWidth((int) (col.getWidth() - shrinkFactor));
+              }
+            else // need to grow
+              {
+                // what percentage of the overage goes to this col?
 
-		percentOver = (nominalWidth[i] - col.getWidth()) / totalOver;
-		growthFactor = redistribute * percentOver;
+                percentOver = (nominalWidth[i] - col.getWidth()) / totalOver;
+                growthFactor = redistribute * percentOver;
 
-		if (debug)
-		  {
-		    System.err.println("Column " + i + ": percentOver = " + percentOver +
-				       " , growing by " + growthFactor + ", new width = " +
-				       (col.getWidth() + growthFactor));
-		  }
+                if (debug)
+                  {
+                    System.err.println("Column " + i + ": percentOver = " + percentOver +
+                                       " , growing by " + growthFactor + ", new width = " +
+                                       (col.getWidth() + growthFactor));
+                  }
 
-		col.setPreferredWidth((int) (col.getWidth() + growthFactor));
-	      }
-	  }
+                col.setPreferredWidth((int) (col.getWidth() + growthFactor));
+              }
+          }
       }
   }
 
@@ -538,12 +538,12 @@ public class SmartTable extends JPanel implements ActionListener
   {
     if (column == null)
       {
-	return;
+        return;
       }
 
     if (myModel.getColumnClass(column.getModelIndex()) != Date.class)
       {
-	column.setCellRenderer(new TextAreaRenderer());
+        column.setCellRenderer(new TextAreaRenderer());
       }
   }
 
@@ -555,24 +555,24 @@ public class SmartTable extends JPanel implements ActionListener
   {
     try
       {
-	Printable printable = table.getPrintable(JTable.PrintMode.FIT_WIDTH,
-						 null,
-						 new MessageFormat(ts.l("print.page_template"))); // Page - {0}
+        Printable printable = table.getPrintable(JTable.PrintMode.FIT_WIDTH,
+                                                 null,
+                                                 new MessageFormat(ts.l("print.page_template"))); // Page - {0}
 
-	PrinterJob job = PrinterJob.getPrinterJob();
+        PrinterJob job = PrinterJob.getPrinterJob();
 
-	job.setPrintable(printable);
+        job.setPrintable(printable);
 
-	PrintRequestAttributeSet attr = new HashPrintRequestAttributeSet();
+        PrintRequestAttributeSet attr = new HashPrintRequestAttributeSet();
 
-	if (job.printDialog(attr))
-	  {
-	    job.print(attr);
-	  }
+        if (job.printDialog(attr))
+          {
+            job.print(attr);
+          }
       }
     catch (PrinterException pe)
       {
-	System.err.println("Error printing: " + pe.getMessage());
+        System.err.println("Error printing: " + pe.getMessage());
       }
   }
 
@@ -685,9 +685,9 @@ public class SmartTable extends JPanel implements ActionListener
     private TableColumn getNextColumn(TableColumn col)
     {
       if (col == null)
-	{
-	  return null;
-	}
+        {
+          return null;
+        }
 
       TableColumnModel colModel = table.getTableHeader().getColumnModel();
 
@@ -696,15 +696,15 @@ public class SmartTable extends JPanel implements ActionListener
       Enumeration<TableColumn> columns = colModel.getColumns();
 
       while (columns.hasMoreElements())
-	{
-	  if (columns.nextElement() == col)
-	    {
-	      if (columns.hasMoreElements())
-		{
-		  return columns.nextElement();
-		}
-	    }
-	}
+        {
+          if (columns.nextElement() == col)
+            {
+              if (columns.hasMoreElements())
+                {
+                  return columns.nextElement();
+                }
+            }
+        }
 
       return null;
     }
@@ -821,15 +821,15 @@ public class SmartTable extends JPanel implements ActionListener
     private void showPopup(MouseEvent e)
     {
       if (!e.isPopupTrigger())
-	{
-	  return;
-	}
+        {
+          return;
+        }
 
       if (debug)
-	{
-	  System.out.println("mouseevent on row:"+ table.rowAtPoint(e.getPoint()) +"*");
-	  System.out.println("mouseevent on col:"+ table.columnAtPoint(e.getPoint()) +"*");
-	}
+        {
+          System.out.println("mouseevent on row:"+ table.rowAtPoint(e.getPoint()) +"*");
+          System.out.println("mouseevent on col:"+ table.columnAtPoint(e.getPoint()) +"*");
+        }
 
       master_control.remember_row = master_control.table.rowAtPoint(e.getPoint());
       master_control.remember_col = master_control.remember_col2 = master_control.table.columnAtPoint(e.getPoint());
@@ -838,20 +838,20 @@ public class SmartTable extends JPanel implements ActionListener
       // column number here
 
       if (e.getSource() instanceof JMenuItem)
-	{
-	  JTableHeader h = (JTableHeader) e.getSource();
-	  TableColumnModel columnModel = h.getColumnModel();
+        {
+          JTableHeader h = (JTableHeader) e.getSource();
+          TableColumnModel columnModel = h.getColumnModel();
 
-	  int viewColumn = columnModel.getColumnIndexAtX(e.getX());
-	  int column = columnModel.getColumn(viewColumn).getModelIndex();
+          int viewColumn = columnModel.getColumnIndexAtX(e.getX());
+          int column = columnModel.getColumn(viewColumn).getModelIndex();
 
-	  if (debug)
-	    {
-	      System.out.println("second way is col:"+ column +"*");
-	    }
+          if (debug)
+            {
+              System.out.println("second way is col:"+ column +"*");
+            }
 
-	  master_control.remember_col = column;
-	}
+          master_control.remember_col = column;
+        }
 
       // Select a single row for right clicks - rows 1 to 1
 
@@ -905,9 +905,9 @@ public class SmartTable extends JPanel implements ActionListener
     public void newRow(Object key)
     {
       if (index.containsKey(key))
-	{
-	  throw new IllegalArgumentException("newRow(): row " + key + " already exists.");
-	}
+        {
+          throw new IllegalArgumentException("newRow(): row " + key + " already exists.");
+        }
 
       rowHandler newRow1 = new rowHandler(key, getColumnCount());
       rows.add(newRow1);
@@ -942,9 +942,9 @@ public class SmartTable extends JPanel implements ActionListener
     public void setValueAt(Object value, int row, int col)
     {
       if (value != null && columnClasses[col] == null)
-	{
-	  columnClasses[col] = value.getClass();
-	}
+        {
+          columnClasses[col] = value.getClass();
+        }
 
       getRowHandler(row).cells[col] = value;
     }
@@ -991,13 +991,13 @@ public class SmartTable extends JPanel implements ActionListener
     public Class getColumnClass(int c)
     {
       if (columnClasses[c] == null)
-	{
-	  return Object.class;
-	}
+        {
+          return Object.class;
+        }
       else
-	{
-	  return columnClasses[c];
-	}
+        {
+          return columnClasses[c];
+        }
     }
 
     /**
@@ -1020,16 +1020,16 @@ public class SmartTable extends JPanel implements ActionListener
       System.out.println("numCols = " + numCols);
 
       for (int i=0; i < numRows; i++)
-	{
-	  System.out.print("    row " + i + ":");
+        {
+          System.out.print("    row " + i + ":");
 
-	  for (int j=0; j < numCols; j++)
-	    {
-	      System.out.print("  " + getValueAt(i,j));
-	    }
+          for (int j=0; j < numCols; j++)
+            {
+              System.out.print("  " + getValueAt(i,j));
+            }
 
-	  System.out.println();
-	}
+          System.out.println();
+        }
 
       System.out.println("--------------------------");
     }
@@ -1081,7 +1081,7 @@ public class SmartTable extends JPanel implements ActionListener
         {
           Date dateValue = (Date) value;
 
-	  setText(getString(dateValue));
+          setText(getString(dateValue));
         }
 
       return this;
@@ -1095,14 +1095,14 @@ public class SmartTable extends JPanel implements ActionListener
     public int getUnwrappedWidth(JTable table, Object value)
     {
       if (value == null)
-	{
-	  return 0;
-	}
+        {
+          return 0;
+        }
 
       if (metrics == null)
-	{
-	  metrics = this.getFontMetrics(table.getFont());
-	}
+        {
+          metrics = this.getFontMetrics(table.getFont());
+        }
 
       Date dateValue = (Date) value;
 

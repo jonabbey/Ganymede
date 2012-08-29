@@ -86,7 +86,7 @@ class tableRow {
 
     for (int i = 0; i < cells.length; i++)
       {
-	this.cells.addElement(cells[i]);
+        this.cells.addElement(cells[i]);
       }
   }
 
@@ -106,7 +106,7 @@ class tableRow {
 
     for (int i = 0; i < size; i++)
       {
-	this.cells.addElement(new tableCell((tableCol) rt.cols.elementAt(i)));
+        this.cells.addElement(new tableCell((tableCol) rt.cols.elementAt(i)));
       }
   }
 
@@ -147,7 +147,7 @@ class tableRow {
 
     if (cell.getRowSpan() > rowSpan)
       {
-	rowSpan = cell.getRowSpan();
+        rowSpan = cell.getRowSpan();
       }
   }
 
@@ -165,12 +165,12 @@ class tableRow {
 
     for (int i = 0; i < cells.size(); i++)
       {
-	cell = (tableCell) cells.elementAt(i);
+        cell = (tableCell) cells.elementAt(i);
 
-	if (cell.getRowSpan() > rowSpan)
-	  {
-	    rowSpan = cell.getRowSpan();
-	  }
+        if (cell.getRowSpan() > rowSpan)
+          {
+            rowSpan = cell.getRowSpan();
+          }
       }
 
     return rowSpan;

@@ -92,32 +92,32 @@ public class gridTable extends baseTable {
    * @param vertLines   true if vertical lines should be shown between columns in report table
    * @param vertFill    true if table should expand vertically to fill size of baseTable
    * @param hVertFill   true if horizontal lines should be drawn in the vertical fill region
-   * 			(only applies if vertFill and horizLines are true)
+   *                    (only applies if vertFill and horizLines are true)
    *
    */
 
   public gridTable(tableAttr headerAttrib, 
-		   tableAttr tableAttrib,
-		   tableAttr[] colAttribs, 
-		   int[] colWidths, 
-		   Color vHeadLineColor,
-		   Color vRowLineColor,
-		   Color hHeadLineColor,
-		   Color hRowLineColor,
-		   String[] headers,
-		   boolean horizLines, boolean vertLines,
-		   boolean vertFill, boolean hVertFill,
-		   JPopupMenu menu,
-		   JPopupMenu headerMenu)
+                   tableAttr tableAttrib,
+                   tableAttr[] colAttribs, 
+                   int[] colWidths, 
+                   Color vHeadLineColor,
+                   Color vRowLineColor,
+                   Color hHeadLineColor,
+                   Color hRowLineColor,
+                   String[] headers,
+                   boolean horizLines, boolean vertLines,
+                   boolean vertFill, boolean hVertFill,
+                   JPopupMenu menu,
+                   JPopupMenu headerMenu)
   {
     super(headerAttrib, tableAttrib, colAttribs, colWidths,
-	  vHeadLineColor, vRowLineColor, hHeadLineColor, hRowLineColor,
-	  headers, horizLines, vertLines, vertFill, hVertFill,
-	  menu, headerMenu);
+          vHeadLineColor, vRowLineColor, hHeadLineColor, hRowLineColor,
+          headers, horizLines, vertLines, vertFill, hVertFill,
+          menu, headerMenu);
 
     if (debug)
       {
-	System.err.println(">> gridTable primary constructor exiting");
+        System.err.println(">> gridTable primary constructor exiting");
       }
   }
 
@@ -133,23 +133,23 @@ public class gridTable extends baseTable {
   public gridTable(int[] colWidths, String[] headers, JPopupMenu menu)
   {
     this(new tableAttr(null, new Font("SansSerif", Font.BOLD, 14), 
-			     Color.white, Color.blue, tableAttr.JUST_CENTER),
-	 new tableAttr(null, new Font("SansSerif", Font.PLAIN, 12),
-			     Color.black, Color.white, tableAttr.JUST_LEFT),
-	 (tableAttr[]) null,
-	 colWidths, 
-	 Color.black,
-	 Color.black,
-	 Color.black,
-	 Color.black,
-	 headers,
-	 true, true, true, true,
-	 menu,
-	 null);
+                             Color.white, Color.blue, tableAttr.JUST_CENTER),
+         new tableAttr(null, new Font("SansSerif", Font.PLAIN, 12),
+                             Color.black, Color.white, tableAttr.JUST_LEFT),
+         (tableAttr[]) null,
+         colWidths, 
+         Color.black,
+         Color.black,
+         Color.black,
+         Color.black,
+         headers,
+         true, true, true, true,
+         menu,
+         null);
 
     if (debug)
       {
-	System.err.println(">>> processing gridTable default constructor");
+        System.err.println(">>> processing gridTable default constructor");
       }
 
     // we couldn't pass this to the baseTableConstructors
@@ -163,21 +163,21 @@ public class gridTable extends baseTable {
 
     if (debug)
       {
-	System.err.println(">>> calling calcFonts");
+        System.err.println(">>> calling calcFonts");
       }
 
     calcFonts();
 
     if (debug)
       {
-	System.err.println(">>> calling calcCols");
+        System.err.println(">>> calling calcCols");
       }
 
     calcCols();
 
     if (debug)
       {
-	System.err.println(">>> exiting gridTable default constructor");
+        System.err.println(">>> exiting gridTable default constructor");
       }
   }
 
@@ -197,7 +197,7 @@ public class gridTable extends baseTable {
 
     if (y >= rows.size())
       {
-	setRows(y+1, false);
+        setRows(y+1, false);
       }
 
     setCellText(getCell(x,y),cellText,repaint);

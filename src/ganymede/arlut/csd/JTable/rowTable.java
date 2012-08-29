@@ -89,7 +89,7 @@ public class rowTable extends baseTable implements ActionListener {
 
   static final public String menuTitle = ts.l("global.menu_title"); // "Column Menu"
   static final public String sortByStr = ts.l("global.sort_by"); // "Sort By This Column"
-  static final public String revSortByStr = ts.l("global.rev_sort_by");	// "Reverse Sort By This Column"
+  static final public String revSortByStr = ts.l("global.rev_sort_by"); // "Reverse Sort By This Column"
   static final public String delColStr = ts.l("global.del_col"); // "Delete This Column"
   static final public String optColWidStr = ts.l("global.opt_col_widths"); // "Optimize Column Widths"
 
@@ -132,7 +132,7 @@ public class rowTable extends baseTable implements ActionListener {
    * @param vertLines   true if vertical lines should be shown between columns in report table
    * @param vertFill    true if table should expand vertically to fill size of baseTable
    * @param hVertFill   true if horizontal lines should be drawn in the vertical fill region
-   * 			(only applies if vertFill and horizLines are true)
+   *                    (only applies if vertFill and horizLines are true)
    * @param callback    reference to an object that implements the rowSelectCallback interface
    * @param menu  reference to a popup menu to be associated with rows in this table
    * @param allowDeleteColumn if true, a 'Delete This Column' menu item will be added
@@ -141,24 +141,24 @@ public class rowTable extends baseTable implements ActionListener {
    */
 
   public rowTable(tableAttr headerAttrib, 
-		  tableAttr tableAttrib,
-		  tableAttr[] colAttribs, 
-		  int[] colWidths, 
-		  Color vHeadLineColor,
-		  Color vRowLineColor,
-		  Color hHeadLineColor,
-		  Color hRowLineColor,
-		  String[] headers,
-		  boolean horizLines, boolean vertLines,
-		  boolean vertFill, boolean hVertFill,
-		  rowSelectCallback callback,
-		  JPopupMenu menu,
-		  boolean allowDeleteColumn)
+                  tableAttr tableAttrib,
+                  tableAttr[] colAttribs, 
+                  int[] colWidths, 
+                  Color vHeadLineColor,
+                  Color vRowLineColor,
+                  Color hHeadLineColor,
+                  Color hRowLineColor,
+                  String[] headers,
+                  boolean horizLines, boolean vertLines,
+                  boolean vertFill, boolean hVertFill,
+                  rowSelectCallback callback,
+                  JPopupMenu menu,
+                  boolean allowDeleteColumn)
   {
     super(headerAttrib, tableAttrib, colAttribs, colWidths,
-	  vHeadLineColor, vRowLineColor, hHeadLineColor, hRowLineColor,
-	  headers, horizLines, vertLines, vertFill, hVertFill, 
-	  menu, null);
+          vHeadLineColor, vRowLineColor, hHeadLineColor, hRowLineColor,
+          headers, horizLines, vertLines, vertFill, hVertFill, 
+          menu, null);
     
     rowMenu = new JPopupMenu();
     
@@ -167,24 +167,24 @@ public class rowTable extends baseTable implements ActionListener {
 
     if (colWidths.length > 1)
       {
-	SortByMI = new JMenuItem(sortByStr);
+        SortByMI = new JMenuItem(sortByStr);
         SortByMI.setActionCommand(sortByStr);
 
-	RevSortByMI = new JMenuItem(revSortByStr);
+        RevSortByMI = new JMenuItem(revSortByStr);
         RevSortByMI.setActionCommand(revSortByStr);
 
-	DeleteColMI = new JMenuItem(delColStr);
+        DeleteColMI = new JMenuItem(delColStr);
         DeleteColMI.setActionCommand(delColStr);
 
-	OptimizeMI = new JMenuItem(optColWidStr);
+        OptimizeMI = new JMenuItem(optColWidStr);
         OptimizeMI.setActionCommand(optColWidStr);
       }
     else
       {
-	SortByMI = new JMenuItem(sortByStr);
+        SortByMI = new JMenuItem(sortByStr);
         SortByMI.setActionCommand(sortByStr);
 
-	RevSortByMI = new JMenuItem(revSortByStr);
+        RevSortByMI = new JMenuItem(revSortByStr);
         RevSortByMI.setActionCommand(revSortByStr);
       }
 
@@ -193,12 +193,12 @@ public class rowTable extends baseTable implements ActionListener {
 
     if (colWidths.length > 1)
       {
-	if (allowDeleteColumn)
-	  {
-	    rowMenu.add(DeleteColMI);
-	  }
+        if (allowDeleteColumn)
+          {
+            rowMenu.add(DeleteColMI);
+          }
 
-	rowMenu.add(OptimizeMI);
+        rowMenu.add(OptimizeMI);
       }
 
     SortByMI.addActionListener(this);
@@ -206,12 +206,12 @@ public class rowTable extends baseTable implements ActionListener {
 
     if (colWidths.length > 1)
       {
-	if (allowDeleteColumn)
-	  {
-	    DeleteColMI.addActionListener(this);
-	  }
+        if (allowDeleteColumn)
+          {
+            DeleteColMI.addActionListener(this);
+          }
 
-	OptimizeMI.addActionListener(this);
+        OptimizeMI.addActionListener(this);
       }
     
     canvas.add(rowMenu);
@@ -236,22 +236,22 @@ public class rowTable extends baseTable implements ActionListener {
    */
 
   public rowTable(int[] colWidths, String[] headers, 
-		  rowSelectCallback callback, 
-		  boolean horizLines,
-		  JPopupMenu menu, boolean allowDeleteColumn)
+                  rowSelectCallback callback, 
+                  boolean horizLines,
+                  JPopupMenu menu, boolean allowDeleteColumn)
   {
     this(new tableAttr(null, new Font("SansSerif", Font.BOLD, 14), 
-		       Color.white, Color.blue, tableAttr.JUST_CENTER),
-	 new tableAttr(null, new Font("SansSerif", Font.PLAIN, 12),
-		       Color.black, Color.white, tableAttr.JUST_LEFT),
-	 (tableAttr[]) null,
-	 colWidths, 
-	 Color.black,
-	 Color.black,
-	 Color.black,
-	 Color.black,
-	 headers,
-	 horizLines, true, true, false, callback, menu, allowDeleteColumn);
+                       Color.white, Color.blue, tableAttr.JUST_CENTER),
+         new tableAttr(null, new Font("SansSerif", Font.PLAIN, 12),
+                       Color.black, Color.white, tableAttr.JUST_LEFT),
+         (tableAttr[]) null,
+         colWidths, 
+         Color.black,
+         Color.black,
+         Color.black,
+         Color.black,
+         headers,
+         horizLines, true, true, false, callback, menu, allowDeleteColumn);
 
     // we couldn't pass this to the baseTableConstructors
     // above, so we set it directly here, then force metrics
@@ -276,21 +276,21 @@ public class rowTable extends baseTable implements ActionListener {
    */
 
   public rowTable(int[] colWidths, String[] headers, 
-		  rowSelectCallback callback, 
-		  JPopupMenu menu, boolean allowDeleteColumn)
+                  rowSelectCallback callback, 
+                  JPopupMenu menu, boolean allowDeleteColumn)
   {
     this(new tableAttr(null, new Font("SansSerif", Font.BOLD, 14), 
-		       Color.white, Color.blue, tableAttr.JUST_CENTER),
-	 new tableAttr(null, new Font("SansSerif", Font.PLAIN, 12),
-		       Color.black, Color.white, tableAttr.JUST_LEFT),
-	 (tableAttr[]) null,
-	 colWidths, 
-	 Color.black,
-	 Color.black,
-	 Color.black,
-	 Color.black,
-	 headers,
-	 true, true, true, false, callback, menu, allowDeleteColumn);
+                       Color.white, Color.blue, tableAttr.JUST_CENTER),
+         new tableAttr(null, new Font("SansSerif", Font.PLAIN, 12),
+                       Color.black, Color.white, tableAttr.JUST_LEFT),
+         (tableAttr[]) null,
+         colWidths, 
+         Color.black,
+         Color.black,
+         Color.black,
+         Color.black,
+         headers,
+         true, true, true, false, callback, menu, allowDeleteColumn);
 
     // we couldn't pass this to the baseTableConstructors
     // above, so we set it directly here, then force metrics
@@ -322,77 +322,77 @@ public class rowTable extends baseTable implements ActionListener {
 
     if (debug)
       {
-	System.err.println("rowTable.clickInCell(" + x + "," + y + "): seeking key");
+        System.err.println("rowTable.clickInCell(" + x + "," + y + "): seeking key");
       }
 
     element = findRow(y);
 
     if (debug)
       {
-	if (element == null)
-	  {
-	    System.err.println("rowTable.clickInCell(" + x + "," + y + "): key not found");
-	  }
-	else
-	  {
-	    System.err.println("rowTable.clickInCell(" + x + "," + y + "): found key " + element.key);
-	  }
+        if (element == null)
+          {
+            System.err.println("rowTable.clickInCell(" + x + "," + y + "): key not found");
+          }
+        else
+          {
+            System.err.println("rowTable.clickInCell(" + x + "," + y + "): found key " + element.key);
+          }
       }
 
     if (!element.key.equals(rowSelectedKey))
       {
-	if (debug)
-	  {
-	    System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in unselected row.. unselecting");
-	  }
+        if (debug)
+          {
+            System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in unselected row.. unselecting");
+          }
 
-	unSelectRow();
+        unSelectRow();
 
-	if (debug)
-	  {
-	    System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in unselected row.. selecting");
-	  }
+        if (debug)
+          {
+            System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in unselected row.. selecting");
+          }
 
-	selectRow(element.key, false);
+        selectRow(element.key, false);
 
-	if (debug)
-	  {
-	    System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in unselected row.. refreshing");
-	  }
+        if (debug)
+          {
+            System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in unselected row.. refreshing");
+          }
 
-	refreshTable();
+        refreshTable();
 
-	if (debug)
-	  {
-	    System.err.println("rowTable.clickInCell(" + x + "," + y + "): table refreshed");
-	  }
+        if (debug)
+          {
+            System.err.println("rowTable.clickInCell(" + x + "," + y + "): table refreshed");
+          }
       }
     else
       {
-	// go ahead and deselect the current row, if and only if this is a left-button
-	// click.
-	
-	if (!rightButton)
-	  {
-	    if (debug)
-	      {
-		System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in selected row.. unselecting");
-	      }
-	    
-	    unSelectRow();
-	    
-	    if (debug)
-	      {
-		System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in selected row.. refreshing");
-	      }
-	    
-	    refreshTable();
-	    
-	    if (debug)
-	      {
-		System.err.println("rowTable.clickInCell(" + x + "," + y + "): table refreshed");
-	      }
-	  }
+        // go ahead and deselect the current row, if and only if this is a left-button
+        // click.
+        
+        if (!rightButton)
+          {
+            if (debug)
+              {
+                System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in selected row.. unselecting");
+              }
+            
+            unSelectRow();
+            
+            if (debug)
+              {
+                System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in selected row.. refreshing");
+              }
+            
+            refreshTable();
+            
+            if (debug)
+              {
+                System.err.println("rowTable.clickInCell(" + x + "," + y + "): table refreshed");
+              }
+          }
       }
   }
 
@@ -413,14 +413,14 @@ public class rowTable extends baseTable implements ActionListener {
 
     if (element.key.equals(rowSelectedKey))
       {
-	callback.rowDoubleSelected(element.key);
+        callback.rowDoubleSelected(element.key);
       }
     else
       {
-	// the first click of our double click deselected
-	// the row, go ahead and reselect it
+        // the first click of our double click deselected
+        // the row, go ahead and reselect it
 
-	clickInCell(x,y);
+        clickInCell(x,y);
       }
   }
 
@@ -459,26 +459,26 @@ public class rowTable extends baseTable implements ActionListener {
 
     if (key != null)
       {
-	rowHandle row = (rowHandle) index.get(key);
+        rowHandle row = (rowHandle) index.get(key);
 
-	if (row == null)
-	  {
-	    return;
-	  }
+        if (row == null)
+          {
+            return;
+          }
 
-	selectRow(row.rownum);
+        selectRow(row.rownum);
 
-	rowSelectedKey = key;
+        rowSelectedKey = key;
       }
 
     if (refreshTable)
       {
-	refreshTable();
+        refreshTable();
       }
 
     if (callback != null)
       {
-	callback.rowSelected(key);
+        callback.rowSelected(key);
       }
   }
 
@@ -492,21 +492,21 @@ public class rowTable extends baseTable implements ActionListener {
   {
     if (rowSelectedKey != null)
       {
-	rowHandle row = (rowHandle) index.get(rowSelectedKey);
+        rowHandle row = (rowHandle) index.get(rowSelectedKey);
 
-	if (row == null)
-	  {
-	    return;
-	  }
+        if (row == null)
+          {
+            return;
+          }
 
-	unSelectRow(row.rownum);
+        unSelectRow(row.rownum);
 
-	if (callback != null)
-	  {
-	    callback.rowSelected(rowSelectedKey);
-	  }
+        if (callback != null)
+          {
+            callback.rowSelected(rowSelectedKey);
+          }
 
-	rowSelectedKey = null;
+        rowSelectedKey = null;
       }
   }
 
@@ -540,7 +540,7 @@ public class rowTable extends baseTable implements ActionListener {
 
     if (index.containsKey(key))
       {
-	throw new IllegalArgumentException("rowTable.newRow(): row " + key + " already exists.");
+        throw new IllegalArgumentException("rowTable.newRow(): row " + key + " already exists.");
       }
 
     element = new rowHandle(this, key);
@@ -563,13 +563,13 @@ public class rowTable extends baseTable implements ActionListener {
 
     if (!index.containsKey(key))
       {
-	// no such row exists.. what to do?
-	return;
+        // no such row exists.. what to do?
+        return;
       }
 
     if (key.equals(rowSelectedKey))
       {
-	unSelectRow();
+        unSelectRow();
       }
 
     element = (rowHandle) index.get(key);
@@ -588,7 +588,7 @@ public class rowTable extends baseTable implements ActionListener {
 
     for (int i = element.rownum; i < crossref.size(); i++)
       {
-	((rowHandle) crossref.elementAt(i)).rownum = i;
+        ((rowHandle) crossref.elementAt(i)).rownum = i;
       }
 
     reShape();
@@ -795,56 +795,56 @@ public class rowTable extends baseTable implements ActionListener {
 
     if (callback == null)
       {
-	return;
+        return;
       }
 
     try
       {
-	if (menuRow == -1)
-	  {
-	    if (e.getSource() == DeleteColMI)
-	      {
-		callback.colMenuPerformed(menuCol, e);
-		this.deleteColumn(menuCol, true);
-		refreshTable();
-	      }
-	    else if (e.getSource() == SortByMI)
-	      {
-		callback.colMenuPerformed(menuCol, e);
-		sortForward = true;
-		resort(menuCol, true);
-	      }
-	    else if (e.getSource() == RevSortByMI)
-	      {
-		callback.colMenuPerformed(menuCol, e);
-		sortForward = false;
-		resort(menuCol, true);
-	      }
-	    else if (e.getSource() == OptimizeMI)
-	      {
-		callback.colMenuPerformed(menuCol, e);
-		optimizeCols();
-		refreshTable();
-	      }
+        if (menuRow == -1)
+          {
+            if (e.getSource() == DeleteColMI)
+              {
+                callback.colMenuPerformed(menuCol, e);
+                this.deleteColumn(menuCol, true);
+                refreshTable();
+              }
+            else if (e.getSource() == SortByMI)
+              {
+                callback.colMenuPerformed(menuCol, e);
+                sortForward = true;
+                resort(menuCol, true);
+              }
+            else if (e.getSource() == RevSortByMI)
+              {
+                callback.colMenuPerformed(menuCol, e);
+                sortForward = false;
+                resort(menuCol, true);
+              }
+            else if (e.getSource() == OptimizeMI)
+              {
+                callback.colMenuPerformed(menuCol, e);
+                optimizeCols();
+                refreshTable();
+              }
 
-	    return;
-	  }
+            return;
+          }
 
-	element = findRow(menuRow);
+        element = findRow(menuRow);
     
-	// perform our callback
+        // perform our callback
 
-	if (element != null)
-	  {
-	    callback.rowMenuPerformed(element.key, e);
-	  }
+        if (element != null)
+          {
+            callback.rowMenuPerformed(element.key, e);
+          }
       }
     finally
       {
-	// clear our lastpopped menu row, col
+        // clear our lastpopped menu row, col
 
-	menuRow = -1;
-	menuCol = -1;
+        menuRow = -1;
+        menuCol = -1;
       }
   }
 
@@ -861,7 +861,7 @@ public class rowTable extends baseTable implements ActionListener {
 
     if (repaint)
       {
-	refreshTable();
+        refreshTable();
       }
   }
 
@@ -871,7 +871,7 @@ public class rowTable extends baseTable implements ActionListener {
 
     if (repaint)
       {
-	refreshTable();
+        refreshTable();
       }
   }
 
@@ -879,10 +879,10 @@ public class rowTable extends baseTable implements ActionListener {
   {
     for (int i = 0; i < crossref.size(); i++)
       {
-	if (((rowHandle) crossref.elementAt(i)).rownum == y)
-	  {
-	    return (rowHandle) crossref.elementAt(i);
-	  }
+        if (((rowHandle) crossref.elementAt(i)).rownum == y)
+          {
+            return (rowHandle) crossref.elementAt(i);
+          }
       }
 
     throw new RuntimeException("Couldn't find row " + y);
@@ -892,10 +892,10 @@ public class rowTable extends baseTable implements ActionListener {
 
 /* from Fundamentals of Data Structures in Pascal, 
         Ellis Horowitz and Sartaj Sahni,
-	Second Edition, p.347
-	Computer Science Press, Inc.
-	Rockville, Maryland
-	ISBN 0-88175-165-0 */
+        Second Edition, p.347
+        Computer Science Press, Inc.
+        Rockville, Maryland
+        ISBN 0-88175-165-0 */
 
 class mergeRec {
 
@@ -945,20 +945,20 @@ class rowSorter {
 
     try
       {
-	Adata = a.element.elementAt(column).getData();
+        Adata = a.element.elementAt(column).getData();
       }
     catch (NullPointerException ex)
       {
-	Adata = null;
+        Adata = null;
       }
 
     try
       {
-	Bdata = b.element.elementAt(column).getData();
+        Bdata = b.element.elementAt(column).getData();
       }
     catch (NullPointerException ex)
       {
-	Bdata = null;
+        Bdata = null;
       }
 
     // Adata and/or Bdata will be null if we are just comparing
@@ -970,52 +970,52 @@ class rowSorter {
 
     if (Adata == null || Bdata == null)
       {
-	String one, two;
+        String one, two;
 
-	if (forward)
-	  {
-	    try
-	      {
-		one = a.element.elementAt(column).text;
-	      }
-	    catch (NullPointerException ex)
-	      {
-		one = null;
-	      }
+        if (forward)
+          {
+            try
+              {
+                one = a.element.elementAt(column).text;
+              }
+            catch (NullPointerException ex)
+              {
+                one = null;
+              }
 
-	    try
-	      {
-		two = b.element.elementAt(column).text;
-	      }
-	    catch (NullPointerException ex)
-	      {
-		two = null;
-	      }
-	  }
-	else
-	  {
-	    try
-	      {
-		one = b.element.elementAt(column).text;
-	      }
-	    catch (NullPointerException ex)
-	      {
-		one = null;
-	      }
+            try
+              {
+                two = b.element.elementAt(column).text;
+              }
+            catch (NullPointerException ex)
+              {
+                two = null;
+              }
+          }
+        else
+          {
+            try
+              {
+                one = b.element.elementAt(column).text;
+              }
+            catch (NullPointerException ex)
+              {
+                one = null;
+              }
 
-	    try
-	      {
-		two = a.element.elementAt(column).text;
-	      }
-	    catch (NullPointerException ex)
-	      {
-		two = null;
-	      }
-	  }
+            try
+              {
+                two = a.element.elementAt(column).text;
+              }
+            catch (NullPointerException ex)
+              {
+                two = null;
+              }
+          }
 
-	// null is always lesser
+        // null is always lesser
 
-	if (one == null)
+        if (one == null)
           {
             if (two == null)
               {
@@ -1026,14 +1026,14 @@ class rowSorter {
                 return -1;
               }
           }
-	else if (two == null)
-	  {
-	    return 1;
-	  }
+        else if (two == null)
+          {
+            return 1;
+          }
 
-	// okay, neither null.
-	
-	return one.compareToIgnoreCase(two);
+        // okay, neither null.
+        
+        return one.compareToIgnoreCase(two);
       }
 
     // if we are sorting dates, we expect everything in this column
@@ -1041,113 +1041,113 @@ class rowSorter {
 
     if (Adata instanceof Date)
       {
-	Date Adate = (Date) Adata;
-	Date Bdate = (Date) Bdata;
+        Date Adate = (Date) Adata;
+        Date Bdate = (Date) Bdata;
 
-	if (forward)
-	  {
-	    if (Adate.before(Bdate))
-	      {
-		return -1;
-	      }
-	    else if (Bdate.before(Adate))
-	      {
-		return 1;
-	      }
-	    else
-	      {
-		return 0;
-	      }
-	  }
-	else
-	  {
-	    if (Bdate.before(Adate))
-	      {
-		return -1;
-	      }
-	    else if (Adate.before(Bdate))
-	      {
-		return 1;
-	      }
-	    else
-	      {
-		return 0;
-	      }
-	  }
+        if (forward)
+          {
+            if (Adate.before(Bdate))
+              {
+                return -1;
+              }
+            else if (Bdate.before(Adate))
+              {
+                return 1;
+              }
+            else
+              {
+                return 0;
+              }
+          }
+        else
+          {
+            if (Bdate.before(Adate))
+              {
+                return -1;
+              }
+            else if (Adate.before(Bdate))
+              {
+                return 1;
+              }
+            else
+              {
+                return 0;
+              }
+          }
       }
 
     if (Adata instanceof Integer)
       {
-	int ia = ((Integer) Adata).intValue();
-	int ib = ((Integer) Bdata).intValue();
+        int ia = ((Integer) Adata).intValue();
+        int ib = ((Integer) Bdata).intValue();
 
-	if (forward)
-	  {
-	    if (ia < ib)
-	      {
-		return -1;
-	      }
-	    else if (ia > ib)
-	      {
-		return 1;
-	      }
-	    else
-	      {
-		return 0;
-	      }
-	  }
-	else
-	  {
-	    if (ib < ia)
-	      {
-		return -1;
-	      }
-	    else if (ib > ia)
-	      {
-		return 1;
-	      }
-	    else
-	      {
-		return 0;
-	      }
-	  }
+        if (forward)
+          {
+            if (ia < ib)
+              {
+                return -1;
+              }
+            else if (ia > ib)
+              {
+                return 1;
+              }
+            else
+              {
+                return 0;
+              }
+          }
+        else
+          {
+            if (ib < ia)
+              {
+                return -1;
+              }
+            else if (ib > ia)
+              {
+                return 1;
+              }
+            else
+              {
+                return 0;
+              }
+          }
       }
 
     if (Adata instanceof Double)
       {
-	double da = ((Double) Adata).doubleValue();
-	double db = ((Double) Bdata).doubleValue();
+        double da = ((Double) Adata).doubleValue();
+        double db = ((Double) Bdata).doubleValue();
 
-	if (forward)
-	  {
-	    if (da < db)
-	      {
-		return -1;
-	      }
-	    else if (da > db)
-	      {
-		return 1;
-	      }
-	    else
-	      {
-		return 0;
-	      }
-	  }
-	else
-	  {
-	    if (db < da)
-	      {
-		return -1;
-	      }
-	    else if (db > da)
-	      {
-		return 1;
-	      }
-	    else
-	      {
-		return 0;
-	      }
-	  }
+        if (forward)
+          {
+            if (da < db)
+              {
+                return -1;
+              }
+            else if (da > db)
+              {
+                return 1;
+              }
+            else
+              {
+                return 0;
+              }
+          }
+        else
+          {
+            if (db < da)
+              {
+                return -1;
+              }
+            else if (db > da)
+              {
+                return 1;
+              }
+            else
+              {
+                return 0;
+              }
+          }
       }
 
     // unrecognized data type.. can't compare
@@ -1164,14 +1164,14 @@ class rowSorter {
 
     if (l >= u)
       {
-	return (mergeRec) mergeRecs.elementAt(l);
+        return (mergeRec) mergeRecs.elementAt(l);
       }
     else
       {
-	mid = (l + u) / 2;
-	q = rmsort(l, mid);
-	r = rmsort(mid+1, u);
-	return rmerge(q,r);
+        mid = (l + u) / 2;
+        q = rmsort(l, mid);
+        r = rmsort(mid+1, u);
+        return rmerge(q,r);
       }
   }
 
@@ -1187,41 +1187,41 @@ class rowSorter {
 
     if (compare(p1, p2) <= 0)
       {
-	result = p1;
-	p1 = p1.next();
-	result.setNext(null);
+        result = p1;
+        p1 = p1.next();
+        result.setNext(null);
       }
     else
       {
-	result = p2;
-	p2 = p2.next();
-	result.setNext(null);
+        result = p2;
+        p2 = p2.next();
+        result.setNext(null);
       }
 
     node = result;
     
     while (p1 != null || p2 != null)
       {
-	if (p1 == null || compare(p1,p2) > 0)
-	  {
-	    node.setNext(p2);
+        if (p1 == null || compare(p1,p2) > 0)
+          {
+            node.setNext(p2);
 
-	    if (p2 != null)
-	      {
-		px = p2.next();
-		p2.setNext(null);
-		p2 = px;
-	      }
-	  }
-	else
-	  {
-	    px = p1.next();
-	    node.setNext(p1);
-	    p1.setNext(null);
-	    p1 = px;
-	  }
+            if (p2 != null)
+              {
+                px = p2.next();
+                p2.setNext(null);
+                p2 = px;
+              }
+          }
+        else
+          {
+            px = p1.next();
+            node.setNext(p1);
+            p1.setNext(null);
+            p1 = px;
+          }
 
-	node = node.next();
+        node = node.next();
       }
 
     return result;
@@ -1231,7 +1231,7 @@ class rowSorter {
   {
     if (parent.rows.size() < 2)
       {
-	return;
+        return;
       }
 
     mergeRecs = new Vector();
@@ -1240,8 +1240,8 @@ class rowSorter {
 
     for (int i = 0; i < parent.rows.size(); i++)
       {
-	mergeRecs.addElement(new mergeRec((tableRow)parent.rows.elementAt(i),
-					  (rowHandle)parent.crossref.elementAt(i)));
+        mergeRecs.addElement(new mergeRec((tableRow)parent.rows.elementAt(i),
+                                          (rowHandle)parent.crossref.elementAt(i)));
       }
 
     // System.err.println("Sorting from element " + 0 + " to " + (mergeRecs.size()-1));
@@ -1252,14 +1252,14 @@ class rowSorter {
 
     for (int i = 0; i < parent.rows.size(); i++)
       {
-	parent.rows.setElementAt(result.element, i);
-	parent.crossref.setElementAt(result.handle, i);
-	result.handle.rownum = i;
+        parent.rows.setElementAt(result.element, i);
+        parent.crossref.setElementAt(result.handle, i);
+        result.handle.rownum = i;
 
-	result = result.next();
+        result = result.next();
       }
 
-    parent.reCalcRowPos(0);		// recalc vertical positions
+    parent.reCalcRowPos(0);             // recalc vertical positions
   }
 
 }
@@ -1282,7 +1282,7 @@ class rowHandle {
 
   public rowHandle(rowTable parent, Object key)
   {
-    parent.addRow(false);	// don't repaint table
+    parent.addRow(false);       // don't repaint table
     rownum = parent.rows.size() - 1;
     this.key = key;
 
@@ -1295,7 +1295,7 @@ class rowHandle {
 
     if (parent.crossref.indexOf(this) != rownum)
       {
-	throw new RuntimeException("rowTable / baseTable mismatch");
+        throw new RuntimeException("rowTable / baseTable mismatch");
       }
   }
 }

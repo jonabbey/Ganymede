@@ -83,18 +83,18 @@ public class tableAttr {
 
     if (c != null)
       {
-	calculateMetrics();
+        calculateMetrics();
       }
     else
       {
-	if (debug)
-	  {
-	    System.err.println("Null component c, setting height and baseline to 0");
-	  }
+        if (debug)
+          {
+            System.err.println("Null component c, setting height and baseline to 0");
+          }
 
-	this.fontMetric = null;
-	height = 0;
-	baseline = 0;
+        this.fontMetric = null;
+        height = 0;
+        baseline = 0;
       }
 
     this.fg = fg;
@@ -116,38 +116,38 @@ public class tableAttr {
   {
     if (font == null)
       {
-	if (debug)
-	  {
-	    System.err.println("font null ptr");
-	    System.err.println("Setting baseline and height to 0");
-	  }
-	
-	fontMetric = null;
-	baseline = 0;
-	height = 0;
+        if (debug)
+          {
+            System.err.println("font null ptr");
+            System.err.println("Setting baseline and height to 0");
+          }
+        
+        fontMetric = null;
+        baseline = 0;
+        height = 0;
       }
     else
       {
-	try
-	  {
-	    fontMetric = c.getFontMetrics(font);
-	  }
-	catch (NullPointerException ex)
-	  {
-	    if (debug)
-	      {
-		System.err.println("font null ptr");
-		System.err.println("c = " + c);
-		System.err.println("font = " + font);
-	      }
+        try
+          {
+            fontMetric = c.getFontMetrics(font);
+          }
+        catch (NullPointerException ex)
+          {
+            if (debug)
+              {
+                System.err.println("font null ptr");
+                System.err.println("c = " + c);
+                System.err.println("font = " + font);
+              }
 
-	    baseline=0;
-	    height=0;
-	    return;
-	  }
+            baseline=0;
+            height=0;
+            return;
+          }
 
-	baseline = fontMetric.getMaxAscent();
-	height = baseline + fontMetric.getMaxDescent();
+        baseline = fontMetric.getMaxAscent();
+        height = baseline + fontMetric.getMaxDescent();
       }
   } 
 

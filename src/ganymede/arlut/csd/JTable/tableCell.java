@@ -121,10 +121,10 @@ class tableCell {
   tableCol col;
 
   int
-    nominalWidth,		// width before any wrapping
-    currentWidth,		// width of rightmost pixel of real text in this
-				// cell, after wrapping
-    lastOfficialWidth = 0;	// what were we last wrapped to?
+    nominalWidth,               // width before any wrapping
+    currentWidth,               // width of rightmost pixel of real text in this
+                                // cell, after wrapping
+    lastOfficialWidth = 0;      // what were we last wrapped to?
 
   /**
    *
@@ -184,16 +184,16 @@ class tableCell {
     
     if (origText != null)
       {
-	currentWidth = nominalWidth = getMetrics().stringWidth(origText);
+        currentWidth = nominalWidth = getMetrics().stringWidth(origText);
     
-	if (lastOfficialWidth != 0)
-	  {
-	    this.wrap(lastOfficialWidth);
-	  }
+        if (lastOfficialWidth != 0)
+          {
+            this.wrap(lastOfficialWidth);
+          }
       }
     else
       {
-	currentWidth = nominalWidth = tableCanvas.mincolwidth;
+        currentWidth = nominalWidth = tableCanvas.mincolwidth;
       }
 
     calcRowSpan();
@@ -238,7 +238,7 @@ class tableCell {
     
     if (lastOfficialWidth != 0)
       {
-	this.wrap(lastOfficialWidth);
+        this.wrap(lastOfficialWidth);
       }
 
     calcRowSpan();
@@ -254,15 +254,15 @@ class tableCell {
   {
     if (attr != null && attr.fontMetric !=null)
       {
-	return attr.fontMetric;
+        return attr.fontMetric;
       }
     else if (col.attr != null && col.attr.fontMetric != null)
       {
-	return col.attr.fontMetric;
+        return col.attr.fontMetric;
       }
     else 
       {
-	return col.rt.tableAttrib.fontMetric;
+        return col.rt.tableAttrib.fontMetric;
       }
   }
 
@@ -276,15 +276,15 @@ class tableCell {
   {
     if (attr != null && attr.fontMetric !=null)
       {
-	return attr.font;
+        return attr.font;
       }
     else if (col.attr != null && col.attr.font != null)
       {
-	return col.attr.font;
+        return col.attr.font;
       }
     else 
       {
-	return col.rt.tableAttrib.font;
+        return col.rt.tableAttrib.font;
       }
   }
 
@@ -298,15 +298,15 @@ class tableCell {
   {
     if (attr != null && attr.align != tableAttr.JUST_INHERIT)
       {
-	return attr.align;
+        return attr.align;
       }
     else if (col.attr != null && col.attr.align != tableAttr.JUST_INHERIT)
       {
-	return col.attr.align;
+        return col.attr.align;
       }
     else 
       {
-	return col.rt.tableAttrib.align;
+        return col.rt.tableAttrib.align;
       }
   }
 
@@ -345,35 +345,35 @@ class tableCell {
   {
     if (text == null)
       {
-	return null;
+        return null;
       }
 
     if (n+1 > rowSpan)
       {
-	return "";
+        return "";
       }
     else
       {
-	int pos, oldpos = -1;
+        int pos, oldpos = -1;
 
-	for (int i = 0; i < n; i++)
-	  {
-	    pos = text.indexOf('\n', oldpos + 1);
+        for (int i = 0; i < n; i++)
+          {
+            pos = text.indexOf('\n', oldpos + 1);
 
-	    if (pos != -1)
-	      {
-		oldpos = pos;
-	      }
-	  }
+            if (pos != -1)
+              {
+                oldpos = pos;
+              }
+          }
 
-	if (text.indexOf('\n', oldpos+1) == -1)
-	  {
-	    return text.substring(oldpos+1);
-	  }
-	else
-	  {
-	    return text.substring(oldpos+1, text.indexOf('\n', oldpos+1));
-	  }
+        if (text.indexOf('\n', oldpos+1) == -1)
+          {
+            return text.substring(oldpos+1);
+          }
+        else
+          {
+            return text.substring(oldpos+1, text.indexOf('\n', oldpos+1));
+          }
       }
   }
 
@@ -408,12 +408,12 @@ class tableCell {
 
     if (text == null)
       {
-	return;
+        return;
       }
 
     if (wrap_length < 5)
       {
-	throw new IllegalArgumentException("bad params: wrap_length specified as " + wrap_length);
+        throw new IllegalArgumentException("bad params: wrap_length specified as " + wrap_length);
       }
 
     // if the adjustment is a small enough reduction that it won't affect our
@@ -421,20 +421,20 @@ class tableCell {
     // and our cell width just got bigger, we don't need to wrap.
 
     if (((wrap_length > currentWidth) && (wrap_length <= lastOfficialWidth)) ||
-	((currentWidth == nominalWidth) && (wrap_length >= nominalWidth)))
+        ((currentWidth == nominalWidth) && (wrap_length >= nominalWidth)))
       {
-	return;
+        return;
       }
     else
       {
-	lastOfficialWidth = wrap_length;
+        lastOfficialWidth = wrap_length;
       }
 
     fm = getMetrics();
 
     if (debug)
       {
-	System.err.println("String size = " + origText.length());
+        System.err.println("String size = " + origText.length());
       }
 
     this.currentWidth = 0;
@@ -452,154 +452,154 @@ class tableCell {
     
     while (marker < charAry.length)
       {
-	localWidth = 0;
+        localWidth = 0;
 
-	while ((p < charAry.length) && (charAry[p] != '\n') && (localWidth + fm.charWidth(charAry[p]) < wrap_length))
-	  {
-	    localWidth += fm.charWidth(charAry[p++]);
-	  }
+        while ((p < charAry.length) && (charAry[p] != '\n') && (localWidth + fm.charWidth(charAry[p]) < wrap_length))
+          {
+            localWidth += fm.charWidth(charAry[p++]);
+          }
 
-	// now p points to the character that terminated the loop.. either
-	// the first character that extends past the desired wrap_length,
-	// or the first newline after marker, or it will have overflowed
-	// to be == charAry.length
+        // now p points to the character that terminated the loop.. either
+        // the first character that extends past the desired wrap_length,
+        // or the first newline after marker, or it will have overflowed
+        // to be == charAry.length
 
-	// remember what our current needs are after wrapping
+        // remember what our current needs are after wrapping
 
-	if (localWidth > this.currentWidth)
-	  {
-	    this.currentWidth = localWidth;
-	  }
-	
-	if (p == charAry.length)
-	  {
-	    if (debug)
-	      {
-		System.err.println("At completion..");
-	      }
+        if (localWidth > this.currentWidth)
+          {
+            this.currentWidth = localWidth;
+          }
+        
+        if (p == charAry.length)
+          {
+            if (debug)
+              {
+                System.err.println("At completion..");
+              }
 
-	    result.append(origText.substring(marker, p));
-	    text = result.toString();
+            result.append(origText.substring(marker, p));
+            text = result.toString();
 
-	    return;
-	  }
+            return;
+          }
 
-	if (debug)
-	  {
-	    System.err.println("Step 1: p = " + p + ", marker = " + marker);
-	  }
+        if (debug)
+          {
+            System.err.println("Step 1: p = " + p + ", marker = " + marker);
+          }
 
-	if (charAry[p] == '\n')
-	  {
-	    /* We've got a newline.  This newline is bound to have
-	       terminated the while loop above.  Step p and marker past
-	       the newline and continue on with our loop. */
+        if (charAry[p] == '\n')
+          {
+            /* We've got a newline.  This newline is bound to have
+               terminated the while loop above.  Step p and marker past
+               the newline and continue on with our loop. */
 
-	    result.append(origText.substring(marker, p));
+            result.append(origText.substring(marker, p));
 
-	    if (debug)
-	      {
-		System.err.println("found natural newline.. current result = " + result.toString());
-	      }
+            if (debug)
+              {
+                System.err.println("found natural newline.. current result = " + result.toString());
+              }
 
-	    p = marker = p+1;
-	    rowSpan++;
+            p = marker = p+1;
+            rowSpan++;
 
-	    continue;
-	  }
+            continue;
+          }
 
-	if (debug)
-	  {
-	    System.err.println("Step 2: hit wrap length, back searching for whitespace break point");
-	  }
+        if (debug)
+          {
+            System.err.println("Step 2: hit wrap length, back searching for whitespace break point");
+          }
 
-	p2 = p;
+        p2 = p;
 
-	/* We've either hit the end of the string, or we've
-	   gotten past the wrap_length.  Back p2 up to the last space
-	   before the wrap_length, if there is such a space.
+        /* We've either hit the end of the string, or we've
+           gotten past the wrap_length.  Back p2 up to the last space
+           before the wrap_length, if there is such a space.
 
-	   Note that if the next character in the string (the character
-	   immediately after the break point) is a space, we don't need
-	   to back up at all.  We'll just print up to our current
-	   location, do the newline, and skip to the next line. */
-	
-	if (p < charAry.length)
-	  {
-	    if (!isspace(charAry[p]))
-	      {
-		/* back p2 up to the last white space before the break point */
+           Note that if the next character in the string (the character
+           immediately after the break point) is a space, we don't need
+           to back up at all.  We'll just print up to our current
+           location, do the newline, and skip to the next line. */
+        
+        if (p < charAry.length)
+          {
+            if (!isspace(charAry[p]))
+              {
+                /* back p2 up to the last white space before the break point */
 
-		while ((p2 > marker) && !isspace(charAry[p2]))
-		  {
- 		    p2--;
-		  }
-	      }
-	  }
+                while ((p2 > marker) && !isspace(charAry[p2]))
+                  {
+                    p2--;
+                  }
+              }
+          }
 
-	// now we're guaranteed that p2 points to our break character,
-	// or that p2 == marker, indicating no whitespace in this row
-	// to split on
+        // now we're guaranteed that p2 points to our break character,
+        // or that p2 == marker, indicating no whitespace in this row
+        // to split on
 
-	/* If the line was completely filled (no place to break),
-	   we'll just copy the whole line out and force a break. */
+        /* If the line was completely filled (no place to break),
+           we'll just copy the whole line out and force a break. */
 
-	if (p2 == marker)
-	  {
-	    p2 = p-1;
+        if (p2 == marker)
+          {
+            p2 = p-1;
 
-	    if (debug)
-	      {
-		System.err.println("Step 3: no opportunity for break, forcing..");
-	      }
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.err.println("Step 3: found break at column " + p2);
-	      }
-	  }
+            if (debug)
+              {
+                System.err.println("Step 3: no opportunity for break, forcing..");
+              }
+          }
+        else
+          {
+            if (debug)
+              {
+                System.err.println("Step 3: found break at column " + p2);
+              }
+          }
 
-	if (!isspace(charAry[p2]))
-	  {
-	    /* If weren't were able to back up to a space, copy
-	       out the whole line, including the break character 
-	       (in this case, we'll be making the string one
-	       character longer by inserting a newline). */
+        if (!isspace(charAry[p2]))
+          {
+            /* If weren't were able to back up to a space, copy
+               out the whole line, including the break character 
+               (in this case, we'll be making the string one
+               character longer by inserting a newline). */
 
-	    if (debug)
-	      {
-		System.err.println("appending: marker = " + marker + ", p2 = " + p2 + "+1");
-	      }
-	    
-	    result.append(origText.substring(marker, p2+1));
-	  }
-	else
-	  {
-	    /* The break character is whitespace.  We'll
-	       copy out the characters up to but not
-	       including the break character, which
-	       we will effectively replace with a
-	       newline. */
+            if (debug)
+              {
+                System.err.println("appending: marker = " + marker + ", p2 = " + p2 + "+1");
+              }
+            
+            result.append(origText.substring(marker, p2+1));
+          }
+        else
+          {
+            /* The break character is whitespace.  We'll
+               copy out the characters up to but not
+               including the break character, which
+               we will effectively replace with a
+               newline. */
 
-	    if (debug)
-	      {
-		System.err.println("appending: marker = " + marker + ", p2 = " + p2);
-	      }
+            if (debug)
+              {
+                System.err.println("appending: marker = " + marker + ", p2 = " + p2);
+              }
 
-	    result.append(origText.substring(marker, p2));
-	  }
+            result.append(origText.substring(marker, p2));
+          }
 
-	/* If we have not reached the end of the string, newline */
+        /* If we have not reached the end of the string, newline */
 
-	if (p < charAry.length) 
-	  {
-	    result.append("\n");
-	    rowSpan++;
-	  }
+        if (p < charAry.length) 
+          {
+            result.append("\n");
+            rowSpan++;
+          }
 
-	p = marker = p2 + 1;
+        p = marker = p2 + 1;
       }
 
     text = result.toString();
@@ -614,8 +614,8 @@ class tableCell {
   {
     if (text == null)
       {
-	rowSpan = 1;
-	return;
+        rowSpan = 1;
+        return;
       }
 
     char[] cAry = text.toCharArray();
@@ -624,10 +624,10 @@ class tableCell {
 
     for (int i = 0; i < cAry.length; i++)
       {
-	if (cAry[i] == '\n')
-	  {
-	    rowSpan++;
-	  }
+        if (cAry[i] == '\n')
+          {
+            rowSpan++;
+          }
       }
   }
 

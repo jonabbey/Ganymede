@@ -89,7 +89,7 @@ public class TextAreaRenderer extends JTextArea implements TableCellRenderer
   }
 
   public Component getTableCellRendererComponent(JTable table, Object obj, boolean isSelected,
-						 boolean hasFocus, int row, int column) 
+                                                 boolean hasFocus, int row, int column) 
   {
     // set the colours, etc. using the standard for that platform
     adaptee.getTableCellRendererComponent(table, obj, isSelected, hasFocus, row, column);
@@ -113,7 +113,7 @@ public class TextAreaRenderer extends JTextArea implements TableCellRenderer
 
     if (height_wanted > 0 && height_wanted != table.getRowHeight(row))
       {
-	table.setRowHeight(row, height_wanted);
+        table.setRowHeight(row, height_wanted);
       }
 
     return this;
@@ -128,12 +128,12 @@ public class TextAreaRenderer extends JTextArea implements TableCellRenderer
   {
     if (obj == null)
       {
-	return 0;
+        return 0;
       }
 
     if (metrics == null)
       {
-	metrics = this.getFontMetrics(table.getFont());
+        metrics = this.getFontMetrics(table.getFont());
       }
 
     return metrics.stringWidth(obj.toString());
@@ -145,16 +145,16 @@ public class TextAreaRenderer extends JTextArea implements TableCellRenderer
 
     if (rows == null) 
       {
-	rows = new HashMap<Integer, HashMap<Integer, Integer>>();
-	cellSizes.put(table, rows);
+        rows = new HashMap<Integer, HashMap<Integer, Integer>>();
+        cellSizes.put(table, rows);
       }
 
     HashMap<Integer, Integer> rowheights = rows.get(Integer.valueOf(row));
 
     if (rowheights == null) 
       {
-	rowheights = new HashMap<Integer, Integer>();
-	rows.put(Integer.valueOf(row), rowheights);
+        rowheights = new HashMap<Integer, Integer>();
+        rows.put(Integer.valueOf(row), rowheights);
       }
 
     rowheights.put(Integer.valueOf(column), Integer.valueOf(height));
@@ -173,14 +173,14 @@ public class TextAreaRenderer extends JTextArea implements TableCellRenderer
 
     while (columns.hasMoreElements()) 
       {
-	TableColumn tc = (TableColumn) columns.nextElement();
-	TableCellRenderer cellRenderer = tc.getCellRenderer();
+        TableColumn tc = (TableColumn) columns.nextElement();
+        TableCellRenderer cellRenderer = tc.getCellRenderer();
 
-	if (cellRenderer instanceof TextAreaRenderer) 
-	  {
-	    TextAreaRenderer tar = (TextAreaRenderer) cellRenderer;
-	    maximum_height = Math.max(maximum_height, tar.findMaximumRowSize(table, row));
-	  }
+        if (cellRenderer instanceof TextAreaRenderer) 
+          {
+            TextAreaRenderer tar = (TextAreaRenderer) cellRenderer;
+            maximum_height = Math.max(maximum_height, tar.findMaximumRowSize(table, row));
+          }
       }
 
     return maximum_height;
@@ -192,23 +192,23 @@ public class TextAreaRenderer extends JTextArea implements TableCellRenderer
 
     if (rows == null)
       {
-	return 0;
+        return 0;
       }
 
     Map rowheights = (Map) rows.get(Integer.valueOf(row));
 
     if (rowheights == null)
       {
-	return 0;
+        return 0;
       }
 
     int maximum_height = 0;
 
     for (Iterator it = rowheights.entrySet().iterator(); it.hasNext();) 
       {
-	Map.Entry entry = (Map.Entry) it.next();
-	int cellHeight = ((Integer) entry.getValue()).intValue();
-	maximum_height = Math.max(maximum_height, cellHeight);
+        Map.Entry entry = (Map.Entry) it.next();
+        int cellHeight = ((Integer) entry.getValue()).intValue();
+        maximum_height = Math.max(maximum_height, cellHeight);
       }
 
     return maximum_height;
