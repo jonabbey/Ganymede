@@ -85,7 +85,7 @@ public class treeNode implements Cloneable {
   treeMenu menu;
   treeControl tree;
 
-  int row;			// # of the row in the tree this node is currently visible at
+  int row;                      // # of the row in the tree this node is currently visible at
 
   Stack childStack;
 
@@ -104,7 +104,7 @@ public class treeNode implements Cloneable {
    */
   
   public treeNode(treeNode parent, String text, treeNode insertAfter,
-		  boolean expandable, int openImage, int closedImage, treeMenu menu)
+                  boolean expandable, int openImage, int closedImage, treeMenu menu)
   {
     this.parent = parent;
     this.text = text;
@@ -121,7 +121,7 @@ public class treeNode implements Cloneable {
     expanded = false;
     selected = false;
 
-    row = -1;			// undetermined
+    row = -1;                   // undetermined
   }
 
   /**
@@ -136,7 +136,7 @@ public class treeNode implements Cloneable {
    */
   
   public treeNode(treeNode parent, String text, treeNode insertAfter,
-		  boolean expandable, int openImage, int closedImage)
+                  boolean expandable, int openImage, int closedImage)
   {
     this(parent, text, insertAfter, expandable, openImage, closedImage, null);
   }
@@ -169,11 +169,11 @@ public class treeNode implements Cloneable {
   {
     try
       {
-	return super.clone();
+        return super.clone();
       }
     catch (CloneNotSupportedException ex)
       {
-	throw new RuntimeException("What the hey?  treeNode superclass not clonable.");
+        throw new RuntimeException("What the hey?  treeNode superclass not clonable.");
       }
   }
 
@@ -197,7 +197,7 @@ public class treeNode implements Cloneable {
     expanded = false;
     selected = false;
 
-    row = -1;			// undetermined
+    row = -1;                   // undetermined
   }
 
   public String getText()
@@ -223,12 +223,12 @@ public class treeNode implements Cloneable {
 
     if (tree == null)
       {
-	return;
+        return;
       }
 
     if (menu.registerItems(tree))
       {
-	tree.canvas.add(menu);
+        tree.canvas.add(menu);
       }
   }
   
@@ -288,12 +288,12 @@ public class treeNode implements Cloneable {
 
     while (result != null)
       {
-	if (result.getText().equals(key))
-	  {
-	    return result;
-	  }
+        if (result.getText().equals(key))
+          {
+            return result;
+          }
 
-	result = result.getNextSibling();
+        result = result.getNextSibling();
       }
 
     return null;
@@ -315,12 +315,12 @@ public class treeNode implements Cloneable {
 
     while (pNode != null)
       {
-	if (pNode == node)
-	  {
-	    return true;
-	  }
+        if (pNode == node)
+          {
+            return true;
+          }
 
-	pNode = pNode.getParent();
+        pNode = pNode.getParent();
       }
 
     return false;

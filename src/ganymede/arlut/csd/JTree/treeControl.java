@@ -144,14 +144,14 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   treeNode
     oldNode = null,
     dragNode = null,
-    dragOverNode = null,	// used in DRAG_ICON mode
-    dragBelowNode = null,	// used in DRAG_LINE mode
-    dragAboveNode = null;	// used in DRAG_LINE mode
+    dragOverNode = null,        // used in DRAG_ICON mode
+    dragBelowNode = null,       // used in DRAG_LINE mode
+    dragAboveNode = null;       // used in DRAG_LINE mode
 
   // popup menu support
 
   treeMenu
-    menu;			// default popup menu attached to tree as a whole
+    menu;                       // default popup menu attached to tree as a whole
 
   // housekeeping
 
@@ -168,14 +168,14 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
   int
     minWidth = 50,
-    maxWidth = 0,		// how wide is our tree at its maximum width currently?
-    row_height;			// how tall is a row of our tree, all told?
+    maxWidth = 0,               // how wide is our tree at its maximum width currently?
+    row_height;                 // how tall is a row of our tree, all told?
 
   Vector
-    rows;			// map visible rows to nodes in the tree
+    rows;                       // map visible rows to nodes in the tree
 
   treeNode
-    menuedNode = null;		// node most recently selected by a popup menu
+    menuedNode = null;          // node most recently selected by a popup menu
 
   /* -- */
 
@@ -191,9 +191,9 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
    */
 
   public treeControl(Font font, Color fgColor, Color bgColor, treeCallback callback,
-		     Image[] images, treeMenu menu)
+                     Image[] images, treeMenu menu)
   {
-    super(false);		// no double buffering for us, we'll do it ourselves
+    super(false);               // no double buffering for us, we'll do it ourselves
 
     /* Initialize our bounding rectangle.
        This will get filled when the AWT calls our
@@ -222,10 +222,10 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (menu!= null)
       {
-	if (menu.registerItems(this))
-	  {
-	    canvas.add(menu);
-	  }
+        if (menu.registerItems(this))
+          {
+            canvas.add(menu);
+          }
       }
 
     rows = new Vector();
@@ -252,7 +252,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
    */
 
   public treeControl(Font font, Color fgColor, Color bgColor, treeCallback callback,
-		     Image[] images)
+                     Image[] images)
   {
     this(font, fgColor, bgColor, callback, images, null);
   }
@@ -273,11 +273,11 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (dCallback == null)
       {
-	dragMode = DRAG_NONE;
+        dragMode = DRAG_NONE;
       }
     else
       {
-	dragMode = mode;
+        dragMode = mode;
       }
   }
 
@@ -301,7 +301,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   {
     if (root == null)
       {
-	return;
+        return;
       }
 
     // get rid of the nodes
@@ -315,12 +315,12 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (rows != null)
       {
-	rows.removeAllElements();
+        rows.removeAllElements();
       }
     else
       {
-	rows = new Vector();	// shouldn't ever be the case, but just
-				// to be safe..
+        rows = new Vector();    // shouldn't ever be the case, but just
+                                // to be safe..
       }
 
     refresh();
@@ -334,23 +334,23 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   {
     if (root == null)
       {
-	throw new IllegalArgumentException("can't setRoot(null), use clearTree");
+        throw new IllegalArgumentException("can't setRoot(null), use clearTree");
       }
 
     unselectAllNodes(false);
 
     if (this.root != null)
       {
-	breakdownTree(this.root);
+        breakdownTree(this.root);
       }
 
     if (rows != null)
       {
-	rows.removeAllElements();
+        rows.removeAllElements();
       }
     else
       {
-	rows = new Vector();
+        rows = new Vector();
       }
 
     // let the node know who it is attached to
@@ -363,10 +363,10 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (root.menu != null)
       {
-	if (root.menu.registerItems(this))
-	  {
-	    canvas.add(root.menu);
-	  }
+        if (root.menu.registerItems(this))
+          {
+            canvas.add(root.menu);
+          }
       }
 
     rows.addElement(root);
@@ -406,14 +406,14 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (debug)
       {
-	System.err.println("treeControl: Inserting node " + newNode.getText() + ", repaint is " + repaint);
+        System.err.println("treeControl: Inserting node " + newNode.getText() + ", repaint is " + repaint);
       }
 
     newNode.childStack = null;
 
     if (newNode.prevSibling == null && newNode.parent == null)
       {
-	throw new IllegalArgumentException("error, no insert after or parent set.  Use setRoot to establish root node");
+        throw new IllegalArgumentException("error, no insert after or parent set.  Use setRoot to establish root node");
       }
 
     // let the node know who we are, so it can change
@@ -425,118 +425,118 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (newNode.menu != null)
       {
-	if (newNode.menu.registerItems(this))
-	  {
-	    canvas.add(newNode.menu);
-	  }
+        if (newNode.menu.registerItems(this))
+          {
+            canvas.add(newNode.menu);
+          }
       }
 
     if (newNode.prevSibling != null)
       {
-	// if we're being inserted after the last sibling
-	// in the family and they had a childStack
-	// constructed, we need to invalidate that
+        // if we're being inserted after the last sibling
+        // in the family and they had a childStack
+        // constructed, we need to invalidate that
 
-	if (newNode.prevSibling.nextSibling == null &&
-	    newNode.prevSibling.childStack != null)
-	  {
-	    clearStacks(newNode.prevSibling); // not newNode.prevSibling.child!
-	  }
+        if (newNode.prevSibling.nextSibling == null &&
+            newNode.prevSibling.childStack != null)
+          {
+            clearStacks(newNode.prevSibling); // not newNode.prevSibling.child!
+          }
 
-	// if our prevSibling was visible, we're going to be
-	// visible too.  We just need to figure out where
-	// we are in relation to our sibling
+        // if our prevSibling was visible, we're going to be
+        // visible too.  We just need to figure out where
+        // we are in relation to our sibling
 
-	if (newNode.prevSibling.row != -1)
-	  {
-	    if (newNode.prevSibling.child == null || !newNode.prevSibling.expanded)
-	      {
-		// we're going to be the next row
+        if (newNode.prevSibling.row != -1)
+          {
+            if (newNode.prevSibling.child == null || !newNode.prevSibling.expanded)
+              {
+                // we're going to be the next row
 
-		newNode.row = newNode.prevSibling.row + 1;
-		rows.insertElementAt(newNode, newNode.row);
-	      }
-	    else
-	      {
-		// we're going to be the row after all the kiddies
+                newNode.row = newNode.prevSibling.row + 1;
+                rows.insertElementAt(newNode, newNode.row);
+              }
+            else
+              {
+                // we're going to be the row after all the kiddies
 
-		// create an empty range.. getVisibleDescendantRange will
-		// expand this to represent the span taken by the visible
-		// children of newNode.prevSibling.
+                // create an empty range.. getVisibleDescendantRange will
+                // expand this to represent the span taken by the visible
+                // children of newNode.prevSibling.
 
-		Range range = new Range(newNode.prevSibling.child.row,
-					newNode.prevSibling.child.row);
+                Range range = new Range(newNode.prevSibling.child.row,
+                                        newNode.prevSibling.child.row);
 
-		getVisibleDescendantRange(newNode.prevSibling.child, range);
+                getVisibleDescendantRange(newNode.prevSibling.child, range);
 
-		// and we're next after range.high
+                // and we're next after range.high
 
-		newNode.row = range.high + 1;
-		rows.insertElementAt(newNode, newNode.row);
-	      }
+                newNode.row = range.high + 1;
+                rows.insertElementAt(newNode, newNode.row);
+              }
 
-	    // adjust everybody below
+            // adjust everybody below
 
-	    for (int i = newNode.row + 1; i < rows.size(); i++)
-	      {
-		p = (treeNode) rows.elementAt(i);
-		p.row = i;
-	      }
-	  }
-	else
-	  {
-	    newNode.row = -1;
-	  }
+            for (int i = newNode.row + 1; i < rows.size(); i++)
+              {
+                p = (treeNode) rows.elementAt(i);
+                p.row = i;
+              }
+          }
+        else
+          {
+            newNode.row = -1;
+          }
 
-	newNode.nextSibling = newNode.prevSibling.nextSibling;
-	newNode.prevSibling.nextSibling = newNode;
+        newNode.nextSibling = newNode.prevSibling.nextSibling;
+        newNode.prevSibling.nextSibling = newNode;
 
-	if (newNode.nextSibling != null)
-	  {
-	    newNode.nextSibling.prevSibling = newNode;
-	  }
+        if (newNode.nextSibling != null)
+          {
+            newNode.nextSibling.prevSibling = newNode;
+          }
 
-	newNode.parent = newNode.prevSibling.parent;
+        newNode.parent = newNode.prevSibling.parent;
       }
     else if (newNode.parent != null)
       {
-	// insert us right before the first child
-	// node of our parent
+        // insert us right before the first child
+        // node of our parent
 
-	newNode.nextSibling = newNode.parent.child;
+        newNode.nextSibling = newNode.parent.child;
 
-	if (newNode.nextSibling != null)
-	  {
-	    newNode.nextSibling.prevSibling = newNode;
-	  }
+        if (newNode.nextSibling != null)
+          {
+            newNode.nextSibling.prevSibling = newNode;
+          }
 
-	newNode.parent.child = newNode;
+        newNode.parent.child = newNode;
 
-	// Figure out our row and adjust all rows below
-	// us if we're visible
+        // Figure out our row and adjust all rows below
+        // us if we're visible
 
-	if (newNode.parent.row != -1 && newNode.parent.expanded)
-	  {
-	    newNode.row = newNode.parent.row + 1;
-	    rows.insertElementAt(newNode, newNode.row);
+        if (newNode.parent.row != -1 && newNode.parent.expanded)
+          {
+            newNode.row = newNode.parent.row + 1;
+            rows.insertElementAt(newNode, newNode.row);
 
-	    for (int i = newNode.row + 1; i < rows.size(); i++)
-	      {
-		p = (treeNode) rows.elementAt(i);
-		p.row = i;
-	      }
-	  }
-	else
-	  {
-	    // oops, not visible
+            for (int i = newNode.row + 1; i < rows.size(); i++)
+              {
+                p = (treeNode) rows.elementAt(i);
+                p.row = i;
+              }
+          }
+        else
+          {
+            // oops, not visible
 
-	    newNode.row = -1;
-	  }
+            newNode.row = -1;
+          }
       }
 
     if (repaint)
       {
-	refresh();
+        refresh();
       }
   }
 
@@ -562,15 +562,15 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (node.selected)
       {
-	unselectNode(node, false);
+        unselectNode(node, false);
       }
 
     if (node.row != -1)
       {
-	if (node.expanded)
-	  {
-	    contractNode(node, false);
-	  }
+        if (node.expanded)
+          {
+            contractNode(node, false);
+          }
       }
 
     // if our removal would change the picture for our prevSibling's
@@ -579,31 +579,31 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (node.nextSibling == null && node.prevSibling != null && node.prevSibling.child != null)
       {
-	clearStacks(node.prevSibling);
+        clearStacks(node.prevSibling);
       }
 
     // unlink us from the tree
 
     if (node.parent != null)
       {
-	if (node.prevSibling == null)
-	  {
-	    node.parent.child = node.nextSibling;
-	  }
+        if (node.prevSibling == null)
+          {
+            node.parent.child = node.nextSibling;
+          }
       }
     else
       {
-	root = node.nextSibling;
+        root = node.nextSibling;
       }
 
     if (node.prevSibling != null)
       {
-	node.prevSibling.nextSibling = node.nextSibling;
+        node.prevSibling.nextSibling = node.nextSibling;
       }
 
     if (node.nextSibling != null)
       {
-	node.nextSibling.prevSibling = node.prevSibling;
+        node.nextSibling.prevSibling = node.prevSibling;
       }
 
     // if node.row == -1, the node is not currently visible for
@@ -611,15 +611,15 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (node.row != -1)
       {
-	rows.removeElementAt(node.row);
+        rows.removeElementAt(node.row);
 
-	// move everybody else up
+        // move everybody else up
 
-	for (int i = node.row; i < rows.size(); i++)
-	  {
-	    p = (treeNode) rows.elementAt(i);
-	    p.row = i;
-	  }
+        for (int i = node.row; i < rows.size(); i++)
+          {
+            p = (treeNode) rows.elementAt(i);
+            p.row = i;
+          }
       }
 
     // clean things out for GC.
@@ -634,7 +634,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (repaint)
       {
-	refresh();
+        refresh();
       }
   }
 
@@ -656,21 +656,21 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
    */
 
   public synchronized treeNode moveNode(treeNode node, treeNode parent,
-					treeNode insertAfter, boolean repaint)
+                                        treeNode insertAfter, boolean repaint)
   {
     if (insertAfter == null && parent == null)
       {
-	throw new IllegalArgumentException("error, no insert after or parent set.  Use setRoot to establish root node");
+        throw new IllegalArgumentException("error, no insert after or parent set.  Use setRoot to establish root node");
       }
 
     if (node == null)
       {
-	throw new IllegalArgumentException("can't move null");
+        throw new IllegalArgumentException("can't move null");
       }
 
     if (node == parent)
       {
-	throw new IllegalArgumentException("error, attempt made to move node under itself.");
+        throw new IllegalArgumentException("error, attempt made to move node under itself.");
       }
 
     /* - */
@@ -695,7 +695,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (node.isOpen())
       {
-	expandNode(newNode, false, false);
+        expandNode(newNode, false, false);
       }
 
     // now, if the node we moved has children, move them over too.
@@ -705,9 +705,9 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     while (child != null)
       {
-	nextchild = child.nextSibling;
-	oldchild = moveNode(child, newNode, oldchild, false);
-	child = nextchild;
+        nextchild = child.nextSibling;
+        oldchild = moveNode(child, newNode, oldchild, false);
+        child = nextchild;
       }
 
     // now take the node we moved out of the tree
@@ -716,7 +716,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (repaint)
       {
-	refresh();
+        refresh();
       }
 
     return newNode;
@@ -736,10 +736,10 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (node.row != -1)
       {
-	if (node.expanded)
-	  {
-	    contractNode(node, false);
-	  }
+        if (node.expanded)
+          {
+            contractNode(node, false);
+          }
       }
 
     breakdownTree(node.child);
@@ -748,7 +748,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (repaint)
       {
-	refresh();
+        refresh();
       }
   }
 
@@ -763,7 +763,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   {
     if (node == null)
       {
-	return;
+        return;
       }
 
     node.tree = null;
@@ -797,13 +797,13 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   {
     if (node == null)
       {
-	return;
+        return;
       }
 
     if (node.child != null)
       {
-	node.childStack = null;
-	clearStacks(node.child);
+        node.childStack = null;
+        clearStacks(node.child);
       }
 
     clearStacks(node.nextSibling);
@@ -839,28 +839,28 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     for (int i = 0; i < rows.size(); i++)
       {
-	p = (treeNode) rows.elementAt(i);
+        p = (treeNode) rows.elementAt(i);
 
-	System.err.print("row " + i + ": " + p.text + ", ");
+        System.err.print("row " + i + ": " + p.text + ", ");
 
-	if (p.parent != null)
-	  {
-	    System.err.println(p.parent.childStack.size() + "levels in");
-	  }
-	else
-	  {
-	    System.err.println("top level");
-	  }
+        if (p.parent != null)
+          {
+            System.err.println(p.parent.childStack.size() + "levels in");
+          }
+        else
+          {
+            System.err.println("top level");
+          }
 
-	if (p.prevSibling != null)
-	  {
-	    System.err.print("previous sibling = " + p.prevSibling.getText() + " ");
-	  }
+        if (p.prevSibling != null)
+          {
+            System.err.print("previous sibling = " + p.prevSibling.getText() + " ");
+          }
 
-	if (p.nextSibling != null)
-	  {
-	    System.err.println("next sibling = " + p.nextSibling.getText());
-	  }
+        if (p.nextSibling != null)
+          {
+            System.err.println("next sibling = " + p.nextSibling.getText());
+          }
       }
   }
 
@@ -888,7 +888,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (node.expanded)
       {
-	return;
+        return;
       }
 
     node.expanded = true;
@@ -899,18 +899,18 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     for (int i = row; i < rows.size(); i++)
       {
-	p = (treeNode) rows.elementAt(i);
-	p.row = i;
+        p = (treeNode) rows.elementAt(i);
+        p.row = i;
       }
 
     if (repaint)
       {
-	refresh();
+        refresh();
       }
 
     if (doCallback && callback != null)
       {
-	callback.treeNodeExpanded(node);
+        callback.treeNodeExpanded(node);
       }
   }
 
@@ -928,16 +928,16 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   {
     while (node != null)
       {
-	node.row = row;
-	rows.insertElementAt(node, row);
+        node.row = row;
+        rows.insertElementAt(node, row);
 
-	if (node.child != null && node.expanded)
-	  {
-	    row = makeDescendantsVisible(node.child, row + 1);
-	  }
+        if (node.child != null && node.expanded)
+          {
+            row = makeDescendantsVisible(node.child, row + 1);
+          }
 
-	node = node.nextSibling;
-	row++;
+        node = node.nextSibling;
+        row++;
       }
 
     return row-1;
@@ -965,75 +965,75 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (!node.expanded)
       {
-	return;
+        return;
       }
 
     node.expanded = false;
 
     if (debug)
       {
-	System.err.println("contractNode: row " + node.row + ", text=" + node.text);
+        System.err.println("contractNode: row " + node.row + ", text=" + node.text);
       }
 
     if (node.child != null)
       {
-	range = new Range(node.child.row, node.child.row);
-	getVisibleDescendantRange(node.child, range);
+        range = new Range(node.child.row, node.child.row);
+        getVisibleDescendantRange(node.child, range);
 
-	// remove our descendants from the visibility vector
+        // remove our descendants from the visibility vector
 
-	if (debug)
-	  {
-	    System.err.println("Before contraction, size = " + rows.size());
-	    System.err.println("Contracting rows " + range.low + " through " + range.high);
-	  }
+        if (debug)
+          {
+            System.err.println("Before contraction, size = " + rows.size());
+            System.err.println("Contracting rows " + range.low + " through " + range.high);
+          }
 
-	for (int i = range.low; i <= range.high; i++)
-	  {
-	    n = (treeNode) rows.elementAt(range.low);
+        for (int i = range.low; i <= range.high; i++)
+          {
+            n = (treeNode) rows.elementAt(range.low);
 
-	    if (debug)
-	      {
-		System.err.println("Contracting row " + n.row + ", text=" + n.text);
-	      }
+            if (debug)
+              {
+                System.err.println("Contracting row " + n.row + ", text=" + n.text);
+              }
 
-	    if (n.selected)
-	      {
+            if (n.selected)
+              {
                 moveSelection(node);
-	      }
+              }
 
-	    rows.removeElementAt(range.low);
-	    n.row = -1;
-	  }
+            rows.removeElementAt(range.low);
+            n.row = -1;
+          }
 
-	// move everybody else up
+        // move everybody else up
 
-	for (int i = range.low; i < rows.size(); i++)
-	  {
-	    n = (treeNode) rows.elementAt(i);
+        for (int i = range.low; i < rows.size(); i++)
+          {
+            n = (treeNode) rows.elementAt(i);
 
-	    if (debug)
-	      {
-		System.err.println("moving up row " + n.row + " to " + i);
-	      }
+            if (debug)
+              {
+                System.err.println("moving up row " + n.row + " to " + i);
+              }
 
-	    n.row = i;
-	  }
+            n.row = i;
+          }
 
-	if (debug)
-	  {
-	    System.err.println("After contraction, size = " + rows.size());
-	  }
+        if (debug)
+          {
+            System.err.println("After contraction, size = " + rows.size());
+          }
       }
 
     if (repaint)
       {
-	refresh();
+        refresh();
       }
 
     if (doCallback && callback != null)
       {
-	callback.treeNodeContracted(node);
+        callback.treeNodeContracted(node);
       }
   }
 
@@ -1052,39 +1052,39 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     while (myNode != null)
       {
-	// a row of -1 means we've hit an invisible row, which we
-	// never should do.
+        // a row of -1 means we've hit an invisible row, which we
+        // never should do.
 
-	if (myNode.row == -1)
-	  {
-	    throw new RuntimeException("invisible row hit");
-	  }
+        if (myNode.row == -1)
+          {
+            throw new RuntimeException("invisible row hit");
+          }
 
-	if (myNode.row > range.high)
-	  {
-	    range.high = myNode.row;
-	  }
+        if (myNode.row > range.high)
+          {
+            range.high = myNode.row;
+          }
 
-	if (myNode.row < range.low)
-	  {
-	    range.low = myNode.row;
-	  }
+        if (myNode.row < range.low)
+          {
+            range.low = myNode.row;
+          }
 
-	// if we have a sibling below us, we don't need to
-	// check the kids
+        // if we have a sibling below us, we don't need to
+        // check the kids
 
-	if (myNode.nextSibling != null)
-	  {
-	    myNode = myNode.nextSibling;
-	  }
-	else if (myNode.child != null && myNode.expanded)
-	  {
-	    myNode = myNode.child;
-	  }
-	else			// we're done going down
-	  {
-	    break;
-	  }
+        if (myNode.nextSibling != null)
+          {
+            myNode = myNode.nextSibling;
+          }
+        else if (myNode.child != null && myNode.expanded)
+          {
+            myNode = myNode.child;
+          }
+        else                    // we're done going down
+          {
+            break;
+          }
       }
   }
 
@@ -1098,7 +1098,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   {
     if (node.selected)
       {
-	return;
+        return;
       }
 
     node.selected = true;
@@ -1114,7 +1114,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   {
     if (callback != null)
       {
-	callback.treeNodeDoubleClicked(node);
+        callback.treeNodeDoubleClicked(node);
       }
   }
 
@@ -1131,7 +1131,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   {
     if (node.selected)
       {
-	return;
+        return;
       }
 
     node.selected = true;
@@ -1140,7 +1140,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (callback != null)
       {
-	callback.treeNodeSelected(node);
+        callback.treeNodeSelected(node);
       }
   }
 
@@ -1155,12 +1155,12 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   {
     if (node.selected)
       {
-	return;
+        return;
       }
 
     if (selectedNode != null)
       {
-	unselectNode(selectedNode, true);
+        unselectNode(selectedNode, true);
       }
 
     selectNode(node);
@@ -1178,7 +1178,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   {
     if (!node.selected)
       {
-	return;
+        return;
       }
 
     node.selected = false;
@@ -1200,7 +1200,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   {
     if (!node.selected)
       {
-	return;
+        return;
       }
 
     node.selected = false;
@@ -1209,7 +1209,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (callback != null)
       {
-	callback.treeNodeUnSelected(node, anySelected);
+        callback.treeNodeUnSelected(node, anySelected);
       }
   }
 
@@ -1230,12 +1230,12 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     for (int i = 0; i < rows.size(); i++)
       {
-	node = (treeNode) rows.elementAt(i);
+        node = (treeNode) rows.elementAt(i);
 
-	if (node.selected)
-	  {
-	    unselectNode(node, anySelected);
-	  }
+        if (node.selected)
+          {
+            unselectNode(node, anySelected);
+          }
       }
   }
 
@@ -1250,20 +1250,20 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   {
     if (e.getSource() instanceof JMenuItem)
       {
-	if (callback == null)
-	  {
-	    return;
-	  }
+        if (callback == null)
+          {
+            return;
+          }
 
-	if (menuedNode == null)
-	  {
-	    return;
-	  }
+        if (menuedNode == null)
+          {
+            return;
+          }
 
-	callback.treeNodeMenuPerformed(menuedNode, e);
+        callback.treeNodeMenuPerformed(menuedNode, e);
 
-	menuedNode = null;
-	return;
+        menuedNode = null;
+        return;
       }
 
 
@@ -1271,73 +1271,73 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (actionCommand == null)
       {
-	System.err.println("Null action command from " + e);
+        System.err.println("Null action command from " + e);
 
-	return;
+        return;
       }
 
     if (actionCommand.equals("unitdown"))
       {
-	if (selectedNode != null)
-	  {
-	    int rowIndex = selectedNode.row;
+        if (selectedNode != null)
+          {
+            int rowIndex = selectedNode.row;
 
-	    if (rowIndex + 1 < rows.size())
-	      {
-		treeNode newNode = (treeNode) rows.elementAt(rowIndex + 1);
-		moveSelection(newNode);
+            if (rowIndex + 1 < rows.size())
+              {
+                treeNode newNode = (treeNode) rows.elementAt(rowIndex + 1);
+                moveSelection(newNode);
 
-		scrollToSelectedRow();
+                scrollToSelectedRow();
 
-		canvas.render();
-		canvas.repaint();
-	      }
-	  }
+                canvas.render();
+                canvas.repaint();
+              }
+          }
       }
     else if (actionCommand.equals("unitup"))
       {
-	if (selectedNode != null)
-	  {
-	    int rowIndex = selectedNode.row;
+        if (selectedNode != null)
+          {
+            int rowIndex = selectedNode.row;
 
-	    if (rowIndex > 0)
-	      {
-		treeNode newNode = (treeNode) rows.elementAt(rowIndex - 1);
-		moveSelection(newNode);
+            if (rowIndex > 0)
+              {
+                treeNode newNode = (treeNode) rows.elementAt(rowIndex - 1);
+                moveSelection(newNode);
 
-		scrollToSelectedRow();
+                scrollToSelectedRow();
 
-		canvas.render();
-		canvas.repaint();
-	      }
-	  }
+                canvas.render();
+                canvas.repaint();
+              }
+          }
       }
     else if (actionCommand.equals("scrolldown"))
       {
-	if (selectedNode != null)
-	  {
-	    // move our selection down, scrolling if necessary
+        if (selectedNode != null)
+          {
+            // move our selection down, scrolling if necessary
 
-	    int rowIndex = selectedNode.row;
+            int rowIndex = selectedNode.row;
 
-	    int jumpIncrement = (canvas.getBottomRow() - canvas.getTopRow()) - 1;
+            int jumpIncrement = (canvas.getBottomRow() - canvas.getTopRow()) - 1;
 
-	    int newSelectionIndex = rowIndex + jumpIncrement;
+            int newSelectionIndex = rowIndex + jumpIncrement;
 
-	    if (newSelectionIndex >= rows.size())
-	      {
-		newSelectionIndex = rows.size() - 1;
-	      }
+            if (newSelectionIndex >= rows.size())
+              {
+                newSelectionIndex = rows.size() - 1;
+              }
 
-	    moveSelection((treeNode) rows.elementAt(newSelectionIndex));
+            moveSelection((treeNode) rows.elementAt(newSelectionIndex));
 
-	    scrollToSelectedRow();
-	    canvas.render();
-	    canvas.repaint();
-	  }
-	else if (vbar_visible)
-	  {
-	    // no selected unit, just scroll
+            scrollToSelectedRow();
+            canvas.render();
+            canvas.repaint();
+          }
+        else if (vbar_visible)
+          {
+            // no selected unit, just scroll
 
             int adj = vbar.getBlockIncrement();
             int presentValue = vbar.getValue();
@@ -1354,34 +1354,34 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
               }
 
             vbar.setValue(presentValue);
-	  }
+          }
       }
     else if (actionCommand.equals("scrollup"))
       {
-	if (selectedNode != null)
-	  {
-	    // move our selection down, scrolling if necessary
+        if (selectedNode != null)
+          {
+            // move our selection down, scrolling if necessary
 
-	    int rowIndex = selectedNode.row;
+            int rowIndex = selectedNode.row;
 
-	    int jumpIncrement = (canvas.getBottomRow() - canvas.getTopRow()) - 1;
+            int jumpIncrement = (canvas.getBottomRow() - canvas.getTopRow()) - 1;
 
-	    int newSelectionIndex = rowIndex - jumpIncrement;
+            int newSelectionIndex = rowIndex - jumpIncrement;
 
-	    if (newSelectionIndex <= 0)
-	      {
-		newSelectionIndex = 0;
-	      }
+            if (newSelectionIndex <= 0)
+              {
+                newSelectionIndex = 0;
+              }
 
-	    moveSelection((treeNode) rows.elementAt(newSelectionIndex));
+            moveSelection((treeNode) rows.elementAt(newSelectionIndex));
 
-	    scrollToSelectedRow();
-	    canvas.render();
-	    canvas.repaint();
-	  }
-	else if (vbar_visible)
-	  {
-	    // no selected unit, just scroll
+            scrollToSelectedRow();
+            canvas.render();
+            canvas.repaint();
+          }
+        else if (vbar_visible)
+          {
+            // no selected unit, just scroll
 
             int adj = vbar.getBlockIncrement();
             int presentValue = vbar.getValue();
@@ -1396,32 +1396,32 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
               }
 
             vbar.setValue(presentValue);
-	  }
+          }
       }
     else if (actionCommand.equals("scrolltop"))
       {
-	moveSelection((treeNode) rows.elementAt(0));
-	scrollToSelectedRow();
-	canvas.render();
-	canvas.repaint();
+        moveSelection((treeNode) rows.elementAt(0));
+        scrollToSelectedRow();
+        canvas.render();
+        canvas.repaint();
       }
     else if (actionCommand.equals("scrollbottom"))
       {
-	moveSelection((treeNode) rows.elementAt(rows.size() - 1));
-	scrollToSelectedRow();
-	canvas.render();
-	canvas.repaint();
+        moveSelection((treeNode) rows.elementAt(rows.size() - 1));
+        scrollToSelectedRow();
+        canvas.render();
+        canvas.repaint();
       }
     else if (actionCommand.equals("right"))
       {
-	if (selectedNode != null && selectedNode.expandable && !selectedNode.isOpen())
-	  {
-	    expandNode(selectedNode, true);
-	  }
+        if (selectedNode != null && selectedNode.expandable && !selectedNode.isOpen())
+          {
+            expandNode(selectedNode, true);
+          }
       }
     else if (actionCommand.equals("left"))
       {
-	if (selectedNode != null)
+        if (selectedNode != null)
           {
             if (selectedNode.expandable && selectedNode.isOpen())
               {
@@ -1438,17 +1438,17 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
       }
     else if (actionCommand.equals("enter"))
       {
-	if (selectedNode != null)
-	  {
-	    if (selectedNode.expandable)
-	      {
-		expandNode(selectedNode, true);
-	      }
-	    else
-	      {
-		doubleClickNode(selectedNode);
-	      }
-	  }
+        if (selectedNode != null)
+          {
+            if (selectedNode.expandable)
+              {
+                expandNode(selectedNode, true);
+              }
+            else
+              {
+                doubleClickNode(selectedNode);
+              }
+          }
       }
     else if (actionCommand.equals("context"))
       {
@@ -1482,16 +1482,16 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   {
     if (!vbar_visible)
       {
-	return;
+        return;
       }
 
     if (selectedNode.row <= canvas.getTopRow())
       {
-	vbar.setValue(row_height * selectedNode.row);
+        vbar.setValue(row_height * selectedNode.row);
       }
     else if (selectedNode.row + 1 >= canvas.getBottomRow())
       {
-	vbar.setValue(row_height * (selectedNode.row + 1) - canvas.getBounds().height);
+        vbar.setValue(row_height * (selectedNode.row + 1) - canvas.getBounds().height);
       }
   }
 
@@ -1522,7 +1522,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   {
     if (debug)
       {
-	System.err.println("setBounds(): x:" + x + ", y:" + y + ", width:" + width + ", height:" + height);
+        System.err.println("setBounds(): x:" + x + ", y:" + y + ", width:" + width + ", height:" + height);
       }
 
     super.setBounds(x,y,width,height);
@@ -1531,24 +1531,24 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     Rectangle rect = new Rectangle(bounding_rect);
 
     if ((width != bounding_rect.width) ||
-	(height != bounding_rect.height))
+        (height != bounding_rect.height))
       {
-	bounding_rect.x = x;
-	bounding_rect.y = y;
-	bounding_rect.width = width;
-	bounding_rect.height = height;
+        bounding_rect.x = x;
+        bounding_rect.y = y;
+        bounding_rect.width = width;
+        bounding_rect.height = height;
 
-	reShape();
+        reShape();
       }
 
     if (width > rect.width || height > rect.height)
       {
-	refreshTree();
+        refreshTree();
       }
 
     if (debug)
       {
-	System.err.println("exiting setBounds()");
+        System.err.println("exiting setBounds()");
       }
   }
 
@@ -1565,7 +1565,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   {
     if (debug)
       {
-	System.err.println("reShape()");
+        System.err.println("reShape()");
       }
 
     // calculate whether we need scrollbars, add/remove them
@@ -1574,7 +1574,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (debug)
       {
-	System.err.println("exiting reShape()");
+        System.err.println("exiting reShape()");
       }
   }
 
@@ -1596,9 +1596,9 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (debug)
       {
-	System.err.println("adjustScrollbars()");
-	System.err.println("canvas.getBounds().width = " + canvas.getBounds().width);
-	System.err.println("canvas.getBounds().height = " + canvas.getBounds().height);
+        System.err.println("adjustScrollbars()");
+        System.err.println("canvas.getBounds().width = " + canvas.getBounds().width);
+        System.err.println("canvas.getBounds().height = " + canvas.getBounds().height);
       }
 
     // calculate how tall or table is, not counting any scroll bars.
@@ -1615,70 +1615,70 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (canvas.getBounds().width < maxWidth)
       {
-	if (!hbar_visible)
-	  {
-	    this.add("South", hbar);
-	    hbar.setValue(0);
-	    this.doLayout();
-	    //	    getParent().doLayout();
-	  }
-	hbar_visible = true;
+        if (!hbar_visible)
+          {
+            this.add("South", hbar);
+            hbar.setValue(0);
+            this.doLayout();
+            //      getParent().doLayout();
+          }
+        hbar_visible = true;
 
-	if (debug)
-	  {
-	    System.err.println("hbar being made visible");
-	  }
+        if (debug)
+          {
+            System.err.println("hbar being made visible");
+          }
       }
     else
       {
-	if (hbar_visible)
-	  {
-	    this.remove(hbar);
-	    this.doLayout();
-	    //	    getParent().doLayout();
-	  }
-	hbar_visible = false;
+        if (hbar_visible)
+          {
+            this.remove(hbar);
+            this.doLayout();
+            //      getParent().doLayout();
+          }
+        hbar_visible = false;
 
-	if (debug)
-	  {
-	    System.err.println("hbar being made INvisible");
-	  }
+        if (debug)
+          {
+            System.err.println("hbar being made INvisible");
+          }
 
-	canvas.h_offset = 0;
+        canvas.h_offset = 0;
       }
 
     // check to see if we need a vertical scrollbar
 
     if (canvas.getBounds().height < vSize)
       {
-	if (!vbar_visible)
-	  {
-	    this.add("East", vbar);
-	    vbar.setValue(0);
-	    this.doLayout();
-	  }
-	vbar_visible = true;
+        if (!vbar_visible)
+          {
+            this.add("East", vbar);
+            vbar.setValue(0);
+            this.doLayout();
+          }
+        vbar_visible = true;
 
-	if (debug)
-	  {
-	    System.err.println("vbar being made visible");
-	  }
+        if (debug)
+          {
+            System.err.println("vbar being made visible");
+          }
       }
     else
       {
-	if (vbar_visible)
-	  {
-	    this.remove(vbar);
-	    this.doLayout();
-	  }
-	vbar_visible = false;
+        if (vbar_visible)
+          {
+            this.remove(vbar);
+            this.doLayout();
+          }
+        vbar_visible = false;
 
-	if (debug)
-	  {
-	    System.err.println("vbar being made INvisible");
-	  }
+        if (debug)
+          {
+            System.err.println("vbar being made INvisible");
+          }
 
-	canvas.v_offset = 0;
+        canvas.v_offset = 0;
       }
 
     // check again to see if we need a horizontal scrollbar..
@@ -1688,34 +1688,34 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (canvas.getBounds().width < maxWidth)
       {
-	if (!hbar_visible)
-	  {
-	    this.add("South", hbar);
-	    hbar.setValue(0);
-	    this.doLayout();
-	  }
-	hbar_visible = true;
+        if (!hbar_visible)
+          {
+            this.add("South", hbar);
+            hbar.setValue(0);
+            this.doLayout();
+          }
+        hbar_visible = true;
 
-	if (debug)
-	  {
-	    System.err.println("hbar being made visible");
-	  }
+        if (debug)
+          {
+            System.err.println("hbar being made visible");
+          }
       }
     else
       {
-	if (hbar_visible)
-	  {
-	    this.remove(hbar);
-	    this.doLayout();
-	  }
-	hbar_visible = false;
+        if (hbar_visible)
+          {
+            this.remove(hbar);
+            this.doLayout();
+          }
+        hbar_visible = false;
 
-	if (debug)
-	  {
-	    System.err.println("hbar being made INvisible");
-	  }
+        if (debug)
+          {
+            System.err.println("hbar being made INvisible");
+          }
 
-	canvas.h_offset = 0;
+        canvas.h_offset = 0;
       }
 
     // now we've got our scrollbars the way we want them as
@@ -1726,57 +1726,57 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     if (vbar_visible && (canvas.getBounds().height != 0))
       {
-	int my_total_height = rows.size() * row_height;
+        int my_total_height = rows.size() * row_height;
 
-	int max_acceptable_value = my_total_height - canvas.getBounds().height;
+        int max_acceptable_value = my_total_height - canvas.getBounds().height;
 
-	if (vbar.getValue() > max_acceptable_value)
-	  {
-	    vbar.setValues(max_acceptable_value,
-			   canvas.getBounds().height,
-			   0,
-			   my_total_height);
-	  }
-	else
-	  {
-	    vbar.setValues(vbar.getValue(),
-			   canvas.getBounds().height,
-			   0,
-			   my_total_height);
-	  }
+        if (vbar.getValue() > max_acceptable_value)
+          {
+            vbar.setValues(max_acceptable_value,
+                           canvas.getBounds().height,
+                           0,
+                           my_total_height);
+          }
+        else
+          {
+            vbar.setValues(vbar.getValue(),
+                           canvas.getBounds().height,
+                           0,
+                           my_total_height);
+          }
 
-	vbar.setUnitIncrement(row_height);    // we want the up/down buttons to go a line at a time
+        vbar.setUnitIncrement(row_height);    // we want the up/down buttons to go a line at a time
 
-	vbar.setBlockIncrement(canvas.getBounds().height/2);
+        vbar.setBlockIncrement(canvas.getBounds().height/2);
       }
 
     // Adjust the Horizontal Scrollbar's Parameters
 
     if (hbar_visible && (canvas.getBounds().width != 0))
       {
-	int max_acceptable_value = maxWidth - canvas.getBounds().width;
+        int max_acceptable_value = maxWidth - canvas.getBounds().width;
 
-	if (hbar.getValue() > max_acceptable_value)
-	  {
-	    hbar.setValues(max_acceptable_value,
-			   canvas.getBounds().width,
-			   0,
-			   maxWidth);
-	  }
-	else
-	  {
-	    hbar.setValues(hbar.getValue(),
-			   canvas.getBounds().width,
-			   0,
-			   maxWidth);
-	  }
+        if (hbar.getValue() > max_acceptable_value)
+          {
+            hbar.setValues(max_acceptable_value,
+                           canvas.getBounds().width,
+                           0,
+                           maxWidth);
+          }
+        else
+          {
+            hbar.setValues(hbar.getValue(),
+                           canvas.getBounds().width,
+                           0,
+                           maxWidth);
+          }
 
-	hbar.setBlockIncrement(canvas.getBounds().width / 2);
+        hbar.setBlockIncrement(canvas.getBounds().width / 2);
       }
 
     if (debug)
       {
-	System.err.println("exiting adjustScrollbars()");
+        System.err.println("exiting adjustScrollbars()");
       }
   }
 
@@ -1873,14 +1873,14 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   {
     if (selectedNode == null)
       {
-	selectNode(root);
+        selectNode(root);
       }
 
     treeNode firstNode = selectedNode;
 
     if (firstNode.expanded && firstNode.child != null)
       {
-	firstNode = firstNode.child;
+        firstNode = firstNode.child;
       }
 
     treeNode matchNode = firstNode;
@@ -1892,33 +1892,33 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
 
     while (!found)
       {
-	if (matchNode.nextSibling != null)
-	  {
-	    matchNode = matchNode.nextSibling;
-	  }
-	else if (matchNode.nextSibling == null && matchNode.parent == null)
-	  {
-	    matchNode = root;
-	  }
-	else if (matchNode.nextSibling == null && matchNode.parent != null)
-	  {
-	    matchNode = matchNode.parent.child;
-	  }
+        if (matchNode.nextSibling != null)
+          {
+            matchNode = matchNode.nextSibling;
+          }
+        else if (matchNode.nextSibling == null && matchNode.parent == null)
+          {
+            matchNode = root;
+          }
+        else if (matchNode.nextSibling == null && matchNode.parent != null)
+          {
+            matchNode = matchNode.parent.child;
+          }
 
-	if (matchNode == firstNode)
-	  {
-	    break;
-	  }
+        if (matchNode == firstNode)
+          {
+            break;
+          }
 
-	found = pattern.matcher(matchNode.text).find();
+        found = pattern.matcher(matchNode.text).find();
       }
 
     if (found)
       {
-	moveSelection(matchNode);
-	scrollToSelectedRow();
-	canvas.render();
-	canvas.repaint();
+        moveSelection(matchNode);
+        scrollToSelectedRow();
+        canvas.render();
+        canvas.repaint();
       }
   }
 
@@ -2003,9 +2003,9 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
     public void keyPressed(KeyEvent e)
     {
       if (e.isActionKey() ||
-	  e.getKeyCode() == KeyEvent.VK_BACK_SPACE ||
-	  e.getKeyCode() == KeyEvent.VK_DELETE ||
-	  e.getKeyCode() == KeyEvent.VK_ENTER)
+          e.getKeyCode() == KeyEvent.VK_BACK_SPACE ||
+          e.getKeyCode() == KeyEvent.VK_DELETE ||
+          e.getKeyCode() == KeyEvent.VK_ENTER)
         {
           matchString.setLength(0);
         }
@@ -2089,7 +2089,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
   public treeCanvas(treeControl ctrl, Font font, Color fgColor, Color bgColor, Image[] images)
   {
-    //    super(false);		// no double buffering for us, we'll do it ourselves
+    //    super(false);         // no double buffering for us, we'll do it ourselves
 
     this.ctrl = ctrl;
     this.font = font;
@@ -2107,19 +2107,19 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     for (int i=0; i<images.length; i++)
       {
-	int temp;
+        int temp;
 
-	temp = images[i].getHeight(this);
+        temp = images[i].getHeight(this);
 
-	if (temp > rowHeight)
-	  {
-	    rowHeight = temp;
-	  }
+        if (temp > rowHeight)
+          {
+            rowHeight = temp;
+          }
 
-	if (temp > maxImageHeight)
-	  {
-	    maxImageHeight = temp;
-	  }
+        if (temp > maxImageHeight)
+          {
+            maxImageHeight = temp;
+          }
       }
 
     ctrl.row_height = rowHeight + rowLeading; // let our ctrl know the inter-line separation
@@ -2141,26 +2141,26 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (ctrl.maxWidth < ctrl.minWidth)
       {
-	ctrl.maxWidth = ctrl.minWidth;
+        ctrl.maxWidth = ctrl.minWidth;
       }
 
     if (ctrl.rows.size() < 5)
       {
-	result = new Dimension(ctrl.maxWidth + ctrl.borderSpace, ctrl.row_height * 5);
-	if (debug)
-	  {
-	    System.err.println("getPreferredSize:" + result);
-	  }
-	return result;
+        result = new Dimension(ctrl.maxWidth + ctrl.borderSpace, ctrl.row_height * 5);
+        if (debug)
+          {
+            System.err.println("getPreferredSize:" + result);
+          }
+        return result;
       }
     else
       {
-	result = new Dimension(ctrl.maxWidth + ctrl.borderSpace, ctrl.row_height * ctrl.rows.size());
-	if (debug)
-	  {
-	    System.err.println("getPreferredSize:" + result);
-	  }
-	return result;
+        result = new Dimension(ctrl.maxWidth + ctrl.borderSpace, ctrl.row_height * ctrl.rows.size());
+        if (debug)
+          {
+            System.err.println("getPreferredSize:" + result);
+          }
+        return result;
       }
   }
 
@@ -2176,35 +2176,35 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
   public void paint(Graphics g)
   {
     if ((backing == null) ||
-	(backing.getWidth(this) < getBounds().width) ||
-	(backing.getHeight(this) < getBounds().height))
+        (backing.getWidth(this) < getBounds().width) ||
+        (backing.getHeight(this) < getBounds().height))
       {
-	render();
+        render();
       }
 
     g.drawImage(backing, 0, 0, this);
 
     if (drawLine)
       {
-	int y;
+        int y;
 
-	if (ctrl.dragBelowNode != null)
-	  {
-	    y = ctrl.dragBelowNode.row * ctrl.row_height - (rowAscent / 2) + (ctrl.row_height / 2);
-	  }
-	else
-	  {
-	    y = (ctrl.dragAboveNode.row + 1) * ctrl.row_height - (rowAscent / 2) + (ctrl.row_height / 2);
-	  }
+        if (ctrl.dragBelowNode != null)
+          {
+            y = ctrl.dragBelowNode.row * ctrl.row_height - (rowAscent / 2) + (ctrl.row_height / 2);
+          }
+        else
+          {
+            y = (ctrl.dragAboveNode.row + 1) * ctrl.row_height - (rowAscent / 2) + (ctrl.row_height / 2);
+          }
 
-	g.setColor(dragLineColor);
+        g.setColor(dragLineColor);
 
-	g.drawLine(0, y - v_offset, backing.getWidth(this), y - v_offset);
+        g.drawLine(0, y - v_offset, backing.getWidth(this), y - v_offset);
       }
 
     if (spriteVisible && (sprite != null) && (spriteLoc != null))
       {
-	g.drawImage(sprite, spriteLoc.x, spriteLoc.y, this);
+        g.drawImage(sprite, spriteLoc.x, spriteLoc.y, this);
       }
   }
 
@@ -2229,11 +2229,11 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (ctrl.vbar_visible)
       {
-	v_offset = ctrl.vbar.getValue();
+        v_offset = ctrl.vbar.getValue();
       }
     else
       {
-	v_offset = 0;
+        v_offset = 0;
       }
 
     return v_offset / ctrl.row_height;
@@ -2250,7 +2250,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (result > ctrl.rows.size())
       {
-	result = ctrl.rows.size();
+        result = ctrl.rows.size();
       }
 
     return result;
@@ -2282,7 +2282,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (!isVisible() || getBounds().width <= 0 || getBounds().height <= 0)
       {
-	return;
+        return;
       }
 
     // We don't want to construct our box images until we're sure that
@@ -2290,44 +2290,44 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (plusBox == null || minusBox == null)
       {
-	// buildBoxes will return false if our peer isn't
-	// ready for us to create images
+        // buildBoxes will return false if our peer isn't
+        // ready for us to create images
 
-	if (!buildBoxes())
-	  {
-	    return;
-	  }
+        if (!buildBoxes())
+          {
+            return;
+          }
       }
 
     if (backing == null)
       {
-	if (debug)
-	  {
-	    System.err.println("creating backing image");
+        if (debug)
+          {
+            System.err.println("creating backing image");
 
-	    System.err.println("width = " + getBounds().width);
-	    System.err.println("height = " + getBounds().height);
-	  }
+            System.err.println("width = " + getBounds().width);
+            System.err.println("height = " + getBounds().height);
+          }
 
-	backing_rect = new Rectangle(0, 0, getBounds().width, getBounds().height);
-	backing = createImage(getBounds().width, getBounds().height);
-	bg = backing.getGraphics();
+        backing_rect = new Rectangle(0, 0, getBounds().width, getBounds().height);
+        backing = createImage(getBounds().width, getBounds().height);
+        bg = backing.getGraphics();
       }
     else if ((backing_rect.width != getBounds().width) ||
-	     (backing_rect.height != getBounds().height))
+             (backing_rect.height != getBounds().height))
       {
-	// need to get a new backing image
+        // need to get a new backing image
 
-	if (debug)
-	  {
-	    System.err.println("creating new backing image");
-	  }
+        if (debug)
+          {
+            System.err.println("creating new backing image");
+          }
 
-	backing_rect = new Rectangle(0, 0, getBounds().width, getBounds().height);
+        backing_rect = new Rectangle(0, 0, getBounds().width, getBounds().height);
 
-	backing.flush();	// free old image resources
-	backing = createImage(getBounds().width, getBounds().height);
-	bg = backing.getGraphics();
+        backing.flush();        // free old image resources
+        backing = createImage(getBounds().width, getBounds().height);
+        bg = backing.getGraphics();
       }
 
     // set our font.
@@ -2338,20 +2338,20 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (ctrl.vbar_visible)
       {
-	v_offset = ctrl.vbar.getValue();
+        v_offset = ctrl.vbar.getValue();
       }
     else
       {
-	v_offset = 0;
+        v_offset = 0;
       }
 
     if (ctrl.hbar_visible)
       {
-	h_offset = ctrl.hbar.getValue();
+        h_offset = ctrl.hbar.getValue();
       }
     else
       {
-	h_offset = 0;
+        h_offset = 0;
       }
 
     bg.setColor(bgColor);
@@ -2362,29 +2362,29 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (bottom_row >= ctrl.rows.size())
       {
-	bottom_row = ctrl.rows.size() - 1;
+        bottom_row = ctrl.rows.size() - 1;
       }
 
     for (int i = top_row; i <= bottom_row; i ++)
       {
-	node = (treeNode) ctrl.rows.elementAt(i);
+        node = (treeNode) ctrl.rows.elementAt(i);
 
-	if (node.parent == null)
-	  {
-	    drawVector = null;
-	  }
-	else if (node.parent.childStack == null)
-	  {
-	    node.parent.childStack = new Stack();
-	    recursiveGenStack(node.parent, node.parent.childStack);
-	    drawVector = node.parent.childStack;
-	  }
-	else
-	  {
-	    drawVector = node.parent.childStack;
-	  }
+        if (node.parent == null)
+          {
+            drawVector = null;
+          }
+        else if (node.parent.childStack == null)
+          {
+            node.parent.childStack = new Stack();
+            recursiveGenStack(node.parent, node.parent.childStack);
+            drawVector = node.parent.childStack;
+          }
+        else
+          {
+            drawVector = node.parent.childStack;
+          }
 
-	drawRow(node, i, drawVector);
+        drawRow(node, i, drawVector);
       }
   }
 
@@ -2403,18 +2403,18 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
   {
     if (node == null)
       {
-	return;
+        return;
       }
 
     recursiveGenStack(node.parent, stack);
 
     if (node.nextSibling != null)
       {
-	stack.push(LINE);
+        stack.push(LINE);
       }
     else
       {
-	stack.push(SPACE);
+        stack.push(SPACE);
       }
 
     return;
@@ -2437,9 +2437,9 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
   private void drawRow(treeNode node, int row, Vector s)
   {
     int
-      horizLine,		// y pos of this row's horizontal connecting line
-      x1,			// working variable
-      x2,			// working variable
+      horizLine,                // y pos of this row's horizontal connecting line
+      x1,                       // working variable
+      x2,                       // working variable
       imageIndex;
 
     Image temp;
@@ -2448,16 +2448,16 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (debug)
       {
-	if (s != null)
-	  {
-	    System.err.println("Drawing node " + node.text + ", row = " +
-			       row + "(" + node.row + "), " + s.size() + " steps in");
-	  }
-	else
-	  {
-	    System.err.println("Drawing node " + node.text + ", row = " +
-			       row + "(" + node.row + "), top level");
-	  }
+        if (s != null)
+          {
+            System.err.println("Drawing node " + node.text + ", row = " +
+                               row + "(" + node.row + "), " + s.size() + " steps in");
+          }
+        else
+          {
+            System.err.println("Drawing node " + node.text + ", row = " +
+                               row + "(" + node.row + "), top level");
+          }
       }
 
     // this equation, especially the .75 figure, is a fudge factor to try to
@@ -2468,13 +2468,13 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (plusBox == null || minusBox == null)
       {
-	// buildBoxes will return false if our peer isn't
-	// ready for us to create images
+        // buildBoxes will return false if our peer isn't
+        // ready for us to create images
 
-	if (!buildBoxes())
-	  {
-	    return;
-	  }
+        if (!buildBoxes())
+          {
+            return;
+          }
       }
 
     x1 = x2 = leftSpacing + (minusBox.getWidth(this) / 2) - h_offset;
@@ -2483,40 +2483,40 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (s != null)
       {
-	for (int i = 0; i < s.size(); i++)
-	  {
-	    x1 = x2;
-	    x2 = x1 + tabStep;
+        for (int i = 0; i < s.size(); i++)
+          {
+            x1 = x2;
+            x2 = x1 + tabStep;
 
-	    if (s.elementAt(i) == SPACE)
-	      {
-		continue;
-	      }
+            if (s.elementAt(i) == SPACE)
+              {
+                continue;
+              }
 
-	    // Draw our vertical line up to our upstairs neighbor
+            // Draw our vertical line up to our upstairs neighbor
 
-	    if (row > 0)
-	      {
-		bg.drawLine(x1, ctrl.row_height * row - v_offset, x1, horizLine);
-	      }
+            if (row > 0)
+              {
+                bg.drawLine(x1, ctrl.row_height * row - v_offset, x1, horizLine);
+              }
 
-	    // If appropriate, draw our vertical line down to where we'll meet
-	    // with our downstairs neighbor
+            // If appropriate, draw our vertical line down to where we'll meet
+            // with our downstairs neighbor
 
-	    bg.drawLine(x1, horizLine, x1, ctrl.row_height * (row + 1) - v_offset);
-	  }
+            bg.drawLine(x1, horizLine, x1, ctrl.row_height * (row + 1) - v_offset);
+          }
       }
 
     x1 = x2; x2 = x1 + tabStep;
 
     if (node.parent != null || node.prevSibling != null)
       {
-	bg.drawLine(x1, ctrl.row_height * row - v_offset, x1, horizLine);
+        bg.drawLine(x1, ctrl.row_height * row - v_offset, x1, horizLine);
       }
 
     if (node.nextSibling != null)
       {
-	bg.drawLine(x1, horizLine, x1, ctrl.row_height * (row + 1) - v_offset);
+        bg.drawLine(x1, horizLine, x1, ctrl.row_height * (row + 1) - v_offset);
       }
 
     // Now draw from our connecting point over to where we'll draw our icon
@@ -2525,36 +2525,36 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (node.expandable || node.child != null)
       {
-	if (node.expanded)
-	  {
-	    // draw our minus box over the intersection
+        if (node.expanded)
+          {
+            // draw our minus box over the intersection
 
-	    node.boxX1 = x1 - (minusBox.getWidth(this)/2);
-	    node.boxX2 = node.boxX1 + minusBox.getWidth(this);
+            node.boxX1 = x1 - (minusBox.getWidth(this)/2);
+            node.boxX2 = node.boxX1 + minusBox.getWidth(this);
 
-	    node.boxY1 = horizLine - (minusBox.getHeight(this)/2);
-	    node.boxY2 = node.boxY1 + minusBox.getHeight(this);
+            node.boxY1 = horizLine - (minusBox.getHeight(this)/2);
+            node.boxY2 = node.boxY1 + minusBox.getHeight(this);
 
-	    bg.drawImage(minusBox,
-			 node.boxX1,
-			 node.boxY1,
-			 this);
-	  }
-	else
-	  {
-	    // draw our plus box over the intersection
+            bg.drawImage(minusBox,
+                         node.boxX1,
+                         node.boxY1,
+                         this);
+          }
+        else
+          {
+            // draw our plus box over the intersection
 
-	    node.boxX1 = x1 - (plusBox.getWidth(this)/2);
-	    node.boxX2 = node.boxX1 + plusBox.getWidth(this);
+            node.boxX1 = x1 - (plusBox.getWidth(this)/2);
+            node.boxX2 = node.boxX1 + plusBox.getWidth(this);
 
-	    node.boxY1 = horizLine - (plusBox.getHeight(this)/2);
-	    node.boxY2 = node.boxY1 + plusBox.getHeight(this);
+            node.boxY1 = horizLine - (plusBox.getHeight(this)/2);
+            node.boxY2 = node.boxY1 + plusBox.getHeight(this);
 
-	    bg.drawImage(plusBox,
-			 node.boxX1,
-			 node.boxY1,
-			 this);
-	  }
+            bg.drawImage(plusBox,
+                         node.boxX1,
+                         node.boxY1,
+                         this);
+          }
       }
 
     x1 = x2;
@@ -2565,71 +2565,71 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (node.expanded && node.child != null)
       {
-	bg.drawLine(x1, horizLine, x1, ctrl.row_height * (row + 1) - v_offset);
+        bg.drawLine(x1, horizLine, x1, ctrl.row_height * (row + 1) - v_offset);
       }
 
     imageIndex = node.expanded ? node.openImage : node.closedImage;
 
     if (imageIndex >= 0 && imageIndex < images.length)
       {
-	temp = images[imageIndex];
+        temp = images[imageIndex];
 
-	bg.drawImage(temp,
-		     x1 - (temp.getWidth(this)/2),
-		     horizLine - (temp.getHeight(this)/2),
-		     this);
+        bg.drawImage(temp,
+                     x1 - (temp.getWidth(this)/2),
+                     horizLine - (temp.getHeight(this)/2),
+                     this);
 
-	x1 = x1 + temp.getWidth(this)/2 + iconTextSpacing;
+        x1 = x1 + temp.getWidth(this)/2 + iconTextSpacing;
       }
 
     x2 = x1 + fontMetric.stringWidth(node.text);
 
     if (node.selected)
       {
-	if (ctrl.isFocusOwner())
-	  {
-	    bg.setColor(fgColor);
-	  }
-	else
-	  {
-	    Color transparentFgColor = new Color(fgColor.getRed(), fgColor.getGreen(), fgColor.getBlue(), 64);
+        if (ctrl.isFocusOwner())
+          {
+            bg.setColor(fgColor);
+          }
+        else
+          {
+            Color transparentFgColor = new Color(fgColor.getRed(), fgColor.getGreen(), fgColor.getBlue(), 64);
 
-	    bg.setColor(transparentFgColor);
-	  }
+            bg.setColor(transparentFgColor);
+          }
 
-	bg.fillRect(x1,
-		    (horizLine - rowAscent/2),
-		    x2-x1+1,
-		    rowAscent + rowDescent + rowLeading + 1);
+        bg.fillRect(x1,
+                    (horizLine - rowAscent/2),
+                    x2-x1+1,
+                    rowAscent + rowDescent + rowLeading + 1);
 
-	bg.setColor(bgColor);
+        bg.setColor(bgColor);
       }
     else if (spriteVisible && node == ctrl.dragNode)
       {
-	bg.setColor(java.awt.Color.blue);
+        bg.setColor(java.awt.Color.blue);
 
-	bg.fillRect(x1,
-		    (horizLine - rowAscent/2),
-		    x2-x1+1,
-		    rowAscent + rowDescent + rowLeading + 1);
+        bg.fillRect(x1,
+                    (horizLine - rowAscent/2),
+                    x2-x1+1,
+                    rowAscent + rowDescent + rowLeading + 1);
 
-	bg.setColor(bgColor);
+        bg.setColor(bgColor);
       }
     else
       {
-	bg.setColor(fgColor);
+        bg.setColor(fgColor);
       }
 
     bg.drawString(node.text,
-		  x1,
-		  horizLine + rowAscent/2);
+                  x1,
+                  horizLine + rowAscent/2);
 
     if (x2 > ctrl.maxWidth)
       {
-	if (debug)
-	  {
-	    System.err.println("Width overrun in drawRow for node " + node);
-	  }
+        if (debug)
+          {
+            System.err.println("Width overrun in drawRow for node " + node);
+          }
       }
   }
 
@@ -2705,7 +2705,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
                 ctrl.maxWidth = x;
               }
-	  }
+          }
       }
 
     return ctrl.maxWidth;
@@ -2733,7 +2733,7 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (plusBox == null)
       {
-	return false;
+        return false;
       }
 
     g = plusBox.getGraphics();
@@ -2785,65 +2785,65 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     try
       {
-	node = (treeNode) ctrl.rows.elementAt(row);
+        node = (treeNode) ctrl.rows.elementAt(row);
       }
     catch (ArrayIndexOutOfBoundsException ex)
       {
-	return;
+        return;
       }
 
     if (debug2)
       {
-	System.err.println("Clicked on node " + node.getText() + ", row " + row);
+        System.err.println("Clicked on node " + node.getText() + ", row " + row);
 
-	System.err.println("Location: " + x + ", " + y);
+        System.err.println("Location: " + x + ", " + y);
 
-	System.err.println("v_offset = " + v_offset);
+        System.err.println("v_offset = " + v_offset);
 
-	if (node.expandable)
-	  {
-	    System.err.println("Box for this row currently at (" +
-			       node.boxX1 + "," + node.boxY1 + "-" +
-			       node.boxX2 + "," + node.boxY2 + ")");
-	  }
+        if (node.expandable)
+          {
+            System.err.println("Box for this row currently at (" +
+                               node.boxX1 + "," + node.boxY1 + "-" +
+                               node.boxX2 + "," + node.boxY2 + ")");
+          }
       }
 
     // if they double clicked outside of a box, open/close the node
 
     if (e.getClickCount() >= 2)
       {
-	if ((node.expandable || node.child != null) &&
-	    (x < node.boxX1 || y < node.boxY1 || x > node.boxX2 || y > node.boxY2))
-	  {
-	    if (node.expanded)
-	      {
-		ctrl.contractNode(node, true);
-	      }
-	    else
-	      {
-		ctrl.expandNode(node, true);
-	      }
-	    return;
-	  }
-	else if (!node.expandable)
-	  {
-	    ctrl.doubleClickNode(node);
-	  }
+        if ((node.expandable || node.child != null) &&
+            (x < node.boxX1 || y < node.boxY1 || x > node.boxX2 || y > node.boxY2))
+          {
+            if (node.expanded)
+              {
+                ctrl.contractNode(node, true);
+              }
+            else
+              {
+                ctrl.expandNode(node, true);
+              }
+            return;
+          }
+        else if (!node.expandable)
+          {
+            ctrl.doubleClickNode(node);
+          }
       }
     else
       {
-	if (debug2)
-	  {
-	    System.err.println("Click in row " + row);
-	  }
+        if (debug2)
+          {
+            System.err.println("Click in row " + row);
+          }
 
-	if ((node.expandable || node.child != null) &&
-	    (x >= node.boxX1 && y >= node.boxY1 && x <= node.boxX2 && y <= node.boxY2))
-	  {
-	    // mousePressed will have taken care of this for us.
+        if ((node.expandable || node.child != null) &&
+            (x >= node.boxX1 && y >= node.boxY1 && x <= node.boxX2 && y <= node.boxY2))
+          {
+            // mousePressed will have taken care of this for us.
 
-	    return;
-	  }
+            return;
+          }
       }
   }
 
@@ -2870,58 +2870,58 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     try
       {
-	node = (treeNode) ctrl.rows.elementAt(row);
+        node = (treeNode) ctrl.rows.elementAt(row);
       }
     catch (ArrayIndexOutOfBoundsException ex)
       {
-	// out of range, deselect all rows
+        // out of range, deselect all rows
 
-	if (debug)
-	  {
-	    System.err.println("Hey!  received out of bounds exception, row = " + row);
-	  }
+        if (debug)
+          {
+            System.err.println("Hey!  received out of bounds exception, row = " + row);
+          }
 
-	ctrl.unselectAllNodes(false);
-	render();
-	repaint();
-	return;
+        ctrl.unselectAllNodes(false);
+        render();
+        repaint();
+        return;
       }
 
     // we don't want to take a right or middle mouse button click as anything
     // but a pop-up driver
 
     if (((e.getModifiers() & InputEvent.BUTTON2_MASK) != 0) ||
-	((e.getModifiers() & InputEvent.BUTTON3_MASK) != 0))
+        ((e.getModifiers() & InputEvent.BUTTON3_MASK) != 0))
       {
-	if (!spriteVisible)
-	  {
-	    ctrl.unselectAllNodes(true); // another node is being selected
-	    ctrl.selectNode(node);
-	    render();
-	    repaint();
+        if (!spriteVisible)
+          {
+            ctrl.unselectAllNodes(true); // another node is being selected
+            ctrl.selectNode(node);
+            render();
+            repaint();
 
-	    if (e.isPopupTrigger())
-	      {
-		popupHandler(e, node);
-	      }
-	  }
+            if (e.isPopupTrigger())
+              {
+                popupHandler(e, node);
+              }
+          }
 
-	return;
+        return;
       }
 
     if ((node.expandable || node.child != null) &&
-	(x >= node.boxX1 && y >= node.boxY1 && x <= node.boxX2 && y <= node.boxY2))
+        (x >= node.boxX1 && y >= node.boxY1 && x <= node.boxX2 && y <= node.boxY2))
       {
-	if (node.expanded)
-	  {
-	    ctrl.contractNode(node, true);
-	  }
-	else
-	  {
-	    ctrl.expandNode(node, true);
-	  }
+        if (node.expanded)
+          {
+            ctrl.contractNode(node, true);
+          }
+        else
+          {
+            ctrl.expandNode(node, true);
+          }
 
-	return;
+        return;
       }
 
     // remember that the mouse was last pressed on this node if
@@ -2929,24 +2929,24 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (ctrl.dragNode == null)
       {
-	try
-	  {
-	    ctrl.dragNode = (treeNode) ctrl.rows.elementAt(row);
+        try
+          {
+            ctrl.dragNode = (treeNode) ctrl.rows.elementAt(row);
 
-	    if (debug2)
-	      {
-		System.err.println("mousePressed(): I'm setting dragNode to " + ctrl.dragNode.getText() + "!!!");
-	      }
-	  }
-	catch (ArrayIndexOutOfBoundsException ex)
-	  {
-	    // ignore
-	  }
+            if (debug2)
+              {
+                System.err.println("mousePressed(): I'm setting dragNode to " + ctrl.dragNode.getText() + "!!!");
+              }
+          }
+        catch (ArrayIndexOutOfBoundsException ex)
+          {
+            // ignore
+          }
       }
 
     if (debug2)
       {
-	System.err.println("Press in row " + row);
+        System.err.println("Press in row " + row);
       }
 
     // we'll do the selection/popup logic here as well, just in case
@@ -2956,17 +2956,17 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (!node.selected && !spriteVisible)
       {
-	ctrl.unselectAllNodes(true); // another node is being selected
-	ctrl.selectNode(node);
+        ctrl.unselectAllNodes(true); // another node is being selected
+        ctrl.selectNode(node);
 
-	render();
-	repaint();
+        render();
+        repaint();
       }
 
     if (e.isPopupTrigger() && !spriteVisible)
       {
-	popupHandler(e, node);
-	return;
+        popupHandler(e, node);
+        return;
       }
   }
 
@@ -2981,11 +2981,11 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (dragSelected && (ctrl.dragNode != ctrl.dragOverNode))
       {
-	ctrl.dCallback.iconDragDrop(ctrl.dragNode, ctrl.dragOverNode);
+        ctrl.dCallback.iconDragDrop(ctrl.dragNode, ctrl.dragOverNode);
       }
     else if (drawLine && (ctrl.dragNode != ctrl.dragAboveNode) && (ctrl.dragNode != ctrl.dragBelowNode))
       {
-	ctrl.dCallback.dragLineRelease(ctrl.dragNode, ctrl.dragAboveNode, ctrl.dragBelowNode);
+        ctrl.dCallback.dragLineRelease(ctrl.dragNode, ctrl.dragAboveNode, ctrl.dragBelowNode);
       }
 
     drawLine = false;
@@ -2993,9 +2993,9 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (spriteVisible)
       {
-	spriteVisible = false;
-	this.setCursor(Cursor.getDefaultCursor());
-	ctrl.refreshTree();
+        spriteVisible = false;
+        this.setCursor(Cursor.getDefaultCursor());
+        ctrl.refreshTree();
       }
 
     dontdrag = false;
@@ -3003,30 +3003,30 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (debug2)
       {
-	System.err.println("Released in row " + row);
+        System.err.println("Released in row " + row);
       }
 
     try
       {
-	node = (treeNode) ctrl.rows.elementAt(row);
+        node = (treeNode) ctrl.rows.elementAt(row);
       }
     catch (ArrayIndexOutOfBoundsException ex)
       {
-	// out of range
-	return;
+        // out of range
+        return;
       }
 
     if (node == null)
       {
-	throw new RuntimeException("null node");
+        throw new RuntimeException("null node");
       }
 
     // Win32 does popup trigger on mouse release
 
     if (e.isPopupTrigger() && !spriteVisible)
       {
-	popupHandler(e, node);
-	return;
+        popupHandler(e, node);
+        return;
       }
   }
 
@@ -3040,37 +3040,37 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (dontdrag || ctrl.dragNode == null)
       {
-	return;
+        return;
       }
 
     row = (e.getY() + v_offset) / ctrl.row_height;
 
     if (debug2)
       {
-	System.err.println("Dragging over row " + row);
+        System.err.println("Dragging over row " + row);
       }
 
     try
       {
-	n = (treeNode) ctrl.rows.elementAt(row);
+        n = (treeNode) ctrl.rows.elementAt(row);
       }
     catch (ArrayIndexOutOfBoundsException ex)
       {
-	// out of range.. go ahead and allow the
-	// drag down below, but don't do any
-	// further processing
+        // out of range.. go ahead and allow the
+        // drag down below, but don't do any
+        // further processing
 
-	if (spriteVisible)
-	  {
-	    repaint();
-	  }
+        if (spriteVisible)
+          {
+            repaint();
+          }
 
-	return;
+        return;
       }
 
     if (debug2)
       {
-	System.err.println("Dragging over Node: " + n.getText());
+        System.err.println("Dragging over Node: " + n.getText());
       }
 
     // **
@@ -3079,250 +3079,250 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
 
     if (!spriteVisible && (ctrl.dragMode != treeControl.DRAG_NONE))
       {
-	if (ctrl.dCallback.startDrag(ctrl.dragNode))
-	  {
-	    spriteVisible = true;
+        if (ctrl.dCallback.startDrag(ctrl.dragNode))
+          {
+            spriteVisible = true;
 
-	    if (debug2)
-	      {
-		System.err.println("mouseDragged(): I'm setting dragNode to " + ctrl.dragNode.getText() + "!!!");
-	      }
+            if (debug2)
+              {
+                System.err.println("mouseDragged(): I'm setting dragNode to " + ctrl.dragNode.getText() + "!!!");
+              }
 
-	    this.setCursor(Cursor.getPredefinedCursor(java.awt.Cursor.CROSSHAIR_CURSOR));
-	    sprite = images[n.closedImage];
-	    spriteLoc = e.getPoint();
+            this.setCursor(Cursor.getPredefinedCursor(java.awt.Cursor.CROSSHAIR_CURSOR));
+            sprite = images[n.closedImage];
+            spriteLoc = e.getPoint();
 
-	    //		System.err.println("Created sprite");
+            //          System.err.println("Created sprite");
 
-	    if ((ctrl.dragMode & ctrl.DRAG_ICON) != 0)
-	      {
-		ctrl.oldNode = ctrl.dragNode;
-	      }
-	  }
-	else
-	  {
-	    dontdrag = true;
-	  }
+            if ((ctrl.dragMode & ctrl.DRAG_ICON) != 0)
+              {
+                ctrl.oldNode = ctrl.dragNode;
+              }
+          }
+        else
+          {
+            dontdrag = true;
+          }
       }
 
     // if we are dragging, check out what we want to be doing
 
     if (spriteVisible)
       {
-	spriteLoc = e.getPoint();
+        spriteLoc = e.getPoint();
 
-	if (debug)
-	  {
-	    System.err.println("pos = " + spriteLoc.y);
-	  }
+        if (debug)
+          {
+            System.err.println("pos = " + spriteLoc.y);
+          }
 
-	// do drag mode specific processing
+        // do drag mode specific processing
 
-	if ((ctrl.dragMode & ctrl.DRAG_ICON) != 0)
-	  {
-	    // we only want to do the drag over test if we're not over
-	    // the same node we were last time
+        if ((ctrl.dragMode & ctrl.DRAG_ICON) != 0)
+          {
+            // we only want to do the drag over test if we're not over
+            // the same node we were last time
 
-	    if (!dragSelected || ctrl.oldNode != n)
-	      {
-		if (ctrl.dCallback.iconDragOver(ctrl.dragNode, n))
-		  {
-		    if (debug2)
-		      {
-			System.err.println("** treeControl: iconDragOver <" + n.getText() + "> returned true");
-		      }
+            if (!dragSelected || ctrl.oldNode != n)
+              {
+                if (ctrl.dCallback.iconDragOver(ctrl.dragNode, n))
+                  {
+                    if (debug2)
+                      {
+                        System.err.println("** treeControl: iconDragOver <" + n.getText() + "> returned true");
+                      }
 
-		    dragSelected = true;
-		    ctrl.dragOverNode = n;
-		    drawLine = false;
+                    dragSelected = true;
+                    ctrl.dragOverNode = n;
+                    drawLine = false;
 
-		    ctrl.transientSelectNode(n);
-		    reRender = true;
-		  }
-		else
-		  {
-		    if (debug2)
-		      {
-			System.err.println("** treeControl: iconDragOver <" + n.getText() + "> returned false");
-		      }
+                    ctrl.transientSelectNode(n);
+                    reRender = true;
+                  }
+                else
+                  {
+                    if (debug2)
+                      {
+                        System.err.println("** treeControl: iconDragOver <" + n.getText() + "> returned false");
+                      }
 
-		    dragSelected = false;
-		    ctrl.dragOverNode = null;
-		    ctrl.transientUnselectNode(n);
-		  }
+                    dragSelected = false;
+                    ctrl.dragOverNode = null;
+                    ctrl.transientUnselectNode(n);
+                  }
 
-		if ((ctrl.oldNode != n) && (ctrl.oldNode != null))
-		  {
-		    ctrl.transientUnselectNode(ctrl.oldNode);
-		  }
+                if ((ctrl.oldNode != n) && (ctrl.oldNode != null))
+                  {
+                    ctrl.transientUnselectNode(ctrl.oldNode);
+                  }
 
-		ctrl.oldNode = n;
-	      }
-	    else
-	      {
-		if (dragSelected)
-		  {
-		    if (debug2)
-		      {
-			System.err.println("** still dragging over selected node " + n.getText());
-		      }
+                ctrl.oldNode = n;
+              }
+            else
+              {
+                if (dragSelected)
+                  {
+                    if (debug2)
+                      {
+                        System.err.println("** still dragging over selected node " + n.getText());
+                      }
 
-		    drawLine = false;
-		  }
-		else
-		  {
-		    if (debug2)
-		      {
-			System.err.println("** still dragging over unselected node " + n.getText());
-		      }
-		  }
-	      }
-	  }
+                    drawLine = false;
+                  }
+                else
+                  {
+                    if (debug2)
+                      {
+                        System.err.println("** still dragging over unselected node " + n.getText());
+                      }
+                  }
+              }
+          }
 
-	// okay, we've done determinations on dragging the icon onto a row
-	// if necessary.. now check to see if we are also in a position
-	// to place a line between rows.. if we are, we'll essentially forget
-	// about the dragOver if we're not near the center of the row.
+        // okay, we've done determinations on dragging the icon onto a row
+        // if necessary.. now check to see if we are also in a position
+        // to place a line between rows.. if we are, we'll essentially forget
+        // about the dragOver if we're not near the center of the row.
 
-	if ((ctrl.dragMode & ctrl.DRAG_LINE) != 0)
-	  {
-	    treeNode aboveNode, belowNode;
+        if ((ctrl.dragMode & ctrl.DRAG_LINE) != 0)
+          {
+            treeNode aboveNode, belowNode;
 
-	    /* -- */
+            /* -- */
 
-	    // if the mouse is below the midline of row n, n will be above the
-	    // line we're calculating
+            // if the mouse is below the midline of row n, n will be above the
+            // line we're calculating
 
-	    if (spriteLoc.y > (n.row * ctrl.row_height + (ctrl.row_height / 2) - v_offset))
-	      {
-		aboveNode = n;
+            if (spriteLoc.y > (n.row * ctrl.row_height + (ctrl.row_height / 2) - v_offset))
+              {
+                aboveNode = n;
 
-		if (debug2)
-		  {
-		    System.err.println("aboveNode is " + aboveNode.getText());
-		  }
+                if (debug2)
+                  {
+                    System.err.println("aboveNode is " + aboveNode.getText());
+                  }
 
-		try
-		  {
-		    belowNode = (treeNode) ctrl.rows.elementAt(aboveNode.row + 1);
+                try
+                  {
+                    belowNode = (treeNode) ctrl.rows.elementAt(aboveNode.row + 1);
 
-		    if (debug2)
-		      {
-			System.err.println("belowNode is " + belowNode.getText());
-		      }
-		  }
-		catch (ArrayIndexOutOfBoundsException ex)
-		  {
-		    belowNode = null;
-		  }
-	      }
-	    else
-	      {
-		belowNode = n;
+                    if (debug2)
+                      {
+                        System.err.println("belowNode is " + belowNode.getText());
+                      }
+                  }
+                catch (ArrayIndexOutOfBoundsException ex)
+                  {
+                    belowNode = null;
+                  }
+              }
+            else
+              {
+                belowNode = n;
 
-		if (debug2)
-		  {
-		    System.err.println("belowNode is " + belowNode.getText());
-		  }
+                if (debug2)
+                  {
+                    System.err.println("belowNode is " + belowNode.getText());
+                  }
 
-		try
-		  {
-		    aboveNode = (treeNode) ctrl.rows.elementAt(belowNode.row - 1);
+                try
+                  {
+                    aboveNode = (treeNode) ctrl.rows.elementAt(belowNode.row - 1);
 
-		    if (debug2)
-		      {
-			System.err.println("aboveNode is " + aboveNode.getText());
-		      }
-		  }
-		catch (ArrayIndexOutOfBoundsException ex)
-		  {
-		    aboveNode = null;
-		  }
-	      }
+                    if (debug2)
+                      {
+                        System.err.println("aboveNode is " + aboveNode.getText());
+                      }
+                  }
+                catch (ArrayIndexOutOfBoundsException ex)
+                  {
+                    aboveNode = null;
+                  }
+              }
 
-	    // if we've moved into a new region, update the ctrl's notion
-	    // of our position
+            // if we've moved into a new region, update the ctrl's notion
+            // of our position
 
-	    if ((aboveNode != ctrl.dragAboveNode) || (belowNode != ctrl.dragBelowNode))
-	      {
-		if (debug)
-		  {
-		    System.err.println("Setting hiBound/loBound");
-		  }
+            if ((aboveNode != ctrl.dragAboveNode) || (belowNode != ctrl.dragBelowNode))
+              {
+                if (debug)
+                  {
+                    System.err.println("Setting hiBound/loBound");
+                  }
 
-		hiBound = n.row * ctrl.row_height + (ctrl.row_height / 6) - v_offset;
-		loBound = (n.row + 1) * ctrl.row_height - (ctrl.row_height / 6) - v_offset;
+                hiBound = n.row * ctrl.row_height + (ctrl.row_height / 6) - v_offset;
+                loBound = (n.row + 1) * ctrl.row_height - (ctrl.row_height / 6) - v_offset;
 
-		ctrl.dragAboveNode = aboveNode;
-		ctrl.dragBelowNode = belowNode;
-	      }
+                ctrl.dragAboveNode = aboveNode;
+                ctrl.dragBelowNode = belowNode;
+              }
 
-	    if (debug)
-	      {
-		System.err.println("hiBound for node " + n.getText() + " is " + hiBound);
-		System.err.println("loBound for node " + n.getText() + " is " + loBound);
-		System.err.println("(spriteLoc.y == " + spriteLoc.y + ")");
-	      }
+            if (debug)
+              {
+                System.err.println("hiBound for node " + n.getText() + " is " + hiBound);
+                System.err.println("loBound for node " + n.getText() + " is " + loBound);
+                System.err.println("(spriteLoc.y == " + spriteLoc.y + ")");
+              }
 
-	    if (!dragSelected ||
-		((spriteLoc.y < hiBound) || (spriteLoc.y > loBound)))
-	      {
-		if (debug2)
-		  {
-		    if (dragSelected)
-		      {
-			System.err.println("dragSelected is true.. mixed mode check");
-		      }
-		    else
-		      {
-			System.err.println("dragSelected is false.. just tweening");
-		      }
+            if (!dragSelected ||
+                ((spriteLoc.y < hiBound) || (spriteLoc.y > loBound)))
+              {
+                if (debug2)
+                  {
+                    if (dragSelected)
+                      {
+                        System.err.println("dragSelected is true.. mixed mode check");
+                      }
+                    else
+                      {
+                        System.err.println("dragSelected is false.. just tweening");
+                      }
 
-		    System.err.println("Checking for dragLineTween");
-		  }
+                    System.err.println("Checking for dragLineTween");
+                  }
 
-		if (ctrl.dCallback.dragLineTween(ctrl.dragNode, aboveNode, belowNode))
-		  {
-		    if (debug2)
-		      {
-			System.err.println("dragLineTween affirm");
-		      }
+                if (ctrl.dCallback.dragLineTween(ctrl.dragNode, aboveNode, belowNode))
+                  {
+                    if (debug2)
+                      {
+                        System.err.println("dragLineTween affirm");
+                      }
 
-		    drawLine = true;
-		    dragSelected = false;
+                    drawLine = true;
+                    dragSelected = false;
 
-		    if (ctrl.dragOverNode != null)
-		      {
-			ctrl.transientUnselectNode(ctrl.dragOverNode);
-		      }
+                    if (ctrl.dragOverNode != null)
+                      {
+                        ctrl.transientUnselectNode(ctrl.dragOverNode);
+                      }
 
-		    reRender = true;
-		  }
-		else
-		  {
-		    drawLine = false;
-		  }
-	      }
-	  }
-	else
-	  {
-	    drawLine = false;
-	  }
+                    reRender = true;
+                  }
+                else
+                  {
+                    drawLine = false;
+                  }
+              }
+          }
+        else
+          {
+            drawLine = false;
+          }
       }
 
     if (reRender)
       {
-	if (debug)
-	  {
-	    System.err.println("treeControl: ** Rendering");
-	  }
+        if (debug)
+          {
+            System.err.println("treeControl: ** Rendering");
+          }
 
-	render();
+        render();
       }
 
     if (reRender || spriteVisible)
       {
-	repaint();
+        repaint();
       }
   }
 
@@ -3338,28 +3338,28 @@ class treeCanvas extends JComponent implements MouseListener, MouseMotionListene
   {
     if (debug2)
       {
-	System.err.println("popupHandler");
+        System.err.println("popupHandler");
       }
 
     ctrl.menuedNode = node;
 
     if (node.menu != null)
       {
-	if (debug2)
-	  {
-	    System.err.println("node popup");
-	  }
+        if (debug2)
+          {
+            System.err.println("node popup");
+          }
 
-	node.menu.show(this, e.getX(), e.getY());
+        node.menu.show(this, e.getX(), e.getY());
       }
     else if (ctrl.menu != null)
       {
-	if (debug2)
-	  {
-	    System.err.println("ctrl popup");
-	  }
+        if (debug2)
+          {
+            System.err.println("ctrl popup");
+          }
 
-	ctrl.menu.show(this, e.getX(), e.getY());
+        ctrl.menu.show(this, e.getX(), e.getY());
       }
   }
 

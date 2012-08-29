@@ -96,18 +96,18 @@ public class treeMenu extends JPopupMenu {
 
     if (registered)
       {
-	return false;
+        return false;
       }
 
     elements = getComponents();
 
     for (int i = 0; i < elements.length; i++)
       {
-	if (elements[i] instanceof JMenuItem)
-	  {
-	    temp = (JMenuItem) elements[i];
-	    temp.addActionListener(listener);
-	  }
+        if (elements[i] instanceof JMenuItem)
+          {
+            temp = (JMenuItem) elements[i];
+            temp.addActionListener(listener);
+          }
       }
 
     registered = true;
