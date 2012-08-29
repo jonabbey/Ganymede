@@ -12,7 +12,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -79,10 +79,10 @@ public class ObjectHandle implements Cloneable {
   /* -- */
 
   public ObjectHandle(String label, Invid invid,
-		      boolean inactive,
-		      boolean expirationSet,
-		      boolean removalSet,
-		      boolean editable)
+                      boolean inactive,
+                      boolean expirationSet,
+                      boolean removalSet,
+                      boolean editable)
   {
     this.label = label;
     this.invid = invid;
@@ -96,13 +96,13 @@ public class ObjectHandle implements Cloneable {
   {
     try
       {
-	return super.clone();
+        return super.clone();
       }
     catch (CloneNotSupportedException ex)
       {
       }
 
-    return null;		// if it didn't work.. not a prob.
+    return null;                // if it didn't work.. not a prob.
   }
 
   public final String getLabel()
@@ -116,7 +116,7 @@ public class ObjectHandle implements Cloneable {
 
     if (lHandle != null)
       {
-	lHandle.setLabel(label);
+        lHandle.setLabel(label);
       }
   }
 
@@ -135,7 +135,7 @@ public class ObjectHandle implements Cloneable {
   {
     if (lHandle == null)
       {
-	lHandle = new listHandle(label, invid);
+        lHandle = new listHandle(label, invid);
       }
 
     return lHandle;
@@ -202,22 +202,22 @@ public class ObjectHandle implements Cloneable {
     
     if (editable)
       {
-	tmpBuf.append("editable :");
+        tmpBuf.append("editable :");
       }
 
     if (inactive)
       {
-	tmpBuf.append("inactive :");
+        tmpBuf.append("inactive :");
       }
     
     if (expirationSet)
       {
-	tmpBuf.append("expiration set :");
+        tmpBuf.append("expiration set :");
       }
 
     if (removalSet)
       {
-	tmpBuf.append("removal set :");
+        tmpBuf.append("removal set :");
       }
 
     return tmpBuf.toString();

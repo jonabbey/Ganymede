@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2012
@@ -100,38 +100,38 @@ public class DBBaseCategory implements Category, CategoryNode {
     new Comparator() {
     public int compare(Object a, Object b) 
       {
-	int valA, valB;
+        int valA, valB;
 
-	if (a instanceof DBBaseCategory)
-	  {
-	    valA = ((DBBaseCategory) a).tmp_displayOrder;
-	  }
-	else
-	  {
-	    valA = ((DBObjectBase) a).tmp_displayOrder;
-	  }
+        if (a instanceof DBBaseCategory)
+          {
+            valA = ((DBBaseCategory) a).tmp_displayOrder;
+          }
+        else
+          {
+            valA = ((DBObjectBase) a).tmp_displayOrder;
+          }
 
-	if (b instanceof DBBaseCategory)
-	  {
-	    valB = ((DBBaseCategory) b).tmp_displayOrder;
-	  }
-	else
-	  {
-	    valB = ((DBObjectBase) b).tmp_displayOrder;
-	  }
+        if (b instanceof DBBaseCategory)
+          {
+            valB = ((DBBaseCategory) b).tmp_displayOrder;
+          }
+        else
+          {
+            valB = ((DBObjectBase) b).tmp_displayOrder;
+          }
 
-	if (valA < valB)
-	  {
-	    return -1;
-	  }
-	else if (valB > valA)
-	  { 
-	    return 1;
-	  } 
-	else
-	  { 
-	    return 0;
-	  }
+        if (valA < valB)
+          {
+            return -1;
+          }
+        else if (valB > valA)
+          { 
+            return 1;
+          } 
+        else
+          { 
+            return 0;
+          }
       }
   };
 
@@ -202,8 +202,8 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     if (parent != null)
       {
-	this.baseHash = parent.baseHash;
-	this.editor = parent.editor;
+        this.baseHash = parent.baseHash;
+        this.editor = parent.editor;
       }
 
     contents = new Vector<CategoryNode>();
@@ -265,7 +265,7 @@ public class DBBaseCategory implements Category, CategoryNode {
    */
 
   public DBBaseCategory(DBStore store, DBBaseCategory rootCategory,
-			Hashtable baseHash, DBSchemaEdit editor) throws RemoteException
+                        Hashtable baseHash, DBSchemaEdit editor) throws RemoteException
   {
     this.editor = editor;
     this.store = store;
@@ -288,7 +288,7 @@ public class DBBaseCategory implements Category, CategoryNode {
    */
 
   private void recurseDown(DBBaseCategory category, Hashtable baseHash,
-			   DBSchemaEdit editor) throws RemoteException
+                           DBSchemaEdit editor) throws RemoteException
   {
     Vector<CategoryNode> children = category.getNodes();
     DBObjectBase oldBase, newBase;
@@ -298,54 +298,54 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     if (debug)
       {
-	Ganymede.debug("** recurseDown");
+        Ganymede.debug("** recurseDown");
 
-	if (editor == null)
-	  {
-	    Ganymede.debug("**#?!?!!! DBBaseCategory.recurseDown(): editor == null!!!");
-	  }
+        if (editor == null)
+          {
+            Ganymede.debug("**#?!?!!! DBBaseCategory.recurseDown(): editor == null!!!");
+          }
       }
 
     for (CategoryNode node: children)
       {
-	if (node instanceof DBObjectBase)
-	  {
-	    oldBase = (DBObjectBase) node;
+        if (node instanceof DBObjectBase)
+          {
+            oldBase = (DBObjectBase) node;
 
-	    // a new copy, with the same objects under it
+            // a new copy, with the same objects under it
 
-	    newBase = new DBObjectBase(oldBase, editor); 
-	    baseHash.put(newBase.getKey(), newBase);
+            newBase = new DBObjectBase(oldBase, editor); 
+            baseHash.put(newBase.getKey(), newBase);
 
-	    if (false)
-	      {
-		Ganymede.debug("Created newBase " + newBase.getName() + 
-			       " in recursive category tree duplication");
-	      }
+            if (false)
+              {
+                Ganymede.debug("Created newBase " + newBase.getName() + 
+                               " in recursive category tree duplication");
+              }
 
-	    // we want this base to be added to the current end of this category
+            // we want this base to be added to the current end of this category
 
-	    addNodeAfter(newBase, null);
+            addNodeAfter(newBase, null);
 
-	    if (false)
-	      {
-		Ganymede.debug("Added " + newBase.getName() + " to new category tree");
-	      }
-	  }
-	else if (node instanceof DBBaseCategory)
-	  {
-	    oldCategory = (DBBaseCategory) node;
-	    newCategory = (DBBaseCategory) newSubCategory(oldCategory.getName());
-	    newCategory.editor = editor;
+            if (false)
+              {
+                Ganymede.debug("Added " + newBase.getName() + " to new category tree");
+              }
+          }
+        else if (node instanceof DBBaseCategory)
+          {
+            oldCategory = (DBBaseCategory) node;
+            newCategory = (DBBaseCategory) newSubCategory(oldCategory.getName());
+            newCategory.editor = editor;
 
-	    if (false)
-	      {
-		Ganymede.debug("Created newCategory " + newCategory.getName() + 
-			       " in recursive category tree duplication");
-	      }
+            if (false)
+              {
+                Ganymede.debug("Created newCategory " + newCategory.getName() + 
+                               " in recursive category tree duplication");
+              }
 
-	    newCategory.recurseDown(oldCategory, baseHash, editor);
-	  }
+            newCategory.recurseDown(oldCategory, baseHash, editor);
+          }
       }
   }
 
@@ -361,10 +361,10 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     for (CategoryNode node: contents)
       {
-	if (node instanceof DBBaseCategory)
-	  {
-	    ((DBBaseCategory) node).clearEditor();
-	  }
+        if (node instanceof DBBaseCategory)
+          {
+            ((DBBaseCategory) node).clearEditor();
+          }
       }
   }
 
@@ -380,19 +380,19 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     for (CategoryNode node: contents)
       {
-	// in DBStore 2.0 and later, we emit all bases during our
-	// DBBaseCategory dump.
+        // in DBStore 2.0 and later, we emit all bases during our
+        // DBBaseCategory dump.
 
-	if (node instanceof DBBaseCategory)
-	  {
-	    out.writeBoolean(false); // it's a category
-	    ((DBBaseCategory) node).emit(out);
-	  }
-	else if (node instanceof DBObjectBase)
-	  {
-	    out.writeBoolean(true); // it's a base
-	    ((DBObjectBase) node).emit(out, true);
-	  }
+        if (node instanceof DBBaseCategory)
+          {
+            out.writeBoolean(false); // it's a category
+            ((DBBaseCategory) node).emit(out);
+          }
+        else if (node instanceof DBObjectBase)
+          {
+            out.writeBoolean(true); // it's a base
+            ((DBObjectBase) node).emit(out, true);
+          }
       }
   }
 
@@ -421,11 +421,11 @@ public class DBBaseCategory implements Category, CategoryNode {
     
     if (store.isLessThan(2,0))
       {
-	tmp_displayOrder = in.readInt();
+        tmp_displayOrder = in.readInt();
       }
     else
       {
-	tmp_displayOrder = -1;
+        tmp_displayOrder = -1;
       }
 
     // now parse our path name to get our path
@@ -446,43 +446,43 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     if (false)
       {
-	System.err.println("DBBaseCategory.receive(): reading in " + count + 
-			   " subcategories and bases");
+        System.err.println("DBBaseCategory.receive(): reading in " + count + 
+                           " subcategories and bases");
       }
 
     for (int i = 0; i < count; i++)
       {
-	// starting at 2.0, we started reading DBObjectBases in during
-	// category reading.
+        // starting at 2.0, we started reading DBObjectBases in during
+        // category reading.
 
-	if (store.isAtLeast(2,0))
-	  {
-	    if (in.readBoolean())
-	      {
-		DBObjectBase tempBase = new DBObjectBase(in, store);
+        if (store.isAtLeast(2,0))
+          {
+            if (in.readBoolean())
+              {
+                DBObjectBase tempBase = new DBObjectBase(in, store);
 
-		store.setBase(tempBase); // register in DBStore objectBases hash
+                store.setBase(tempBase); // register in DBStore objectBases hash
 
-		// we want to add this node to the end of this
-		// category, since we are reading them in order.
+                // we want to add this node to the end of this
+                // category, since we are reading them in order.
 
-		addNodeAfter(tempBase, null);
-	      }
-	    else
-	      {
-		// we want to add this node to the end of this
-		// category, since we are reading them in order.
+                addNodeAfter(tempBase, null);
+              }
+            else
+              {
+                // we want to add this node to the end of this
+                // category, since we are reading them in order.
 
-		addNodeAfter(new DBBaseCategory(store, in), null);
-	      }
-	  }
-	else
-	  {
-	    // we're reading an old file, and we'll never see a
-	    // DBObjectBase here
+                addNodeAfter(new DBBaseCategory(store, in), null);
+              }
+          }
+        else
+          {
+            // we're reading an old file, and we'll never see a
+            // DBObjectBase here
 
-	    addNodeAfter(new DBBaseCategory(store, in), null);
-	  }
+            addNodeAfter(new DBBaseCategory(store, in), null);
+          }
       }
   }
 
@@ -495,22 +495,22 @@ public class DBBaseCategory implements Category, CategoryNode {
   {
     xmlOut.startElementIndent("category");
     xmlOut.attribute("name", getName());
-    xmlOut.skipLine();		// skip line after category start
+    xmlOut.skipLine();          // skip line after category start
 
     xmlOut.indentOut();
 
     for (CategoryNode node: contents)
       {
-	if (node instanceof DBBaseCategory)
-	  {
-	    ((DBBaseCategory) node).emitXML(xmlOut);
+        if (node instanceof DBBaseCategory)
+          {
+            ((DBBaseCategory) node).emitXML(xmlOut);
 
-	    xmlOut.skipLine();
-	  }
-	else if (node instanceof DBObjectBase)
-	  {
-	    ((DBObjectBase) node).emitXML(xmlOut);
-	  }
+            xmlOut.skipLine();
+          }
+        else if (node instanceof DBObjectBase)
+          {
+            ((DBObjectBase) node).emitXML(xmlOut);
+          }
       }
 
     xmlOut.indentIn();
@@ -577,33 +577,33 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     if (contents.size() > 0)
       {
-	transport.addChunk("<");
+        transport.addChunk("<");
 
-	for (CategoryNode node: contents)
-	  {
-	    if (node instanceof DBObjectBase)
-	      {
-		DBObjectBase base = (DBObjectBase) node;
+        for (CategoryNode node: contents)
+          {
+            if (node instanceof DBObjectBase)
+              {
+                DBObjectBase base = (DBObjectBase) node;
 
-		if (session == null ||
-		    (hideNonEditables && session.getPermManager().getPerm(base.getTypeID(), true).isEditable()) ||
-		    (!hideNonEditables && session.getPermManager().getPerm(base.getTypeID(), true).isVisible()))
-		  {
-		    base.addBaseToTransport(transport, session);
-		  }
-	      }
-	    else if (node instanceof DBBaseCategory)
-	      {
-		DBBaseCategory subCategory = (DBBaseCategory) node;
-		
-		if (session == null ||
-		    (hideNonEditables && subCategory.containsEditableBase(session)) ||
-		    (!hideNonEditables && subCategory.containsVisibleBase(session)))
-		  {
-		    subCategory.addCategoryToTransport(transport, session, hideNonEditables);
-		  }
-	      }
-	  }
+                if (session == null ||
+                    (hideNonEditables && session.getPermManager().getPerm(base.getTypeID(), true).isEditable()) ||
+                    (!hideNonEditables && session.getPermManager().getPerm(base.getTypeID(), true).isVisible()))
+                  {
+                    base.addBaseToTransport(transport, session);
+                  }
+              }
+            else if (node instanceof DBBaseCategory)
+              {
+                DBBaseCategory subCategory = (DBBaseCategory) node;
+                
+                if (session == null ||
+                    (hideNonEditables && subCategory.containsEditableBase(session)) ||
+                    (!hideNonEditables && subCategory.containsVisibleBase(session)))
+                  {
+                    subCategory.addCategoryToTransport(transport, session, hideNonEditables);
+                  }
+              }
+          }
       }
 
     // terminate this category record
@@ -625,31 +625,31 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     if (session == null)
       {
-	return true;		// we're not filtering, return true immediately
+        return true;            // we're not filtering, return true immediately
       }
 
     contents = getNodes();
 
     for (CategoryNode node: contents)
       {
-	if (node instanceof DBObjectBase)
-	  {
-	    DBObjectBase base = (DBObjectBase) node;
+        if (node instanceof DBObjectBase)
+          {
+            DBObjectBase base = (DBObjectBase) node;
 
-	    if (session.getPermManager().getPerm(base.getTypeID(), true).isEditable())
-	      {
-		return true;
-	      }
-	  }
-	else if (node instanceof DBBaseCategory)
-	  {
-	    DBBaseCategory subCategory = (DBBaseCategory) node;
+            if (session.getPermManager().getPerm(base.getTypeID(), true).isEditable())
+              {
+                return true;
+              }
+          }
+        else if (node instanceof DBBaseCategory)
+          {
+            DBBaseCategory subCategory = (DBBaseCategory) node;
 
-	    if (subCategory.containsEditableBase(session))
-	      {
-		return true;
-	      }
-	  }
+            if (subCategory.containsEditableBase(session))
+              {
+                return true;
+              }
+          }
       }
 
     return false;
@@ -670,28 +670,28 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     if (session == null)
       {
-	return true;		// we're not filtering, return true immediately
+        return true;            // we're not filtering, return true immediately
       }
 
     contents = getNodes();
 
     for (CategoryNode node: contents)
       {
-	if (node instanceof DBObjectBase)
-	  {
-	    DBObjectBase base = (DBObjectBase) node;
+        if (node instanceof DBObjectBase)
+          {
+            DBObjectBase base = (DBObjectBase) node;
 
-	    if (session.getPermManager().getPerm(base.getTypeID(), true).isVisible())
-	      {
-		result = true;
-	      }
-	  }
-	else if (node instanceof DBBaseCategory)
-	  {
-	    DBBaseCategory subCategory = (DBBaseCategory) node;
+            if (session.getPermManager().getPerm(base.getTypeID(), true).isVisible())
+              {
+                result = true;
+              }
+          }
+        else if (node instanceof DBBaseCategory)
+          {
+            DBBaseCategory subCategory = (DBBaseCategory) node;
 
-	    result = subCategory.containsVisibleBase(session);
-	  }
+            result = subCategory.containsVisibleBase(session);
+          }
       }
 
     return result;
@@ -712,31 +712,31 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     if (false)
       {
-	System.err.println("** Sorted category " + getPath());
+        System.err.println("** Sorted category " + getPath());
 
-	for (CategoryNode x: contents)
-	  {
-	    if (x instanceof DBBaseCategory)
-	      {
-		System.err.print("Cat[" + ((DBBaseCategory) x).tmp_displayOrder);
-		System.err.println("] = " + ((DBBaseCategory) x).getPath());
-	      }
-	    else if (x instanceof DBObjectBase)
-	      {
-		System.err.print("Base[" + ((DBObjectBase) x).tmp_displayOrder);
-		System.err.println("] = " + ((DBObjectBase) x).getName());
-	      }
-	  }
+        for (CategoryNode x: contents)
+          {
+            if (x instanceof DBBaseCategory)
+              {
+                System.err.print("Cat[" + ((DBBaseCategory) x).tmp_displayOrder);
+                System.err.println("] = " + ((DBBaseCategory) x).getPath());
+              }
+            else if (x instanceof DBObjectBase)
+              {
+                System.err.print("Base[" + ((DBObjectBase) x).tmp_displayOrder);
+                System.err.println("] = " + ((DBObjectBase) x).getName());
+              }
+          }
       }
 
     // re-sort subcategories
 
     for (CategoryNode x: contents)
       {
-	if (x instanceof DBBaseCategory)
-	  {
-	    ((DBBaseCategory) x).resort();
-	  }
+        if (x instanceof DBBaseCategory)
+          {
+            ((DBBaseCategory) x).resort();
+          }
       }
   }
 
@@ -751,11 +751,11 @@ public class DBBaseCategory implements Category, CategoryNode {
   {
     if (parent != null)
       {
-	return parent.getPath() + "/" + name;
+        return parent.getPath() + "/" + name;
       }
     else
       {
-	return "/" + name;
+        return "/" + name;
       }
   }
 
@@ -779,16 +779,16 @@ public class DBBaseCategory implements Category, CategoryNode {
   {
     if (!(operand instanceof Category))
       {
-	return false;
+        return false;
       }
 
     try
       {
-	return this.getPath().equals(((Category) operand).getPath());
+        return this.getPath().equals(((Category) operand).getPath());
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException(ex);
+        throw new RuntimeException(ex);
       }
   }
 
@@ -803,23 +803,23 @@ public class DBBaseCategory implements Category, CategoryNode {
   {
     if (newName == null)
       {
-	throw new IllegalArgumentException("DBBaseCategory can't have null name");
+        throw new IllegalArgumentException("DBBaseCategory can't have null name");
       }
 
     if (newName.indexOf('/') != -1)
       {
-	throw new IllegalArgumentException("DBBaseCategory name can't include /");
+        throw new IllegalArgumentException("DBBaseCategory name can't include /");
       }
 
     if (parent != null)
       {
-	if (!newName.equals(name))
-	  {
-	    if (parent.contains(newName))
-	      {
-		throw new IllegalArgumentException("DBBaseCategory name conflicts with existing name in this category");
-	      }
-	  }
+        if (!newName.equals(name))
+          {
+            if (parent.contains(newName))
+              {
+                throw new IllegalArgumentException("DBBaseCategory name conflicts with existing name in this category");
+              }
+          }
       }
 
     this.name = newName;
@@ -856,50 +856,50 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     if (category == null)
       {
-	parent = null;
-	return;
+        parent = null;
+        return;
       }
 
     if (!(category instanceof DBBaseCategory))
       {
-	// we need a local reference
+        // we need a local reference
 
-	try
-	  {
-	    path = category.getPath();
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("couldn't get path of remote category: " + ex);
-	  }
+        try
+          {
+            path = category.getPath();
+          }
+        catch (RemoteException ex)
+          {
+            throw new RuntimeException("couldn't get path of remote category: " + ex);
+          }
 
-	if (debug)
-	  {
-	    System.err.println("** Attempting to find local copy of category " + path);
-	  }
+        if (debug)
+          {
+            System.err.println("** Attempting to find local copy of category " + path);
+          }
 
-	// getCategoryNode could also return a DBObjectBase, but not
-	// in this context
+        // getCategoryNode could also return a DBObjectBase, but not
+        // in this context
 
-	if (editor == null)
-	  {
-	    cat = (DBBaseCategory) store.getCategoryNode(path);
-	  }
-	else
-	  {
-	    cat = (DBBaseCategory) editor.getCategoryNode(path);
-	  }
+        if (editor == null)
+          {
+            cat = (DBBaseCategory) store.getCategoryNode(path);
+          }
+        else
+          {
+            cat = (DBBaseCategory) editor.getCategoryNode(path);
+          }
 
-	if (cat == null)
-	  {
-	    throw new RuntimeException("setCategory: couldn't find local parent category");
-	  }
+        if (cat == null)
+          {
+            throw new RuntimeException("setCategory: couldn't find local parent category");
+          }
 
-	parent = cat;
+        parent = cat;
       }
     else
       {
-	parent = (DBBaseCategory) category;
+        parent = (DBBaseCategory) category;
       }
   }
 
@@ -919,7 +919,7 @@ public class DBBaseCategory implements Category, CategoryNode {
   {
     if (node == null)
       {
-	throw new IllegalArgumentException("Can't add a null node, not even after " + prevNodeName);
+        throw new IllegalArgumentException("Can't add a null node, not even after " + prevNodeName);
       }
 
     // make sure we've got a local reference if we're being given a
@@ -927,42 +927,42 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     if ((node instanceof Base) && !(node instanceof DBObjectBase))
       {
-	node = getBaseFromBase((Base) node);
+        node = getBaseFromBase((Base) node);
       }
 
     if (debug)
       {
-	try
-	  {
-	    System.err.println("DBBaseCategory<" + getName() + ">.addNodeAfter(" + 
-			       node.getPath() + "," + prevNodeName +")");
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("Couldn't check node path: " + ex);
-	  }
+        try
+          {
+            System.err.println("DBBaseCategory<" + getName() + ">.addNodeAfter(" + 
+                               node.getPath() + "," + prevNodeName +")");
+          }
+        catch (RemoteException ex)
+          {
+            throw new RuntimeException("Couldn't check node path: " + ex);
+          }
       }
 
     // find our insertion point
 
     //    if (debug)
     //      {
-    //	System.err.println("DBBaseCategory.addNodeAfter(): searching to see if node is already in this category");
+    //  System.err.println("DBBaseCategory.addNodeAfter(): searching to see if node is already in this category");
     //      }
 
     for (CategoryNode cNode: contents)
       {
-	try
-	  {
-	    if (cNode.getName().equals(node.getName()))
-	      {
-		throw new IllegalArgumentException("can't add a node that's already in the category");
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("Couldn't check node name: " + ex);
-	  }
+        try
+          {
+            if (cNode.getName().equals(node.getName()))
+              {
+                throw new IllegalArgumentException("can't add a node that's already in the category");
+              }
+          }
+        catch (RemoteException ex)
+          {
+            throw new RuntimeException("Couldn't check node name: " + ex);
+          }
       }
 
 
@@ -973,43 +973,43 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     if (prevNodeName == null)
       {
-	contents.addElement(node);
+        contents.addElement(node);
       }
     else
       {
-	for (int i = 0; i < contents.size(); i++)
-	  {
-	    CategoryNode cNode = contents.get(i);
+        for (int i = 0; i < contents.size(); i++)
+          {
+            CategoryNode cNode = contents.get(i);
 
-	    try
-	      {
-		if (cNode.getName().equals(prevNodeName))
-		  {
-		    contents.insertElementAt(node, i+1);
-		    break;
-		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-		throw new RuntimeException(ex.getMessage());
-	      }
-	  }
+            try
+              {
+                if (cNode.getName().equals(prevNodeName))
+                  {
+                    contents.insertElementAt(node, i+1);
+                    break;
+                  }
+              }
+            catch (RemoteException ex)
+              {
+                throw new RuntimeException(ex.getMessage());
+              }
+          }
       }
 
     // tell the node who's its daddy
 
     try
       {
-	//	if (debug)
-	//	  {
-	//	    System.err.println("DBBaseCategory.addNodeAfter(): setting category for node");
-	//	  }
+        //      if (debug)
+        //        {
+        //          System.err.println("DBBaseCategory.addNodeAfter(): setting category for node");
+        //        }
 
-	node.setCategory(this);
+        node.setCategory(this);
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("caught remote exception " + ex);
+        throw new RuntimeException("caught remote exception " + ex);
       }
   }
 
@@ -1029,20 +1029,20 @@ public class DBBaseCategory implements Category, CategoryNode {
   {
     if (node == null)
       {
-	throw new IllegalArgumentException("Can't add a null node, not even before " + nextNodeName);
+        throw new IllegalArgumentException("Can't add a null node, not even before " + nextNodeName);
       }
 
     if (debug)
       {
-	try
-	  {
-	    System.err.println("DBBaseCategory<" + getName() + ">.addNodeBefore(" + 
-			       node.getPath() + "," + nextNodeName +")");
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException(ex.getMessage());
-	  }
+        try
+          {
+            System.err.println("DBBaseCategory<" + getName() + ">.addNodeBefore(" + 
+                               node.getPath() + "," + nextNodeName +")");
+          }
+        catch (RemoteException ex)
+          {
+            throw new RuntimeException(ex.getMessage());
+          }
       }
 
     // make sure we've got a local reference if we're being given a
@@ -1050,29 +1050,29 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     if ((node instanceof Base) && !(node instanceof DBObjectBase))
       {
-	node = getBaseFromBase((Base) node);
+        node = getBaseFromBase((Base) node);
       }
 
     // find our insertion point
 
     //    if (debug)
     //      {
-    //	System.err.println("DBBaseCategory.addNodeBefore(): searching to see if node is already in this category");
+    //  System.err.println("DBBaseCategory.addNodeBefore(): searching to see if node is already in this category");
     //      }
 
     for (CategoryNode cNode: contents)
       {
-	try
-	  {
-	    if (cNode.getName().equals(node.getName()))
-	      {
-		throw new IllegalArgumentException("can't add a node that's already in the category");
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("Couldn't check node name: " + ex);
-	  }
+        try
+          {
+            if (cNode.getName().equals(node.getName()))
+              {
+                throw new IllegalArgumentException("can't add a node that's already in the category");
+              }
+          }
+        catch (RemoteException ex)
+          {
+            throw new RuntimeException("Couldn't check node name: " + ex);
+          }
       }
 
     // put our node into our content list
@@ -1082,43 +1082,43 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     if (nextNodeName == null)
       {
-	contents.insertElementAt(node, 0);
+        contents.insertElementAt(node, 0);
       }
     else
       {
-	for (int i = 0; i < contents.size(); i++)
-	  {
-	    CategoryNode cNode = (CategoryNode) contents.elementAt(i);
+        for (int i = 0; i < contents.size(); i++)
+          {
+            CategoryNode cNode = (CategoryNode) contents.elementAt(i);
 
-	    try
-	      {
-		if (cNode.getName().equals(nextNodeName))
-		  {
-		    contents.insertElementAt(node, i);
-		    break;
-		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-		throw new RuntimeException(ex.getMessage());
-	      }
-	  }
+            try
+              {
+                if (cNode.getName().equals(nextNodeName))
+                  {
+                    contents.insertElementAt(node, i);
+                    break;
+                  }
+              }
+            catch (RemoteException ex)
+              {
+                throw new RuntimeException(ex.getMessage());
+              }
+          }
       }
 
     // tell the node who's its daddy
 
     try
       {
-	//	if (debug)
-	//	  {
-	//	    System.err.println("DBBaseCategory.addNodeBefore(): setting category for node");
-	//	  }
+        //      if (debug)
+        //        {
+        //          System.err.println("DBBaseCategory.addNodeBefore(): setting category for node");
+        //        }
 
-	node.setCategory(this);
+        node.setCategory(this);
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("caught remote exception " + ex);
+        throw new RuntimeException("caught remote exception " + ex);
       }
   }
 
@@ -1139,7 +1139,7 @@ public class DBBaseCategory implements Category, CategoryNode {
   {
     if (debug)
       {
-	System.err.println("DBBaseCategory.moveCategoryNode(" + catPath + "," + prevNodeName + ")");
+        System.err.println("DBBaseCategory.moveCategoryNode(" + catPath + "," + prevNodeName + ")");
       }
 
     CategoryNode categoryNode;
@@ -1147,77 +1147,77 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     try
       {
-	categoryNode = editor.getCategoryNode(catPath);
-	oldCategory = (DBBaseCategory) categoryNode.getCategory();
+        categoryNode = editor.getCategoryNode(catPath);
+        oldCategory = (DBBaseCategory) categoryNode.getCategory();
       }
     catch (RemoteException ex)
       {
-	Ganymede.logError(ex);
-	throw new RuntimeException("wow, surprising remote local exception");
+        Ganymede.logError(ex);
+        throw new RuntimeException("wow, surprising remote local exception");
       }
 
     if (oldCategory == this)
       {
-	if (debug)
-	  {
-	    System.err.println("DBBaseCategory.moveCategoryNode(): moving node within category");
-	  }
+        if (debug)
+          {
+            System.err.println("DBBaseCategory.moveCategoryNode(): moving node within category");
+          }
 
-	contents.removeElement(categoryNode);
+        contents.removeElement(categoryNode);
       }
     else
       {
-	if (debug)
-	  {
-	    System.err.println("DBBaseCategory.moveCategoryNode(): moving node from " + 
-			       oldCategory.getPath() + " to " + getPath());
-	  }
+        if (debug)
+          {
+            System.err.println("DBBaseCategory.moveCategoryNode(): moving node from " + 
+                               oldCategory.getPath() + " to " + getPath());
+          }
 
-	try
-	  {
-	    oldCategory.removeNode(categoryNode);
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("Local category threw a remote exception.. ? " + ex);
-	  }
+        try
+          {
+            oldCategory.removeNode(categoryNode);
+          }
+        catch (RemoteException ex)
+          {
+            throw new RuntimeException("Local category threw a remote exception.. ? " + ex);
+          }
       }
 
     try
       {
-	categoryNode.setCategory(this);
+        categoryNode.setCategory(this);
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("Local category node threw a remote exception.. ? " + ex);
+        throw new RuntimeException("Local category node threw a remote exception.. ? " + ex);
       }
 
     if (prevNodeName == null)
       {
-	contents.insertElementAt(categoryNode, 0);
+        contents.insertElementAt(categoryNode, 0);
       }
     else
       {
-	for (int i = 0; i < contents.size(); i++)
-	  {
-	    CategoryNode cNode = (CategoryNode) contents.elementAt(i);
+        for (int i = 0; i < contents.size(); i++)
+          {
+            CategoryNode cNode = (CategoryNode) contents.elementAt(i);
 
-	    try
-	      {
-		if (cNode.getName().equals(prevNodeName))
-		  {
-		    contents.insertElementAt(categoryNode, i+1);
-		    return;
-		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-	      }
-	  }
+            try
+              {
+                if (cNode.getName().equals(prevNodeName))
+                  {
+                    contents.insertElementAt(categoryNode, i+1);
+                    return;
+                  }
+              }
+            catch (RemoteException ex)
+              {
+              }
+          }
 
-	throw new RuntimeException("Couldn't move category node " + catPath +
-				   " after non-existent " +
-				   prevNodeName);
+        throw new RuntimeException("Couldn't move category node " + catPath +
+                                   " after non-existent " +
+                                   prevNodeName);
       }
   }
 
@@ -1237,48 +1237,48 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     if (node == null)
       {
-	throw new IllegalArgumentException("Can't remove a null node");
+        throw new IllegalArgumentException("Can't remove a null node");
       }
 
     // find our deletion point
 
     if (debug)
       {
-	try
-	  {
-	    Ganymede.debug("DBBaseCategory (" + getName() + ").removeNode(" + node.getPath() + ")");
-	  }
-	catch (RemoteException ex)
-	  {
+        try
+          {
+            Ganymede.debug("DBBaseCategory (" + getName() + ").removeNode(" + node.getPath() + ")");
+          }
+        catch (RemoteException ex)
+          {
             Ganymede.logError(ex);
-	    throw new RuntimeException("rmi local failure?" + ex.getMessage());
-	  }
+            throw new RuntimeException("rmi local failure?" + ex.getMessage());
+          }
       }
 
     for (i = 0; i < contents.size(); i++)
       {
-	if (debug)
-	  {
-	    try
-	      {
-		Ganymede.debug(" examining: " + ((CategoryNode) contents.elementAt(i)).getPath());
-	      }
-	    catch (RemoteException ex)
-	      {
+        if (debug)
+          {
+            try
+              {
+                Ganymede.debug(" examining: " + ((CategoryNode) contents.elementAt(i)).getPath());
+              }
+            catch (RemoteException ex)
+              {
                 Ganymede.logError(ex);
-		throw new RuntimeException("rmi local failure?" + ex.getMessage());
-	      }
-	  }
+                throw new RuntimeException("rmi local failure?" + ex.getMessage());
+              }
+          }
 
-	if (contents.elementAt(i).equals(node))
-	  {
-	    index = i;
-	  }
+        if (contents.elementAt(i).equals(node))
+          {
+            index = i;
+          }
       }
 
     if (index == -1)
       {
-	throw new IllegalArgumentException("can't delete a node that's not in the category");
+        throw new IllegalArgumentException("can't delete a node that's not in the category");
       }
 
     // remove our node from our content list
@@ -1287,19 +1287,19 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     if (false)
       {
-	if (node instanceof DBObjectBase)
-	  {
-	    DBObjectBase base = (DBObjectBase) node;
+        if (node instanceof DBObjectBase)
+          {
+            DBObjectBase base = (DBObjectBase) node;
 
-	    if (!base.isEditing())
-	      {
-		System.err.println("DBBaseCategory.removeNode(): " + base.getName() + " has a null editor!");
-	      }
-	    else
-	      {
-		System.err.println("DBBaseCategory.removeNode(): " + base.getName() + " has a non-null editor!");
-	      }
-	  }
+            if (!base.isEditing())
+              {
+                System.err.println("DBBaseCategory.removeNode(): " + base.getName() + " has a null editor!");
+              }
+            else
+              {
+                System.err.println("DBBaseCategory.removeNode(): " + base.getName() + " has a non-null editor!");
+              }
+          }
       }
 
     // Sorry, kid, yer on your own now!
@@ -1326,66 +1326,66 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     if (name == null)
       {
-	throw new IllegalArgumentException("Can't remove a null name");
+        throw new IllegalArgumentException("Can't remove a null name");
       }
 
     // find our deletion point
 
     if (debug)
       {
-	Ganymede.debug("DBBaseCategory (" + getName() + ").removeNode(" + name + ")");
+        Ganymede.debug("DBBaseCategory (" + getName() + ").removeNode(" + name + ")");
       }
 
     for (i = 0; i < contents.size() && (index == -1); i++)
       {
-	if (debug)
-	  {
-	    Ganymede.debug(" examining: " + contents.elementAt(i));
-	  }
+        if (debug)
+          {
+            Ganymede.debug(" examining: " + contents.elementAt(i));
+          }
 
-	node = (CategoryNode) contents.elementAt(i);
+        node = (CategoryNode) contents.elementAt(i);
 
-	try
-	  {
-	    if (node.getName().equals(name))
-	      {
-		index = i;
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("caught remote: " + ex);
-	  }
+        try
+          {
+            if (node.getName().equals(name))
+              {
+                index = i;
+              }
+          }
+        catch (RemoteException ex)
+          {
+            throw new RuntimeException("caught remote: " + ex);
+          }
       }
 
     if (index == -1)
       {
-	throw new IllegalArgumentException("can't delete a name that's not in the category");
+        throw new IllegalArgumentException("can't delete a name that's not in the category");
       }
     else if (debug)
       {
-	System.err.println("DBBaseCategory.removeNode(): found node " + node);
-	
-	if (node instanceof DBObjectBase)
-	  {
-	    System.err.println("DBBaseCategory.removeNode(): node is DBObjectBase");
-	  }
-	else if (node instanceof Base)
-	  {
-	    System.err.println("DBBaseCategory.removeNode(): node is Base");
-	  }
-	else if (node instanceof DBBaseCategory)
-	  {
-	    System.err.println("DBBaseCategory.removeNode(): node is DBBaseCategory");
-	  }
-	else if (node instanceof Category)
-	  {
-	    System.err.println("DBBaseCategory.removeNode(): node is Category");
-	  }
-	else
-	  {
-	    System.err.println("DBBaseCategory.removeNode(): node is <unrecognized>");
-	  }
+        System.err.println("DBBaseCategory.removeNode(): found node " + node);
+        
+        if (node instanceof DBObjectBase)
+          {
+            System.err.println("DBBaseCategory.removeNode(): node is DBObjectBase");
+          }
+        else if (node instanceof Base)
+          {
+            System.err.println("DBBaseCategory.removeNode(): node is Base");
+          }
+        else if (node instanceof DBBaseCategory)
+          {
+            System.err.println("DBBaseCategory.removeNode(): node is DBBaseCategory");
+          }
+        else if (node instanceof Category)
+          {
+            System.err.println("DBBaseCategory.removeNode(): node is Category");
+          }
+        else
+          {
+            System.err.println("DBBaseCategory.removeNode(): node is <unrecognized>");
+          }
       }
 
     // remove our node from our content list
@@ -1394,19 +1394,19 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     if (debug)
       {
-	if (node instanceof DBObjectBase)
-	  {
-	    DBObjectBase base = (DBObjectBase) node;
+        if (node instanceof DBObjectBase)
+          {
+            DBObjectBase base = (DBObjectBase) node;
 
-	    if (!base.isEditing())
-	      {
-		System.err.println("DBBaseCategory.removeNode(2): " + base.getName() + " has a null editor!");
-	      }
-	    else
-	      {
-		System.err.println("DBBaseCategory.removeNode(2): " + base.getName() + " has a non-null editor!");
-	      }
-	  }
+            if (!base.isEditing())
+              {
+                System.err.println("DBBaseCategory.removeNode(2): " + base.getName() + " has a null editor!");
+              }
+            else
+              {
+                System.err.println("DBBaseCategory.removeNode(2): " + base.getName() + " has a non-null editor!");
+              }
+          }
       }
 
     // Sorry, kid, yer on your own now!
@@ -1424,17 +1424,17 @@ public class DBBaseCategory implements Category, CategoryNode {
   {
     for (CategoryNode candidate: contents)
       {
-	try
-	  {
-	    if (candidate.getName().equals(name))
-	      {
-		return candidate;
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("caught remote: " + ex);
-	  }
+        try
+          {
+            if (candidate.getName().equals(name))
+              {
+                return candidate;
+              }
+          }
+        catch (RemoteException ex)
+          {
+            throw new RuntimeException("caught remote: " + ex);
+          }
       }
 
     return null;
@@ -1465,11 +1465,11 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     try
       {
-	bc = new DBBaseCategory(store, name, this);
+        bc = new DBBaseCategory(store, name, this);
       }
     catch (RemoteException ex)
       {
-	return null;
+        return null;
       }
 
     addNodeAfter(bc, null);
@@ -1501,16 +1501,16 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     while (this.contains(name))
       {
-	name = ts.l("newSubCategory.new_category_indexed", Integer.valueOf(i++));
+        name = ts.l("newSubCategory.new_category_indexed", Integer.valueOf(i++));
       }
 
     try
       {
-	bc = new DBBaseCategory(store, name, this);
+        bc = new DBBaseCategory(store, name, this);
       }
     catch (RemoteException ex)
       {
-	return null;
+        return null;
       }
 
     addNodeAfter(bc, null);
@@ -1529,21 +1529,21 @@ public class DBBaseCategory implements Category, CategoryNode {
   {
     if (cat == null)
       {
-	return false;
+        return false;
       }
 
     if (cat.equals(this))
       {
-	return true;
+        return true;
       }
 
     if (parent == null)
       {
-	return false;
+        return false;
       }
     else
       {
-	return parent.isUnder(cat);
+        return parent.isUnder(cat);
       }
   }
 
@@ -1557,17 +1557,17 @@ public class DBBaseCategory implements Category, CategoryNode {
   {
     for (CategoryNode node: contents)
       {
-	try
-	  {
-	    if (node.getName().equals(name))
-	      {
-		return true;
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("caught remote: " + ex);
-	  }
+        try
+          {
+            if (node.getName().equals(name))
+              {
+                return true;
+              }
+          }
+        catch (RemoteException ex)
+          {
+            throw new RuntimeException("caught remote: " + ex);
+          }
       }
 
     return false;
@@ -1584,7 +1584,7 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     while (node.parent != null)
       {
-	node = node.parent;
+        node = node.parent;
       }
 
     return node;
@@ -1601,11 +1601,11 @@ public class DBBaseCategory implements Category, CategoryNode {
   {
     try
       {
-	return getBaseFromKey(base.getTypeID());
+        return getBaseFromKey(base.getTypeID());
       }
     catch (RemoteException ex)
       {
-	return null;
+        return null;
       }
   }
 
@@ -1620,11 +1620,11 @@ public class DBBaseCategory implements Category, CategoryNode {
   {
     if (editor != null)
       {
-	return (DBObjectBase) baseHash.get(Short.valueOf(id));
+        return (DBObjectBase) baseHash.get(Short.valueOf(id));
       }
     else
       {
-	return store.getObjectBase(id);
+        return store.getObjectBase(id);
       }
   }
 }

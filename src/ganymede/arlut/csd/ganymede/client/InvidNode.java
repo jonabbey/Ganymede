@@ -9,7 +9,7 @@
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2005
@@ -74,8 +74,8 @@ class InvidNode extends arlut.csd.JTree.treeNode {
   private ObjectHandle handle;
 
   public InvidNode(treeNode parent, String text, Invid invid, treeNode insertAfter,
-		   boolean expandable, int openImage, int closedImage, treeMenu menu,
-		   ObjectHandle handle)
+                   boolean expandable, int openImage, int closedImage, treeMenu menu,
+                   ObjectHandle handle)
   {
     super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
 
@@ -85,10 +85,10 @@ class InvidNode extends arlut.csd.JTree.treeNode {
 
     if (debug)
       {
-	if (invid == null)
-	  {
-	    System.out.println(" null invid in InvidNode: " + text);
-	  }
+        if (invid == null)
+          {
+            System.out.println(" null invid in InvidNode: " + text);
+          }
       }
   }
 

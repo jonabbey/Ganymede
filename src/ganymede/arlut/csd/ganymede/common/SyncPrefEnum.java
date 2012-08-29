@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -147,15 +147,15 @@ public enum SyncPrefEnum {
    */
 
   static public final String labels[] = {ts.l("global.never"), // "Never"
-					 ts.l("global.whenchanged"), // "When Changed"
-					 ts.l("global.always")}; // "Always"
+                                         ts.l("global.whenchanged"), // "When Changed"
+                                         ts.l("global.always")}; // "Always"
 
   /**
    * Full state sync channel fields only should have never and always.
    */
 
   static public final String fullStateLabels[] = {ts.l("global.never"), // "Never"
-						  ts.l("global.always")}; // "Always"
+                                                  ts.l("global.always")}; // "Always"
 
   /**
    * Locates and returns a SyncPrefEnum instance given the old numeric
@@ -167,17 +167,17 @@ public enum SyncPrefEnum {
   {
     if (val.equals("0") || val.equals(labels[0]))
       {
-	return NEVER;
+        return NEVER;
       }
 
     if (val.equals("1") || val.equals(labels[1]))
       {
-	return WHENCHANGED;
+        return WHENCHANGED;
       }
 
     if (val.equals("2") || val.equals(labels[2]))
       {
-	return ALWAYS;
+        return ALWAYS;
       }
 
     throw new IllegalArgumentException("bad option string");
@@ -188,16 +188,16 @@ public enum SyncPrefEnum {
     switch (this)
       {
       case NEVER:
-	return labels[0];
+        return labels[0];
 
       case WHENCHANGED:
-	return labels[1];
+        return labels[1];
 
       case ALWAYS:
-	return labels[2];
+        return labels[2];
 
       default:
-	return null;		// no-op
+        return null;            // no-op
       }
   }
 
@@ -210,16 +210,16 @@ public enum SyncPrefEnum {
     switch (this)
       {
       case NEVER:
-	return "0";
+        return "0";
       
       case WHENCHANGED:
-	return "1";
+        return "1";
 
       case ALWAYS:   
-	return "2";
+        return "2";
 
       default:
-	return null;		// no-op
+        return null;            // no-op
       }
   }
 
@@ -233,16 +233,16 @@ public enum SyncPrefEnum {
     switch (this)
       {
       case NEVER:
-	return 0;
+        return 0;
       
       case WHENCHANGED:
-	return 1;
+        return 1;
 
       case ALWAYS:   
-	return 2;
+        return 2;
 
       default:
-	return -1;		// no-op
+        return -1;              // no-op
       }
   }
 }

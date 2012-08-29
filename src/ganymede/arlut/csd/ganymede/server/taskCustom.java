@@ -9,7 +9,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -127,7 +127,7 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
   {
     if (field.getID() == SchemaConstants.TaskPeriodUnit)
       {
-	return true;
+        return true;
       }
 
     return super.mustChoose(field);
@@ -149,7 +149,7 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
   {
     if (field.getID() == SchemaConstants.TaskPeriodUnit)
       {
-	return choiceList;
+        return choiceList;
       }
 
     return super.obtainChoiceList(field);
@@ -174,12 +174,12 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
   {
     if (fieldid == SchemaConstants.TaskName || fieldid == SchemaConstants.TaskClass)
       {
-	return true;
+        return true;
       }
 
     if (fieldid == SchemaConstants.TaskPeriodUnit)
       {
-	return object.isSet(SchemaConstants.TaskRunPeriodically);
+        return object.isSet(SchemaConstants.TaskRunPeriodically);
       }
 
     return false;
@@ -197,7 +197,7 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
   {
     if (field.getID() == SchemaConstants.TaskPeriodCount)
       {
-	return true;
+        return true;
       }
 
     return super.isIntLimited(field);
@@ -214,7 +214,7 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
   {
     if (field.getID() == SchemaConstants.TaskPeriodCount)
       {
-	return 0;
+        return 0;
       }
 
     return super.minInt(field);
@@ -250,32 +250,32 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
 
     if (field.getID() == SchemaConstants.TaskRunOnCommit)
       {
-	boolean boolVal = ((Boolean) value).booleanValue();
+        boolean boolVal = ((Boolean) value).booleanValue();
 
-	ReturnVal result = new ReturnVal(true);
-	result.setRescanAll(field.getOwner().getInvid());
-		
-	if (boolVal)
-	  {
-	    setFieldValueLocal(SchemaConstants.TaskRunPeriodically, Boolean.FALSE);
-	  }
+        ReturnVal result = new ReturnVal(true);
+        result.setRescanAll(field.getOwner().getInvid());
+                
+        if (boolVal)
+          {
+            setFieldValueLocal(SchemaConstants.TaskRunPeriodically, Boolean.FALSE);
+          }
 
-	return result;
+        return result;
       }
 
     if (field.getID() == SchemaConstants.TaskRunPeriodically)
       {
-	boolean boolVal = ((Boolean) value).booleanValue();
+        boolean boolVal = ((Boolean) value).booleanValue();
 
-	ReturnVal result = new ReturnVal(true);
-	result.setRescanAll(field.getOwner().getInvid());
+        ReturnVal result = new ReturnVal(true);
+        result.setRescanAll(field.getOwner().getInvid());
 
-	if (boolVal)
-	  {
-	    setFieldValueLocal(SchemaConstants.TaskRunOnCommit, Boolean.FALSE);
-	  }
+        if (boolVal)
+          {
+            setFieldValueLocal(SchemaConstants.TaskRunOnCommit, Boolean.FALSE);
+          }
 
-	return result;
+        return result;
       }
 
     return null;
@@ -305,21 +305,21 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
   {
     if (field.getFieldDef().base() != this.objectBase)
       {
-	throw new IllegalArgumentException("field/object mismatch");
+        throw new IllegalArgumentException("field/object mismatch");
       }
 
     if (field.getOwner() instanceof DBEditObject)
       {
-	DBEditObject myObj = (DBEditObject) field.getOwner();
+        DBEditObject myObj = (DBEditObject) field.getOwner();
 
-	switch (field.getID())
-	  {
-	  case SchemaConstants.TaskPeriodUnit:
-	  case SchemaConstants.TaskPeriodCount:
-	  case SchemaConstants.TaskPeriodAnchor:
-	    
-	    return myObj.isSet(SchemaConstants.TaskRunPeriodically);
-	  }
+        switch (field.getID())
+          {
+          case SchemaConstants.TaskPeriodUnit:
+          case SchemaConstants.TaskPeriodCount:
+          case SchemaConstants.TaskPeriodAnchor:
+            
+            return myObj.isSet(SchemaConstants.TaskRunPeriodically);
+          }
       }
 
     // by default, return the field definition's visibility
@@ -353,7 +353,7 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
 
     if (original != null)
       {
-	origName = (String) original.getFieldValueLocal(SchemaConstants.TaskName);
+        origName = (String) original.getFieldValueLocal(SchemaConstants.TaskName);
       }
 
     taskName = (String) getFieldValueLocal(SchemaConstants.TaskName);
@@ -361,34 +361,34 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
     switch (getStatus())
       {
       case DROPPING:
-	return;
+        return;
 
       case DELETING:
-	Ganymede.scheduler.unregisterTask(origName);
+        Ganymede.scheduler.unregisterTask(origName);
 
-	break;
+        break;
 
       case EDITING:
-	if (!origName.equals(taskName))
-	  {
-	    // we changed our task name.. ditch the old record
+        if (!origName.equals(taskName))
+          {
+            // we changed our task name.. ditch the old record
 
-	    Ganymede.scheduler.unregisterTask(origName);
+            Ganymede.scheduler.unregisterTask(origName);
 
-	    // and re-register ourselves appropriately
+            // and re-register ourselves appropriately
 
-	    Ganymede.scheduler.registerTaskObject(this);
-	  }
-	else
-	  {
-	    // no name change, go ahead and reschedule ourselves
+            Ganymede.scheduler.registerTaskObject(this);
+          }
+        else
+          {
+            // no name change, go ahead and reschedule ourselves
 
-	    Ganymede.scheduler.registerTaskObject(this);
-	  }
-	break;
+            Ganymede.scheduler.registerTaskObject(this);
+          }
+        break;
 
       case CREATING:
-	Ganymede.scheduler.registerTaskObject(this);
+        Ganymede.scheduler.registerTaskObject(this);
       }
   }
 

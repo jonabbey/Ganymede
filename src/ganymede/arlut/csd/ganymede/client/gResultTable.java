@@ -200,7 +200,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
   public gResultTable(windowPanel wp, Session session, Query query, DumpResult results) throws RemoteException
   {
-    super();			// JInternalFrame init
+    super();                    // JInternalFrame init
 
     this.wp = wp;
     this.session = session;
@@ -249,15 +249,15 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     if (query.objectName != null)
       {
-	queryType = query.objectName;
+        queryType = query.objectName;
       }
     else if (query.objectType != -1)
       {
-	queryType = wp.getgclient().loader.getObjectType(query.objectType);
+        queryType = wp.getgclient().loader.getObjectType(query.objectType);
       }
     else
       {
-	queryType = ts.l("loadResults.unknown_query_type");   // "<unknown>"
+        queryType = ts.l("loadResults.unknown_query_type");   // "<unknown>"
       }
 
     int rows = results.resultSize();
@@ -270,18 +270,18 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     for (int j = 0; j < headerVect.size(); j++)
       {
-	used[j] = false;
+        used[j] = false;
 
-	for (int i = 0; !used[j] && i < rows; i++)
-	  {
-	    Object x = results.getResult(i, j);
+        for (int i = 0; !used[j] && i < rows; i++)
+          {
+            Object x = results.getResult(i, j);
 
-	    if (x != null && !x.toString().equals(""))
-	      {
-		used[j] = true;
-		colsUsed++;
-	      }
-	  }
+            if (x != null && !x.toString().equals(""))
+              {
+                used[j] = true;
+                colsUsed++;
+              }
+          }
       }
 
     // "Query: [{0}] results: {1,num,#} entries"
@@ -290,7 +290,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     if (debug)
       {
-	System.err.println("gResultTable: " + headerVect.size() + " headers returned by query, " + colsUsed + " in use.");
+        System.err.println("gResultTable: " + headerVect.size() + " headers returned by query, " + colsUsed + " in use.");
       }
 
     String[] columnNames = new String[colsUsed];
@@ -299,17 +299,17 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     for (int j=0, k=0; j < headerVect.size(); j++)
       {
-	if (used[j])
-	  {
-	    columnNames[k] = (String) headerVect.elementAt(j);
+        if (used[j])
+          {
+            columnNames[k] = (String) headerVect.elementAt(j);
 
-	    if (debug)
-	      {
-		System.out.println("columnNames " + k + " value is:" + columnNames[k] + "*");
-	      }
+            if (debug)
+              {
+                System.out.println("columnNames " + k + " value is:" + columnNames[k] + "*");
+              }
 
-	    k++;
-	  }
+            k++;
+          }
       }
 
     // Pass our SmartTable the results set, and a text Row menu
@@ -323,19 +323,19 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     // Now Read in all the result lines.
     for (int i=0; i < rows; i++)
       {
-	Invid invid = results.getInvid(i);
-	sTable.newRow(invid);
+        Invid invid = results.getInvid(i);
+        sTable.newRow(invid);
 
-	for (int j=0, k=0; j < headerVect.size(); j++)
-	  {
-	    if (used[j])
-	      {
-		Object cellResult = results.getResult(i, j);
-		sTable.setCellValue(invid, k, cellResult);
+        for (int j=0, k=0; j < headerVect.size(); j++)
+          {
+            if (used[j])
+              {
+                Object cellResult = results.getResult(i, j);
+                sTable.setCellValue(invid, k, cellResult);
 
-		k++;
-	      }
-	  }
+                k++;
+              }
+          }
       }
 
     validate(); // needed after refresh results.
@@ -371,7 +371,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     // "M"
     if (ts.hasPattern("createToolBar.mail_button_mnemonic_optional"))
       {
-	b.setMnemonic((int) ts.l("createToolBar.mail_button_mnemonic_optional").charAt(0));
+        b.setMnemonic((int) ts.l("createToolBar.mail_button_mnemonic_optional").charAt(0));
       }
 
     b.setFont(new Font("SansSerif", Font.PLAIN, 10));
@@ -383,7 +383,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     // "Email results"
     if (ts.hasPattern("createToolBar.mail_button_tooltip_optional"))
       {
-	b.setToolTipText(ts.l("createToolBar.mail_button_tooltip_optional"));
+        b.setToolTipText(ts.l("createToolBar.mail_button_tooltip_optional"));
       }
 
     b.addActionListener(this);
@@ -392,29 +392,29 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     // No save feature if running from applet
     if (!glogin.isApplet())
       {
-	// "Save"
-	b = new JButton(ts.l("createToolBar.save_button"), new ImageIcon(saveIcon));
+        // "Save"
+        b = new JButton(ts.l("createToolBar.save_button"), new ImageIcon(saveIcon));
 
-	// "S"
-	if (ts.hasPattern("createToolBar.save_button_mnemonic_optional"))
-	  {
-	    b.setMnemonic((int) ts.l("createToolBar.save_button_mnemonic_optional").charAt(0));
-	  }
+        // "S"
+        if (ts.hasPattern("createToolBar.save_button_mnemonic_optional"))
+          {
+            b.setMnemonic((int) ts.l("createToolBar.save_button_mnemonic_optional").charAt(0));
+          }
 
-	b.setFont(new Font("SansSerif", Font.PLAIN, 10));
-	b.setMargin(insets);
-	b.setActionCommand(save_report);
-	b.setVerticalTextPosition(b.BOTTOM);
-	b.setHorizontalTextPosition(b.CENTER);
+        b.setFont(new Font("SansSerif", Font.PLAIN, 10));
+        b.setMargin(insets);
+        b.setActionCommand(save_report);
+        b.setVerticalTextPosition(b.BOTTOM);
+        b.setHorizontalTextPosition(b.CENTER);
 
-	// "Save results"
-	if (ts.hasPattern("createToolBar.save_button_tooltip_optional"))
-	  {
-	    b.setToolTipText(ts.l("createToolBar.save_button_tooltip_optional"));
-	  }
+        // "Save results"
+        if (ts.hasPattern("createToolBar.save_button_tooltip_optional"))
+          {
+            b.setToolTipText(ts.l("createToolBar.save_button_tooltip_optional"));
+          }
 
-	b.addActionListener(this);
-	toolBarTemp.add(b);
+        b.addActionListener(this);
+        toolBarTemp.add(b);
       }
 
 
@@ -424,7 +424,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     // "P"
     if (ts.hasPattern("createToolBar.print_button_mnemonic_optional"))
       {
-	b.setMnemonic((int) ts.l("createToolBar.print_button_mnemonic_optional").charAt(0));
+        b.setMnemonic((int) ts.l("createToolBar.print_button_mnemonic_optional").charAt(0));
       }
 
     b.setFont(new Font("SansSerif", Font.PLAIN, 10));
@@ -436,7 +436,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     // "Print results"
     if (ts.hasPattern("createToolBar.print_button_tooltip_optional"))
       {
-	b.setToolTipText(ts.l("createToolBar.print_button_tooltip_optional"));
+        b.setToolTipText(ts.l("createToolBar.print_button_tooltip_optional"));
       }
 
     b.addActionListener(this);
@@ -448,7 +448,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     // "R"
     if (ts.hasPattern("createToolBar.refresh_button_mnemonic_optional"))
       {
-	b.setMnemonic((int) ts.l("createToolBar.refresh_button_mnemonic_optional").charAt(0));
+        b.setMnemonic((int) ts.l("createToolBar.refresh_button_mnemonic_optional").charAt(0));
       }
 
     b.setFont(new Font("SansSerif", Font.PLAIN, 10));
@@ -460,7 +460,7 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
     // "Refresh query"
     if (ts.hasPattern("createToolBar.refresh_button_tooltip_optional"))
       {
-	b.setToolTipText(ts.l("createToolBar.refresh_button_tooltip_optional"));
+        b.setToolTipText(ts.l("createToolBar.refresh_button_tooltip_optional"));
       }
 
     b.addActionListener(this);
@@ -478,16 +478,16 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   {
     if (event.getActionCommand().equals(mail_report))
       {
-	sendReport(true);
-	toolbar.requestFocus();
-	return;
+        sendReport(true);
+        toolbar.requestFocus();
+        return;
       }
 
     if (event.getActionCommand().equals(save_report))
       {
-	sendReport(false);
-	toolbar.requestFocus();
-	return;
+        sendReport(false);
+        toolbar.requestFocus();
+        return;
       }
 
      if (event.getActionCommand().equals(print_report))
@@ -499,9 +499,9 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     if (event.getActionCommand().equals(refresh_query))
       {
-	refreshQuery();
-	toolbar.requestFocus();
-	return;
+        refreshQuery();
+        toolbar.requestFocus();
+        return;
       }
   }
 
@@ -522,22 +522,22 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     if (!dialog.showDialog())
       {
-	return;
+        return;
       }
 
     format = dialog.getFormat();
 
     if (format.equals(html_option))
       {
-	report = generateHTMLRep();
+        report = generateHTMLRep();
       }
     else if (format.equals(csv_option))
       {
-	report = generateCSV();
+        report = generateCSV();
       }
     else if (format.equals(tab_option))
       {
-	report = generateTextRep('\t');
+        report = generateTextRep('\t');
       }
     else if (format.equals(xml_option))
       {
@@ -552,109 +552,109 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
       }
     else
       {
-	throw new RuntimeException("Error, SaveDialog returned unrecognized format! " + format);
+        throw new RuntimeException("Error, SaveDialog returned unrecognized format! " + format);
       }
 
     if (mailit)
       {
-	addresses = dialog.getRecipients();
+        addresses = dialog.getRecipients();
 
-	try
-	  {
-	    if (format.equals(html_option))
-	      {
-		session.sendHTMLMail(addresses, dialog.getSubject(), null, report);
-	      }
-	    else
-	      {
-		session.sendMail(addresses, dialog.getSubject(), report);
-	      }
-	  }
-	catch (Exception ex)
-	  {
-	    wp.gc.processException(ex, "Could not send mail.");
-	  }
+        try
+          {
+            if (format.equals(html_option))
+              {
+                session.sendHTMLMail(addresses, dialog.getSubject(), null, report);
+              }
+            else
+              {
+                session.sendMail(addresses, dialog.getSubject(), report);
+              }
+          }
+        catch (Exception ex)
+          {
+            wp.gc.processException(ex, "Could not send mail.");
+          }
 
-	return;
+        return;
       }
     else
       {
-	JFileChooser chooser = new JFileChooser();
-	File file;
-	PrintWriter writer = null;
+        JFileChooser chooser = new JFileChooser();
+        File file;
+        PrintWriter writer = null;
 
-	chooser.setDialogType(JFileChooser.SAVE_DIALOG);
+        chooser.setDialogType(JFileChooser.SAVE_DIALOG);
 
-	// "Save Report As"
-	chooser.setDialogTitle(ts.l("sendReport.dialog_title"));
+        // "Save Report As"
+        chooser.setDialogTitle(ts.l("sendReport.dialog_title"));
 
-	if (gclient.prefs != null)
-	  {
-	    String defaultPath = gclient.prefs.get(TABLE_SAVE, null);
+        if (gclient.prefs != null)
+          {
+            String defaultPath = gclient.prefs.get(TABLE_SAVE, null);
 
-	    if (defaultPath != null)
-	      {
-		chooser.setCurrentDirectory(new File(defaultPath));
-	      }
-	  }
+            if (defaultPath != null)
+              {
+                chooser.setCurrentDirectory(new File(defaultPath));
+              }
+          }
 
-	int returnValue = chooser.showDialog(wp.gc, null);
+        int returnValue = chooser.showDialog(wp.gc, null);
 
-	if (!(returnValue == JFileChooser.APPROVE_OPTION))
-	  {
-	    return;
-	  }
+        if (!(returnValue == JFileChooser.APPROVE_OPTION))
+          {
+            return;
+          }
 
-	file = chooser.getSelectedFile();
-	File directory = chooser.getCurrentDirectory();
+        file = chooser.getSelectedFile();
+        File directory = chooser.getCurrentDirectory();
 
-	try
-	  {
-	    if (gclient.prefs != null)
-	      {
-		gclient.prefs.put(TABLE_SAVE, directory.getCanonicalPath());
-	      }
-	  }
-	catch (java.io.IOException ex)
-	  {
-	    // we don't really care if we can't save the directory
-	    // path in our preferences all that much.
-	  }
+        try
+          {
+            if (gclient.prefs != null)
+              {
+                gclient.prefs.put(TABLE_SAVE, directory.getCanonicalPath());
+              }
+          }
+        catch (java.io.IOException ex)
+          {
+            // we don't really care if we can't save the directory
+            // path in our preferences all that much.
+          }
 
-	if (file.exists())
-	  {
-	    // "Warning, file {0} already exists.
-	    // "Warning, file {0} already exists.  Are you sure you want to replace this file?"
-	    // "Yes, Overwrite"
-	    StringDialog d = new StringDialog(wp.gc,
-					      ts.l("sendReport.file_exists_title", file.getName()),
-					      ts.l("sendReport.file_exists", file.getName()),
-					      ts.l("sendReport.overwrite"),
-					      StringDialog.getDefaultCancel(),
-					      null);
-	    Hashtable result = d.showDialog();
+        if (file.exists())
+          {
+            // "Warning, file {0} already exists.
+            // "Warning, file {0} already exists.  Are you sure you want to replace this file?"
+            // "Yes, Overwrite"
+            StringDialog d = new StringDialog(wp.gc,
+                                              ts.l("sendReport.file_exists_title", file.getName()),
+                                              ts.l("sendReport.file_exists", file.getName()),
+                                              ts.l("sendReport.overwrite"),
+                                              StringDialog.getDefaultCancel(),
+                                              null);
+            Hashtable result = d.showDialog();
 
-	    if (result == null)
-	      {
-		return;
-	      }
-	  }
+            if (result == null)
+              {
+                return;
+              }
+          }
 
-	try
-	  {
-	    writer = new PrintWriter(new BufferedWriter(new FileWriter(file)));
-	  }
-	catch (java.io.IOException e)
-	  {
-	    // "Trouble saving"
-	    // "Could not open the file."
-	    wp.gc.showErrorMessage(ts.l("sendReport.save_problem_subj"),
-				   ts.l("sendReport.save_problem_text"));
-	    return;
-	  }
+        try
+          {
+            writer = new PrintWriter(new BufferedWriter(new FileWriter(file)));
+          }
+        catch (java.io.IOException e)
+          {
+            // "Trouble saving"
+            // "Could not open the file."
+            wp.gc.showErrorMessage(ts.l("sendReport.save_problem_subj"),
+                                   ts.l("sendReport.save_problem_text"));
+            return;
+          }
 
-	writer.print(report.toString());
-	writer.close();
+        writer.print(report.toString());
+        writer.close();
       }
   }
 
@@ -667,31 +667,31 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     if (query == null)
       {
-	return;
+        return;
       }
 
     try
       {
-	buffer = session.dump(query);
+        buffer = session.dump(query);
       }
     catch (Exception ex)
       {
-	this.wp.getgclient().processException(ex);
+        this.wp.getgclient().processException(ex);
       }
 
     if (buffer == null)
       {
-	if (debug)
-	  {
-	    System.err.println("null query dump result");
-	  }
+        if (debug)
+          {
+            System.err.println("null query dump result");
+          }
 
-	// "No results"
-	setStatus(ts.l("refreshQuery.no_result_status"));
+        // "No results"
+        setStatus(ts.l("refreshQuery.no_result_status"));
       }
     else
       {
-	loadResults(buffer);
+        loadResults(buffer);
       }
   }
 
@@ -741,23 +741,23 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
   {
     if (event.getSource() == viewMI)
       {
-	wp.getgclient().viewObject((Invid) key);
+        wp.getgclient().viewObject((Invid) key);
       }
     else if (event.getSource() == editMI)
       {
-	wp.getgclient().editObject((Invid)key);
+        wp.getgclient().editObject((Invid)key);
       }
     else if (event.getSource() == deleteMI)
       {
-	wp.getgclient().deleteObject((Invid)key, true);
+        wp.getgclient().deleteObject((Invid)key, true);
       }
     else if (event.getSource() == inactivateMI)
       {
-	wp.getgclient().inactivateObject((Invid)key);
+        wp.getgclient().inactivateObject((Invid)key);
       }
     else if (event.getSource() == cloneMI)
       {
-	wp.getgclient().cloneObject((Invid)key);
+        wp.getgclient().cloneObject((Invid)key);
       }
   }
 
@@ -801,33 +801,33 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     for (int i = 0; i < colcount; i++)
       {
-	result.append("<th>");
-	result.append(sTable.getColumnName(i));
-	result.append("</th>\n");
+        result.append("<th>");
+        result.append(sTable.getColumnName(i));
+        result.append("</th>\n");
       }
 
     result.append("</tr>\n");
 
     for (int i = 0; i < size; i++)
       {
-	result.append("<tr>\n");
+        result.append("<tr>\n");
 
-	for (int j = 0; j < colcount; j++)
-	  {
-	    result.append("<td>");
+        for (int j = 0; j < colcount; j++)
+          {
+            result.append("<td>");
 
-	    Object value = sTable.getValueAt(i, j);
+            Object value = sTable.getValueAt(i, j);
 
-	    if (value != null)
-	      {
-		cellText = escapeHTML(value.toString());
-		result.append(cellText);
-	      }
+            if (value != null)
+              {
+                cellText = escapeHTML(value.toString());
+                result.append(cellText);
+              }
 
-	    result.append("</td>\n");
-	  }
+            result.append("</td>\n");
+          }
 
-	result.append("</tr>\n");
+        result.append("</tr>\n");
       }
 
     result.append("</table><hr></body></html>\n");
@@ -856,23 +856,23 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     for (int i = 0; i < size; i++)
       {
-	for (int j = 0; j < colcount; j++)
-	  {
-	    if (j > 0)
-	      {
-		result.append(",");
-	      }
+        for (int j = 0; j < colcount; j++)
+          {
+            if (j > 0)
+              {
+                result.append(",");
+              }
 
-	    Object value = sTable.getValueAt(i, j);
+            Object value = sTable.getValueAt(i, j);
 
-	    if (value != null)
-	      {
-		cellText = escapeCSV(value.toString());
-		result.append(cellText);
-	      }
-	  }
+            if (value != null)
+              {
+                cellText = escapeCSV(value.toString());
+                result.append(cellText);
+              }
+          }
 
-	result.append("\n");
+        result.append("\n");
       }
 
     return result;
@@ -900,23 +900,23 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     for (int i = 0; i < size; i++)
       {
-	for (int j = 0; j < colcount; j++)
-	  {
-	    if (j > 0)
-	      {
-		result.append(sepChar);
-	      }
+        for (int j = 0; j < colcount; j++)
+          {
+            if (j > 0)
+              {
+                result.append(sepChar);
+              }
 
-	    Object value = sTable.getValueAt(i, j);
+            Object value = sTable.getValueAt(i, j);
 
-	    if (value != null)
-	      {
-		cellText = escapeString(value.toString(), sepChar);
-		result.append(cellText);
-	      }
-	  }
+            if (value != null)
+              {
+                cellText = escapeString(value.toString(), sepChar);
+                result.append(cellText);
+              }
+          }
 
-	result.append("\n");
+        result.append("\n");
       }
 
     return result;
@@ -972,27 +972,27 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     for (int j = 0; j < chars.length; j++)
       {
-	if (chars[j] == '\\')
-	  {
-	    buffer.append("\\\\");
-	  }
-	else if (chars[j] == '\t')
-	  {
-	    buffer.append("    ");
-	  }
-	else if (chars[j] == '\n')
-	  {
-	    buffer.append("\\n");
-	  }
-	else if (chars[j] == sepChar)
-	  {
-	    buffer.append("\\");
-	    buffer.append(sepChar);
-	  }
-	else
-	  {
-	    buffer.append(chars[j]);
-	  }
+        if (chars[j] == '\\')
+          {
+            buffer.append("\\\\");
+          }
+        else if (chars[j] == '\t')
+          {
+            buffer.append("    ");
+          }
+        else if (chars[j] == '\n')
+          {
+            buffer.append("\\n");
+          }
+        else if (chars[j] == sepChar)
+          {
+            buffer.append("\\");
+            buffer.append(sepChar);
+          }
+        else
+          {
+            buffer.append(chars[j]);
+          }
       }
 
     return buffer.toString();
@@ -1013,30 +1013,30 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     for (int j = 0; j < chars.length; j++)
       {
-	if (chars[j] == '"')
-	  {
-	    buffer.append("\"\"");
-	    continue;
-	  }
-	else if (chars[j] == '\n')
-	  {
-	    surround_with_quotes = true;
-	  }
-	else if (chars[j] == ',')
-	  {
-	    surround_with_quotes = true;
-	  }
+        if (chars[j] == '"')
+          {
+            buffer.append("\"\"");
+            continue;
+          }
+        else if (chars[j] == '\n')
+          {
+            surround_with_quotes = true;
+          }
+        else if (chars[j] == ',')
+          {
+            surround_with_quotes = true;
+          }
 
-	buffer.append(chars[j]);
+        buffer.append(chars[j]);
       }
 
     if (surround_with_quotes)
       {
-	return "\"" + buffer.toString() + "\"";
+        return "\"" + buffer.toString() + "\"";
       }
     else
       {
-	return buffer.toString();
+        return buffer.toString();
       }
   }
 
@@ -1055,18 +1055,18 @@ public class gResultTable extends JInternalFrame implements rowSelectCallback, A
 
     for (int j = 0; j < chars.length; j++)
       {
-	if (chars[j] == '<')
-	  {
-	    buffer.append("&lt;");
-	  }
-	else if (chars[j] == '>')
-	  {
-	    buffer.append("&gt;");
-	  }
-	else
-	  {
-	    buffer.append(chars[j]);
-	  }
+        if (chars[j] == '<')
+          {
+            buffer.append("&lt;");
+          }
+        else if (chars[j] == '>')
+          {
+            buffer.append("&gt;");
+          }
+        else
+          {
+            buffer.append(chars[j]);
+          }
       }
 
     return buffer.toString();

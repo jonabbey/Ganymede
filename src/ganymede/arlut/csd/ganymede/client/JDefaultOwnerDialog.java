@@ -9,7 +9,7 @@
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2009
@@ -144,19 +144,19 @@ public class JDefaultOwnerDialog extends StandardDialog implements ActionListene
 
     synchronized(JDefaultOwnerDialog.last_chosen_lock)
       {
-	if (JDefaultOwnerDialog.last_chosen != null)
-	  {
-	    handleVector = new Vector();
+        if (JDefaultOwnerDialog.last_chosen != null)
+          {
+            handleVector = new Vector();
 
-	    for (int i = 0; i < JDefaultOwnerDialog.last_chosen.size(); i++)
-	      {
-		listHandle lh = (listHandle) JDefaultOwnerDialog.last_chosen.elementAt(i);
-		Invid element_invid = (Invid) lh.getObject();
+            for (int i = 0; i < JDefaultOwnerDialog.last_chosen.size(); i++)
+              {
+                listHandle lh = (listHandle) JDefaultOwnerDialog.last_chosen.elementAt(i);
+                Invid element_invid = (Invid) lh.getObject();
 
-		handleVector.add(lh);
-		chosen.add(element_invid);
-	      }
-	  }
+                handleVector.add(lh);
+                chosen.add(element_invid);
+              }
+          }
       }
 
     ss = new StringSelector(this, true, true, true);
@@ -172,26 +172,26 @@ public class JDefaultOwnerDialog extends StandardDialog implements ActionListene
     
     if (glogin.isRunningOnMac())
       {
-	JPanel p = new JPanel();
-	p.add(cancel);
-	p.add(ok);
+        JPanel p = new JPanel();
+        p.add(cancel);
+        p.add(ok);
 
-	JPanel macPanel = new JPanel();
-	macPanel.setLayout(new BorderLayout());
-	macPanel.add(p, BorderLayout.EAST);
+        JPanel macPanel = new JPanel();
+        macPanel.setLayout(new BorderLayout());
+        macPanel.add(p, BorderLayout.EAST);
 
-	macPanel.setBorder(gc.raisedBorder);
+        macPanel.setBorder(gc.raisedBorder);
     
-	getContentPane().add("South", macPanel);
+        getContentPane().add("South", macPanel);
       }
     else
       {
-	JPanel p = new JPanel();
-	p.add(ok);
-	p.add(cancel);
-	p.setBorder(gc.raisedBorder);
+        JPanel p = new JPanel();
+        p.add(ok);
+        p.add(cancel);
+        p.setBorder(gc.raisedBorder);
     
-	getContentPane().add("South", p);
+        getContentPane().add("South", p);
       }
 
     setBounds(50,50,50,50);
@@ -202,38 +202,38 @@ public class JDefaultOwnerDialog extends StandardDialog implements ActionListene
   {
     if (e instanceof JAddValueObject)
       {
-	if (debug)
-	  {
-	    System.out.println("Adding element");
-	  }
+        if (debug)
+          {
+            System.out.println("Adding element");
+          }
 
-	chosen.addElement(e.getValue());
+        chosen.addElement(e.getValue());
       }
     else if (e instanceof JAddVectorValueObject)
       {
-	Vector newElements = (Vector) e.getValue();
+        Vector newElements = (Vector) e.getValue();
 
-	for (int i = 0; i < newElements.size(); i++)
-	  {
-	    chosen.addElement(newElements.elementAt(i));
-	  }
+        for (int i = 0; i < newElements.size(); i++)
+          {
+            chosen.addElement(newElements.elementAt(i));
+          }
       }
     else if (e instanceof JDeleteValueObject)
       {
-	if (debug)
-	  {
-	    System.out.println("removing element");
-	  }
-	chosen.removeElement(e.getValue());
+        if (debug)
+          {
+            System.out.println("removing element");
+          }
+        chosen.removeElement(e.getValue());
       }
     else if (e instanceof JDeleteVectorValueObject)
       {
-	Vector newElements = (Vector) e.getValue();
+        Vector newElements = (Vector) e.getValue();
 
-	for (int i = 0; i < newElements.size(); i++)
-	  {
-	    chosen.removeElement(newElements.elementAt(i));
-	  }
+        for (int i = 0; i < newElements.size(); i++)
+          {
+            chosen.removeElement(newElements.elementAt(i));
+          }
       }
 
     ok.setEnabled(chosen.size () != 0);
@@ -245,41 +245,41 @@ public class JDefaultOwnerDialog extends StandardDialog implements ActionListene
   {
     if (e.getSource() == ok)
       {
-	try
-	  {
-	    retVal = gc.getSession().setDefaultOwner(chosen);
-	    
-	    retVal = gc.handleReturnVal(retVal);
+        try
+          {
+            retVal = gc.getSession().setDefaultOwner(chosen);
+            
+            retVal = gc.handleReturnVal(retVal);
 
-	    if (retVal == null || retVal.didSucceed())
-	      {
-		this.group_chosen = true;
+            if (retVal == null || retVal.didSucceed())
+              {
+                this.group_chosen = true;
 
-		synchronized (JDefaultOwnerDialog.last_chosen_lock)
-		  {
-		    if (JDefaultOwnerDialog.last_chosen == null)
-		      {
-			JDefaultOwnerDialog.last_chosen = new Vector();
-		      }
-		    else
-		      {
-			JDefaultOwnerDialog.last_chosen.clear();
-		      }
+                synchronized (JDefaultOwnerDialog.last_chosen_lock)
+                  {
+                    if (JDefaultOwnerDialog.last_chosen == null)
+                      {
+                        JDefaultOwnerDialog.last_chosen = new Vector();
+                      }
+                    else
+                      {
+                        JDefaultOwnerDialog.last_chosen.clear();
+                      }
 
-		    JDefaultOwnerDialog.last_chosen.addAll(ss.getChosenHandles());
-		  }
-	      }
+                    JDefaultOwnerDialog.last_chosen.addAll(ss.getChosenHandles());
+                  }
+              }
 
-	    this.setVisible(false);
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not set filter: " + rx);
-	  }
+            this.setVisible(false);
+          }
+        catch (RemoteException rx)
+          {
+            throw new RuntimeException("Could not set filter: " + rx);
+          }
       }
     else if (e.getSource() == cancel)
       {
-	this.setVisible(false);
+        this.setVisible(false);
       }
   }
 
@@ -307,7 +307,7 @@ public class JDefaultOwnerDialog extends StandardDialog implements ActionListene
 
     if (!this.group_chosen && (retVal == null || retVal.didSucceed()))
       {
-	retVal = new ReturnVal(false);
+        retVal = new ReturnVal(false);
       }
 
     return retVal;
@@ -324,7 +324,7 @@ public class JDefaultOwnerDialog extends StandardDialog implements ActionListene
   {
     synchronized (JDefaultOwnerDialog.last_chosen_lock)
       {
-	JDefaultOwnerDialog.last_chosen = null;
+        JDefaultOwnerDialog.last_chosen = null;
       }
   }
 }

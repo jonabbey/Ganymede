@@ -178,7 +178,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   {
     if (debug)
       {
-	System.err.println("DBSchemaEdit constructor entered");
+        System.err.println("DBSchemaEdit constructor entered");
       }
 
     // the GanymedeAdmin editSchema() method should have disabled the
@@ -187,7 +187,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     if (!"schema edit".equals(GanymedeServer.lSemaphore.checkEnabled()))
       {
-	throw new RuntimeException("can't edit schema without lock");
+        throw new RuntimeException("can't edit schema without lock");
       }
 
     locked = true;
@@ -198,37 +198,37 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     synchronized (store)
       {
-	// duplicate the existing category tree and all the contained
-	// bases
+        // duplicate the existing category tree and all the contained
+        // bases
 
-	newBases = new Hashtable<Short, DBObjectBase>();
+        newBases = new Hashtable<Short, DBObjectBase>();
 
-	// this DBBaseCategory constructor recursively copies the
-	// bases referenced from store.rootCategory into newBases,
-	// making copies for us to edit along the way.
+        // this DBBaseCategory constructor recursively copies the
+        // bases referenced from store.rootCategory into newBases,
+        // making copies for us to edit along the way.
 
-	rootCategory = new DBBaseCategory(store, store.rootCategory, newBases, this);
+        rootCategory = new DBBaseCategory(store, store.rootCategory, newBases, this);
 
-	// make a shallow copy of our namespaces vector.. note that
-	// since DBNameSpace's are immutable once created, we don't
-	// need to worry about creating new ones, or about correcting
-	// the DBNameSpace references in the duplicated
-	// DBObjectBaseFields.
+        // make a shallow copy of our namespaces vector.. note that
+        // since DBNameSpace's are immutable once created, we don't
+        // need to worry about creating new ones, or about correcting
+        // the DBNameSpace references in the duplicated
+        // DBObjectBaseFields.
 
-	// we use oldNameSpaces to undo any namespace additions or deletions
-	// we do in store.nameSpaces during our editing.
+        // we use oldNameSpaces to undo any namespace additions or deletions
+        // we do in store.nameSpaces during our editing.
 
-	// note that we'll have to change our namespaces logic if/when
-	// DBNameSpace objects become mutable.
+        // note that we'll have to change our namespaces logic if/when
+        // DBNameSpace objects become mutable.
 
-	oldNameSpaces = new Vector<DBNameSpace>();
+        oldNameSpaces = new Vector<DBNameSpace>();
 
-	for (DBNameSpace ns: store.nameSpaces)
-	  {
-	    Ganymede.rmi.publishObject(ns);
+        for (DBNameSpace ns: store.nameSpaces)
+          {
+            Ganymede.rmi.publishObject(ns);
 
-	    oldNameSpaces.add(ns);
-	  }
+            oldNameSpaces.add(ns);
+          }
       }
 
     Ganymede.rmi.publishObject(this);
@@ -262,7 +262,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     if (pathName == null)
       {
-	throw new IllegalArgumentException("can't deal with null pathName");
+        throw new IllegalArgumentException("can't deal with null pathName");
       }
 
     StringReader reader = new StringReader(pathName);
@@ -276,50 +276,50 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     try
       {
-	tok = tokens.nextToken();
+        tok = tokens.nextToken();
 
-	bc = rootCategory;
+        bc = rootCategory;
 
-	// The path is going to include the name of the root node
-	// itself (unlike in the UNIX filesystem, where the root node
-	// has no 'name' of its own), so we need to skip into the root
-	// node.
+        // The path is going to include the name of the root node
+        // itself (unlike in the UNIX filesystem, where the root node
+        // has no 'name' of its own), so we need to skip into the root
+        // node.
 
-	if (tok == '/')
-	  {
-	    tok = tokens.nextToken();
-	  }
+        if (tok == '/')
+          {
+            tok = tokens.nextToken();
+          }
 
-	if (tok == StreamTokenizer.TT_WORD && tokens.sval.equals(rootCategory.getName()))
-	  {
-	    tok = tokens.nextToken();
-	  }
+        if (tok == StreamTokenizer.TT_WORD && tokens.sval.equals(rootCategory.getName()))
+          {
+            tok = tokens.nextToken();
+          }
 
-	while (tok != StreamTokenizer.TT_EOF && bc != null)
-	  {
-	    // note that slashes are the only non-word token we should
-	    // ever get, so they are implicitly separators.
+        while (tok != StreamTokenizer.TT_EOF && bc != null)
+          {
+            // note that slashes are the only non-word token we should
+            // ever get, so they are implicitly separators.
 
-	    if (tok == StreamTokenizer.TT_WORD)
-	      {
-		CategoryNode cn = bc.getNode(tokens.sval);
+            if (tok == StreamTokenizer.TT_WORD)
+              {
+                CategoryNode cn = bc.getNode(tokens.sval);
 
-		if (cn instanceof DBBaseCategory)
-		  {
-		    bc = (DBBaseCategory) cn;
-		  }
-		else if (cn instanceof DBObjectBase)
-		  {
-		    return cn;
-		  }
-	      }
+                if (cn instanceof DBBaseCategory)
+                  {
+                    bc = (DBBaseCategory) cn;
+                  }
+                else if (cn instanceof DBObjectBase)
+                  {
+                    return cn;
+                  }
+              }
 
-	    tok = tokens.nextToken();
-	  }
+            tok = tokens.nextToken();
+          }
       }
     catch (IOException ex)
       {
-	throw new RuntimeException("parse error in getCategory: " + ex);
+        throw new RuntimeException("parse error in getCategory: " + ex);
       }
 
     return bc;
@@ -349,20 +349,20 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     for (DBObjectBase base: newBases.values())
       {
-	if (base.isEmbedded())
-	  {
-	    if (embedded)
-	      {
-		size++;
-	      }
-	  }
-	else
-	  {
-	    if (!embedded)
-	      {
-		size++;
-	      }
-	  }
+        if (base.isEmbedded())
+          {
+            if (embedded)
+              {
+                size++;
+              }
+          }
+        else
+          {
+            if (!embedded)
+              {
+                size++;
+              }
+          }
       }
 
     // and create the return list
@@ -371,20 +371,20 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     for (DBObjectBase base: newBases.values())
       {
-	if (base.isEmbedded())
-	  {
-	    if (embedded)
-	      {
-		bases[i++] = base;
-	      }
-	  }
-	else
-	  {
-	    if (!embedded)
-	      {
-		bases[i++] = base;
-	      }
-	  }
+        if (base.isEmbedded())
+          {
+            if (embedded)
+              {
+                bases[i++] = base;
+              }
+          }
+        else
+          {
+            if (!embedded)
+              {
+                bases[i++] = base;
+              }
+          }
       }
 
     return bases;
@@ -408,7 +408,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     for (DBObjectBase base: newBases.values())
       {
-	bases[i++] = base;
+        bases[i++] = base;
       }
 
     return bases;
@@ -437,10 +437,10 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   {
     for (DBObjectBase base: newBases.values())
       {
-	if (base.getName().equalsIgnoreCase(baseName))
-	  {
-	    return (Base) base;
-	  }
+        if (base.getName().equalsIgnoreCase(baseName))
+          {
+            return (Base) base;
+          }
       }
 
     return null;
@@ -462,28 +462,28 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     if (lowRange)
       {
-	for (id = 0; id < 256; id++)
-	  {
-	    if (getBase(id) == null)
-	      {
-		break;
-	      }
-	  }
+        for (id = 0; id < 256; id++)
+          {
+            if (getBase(id) == null)
+              {
+                break;
+              }
+          }
 
-	if (id == 256)
-	  {
-	    return null;
-	  }
+        if (id == 256)
+          {
+            return null;
+          }
       }
     else
       {
-	for (id = 256; id <= Short.MAX_VALUE; id++)
-	  {
-	    if (getBase(id) == null)
-	      {
-		break;
-	      }
-	  }
+        for (id = 256; id <= Short.MAX_VALUE; id++)
+          {
+            if (getBase(id) == null)
+              {
+                break;
+              }
+          }
       }
 
     return createNewBase(category, embedded, id);
@@ -507,34 +507,34 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     if (debug)
       {
-	Ganymede.debug("DBSchemaEdit: entered createNewBase()");
+        Ganymede.debug("DBSchemaEdit: entered createNewBase()");
       }
 
     if (!locked)
       {
-	Ganymede.debug("createNewBase failure: already released/committed");
-	throw new RuntimeException("already released/committed");
+        Ganymede.debug("createNewBase failure: already released/committed");
+        throw new RuntimeException("already released/committed");
       }
 
     if (store.getObjectBase(id) != null)
       {
-	throw new RuntimeException("Error, DBSchemaEdit.createNewBase() tried to create a new base " +
-				   "with a pre-allocated id: " + id);
+        throw new RuntimeException("Error, DBSchemaEdit.createNewBase() tried to create a new base " +
+                                   "with a pre-allocated id: " + id);
       }
 
     try
       {
-	base = new DBObjectBase(store, id, embedded, this);
+        base = new DBObjectBase(store, id, embedded, this);
       }
     catch (RemoteException ex)
       {
-	Ganymede.debug("DBSchemaEdit.createNewBase(): couldn't initialize new ObjectBase" + ex);
-	throw new RuntimeException("couldn't initialize new ObjectBase" + ex);
+        Ganymede.debug("DBSchemaEdit.createNewBase(): couldn't initialize new ObjectBase" + ex);
+        throw new RuntimeException("couldn't initialize new ObjectBase" + ex);
       }
 
     if (debug)
       {
-	Ganymede.debug("DBSchemaEdit: created new base, setting title");
+        Ganymede.debug("DBSchemaEdit: created new base, setting title");
       }
 
     String newName = ts.l("createNewBase.new_base"); // "New Base"
@@ -543,25 +543,25 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     while (getBase(newName) != null)
       {
-	// "New Base {0,number,#}"
-	newName = ts.l("createNewBase.new_base_indexed", Integer.valueOf(i++));
+        // "New Base {0,number,#}"
+        newName = ts.l("createNewBase.new_base_indexed", Integer.valueOf(i++));
       }
 
     base.setName(newName);
 
     try
       {
-	path = category.getPath();
+        path = category.getPath();
       }
     catch (RemoteException ex)
       {
         Ganymede.logError(ex);
-	throw new RuntimeException("should never happen " + ex.getMessage());
+        throw new RuntimeException("should never happen " + ex.getMessage());
       }
 
     if (debug)
       {
-	Ganymede.debug("DBSchemaEdit: title is " + newName + ", working to add to category " + path);
+        Ganymede.debug("DBSchemaEdit: title is " + newName + ", working to add to category " + path);
       }
 
     // getCategoryNode can also return DBObjectBases, if the path
@@ -573,8 +573,8 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     if (localCat == null)
       {
-	Ganymede.debug("DBSchemaEdit: createNewBase couldn't find local copy of category object");
-	throw new RuntimeException("couldn't get local version of " + path);
+        Ganymede.debug("DBSchemaEdit: createNewBase couldn't find local copy of category object");
+        throw new RuntimeException("couldn't get local version of " + path);
       }
 
     // newBases is the same as the baseHash variables used in the category
@@ -588,7 +588,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     if (debug)
       {
-	Ganymede.debug("DBSchemaEdit: created base: " + base.getKey());
+        Ganymede.debug("DBSchemaEdit: created base: " + base.getKey());
       }
 
     return base;
@@ -615,33 +615,33 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     if (base == null)
       {
-	// "Schema Editing Error"
-	// "Deletion Error.\nObject Base "{0}" not found in the Ganymede DBStore."
-	return Ganymede.createErrorDialog(ts.l("global.schema_error"),
-					  ts.l("deleteBase.none_such", baseName));
+        // "Schema Editing Error"
+        // "Deletion Error.\nObject Base "{0}" not found in the Ganymede DBStore."
+        return Ganymede.createErrorDialog(ts.l("global.schema_error"),
+                                          ts.l("deleteBase.none_such", baseName));
       }
 
     id = base.getTypeID();
 
     if (debug)
       {
-	System.err.println("Calling deleteBase on base " + base.getName());
+        System.err.println("Calling deleteBase on base " + base.getName());
       }
 
     if (!locked)
       {
-	Ganymede.debug("deleteBase failure: already released/committed");
-	throw new RuntimeException("already released/committed");
+        Ganymede.debug("deleteBase failure: already released/committed");
+        throw new RuntimeException("already released/committed");
       }
 
     tmpBase = newBases.get(Short.valueOf(id));
 
     if (tmpBase.getObjectCount() > 0)
       {
-	// "Schema Editing Error"
-	// "Deletion Error.\nObject Base "{0}" is currently in use in the Ganymede DBStore."
-	return Ganymede.createErrorDialog(ts.l("global.schema_error"),
-					  ts.l("deleteBase.in_use", tmpBase.getName()));
+        // "Schema Editing Error"
+        // "Deletion Error.\nObject Base "{0}" is currently in use in the Ganymede DBStore."
+        return Ganymede.createErrorDialog(ts.l("global.schema_error"),
+                                          ts.l("deleteBase.in_use", tmpBase.getName()));
       }
 
     parent = tmpBase.getCategory();
@@ -667,13 +667,13 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     synchronized (store)
       {
-	spaces = new NameSpace[store.nameSpaces.size()];
-	i = 0;
+        spaces = new NameSpace[store.nameSpaces.size()];
+        i = 0;
 
-	for (DBNameSpace ns: store.nameSpaces)
-	  {
-	    spaces[i++] = ns;
-	  }
+        for (DBNameSpace ns: store.nameSpaces)
+          {
+            spaces[i++] = ns;
+          }
       }
 
     return spaces;
@@ -691,13 +691,13 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   {
     synchronized (store)
       {
-	for (DBNameSpace ns: store.nameSpaces)
-	  {
-	    if (ns.getName().equals(name))
-	      {
-		return ns;
-	      }
-	  }
+        for (DBNameSpace ns: store.nameSpaces)
+          {
+            if (ns.getName().equals(name))
+              {
+                return ns;
+              }
+          }
       }
 
     return null;
@@ -720,14 +720,14 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     if (!locked)
       {
-	throw new RuntimeException("already released/committed");
+        throw new RuntimeException("already released/committed");
       }
 
     synchronized (store)
       {
-	ns = new DBNameSpace(name, caseInsensitive);
+        ns = new DBNameSpace(name, caseInsensitive);
 
-	store.nameSpaces.add(ns);
+        store.nameSpaces.add(ns);
       }
 
     Ganymede.rmi.publishObject(ns);
@@ -753,7 +753,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     if (!locked)
       {
-	throw new RuntimeException("already released/committed");
+        throw new RuntimeException("already released/committed");
       }
 
     // we declare index outside of this loop, and use it to keep track
@@ -761,42 +761,42 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     for (index = 0; index < store.nameSpaces.size(); index++)
       {
-	ns = (DBNameSpace) store.nameSpaces.elementAt(index);
+        ns = (DBNameSpace) store.nameSpaces.elementAt(index);
 
-	if (ns.getName().equals(name))
-	  {
-	    break;
-	  }
-	else
-	  {
-	    ns = null;
-	  }
+        if (ns.getName().equals(name))
+          {
+            break;
+          }
+        else
+          {
+            ns = null;
+          }
       }
 
     if (ns == null)
       {
-	// "Schema Editing Error"
-	// "Namespace Deletion Error.\nNamespace "{0}" not found in the Ganymede DBStore."
-	return Ganymede.createErrorDialog(ts.l("global.schema_error"),
-					  ts.l("deleteNameSpace.missing_namespace", name));
+        // "Schema Editing Error"
+        // "Namespace Deletion Error.\nNamespace "{0}" not found in the Ganymede DBStore."
+        return Ganymede.createErrorDialog(ts.l("global.schema_error"),
+                                          ts.l("deleteNameSpace.missing_namespace", name));
       }
 
     // check to make sure this namespace isn't tied to a field still
 
     for (DBObjectBase base: newBases.values())
       {
-	Vector<DBObjectBaseField> fieldDefs = base.getFields();
+        Vector<DBObjectBaseField> fieldDefs = base.getFields();
 
-	for (DBObjectBaseField fieldDef: fieldDefs)
-	  {
-	    if (fieldDef.getNameSpace() == ns)
-	      {
-		// "Schema Editing Error"
-		// "Namespace Deletion Error.\nNamespace "{0}" is currently in use, bound to {1}."
-		return Ganymede.createErrorDialog(ts.l("global.schema_error"),
-						  ts.l("deleteNameSpace.in_use", name, fieldDef));
-	      }
-	  }
+        for (DBObjectBaseField fieldDef: fieldDefs)
+          {
+            if (fieldDef.getNameSpace() == ns)
+              {
+                // "Schema Editing Error"
+                // "Namespace Deletion Error.\nNamespace "{0}" is currently in use, bound to {1}."
+                return Ganymede.createErrorDialog(ts.l("global.schema_error"),
+                                                  ts.l("deleteNameSpace.in_use", name, fieldDef));
+              }
+          }
       }
 
     store.nameSpaces.removeElementAt(index);
@@ -817,33 +817,33 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     while (it.hasNext())
       {
-	DBNameSpace space = it.next();
+        DBNameSpace space = it.next();
 
-	boolean ok_to_delete = true;
+        boolean ok_to_delete = true;
 
-	Iterator<DBObjectBase> obIt = newBases.values().iterator();
+        Iterator<DBObjectBase> obIt = newBases.values().iterator();
 
-	while (ok_to_delete && obIt.hasNext())
-	  {
-	    DBObjectBase base = obIt.next();
+        while (ok_to_delete && obIt.hasNext())
+          {
+            DBObjectBase base = obIt.next();
 
-	    Vector fieldDefs = base.getFields();
+            Vector fieldDefs = base.getFields();
 
-	    for (int i = 0; ok_to_delete && i < fieldDefs.size(); i++)
-	      {
-		DBObjectBaseField fieldDef = (DBObjectBaseField) fieldDefs.elementAt(i);
+            for (int i = 0; ok_to_delete && i < fieldDefs.size(); i++)
+              {
+                DBObjectBaseField fieldDef = (DBObjectBaseField) fieldDefs.elementAt(i);
 
-		if (fieldDef.getNameSpace() == space)
-		  {
-		    ok_to_delete = false;
-		  }
-	      }
-	  }
+                if (fieldDef.getNameSpace() == space)
+                  {
+                    ok_to_delete = false;
+                  }
+              }
+          }
 
-	if (ok_to_delete)
-	  {
-	    it.remove();
-	  }
+        if (ok_to_delete)
+          {
+            it.remove();
+          }
       }
 
     return null;
@@ -867,56 +867,56 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     if (!locked)
       {
-	throw new RuntimeException("already released/committed");
+        throw new RuntimeException("already released/committed");
       }
 
     // do commit here
 
     synchronized (store)
       {
-	// make sure our schema passes all required constraints.
+        // make sure our schema passes all required constraints.
 
-	retVal = checkCommitState();
+        retVal = checkCommitState();
 
-	if (retVal != null)
-	  {
-	    return retVal;
-	  }
+        if (retVal != null)
+          {
+            return retVal;
+          }
 
-      	// Clear the Jython class cache
+        // Clear the Jython class cache
 
-      	JythonEditObjectFactory.unloadAllURIs();
+        JythonEditObjectFactory.unloadAllURIs();
 
-	// first the new object bases
+        // first the new object bases
 
-	for (DBObjectBase base: newBases.values())
-	  {
-	    if (debug)
-	      {
-		System.err.println("Checking in " + base);
-	      }
+        for (DBObjectBase base: newBases.values())
+          {
+            if (debug)
+              {
+                System.err.println("Checking in " + base);
+              }
 
-	    base.clearEditor();
-	  }
+            base.clearEditor();
+          }
 
-	// now the namespaces.  we won't worry about the oldNameSpaces, GC should
-	// take care of those for us.
+        // now the namespaces.  we won't worry about the oldNameSpaces, GC should
+        // take care of those for us.
 
-	for (DBNameSpace ns: store.nameSpaces)
-	  {
-	    ns.schemaEditCommit();
-	  }
+        for (DBNameSpace ns: store.nameSpaces)
+          {
+            ns.schemaEditCommit();
+          }
 
-	unexportNameSpaces();
+        unexportNameSpaces();
 
-	// ** need to unlink old objectBases / rootCategory for GC here? **
+        // ** need to unlink old objectBases / rootCategory for GC here? **
 
-	// all the bases already have containingHash pointing to
-	// newBases
+        // all the bases already have containingHash pointing to
+        // newBases
 
-	store.objectBases = newBases;
-	rootCategory.clearEditor();
-	store.rootCategory = rootCategory;
+        store.objectBases = newBases;
+        rootCategory.clearEditor();
+        store.rootCategory = rootCategory;
       }
 
     // update the serialized representation of the
@@ -927,15 +927,15 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     try
       {
-	Ganymede.baseTransport = null; // to force internalSession to regenerate it next
-	Ganymede.baseTransport = Ganymede.internalSession.getBaseList();
+        Ganymede.baseTransport = null; // to force internalSession to regenerate it next
+        Ganymede.baseTransport = Ganymede.internalSession.getBaseList();
       }
     catch (NotLoggedInException ex)
       {
-	// oops, something odd got fubar'ed, but we don't want to
-	// abort the commit for this.. let's record what happened
+        // oops, something odd got fubar'ed, but we don't want to
+        // abort the commit for this.. let's record what happened
 
-	Ganymede.debug(Ganymede.stackTrace(ex));
+        Ganymede.debug(Ganymede.stackTrace(ex));
       }
 
     Ganymede.debug("DBSchemaEdit: schema changes committed.");
@@ -955,22 +955,22 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     while (!dumpedOk)
       {
-	try
-	  {
-	    Ganymede.db.dump(Ganymede.dbFilename, true, true); // release, archive
+        try
+          {
+            Ganymede.db.dump(Ganymede.dbFilename, true, true); // release, archive
 
-	    dumpedOk = true;
-	  }
-	catch (IOException ex)
-	  {
+            dumpedOk = true;
+          }
+        catch (IOException ex)
+          {
             Ganymede.logError(ex);
-	    dumpedOk = true;	// if we had an io exception, retrying isn't likely to succeed
-	  }
-	catch (InterruptedException ex)
-	  {
+            dumpedOk = true;    // if we had an io exception, retrying isn't likely to succeed
+          }
+        catch (InterruptedException ex)
+          {
             Ganymede.logError(ex);
-	    Ganymede.debug("DBSchemaEdit: retrying database dump");
-	  }
+            Ganymede.debug("DBSchemaEdit: retrying database dump");
+          }
       }
 
     // and unlock the server.
@@ -1000,12 +1000,12 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     for (DBObjectBase base: newBases.values())
       {
-	retVal = base.checkSchemaState();
+        retVal = base.checkSchemaState();
 
-	if (retVal != null)
-	  {
-	    return retVal;
-	  }
+        if (retVal != null)
+          {
+            return retVal;
+          }
       }
 
     return null;
@@ -1024,21 +1024,21 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     if (!locked)
       {
-	throw new RuntimeException("already released/committed");
+        throw new RuntimeException("already released/committed");
       }
 
     synchronized (store)
       {
-	unexportNameSpaces();
+        unexportNameSpaces();
 
-	// restore the namespace vector
-	store.nameSpaces.setSize(0);
-	store.nameSpaces = oldNameSpaces;
+        // restore the namespace vector
+        store.nameSpaces.setSize(0);
+        store.nameSpaces = oldNameSpaces;
 
-	for (DBNameSpace ns: store.nameSpaces)
-	  {
-	    ns.schemaEditAbort();
-	  }
+        for (DBNameSpace ns: store.nameSpaces)
+          {
+            ns.schemaEditAbort();
+          }
       }
 
     // unlock the server
@@ -1074,15 +1074,15 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
   {
     if (oldNameSpaces != null)
       {
-	for (DBNameSpace ns: oldNameSpaces)
-	  {
-	    Ganymede.rmi.unpublishObject(ns, true);
-	  }
+        for (DBNameSpace ns: oldNameSpaces)
+          {
+            Ganymede.rmi.unpublishObject(ns, true);
+          }
       }
 
     for (DBNameSpace ns: store.nameSpaces)
       {
-	Ganymede.rmi.unpublishObject(ns, true);
+        Ganymede.rmi.unpublishObject(ns, true);
       }
   }
 
@@ -1097,7 +1097,7 @@ public class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     if (locked)
       {
-	release();
+        release();
       }
   }
 }

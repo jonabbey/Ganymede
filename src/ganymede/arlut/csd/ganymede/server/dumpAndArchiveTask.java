@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -72,7 +72,7 @@ class dumpAndArchiveTask implements Runnable {
   {
     if (dumpAndArchiveTask.ts == null)
       {
-	dumpAndArchiveTask.ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.dumpAndArchiveTask");
+        dumpAndArchiveTask.ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.dumpAndArchiveTask");
       }
   }
 
@@ -86,7 +86,7 @@ class dumpAndArchiveTask implements Runnable {
     try
       {
         String error = GanymedeServer.lSemaphore.increment();
-	    
+            
         if (error != null)
           {
             Ganymede.debug(ts.l("semaphore_disabled", error));
@@ -129,7 +129,7 @@ class dumpAndArchiveTask implements Runnable {
       }
     finally
       {
-	Ganymede.debug(ts.l("completed"));
+        Ganymede.debug(ts.l("completed"));
       }
   }
 }

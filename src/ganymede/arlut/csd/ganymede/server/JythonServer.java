@@ -11,7 +11,7 @@
    Module By: Deepak Giridharagopal, deepak@brownman.org
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -225,7 +225,7 @@ class JythonServerProtocol {
   {
     try
       {
-      	/* Snag the appropriate Admin Persona from the database */
+        /* Snag the appropriate Admin Persona from the database */
         DBObject persona = (DBObject) ((DBObjectBase) Ganymede.db.get("Admin Persona")).get(personaName);
         
         /* If there is a user associated with this persona, snag it */
@@ -255,8 +255,8 @@ class JythonServerProtocol {
     
     if (input == null)
       {
-	// '\nHello {0}\nWelcome to the Ganymede Jython interpreter!\n\nType "quit" to exit.\n{1}'
-	return ts.l("processInput.greeting", socket.getInetAddress().getHostAddress(), prompt);
+        // '\nHello {0}\nWelcome to the Ganymede Jython interpreter!\n\nType "quit" to exit.\n{1}'
+        return ts.l("processInput.greeting", socket.getInetAddress().getHostAddress(), prompt);
       }
     
     if (input.equals(ts.l("processInput.quitcommand")))
@@ -279,9 +279,9 @@ class JythonServerProtocol {
       }
     catch (PyException pex) 
       {
-      	output = buffer.toString() + "\n" + pex.toString();
-      	interp.resetbuffer();
-      	buffer.getBuffer().setLength(0);
+        output = buffer.toString() + "\n" + pex.toString();
+        interp.resetbuffer();
+        buffer.getBuffer().setLength(0);
       }
     
     return output + prompt;
@@ -365,12 +365,12 @@ class JythonServerWorker extends Thread {
 
             return;
           }
-	
+        
         try
           {
-	    // "Username"
+            // "Username"
             out.print(ts.l("run.username"));
-	    out.print(": ");
+            out.print(": ");
             out.flush();
             String loginName = in.readLine();
 
@@ -387,9 +387,9 @@ class JythonServerWorker extends Thread {
             /* Holds the client response to each terminal code */
             byte[] responseBuffer = new byte[3];
 
-	    // "Password" 
+            // "Password" 
             out.print(ts.l("run.password"));
-	    out.print(": ");
+            out.print(": ");
             out.flush();
 
             /* Disable client-side character echo while the user types in 
@@ -406,10 +406,10 @@ class JythonServerWorker extends Thread {
 
             if (!Arrays.equals(responseBuffer, echoOffResponse))
               {
-              	out.print("Your telnet client won't properly suppress character echo.");
-              	out.flush();
-              	socket.close();
-              	return;
+                out.print("Your telnet client won't properly suppress character echo.");
+                out.flush();
+                socket.close();
+                return;
               }
 
             String password = in.readLine();
@@ -428,10 +428,10 @@ class JythonServerWorker extends Thread {
 
             if (!Arrays.equals(responseBuffer, echoOnResponse))
               {
-              	out.print("Your telnet client won't properly resume character echo.");
-              	out.flush();
-              	socket.close();
-              	return;
+                out.print("Your telnet client won't properly resume character echo.");
+                out.flush();
+                socket.close();
+                return;
               }
 
             /* Authenticate the user */
@@ -451,9 +451,9 @@ class JythonServerWorker extends Thread {
                     /* Move along */
                   }
 
-		// "Permission denied."
+                // "Permission denied."
                 out.print(ts.l("run.denied"));
-		out.print("\n");
+                out.print("\n");
                 out.flush();
                 socket.close();
                 return;

@@ -9,7 +9,7 @@
    Module By: Deepak Giridharagopal, deepak@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -201,8 +201,8 @@ public class QueryResultContainer implements List, Serializable {
   public void addRow(ObjectHandle handle, Object[] row)
   {
     addRow(handle.invid, handle.label, row, handle.inactive,
-	   handle.expirationSet, handle.removalSet,
-	   handle.editable);
+           handle.expirationSet, handle.removalSet,
+           handle.editable);
   }
 
   /**
@@ -214,26 +214,26 @@ public class QueryResultContainer implements List, Serializable {
    */
 
   public synchronized void addRow(Invid invid, String label,
-				  Object[] row,
-				  boolean inactive,
-				  boolean expirationSet,
-				  boolean removalSet,
-				  boolean editable)
+                                  Object[] row,
+                                  boolean inactive,
+                                  boolean expirationSet,
+                                  boolean removalSet,
+                                  boolean editable)
   {
     if (label == null)
       {
-	throw new NullPointerException("QueryResult.addRow(): null label passed in");
+        throw new NullPointerException("QueryResult.addRow(): null label passed in");
       }
 
     // don't add an object we've already got here
 
     if (invid != null && containsInvid(invid))
       {
-	return;
+        return;
       }
     else if (invid == null && containsLabel(label))
       {
-	return;
+        return;
       }
 
     handles.add(new ObjectHandle(label, invid, inactive, expirationSet,
@@ -241,11 +241,11 @@ public class QueryResultContainer implements List, Serializable {
 
     if (rowType == MAPROWS)
       {
-      	rows.add(convertArrayRowToMapRow(row));
+        rows.add(convertArrayRowToMapRow(row));
       }
     else 
       {
-      	rows.add(row);
+        rows.add(row);
       }
   }
 
@@ -291,7 +291,7 @@ public class QueryResultContainer implements List, Serializable {
   {
     if (invidList == null)
       {
-      	rebuildTransients();
+        rebuildTransients();
       }
 
     return invidList;
@@ -309,7 +309,7 @@ public class QueryResultContainer implements List, Serializable {
   {
     if (labelList == null)
       {
-      	rebuildTransients();
+        rebuildTransients();
       }
 
     return labelList;
@@ -345,7 +345,7 @@ public class QueryResultContainer implements List, Serializable {
   {
     if (invidHash == null)
       {
-      	rebuildTransients();
+        rebuildTransients();
       }
     
     return invidHash.containsKey(invid);
@@ -360,7 +360,7 @@ public class QueryResultContainer implements List, Serializable {
   {
     if (labelHash == null)
       {
-      	rebuildTransients();
+        rebuildTransients();
       }
     
     return labelHash.containsKey(label);
@@ -419,11 +419,11 @@ public class QueryResultContainer implements List, Serializable {
     Object[] row;
     if (rowType == MAPROWS)
       {
-      	row = convertMapRowToArrayRow((Map) rows.get(rowNumber));
+        row = convertMapRowToArrayRow((Map) rows.get(rowNumber));
       }
     else
       {
-      	row = (Object[]) rows.get(rowNumber);
+        row = (Object[]) rows.get(rowNumber);
       }
     return new Vector(Arrays.asList(row));
   }
@@ -442,11 +442,11 @@ public class QueryResultContainer implements List, Serializable {
     Object[] r;
     if (rowType == MAPROWS)
       {
-      	r = convertMapRowToArrayRow((Map) rows.get(row));
+        r = convertMapRowToArrayRow((Map) rows.get(row));
       }
     else
       {
-      	r = (Object[]) rows.get(row);
+        r = (Object[]) rows.get(row);
       }
     return r[col];
   }
@@ -501,8 +501,8 @@ public class QueryResultContainer implements List, Serializable {
     String currentHeader;
     for (int i = 0; i < row.length; i++)
       {
-      	currentHeader = (String) headers.get(i);
-      	newRow.put(currentHeader, row[i]);
+        currentHeader = (String) headers.get(i);
+        newRow.put(currentHeader, row[i]);
       }
     return newRow;
   }
@@ -521,8 +521,8 @@ public class QueryResultContainer implements List, Serializable {
     String currentHeader;
     for (int i = 0; i < headers.size(); i++)
       {
-      	currentHeader = (String) headers.get(i);
-      	newRow[i] = row.get(currentHeader);
+        currentHeader = (String) headers.get(i);
+        newRow[i] = row.get(currentHeader);
       }
     return newRow;
   }
@@ -539,25 +539,25 @@ public class QueryResultContainer implements List, Serializable {
     /* If we're not really changing anything, then bail out */
     if (newRowType == rowType)
       {
-      	return;
+        return;
       }
     else
       {
-      	rowType = newRowType;
+        rowType = newRowType;
       }
     
     Object row;
     for (int i=0; i<handles.size(); i++)
       {
-      	row = rows.get(i);
-      	if (newRowType == ARRAYROWS)
-      	  {
-      	    rows.set(i, convertMapRowToArrayRow((Map) row));
-      	  }
-      	else
-      	  {
-      	    rows.set(i, convertArrayRowToMapRow((Object[]) row));
-      	  }
+        row = rows.get(i);
+        if (newRowType == ARRAYROWS)
+          {
+            rows.set(i, convertMapRowToArrayRow((Map) row));
+          }
+        else
+          {
+            rows.set(i, convertArrayRowToMapRow((Object[]) row));
+          }
       }
   }
 
@@ -769,7 +769,7 @@ public class QueryResultContainer implements List, Serializable {
     
     for (Iterator iter = headers.iterator(); iter.hasNext();)
       {
-      	result.append((String) iter.next() + ":\t");
+        result.append((String) iter.next() + ":\t");
       }
 
     result.append("\n");
@@ -777,19 +777,19 @@ public class QueryResultContainer implements List, Serializable {
     Object[] row;
     for (Iterator iter = rows.iterator(); iter.hasNext();)
       {
-      	if (rowType == MAPROWS)
-      	  {
-      	    row = convertMapRowToArrayRow((Map) iter.next());
-      	  }
-      	else
-      	  {
-      	    row = (Object[]) iter.next();
-      	  }
-      	for (int i = 0; i < row.length; i++)
-      	  {
-      	    result.append(row[i].toString() + "\t");
-      	  }
-      	result.append("\n");
+        if (rowType == MAPROWS)
+          {
+            row = convertMapRowToArrayRow((Map) iter.next());
+          }
+        else
+          {
+            row = (Object[]) iter.next();
+          }
+        for (int i = 0; i < row.length; i++)
+          {
+            result.append(row[i].toString() + "\t");
+          }
+        result.append("\n");
       }
     
     return result.toString();

@@ -9,7 +9,7 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2005
@@ -80,7 +80,7 @@ public class ownerTab extends clientTab {
   {
     if (contentPane == null)
       {
-	contentPane = new JScrollPane();
+        contentPane = new JScrollPane();
       }
 
     return contentPane;
@@ -90,14 +90,14 @@ public class ownerTab extends clientTab {
   {
     try
       {
-	contentPane.getVerticalScrollBar().setUnitIncrement(15);
-	invf = (invid_field) parent.getObject().getField(SchemaConstants.OwnerListField);
-	owner_panel = new ownerPanel(invf, parent.isEditable() && invf.isEditable(), parent);
-	contentPane.setViewportView(owner_panel);
+        contentPane.getVerticalScrollBar().setUnitIncrement(15);
+        invf = (invid_field) parent.getObject().getField(SchemaConstants.OwnerListField);
+        owner_panel = new ownerPanel(invf, parent.isEditable() && invf.isEditable(), parent);
+        contentPane.setViewportView(owner_panel);
       }
     catch (RemoteException ex)
       {
-	parent.getgclient().processExceptionRethrow(ex);
+        parent.getgclient().processExceptionRethrow(ex);
       }
   }
 
@@ -105,11 +105,11 @@ public class ownerTab extends clientTab {
   {
     try
       {
-	owner_panel.updateInvidStringSelector();
+        owner_panel.updateInvidStringSelector();
       }
     catch (Exception ex)
       {
-	parent.getgclient().processExceptionRethrow(ex);
+        parent.getgclient().processExceptionRethrow(ex);
       }
   }
 
@@ -119,14 +119,14 @@ public class ownerTab extends clientTab {
 
     if (contentPane != null)
       {
-	contentPane.removeAll();
-	contentPane = null;
+        contentPane.removeAll();
+        contentPane = null;
       }
 
     if (owner_panel != null)
       {
-	owner_panel.dispose();
-	owner_panel = null;
+        owner_panel.dispose();
+        owner_panel = null;
       }
 
     super.dispose();

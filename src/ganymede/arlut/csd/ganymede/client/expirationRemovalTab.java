@@ -9,7 +9,7 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2005
@@ -90,7 +90,7 @@ public class expirationRemovalTab extends clientTab {
   {
     if (contentPane == null)
       {
-	contentPane = new JScrollPane();
+        contentPane = new JScrollPane();
       }
 
     return contentPane;
@@ -100,18 +100,18 @@ public class expirationRemovalTab extends clientTab {
   {
     try
       {
-	contentPane.getVerticalScrollBar().setUnitIncrement(15);
+        contentPane.getVerticalScrollBar().setUnitIncrement(15);
 
-	date_panel = new datePanel(server_field, parent.gc.getFieldTemplate(parent.getObjectInvid().getType(), server_field.getID()),
-				   this.datePanelTitle,
-				   parent.isEditable() && server_field.isEditable(), 
-				   parent);
-	
-	contentPane.setViewportView(date_panel);
+        date_panel = new datePanel(server_field, parent.gc.getFieldTemplate(parent.getObjectInvid().getType(), server_field.getID()),
+                                   this.datePanelTitle,
+                                   parent.isEditable() && server_field.isEditable(), 
+                                   parent);
+        
+        contentPane.setViewportView(date_panel);
       }
     catch (RemoteException ex)
       {
-	parent.getgclient().processExceptionRethrow(ex);
+        parent.getgclient().processExceptionRethrow(ex);
       }
   }
 
@@ -119,7 +119,7 @@ public class expirationRemovalTab extends clientTab {
   {
     if (date_panel != null)
       {
-	date_panel.refresh();
+        date_panel.refresh();
       }
   }
 
@@ -130,8 +130,8 @@ public class expirationRemovalTab extends clientTab {
 
     if (date_panel != null)
       {
-	date_panel.dispose();
-	date_panel = null;
+        date_panel.dispose();
+        date_panel = null;
       }
 
     super.dispose();

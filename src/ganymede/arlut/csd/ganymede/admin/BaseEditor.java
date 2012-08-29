@@ -9,7 +9,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -131,12 +131,12 @@ class BaseEditor extends JStretchPanel implements JsetValueCallback, ItemListene
   {
     if (owner == null)
       {
-	throw new IllegalArgumentException("owner must not be null");
+        throw new IllegalArgumentException("owner must not be null");
       }
 
     if (debug)
       {
-	System.err.println("BaseEditor constructed");
+        System.err.println("BaseEditor constructed");
       }
 
     base = null;
@@ -168,11 +168,11 @@ class BaseEditor extends JStretchPanel implements JsetValueCallback, ItemListene
     // the 'set' button.
 
     classS = new JstringField(30, 100, true, false,
-			      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.", 
-			      null);
+                              "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.", 
+                              null);
 
     classOptionS = new JstringField(30, 100, true, false,
-				    null, null);
+                                    null, null);
 
     classInfoResetButton = new JButton("Reset");
     classInfoSetButton = new JButton("Set");
@@ -215,15 +215,15 @@ class BaseEditor extends JStretchPanel implements JsetValueCallback, ItemListene
 
     try
       {
-	typeN.setValue(base.getTypeID());
-	nameS.setText(base.getName());
-	classS.setText(base.getClassName());
-	classOptionS.setText(base.getClassOptionString());
-	refreshLabelChoice();
+        typeN.setValue(base.getTypeID());
+        nameS.setText(base.getName());
+        classS.setText(base.getClassName());
+        classOptionS.setText(base.getClassOptionString());
+        refreshLabelChoice();
       }
     catch (RemoteException ex)
       {
-	System.err.println("editBase: accessor failed: " + ex);
+        System.err.println("editBase: accessor failed: " + ex);
       }
 
     owner.setNormalCursor();
@@ -247,101 +247,101 @@ class BaseEditor extends JStretchPanel implements JsetValueCallback, ItemListene
 
     try
       {
-	labelC.removeAllItems();
+        labelC.removeAllItems();
       }
     catch (IndexOutOfBoundsException ex)
       {
-	// Swing 1.1 beta 2 will do this to us, just
-	// ignore it.
+        // Swing 1.1 beta 2 will do this to us, just
+        // ignore it.
 
-	System.err.println("refreshLabelChoice(): Swing Bug Bites Again");
+        System.err.println("refreshLabelChoice(): Swing Bug Bites Again");
       }
 
     if (base == null)
       {
-	if (debug)
-	  {
-	    System.out.println("base is null, not refreshing labelC");
-	  }
-	return;
+        if (debug)
+          {
+            System.out.println("base is null, not refreshing labelC");
+          }
+        return;
       }
 
     try
       {
-	fields = base.getFields(true);
+        fields = base.getFields(true);
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("exception getting fields: " + rx);
+        throw new RuntimeException("exception getting fields: " + rx);
       }
     
     //labelC.addItem("<none>");
     
     if (fields == null)
       {
-	if (debug)
-	  {
-	    System.out.println("No fields to add");
-	  }
-	return;
+        if (debug)
+          {
+            System.out.println("No fields to add");
+          }
+        return;
       }
 
     for (int i = 0; i < fields.size() ; i++)
       {
-	currentField = (BaseField) fields.elementAt(i);
+        currentField = (BaseField) fields.elementAt(i);
 
-	if (currentField != null)
-	  {
-	    try
-	      {
-		if ((currentField.isString() || currentField.isNumeric() ||
-		     currentField.isIP()) &&
-		    currentField.getNameSpaceLabel() != null)
-		  {
-		    labelC.addItem(currentField.getName());
-		  }
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("exception getting field name: " + rx);
-	      }
-	  }
+        if (currentField != null)
+          {
+            try
+              {
+                if ((currentField.isString() || currentField.isNumeric() ||
+                     currentField.isIP()) &&
+                    currentField.getNameSpaceLabel() != null)
+                  {
+                    labelC.addItem(currentField.getName());
+                  }
+              }
+            catch (RemoteException rx)
+              {
+                throw new RuntimeException("exception getting field name: " + rx);
+              }
+          }
       }
 
     try
       {
-	labelField = base.getLabelFieldName();
+        labelField = base.getLabelFieldName();
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("Exception getting base label: " + rx);
+        throw new RuntimeException("Exception getting base label: " + rx);
       }
 
     if (labelField == null)
       {
-	if (debug)
-	  {
-	    System.out.println("selecting <none>");
-	  }
+        if (debug)
+          {
+            System.out.println("selecting <none>");
+          }
 
-	labelC.getModel().setSelectedItem("<none>");
+        labelC.getModel().setSelectedItem("<none>");
       }
     else
       {
-	try
-	  {
-	    if (debug)
-	      {
-		System.out.println("selecting label: " + labelField);
-	      }
+        try
+          {
+            if (debug)
+              {
+                System.out.println("selecting label: " + labelField);
+              }
 
-	    labelC.getModel().setSelectedItem(labelField);
-	  }
-	catch (NullPointerException ex)
-	  {
-	    System.out.println("Attempted to set label to field not in choice, setting it to <none>");
-	    labelC.setSelectedItem("<none>");
-	  }
+            labelC.getModel().setSelectedItem(labelField);
+          }
+        catch (NullPointerException ex)
+          {
+            System.out.println("Attempted to set label to field not in choice, setting it to <none>");
+            labelC.setSelectedItem("<none>");
+          }
       }
   }
 
@@ -353,11 +353,11 @@ class BaseEditor extends JStretchPanel implements JsetValueCallback, ItemListene
   {
     if (!listenToCallbacks)
       {
-	if (debug)
-	  {
-	    System.out.println("I'm not listening, go away.");
-	  }
-	return;
+        if (debug)
+          {
+            System.out.println("I'm not listening, go away.");
+          }
+        return;
       }
 
     String label = null;
@@ -366,43 +366,43 @@ class BaseEditor extends JStretchPanel implements JsetValueCallback, ItemListene
 
     if (debug)
       {
-	System.out.println("itemStateChanged");
+        System.out.println("itemStateChanged");
       }
 
     if (e.getItemSelectable() == labelC)
       {
-	try
-	  {
-	    label = (String)labelC.getModel().getSelectedItem();
+        try
+          {
+            label = (String)labelC.getModel().getSelectedItem();
 
-	    if (debug)
-	      {
-		System.out.println("setting label to " + label);
-	      }
+            if (debug)
+              {
+                System.out.println("setting label to " + label);
+              }
 
-	    if ((label == null) || (label.equals("<none>")))
-	      {
-		if (debug)
-		  {
-		    System.out.println("Setting label field to null");
-		  }
+            if ((label == null) || (label.equals("<none>")))
+              {
+                if (debug)
+                  {
+                    System.out.println("Setting label field to null");
+                  }
 
-		base.setLabelField(null);
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    System.out.println("Setting label field to " + label);
-		  }
+                base.setLabelField(null);
+              }
+            else
+              {
+                if (debug)
+                  {
+                    System.out.println("Setting label field to " + label);
+                  }
 
-		base.setLabelField(label);
-	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("exception setting label field: " + rx);
-	  }
+                base.setLabelField(label);
+              }
+          }
+        catch (RemoteException rx)
+          {
+            throw new RuntimeException("exception setting label field: " + rx);
+          }
       }
   }
 
@@ -418,31 +418,31 @@ class BaseEditor extends JStretchPanel implements JsetValueCallback, ItemListene
 
     if (e.getSource() == classInfoResetButton)
       {
-	try
-	  {
-	    classS.setText(base.getClassName());
-	    classOptionS.setText(base.getClassOptionString());
-	  }
-	catch (RemoteException ex)
-	  {
-	  }
+        try
+          {
+            classS.setText(base.getClassName());
+            classOptionS.setText(base.getClassOptionString());
+          }
+        catch (RemoteException ex)
+          {
+          }
       }
     else if (e.getSource() == classInfoSetButton)
       {
-	try
-	  {
-	    retVal = owner.handleReturnVal(base.setClassInfo(classS.getValue(), classOptionS.getValue()));
+        try
+          {
+            retVal = owner.handleReturnVal(base.setClassInfo(classS.getValue(), classOptionS.getValue()));
 
-	    if (retVal != null && !retVal.didSucceed())
-	      {
-		// revert
-		classS.setText(base.getClassName());
-		classOptionS.setText(base.getClassOptionString());
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	  }
+            if (retVal != null && !retVal.didSucceed())
+              {
+                // revert
+                classS.setText(base.getClassName());
+                classOptionS.setText(base.getClassOptionString());
+              }
+          }
+        catch (RemoteException ex)
+          {
+          }
       }
   }
 
@@ -454,12 +454,12 @@ class BaseEditor extends JStretchPanel implements JsetValueCallback, ItemListene
   {
     if (!listenToCallbacks)
       {
-	if (debug)
-	  {
-	    System.out.println("Not listening");
-	  }
+        if (debug)
+          {
+            System.out.println("Not listening");
+          }
 
-	return true;
+        return true;
       }
 
     java.awt.Component source;
@@ -472,12 +472,12 @@ class BaseEditor extends JStretchPanel implements JsetValueCallback, ItemListene
 
     if (base == null)
       {
-	return false;
+        return false;
       }
 
     if (debug)
       {
-	System.err.println("setValuePerformed:" + v);
+        System.err.println("setValuePerformed:" + v);
       }
 
     source = v.getSource();
@@ -485,26 +485,26 @@ class BaseEditor extends JStretchPanel implements JsetValueCallback, ItemListene
 
     try
       {
-	if (source == nameS)
-	  {
-	    ReturnVal retVal = owner.handleReturnVal(base.setName(val));
+        if (source == nameS)
+          {
+            ReturnVal retVal = owner.handleReturnVal(base.setName(val));
 
-	    if (retVal == null || retVal.didSucceed())
-	      {
-		baseNode.setText(base.getName());
-		nameS.setText(baseNode.getText());
-		owner.tree.refresh();
-	      }
-	    else
-	      {
-		return false;
-	      }
-	  }
+            if (retVal == null || retVal.didSucceed())
+              {
+                baseNode.setText(base.getName());
+                nameS.setText(baseNode.getText());
+                owner.tree.refresh();
+              }
+            else
+              {
+                return false;
+              }
+          }
       }
     catch (RemoteException ex)
       {
-	System.err.println("Couldn't set attribute on base: " + ex);
-	return false;
+        System.err.println("Couldn't set attribute on base: " + ex);
+        return false;
       }
     
     return true;
@@ -517,7 +517,7 @@ class BaseEditor extends JStretchPanel implements JsetValueCallback, ItemListene
   public void cleanup()
   {
     this.baseNode = null;
-    this.base = null;	// remote reference
+    this.base = null;   // remote reference
     this.typeN = null;
     this.nameS = null;
     this.classS = null;
@@ -529,24 +529,24 @@ class BaseEditor extends JStretchPanel implements JsetValueCallback, ItemListene
 
     // and clean up the AWT's linkages
 
-    this.removeAll();		// should be done on GUI thread
+    this.removeAll();           // should be done on GUI thread
 
     if (editPanel != null)
       {
-	editPanel.cleanup();
-	editPanel = null;
+        editPanel.cleanup();
+        editPanel = null;
       }
 
     if (classPanel != null)
       {
-	classPanel.cleanup();
-	classPanel = null;
+        classPanel.cleanup();
+        classPanel = null;
       }
 
     if (buttonPanel != null)
       {
-	buttonPanel.cleanup();
-	buttonPanel = null;
+        buttonPanel.cleanup();
+        buttonPanel = null;
       }
   }
 }

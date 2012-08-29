@@ -9,7 +9,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -63,7 +63,7 @@ class SpaceNode extends arlut.csd.JTree.treeNode {
   /* -- */
 
   SpaceNode(treeNode parent, String text, NameSpace space, treeNode insertAfter,
-	    boolean expandable, int openImage, int closedImage, treeMenu menu)
+            boolean expandable, int openImage, int closedImage, treeMenu menu)
   {
     super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
     this.space = space;

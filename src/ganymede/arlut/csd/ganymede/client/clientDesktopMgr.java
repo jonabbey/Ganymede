@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -91,12 +91,12 @@ public final class clientDesktopMgr extends DefaultDesktopManager {
   {
     if (x < 0)
       {
-	x = 0;
+        x = 0;
       }
 
     if (y < 0)
       {
-	y = 0;
+        y = 0;
       }
 
     this.x = x;
@@ -128,14 +128,14 @@ public final class clientDesktopMgr extends DefaultDesktopManager {
   {
     if (x < 0)
       {
-	w = w + x;
-	x = 0;
+        w = w + x;
+        x = 0;
       }
 
     if (y < 0)
       {
-	h = h + y;
-	y = 0;
+        h = h + y;
+        y = 0;
       }
 
     this.x = x;

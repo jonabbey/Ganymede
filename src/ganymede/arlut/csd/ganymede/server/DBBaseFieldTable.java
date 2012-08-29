@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2009
@@ -178,7 +178,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
     if (index < 0)
       {
-	return false;
+        return false;
       }
 
     return table[index].equals(value);
@@ -218,7 +218,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
     for (int i = 0; i < copy.length; i++)
       {
-	copy[i] = table[i];
+        copy[i] = table[i];
       }
 
     return copy;
@@ -235,7 +235,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
     if (index < 0)
       {
-	return null;
+        return null;
       }
 
     return table[index];
@@ -252,7 +252,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
     if (index < 0)
       {
-	return null;
+        return null;
       }
 
     return table[index];
@@ -298,58 +298,58 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
     if (value == null) 
       {
-	throw new NullPointerException();
+        throw new NullPointerException();
       }
 
     int index = java.util.Arrays.binarySearch(table, value);
 
     if (index < 0)
       {
-	// we'll need to expand to make room
+        // we'll need to expand to make room
 
-	DBObjectBaseField[] newTable = new DBObjectBaseField[table.length + 1];
+        DBObjectBaseField[] newTable = new DBObjectBaseField[table.length + 1];
 
-	if (table.length == 0)
-	  {
-	    newTable[0] = value;
-	  }
-	else
-	  {
-	    boolean found = false;
+        if (table.length == 0)
+          {
+            newTable[0] = value;
+          }
+        else
+          {
+            boolean found = false;
 
-	    int j = 0;
-	    int i = 0;
+            int j = 0;
+            int i = 0;
 
-	    while (j < newTable.length)
-	      {
-		if (i < table.length)
-		  {
-		    DBObjectBaseField field = table[i];
+            while (j < newTable.length)
+              {
+                if (i < table.length)
+                  {
+                    DBObjectBaseField field = table[i];
 
-		    if (!found && value.getID() < field.getID())
-		      {
-			// insert into the beginning or middle
+                    if (!found && value.getID() < field.getID())
+                      {
+                        // insert into the beginning or middle
 
-			newTable[j++] = value;
-			found = true;
-		      }
-		    else
-		      {
-			newTable[j++] = table[i++];
-		      }
-		  }
-		else
-		  {
-		    // append to the end
+                        newTable[j++] = value;
+                        found = true;
+                      }
+                    else
+                      {
+                        newTable[j++] = table[i++];
+                      }
+                  }
+                else
+                  {
+                    // append to the end
 
-		    newTable[j++] = value;
-		  }
-	      }
-	  }
+                    newTable[j++] = value;
+                  }
+              }
+          }
 
-	table = newTable;
+        table = newTable;
 
-	return;
+        return;
       }
 
     // else, we're replacing
@@ -388,7 +388,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
     if (index < 0)
       {
-	return;
+        return;
       }
 
     // we'll need to shrink by one
@@ -397,10 +397,10 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
     for (int j = 0, i = 0; i < table.length; i++)
       {
-	if (i != index)
-	  {
-	    newTable[j++] = table[i];
-	  }
+        if (i != index)
+          {
+            newTable[j++] = table[i];
+          }
       }
 
     table = newTable;
@@ -433,10 +433,10 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
   {
     for (int i = 0; i < table.length; i++)
       {
-	if (table[i].getName().equalsIgnoreCase(name))
-	  {
-	    return table[i];
-	  }
+        if (table[i].getName().equalsIgnoreCase(name))
+          {
+            return table[i];
+          }
       }
 
     return null;
@@ -466,7 +466,7 @@ class DBBaseFieldTableEnumerator implements Enumeration {
     this.table = table;
     this.index = 0;
   }
-	
+        
   public boolean hasMoreElements() 
   {
     return index < table.length;
@@ -502,7 +502,7 @@ class DBBaseFieldTableIterator implements Iterator<DBObjectBaseField> {
     this.table = table;
     this.index = 0;
   }
-	
+        
   public boolean hasNext() 
   {
     return index < table.length;
@@ -544,7 +544,7 @@ class DBBaseFieldTableBuiltInIterator implements Iterator<DBObjectBaseField> {
     this.table = table;
     this.index = 0;
   }
-	
+        
   public boolean hasNext() 
   {
     // we know all the built-ins will come before the custom fields,

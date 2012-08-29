@@ -229,7 +229,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     if (!debug)
       {
-	debug = gc.debug;
+        debug = gc.debug;
       }
 
     this.windowMenu = windowMenu;
@@ -243,7 +243,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     if (debug)
       {
-	System.err.println("Initializing windowPanel");
+        System.err.println("Initializing windowPanel");
       }
 
     // "Remove All Windows"
@@ -253,7 +253,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     if (pattern != null)
       {
-	removeAllMI.setMnemonic((int) pattern.charAt(0));
+        removeAllMI.setMnemonic((int) pattern.charAt(0));
       }
 
     removeAllMI.addActionListener(this);
@@ -282,7 +282,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   {
     if (waitImage == null)
       {
-	waitImage = PackageResources.getImageResource(this, "atwork01.gif", getClass());
+        waitImage = PackageResources.getImageResource(this, "atwork01.gif", getClass());
       }
 
     return waitImage;
@@ -341,8 +341,8 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     if (object == null)
       {
-	gc.showErrorMessage("null object passed to addWindow.");
-	return;
+        gc.showErrorMessage("null object passed to addWindow.");
+        return;
       }
 
     // We only want top level windows for top level objects.  No
@@ -350,153 +350,153 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     try
       {
-	while (object.isEmbedded())
-	  {
-	    db_field parent = object.getField(SchemaConstants.ContainerField);
+        while (object.isEmbedded())
+          {
+            db_field parent = object.getField(SchemaConstants.ContainerField);
 
-	    if (parent == null)
-	      {
-		throw new IllegalArgumentException("Could not find the ContainerField of this " +
-						   "embedded object: " + object);
-	      }
+            if (parent == null)
+              {
+                throw new IllegalArgumentException("Could not find the ContainerField of this " +
+                                                   "embedded object: " + object);
+              }
 
-	    finalInvid  = (Invid) ((invid_field)parent).getValue();
+            finalInvid  = (Invid) ((invid_field)parent).getValue();
 
-	    if (finalInvid == null)
-	      {
-		throw new RuntimeException("Invid value of ContainerField is null");
-	      }
+            if (finalInvid == null)
+              {
+                throw new RuntimeException("Invid value of ContainerField is null");
+              }
 
-	    if (editable)
-	      {
-		ReturnVal rv = gc.handleReturnVal(gc.getSession().edit_db_object(finalInvid));
-		object = (db_object) rv.getObject();
+            if (editable)
+              {
+                ReturnVal rv = gc.handleReturnVal(gc.getSession().edit_db_object(finalInvid));
+                object = (db_object) rv.getObject();
 
-		if (object == null)
-		  {
-		    throw new RuntimeException("Could not call edit_db_object on " +
-					       "the parent of this embedded object.");
-		  }
-	      }
-	    else
-	      {
-		object = (db_object) (gc.handleReturnVal(gc.getSession().view_db_object(finalInvid))).getObject();
+                if (object == null)
+                  {
+                    throw new RuntimeException("Could not call edit_db_object on " +
+                                               "the parent of this embedded object.");
+                  }
+              }
+            else
+              {
+                object = (db_object) (gc.handleReturnVal(gc.getSession().view_db_object(finalInvid))).getObject();
 
-		if (object == null)
-		  {
-		    throw new RuntimeException("Could not call view_db_object on " +
-					       "the parent of this embedded object.");
-		  }
-	      }
-	  }
+                if (object == null)
+                  {
+                    throw new RuntimeException("Could not call view_db_object on " +
+                                               "the parent of this embedded object.");
+                  }
+              }
+          }
       }
     catch (Exception rx)
       {
-	gc.processExceptionRethrow(rx);
+        gc.processExceptionRethrow(rx);
       }
 
     gc.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
 
     try
       {
-	if (editable)
-	  {
-	    // "Opening object for editing"
-	    setStatus(ts.l("addWindow.editing_status"), 1);
-	  }
-	else
-	  {
-	    // "Opening object for viewing"
-	    setStatus(ts.l("addWindow.viewing_status"), 1);
-	  }
+        if (editable)
+          {
+            // "Opening object for editing"
+            setStatus(ts.l("addWindow.editing_status"), 1);
+          }
+        else
+          {
+            // "Opening object for viewing"
+            setStatus(ts.l("addWindow.viewing_status"), 1);
+          }
 
-	// First figure out the title, and put it in the hash
+        // First figure out the title, and put it in the hash
 
-	try
-	  {
-	    String objectType = gc.getObjectType(finalInvid);
+        try
+          {
+            String objectType = gc.getObjectType(finalInvid);
 
-	    if (isNewlyCreated)
-	      {
-		title = getWindowTitle(editable, isNewlyCreated, objectType, null);
-	      }
-	    else
-	      {
-		title = getWindowTitle(editable, isNewlyCreated, objectType, object.getLabel());
-	      }
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx, "Could not get label of object: ");
-	  }
+            if (isNewlyCreated)
+              {
+                title = getWindowTitle(editable, isNewlyCreated, objectType, null);
+              }
+            else
+              {
+                title = getWindowTitle(editable, isNewlyCreated, objectType, object.getLabel());
+              }
+          }
+        catch (Exception rx)
+          {
+            gc.processExceptionRethrow(rx, "Could not get label of object: ");
+          }
 
-	framePanel w = null;
+        framePanel w = null;
 
-	try
-	  {
-	    /*
-	      This is a big opportunity to spin the loading and
-	      creation of the framepanel off of the AWT/Swing Event
-	      Dispatch Thread through the use of Foxtrot, as if we can
-	      synchronously block execution of this thread of
-	      execution on the EDT while still allowing the EDT to
-	      chew through other stuff, we can allow for the refresh
-	      of the GUI while we're getting this internal frame
-	      created.  That still means we won't pop anything up on
-	      screen until the load is completed, but at least we'll
-	      have refresh in the meantime.
+        try
+          {
+            /*
+              This is a big opportunity to spin the loading and
+              creation of the framepanel off of the AWT/Swing Event
+              Dispatch Thread through the use of Foxtrot, as if we can
+              synchronously block execution of this thread of
+              execution on the EDT while still allowing the EDT to
+              chew through other stuff, we can allow for the refresh
+              of the GUI while we're getting this internal frame
+              created.  That still means we won't pop anything up on
+              screen until the load is completed, but at least we'll
+              have refresh in the meantime.
 
-	      This wouldn't even be feasible, except that we would know that
-	      this framePanel won't be made visible (and hence subject to
-	      heavy Swing threading constraints) until this constructor
-	      returns.
+              This wouldn't even be feasible, except that we would know that
+              this framePanel won't be made visible (and hence subject to
+              heavy Swing threading constraints) until this constructor
+              returns.
 
-	      That's foxtrot.sourceforge.net, yo.
-	    */
+              That's foxtrot.sourceforge.net, yo.
+            */
 
-	    final Invid localFinalInvid = finalInvid;
-	    final db_object localObject = object;
-	    final boolean localEditable = editable;
-	    final windowPanel localWindowPanel = this;
-	    final String localTitle = title;
-	    final boolean localIsNewlyCreated = isNewlyCreated;
+            final Invid localFinalInvid = finalInvid;
+            final db_object localObject = object;
+            final boolean localEditable = editable;
+            final windowPanel localWindowPanel = this;
+            final String localTitle = title;
+            final boolean localIsNewlyCreated = isNewlyCreated;
 
-	    // don't let the user log out while we're creating a new
-	    // window in the background
+            // don't let the user log out while we're creating a new
+            // window in the background
 
-	    gc.logoutMI.setEnabled(false);
+            gc.logoutMI.setEnabled(false);
 
-	    w = (framePanel) FoxtrotAdapter.post(new foxtrot.Task()
-	      {
-		public Object run() throws Exception
-		{
-		  try
-		    {
-		      framePanel foxFP = new framePanel(localFinalInvid,
-							localObject,
-							localEditable,
-							localWindowPanel,
-							localIsNewlyCreated);
+            w = (framePanel) FoxtrotAdapter.post(new foxtrot.Task()
+              {
+                public Object run() throws Exception
+                {
+                  try
+                    {
+                      framePanel foxFP = new framePanel(localFinalInvid,
+                                                        localObject,
+                                                        localEditable,
+                                                        localWindowPanel,
+                                                        localIsNewlyCreated);
 
-		      localWindowPanel.setWindowTitle(foxFP, localTitle);
-		      return foxFP;
-		    }
-		  catch (Throwable ex)
-		    {
-		      gc.processExceptionRethrow(ex);
-		      return null;
-		    }
-		}
-	      });
-	  }
-	catch (Exception ex)
-	  {
-	    gc.processExceptionRethrow(ex);
-	  }
-	finally
-	  {
-	    gc.logoutMI.setEnabled(true);
-	  }
+                      localWindowPanel.setWindowTitle(foxFP, localTitle);
+                      return foxFP;
+                    }
+                  catch (Throwable ex)
+                    {
+                      gc.processExceptionRethrow(ex);
+                      return null;
+                    }
+                }
+              });
+          }
+        catch (Exception ex)
+          {
+            gc.processExceptionRethrow(ex);
+          }
+        finally
+          {
+            gc.logoutMI.setEnabled(true);
+          }
 
         if (originalWindow != null)
           {
@@ -510,7 +510,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
           }
         else
           {
-	    sizeWindow(w);
+            sizeWindow(w);
             placeWindow(w);
             w.setLayer(Integer.valueOf(topLayer));
 
@@ -519,23 +519,23 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
             setSelectedWindow(w);
           }
 
-	// turn the cancel button on once the window has appeared.
+        // turn the cancel button on once the window has appeared.
 
-	if (editable)
-	  {
-	    gc.cancel.setEnabled(true);
-	  }
+        if (editable)
+          {
+            gc.cancel.setEnabled(true);
+          }
       }
     catch (Throwable ex)
       {
-	gc.processException(ex);
+        gc.processException(ex);
       }
     finally
       {
-	// if we have an exception creating the framePanel, don't leave
-	// the cursor frozen in wait
+        // if we have an exception creating the framePanel, don't leave
+        // the cursor frozen in wait
 
-	gc.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+        gc.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
       }
   }
 
@@ -553,27 +553,27 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   {
     if (newlyCreated)
       {
-	if (object_label == null)
-	  {
-	    // "Create: {0} - New Object"
-	    return ts.l("getWindowTitle.create_object_title", objectType);
-	  }
-	else
-	  {
-	    // "Create: {0} - {1}"
-	    return ts.l("getWindowTitle.create_object_title2", objectType, object_label);
-	  }
+        if (object_label == null)
+          {
+            // "Create: {0} - New Object"
+            return ts.l("getWindowTitle.create_object_title", objectType);
+          }
+        else
+          {
+            // "Create: {0} - {1}"
+            return ts.l("getWindowTitle.create_object_title2", objectType, object_label);
+          }
       }
 
     if (editable)
       {
-	// "Edit: {0} - {1}"
-	return ts.l("getWindowTitle.edit_object_title", objectType, object_label);
+        // "Edit: {0} - {1}"
+        return ts.l("getWindowTitle.edit_object_title", objectType, object_label);
       }
     else
       {
-	// "View: {0} - {1}"
-	return ts.l("getWindowTitle.view_object_title", objectType, object_label);
+        // "View: {0} - {1}"
+        return ts.l("getWindowTitle.view_object_title", objectType, object_label);
       }
   }
 
@@ -589,12 +589,12 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     if (defWidth > maxDefaultWidth)
       {
-	defWidth = maxDefaultWidth;
+        defWidth = maxDefaultWidth;
       }
 
     if (defHeight > maxDefaultHeight)
       {
-	defHeight = maxDefaultHeight;
+        defHeight = maxDefaultHeight;
       }
 
     window.setBounds(0, 0, defWidth, defHeight);
@@ -620,18 +620,18 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     if (width > d.width || height > d.height)
       {
-	window.setBounds(0,0, width, height);
+        window.setBounds(0,0, width, height);
       }
     else if (width + stagger_offset < d.width && height + stagger_offset < d.height)
       {
-	window.setBounds(stagger_offset, stagger_offset, width, height);
+        window.setBounds(stagger_offset, stagger_offset, width, height);
       }
     else
       {
-	x_offset = (int) ((d.width - width) * randgen.nextFloat());
-	y_offset = (int) ((d.height - height) * randgen.nextFloat());
+        x_offset = (int) ((d.width - width) * randgen.nextFloat());
+        y_offset = (int) ((d.height - height) * randgen.nextFloat());
 
-	window.setBounds(x_offset, y_offset, width, height);
+        window.setBounds(x_offset, y_offset, width, height);
       }
   }
 
@@ -643,37 +643,37 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     while (windows.hasMoreElements())
       {
-	JInternalFrame w = (JInternalFrame)windowList.get(windows.nextElement());
+        JInternalFrame w = (JInternalFrame)windowList.get(windows.nextElement());
 
-	try
-	  {
-	    w.setSelected(false);
-	  }
-	catch (java.beans.PropertyVetoException e)
-	  {
-	    System.err.println("Could not set selected false.  sorry.");
-	  }
+        try
+          {
+            w.setSelected(false);
+          }
+        catch (java.beans.PropertyVetoException e)
+          {
+            System.err.println("Could not set selected false.  sorry.");
+          }
       }
 
     try
       {
-	window.setIcon(false);
+        window.setIcon(false);
       }
     catch (java.beans.PropertyVetoException e)
       {
-	System.err.println("Could not de-iconify window");
+        System.err.println("Could not de-iconify window");
       }
 
     window.moveToFront();
 
     try
       {
-	window.setSelected(true);
-	window.toFront();
+        window.setSelected(true);
+        window.toFront();
       }
     catch (java.beans.PropertyVetoException e)
       {
-	System.err.println("Could not set selected and bring window to front");
+        System.err.println("Could not set selected and bring window to front");
       }
   }
 
@@ -689,27 +689,27 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     synchronized (windowList)
       {
-	ary = windowList.values().toArray();
+        ary = windowList.values().toArray();
       }
 
     for (int i = 0; i < ary.length; i++)
       {
-	Object o = ary[i];
+        Object o = ary[i];
 
-	if (o instanceof framePanel)
-	  {
-	    framePanel fp = (framePanel) o;
+        if (o instanceof framePanel)
+          {
+            framePanel fp = (framePanel) o;
 
-	    // we may have a view window and an edit window, so we
-	    // need to scan over all editable windows, not just stop
-	    // when we see a non-editable window with the invid we are
-	    // looking for.
+            // we may have a view window and an edit window, so we
+            // need to scan over all editable windows, not just stop
+            // when we see a non-editable window with the invid we are
+            // looking for.
 
-	    if (fp.isEditable() && fp.getObjectInvid().equals(invid))
-	      {
-		return true;
-	      }
-	  }
+            if (fp.isEditable() && fp.getObjectInvid().equals(invid))
+              {
+                return true;
+              }
+          }
       }
 
     return false;
@@ -728,27 +728,27 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     synchronized (windowList)
       {
-	ary = windowList.values().toArray();
+        ary = windowList.values().toArray();
       }
 
     for (int i = 0; i < ary.length; i++)
       {
-	Object o = ary[i];
+        Object o = ary[i];
 
-	if (o instanceof framePanel)
-	  {
-	    framePanel fp = (framePanel) o;
+        if (o instanceof framePanel)
+          {
+            framePanel fp = (framePanel) o;
 
-	    // we may have a view window and an edit window, so we
-	    // need to scan over all editable windows, not just stop
-	    // when we see a non-editable window with the invid we are
-	    // looking for.
+            // we may have a view window and an edit window, so we
+            // need to scan over all editable windows, not just stop
+            // when we see a non-editable window with the invid we are
+            // looking for.
 
-	    if (fp.isEditable() && fp.getObjectInvid().equals(invid))
-	      {
-		return fp.isApprovedForClosing();
-	      }
-	  }
+            if (fp.isEditable() && fp.getObjectInvid().equals(invid))
+              {
+                return fp.isApprovedForClosing();
+              }
+          }
       }
 
     return false;
@@ -799,28 +799,28 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     if (results.resultSize() == 0)
       {
-	final gclient my_gc = gc;
+        final gclient my_gc = gc;
 
-	EventQueue.invokeLater(new Runnable()
-				   {
-				     public void run()
-				       {
-					 // "Query Result"
-					 // "No results were found to match your query."
-					 // "Try Again"
-					 StringDialog d = new StringDialog(my_gc,
-									   ts.l("addTableWindow.query_result_subj"),
-									   ts.l("addTableWindow.query_result_txt"),
-									   ts.l("addTableWindow.query_result_try_again"),
-									   StringDialog.getDefaultCancel(), StandardDialog.ModalityType.DOCUMENT_MODAL);
+        EventQueue.invokeLater(new Runnable()
+                                   {
+                                     public void run()
+                                       {
+                                         // "Query Result"
+                                         // "No results were found to match your query."
+                                         // "Try Again"
+                                         StringDialog d = new StringDialog(my_gc,
+                                                                           ts.l("addTableWindow.query_result_subj"),
+                                                                           ts.l("addTableWindow.query_result_txt"),
+                                                                           ts.l("addTableWindow.query_result_try_again"),
+                                                                           StringDialog.getDefaultCancel(), StandardDialog.ModalityType.DOCUMENT_MODAL);
 
-					 if (d.showDialog() != null)
-					   {
-					     my_gc.postQuery(null);
-					   }
-				       }
-				   });
-	return;
+                                         if (d.showDialog() != null)
+                                           {
+                                             my_gc.postQuery(null);
+                                           }
+                                       }
+                                   });
+        return;
       }
 
     // "Querying object types"
@@ -829,23 +829,23 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     try
       {
-	rt = new gResultTable(this, session, query, results);
+        rt = new gResultTable(this, session, query, results);
       }
     catch (Exception rx)
       {
-	// "Could not make results table"
-	gc.processExceptionRethrow(rx, ts.l("addTableWindow.resulting_exception"));
+        // "Could not make results table"
+        gc.processExceptionRethrow(rx, ts.l("addTableWindow.resulting_exception"));
       }
 
     if (rt == null)
       {
-	if (debug)
-	  {
-	    System.err.println("rt == null");
-	  }
+        if (debug)
+          {
+            System.err.println("rt == null");
+          }
 
-	// "Could not get the result table."
-	setStatus(ts.l("addTableWindow.failure_status"));
+        // "Could not get the result table."
+        setStatus(ts.l("addTableWindow.failure_status"));
 
         return;
       }
@@ -860,7 +860,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     placeWindow(rt);
 
     add(rt);
-    rt.setVisible(true);	// for Kestrel
+    rt.setVisible(true);        // for Kestrel
     setSelectedWindow(rt);
 
     rt.addInternalFrameListener(this);
@@ -888,19 +888,19 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     // "Waiting for query"
     frame.getContentPane().add(new JLabel(ts.l("addWaitWindow.label"),
-					  icon,
-					  SwingConstants.CENTER));
+                                          icon,
+                                          SwingConstants.CENTER));
     frame.setLayer(Integer.valueOf(topLayer));
 
     if (debug)
       {
-	System.err.println("Adding wait window");
+        System.err.println("Adding wait window");
       }
 
     waitWindowHash.put(key, frame);
 
     add(frame);
-    frame.setVisible(true);	// for Kestrel
+    frame.setVisible(true);     // for Kestrel
     setSelectedWindow(frame);
   }
 
@@ -916,28 +916,28 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     if (frame == null)
       {
-	if (debug)
-	  {
-	    System.err.println("Couldn't find window to remove.");
-	  }
+        if (debug)
+          {
+            System.err.println("Couldn't find window to remove.");
+          }
 
-	return;
+        return;
       }
 
     if (debug)
       {
-	System.err.println("Removing wait window");
+        System.err.println("Removing wait window");
       }
 
     frame.setClosable(true);
 
     try
       {
-	frame.setClosed(true);
+        frame.setClosed(true);
       }
     catch (java.beans.PropertyVetoException ex)
       {
-	throw new RuntimeException("beans? " + ex);
+        throw new RuntimeException("beans? " + ex);
       }
 
     waitWindowHash.remove(frame);
@@ -956,20 +956,20 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     synchronized (windowList)
       {
-	ary = windowList.values().toArray();
+        ary = windowList.values().toArray();
       }
 
     for (int i = 0; i < ary.length; i++)
       {
-	Object o = ary[i];
+        Object o = ary[i];
 
-	if (o instanceof framePanel)
-	  {
-	    if (((framePanel)o).isEditable())
-	      {
-		editables.addElement(o);
-	      }
-	  }
+        if (o instanceof framePanel)
+          {
+            if (((framePanel)o).isEditable())
+              {
+                editables.addElement(o);
+              }
+          }
       }
 
     return editables;
@@ -990,35 +990,35 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     synchronized (windowList)
       {
-	ary = windowList.values().toArray();
+        ary = windowList.values().toArray();
       }
 
     for (int i = 0; i < ary.length; i++)
       {
-	Object o  = ary[i];
+        Object o  = ary[i];
 
-	if (o instanceof framePanel)
-	  {
-	    framePanel w = (framePanel)o;
+        if (o instanceof framePanel)
+          {
+            framePanel w = (framePanel)o;
 
-	    if (w.isEditable())
-	      {
-		if (debug)
-		  {
-		    System.err.println("closing editables.. " + w.getTitle());
-		  }
+            if (w.isEditable())
+              {
+                if (debug)
+                  {
+                    System.err.println("closing editables.. " + w.getTitle());
+                  }
 
-		try
-		  {
-		    w.closingApproved = true;
-		    w.setClosed(true);
-		  }
-		catch (java.beans.PropertyVetoException ex)
-		  {
-		    // shouldn't happen here
-		  }
-	      }
-	  }
+                try
+                  {
+                    w.closingApproved = true;
+                    w.setClosed(true);
+                  }
+                catch (java.beans.PropertyVetoException ex)
+                  {
+                    // shouldn't happen here
+                  }
+              }
+          }
       }
   }
 
@@ -1037,30 +1037,30 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     synchronized (windowList)
       {
-	ary = windowList.values().toArray();
+        ary = windowList.values().toArray();
       }
 
     for (int i = 0; i < ary.length; i++)
       {
-	Object o  = ary[i];
+        Object o  = ary[i];
 
-	if (o instanceof framePanel)
-	  {
-	    framePanel w = (framePanel)o;
+        if (o instanceof framePanel)
+          {
+            framePanel w = (framePanel)o;
 
             if (w.getObjectInvid().equals(invid))
               {
-		try
-		  {
-		    w.closingApproved = true;
-		    w.setClosed(true);
-		  }
-		catch (java.beans.PropertyVetoException ex)
-		  {
-		    // shouldn't happen here
-		  }
+                try
+                  {
+                    w.closingApproved = true;
+                    w.setClosed(true);
+                  }
+                catch (java.beans.PropertyVetoException ex)
+                  {
+                    // shouldn't happen here
+                  }
               }
-	  }
+          }
       }
   }
 
@@ -1079,55 +1079,55 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     synchronized (windowList)
       {
-	ary = windowList.values().toArray();
+        ary = windowList.values().toArray();
       }
 
     for (int i = 0; i < ary.length; i++)
       {
-	JInternalFrame o = (JInternalFrame) ary[i];
+        JInternalFrame o = (JInternalFrame) ary[i];
 
-	if (o instanceof framePanel)
-	  {
-	    framePanel w = (framePanel)o;
+        if (o instanceof framePanel)
+          {
+            framePanel w = (framePanel)o;
 
-	    if (!w.isClosable())
-	      {
-		w.setClosable(true);
-	      }
+            if (!w.isClosable())
+              {
+                w.setClosable(true);
+              }
 
-	    if (debug)
-	      {
-		System.err.println("windowPanel.closeAll() - closing window " + w.getTitle());
-	      }
+            if (debug)
+              {
+                System.err.println("windowPanel.closeAll() - closing window " + w.getTitle());
+              }
 
-	    try
-	      {
-		if (askNoQuestions)
-		  {
-                    w.stopNow();	// stop all container threads asap
+            try
+              {
+                if (askNoQuestions)
+                  {
+                    w.stopNow();        // stop all container threads asap
                     w.closingApproved = true;
-		  }
+                  }
 
-		w.setClosed(true);
-	      }
-	    catch (java.beans.PropertyVetoException ex)
-	      {
-		// user decided against this one..
-	      }
-	  }
-	else if (o instanceof gResultTable)
-	  {
-	    gResultTable w = (gResultTable) o;
+                w.setClosed(true);
+              }
+            catch (java.beans.PropertyVetoException ex)
+              {
+                // user decided against this one..
+              }
+          }
+        else if (o instanceof gResultTable)
+          {
+            gResultTable w = (gResultTable) o;
 
-	    try
-	      {
-		w.setClosed(true);
-	      }
-	    catch (java.beans.PropertyVetoException ex)
-	      {
-		// something decided against this one.. oh well.
-	      }
-	  }
+            try
+              {
+                w.setClosed(true);
+              }
+            catch (java.beans.PropertyVetoException ex)
+              {
+                // something decided against this one.. oh well.
+              }
+          }
       }
   }
 
@@ -1150,32 +1150,32 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     if (w != null && w.isClosable())
       {
-	if (debug)
-	  {
-	    System.err.println("windowPanel.java closing " + title);
-	  }
+        if (debug)
+          {
+            System.err.println("windowPanel.java closing " + title);
+          }
 
-	if (w instanceof framePanel)
-	  {
-	    ((framePanel) w).closingApproved = true;
-	  }
+        if (w instanceof framePanel)
+          {
+            ((framePanel) w).closingApproved = true;
+          }
 
-	try
-	  {
-	    w.setClosed(true);
-	  }
-	catch (java.beans.PropertyVetoException ex)
-	  {
-	    // okay, so the user decided against it.
-	  }
+        try
+          {
+            w.setClosed(true);
+          }
+        catch (java.beans.PropertyVetoException ex)
+          {
+            // okay, so the user decided against it.
+          }
 
-	// "Window closed."
-	setStatus(ts.l("closeWindow.yes_sir_status"), 1);
+        // "Window closed."
+        setStatus(ts.l("closeWindow.yes_sir_status"), 1);
       }
     else
       {
-	// "You can''t close that window."
-	setStatus(ts.l("closeWindow.no_sir_status"));
+        // "You can''t close that window."
+        setStatus(ts.l("closeWindow.no_sir_status"));
       }
   }
 
@@ -1201,38 +1201,38 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     synchronized (windowList)
       {
-	// if the frame we're dealing with is already in the windowList
-	// hash, remove the old title.
+        // if the frame we're dealing with is already in the windowList
+        // hash, remove the old title.
 
-	en = windowList.keys();
+        en = windowList.keys();
 
-	while (en.hasMoreElements())
-	  {
-	    String enTitle = (String) en.nextElement();
-	    JInternalFrame enWindow = (JInternalFrame) windowList.get(enTitle);
+        while (en.hasMoreElements())
+          {
+            String enTitle = (String) en.nextElement();
+            JInternalFrame enWindow = (JInternalFrame) windowList.get(enTitle);
 
-	    if (enWindow == frame)
-	      {
-		windowList.remove(enTitle);
-		break;		// we've killed the enumeration, stop looping
-	      }
-	  }
+            if (enWindow == frame)
+              {
+                windowList.remove(enTitle);
+                break;          // we've killed the enumeration, stop looping
+              }
+          }
 
-	// now find a title for the window and set it
+        // now find a title for the window and set it
 
-	while (windowList.containsKey(title))
-	  {
-	    title = proposedTitle + " <" + num++ + ">";
-	  }
+        while (windowList.containsKey(title))
+          {
+            title = proposedTitle + " <" + num++ + ">";
+          }
 
-	windowList.put(title, frame);
+        windowList.put(title, frame);
 
-	frame.setTitle(title);
+        frame.setTitle(title);
 
-	updateWindowMenu();
+        updateWindowMenu();
       }
 
-    return title;		// in case the caller cares about what unique title we wound up with
+    return title;               // in case the caller cares about what unique title we wound up with
   }
 
   public JMenu updateWindowMenu()
@@ -1245,13 +1245,13 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     try
       {
-	windowMenu.removeAll();
+        windowMenu.removeAll();
       }
     catch (NullPointerException e)
       {
-	// Swing 1.1 is picky, but don't complain publicly
+        // Swing 1.1 is picky, but don't complain publicly
 
-	// System.err.println(e + " - windowMenu.removeAll() found nothing to remove.");
+        // System.err.println(e + " - windowMenu.removeAll() found nothing to remove.");
       }
 
     windowMenu.add(toggleToolBarMI);
@@ -1262,53 +1262,53 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     synchronized (windowList)
       {
-	windows = windowList.keys();
+        windows = windowList.keys();
 
-	while (windows.hasMoreElements())
-	  {
-	    obj = windowList.get(windows.nextElement());
-	    MI = null;
+        while (windows.hasMoreElements())
+          {
+            obj = windowList.get(windows.nextElement());
+            MI = null;
 
-	    if (obj instanceof framePanel)
-	      {
-		if (debug)
-		  {
-		    System.err.println("Adding menu item(fp): " + ((framePanel)obj).getTitle());
-		  }
+            if (obj instanceof framePanel)
+              {
+                if (debug)
+                  {
+                    System.err.println("Adding menu item(fp): " + ((framePanel)obj).getTitle());
+                  }
 
-		MI = new JMenuItem(((framePanel)obj).getTitle());
-	      }
-	    else if (obj instanceof gResultTable)
-	      {
-		if (debug)
-		  {
-		    System.err.println("Adding menu item: " + ((gResultTable)obj).getTitle());
-		  }
+                MI = new JMenuItem(((framePanel)obj).getTitle());
+              }
+            else if (obj instanceof gResultTable)
+              {
+                if (debug)
+                  {
+                    System.err.println("Adding menu item: " + ((gResultTable)obj).getTitle());
+                  }
 
-		MI = new JMenuItem(((gResultTable)obj).getTitle());
-	      }
+                MI = new JMenuItem(((gResultTable)obj).getTitle());
+              }
 
-	    if (MI != null)
-	      {
-		MI.setActionCommand("showWindow");
-		MI.addActionListener(this);
-		windowMenu.add(MI);
-		emptyList = false;
-	      }
-	  }
+            if (MI != null)
+              {
+                MI.setActionCommand("showWindow");
+                MI.addActionListener(this);
+                windowMenu.add(MI);
+                emptyList = false;
+              }
+          }
       }
 
     if (emptyList)
       {
-	try
-	  {
-	    gc.tree.requestFocus();
-	  }
-	catch (NullPointerException ex)
-	  {
-	    // if we're closing down, we might have zeroed out the
-	    // tree reference already.
-	  }
+        try
+          {
+            gc.tree.requestFocus();
+          }
+        catch (NullPointerException ex)
+          {
+            // if we're closing down, we might have zeroed out the
+            // tree reference already.
+          }
       }
 
     return windowMenu;
@@ -1325,15 +1325,15 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     if (obj instanceof framePanel)
       {
-	setSelectedWindow((framePanel)obj);
+        setSelectedWindow((framePanel)obj);
       }
     else if (obj instanceof gResultTable)
       {
-	setSelectedWindow((gResultTable)obj);
+        setSelectedWindow((gResultTable)obj);
       }
     else if (debug)
       {
-	System.err.println("Hmm, don't know what kind of window this is:" + obj);
+        System.err.println("Hmm, don't know what kind of window this is:" + obj);
       }
   }
 
@@ -1348,21 +1348,21 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     synchronized (windowList)
       {
-	ary = windowList.values().toArray();
+        ary = windowList.values().toArray();
       }
 
     for (int i = 0; i < ary.length; i++)
       {
-	if (ary[i] instanceof framePanel)
-	  {
-	    framePanel fp = (framePanel) ary[i];
+        if (ary[i] instanceof framePanel)
+          {
+            framePanel fp = (framePanel) ary[i];
 
-	    if (fp.isEditable() && fp.getObjectInvid().equals(objInvid))
-	      {
-		setSelectedWindow(fp);
-		return;
-	      }
-	  }
+            if (fp.isEditable() && fp.getObjectInvid().equals(objInvid))
+              {
+                setSelectedWindow(fp);
+                return;
+              }
+          }
       }
   }
 
@@ -1380,15 +1380,15 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     synchronized (windowList)
       {
-	ary = windowList.values().toArray();
+        ary = windowList.values().toArray();
       }
 
     for (int i = 0; i < ary.length; i++)
       {
-	if (ary[i] instanceof gResultTable)
-	  {
-	    ((gResultTable) ary[i]).refreshQuery();
-	  }
+        if (ary[i] instanceof gResultTable)
+          {
+            ((gResultTable) ary[i]).refreshQuery();
+          }
       }
   }
 
@@ -1419,15 +1419,15 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     synchronized (windowList)
       {
-	ary = windowList.values().toArray();
+        ary = windowList.values().toArray();
       }
 
     for (int i = 0; i < ary.length; i++)
       {
-	if (ary[i] instanceof framePanel)
-	  {
-	    ((framePanel) ary[i]).updateContainerPanels(invid, retVal);
-	  }
+        if (ary[i] instanceof framePanel)
+          {
+            ((framePanel) ary[i]).updateContainerPanels(invid, retVal);
+          }
       }
   }
 
@@ -1444,15 +1444,15 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     synchronized (windowList)
       {
-	ary = windowList.values().toArray();
+        ary = windowList.values().toArray();
       }
 
     for (int i = 0; i < ary.length; i++)
       {
-	if (ary[i] instanceof framePanel)
-	  {
-	    ((framePanel) ary[i]).relabelObject(invid, newLabel);
-	  }
+        if (ary[i] instanceof framePanel)
+          {
+            ((framePanel) ary[i]).relabelObject(invid, newLabel);
+          }
       }
   }
 
@@ -1462,23 +1462,23 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   {
     if (e.getSource() instanceof JMenuItem)
       {
-	if (e.getSource() == removeAllMI)
-	  {
-	    closeAll(false);
-	  }
-	else
-	  {
-	    JMenuItem MI = (JMenuItem)e.getSource();
+        if (e.getSource() == removeAllMI)
+          {
+            closeAll(false);
+          }
+        else
+          {
+            JMenuItem MI = (JMenuItem)e.getSource();
 
-	    if (e.getActionCommand().equals("showWindow"))
-	      {
-		showWindow(MI.getText());
-	      }
-	  }
+            if (e.getActionCommand().equals("showWindow"))
+              {
+                showWindow(MI.getText());
+              }
+          }
       }
     else
       {
-	System.err.println("Unknown ActionEvent in windowPanel");
+        System.err.println("Unknown ActionEvent in windowPanel");
       }
   }
 
@@ -1490,18 +1490,18 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     if (oldTitle == null)
       {
-	System.err.println("Title is null");
+        System.err.println("Title is null");
       }
     else
       {
         windowList.remove(oldTitle);
 
-	updateWindowMenu();
+        updateWindowMenu();
       }
 
     if (debug)
       {
-	System.err.println("windowPanel.internalFrameClosed(): exiting");
+        System.err.println("windowPanel.internalFrameClosed(): exiting");
       }
   }
 
@@ -1522,7 +1522,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
         windowList.remove(rt.getTitle());
 
-	updateWindowMenu();
+        updateWindowMenu();
       }
   }
 

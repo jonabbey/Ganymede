@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -77,11 +77,11 @@ public class GHashtable extends Hashtable {
   {
     if (x instanceof Byte[])
       {
-	return String.valueOf(new IPwrap((Byte[]) x));
+        return String.valueOf(new IPwrap((Byte[]) x));
       }
     else
       {
-	return String.valueOf(x);
+        return String.valueOf(x);
       }
   }
 
@@ -152,7 +152,7 @@ public class GHashtable extends Hashtable {
   {
     if (this.caseInsensitive == caseInsensitive)
       {
-	return;
+        return;
       }
 
     // if we're currently caseInsensitive, then aa and aA are treated
@@ -163,72 +163,72 @@ public class GHashtable extends Hashtable {
 
     if (this.caseInsensitive)
       {
-	Hashtable temp = new Hashtable(this.size());
+        Hashtable temp = new Hashtable(this.size());
 
-	Enumeration x = this.keys();
-	
-	while (x.hasMoreElements())
-	  {
-	    Object key = x.nextElement(); // GEnum strips off the GKey
+        Enumeration x = this.keys();
+        
+        while (x.hasMoreElements())
+          {
+            Object key = x.nextElement(); // GEnum strips off the GKey
 
-	    temp.put(key, this.get(key));
-	  }
+            temp.put(key, this.get(key));
+          }
 
-	this.caseInsensitive = false; // now sensitive.
+        this.caseInsensitive = false; // now sensitive.
 
-	this.clear();
+        this.clear();
 
-	x = temp.keys();
+        x = temp.keys();
 
-	while (x.hasMoreElements())
-	  {
-	    Object key = x.nextElement();
-	    
-	    this.put(key, temp.get(key));
-	  }
+        while (x.hasMoreElements())
+          {
+            Object key = x.nextElement();
+            
+            this.put(key, temp.get(key));
+          }
 
-	return;
+        return;
       }
-    else			// flipping !caseInsensitive to caseInsensitive
+    else                        // flipping !caseInsensitive to caseInsensitive
       {
-	// we're now attempting to switch a previously case-sensitive
-	// hash to a caseinsensitive one.. this can only be done if we
-	// don't find any collisions
+        // we're now attempting to switch a previously case-sensitive
+        // hash to a caseinsensitive one.. this can only be done if we
+        // don't find any collisions
 
-	GHashtable temp = new GHashtable(this.size(), true); // insensitive
+        GHashtable temp = new GHashtable(this.size(), true); // insensitive
 
-	Enumeration x = this.keys();
+        Enumeration x = this.keys();
 
-	while (x.hasMoreElements())
-	  {
-	    Object key = x.nextElement();
-	    
-	    if (temp.containsKey(key))
-	      {
-		throw new IllegalStateException("collision detected switching to case insensitivity");
-	      }
-	    else
-	      {
-		temp.put(key, this.get(key));
-	      }
-	  }
+        while (x.hasMoreElements())
+          {
+            Object key = x.nextElement();
+            
+            if (temp.containsKey(key))
+              {
+                throw new IllegalStateException("collision detected switching to case insensitivity");
+              }
+            else
+              {
+                temp.put(key, this.get(key));
+              }
+          }
 
-	// okay, we've gotten through without finding any collisions
+        // okay, we've gotten through without finding any collisions
 
-	this.caseInsensitive = true; // now insensitive.
+        this.caseInsensitive = true; // now insensitive.
 
-	this.clear();
+        this.clear();
 
-	x = temp.keys();
+        x = temp.keys();
 
-	while (x.hasMoreElements())
-	  {
-	    Object key = x.nextElement();
-	    
-	    this.put(key, temp.get(key));
-	  }
+        while (x.hasMoreElements())
+          {
+            Object key = x.nextElement();
+            
+            this.put(key, temp.get(key));
+          }
 
-	return;
+        return;
       }
   }
 
@@ -236,11 +236,11 @@ public class GHashtable extends Hashtable {
   {
     if (caseInsensitive)
       {
-	return new GEnum(super.keys());
+        return new GEnum(super.keys());
       }
     else
       {
-	return super.keys();
+        return super.keys();
       }
   }
 
@@ -248,16 +248,16 @@ public class GHashtable extends Hashtable {
   {
     if (key instanceof Byte[])
       {
-	key = new IPwrap((Byte[]) key);
+        key = new IPwrap((Byte[]) key);
       }
 
     if (caseInsensitive)
       {
-	return super.containsKey(new GKey(key));
+        return super.containsKey(new GKey(key));
       }
     else
       {
-	return super.containsKey(key);
+        return super.containsKey(key);
       }
   }
 
@@ -265,16 +265,16 @@ public class GHashtable extends Hashtable {
   {
     if (key instanceof Byte[])
       {
-	key = new IPwrap((Byte[]) key);
+        key = new IPwrap((Byte[]) key);
       }
 
     if (caseInsensitive)
       {
-	return super.get(new GKey(key));
+        return super.get(new GKey(key));
       }
     else
       {
-	return super.get(key);
+        return super.get(key);
       }
   }
 
@@ -286,16 +286,16 @@ public class GHashtable extends Hashtable {
 
     if (key instanceof Byte[])
       {
-	key = new IPwrap((Byte[]) key);
+        key = new IPwrap((Byte[]) key);
       }
 
     if (caseInsensitive)
       {
-	result = super.put(new GKey(key), value);
+        result = super.put(new GKey(key), value);
       }
     else
       {
-	result = super.put(key, value);
+        result = super.put(key, value);
       }
 
     return result;
@@ -305,16 +305,16 @@ public class GHashtable extends Hashtable {
   {
     if (key instanceof Byte[])
       {
-	key = new IPwrap((Byte[]) key);
+        key = new IPwrap((Byte[]) key);
       }
 
     if (caseInsensitive)
       {
-	return super.remove(new GKey(key));
+        return super.remove(new GKey(key));
       }
     else
       {
-	return super.remove(key);
+        return super.remove(key);
       }
   }
 }
@@ -343,17 +343,17 @@ class GKey {
   {
     if (key == null)
       {
-	throw new NullPointerException("Null key value");
+        throw new NullPointerException("Null key value");
       }
 
     if (key instanceof String)
       {
-	orig = key;
-	this.key = ((String) key).toLowerCase();
+        orig = key;
+        this.key = ((String) key).toLowerCase();
       }
     else
       {
-	this.key = orig = key;
+        this.key = orig = key;
       }
   }
 
@@ -366,11 +366,11 @@ class GKey {
   {
     if (obj instanceof GKey)
       {
-	return key.equals(((GKey) obj).key);
+        return key.equals(((GKey) obj).key);
       }
     else
       {
-	return key.equals(obj);
+        return key.equals(obj);
       }
   }
 
@@ -415,11 +415,11 @@ class GEnum implements Enumeration {
     
     if (t instanceof GKey)
       {
-	return ((GKey) t).origValue();
+        return ((GKey) t).origValue();
       }
     else
       {
-	return t;
+        return t;
       }
   }
 }

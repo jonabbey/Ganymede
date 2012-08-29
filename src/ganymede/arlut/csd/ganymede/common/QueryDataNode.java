@@ -126,9 +126,9 @@ public class QueryDataNode extends QueryNode {
     this.fieldId = UNUSEDVAL;
 
     if ((comparator < FIRST || comparator > LAST) &&
-	(vecOp == NONE))
+        (vecOp == NONE))
       {
-	throw new IllegalArgumentException("bad comparator value: " + comparator);
+        throw new IllegalArgumentException("bad comparator value: " + comparator);
       }
 
     this.comparator = comparator;
@@ -136,7 +136,7 @@ public class QueryDataNode extends QueryNode {
 
     if (vecOp < FIRSTVECOP || vecOp > LASTVECOP)
       {
-	throw new IllegalArgumentException("bad vector operator value: " + vecOp);
+        throw new IllegalArgumentException("bad vector operator value: " + vecOp);
       }
 
     this.arrayOp = vecOp;
@@ -156,7 +156,7 @@ public class QueryDataNode extends QueryNode {
 
     if (comparator < FIRST || comparator > LAST)
       {
-	throw new IllegalArgumentException("bad comparator value: " + comparator);
+        throw new IllegalArgumentException("bad comparator value: " + comparator);
       }
 
     this.comparator = comparator;
@@ -184,9 +184,9 @@ public class QueryDataNode extends QueryNode {
     this.fieldId = fieldId;
 
     if ((comparator < FIRST || comparator > LAST) &&
-	(vecOp == NONE))
+        (vecOp == NONE))
       {
-	throw new IllegalArgumentException("bad comparator value: " + comparator);
+        throw new IllegalArgumentException("bad comparator value: " + comparator);
       }
 
     this.comparator = comparator;
@@ -194,7 +194,7 @@ public class QueryDataNode extends QueryNode {
 
     if (vecOp < FIRSTVECOP || vecOp > LASTVECOP)
       {
-	throw new IllegalArgumentException("bad vector operator value: " + vecOp);
+        throw new IllegalArgumentException("bad vector operator value: " + vecOp);
       }
 
     this.arrayOp = vecOp;
@@ -220,7 +220,7 @@ public class QueryDataNode extends QueryNode {
 
     if (comparator < FIRST || comparator > LAST)
       {
-	throw new IllegalArgumentException("bad comparator value: " + comparator);
+        throw new IllegalArgumentException("bad comparator value: " + comparator);
       }
 
     this.comparator = comparator;
@@ -243,7 +243,7 @@ public class QueryDataNode extends QueryNode {
 
     if (comparator < FIRST || comparator > LAST)
       {
-	throw new IllegalArgumentException("bad comparator value: " + comparator);
+        throw new IllegalArgumentException("bad comparator value: " + comparator);
       }
 
     this.comparator = comparator;
@@ -266,97 +266,97 @@ public class QueryDataNode extends QueryNode {
 
     if (fieldname != null)
       {
-	result.append(fieldname);
+        result.append(fieldname);
       }
     else
       {
-	result.append("<");
-	result.append(Short.toString(fieldId));
-	result.append(">");
+        result.append("<");
+        result.append(Short.toString(fieldId));
+        result.append(">");
       }
 
     result.append(" ");
 
     if (arrayOp == NONE)
       {
-	switch (comparator)
-	  {
-	  case EQUALS:
-	    result.append("EQUALS");
-	    break;
+        switch (comparator)
+          {
+          case EQUALS:
+            result.append("EQUALS");
+            break;
 
-	  case LESS:
-	    result.append("LESS");
-	    break;
+          case LESS:
+            result.append("LESS");
+            break;
 
-	  case LESSEQ:
-	    result.append("LESSEQ");
-	    break;
+          case LESSEQ:
+            result.append("LESSEQ");
+            break;
 
-	  case GREAT:
-	    result.append("GREAT");
-	    break;
+          case GREAT:
+            result.append("GREAT");
+            break;
 
-	  case GREATEQ:
-	    result.append("GREATEQ");
-	    break;
+          case GREATEQ:
+            result.append("GREATEQ");
+            break;
 
-	  case NOCASEEQ:
-	    result.append("NOCASEEQ");
-	    break;
+          case NOCASEEQ:
+            result.append("NOCASEEQ");
+            break;
 
-	  case STARTSWITH:
-	    result.append("STARTSWITH");
-	    break;
+          case STARTSWITH:
+            result.append("STARTSWITH");
+            break;
 
-	  case ENDSWITH:
-	    result.append("ENDSWITH");
-	    break;
+          case ENDSWITH:
+            result.append("ENDSWITH");
+            break;
 
-	  case DEFINED:
-	    result.append("DEFINED");
-	    break;
+          case DEFINED:
+            result.append("DEFINED");
+            break;
 
-	  case MATCHES:
-	    result.append("MATCHES");
-	    break;
+          case MATCHES:
+            result.append("MATCHES");
+            break;
 
-	  case NOCASEMATCHES:
-	    result.append("NOCASEMATCHES");
-	    break;
-	  }
+          case NOCASEMATCHES:
+            result.append("NOCASEMATCHES");
+            break;
+          }
       }
     else
       {
-	switch (arrayOp)
-	  {
-	  case CONTAINS:
-	    result.append("CONTAINS");
+        switch (arrayOp)
+          {
+          case CONTAINS:
+            result.append("CONTAINS");
 
-	    switch (comparator)
-	      {
-	      case EQUALS:
-		result.append("/EQUALS");
-		break;
+            switch (comparator)
+              {
+              case EQUALS:
+                result.append("/EQUALS");
+                break;
 
-	      default:
-		result.append("/?");
-	      }
+              default:
+                result.append("/?");
+              }
 
-	    break;
+            break;
 
-	  case LENGTHEQ:
-	    result.append("LENGTHEQ");
-	    break;
+          case LENGTHEQ:
+            result.append("LENGTHEQ");
+            break;
 
-	  case LENGTHGR:
-	    result.append("LENGTHGR");
-	    break;
+          case LENGTHGR:
+            result.append("LENGTHGR");
+            break;
 
-	  case LENGTHLE:
-	    result.append("LENGTHLE");
-	    break;
-	  }
+          case LENGTHLE:
+            result.append("LENGTHLE");
+            break;
+          }
       }
 
     result.append(" ");

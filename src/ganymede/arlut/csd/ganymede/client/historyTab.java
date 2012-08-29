@@ -9,7 +9,7 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2005
@@ -82,7 +82,7 @@ public class historyTab extends clientTab {
   {
     if (contentPane == null)
       {
-	contentPane = new JPanel(new BorderLayout());
+        contentPane = new JPanel(new BorderLayout());
       }
 
     return contentPane;
@@ -92,23 +92,23 @@ public class historyTab extends clientTab {
   {
     try
       {
-	string_field creator_field = (string_field) parent.getObject().getField(SchemaConstants.CreatorField);
-	date_field creation_date_field = (date_field) parent.getObject().getField(SchemaConstants.CreationDateField);
-	string_field modifier_field = (string_field) parent.getObject().getField(SchemaConstants.ModifierField);
-	date_field modification_date_field = (date_field) parent.getObject().getField(SchemaConstants.ModificationDateField);
-	
-	history_panel = new historyPanel(parent.getObjectInvid(),
-					 parent.getgclient(),
-					 creator_field,
-					 creation_date_field,
-					 modifier_field,
-					 modification_date_field);
+        string_field creator_field = (string_field) parent.getObject().getField(SchemaConstants.CreatorField);
+        date_field creation_date_field = (date_field) parent.getObject().getField(SchemaConstants.CreationDateField);
+        string_field modifier_field = (string_field) parent.getObject().getField(SchemaConstants.ModifierField);
+        date_field modification_date_field = (date_field) parent.getObject().getField(SchemaConstants.ModificationDateField);
+        
+        history_panel = new historyPanel(parent.getObjectInvid(),
+                                         parent.getgclient(),
+                                         creator_field,
+                                         creation_date_field,
+                                         modifier_field,
+                                         modification_date_field);
 
-	contentPane.add("Center", history_panel);
+        contentPane.add("Center", history_panel);
       }
     catch (RemoteException ex)
       {
-	parent.getgclient().processExceptionRethrow(ex);
+        parent.getgclient().processExceptionRethrow(ex);
       }
   }
 
@@ -120,14 +120,14 @@ public class historyTab extends clientTab {
   {
     if (contentPane != null)
       {
-	contentPane.removeAll();
-	contentPane = null;
+        contentPane.removeAll();
+        contentPane = null;
       }
 
     if (history_panel != null)
       {
-	history_panel.dispose();
-	history_panel = null;
+        history_panel.dispose();
+        history_panel = null;
       }
 
     super.dispose();

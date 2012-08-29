@@ -146,7 +146,7 @@ public class PersonaDialog extends StandardDialog implements ActionListener {
 
     if (requirePassword)
       {
-	enableEvents(AWTEvent.WINDOW_EVENT_MASK);
+        enableEvents(AWTEvent.WINDOW_EVENT_MASK);
       }
 
     // Main dialog container
@@ -173,33 +173,33 @@ public class PersonaDialog extends StandardDialog implements ActionListener {
 
     // "Select Persona"
     personaPanel.setBorder(new TitledBorder(new EtchedBorder(),
-					    ts.l("init.border_title"),
-					    TitledBorder.LEFT,
-					    TitledBorder.TOP));
+                                            ts.l("init.border_title"),
+                                            TitledBorder.LEFT,
+                                            TitledBorder.TOP));
 
     JLabel image = new JLabel(new ImageIcon(gc.personaIcon));
 
     if (requirePassword)
       {
-	image.setBorder(new EmptyBorder(new Insets(10,15,0,15)));
-	image.setVerticalAlignment(JLabel.TOP);
+        image.setBorder(new EmptyBorder(new Insets(10,15,0,15)));
+        image.setVerticalAlignment(JLabel.TOP);
 
-	JPanel topPersonaPanel = new JPanel(new BorderLayout());
+        JPanel topPersonaPanel = new JPanel(new BorderLayout());
 
-	// "\nThe Ganymede server timed you out due to inactivity.\n\nYou will have to re-authenticate with your password in order to continue using Ganymede."
-	JMultiLineLabel explanation = new JMultiLineLabel(ts.l("init.timed_out_msg"));
+        // "\nThe Ganymede server timed you out due to inactivity.\n\nYou will have to re-authenticate with your password in order to continue using Ganymede."
+        JMultiLineLabel explanation = new JMultiLineLabel(ts.l("init.timed_out_msg"));
 
-	explanation.setBorder(new EmptyBorder(new Insets(0,0,0,10)));
+        explanation.setBorder(new EmptyBorder(new Insets(0,0,0,10)));
 
-	topPersonaPanel.add("West", image);
-	topPersonaPanel.add("Center", explanation);
-	personaPanel.add("North", topPersonaPanel);
+        topPersonaPanel.add("West", image);
+        topPersonaPanel.add("Center", explanation);
+        personaPanel.add("North", topPersonaPanel);
       }
     else
       {
-	image.setBorder(new EmptyBorder(new Insets(10,15,0,0)));
-	image.setVerticalAlignment(JLabel.TOP);
-	personaPanel.add("West", image);
+        image.setBorder(new EmptyBorder(new Insets(10,15,0,0)));
+        image.setVerticalAlignment(JLabel.TOP);
+        personaPanel.add("West", image);
       }
 
     topPanel.add("Center", personaPanel);
@@ -223,22 +223,22 @@ public class PersonaDialog extends StandardDialog implements ActionListener {
 
     for (int i= personae.size()-1;i >=0; i--)
       {
-	String p = (String)personae.elementAt(i);
-	JRadioButton rb = new JRadioButton(p);
+        String p = (String)personae.elementAt(i);
+        JRadioButton rb = new JRadioButton(p);
 
-	// Note that all strings (incl actionCommand) should be _compared_ as
-	// lowercase. Since there is a need for caps to be displayed (title, etc),
-	// I didn't just convert to lowercase.
+        // Note that all strings (incl actionCommand) should be _compared_ as
+        // lowercase. Since there is a need for caps to be displayed (title, etc),
+        // I didn't just convert to lowercase.
 
-	if (p.toLowerCase().equals(currentPersonaString.toLowerCase()))
-	  {
-	    rb.doClick();
-	    // No actionListener yet, so just selects current username
-	  }
+        if (p.toLowerCase().equals(currentPersonaString.toLowerCase()))
+          {
+            rb.doClick();
+            // No actionListener yet, so just selects current username
+          }
 
-	rb.addActionListener(personaListener);
-	personaGroupRB.add(rb);
-	personaBox.add(rb);
+        rb.addActionListener(personaListener);
+        personaGroupRB.add(rb);
+        personaBox.add(rb);
       }
 
     // Give a little space b/t buttons and pass field
@@ -258,26 +258,26 @@ public class PersonaDialog extends StandardDialog implements ActionListener {
 
     if (e.getSource() instanceof JPasswordField)
       {
-	// do this so the PersonaListener gets it
+        // do this so the PersonaListener gets it
 
-	login.doClick();
+        login.doClick();
       }
     else
       {
-	// Clicking OK hides the dialog, as long as
-	// we aren't forcing a password
+        // Clicking OK hides the dialog, as long as
+        // we aren't forcing a password
 
-	if (requirePassword && getPasswordField().equals(""))
-	  {
-	    if (debug)
-	      {
-		System.err.println("Rejecting actionPerformed.doClick() due to password");
-	      }
+        if (requirePassword && getPasswordField().equals(""))
+          {
+            if (debug)
+              {
+                System.err.println("Rejecting actionPerformed.doClick() due to password");
+              }
 
-	    return;
-	  }
+            return;
+          }
 
-	setHidden(true);
+        setHidden(true);
       }
   }
 
@@ -287,20 +287,20 @@ public class PersonaDialog extends StandardDialog implements ActionListener {
   {
     if (!requirePassword || changedOK)
       {
-	super.processWindowEvent(e);
+        super.processWindowEvent(e);
       }
     else if (e.getID() == WindowEvent.WINDOW_CLOSING)
       {
-	super.processWindowEvent(e);
+        super.processWindowEvent(e);
 
-	if (requirePassword && !changedOK)
-	  {
-	    gc.logout();
-	  }
+        if (requirePassword && !changedOK)
+          {
+            gc.logout();
+          }
       }
     else
       {
-	super.processWindowEvent(e);
+        super.processWindowEvent(e);
       }
   }
 
@@ -308,7 +308,7 @@ public class PersonaDialog extends StandardDialog implements ActionListener {
   {
     if (debug)
       {
-	System.err.println("setHidden");
+        System.err.println("setHidden");
       }
 
     bool = !bool;
@@ -337,20 +337,20 @@ public class PersonaDialog extends StandardDialog implements ActionListener {
     // If still same persona or base user (no ":" in name) then disable password field
 
     if (!requirePassword &&
-	((newPersona.toLowerCase()).equals(currentPersonaString.toLowerCase()) ||
-	 (newPersona.indexOf(":") < 0)))
+        ((newPersona.toLowerCase()).equals(currentPersonaString.toLowerCase()) ||
+         (newPersona.indexOf(":") < 0)))
       {
-	password.setText("");
-	password.setEditable(false);
-	password.setBackground(Color.lightGray);
-	password.requestFocus();
+        password.setText("");
+        password.setEditable(false);
+        password.setBackground(Color.lightGray);
+        password.requestFocus();
       }
     else
       {
-	password.setText("");
-	password.setEditable(true);
-	password.setBackground(Color.white);
-	password.requestFocus();
+        password.setText("");
+        password.setEditable(true);
+        password.setBackground(Color.white);
+        password.requestFocus();
       }
   }
 

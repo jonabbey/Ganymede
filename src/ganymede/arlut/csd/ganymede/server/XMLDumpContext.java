@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2011
@@ -323,7 +323,7 @@ public class XMLDumpContext {
   {
     if (this.syncConstraints == null)
       {
-	return null;
+        return null;
       }
 
     return this.syncConstraints.getName();
@@ -345,7 +345,7 @@ public class XMLDumpContext {
   {
     if (book != null)
       {
-	return book.has(object.getInvid());
+        return book.has(object.getInvid());
       }
 
     return syncConstraints == null || syncConstraints.mayInclude(object);
@@ -368,7 +368,7 @@ public class XMLDumpContext {
   {
     if (book != null)
       {
-	return book.has(object.getInvid());
+        return book.has(object.getInvid());
       }
 
     return syncConstraints == null || syncConstraints.shouldInclude(object);
@@ -389,12 +389,12 @@ public class XMLDumpContext {
 
     if (newField.getOwner().isEmbedded() && newField.getID() == SchemaConstants.ContainerField)
       {
-	return false;
+        return false;
       }
 
     if (syncConstraints == null)
       {
-	return true;
+        return true;
       }
 
     return syncConstraints.shouldInclude(newField, oldField, book);
@@ -417,26 +417,26 @@ public class XMLDumpContext {
   public boolean mayInclude(DBField field)
   {
     if ((field.getID() == SchemaConstants.CreationDateField ||
-	 field.getID() == SchemaConstants.CreatorField ||
-	 field.getID() == SchemaConstants.ModificationDateField ||
-	 field.getID() == SchemaConstants.ModifierField) &&
-	!doDumpHistoryInfo())
+         field.getID() == SchemaConstants.CreatorField ||
+         field.getID() == SchemaConstants.ModificationDateField ||
+         field.getID() == SchemaConstants.ModifierField) &&
+        !doDumpHistoryInfo())
       {
-	return false;
+        return false;
       }
 
     if (book != null)
       {
-	return book.has(field.getOwner().getInvid(), field.getID());
+        return book.has(field.getOwner().getInvid(), field.getID());
       }
 
     if (query != null)
       {
-	return query.returnField(field.getID());
+        return query.returnField(field.getID());
       }
     else
       {
-	return syncConstraints == null || syncConstraints.mayInclude(field, true);
+        return syncConstraints == null || syncConstraints.mayInclude(field, true);
       }
   }
 
@@ -457,17 +457,17 @@ public class XMLDumpContext {
   public boolean mayInclude(DBField field, boolean hasChanged)
   {
     if ((field.getID() == SchemaConstants.CreationDateField ||
-	 field.getID() == SchemaConstants.CreatorField ||
-	 field.getID() == SchemaConstants.ModificationDateField ||
-	 field.getID() == SchemaConstants.ModifierField) &&
-	!doDumpHistoryInfo())
+         field.getID() == SchemaConstants.CreatorField ||
+         field.getID() == SchemaConstants.ModificationDateField ||
+         field.getID() == SchemaConstants.ModifierField) &&
+        !doDumpHistoryInfo())
       {
-	return false;
+        return false;
       }
 
     if (book != null)
       {
-	return book.has(field.getOwner().getInvid(), field.getID());
+        return book.has(field.getOwner().getInvid(), field.getID());
       }
 
     return syncConstraints == null || syncConstraints.mayInclude(field, hasChanged);

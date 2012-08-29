@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2010
@@ -78,11 +78,11 @@ public class IPwrap {
   {
     if (addressStr.indexOf(':') == -1)
       {
-	this.address = IPDBField.genIPV4bytes(addressStr);
+        this.address = IPDBField.genIPV4bytes(addressStr);
       }
     else
       {
-	this.address = IPDBField.genIPV6bytes(addressStr);
+        this.address = IPDBField.genIPV6bytes(addressStr);
       }
   }
 
@@ -97,21 +97,21 @@ public class IPwrap {
   {
     if ((address == null) || (address.length == 0))
       {
-	return 0;
+        return 0;
       }
 
     int result = 0;
 
     try
       {
-	for (int i = 0; i < address.length; i++)
-	  {
-	    result += address[i].intValue();
-	  }
+        for (int i = 0; i < address.length; i++)
+          {
+            result += address[i].intValue();
+          }
       }
     catch (ArithmeticException ex)
       {
-	return result;
+        return result;
       }
 
     return result;
@@ -132,36 +132,36 @@ public class IPwrap {
 
     if (value == null)
       {
-	return false;
+        return false;
       }
 
     if (value instanceof IPwrap)
       {
-	foreignBytes = ((IPwrap) value).address;
+        foreignBytes = ((IPwrap) value).address;
       }
     else
       {
-	return false;
+        return false;
       }
 
     if (foreignBytes.length != address.length)
       {
-	return false;
+        return false;
       }
 
     for (int i = 0; i < address.length; i++)
       {
-	try
-	  {
-	    if (!foreignBytes[i].equals(address[i]))
-	      {
-		return false;
-	      }
-	  }
-	catch (NullPointerException ex)
-	  {
-	    return false;
-	  }
+        try
+          {
+            if (!foreignBytes[i].equals(address[i]))
+              {
+                return false;
+              }
+          }
+        catch (NullPointerException ex)
+          {
+            return false;
+          }
       }
 
     return true;

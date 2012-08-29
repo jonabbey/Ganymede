@@ -10,7 +10,7 @@
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -113,11 +113,11 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 
     try
       {
-	available = gc.getSession().getOwnerGroups().getListHandles();
+        available = gc.getSession().getOwnerGroups().getListHandles();
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("Could not get Owner groups: " + rx);
+        throw new RuntimeException("Could not get Owner groups: " + rx);
       }
     
     StringSelector ss = new StringSelector(this, true, true, true);
@@ -133,26 +133,26 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
 
     if (glogin.isRunningOnMac())
       {
-	JPanel p = new JPanel();
-	p.add(cancel);
-	p.add(ok);
+        JPanel p = new JPanel();
+        p.add(cancel);
+        p.add(ok);
 
-	JPanel macPanel = new JPanel();
-	macPanel.setLayout(new BorderLayout());
-	macPanel.add(p, BorderLayout.EAST);
+        JPanel macPanel = new JPanel();
+        macPanel.setLayout(new BorderLayout());
+        macPanel.add(p, BorderLayout.EAST);
 
-	macPanel.setBorder(gc.raisedBorder);
+        macPanel.setBorder(gc.raisedBorder);
     
-	getContentPane().add("South", macPanel);
+        getContentPane().add("South", macPanel);
       }
     else
       {
-	JPanel p = new JPanel();
-	p.add(ok);
-	p.add(cancel);
-	p.setBorder(gc.raisedBorder);
+        JPanel p = new JPanel();
+        p.add(ok);
+        p.add(cancel);
+        p.setBorder(gc.raisedBorder);
     
-	getContentPane().add("South", p);
+        getContentPane().add("South", p);
       }
 
     setBounds(50,50,50,50);
@@ -164,57 +164,57 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
   {
     if (e instanceof JAddValueObject)
       {
-	if (debug)
-	  {
-	    System.out.println("Adding element");
-	  }
-	
-	changed = true;
-	filter.addElement(e.getValue());
+        if (debug)
+          {
+            System.out.println("Adding element");
+          }
+        
+        changed = true;
+        filter.addElement(e.getValue());
       }
     else if (e instanceof JAddVectorValueObject)
       {
-	if (debug)
-	  {
-	    System.out.println("Adding elements");
-	  }
+        if (debug)
+          {
+            System.out.println("Adding elements");
+          }
 
-	changed = true;
+        changed = true;
 
-	Vector newValues = (Vector) e.getValue();
+        Vector newValues = (Vector) e.getValue();
 
-	for (int i = 0; i < newValues.size(); i++)
-	  {
-	    filter.addElement(newValues.elementAt(i));
-	  }
+        for (int i = 0; i < newValues.size(); i++)
+          {
+            filter.addElement(newValues.elementAt(i));
+          }
       }
     else if (e instanceof JDeleteValueObject)
       {
-	if (debug)
-	  {
-	    System.out.println("removing element");
-	  }
+        if (debug)
+          {
+            System.out.println("removing element");
+          }
 
-	changed = true;
+        changed = true;
 
-	filter.removeElement(e.getValue());
+        filter.removeElement(e.getValue());
       }
     else if (e instanceof JDeleteVectorValueObject)
       {
-	if (debug)
-	  {
-	    System.out.println("Removing elements");
-	  }
+        if (debug)
+          {
+            System.out.println("Removing elements");
+          }
 
-	changed = true;
+        changed = true;
 
-	Vector newValues = (Vector) e.getValue();
+        Vector newValues = (Vector) e.getValue();
 
-	for (int i = 0; i < newValues.size(); i++)
-	  {
-	    filter.removeElement(newValues.elementAt(i));
-	  }
-      }	
+        for (int i = 0; i < newValues.size(); i++)
+          {
+            filter.removeElement(newValues.elementAt(i));
+          }
+      } 
     return true;
   }
 
@@ -222,38 +222,38 @@ public class JFilterDialog extends JDialog implements ActionListener, JsetValueC
   {
     if (e.getSource() == ok)
       {
-	try
-	  {
-	    ReturnVal retVal = gc.getSession().filterQueries(filter);
-	    gc.handleReturnVal(retVal);
+        try
+          {
+            ReturnVal retVal = gc.getSession().filterQueries(filter);
+            gc.handleReturnVal(retVal);
 
-	    if ((retVal == null) || (retVal.didSucceed()))
-	      {
-		if (changed)
-		  {
-		    gc.updateAfterFilterChange();
-		  }
+            if ((retVal == null) || (retVal.didSucceed()))
+              {
+                if (changed)
+                  {
+                    gc.updateAfterFilterChange();
+                  }
 
-		this.setVisible(false);
-	      }
-	    else
-	      {
-		this.setVisible(false);
-		// "Could not set Query Filter."
-		gc.showErrorMessage(ts.l("actionPerformed.error"));
-	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not set filter: " + rx);
-	  }
+                this.setVisible(false);
+              }
+            else
+              {
+                this.setVisible(false);
+                // "Could not set Query Filter."
+                gc.showErrorMessage(ts.l("actionPerformed.error"));
+              }
+          }
+        catch (RemoteException rx)
+          {
+            throw new RuntimeException("Could not set filter: " + rx);
+          }
 
-	changed = false;
+        changed = false;
       }
     else if (e.getSource() == cancel)
       {
-	this.setVisible(false);
-	changed = false;
+        this.setVisible(false);
+        changed = false;
       }
   }
 }

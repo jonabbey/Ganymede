@@ -246,7 +246,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     super();
 
     this.objectBase = base;
-    editset = null;		// this will be our cue to our static handle status for our methods
+    editset = null;             // this will be our cue to our static handle status for our methods
   }
 
   /**
@@ -268,8 +268,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (editset == null)
       {
-	// "Null DBEditSet"
-	throw new NullPointerException(ts.l("init.notrans"));
+        // "Null DBEditSet"
+        throw new NullPointerException(ts.l("init.notrans"));
       }
 
     original = null;
@@ -283,42 +283,42 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     synchronized (objectBase)
       {
-	int count = 0;
+        int count = 0;
 
-	for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
-	  {
-	    // check for permission to create a particular field
+        for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
+          {
+            // check for permission to create a particular field
 
-	    if (checkNewField(fieldDef.getID()))
-	      {
-		count++;
-	      }
-	  }
+            if (checkNewField(fieldDef.getID()))
+              {
+                count++;
+              }
+          }
 
-	fieldAry = new DBField[count];
+        fieldAry = new DBField[count];
 
-	int i = 0;
+        int i = 0;
 
-	// the iterator on DBBaseFieldTable gives us the field
-	// defintion objects in field id order, which we need to order
-	// the fieldAry elements properly.
+        // the iterator on DBBaseFieldTable gives us the field
+        // defintion objects in field id order, which we need to order
+        // the fieldAry elements properly.
 
-	for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
-	  {
-	    if (!checkNewField(fieldDef.getID()))
-	      {
-		continue;
-	      }
+        for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
+          {
+            if (!checkNewField(fieldDef.getID()))
+              {
+                continue;
+              }
 
-	    DBField newField = DBField.createTypedField(this, fieldDef);
+            DBField newField = DBField.createTypedField(this, fieldDef);
 
-	    if (newField == null)
-	      {
-		throw new NullPointerException("Error creating typed field when creating object");
-	      }
+            if (newField == null)
+              {
+                throw new NullPointerException("Error creating typed field when creating object");
+              }
 
-	    fieldAry[i++] = newField;
-	  }
+            fieldAry[i++] = newField;
+          }
       }
   }
 
@@ -359,26 +359,26 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
       {
-	if (field != null && fieldDef.getID() == field.getID())
-	  {
-	    count++;
+        if (field != null && fieldDef.getID() == field.getID())
+          {
+            count++;
 
-	    if (++j < fieldVect.size())
-	      {
-		field = fieldVect.elementAt(j);
-	      }
-	    else
-	      {
-		field = null;	// end of the fields in fieldVect
-	      }
-	  }
-	else
-	  {
-	    if (checkNewField(fieldDef.getID()))
-	      {
-		count++;
-	      }
-	  }
+            if (++j < fieldVect.size())
+              {
+                field = fieldVect.elementAt(j);
+              }
+            else
+              {
+                field = null;   // end of the fields in fieldVect
+              }
+          }
+        else
+          {
+            if (checkNewField(fieldDef.getID()))
+              {
+                count++;
+              }
+          }
       }
 
     this.fieldAry = new DBField[count];
@@ -390,26 +390,26 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
       {
-	if (field != null && fieldDef.getID() == field.getID())
-	  {
-	    fieldAry[i++] = DBField.copyField(this, field);
+        if (field != null && fieldDef.getID() == field.getID())
+          {
+            fieldAry[i++] = DBField.copyField(this, field);
 
-	    if (++j < fieldVect.size())
-	      {
-		field = fieldVect.elementAt(j);
-	      }
-	    else
-	      {
-		field = null;
-	      }
-	  }
-	else
-	  {
-	    if (checkNewField(fieldDef.getID()))
-	      {
-		fieldAry[i++] = DBField.createTypedField(this, fieldDef);
-	      }
-	  }
+            if (++j < fieldVect.size())
+              {
+                field = fieldVect.elementAt(j);
+              }
+            else
+              {
+                field = null;
+              }
+          }
+        else
+          {
+            if (checkNewField(fieldDef.getID()))
+              {
+                fieldAry[i++] = DBField.createTypedField(this, fieldDef);
+              }
+          }
       }
   }
 
@@ -472,7 +472,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   {
     if (getStatus() == DELETING)
       {
-	return getOriginal().getLabel();
+        return getOriginal().getLabel();
       }
 
     return super.getLabel();
@@ -493,7 +493,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   {
     if (getStatus() == DELETING)
       {
-	return getOriginal().getEmbeddedObjectDisplayLabel();
+        return getOriginal().getEmbeddedObjectDisplayLabel();
       }
 
     return super.getEmbeddedObjectDisplayLabel();
@@ -533,7 +533,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   {
     if (fieldID <= SchemaConstants.FinalSystemField)
       {
-	return true;		// we always allow the built in fields
+        return true;            // we always allow the built in fields
       }
 
     return instantiateNewField(fieldID);
@@ -556,11 +556,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
       case EDITING:
       case DELETING:
       case DROPPING:
-	status = new_status;
-	break;
+        status = new_status;
+        break;
 
       default:
-	throw new RuntimeException("unrecognized status code");
+        throw new RuntimeException("unrecognized status code");
       }
   }
 
@@ -582,14 +582,14 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (field != null)
       {
-	return field.setValue(value);
+        return field.setValue(value);
       }
 
     // "DBEditObject.setFieldValue() error"
     // "DBEditObject.setFieldValue() couldn''t find field {0} in object {1}"
 
     return Ganymede.createErrorDialog(ts.l("setFieldValue.error"),
-				      ts.l("setFieldValue.errorTxt", Short.valueOf(fieldID), getLabel()));
+                                      ts.l("setFieldValue.errorTxt", Short.valueOf(fieldID), getLabel()));
   }
 
   /**
@@ -609,14 +609,14 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (field != null)
       {
-	return field.setValueLocal(value);
+        return field.setValueLocal(value);
       }
 
     // "DBEditObject.setFieldValueLocal() error"
     // "DBEditObject.setFieldValueLocal() couldn''t find field {0} in object {1}"
 
     return Ganymede.createErrorDialog(ts.l("setFieldValueLocal.error"),
-				      ts.l("setFieldValueLocal.errorTxt", Short.valueOf(fieldID), getLabel()));
+                                      ts.l("setFieldValueLocal.errorTxt", Short.valueOf(fieldID), getLabel()));
   }
 
   /**
@@ -690,8 +690,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * @param gsession Who is trying to do this linking?  */
 
   public boolean anonymousLinkOK(DBObject targetObject, short targetFieldID,
-				 DBObject sourceObject, short sourceFieldID,
-				 GanymedeSession gsession)
+                                 DBObject sourceObject, short sourceFieldID,
+                                 GanymedeSession gsession)
   {
     // by default, dispatch to the more generic approval method
 
@@ -732,8 +732,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    */
 
   public boolean anonymousUnlinkOK(DBObject targetObject, short targetFieldID,
-				   DBObject sourceObject, short sourceFieldID,
-				   GanymedeSession gsession)
+                                   DBObject sourceObject, short sourceFieldID,
+                                   GanymedeSession gsession)
   {
     // by default, dispatch to the more generic approval method
 
@@ -845,7 +845,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public boolean anonymousLinkOK(DBObject targetObject, short targetFieldID)
   {
-    return false;		// by default, permission is denied
+    return false;               // by default, permission is denied
   }
 
   /**
@@ -874,7 +874,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public boolean anonymousUnlinkOK(DBObject object, short fieldID)
   {
-    return true;		// by default, permission is granted to unlink
+    return true;                // by default, permission is granted to unlink
   }
 
   /**
@@ -1111,8 +1111,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (field.getFieldDef().base() != this.objectBase)
       {
-	// "field/object mismatch"
-	throw new IllegalArgumentException(ts.l("canSeeField.mismatch"));
+        // "field/object mismatch"
+        throw new IllegalArgumentException(ts.l("canSeeField.mismatch"));
       }
 
     return field.getFieldDef().isVisible();
@@ -1207,10 +1207,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (this.canBeInactivated() && !session.getGSession().getPermManager().isSuperGash())
       {
-	return ReturnVal.failure();
+        return ReturnVal.failure();
       }
 
-    return null;		// success
+    return null;                // success
   }
 
   /**
@@ -1266,13 +1266,13 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   {
     if (session != null && (session instanceof GanymedeSession))
       {
-	GanymedeSession gSession;
+        GanymedeSession gSession;
 
-	/* -- */
+        /* -- */
 
-	gSession = (GanymedeSession) session;
+        gSession = (GanymedeSession) session;
 
-	return gSession.getPermManager().getPerm(getTypeID(), true).isCreatable(); // *sync* GanymedeSession
+        return gSession.getPermManager().getPerm(getTypeID(), true).isCreatable(); // *sync* GanymedeSession
       }
 
     // note that we are going ahead and returning false here, as
@@ -1434,7 +1434,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    */
 
   public String[] getForeignSyncKeys(Invid invid, DBObject sourceObj, DBObject targetObj,
-				     String syncChannel, boolean forceOriginal)
+                                     String syncChannel, boolean forceOriginal)
   {
     return null;
   }
@@ -1638,96 +1638,96 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if ((origObj.getTypeID() != getTypeID()))
       {
-	// "Clone Error"
-	// "Can''t clone an object of the wrong type.  This is an internal error."
-	return Ganymede.createErrorDialog(ts.l("cloneFromObject.error"),
-					  ts.l("cloneFromObject.typeError"));
+        // "Clone Error"
+        // "Can''t clone an object of the wrong type.  This is an internal error."
+        return Ganymede.createErrorDialog(ts.l("cloneFromObject.error"),
+                                          ts.l("cloneFromObject.typeError"));
       }
 
     origFields = origObj.getFieldVector(true); // don't clone system fields
 
     for (int i = 0; i < origFields.size(); i++)
       {
-	origField = (DBField) origFields.elementAt(i);
+        origField = (DBField) origFields.elementAt(i);
 
-	if (canCloneField(session, origObj, origField))
-	  {
-	    newField = retrieveField(origField.getID());
+        if (canCloneField(session, origObj, origField))
+          {
+            newField = retrieveField(origField.getID());
 
-	    // if we already initialized this field when we were
-	    // constructed, don't copy over a value onto this field.
-	    // this is to allow initializeNewObject() to handle
-	    // object-unique values
+            // if we already initialized this field when we were
+            // constructed, don't copy over a value onto this field.
+            // this is to allow initializeNewObject() to handle
+            // object-unique values
 
-	    if (newField.isDefined())
-	      {
-		continue;
-	      }
+            if (newField.isDefined())
+              {
+                continue;
+              }
 
-	    // if the field is guarded by a unique value namespace, don't
-	    // attempt to clone anything to it
+            // if the field is guarded by a unique value namespace, don't
+            // attempt to clone anything to it
 
-	    if (newField.getNameSpace() != null)
-	      {
-		continue;
-	      }
+            if (newField.getNameSpace() != null)
+              {
+                continue;
+              }
 
-	    // if the field is an invid editinplace field, don't try
-	    // to clone the actual invid pointers to contained
-	    // objects.
+            // if the field is an invid editinplace field, don't try
+            // to clone the actual invid pointers to contained
+            // objects.
 
-	    if (newField.isEditInPlace())
-	      {
-		continue;
-	      }
+            if (newField.isEditInPlace())
+              {
+                continue;
+              }
 
-	    // if the field is a password field, don't try to clone it
+            // if the field is a password field, don't try to clone it
 
-	    if (newField instanceof PasswordDBField)
-	      {
-		continue;
-	      }
+            if (newField instanceof PasswordDBField)
+              {
+                continue;
+              }
 
-	    // if the field is an invid field whose target is a scalar
-	    // invid field, then this field has an association which
-	    // is a one-to-one or many-to-one, and shouldn't be
-	    // cloned, lest we disrupt the previous association
+            // if the field is an invid field whose target is a scalar
+            // invid field, then this field has an association which
+            // is a one-to-one or many-to-one, and shouldn't be
+            // cloned, lest we disrupt the previous association
 
-	    if (newField instanceof InvidDBField)
-	      {
-		InvidDBField iField = (InvidDBField) newField;
+            if (newField instanceof InvidDBField)
+              {
+                InvidDBField iField = (InvidDBField) newField;
 
-		DBObjectBaseField targetDef = iField.getTargetFieldDef();
+                DBObjectBaseField targetDef = iField.getTargetFieldDef();
 
-		if (targetDef != null && !targetDef.isArray())
-		  {
-		    continue;
-		  }
-	      }
+                if (targetDef != null && !targetDef.isArray())
+                  {
+                    continue;
+                  }
+              }
 
-	    // and do the thing
+            // and do the thing
 
-	    // copyFieldTo() checks read permissions on the
-	    // original object's field, and will return an error
-	    // dialog if the user doesn't have permission to read
-	    // the field.  If we have a problem, we'll return a
-	    // dialog describing the fields that could not be
-	    // cloned, but we won't fail the operation.
+            // copyFieldTo() checks read permissions on the
+            // original object's field, and will return an error
+            // dialog if the user doesn't have permission to read
+            // the field.  If we have a problem, we'll return a
+            // dialog describing the fields that could not be
+            // cloned, but we won't fail the operation.
 
-	    retVal = origField.copyFieldTo(newField, local);
+            retVal = origField.copyFieldTo(newField, local);
 
-	    if (retVal != null && retVal.getDialog() != null)
-	      {
-		if (resultBuf.length() != 0)
-		  {
-		    resultBuf.append("\n\n");
-		  }
+            if (retVal != null && retVal.getDialog() != null)
+              {
+                if (resultBuf.length() != 0)
+                  {
+                    resultBuf.append("\n\n");
+                  }
 
-		resultBuf.append(retVal.getDialog().getText());
+                resultBuf.append(retVal.getDialog().getText());
 
-		problem = true;
-	      }
-	  }
+                problem = true;
+              }
+          }
       }
 
     // we're returning a successful result if we've gotten here, but
@@ -1738,10 +1738,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (problem)
       {
-	// "Possible Clone Problems"
-	retVal.setDialog(new JDialogBuff(ts.l("cloneFromObject.possibleError"),
-					 resultBuf.toString(),
-					 ts.l("global.buttonOK"), null, "ok.gif"));
+        // "Possible Clone Problems"
+        retVal.setDialog(new JDialogBuff(ts.l("cloneFromObject.possibleError"),
+                                         resultBuf.toString(),
+                                         ts.l("global.buttonOK"), null, "ok.gif"));
       }
 
     return retVal;
@@ -1861,7 +1861,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
   {
-    return null;		// by default, we just ok whatever
+    return null;                // by default, we just ok whatever
   }
 
   /**
@@ -1897,8 +1897,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (!fieldDef.isEditInPlace())
       {
-	// "Error in server, DBEditObject.createNewEmbeddedObject() called on non-embedded object"
-	throw new RuntimeException(ts.l("createNewEmbeddedObject.embeddedError"));
+        // "Error in server, DBEditObject.createNewEmbeddedObject() called on non-embedded object"
+        throw new RuntimeException(ts.l("createNewEmbeddedObject.embeddedError"));
       }
 
     // we can't create an embedded object unless we know what type to
@@ -1906,9 +1906,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (fieldDef.getTargetBase() == -1)
       {
-	// "Error in custom code on server.  createNewEmbeddedObject() called without a valid target"
-	return Ganymede.createErrorDialog(ts.l("global.serverError"),
-					  ts.l("createNewEmbeddedObject.badTarget"));
+        // "Error in custom code on server.  createNewEmbeddedObject() called without a valid target"
+        return Ganymede.createErrorDialog(ts.l("global.serverError"),
+                                          ts.l("createNewEmbeddedObject.badTarget"));
       }
 
     // we use GanymedeSession to check permissions to create the target.
@@ -2199,23 +2199,23 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     // id for the field's target
 
     if ((field instanceof InvidDBField) &&
-	!field.isEditInPlace())
+        !field.isEditInPlace())
       {
-	DBObjectBaseField fieldDef;
-	short baseId;
+        DBObjectBaseField fieldDef;
+        short baseId;
 
-	/* -- */
+        /* -- */
 
-	fieldDef = field.getFieldDef();
+        fieldDef = field.getFieldDef();
 
-	baseId = fieldDef.getTargetBase();
+        baseId = fieldDef.getTargetBase();
 
-	if (baseId < 0)
-	  {
-	    return null;
-	  }
+        if (baseId < 0)
+          {
+            return null;
+          }
 
-	return Short.valueOf(baseId);
+        return Short.valueOf(baseId);
       }
 
     return null;
@@ -2279,55 +2279,55 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (field instanceof InvidDBField &&
-	!field.isEditInPlace() && field.isEditable())
+        !field.isEditInPlace() && field.isEditable())
       {
-	DBObjectBaseField fieldDef;
-	short baseId;
+        DBObjectBaseField fieldDef;
+        short baseId;
 
-	/* -- */
+        /* -- */
 
-	fieldDef = field.getFieldDef();
+        fieldDef = field.getFieldDef();
 
-	baseId = fieldDef.getTargetBase();
+        baseId = fieldDef.getTargetBase();
 
-	if (baseId < 0)
-	  {
-	    //	    Ganymede.debug("DBEditObject: Returning null 2 for choiceList for field: " + field.getName());
-	    return null;
-	  }
+        if (baseId < 0)
+          {
+            //      Ganymede.debug("DBEditObject: Returning null 2 for choiceList for field: " + field.getName());
+            return null;
+          }
 
-	// and we want to return a list of choices.. can use the regular
-	// query output here
+        // and we want to return a list of choices.. can use the regular
+        // query output here
 
-	QueryNode root;
+        QueryNode root;
 
-	// if we are pointing to objects of our own type, we don't want ourselves to be
-	// a valid choice by default.. (DBEditObject subclasses can override this, of course)
+        // if we are pointing to objects of our own type, we don't want ourselves to be
+        // a valid choice by default.. (DBEditObject subclasses can override this, of course)
 
-	// XXX
-	//
-	// note: if we are omitting ourself from a choice list, we
-	// sure shouldn't be cached by the client.  Right now, nothing
-	// ensures this.
-	//
-	// XXX
+        // XXX
+        //
+        // note: if we are omitting ourself from a choice list, we
+        // sure shouldn't be cached by the client.  Right now, nothing
+        // ensures this.
+        //
+        // XXX
 
-	if (baseId == getTypeID())
-	  {
-	    root = new QueryNotNode(new QueryDataNode((short) -2, QueryDataNode.EQUALS, getInvid()));
-	  }
-	else
-	  {
-	    root = null;
-	  }
+        if (baseId == getTypeID())
+          {
+            root = new QueryNotNode(new QueryDataNode((short) -2, QueryDataNode.EQUALS, getInvid()));
+          }
+        else
+          {
+            root = null;
+          }
 
-	boolean editOnly = !choiceListHasExceptions(field);
+        boolean editOnly = !choiceListHasExceptions(field);
 
-	Query myQuery = new Query(baseId, root, editOnly);
+        Query myQuery = new Query(baseId, root, editOnly);
 
-	myQuery.setFiltered(false); // be sure not to filter the query
+        myQuery.setFiltered(false); // be sure not to filter the query
 
-	return getDBSession().getGSession().query(myQuery, this);
+        return getDBSession().getGSession().query(myQuery, this);
       }
 
     //    Ganymede.debug("DBEditObject: Returning null for choiceList for field: " + field.getName());
@@ -2356,8 +2356,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   {
     if (!(field instanceof InvidDBField))
       {
-	// "field not an InvidDBField"
-	throw new IllegalArgumentException(ts.l("choiceListHasExceptions.badType"));
+        // "field not an InvidDBField"
+        throw new IllegalArgumentException(ts.l("choiceListHasExceptions.badType"));
       }
 
     // --
@@ -2374,18 +2374,18 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (fieldDef.isSymmetric())
       {
-	targetField = fieldDef.getTargetField();
+        targetField = fieldDef.getTargetField();
       }
     else
       {
-	targetField = SchemaConstants.BackLinksField;
+        targetField = SchemaConstants.BackLinksField;
       }
 
     DBObjectBase targetBase = Ganymede.db.getObjectBase(baseId);
 
     return targetBase.getObjectHook().anonymousLinkOK(null, targetField,
-						      this, field.getID(),
-						      this.gSession);
+                                                      this, field.getID(),
+                                                      this.gSession);
   }
 
   /**
@@ -2406,7 +2406,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (field instanceof InvidDBField)
       {
-	return true;
+        return true;
       }
 
     return false;
@@ -2438,10 +2438,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   public boolean isDateLimited(DBField field)
   {
     if (getGSession() != null && getGSession().enableWizards &&
-	((field.getID() == SchemaConstants.ExpirationField) ||
-	 (field.getID() == SchemaConstants.RemovalField)))
+        ((field.getID() == SchemaConstants.ExpirationField) ||
+         (field.getID() == SchemaConstants.RemovalField)))
       {
-	return true; // no values in the past, thanks
+        return true; // no values in the past, thanks
       }
 
     return false;
@@ -2457,10 +2457,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   public Date minDate(DBField field)
   {
     if (getGSession() != null && getGSession().enableWizards &&
-	((field.getID() == SchemaConstants.ExpirationField) ||
-	 (field.getID() == SchemaConstants.RemovalField)))
+        ((field.getID() == SchemaConstants.ExpirationField) ||
+         (field.getID() == SchemaConstants.RemovalField)))
       {
-	return new Date(); // no values in the past, thanks
+        return new Date(); // no values in the past, thanks
       }
 
     return new Date(Long.MIN_VALUE);
@@ -2614,7 +2614,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     // "DBEditObject.inactivate() Error"
     // "This object type has not been configured to allow inactivation."
     return Ganymede.createErrorDialog(ts.l("inactivate.error"),
-				      ts.l("inactivate.errorTxt"));
+                                      ts.l("inactivate.errorTxt"));
   }
 
   /**
@@ -2630,45 +2630,45 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   {
     if (success)
       {
-	Object val = getFieldValueLocal(SchemaConstants.RemovalField);
+        Object val = getFieldValueLocal(SchemaConstants.RemovalField);
 
-	if (val != null)
-	  {
-	    Vector invids = new Vector();
+        if (val != null)
+          {
+            Vector invids = new Vector();
 
-	    invids.addElement(this.getInvid());
+            invids.addElement(this.getInvid());
 
-	    // "{0} {1} has been inactivated.\n\nThe object is due to be removed from the database at {2}.\n\n"
-	    editset.logEvent(new DBLogEvent("inactivateobject",
-					    ts.l("finalizeInactivate.removeSet",
-						 getTypeName(),
-						 getLabel(),
-						 getFieldValueLocal(SchemaConstants.RemovalField).toString()),
-					    gSession.getPermManager().getResponsibleInvid(),
-					    gSession.getPermManager().getIdentity(),
-					    invids,
-					    getEmailTargets(this)));
-	  }
-	else
-	  {
-	    Vector invids = new Vector();
+            // "{0} {1} has been inactivated.\n\nThe object is due to be removed from the database at {2}.\n\n"
+            editset.logEvent(new DBLogEvent("inactivateobject",
+                                            ts.l("finalizeInactivate.removeSet",
+                                                 getTypeName(),
+                                                 getLabel(),
+                                                 getFieldValueLocal(SchemaConstants.RemovalField).toString()),
+                                            gSession.getPermManager().getResponsibleInvid(),
+                                            gSession.getPermManager().getIdentity(),
+                                            invids,
+                                            getEmailTargets(this)));
+          }
+        else
+          {
+            Vector invids = new Vector();
 
-	    invids.addElement(this.getInvid());
+            invids.addElement(this.getInvid());
 
-	    // "{0} {1} has been inactivated.\n\nThe object has no removal date set.\n\n"
-	    editset.logEvent(new DBLogEvent("inactivateobject",
-					    ts.l("finalizeInactivate.noRemove", getTypeName(), getLabel()),
-					    gSession.getPermManager().getResponsibleInvid(),
-					    gSession.getPermManager().getIdentity(),
-					    invids,
-					    getEmailTargets(this)));
-	  }
+            // "{0} {1} has been inactivated.\n\nThe object has no removal date set.\n\n"
+            editset.logEvent(new DBLogEvent("inactivateobject",
+                                            ts.l("finalizeInactivate.noRemove", getTypeName(), getLabel()),
+                                            gSession.getPermManager().getResponsibleInvid(),
+                                            gSession.getPermManager().getIdentity(),
+                                            invids,
+                                            getEmailTargets(this)));
+          }
 
-	editset.popCheckpoint(ckp_label);
+        editset.popCheckpoint(ckp_label);
       }
     else
       {
-	editset.rollback(ckp_label);
+        editset.rollback(ckp_label);
       }
   }
 
@@ -2715,17 +2715,17 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   {
     if (isInactivated())
       {
-	// by default, we'll just clear the removal field
+        // by default, we'll just clear the removal field
 
-	setFieldValueLocal(SchemaConstants.RemovalField, null);
-	return null;		// success
+        setFieldValueLocal(SchemaConstants.RemovalField, null);
+        return null;            // success
       }
 
     // "DBEditObject.reactivate() error"
     // "I can''t reactivate this object.  It was not inactivated."
 
     return Ganymede.createErrorDialog(ts.l("reactivate.error"),
-				      ts.l("reactivate.errorTxt"));
+                                      ts.l("reactivate.errorTxt"));
   }
 
   /**
@@ -2738,23 +2738,23 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   {
     if (success)
       {
-	Vector invids = new Vector();
+        Vector invids = new Vector();
 
-	invids.addElement(this.getInvid());
+        invids.addElement(this.getInvid());
 
-	// "{0} {1} has been reactivated.\n\n"
-	editset.logEvent(new DBLogEvent("reactivateobject",
-					ts.l("finalizeReactivate.message", getTypeName(), getLabel()),
-					gSession.getPermManager().getResponsibleInvid(),
-					gSession.getPermManager().getIdentity(),
-					invids,
-					getEmailTargets(this)));
+        // "{0} {1} has been reactivated.\n\n"
+        editset.logEvent(new DBLogEvent("reactivateobject",
+                                        ts.l("finalizeReactivate.message", getTypeName(), getLabel()),
+                                        gSession.getPermManager().getResponsibleInvid(),
+                                        gSession.getPermManager().getIdentity(),
+                                        invids,
+                                        getEmailTargets(this)));
 
-	editset.popCheckpoint(ckp_label);
+        editset.popCheckpoint(ckp_label);
       }
     else
       {
-	editset.rollback(ckp_label); // see DBSession.reactivateDBObject() for checkpoint
+        editset.rollback(ckp_label); // see DBSession.reactivateDBObject() for checkpoint
       }
   }
 
@@ -2830,19 +2830,19 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   {
     ReturnVal retVal = null;
     DBField field;
-    String label = getLabel();	// remember the label before we clear it
+    String label = getLabel();  // remember the label before we clear it
 
     /* -- */
 
     if (!success)
       {
-	editset.rollback(ckp_label); // *sync*
+        editset.rollback(ckp_label); // *sync*
 
-	// "Object Removal Error"
-	// "Could not delete object {0}.  Custom code in the server rejected this operation."
+        // "Object Removal Error"
+        // "Could not delete object {0}.  Custom code in the server rejected this operation."
 
-	return Ganymede.createErrorDialog(ts.l("finalizeRemove.error"),
-					  ts.l("finalizeRemove.errorTxt", label));
+        return Ganymede.createErrorDialog(ts.l("finalizeRemove.error"),
+                                          ts.l("finalizeRemove.errorTxt", label));
       }
 
     // we want to delete / null out all fields.. this will take care
@@ -2855,184 +2855,184 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     try
       {
-	// get a sync'ed snapshot of this object's fields
+        // get a sync'ed snapshot of this object's fields
 
-	Vector fieldVect = getFieldVect();
+        Vector fieldVect = getFieldVect();
 
-	for (int i = 0; i < fieldVect.size(); i++)
-	  {
-	    field = (DBField) fieldVect.elementAt(i);
+        for (int i = 0; i < fieldVect.size(); i++)
+          {
+            field = (DBField) fieldVect.elementAt(i);
 
-	    // we can't clear field 0 (the owner/container field) yet,
-	    // since we need that for permissions verifications for
-	    // other fields
+            // we can't clear field 0 (the owner/container field) yet,
+            // since we need that for permissions verifications for
+            // other fields
 
-	    if (field.getID() == 0)
-	      {
-		continue;
-	      }
+            if (field.getID() == 0)
+              {
+                continue;
+              }
 
-	    if (field.isVector())
-	      {
-		while (field.size() > 0)
-		  {
-		    try
-		      {
-			// if this is an edit-in-place InvidDBField,
-			// deleteElement() will convert this request into
-			// a deletion of the embedded object if necessary
+            if (field.isVector())
+              {
+                while (field.size() > 0)
+                  {
+                    try
+                      {
+                        // if this is an edit-in-place InvidDBField,
+                        // deleteElement() will convert this request into
+                        // a deletion of the embedded object if necessary
 
-			retVal = ReturnVal.merge(retVal, field.deleteElement(0)); // *sync*
+                        retVal = ReturnVal.merge(retVal, field.deleteElement(0)); // *sync*
 
-			if (!ReturnVal.didSucceed(retVal))
-			  {
-			    editset.rollback(ckp_label); // *sync*
+                        if (!ReturnVal.didSucceed(retVal))
+                          {
+                            editset.rollback(ckp_label); // *sync*
 
-			    if (retVal.getDialog() != null)
-			      {
-				return retVal;
-			      }
+                            if (retVal.getDialog() != null)
+                              {
+                                return retVal;
+                              }
 
-			    // "Server: Error in DBEditObject.finalizeRemove()"
-			    // "Custom code disapproved of deleting element from field {0}."
-			    return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
-							      ts.l("finalizeRemove.badDelete", field.getName()));
-			  }
-		      }
-		    catch (GanyPermissionsException ex)
-		      {
-			editset.rollback(ckp_label); // *sync*
+                            // "Server: Error in DBEditObject.finalizeRemove()"
+                            // "Custom code disapproved of deleting element from field {0}."
+                            return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
+                                                              ts.l("finalizeRemove.badDelete", field.getName()));
+                          }
+                      }
+                    catch (GanyPermissionsException ex)
+                      {
+                        editset.rollback(ckp_label); // *sync*
 
-			// "Server: Error in DBEditObject.finalizeRemove()"
-			// "Permissions violation during attempted deletion of element from field {0}."
-			return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
-							  ts.l("finalizeRemove.badDeletePerm", field.getName()));
-		      }
-		  }
-	      }
-	    else
-	      {
-		// permission and field option matrices, along with
-		// passwords, don't allow us to call set value
-		// directly.  We're mainly concerned with invid's (for
-		// linking), i.p. addresses and strings (for the
-		// namespace) here anyway.
+                        // "Server: Error in DBEditObject.finalizeRemove()"
+                        // "Permissions violation during attempted deletion of element from field {0}."
+                        return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
+                                                          ts.l("finalizeRemove.badDeletePerm", field.getName()));
+                      }
+                  }
+              }
+            else
+              {
+                // permission and field option matrices, along with
+                // passwords, don't allow us to call set value
+                // directly.  We're mainly concerned with invid's (for
+                // linking), i.p. addresses and strings (for the
+                // namespace) here anyway.
 
-		if (field.getType() != PERMISSIONMATRIX &&
-		    field.getType() != PASSWORD &&
-		    field.getType() != FIELDOPTIONS)
-		  {
-		    retVal = ReturnVal.merge(retVal, field.setValueLocal(null)); // *sync*
+                if (field.getType() != PERMISSIONMATRIX &&
+                    field.getType() != PASSWORD &&
+                    field.getType() != FIELDOPTIONS)
+                  {
+                    retVal = ReturnVal.merge(retVal, field.setValueLocal(null)); // *sync*
 
-		    if (!ReturnVal.didSucceed(retVal))
-		      {
-			editset.rollback(ckp_label); // *sync*
+                    if (!ReturnVal.didSucceed(retVal))
+                      {
+                        editset.rollback(ckp_label); // *sync*
 
-			if (retVal.getDialog() != null)
-			  {
-			    return retVal;
-			  }
+                        if (retVal.getDialog() != null)
+                          {
+                            return retVal;
+                          }
 
-			// "Server: Error in DBEditObject.finalizeRemove()"
-			// "Custom code disapproved of clearing the value held in field {0}."
-			return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
-							  ts.l("finalizeRemove.badScalarClear", field.getName()));
-		      }
-		  }
-		else
-		  {
-		    // catchall for permission matrix, field options,
-		    // and password fields, which do this their own
-		    // way.
+                        // "Server: Error in DBEditObject.finalizeRemove()"
+                        // "Custom code disapproved of clearing the value held in field {0}."
+                        return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
+                                                          ts.l("finalizeRemove.badScalarClear", field.getName()));
+                      }
+                  }
+                else
+                  {
+                    // catchall for permission matrix, field options,
+                    // and password fields, which do this their own
+                    // way.
 
-		    try
-		      {
-			field.setUndefined(true);
-		      }
-		    catch (GanyPermissionsException ex)
-		      {
-			throw new RuntimeException(ex);	// should never happen
-		      }
-		  }
-	      }
-	  }
+                    try
+                      {
+                        field.setUndefined(true);
+                      }
+                    catch (GanyPermissionsException ex)
+                      {
+                        throw new RuntimeException(ex); // should never happen
+                      }
+                  }
+              }
+          }
 
-	// ok, we've cleared all fields but field 0.. clear that to finish up.
+        // ok, we've cleared all fields but field 0.. clear that to finish up.
 
-	field = retrieveField((short) 0);
+        field = retrieveField((short) 0);
 
-	if (field != null)
-	  {
-	    if (field.isVector())
-	      {
-		// if we're deleting elements out of vector field 0 (the list
-		// of owner groups), we'll want to deleteElementLocal.. this
-		// will simplify things and will prevent us from losing permission
-		// to write to this field in midstream (although the new DBField
-		// permCache would actually obviate this problem as well).
+        if (field != null)
+          {
+            if (field.isVector())
+              {
+                // if we're deleting elements out of vector field 0 (the list
+                // of owner groups), we'll want to deleteElementLocal.. this
+                // will simplify things and will prevent us from losing permission
+                // to write to this field in midstream (although the new DBField
+                // permCache would actually obviate this problem as well).
 
-		while (field.size() > 0)
-		  {
-		    retVal = ReturnVal.merge(retVal, field.deleteElementLocal(0)); // *sync*
+                while (field.size() > 0)
+                  {
+                    retVal = ReturnVal.merge(retVal, field.deleteElementLocal(0)); // *sync*
 
-		    if (!ReturnVal.didSucceed(retVal))
-		      {
-			editset.rollback(ckp_label); // *sync*
+                    if (!ReturnVal.didSucceed(retVal))
+                      {
+                        editset.rollback(ckp_label); // *sync*
 
-			// "Server: Error in DBEditObject.finalizeRemove()"
-			// "Custom code disapproved of deleting element from field {0}."
-			return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
-							  ts.l("finalizeRemove.badDelete", field.getName()));
-		      }
-		  }
-	      }
-	    else
-	      {
-		// scalar field 0 is the ContainerField for an
-		// embedded object.  Note that setting this field to
-		// null will not unlink us from the container object,
-		// since the ContainerField pointer is a generic one
-		// (it has no symmetric relationship information
-		// contained in the invid field definition)
+                        // "Server: Error in DBEditObject.finalizeRemove()"
+                        // "Custom code disapproved of deleting element from field {0}."
+                        return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
+                                                          ts.l("finalizeRemove.badDelete", field.getName()));
+                      }
+                  }
+              }
+            else
+              {
+                // scalar field 0 is the ContainerField for an
+                // embedded object.  Note that setting this field to
+                // null will not unlink us from the container object,
+                // since the ContainerField pointer is a generic one
+                // (it has no symmetric relationship information
+                // contained in the invid field definition)
 
-		retVal = ReturnVal.merge(retVal, field.setValueLocal(null)); // *sync*
+                retVal = ReturnVal.merge(retVal, field.setValueLocal(null)); // *sync*
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    editset.rollback(ckp_label);  // *sync*
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    editset.rollback(ckp_label);  // *sync*
 
-		    // "Server: Error in DBEditObject.finalizeRemove()"
-		    // "Custom code disapproved of clearing the value held in field {0}."
-		    return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
-						      ts.l("finalizeRemove.badScalarClear", field.getName()));
-		  }
-	      }
-	  }
+                    // "Server: Error in DBEditObject.finalizeRemove()"
+                    // "Custom code disapproved of clearing the value held in field {0}."
+                    return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
+                                                      ts.l("finalizeRemove.badScalarClear", field.getName()));
+                  }
+              }
+          }
 
-	// Finally we need to take care of any back links. This scans
-	// all objects which have asymmetric invid fields pointing to
-	// us, checks them out for editing if they are not already
-	// checked out by this session, and takes this object's Invid
-	// out of all fields in those objects.
+        // Finally we need to take care of any back links. This scans
+        // all objects which have asymmetric invid fields pointing to
+        // us, checks them out for editing if they are not already
+        // checked out by this session, and takes this object's Invid
+        // out of all fields in those objects.
 
-	retVal = attemptAsymBackLinkClear(true);
+        retVal = attemptAsymBackLinkClear(true);
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    editset.rollback(ckp_label); // *sync*
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            editset.rollback(ckp_label); // *sync*
 
-	    return retVal;
-	  }
+            return retVal;
+          }
 
-	editset.popCheckpoint(ckp_label);
+        editset.popCheckpoint(ckp_label);
 
-	return retVal;
+        return retVal;
       }
     finally
       {
-	// make sure we clear deleting before we return
+        // make sure we clear deleting before we return
 
-	deleting = false;
+        deleting = false;
       }
   }
 
@@ -3061,19 +3061,19 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (false)
       {
-	System.err.println("Entering attemptAsymBackLinkClear() for object " + toString());
+        System.err.println("Entering attemptAsymBackLinkClear() for object " + toString());
       }
 
     Set<Invid> linkSources = Ganymede.db.aSymLinkTracker.getForwardLinkSources(getDBSession(), getInvid());
 
     for (Invid remote: linkSources)
       {
-	retVal = ReturnVal.merge(retVal, clearBackLink(remote, local));
+        retVal = ReturnVal.merge(retVal, clearBackLink(remote, local));
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    return retVal;	// finalizeRemove() will rollback
-	  }
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            return retVal;      // finalizeRemove() will rollback
+          }
       }
 
     return retVal;
@@ -3136,15 +3136,15 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (remobj == null)
       {
-	// "DBEditObject.clearBackLink(): Couldn''t find old reference"
-	// "Your operation could not succeed because {0} was linked to a remote reference {1} that could not be resolved for unlinking.\n\nThis is a serious logic error in the server.  You should run the invid diagnostics in the admin console."
-	return Ganymede.createErrorDialog(ts.l("clearBackLink.badRef"),
-					  ts.l("clearBackLink.badRefTxt", toString(), remote.toString()));
+        // "DBEditObject.clearBackLink(): Couldn''t find old reference"
+        // "Your operation could not succeed because {0} was linked to a remote reference {1} that could not be resolved for unlinking.\n\nThis is a serious logic error in the server.  You should run the invid diagnostics in the admin console."
+        return Ganymede.createErrorDialog(ts.l("clearBackLink.badRef"),
+                                          ts.l("clearBackLink.badRefTxt", toString(), remote.toString()));
       }
 
     if (false)
       {
-	System.err.println("DBEditObject.clearBackLink(): Clearing link in " + getGSession().describe(remote));
+        System.err.println("DBEditObject.clearBackLink(): Clearing link in " + getGSession().describe(remote));
       }
 
     // loop over the invid fields in the target, get a list of fields we need to unlink.
@@ -3157,131 +3157,131 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     for (int i = 0; i < fieldVect.size(); i++)
       {
-	DBField tmpField = (DBField) fieldVect.elementAt(i);
+        DBField tmpField = (DBField) fieldVect.elementAt(i);
 
-	if (!(tmpField instanceof InvidDBField))
-	  {
-	    continue;
-	  }
+        if (!(tmpField instanceof InvidDBField))
+          {
+            continue;
+          }
 
-	// if the field is symmetric, the InvidDBField logic should
-	// take care of the unbinding, so we won't need to take care
-	// of it ourselves.
+        // if the field is symmetric, the InvidDBField logic should
+        // take care of the unbinding, so we won't need to take care
+        // of it ourselves.
 
-	if (tmpField.getFieldDef().isSymmetric())
-	  {
-	    continue;
-	  }
+        if (tmpField.getFieldDef().isSymmetric())
+          {
+            continue;
+          }
 
-	// If the invid field we're checking out doesn't reference
-	// us, don't bother with it.
+        // If the invid field we're checking out doesn't reference
+        // us, don't bother with it.
 
-	if (tmpField.isVector())
-	  {
-	    if (!tmpField.containsElementLocal(myInvid))
-	      {
-		continue;
-	      }
-	  }
-	else
-	  {
-	    Invid tempInvid = (Invid) tmpField.getValueLocal();
+        if (tmpField.isVector())
+          {
+            if (!tmpField.containsElementLocal(myInvid))
+              {
+                continue;
+              }
+          }
+        else
+          {
+            Invid tempInvid = (Invid) tmpField.getValueLocal();
 
-	    if (!myInvid.equals(tempInvid))
-	      {
-		continue;
-	      }
-	  }
+            if (!myInvid.equals(tempInvid))
+              {
+                continue;
+              }
+          }
 
-	// ok, we know we need to do the unbinding for this field.
+        // ok, we know we need to do the unbinding for this field.
 
-	fieldsToUnbind.add(tmpField.getID());
+        fieldsToUnbind.add(tmpField.getID());
       }
 
     if (remobj instanceof DBEditObject)
       {
-	oldRef = (DBEditObject) remobj;
+        oldRef = (DBEditObject) remobj;
       }
     else
       {
-	if (local || getGSession().getPermManager().getPerm(remobj).isEditable())
-	  {
-	    oldRef = (DBEditObject) session.editDBObject(remote);
-	  }
+        if (local || getGSession().getPermManager().getPerm(remobj).isEditable())
+          {
+            oldRef = (DBEditObject) session.editDBObject(remote);
+          }
       }
 
     if (oldRef == null)
       {
-	// it's there, but we can't unlink it
+        // it's there, but we can't unlink it
 
-	// "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
-	// "You don''t have permission to unlink object {0} from one or more fields in object {1}."
-	return Ganymede.createErrorDialog(ts.l("clearBackLink.badUnlink"),
-					  ts.l("clearBackLink.perm", getLabel(), remobj.toString()));
+        // "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
+        // "You don''t have permission to unlink object {0} from one or more fields in object {1}."
+        return Ganymede.createErrorDialog(ts.l("clearBackLink.badUnlink"),
+                                          ts.l("clearBackLink.perm", getLabel(), remobj.toString()));
       }
 
     for (Short remote_fieldid: fieldsToUnbind)
       {
-	targetField = remote_fieldid.shortValue();
+        targetField = remote_fieldid.shortValue();
 
-	retVal.addRescanField(remote, targetField);
+        retVal.addRescanField(remote, targetField);
 
-	// are we allowed to ignore permissions on this field?
+        // are we allowed to ignore permissions on this field?
 
-	try
-	  {
-	    oldRefField = (InvidDBField) oldRef.getField(targetField);
-	  }
-	catch (ClassCastException ex)
-	  {
-	    try
-	      {
-		// "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
-		// "Your operation could not succeed due to an error in the server''s custom schema code.  Target field {0} in object {1} is not an Invid field."
-		return Ganymede.createErrorDialog(ts.l("clearBackLink.badUnlink"),
-						  ts.l("clearBackLink.badTarget", oldRef.getField(targetField).getName(), oldRef.getLabel()));
-	      }
-	    catch (RemoteException rx)
-	      {
-		// "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
-		// "Your operation could not succeed due to an error in the server''s custom schema code.  Target field {0} in object {1} is not an Invid field."
-		return Ganymede.createErrorDialog(ts.l("clearBackLink.badUnlink"),
-						  ts.l("clearBackLink.badTarget", Short.valueOf(targetField), oldRef.getLabel()));
-	      }
-	  }
+        try
+          {
+            oldRefField = (InvidDBField) oldRef.getField(targetField);
+          }
+        catch (ClassCastException ex)
+          {
+            try
+              {
+                // "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
+                // "Your operation could not succeed due to an error in the server''s custom schema code.  Target field {0} in object {1} is not an Invid field."
+                return Ganymede.createErrorDialog(ts.l("clearBackLink.badUnlink"),
+                                                  ts.l("clearBackLink.badTarget", oldRef.getField(targetField).getName(), oldRef.getLabel()));
+              }
+            catch (RemoteException rx)
+              {
+                // "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
+                // "Your operation could not succeed due to an error in the server''s custom schema code.  Target field {0} in object {1} is not an Invid field."
+                return Ganymede.createErrorDialog(ts.l("clearBackLink.badUnlink"),
+                                                  ts.l("clearBackLink.badTarget", Short.valueOf(targetField), oldRef.getLabel()));
+              }
+          }
 
-	if (oldRefField == null)
-	  {
-	    // editDBObject() will create undefined fields for all fields defined
-	    // in the DBObjectBase, so if we got a null result we have a schema
-	    // corruption problem.
+        if (oldRefField == null)
+          {
+            // editDBObject() will create undefined fields for all fields defined
+            // in the DBObjectBase, so if we got a null result we have a schema
+            // corruption problem.
 
-	    // "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
-	    // "Your operation could not succeed due to an inconsistency in the server''s database schema.  Target field number {0} in object {1} does not exist, or you do not have permission to access this field."
+            // "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
+            // "Your operation could not succeed due to an inconsistency in the server''s database schema.  Target field number {0} in object {1} does not exist, or you do not have permission to access this field."
 
-	    return Ganymede.createErrorDialog(ts.l("clearBackLink.badUnlink"),
-					      ts.l("clearBackLink.badSchema", Short.valueOf(targetField), oldRef.getLabel()));
-	  }
+            return Ganymede.createErrorDialog(ts.l("clearBackLink.badUnlink"),
+                                              ts.l("clearBackLink.badSchema", Short.valueOf(targetField), oldRef.getLabel()));
+          }
 
-	try
-	  {
-	    // clear any reference in this field to us, if we can
+        try
+          {
+            // clear any reference in this field to us, if we can
 
-	    retVal = ReturnVal.merge(retVal, oldRefField.dissolve(getInvid(), local));
+            retVal = ReturnVal.merge(retVal, oldRefField.dissolve(getInvid(), local));
 
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		return retVal;
-	      }
-	  }
-	catch (IllegalArgumentException ex)
-	  {
-	    System.err.println("hm, couldn't dissolve a reference in " + getLabel());
+            if (!ReturnVal.didSucceed(retVal))
+              {
+                return retVal;
+              }
+          }
+        catch (IllegalArgumentException ex)
+          {
+            System.err.println("hm, couldn't dissolve a reference in " + getLabel());
 
-	    System.err.println("Did do an anonymous edit on target");
+            System.err.println("Did do an anonymous edit on target");
 
-	    throw (IllegalArgumentException) ex;
-	  }
+            throw (IllegalArgumentException) ex;
+          }
       }
 
     // tell the client that it needs to rescan the old remote ends of this binding
@@ -3369,7 +3369,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
       {
       case ObjectStatus.DELETING:
       case ObjectStatus.DROPPING:
-	return null;
+        return null;
       }
 
     // if we have enableOversight turned on, let's check and see if
@@ -3385,21 +3385,21 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (getGSession().enableOversight)
       {
-	ReturnVal retVal = consistencyCheck(this);
+        ReturnVal retVal = consistencyCheck(this);
 
-	if (ReturnVal.didSucceed(retVal))
-	  {
-	    return retVal;	// no problem
-	  }
+        if (ReturnVal.didSucceed(retVal))
+          {
+            return retVal;      // no problem
+          }
 
-	if (original != null)
-	  {
-	    ReturnVal retVal2 = original.objectBase.getObjectHook().consistencyCheck(original);
+        if (original != null)
+          {
+            ReturnVal retVal2 = original.objectBase.getObjectHook().consistencyCheck(original);
 
-	    if (!ReturnVal.didSucceed(retVal2))
-	      {
-		return null;	// we were already inconsistent, so don't complain
-	      }
+            if (!ReturnVal.didSucceed(retVal2))
+              {
+                return null;    // we were already inconsistent, so don't complain
+              }
           }
 
         // we were consistent before (or newly created in an
@@ -3409,7 +3409,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -3551,7 +3551,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   {
     if (!finalAbort)
       {
-	setCommitting(false);
+        setCommitting(false);
       }
   }
 
@@ -3588,25 +3588,25 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     synchronized (fieldAry)
       {
-	for (int i = 0; i < fieldAry.length; i++)
-	  {
-	    field = fieldAry[i];
+        for (int i = 0; i < fieldAry.length; i++)
+          {
+            field = fieldAry[i];
 
-	    key = Short.valueOf(field.getID());
-	    value = field.checkpoint();
+            key = Short.valueOf(field.getID());
+            value = field.checkpoint();
 
-	    if (value != null)
-	      {
-		result.put(key, value);
-	      }
-	    else
-	      {
-		// hack, hack.. we're using a reference
-		// to this object to represent a null value
+            if (value != null)
+              {
+                result.put(key, value);
+              }
+            else
+              {
+                // hack, hack.. we're using a reference
+                // to this object to represent a null value
 
-		result.put(key, this);
-	      }
-	  }
+                result.put(key, this);
+              }
+          }
       }
 
     return result;
@@ -3638,24 +3638,24 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     while (en.hasMoreElements())
       {
-	key = (Short) en.nextElement();
+        key = (Short) en.nextElement();
 
-	field = retrieveField(key.shortValue());
+        field = retrieveField(key.shortValue());
 
-	value = ckpoint.get(key);
+        value = ckpoint.get(key);
 
-	// again, we use a reference to ourselves as a
-	// hackish way of representing null in the
-	// hashtable
+        // again, we use a reference to ourselves as a
+        // hackish way of representing null in the
+        // hashtable
 
-	if (value == this)
-	  {
-	    field.rollback(null);
-	  }
-	else
-	  {
-	    field.rollback(value);
-	  }
+        if (value == this)
+          {
+            field.rollback(null);
+          }
+        else
+          {
+            field.rollback(value);
+          }
       }
   }
 
@@ -3683,8 +3683,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (getStatus() != ObjectStatus.EDITING)
       {
-	// "Can''t call emitXMLDelta on a DBEditObject in the CREATING, DELETING, or DROPPING state."
-	throw new IllegalArgumentException(ts.l("emitXMLDelta.bad_state"));
+        // "Can''t call emitXMLDelta on a DBEditObject in the CREATING, DELETING, or DROPPING state."
+        throw new IllegalArgumentException(ts.l("emitXMLDelta.bad_state"));
       }
 
     xmlOut.startElementIndent("object_delta");
@@ -3702,30 +3702,30 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInDisplayOrder())
       {
-	DBField myField = (DBField) this.getField(fieldDef.getID());
-	DBField origField = (DBField) original.getField(fieldDef.getID());
+        DBField myField = (DBField) this.getField(fieldDef.getID());
+        DBField origField = (DBField) original.getField(fieldDef.getID());
 
-	if (origField == null)
-	  {
-	    // not present in the before state, don't write anything for it
+        if (origField == null)
+          {
+            // not present in the before state, don't write anything for it
 
-	    continue;
-	  }
-	else if (myField != null)
-	  {
-	    // we had this field in the before state, let's see if we
-	    // need to write it out, either because this field was
-	    // deleted from the after state and our sync constraints
-	    // require us to write it out, or because the field is
-	    // present both before and after, but it has changed and
-	    // our sync constraints require us to write it out in that
-	    // circumstance.
+            continue;
+          }
+        else if (myField != null)
+          {
+            // we had this field in the before state, let's see if we
+            // need to write it out, either because this field was
+            // deleted from the after state and our sync constraints
+            // require us to write it out, or because the field is
+            // present both before and after, but it has changed and
+            // our sync constraints require us to write it out in that
+            // circumstance.
 
-	    if ((!myField.isDefined() && xmlOut.mayInclude(origField))|| (myField.isDefined() && xmlOut.shouldInclude(myField, origField)))
-	      {
-		origField.emitXML(xmlOut);
-	      }
-	  }
+            if ((!myField.isDefined() && xmlOut.mayInclude(origField))|| (myField.isDefined() && xmlOut.shouldInclude(myField, origField)))
+              {
+                origField.emitXML(xmlOut);
+              }
+          }
       }
 
     xmlOut.indentIn();
@@ -3746,30 +3746,30 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInDisplayOrder())
       {
-	DBField myField = (DBField) this.getField(fieldDef.getID());
-	DBField origField = (DBField) original.getField(fieldDef.getID());
+        DBField myField = (DBField) this.getField(fieldDef.getID());
+        DBField origField = (DBField) original.getField(fieldDef.getID());
 
-	if (myField == null || !myField.isDefined())
-	  {
-	    // not present in the after state, don't write anything for it
+        if (myField == null || !myField.isDefined())
+          {
+            // not present in the after state, don't write anything for it
 
-	    continue;
-	  }
-	else
-	  {
-	    // we have this field in the after state, let's see if we
-	    // need to write it out, either because this field was
-	    // newly created in the after state and our sync
-	    // constraints require us to write it out, or because the
-	    // field is present both before and after, but it has
-	    // changed and our sync constraints require us to write it
-	    // out in that circumstance.
+            continue;
+          }
+        else
+          {
+            // we have this field in the after state, let's see if we
+            // need to write it out, either because this field was
+            // newly created in the after state and our sync
+            // constraints require us to write it out, or because the
+            // field is present both before and after, but it has
+            // changed and our sync constraints require us to write it
+            // out in that circumstance.
 
-	    if ((origField == null && xmlOut.mayInclude(myField))|| (origField != null && xmlOut.shouldInclude(myField, origField)))
-	      {
-		myField.emitXML(xmlOut);
-	      }
-	  }
+            if ((origField == null && xmlOut.mayInclude(myField))|| (origField != null && xmlOut.shouldInclude(myField, origField)))
+              {
+                myField.emitXML(xmlOut);
+              }
+          }
       }
 
     xmlOut.indentIn();
@@ -3857,166 +3857,166 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (debug)
       {
-	System.err.println("Entering diff for object " + getLabel());
+        System.err.println("Entering diff for object " + getLabel());
       }
 
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
       {
-	// we don't care if certain fields change
+        // we don't care if certain fields change
 
-	if (fieldDef.getID() == SchemaConstants.CreationDateField ||
-	    fieldDef.getID() == SchemaConstants.CreatorField ||
-	    fieldDef.getID() == SchemaConstants.ModificationDateField ||
-	    fieldDef.getID() == SchemaConstants.ModifierField)
-	  {
-	    continue;
-	  }
+        if (fieldDef.getID() == SchemaConstants.CreationDateField ||
+            fieldDef.getID() == SchemaConstants.CreatorField ||
+            fieldDef.getID() == SchemaConstants.ModificationDateField ||
+            fieldDef.getID() == SchemaConstants.ModifierField)
+          {
+            continue;
+          }
 
-	if (debug)
-	  {
-	    System.err.println("Comparing field " + fieldDef.getName());
-	  }
+        if (debug)
+          {
+            System.err.println("Comparing field " + fieldDef.getName());
+          }
 
-	// if we're newly created, we'll just treat the old field as
-	// non-existent.
+        // if we're newly created, we'll just treat the old field as
+        // non-existent.
 
-	if (original == null)
-	  {
-	    origField = null;
+        if (original == null)
+          {
+            origField = null;
 
-	    if (changedFieldDefs != null)
-	      {
-		changedFieldDefs.add(fieldDef);
-	      }
-	  }
-	else
-	  {
-	    origField = (DBField) original.getField(fieldDef.getID());
-	  }
+            if (changedFieldDefs != null)
+              {
+                changedFieldDefs.add(fieldDef);
+              }
+          }
+        else
+          {
+            origField = (DBField) original.getField(fieldDef.getID());
+          }
 
-	currentField = (DBField) this.getField(fieldDef.getID());
+        currentField = (DBField) this.getField(fieldDef.getID());
 
-	if ((origField == null || !origField.isDefined()) &&
-	    (currentField == null || !currentField.isDefined()))
-	  {
-	    continue;
-	  }
+        if ((origField == null || !origField.isDefined()) &&
+            (currentField == null || !currentField.isDefined()))
+          {
+            continue;
+          }
 
-	if (((origField == null) || !origField.isDefined()) &&
-	    ((currentField != null) && currentField.isDefined()))
-	  {
-	    if (changedFieldDefs != null)
-	      {
-		changedFieldDefs.add(fieldDef);
-	      }
+        if (((origField == null) || !origField.isDefined()) &&
+            ((currentField != null) && currentField.isDefined()))
+          {
+            if (changedFieldDefs != null)
+              {
+                changedFieldDefs.add(fieldDef);
+              }
 
-	    if (okToLogField(currentField))
-	      {
-		// "\t{0}: {1}\n"
-		added.append(ts.l("diff.field_template", fieldDef.getName(), currentField.getValueString()));
-	      }
-	    else
-	      {
-		// "\t{0}\n"
-		added.append(ts.l("diff.anon_field_template", fieldDef.getName()));
-	      }
+            if (okToLogField(currentField))
+              {
+                // "\t{0}: {1}\n"
+                added.append(ts.l("diff.field_template", fieldDef.getName(), currentField.getValueString()));
+              }
+            else
+              {
+                // "\t{0}\n"
+                added.append(ts.l("diff.anon_field_template", fieldDef.getName()));
+              }
 
-	    diffFound = true;
+            diffFound = true;
 
-	    if (debug)
-	      {
-		System.err.println("Field added: " + fieldDef.getName() + "\nValue: " +
-				   currentField.getValueString() + "\n");
-	      }
-	  }
-	else if (((currentField == null) || !currentField.isDefined()) &&
-		 ((origField != null) && origField.isDefined()))
+            if (debug)
+              {
+                System.err.println("Field added: " + fieldDef.getName() + "\nValue: " +
+                                   currentField.getValueString() + "\n");
+              }
+          }
+        else if (((currentField == null) || !currentField.isDefined()) &&
+                 ((origField != null) && origField.isDefined()))
 
-	  {
-	    if (changedFieldDefs != null)
-	      {
-		changedFieldDefs.add(fieldDef);
-	      }
+          {
+            if (changedFieldDefs != null)
+              {
+                changedFieldDefs.add(fieldDef);
+              }
 
-	    if (okToLogField(origField))
-	      {
-		// "\t{0}: {1}\n"
-		deleted.append(ts.l("diff.field_template", fieldDef.getName(), origField.getValueString()));
-	      }
-	    else
-	      {
-		// "\t{0}\n"
-		deleted.append(ts.l("diff.anon_field_template", fieldDef.getName()));
-	      }
+            if (okToLogField(origField))
+              {
+                // "\t{0}: {1}\n"
+                deleted.append(ts.l("diff.field_template", fieldDef.getName(), origField.getValueString()));
+              }
+            else
+              {
+                // "\t{0}\n"
+                deleted.append(ts.l("diff.anon_field_template", fieldDef.getName()));
+              }
 
-	    diffFound = true;
+            diffFound = true;
 
-	    if (debug)
-	      {
-		System.err.println("Field deleted: " + fieldDef.getName() + "\nValue: " +
-				   origField.getValueString() + "\n");
-	      }
-	  }
-	else
-	  {
-	    if (okToLogField(currentField) && okToLogField(origField))
-	      {
-		String diff = currentField.getDiffString(origField);
+            if (debug)
+              {
+                System.err.println("Field deleted: " + fieldDef.getName() + "\nValue: " +
+                                   origField.getValueString() + "\n");
+              }
+          }
+        else
+          {
+            if (okToLogField(currentField) && okToLogField(origField))
+              {
+                String diff = currentField.getDiffString(origField);
 
-		if (diff != null)
-		  {
-		    if (changedFieldDefs != null)
-		      {
-			changedFieldDefs.add(fieldDef);
-		      }
+                if (diff != null)
+                  {
+                    if (changedFieldDefs != null)
+                      {
+                        changedFieldDefs.add(fieldDef);
+                      }
 
-		    changed.append(fieldDef.getName());
-		    changed.append("\n");
-		    changed.append(diff);
+                    changed.append(fieldDef.getName());
+                    changed.append("\n");
+                    changed.append(diff);
 
-		    diffFound = true;
+                    diffFound = true;
 
-		    if (debug)
-		      {
-			System.err.println("Field changed: " +
-					   fieldDef.getName() + "\n" +
-					   diff);
-		      }
-		  }
-	      }
-	    else
-	      {
-		changed.append(fieldDef.getName());
-		changed.append("\n");
-	      }
-	  }
+                    if (debug)
+                      {
+                        System.err.println("Field changed: " +
+                                           fieldDef.getName() + "\n" +
+                                           diff);
+                      }
+                  }
+              }
+            else
+              {
+                changed.append(fieldDef.getName());
+                changed.append("\n");
+              }
+          }
       }
 
     if (diffFound)
       {
-	if (added.length() > 0)
-	  {
-	    // "Fields Added:\n\n{0}\n"
-	    result.append(ts.l("diff.added", added));
-	  }
+        if (added.length() > 0)
+          {
+            // "Fields Added:\n\n{0}\n"
+            result.append(ts.l("diff.added", added));
+          }
 
-	if (changed.length() > 0)
-	  {
-	    // "Fields Changed:\n\n{0}\n"
-	    result.append(ts.l("diff.changed", changed));
-	  }
+        if (changed.length() > 0)
+          {
+            // "Fields Changed:\n\n{0}\n"
+            result.append(ts.l("diff.changed", changed));
+          }
 
-	if (deleted.length() > 0)
-	  {
-	    // "Fields Deleted:\n\n{0}\n"
-	    result.append(ts.l("diff.deleted", deleted));
-	  }
+        if (deleted.length() > 0)
+          {
+            // "Fields Deleted:\n\n{0}\n"
+            result.append(ts.l("diff.deleted", deleted));
+          }
 
-	return result.toString();
+        return result.toString();
       }
     else
       {
-	return null;
+        return null;
       }
   }
 

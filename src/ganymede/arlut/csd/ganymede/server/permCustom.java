@@ -9,7 +9,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2009
@@ -135,10 +135,10 @@ public class permCustom extends DBEditObject implements SchemaConstants {
   {
     if (fieldID == SchemaConstants.RolePersonae)
       {
-	if (getID() == SchemaConstants.RoleDefaultObj)
-	  {
-	    return false;
-	  }
+        if (getID() == SchemaConstants.RoleDefaultObj)
+          {
+            return false;
+          }
       }
 
     return true;
@@ -169,13 +169,13 @@ public class permCustom extends DBEditObject implements SchemaConstants {
 
     if (field.getFieldDef().base() != this.objectBase)
       {
-	throw new IllegalArgumentException("field/object mismatch");
+        throw new IllegalArgumentException("field/object mismatch");
       }
 
     if ((field.getID() == SchemaConstants.RoleDelegatable) &&
-	(field.getOwner().getID() == SchemaConstants.RoleDefaultObj))
+        (field.getOwner().getID() == SchemaConstants.RoleDefaultObj))
       {
-	return false;
+        return false;
       }
 
     return super.canSeeField(session, field);

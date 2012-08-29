@@ -82,28 +82,28 @@ public class QueryResult implements java.io.Serializable {
   public static final Comparator comparator = new Comparator()
     {
       public int compare(Object o_a, Object o_b)
-	{
-	  ObjectHandle a, b;
+        {
+          ObjectHandle a, b;
 
-	  a = (ObjectHandle) o_a;
-	  b = (ObjectHandle) o_b;
-	  int comp = 0;
+          a = (ObjectHandle) o_a;
+          b = (ObjectHandle) o_b;
+          int comp = 0;
 
-	  comp = a.getLabel().compareToIgnoreCase(b.getLabel());
+          comp = a.getLabel().compareToIgnoreCase(b.getLabel());
 
-	  if (comp < 0)
-	    {
-	      return -1;
-	    }
-	  else if (comp > 0)
-	    {
-	      return 1;
-	    }
-	  else
-	    {
-	      return 0;
-	    }
-	}
+          if (comp < 0)
+            {
+              return -1;
+            }
+          else if (comp > 0)
+            {
+              return 1;
+            }
+          else
+            {
+              return 0;
+            }
+        }
     };
 
   // ---
@@ -189,8 +189,8 @@ public class QueryResult implements java.io.Serializable {
   public void addRow(ObjectHandle handle)
   {
     addRow(handle.invid, handle.label, handle.inactive,
-	   handle.expirationSet, handle.removalSet,
-	   handle.editable);
+           handle.expirationSet, handle.removalSet,
+           handle.editable);
   }
 
   /**
@@ -215,14 +215,14 @@ public class QueryResult implements java.io.Serializable {
    */
 
   public synchronized void addRow(Invid invid, String label,
-				  boolean inactive,
-				  boolean expirationSet,
-				  boolean removalSet,
-				  boolean editable)
+                                  boolean inactive,
+                                  boolean expirationSet,
+                                  boolean removalSet,
+                                  boolean editable)
   {
     if (debug)
       {
-	System.err.println("QueryResult: addRow(" + invid + "," + label + ")");
+        System.err.println("QueryResult: addRow(" + invid + "," + label + ")");
       }
 
     if (nonEditable)
@@ -232,99 +232,99 @@ public class QueryResult implements java.io.Serializable {
 
     if (label == null)
       {
-	throw new NullPointerException("QueryResult.addRow(): null label passed in");
+        throw new NullPointerException("QueryResult.addRow(): null label passed in");
       }
 
     // don't add an object we've already got here
 
     if (invid != null && containsInvid(invid))
       {
-	return;
+        return;
       }
     else if (invid == null && containsLabel(label))
       {
-	return;
+        return;
       }
 
     handles.addElement(new ObjectHandle(label, invid,
-					inactive, expirationSet,
-					removalSet, editable));
+                                        inactive, expirationSet,
+                                        removalSet, editable));
 
     if (forTransport)
       {
-	// encode any true bits
+        // encode any true bits
 
-	if (inactive)
-	  {
-	    buffer.append("A");
-	  }
+        if (inactive)
+          {
+            buffer.append("A");
+          }
 
-	if (expirationSet)
-	  {
-	    buffer.append("B");
-	  }
+        if (expirationSet)
+          {
+            buffer.append("B");
+          }
 
-	if (removalSet)
-	  {
-	    buffer.append("C");
-	  }
+        if (removalSet)
+          {
+            buffer.append("C");
+          }
 
-	if (editable)
-	  {
-	    buffer.append("D");
-	  }
+        if (editable)
+          {
+            buffer.append("D");
+          }
 
-	buffer.append("|");
+        buffer.append("|");
 
-	if (invid != null)
-	  {
-	    buffer.append(invid.toString());
-	  }
+        if (invid != null)
+          {
+            buffer.append(invid.toString());
+          }
 
-	buffer.append("|");
-	char[] chars = label.toCharArray();
+        buffer.append("|");
+        char[] chars = label.toCharArray();
 
-	for (int j = 0; j < chars.length; j++)
-	  {
-	    if (chars[j] == '|')
-	      {
-		buffer.append("\\|");
-	      }
-	    else if (chars[j] == '\n')
-	      {
-		buffer.append("\\\n");
-	      }
-	    else if (chars[j] == '\\')
-	      {
-		buffer.append("\\\\");
-	      }
-	    else
-	      {
-		buffer.append(chars[j]);
-	      }
-	  }
+        for (int j = 0; j < chars.length; j++)
+          {
+            if (chars[j] == '|')
+              {
+                buffer.append("\\|");
+              }
+            else if (chars[j] == '\n')
+              {
+                buffer.append("\\\n");
+              }
+            else if (chars[j] == '\\')
+              {
+                buffer.append("\\\\");
+              }
+            else
+              {
+                buffer.append(chars[j]);
+              }
+          }
 
-	buffer.append("\n");
+        buffer.append("\n");
       }
 
     if (invid != null)
       {
-	invidMap.put(invid, label);
+        invidMap.put(invid, label);
 
-	if (invidList != null)
-	  {
-	    invidList.addElement(invid);
-	  }
+        if (invidList != null)
+          {
+            invidList.addElement(invid);
+          }
       }
 
     if (label != null)
       {
-	labelSet.add(label);
+        labelSet.add(label);
 
-	if (labelList != null)
-	  {
-	    labelList.addElement(label);
-	  }
+        if (labelList != null)
+          {
+            labelList.addElement(label);
+          }
       }
 
     unpacked = false;
@@ -355,7 +355,7 @@ public class QueryResult implements java.io.Serializable {
   {
     if (forTransport && !unpacked)
       {
-	unpackBuffer();
+        unpackBuffer();
       }
 
     if (nonEditable)
@@ -375,7 +375,7 @@ public class QueryResult implements java.io.Serializable {
   {
     if (forTransport && !unpacked)
       {
-	unpackBuffer();
+        unpackBuffer();
       }
 
     return ((ObjectHandle) handles.elementAt(row)).getInvid();
@@ -385,7 +385,7 @@ public class QueryResult implements java.io.Serializable {
   {
     if (forTransport && !unpacked)
       {
-	unpackBuffer();
+        unpackBuffer();
       }
 
     if (nonEditable)
@@ -419,7 +419,7 @@ public class QueryResult implements java.io.Serializable {
   {
     if (forTransport && !unpacked)
       {
-	unpackBuffer();
+        unpackBuffer();
       }
 
     if (nonEditable)
@@ -453,7 +453,7 @@ public class QueryResult implements java.io.Serializable {
   {
     if (forTransport && !unpacked)
       {
-	unpackBuffer();
+        unpackBuffer();
       }
 
     return ((ObjectHandle) handles.elementAt(row)).getLabel();
@@ -468,7 +468,7 @@ public class QueryResult implements java.io.Serializable {
   {
     if (forTransport && !unpacked)
       {
-	unpackBuffer();
+        unpackBuffer();
       }
 
     return handles.size();
@@ -495,7 +495,7 @@ public class QueryResult implements java.io.Serializable {
    */
 
   public synchronized Vector<listHandle> getListHandles(boolean includeInactives,
-							boolean includeNonEditables)
+                                                        boolean includeNonEditables)
   {
     Vector<listHandle> valueHandles = new Vector<listHandle>();
     ObjectHandle handle;
@@ -504,18 +504,18 @@ public class QueryResult implements java.io.Serializable {
 
     if (forTransport && !unpacked)
       {
-	unpackBuffer();
+        unpackBuffer();
       }
 
     for (int i = 0; i < handles.size(); i++)
       {
-	handle = (ObjectHandle) handles.elementAt(i);
+        handle = (ObjectHandle) handles.elementAt(i);
 
-	if ((includeInactives || !handle.isInactive()) &&
-	    (includeNonEditables || handle.isEditable()))
-	  {
-	    valueHandles.addElement(handle.getListHandle());
-	  }
+        if ((includeInactives || !handle.isInactive()) &&
+            (includeNonEditables || handle.isEditable()))
+          {
+            valueHandles.addElement(handle.getListHandle());
+          }
       }
 
     return valueHandles;
@@ -529,7 +529,7 @@ public class QueryResult implements java.io.Serializable {
   {
     if (forTransport && !unpacked)
       {
-	unpackBuffer();
+        unpackBuffer();
       }
 
     return handles.elementAt(row).getListHandle();
@@ -543,7 +543,7 @@ public class QueryResult implements java.io.Serializable {
   {
     if (forTransport && !unpacked)
       {
-	unpackBuffer();
+        unpackBuffer();
       }
 
     return handles.elementAt(row);
@@ -624,27 +624,27 @@ public class QueryResult implements java.io.Serializable {
 
     if (operand == null || operand.size() == 0)
       {
-	return result;
+        return result;
       }
 
     for (int i = 0; i < handles.size(); i++)
       {
-	handle = (ObjectHandle) handles.elementAt(i);
+        handle = (ObjectHandle) handles.elementAt(i);
 
-	if (handle.getInvid() != null)
-	  {
-	    if (operand.containsInvid(handle.getInvid()))
-	      {
-		result.addRow(handle);
-	      }
-	  }
-	else
-	  {
-	    if (operand.containsLabel(handle.getLabel()))
-	      {
-		result.addRow(handle);
-	      }
-	  }
+        if (handle.getInvid() != null)
+          {
+            if (operand.containsInvid(handle.getInvid()))
+              {
+                result.addRow(handle);
+              }
+          }
+        else
+          {
+            if (operand.containsLabel(handle.getLabel()))
+              {
+                result.addRow(handle);
+              }
+          }
       }
 
     return result;
@@ -680,7 +680,7 @@ public class QueryResult implements java.io.Serializable {
 
     if (debug)
       {
-	System.err.println("QueryResult.unpackBuffer()");
+        System.err.println("QueryResult.unpackBuffer()");
       }
 
     // prepare our handle vector
@@ -696,94 +696,94 @@ public class QueryResult implements java.io.Serializable {
 
     if (debug)
       {
-	System.err.println("*** unpacking buffer");
+        System.err.println("*** unpacking buffer");
       }
 
     // now read in all the result lines
 
     while (index < chars.length)
       {
-	inactive = false;
-	expirationSet = false;
-	removalSet = false;
-	editable = false;
+        inactive = false;
+        expirationSet = false;
+        removalSet = false;
+        editable = false;
 
-	// first read in the bits
+        // first read in the bits
 
-	while (chars[index] != '|')
-	  {
-	    if (chars[index] == 'A')
-	      {
-		inactive = true;
-	      }
-	    else if (chars[index] == 'B')
-	      {
-		expirationSet = true;
-	      }
-	    else if (chars[index] == 'C')
-	      {
-		removalSet = true;
-	      }
-	    else if (chars[index] == 'D')
-	      {
-		editable = true;
-	      }
+        while (chars[index] != '|')
+          {
+            if (chars[index] == 'A')
+              {
+                inactive = true;
+              }
+            else if (chars[index] == 'B')
+              {
+                expirationSet = true;
+              }
+            else if (chars[index] == 'C')
+              {
+                removalSet = true;
+              }
+            else if (chars[index] == 'D')
+              {
+                editable = true;
+              }
 
-	    index++;
-	  }
+            index++;
+          }
 
-	index++;		// skip separator |
+        index++;                // skip separator |
 
-	// now read in the Invid
+        // now read in the Invid
 
-	tempString.setLength(0); // truncate the buffer
+        tempString.setLength(0); // truncate the buffer
 
-	while (chars[index] != '|')
-	  {
-	    if (chars[index] == '\n')
-	      {
-		throw new RuntimeException("parse error in row" + rows);
-	      }
+        while (chars[index] != '|')
+          {
+            if (chars[index] == '\n')
+              {
+                throw new RuntimeException("parse error in row" + rows);
+              }
 
-	    tempString.append(chars[index++]);
-	  }
+            tempString.append(chars[index++]);
+          }
 
-	if (tempString.toString().length() != 0)
-	  {
-	    invid = Invid.createInvid(tempString.toString());
-	  }
-	else
-	  {
-	    invid = null;
-	  }
+        if (tempString.toString().length() != 0)
+          {
+            invid = Invid.createInvid(tempString.toString());
+          }
+        else
+          {
+            invid = null;
+          }
 
-	index++;		// skip over |
+        index++;                // skip over |
 
-	// now read in the label for this invid
+        // now read in the label for this invid
 
-	tempString.setLength(0); // truncate the buffer
+        tempString.setLength(0); // truncate the buffer
 
-	while (chars[index] != '\n')
-	  {
-	    // if we have a backslashed character, take the backslashed char
-	    // as a literal
+        while (chars[index] != '\n')
+          {
+            // if we have a backslashed character, take the backslashed char
+            // as a literal
 
-	    if (chars[index] == '\\')
-	      {
-		index++;
-	      }
+            if (chars[index] == '\\')
+              {
+                index++;
+              }
 
-	    tempString.append(chars[index++]);
-	  }
+            tempString.append(chars[index++]);
+          }
 
-	label = tempString.toString();
+        label = tempString.toString();
 
-	inserter.insert(handles, new ObjectHandle(label, invid,
-						  inactive, expirationSet,
-						  removalSet, editable));
+        inserter.insert(handles, new ObjectHandle(label, invid,
+                                                  inactive, expirationSet,
+                                                  removalSet, editable));
 
-	rows++;
-	index++; // skip newline
+        rows++;
+        index++; // skip newline
       }
 
     unpacked = true;

@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2008
@@ -94,7 +94,7 @@ public class windowSizer {
   {
     if (prefEngine == null)
       {
-	return;
+        return;
       }
 
     int status = window.getExtendedState();
@@ -103,15 +103,15 @@ public class windowSizer {
 
     if ((status & Frame.MAXIMIZED_BOTH) != 0)
       {
-	prefEngine.putBoolean(key(window, MAXIMIZED), true);
+        prefEngine.putBoolean(key(window, MAXIMIZED), true);
       }
     else
       {
-	prefEngine.putBoolean(key(window, MAXIMIZED), false);
-	prefEngine.putInt(key(window, XPOS), window.getX());
-	prefEngine.putInt(key(window, YPOS), window.getY());
-	prefEngine.putInt(key(window, WIDTH), window.getWidth());
-	prefEngine.putInt(key(window, HEIGHT), window.getHeight());
+        prefEngine.putBoolean(key(window, MAXIMIZED), false);
+        prefEngine.putInt(key(window, XPOS), window.getX());
+        prefEngine.putInt(key(window, YPOS), window.getY());
+        prefEngine.putInt(key(window, WIDTH), window.getWidth());
+        prefEngine.putInt(key(window, HEIGHT), window.getHeight());
       }
   }
 
@@ -130,7 +130,7 @@ public class windowSizer {
   {
     if (prefEngine == null || !prefEngine.getBoolean(key(window, SIZESAVED), false))
       {
-	return false;
+        return false;
       }
 
     int xpos = prefEngine.getInt(key(window, XPOS), -1);
@@ -146,19 +146,19 @@ public class windowSizer {
 
     if (xpos != -1 && ypos != -1 && width != -1 && height != -1)
       {
-	window.setBounds(xpos, ypos, width, height);
-	locationSet = true;
+        window.setBounds(xpos, ypos, width, height);
+        locationSet = true;
       }
 
     if (prefEngine.getBoolean(key(window, MAXIMIZED), false))
       {
-	window.setExtendedState(Frame.MAXIMIZED_BOTH);
-	locationSet = true;
+        window.setExtendedState(Frame.MAXIMIZED_BOTH);
+        locationSet = true;
       }
 
     if (!locationSet)
       {
-	return false;
+        return false;
       }
 
     return true;
@@ -176,7 +176,7 @@ public class windowSizer {
   {
     if (prefEngine == null)
       {
-	return;
+        return;
       }
 
     prefEngine.putBoolean(key(dialog, SIZESAVED), true);
@@ -202,7 +202,7 @@ public class windowSizer {
   {
     if (prefEngine == null || !prefEngine.getBoolean(key(dialog, SIZESAVED), false))
       {
-	return false;
+        return false;
       }
 
     int xpos = prefEngine.getInt(key(dialog, XPOS), -1);
@@ -218,8 +218,8 @@ public class windowSizer {
 
     if (xpos != -1 && ypos != -1 && width != -1 && height != -1)
       {
-	dialog.setBounds(xpos, ypos, width, height);
-	return true;
+        dialog.setBounds(xpos, ypos, width, height);
+        return true;
       }
 
     return false;
@@ -234,7 +234,7 @@ public class windowSizer {
   {
     if (prefEngine == null)
       {
-	return;
+        return;
       }
 
     String selectedLookAndFeel = UIManager.getLookAndFeel().getClass().getName();
@@ -252,7 +252,7 @@ public class windowSizer {
   {
     if (prefEngine == null)
       {
-	return false;
+        return false;
       }
 
     String savedLookAndFeel = prefEngine.get(LOOKANDFEEL, null);

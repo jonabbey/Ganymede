@@ -157,7 +157,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 
     if (getSelectedInvid() == null)
       {
-	view.setEnabled(false);
+        view.setEnabled(false);
       }
 
     buttonPanel.add("West", view);
@@ -173,17 +173,17 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 
     if (lh == null)
       {
-	return null;
+        return null;
       }
 
     if (editor != null && editor.theField != null)
       {
-	if (!lh.toString().equals(editor.theField.getText()))
-	  {
-	    System.err.println("JInvidChooser: " + lh.toString() + " does not equal " +
-			       editor.theField.getText());
-	    return null;
-	  }
+        if (!lh.toString().equals(editor.theField.getText()))
+          {
+            System.err.println("JInvidChooser: " + lh.toString() + " does not equal " +
+                               editor.theField.getText());
+            return null;
+          }
       }
 
     return (Invid) lh.getObject();
@@ -202,7 +202,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   {
     if (debug)
       {
-	System.out.println("JInvidChooser: setAllowNone(" + allow +")");
+        System.out.println("JInvidChooser: setAllowNone(" + allow +")");
       }
 
     // If we used to allow, but now we don't, we need to take out the
@@ -210,35 +210,35 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 
     if (allowNone && (!allow) && (!removedNone))
       {
-	Object item = getCombo().getSelectedItem();
+        Object item = getCombo().getSelectedItem();
 
-	if ((item != null) && (!item.equals(noneHandle)))
-	  {
-	    if (debug)
-	      {
-		System.out.println("taking out <none>");
-	      }
+        if ((item != null) && (!item.equals(noneHandle)))
+          {
+            if (debug)
+              {
+                System.out.println("taking out <none>");
+              }
 
-	    try
-	      {
-		getCombo().removeItem(noneHandle);
-		removedNone = true;
+            try
+              {
+                getCombo().removeItem(noneHandle);
+                removedNone = true;
 
-		if (debug)
-		  {
-		    System.out.println("+setting removedNone to true");
-		  }
-	      }
-	    catch (IllegalArgumentException ia)
-	      {
-		// none handle wasn't in there...
-		removedNone = false;
-	      }
-	  }
-	else if (debug)
-	  {
-	    System.out.println("<none> is selected, I will wait.");
-	  }
+                if (debug)
+                  {
+                    System.out.println("+setting removedNone to true");
+                  }
+              }
+            catch (IllegalArgumentException ia)
+              {
+                // none handle wasn't in there...
+                removedNone = false;
+              }
+          }
+        else if (debug)
+          {
+            System.out.println("<none> is selected, I will wait.");
+          }
       }
 
     // Now if we are allowing none, but we weren't before, and we took
@@ -246,33 +246,33 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 
     if (removedNone && allow && !allowNone)
       {
-	boolean found = false;
+        boolean found = false;
 
-	for (int i = 0; i < getCombo().getItemCount(); i++)
-	  {
-	    if (getCombo().getItemAt(i).equals(noneHandle))
-	      {
-		found = true;
-		break;
-	      }
-	  }
+        for (int i = 0; i < getCombo().getItemCount(); i++)
+          {
+            if (getCombo().getItemAt(i).equals(noneHandle))
+              {
+                found = true;
+                break;
+              }
+          }
 
-	if (!found)
-	  {
-	    if (debug)
-	      {
-		System.out.println("Putting none back in.");
-	      }
+        if (!found)
+          {
+            if (debug)
+              {
+                System.out.println("Putting none back in.");
+              }
 
-	    getCombo().addItem(noneHandle);
-	  }
+            getCombo().addItem(noneHandle);
+          }
 
-	removedNone = false;
+        removedNone = false;
 
-	if (debug)
-	  {
-	    System.out.println("+setting removedNone to false");
-	  }
+        if (debug)
+          {
+            System.out.println("+setting removedNone to false");
+          }
       }
 
     allowNone = allow;
@@ -303,19 +303,19 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 
     synchronized (model)
       {
-	for (int i = 0; i < model.getSize(); i++)
-	  {
-	    listHandle lh = (listHandle) model.getElementAt(i);
+        for (int i = 0; i < model.getSize(); i++)
+          {
+            listHandle lh = (listHandle) model.getElementAt(i);
 
-	    if (lh != null && lh.getObject() != null && lh.getObject().equals(invid))
-	      {
-		model.removeElementAt(i);
-		lh.setLabel(newLabel);
-		model.insertElementAt(lh, i);
-		repaint();
-		break;
-	      }
-	  }
+            if (lh != null && lh.getObject() != null && lh.getObject().equals(invid))
+              {
+                model.removeElementAt(i);
+                lh.setLabel(newLabel);
+                model.insertElementAt(lh, i);
+                repaint();
+                break;
+              }
+          }
       }
   }
 
@@ -323,11 +323,11 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   {
     if (o == null && isAllowNone())
       {
-	getCombo().setSelectedItem(noneHandle);
+        getCombo().setSelectedItem(noneHandle);
       }
     else
       {
-	getCombo().setSelectedItem(o);
+        getCombo().setSelectedItem(o);
       }
   }
 
@@ -343,12 +343,12 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
 
     if (e.getStateChange() != ItemEvent.SELECTED)
       {
-	return;
+        return;
       }
 
     if (debug)
       {
-	System.err.println("JInvidChooser.itemStateChanged(" + e.toString() + ")");
+        System.err.println("JInvidChooser.itemStateChanged(" + e.toString() + ")");
       }
 
     view.setEnabled(getSelectedInvid() != null);
@@ -364,24 +364,24 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
   {
     if (e.getSource() == view)
       {
-	listHandle lh = (listHandle) getSelectedItem();
+        listHandle lh = (listHandle) getSelectedItem();
 
-	if (lh != null)
-	  {
-	    Invid invid = (Invid) lh.getObject();
+        if (lh != null)
+          {
+            Invid invid = (Invid) lh.getObject();
 
-	    if (invid == null)
-	      {
-		/* XXX I don't think this can ever occur.. */
+            if (invid == null)
+              {
+                /* XXX I don't think this can ever occur.. */
 
-		// "You don''t have permission to view {0}."
-		showErrorMessage(ts.l("actionPerformed.permissions_error", lh));
-	      }
-	    else
-	      {
-		cp.gc.viewObject(invid);
-	      }
-	  }
+                // "You don''t have permission to view {0}."
+                showErrorMessage(ts.l("actionPerformed.permissions_error", lh));
+              }
+            else
+              {
+                cp.gc.viewObject(invid);
+              }
+          }
       }
   }
 
@@ -434,18 +434,18 @@ class JInvidChooserFieldEditor extends KeyAdapter implements ComboBoxEditor, Act
 
     if (curItem != null)
       {
-	String str;
+        String str;
 
-	str = curItem.toString();
-	theField.setText(str);
-	lastGoodString = str;
-	lastGoodMatched = true;
+        str = curItem.toString();
+        theField.setText(str);
+        lastGoodString = str;
+        lastGoodMatched = true;
       }
     else
       {
-	theField.setText("");
-	lastGoodString = "";
-	lastGoodMatched = false;
+        theField.setText("");
+        lastGoodString = "";
+        lastGoodMatched = false;
       }
   }
 
@@ -497,11 +497,11 @@ class JInvidChooserFieldEditor extends KeyAdapter implements ComboBoxEditor, Act
 
     if (curVal != null)
       {
-	curLen = curVal.length();
+        curLen = curVal.length();
       }
     else
       {
-	curLen = 0;
+        curLen = 0;
       }
 
     // ignore arrow keys, delete, shift
@@ -515,123 +515,123 @@ class JInvidChooserFieldEditor extends KeyAdapter implements ComboBoxEditor, Act
       case KeyEvent.VK_LEFT:
       case KeyEvent.VK_RIGHT:
       case KeyEvent.VK_SHIFT:
-	return;
+        return;
 
       case KeyEvent.VK_DELETE:
       case KeyEvent.VK_BACK_SPACE:
-	viewButton.setEnabled(false);
-	return;
+        viewButton.setEnabled(false);
+        return;
       }
 
     if (curLen > 0)
       {
-	String item;
-	int max = box.getItemCount();
+        String item;
+        int max = box.getItemCount();
 
-	int matching = 0;
-	String matchingItem = null;
-	int matchingIndex = -1;
+        int matching = 0;
+        String matchingItem = null;
+        int matchingIndex = -1;
 
-	for (int i = 0; i < max; i++)
-	  {
-	    item = box.getItemAt(i).toString();
+        for (int i = 0; i < max; i++)
+          {
+            item = box.getItemAt(i).toString();
 
-	    if (item.equals(curVal))
-	      {
-		// found it
+            if (item.equals(curVal))
+              {
+                // found it
 
-		lastGoodString = curVal;
-		lastGoodMatched = true;
-		lastGoodIndex = i;
+                lastGoodString = curVal;
+                lastGoodMatched = true;
+                lastGoodIndex = i;
 
-		chooser.cp.gc.setWaitCursor();
+                chooser.cp.gc.setWaitCursor();
 
-		try
-		  {
-		    box.setSelectedIndex(lastGoodIndex);
-		  }
-		finally
-		  {
-		    chooser.cp.gc.setNormalCursor();
-		  }
+                try
+                  {
+                    box.setSelectedIndex(lastGoodIndex);
+                  }
+                finally
+                  {
+                    chooser.cp.gc.setNormalCursor();
+                  }
 
-		viewButton.setEnabled(true);
+                viewButton.setEnabled(true);
 
-		return;
-	      }
-	    else if (item.startsWith(curVal))
-	      {
-		matching++;
-		matchingItem = item;
-		matchingIndex = i;
-		lastGoodString = curVal;
+                return;
+              }
+            else if (item.startsWith(curVal))
+              {
+                matching++;
+                matchingItem = item;
+                matchingIndex = i;
+                lastGoodString = curVal;
 
-		lastGoodIndex = -1;    // nothing definitively selected
-	      }
-	  }
+                lastGoodIndex = -1;    // nothing definitively selected
+              }
+          }
 
-	if (matching == 1)
-	  {
-	    lastGoodIndex = matchingIndex;
-	    lastGoodMatched = true;
+        if (matching == 1)
+          {
+            lastGoodIndex = matchingIndex;
+            lastGoodMatched = true;
 
-	    setItem(matchingItem); // will set lastGoodString
+            setItem(matchingItem); // will set lastGoodString
 
-	    chooser.cp.gc.setWaitCursor();
+            chooser.cp.gc.setWaitCursor();
 
-	    try
-	      {
-		box.setSelectedIndex(lastGoodIndex);
-	      }
-	    finally
-	      {
-		chooser.cp.gc.setNormalCursor();
-	      }
+            try
+              {
+                box.setSelectedIndex(lastGoodIndex);
+              }
+            finally
+              {
+                chooser.cp.gc.setNormalCursor();
+              }
 
-	    theField.select(curLen, matchingItem.length());
+            theField.select(curLen, matchingItem.length());
 
-	    viewButton.setEnabled(true);
+            viewButton.setEnabled(true);
 
-	    return;
-	  }
-	else if (matching == 0)		       // no match, don't let them have that char
-	  {
-	    // this is really kind of weak, since we're not actually
-	    // rejecting this with a document model, but it seems to
-	    // work..
+            return;
+          }
+        else if (matching == 0)                // no match, don't let them have that char
+          {
+            // this is really kind of weak, since we're not actually
+            // rejecting this with a document model, but it seems to
+            // work..
 
-	    Toolkit.getDefaultToolkit().beep();
+            Toolkit.getDefaultToolkit().beep();
 
-	    if (lastGoodMatched)
-	      {
-		chooser.cp.gc.setWaitCursor();
+            if (lastGoodMatched)
+              {
+                chooser.cp.gc.setWaitCursor();
 
-		try
-		  {
-		    box.setSelectedIndex(lastGoodIndex);
-		  }
-		finally
-		  {
-		    chooser.cp.gc.setNormalCursor();
-		  }
+                try
+                  {
+                    box.setSelectedIndex(lastGoodIndex);
+                  }
+                finally
+                  {
+                    chooser.cp.gc.setNormalCursor();
+                  }
 
-		setItem(box.getSelectedItem());
-		viewButton.setEnabled(true);
-	      }
-	    else
-	      {
-		theField.setText(lastGoodString);
+                setItem(box.getSelectedItem());
+                viewButton.setEnabled(true);
+              }
+            else
+              {
+                theField.setText(lastGoodString);
 
-		viewButton.setEnabled(false);
-	      }
-	  }
-	else
-	  {
-	    // too many matching, we don't yet have a unique prefix
+                viewButton.setEnabled(false);
+              }
+          }
+        else
+          {
+            // too many matching, we don't yet have a unique prefix
 
-	    lastGoodMatched = false;
-	    lastGoodIndex = -1;
-	  }
+            lastGoodMatched = false;
+            lastGoodIndex = -1;
+          }
       }
   }
 
@@ -651,50 +651,50 @@ class JInvidChooserFieldEditor extends KeyAdapter implements ComboBoxEditor, Act
 
     for (int i = 0; !found && i < max; i++)
       {
-	item = box.getItemAt(i).toString();
+        item = box.getItemAt(i).toString();
 
-	if (item.equals(value))
-	  {
-	    found = true;
-	    lastGoodIndex = i;
+        if (item.equals(value))
+          {
+            found = true;
+            lastGoodIndex = i;
 
-	    chooser.cp.gc.setWaitCursor();
+            chooser.cp.gc.setWaitCursor();
 
-	    try
-	      {
-		box.setSelectedIndex(i);   // this will cause the combo box to send an update
-	      }
-	    finally
-	      {
-		chooser.cp.gc.setNormalCursor();
-	      }
-	  }
+            try
+              {
+                box.setSelectedIndex(i);   // this will cause the combo box to send an update
+              }
+            finally
+              {
+                chooser.cp.gc.setNormalCursor();
+              }
+          }
       }
 
     if (!found)
       {
-	if (lastGoodMatched)
-	  {
-	    chooser.cp.gc.setWaitCursor();
+        if (lastGoodMatched)
+          {
+            chooser.cp.gc.setWaitCursor();
 
-	    try
-	      {
-		box.setSelectedIndex(lastGoodIndex);
-	      }
-	    finally
-	      {
-		chooser.cp.gc.setNormalCursor();
-	      }
+            try
+              {
+                box.setSelectedIndex(lastGoodIndex);
+              }
+            finally
+              {
+                chooser.cp.gc.setNormalCursor();
+              }
 
-	    setItem(box.getSelectedItem());
-	    chooser.view.setEnabled(true);
-	  }
-	else
-	  {
-	    theField.setText(lastGoodString);
+            setItem(box.getSelectedItem());
+            chooser.view.setEnabled(true);
+          }
+        else
+          {
+            theField.setText(lastGoodString);
 
-	    chooser.view.setEnabled(false);
-	  }
+            chooser.view.setEnabled(false);
+          }
       }
   }
 }

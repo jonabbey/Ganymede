@@ -9,7 +9,7 @@
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2009
@@ -74,53 +74,53 @@ class FoxtrotAdapter {
   {
     if (useFoxtrot == null)
       {
-	String version = System.getProperty("java.version");
+        String version = System.getProperty("java.version");
 
-	if (version.matches("^1.[56]"))
-	  {
-	    useFoxtrot = Boolean.valueOf(glogin.getConfigBoolean("enable.foxtrot", true));
-	  }
-	else
-	  {
-	    useFoxtrot = Boolean.valueOf(false);
-	  }
+        if (version.matches("^1.[56]"))
+          {
+            useFoxtrot = Boolean.valueOf(glogin.getConfigBoolean("enable.foxtrot", true));
+          }
+        else
+          {
+            useFoxtrot = Boolean.valueOf(false);
+          }
       }
 
     if (useFoxtrot)
       {
-	try
-	  {
-	    return foxtrot.Worker.post(task);
-	  }
-	catch (java.security.AccessControlException ex)
-	  {
-	    try
-	      {
-		return task.run();
-	      }
-	    catch (Exception ex2)
-	      {
-		gclient.client.processExceptionRethrow(ex2);
-		return null;
-	      }
-	  }
-	catch (Throwable ex)
-	  {
-	    gclient.client.processExceptionRethrow(ex);
-	    return null;
-	  }
+        try
+          {
+            return foxtrot.Worker.post(task);
+          }
+        catch (java.security.AccessControlException ex)
+          {
+            try
+              {
+                return task.run();
+              }
+            catch (Exception ex2)
+              {
+                gclient.client.processExceptionRethrow(ex2);
+                return null;
+              }
+          }
+        catch (Throwable ex)
+          {
+            gclient.client.processExceptionRethrow(ex);
+            return null;
+          }
       }
     else
       {
-	try
-	  {
-	    return task.run();
-	  }
-	catch (Throwable ex)
-	  {
-	    gclient.client.processExceptionRethrow(ex);
-	    return null;
-	  }
+        try
+          {
+            return task.run();
+          }
+        catch (Throwable ex)
+          {
+            gclient.client.processExceptionRethrow(ex);
+            return null;
+          }
       }
   }
 }

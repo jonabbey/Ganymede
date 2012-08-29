@@ -197,7 +197,7 @@ final public class DBSession {
 
     if (editSet != null)
       {
-	abortTransaction();
+        abortTransaction();
       }
 
     // help GC
@@ -263,7 +263,7 @@ final public class DBSession {
 
     if (editSet == null)
       {
-	throw new RuntimeException(ts.l("global.notransaction", "createDBObject"));
+        throw new RuntimeException(ts.l("global.notransaction", "createDBObject"));
       }
 
     base = store.getObjectBase(object_type);
@@ -276,13 +276,13 @@ final public class DBSession {
 
     if (e_object == null)
       {
-	// failure?  Report it, but we don't have to do any clean up at this
-	// point.
+        // failure?  Report it, but we don't have to do any clean up at this
+        // point.
 
         // "Object Creation Failure"
         // "Couldn''t create the new object in the database."
-	return Ganymede.createErrorDialog(ts.l("createDBObject.failure"),
-					  ts.l("createDBObject.failure_text"));
+        return Ganymede.createErrorDialog(ts.l("createDBObject.failure"),
+                                          ts.l("createDBObject.failure_text"));
       }
 
     // Checkpoint the transaction at this point so that we can
@@ -296,140 +296,140 @@ final public class DBSession {
 
     try
       {
-	// set ownership for this new object if it is not an embedded object
+        // set ownership for this new object if it is not an embedded object
 
-	if (!base.isEmbedded() && (owners != null))
-	  {
-	    InvidDBField inf = (InvidDBField) e_object.getField(SchemaConstants.OwnerListField);
-	    Invid tmpInvid;
+        if (!base.isEmbedded() && (owners != null))
+          {
+            InvidDBField inf = (InvidDBField) e_object.getField(SchemaConstants.OwnerListField);
+            Invid tmpInvid;
 
-	    /* -- */
+            /* -- */
 
-	    for (int i = 0; i < owners.size(); i++)
-	      {
-		tmpInvid = (Invid) owners.elementAt(i);
+            for (int i = 0; i < owners.size(); i++)
+              {
+                tmpInvid = (Invid) owners.elementAt(i);
 
-		if (tmpInvid.getType() != SchemaConstants.OwnerBase)
-		  {
-		    throw new RuntimeException(ts.l("createDBObject.badowner"));
-		  }
+                if (tmpInvid.getType() != SchemaConstants.OwnerBase)
+                  {
+                    throw new RuntimeException(ts.l("createDBObject.badowner"));
+                  }
 
-		// we don't want to explicitly record supergash ownership
+                // we don't want to explicitly record supergash ownership
 
-		if (tmpInvid.getNum() == SchemaConstants.OwnerSupergash)
-		  {
-		    continue;
-		  }
+                if (tmpInvid.getNum() == SchemaConstants.OwnerSupergash)
+                  {
+                    continue;
+                  }
 
-		retVal = inf.addElementLocal(owners.elementAt(i));
+                retVal = inf.addElementLocal(owners.elementAt(i));
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    try
-		      {
-			DBObject owner = viewDBObject((Invid) owners.elementAt(i));
-			String name = owner.getLabel();
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    try
+                      {
+                        DBObject owner = viewDBObject((Invid) owners.elementAt(i));
+                        String name = owner.getLabel();
 
-			String checkedOutBy = owner.shadowObject.editset.description;
+                        String checkedOutBy = owner.shadowObject.editset.description;
 
-			retVal.getDialog().appendText("\n" + ts.l("createDBObject.checkedout", name, checkedOutBy));
-		      }
-		    catch (NullPointerException ex)
-		      {
-		      }
+                        retVal.getDialog().appendText("\n" + ts.l("createDBObject.checkedout", name, checkedOutBy));
+                      }
+                    catch (NullPointerException ex)
+                      {
+                      }
 
-		    return retVal;
-		  }
-	      }
-	  }
+                    return retVal;
+                  }
+              }
+          }
 
-	// register the object as created
+        // register the object as created
 
-	// this can fail if the e_object comes to us already pointing
-	// to an object that is being deleted by another transaction
-	// by way of an asymmetric InvidDBField.  This should never
-	// happen, as it would require a custom object's constructor
-	// to have set an InvidDBField value instead of putting that
-	// logic in its initializeNewObject() method, but we should
-	// check just in case.
+        // this can fail if the e_object comes to us already pointing
+        // to an object that is being deleted by another transaction
+        // by way of an asymmetric InvidDBField.  This should never
+        // happen, as it would require a custom object's constructor
+        // to have set an InvidDBField value instead of putting that
+        // logic in its initializeNewObject() method, but we should
+        // check just in case.
 
-	if (!editSet.addObject(e_object))
-	  {
-	    return Ganymede.createErrorDialog(ts.l("createDBObject.failure"),
-					      ts.l("createDBObject.addObject_failed"));
-	  }
+        if (!editSet.addObject(e_object))
+          {
+            return Ganymede.createErrorDialog(ts.l("createDBObject.failure"),
+                                              ts.l("createDBObject.addObject_failed"));
+          }
 
-	// update admin consoles
-	//
-	// Now that we've added our new object to our transaction, we need
-	// to update objects checked-out counts.  After this point, doing a
-	// rollback will cause the session and server check-out counts to
-	// be decremented for our new object, and we have to increment it
-	// before that happens.
-	//
-	// we need to do the session's checkout count first, then
-	// update the database's overall checkout, which
-	// will trigger a console update
+        // update admin consoles
+        //
+        // Now that we've added our new object to our transaction, we need
+        // to update objects checked-out counts.  After this point, doing a
+        // rollback will cause the session and server check-out counts to
+        // be decremented for our new object, and we have to increment it
+        // before that happens.
+        //
+        // we need to do the session's checkout count first, then
+        // update the database's overall checkout, which
+        // will trigger a console update
 
-	GSession.checkOut();
+        GSession.checkOut();
 
-	store.checkOut();
+        store.checkOut();
 
-	if (!base.isEmbedded())
-	  {
-	    // do any work that the custom code for this object wants
-	    // to have done
+        if (!base.isEmbedded())
+          {
+            // do any work that the custom code for this object wants
+            // to have done
 
-	    // note that we're not doing this for embedded objects,
-	    // because we want to defer the initializeNewObject() call
-	    // until the embedded object has been linked to its
-	    // parent, which is done by
-	    // InvidDBField.createNewEmbedded().
+            // note that we're not doing this for embedded objects,
+            // because we want to defer the initializeNewObject() call
+            // until the embedded object has been linked to its
+            // parent, which is done by
+            // InvidDBField.createNewEmbedded().
 
-	    retVal = e_object.initializeNewObject();
+            retVal = e_object.initializeNewObject();
 
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		return retVal;
-	      }
-	  }
+            if (!ReturnVal.didSucceed(retVal))
+              {
+                return retVal;
+              }
+          }
 
-	// okay, we're good, and we won't need to revert to the checkpoint.
-	// Clear out the checkpoint and continue
+        // okay, we're good, and we won't need to revert to the checkpoint.
+        // Clear out the checkpoint and continue
 
-	popCheckpoint(ckp_label);
-	checkpointed = false;
+        popCheckpoint(ckp_label);
+        checkpointed = false;
       }
     finally
       {
-	// just in case we had an exception thrown.. all standard
-	// returns from the above try clause should have taken care of
-	// the checkpoint
+        // just in case we had an exception thrown.. all standard
+        // returns from the above try clause should have taken care of
+        // the checkpoint
 
-	if (checkpointed)
-	  {
-	    rollback(ckp_label);
-	  }
+        if (checkpointed)
+          {
+            rollback(ckp_label);
+          }
       }
 
     // set the following false to true to view the initial state of the object
 
     if (false)
       {
-	try
-	  {
-	    Ganymede.debug(ts.l("createDBObject.created", e_object.getLabel(), e_object.getInvid().toString()));
-	    db_field[] fields = e_object.listFields();
+        try
+          {
+            Ganymede.debug(ts.l("createDBObject.created", e_object.getLabel(), e_object.getInvid().toString()));
+            db_field[] fields = e_object.listFields();
 
-	    for (int i = 0; i < fields.length; i++)
-	      {
-		Ganymede.debug(ts.l("createDBObject.field_report", Integer.valueOf(i), Integer.valueOf(fields[i].getID()), fields[i].getName()));
-	      }
-	  }
-	catch (java.rmi.RemoteException ex)
-	  {
-	    Ganymede.debug("Whoah!" + ex);
-	  }
+            for (int i = 0; i < fields.length; i++)
+              {
+                Ganymede.debug(ts.l("createDBObject.field_report", Integer.valueOf(i), Integer.valueOf(fields[i].getID()), fields[i].getName()));
+              }
+          }
+        catch (java.rmi.RemoteException ex)
+          {
+            Ganymede.debug("Whoah!" + ex);
+          }
       }
 
     // finish initialization of the object.. none of this should fail
@@ -437,44 +437,44 @@ final public class DBSession {
 
     if (!base.isEmbedded())
       {
-	DateDBField df;
-	StringDBField sf;
-	Date modDate = new Date();
-	String result;
+        DateDBField df;
+        StringDBField sf;
+        Date modDate = new Date();
+        String result;
 
-	/* -- */
+        /* -- */
 
-	// set creator info to something non-null
+        // set creator info to something non-null
 
-	df = (DateDBField) e_object.getField(SchemaConstants.CreationDateField);
-	df.setValueLocal(modDate);
+        df = (DateDBField) e_object.getField(SchemaConstants.CreationDateField);
+        df.setValueLocal(modDate);
 
-	sf = (StringDBField) e_object.getField(SchemaConstants.CreatorField);
+        sf = (StringDBField) e_object.getField(SchemaConstants.CreatorField);
 
-	result = getID();
+        result = getID();
 
-	if (editSet.description != null)
-	  {
-	    result += ": " + editSet.description;
-	  }
+        if (editSet.description != null)
+          {
+            result += ": " + editSet.description;
+          }
 
-	sf.setValueLocal(result);
+        sf.setValueLocal(result);
 
-	// set modifier info to something non-null
+        // set modifier info to something non-null
 
-	df = (DateDBField) e_object.getField(SchemaConstants.ModificationDateField);
-	df.setValueLocal(modDate);
+        df = (DateDBField) e_object.getField(SchemaConstants.ModificationDateField);
+        df.setValueLocal(modDate);
 
-	sf = (StringDBField) e_object.getField(SchemaConstants.ModifierField);
+        sf = (StringDBField) e_object.getField(SchemaConstants.ModifierField);
 
-	result = getID();
+        result = getID();
 
-	if (editSet.description != null)
-	  {
-	    result += ": " + editSet.description;
-	  }
+        if (editSet.description != null)
+          {
+            result += ": " + editSet.description;
+          }
 
-	sf.setValueLocal(result);
+        sf.setValueLocal(result);
       }
 
     retVal = new ReturnVal(true);
@@ -580,31 +580,31 @@ final public class DBSession {
 
     if (editSet == null)
       {
-	throw new RuntimeException(ts.l("global.notransaction", "editDBObject"));
+        throw new RuntimeException(ts.l("global.notransaction", "editDBObject"));
       }
 
     obj = viewDBObject(baseID, objectID);
 
     if (obj == null)
       {
-	System.err.println(ts.l("editDBObject.noobject", Integer.valueOf(baseID), Integer.valueOf(objectID)));
-	return null;
+        System.err.println(ts.l("editDBObject.noobject", Integer.valueOf(baseID), Integer.valueOf(objectID)));
+        return null;
       }
 
     if (obj instanceof DBEditObject)
       {
-	// we already have a copy checked out.. go ahead and
-	// return a reference to our copy
+        // we already have a copy checked out.. go ahead and
+        // return a reference to our copy
 
-	return (DBEditObject) obj;
+        return (DBEditObject) obj;
       }
     else
       {
-	// the createShadow call will update the check-out counts
+        // the createShadow call will update the check-out counts
 
-	DBEditObject eObj = obj.createShadow(editSet); // *sync* DBObject
+        DBEditObject eObj = obj.createShadow(editSet); // *sync* DBObject
 
-	return eObj; // if null, GanymedeSession.edit_db_object() will handle the error
+        return eObj; // if null, GanymedeSession.edit_db_object() will handle the error
       }
   }
 
@@ -729,7 +729,7 @@ final public class DBSession {
 
     if (base == null)
       {
-	return null;
+        return null;
       }
 
     // this should be safe, as there shouldn't be any threads doing a
@@ -749,7 +749,7 @@ final public class DBSession {
 
     if (!isTransactionOpen())
       {
-	return obj;
+        return obj;
       }
 
     // if we are editing something, we need to be more careful about
@@ -757,36 +757,36 @@ final public class DBSession {
 
     synchronized (this)
       {
-	if (obj == null)
-	  {
-	    // not in the persistent store.. maybe we created it in
-	    // this transaction, or maybe it just doesn't exist.
+        if (obj == null)
+          {
+            // not in the persistent store.. maybe we created it in
+            // this transaction, or maybe it just doesn't exist.
 
-	    return editSet.findObject(Invid.createInvid(baseID, objectID));
-	  }
+            return editSet.findObject(Invid.createInvid(baseID, objectID));
+          }
 
-	// okay, we found it and we've got a transaction open.. see if the
-	// object is being edited and, if so, if it is us that is doing it
+        // okay, we found it and we've got a transaction open.. see if the
+        // object is being edited and, if so, if it is us that is doing it
 
-	DBEditObject shadow = obj.shadowObject;
+        DBEditObject shadow = obj.shadowObject;
 
-	if (shadow == null || shadow.getDBSession() != this)
-	  {
-	    return obj;
-	  }
+        if (shadow == null || shadow.getDBSession() != this)
+          {
+            return obj;
+          }
 
-	// okay, the object is being edited by us.. if we are supposed to
-	// return the original version of an object being deleted, and
-	// this one is, return the original
+        // okay, the object is being edited by us.. if we are supposed to
+        // return the original version of an object being deleted, and
+        // this one is, return the original
 
-	if (getOriginal && shadow.getStatus() == ObjectStatus.DELETING)
-	  {
-	    return obj;
-	  }
+        if (getOriginal && shadow.getStatus() == ObjectStatus.DELETING)
+          {
+            return obj;
+          }
 
-	// else return the object being edited
+        // else return the object being edited
 
-	return shadow;
+        return shadow;
       }
   }
 
@@ -836,7 +836,7 @@ final public class DBSession {
 
     if (editSet == null)
       {
-	throw new RuntimeException(ts.l("global.notransaction", "deleteDBObject"));
+        throw new RuntimeException(ts.l("global.notransaction", "deleteDBObject"));
       }
 
     obj = viewDBObject(baseID, objectID);
@@ -846,17 +846,17 @@ final public class DBSession {
 
     if (obj instanceof DBEditObject)
       {
-	eObj = (DBEditObject) obj;
+        eObj = (DBEditObject) obj;
       }
     else
       {
-	eObj = obj.createShadow(editSet);
+        eObj = obj.createShadow(editSet);
       }
 
     if (eObj == null)
       {
-	return Ganymede.createErrorDialog(ts.l("deleteDBObject.cant_delete", obj.getLabel()),
-					  ts.l("deleteDBObject.cant_delete_text", obj.getLabel()));
+        return Ganymede.createErrorDialog(ts.l("deleteDBObject.cant_delete", obj.getLabel()),
+                                          ts.l("deleteDBObject.cant_delete_text", obj.getLabel()));
       }
 
     return deleteDBObject(eObj);
@@ -897,7 +897,7 @@ final public class DBSession {
 
     if (editSet == null)
       {
-	throw new RuntimeException(ts.l("global.notransaction", "deleteDBObject"));
+        throw new RuntimeException(ts.l("global.notransaction", "deleteDBObject"));
       }
 
     ckp_label = RandomUtils.getSaltedString("del[" + eObj.getLabel() + "]");
@@ -907,87 +907,87 @@ final public class DBSession {
       case DBEditObject.CREATING:
       case DBEditObject.EDITING:
 
-	// we have to checkpoint before we set the status to delete,
-	// or else a later rollback will still leave the object in
-	// must-delete status if the transaction is committed
+        // we have to checkpoint before we set the status to delete,
+        // or else a later rollback will still leave the object in
+        // must-delete status if the transaction is committed
 
-	checkpoint(ckp_label);
+        checkpoint(ckp_label);
 
-	// by calling the synchronized setDeleteStatus() method on the
-	// DBDeletionManager, we announce our intention to delete this
-	// object, and lock out any other objects from establishing
-	// asymmetrical links to this object..  if this fails, another
-	// object in an open transaction has linked to this eObj
-	// without having checked it out for editing (which always
-	// means an asymmetrical link), and we can't let the object be
-	// deleted
+        // by calling the synchronized setDeleteStatus() method on the
+        // DBDeletionManager, we announce our intention to delete this
+        // object, and lock out any other objects from establishing
+        // asymmetrical links to this object..  if this fails, another
+        // object in an open transaction has linked to this eObj
+        // without having checked it out for editing (which always
+        // means an asymmetrical link), and we can't let the object be
+        // deleted
 
-	if (!DBDeletionManager.setDeleteStatus(eObj, this))
-	  {
-	    // if setDeleteStatus() fails, nothing will have been changed,
-	    // so we can just pop our checkpoint
+        if (!DBDeletionManager.setDeleteStatus(eObj, this))
+          {
+            // if setDeleteStatus() fails, nothing will have been changed,
+            // so we can just pop our checkpoint
 
-	    popCheckpoint(ckp_label);
+            popCheckpoint(ckp_label);
 
-	    return Ganymede.createErrorDialog(ts.l("deleteDBObject.cant_delete", eObj.toString()),
-					      ts.l("deleteDBObject.cant_delete_text2", eObj.toString()));
-	  }
+            return Ganymede.createErrorDialog(ts.l("deleteDBObject.cant_delete", eObj.toString()),
+                                              ts.l("deleteDBObject.cant_delete_text2", eObj.toString()));
+          }
 
-	break;
+        break;
 
       case DBEditObject.DELETING:
       case DBEditObject.DROPPING:
 
-	// already to be deleted
+        // already to be deleted
 
-	return null;
+        return null;
       }
 
     try
       {
-	retVal = eObj.remove();
+        retVal = eObj.remove();
       }
     catch (Throwable ex)
       {
         Ganymede.logError(ex);
 
-	rollback(ckp_label);
+        rollback(ckp_label);
 
-	return Ganymede.createErrorDialog(ts.l("deleteDBObject.error"),
-					  ts.l("deleteDBObject.error_text", eObj.toString(), ex.getMessage()));
+        return Ganymede.createErrorDialog(ts.l("deleteDBObject.error"),
+                                          ts.l("deleteDBObject.error_text", eObj.toString(), ex.getMessage()));
       }
 
     // the remove logic can entirely bypass our normal finalize logic
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	if (retVal.getCallback() == null)
-	  {
-	    // oops, irredeemable failure.  rollback.
+        if (retVal.getCallback() == null)
+          {
+            // oops, irredeemable failure.  rollback.
 
-	    rollback(ckp_label);
-	    return retVal;
-	  }
-	else
-	  {
-	    // the remove() logic is presenting a wizard
-	    // to the user.. turn the client over to
-	    // the wizard
+            rollback(ckp_label);
+            return retVal;
+          }
+        else
+          {
+            // the remove() logic is presenting a wizard
+            // to the user.. turn the client over to
+            // the wizard
 
-	    return retVal;
-	  }
+            return retVal;
+          }
       }
     else
       {
-	// ok, go ahead and finalize.. the finalizeRemove method will
-	// handle doing a rollback or popCheckpoint if necessary
+        // ok, go ahead and finalize.. the finalizeRemove method will
+        // handle doing a rollback or popCheckpoint if necessary
 
-	// it is essential that we do this call, or else we might
-	// leave namespace handles referencing this object
+        // it is essential that we do this call, or else we might
+        // leave namespace handles referencing this object
 
-	retVal2 = eObj.finalizeRemove(true, ckp_label);
+        retVal2 = eObj.finalizeRemove(true, ckp_label);
 
-	return retVal2;
+        return retVal2;
       }
   }
 
@@ -1023,7 +1023,7 @@ final public class DBSession {
 
     if (editSet == null)
       {
-	throw new RuntimeException(ts.l("global.notransaction", "inactivateDBObject"));
+        throw new RuntimeException(ts.l("global.notransaction", "inactivateDBObject"));
       }
 
     ckp_label = RandomUtils.getSaltedString("inactivate[" + eObj.getLabel() + "]");
@@ -1032,59 +1032,59 @@ final public class DBSession {
       {
       case DBEditObject.EDITING:
       case DBEditObject.CREATING:
-	break;
+        break;
 
       default:
-	return Ganymede.createErrorDialog(ts.l("inactivateDBObject.error"),
-					  ts.l("inactivateDBObject.error_text"));
+        return Ganymede.createErrorDialog(ts.l("inactivateDBObject.error"),
+                                          ts.l("inactivateDBObject.error_text"));
       }
 
     checkpoint(ckp_label);
 
     if (debug)
       {
-	System.err.println("DBSession.inactivateDBObject(): Calling eObj.inactivate()");
+        System.err.println("DBSession.inactivateDBObject(): Calling eObj.inactivate()");
       }
 
     try
       {
-	retVal = eObj.inactivate(ckp_label);
+        retVal = eObj.inactivate(ckp_label);
       }
     catch (Throwable ex)
       {
         Ganymede.logError(ex);
 
-	// oops, irredeemable failure.  rollback.
+        // oops, irredeemable failure.  rollback.
 
-	eObj.finalizeInactivate(false, ckp_label);
+        eObj.finalizeInactivate(false, ckp_label);
 
-	return Ganymede.createErrorDialog(ts.l("inactivateDBObject.error"),
-					  ts.l("inactivateDBObject.error_text2", eObj.toString(), ex.getMessage()));
+        return Ganymede.createErrorDialog(ts.l("inactivateDBObject.error"),
+                                          ts.l("inactivateDBObject.error_text2", eObj.toString(), ex.getMessage()));
       }
 
     if (debug)
       {
-	System.err.println("DBSession.inactivateDBObject(): Got back from eObj.inactivate()");
+        System.err.println("DBSession.inactivateDBObject(): Got back from eObj.inactivate()");
       }
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	if (retVal.getCallback() == null)
-	  {
-	    // oops, irredeemable failure.  rollback.
+        if (retVal.getCallback() == null)
+          {
+            // oops, irredeemable failure.  rollback.
 
-	    System.err.println("DBSession.inactivateDBObject(): object refused inactivation, rolling back");
+            System.err.println("DBSession.inactivateDBObject(): object refused inactivation, rolling back");
 
-	    eObj.finalizeInactivate(false, ckp_label);
-	  }
+            eObj.finalizeInactivate(false, ckp_label);
+          }
 
-	// otherwise, we've got a wizard that the client will deal with.
+        // otherwise, we've got a wizard that the client will deal with.
       }
     else
       {
-	// immediate success!
+        // immediate success!
 
-	eObj.finalizeInactivate(true, ckp_label);
+        eObj.finalizeInactivate(true, ckp_label);
       }
 
     return retVal;
@@ -1122,7 +1122,7 @@ final public class DBSession {
 
     if (editSet == null)
       {
-	throw new RuntimeException(ts.l("global.notransaction", "reactivateDBObject"));
+        throw new RuntimeException(ts.l("global.notransaction", "reactivateDBObject"));
       }
 
     ckp_label = RandomUtils.getSaltedString("reactivate[" + eObj.getLabel() + "]");
@@ -1131,14 +1131,14 @@ final public class DBSession {
       {
       case DBEditObject.DELETING:
       case DBEditObject.DROPPING:
-	return Ganymede.createErrorDialog(ts.l("reactivateDBObject.error"),
-					  ts.l("reactivateDBObject.error_text"));
+        return Ganymede.createErrorDialog(ts.l("reactivateDBObject.error"),
+                                          ts.l("reactivateDBObject.error_text"));
       }
 
     if (!eObj.isInactivated())
       {
-	return Ganymede.createErrorDialog(ts.l("reactivateDBObject.error"),
-					  ts.l("reactivateDBObject.error_text2"));
+        return Ganymede.createErrorDialog(ts.l("reactivateDBObject.error"),
+                                          ts.l("reactivateDBObject.error_text2"));
       }
 
     checkpoint(ckp_label);
@@ -1147,38 +1147,38 @@ final public class DBSession {
 
     try
       {
-	retVal = eObj.reactivate(ckp_label);
+        retVal = eObj.reactivate(ckp_label);
       }
     catch (Throwable ex)
       {
         Ganymede.logError(ex);
 
-	// oops, irredeemable failure.  rollback.
+        // oops, irredeemable failure.  rollback.
 
-	rollback(ckp_label);
+        rollback(ckp_label);
 
-	return Ganymede.createErrorDialog(ts.l("reactivateDBObject.error"),
-					  ts.l("reactivateDBObject.error_text3", eObj.toString(), ex.getMessage()));
+        return Ganymede.createErrorDialog(ts.l("reactivateDBObject.error"),
+                                          ts.l("reactivateDBObject.error_text3", eObj.toString(), ex.getMessage()));
       }
 
     System.err.println(ts.l("reactivateDBObject.debug2"));
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	if (retVal.getCallback() == null)
-	  {
-	    // oops, irredeemable failure.  rollback.
+        if (retVal.getCallback() == null)
+          {
+            // oops, irredeemable failure.  rollback.
 
-	    System.err.println(ts.l("reactivateDBObject.debug3"));
+            System.err.println(ts.l("reactivateDBObject.debug3"));
 
-	    rollback(ckp_label);
-	  }
+            rollback(ckp_label);
+          }
       }
     else
       {
-	// immediate success!
+        // immediate success!
 
-	eObj.finalizeReactivate(true, ckp_label);
+        eObj.finalizeReactivate(true, ckp_label);
       }
 
     return retVal;
@@ -1213,7 +1213,7 @@ final public class DBSession {
             throw new IntegrityConstraintException(ts.l("getContainingObj.integrity", object.getLabel()));
           }
 
-	localObj = viewDBObject(inv);
+        localObj = viewDBObject(inv);
       }
 
     return localObj;
@@ -1247,70 +1247,70 @@ final public class DBSession {
 
     if (base == null)
       {
-	try
-	  {
-	    throw new RuntimeException(ts.l("getTransactionalObjects.no_base", Integer.valueOf(baseid)));
-	  }
-	catch (RuntimeException ex)
-	  {
-	    Ganymede.debug(Ganymede.stackTrace(ex));
-	    return null;
-	  }
+        try
+          {
+            throw new RuntimeException(ts.l("getTransactionalObjects.no_base", Integer.valueOf(baseid)));
+          }
+        catch (RuntimeException ex)
+          {
+            Ganymede.debug(Ganymede.stackTrace(ex));
+            return null;
+          }
       }
 
     if (!isTransactionOpen())
       {
-	// return a snapshot reference to the base's iteration set
+        // return a snapshot reference to the base's iteration set
 
-	return base.getIterationSet();
+        return base.getIterationSet();
       }
     else
       {
-	List<DBObject> iterationSet;
-	Map<Invid, DBEditObject> objects;
+        List<DBObject> iterationSet;
+        Map<Invid, DBEditObject> objects;
 
-	// grab a snapshot reference to the vector of objects
-	// checked into the database
+        // grab a snapshot reference to the vector of objects
+        // checked into the database
 
-	iterationSet = base.getIterationSet();
+        iterationSet = base.getIterationSet();
 
-	// grab a snapshot copy of the objects checked out in this transaction
+        // grab a snapshot copy of the objects checked out in this transaction
 
-	objects = editSet.getObjectHashClone();
+        objects = editSet.getObjectHashClone();
 
-	// and generate our list
+        // and generate our list
 
-	List<DBObject> results = new ArrayList<DBObject>(iterationSet.size());
+        List<DBObject> results = new ArrayList<DBObject>(iterationSet.size());
 
-	for (DBObject obj: iterationSet)
-	  {
-	    if (objects.containsKey(obj.getInvid()))
-	      {
-		results.add(objects.get(obj.getInvid()));
-	      }
-	    else
-	      {
-		results.add(obj);
-	      }
-	  }
+        for (DBObject obj: iterationSet)
+          {
+            if (objects.containsKey(obj.getInvid()))
+              {
+                results.add(objects.get(obj.getInvid()));
+              }
+            else
+              {
+                results.add(obj);
+              }
+          }
 
-	// drop our reference to the iterationSet
+        // drop our reference to the iterationSet
 
-	iterationSet = null;
+        iterationSet = null;
 
-	// we've recorded any objects that are in the database.. now
-	// look to see if there are any objects that are newly created
-	// in our transaction's object list and add them as well.
+        // we've recorded any objects that are in the database.. now
+        // look to see if there are any objects that are newly created
+        // in our transaction's object list and add them as well.
 
-	for (DBEditObject eObj: objects.values())
-	  {
-	    if ((eObj.getStatus() == ObjectStatus.CREATING) && (eObj.getTypeID()==baseid))
-	      {
-		results.add(eObj);
-	      }
-	  }
+        for (DBEditObject eObj: objects.values())
+          {
+            if ((eObj.getStatus() == ObjectStatus.CREATING) && (eObj.getTypeID()==baseid))
+              {
+                results.add(eObj);
+              }
+          }
 
-	return results;
+        return results;
       }
   }
 
@@ -1505,7 +1505,7 @@ final public class DBSession {
   {
     if (editSet != null)
       {
-	throw new IllegalArgumentException(ts.l("openTransaction.transaction"));
+        throw new IllegalArgumentException(ts.l("openTransaction.transaction"));
       }
 
     editSet = new DBEditSet(store, this, describe, interactive);
@@ -1573,12 +1573,12 @@ final public class DBSession {
 
     if (debug)
       {
-	System.err.println(ts.l("commitTransaction.debug1", String.valueOf(key)));
+        System.err.println(ts.l("commitTransaction.debug1", String.valueOf(key)));
       }
 
     if (editSet == null)
       {
-	throw new RuntimeException(ts.l("commitTransaction.notransaction", String.valueOf(key)));
+        throw new RuntimeException(ts.l("commitTransaction.notransaction", String.valueOf(key)));
       }
 
     // we can't commit a transaction with locks held, because that
@@ -1590,7 +1590,7 @@ final public class DBSession {
 
     if (debug)
       {
-	System.err.println(ts.l("commitTransaction.debug2", String.valueOf(key)));
+        System.err.println(ts.l("commitTransaction.debug2", String.valueOf(key)));
       }
 
     String description = editSet.description; // get before commit() clears it
@@ -1599,38 +1599,38 @@ final public class DBSession {
 
     if (ReturnVal.didSucceed(retVal))
       {
-	if (description != null)
-	  {
-	    // "{0}: committed transaction {1}"
-	    Ganymede.debug(ts.l("commitTransaction.debug3", String.valueOf(key), description));
-	  }
-	else
-	  {
-	    // "{0}: committed transaction"
-	    Ganymede.debug(ts.l("commitTransaction.debug4", String.valueOf(key)));
-	  }
+        if (description != null)
+          {
+            // "{0}: committed transaction {1}"
+            Ganymede.debug(ts.l("commitTransaction.debug3", String.valueOf(key), description));
+          }
+        else
+          {
+            // "{0}: committed transaction"
+            Ganymede.debug(ts.l("commitTransaction.debug4", String.valueOf(key)));
+          }
 
-	editSet = null;
+        editSet = null;
       }
     else
       {
-	// The DBEditSet.commit() method will set retVal.doNormalProcessing true
-	// if the problem that prevented commit was transient.. i.e., missing
-	// fields, lock not available, etc.
+        // The DBEditSet.commit() method will set retVal.doNormalProcessing true
+        // if the problem that prevented commit was transient.. i.e., missing
+        // fields, lock not available, etc.
 
-	// If we had an IO error or some unexpected exception or the
-	// like, doNormalProcessing will be false, and the transaction
-	// will have been wiped out by the commit logic.  In this case,
-	// there's nothing that can be done, the transaction is dead
-	// and gone.
+        // If we had an IO error or some unexpected exception or the
+        // like, doNormalProcessing will be false, and the transaction
+        // will have been wiped out by the commit logic.  In this case,
+        // there's nothing that can be done, the transaction is dead
+        // and gone.
 
-	if (!retVal.doNormalProcessing)
-	  {
-	    editSet = null;
-	  }
+        if (!retVal.doNormalProcessing)
+          {
+            editSet = null;
+          }
       }
 
-    return retVal;		// later on we'll figure out how to do this right
+    return retVal;              // later on we'll figure out how to do this right
   }
 
   /**
@@ -1658,19 +1658,19 @@ final public class DBSession {
   {
     if (editSet == null)
       {
-	throw new RuntimeException(ts.l("global.notransaction", "abortTransaction"));
+        throw new RuntimeException(ts.l("global.notransaction", "abortTransaction"));
       }
 
     if (!editSet.abort())
       {
-	Ganymede.debug(ts.l("abortTransaction.cant_abort", String.valueOf(key)));
+        Ganymede.debug(ts.l("abortTransaction.cant_abort", String.valueOf(key)));
 
-	return Ganymede.createErrorDialog(ts.l("abortTransaction.error"),
-					  ts.l("abortTransaction.error_text"));
+        return Ganymede.createErrorDialog(ts.l("abortTransaction.error"),
+                                          ts.l("abortTransaction.error_text"));
       }
     else
       {
-	editSet = null;		// for gc
+        editSet = null;         // for gc
       }
 
     return null;
@@ -1742,11 +1742,11 @@ final public class DBSession {
   {
     try
       {
-	return viewDBObject(invid).getLabel();
+        return viewDBObject(invid).getLabel();
       }
     catch (NullPointerException ex)
       {
-	return null;
+        return null;
       }
   }
 
@@ -1761,22 +1761,22 @@ final public class DBSession {
   {
     try
       {
-	DBObject obj = viewDBObject(invid);
+        DBObject obj = viewDBObject(invid);
 
-	if (obj != null)
-	  {
-	    return obj.getTypeName() + " " + obj.getLabel();
-	  }
-	else
-	  {
-	    DBObjectBase base = Ganymede.db.getObjectBase(invid.getType());
+        if (obj != null)
+          {
+            return obj.getTypeName() + " " + obj.getLabel();
+          }
+        else
+          {
+            DBObjectBase base = Ganymede.db.getObjectBase(invid.getType());
 
-	    return base.getName() + " " + invid.toString() + " (non-existing)";
-	  }
+            return base.getName() + " " + invid.toString() + " (non-existing)";
+          }
       }
     catch (NullPointerException ex)
       {
-	return null;
+        return null;
       }
   }
 
@@ -1797,11 +1797,11 @@ final public class DBSession {
   {
     if (editSet != null)
       {
-	return "DBSession[" + editSet.description + "]";
+        return "DBSession[" + editSet.description + "]";
       }
     else
       {
-	return super.toString();
+        return super.toString();
       }
   }
 }

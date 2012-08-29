@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -111,86 +111,86 @@ public final class loginSemaphore {
   {
     if (message == null)
       {
-	throw new IllegalArgumentException("loginSemaphore error: disable message must != null");
+        throw new IllegalArgumentException("loginSemaphore error: disable message must != null");
       }
 
     if (!waitForZero)
       {
-	if (disableMsg != null)
-	  {
-	    return "Logins already disabled: " + disableMsg;
-	  }
-	else
-	  {
-	    disableMsg = message;
-	    return null;
-	  }
+        if (disableMsg != null)
+          {
+            return "Logins already disabled: " + disableMsg;
+          }
+        else
+          {
+            disableMsg = message;
+            return null;
+          }
       }
 
     if (count == 0 && disableMsg == null)
       {
-	disableMsg = message;
-	return null;
+        disableMsg = message;
+        return null;
       }
     else if (millis == 0)
       {
-	if (count != 0)
-	  {
-	    return "Login count not zero: " + count;
-	  }
-	else			// disableMsg != null
-	  {
-	    return "Logins already disabled: " + disableMsg;
-	  }
+        if (count != 0)
+          {
+            return "Login count not zero: " + count;
+          }
+        else                    // disableMsg != null
+          {
+            return "Logins already disabled: " + disableMsg;
+          }
       }
-    else if (millis < 0)	// block indefinitely
+    else if (millis < 0)        // block indefinitely
       {
-	while (true)
-	  {
-	    // we already know from above that we have to wait, so
-	    // we'll start the loop waiting
+        while (true)
+          {
+            // we already know from above that we have to wait, so
+            // we'll start the loop waiting
 
-	    wait();
+            wait();
 
-	    if (count == 0 && disableMsg == null)
-	      {
-		disableMsg = message;
-		return null;
-	      }
-	  }
+            if (count == 0 && disableMsg == null)
+              {
+                disableMsg = message;
+                return null;
+              }
+          }
       }
-    else			// don't block more than millis
+    else                        // don't block more than millis
       {
-	long waitTime = millis;
-	long startTime = System.currentTimeMillis();
-	long timeSoFar = 0;
-	    
-	/* -- */
+        long waitTime = millis;
+        long startTime = System.currentTimeMillis();
+        long timeSoFar = 0;
+            
+        /* -- */
 
-	while (true)
-	  {
-	    // we already know from above that we have to wait, so
-	    // we'll start the loop waiting
+        while (true)
+          {
+            // we already know from above that we have to wait, so
+            // we'll start the loop waiting
 
-	    wait(waitTime);
+            wait(waitTime);
 
-	    if (count == 0 && disableMsg == null)
-	      {
-		disableMsg = message;
-		return null;
-	      }
-		
-	    timeSoFar = System.currentTimeMillis() - startTime;
+            if (count == 0 && disableMsg == null)
+              {
+                disableMsg = message;
+                return null;
+              }
+                
+            timeSoFar = System.currentTimeMillis() - startTime;
 
-	    if (timeSoFar > millis)	// timed out
-	      {
-		return "Timeout";
-	      }
-	    else
-	      {
-		waitTime = millis - timeSoFar;
-	      }
-	  }
+            if (timeSoFar > millis)     // timed out
+              {
+                return "Timeout";
+              }
+            else
+              {
+                waitTime = millis - timeSoFar;
+              }
+          }
       }
   }
 
@@ -208,17 +208,17 @@ public final class loginSemaphore {
   {
     if (message == null)
       {
-	throw new IllegalArgumentException("loginSemaphore error: enable message must != null");
+        throw new IllegalArgumentException("loginSemaphore error: enable message must != null");
       }
 
     if (message.equals(disableMsg))
       {
-	disableMsg = null;
-	notifyAll();		// wake up incrementers
+        disableMsg = null;
+        notifyAll();            // wake up incrementers
       }
     else
       {
-	throw new IllegalStateException(disableMsg);
+        throw new IllegalStateException(disableMsg);
       }
   }
 
@@ -283,82 +283,82 @@ public final class loginSemaphore {
   {
     try
       {
-	if (disableMsg == null)
-	  {
-	    count++;
-	    return null;
-	  }
+        if (disableMsg == null)
+          {
+            count++;
+            return null;
+          }
 
-	if (millis == 0)	// don't block.. just fail
-	  {
-	    return disableMsg;
-	  }
-	else if (millis < 0)	// block indefinitely
-	  {
-	    while (true)
-	      {
-		// we already know from above that we have to wait, so
-		// we'll start the loop waiting
+        if (millis == 0)        // don't block.. just fail
+          {
+            return disableMsg;
+          }
+        else if (millis < 0)    // block indefinitely
+          {
+            while (true)
+              {
+                // we already know from above that we have to wait, so
+                // we'll start the loop waiting
 
-		wait();	// can throw InterruptedException
+                wait(); // can throw InterruptedException
 
-		if (disableMsg == null)
-		  {
-		    count++;
-		    return null;
-		  }
-	      }
-	  }
-	else			// block a limited time
-	  {
-	    long waitTime = millis;
-	    long startTime = System.currentTimeMillis();
-	    long timeSoFar = 0;
-	    
-	    /* -- */
+                if (disableMsg == null)
+                  {
+                    count++;
+                    return null;
+                  }
+              }
+          }
+        else                    // block a limited time
+          {
+            long waitTime = millis;
+            long startTime = System.currentTimeMillis();
+            long timeSoFar = 0;
+            
+            /* -- */
 
-	    while (true)
-	      {
-		// we already know from above that we have to wait, so
-		// we'll start the loop waiting
+            while (true)
+              {
+                // we already know from above that we have to wait, so
+                // we'll start the loop waiting
 
-		wait(waitTime);	// can throw InterruptedException
+                wait(waitTime); // can throw InterruptedException
 
-		if (disableMsg == null)
-		  {
-		    count++;
-		    return null;
-		  }
+                if (disableMsg == null)
+                  {
+                    count++;
+                    return null;
+                  }
 
-		timeSoFar = System.currentTimeMillis() - startTime;
+                timeSoFar = System.currentTimeMillis() - startTime;
 
-		if (timeSoFar > millis)	// timed out
-		  {
-		    return disableMsg;
-		  }
-		else
-		  {
-		    waitTime = millis - timeSoFar;
-		  }
-	      }
-	  }
+                if (timeSoFar > millis) // timed out
+                  {
+                    return disableMsg;
+                  }
+                else
+                  {
+                    waitTime = millis - timeSoFar;
+                  }
+              }
+          }
       }
     finally
       {
-	if (debug)
-	  {
-	    // get a stack trace for the increment
+        if (debug)
+          {
+            // get a stack trace for the increment
 
-	    try
-	      {
-		throw new RuntimeException("semaphore increment");
-	      }
-	    catch (RuntimeException ex)
-	      {
-		ex.printStackTrace();
-	      }
-	  }
-	
+            try
+              {
+                throw new RuntimeException("semaphore increment");
+              }
+            catch (RuntimeException ex)
+              {
+                ex.printStackTrace();
+              }
+          }
+        
       }
   }
 
@@ -374,29 +374,29 @@ public final class loginSemaphore {
   {
     if (count == 0)
       {
-	throw new IllegalStateException("Error, decrement called on empty loginSemaphore");
+        throw new IllegalStateException("Error, decrement called on empty loginSemaphore");
       }
 
     try
       {
-	count--;
-	notifyAll();		// wake up disablers
+        count--;
+        notifyAll();            // wake up disablers
       }
     finally
       {
-	if (debug)
-	  {
-	    // get a stack trace for the increment
+        if (debug)
+          {
+            // get a stack trace for the increment
 
-	    try
-	      {
-		throw new RuntimeException("semaphore decrement");
-	      }
-	    catch (RuntimeException ex)
-	      {
-		ex.printStackTrace();
-	      }
-	  }
+            try
+              {
+                throw new RuntimeException("semaphore decrement");
+              }
+            catch (RuntimeException ex)
+              {
+                ex.printStackTrace();
+              }
+          }
       }
   }
 }

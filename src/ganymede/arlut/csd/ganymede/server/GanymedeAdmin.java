@@ -12,7 +12,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -143,7 +143,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   /* -----====================--------------------====================-----
 
-			         static methods
+                                 static methods
 
      -----====================--------------------====================----- */
 
@@ -161,31 +161,31 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     if (debug)
       {
-	System.err.println("GanymedeAdmin.closeAllConsoles: waiting for sync");
+        System.err.println("GanymedeAdmin.closeAllConsoles: waiting for sync");
       }
 
     synchronized (GanymedeAdmin.consoles)
       {
-	if (debug)
-	  {
-	    System.err.println("GanymedeAdmin.closeAllConsoles: got sync");
-	  }
+        if (debug)
+          {
+            System.err.println("GanymedeAdmin.closeAllConsoles: got sync");
+          }
 
-	for (int i = 0; i < GanymedeAdmin.consoles.size(); i++)
-	  {
-	    temp = (GanymedeAdmin) GanymedeAdmin.consoles.elementAt(i);
+        for (int i = 0; i < GanymedeAdmin.consoles.size(); i++)
+          {
+            temp = (GanymedeAdmin) GanymedeAdmin.consoles.elementAt(i);
 
-	    try
-	      {
-		temp.forceDisconnect(reason);
-	      }
-	    catch (RemoteException ex)
-	      {
-		// don't worry about it
-	      }
-	  }
+            try
+              {
+                temp.forceDisconnect(reason);
+              }
+            catch (RemoteException ex)
+              {
+                // don't worry about it
+              }
+          }
 
-	GanymedeAdmin.consoles.removeAllElements();
+        GanymedeAdmin.consoles.removeAllElements();
       }
   }
 
@@ -203,35 +203,35 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     synchronized (GanymedeServer.lSemaphore)
       {
-	if (GanymedeServer.lSemaphore.checkEnabled() == null)
-	  {
-	    // "{0, Date} [{1, number, #}] {2}\n"
-	    stampedLine = ts.l("logAppend.enabled_template", new Date(), Integer.valueOf(GanymedeServer.lSemaphore.getCount()), status);
-	  }
-	else
-	  {
-	    // "{0, Date} [*] {1}\n"
-	    stampedLine = ts.l("logAppend.disabled_template", new Date(), status);
-	  }
+        if (GanymedeServer.lSemaphore.checkEnabled() == null)
+          {
+            // "{0, Date} [{1, number, #}] {2}\n"
+            stampedLine = ts.l("logAppend.enabled_template", new Date(), Integer.valueOf(GanymedeServer.lSemaphore.getCount()), status);
+          }
+        else
+          {
+            // "{0, Date} [*] {1}\n"
+            stampedLine = ts.l("logAppend.disabled_template", new Date(), status);
+          }
       }
 
     /* -- */
 
     synchronized (GanymedeAdmin.consoles)
       {
-	for (int i = 0; i < consoles.size(); i++)
-	  {
-	    temp = (GanymedeAdmin) consoles.elementAt(i);
+        for (int i = 0; i < consoles.size(); i++)
+          {
+            temp = (GanymedeAdmin) consoles.elementAt(i);
 
-	    try
-	      {
-		temp.asyncPort.logAppend(stampedLine);
-	      }
-	    catch (RemoteException ex)
-	      {
-		handleConsoleRMIFailure(temp, ex);
-	      }
-	  }
+            try
+              {
+                temp.asyncPort.logAppend(stampedLine);
+              }
+            catch (RemoteException ex)
+              {
+                handleConsoleRMIFailure(temp, ex);
+              }
+          }
       }
 
     detachBadConsoles();
@@ -251,30 +251,30 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     synchronized (GanymedeAdmin.consoles)
       {
-	if (consoles.size() > 1)
-	  {
-	    // "{0, number, #} consoles attached"
-	    message = ts.l("setConsoleCount.multiple_attached", Integer.valueOf(consoles.size()));
-	  }
-	else
-	  {
-	    // "1 console attached"
-	    message = ts.l("setConsoleCount.single_attached");
-	  }
+        if (consoles.size() > 1)
+          {
+            // "{0, number, #} consoles attached"
+            message = ts.l("setConsoleCount.multiple_attached", Integer.valueOf(consoles.size()));
+          }
+        else
+          {
+            // "1 console attached"
+            message = ts.l("setConsoleCount.single_attached");
+          }
 
-	for (int i = 0; i < consoles.size(); i++)
-	  {
-	    temp = (GanymedeAdmin) consoles.elementAt(i);
+        for (int i = 0; i < consoles.size(); i++)
+          {
+            temp = (GanymedeAdmin) consoles.elementAt(i);
 
-	    try
-	      {
-		temp.asyncPort.changeAdmins(message);
-	      }
-	    catch (RemoteException ex)
-	      {
-		handleConsoleRMIFailure(temp, ex);
-	      }
-	  }
+            try
+              {
+                temp.asyncPort.changeAdmins(message);
+              }
+            catch (RemoteException ex)
+              {
+                handleConsoleRMIFailure(temp, ex);
+              }
+          }
       }
 
     detachBadConsoles();
@@ -293,19 +293,19 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     synchronized (GanymedeAdmin.consoles)
       {
-	for (int i = 0; i < consoles.size(); i++)
-	  {
-	    temp = (GanymedeAdmin) consoles.elementAt(i);
+        for (int i = 0; i < consoles.size(); i++)
+          {
+            temp = (GanymedeAdmin) consoles.elementAt(i);
 
-	    try
-	      {
-		temp.doUpdateTransCount();
-	      }
-	    catch (RemoteException ex)
-	      {
-		handleConsoleRMIFailure(temp, ex);
-	      }
-	  }
+            try
+              {
+                temp.doUpdateTransCount();
+              }
+            catch (RemoteException ex)
+              {
+                handleConsoleRMIFailure(temp, ex);
+              }
+          }
       }
 
     detachBadConsoles();
@@ -335,19 +335,19 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     synchronized (GanymedeAdmin.consoles)
       {
-	for (int i = 0; i < consoles.size(); i++)
-	  {
-	    temp = (GanymedeAdmin) consoles.elementAt(i);
+        for (int i = 0; i < consoles.size(); i++)
+          {
+            temp = (GanymedeAdmin) consoles.elementAt(i);
 
-	    try
-	      {
-		temp.doUpdateLastDump();
-	      }
-	    catch (RemoteException ex)
-	      {
-		handleConsoleRMIFailure(temp, ex);
-	      }
-	  }
+            try
+              {
+                temp.doUpdateLastDump();
+              }
+            catch (RemoteException ex)
+              {
+                handleConsoleRMIFailure(temp, ex);
+              }
+          }
       }
 
     detachBadConsoles();
@@ -378,19 +378,19 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     synchronized (GanymedeAdmin.consoles)
       {
-	for (int i = 0; i < consoles.size(); i++)
-	  {
-	    temp = (GanymedeAdmin) consoles.elementAt(i);
+        for (int i = 0; i < consoles.size(); i++)
+          {
+            temp = (GanymedeAdmin) consoles.elementAt(i);
 
-	    try
-	      {
-		temp.doUpdateMemState();
-	      }
-	    catch (RemoteException ex)
-	      {
-		handleConsoleRMIFailure(temp, ex);
-	      }
-	  }
+            try
+              {
+                temp.doUpdateMemState();
+              }
+            catch (RemoteException ex)
+              {
+                handleConsoleRMIFailure(temp, ex);
+              }
+          }
       }
 
     detachBadConsoles();
@@ -409,19 +409,19 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     synchronized (GanymedeAdmin.consoles)
       {
-	for (int i = 0; i < consoles.size(); i++)
-	  {
-	    temp = (GanymedeAdmin) consoles.elementAt(i);
+        for (int i = 0; i < consoles.size(); i++)
+          {
+            temp = (GanymedeAdmin) consoles.elementAt(i);
 
-	    try
-	      {
-		temp.doUpdateCheckedOut();
-	      }
-	    catch (RemoteException ex)
-	      {
-		handleConsoleRMIFailure(temp, ex);
-	      }
-	  }
+            try
+              {
+                temp.doUpdateCheckedOut();
+              }
+            catch (RemoteException ex)
+              {
+                handleConsoleRMIFailure(temp, ex);
+              }
+          }
       }
 
     detachBadConsoles();
@@ -439,19 +439,19 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     synchronized (GanymedeAdmin.consoles)
       {
-	for (int i = 0; i < consoles.size(); i++)
-	  {
-	    temp = (GanymedeAdmin) consoles.elementAt(i);
+        for (int i = 0; i < consoles.size(); i++)
+          {
+            temp = (GanymedeAdmin) consoles.elementAt(i);
 
-	    try
-	      {
-		temp.doUpdateLocksHeld();
-	      }
-	    catch (RemoteException ex)
-	      {
-		handleConsoleRMIFailure(temp, ex);
-	      }
-	  }
+            try
+              {
+                temp.doUpdateLocksHeld();
+              }
+            catch (RemoteException ex)
+              {
+                handleConsoleRMIFailure(temp, ex);
+              }
+          }
       }
 
     detachBadConsoles();
@@ -472,19 +472,19 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     synchronized (GanymedeAdmin.consoles)
       {
-	for (int i = 0; i < consoles.size(); i++)
-	  {
-	    temp = (GanymedeAdmin) consoles.elementAt(i);
+        for (int i = 0; i < consoles.size(); i++)
+          {
+            temp = (GanymedeAdmin) consoles.elementAt(i);
 
-	    try
-	      {
-		temp.doSetState();
-	      }
-	    catch (RemoteException ex)
-	      {
-		handleConsoleRMIFailure(temp, ex);
-	      }
-	  }
+            try
+              {
+                temp.doSetState();
+              }
+            catch (RemoteException ex)
+              {
+                handleConsoleRMIFailure(temp, ex);
+              }
+          }
       }
 
     detachBadConsoles();
@@ -511,19 +511,19 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     synchronized (GanymedeAdmin.consoles)
       {
-	for (int i = 0; i < consoles.size(); i++)
-	  {
-	    temp = (GanymedeAdmin) consoles.elementAt(i);
-	    
-	    try
-	      {
-		temp.doRefreshUsers(entries);
-	      }
-	    catch (RemoteException ex)
-	      {
-		handleConsoleRMIFailure(temp, ex);
-	      }
-	  }
+        for (int i = 0; i < consoles.size(); i++)
+          {
+            temp = (GanymedeAdmin) consoles.elementAt(i);
+            
+            try
+              {
+                temp.doRefreshUsers(entries);
+              }
+            catch (RemoteException ex)
+              {
+                handleConsoleRMIFailure(temp, ex);
+              }
+          }
       }
 
     detachBadConsoles();
@@ -543,26 +543,26 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
     
     if (Ganymede.scheduler == null)
       {
-	return;
+        return;
       }
 
     scheduleHandles = Ganymede.scheduler.reportTaskInfo();
 
     synchronized (GanymedeAdmin.consoles)
       {
-	for (int i = 0; i < consoles.size(); i++)
-	  {
-	    temp = (GanymedeAdmin) consoles.elementAt(i);
+        for (int i = 0; i < consoles.size(); i++)
+          {
+            temp = (GanymedeAdmin) consoles.elementAt(i);
 
-	    try
-	      {
-		temp.doRefreshTasks(scheduleHandles);
-	      }
-	    catch (RemoteException ex)
-	      {
-		handleConsoleRMIFailure(temp, ex);
-	      }
-	  }
+            try
+              {
+                temp.doRefreshTasks(scheduleHandles);
+              }
+            catch (RemoteException ex)
+              {
+                handleConsoleRMIFailure(temp, ex);
+              }
+          }
       }
 
     detachBadConsoles();
@@ -604,20 +604,20 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     synchronized (GanymedeAdmin.consoles)
       {
-	for (int i=0; i < badConsoles.size(); i++)
-	  {
-	    temp = (GanymedeAdmin) badConsoles.elementAt(i);
+        for (int i=0; i < badConsoles.size(); i++)
+          {
+            temp = (GanymedeAdmin) badConsoles.elementAt(i);
 
-	    // the logout() method will cause the console to remove
-	    // itself from the static GanymedeAdmin.consoles vecotr,
-	    // which is why we are synchronized on
-	    // GanymedeAdmin.consoles here.
+            // the logout() method will cause the console to remove
+            // itself from the static GanymedeAdmin.consoles vecotr,
+            // which is why we are synchronized on
+            // GanymedeAdmin.consoles here.
 
-	    // "error communicating with console"
-	    temp.logout(ts.l("detachBadConsoles.error"));
-	  }
+            // "error communicating with console"
+            temp.logout(ts.l("detachBadConsoles.error"));
+          }
 
-	badConsoles.setSize(0);
+        badConsoles.setSize(0);
       }
   }
 
@@ -679,8 +679,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     if (GanymedeAdmin.freeMem == 0 && GanymedeAdmin.totalMem == 0)
       {
-	GanymedeAdmin.freeMem = Runtime.getRuntime().freeMemory();
-	GanymedeAdmin.totalMem = Runtime.getRuntime().totalMemory();
+        GanymedeAdmin.freeMem = Runtime.getRuntime().freeMemory();
+        GanymedeAdmin.totalMem = Runtime.getRuntime().totalMemory();
       }
 
     this.asyncPort = new serverAdminAsyncResponder();
@@ -688,26 +688,26 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
     this.adminName = adminName;
     this.clientHost = clientHost;
 
-    consoles.addElement(this);	// this can block if we are currently looping on consoles
+    consoles.addElement(this);  // this can block if we are currently looping on consoles
 
     try
       {
-	setConsoleCount();
-	asyncPort.setServerStart(Ganymede.startTime);
-	doUpdateTransCount();
-	doUpdateTransCount();
-	doUpdateLastDump();
-	doUpdateCheckedOut();
-	doUpdateLocksHeld();
-	doUpdateMemState();
-	doSetState();
-	
-	doRefreshUsers(GanymedeServer.getUserTable());
-	doRefreshTasks(Ganymede.scheduler.reportTaskInfo());
+        setConsoleCount();
+        asyncPort.setServerStart(Ganymede.startTime);
+        doUpdateTransCount();
+        doUpdateTransCount();
+        doUpdateLastDump();
+        doUpdateCheckedOut();
+        doUpdateLocksHeld();
+        doUpdateMemState();
+        doSetState();
+        
+        doRefreshUsers(GanymedeServer.getUserTable());
+        doRefreshTasks(Ganymede.scheduler.reportTaskInfo());
       }
     catch (RemoteException ex)
       {
-	handleConsoleRMIFailure(this, ex);
+        handleConsoleRMIFailure(this, ex);
       }
   }
 
@@ -811,19 +811,19 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   {
     if (fullprivs)
       {
-	// "{0} on {1} with full access"
-	return ts.l("toString.fullprivs", adminName, clientHost);
+        // "{0} on {1} with full access"
+        return ts.l("toString.fullprivs", adminName, clientHost);
       }
     else
       {
-	// "{0} on {1} with monitor access"
-	return ts.l("toString.not_fullprivs", adminName, clientHost);
+        // "{0} on {1} with monitor access"
+        return ts.l("toString.not_fullprivs", adminName, clientHost);
       }
   }
 
   /* -----====================--------------------====================-----
 
-			    remotely callable methods
+                            remotely callable methods
 
      -----====================--------------------====================----- */
 
@@ -864,40 +864,40 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   {
     if (asyncPort.isAlive())
       {
-	asyncPort.shutdown();
+        asyncPort.shutdown();
       }
 
     synchronized (GanymedeAdmin.consoles)
       {
-	if (consoles.contains(this))
-	  {
-	    consoles.removeElement(this);
+        if (consoles.contains(this))
+          {
+            consoles.removeElement(this);
 
-	    String eventStr = null;
+            String eventStr = null;
 
-	    if (reason == null)
-	      {
-		// "Admin console {0} detached from {1}"
-		eventStr = ts.l("logout.without_reason", adminName, clientHost);
-	      }
-	    else
-	      {
-		// "Admin console {0} detached from {1}: {2}"
-		eventStr = ts.l("logout.with_reason", adminName, clientHost, reason);
-	      }
+            if (reason == null)
+              {
+                // "Admin console {0} detached from {1}"
+                eventStr = ts.l("logout.without_reason", adminName, clientHost);
+              }
+            else
+              {
+                // "Admin console {0} detached from {1}: {2}"
+                eventStr = ts.l("logout.with_reason", adminName, clientHost, reason);
+              }
 
-	    if (Ganymede.log != null)
-	      {
-		Ganymede.log.logSystemEvent(new DBLogEvent("admindisconnect",
-							   eventStr,
-							   null,
-							   adminName,
-							   null,
-							   null));
-	      }
+            if (Ganymede.log != null)
+              {
+                Ganymede.log.logSystemEvent(new DBLogEvent("admindisconnect",
+                                                           eventStr,
+                                                           null,
+                                                           adminName,
+                                                           null,
+                                                           null));
+              }
 
-	    setConsoleCount();
-	  }
+            setConsoleCount();
+          }
       }
   }
 
@@ -961,13 +961,13 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     if (consoles.size() > 1)
       {
-	// "{0, number, #} consoles attached"
-	asyncPort.changeAdmins(ts.l("setConsoleCount.multiple_attached", Integer.valueOf(consoles.size())));
+        // "{0, number, #} consoles attached"
+        asyncPort.changeAdmins(ts.l("setConsoleCount.multiple_attached", Integer.valueOf(consoles.size())));
       }
     else
       {
-	// "1 console attached"
-	asyncPort.changeAdmins(ts.l("setConsoleCount.single_attached"));
+        // "1 console attached"
+        asyncPort.changeAdmins(ts.l("setConsoleCount.single_attached"));
       }
 
     doUpdateTransCount();
@@ -997,10 +997,10 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   {
     if (!fullprivs)
       {
-	// "Permissions Denied
-	// "You do not have permissions to force a full rebuild."
-	return Ganymede.createErrorDialog(ts.l("forceBuild.denied_title"),
-					  ts.l("forceBuild.denied_text"));
+        // "Permissions Denied
+        // "You do not have permissions to force a full rebuild."
+        return Ganymede.createErrorDialog(ts.l("forceBuild.denied_title"),
+                                          ts.l("forceBuild.denied_text"));
       }
 
     // "Admin console forcing full network build..."
@@ -1024,10 +1024,10 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   {
     if (!fullprivs)
       {
-	// "Permissions Denied"
-	// "You do not have permissions to knock all users off of the server"
-	return Ganymede.createErrorDialog(ts.l("killAll.denied_title"),
-					  ts.l("killAll.denied_text"));
+        // "Permissions Denied"
+        // "You do not have permissions to knock all users off of the server"
+        return Ganymede.createErrorDialog(ts.l("killAll.denied_title"),
+                                          ts.l("killAll.denied_text"));
       }
 
     // "Admin console disconnecting you"
@@ -1049,22 +1049,22 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   {
     if (!fullprivs)
       {
-	// "Permissions Denied"
-	// "You do not have permission to forcibly disconnect user {0}."
-	return Ganymede.createErrorDialog(ts.l("kill.denied_title"),
-					  ts.l("kill.denied_text", user));
+        // "Permissions Denied"
+        // "You do not have permission to forcibly disconnect user {0}."
+        return Ganymede.createErrorDialog(ts.l("kill.denied_title"),
+                                          ts.l("kill.denied_text", user));
       }
 
     // "Admin console disconnecting you"
     if (GanymedeServer.server.killUser(user, ts.l("kill.message_to_user")))
       {
-	return null;
+        return null;
       }
 
     // "Kill Error"
     // "I couldn''t find any active user named {0}."
     return Ganymede.createErrorDialog(ts.l("kill.error_title"),
-				      ts.l("kill.error_text", user));
+                                      ts.l("kill.error_text", user));
   }
 
   /**
@@ -1082,24 +1082,24 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   {
     if (!fullprivs)
       {
-	// "Permissions Denied"
-	// "You do not have permission to shut down the Ganymede server."
-	return Ganymede.createErrorDialog(ts.l("shutdown.denied_title"),
-					  ts.l("shutdown.denied_text"));
+        // "Permissions Denied"
+        // "You do not have permission to shut down the Ganymede server."
+        return Ganymede.createErrorDialog(ts.l("shutdown.denied_title"),
+                                          ts.l("shutdown.denied_text"));
       }
 
     if (waitForUsers)
       {
-	GanymedeServer.setShutdown();
+        GanymedeServer.setShutdown();
 
-	// "Server Set For Shutdown"
-	// "The server is prepared for shut down.  Shutdown will commence as soon as all current users log out."
-	return Ganymede.createInfoDialog(ts.l("shutdown.advisory_title"),
-					 ts.l("shutdown.advisory_text"));
+        // "Server Set For Shutdown"
+        // "The server is prepared for shut down.  Shutdown will commence as soon as all current users log out."
+        return Ganymede.createInfoDialog(ts.l("shutdown.advisory_title"),
+                                         ts.l("shutdown.advisory_text"));
       }
     else
       {
-	return GanymedeServer.shutdown(); // we may never return if the shutdown succeeds.. the client
+        return GanymedeServer.shutdown(); // we may never return if the shutdown succeeds.. the client
                                           // will catch an exception in that case.
       }
   }
@@ -1118,10 +1118,10 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   {
     if (!fullprivs)
       {
-	// "Permissions Denied"
-	// "You do not have permission to execute a database dump."
-	return Ganymede.createErrorDialog(ts.l("dumpDB.denied_title"),
-					  ts.l("dumpDB.denied_text"));
+        // "Permissions Denied"
+        // "You do not have permission to execute a database dump."
+        return Ganymede.createErrorDialog(ts.l("dumpDB.denied_title"),
+                                          ts.l("dumpDB.denied_text"));
       }
 
     // "Dumping Database"
@@ -1129,26 +1129,26 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     try
       {
-	Ganymede.db.dump(Ganymede.dbFilename, true, true); // release, archive
+        Ganymede.db.dump(Ganymede.dbFilename, true, true); // release, archive
       }
     catch (IOException ex)
       {
-	// "Database Dump Error"
-	// "Database could not be dumped successfully: {0}"
-	return Ganymede.createErrorDialog(ts.l("dumpDB.error_title"),
-					  ts.l("dumpDB.error_text", ex.toString()));
+        // "Database Dump Error"
+        // "Database could not be dumped successfully: {0}"
+        return Ganymede.createErrorDialog(ts.l("dumpDB.error_title"),
+                                          ts.l("dumpDB.error_text", ex.toString()));
       }
     catch (InterruptedException ex)
       {
-	// "Database Dump Error"
-	// "Database could not be dumped successfully: {0}"
-	return Ganymede.createErrorDialog(ts.l("dumpDB.error_title"),
-					  ts.l("dumpDB.error_text", ex.toString()));
+        // "Database Dump Error"
+        // "Database could not be dumped successfully: {0}"
+        return Ganymede.createErrorDialog(ts.l("dumpDB.error_title"),
+                                          ts.l("dumpDB.error_text", ex.toString()));
       }
     finally
       {
-	// "Normal Operation"
-	setState(DBStore.normal_state);
+        // "Normal Operation"
+        setState(DBStore.normal_state);
       }
 
     Ganymede.debug(ts.l("dumpDB.dumped"));
@@ -1169,24 +1169,24 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   {
     if (!fullprivs)
       {
-	// "Permissions Denied"
-	// "You do not have permission to execute an Invid integrity test on the server."
-	return Ganymede.createErrorDialog(ts.l("runInvidTest.denied_title"),
-					  ts.l("runInvidTest.denied_text"));
+        // "Permissions Denied"
+        // "You do not have permission to execute an Invid integrity test on the server."
+        return Ganymede.createErrorDialog(ts.l("runInvidTest.denied_title"),
+                                          ts.l("runInvidTest.denied_text"));
       }
 
     // "Running Invid Test"
     GanymedeAdmin.setState(ts.l("runInvidTest.running_state"));
-	 
+         
     if (Ganymede.server.checkInvids())
       {
-	// "Invid Test completed successfully, no problems boss."
-	Ganymede.debug(ts.l("runInvidTest.good_result"));
+        // "Invid Test completed successfully, no problems boss."
+        Ganymede.debug(ts.l("runInvidTest.good_result"));
       }
     else
       {
-	// "Invid Test encountered problems.  Oi, you're in the soup now, boss."
-	Ganymede.debug(ts.l("runInvidTest.bad_result"));
+        // "Invid Test encountered problems.  Oi, you're in the soup now, boss."
+        Ganymede.debug(ts.l("runInvidTest.bad_result"));
       }
 
     // "Normal Operation"
@@ -1212,16 +1212,16 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   {
     if (!fullprivs)
       {
-	// "Permissions Denied"
-	// "You do not have permission to execute an Invid sweep on the server."
-	return Ganymede.createErrorDialog(ts.l("runInvidSweep.denied_title"),
-					  ts.l("runInvidSweep.denied_text"));
+        // "Permissions Denied"
+        // "You do not have permission to execute an Invid sweep on the server."
+        return Ganymede.createErrorDialog(ts.l("runInvidSweep.denied_title"),
+                                          ts.l("runInvidSweep.denied_text"));
       }
 
     // "Running Invid Sweep"
     GanymedeAdmin.setState(ts.l("runInvidSweep.running_state"));
     Ganymede.debug(ts.l("runInvidSweep.running_state"));
-	 
+         
     Ganymede.server.sweepInvids();
 
     // "Normal Operation"
@@ -1244,24 +1244,24 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   {
     if (!fullprivs)
       {
-	// "Permissions Denied"
-	// "You do not have permission to execute an embedded objects integrity test on the server."
-	return Ganymede.createErrorDialog(ts.l("runEmbeddedTest.denied_title"),
-					  ts.l("runEmbeddedTest.denied_text"));
+        // "Permissions Denied"
+        // "You do not have permission to execute an embedded objects integrity test on the server."
+        return Ganymede.createErrorDialog(ts.l("runEmbeddedTest.denied_title"),
+                                          ts.l("runEmbeddedTest.denied_text"));
       }
 
     // "Running Embedded Test"
     GanymedeAdmin.setState(ts.l("runEmbeddedTest.running_state"));
-	 
+         
     if (Ganymede.server.checkEmbeddedObjects())
       {
-	// "Embedded Objects Test completed successfully, no problems boss."
-	Ganymede.debug(ts.l("runEmbeddedTest.good_result"));
+        // "Embedded Objects Test completed successfully, no problems boss."
+        Ganymede.debug(ts.l("runEmbeddedTest.good_result"));
       }
     else
       {
-	// "Embedded Objects Test encountered problems.  Oi, you're in the soup now, boss."
-	Ganymede.debug(ts.l("runEmbeddedTest.bad_result"));
+        // "Embedded Objects Test encountered problems.  Oi, you're in the soup now, boss."
+        Ganymede.debug(ts.l("runEmbeddedTest.bad_result"));
       }
 
     // "Normal Operation"
@@ -1282,10 +1282,10 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   {
     if (!fullprivs)
       {
-	// "Permissions Denied"
-	// "You do not have permission to execute an Embedded Objects sweep on the server."
-	return Ganymede.createErrorDialog(ts.l("runEmbeddedSweep.denied_title"),
-					  ts.l("runEmbeddedSweep.denied_text"));
+        // "Permissions Denied"
+        // "You do not have permission to execute an Embedded Objects sweep on the server."
+        return Ganymede.createErrorDialog(ts.l("runEmbeddedSweep.denied_title"),
+                                          ts.l("runEmbeddedSweep.denied_text"));
       }
 
     return Ganymede.server.sweepEmbeddedObjects();
@@ -1307,15 +1307,15 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   {
     if (!fullprivs)
       {
-	// "Permissions Denied"
-	// "You do not have permission to execute tasks on the server."
-	return Ganymede.createErrorDialog(ts.l("runTaskNow.denied_title"),
-					  ts.l("runTaskNow.denied_text"));
+        // "Permissions Denied"
+        // "You do not have permission to execute tasks on the server."
+        return Ganymede.createErrorDialog(ts.l("runTaskNow.denied_title"),
+                                          ts.l("runTaskNow.denied_text"));
       }
 
     if (Ganymede.scheduler.runTaskNow(name))
       {
-	return null;
+        return null;
       }
 
     // "Couldn''t run task {0}.  Some sort of error on the server?"
@@ -1340,15 +1340,15 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   {
     if (!fullprivs)
       {
-	// "Permissions Denied"
-	// "You do not have permission to stop tasks on the server."
-	return Ganymede.createErrorDialog(ts.l("stopTask.denied_title"),
-					  ts.l("stopTask.denied_text"));
+        // "Permissions Denied"
+        // "You do not have permission to stop tasks on the server."
+        return Ganymede.createErrorDialog(ts.l("stopTask.denied_title"),
+                                          ts.l("stopTask.denied_text"));
       }
 
     if (Ganymede.scheduler.stopTask(name))
       {
-	return null;
+        return null;
       }
 
     // "Couldn''t stop task {0}.  Perhaps the task wasn't running?"
@@ -1372,15 +1372,15 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   {
     if (!fullprivs)
       {
-	// "Permissions Denied"
-	// "You do not have permission to disable tasks on the server."
-	return Ganymede.createErrorDialog(ts.l("disableTask.denied_title"),
-					  ts.l("disableTask.denied_text"));
+        // "Permissions Denied"
+        // "You do not have permission to disable tasks on the server."
+        return Ganymede.createErrorDialog(ts.l("disableTask.denied_title"),
+                                          ts.l("disableTask.denied_text"));
       }
 
     if (Ganymede.scheduler.disableTask(name))
       {
-	return null;
+        return null;
       }
 
     // "Couldn''t disable task {0}.  Some sort of error on the server?"
@@ -1403,15 +1403,15 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   {
     if (!fullprivs)
       {
-	// "Permissions Denied"
-	// "You do not have permission to re-enable tasks on the server."
-	return Ganymede.createErrorDialog(ts.l("enableTask.denied_title"),
-					  ts.l("enableTask.denied_text"));
+        // "Permissions Denied"
+        // "You do not have permission to re-enable tasks on the server."
+        return Ganymede.createErrorDialog(ts.l("enableTask.denied_title"),
+                                          ts.l("enableTask.denied_text"));
       }
 
     if (Ganymede.scheduler.enableTask(name))
       {
-	return null; 
+        return null; 
       }
 
     // "Couldn''t enable task {0}.  Perhaps the task isn't registered?"
@@ -1446,9 +1446,9 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     if (!fullprivs)
       {
-	// "Attempt made to edit schema by a non-privileged console: {0}"
-	Ganymede.debug(ts.l("editSchema.no_privs", this.toString()));
-	return null;
+        // "Attempt made to edit schema by a non-privileged console: {0}"
+        Ganymede.debug(ts.l("editSchema.no_privs", this.toString()));
+        return null;
       }
 
     // "entering editSchema"
@@ -1456,26 +1456,26 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     try
       {
-	// "schema edit"
-	String token = ts.l("editSchema.semaphore_token");
+        // "schema edit"
+        String token = ts.l("editSchema.semaphore_token");
 
-	// Check to see if the server is in its standard state with no
-	// user sessions on the lSemaphore, without blocking.
+        // Check to see if the server is in its standard state with no
+        // user sessions on the lSemaphore, without blocking.
 
-	String semaphoreCondition = GanymedeServer.lSemaphore.disable(token, true, 0);
+        String semaphoreCondition = GanymedeServer.lSemaphore.disable(token, true, 0);
 
-	if (semaphoreCondition != null)
-	  {
-	    // "Admin console {0} can''t edit schema.  Ganymede login semaphore already locked with condition "{1}"."
-	    Ganymede.debug(ts.l("editSchema.semaphore_error", this.toString(), semaphoreCondition));
+        if (semaphoreCondition != null)
+          {
+            // "Admin console {0} can''t edit schema.  Ganymede login semaphore already locked with condition "{1}"."
+            Ganymede.debug(ts.l("editSchema.semaphore_error", this.toString(), semaphoreCondition));
 
-	    return null;
-	  }
+            return null;
+          }
       }
     catch (InterruptedException ex)
       {
-	Ganymede.logError(ex);
-	throw new RuntimeException(ex.getMessage());
+        Ganymede.logError(ex);
+        throw new RuntimeException(ex.getMessage());
       }
 
     // okay at this point we've asserted our interest in editing the
@@ -1496,54 +1496,54 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     synchronized (Ganymede.db.lockSync)
       {
-	// "Admin console {0} entering editSchema synchronization block."
-	Ganymede.debug(ts.l("editSchema.synchronizing", this.toString()));
+        // "Admin console {0} entering editSchema synchronization block."
+        Ganymede.debug(ts.l("editSchema.synchronizing", this.toString()));
 
-	en = Ganymede.db.objectBases.elements();
+        en = Ganymede.db.objectBases.elements();
 
-	if (en != null)
-	  {
-	    while (en.hasMoreElements())
-	      {
-		base = (DBObjectBase) en.nextElement();
-		
-		if (base.isLocked())
-		  {
-		    // "Admin console {0} can''t edit Schema, lock held on {1}."
-		    Ganymede.debug(ts.l("editSchema.locked_base", this.toString(), base.getName()));
-		    
-		    // "schema edit"
-		    GanymedeServer.lSemaphore.enable(ts.l("editSchema.semaphore_token"));
-		    
-		    return null;
-		  }
-	      }
-	  }
-	
-	// should be okay
-	
-	// "Ok to create DBSchemaEdit for admin console {0}."
-	Ganymede.debug(ts.l("editSchema.okay_to_go", this.toString()));
-	
-	// "Schema Edit In Progress"
-	GanymedeAdmin.setState(ts.l("editSchema.edit_state"));
-	
-	try
-	  {
-	    DBSchemaEdit result = new DBSchemaEdit();
+        if (en != null)
+          {
+            while (en.hasMoreElements())
+              {
+                base = (DBObjectBase) en.nextElement();
+                
+                if (base.isLocked())
+                  {
+                    // "Admin console {0} can''t edit Schema, lock held on {1}."
+                    Ganymede.debug(ts.l("editSchema.locked_base", this.toString(), base.getName()));
+                    
+                    // "schema edit"
+                    GanymedeServer.lSemaphore.enable(ts.l("editSchema.semaphore_token"));
+                    
+                    return null;
+                  }
+              }
+          }
+        
+        // should be okay
+        
+        // "Ok to create DBSchemaEdit for admin console {0}."
+        Ganymede.debug(ts.l("editSchema.okay_to_go", this.toString()));
+        
+        // "Schema Edit In Progress"
+        GanymedeAdmin.setState(ts.l("editSchema.edit_state"));
+        
+        try
+          {
+            DBSchemaEdit result = new DBSchemaEdit();
 
-	    // we've created our copy of all of our DBObjectBase and
-	    // DBObjectBaseField objects above.  We're going to return
-	    // and drop the synchronization on Ganymede.db.lockSync.
+            // we've created our copy of all of our DBObjectBase and
+            // DBObjectBaseField objects above.  We're going to return
+            // and drop the synchronization on Ganymede.db.lockSync.
 
-	    return result;
-	  }
-	catch (RemoteException ex)
-	  {
-	    // "schema edit"
-	    GanymedeServer.lSemaphore.enable(ts.l("editSchema.semaphore_token"));
-	    return null;
-	  }
+            return result;
+          }
+        catch (RemoteException ex)
+          {
+            // "schema edit"
+            GanymedeServer.lSemaphore.enable(ts.l("editSchema.semaphore_token"));
+            return null;
+          }
       }
   }
 

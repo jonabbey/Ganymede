@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -81,14 +81,14 @@ class dumpTask implements Runnable {
 
     try
       {
-	if (Ganymede.db.journal.isClean())
-	  {
-	    Ganymede.debug(ts.l("deferring"));
-	    return;
-	  }
+        if (Ganymede.db.journal.isClean())
+          {
+            Ganymede.debug(ts.l("deferring"));
+            return;
+          }
 
         String error = GanymedeServer.lSemaphore.increment();
-	
+        
         if (error != null)
           {
             Ganymede.debug(ts.l("semaphore_disabled", error));
@@ -99,41 +99,41 @@ class dumpTask implements Runnable {
             gotSemaphore = true;
           }
 
-	started = true;
-	Ganymede.debug(ts.l("running", Integer.valueOf(Ganymede.db.journal.transactionsInJournal)));
+        started = true;
+        Ganymede.debug(ts.l("running", Integer.valueOf(Ganymede.db.journal.transactionsInJournal)));
 
-	try
-	  {
-	    Ganymede.db.dump(Ganymede.dbFilename, true, false);
-	  }
-	catch (IOException ex)
-	  {
-	    Ganymede.debug(ts.l("dump_error", ex.getMessage()));
-	  }
-	catch (InterruptedException ex)
-	  {
-	    Ganymede.debug(ts.l("dump_interrupted_error", ex.getMessage()));
-	  }
+        try
+          {
+            Ganymede.db.dump(Ganymede.dbFilename, true, false);
+          }
+        catch (IOException ex)
+          {
+            Ganymede.debug(ts.l("dump_error", ex.getMessage()));
+          }
+        catch (InterruptedException ex)
+          {
+            Ganymede.debug(ts.l("dump_interrupted_error", ex.getMessage()));
+          }
 
-	completed = true;
+        completed = true;
       }
     finally
       {
-	// we'll go through here if our task was stopped
-	// note that the DBStore dump code will handle
-	// thread death ok.
+        // we'll go through here if our task was stopped
+        // note that the DBStore dump code will handle
+        // thread death ok.
 
-	if (started && !completed)
-	  {
-	    Ganymede.debug(ts.l("forced_stop"));
-	  }
+        if (started && !completed)
+          {
+            Ganymede.debug(ts.l("forced_stop"));
+          }
 
-	if (gotSemaphore)
-	  {
-	    GanymedeServer.lSemaphore.decrement();
-	  }
+        if (gotSemaphore)
+          {
+            GanymedeServer.lSemaphore.decrement();
+          }
 
-	Ganymede.debug(ts.l("completed"));
+        Ganymede.debug(ts.l("completed"));
       }
   }
 }

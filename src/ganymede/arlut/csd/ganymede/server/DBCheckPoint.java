@@ -97,15 +97,15 @@ class DBCheckPoint {
 
     for (int i = 0; i < transObjects.length; i++)
       {
-	obj = transObjects[i];
+        obj = transObjects[i];
 
-	if (debug)
-	  {
-	    System.err.println("DBCheckPoint: add " + obj.getLabel() + 
-			       " (" + obj.getInvid().toString() + ")");
-	  }
+        if (debug)
+          {
+            System.err.println("DBCheckPoint: add " + obj.getLabel() + 
+                               " (" + obj.getInvid().toString() + ")");
+          }
 
-	objects.add(new DBCheckPointObj(obj));
+        objects.add(new DBCheckPointObj(obj));
       }
 
     invidDeleteLocks = DBDeletionManager.getSessionCheckpoint(session);

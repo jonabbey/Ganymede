@@ -219,7 +219,7 @@ public final class DBStore implements JythonMap {
   {
     if (DBStore.db == null)
       {
-	throw new IllegalStateException(ts.l("global.notinit")); // "DBStore not initialized"
+        throw new IllegalStateException(ts.l("global.notinit")); // "DBStore not initialized"
       }
 
     DBObjectBase base;
@@ -228,7 +228,7 @@ public final class DBStore implements JythonMap {
 
     if (base == null)
       {
-	return null;
+        return null;
       }
 
     return base.getObject(invid);
@@ -243,7 +243,7 @@ public final class DBStore implements JythonMap {
   {
     if (DBStore.db != null)
       {
-	throw new IllegalStateException(ts.l("setDBSingleton.exception")); // "DBStore already created"
+        throw new IllegalStateException(ts.l("setDBSingleton.exception")); // "DBStore already created"
       }
 
     DBStore.db = store;
@@ -352,20 +352,20 @@ public final class DBStore implements JythonMap {
 
     try
       {
-	rootCategory = new DBBaseCategory(this, ts.l("init.rootcategory"));  // "Categories"
+        rootCategory = new DBBaseCategory(this, ts.l("init.rootcategory"));  // "Categories"
       }
     catch (RemoteException ex)
       {
-	// we shouldn't ever get here unless there is something wrong
-	// with the RMI system or the Java environment
+        // we shouldn't ever get here unless there is something wrong
+        // with the RMI system or the Java environment
 
-	// "Caught DBBaseCategory exception: {0}"
-	System.err.println(ts.l("init.exception", ex.getMessage()));
+        // "Caught DBBaseCategory exception: {0}"
+        System.err.println(ts.l("init.exception", ex.getMessage()));
 
-	Ganymede.logError(ex);
+        Ganymede.logError(ex);
 
-	// "Couldn''t initialize rootCategory"
-	throw new Error(ts.l("init.error")); // XXX wrap earlier exception if we are JDK 1.4+ only?
+        // "Couldn''t initialize rootCategory"
+        throw new Error(ts.l("init.error")); // XXX wrap earlier exception if we are JDK 1.4+ only?
       }
 
     // set the static pointer after we have at least created the basic
@@ -384,7 +384,7 @@ public final class DBStore implements JythonMap {
   public boolean isAtLeast(int major, int minor)
   {
     return (this.file_major > major ||
-	    (this.file_major == major && this.file_minor >= minor));
+            (this.file_major == major && this.file_minor >= minor));
   }
 
   /**
@@ -395,7 +395,7 @@ public final class DBStore implements JythonMap {
   public boolean isLessThan(int major, int minor)
   {
     return (this.file_major < major ||
-	    (this.file_major == major && this.file_minor < minor));
+            (this.file_major == major && this.file_minor < minor));
   }
 
   /**
@@ -418,17 +418,17 @@ public final class DBStore implements JythonMap {
   {
     if (this.file_major == major1 && this.file_minor >= minor1)
       {
-	return true;
+        return true;
       }
 
     if (this.file_major == major2 && this.file_minor < minor2)
       {
-	return true;
+        return true;
       }
 
     if (this.file_major > major1 && this.file_major < major2)
       {
-	return true;
+        return true;
       }
 
     return false;
@@ -475,197 +475,197 @@ public final class DBStore implements JythonMap {
 
     try
       {
-	inStream = new FileInputStream(filename);
-	bufStream = new BufferedInputStream(inStream);
-	in = new DataInputStream(bufStream);
+        inStream = new FileInputStream(filename);
+        bufStream = new BufferedInputStream(inStream);
+        in = new DataInputStream(bufStream);
 
-	try
-	  {
-	    file_id = in.readUTF();
-	    if (!file_id.equals(id_string))
-	      {
-		System.err.println(ts.l("load.versionfail", filename));
-		throw new RuntimeException(ts.l("load.initerror", filename));
-	      }
-	  }
-	catch (IOException ex)
-	  {
- 	    System.err.println("DBStore initialization error: DBStore id read failure for " + filename);
-	    System.err.println("IOException: ");
-	    Ganymede.logError(ex);
-	    throw new RuntimeException(ts.l("load.initerror", filename));
-	  }
+        try
+          {
+            file_id = in.readUTF();
+            if (!file_id.equals(id_string))
+              {
+                System.err.println(ts.l("load.versionfail", filename));
+                throw new RuntimeException(ts.l("load.initerror", filename));
+              }
+          }
+        catch (IOException ex)
+          {
+            System.err.println("DBStore initialization error: DBStore id read failure for " + filename);
+            System.err.println("IOException: ");
+            Ganymede.logError(ex);
+            throw new RuntimeException(ts.l("load.initerror", filename));
+          }
 
-	file_major = in.readByte();
-	file_minor = in.readByte();
+        file_major = in.readByte();
+        file_minor = in.readByte();
 
-	debug("DBStore load(): file version " + file_major + "." + file_minor);
+        debug("DBStore load(): file version " + file_major + "." + file_minor);
 
-	if (file_major > major_version)
-	  {
-	    System.err.println("DBStore initialization error: major version mismatch");
-	    throw new Error("DBStore initialization error (" + filename + ")");
-	  }
+        if (file_major > major_version)
+          {
+            System.err.println("DBStore initialization error: major version mismatch");
+            throw new Error("DBStore initialization error (" + filename + ")");
+          }
 
-	if (file_major == major_version && file_minor > minor_version)
-	  {
-	    System.err.println("*** Error, this ganymede.db file is too new for this version of the Ganymede server.");
-	    System.err.println("*** There may be errors in loading the data.");
-	  }
+        if (file_major == major_version && file_minor > minor_version)
+          {
+            System.err.println("*** Error, this ganymede.db file is too new for this version of the Ganymede server.");
+            System.err.println("*** There may be errors in loading the data.");
+          }
 
-	// at version 2.8, we started tracking monotonic transaction
-	// id numbers
+        // at version 2.8, we started tracking monotonic transaction
+        // id numbers
 
-	if (this.isAtLeast(2, 8))
-	  {
-	    transactionNumber = in.readInt();
-	  }
+        if (this.isAtLeast(2, 8))
+          {
+            transactionNumber = in.readInt();
+          }
 
-	// at version 2.9, we started recording the size of our invid
-	// pool
+        // at version 2.9, we started recording the size of our invid
+        // pool
 
-	if (this.isAtLeast(2, 9))
-	  {
-	    invidPoolSize = in.readInt();
-	  }
-	else
-	  {
-	    invidPoolSize = -1;
-	  }
+        if (this.isAtLeast(2, 9))
+          {
+            invidPoolSize = in.readInt();
+          }
+        else
+          {
+            invidPoolSize = -1;
+          }
 
-	if (invidPoolSize != -1)
-	  {
-	    Invid.setAllocator(new InvidPool(invidPoolSize*2 + 1)); // let's make sure we don't immediately rehash
-	  }
-	else
-	  {
-	    Invid.setAllocator(new InvidPool());
-	  }
+        if (invidPoolSize != -1)
+          {
+            Invid.setAllocator(new InvidPool(invidPoolSize*2 + 1)); // let's make sure we don't immediately rehash
+          }
+        else
+          {
+            Invid.setAllocator(new InvidPool());
+          }
 
-	// read in the namespace definitions
+        // read in the namespace definitions
 
-	namespaceCount = in.readShort();
+        namespaceCount = in.readShort();
 
-	// "DBStore.load(): loading {0,number,#} namespaces"
-	debug(ts.l("load.namespaces", Integer.valueOf(namespaceCount)));
+        // "DBStore.load(): loading {0,number,#} namespaces"
+        debug(ts.l("load.namespaces", Integer.valueOf(namespaceCount)));
 
-	for (int i = 0; i < namespaceCount; i++)
-	  {
-	    nameSpaces.addElement(new DBNameSpace(in));
-	  }
+        for (int i = 0; i < namespaceCount; i++)
+          {
+            nameSpaces.addElement(new DBNameSpace(in));
+          }
 
-	// "DBStore.load(): loading category definitions"
-	debug(ts.l("load.categories"));
+        // "DBStore.load(): loading category definitions"
+        debug(ts.l("load.categories"));
 
-	DBField.fieldCount = 0;
-	DBObject.objectCount = 0;
+        DBField.fieldCount = 0;
+        DBObject.objectCount = 0;
 
-	if (isAtLeast(1,3))
-	  {
-	    rootCategory = new DBBaseCategory(this, in);
-	  }
+        if (isAtLeast(1,3))
+          {
+            rootCategory = new DBBaseCategory(this, in);
+          }
 
-	// previous to 2.0, we wrote out the DBObjectBase structures
-	// to ganymede.db as a separate step from the category loading
+        // previous to 2.0, we wrote out the DBObjectBase structures
+        // to ganymede.db as a separate step from the category loading
 
-	if (isLessThan(2,0))
-	  {
-	    baseCount = in.readShort();
+        if (isLessThan(2,0))
+          {
+            baseCount = in.readShort();
 
-	    debug("DBStore load(): loading " + baseCount + " bases");
+            debug("DBStore load(): loading " + baseCount + " bases");
 
-	    if (baseCount > 0)
-	      {
-		objectBases = new Hashtable<Short, DBObjectBase>(baseCount);
-	      }
-	    else
-	      {
-		objectBases = new Hashtable<Short, DBObjectBase>();
-	      }
+            if (baseCount > 0)
+              {
+                objectBases = new Hashtable<Short, DBObjectBase>(baseCount);
+              }
+            else
+              {
+                objectBases = new Hashtable<Short, DBObjectBase>();
+              }
 
-	    // Actually read in the object bases
+            // Actually read in the object bases
 
-	    for (short i = 0; i < baseCount; i++)
-	      {
-		tempBase = new DBObjectBase(in, this);
-		setBase(tempBase);
+            for (short i = 0; i < baseCount; i++)
+              {
+                tempBase = new DBObjectBase(in, this);
+                setBase(tempBase);
 
-		debug("loaded base " + tempBase.getTypeID());
-	      }
+                debug("loaded base " + tempBase.getTypeID());
+              }
 
-	    // we're only using the resort() method because we're
-	    // handling an old file that might not have the categories
-	    // in display order.  This code is intended to fall out of
-	    // use.
+            // we're only using the resort() method because we're
+            // handling an old file that might not have the categories
+            // in display order.  This code is intended to fall out of
+            // use.
 
-	    rootCategory.resort();
-	  }
+            rootCategory.resort();
+          }
 
-	// print out loading statistics
-	// "DBStore.load(): Loaded {0,number,#} fields in {1,number,#} objects"
-	debug(ts.l("load.statistics", Integer.valueOf(DBField.fieldCount), Integer.valueOf(DBObject.objectCount)));
+        // print out loading statistics
+        // "DBStore.load(): Loaded {0,number,#} fields in {1,number,#} objects"
+        debug(ts.l("load.statistics", Integer.valueOf(DBField.fieldCount), Integer.valueOf(DBObject.objectCount)));
 
-	// make sure that we have the new object bases and fields
-	// that have come into use since Ganymede 1.0.12.
+        // make sure that we have the new object bases and fields
+        // that have come into use since Ganymede 1.0.12.
 
-	verifySchema2_0();
+        verifySchema2_0();
 
-	// make sure that all object bases have namespace-constrained
-	// label fields.  This is a new requirement with Ganymede 2.0
-	// (DBStore rev 2.11), and not one that we can really automate
-	// in any way.  So we just warn the admin and hope that they
-	// start up the schema editor so that we can force them to fix
-	// it.
+        // make sure that all object bases have namespace-constrained
+        // label fields.  This is a new requirement with Ganymede 2.0
+        // (DBStore rev 2.11), and not one that we can really automate
+        // in any way.  So we just warn the admin and hope that they
+        // start up the schema editor so that we can force them to fix
+        // it.
 
-	if (!verify_label_fields())
-	  {
-	    /*
-	     *
-	     *
-	     * WARNING: DBStore load error: one or more object bases are missing
-	     *          namespace constrained label fields.
-	     *
-	     *          Ganymede 2.0 now requires all object types to have
-	     *          namespace-constrained label fields.
-	     *
-	     *          You MUST edit the schema before proceeding and define label fields
-	     *          for all object types, or else Ganymede will behave unreliably.
-	     *
-	     */
+        if (!verify_label_fields())
+          {
+            /*
+             *
+             *
+             * WARNING: DBStore load error: one or more object bases are missing
+             *          namespace constrained label fields.
+             *
+             *          Ganymede 2.0 now requires all object types to have
+             *          namespace-constrained label fields.
+             *
+             *          You MUST edit the schema before proceeding and define label fields
+             *          for all object types, or else Ganymede will behave unreliably.
+             *
+             */
 
-	    System.err.println(ts.l("load.missing_labels"));
-	  }
+            System.err.println(ts.l("load.missing_labels"));
+          }
       }
     catch (IOException ex)
       {
-	System.err.println("DBStore initialization error: couldn't properly process " + filename);
-	System.err.println("IOException: " + ex);
-	System.err.println("Stack Trace: " + Ganymede.stackTrace(ex));
-	throw new RuntimeException(ts.l("load.initerror", filename));
+        System.err.println("DBStore initialization error: couldn't properly process " + filename);
+        System.err.println("IOException: " + ex);
+        System.err.println("Stack Trace: " + Ganymede.stackTrace(ex));
+        throw new RuntimeException(ts.l("load.initerror", filename));
       }
     finally
       {
-	if (bufStream != null)
-	  {
-	    try
-	      {
-		bufStream.close();
-	      }
-	    catch (IOException ex)
-	      {
-	      }
-	  }
+        if (bufStream != null)
+          {
+            try
+              {
+                bufStream.close();
+              }
+            catch (IOException ex)
+              {
+              }
+          }
 
-	if (inStream != null)
-	  {
-	    try
-	      {
-		inStream.close();
-	      }
-	    catch (IOException ex)
-	      {
-	      }
-	  }
+        if (inStream != null)
+          {
+            try
+              {
+                inStream.close();
+              }
+            catch (IOException ex)
+              {
+              }
+          }
       }
 
     // Load the current Journal file.
@@ -680,27 +680,27 @@ public final class DBStore implements JythonMap {
 
     if (!isAtRev(major_version, minor_version) || !journal.isClean())
       {
-	try
-	  {
-	    Ganymede.debug("Coalescing DBJournal.");
+        try
+          {
+            Ganymede.debug("Coalescing DBJournal.");
 
-	    dump(filename, true, true);
-	  }
-	catch (IOException ex)
-	  {
-	    // what do we really want to do here?
+            dump(filename, true, true);
+          }
+        catch (IOException ex)
+          {
+            // what do we really want to do here?
 
-	    Ganymede.logError(ex);
-	    throw new RuntimeException("couldn't load journal");
-	  }
-	catch (InterruptedException ex)
-	  {
-	    // we got interrupted while waiting to lock
-	    // the database.. unlikely in the extreme here.
+            Ganymede.logError(ex);
+            throw new RuntimeException("couldn't load journal");
+          }
+        catch (InterruptedException ex)
+          {
+            // we got interrupted while waiting to lock
+            // the database.. unlikely in the extreme here.
 
-	    Ganymede.logError(ex);
-	    throw new RuntimeException("couldn't dump journal");
-	  }
+            Ganymede.logError(ex);
+            throw new RuntimeException("couldn't dump journal");
+          }
       }
 
     loading = false;
@@ -715,52 +715,52 @@ public final class DBStore implements JythonMap {
   {
     try
       {
-	journal = new DBJournal(this, Ganymede.journalProperty);
+        journal = new DBJournal(this, Ganymede.journalProperty);
       }
     catch (IOException ex)
       {
-	// what do we really want to do here?
+        // what do we really want to do here?
 
-	Ganymede.logError(ex);
-	throw new RuntimeException("couldn't initialize journal:" + ex.getMessage());
+        Ganymede.logError(ex);
+        throw new RuntimeException("couldn't initialize journal:" + ex.getMessage());
       }
 
     if (!journal.isClean())
       {
-	try
-	  {
-	    journalLoading = true;
+        try
+          {
+            journalLoading = true;
 
-	    if (!journal.load())
-	      {
-		// if the journal wasn't in a totally consistent
-		// state, print out a warning.  we'll still
-		// continue to do everything we normally would,
-		// however.
-		System.err.println("\nError, couldn't load entire journal.. " +
-				   "final transaction in journal not processed.\n");
-	      }
+            if (!journal.load())
+              {
+                // if the journal wasn't in a totally consistent
+                // state, print out a warning.  we'll still
+                // continue to do everything we normally would,
+                // however.
+                System.err.println("\nError, couldn't load entire journal.. " +
+                                   "final transaction in journal not processed.\n");
+              }
 
-	    // update the DBObjectBase iterationSets, since the journal
-	    // loading bypasses the transaction mechanism where this is
-	    // normally done
+            // update the DBObjectBase iterationSets, since the journal
+            // loading bypasses the transaction mechanism where this is
+            // normally done
 
-	    for (DBObjectBase base: objectBases.values())
-	      {
-		base.updateIterationSet();
-	      }
-	  }
-	catch (IOException ex)
-	  {
-	    // what do we really want to do here?
+            for (DBObjectBase base: objectBases.values())
+              {
+                base.updateIterationSet();
+              }
+          }
+        catch (IOException ex)
+          {
+            // what do we really want to do here?
 
-	    Ganymede.logError(ex);
-	    throw new RuntimeException("couldn't load journal");
-	  }
-	finally
-	  {
-	    journalLoading = false;
-	  }
+            Ganymede.logError(ex);
+            throw new RuntimeException("couldn't load journal");
+          }
+        finally
+          {
+            journalLoading = false;
+          }
       }
   }
 
@@ -792,7 +792,7 @@ public final class DBStore implements JythonMap {
    */
 
   public synchronized void dump(String filename, boolean releaseLock,
-				boolean archiveIt) throws IOException, InterruptedException
+                                boolean archiveIt) throws IOException, InterruptedException
   {
     File dbFile = null;
     FileOutputStream outStream = null;
@@ -808,112 +808,112 @@ public final class DBStore implements JythonMap {
     debug("DBStore: Dumping");
     lock = new DBDumpLock(this);
     debug("DBStore: establishing dump lock");
-    lock.establish("System");	// wait until we get our lock
+    lock.establish("System");   // wait until we get our lock
     debug("DBStore: dump lock established");
 
     // Move the old version of the file to a backup
 
     try
       {
-	dbFile = new File(filename);
+        dbFile = new File(filename);
 
-	// first thing we do is zip up the old ganymede.db file if
-	// archiveIt is true.
+        // first thing we do is zip up the old ganymede.db file if
+        // archiveIt is true.
 
-	if (dbFile.exists())
-	  {
-	    if (archiveIt)
-	      {
-		debug("DBStore: zipping old db");
+        if (dbFile.exists())
+          {
+            if (archiveIt)
+              {
+                debug("DBStore: zipping old db");
 
-		String directoryName = dbFile.getParent();
+                String directoryName = dbFile.getParent();
 
-		File directory = new File(directoryName);
+                File directory = new File(directoryName);
 
-		if (!directory.isDirectory())
-		  {
-		    throw new IOException("Error, couldn't find output directory to backup: " +
-					  directoryName);
-		  }
+                if (!directory.isDirectory())
+                  {
+                    throw new IOException("Error, couldn't find output directory to backup: " +
+                                          directoryName);
+                  }
 
                 String oldDirName = directoryName + File.separator + "old";
 
-		File oldDirectory = new File(oldDirName);
+                File oldDirectory = new File(oldDirName);
 
-		if (!oldDirectory.exists())
-		  {
-		    if (!oldDirectory.mkdir())
+                if (!oldDirectory.exists())
+                  {
+                    if (!oldDirectory.mkdir())
                       {
                         throw new IOException("Couldn't mkdir " + oldDirName);
                       }
-		  }
+                  }
 
-		DateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss",
-							    java.util.Locale.US);
-		String label = formatter.format(new Date());
+                DateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss",
+                                                            java.util.Locale.US);
+                String label = formatter.format(new Date());
 
-		String zipFileName = directoryName + File.separator + "old" + File.separator +
-		  label + "db.zip";
+                String zipFileName = directoryName + File.separator + "old" + File.separator +
+                  label + "db.zip";
 
-		Vector fileNameVect = new Vector();
-		fileNameVect.addElement(filename);
+                Vector fileNameVect = new Vector();
+                fileNameVect.addElement(filename);
 
-		zipIt.createZipFile(zipFileName, fileNameVect);
-	      }
-	  }
+                zipIt.createZipFile(zipFileName, fileNameVect);
+              }
+          }
 
-	debug("DBStore: writing new db");
+        debug("DBStore: writing new db");
 
-	// and dump the whole thing to ganymede.db.new
+        // and dump the whole thing to ganymede.db.new
 
-	outStream = new FileOutputStream(filename + ".new");
-	bufStream = new BufferedOutputStream(outStream);
-	out = new DataOutputStream(bufStream);
+        outStream = new FileOutputStream(filename + ".new");
+        bufStream = new BufferedOutputStream(outStream);
+        out = new DataOutputStream(bufStream);
 
-	// okay, then!  let's get started!
+        // okay, then!  let's get started!
 
-	out.writeUTF(id_string);
-	out.writeByte(major_version);
-	out.writeByte(minor_version);
-	out.writeInt(transactionNumber); // added in version 2.8
-	out.writeInt(Invid.getCount());	 // added in version 2.9
+        out.writeUTF(id_string);
+        out.writeByte(major_version);
+        out.writeByte(minor_version);
+        out.writeInt(transactionNumber); // added in version 2.8
+        out.writeInt(Invid.getCount());  // added in version 2.9
 
-	namespaceCount = (short) nameSpaces.size();
-	out.writeShort(namespaceCount);
+        namespaceCount = (short) nameSpaces.size();
+        out.writeShort(namespaceCount);
 
-	for (int i = 0; i < namespaceCount; i++)
-	  {
-	    ns = (DBNameSpace) nameSpaces.elementAt(i);
-	    ns.emit(out);
-	  }
+        for (int i = 0; i < namespaceCount; i++)
+          {
+            ns = (DBNameSpace) nameSpaces.elementAt(i);
+            ns.emit(out);
+          }
 
-	rootCategory.emit(out);	// writes out categories and bases
+        rootCategory.emit(out); // writes out categories and bases
 
-	out.flush();
-	outStream.getFD().sync();
-	out.close();
-	out = null;
+        out.flush();
+        outStream.getFD().sync();
+        out.close();
+        out = null;
 
-	if (dbFile.exists())
-	  {
-	    // ok, we've successfully dumped to ganymede.db.new.. move
-	    // the old file to ganymede.db.bak
+        if (dbFile.exists())
+          {
+            // ok, we've successfully dumped to ganymede.db.new.. move
+            // the old file to ganymede.db.bak
 
-	    if (!dbFile.renameTo(new File(filename + ".bak")))
-	      {
-		throw new IOException("Couldn't rename " + filename + " to " + filename + ".bak");
-	      }
-	  }
+            if (!dbFile.renameTo(new File(filename + ".bak")))
+              {
+                throw new IOException("Couldn't rename " + filename + " to " + filename + ".bak");
+              }
+          }
 
-	// and move ganymede.db.new to ganymede.db.. note that we do
-	// have a very slight vulnerability here if we are interrupted
-	// between the above rename and this one.  If this happens,
-	// the Ganymede manager will have to manually move
-	// ganymede.db.new to ganymede.db before starting the server.
+        // and move ganymede.db.new to ganymede.db.. note that we do
+        // have a very slight vulnerability here if we are interrupted
+        // between the above rename and this one.  If this happens,
+        // the Ganymede manager will have to manually move
+        // ganymede.db.new to ganymede.db before starting the server.
 
-	// In all other circumstances, the server will be able to come
-	// up and handle things cleanly without loss of data.
-	debug("DBStore: renaming new db");
+        // In all other circumstances, the server will be able to come
+        // up and handle things cleanly without loss of data.
+        debug("DBStore: renaming new db");
 
         File newFile = new File(filename + ".new");
         if (!newFile.renameTo(dbFile))
@@ -923,35 +923,35 @@ public final class DBStore implements JythonMap {
       }
     catch (IOException ex)
       {
-	System.err.println("DBStore error dumping to " + filename);
+        System.err.println("DBStore error dumping to " + filename);
 
-	throw ex;
+        throw ex;
       }
     finally
       {
-	if (releaseLock)
-	  {
-	    if (lock != null)
-	      {
-		debug("DBStore: releasing dump lock");
-		lock.release();
-	      }
-	  }
+        if (releaseLock)
+          {
+            if (lock != null)
+              {
+                debug("DBStore: releasing dump lock");
+                lock.release();
+              }
+          }
 
-	if (out != null)
-	  {
-	    out.close();
-	  }
+        if (out != null)
+          {
+            out.close();
+          }
 
-	if (bufStream != null)
-	  {
-	    bufStream.close();
-	  }
+        if (bufStream != null)
+          {
+            bufStream.close();
+          }
 
-	if (outStream != null)
-	  {
-	    outStream.close();
-	  }
+        if (outStream != null)
+          {
+            outStream.close();
+          }
       }
 
     // if our thread was terminated above, we won't get here.  If
@@ -962,19 +962,19 @@ public final class DBStore implements JythonMap {
 
     if (journal != null)
       {
-	journal.reset();	// ** sync **
+        journal.reset();        // ** sync **
       }
 
     GanymedeAdmin.updateLastDump(new Date());
 
     if (Ganymede.log != null)
       {
-	Ganymede.log.logSystemEvent(new DBLogEvent("dump",
-						   "Database dumped",
-						   null,
-						   null,
-						   null,
-						   null));
+        Ganymede.log.logSystemEvent(new DBLogEvent("dump",
+                                                   "Database dumped",
+                                                   null,
+                                                   null,
+                                                   null,
+                                                   null));
       }
   }
 
@@ -1012,7 +1012,7 @@ public final class DBStore implements JythonMap {
    */
 
   public void dumpXML(String filename, boolean dumpDataObjects, boolean dumpSchema,
-		      String syncChannel, boolean includeHistory, boolean includeOid) throws IOException
+                      String syncChannel, boolean includeHistory, boolean includeOid) throws IOException
   {
     FileOutputStream outStream = null;
     BufferedOutputStream bufStream = null;
@@ -1067,7 +1067,7 @@ public final class DBStore implements JythonMap {
    */
 
   public synchronized void dumpXML(OutputStream outStream, boolean dumpDataObjects, boolean dumpSchema, String syncChannel,
-				   boolean includeHistory, boolean includeOid) throws IOException
+                                   boolean includeHistory, boolean includeOid) throws IOException
   {
     XMLDumpContext xmlOut = null;
 
@@ -1082,150 +1082,150 @@ public final class DBStore implements JythonMap {
 
     try
       {
-	if (!dumpDataObjects && !dumpSchema)
-	  {
-	    // "One of dumpDataObjects and dumpSchema must be true."
-	    throw new IllegalArgumentException(ts.l("dumpXML.doNothing"));
-	  }
+        if (!dumpDataObjects && !dumpSchema)
+          {
+            // "One of dumpDataObjects and dumpSchema must be true."
+            throw new IllegalArgumentException(ts.l("dumpXML.doNothing"));
+          }
 
-	// we don't need a lock if we're just dumping the schema,
-	// because the GanymedeServer loginSemaphore will keep the
-	// schema from changing under us.
+        // we don't need a lock if we're just dumping the schema,
+        // because the GanymedeServer loginSemaphore will keep the
+        // schema from changing under us.
 
-	if (!dumpDataObjects)
-	  {
-	    xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS));
-	    dumpSchemaXML(xmlOut);
-	    return;		// but see finally {} below for cleanup
-	  }
+        if (!dumpDataObjects)
+          {
+            xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS));
+            dumpSchemaXML(xmlOut);
+            return;             // but see finally {} below for cleanup
+          }
 
-	lock = new DBDumpLock(this);
+        lock = new DBDumpLock(this);
 
-	try
-	  {
-	    lock.establish("System");	// wait until we get our lock
-	  }
-	catch (InterruptedException ex)
-	  {
-	    // "DBStore.dumpXML(): Interrupted waiting for dump lock:\n\n{0}"
-	    Ganymede.debug(ts.l("dumpXML.interrupted", Ganymede.stackTrace(ex)));
-	    throw new RuntimeException(ex);
-	  }
+        try
+          {
+            lock.establish("System");   // wait until we get our lock
+          }
+        catch (InterruptedException ex)
+          {
+            // "DBStore.dumpXML(): Interrupted waiting for dump lock:\n\n{0}"
+            Ganymede.debug(ts.l("dumpXML.interrupted", Ganymede.stackTrace(ex)));
+            throw new RuntimeException(ex);
+          }
 
-	if (false)
-	  {
-	    System.err.println("DBStore.dumpXML(): got dump lock");
-	  }
+        if (false)
+          {
+            System.err.println("DBStore.dumpXML(): got dump lock");
+          }
 
-	if (dumpDataObjects && !dumpSchema && syncChannel != null)
-	  {
-	    syncConstraint = Ganymede.getSyncChannel(syncChannel);
+        if (dumpDataObjects && !dumpSchema && syncChannel != null)
+          {
+            syncConstraint = Ganymede.getSyncChannel(syncChannel);
 
-	    if (syncConstraint == null)
-	      {
-		// "No such sync channel defined: {0}"
-		throw new IllegalArgumentException(ts.l("dumpXML.badSyncChannel", syncChannel));
-	      }
-	    else
-	      {
-		includePlaintext = syncConstraint.includePlaintextPasswords();
-	      }
-	  }
+            if (syncConstraint == null)
+              {
+                // "No such sync channel defined: {0}"
+                throw new IllegalArgumentException(ts.l("dumpXML.badSyncChannel", syncChannel));
+              }
+            else
+              {
+                includePlaintext = syncConstraint.includePlaintextPasswords();
+              }
+          }
 
-	xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
-				    includePlaintext,
-				    includeHistory,
-				    syncConstraint,
-				    includeOid);
+        xmlOut = new XMLDumpContext(new UTF8XMLWriter(outStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
+                                    includePlaintext,
+                                    includeHistory,
+                                    syncConstraint,
+                                    includeOid);
 
-	// we're doing a supergash-approved full dump, so passwords are allowed
+        // we're doing a supergash-approved full dump, so passwords are allowed
 
-	xmlOut.setDumpPasswords(true);
+        xmlOut.setDumpPasswords(true);
 
-	if (false)
-	  {
-	    System.err.println("DBStore.dumpXML(): created XMLDumpContext");
-	  }
+        if (false)
+          {
+            System.err.println("DBStore.dumpXML(): created XMLDumpContext");
+          }
 
-	// start writing
+        // start writing
 
-	xmlOut.startElement("ganymede");
-	xmlOut.attribute("major", Integer.toString(GanymedeXMLSession.majorVersion));
-	xmlOut.attribute("minor", Integer.toString(GanymedeXMLSession.minorVersion));
+        xmlOut.startElement("ganymede");
+        xmlOut.attribute("major", Integer.toString(GanymedeXMLSession.majorVersion));
+        xmlOut.attribute("minor", Integer.toString(GanymedeXMLSession.minorVersion));
 
-	xmlOut.indentOut();
+        xmlOut.indentOut();
 
-	if (dumpSchema)
-	  {
-	    // we may be dumping the schema along with the data objects
+        if (dumpSchema)
+          {
+            // we may be dumping the schema along with the data objects
 
-	    dumpSchemaXML(xmlOut);
-	  }
+            dumpSchemaXML(xmlOut);
+          }
 
-	xmlOut.startElementIndent("ganydata");
-	xmlOut.indentOut();
+        xmlOut.startElementIndent("ganydata");
+        xmlOut.indentOut();
 
-	for (DBObjectBase base: getBases())
-	  {
-	    if (base.isEmbedded())
-	      {
-		continue;
-	      }
+        for (DBObjectBase base: getBases())
+          {
+            if (base.isEmbedded())
+              {
+                continue;
+              }
 
-	    for (DBObject x: base.getObjects())
-	      {
-		if (xmlOut.mayInclude(x))
-		  {
-		    x.emitXML(xmlOut);
-		  }
-	      }
-	  }
+            for (DBObject x: base.getObjects())
+              {
+                if (xmlOut.mayInclude(x))
+                  {
+                    x.emitXML(xmlOut);
+                  }
+              }
+          }
 
-	xmlOut.indentIn();
-	xmlOut.endElementIndent("ganydata");
+        xmlOut.indentIn();
+        xmlOut.endElementIndent("ganydata");
 
-	xmlOut.indentIn();
-	xmlOut.endElementIndent("ganymede");
+        xmlOut.indentIn();
+        xmlOut.endElementIndent("ganymede");
 
-	xmlOut.write("\n");
-	xmlOut.close();
-	xmlOut = null;
+        xmlOut.write("\n");
+        xmlOut.close();
+        xmlOut = null;
       }
     finally
       {
-	if (false)
-	  {
-	    System.err.println("DBStore.dumpXML(): finally!");
-	  }
+        if (false)
+          {
+            System.err.println("DBStore.dumpXML(): finally!");
+          }
 
-	if (lock != null)
-	  {
-	    lock.release();
-	  }
+        if (lock != null)
+          {
+            lock.release();
+          }
 
-	if (xmlOut != null)
-	  {
-	    try
-	      {
-		xmlOut.close();
-	      }
-	    catch (IOException ex)
-	      {
-		Ganymede.logError(ex);
-	      }
-	  }
+        if (xmlOut != null)
+          {
+            try
+              {
+                xmlOut.close();
+              }
+            catch (IOException ex)
+              {
+                Ganymede.logError(ex);
+              }
+          }
 
-	if (outStream != null)
-	  {
-	    try
-	      {
-		outStream.close();
-	      }
-	    catch (IOException ex)
-	      {
-		Ganymede.logError(ex);
-	      }
-	  }
+        if (outStream != null)
+          {
+            try
+              {
+                outStream.close();
+              }
+            catch (IOException ex)
+              {
+                Ganymede.logError(ex);
+              }
+          }
       }
   }
 
@@ -1244,7 +1244,7 @@ public final class DBStore implements JythonMap {
 
     for (DBNameSpace ns: nameSpaces)
       {
-	ns.emitXML(xmlOut);
+        ns.emitXML(xmlOut);
       }
 
     xmlOut.indentIn();
@@ -1279,10 +1279,10 @@ public final class DBStore implements JythonMap {
 
     synchronized (objectBases)
       {
-	for (DBObjectBase base: objectBases.values())
-	  {
-	    result.add(base.getName());
-	  }
+        for (DBObjectBase base: objectBases.values())
+          {
+            result.add(base.getName());
+          }
       }
 
     return result;
@@ -1299,7 +1299,7 @@ public final class DBStore implements JythonMap {
 
     synchronized (objectBases)
       {
-	result = new Vector<DBObjectBase>(objectBases.values());
+        result = new Vector<DBObjectBase>(objectBases.values());
       }
 
     return result;
@@ -1337,13 +1337,13 @@ public final class DBStore implements JythonMap {
   {
     synchronized (objectBases)
       {
-	for (DBObjectBase base: objectBases.values())
-	  {
-	    if (base.getName().equalsIgnoreCase(baseName))
-	      {
-		return base;
-	      }
-	  }
+        for (DBObjectBase base: objectBases.values())
+          {
+            if (base.getName().equalsIgnoreCase(baseName))
+              {
+                return base;
+              }
+          }
       }
 
     return null;
@@ -1369,7 +1369,7 @@ public final class DBStore implements JythonMap {
   {
     synchronized (transactionNumberLock)
       {
-	return ++transactionNumber;
+        return ++transactionNumber;
       }
   }
 
@@ -1392,10 +1392,10 @@ public final class DBStore implements JythonMap {
   {
     synchronized (transactionNumberLock)
       {
-	if (number == transactionNumber)
-	  {
-	    --transactionNumber;
-	  }
+        if (number == transactionNumber)
+          {
+            --transactionNumber;
+          }
       }
   }
 
@@ -1410,25 +1410,25 @@ public final class DBStore implements JythonMap {
   {
     synchronized (transactionNumberLock)
       {
-	if (transactionNumber > 0 && nextNumber != transactionNumber + 1)
-	  {
-	    if (nextNumber == transactionNumber)
-	      {
-		// Inconsistent transaction number ({0}) detected while reading transaction from journal, expected {1}.
-		// This probably means that the server was terminated in the middle of a dump process,
-		// and that the journal file is older than the ganymede.db file.  You should be able to
-		// remove the journal file and restart the server.
+        if (transactionNumber > 0 && nextNumber != transactionNumber + 1)
+          {
+            if (nextNumber == transactionNumber)
+              {
+                // Inconsistent transaction number ({0}) detected while reading transaction from journal, expected {1}.
+                // This probably means that the server was terminated in the middle of a dump process,
+                // and that the journal file is older than the ganymede.db file.  You should be able to
+                // remove the journal file and restart the server.
 
-		throw new IntegrityConstraintException(ts.l("updateTransactionNumber.lingeringJournal", Integer.valueOf(nextNumber), Integer.valueOf(transactionNumber+1)));
-	      }
-	    else
-	      {
-		// "Inconsistent transaction number ({0}) detected while reading transaction from journal, expected {1}.  Throwing up."
-		throw new IntegrityConstraintException(ts.l("updateTransactionNumber.badnumber", Integer.valueOf(nextNumber), Integer.valueOf(transactionNumber+1)));
-	      }
-	  }
+                throw new IntegrityConstraintException(ts.l("updateTransactionNumber.lingeringJournal", Integer.valueOf(nextNumber), Integer.valueOf(transactionNumber+1)));
+              }
+            else
+              {
+                // "Inconsistent transaction number ({0}) detected while reading transaction from journal, expected {1}.  Throwing up."
+                throw new IntegrityConstraintException(ts.l("updateTransactionNumber.badnumber", Integer.valueOf(nextNumber), Integer.valueOf(transactionNumber+1)));
+              }
+          }
 
-	transactionNumber = nextNumber;
+        transactionNumber = nextNumber;
       }
   }
 
@@ -1454,13 +1454,13 @@ public final class DBStore implements JythonMap {
   {
     synchronized (nameSpaces)
       {
-	for (DBNameSpace namespace: nameSpaces)
-	  {
-	    if (namespace.getName().equals(name))
-	      {
-		return namespace;
-	      }
-	  }
+        for (DBNameSpace namespace: nameSpaces)
+          {
+            if (namespace.getName().equals(name))
+              {
+                return namespace;
+              }
+          }
       }
 
     return null;
@@ -1483,7 +1483,7 @@ public final class DBStore implements JythonMap {
 
     if (pathName == null)
       {
-	throw new IllegalArgumentException("can't deal with null pathName");
+        throw new IllegalArgumentException("can't deal with null pathName");
       }
 
     // System.err.println("DBStore.getCategory(): searching for " + pathName);
@@ -1499,56 +1499,56 @@ public final class DBStore implements JythonMap {
 
     try
       {
-	tok = tokens.nextToken();
+        tok = tokens.nextToken();
 
-	bc = rootCategory;
+        bc = rootCategory;
 
-	// The path is going to include the name of the root node
-	// itself (unlike in the UNIX filesystem, where the root node
-	// has no 'name' of its own), so we need to skip into the
-	// root node.
+        // The path is going to include the name of the root node
+        // itself (unlike in the UNIX filesystem, where the root node
+        // has no 'name' of its own), so we need to skip into the
+        // root node.
 
-	if (tok == '/')
-	  {
-	    tok = tokens.nextToken();
-	  }
+        if (tok == '/')
+          {
+            tok = tokens.nextToken();
+          }
 
-	if (tok == StreamTokenizer.TT_WORD && tokens.sval.equals(rootCategory.getName()))
-	  {
-	    tok = tokens.nextToken();
-	  }
+        if (tok == StreamTokenizer.TT_WORD && tokens.sval.equals(rootCategory.getName()))
+          {
+            tok = tokens.nextToken();
+          }
 
-	while (tok != StreamTokenizer.TT_EOF && bc != null)
-	  {
-	    // note that slashes are the only non-word token we
-	    // should ever get, so they are implicitly separators.
+        while (tok != StreamTokenizer.TT_EOF && bc != null)
+          {
+            // note that slashes are the only non-word token we
+            // should ever get, so they are implicitly separators.
 
-	    if (tok == StreamTokenizer.TT_WORD)
-	      {
-		// System.err.println("DBStore.getCategory(): Looking for node " + tokens.sval);
+            if (tok == StreamTokenizer.TT_WORD)
+              {
+                // System.err.println("DBStore.getCategory(): Looking for node " + tokens.sval);
 
-		CategoryNode cn = bc.getNode(tokens.sval);
+                CategoryNode cn = bc.getNode(tokens.sval);
 
-		if (cn instanceof DBBaseCategory)
-		  {
-		    bc = (DBBaseCategory) cn;
-		  }
-		else if (cn instanceof DBObjectBase)
-		  {
-		    return cn;
-		  }
-		else
-		  {
-		    throw new RuntimeException("Found unknown/null thing in category tree.." + cn.toString());
-		  }
-	      }
+                if (cn instanceof DBBaseCategory)
+                  {
+                    bc = (DBBaseCategory) cn;
+                  }
+                else if (cn instanceof DBObjectBase)
+                  {
+                    return cn;
+                  }
+                else
+                  {
+                    throw new RuntimeException("Found unknown/null thing in category tree.." + cn.toString());
+                  }
+              }
 
-	    tok = tokens.nextToken();
-	  }
+            tok = tokens.nextToken();
+          }
       }
     catch (IOException ex)
       {
-	throw new RuntimeException("parse error in getCategory: " + ex);
+        throw new RuntimeException("parse error in getCategory: " + ex);
       }
 
     return bc;
@@ -1579,631 +1579,631 @@ public final class DBStore implements JythonMap {
 
     try
       {
-	DBBaseCategory adminCategory = new DBBaseCategory(this, "Admin-Level Objects", rootCategory);
-	rootCategory.addNodeAfter(adminCategory, null);
-
-	ns = new DBNameSpace("ownerbase", true);
-	nameSpaces.addElement(ns);
-
-	ns = new DBNameSpace("username", true);
-	nameSpaces.addElement(ns);
-
-	ns = new DBNameSpace("rolespace", true);
-	nameSpaces.addElement(ns);
-
-	ns = new DBNameSpace("persona", true);
-	nameSpaces.addElement(ns);
-
-	ns = new DBNameSpace("eventtoken", true);
-	nameSpaces.addElement(ns);
-
-	ns = new DBNameSpace("buildertask", true);
-	nameSpaces.addElement(ns);
-
-	DBBaseCategory permCategory = new DBBaseCategory(this, "Permissions", adminCategory);
-	adminCategory.addNodeAfter(permCategory, null);
-
-	// create owner base
-
-	b = new DBObjectBase(this, false);
-	b.setName("Owner Group");
-	b.setClassInfo("arlut.csd.ganymede.server.ownerCustom", null);
-	b.setTypeID(SchemaConstants.OwnerBase); // 0
-
-	permCategory.addNodeAfter(b, null);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.OwnerNameField);
-	bf.setType(FieldType.STRING);
-	bf.setName("Name");
-	bf.setNameSpace("ownerbase");
-	bf.setComment("The name of this ownership group");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.OwnerMembersField);
-	bf.setType(FieldType.INVID);
-	bf.setName("Members");
-	bf.setArray(true);
-	bf.setTargetBase(SchemaConstants.PersonaBase);
-	bf.setTargetField(SchemaConstants.PersonaGroupsField);
-	bf.setComment("List of admin personae that are members of this owner set");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.OwnerCcAdmins);
-	bf.setType(FieldType.BOOLEAN);
-	bf.setName("Cc All Admins");
-	bf.setComment("If checked, mail to this owner group will be sent to the admins");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.OwnerExternalMail);
-	bf.setType(FieldType.STRING);
-	bf.setName("External Mail List");
-	bf.setArray(true);
-	bf.setComment("What external email addresses should be notified of changes to objects owned?");
-	b.addFieldToEnd(bf);
-
-	/*  XXX As of DBStore 2.7, we don't use this field any more
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.OwnerObjectsOwned);
-	bf.setType(FieldType.INVID);
-	bf.setName("Objects owned");
-	bf.setTargetBase(-2);	// any
-	bf.setTargetField(SchemaConstants.OwnerListField);
-	bf.setArray(true);
-	bf.setComment("What objects are owned by this owner set");
-	b.addFieldToEnd(bf);
-	*/
-
-	b.setLabelField(SchemaConstants.OwnerNameField);
-
-	// link in the class we specified
-
-	b.createHook();
-
-	// and link in the base to this DBStore
-
-	setBase(b);
-
-	// create persona base
-
-	b = new DBObjectBase(this, false);
-	b.setName("Admin Persona");
-	b.setClassInfo("arlut.csd.ganymede.server.adminPersonaCustom", null);
-	b.setTypeID(SchemaConstants.PersonaBase); // 1
-
-	permCategory.addNodeAfter(b, null); // add it to the end is ok
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.PersonaNameField);
-	bf.setType(FieldType.STRING);
-	bf.setName("Name");
-	bf.setComment("Descriptive label for this admin persona");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.PersonaPasswordField);
-	bf.setType(FieldType.PASSWORD);
-	bf.setName("Password");
-	bf.setMaxLength((short)32);
-	bf.setCrypted(false);
-	bf.setShaUnixCrypted(true);
-	bf.setShaUnixCrypted512(true);
-	bf.setComment("Persona password");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.PersonaGroupsField);
-	bf.setType(FieldType.INVID);
-	bf.setName("Owner Sets");
-	bf.setTargetBase(SchemaConstants.OwnerBase);
-	bf.setTargetField(SchemaConstants.OwnerMembersField);
-	bf.setArray(true);
-	bf.setComment("What owner sets are this persona members of?");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.PersonaAssocUser);
-	bf.setType(FieldType.INVID);
-	bf.setName("User");
-	bf.setTargetBase(SchemaConstants.UserBase);
-	bf.setTargetField(SchemaConstants.UserAdminPersonae);
-	bf.setArray(false);
-	bf.setComment("What user is this admin persona associated with?");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.PersonaPrivs);
-	bf.setType(FieldType.INVID);
-	bf.setName("Privilege Sets");
-	bf.setTargetBase(SchemaConstants.RoleBase);
-	bf.setTargetField(SchemaConstants.RolePersonae);
-	bf.setArray(true);
-	bf.setComment("What permission matrices are this admin persona associated with?");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.PersonaAdminConsole);
-	bf.setType(FieldType.BOOLEAN);
-	bf.setName("Admin Console");
-	bf.setArray(false);
-	bf.setComment("If true, this persona can be used to access the admin console");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.PersonaAdminPower);
-	bf.setType(FieldType.BOOLEAN);
-	bf.setName("Full Console");
-	bf.setArray(false);
-	bf.setComment("If true, this persona can kill users and edit the schema");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.PersonaMailAddr);
-	bf.setType(FieldType.STRING);
-	bf.setName("Email Address");
-	bf.setArray(false);
-	bf.setComment("Where email to this administrator should be sent");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.PersonaLabelField);
-	bf.setType(FieldType.STRING);
-	bf.setName("Label");
-	bf.setArray(false);
-	bf.setNameSpace("persona");
-	b.addFieldToEnd(bf);
-
-	b.setLabelField(SchemaConstants.PersonaLabelField);
-
-	// link in the class we specified
-
-	b.createHook();
-
-	// and link in the base to this DBStore
-
-	setBase(b);
-
-	// create Role base
-
-	b = new DBObjectBase(this, false);
-	b.setName("Role");
-	b.setClassInfo("arlut.csd.ganymede.server.permCustom", null);
-	b.setTypeID(SchemaConstants.RoleBase); // 2
-
-	permCategory.addNodeAfter(b, null); // add it to the end is ok
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.RoleName);
-	bf.setType(FieldType.STRING);
-	bf.setName("Name");
-	bf.setNameSpace("rolespace");
-	bf.setComment("The name of this permission matrix");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.RoleDelegatable);
-	bf.setType(FieldType.BOOLEAN);
-	bf.setName("Delegatable Role");
-	bf.setComment("If true, this role can be granted to admins created/edited by Personae with this role.");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.RoleMatrix);
-	bf.setType(FieldType.PERMISSIONMATRIX);
-	bf.setName("Objects Owned Access Bits");
-	bf.setComment("Access bits, by object type for objects owned by admins using this permission object");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.RoleDefaultMatrix);
-	bf.setType(FieldType.PERMISSIONMATRIX);
-	bf.setName("Default Access Bits");
-	bf.setComment("Access bits, by object type for all objects on the part of admins using this permission object");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.RolePersonae);
-	bf.setType(FieldType.INVID);
-	bf.setName("Persona entities");
-	bf.setTargetBase(SchemaConstants.PersonaBase);
-	bf.setTargetField(SchemaConstants.PersonaPrivs);
-	bf.setArray(true);
-	bf.setComment("What personae are using this permission matrix?");
-	b.addFieldToEnd(bf);
-
-	b.setLabelField(SchemaConstants.RoleName);
-
-	// link in the class we specified
-
-	b.createHook();
-
-	// and link in the base to this DBStore
-
-	setBase(b);
-
-	// create System Events base
-
-	DBBaseCategory eventCategory = new DBBaseCategory(this, "Events", adminCategory);
-	adminCategory.addNodeAfter(eventCategory, null);
-
-	b = new DBObjectBase(this, false);
-	b.setName("System Event");
-	b.setClassInfo("arlut.csd.ganymede.server.eventCustom", null);
-	b.setTypeID(SchemaConstants.EventBase);
-
-	eventCategory.addNodeAfter(b, null); // add it to the end is ok
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.EventToken);
-	bf.setType(FieldType.STRING);
-	bf.setName("Event Token");
-	bf.setBadChars(" :");
-	bf.setNameSpace("eventtoken");
-	bf.setComment("Single-word token to identify this event type in Ganymede source code");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.EventName);
-	bf.setType(FieldType.STRING);
-	bf.setName("Event Name");
-	bf.setBadChars(":");
-	bf.setComment("Short name for this event class, suitable for an email message title");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.EventDescription);
-	bf.setType(FieldType.STRING);
-	bf.setName("Event Description");
-	bf.setBadChars(":");
-	bf.setComment("Fuller description for this event class, suitable for an email message body");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.EventMailBoolean);
-	bf.setType(FieldType.BOOLEAN);
-	bf.setName("Send Mail");
-	bf.setComment("If true, occurrences of this event will be emailed");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.EventMailToSelf);
-	bf.setType(FieldType.BOOLEAN);
-	bf.setName("Cc Admin");
-	bf.setComment("If true, mail for this event will always be cc'ed to the admin performing the action");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.EventMailOwners);
-	bf.setType(FieldType.BOOLEAN);
-	bf.setName("Cc Owners");
-	bf.setComment("If true, mail for this event will always be cc'ed to administrators in the owner group");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.EventExternalMail);
-	bf.setType(FieldType.STRING);
-	bf.setName("Mail List");
-	bf.setArray(true);
-	bf.setComment("List of email addresses to send this event to");
-	b.addFieldToEnd(bf);
-
-	b.setLabelField(SchemaConstants.EventToken);
-
-	// link in the class we specified
-
-	b.createHook();
-
-	// and link in the base to this DBStore
-
-	setBase(b);
-
-	// create Object Events base
-
-	b = new DBObjectBase(this, false);
-	b.setName("Object Event");
-	b.setClassInfo("arlut.csd.ganymede.server.objectEventCustom", null);
-	b.setTypeID(SchemaConstants.ObjectEventBase);
-
-	eventCategory.addNodeAfter(b, null); // add it to the end is ok
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.ObjectEventLabel);
-	bf.setType(FieldType.STRING);
-	bf.setName("Hidden Label");
-	bf.setNameSpace("eventtoken");
-	bf.setVisibility(false);	// hidden
-	bf.setComment("Hidden composite label field.  The contents of this label field is automatically set from the Event Token and Object Type Name fields.");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.ObjectEventToken);
-	bf.setType(FieldType.STRING);
-	bf.setName("Event Token");
-	bf.setBadChars(" :");
-	bf.setComment("Single-word token to identify this event type in Ganymede source code");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.ObjectEventObjectName);
-	bf.setType(FieldType.STRING);
-	bf.setName("Object Type Name");
-	bf.setComment("The name of the object that this event is tracking");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.ObjectEventName);
-	bf.setType(FieldType.STRING);
-	bf.setName("Event Name");
-	bf.setBadChars(":");
-	bf.setComment("Short name for this event class, suitable for an email message title");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.ObjectEventDescription);
-	bf.setType(FieldType.STRING);
-	bf.setName("Event Description");
-	bf.setBadChars(":");
-	bf.setComment("Fuller description for this event class, suitable for an email message body");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.ObjectEventMailToSelf);
-	bf.setType(FieldType.BOOLEAN);
-	bf.setName("Cc Admin");
-	bf.setComment("If true, mail for this event will always be cc'ed to the admin performing the action");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.ObjectEventMailOwners);
-	bf.setType(FieldType.BOOLEAN);
-	bf.setName("Cc Owner Groups");
-	bf.setComment("If true, mail for this event will always be cc'ed to the owner groups owning the object");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.ObjectEventExternalMail);
-	bf.setType(FieldType.STRING);
-	bf.setName("External Email");
-	bf.setArray(true);
-	bf.setComment("Email addresses not stored in Ganymede");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.ObjectEventObjectType);
-	bf.setType(FieldType.NUMERIC);
-	bf.setName("Object Type ID");
-	bf.setVisibility(false);	// we don't want this to be seen by the client
-	bf.setComment("The type code of the object that this event is tracking");
-	b.addFieldToEnd(bf);
-
-	// set the label field
-
-	b.setLabelField(SchemaConstants.ObjectEventLabel);
-
-	// link in the class we specified
-
-	b.createHook();
-
-	// and link in the base to this DBStore
-
-	setBase(b);
-
-	// create user base
-
-	DBBaseCategory userCategory = new DBBaseCategory(this, "User-Level Objects", rootCategory);
-	rootCategory.addNodeAfter(userCategory, null);
-
-	b = new DBObjectBase(this, false);
-	b.setName("User");
-	b.setTypeID(SchemaConstants.UserBase); // 2
-
-	userCategory.addNodeAfter(b, null); // add it to the end is ok
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.UserUserName);
-	bf.setType(FieldType.STRING);
-	bf.setName("Username");
-	bf.setMinLength((short)2);
-	bf.setMaxLength((short)8);
-	bf.setBadChars(" :=><|+[]\\/*;:.,?\""); // See p.252, teach yourself WinNT Server 4 in 14 days
-	bf.setNameSpace("username");
-	bf.setComment("User name for an individual privileged to log into Ganymede and/or the network");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.UserPassword);
-	bf.setType(FieldType.PASSWORD);
-	bf.setName("Password");
-	bf.setMaxLength((short)32);
-	bf.setCrypted(true);
-	bf.setComment("Password for an individual privileged to log into Ganymede and/or the network");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.UserAdminPersonae);
-	bf.setType(FieldType.INVID);
-	bf.setTargetBase(SchemaConstants.PersonaBase);
-	bf.setTargetField(SchemaConstants.PersonaAssocUser);
-	bf.setName("Admin Personae");
-	bf.setArray(true);
-	bf.setComment("A list of admin personae this user can assume");
-	b.addFieldToEnd(bf);
-
-	b.setLabelField(SchemaConstants.UserUserName);
-
-	setBase(b);
-
-	// create Task Base
-
-	b = new DBObjectBase(this, false);
-	b.setName("Task");
-	b.setClassInfo("arlut.csd.ganymede.server.taskCustom", null);
-	b.setTypeID(SchemaConstants.TaskBase); // 5
-
-	adminCategory.addNodeAfter(b, null); // add it to the end is ok
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.TaskName);
-	bf.setType(FieldType.STRING);
-	bf.setName("Task Name");
-	bf.setNameSpace("buildertask");
-	bf.setComment("Name of this task, as shown in task monitor");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.TaskClass);
-	bf.setType(FieldType.STRING);
-	bf.setName("Task Class");
-	bf.setBadChars("/:");
-	bf.setComment("Name of the plug-in class to load on server restart to handle this task");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.TaskRunOnCommit);
-	bf.setType(FieldType.BOOLEAN);
-	bf.setName("Run On Transaction Commit");
-	bf.setComment("If true, this task will be run on transaction commit");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.TaskRunPeriodically);
-	bf.setType(FieldType.BOOLEAN);
-	bf.setName("Run Periodically");
-	bf.setComment("If true, this task will be scheduled for periodic execution");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.TaskPeriodUnit);
-	bf.setType(FieldType.STRING);
-	bf.setName("Period Unit");
-	bf.setComment("What is the unit of time we're using?");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.TaskPeriodCount);
-	bf.setType(FieldType.NUMERIC);
-	bf.setName("Period Count");
-	bf.setComment("How many time units between task runs?");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.TaskPeriodAnchor);
-	bf.setType(FieldType.DATE);
-	bf.setName("Period Anchor");
-	bf.setComment("When do we start counting period intervals from?");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.TaskOptionStrings);
-	bf.setType(FieldType.STRING);
-	bf.setArray(true);
-	bf.setName("Option Strings");
-	bf.setComment("Optional task parameters, interpreted by specific tasks if needed");
-	b.addFieldToEnd(bf);
-
-	b.setLabelField(SchemaConstants.TaskName);
-
-    	// link in the class we specified
-
-	b.createHook();
-
-	// and record the base
-
-	setBase(b);
-
-	// create Sync Channel Base
-
-	b = new DBObjectBase(this, false);
-	b.setName("Sync Channel");
-	b.setClassInfo("arlut.csd.ganymede.server.syncChannelCustom", null);
-	b.setTypeID(SchemaConstants.SyncChannelBase); // 7
-
-	adminCategory.addNodeAfter(b, null); // add it to the end is ok
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.SyncChannelName);
-	bf.setType(FieldType.STRING);
-	bf.setName("Name");
-	bf.setNameSpace("buildertask");	// same namespace as tasks
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.SyncChannelTypeString);
-	bf.setType(FieldType.STRING);
-	bf.setName("Sync Channel Type");
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.SyncChannelClassName);
-	bf.setType(FieldType.STRING);
-	bf.setName("Sync Master Classname");
-	bf.setComment(ts.l("initializeSchema.syncmaster_comment")); // "Added a descriptive comment for the new Sync Master Classname field in the Sync Channel object definition."
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.SyncChannelDirectory);
-	bf.setType(FieldType.STRING);
-	bf.setName("Queue Directory");
-	bf.setComment(ts.l("initializeSchema.syncqueuedir_comment")); // "Location of the sync channel directory on disk."
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.SyncChannelFullStateFile);
-	bf.setType(FieldType.STRING);
-	bf.setName("Full State File");
-	bf.setComment(ts.l("initializeSchema.syncfullstatefile_comment")); // "Path to the file to use for full-state XML dumps."
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.SyncChannelServicer);
-	bf.setType(FieldType.STRING);
-	bf.setName("Service Program");
-	bf.setComment(ts.l("initializeSchema.syncprogram_comment")); // "The location of the program to service this sync channel."
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.SyncChannelFields);
-	bf.setType(FieldType.FIELDOPTIONS);
-	bf.setName("Sync Data");
-	bf.setComment(ts.l("initializeSchema.syncdata_comment")); // "The definitions for what object and fields we want to include in this sync channel."
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.SyncChannelPlaintextOK);
-	bf.setType(FieldType.BOOLEAN);
-	bf.setName("Allow Plaintext Passwords");
-	bf.setComment(ts.l("initializeSchema.syncplaintext_comment")); // "Allow Plaintext Passwords to be written to this Sync Channel."
-	b.addFieldToEnd(bf);
-
-	bf = new DBObjectBaseField(b);
-	bf.setID(SchemaConstants.SyncChannelTypeNum);
-	bf.setType(FieldType.NUMERIC);
-	bf.setName("Channel Type Index");
-	b.addFieldToEnd(bf);
-
-	b.setLabelField(SchemaConstants.SyncChannelName);
-
-    	// link in the class we specified
-
-	b.createHook();
-
-	// and record the base
-
-	setBase(b);
-
-	// and lock in the namespaces
-
-	for (DBNameSpace namespace: nameSpaces)
-	  {
-	    namespace.schemaEditCommit();
-	  }
+        DBBaseCategory adminCategory = new DBBaseCategory(this, "Admin-Level Objects", rootCategory);
+        rootCategory.addNodeAfter(adminCategory, null);
+
+        ns = new DBNameSpace("ownerbase", true);
+        nameSpaces.addElement(ns);
+
+        ns = new DBNameSpace("username", true);
+        nameSpaces.addElement(ns);
+
+        ns = new DBNameSpace("rolespace", true);
+        nameSpaces.addElement(ns);
+
+        ns = new DBNameSpace("persona", true);
+        nameSpaces.addElement(ns);
+
+        ns = new DBNameSpace("eventtoken", true);
+        nameSpaces.addElement(ns);
+
+        ns = new DBNameSpace("buildertask", true);
+        nameSpaces.addElement(ns);
+
+        DBBaseCategory permCategory = new DBBaseCategory(this, "Permissions", adminCategory);
+        adminCategory.addNodeAfter(permCategory, null);
+
+        // create owner base
+
+        b = new DBObjectBase(this, false);
+        b.setName("Owner Group");
+        b.setClassInfo("arlut.csd.ganymede.server.ownerCustom", null);
+        b.setTypeID(SchemaConstants.OwnerBase); // 0
+
+        permCategory.addNodeAfter(b, null);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.OwnerNameField);
+        bf.setType(FieldType.STRING);
+        bf.setName("Name");
+        bf.setNameSpace("ownerbase");
+        bf.setComment("The name of this ownership group");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.OwnerMembersField);
+        bf.setType(FieldType.INVID);
+        bf.setName("Members");
+        bf.setArray(true);
+        bf.setTargetBase(SchemaConstants.PersonaBase);
+        bf.setTargetField(SchemaConstants.PersonaGroupsField);
+        bf.setComment("List of admin personae that are members of this owner set");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.OwnerCcAdmins);
+        bf.setType(FieldType.BOOLEAN);
+        bf.setName("Cc All Admins");
+        bf.setComment("If checked, mail to this owner group will be sent to the admins");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.OwnerExternalMail);
+        bf.setType(FieldType.STRING);
+        bf.setName("External Mail List");
+        bf.setArray(true);
+        bf.setComment("What external email addresses should be notified of changes to objects owned?");
+        b.addFieldToEnd(bf);
+
+        /*  XXX As of DBStore 2.7, we don't use this field any more
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.OwnerObjectsOwned);
+        bf.setType(FieldType.INVID);
+        bf.setName("Objects owned");
+        bf.setTargetBase(-2);   // any
+        bf.setTargetField(SchemaConstants.OwnerListField);
+        bf.setArray(true);
+        bf.setComment("What objects are owned by this owner set");
+        b.addFieldToEnd(bf);
+        */
+
+        b.setLabelField(SchemaConstants.OwnerNameField);
+
+        // link in the class we specified
+
+        b.createHook();
+
+        // and link in the base to this DBStore
+
+        setBase(b);
+
+        // create persona base
+
+        b = new DBObjectBase(this, false);
+        b.setName("Admin Persona");
+        b.setClassInfo("arlut.csd.ganymede.server.adminPersonaCustom", null);
+        b.setTypeID(SchemaConstants.PersonaBase); // 1
+
+        permCategory.addNodeAfter(b, null); // add it to the end is ok
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.PersonaNameField);
+        bf.setType(FieldType.STRING);
+        bf.setName("Name");
+        bf.setComment("Descriptive label for this admin persona");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.PersonaPasswordField);
+        bf.setType(FieldType.PASSWORD);
+        bf.setName("Password");
+        bf.setMaxLength((short)32);
+        bf.setCrypted(false);
+        bf.setShaUnixCrypted(true);
+        bf.setShaUnixCrypted512(true);
+        bf.setComment("Persona password");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.PersonaGroupsField);
+        bf.setType(FieldType.INVID);
+        bf.setName("Owner Sets");
+        bf.setTargetBase(SchemaConstants.OwnerBase);
+        bf.setTargetField(SchemaConstants.OwnerMembersField);
+        bf.setArray(true);
+        bf.setComment("What owner sets are this persona members of?");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.PersonaAssocUser);
+        bf.setType(FieldType.INVID);
+        bf.setName("User");
+        bf.setTargetBase(SchemaConstants.UserBase);
+        bf.setTargetField(SchemaConstants.UserAdminPersonae);
+        bf.setArray(false);
+        bf.setComment("What user is this admin persona associated with?");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.PersonaPrivs);
+        bf.setType(FieldType.INVID);
+        bf.setName("Privilege Sets");
+        bf.setTargetBase(SchemaConstants.RoleBase);
+        bf.setTargetField(SchemaConstants.RolePersonae);
+        bf.setArray(true);
+        bf.setComment("What permission matrices are this admin persona associated with?");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.PersonaAdminConsole);
+        bf.setType(FieldType.BOOLEAN);
+        bf.setName("Admin Console");
+        bf.setArray(false);
+        bf.setComment("If true, this persona can be used to access the admin console");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.PersonaAdminPower);
+        bf.setType(FieldType.BOOLEAN);
+        bf.setName("Full Console");
+        bf.setArray(false);
+        bf.setComment("If true, this persona can kill users and edit the schema");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.PersonaMailAddr);
+        bf.setType(FieldType.STRING);
+        bf.setName("Email Address");
+        bf.setArray(false);
+        bf.setComment("Where email to this administrator should be sent");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.PersonaLabelField);
+        bf.setType(FieldType.STRING);
+        bf.setName("Label");
+        bf.setArray(false);
+        bf.setNameSpace("persona");
+        b.addFieldToEnd(bf);
+
+        b.setLabelField(SchemaConstants.PersonaLabelField);
+
+        // link in the class we specified
+
+        b.createHook();
+
+        // and link in the base to this DBStore
+
+        setBase(b);
+
+        // create Role base
+
+        b = new DBObjectBase(this, false);
+        b.setName("Role");
+        b.setClassInfo("arlut.csd.ganymede.server.permCustom", null);
+        b.setTypeID(SchemaConstants.RoleBase); // 2
+
+        permCategory.addNodeAfter(b, null); // add it to the end is ok
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.RoleName);
+        bf.setType(FieldType.STRING);
+        bf.setName("Name");
+        bf.setNameSpace("rolespace");
+        bf.setComment("The name of this permission matrix");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.RoleDelegatable);
+        bf.setType(FieldType.BOOLEAN);
+        bf.setName("Delegatable Role");
+        bf.setComment("If true, this role can be granted to admins created/edited by Personae with this role.");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.RoleMatrix);
+        bf.setType(FieldType.PERMISSIONMATRIX);
+        bf.setName("Objects Owned Access Bits");
+        bf.setComment("Access bits, by object type for objects owned by admins using this permission object");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.RoleDefaultMatrix);
+        bf.setType(FieldType.PERMISSIONMATRIX);
+        bf.setName("Default Access Bits");
+        bf.setComment("Access bits, by object type for all objects on the part of admins using this permission object");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.RolePersonae);
+        bf.setType(FieldType.INVID);
+        bf.setName("Persona entities");
+        bf.setTargetBase(SchemaConstants.PersonaBase);
+        bf.setTargetField(SchemaConstants.PersonaPrivs);
+        bf.setArray(true);
+        bf.setComment("What personae are using this permission matrix?");
+        b.addFieldToEnd(bf);
+
+        b.setLabelField(SchemaConstants.RoleName);
+
+        // link in the class we specified
+
+        b.createHook();
+
+        // and link in the base to this DBStore
+
+        setBase(b);
+
+        // create System Events base
+
+        DBBaseCategory eventCategory = new DBBaseCategory(this, "Events", adminCategory);
+        adminCategory.addNodeAfter(eventCategory, null);
+
+        b = new DBObjectBase(this, false);
+        b.setName("System Event");
+        b.setClassInfo("arlut.csd.ganymede.server.eventCustom", null);
+        b.setTypeID(SchemaConstants.EventBase);
+
+        eventCategory.addNodeAfter(b, null); // add it to the end is ok
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.EventToken);
+        bf.setType(FieldType.STRING);
+        bf.setName("Event Token");
+        bf.setBadChars(" :");
+        bf.setNameSpace("eventtoken");
+        bf.setComment("Single-word token to identify this event type in Ganymede source code");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.EventName);
+        bf.setType(FieldType.STRING);
+        bf.setName("Event Name");
+        bf.setBadChars(":");
+        bf.setComment("Short name for this event class, suitable for an email message title");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.EventDescription);
+        bf.setType(FieldType.STRING);
+        bf.setName("Event Description");
+        bf.setBadChars(":");
+        bf.setComment("Fuller description for this event class, suitable for an email message body");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.EventMailBoolean);
+        bf.setType(FieldType.BOOLEAN);
+        bf.setName("Send Mail");
+        bf.setComment("If true, occurrences of this event will be emailed");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.EventMailToSelf);
+        bf.setType(FieldType.BOOLEAN);
+        bf.setName("Cc Admin");
+        bf.setComment("If true, mail for this event will always be cc'ed to the admin performing the action");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.EventMailOwners);
+        bf.setType(FieldType.BOOLEAN);
+        bf.setName("Cc Owners");
+        bf.setComment("If true, mail for this event will always be cc'ed to administrators in the owner group");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.EventExternalMail);
+        bf.setType(FieldType.STRING);
+        bf.setName("Mail List");
+        bf.setArray(true);
+        bf.setComment("List of email addresses to send this event to");
+        b.addFieldToEnd(bf);
+
+        b.setLabelField(SchemaConstants.EventToken);
+
+        // link in the class we specified
+
+        b.createHook();
+
+        // and link in the base to this DBStore
+
+        setBase(b);
+
+        // create Object Events base
+
+        b = new DBObjectBase(this, false);
+        b.setName("Object Event");
+        b.setClassInfo("arlut.csd.ganymede.server.objectEventCustom", null);
+        b.setTypeID(SchemaConstants.ObjectEventBase);
+
+        eventCategory.addNodeAfter(b, null); // add it to the end is ok
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.ObjectEventLabel);
+        bf.setType(FieldType.STRING);
+        bf.setName("Hidden Label");
+        bf.setNameSpace("eventtoken");
+        bf.setVisibility(false);        // hidden
+        bf.setComment("Hidden composite label field.  The contents of this label field is automatically set from the Event Token and Object Type Name fields.");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.ObjectEventToken);
+        bf.setType(FieldType.STRING);
+        bf.setName("Event Token");
+        bf.setBadChars(" :");
+        bf.setComment("Single-word token to identify this event type in Ganymede source code");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.ObjectEventObjectName);
+        bf.setType(FieldType.STRING);
+        bf.setName("Object Type Name");
+        bf.setComment("The name of the object that this event is tracking");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.ObjectEventName);
+        bf.setType(FieldType.STRING);
+        bf.setName("Event Name");
+        bf.setBadChars(":");
+        bf.setComment("Short name for this event class, suitable for an email message title");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.ObjectEventDescription);
+        bf.setType(FieldType.STRING);
+        bf.setName("Event Description");
+        bf.setBadChars(":");
+        bf.setComment("Fuller description for this event class, suitable for an email message body");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.ObjectEventMailToSelf);
+        bf.setType(FieldType.BOOLEAN);
+        bf.setName("Cc Admin");
+        bf.setComment("If true, mail for this event will always be cc'ed to the admin performing the action");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.ObjectEventMailOwners);
+        bf.setType(FieldType.BOOLEAN);
+        bf.setName("Cc Owner Groups");
+        bf.setComment("If true, mail for this event will always be cc'ed to the owner groups owning the object");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.ObjectEventExternalMail);
+        bf.setType(FieldType.STRING);
+        bf.setName("External Email");
+        bf.setArray(true);
+        bf.setComment("Email addresses not stored in Ganymede");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.ObjectEventObjectType);
+        bf.setType(FieldType.NUMERIC);
+        bf.setName("Object Type ID");
+        bf.setVisibility(false);        // we don't want this to be seen by the client
+        bf.setComment("The type code of the object that this event is tracking");
+        b.addFieldToEnd(bf);
+
+        // set the label field
+
+        b.setLabelField(SchemaConstants.ObjectEventLabel);
+
+        // link in the class we specified
+
+        b.createHook();
+
+        // and link in the base to this DBStore
+
+        setBase(b);
+
+        // create user base
+
+        DBBaseCategory userCategory = new DBBaseCategory(this, "User-Level Objects", rootCategory);
+        rootCategory.addNodeAfter(userCategory, null);
+
+        b = new DBObjectBase(this, false);
+        b.setName("User");
+        b.setTypeID(SchemaConstants.UserBase); // 2
+
+        userCategory.addNodeAfter(b, null); // add it to the end is ok
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.UserUserName);
+        bf.setType(FieldType.STRING);
+        bf.setName("Username");
+        bf.setMinLength((short)2);
+        bf.setMaxLength((short)8);
+        bf.setBadChars(" :=><|+[]\\/*;:.,?\""); // See p.252, teach yourself WinNT Server 4 in 14 days
+        bf.setNameSpace("username");
+        bf.setComment("User name for an individual privileged to log into Ganymede and/or the network");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.UserPassword);
+        bf.setType(FieldType.PASSWORD);
+        bf.setName("Password");
+        bf.setMaxLength((short)32);
+        bf.setCrypted(true);
+        bf.setComment("Password for an individual privileged to log into Ganymede and/or the network");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.UserAdminPersonae);
+        bf.setType(FieldType.INVID);
+        bf.setTargetBase(SchemaConstants.PersonaBase);
+        bf.setTargetField(SchemaConstants.PersonaAssocUser);
+        bf.setName("Admin Personae");
+        bf.setArray(true);
+        bf.setComment("A list of admin personae this user can assume");
+        b.addFieldToEnd(bf);
+
+        b.setLabelField(SchemaConstants.UserUserName);
+
+        setBase(b);
+
+        // create Task Base
+
+        b = new DBObjectBase(this, false);
+        b.setName("Task");
+        b.setClassInfo("arlut.csd.ganymede.server.taskCustom", null);
+        b.setTypeID(SchemaConstants.TaskBase); // 5
+
+        adminCategory.addNodeAfter(b, null); // add it to the end is ok
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.TaskName);
+        bf.setType(FieldType.STRING);
+        bf.setName("Task Name");
+        bf.setNameSpace("buildertask");
+        bf.setComment("Name of this task, as shown in task monitor");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.TaskClass);
+        bf.setType(FieldType.STRING);
+        bf.setName("Task Class");
+        bf.setBadChars("/:");
+        bf.setComment("Name of the plug-in class to load on server restart to handle this task");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.TaskRunOnCommit);
+        bf.setType(FieldType.BOOLEAN);
+        bf.setName("Run On Transaction Commit");
+        bf.setComment("If true, this task will be run on transaction commit");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.TaskRunPeriodically);
+        bf.setType(FieldType.BOOLEAN);
+        bf.setName("Run Periodically");
+        bf.setComment("If true, this task will be scheduled for periodic execution");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.TaskPeriodUnit);
+        bf.setType(FieldType.STRING);
+        bf.setName("Period Unit");
+        bf.setComment("What is the unit of time we're using?");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.TaskPeriodCount);
+        bf.setType(FieldType.NUMERIC);
+        bf.setName("Period Count");
+        bf.setComment("How many time units between task runs?");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.TaskPeriodAnchor);
+        bf.setType(FieldType.DATE);
+        bf.setName("Period Anchor");
+        bf.setComment("When do we start counting period intervals from?");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.TaskOptionStrings);
+        bf.setType(FieldType.STRING);
+        bf.setArray(true);
+        bf.setName("Option Strings");
+        bf.setComment("Optional task parameters, interpreted by specific tasks if needed");
+        b.addFieldToEnd(bf);
+
+        b.setLabelField(SchemaConstants.TaskName);
+
+        // link in the class we specified
+
+        b.createHook();
+
+        // and record the base
+
+        setBase(b);
+
+        // create Sync Channel Base
+
+        b = new DBObjectBase(this, false);
+        b.setName("Sync Channel");
+        b.setClassInfo("arlut.csd.ganymede.server.syncChannelCustom", null);
+        b.setTypeID(SchemaConstants.SyncChannelBase); // 7
+
+        adminCategory.addNodeAfter(b, null); // add it to the end is ok
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.SyncChannelName);
+        bf.setType(FieldType.STRING);
+        bf.setName("Name");
+        bf.setNameSpace("buildertask"); // same namespace as tasks
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.SyncChannelTypeString);
+        bf.setType(FieldType.STRING);
+        bf.setName("Sync Channel Type");
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.SyncChannelClassName);
+        bf.setType(FieldType.STRING);
+        bf.setName("Sync Master Classname");
+        bf.setComment(ts.l("initializeSchema.syncmaster_comment")); // "Added a descriptive comment for the new Sync Master Classname field in the Sync Channel object definition."
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.SyncChannelDirectory);
+        bf.setType(FieldType.STRING);
+        bf.setName("Queue Directory");
+        bf.setComment(ts.l("initializeSchema.syncqueuedir_comment")); // "Location of the sync channel directory on disk."
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.SyncChannelFullStateFile);
+        bf.setType(FieldType.STRING);
+        bf.setName("Full State File");
+        bf.setComment(ts.l("initializeSchema.syncfullstatefile_comment")); // "Path to the file to use for full-state XML dumps."
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.SyncChannelServicer);
+        bf.setType(FieldType.STRING);
+        bf.setName("Service Program");
+        bf.setComment(ts.l("initializeSchema.syncprogram_comment")); // "The location of the program to service this sync channel."
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.SyncChannelFields);
+        bf.setType(FieldType.FIELDOPTIONS);
+        bf.setName("Sync Data");
+        bf.setComment(ts.l("initializeSchema.syncdata_comment")); // "The definitions for what object and fields we want to include in this sync channel."
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.SyncChannelPlaintextOK);
+        bf.setType(FieldType.BOOLEAN);
+        bf.setName("Allow Plaintext Passwords");
+        bf.setComment(ts.l("initializeSchema.syncplaintext_comment")); // "Allow Plaintext Passwords to be written to this Sync Channel."
+        b.addFieldToEnd(bf);
+
+        bf = new DBObjectBaseField(b);
+        bf.setID(SchemaConstants.SyncChannelTypeNum);
+        bf.setType(FieldType.NUMERIC);
+        bf.setName("Channel Type Index");
+        b.addFieldToEnd(bf);
+
+        b.setLabelField(SchemaConstants.SyncChannelName);
+
+        // link in the class we specified
+
+        b.createHook();
+
+        // and record the base
+
+        setBase(b);
+
+        // and lock in the namespaces
+
+        for (DBNameSpace namespace: nameSpaces)
+          {
+            namespace.schemaEditCommit();
+          }
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("remote :" + ex);
+        throw new RuntimeException("remote :" + ex);
       }
 
     loading = false;
@@ -2224,211 +2224,211 @@ public final class DBStore implements JythonMap {
 
     try
       {
-	if (getNameSpace("buildertask") == null)
-	  {
-	    Ganymede.debug("Adding buildertask name space");
+        if (getNameSpace("buildertask") == null)
+          {
+            Ganymede.debug("Adding buildertask name space");
 
-	    // note!  we have had buildertask in the server DBStore
-	    // since 1998.. if we're dealing with a ganymede.db file
-	    // that doesn't have it, it must be old indeed!
+            // note!  we have had buildertask in the server DBStore
+            // since 1998.. if we're dealing with a ganymede.db file
+            // that doesn't have it, it must be old indeed!
 
-	    DBNameSpace ns = new DBNameSpace("buildertask", true);
-	    nameSpaces.addElement(ns);
-	  }
+            DBNameSpace ns = new DBNameSpace("buildertask", true);
+            nameSpaces.addElement(ns);
+          }
 
-	if (getObjectBase(SchemaConstants.SyncChannelBase) == null)
-	  {
-	    Ganymede.debug("Adding Sync Channel ObjectBase");
+        if (getObjectBase(SchemaConstants.SyncChannelBase) == null)
+          {
+            Ganymede.debug("Adding Sync Channel ObjectBase");
 
-	    // create Sync Channel Base
+            // create Sync Channel Base
 
-	    b = new DBObjectBase(this, false);
-	    b.setName("Sync Channel");
-	    b.setClassInfo("arlut.csd.ganymede.server.syncChannelCustom", null);
-	    b.setTypeID(SchemaConstants.SyncChannelBase); // 7
+            b = new DBObjectBase(this, false);
+            b.setName("Sync Channel");
+            b.setClassInfo("arlut.csd.ganymede.server.syncChannelCustom", null);
+            b.setTypeID(SchemaConstants.SyncChannelBase); // 7
 
-	    DBBaseCategory adminCategory = (DBBaseCategory) getCategoryNode("/Admin-Level Objects");
+            DBBaseCategory adminCategory = (DBBaseCategory) getCategoryNode("/Admin-Level Objects");
 
-	    adminCategory.addNodeAfter(b, null); // add it to the end is ok
+            adminCategory.addNodeAfter(b, null); // add it to the end is ok
 
-	    bf = new DBObjectBaseField(b);
-	    bf.setID(SchemaConstants.SyncChannelName);
-	    bf.setType(FieldType.STRING);
-	    bf.setName("Name");
-	    bf.setNameSpace("buildertask");	// same namespace as tasks
-	    b.addFieldToEnd(bf);
+            bf = new DBObjectBaseField(b);
+            bf.setID(SchemaConstants.SyncChannelName);
+            bf.setType(FieldType.STRING);
+            bf.setName("Name");
+            bf.setNameSpace("buildertask");     // same namespace as tasks
+            b.addFieldToEnd(bf);
 
-	    bf = new DBObjectBaseField(b);
-	    bf.setID(SchemaConstants.SyncChannelTypeString);
-	    bf.setType(FieldType.STRING);
-	    bf.setName("Sync Channel Type");
-	    b.addFieldToEnd(bf);
+            bf = new DBObjectBaseField(b);
+            bf.setID(SchemaConstants.SyncChannelTypeString);
+            bf.setType(FieldType.STRING);
+            bf.setName("Sync Channel Type");
+            b.addFieldToEnd(bf);
 
-	    bf = new DBObjectBaseField(b);
-	    bf.setID(SchemaConstants.SyncChannelClassName);
-	    bf.setType(FieldType.STRING);
-	    bf.setName("Sync Master Classname");
-	    b.addFieldToEnd(bf);
+            bf = new DBObjectBaseField(b);
+            bf.setID(SchemaConstants.SyncChannelClassName);
+            bf.setType(FieldType.STRING);
+            bf.setName("Sync Master Classname");
+            b.addFieldToEnd(bf);
 
-	    bf = new DBObjectBaseField(b);
-	    bf.setID(SchemaConstants.SyncChannelDirectory);
-	    bf.setType(FieldType.STRING);
-	    bf.setName("Queue Directory");
-	    bf.setComment("Location of the sync channel directory on disk");
-	    b.addFieldToEnd(bf);
+            bf = new DBObjectBaseField(b);
+            bf.setID(SchemaConstants.SyncChannelDirectory);
+            bf.setType(FieldType.STRING);
+            bf.setName("Queue Directory");
+            bf.setComment("Location of the sync channel directory on disk");
+            b.addFieldToEnd(bf);
 
-	    bf = new DBObjectBaseField(b);
-	    bf.setID(SchemaConstants.SyncChannelFullStateFile);
-	    bf.setType(FieldType.STRING);
-	    bf.setName("Full State File");
-	    bf.setComment("Path to the file to use for full-state XML dumps");
-	    b.addFieldToEnd(bf);
+            bf = new DBObjectBaseField(b);
+            bf.setID(SchemaConstants.SyncChannelFullStateFile);
+            bf.setType(FieldType.STRING);
+            bf.setName("Full State File");
+            bf.setComment("Path to the file to use for full-state XML dumps");
+            b.addFieldToEnd(bf);
 
-	    bf = new DBObjectBaseField(b);
-	    bf.setID(SchemaConstants.SyncChannelServicer);
-	    bf.setType(FieldType.STRING);
-	    bf.setName("Service Program");
-	    bf.setComment("The location of the program to service this sync channel");
-	    b.addFieldToEnd(bf);
+            bf = new DBObjectBaseField(b);
+            bf.setID(SchemaConstants.SyncChannelServicer);
+            bf.setType(FieldType.STRING);
+            bf.setName("Service Program");
+            bf.setComment("The location of the program to service this sync channel");
+            b.addFieldToEnd(bf);
 
-	    bf = new DBObjectBaseField(b);
-	    bf.setID(SchemaConstants.SyncChannelFields);
-	    bf.setType(FieldType.FIELDOPTIONS);
-	    bf.setName("Sync Data");
-	    bf.setComment("The definitions for what object and fields we want to include in this sync channel");
-	    b.addFieldToEnd(bf);
+            bf = new DBObjectBaseField(b);
+            bf.setID(SchemaConstants.SyncChannelFields);
+            bf.setType(FieldType.FIELDOPTIONS);
+            bf.setName("Sync Data");
+            bf.setComment("The definitions for what object and fields we want to include in this sync channel");
+            b.addFieldToEnd(bf);
 
-	    bf = new DBObjectBaseField(b);
-	    bf.setID(SchemaConstants.SyncChannelPlaintextOK);
-	    bf.setType(FieldType.BOOLEAN);
-	    bf.setName("Allow Plaintext Passwords");
-	    bf.setComment("Allow Plaintext Passwords to be written to this Sync Channel");
-	    b.addFieldToEnd(bf);
+            bf = new DBObjectBaseField(b);
+            bf.setID(SchemaConstants.SyncChannelPlaintextOK);
+            bf.setType(FieldType.BOOLEAN);
+            bf.setName("Allow Plaintext Passwords");
+            bf.setComment("Allow Plaintext Passwords to be written to this Sync Channel");
+            b.addFieldToEnd(bf);
 
-	    bf = new DBObjectBaseField(b);
-	    bf.setID(SchemaConstants.SyncChannelTypeNum);
-	    bf.setType(FieldType.NUMERIC);
-	    bf.setName("Channel Type Index");
-	    b.addFieldToEnd(bf);
+            bf = new DBObjectBaseField(b);
+            bf.setID(SchemaConstants.SyncChannelTypeNum);
+            bf.setType(FieldType.NUMERIC);
+            bf.setName("Channel Type Index");
+            b.addFieldToEnd(bf);
 
-	    b.setLabelField(SchemaConstants.SyncChannelName);
+            b.setLabelField(SchemaConstants.SyncChannelName);
 
-	    // link in the class we specified
+            // link in the class we specified
 
-	    b.createHook();
+            b.createHook();
 
-	    setBase(b);
-	  }
-	else
-	  {
-	    // we added the SyncChannelTypeString, SyncChannelTypeNum
-	    // and SyncChannelFullStateFile fields after releasing a
-	    // version without, check to see if we need to add them
+            setBase(b);
+          }
+        else
+          {
+            // we added the SyncChannelTypeString, SyncChannelTypeNum
+            // and SyncChannelFullStateFile fields after releasing a
+            // version without, check to see if we need to add them
 
-	    // note that we redefined the SyncChannel type to have
-	    // these fields in DBStore version 2.11.
+            // note that we redefined the SyncChannel type to have
+            // these fields in DBStore version 2.11.
 
-	    DBObjectBase syncBase = (DBObjectBase) getObjectBase(SchemaConstants.SyncChannelBase);
-	    syncBase.setEditingMode(DBObjectBase.EditingMode.LOADING);
+            DBObjectBase syncBase = (DBObjectBase) getObjectBase(SchemaConstants.SyncChannelBase);
+            syncBase.setEditingMode(DBObjectBase.EditingMode.LOADING);
 
-	    try
-	      {
-		if (syncBase.getField(SchemaConstants.SyncChannelTypeString) == null)
-		  {
-		    bf = new DBObjectBaseField(syncBase);
-		    bf.setID(SchemaConstants.SyncChannelTypeString);
-		    bf.setType(FieldType.STRING);
-		    bf.setName("Sync Channel Type");
-		    syncBase.addFieldAfter(bf, SchemaConstants.SyncChannelName);
-		  }
+            try
+              {
+                if (syncBase.getField(SchemaConstants.SyncChannelTypeString) == null)
+                  {
+                    bf = new DBObjectBaseField(syncBase);
+                    bf.setID(SchemaConstants.SyncChannelTypeString);
+                    bf.setType(FieldType.STRING);
+                    bf.setName("Sync Channel Type");
+                    syncBase.addFieldAfter(bf, SchemaConstants.SyncChannelName);
+                  }
 
-		if (syncBase.getField(SchemaConstants.SyncChannelClassName) == null)
-		  {
-		    bf = new DBObjectBaseField(syncBase);
-		    bf.setID(SchemaConstants.SyncChannelClassName);
-		    bf.setType(FieldType.STRING);
-		    bf.setName("Sync Master Classname");
-		    syncBase.addFieldAfter(bf, SchemaConstants.SyncChannelTypeString);
-		  }
+                if (syncBase.getField(SchemaConstants.SyncChannelClassName) == null)
+                  {
+                    bf = new DBObjectBaseField(syncBase);
+                    bf.setID(SchemaConstants.SyncChannelClassName);
+                    bf.setType(FieldType.STRING);
+                    bf.setName("Sync Master Classname");
+                    syncBase.addFieldAfter(bf, SchemaConstants.SyncChannelTypeString);
+                  }
 
-		if (syncBase.getField(SchemaConstants.SyncChannelFullStateFile) == null)
-		  {
-		    bf = new DBObjectBaseField(syncBase);
-		    bf.setID(SchemaConstants.SyncChannelFullStateFile);
-		    bf.setType(FieldType.STRING);
-		    bf.setName("Full State File");
-		    bf.setComment("Path to the file to use for full-state XML dumps");
-		    syncBase.addFieldAfter(bf, SchemaConstants.SyncChannelDirectory);
-		  }
+                if (syncBase.getField(SchemaConstants.SyncChannelFullStateFile) == null)
+                  {
+                    bf = new DBObjectBaseField(syncBase);
+                    bf.setID(SchemaConstants.SyncChannelFullStateFile);
+                    bf.setType(FieldType.STRING);
+                    bf.setName("Full State File");
+                    bf.setComment("Path to the file to use for full-state XML dumps");
+                    syncBase.addFieldAfter(bf, SchemaConstants.SyncChannelDirectory);
+                  }
 
-		if (syncBase.getField(SchemaConstants.SyncChannelTypeNum) == null)
-		  {
-		    bf = new DBObjectBaseField(syncBase);
-		    bf.setID(SchemaConstants.SyncChannelTypeNum);
-		    bf.setType(FieldType.NUMERIC);
-		    bf.setName("Channel Type Index");
-		    syncBase.addFieldToEnd(bf);
-		  }
-	      }
-	    finally
-	      {
-		syncBase.setEditingMode(DBObjectBase.EditingMode.LOCKED);
-	      }
-	  }
+                if (syncBase.getField(SchemaConstants.SyncChannelTypeNum) == null)
+                  {
+                    bf = new DBObjectBaseField(syncBase);
+                    bf.setID(SchemaConstants.SyncChannelTypeNum);
+                    bf.setType(FieldType.NUMERIC);
+                    bf.setName("Channel Type Index");
+                    syncBase.addFieldToEnd(bf);
+                  }
+              }
+            finally
+              {
+                syncBase.setEditingMode(DBObjectBase.EditingMode.LOCKED);
+              }
+          }
 
-	// now make sure that the Task base has the TaskOptionStrings field
+        // now make sure that the Task base has the TaskOptionStrings field
 
-	DBObjectBase taskBase = (DBObjectBase) getObjectBase(SchemaConstants.TaskBase);
+        DBObjectBase taskBase = (DBObjectBase) getObjectBase(SchemaConstants.TaskBase);
 
-	if (taskBase.getField(SchemaConstants.TaskOptionStrings) == null)
-	  {
-	    Ganymede.debug("Adding TaskOptionStrings to task base");
+        if (taskBase.getField(SchemaConstants.TaskOptionStrings) == null)
+          {
+            Ganymede.debug("Adding TaskOptionStrings to task base");
 
-	    bf = new DBObjectBaseField(taskBase);
-	    bf.setID(SchemaConstants.TaskOptionStrings);
-	    bf.setType(FieldType.STRING);
-	    bf.setArray(true);
-	    bf.setName("Option Strings");
-	    bf.setComment("Optional task parameters, interpreted by specific tasks if needed");
-	    taskBase.addFieldToEnd(bf);
-	  }
+            bf = new DBObjectBaseField(taskBase);
+            bf.setID(SchemaConstants.TaskOptionStrings);
+            bf.setType(FieldType.STRING);
+            bf.setArray(true);
+            bf.setName("Option Strings");
+            bf.setComment("Optional task parameters, interpreted by specific tasks if needed");
+            taskBase.addFieldToEnd(bf);
+          }
 
-	// make sure that the ObjectEvent type has the new hidden label field
+        // make sure that the ObjectEvent type has the new hidden label field
 
-	DBObjectBase objectEventBase = (DBObjectBase) getObjectBase(SchemaConstants.ObjectEventBase);
+        DBObjectBase objectEventBase = (DBObjectBase) getObjectBase(SchemaConstants.ObjectEventBase);
 
-	if (objectEventBase.getField(SchemaConstants.ObjectEventLabel) == null)
-	  {
-	    Ganymede.debug("Adding ObjectEventLabel to ObjectEvent base");
+        if (objectEventBase.getField(SchemaConstants.ObjectEventLabel) == null)
+          {
+            Ganymede.debug("Adding ObjectEventLabel to ObjectEvent base");
 
-	    bf = new DBObjectBaseField(objectEventBase);
-	    bf.setID(SchemaConstants.ObjectEventLabel);
-	    bf.setName("Hidden Label");
-	    bf.setType(FieldType.STRING);
-	    bf.setNameSpace("eventtoken");
-	    bf.setVisibility(false);	// hidden
-	    bf.setComment("Hidden composite label field.  The contents of this label field is automatically set from the Event Token and Object Type Name fields.");
-	    objectEventBase.addFieldToStart(bf);
-	  }
+            bf = new DBObjectBaseField(objectEventBase);
+            bf.setID(SchemaConstants.ObjectEventLabel);
+            bf.setName("Hidden Label");
+            bf.setType(FieldType.STRING);
+            bf.setNameSpace("eventtoken");
+            bf.setVisibility(false);    // hidden
+            bf.setComment("Hidden composite label field.  The contents of this label field is automatically set from the Event Token and Object Type Name fields.");
+            objectEventBase.addFieldToStart(bf);
+          }
 
-	objectEventBase.setLabelField(SchemaConstants.ObjectEventLabel);
+        objectEventBase.setLabelField(SchemaConstants.ObjectEventLabel);
 
-	// and this last check is for the old ARL database, which
-	// somehow did not get namespace constrained on the task name
-	// field
+        // and this last check is for the old ARL database, which
+        // somehow did not get namespace constrained on the task name
+        // field
 
-	bf = (DBObjectBaseField) taskBase.getField(SchemaConstants.TaskName);
+        bf = (DBObjectBaseField) taskBase.getField(SchemaConstants.TaskName);
 
-	if (bf.getNameSpace() == null)
-	  {
-	    Ganymede.debug("Applying namespace constraint to task name");
+        if (bf.getNameSpace() == null)
+          {
+            Ganymede.debug("Applying namespace constraint to task name");
 
-	    bf.setNameSpace("buildertask");
-	  }
+            bf.setNameSpace("buildertask");
+          }
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException(ex);
+        throw new RuntimeException(ex);
       }
   }
 
@@ -2443,7 +2443,7 @@ public final class DBStore implements JythonMap {
   {
     if (debug)
       {
-	System.err.println(string);
+        System.err.println(string);
       }
   }
 
@@ -2460,23 +2460,23 @@ public final class DBStore implements JythonMap {
 
     for (DBObjectBase base: objectBases.values())
       {
-	if (base.getLabelField() == -1)
-	  {
-	    // "Error, object base {0} has no label field defined."
-	    System.err.println(ts.l("verify_label_fields.no_label", base.getName()));
-	    ok = false;
-	  }
-	else
-	  {
-	    DBObjectBaseField labelFieldDef = (DBObjectBaseField) base.getField(base.getLabelField());
+        if (base.getLabelField() == -1)
+          {
+            // "Error, object base {0} has no label field defined."
+            System.err.println(ts.l("verify_label_fields.no_label", base.getName()));
+            ok = false;
+          }
+        else
+          {
+            DBObjectBaseField labelFieldDef = (DBObjectBaseField) base.getField(base.getLabelField());
 
-	    if (labelFieldDef.getNameSpace() == null)
-	      {
-		// "Error, object base {0}''s label field ({1}) must be namespace-constrained."
-		System.err.println(ts.l("verify_label_fields.no_namespace", base.getName(), labelFieldDef.getName()));
-		ok = false;
-	      }
-	  }
+            if (labelFieldDef.getNameSpace() == null)
+              {
+                // "Error, object base {0}''s label field ({1}) must be namespace-constrained."
+                System.err.println(ts.l("verify_label_fields.no_namespace", base.getName(), labelFieldDef.getName()));
+                ok = false;
+              }
+          }
       }
 
     return ok;
@@ -2512,11 +2512,11 @@ public final class DBStore implements JythonMap {
 
     try
       {
-	gSession = new GanymedeSession();
+        gSession = new GanymedeSession();
       }
     catch (RemoteException ex)
       {
-	throw new Error("RMI system could not initialize GanymedeSession");
+        throw new Error("RMI system could not initialize GanymedeSession");
       }
 
     session = gSession.getDBSession();
@@ -2524,313 +2524,313 @@ public final class DBStore implements JythonMap {
 
     try
       {
-	// make sure the supergash owner group exists
+        // make sure the supergash owner group exists
 
-	if (!exists(session, supergashOwner))
-	  {
-	    System.err.println("Creating supergash Owner Group");
+        if (!exists(session, supergashOwner))
+          {
+            System.err.println("Creating supergash Owner Group");
 
-	    retVal = session.createDBObject(SchemaConstants.OwnerBase, supergashOwner, null);
+            retVal = session.createDBObject(SchemaConstants.OwnerBase, supergashOwner, null);
 
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		throw new RuntimeException("Couldn't create supergash owner group.");
-	      }
+            if (!ReturnVal.didSucceed(retVal))
+              {
+                throw new RuntimeException("Couldn't create supergash owner group.");
+              }
 
-	    eObj = (DBEditObject) retVal.getObject();
+            eObj = (DBEditObject) retVal.getObject();
 
-	    s = (StringDBField) eObj.getField("Name");
-	    s.setValueLocal(Ganymede.rootname);
-	  }
+            s = (StringDBField) eObj.getField("Name");
+            s.setValueLocal(Ganymede.rootname);
+          }
 
-	// make sure the supergash admin persona object exists
+        // make sure the supergash admin persona object exists
 
-	if (!exists(session, supergash))
-	  {
-	    System.err.println("Creating supergash persona object");
+        if (!exists(session, supergash))
+          {
+            System.err.println("Creating supergash persona object");
 
-	    retVal = session.createDBObject(SchemaConstants.PersonaBase, supergash, null);
+            retVal = session.createDBObject(SchemaConstants.PersonaBase, supergash, null);
 
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		throw new RuntimeException("Couldn't create supergash admin persona.");
-	      }
+            if (!ReturnVal.didSucceed(retVal))
+              {
+                throw new RuntimeException("Couldn't create supergash admin persona.");
+              }
 
-	    eObj = (DBEditObject) retVal.getObject();
+            eObj = (DBEditObject) retVal.getObject();
 
-	    // set the user visible name
+            // set the user visible name
 
-	    s = (StringDBField) eObj.getField(SchemaConstants.PersonaNameField);
-	    s.setValueLocal(Ganymede.rootname);
+            s = (StringDBField) eObj.getField(SchemaConstants.PersonaNameField);
+            s.setValueLocal(Ganymede.rootname);
 
-	    // check to make sure the invisible label field was properly set
+            // check to make sure the invisible label field was properly set
 
-	    s = (StringDBField) eObj.getField(SchemaConstants.PersonaLabelField);
+            s = (StringDBField) eObj.getField(SchemaConstants.PersonaLabelField);
 
-	    if (!s.getValueString().equals(Ganymede.rootname))
-	      {
-		System.err.println("*** Error, supergash label field not automatically set..");
-		System.err.println("*** problem in adminPersonaCustom? " + s.getValueString());
+            if (!s.getValueString().equals(Ganymede.rootname))
+              {
+                System.err.println("*** Error, supergash label field not automatically set..");
+                System.err.println("*** problem in adminPersonaCustom? " + s.getValueString());
 
-		s.setValueLocal(Ganymede.rootname);
-	      }
+                s.setValueLocal(Ganymede.rootname);
+              }
 
-	    p = (PasswordDBField) eObj.getField(SchemaConstants.PersonaPasswordField);
-	    p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
+            p = (PasswordDBField) eObj.getField(SchemaConstants.PersonaPasswordField);
+            p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
 
-	    b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminConsole);
-	    b.setValueLocal(Boolean.TRUE);
+            b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminConsole);
+            b.setValueLocal(Boolean.TRUE);
 
-	    b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminPower);
-	    b.setValueLocal(Boolean.TRUE);
-	  }
-	else
-	  {
-	    eObj = session.editDBObject(supergash);
+            b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminPower);
+            b.setValueLocal(Boolean.TRUE);
+          }
+        else
+          {
+            eObj = session.editDBObject(supergash);
 
-	    if (eObj == null)
-	      {
-		throw new RuntimeException("Couldn't edit supergash admin persona.");
-	      }
+            if (eObj == null)
+              {
+                throw new RuntimeException("Couldn't edit supergash admin persona.");
+              }
 
-	    if (Ganymede.rootname != null && !Ganymede.rootname.equals(""))
-	      {
-		s = (StringDBField) eObj.getField(SchemaConstants.PersonaNameField);
-		s.setValueLocal(Ganymede.rootname);
-	      }
+            if (Ganymede.rootname != null && !Ganymede.rootname.equals(""))
+              {
+                s = (StringDBField) eObj.getField(SchemaConstants.PersonaNameField);
+                s.setValueLocal(Ganymede.rootname);
+              }
 
-	    if (Ganymede.resetadmin)
-	      {
-		p = (PasswordDBField) eObj.getField(SchemaConstants.PersonaPasswordField);
-		p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
-	      }
+            if (Ganymede.resetadmin)
+              {
+                p = (PasswordDBField) eObj.getField(SchemaConstants.PersonaPasswordField);
+                p.setPlainTextPass(Ganymede.defaultrootpassProperty); // default supergash password
+              }
 
-	    b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminConsole);
-	    b.setValueLocal(Boolean.TRUE);
+            b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminConsole);
+            b.setValueLocal(Boolean.TRUE);
 
-	    b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminPower);
-	    b.setValueLocal(Boolean.TRUE);
-	  }
+            b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminPower);
+            b.setValueLocal(Boolean.TRUE);
+          }
 
-	// make sure the supergash admin persona and supergash owner group are linked.
+        // make sure the supergash admin persona and supergash owner group are linked.
 
-	eObj = session.editDBObject(supergash);
+        eObj = session.editDBObject(supergash);
 
-	i = (InvidDBField) eObj.getField(SchemaConstants.PersonaGroupsField);
+        i = (InvidDBField) eObj.getField(SchemaConstants.PersonaGroupsField);
 
-	if (!i.containsElement(supergashOwner))
-	  {
-	    System.err.println("Linking supergash Persona object to supergash Owner Group");
-	    i.addElementLocal(supergashOwner);
-	  }
+        if (!i.containsElement(supergashOwner))
+          {
+            System.err.println("Linking supergash Persona object to supergash Owner Group");
+            i.addElementLocal(supergashOwner);
+          }
 
-	// make sure the monitor object exists if the properties file defines one
+        // make sure the monitor object exists if the properties file defines one
 
-	if (!exists(session, monitor) && Ganymede.monitornameProperty != null &&
-	    Ganymede.defaultmonitorpassProperty != null)
-	  {
-	    System.err.println("Creating monitor persona");
+        if (!exists(session, monitor) && Ganymede.monitornameProperty != null &&
+            Ganymede.defaultmonitorpassProperty != null)
+          {
+            System.err.println("Creating monitor persona");
 
-	    retVal = session.createDBObject(SchemaConstants.PersonaBase, monitor, null);
+            retVal = session.createDBObject(SchemaConstants.PersonaBase, monitor, null);
 
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		throw new RuntimeException("Couldn't create monitor admin persona.");
-	      }
+            if (!ReturnVal.didSucceed(retVal))
+              {
+                throw new RuntimeException("Couldn't create monitor admin persona.");
+              }
 
-	    if (Ganymede.monitornameProperty == null)
-	      {
-		throw new NullPointerException("monitor name property not loaded, can't initialize monitor account");
-	      }
+            if (Ganymede.monitornameProperty == null)
+              {
+                throw new NullPointerException("monitor name property not loaded, can't initialize monitor account");
+              }
 
-	    eObj = (DBEditObject) retVal.getObject();
+            eObj = (DBEditObject) retVal.getObject();
 
-	    s = (StringDBField) eObj.getField(SchemaConstants.PersonaNameField);
-	    s.setValueLocal(Ganymede.monitornameProperty);
+            s = (StringDBField) eObj.getField(SchemaConstants.PersonaNameField);
+            s.setValueLocal(Ganymede.monitornameProperty);
 
-	    // check our autonomic functioning
+            // check our autonomic functioning
 
-	    s = (StringDBField) eObj.getField(SchemaConstants.PersonaLabelField);
+            s = (StringDBField) eObj.getField(SchemaConstants.PersonaLabelField);
 
-	    if (!s.getValueString().equals(Ganymede.monitornameProperty))
-	      {
-		System.err.println("*** Error, monitor label field not automatically set..");
-		System.err.println("*** problem in adminPersonaCustom? " + s.getValueString());
+            if (!s.getValueString().equals(Ganymede.monitornameProperty))
+              {
+                System.err.println("*** Error, monitor label field not automatically set..");
+                System.err.println("*** problem in adminPersonaCustom? " + s.getValueString());
 
-		s.setValueLocal(Ganymede.monitornameProperty);
-	      }
+                s.setValueLocal(Ganymede.monitornameProperty);
+              }
 
-	    //	    s.setValueLocal(Ganymede.monitornameProperty);
+            //      s.setValueLocal(Ganymede.monitornameProperty);
 
-	    p = (PasswordDBField) eObj.getField(SchemaConstants.PersonaPasswordField);
+            p = (PasswordDBField) eObj.getField(SchemaConstants.PersonaPasswordField);
 
-	    if (Ganymede.defaultmonitorpassProperty != null)
-	      {
-		p.setPlainTextPass(Ganymede.defaultmonitorpassProperty); // default monitor password
-	      }
-	    else
-	      {
-		throw new NullPointerException("monitor password property not loaded, can't initialize monitor account");
-	      }
+            if (Ganymede.defaultmonitorpassProperty != null)
+              {
+                p.setPlainTextPass(Ganymede.defaultmonitorpassProperty); // default monitor password
+              }
+            else
+              {
+                throw new NullPointerException("monitor password property not loaded, can't initialize monitor account");
+              }
 
-	    b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminConsole);
-	    b.setValueLocal(Boolean.TRUE);
+            b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminConsole);
+            b.setValueLocal(Boolean.TRUE);
 
-	    b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminPower);
-	    b.setValueLocal(Boolean.FALSE);
-	  }
+            b = (BooleanDBField) eObj.getField(SchemaConstants.PersonaAdminPower);
+            b.setValueLocal(Boolean.FALSE);
+          }
 
-	// make sure we have the default role object
+        // make sure we have the default role object
 
-	if (!exists(session, defaultRole))
-	  {
-	    System.err.println("Creating default Role object");
+        if (!exists(session, defaultRole))
+          {
+            System.err.println("Creating default Role object");
 
-	    retVal = session.createDBObject(SchemaConstants.RoleBase, defaultRole, null);
+            retVal = session.createDBObject(SchemaConstants.RoleBase, defaultRole, null);
 
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		throw new RuntimeException("Couldn't create permissions default object.");
-	      }
+            if (!ReturnVal.didSucceed(retVal))
+              {
+                throw new RuntimeException("Couldn't create permissions default object.");
+              }
 
-	    eObj = (DBEditObject) retVal.getObject();
+            eObj = (DBEditObject) retVal.getObject();
 
-	    s = (StringDBField) eObj.getField(SchemaConstants.RoleName);
-	    s.setValueLocal("Default");
+            s = (StringDBField) eObj.getField(SchemaConstants.RoleName);
+            s.setValueLocal("Default");
 
-	    // what can users do with objects they own?  Includes users themselves
+            // what can users do with objects they own?  Includes users themselves
 
-	    pm = (PermissionMatrixDBField) eObj.getField(SchemaConstants.RoleMatrix);
+            pm = (PermissionMatrixDBField) eObj.getField(SchemaConstants.RoleMatrix);
 
-	    // view self, nothing else
+            // view self, nothing else
 
-	    pm.setPerm(SchemaConstants.UserBase, PermEntry.getPermEntry(true, false, false, false));
-	  }
+            pm.setPerm(SchemaConstants.UserBase, PermEntry.getPermEntry(true, false, false, false));
+          }
 
-	createSysEventObj(session, "abnormallogout", "Unusual Logout", null, false);
+        createSysEventObj(session, "abnormallogout", "Unusual Logout", null, false);
 
-	createSysEventObj(session, "adminconnect", "Admin Console Attached",
-			  "Admin Console Attached", false);
+        createSysEventObj(session, "adminconnect", "Admin Console Attached",
+                          "Admin Console Attached", false);
 
-	createSysEventObj(session, "admindisconnect", "Admin Console Disconnected",
-			  "Admin Console Disconnected", false);
+        createSysEventObj(session, "admindisconnect", "Admin Console Disconnected",
+                          "Admin Console Disconnected", false);
 
-	createSysEventObj(session, "badpass", "Failed login attempt",
-			  "Bad username and/or password", true);
+        createSysEventObj(session, "badpass", "Failed login attempt",
+                          "Bad username and/or password", true);
 
-	createSysEventObj(session, "deleteobject", "Object Deleted",
-			  "This object has been deleted.", true);
+        createSysEventObj(session, "deleteobject", "Object Deleted",
+                          "This object has been deleted.", true);
 
-	createSysEventObj(session, "dump", "Database Dump", "Database Dump", false);
+        createSysEventObj(session, "dump", "Database Dump", "Database Dump", false);
 
-	createSysEventObj(session, "expirationwarn", "Expiration Warning",
-			  "This object is going to expire soon.", false);
+        createSysEventObj(session, "expirationwarn", "Expiration Warning",
+                          "This object is going to expire soon.", false);
 
-	createSysEventObj(session, "expirenotify", "Expiration Notification",
-			  "This object has been expired.", false);
+        createSysEventObj(session, "expirenotify", "Expiration Notification",
+                          "This object has been expired.", false);
 
         createSysEventObj(session, "externalerror", "Error Running External Process",
                           "The Ganymede Server encountered an error when attempting to run an external process.",
                           false);
 
-	createSysEventObj(session, "finishtransaction", "transaction end", null, false);
+        createSysEventObj(session, "finishtransaction", "transaction end", null, false);
 
-	createSysEventObj(session, "goodlogin", "Successful login", null, false);
+        createSysEventObj(session, "goodlogin", "Successful login", null, false);
 
-	createSysEventObj(session, "inactivateobject", "Object Inactivation",
-			  "This object has been inactivated", true);
+        createSysEventObj(session, "inactivateobject", "Object Inactivation",
+                          "This object has been inactivated", true);
 
-	createSysEventObj(session, "journalreset", "Journal File Reset", "Journal file reset", false);
+        createSysEventObj(session, "journalreset", "Journal File Reset", "Journal file reset", false);
 
-	createSysEventObj(session, "normallogout", "Normal Logout", null, false);
+        createSysEventObj(session, "normallogout", "Normal Logout", null, false);
 
-	createSysEventObj(session, "objectchanged", "Object Changed", "Object Changed", true);
+        createSysEventObj(session, "objectchanged", "Object Changed", "Object Changed", true);
 
-	createSysEventObj(session, "objectcreated", "Object Created", "Object Created", true);
+        createSysEventObj(session, "objectcreated", "Object Created", "Object Created", true);
 
-	createSysEventObj(session, "reactivateobject", "Object Reactivation",
-			  "This object has been reactivated", true);
+        createSysEventObj(session, "reactivateobject", "Object Reactivation",
+                          "This object has been reactivated", true);
 
-	createSysEventObj(session, "removalwarn", "Removal Warning", "This object is going to be removed", false);
+        createSysEventObj(session, "removalwarn", "Removal Warning", "This object is going to be removed", false);
 
-	createSysEventObj(session, "removenotify", "Removal Notification", "This object has been removed", false);
+        createSysEventObj(session, "removenotify", "Removal Notification", "This object has been removed", false);
 
-	createSysEventObj(session, "restart", "Server Restarted", "The Ganymede server was restarted", false);
+        createSysEventObj(session, "restart", "Server Restarted", "The Ganymede server was restarted", false);
 
-	createSysEventObj(session, "shutdown", "Server shutdown",
-			  "The Ganymede server was cleanly shut down", false);
+        createSysEventObj(session, "shutdown", "Server shutdown",
+                          "The Ganymede server was cleanly shut down", false);
 
-	// Create the start transaction oBject.  This object is
-	// consulted by the DBLog class to guide how mail should be
-	// handled for transaction logs.
+        // Create the start transaction oBject.  This object is
+        // consulted by the DBLog class to guide how mail should be
+        // handled for transaction logs.
 
-	DBEditObject transactionEvent = createSysEventObj(session,
-							  "starttransaction",
-							  "transaction start", null, false);
+        DBEditObject transactionEvent = createSysEventObj(session,
+                                                          "starttransaction",
+                                                          "transaction start", null, false);
 
-	if (transactionEvent != null)
-	  {
-	    transactionEvent.setFieldValueLocal(SchemaConstants.EventMailBoolean, Boolean.TRUE);
-	    transactionEvent.setFieldValueLocal(SchemaConstants.EventMailToSelf, Boolean.TRUE);
-	    transactionEvent.setFieldValueLocal(SchemaConstants.EventMailOwners, Boolean.TRUE);
-	    transactionEvent.setFieldValueLocal(SchemaConstants.NotesField,
-						"This system event object is consulted to determine whether " +
-						"mail should be sent\nout when a transaction is committed.\n\n" +
-						"If the 'Event Mail' checkbox is set to false, no transaction log " +
-						"mail will be sent\nfrom the Ganymede server, ever.\n\nIf the " +
-						"'Cc: Admin' checkbox is set to true, the admin who committed the " +
-						"transaction will receive a copy of the transaction log.\n\n" +
-						"If the 'Cc: Owner Groups' checkbox is set to true, the members of " +
-						"the owner groups whose objects were affected by the transaction " +
-						"committed will each receive a copy of that portion of the transaction " +
-						"log that concerns objects owned by those admins.");
-	  }
+        if (transactionEvent != null)
+          {
+            transactionEvent.setFieldValueLocal(SchemaConstants.EventMailBoolean, Boolean.TRUE);
+            transactionEvent.setFieldValueLocal(SchemaConstants.EventMailToSelf, Boolean.TRUE);
+            transactionEvent.setFieldValueLocal(SchemaConstants.EventMailOwners, Boolean.TRUE);
+            transactionEvent.setFieldValueLocal(SchemaConstants.NotesField,
+                                                "This system event object is consulted to determine whether " +
+                                                "mail should be sent\nout when a transaction is committed.\n\n" +
+                                                "If the 'Event Mail' checkbox is set to false, no transaction log " +
+                                                "mail will be sent\nfrom the Ganymede server, ever.\n\nIf the " +
+                                                "'Cc: Admin' checkbox is set to true, the admin who committed the " +
+                                                "transaction will receive a copy of the transaction log.\n\n" +
+                                                "If the 'Cc: Owner Groups' checkbox is set to true, the members of " +
+                                                "the owner groups whose objects were affected by the transaction " +
+                                                "committed will each receive a copy of that portion of the transaction " +
+                                                "log that concerns objects owned by those admins.");
+          }
 
-	// we commit the transaction at the DBStore level because we don't
-	// want to mess with running builder tasks
+        // we commit the transaction at the DBStore level because we don't
+        // want to mess with running builder tasks
 
-	retVal = session.commitTransaction();
+        retVal = session.commitTransaction();
 
-	// if the DBSession commit failed, we won't get an automatic
-	// abort..  do that here.
+        // if the DBSession commit failed, we won't get an automatic
+        // abort..  do that here.
 
-	try
-	  {
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		try
-		  {
-		    session.abortTransaction();
-		  }
-		catch (Throwable ex)
-		  {
-		    Ganymede.logError(ex);
-		  }
-		finally
-		  {
-		    success=true;	// true enough, anyway
-		  }
-	      }
-	  }
-	finally
-	  {
-	    gSession.logout();
-	  }
+        try
+          {
+            if (!ReturnVal.didSucceed(retVal))
+              {
+                try
+                  {
+                    session.abortTransaction();
+                  }
+                catch (Throwable ex)
+                  {
+                    Ganymede.logError(ex);
+                  }
+                finally
+                  {
+                    success=true;       // true enough, anyway
+                  }
+              }
+          }
+        finally
+          {
+            gSession.logout();
+          }
 
-	success = true;
+        success = true;
       }
     catch (Throwable ex)
       {
-	Ganymede.logError(ex);
+        Ganymede.logError(ex);
       }
     finally
       {
-	if (!success)
-	  {
-	    session.abortTransaction();
+        if (!success)
+          {
+            session.abortTransaction();
 
-	    gSession.logout();
-	  }
+            gSession.logout();
+          }
       }
   }
 
@@ -2848,8 +2848,8 @@ public final class DBStore implements JythonMap {
    */
 
   private DBEditObject createSysEventObj(DBSession session,
-					 String token, String name, String description,
-					 boolean ccAdmin)
+                                         String token, String name, String description,
+                                         boolean ccAdmin)
 
   {
     DBEditObject eO = null;
@@ -2857,14 +2857,14 @@ public final class DBStore implements JythonMap {
 
     try
       {
-	if (session.getGSession().findLabeledObject(token, SchemaConstants.EventBase) != null)
-	  {
-	    return null;
-	  }
+        if (session.getGSession().findLabeledObject(token, SchemaConstants.EventBase) != null)
+          {
+            return null;
+          }
       }
     catch (NotLoggedInException ex)
       {
-	throw new Error("Mysterious not logged in exception: " + ex.getMessage());
+        throw new Error("Mysterious not logged in exception: " + ex.getMessage());
       }
 
     System.err.println("Creating " + token + " system event object");
@@ -2873,7 +2873,7 @@ public final class DBStore implements JythonMap {
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	throw new RuntimeException("Error, could not create system event object " + token);
+        throw new RuntimeException("Error, could not create system event object " + token);
       }
 
     eO = (DBEditObject) retVal.getObject();
@@ -2882,24 +2882,24 @@ public final class DBStore implements JythonMap {
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	throw new RuntimeException("Error, could not set token for system event object " + token);
+        throw new RuntimeException("Error, could not set token for system event object " + token);
       }
 
     retVal = eO.setFieldValueLocal(SchemaConstants.EventName, name);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	throw new RuntimeException("Error, could not set name for system event object " + token);
+        throw new RuntimeException("Error, could not set name for system event object " + token);
       }
 
     if (description != null)
       {
-	retVal = eO.setFieldValueLocal(SchemaConstants.EventDescription, description);
+        retVal = eO.setFieldValueLocal(SchemaConstants.EventDescription, description);
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    throw new RuntimeException("Error, could not set description system event object " + token);
-	  }
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            throw new RuntimeException("Error, could not set description system event object " + token);
+          }
       }
 
     return eO;
@@ -2935,7 +2935,7 @@ public final class DBStore implements JythonMap {
 
     if (objectsCheckedOut < 0)
       {
-	throw new RuntimeException("Objects checked out has gone negative");
+        throw new RuntimeException("Objects checked out has gone negative");
       }
   }
 
@@ -2993,10 +2993,10 @@ public final class DBStore implements JythonMap {
 
     synchronized( objectBases)
       {
-	for (DBObjectBase base: objectBases.values())
-	  {
-	    entrySet.add(new Entry(base));
-	  }
+        for (DBObjectBase base: objectBases.values())
+          {
+            entrySet.add(new Entry(base));
+          }
       }
 
     return entrySet;

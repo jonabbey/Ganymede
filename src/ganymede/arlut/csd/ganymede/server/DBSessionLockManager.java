@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -86,16 +86,16 @@ public class DBSessionLockManager {
   {
     if (lock == null)
       {
-	throw new IllegalArgumentException("bad param to isLocked()");
+        throw new IllegalArgumentException("bad param to isLocked()");
       }
 
     if (!lockHash.containsKey(lock))
       {
-	return false;
+        return false;
       }
     else
       {
-	return lock.isLocked();
+        return lock.isLocked();
       }
   }
 
@@ -126,27 +126,27 @@ public class DBSessionLockManager {
 
     if (lockHash.size() != 0)
       {
-	Enumeration en = lockHash.keys();
+        Enumeration en = lockHash.keys();
 
-	while (en.hasMoreElements())
-	  {
-	    DBLock oldLock = (DBLock) en.nextElement();
+        while (en.hasMoreElements())
+          {
+            DBLock oldLock = (DBLock) en.nextElement();
 
-	    if (oldLock instanceof DBWriteLock)
-	      {
-		if (oldLock.overlaps(bases))
-		  {
-		    throw new InterruptedException("Can't establish read lock, session " + session.getID() +
-						   " already has overlapping write lock:\n" +
-						   oldLock.toString());
-		  }
-	      }
-	  }
+            if (oldLock instanceof DBWriteLock)
+              {
+                if (oldLock.overlaps(bases))
+                  {
+                    throw new InterruptedException("Can't establish read lock, session " + session.getID() +
+                                                   " already has overlapping write lock:\n" +
+                                                   oldLock.toString());
+                  }
+              }
+          }
       }
     
     lock = new DBReadLock(session.getStore(), bases);
     
-    lockHash.put(lock, Boolean.TRUE);	// use like a set
+    lockHash.put(lock, Boolean.TRUE);   // use like a set
     
     lock.establish(session.getKey()); // block
 
@@ -179,19 +179,19 @@ public class DBSessionLockManager {
 
     if (lockHash.size() != 0)
       {
-	Enumeration en = lockHash.keys();
+        Enumeration en = lockHash.keys();
 
-	while (en.hasMoreElements())
-	  {
-	    DBLock oldLock = (DBLock) en.nextElement();
+        while (en.hasMoreElements())
+          {
+            DBLock oldLock = (DBLock) en.nextElement();
 
-	    if (oldLock instanceof DBWriteLock)
-	      {
-		throw new InterruptedException("Can't establish global read lock, session " + session.getID() +
-					       " already has write lock:\n" +
-					       oldLock.toString());
-	      }
-	  }
+            if (oldLock instanceof DBWriteLock)
+              {
+                throw new InterruptedException("Can't establish global read lock, session " + session.getID() +
+                                               " already has write lock:\n" +
+                                               oldLock.toString());
+              }
+          }
       }
 
     lock = new DBReadLock(session.getStore());
@@ -231,19 +231,19 @@ public class DBSessionLockManager {
 
     if (lockHash.size() != 0)
       {
-	StringBuilder resultBuffer = new StringBuilder();
+        StringBuilder resultBuffer = new StringBuilder();
 
-	Enumeration en = lockHash.keys();
+        Enumeration en = lockHash.keys();
 
-	while (en.hasMoreElements())
-	  {
-	    resultBuffer.append(en.nextElement().toString());
-	    resultBuffer.append("\n");
-	  }
+        while (en.hasMoreElements())
+          {
+            resultBuffer.append(en.nextElement().toString());
+            resultBuffer.append("\n");
+          }
 
-	throw new InterruptedException("Can't establish write lock, session " + session.getID() + 
-				       " already has locks:\n" +
-				       resultBuffer.toString());
+        throw new InterruptedException("Can't establish write lock, session " + session.getID() + 
+                                       " already has locks:\n" +
+                                       resultBuffer.toString());
       }
 
     lock = new DBWriteLock(session.getStore(), bases);
@@ -271,19 +271,19 @@ public class DBSessionLockManager {
 
     if (lockHash.size() != 0)
       {
-	Enumeration en = lockHash.keys();
+        Enumeration en = lockHash.keys();
 
-	while (en.hasMoreElements())
-	  {
-	    DBLock oldLock = (DBLock) en.nextElement();
+        while (en.hasMoreElements())
+          {
+            DBLock oldLock = (DBLock) en.nextElement();
 
-	    if (oldLock instanceof DBWriteLock)
-	      {
-		throw new InterruptedException("Can't establish global dump lock, session " + session.getID() +
-					       " already has write lock:\n" +
-					       oldLock.toString());
-	      }
-	  }
+            if (oldLock instanceof DBWriteLock)
+              {
+                throw new InterruptedException("Can't establish global dump lock, session " + session.getID() +
+                                               " already has write lock:\n" +
+                                               oldLock.toString());
+              }
+          }
       }
 
     lock = new DBDumpLock(session.getStore());
@@ -305,7 +305,7 @@ public class DBSessionLockManager {
   {
     if (!lockHash.containsKey(lock))
       {
-	throw new IllegalArgumentException("lock " + lock.toString() + " not held by this session");
+        throw new IllegalArgumentException("lock " + lock.toString() + " not held by this session");
       }
 
     lock.release();
@@ -323,8 +323,8 @@ public class DBSessionLockManager {
 
     while (en.hasMoreElements())
       {
-	DBLock lock = (DBLock) en.nextElement();
-	lock.abort();		// blocks until the lock can be cleared
+        DBLock lock = (DBLock) en.nextElement();
+        lock.abort();           // blocks until the lock can be cleared
       }
 
     lockHash.clear();

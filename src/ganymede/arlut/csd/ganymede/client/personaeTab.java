@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2008
@@ -84,7 +84,7 @@ public class personaeTab extends clientTab {
   {
     if (contentPane == null)
       {
-	contentPane = new JPanel(false);
+        contentPane = new JPanel(false);
       }
 
     return contentPane;
@@ -94,14 +94,14 @@ public class personaeTab extends clientTab {
   {
     try
       {
-	persona_field = (invid_field) parent.getObject().getField(SchemaConstants.UserAdminPersonae);
-	pP = new personaPanel(persona_field, parent.isEditable(), parent);
-	contentPane.setLayout(new BorderLayout());
-	contentPane.add("Center", pP);
+        persona_field = (invid_field) parent.getObject().getField(SchemaConstants.UserAdminPersonae);
+        pP = new personaPanel(persona_field, parent.isEditable(), parent);
+        contentPane.setLayout(new BorderLayout());
+        contentPane.add("Center", pP);
       }
     catch (RemoteException ex)
       {
-	parent.getgclient().processExceptionRethrow(ex);
+        parent.getgclient().processExceptionRethrow(ex);
       }
   }
 
@@ -113,14 +113,14 @@ public class personaeTab extends clientTab {
   {
     if (contentPane != null)
       {
-	contentPane.removeAll();
-	contentPane = null;
+        contentPane.removeAll();
+        contentPane = null;
       }
 
     if (pP != null)
       {
-	pP.dispose();
-	pP = null;
+        pP.dispose();
+        pP = null;
       }
 
     persona_field = null;

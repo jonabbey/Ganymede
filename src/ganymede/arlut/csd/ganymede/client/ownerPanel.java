@@ -9,7 +9,7 @@
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2005
@@ -151,12 +151,12 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 
     if (!debug)
       {
-	debug = gc.debug;
+        debug = gc.debug;
       }
 
     if (debug)
       {
-	System.err.println("Adding ownerPanel");
+        System.err.println("Adding ownerPanel");
       }
 
     setLayout(new BorderLayout());
@@ -167,8 +167,8 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 
     // "Loading ownerPanel, please wait."
     holdOnPanel.add(new JLabel(ts.l("init.loading_label"),
-			       new ImageIcon(fp.getWaitImage()),
-			       SwingConstants.CENTER));
+                               new ImageIcon(fp.getWaitImage()),
+                               SwingConstants.CENTER));
     
     add("Center", holdOnPanel);
     invalidate();
@@ -176,40 +176,40 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 
     if (field == null)
       {
-	// we'll only get this if we are view-only and there are no owners
-	// for this object registered.. in this case, the object is
-	// effectively owned by supergash.
+        // we'll only get this if we are view-only and there are no owners
+        // for this object registered.. in this case, the object is
+        // effectively owned by supergash.
 
-	if (debug)
-	  {
-	    System.err.println("ownerPanel: field is null, there is no owner for this object.");
-	  }
+        if (debug)
+          {
+            System.err.println("ownerPanel: field is null, there is no owner for this object.");
+          }
 
-	// "No owners assigned.  Supergash-level admins share ownership of this object."
-	JLabel l = new JLabel(ts.l("init.no_owner_label"),
-			      SwingConstants.CENTER);
+        // "No owners assigned.  Supergash-level admins share ownership of this object."
+        JLabel l = new JLabel(ts.l("init.no_owner_label"),
+                              SwingConstants.CENTER);
 
-	remove(holdOnPanel);
-	add("Center", l);
+        remove(holdOnPanel);
+        add("Center", l);
       }
     else
       {
-	if (debug)
-	  {
-	    System.err.println("ownerPanel: field is not null, creating invid selector.");
-	  }
+        if (debug)
+          {
+            System.err.println("ownerPanel: field is not null, creating invid selector.");
+          }
 
-	try
-	  {
-	    ownerList = createInvidSelector(field);
-	    ownerList.setBorder(new LineBorder(Color.black));
-	    remove(holdOnPanel);
-	    add("Center", ownerList);
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx);
-	  }
+        try
+          {
+            ownerList = createInvidSelector(field);
+            ownerList.setBorder(new LineBorder(Color.black));
+            remove(holdOnPanel);
+            add("Center", ownerList);
+          }
+        catch (Exception rx)
+          {
+            gc.processExceptionRethrow(rx);
+          }
       }
 
     invalidate();
@@ -229,19 +229,19 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 
     if (debug)
       {
-	System.err.println("Adding StringSelector, its a vector of invids!");
+        System.err.println("Adding StringSelector, its a vector of invids!");
       }
 
     if (editable)
       {
-	QueryResult choices = field.choices(false);
+        QueryResult choices = field.choices(false);
 
-	if (choices != null)
-	  {
-	    list = new objectList(choices);
-		
-	    availableOwners = list.getListHandles(false, true);
-	  }
+        if (choices != null)
+          {
+            list = new objectList(choices);
+                
+            availableOwners = list.getListHandles(false, true);
+          }
       }
 
     currentOwners = field.encodedValues().getListHandles();
@@ -278,28 +278,28 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 
     if (debug)
       {
-	System.err.println("ownerPanel: Taking out supergash");
+        System.err.println("ownerPanel: Taking out supergash");
       }
 
     if (availableOwners != null)
       {
-	Invid supergash = Invid.createInvid((short)0, 1); // This is supergash
+        Invid supergash = Invid.createInvid((short)0, 1); // This is supergash
 
-	for (int i = 0; i < availableOwners.size(); i++)
-	  {
-	    listHandle l = (listHandle)availableOwners.elementAt(i);
+        for (int i = 0; i < availableOwners.size(); i++)
+          {
+            listHandle l = (listHandle)availableOwners.elementAt(i);
 
-	    if (supergash.equals(l.getObject()))
-	      {
-		availableOwners.removeElementAt(i);
-		break;
-	      }
-	  }
+            if (supergash.equals(l.getObject()))
+              {
+                availableOwners.removeElementAt(i);
+                break;
+              }
+          }
       }
 
     if (debug)
       {
-	System.err.println("ownerPanel: creating string selector");
+        System.err.println("ownerPanel: creating string selector");
       }
 
     StringSelector ss = new StringSelector(this, editable, true, true);
@@ -309,7 +309,7 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
     // "Owners"
     // "Owner Groups"
     ss.setTitles(ts.l("createInvidSelector.column_title1"),
-		 ts.l("createInvidSelector.column_title2"));
+                 ts.l("createInvidSelector.column_title2"));
 
     ss.setPopups(invidTablePopup, invidTablePopup2);
     ss.update(availableOwners, true, null, currentOwners, true, null);
@@ -335,53 +335,53 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 
     if (ownerList.isEditable())
       {
-	QueryResult choicesV = field.choices(false);
-	    
-	// if we got a null result, assume we have no choices
-	// otherwise, we're going to cache this result
-	    
-	if (choicesV == null)
-	  {
-	    available = new Vector();
-	  }
-	else
-	  {
-	    available = choicesV.getListHandles();
-	  }
+        QueryResult choicesV = field.choices(false);
+            
+        // if we got a null result, assume we have no choices
+        // otherwise, we're going to cache this result
+            
+        if (choicesV == null)
+          {
+            available = new Vector();
+          }
+        else
+          {
+            available = choicesV.getListHandles();
+          }
 
-	// hide the supergash object choice
+        // hide the supergash object choice
 
-	if (available != null)
-	  {
-	    Invid supergash = Invid.createInvid((short)0, 1); // This is supergash
-	    
-	    for (int i = 0; i < available.size(); i++)
-	      {
-		listHandle l = (listHandle)available.elementAt(i);
-		
-		if (supergash.equals(l.getObject()))
-		  {
-		    available.removeElementAt(i);
-		    break;
-		  }
-	      }
-	  }
+        if (available != null)
+          {
+            Invid supergash = Invid.createInvid((short)0, 1); // This is supergash
+            
+            for (int i = 0; i < available.size(); i++)
+              {
+                listHandle l = (listHandle)available.elementAt(i);
+                
+                if (supergash.equals(l.getObject()))
+                  {
+                    available.removeElementAt(i);
+                    break;
+                  }
+              }
+          }
       }
     
     QueryResult res = field.encodedValues();
 
     if (res != null)
       {
-	chosen = res.getListHandles();
+        chosen = res.getListHandles();
       }
 
     try
       {
-	ownerList.update(available, true, null, chosen, false, null);
+        ownerList.update(available, true, null, chosen, false, null);
       }
     catch (Exception e)
       {
-	throw new RuntimeException(e.getMessage());
+        throw new RuntimeException(e.getMessage());
       }
   }
 
@@ -394,133 +394,133 @@ public class ownerPanel extends JPanel implements JsetValueCallback {
 
     if (!(o.getSource() instanceof StringSelector))
       {
-	System.err.println("Where did this setValuePerformed come from?");
-	return false;
+        System.err.println("Where did this setValuePerformed come from?");
+        return false;
       }
 
     if (o instanceof JErrorValueObject)
       {
-	fp.getgclient().setStatus((String)o.getValue());
+        fp.getgclient().setStatus((String)o.getValue());
       }
     else if (o instanceof JParameterValueObject)
       {  // From the popup menu
-	
-	JParameterValueObject v = (JParameterValueObject) o; // because this code was originally used with a v
-	String command = (String)v.getParameter();
-	  
-	if (command.equals("Edit object"))
-	  {
-	    if (debug)
-	      {
-		System.err.println("Edit object: " + v.getValue());
-	      }
-		
-	    if (v.getValue() instanceof listHandle)
-	      {
-		Invid invid = (Invid)((listHandle)v.getValue()).getObject();
-		    
-		gc.editObject(invid);
-	      }
-	    else if (v.getValue() instanceof Invid)
-	      {
-		if (debug)
-		  {
-		    System.err.println("It's an invid!");
-		  }
-		    
-		Invid invid = (Invid)v.getValue();
-		    
-		gc.editObject(invid);
-	      }
-		
-	    retVal = null;
-	  }
-	else if (command.equals("View object"))
-	  {
-	    if (debug)
-	      {
-		System.err.println("View object: " + v.getValue());
-	      }
-		
-	    if (v.getValue() instanceof Invid)
-	      {
-		Invid invid = (Invid)v.getValue();
-		    
-		gc.viewObject(invid);
-	      }
-		
-	    retVal = null;
-	  }
-	else
-	  {
-	    System.err.println("Unknown action command from popup: " + command);
-	  }
+        
+        JParameterValueObject v = (JParameterValueObject) o; // because this code was originally used with a v
+        String command = (String)v.getParameter();
+          
+        if (command.equals("Edit object"))
+          {
+            if (debug)
+              {
+                System.err.println("Edit object: " + v.getValue());
+              }
+                
+            if (v.getValue() instanceof listHandle)
+              {
+                Invid invid = (Invid)((listHandle)v.getValue()).getObject();
+                    
+                gc.editObject(invid);
+              }
+            else if (v.getValue() instanceof Invid)
+              {
+                if (debug)
+                  {
+                    System.err.println("It's an invid!");
+                  }
+                    
+                Invid invid = (Invid)v.getValue();
+                    
+                gc.editObject(invid);
+              }
+                
+            retVal = null;
+          }
+        else if (command.equals("View object"))
+          {
+            if (debug)
+              {
+                System.err.println("View object: " + v.getValue());
+              }
+                
+            if (v.getValue() instanceof Invid)
+              {
+                Invid invid = (Invid)v.getValue();
+                    
+                gc.viewObject(invid);
+              }
+                
+            retVal = null;
+          }
+        else
+          {
+            System.err.println("Unknown action command from popup: " + command);
+          }
       } // end of popup processing, now it's just an add or remove kind of thing.
     else
       {
-	Invid invid = null;	// have to init for javac
+        Invid invid = null;     // have to init for javac
 
-	if (o.getValue() instanceof Invid)
-	  {
-	    invid = (Invid) o.getValue();
-	  }
-	
-	try
-	  {
-	    if (o instanceof JAddValueObject)
-	      {
-		retVal = field.addElement(invid);
+        if (o.getValue() instanceof Invid)
+          {
+            invid = (Invid) o.getValue();
+          }
+        
+        try
+          {
+            if (o instanceof JAddValueObject)
+              {
+                retVal = field.addElement(invid);
 
-		if (retVal != null)
-		  {
-		    gc.handleReturnVal(retVal);
-		  }
+                if (retVal != null)
+                  {
+                    gc.handleReturnVal(retVal);
+                  }
 
-		succeeded = (retVal == null) ? true : retVal.didSucceed();
-	      }
-	    else if (o instanceof JAddVectorValueObject)
-	      {
-		retVal = field.addElements((Vector) o.getValue());
+                succeeded = (retVal == null) ? true : retVal.didSucceed();
+              }
+            else if (o instanceof JAddVectorValueObject)
+              {
+                retVal = field.addElements((Vector) o.getValue());
 
-		if (retVal != null)
-		  {
-		    gc.handleReturnVal(retVal);
-		  }
+                if (retVal != null)
+                  {
+                    gc.handleReturnVal(retVal);
+                  }
 
-		succeeded = (retVal == null) ? true : retVal.didSucceed();
-	      }
-	    else if (o instanceof JDeleteValueObject)
-	      {
-		retVal = field.deleteElement(invid);
+                succeeded = (retVal == null) ? true : retVal.didSucceed();
+              }
+            else if (o instanceof JDeleteValueObject)
+              {
+                retVal = field.deleteElement(invid);
 
-		if (retVal != null)
-		  {
-		    gc.handleReturnVal(retVal);
-		  }
+                if (retVal != null)
+                  {
+                    gc.handleReturnVal(retVal);
+                  }
 
-		succeeded = (retVal == null) ? true : retVal.didSucceed();
-	      }
-	    else if (o instanceof JDeleteVectorValueObject)
-	      {
-		retVal = field.deleteElements((Vector) o.getValue());
+                succeeded = (retVal == null) ? true : retVal.didSucceed();
+              }
+            else if (o instanceof JDeleteVectorValueObject)
+              {
+                retVal = field.deleteElements((Vector) o.getValue());
 
-		if (retVal != null)
-		  {
-		    gc.handleReturnVal(retVal);
-		  }
+                if (retVal != null)
+                  {
+                    gc.handleReturnVal(retVal);
+                  }
 
-		succeeded = (retVal == null) ? true : retVal.didSucceed();
-	      }
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx);
-	  }
+                succeeded = (retVal == null) ? true : retVal.didSucceed();
+              }
+          }
+        catch (Exception rx)
+          {
+            gc.processExceptionRethrow(rx);
+          }
       }
     
     if (succeeded)
       {
-	fp.getgclient().somethingChanged();
+        fp.getgclient().somethingChanged();
       }
     
     return succeeded;

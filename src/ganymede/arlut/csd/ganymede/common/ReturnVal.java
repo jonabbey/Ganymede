@@ -220,7 +220,7 @@ public final class ReturnVal implements java.io.Serializable {
 
     if (retVal.isCompatible(retVal2))
       {
-	return retVal;
+        return retVal;
       }
 
     // if one of the ReturnVals indicated a failure, pass the failure
@@ -245,12 +245,12 @@ public final class ReturnVal implements java.io.Serializable {
 
     if (retVal.didSucceed())
       {
-	// we know that both of the ReturnVals that we're merging were
-	// successful, so we'll want to merge all rescan information from
-	// both.
+        // we know that both of the ReturnVals that we're merging were
+        // successful, so we'll want to merge all rescan information from
+        // both.
 
-	result.unionRescan(retVal);
-	result.unionRescan(retVal2);
+        result.unionRescan(retVal);
+        result.unionRescan(retVal2);
       }
 
     // doNormalProcessing is meant to be a signal that the normal
@@ -287,37 +287,37 @@ public final class ReturnVal implements java.io.Serializable {
       }
     else
       {
-	// if we're not involved in a wizard bit, we'll pass back a
-	// true doNormalProcessing only if both of our inputs had
-	// doNormalProcessing.
+        // if we're not involved in a wizard bit, we'll pass back a
+        // true doNormalProcessing only if both of our inputs had
+        // doNormalProcessing.
 
-	result.doNormalProcessing = retVal.doNormalProcessing && retVal2.doNormalProcessing;
+        result.doNormalProcessing = retVal.doNormalProcessing && retVal2.doNormalProcessing;
 
-	// no wizard?  look to see if either or both of the ReturnVals
-	// that we are merging have any dialog information, and put
-	// either or both of them together in the result.
+        // no wizard?  look to see if either or both of the ReturnVals
+        // that we are merging have any dialog information, and put
+        // either or both of them together in the result.
 
-	if (retVal.dialog != null && retVal2.dialog != null)
-	  {
-	    // ugh, we've got two dialogs that need to be merged, so we'll
-	    // have to do something about that.
-	    //
-	    // if either one was an error dialog, we'll prioritize that as
-	    // far as the title is concerned.  Otherwise, the first
-	    // ReturnVal we're merging will have priority for the title,
-	    // image, and text.
+        if (retVal.dialog != null && retVal2.dialog != null)
+          {
+            // ugh, we've got two dialogs that need to be merged, so we'll
+            // have to do something about that.
+            //
+            // if either one was an error dialog, we'll prioritize that as
+            // far as the title is concerned.  Otherwise, the first
+            // ReturnVal we're merging will have priority for the title,
+            // image, and text.
 
-	    if ("error.gif".equals(retVal2.dialog.getImageName()))
-	      {
-		result.dialog = retVal2.dialog;
-		result.dialog.appendText(retVal.dialog.getText());
-	      }
-	    else
-	      {
-		result.dialog = retVal.dialog;
-		result.dialog.appendText(retVal2.dialog.getText());
-	      }
-	  }
+            if ("error.gif".equals(retVal2.dialog.getImageName()))
+              {
+                result.dialog = retVal2.dialog;
+                result.dialog.appendText(retVal.dialog.getText());
+              }
+            else
+              {
+                result.dialog = retVal.dialog;
+                result.dialog.appendText(retVal2.dialog.getText());
+              }
+          }
         else if (retVal.dialog != null)
           {
             result.dialog = retVal.dialog;
@@ -640,11 +640,11 @@ public final class ReturnVal implements java.io.Serializable {
   {
     if (dialog == null)
       {
-	return null;
+        return null;
       }
     else
       {
-	return dialog.getText();
+        return dialog.getText();
       }
   }
 
@@ -686,7 +686,7 @@ public final class ReturnVal implements java.io.Serializable {
   {
     if (!doRescan())
       {
-	return new Vector<Invid>();
+        return new Vector<Invid>();
       }
 
     breakOutRescanList();
@@ -726,14 +726,14 @@ public final class ReturnVal implements java.io.Serializable {
   {
     if (!doRescan())
       {
-	return false;
+        return false;
       }
 
     breakOutRescanList();
 
     if (rescanHash.containsKey(objID) && rescanHash.get(objID) == all)
       {
-	return true;
+        return true;
       }
 
     return false;
@@ -749,7 +749,7 @@ public final class ReturnVal implements java.io.Serializable {
   {
     if (!doRescan())
       {
-	return null;
+        return null;
       }
 
     breakOutRescanList();
@@ -758,7 +758,7 @@ public final class ReturnVal implements java.io.Serializable {
 
     if (result == null || result == all)
       {
-	return null;
+        return null;
       }
 
     return result;
@@ -780,12 +780,12 @@ public final class ReturnVal implements java.io.Serializable {
 
     if (rescanList != null)
       {
-	buffer.append("dumpRescanInfo(): ");
-	buffer.append(rescanList.toString());
+        buffer.append("dumpRescanInfo(): ");
+        buffer.append(rescanList.toString());
       }
     else
       {
-	buffer.append("none in this object");
+        buffer.append("none in this object");
       }
 
     return buffer.toString();
@@ -801,7 +801,7 @@ public final class ReturnVal implements java.io.Serializable {
   {
     if (rescanHash != null)
       {
-	return;
+        return;
       }
 
     rescanHash = new HashMap<Invid, Vector<Short>>();
@@ -831,12 +831,12 @@ public final class ReturnVal implements java.io.Serializable {
   {
     if (buffer == null)
       {
-	return null;
+        return null;
       }
 
     if (original == null)
       {
-	throw new IllegalArgumentException("Can't have a null original hash.");
+        throw new IllegalArgumentException("Can't have a null original hash.");
       }
 
     /* - */
@@ -851,45 +851,45 @@ public final class ReturnVal implements java.io.Serializable {
 
     while (lastIndex < tmpString.length())
       {
-	nextIndex = tmpString.indexOf('|', lastIndex);
+        nextIndex = tmpString.indexOf('|', lastIndex);
 
-	atom = tmpString.substring(lastIndex, nextIndex);
+        atom = tmpString.substring(lastIndex, nextIndex);
 
-	if (atom.indexOf(':') != -1)
-	  {
-	    invid = Invid.createInvid(atom);
-	  }
-	else if (atom.equals("all"))
-	  {
-	    original.put(invid, all);
-	  }
-	else
-	  {
-	    Vector vec;
-	    Short fieldID = Short.valueOf(atom);
+        if (atom.indexOf(':') != -1)
+          {
+            invid = Invid.createInvid(atom);
+          }
+        else if (atom.equals("all"))
+          {
+            original.put(invid, all);
+          }
+        else
+          {
+            Vector vec;
+            Short fieldID = Short.valueOf(atom);
 
-	    if (original.containsKey(invid) && original.get(invid) != all)
-	      {
-		vec = (Vector<Short>) original.get(invid);
+            if (original.containsKey(invid) && original.get(invid) != all)
+              {
+                vec = (Vector<Short>) original.get(invid);
 
-		if (!vec.contains(fieldID))
-		  {
-		    vec.addElement(fieldID);
-		  }
-	      }
-	    else if (!original.containsKey(invid))
-	      {
-		vec = new Vector<Short>();
-		vec.addElement(fieldID);
+                if (!vec.contains(fieldID))
+                  {
+                    vec.addElement(fieldID);
+                  }
+              }
+            else if (!original.containsKey(invid))
+              {
+                vec = new Vector<Short>();
+                vec.addElement(fieldID);
 
-		original.put(invid, vec);
-	      }
+                original.put(invid, vec);
+              }
 
-	    // else we've already got 'all' specified for this invid, so we
-	    // don't need to do anything else.
-	  }
+            // else we've already got 'all' specified for this invid, so we
+            // don't need to do anything else.
+          }
 
-	lastIndex = nextIndex + 1;
+        lastIndex = nextIndex + 1;
       }
 
     return original;
@@ -903,67 +903,67 @@ public final class ReturnVal implements java.io.Serializable {
 
     if (dialog != null)
       {
-	result.append("\"");
-	result.append(dialog.getText());
-	result.append("\"");
+        result.append("\"");
+        result.append(dialog.getText());
+        result.append("\"");
       }
     else
       {
-	result.append("\"\"");
+        result.append("\"\"");
       }
 
     if (didSucceed())
       {
-	result.append(", success");
+        result.append(", success");
       }
     else
       {
-	result.append(", failure");
+        result.append(", failure");
       }
 
     if (doNormalProcessing)
       {
-	result.append(", normal");
+        result.append(", normal");
       }
     else
       {
-	result.append(", abnormal");
+        result.append(", abnormal");
       }
 
     if (newObjectInvid != null)
       {
-	result.append(", invid set");
+        result.append(", invid set");
       }
     else
       {
-	result.append(", invid not set");
+        result.append(", invid not set");
       }
 
     if (remoteObjectRef != null)
       {
-	result.append(", remote obj set");
+        result.append(", remote obj set");
       }
     else
       {
-	result.append(", remote obj not set");
+        result.append(", remote obj not set");
       }
 
     if (callback != null)
       {
-	result.append(", callback set");
+        result.append(", callback set");
       }
     else
       {
-	result.append(", callback not set");
+        result.append(", callback not set");
       }
 
     if (rescanList != null)
       {
-	result.append(", rescan set");
+        result.append(", rescan set");
       }
     else
       {
-	result.append(", rescan not set");
+        result.append(", rescan not set");
       }
 
     result.append("]");
@@ -1017,29 +1017,29 @@ public final class ReturnVal implements java.io.Serializable {
   {
     if ((retVal == null) || (retVal == this))
       {
-	return this;
+        return this;
       }
 
     // add any rescan fields requested by retVal
 
     if (retVal.rescanList != null)
       {
-	// if our rescanList is null, take theirs.
+        // if our rescanList is null, take theirs.
 
-	if (rescanList == null)
-	  {
-	    rescanList = new StringBuffer();
-	    rescanList.append(retVal.rescanList.toString());
-	  }
-	else
-	  {
-	    HashMap<Invid,Vector<Short>> result = new HashMap<Invid,Vector<Short>>();
+        if (rescanList == null)
+          {
+            rescanList = new StringBuffer();
+            rescanList.append(retVal.rescanList.toString());
+          }
+        else
+          {
+            HashMap<Invid,Vector<Short>> result = new HashMap<Invid,Vector<Short>>();
 
-	    decodeRescanList(retVal.rescanList, result);
-	    decodeRescanList(rescanList, result);
+            decodeRescanList(retVal.rescanList, result);
+            decodeRescanList(rescanList, result);
 
-	    encodeRescanList(result);
-	  }
+            encodeRescanList(result);
+          }
       }
 
     return this;
@@ -1057,33 +1057,33 @@ public final class ReturnVal implements java.io.Serializable {
   {
     if (rescanList == null)
       {
-	rescanList = new StringBuffer();
+        rescanList = new StringBuffer();
       }
     else
       {
-	rescanList.setLength(0);
+        rescanList.setLength(0);
       }
 
     for (Map.Entry<Invid, Vector<Short>> entry: rescanTable.entrySet())
       {
-	Invid invid = entry.getKey();
-	Vector<Short> fields = entry.getValue();
+        Invid invid = entry.getKey();
+        Vector<Short> fields = entry.getValue();
 
-	rescanList.append(invid.toString());
-	rescanList.append("|");
+        rescanList.append(invid.toString());
+        rescanList.append("|");
 
-	if (fields == all)
-	  {
-	    rescanList.append("all|");
-	  }
-	else
-	  {
-	    for (Short field: fields)
-	      {
-		rescanList.append(field.toString());
-		rescanList.append("|");
-	      }
-	  }
+        if (fields == all)
+          {
+            rescanList.append("all|");
+          }
+        else
+          {
+            for (Short field: fields)
+              {
+                rescanList.append(field.toString());
+                rescanList.append("|");
+              }
+          }
       }
   }
 
@@ -1132,7 +1132,7 @@ public final class ReturnVal implements java.io.Serializable {
   {
     if (newObjectInvid != null)
       {
-	throw new RuntimeException();
+        throw new RuntimeException();
       }
 
     this.newObjectInvid = objInvid;
@@ -1152,12 +1152,12 @@ public final class ReturnVal implements java.io.Serializable {
   {
     if (debug)
       {
-	System.err.println("ReturnVal.setRescanAll(" + objID + ")");
+        System.err.println("ReturnVal.setRescanAll(" + objID + ")");
       }
 
     if (rescanList == null)
       {
-	rescanList = new StringBuffer();
+        rescanList = new StringBuffer();
       }
 
     rescanList.append(objID.toString());
@@ -1177,12 +1177,12 @@ public final class ReturnVal implements java.io.Serializable {
   {
     if (debug)
       {
-	System.err.println("ReturnVal.addRescanField(" + objID + ", " + fieldID + ")");
+        System.err.println("ReturnVal.addRescanField(" + objID + ", " + fieldID + ")");
       }
 
     if (rescanList == null)
       {
-	rescanList = new StringBuffer();
+        rescanList = new StringBuffer();
       }
 
     rescanList.append(objID.toString());
@@ -1236,9 +1236,9 @@ public final class ReturnVal implements java.io.Serializable {
   public ReturnVal setErrorText(String title, String body)
   {
     this.dialog = new JDialogBuff(title, body,
-				  ts.l("setErrorText.ok"),
-				  null,
-				  "error.gif");
+                                  ts.l("setErrorText.ok"),
+                                  null,
+                                  "error.gif");
 
     return this;
   }
@@ -1271,9 +1271,9 @@ public final class ReturnVal implements java.io.Serializable {
   public ReturnVal setInfoText(String title, String body)
   {
     this.dialog = new JDialogBuff(title, body,
-				  ts.l("setInfoText.ok"),
-				  null,
-				  "ok.gif");
+                                  ts.l("setInfoText.ok"),
+                                  null,
+                                  "ok.gif");
 
     return this;
   }
@@ -1499,22 +1499,22 @@ public final class ReturnVal implements java.io.Serializable {
   private boolean isCompatible(ReturnVal retVal)
   {
     if ((success != retVal.success) ||
-	(doNormalProcessing != retVal.doNormalProcessing) ||
-	(errorType != retVal.errorType) ||
-	(newObjectInvid != null) ||
-	(newLabel != null) ||
-	(retVal.newObjectInvid != null) ||
-	(retVal.newLabel != null) ||
-	(remoteObjectRef != null) ||
-	(retVal.remoteObjectRef != null) ||
-	(rescanList != null) ||
-	(retVal.rescanList != null) ||
-	(dialog != null) ||
-	(retVal.dialog != null) ||
-	(callback != null) ||
-	(retVal.callback != null))
+        (doNormalProcessing != retVal.doNormalProcessing) ||
+        (errorType != retVal.errorType) ||
+        (newObjectInvid != null) ||
+        (newLabel != null) ||
+        (retVal.newObjectInvid != null) ||
+        (retVal.newLabel != null) ||
+        (remoteObjectRef != null) ||
+        (retVal.remoteObjectRef != null) ||
+        (rescanList != null) ||
+        (retVal.rescanList != null) ||
+        (dialog != null) ||
+        (retVal.dialog != null) ||
+        (callback != null) ||
+        (retVal.callback != null))
       {
-	return false;
+        return false;
       }
 
     return true;

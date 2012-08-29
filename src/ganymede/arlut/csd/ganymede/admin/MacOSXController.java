@@ -8,7 +8,7 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -48,7 +48,7 @@ package arlut.csd.ganymede.admin;
 
 /*------------------------------------------------------------------------------
                                                                            class
-								MacOSXController
+                                                                MacOSXController
 
 ------------------------------------------------------------------------------*/
 

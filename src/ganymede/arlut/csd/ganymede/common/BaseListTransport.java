@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -100,16 +100,16 @@ public class BaseListTransport implements java.io.Serializable {
 
     while (lastIndex < src.length)
       {
-	token = getChunk(src, lastIndex);
+        token = getChunk(src, lastIndex);
 
-	if (!token.equals("base"))
-	  {
-	    throw new RuntimeException("buffer format exception");
-	  }
+        if (!token.equals("base"))
+          {
+            throw new RuntimeException("buffer format exception");
+          }
 
-	baseChild = new BaseDump(this, src, lastIndex);
-	lastIndex = baseChild.getLastIndex();
-	results.addElement(baseChild);
+        baseChild = new BaseDump(this, src, lastIndex);
+        lastIndex = baseChild.getLastIndex();
+        results.addElement(baseChild);
       }
 
     return results;
@@ -139,35 +139,35 @@ public class BaseListTransport implements java.io.Serializable {
 
     if (buffer == null)
       {
-	buffer = new StringBuffer();
+        buffer = new StringBuffer();
       }
 
     // add our label
 
     if (text != null)
       {
-	chars = text.toCharArray();
+        chars = text.toCharArray();
       }
     else
       {
-	buffer.append("|");
-	return;
+        buffer.append("|");
+        return;
       }
-	
+        
     for (int j = 0; j < chars.length; j++)
       {
-	if (chars[j] == '|')
-	  {
-	    buffer.append("\\|");
-	  }
-	else if (chars[j] == '\\')
-	  {
-	    buffer.append("\\\\");
-	  }
-	else
-	  {
-	    buffer.append(chars[j]);
-	  }
+        if (chars[j] == '|')
+          {
+            buffer.append("\\|");
+          }
+        else if (chars[j] == '\\')
+          {
+            buffer.append("\\\\");
+          }
+        else
+          {
+            buffer.append(chars[j]);
+          }
       }
 
     buffer.append("|");
@@ -187,19 +187,19 @@ public class BaseListTransport implements java.io.Serializable {
 
     for (lastIndex = startDex; lastIndex < chars.length; lastIndex++)
       {
-	if (chars[lastIndex] == '|')
-	  {
-	    lastIndex++;
-	    return result.toString();
-	  }
-	else if (chars[lastIndex] == '\\')
-	  {
-	    result.append(chars[++lastIndex]);
-	  }
-	else
-	  {
-	    result.append(chars[lastIndex]);
-	  }
+        if (chars[lastIndex] == '|')
+          {
+            lastIndex++;
+            return result.toString();
+          }
+        else if (chars[lastIndex] == '\\')
+          {
+            result.append(chars[++lastIndex]);
+          }
+        else
+          {
+            result.append(chars[lastIndex]);
+          }
       }
 
     throw new RuntimeException("Ran out of chunk data: " + result.toString());

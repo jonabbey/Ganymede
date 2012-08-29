@@ -8,7 +8,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -166,11 +166,11 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     try
       {
-	_prefs = Preferences.userNodeForPackage(GASHAdminFrame.class);
+        _prefs = Preferences.userNodeForPackage(GASHAdminFrame.class);
       }
     catch (Throwable ex)
       {
-	ex.printStackTrace();
+        ex.printStackTrace();
       }
 
     prefs = _prefs;
@@ -303,11 +303,11 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   rowTable table = null;
 
   String headers[] = {ts.l("global.user_col_0"), // "User"
-		      ts.l("global.user_col_1"), // "System"
-		      ts.l("global.user_col_2"), // "Status"
-		      ts.l("global.user_col_3"), // "Connect Time"
-		      ts.l("global.user_col_4"), // "Last Event"
-		      ts.l("global.user_col_5")}; // "Objects Checked Out"
+                      ts.l("global.user_col_1"), // "System"
+                      ts.l("global.user_col_2"), // "Status"
+                      ts.l("global.user_col_3"), // "Connect Time"
+                      ts.l("global.user_col_4"), // "Last Event"
+                      ts.l("global.user_col_5")}; // "Objects Checked Out"
 
   int colWidths[] = {100,100,100,100,100,100};
 
@@ -316,10 +316,10 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   rowTable syncTaskTable = null;
 
   String syncTaskHeaders[] = {ts.l("global.task_col_0"), // "Task"
-			      ts.l("global.task_col_5"), // "Type"
-			      ts.l("global.task_col_6"), // "Status"
-			      ts.l("global.task_col_1"), // "Scheduling Status"
-			      ts.l("global.task_col_2")}; // "Last Run"
+                              ts.l("global.task_col_5"), // "Type"
+                              ts.l("global.task_col_6"), // "Status"
+                              ts.l("global.task_col_1"), // "Scheduling Status"
+                              ts.l("global.task_col_2")}; // "Last Run"
   int syncTaskColWidths[] = {100,100,200,100,100};
 
   // resources for the scheduled task monitor table
@@ -327,10 +327,10 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   rowTable taskTable = null;
 
   String taskHeaders[] = {ts.l("global.task_col_0"), // "Task"
-			  ts.l("global.task_col_1"), // "Status"
-			  ts.l("global.task_col_2"), // "Last Run"
-			  ts.l("global.task_col_3"), // "Next Run"
-			  ts.l("global.task_col_4")}; // "Interval"
+                          ts.l("global.task_col_1"), // "Status"
+                          ts.l("global.task_col_2"), // "Last Run"
+                          ts.l("global.task_col_3"), // "Next Run"
+                          ts.l("global.task_col_4")}; // "Interval"
   int taskColWidths[] = {100,100,100,100,100};
 
   // resources for the manual task monitor table
@@ -338,8 +338,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   rowTable manualTaskTable = null;
 
   String manualTaskHeaders[] = {ts.l("global.task_col_0"), // "Task"
-				ts.l("global.task_col_1"), // "Status"
-				ts.l("global.task_col_2")}; // "Last Run"
+                                ts.l("global.task_col_1"), // "Status"
+                                ts.l("global.task_col_2")}; // "Last Run"
   int manualTaskColWidths[] = {100,100,100};
 
   JSplitPane splitterPane = null;
@@ -375,7 +375,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (GASHAdmin.isRunningOnMac())
       {
-	System.setProperty("apple.laf.useScreenMenuBar", "true");
+        System.setProperty("apple.laf.useScreenMenuBar", "true");
       }
 
     mbar = new JMenuBar();
@@ -385,7 +385,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (ts.hasPattern("init.control_menu_key_optional"))
       {
-	controlMenu.setMnemonic((int) ts.l("init.control_menu_key_optional").charAt(0));
+        controlMenu.setMnemonic((int) ts.l("init.control_menu_key_optional").charAt(0));
       }
 
     // "Clear Log Panel"
@@ -394,7 +394,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (ts.hasPattern("init.control_menu_0_key_optional"))
       {
-	clearLogMI.setMnemonic((int) ts.l("init.control_menu_0_key_optional").charAt(0));
+        clearLogMI.setMnemonic((int) ts.l("init.control_menu_0_key_optional").charAt(0));
       }
 
     clearLogMI.addActionListener(this);
@@ -405,7 +405,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (ts.hasPattern("init.control_menu_1_key_optional"))
       {
-	forceBuildMI.setMnemonic((int) ts.l("init.control_menu_1_key_optional").charAt(0));
+        forceBuildMI.setMnemonic((int) ts.l("init.control_menu_1_key_optional").charAt(0));
       }
 
     forceBuildMI.setMnemonic('f');
@@ -417,7 +417,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (ts.hasPattern("init.control_menu_2_key_optional"))
       {
-	killAllMI.setMnemonic((int) ts.l("init.control_menu_2_key_optional").charAt(0));
+        killAllMI.setMnemonic((int) ts.l("init.control_menu_2_key_optional").charAt(0));
       }
 
     killAllMI.addActionListener(this);
@@ -428,7 +428,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (ts.hasPattern("init.control_menu_3_key_optional"))
       {
-	schemaMI.setMnemonic((int) ts.l("init.control_menu_3_key_optional").charAt(0));
+        schemaMI.setMnemonic((int) ts.l("init.control_menu_3_key_optional").charAt(0));
       }
 
     schemaMI.addActionListener(this);
@@ -439,7 +439,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (ts.hasPattern("init.control_menu_4_key_optional"))
       {
-	shutdownMI.setMnemonic((int) ts.l("init.control_menu_4_key_optional").charAt(0));
+        shutdownMI.setMnemonic((int) ts.l("init.control_menu_4_key_optional").charAt(0));
       }
 
     shutdownMI.addActionListener(this);
@@ -450,23 +450,23 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (ts.hasPattern("init.control_menu_5_key_optional"))
       {
-	dumpMI.setMnemonic((int) ts.l("init.control_menu_5_key_optional").charAt(0));
+        dumpMI.setMnemonic((int) ts.l("init.control_menu_5_key_optional").charAt(0));
       }
 
     dumpMI.addActionListener(this);
 
     if (!GASHAdmin.isRunningOnMac())
       {
-	// "Quit Console"
-	quitMI = new JMenuItem(ts.l("init.control_menu_6"));
-	quitMI.setActionCommand(QUIT);
+        // "Quit Console"
+        quitMI = new JMenuItem(ts.l("init.control_menu_6"));
+        quitMI.setActionCommand(QUIT);
 
-	if (ts.hasPattern("init.control_menu_6_key_optional"))
-	  {
-	    quitMI.setMnemonic((int) ts.l("init.control_menu_6_key_optional").charAt(0));
-	  }
+        if (ts.hasPattern("init.control_menu_6_key_optional"))
+          {
+            quitMI.setMnemonic((int) ts.l("init.control_menu_6_key_optional").charAt(0));
+          }
 
-	quitMI.addActionListener(this);
+        quitMI.addActionListener(this);
       }
 
     controlMenu.add(clearLogMI);
@@ -485,7 +485,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (!GASHAdmin.isRunningOnMac())
       {
-	controlMenu.add(quitMI);
+        controlMenu.add(quitMI);
       }
 
     // "Debug"
@@ -493,7 +493,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (ts.hasPattern("init.debug_menu_key_optional"))
       {
-	debugMenu.setMnemonic((int) ts.l("init.debug_menu_key_optional").charAt(0));
+        debugMenu.setMnemonic((int) ts.l("init.debug_menu_key_optional").charAt(0));
       }
 
     // "Test Invid Integrity"
@@ -502,7 +502,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (ts.hasPattern("init.debug_menu_0_key_optional"))
       {
-	runInvidTestMI.setMnemonic((int) ts.l("init.debug_menu_0_key_optional").charAt(0));
+        runInvidTestMI.setMnemonic((int) ts.l("init.debug_menu_0_key_optional").charAt(0));
       }
 
     runInvidTestMI.addActionListener(this);
@@ -513,7 +513,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (ts.hasPattern("init.debug_menu_1_key_optional"))
       {
-	runInvidSweepMI.setMnemonic((int) ts.l("init.debug_menu_1_key_optional").charAt(0));
+        runInvidSweepMI.setMnemonic((int) ts.l("init.debug_menu_1_key_optional").charAt(0));
       }
 
     runInvidSweepMI.addActionListener(this);
@@ -524,7 +524,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (ts.hasPattern("init.debug_menu_2_key_optional"))
       {
-	runEmbeddedTestMI.setMnemonic((int) ts.l("init.debug_menu_2_key_optional").charAt(0));
+        runEmbeddedTestMI.setMnemonic((int) ts.l("init.debug_menu_2_key_optional").charAt(0));
       }
 
     runEmbeddedTestMI.addActionListener(this);
@@ -535,7 +535,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (ts.hasPattern("init.debug_menu_3_key_optional"))
       {
-	runEmbeddedSweepMI.setMnemonic((int) ts.l("init.debug_menu_3_key_optional").charAt(0));
+        runEmbeddedSweepMI.setMnemonic((int) ts.l("init.debug_menu_3_key_optional").charAt(0));
       }
 
     runEmbeddedSweepMI.addActionListener(this);
@@ -550,24 +550,24 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (ts.hasPattern("init.help_menu_key_optional"))
       {
-	helpMenu.setMnemonic((int) ts.l("init.help_menu_key_optional").charAt(0));
+        helpMenu.setMnemonic((int) ts.l("init.help_menu_key_optional").charAt(0));
       }
 
     if (!GASHAdmin.isRunningOnMac())
       {
-	// "About Ganymede"
-	showAboutMI = new JMenuItem(ts.l("init.help_menu_0"));
-	showAboutMI.setActionCommand(ABOUT);
+        // "About Ganymede"
+        showAboutMI = new JMenuItem(ts.l("init.help_menu_0"));
+        showAboutMI.setActionCommand(ABOUT);
 
-	if (ts.hasPattern("init.help_menu_0_key_optional"))
-	  {
-	    showAboutMI.setMnemonic((int) ts.l("init.help_menu_0_key_optional").charAt(0));
-	  }
+        if (ts.hasPattern("init.help_menu_0_key_optional"))
+          {
+            showAboutMI.setMnemonic((int) ts.l("init.help_menu_0_key_optional").charAt(0));
+          }
 
-	showAboutMI.addActionListener(this);
-	helpMenu.add(showAboutMI);
+        showAboutMI.addActionListener(this);
+        helpMenu.add(showAboutMI);
 
-	helpMenu.addSeparator();
+        helpMenu.addSeparator();
       }
 
     // "Java Version"
@@ -605,13 +605,13 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (loginPanel.isSSL())
       {
-	// "{0}  [SSL]"
-	hostField = new JTextField(ts.l("init.urlssl", GASHAdmin.server_url), 60);
+        // "{0}  [SSL]"
+        hostField = new JTextField(ts.l("init.urlssl", GASHAdmin.server_url), 60);
       }
     else
       {
-	// "{0}  [NO SSL]"
-	hostField = new JTextField(ts.l("init.urlnossl", GASHAdmin.server_url), 60);
+        // "{0}  [NO SSL]"
+        hostField = new JTextField(ts.l("init.urlnossl", GASHAdmin.server_url), 60);
       }
 
     hostField.setEditable(false);
@@ -1035,7 +1035,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     taskTable = new rowTable(taskColWidths, taskHeaders, this, false, taskPopMenu, false);
     taskTable.setHeadBackColor(Color.red, false);
-			  
+                          
     JPanel taskBox = new JPanel(new java.awt.BorderLayout());
     taskBox.add("Center", taskTable);
 
@@ -1056,7 +1056,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     manualTaskTable = new rowTable(manualTaskColWidths, manualTaskHeaders, this, false, manualTaskPopMenu, false);
     manualTaskTable.setHeadBackColor(Color.gray, false);
-			  
+                          
     JPanel manualTaskBox = new JPanel(new java.awt.BorderLayout());
     manualTaskBox.add("Center", manualTaskTable);
 
@@ -1085,37 +1085,37 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (prefs != null)
       {
-	statusAreaHeight = prefs.getInt(STATUS_AREA_HEIGHT, -1);
-	tabAreaHeight = prefs.getInt(TAB_AREA_HEIGHT, -1);
-	dividerLoc = prefs.getInt(SPLITTER_POS, -1);
+        statusAreaHeight = prefs.getInt(STATUS_AREA_HEIGHT, -1);
+        tabAreaHeight = prefs.getInt(TAB_AREA_HEIGHT, -1);
+        dividerLoc = prefs.getInt(SPLITTER_POS, -1);
 
-	if (debug)
-	  {
-	    System.err.println("statusAreaHeight = " + statusAreaHeight);
-	    System.err.println("tabAreaHeight = " + tabAreaHeight);
-	    System.err.println("dividerLoc = " + dividerLoc);
-	  }
+        if (debug)
+          {
+            System.err.println("statusAreaHeight = " + statusAreaHeight);
+            System.err.println("tabAreaHeight = " + tabAreaHeight);
+            System.err.println("dividerLoc = " + dividerLoc);
+          }
       }
 
     if (GASHAdmin.isRunningOnMac())
       {
-	MacOSXController controller = new MacOSXController(this);
+        MacOSXController controller = new MacOSXController(this);
 
-	try
-	  {
-	    OSXAdapter.setQuitHandler(controller, MacOSXController.class.getMethod("handleQuit", (Class[]) null));
-	    OSXAdapter.setAboutHandler(controller, MacOSXController.class.getMethod("handleAbout", (Class[]) null));
-	  }
-	catch (NoSuchMethodException ex)
-	  {
-	    // we shouldn't get an exception here at runtime unless
-	    // we've made a mistake in the MacOSXController class.
-	  }
+        try
+          {
+            OSXAdapter.setQuitHandler(controller, MacOSXController.class.getMethod("handleQuit", (Class[]) null));
+            OSXAdapter.setAboutHandler(controller, MacOSXController.class.getMethod("handleAbout", (Class[]) null));
+          }
+        catch (NoSuchMethodException ex)
+          {
+            // we shouldn't get an exception here at runtime unless
+            // we've made a mistake in the MacOSXController class.
+          }
       }
 
     /*********************************************************************************
 
-        				NOTE!
+                                        NOTE!
 
         This whole JSplitPane sizing business is *very* *very* finicky!!
 
@@ -1147,30 +1147,30 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (statusAreaHeight != -1 && tabAreaHeight != -1)
       {
-	statusBox.setPreferredSize(new Dimension(0, statusAreaHeight));
-	tabPane.setPreferredSize(new Dimension(0, tabAreaHeight));
+        statusBox.setPreferredSize(new Dimension(0, statusAreaHeight));
+        tabPane.setPreferredSize(new Dimension(0, tabAreaHeight));
       }
     
     if (!sizer.restoreSize(this))
       {
-	statusBox.setPreferredSize(new Dimension(0, 200));
-	tabPane.setPreferredSize(new Dimension(0, 200));
+        statusBox.setPreferredSize(new Dimension(0, 200));
+        tabPane.setPreferredSize(new Dimension(0, 200));
 
-	this.pack();
+        this.pack();
 
-	sizer.saveSize(this);	// save an initial size before the user might maximize
+        sizer.saveSize(this);   // save an initial size before the user might maximize
       }
 
     if (debugFilename != null)
       {
-	try
-	  {
-	    RemoteServer.setLog(new FileOutputStream(debugFilename));
-	  }
-	catch (IOException ex)
-	  {
-	    System.err.println("couldn't open RMI debug log: " + ex);
-	  }
+        try
+          {
+            RemoteServer.setLog(new FileOutputStream(debugFilename));
+          }
+        catch (IOException ex)
+          {
+            System.err.println("couldn't open RMI debug log: " + ex);
+          }
       }
 
     // along with processWindowEvent(), this method allows us
@@ -1182,12 +1182,12 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     if (statusAreaHeight != -1)
       {
-	if (debug)
-	  {
-	    System.err.println("Setting dividerLoc to " + dividerLoc);
-	  }
+        if (debug)
+          {
+            System.err.println("Setting dividerLoc to " + dividerLoc);
+          }
 
-	splitterPane.setDividerLocation(dividerLoc);
+        splitterPane.setDividerLocation(dividerLoc);
       }
 
     // these break things on JDK 7
@@ -1211,29 +1211,29 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   {
     try
       {
-	adminDispatch.disconnect();
+        adminDispatch.disconnect();
       }
     catch (RemoteException ex)
       {
-	System.err.println("Couldn't logout cleanly: " + ex);
+        System.err.println("Couldn't logout cleanly: " + ex);
       }
     finally
       {
-	if (loginPanel.quitButton != null)
-	  {
-	    loginPanel.quitButton.setEnabled(true);
-	  }
+        if (loginPanel.quitButton != null)
+          {
+            loginPanel.quitButton.setEnabled(true);
+          }
 
-	loginPanel.loginButton.setEnabled(true);
-	saveWindowPrefs();
-	setVisible(false);
+        loginPanel.loginButton.setEnabled(true);
+        saveWindowPrefs();
+        setVisible(false);
 
-	// This shouldn't kill everything off, but it does for now.  Need to fix this later.
-	    
-	if (!GASHAdmin.WeAreApplet)
-	  {
-	    System.exit(0);
-	  }
+        // This shouldn't kill everything off, but it does for now.  Need to fix this later.
+            
+        if (!GASHAdmin.WeAreApplet)
+          {
+            System.exit(0);
+          }
       }
   }
 
@@ -1251,52 +1251,52 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     for (String line: lines)
       {
-	if (line.matches(".*\\[.\\d\\].*"))
-	  {
-	    String date = line.substring(0, line.indexOf('['));
-	    String count = line.substring(line.indexOf('[') + 1, line.indexOf(']')).trim();
-	    String remnant = line.substring(line.indexOf(']') + 2);
+        if (line.matches(".*\\[.\\d\\].*"))
+          {
+            String date = line.substring(0, line.indexOf('['));
+            String count = line.substring(line.indexOf('[') + 1, line.indexOf(']')).trim();
+            String remnant = line.substring(line.indexOf(']') + 2);
 
-	    int countVal = 0;
+            int countVal = 0;
 
-	    try
-	      {
-		countVal = Integer.valueOf(count);
-	      }
-	    catch (NumberFormatException ex)
-	      {
-	      }
+            try
+              {
+                countVal = Integer.valueOf(count);
+              }
+            catch (NumberFormatException ex)
+              {
+              }
 
-	    appendLogText(date, Color.black, Color.white);
-	    appendLogText(" [", Color.black, Color.white);
+            appendLogText(date, Color.black, Color.white);
+            appendLogText(" [", Color.black, Color.white);
 
-	    if (countVal == 0)
-	      {
-		appendLogText(count, Color.black, Color.white);
-	      }
-	    else
-	      {
-		appendLogText(count, Color.blue, Color.white);
-	      }
+            if (countVal == 0)
+              {
+                appendLogText(count, Color.black, Color.white);
+              }
+            else
+              {
+                appendLogText(count, Color.blue, Color.white);
+              }
 
-	    appendLogText("] ", Color.black, Color.white);
-	    appendLogText(remnant + "\n", Color.black, Color.white);
-	  }
-	else if (line.matches(".*\\[\\*\\].*"))
-	  {
-	    String date = line.substring(0, line.indexOf('['));
-	    String remnant = line.substring(line.indexOf(']') + 2);
+            appendLogText("] ", Color.black, Color.white);
+            appendLogText(remnant + "\n", Color.black, Color.white);
+          }
+        else if (line.matches(".*\\[\\*\\].*"))
+          {
+            String date = line.substring(0, line.indexOf('['));
+            String remnant = line.substring(line.indexOf(']') + 2);
 
-	    appendLogText(date, Color.black, Color.white);
-	    appendLogText(" [", Color.black, Color.white);
-	    appendLogText("*", Color.red, Color.white);
-	    appendLogText("] ", Color.black, Color.white);
-	    appendLogText(remnant + "\n", Color.black, Color.white);
-	  }
-	else
-	  {
-	    appendLogText(line + "\n", Color.black, Color.white);
-	  }
+            appendLogText(date, Color.black, Color.white);
+            appendLogText(" [", Color.black, Color.white);
+            appendLogText("*", Color.red, Color.white);
+            appendLogText("] ", Color.black, Color.white);
+            appendLogText(remnant + "\n", Color.black, Color.white);
+          }
+        else
+          {
+            appendLogText(line + "\n", Color.black, Color.white);
+          }
       }
 
     statusArea.setCaretPosition(statusArea.getDocument().getEndPosition().getOffset() - 1);
@@ -1318,11 +1318,11 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     try
       {
-	statusArea.getDocument().insertString(end.getOffset() - 1, text, attr);
+        statusArea.getDocument().insertString(end.getOffset() - 1, text, attr);
       }
     catch (BadLocationException ex)
       {
-	throw new RuntimeException(ex);
+        throw new RuntimeException(ex);
       }
   }
 
@@ -1332,260 +1332,260 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   {
     if (FORCEBUILD.equals(event.getActionCommand()))
       {
-	try
-	  {
-	    adminDispatch.forceBuild();
-	  }
-	catch (RemoteException ex)
-	  {
-	    exceptionHandler(ex);
-	  }
+        try
+          {
+            adminDispatch.forceBuild();
+          }
+        catch (RemoteException ex)
+          {
+            exceptionHandler(ex);
+          }
       }
     else if (QUIT.equals(event.getActionCommand()))
       {
-	if (debug)
-	  {
-	    System.err.println("Quitting");
-	  }
+        if (debug)
+          {
+            System.err.println("Quitting");
+          }
 
-	this.disconnect();
+        this.disconnect();
       }
     else if (DUMP.equals(event.getActionCommand()))
       {
-	if (dumpDialog == null)
-	  {
-	    // "Ganymede Server Dump"
-	    // "Are you sure you want to schedule\na full dump of the Ganymede database to disk?"
+        if (dumpDialog == null)
+          {
+            // "Ganymede Server Dump"
+            // "Are you sure you want to schedule\na full dump of the Ganymede database to disk?"
 
-	    dumpDialog = new StringDialog(this,
-					  ts.l("actionPerformed.dump_title"),
-					  ts.l("actionPerformed.dump_question"),
-					  ts.l("global.yes"), ts.l("global.no"), question, StandardDialog.ModalityType.DOCUMENT_MODAL);
-	  }
+            dumpDialog = new StringDialog(this,
+                                          ts.l("actionPerformed.dump_title"),
+                                          ts.l("actionPerformed.dump_question"),
+                                          ts.l("global.yes"), ts.l("global.no"), question, StandardDialog.ModalityType.DOCUMENT_MODAL);
+          }
 
-	if (dumpDialog.showDialog() != null)
-	  {
-	    if (debug)
-	      {
-		System.err.println("Affirmative dump request");
-	      }
+        if (dumpDialog.showDialog() != null)
+          {
+            if (debug)
+              {
+                System.err.println("Affirmative dump request");
+              }
 
-	    try
-	      {
-		adminDispatch.dumpDB();
-	      }
-	    catch (RemoteException ex)
-	      {
-		exceptionHandler(ex);
-	      }
-	  }
+            try
+              {
+                adminDispatch.dumpDB();
+              }
+            catch (RemoteException ex)
+              {
+                exceptionHandler(ex);
+              }
+          }
       }
     else if (TESTINVIDS.equals(event.getActionCommand()))
       {
-	// "Invid Test"
-	// "Are you sure you want to trigger a full Invid consistency test?\nIt may take awhile."
+        // "Invid Test"
+        // "Are you sure you want to trigger a full Invid consistency test?\nIt may take awhile."
 
-	StringDialog invidTestDialog = new StringDialog(this,
-							ts.l("actionPerformed.invid_title"),
-							ts.l("actionPerformed.invid_question"),
-							ts.l("global.yes"), ts.l("global.no"), question, StandardDialog.ModalityType.DOCUMENT_MODAL);
+        StringDialog invidTestDialog = new StringDialog(this,
+                                                        ts.l("actionPerformed.invid_title"),
+                                                        ts.l("actionPerformed.invid_question"),
+                                                        ts.l("global.yes"), ts.l("global.no"), question, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
-	if (invidTestDialog.showDialog() != null)
-	  {
-	    if (debug)
-	      {
-		System.err.println("Affirmative invid test request");
-	      }
+        if (invidTestDialog.showDialog() != null)
+          {
+            if (debug)
+              {
+                System.err.println("Affirmative invid test request");
+              }
 
-	    try
-	      {
-		adminDispatch.runInvidTest();
-	      }
-	    catch (RemoteException ex)
-	      {
-		exceptionHandler(ex);
-	      }
-	  }
+            try
+              {
+                adminDispatch.runInvidTest();
+              }
+            catch (RemoteException ex)
+              {
+                exceptionHandler(ex);
+              }
+          }
       }
     else if (SWEEPINVIDS.equals(event.getActionCommand()))
       {
-	// "Invid Sweep"
-	// "Are you sure you want to trigger a full Invid fixup sweep?\nIt may take awhile."
-	StringDialog invidTestDialog = new StringDialog(this,
-							ts.l("actionPerformed.invidsweep_title"),
-							ts.l("actionPerformed.invidsweep_question"),
-							ts.l("global.yes"), ts.l("global.no"), question, StandardDialog.ModalityType.DOCUMENT_MODAL);
+        // "Invid Sweep"
+        // "Are you sure you want to trigger a full Invid fixup sweep?\nIt may take awhile."
+        StringDialog invidTestDialog = new StringDialog(this,
+                                                        ts.l("actionPerformed.invidsweep_title"),
+                                                        ts.l("actionPerformed.invidsweep_question"),
+                                                        ts.l("global.yes"), ts.l("global.no"), question, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
-	if (invidTestDialog.showDialog() != null)
-	  {
-	    if (debug)
-	      {
-		System.err.println("Affirmative invid sweep request");
-	      }
+        if (invidTestDialog.showDialog() != null)
+          {
+            if (debug)
+              {
+                System.err.println("Affirmative invid sweep request");
+              }
 
-	    try
-	      {
-		adminDispatch.runInvidSweep();
-	      }
-	    catch (RemoteException ex)
-	      {
-		exceptionHandler(ex);
-	      }
-	  }
+            try
+              {
+                adminDispatch.runInvidSweep();
+              }
+            catch (RemoteException ex)
+              {
+                exceptionHandler(ex);
+              }
+          }
       }
     else if (TESTEMBEDDED.equals(event.getActionCommand()))
       {
-	// "Embedded Object Consistency Test"
-	// "Are you sure you want to trigger a full embedded object consistency test?"
-	StringDialog invidTestDialog = new StringDialog(this,
-							ts.l("actionPerformed.embedded_title"),
-							ts.l("actionPerformed.embedded_question"),
-							ts.l("global.yes"), ts.l("global.no"), question, StandardDialog.ModalityType.DOCUMENT_MODAL);
+        // "Embedded Object Consistency Test"
+        // "Are you sure you want to trigger a full embedded object consistency test?"
+        StringDialog invidTestDialog = new StringDialog(this,
+                                                        ts.l("actionPerformed.embedded_title"),
+                                                        ts.l("actionPerformed.embedded_question"),
+                                                        ts.l("global.yes"), ts.l("global.no"), question, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
-	if (invidTestDialog.showDialog() != null)
-	  {
-	    if (debug)
-	      {
-		System.err.println("Affirmative Embedded test request");
-	      }
+        if (invidTestDialog.showDialog() != null)
+          {
+            if (debug)
+              {
+                System.err.println("Affirmative Embedded test request");
+              }
 
-	    try
-	      {
-		adminDispatch.runEmbeddedTest();
-	      }
-	    catch (RemoteException ex)
-	      {
-		exceptionHandler(ex);
-	      }
-	  }
+            try
+              {
+                adminDispatch.runEmbeddedTest();
+              }
+            catch (RemoteException ex)
+              {
+                exceptionHandler(ex);
+              }
+          }
       }
     else if (REPAIREMBEDDED.equals(event.getActionCommand()))
       {
-	// "Embedded Object Sweep"
-	// "Are you sure you want to trigger a full embedded object consistency fixup sweep?"
+        // "Embedded Object Sweep"
+        // "Are you sure you want to trigger a full embedded object consistency fixup sweep?"
 
-	StringDialog invidTestDialog = new StringDialog(this,
-							ts.l("actionPerformed.embedded_sweep_title"),
-							ts.l("actionPerformed.embedded_sweep_question"),
-							ts.l("global.yes"), ts.l("global.no"), question, StandardDialog.ModalityType.DOCUMENT_MODAL);
+        StringDialog invidTestDialog = new StringDialog(this,
+                                                        ts.l("actionPerformed.embedded_sweep_title"),
+                                                        ts.l("actionPerformed.embedded_sweep_question"),
+                                                        ts.l("global.yes"), ts.l("global.no"), question, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
-	if (invidTestDialog.showDialog() != null)
-	  {
-	    if (debug)
-	      {
-		System.err.println("Affirmative Embedded Sweep request");
-	      }
+        if (invidTestDialog.showDialog() != null)
+          {
+            if (debug)
+              {
+                System.err.println("Affirmative Embedded Sweep request");
+              }
 
-	    try
-	      {
-		adminDispatch.runEmbeddedSweep();
-	      }
-	    catch (RemoteException ex)
-	      {
-		exceptionHandler(ex);
-	      }
-	  }
+            try
+              {
+                adminDispatch.runEmbeddedSweep();
+              }
+            catch (RemoteException ex)
+              {
+                exceptionHandler(ex);
+              }
+          }
       }
     else if (SHUTDOWN.equals(event.getActionCommand()))
       {
-	boolean waitForUsers=false;
+        boolean waitForUsers=false;
 
-	shutdownDialog = new consoleShutdownDialog(this);
+        shutdownDialog = new consoleShutdownDialog(this);
 
-	int result = shutdownDialog.showDialog();
+        int result = shutdownDialog.showDialog();
 
-	if (result == 0)
-	  {
-	    return;
-	  }
+        if (result == 0)
+          {
+            return;
+          }
 
-	if (result == 2)
-	  {
-	    waitForUsers = true;
-	  }
+        if (result == 2)
+          {
+            waitForUsers = true;
+          }
 
-	boolean success = true;
+        boolean success = true;
 
-	try
-	  {
-	    success = adminDispatch.shutdown(waitForUsers);
-	  }
-	catch (RemoteException ex)
-	  {
-	    adminDispatch.forceDisconnect("Couldn't talk to server" + ex);
-	  }
+        try
+          {
+            success = adminDispatch.shutdown(waitForUsers);
+          }
+        catch (RemoteException ex)
+          {
+            adminDispatch.forceDisconnect("Couldn't talk to server" + ex);
+          }
 
-	// if we are going to delay shutting down until all users log
-	// out, don't close down the admin console.  We don't
-	// currently provide a way to clear the
-	// shutdown-on-users-logged-out, but it's still useful to be
-	// able to continue to monitor things while we're waiting for
-	// users to trickle off.
+        // if we are going to delay shutting down until all users log
+        // out, don't close down the admin console.  We don't
+        // currently provide a way to clear the
+        // shutdown-on-users-logged-out, but it's still useful to be
+        // able to continue to monitor things while we're waiting for
+        // users to trickle off.
 
-	if (!waitForUsers && success)
-	  {
-	    if (loginPanel.quitButton != null)
-	      {
-		loginPanel.quitButton.setEnabled(true);
-	      }
+        if (!waitForUsers && success)
+          {
+            if (loginPanel.quitButton != null)
+              {
+                loginPanel.quitButton.setEnabled(true);
+              }
 
-	    loginPanel.loginButton.setEnabled(true);
+            loginPanel.loginButton.setEnabled(true);
 
-	    saveWindowPrefs();
-	    setVisible(false);
-		
-	    if (!GASHAdmin.WeAreApplet)
-	      {
-		System.exit(0);
-	      }
-	  }
+            saveWindowPrefs();
+            setVisible(false);
+                
+            if (!GASHAdmin.WeAreApplet)
+              {
+                System.exit(0);
+              }
+          }
       }
     else if (KILLALL.equals(event.getActionCommand()))
       {
-	DialogRsrc killAllDLGR;
-	StringDialog killAllDLG;
+        DialogRsrc killAllDLGR;
+        StringDialog killAllDLG;
 
-	// "Force Disconnect"
-	// "Are you sure you want to force all connected users to log out from the Ganymede server?"
+        // "Force Disconnect"
+        // "Are you sure you want to force all connected users to log out from the Ganymede server?"
 
-	killAllDLGR = new DialogRsrc(this,
-				     ts.l("actionPerformed.killall_title"),
-				     ts.l("actionPerformed.killall_question"),
-				     ts.l("global.yes"), ts.l("global.no"), question);
+        killAllDLGR = new DialogRsrc(this,
+                                     ts.l("actionPerformed.killall_title"),
+                                     ts.l("actionPerformed.killall_question"),
+                                     ts.l("global.yes"), ts.l("global.no"), question);
     
-	killAllDLG = new StringDialog(killAllDLGR, StandardDialog.ModalityType.DOCUMENT_MODAL);
-	
-	if (killAllDLG.showDialog() == null)
-	  {
-	    return;
-	  }
+        killAllDLG = new StringDialog(killAllDLGR, StandardDialog.ModalityType.DOCUMENT_MODAL);
+        
+        if (killAllDLG.showDialog() == null)
+          {
+            return;
+          }
 
-	try
-	  {
-	    adminDispatch.killAll();
-	  }
-	catch (RemoteException ex)
-	  {
-	    exceptionHandler(ex);
-	  }
+        try
+          {
+            adminDispatch.killAll();
+          }
+        catch (RemoteException ex)
+          {
+            exceptionHandler(ex);
+          }
       }
     else if (SCHEMA.equals(event.getActionCommand()))
       {
-	if (schemaEditor != null)
-	  {
-	    return;
-	  }
+        if (schemaEditor != null)
+          {
+            return;
+          }
 
-	try
-	  {
+        try
+          {
             schemaMI.setEnabled(false);
 
-	    schemaEditor = adminDispatch.pullSchema();
-	  }
-	catch (RemoteException ex)
-	  {
-	    exceptionHandler(ex);
-	  }
+            schemaEditor = adminDispatch.pullSchema();
+          }
+        catch (RemoteException ex)
+          {
+            exceptionHandler(ex);
+          }
         finally
           {
             if (schemaEditor == null)
@@ -1600,11 +1600,11 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
       }
     else if (ABOUT.equals(event.getActionCommand()))
       {
-	showAboutMessage();
+        showAboutMessage();
       }
     else if (CLEARLOG.equals(event.getActionCommand()))
       {
-	statusArea.setText("");
+        statusArea.setText("");
       }
   }
 
@@ -1612,10 +1612,10 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   {
     if (prefs != null)
       {
-	sizer.saveSize(this);
-	prefs.putInt(STATUS_AREA_HEIGHT, statusBox.getHeight());
-	prefs.putInt(TAB_AREA_HEIGHT, tabPane.getHeight());
-	prefs.putInt(SPLITTER_POS, splitterPane.getDividerLocation());
+        sizer.saveSize(this);
+        prefs.putInt(STATUS_AREA_HEIGHT, statusBox.getHeight());
+        prefs.putInt(TAB_AREA_HEIGHT, tabPane.getHeight());
+        prefs.putInt(SPLITTER_POS, splitterPane.getDividerLocation());
       }
   }
 
@@ -1627,7 +1627,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   {
     if (java_ver_dialog == null)
       {
-	java_ver_dialog = new aboutJavaDialog(this, ts.l("showJavaVersion.dialog_title"));  // "Java Version"
+        java_ver_dialog = new aboutJavaDialog(this, ts.l("showJavaVersion.dialog_title"));  // "Java Version"
       }
 
     java_ver_dialog.setVisible(true);
@@ -1641,7 +1641,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   {
     if (about == null)
       {
-	about = new aboutGanyDialog(this, ts.l("showAboutMessage.dialog_title"));  // "About Ganymede"
+        about = new aboutGanyDialog(this, ts.l("showAboutMessage.dialog_title"));  // "About Ganymede"
       }
 
     about.setVisible(true);
@@ -1659,50 +1659,50 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   {
     if (o instanceof JErrorValueObject)
       {
-	showErrorMessage((String)o.getValue());
+        showErrorMessage((String)o.getValue());
       }
     else if (o instanceof JSetValueObject && o.getSource() == LandFMenu)
       {
         sizer.saveLookAndFeel();
 
-	if (about != null)
-	  {
-	    SwingUtilities.updateComponentTreeUI(about);
-	  }
+        if (about != null)
+          {
+            SwingUtilities.updateComponentTreeUI(about);
+          }
 
-	if (java_ver_dialog != null)
-	  {
-	    SwingUtilities.updateComponentTreeUI(java_ver_dialog);
-	  }
+        if (java_ver_dialog != null)
+          {
+            SwingUtilities.updateComponentTreeUI(java_ver_dialog);
+          }
 
-	if (shutdownDialog != null)
-	  {
-	    SwingUtilities.updateComponentTreeUI(java_ver_dialog);
-	  }
+        if (shutdownDialog != null)
+          {
+            SwingUtilities.updateComponentTreeUI(java_ver_dialog);
+          }
 
-	if (dumpDialog != null)
-	  {
-	    SwingUtilities.updateComponentTreeUI(dumpDialog);
-	  }
+        if (dumpDialog != null)
+          {
+            SwingUtilities.updateComponentTreeUI(dumpDialog);
+          }
 
-	if (schemaEditor != null)
-	  {
-	    SwingUtilities.updateComponentTreeUI(schemaEditor);
-	  }
+        if (schemaEditor != null)
+          {
+            SwingUtilities.updateComponentTreeUI(schemaEditor);
+          }
 
-	if (loginPanel != null)
-	  {
-	    SwingUtilities.updateComponentTreeUI(loginPanel);
-	  }
+        if (loginPanel != null)
+          {
+            SwingUtilities.updateComponentTreeUI(loginPanel);
+          }
       }
     else
       {
-	if (debug)
-	  {
-	    System.err.println("I don't know what to do with this setValuePerformed: " + o);
-	  }
+        if (debug)
+          {
+            System.err.println("I don't know what to do with this setValuePerformed: " + o);
+          }
 
-	return false;
+        return false;
       }
 
     return true;
@@ -1726,97 +1726,97 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   {
     if (debug)
       {
-	System.err.println("rowMenuPerformed");
+        System.err.println("rowMenuPerformed");
       }
 
     if (KILLUSER.equals(e.getActionCommand()))
       {
-	if (debug)
-	  {
-	    System.err.println("kill " + key + " selected");
-	  }
+        if (debug)
+          {
+            System.err.println("kill " + key + " selected");
+          }
 
-	killVictim = (String) key;
+        killVictim = (String) key;
 
-	// "Force Disconnect"
-	// "Are you sure you want to force user {0} to be logged out from the Ganymede server?"
+        // "Force Disconnect"
+        // "Are you sure you want to force user {0} to be logged out from the Ganymede server?"
 
-	if (new StringDialog(this,
-			     ts.l("rowMenuPerformed.kill_title"),
-			     ts.l("rowMenuPerformed.kill_question", key),
-			     ts.l("global.yes"), ts.l("global.no"), question, StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog() != null)
-	  {
-	    if (debug)
-	      {
-		System.err.println("Affirmative kill request");
-	      }
+        if (new StringDialog(this,
+                             ts.l("rowMenuPerformed.kill_title"),
+                             ts.l("rowMenuPerformed.kill_question", key),
+                             ts.l("global.yes"), ts.l("global.no"), question, StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog() != null)
+          {
+            if (debug)
+              {
+                System.err.println("Affirmative kill request");
+              }
 
-	    if (killVictim != null)
-	      {
-		try
-		  {
-		    adminDispatch.kill(killVictim);
-		  }
-		catch (RemoteException ex)
-		  {
-		    exceptionHandler(ex);
-		  }
-	      }
-	    killVictim = null;
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.err.println("Negative kill request");
-	      }
+            if (killVictim != null)
+              {
+                try
+                  {
+                    adminDispatch.kill(killVictim);
+                  }
+                catch (RemoteException ex)
+                  {
+                    exceptionHandler(ex);
+                  }
+              }
+            killVictim = null;
+          }
+        else
+          {
+            if (debug)
+              {
+                System.err.println("Negative kill request");
+              }
 
-	    killVictim = null;
-	  }
+            killVictim = null;
+          }
       }
     else if (RUNTASK.equals(e.getActionCommand()))
       {
-	try
-	  {
-	    adminDispatch.runTaskNow((String) key);
-	  }
-	catch (RemoteException ex)
-	  {
-	    exceptionHandler(ex);
-	  }
+        try
+          {
+            adminDispatch.runTaskNow((String) key);
+          }
+        catch (RemoteException ex)
+          {
+            exceptionHandler(ex);
+          }
       }
     else if (STOPTASK.equals(e.getActionCommand()))
       {
-	try
-	  {
-	    adminDispatch.stopTask((String) key);
-	  }
-	catch (RemoteException ex)
-	  {
-	    exceptionHandler(ex);
-	  }
+        try
+          {
+            adminDispatch.stopTask((String) key);
+          }
+        catch (RemoteException ex)
+          {
+            exceptionHandler(ex);
+          }
       }
     else if (DISABLETASK.equals(e.getActionCommand()))
       {
-	try
-	  {
-	    adminDispatch.disableTask((String) key);
-	  }
-	catch (RemoteException ex)
-	  {
-	    exceptionHandler(ex);
-	  }
+        try
+          {
+            adminDispatch.disableTask((String) key);
+          }
+        catch (RemoteException ex)
+          {
+            exceptionHandler(ex);
+          }
       }
     else if (ENABLETASK.equals(e.getActionCommand()))
       {
-	try
-	  {
-	    adminDispatch.enableTask((String) key);
-	  }
-	catch (RemoteException ex)
-	  {
-	    exceptionHandler(ex);
-	  }
+        try
+          {
+            adminDispatch.enableTask((String) key);
+          }
+        catch (RemoteException ex)
+          {
+            exceptionHandler(ex);
+          }
       }
   }
 
@@ -1836,16 +1836,16 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   {
     if (e.getID() == WindowEvent.WINDOW_CLOSING)
       {
-	// make sure that we cancel any schema editing in process if
-	// we have it open and we are made to close the main window
+        // make sure that we cancel any schema editing in process if
+        // we have it open and we are made to close the main window
 
-	if (schemaEditor != null)
-	  {
-	    schemaEditor.cancel();
-	  }
+        if (schemaEditor != null)
+          {
+            schemaEditor.cancel();
+          }
 
-	disconnect();
-	saveWindowPrefs();
+        disconnect();
+        saveWindowPrefs();
       }
 
     super.processWindowEvent(e);
@@ -1879,7 +1879,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   {
     if (errorImage == null)
       {
-	errorImage = PackageResources.getImageResource(this, "error.gif", getClass());
+        errorImage = PackageResources.getImageResource(this, "error.gif", getClass());
       }
     
     return errorImage;
@@ -1917,7 +1917,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   {
     if (debug)
       {
-	System.err.println("Error message: " + message);
+        System.err.println("Error message: " + message);
       }
 
     final GASHAdminFrame my_frame = this;
@@ -1926,12 +1926,12 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     final Image fIcon = icon;
 
     EventQueue.invokeLater(new Runnable() 
-			       {
-				 public void run()
-				   {
-				     new JErrorDialog(my_frame, Title, Message, fIcon, StandardDialog.ModalityType.DOCUMENT_MODAL); // implicit show
-				   }
-			       });
+                               {
+                                 public void run()
+                                   {
+                                     new JErrorDialog(my_frame, Title, Message, fIcon, StandardDialog.ModalityType.DOCUMENT_MODAL); // implicit show
+                                   }
+                               });
   }
 }
 
@@ -1998,7 +1998,7 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
 
     mainPanel = new JPanel();
     mainPanel.setBorder(new CompoundBorder(new EtchedBorder(),
-					   new EmptyBorder(10, 10, 10, 10)));
+                                           new EmptyBorder(10, 10, 10, 10)));
     mainPanel.setLayout(gbl);
     setContentPane(mainPanel);
 
@@ -2070,12 +2070,12 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
 
     if (image != null)
       {
-	imageCanvas = new JLabel(new ImageIcon(image));
-	imagePanel.add(imageCanvas);
+        imageCanvas = new JLabel(new ImageIcon(image));
+        imagePanel.add(imageCanvas);
       }
     else
       {
-	imagePanel.add(Box.createGlue());
+        imagePanel.add(Box.createGlue());
       }
 
     gbc.gridx = 0;
@@ -2113,7 +2113,7 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
 
     if (debug)
       {
-	System.err.println("Done invoking.");
+        System.err.println("Done invoking.");
       }
 
     return result;
@@ -2123,19 +2123,19 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
   {
     if (e.getSource() == button1)
       {
-	result = 1;
+        result = 1;
       }
     else if (e.getSource() == button2)
       {
-	result = 2;
+        result = 2;
       }
     else if (e.getSource() == button3)
       {
-	result = 0;
+        result = 0;
       }
     else
       {
-	return;
+        return;
       }
 
     // pop down so that showDialog() can proceed to completion.
@@ -2159,15 +2159,15 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
   {
     if (!done)
       {
-	if (debug)
-	  {
-	    System.err.println("Window is closing and we haven't done a cancel.");
-	  }
+        if (debug)
+          {
+            System.err.println("Window is closing and we haven't done a cancel.");
+          }
 
-	// by setting valueHash to null, we're basically treating
-	// this window close as a cancel.
-	
-	result = 0;
+        // by setting valueHash to null, we're basically treating
+        // this window close as a cancel.
+        
+        result = 0;
       }
 
     done = true;

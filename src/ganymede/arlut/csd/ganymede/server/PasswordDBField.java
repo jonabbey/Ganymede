@@ -312,7 +312,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (definition.isHistoryChecked())
       {
-	this.history = new passwordHistoryArchive(definition.getHistoryDepth());
+        this.history = new passwordHistoryArchive(definition.getHistoryDepth());
       }
 
     value = null;
@@ -343,41 +343,41 @@ public class PasswordDBField extends DBField implements pass_field {
 
     try
       {
-	// If we're keeping history and we're copying from an editable
-	// object to a non-editable object and the field we're copying
-	// from changed during the transaction we're consolidating, we
-	// need to remember the password that is being set with this
-	// commit.
+        // If we're keeping history and we're copying from an editable
+        // object to a non-editable object and the field we're copying
+        // from changed during the transaction we're consolidating, we
+        // need to remember the password that is being set with this
+        // commit.
 
-	if (getFieldDef().isHistoryChecked())
-	  {
-	    if (history == null)
-	      {
-		history = new passwordHistoryArchive(getFieldDef().getHistoryDepth());
-	      }
-	    else if (history.getPoolSize() != getFieldDef().getHistoryDepth())
-	      {
-		history.setPoolSize(getFieldDef().getHistoryDepth());
-	      }
+        if (getFieldDef().isHistoryChecked())
+          {
+            if (history == null)
+              {
+                history = new passwordHistoryArchive(getFieldDef().getHistoryDepth());
+              }
+            else if (history.getPoolSize() != getFieldDef().getHistoryDepth())
+              {
+                history.setPoolSize(getFieldDef().getHistoryDepth());
+              }
 
-	    if (this.uncryptedPass != null &&
-		!(this.owner instanceof DBEditObject) &&
-		field.hasChanged())
-	      {
-		history.add(uncryptedPass, new Date());
-	      }
-	  }
-	else
-	  {
-	    history = null;
-	  }
+            if (this.uncryptedPass != null &&
+                !(this.owner instanceof DBEditObject) &&
+                field.hasChanged())
+              {
+                history.add(uncryptedPass, new Date());
+              }
+          }
+        else
+          {
+            history = null;
+          }
       }
     catch (Throwable ex)
       {
-	// we're *not* going to allow an exception to be thrown here
-	// for the sake of the password history tracking
+        // we're *not* going to allow an exception to be thrown here
+        // for the sake of the password history tracking
 
-	ex.printStackTrace();
+        ex.printStackTrace();
       }
   }
 
@@ -391,8 +391,8 @@ public class PasswordDBField extends DBField implements pass_field {
   public boolean isDefined()
   {
     return (cryptedPass != null || md5CryptPass != null ||
-	    apacheMd5CryptPass != null || uncryptedPass != null || lanHash != null
-	    || ntHash != null || bCryptPass != null | sshaHash != null || shaUnixCrypt != null);
+            apacheMd5CryptPass != null || uncryptedPass != null || lanHash != null
+            || ntHash != null || bCryptPass != null | sshaHash != null || shaUnixCrypt != null);
   }
 
   /**
@@ -420,10 +420,10 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (!isEditable(local))
       {
-	// "Permissions Error"
-	// "You do not have permission to clear the "{0}" password field in object "{1}"."
-	return Ganymede.createErrorDialog(ts.l("setUndefined.perm_error_subj"),
-					  ts.l("setUndefined.perm_error_text", this.getName(), owner.getLabel()));
+        // "Permissions Error"
+        // "You do not have permission to clear the "{0}" password field in object "{1}"."
+        return Ganymede.createErrorDialog(ts.l("setUndefined.perm_error_subj"),
+                                          ts.l("setUndefined.perm_error_text", this.getName(), owner.getLabel()));
       }
 
     clear_stored();
@@ -460,33 +460,33 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (!getFieldDef().isCrypted())
       {
-	cryptedPass = null;
+        cryptedPass = null;
       }
 
     if (!getFieldDef().isMD5Crypted())
       {
-	md5CryptPass = null;
+        md5CryptPass = null;
       }
 
     if (!getFieldDef().isApacheMD5Crypted())
       {
-	apacheMd5CryptPass = null;
+        apacheMd5CryptPass = null;
       }
 
     if (!getFieldDef().isWinHashed())
       {
-	lanHash = null;
-	ntHash = null;
+        lanHash = null;
+        ntHash = null;
       }
 
     if (!getFieldDef().isBCrypted())
       {
-	bCryptPass = null;
+        bCryptPass = null;
       }
 
     if (!getFieldDef().isSSHAHashed())
       {
-	sshaHash = null;
+        sshaHash = null;
       }
 
     if (!getFieldDef().isShaUnixCrypted())
@@ -521,20 +521,20 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (!(obj.getClass().equals(this.getClass())))
       {
-	return false;
+        return false;
       }
 
     PasswordDBField origP = (PasswordDBField) obj;
 
     return (streq(cryptedPass, origP.cryptedPass) &&
-	    streq(md5CryptPass, origP.md5CryptPass) &&
-	    streq(apacheMd5CryptPass, origP.apacheMd5CryptPass) &&
-	    streq(uncryptedPass, origP.uncryptedPass) &&
-	    streq(lanHash, origP.lanHash) &&
-	    streq(ntHash, origP.ntHash) &&
-	    streq(bCryptPass, origP.bCryptPass) &&
-	    streq(sshaHash, origP.sshaHash) &&
-	    streq(shaUnixCrypt, origP.shaUnixCrypt));
+            streq(md5CryptPass, origP.md5CryptPass) &&
+            streq(apacheMd5CryptPass, origP.apacheMd5CryptPass) &&
+            streq(uncryptedPass, origP.uncryptedPass) &&
+            streq(lanHash, origP.lanHash) &&
+            streq(ntHash, origP.ntHash) &&
+            streq(bCryptPass, origP.bCryptPass) &&
+            streq(sshaHash, origP.sshaHash) &&
+            streq(shaUnixCrypt, origP.shaUnixCrypt));
   }
 
   /**
@@ -545,12 +545,12 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (str1 == null && str2 == null)
       {
-	return true;
+        return true;
       }
 
     if (str1 == null || str2 == null)
       {
-	return false;
+        return false;
       }
 
     return str1.equals(str2);
@@ -575,21 +575,21 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (!local)
       {
-	if (!verifyReadPermission())
-	  {
-	    // "Error Copying Password Field"
-	    // "Can''t copy field "{0}" in object "{1}", no read privileges on source."
-	    return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
-					      ts.l("copyFieldTo.no_read", this.getName(), owner.getLabel()));
-	  }
+        if (!verifyReadPermission())
+          {
+            // "Error Copying Password Field"
+            // "Can''t copy field "{0}" in object "{1}", no read privileges on source."
+            return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
+                                              ts.l("copyFieldTo.no_read", this.getName(), owner.getLabel()));
+          }
       }
 
     if (!target.isEditable(local))
       {
-	// "Error Copying Password Field"
-	// "Can''t copy field "{0}" in object "{1}", no write privileges on target."
-	return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
-					  ts.l("copyFieldTo.no_write", this.getName(), owner.getLabel()));
+        // "Error Copying Password Field"
+        // "Can''t copy field "{0}" in object "{1}", no write privileges on target."
+        return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
+                                          ts.l("copyFieldTo.no_write", this.getName(), owner.getLabel()));
       }
 
     target.cryptedPass = cryptedPass;
@@ -604,7 +604,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     target.history = history;
 
-    return null;		// simple success value
+    return null;                // simple success value
   }
 
   /**
@@ -647,56 +647,56 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (getFieldDef().isCrypted() || (cryptedPass != null && need_to_write_all_hashes))
       {
-	cryptedPass = getUNIXCryptText();
-	wrote_hash = emitHelper(out, cryptedPass, wrote_hash);
+        cryptedPass = getUNIXCryptText();
+        wrote_hash = emitHelper(out, cryptedPass, wrote_hash);
       }
     else
       {
-	out.writeUTF("");
+        out.writeUTF("");
       }
 
     if (getFieldDef().isMD5Crypted() || (md5CryptPass != null && need_to_write_all_hashes))
       {
-	md5CryptPass = getMD5CryptText();
-	wrote_hash = emitHelper(out, md5CryptPass, wrote_hash);
+        md5CryptPass = getMD5CryptText();
+        wrote_hash = emitHelper(out, md5CryptPass, wrote_hash);
       }
     else
       {
-	out.writeUTF("");
+        out.writeUTF("");
       }
 
     if (getFieldDef().isApacheMD5Crypted() || (apacheMd5CryptPass != null && need_to_write_all_hashes))
       {
-	apacheMd5CryptPass = getApacheMD5CryptText();
-	wrote_hash = emitHelper(out, apacheMd5CryptPass, wrote_hash);
+        apacheMd5CryptPass = getApacheMD5CryptText();
+        wrote_hash = emitHelper(out, apacheMd5CryptPass, wrote_hash);
       }
     else
       {
-	out.writeUTF("");
+        out.writeUTF("");
       }
 
     if (getFieldDef().isWinHashed() || ((lanHash != null || ntHash != null) && need_to_write_all_hashes))
       {
-	lanHash = getLANMANCryptText();
-	wrote_hash = emitHelper(out, lanHash, wrote_hash);
+        lanHash = getLANMANCryptText();
+        wrote_hash = emitHelper(out, lanHash, wrote_hash);
 
-	ntHash = getNTUNICODECryptText();
-	wrote_hash = emitHelper(out, ntHash, wrote_hash);
+        ntHash = getNTUNICODECryptText();
+        wrote_hash = emitHelper(out, ntHash, wrote_hash);
       }
     else
       {
-	out.writeUTF("");
-	out.writeUTF("");
+        out.writeUTF("");
+        out.writeUTF("");
       }
 
     if (getFieldDef().isSSHAHashed() || (sshaHash != null && need_to_write_all_hashes))
       {
-	sshaHash = getSSHAHashText();
-	wrote_hash = emitHelper(out, sshaHash, wrote_hash);
+        sshaHash = getSSHAHashText();
+        wrote_hash = emitHelper(out, sshaHash, wrote_hash);
       }
     else
       {
-	out.writeUTF("");
+        out.writeUTF("");
       }
 
     // starting at file version 2.13
@@ -705,12 +705,12 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (getFieldDef().isShaUnixCrypted() || (shaUnixCrypt != null && need_to_write_all_hashes))
       {
-	shaUnixCrypt = getShaUnixCryptText();
-	wrote_hash = emitHelper(out, shaUnixCrypt, wrote_hash);
+        shaUnixCrypt = getShaUnixCryptText();
+        wrote_hash = emitHelper(out, shaUnixCrypt, wrote_hash);
       }
     else
       {
-	out.writeUTF("");
+        out.writeUTF("");
       }
 
     // starting at file version 2.21
@@ -719,12 +719,12 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (getFieldDef().isBCrypted() || (bCryptPass != null && need_to_write_all_hashes))
       {
-	bCryptPass = getBCryptText();
-	wrote_hash = emitHelper(out, bCryptPass, wrote_hash);
+        bCryptPass = getBCryptText();
+        wrote_hash = emitHelper(out, bCryptPass, wrote_hash);
       }
     else
       {
-	out.writeUTF("");
+        out.writeUTF("");
       }
 
     // at file version 2.1, we write out plaintext if the field
@@ -733,34 +733,34 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (getFieldDef().isPlainText() || !wrote_hash)
       {
-	emitHelper(out, uncryptedPass, true);
+        emitHelper(out, uncryptedPass, true);
       }
     else
       {
-	out.writeUTF("");
+        out.writeUTF("");
       }
 
     // starting at 2.19, we store a history archive, if defined
 
     if (getFieldDef().isHistoryChecked())
       {
-	if (history != null)
-	  {
-	    // if this field's pool size has been changed since the last
-	    // time the history archive was adjusted, tweak it as a side
-	    // effect while we're writing out.
+        if (history != null)
+          {
+            // if this field's pool size has been changed since the last
+            // time the history archive was adjusted, tweak it as a side
+            // effect while we're writing out.
 
-	    if (getFieldDef().getHistoryDepth() != history.getPoolSize())
-	      {
-		history.setPoolSize(getFieldDef().getHistoryDepth());
-	      }
+            if (getFieldDef().getHistoryDepth() != history.getPoolSize())
+              {
+                history.setPoolSize(getFieldDef().getHistoryDepth());
+              }
 
-	    history.emit(out);
-	  }
-	else
-	  {
-	    out.writeInt(0);
-	  }
+            history.emit(out);
+          }
+        else
+          {
+            out.writeInt(0);
+          }
       }
   }
 
@@ -778,13 +778,13 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (val == null)
       {
-	out.writeUTF("");
-	return wrote_hash;
+        out.writeUTF("");
+        return wrote_hash;
       }
     else
       {
-	out.writeUTF(val);
-	return true;
+        out.writeUTF(val);
+        return true;
       }
   }
 
@@ -859,7 +859,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (def.isBCrypted() && bCryptPass != null)
       {
-	return false;
+        return false;
       }
 
     if (def.isShaUnixCrypted() && shaUnixCrypt != null)
@@ -890,67 +890,67 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (Ganymede.db.isAtLeast(2,1))
       {
-	cryptedPass = readUTF(in);
-	md5CryptPass = readUTF(in);
+        cryptedPass = readUTF(in);
+        md5CryptPass = readUTF(in);
 
-	if (Ganymede.db.isAtLeast(2,4))
-	  {
-	    apacheMd5CryptPass = readUTF(in);
-	  }
+        if (Ganymede.db.isAtLeast(2,4))
+          {
+            apacheMd5CryptPass = readUTF(in);
+          }
 
-	lanHash = readUTF(in);
-	ntHash = readUTF(in);
+        lanHash = readUTF(in);
+        ntHash = readUTF(in);
 
-	if (Ganymede.db.isAtLeast(2,5))
-	  {
-	    sshaHash = readUTF(in);
-	  }
+        if (Ganymede.db.isAtLeast(2,5))
+          {
+            sshaHash = readUTF(in);
+          }
 
-	if (Ganymede.db.isAtLeast(2,13))
-	  {
-	    shaUnixCrypt = readUTF(in);
-	  }
+        if (Ganymede.db.isAtLeast(2,13))
+          {
+            shaUnixCrypt = readUTF(in);
+          }
 
-	if (Ganymede.db.isAtLeast(2,21))
-	  {
-	    bCryptPass = readUTF(in);
-	  }
+        if (Ganymede.db.isAtLeast(2,21))
+          {
+            bCryptPass = readUTF(in);
+          }
 
-	uncryptedPass = readUTF(in);
+        uncryptedPass = readUTF(in);
 
-	// we added passwordHistoryArchive at 2.19
+        // we added passwordHistoryArchive at 2.19
 
-	if (Ganymede.db.isAtLeast(2,19))
-	  {
-	    // At 2.19, I had things quite broken, so I need some
-	    // special logic for reading the history pool during
-	    // journal loading when treating that db version.
-	    //
-	    // At 2.20, we only write out an archive (including the
-	    // count) if the field is configured for history
-	    // archiving/checking, and things are stable and as we
-	    // like it.
+        if (Ganymede.db.isAtLeast(2,19))
+          {
+            // At 2.19, I had things quite broken, so I need some
+            // special logic for reading the history pool during
+            // journal loading when treating that db version.
+            //
+            // At 2.20, we only write out an archive (including the
+            // count) if the field is configured for history
+            // archiving/checking, and things are stable and as we
+            // like it.
 
-	    if ((Ganymede.db.isAtRev(2,19) && Ganymede.db.journalLoading) || definition.isHistoryChecked())
-	      {
-		int count = in.readInt();
+            if ((Ganymede.db.isAtRev(2,19) && Ganymede.db.journalLoading) || definition.isHistoryChecked())
+              {
+                int count = in.readInt();
 
-		history = new passwordHistoryArchive(definition.getHistoryDepth(), count, in);
-	      }
-	  }
-	else
-	  {
-	    if (getFieldDef().isHistoryChecked())
-	      {
-		history = new passwordHistoryArchive(definition.getHistoryDepth());
-	      }
-	    else
-	      {
-		history = null;
-	      }
-	  }
+                history = new passwordHistoryArchive(definition.getHistoryDepth(), count, in);
+              }
+          }
+        else
+          {
+            if (getFieldDef().isHistoryChecked())
+              {
+                history = new passwordHistoryArchive(definition.getHistoryDepth());
+              }
+            else
+              {
+                history = null;
+              }
+          }
 
-	return;
+        return;
       }
 
     // From here on down we do things the old, hard way
@@ -961,10 +961,10 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (Ganymede.db.isAtRev(1,10))
       {
-	cryptedPass = readUTF(in);
-	uncryptedPass = readUTF(in);
+        cryptedPass = readUTF(in);
+        uncryptedPass = readUTF(in);
 
-	return;
+        return;
       }
 
     // if we're not looking at file version 1.10, the crypted password is
@@ -973,12 +973,12 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (definition.isCrypted())
       {
-	cryptedPass = readUTF(in);
+        cryptedPass = readUTF(in);
 
-	if (Ganymede.db.isBetweenRevs(1,13,1,16))
-	  {
-	    in.readUTF();	// skip old-style (buggy) md5 pass
-	  }
+        if (Ganymede.db.isBetweenRevs(1,13,1,16))
+          {
+            in.readUTF();       // skip old-style (buggy) md5 pass
+          }
       }
 
     // now we see if we expect to see an MD5Crypt()'ed  password
@@ -988,15 +988,15 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (Ganymede.db.isAtLeast(1,16))
       {
-	if (definition.isMD5Crypted())
-	  {
-	    md5CryptPass = readUTF(in);
-	  }
+        if (definition.isMD5Crypted())
+          {
+            md5CryptPass = readUTF(in);
+          }
       }
 
     if (!definition.isCrypted() && !definition.isMD5Crypted())
       {
-	uncryptedPass = readUTF(in);
+        uncryptedPass = readUTF(in);
       }
   }
 
@@ -1011,11 +1011,11 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (val.equals(""))
       {
-	return null;
+        return null;
       }
     else
       {
-	return val;
+        return val;
       }
   }
 
@@ -1038,83 +1038,83 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (writeSurroundContext)
       {
-	dump.indent();
-	dump.startElement(this.getXMLName());
+        dump.indent();
+        dump.startElement(this.getXMLName());
       }
 
     dump.startElement("password");
 
     if (!dump.doDumpPasswords())
       {
-	dump.endElement("password");
+        dump.endElement("password");
 
-	if (writeSurroundContext)
-	  {
-	    dump.endElement(this.getXMLName());
-	  }
+        if (writeSurroundContext)
+          {
+            dump.endElement(this.getXMLName());
+          }
 
-	return;
+        return;
       }
 
     if (uncryptedPass != null &&
-	(dump.doDumpPlaintext() ||
-	 (cryptedPass == null &&
-	  md5CryptPass == null &&
-	  apacheMd5CryptPass == null &&
-	  lanHash == null &&
-	  ntHash == null &&
-	  sshaHash == null &&
-	  shaUnixCrypt == null &&
-	  bCryptPass == null)))
+        (dump.doDumpPlaintext() ||
+         (cryptedPass == null &&
+          md5CryptPass == null &&
+          apacheMd5CryptPass == null &&
+          lanHash == null &&
+          ntHash == null &&
+          sshaHash == null &&
+          shaUnixCrypt == null &&
+          bCryptPass == null)))
       {
-	dump.attribute("plaintext", uncryptedPass);
+        dump.attribute("plaintext", uncryptedPass);
       }
 
     if (cryptedPass != null)
       {
-	dump.attribute("crypt", cryptedPass);
+        dump.attribute("crypt", cryptedPass);
       }
 
     if (md5CryptPass != null)
       {
-	dump.attribute("md5crypt", md5CryptPass);
+        dump.attribute("md5crypt", md5CryptPass);
       }
 
     if (apacheMd5CryptPass != null)
       {
-	dump.attribute("apachemd5crypt", apacheMd5CryptPass);
+        dump.attribute("apachemd5crypt", apacheMd5CryptPass);
       }
 
     if (lanHash != null)
       {
-	dump.attribute("lanman", lanHash);
+        dump.attribute("lanman", lanHash);
       }
 
     if (ntHash != null)
       {
-	dump.attribute("ntmd4", ntHash);
+        dump.attribute("ntmd4", ntHash);
       }
 
     if (sshaHash != null)
       {
-	dump.attribute("ssha", sshaHash);
+        dump.attribute("ssha", sshaHash);
       }
 
     if (shaUnixCrypt != null)
       {
-	dump.attribute("shaUnixCrypt", shaUnixCrypt);
+        dump.attribute("shaUnixCrypt", shaUnixCrypt);
       }
 
     if (bCryptPass != null)
       {
-	dump.attribute("bCrypt", bCryptPass);
+        dump.attribute("bCrypt", bCryptPass);
       }
 
     dump.endElement("password");
 
     if (writeSurroundContext)
       {
-	dump.endElement(this.getXMLName());
+        dump.endElement(this.getXMLName());
       }
   }
 
@@ -1180,57 +1180,57 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (this.isDefined())
       {
-	StringBuilder result = new StringBuilder();
+        StringBuilder result = new StringBuilder();
 
-	result.append("< ");
+        result.append("< ");
 
-	if (cryptedPass != null)
-	  {
-	    result.append("crypt ");
-	  }
+        if (cryptedPass != null)
+          {
+            result.append("crypt ");
+          }
 
-	if (md5CryptPass != null)
-	  {
-	    result.append("md5crypt ");
-	  }
+        if (md5CryptPass != null)
+          {
+            result.append("md5crypt ");
+          }
 
-	if (apacheMd5CryptPass != null)
-	  {
-	    result.append("apachemd5crypt ");
-	  }
+        if (apacheMd5CryptPass != null)
+          {
+            result.append("apachemd5crypt ");
+          }
 
-	if (lanHash != null)
-	  {
-	    result.append("lanman ");
-	  }
+        if (lanHash != null)
+          {
+            result.append("lanman ");
+          }
 
-	if (ntHash != null)
-	  {
-	    result.append("ntmd4 ");
-	  }
+        if (ntHash != null)
+          {
+            result.append("ntmd4 ");
+          }
 
-	if (sshaHash != null)
-	  {
-	    result.append("ssha ");
-	  }
+        if (sshaHash != null)
+          {
+            result.append("ssha ");
+          }
 
-	if (shaUnixCrypt != null)
-	  {
-	    result.append("shaUnixCrypt ");
-	  }
+        if (shaUnixCrypt != null)
+          {
+            result.append("shaUnixCrypt ");
+          }
 
-	if (uncryptedPass != null)
-	  {
-	    result.append("text ");
-	  }
+        if (uncryptedPass != null)
+          {
+            result.append("text ");
+          }
 
-	result.append(">");
+        result.append(">");
 
-	return result.toString();
+        return result.toString();
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -1264,19 +1264,19 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (!(orig instanceof PasswordDBField))
       {
-	throw new IllegalArgumentException("bad field comparison");
+        throw new IllegalArgumentException("bad field comparison");
       }
 
     origP = (PasswordDBField) orig;
 
     if (!this.equals(origP))
       {
-	// "\tPassword changed\n"
-	return ts.l("getDiffString.changed");
+        // "\tPassword changed\n"
+        return ts.l("getDiffString.changed");
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -1349,12 +1349,12 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (allowedChars() != null && (allowedChars().indexOf(c) == -1))
       {
-	return false;
+        return false;
       }
 
     if (disallowedChars() != null && (disallowedChars().indexOf(c) != -1))
       {
-	return false;
+        return false;
       }
 
     return true;
@@ -1397,7 +1397,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (plaintext == null || !this.isDefined())
       {
-	return false;
+        return false;
       }
 
     // Test against our hashes in decreasing order of hashing
@@ -1411,46 +1411,46 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (uncryptedPass != null)
       {
-	success = uncryptedPass.equals(plaintext); // most accurate
+        success = uncryptedPass.equals(plaintext); // most accurate
       }
-    else if (sshaHash != null)	// 2^64 bits, but fast
+    else if (sshaHash != null)  // 2^64 bits, but fast
       {
-	success = SSHA.matchSHAHash(sshaHash, plaintext);
+        success = SSHA.matchSHAHash(sshaHash, plaintext);
       }
     else if (shaUnixCrypt != null) // large precision, but potentially quite slow
       {
-	if (shaUnixCrypt.startsWith("$5$"))
-	  {
-	    success = Sha256Crypt.verifyPassword(plaintext, shaUnixCrypt);
-	  }
-	else if (shaUnixCrypt.startsWith("$6$"))
-	  {
-	    success = Sha512Crypt.verifyPassword(plaintext, shaUnixCrypt);
-	  }
+        if (shaUnixCrypt.startsWith("$5$"))
+          {
+            success = Sha256Crypt.verifyPassword(plaintext, shaUnixCrypt);
+          }
+        else if (shaUnixCrypt.startsWith("$6$"))
+          {
+            success = Sha512Crypt.verifyPassword(plaintext, shaUnixCrypt);
+          }
       }
     else if (bCryptPass != null) // ditto
       {
-	success = BCrypt.checkpw(plaintext, bCryptPass);
+        success = BCrypt.checkpw(plaintext, bCryptPass);
       }
     else if (md5CryptPass != null) // indefinite
       {
-	success = md5CryptPass.equals(MD5Crypt.crypt(plaintext, getMD5Salt()));
+        success = md5CryptPass.equals(MD5Crypt.crypt(plaintext, getMD5Salt()));
       }
     else if (apacheMd5CryptPass != null) // indefinite
       {
-	success = apacheMd5CryptPass.equals(MD5Crypt.apacheCrypt(plaintext, getApacheMD5Salt()));
+        success = apacheMd5CryptPass.equals(MD5Crypt.apacheCrypt(plaintext, getApacheMD5Salt()));
       }
-    else if (ntHash != null)	// 2^64 bits
+    else if (ntHash != null)    // 2^64 bits
       {
-	success = ntHash.equals(smbencrypt.NTUNICODEHash(plaintext));
+        success = ntHash.equals(smbencrypt.NTUNICODEHash(plaintext));
       }
-    else if (lanHash != null)	// 14 chars
+    else if (lanHash != null)   // 14 chars
       {
-	success = lanHash.equals(smbencrypt.LANMANHash(plaintext));
+        success = lanHash.equals(smbencrypt.LANMANHash(plaintext));
       }
     else if (cryptedPass != null) // 8 chars
       {
-	success = cryptedPass.equals(jcrypt.crypt(getSalt(), plaintext));
+        success = cryptedPass.equals(jcrypt.crypt(getSalt(), plaintext));
       }
 
     // if we matched against a stored hash that has sufficient
@@ -1463,15 +1463,15 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (success && uncryptedPass == null)
       {
-	int precision = getHashPrecision();
+        int precision = getHashPrecision();
 
-	if (precision == -1 ||
-	    (precision > 0 && precision >= plaintext.length()))
-	  {
-	    uncryptedPass = plaintext;
-	    clear_unused_stored();
-	    setHashes(plaintext, false);
-	  }
+        if (precision == -1 ||
+            (precision > 0 && precision >= plaintext.length()))
+          {
+            uncryptedPass = plaintext;
+            clear_unused_stored();
+            setHashes(plaintext, false);
+          }
       }
 
     return success;
@@ -1488,18 +1488,18 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (cryptedPass != null)
       {
-	return cryptedPass;
+        return cryptedPass;
       }
     else
       {
-	if (uncryptedPass != null)
-	  {
-	    return jcrypt.crypt(uncryptedPass);
-	  }
-	else
-	  {
-	    return null;
-	  }
+        if (uncryptedPass != null)
+          {
+            return jcrypt.crypt(uncryptedPass);
+          }
+        else
+          {
+            return null;
+          }
       }
   }
 
@@ -1514,18 +1514,18 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (md5CryptPass != null)
       {
-	return md5CryptPass;
+        return md5CryptPass;
       }
     else
       {
-	if (uncryptedPass != null)
-	  {
-	    return MD5Crypt.crypt(uncryptedPass);
-	  }
-	else
-	  {
-	    return null;
-	  }
+        if (uncryptedPass != null)
+          {
+            return MD5Crypt.crypt(uncryptedPass);
+          }
+        else
+          {
+            return null;
+          }
       }
   }
 
@@ -1540,18 +1540,18 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (apacheMd5CryptPass != null)
       {
-	return apacheMd5CryptPass;
+        return apacheMd5CryptPass;
       }
     else
       {
-	if (uncryptedPass != null)
-	  {
-	    return MD5Crypt.apacheCrypt(uncryptedPass);
-	  }
-	else
-	  {
-	    return null;
-	  }
+        if (uncryptedPass != null)
+          {
+            return MD5Crypt.apacheCrypt(uncryptedPass);
+          }
+        else
+          {
+            return null;
+          }
       }
   }
 
@@ -1566,18 +1566,18 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (lanHash != null)
       {
-	return lanHash;
+        return lanHash;
       }
     else
       {
-	if (uncryptedPass != null)
-	  {
-	    return smbencrypt.LANMANHash(uncryptedPass);
-	  }
-	else
-	  {
-	    return null;
-	  }
+        if (uncryptedPass != null)
+          {
+            return smbencrypt.LANMANHash(uncryptedPass);
+          }
+        else
+          {
+            return null;
+          }
       }
   }
 
@@ -1593,18 +1593,18 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (ntHash != null)
       {
-	return ntHash;
+        return ntHash;
       }
     else
       {
-	if (uncryptedPass != null)
-	  {
-	    return smbencrypt.NTUNICODEHash(uncryptedPass);
-	  }
-	else
-	  {
-	    return null;
-	  }
+        if (uncryptedPass != null)
+          {
+            return smbencrypt.NTUNICODEHash(uncryptedPass);
+          }
+        else
+          {
+            return null;
+          }
       }
   }
 
@@ -1619,18 +1619,18 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (sshaHash != null)
       {
-	return sshaHash;
+        return sshaHash;
       }
     else
       {
-	if (uncryptedPass != null)
-	  {
-	    return SSHA.getLDAPSSHAHash(uncryptedPass, null);
-	  }
-	else
-	  {
-	    return null;
-	  }
+        if (uncryptedPass != null)
+          {
+            return SSHA.getLDAPSSHAHash(uncryptedPass, null);
+          }
+        else
+          {
+            return null;
+          }
       }
   }
 
@@ -1647,18 +1647,18 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (bCryptPass != null)
       {
-	return bCryptPass;
+        return bCryptPass;
       }
     else
       {
-	if (uncryptedPass == null)
-	  {
-	    return null;
-	  }
+        if (uncryptedPass == null)
+          {
+            return null;
+          }
 
-	bCryptPass = BCrypt.hashpw(uncryptedPass, BCrypt.gensalt(getFieldDef().getBCryptRounds()));
+        bCryptPass = BCrypt.hashpw(uncryptedPass, BCrypt.gensalt(getFieldDef().getBCryptRounds()));
 
-	return bCryptPass;
+        return bCryptPass;
       }
   }
 
@@ -1695,25 +1695,25 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (shaUnixCrypt != null)
       {
-	return shaUnixCrypt;
+        return shaUnixCrypt;
       }
     else
       {
-	if (uncryptedPass == null)
-	  {
-	    return null;
-	  }
+        if (uncryptedPass == null)
+          {
+            return null;
+          }
 
-	if (getFieldDef().isShaUnixCrypted512())
-	  {
-	    shaUnixCrypt = Sha512Crypt.Sha512_crypt(uncryptedPass, null, getFieldDef().getShaUnixCryptRounds());
-	  }
-	else
-	  {
-	    shaUnixCrypt = Sha256Crypt.Sha256_crypt(uncryptedPass, null, getFieldDef().getShaUnixCryptRounds());
-	  }
+        if (getFieldDef().isShaUnixCrypted512())
+          {
+            shaUnixCrypt = Sha512Crypt.Sha512_crypt(uncryptedPass, null, getFieldDef().getShaUnixCryptRounds());
+          }
+        else
+          {
+            shaUnixCrypt = Sha256Crypt.Sha256_crypt(uncryptedPass, null, getFieldDef().getShaUnixCryptRounds());
+          }
 
-	return shaUnixCrypt;
+        return shaUnixCrypt;
       }
   }
 
@@ -1743,11 +1743,11 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (cryptedPass != null)
       {
-	return cryptedPass.substring(0,2);
+        return cryptedPass.substring(0,2);
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -1765,31 +1765,31 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (getFieldDef().isMD5Crypted() && md5CryptPass != null)
       {
-	String salt = md5CryptPass;
-	String magic = "$1$";
+        String salt = md5CryptPass;
+        String magic = "$1$";
 
-	if (salt.startsWith(magic))
-	  {
-	    salt = salt.substring(magic.length());
-	  }
+        if (salt.startsWith(magic))
+          {
+            salt = salt.substring(magic.length());
+          }
 
-	/* It stops at the first '$', max 8 chars */
+        /* It stops at the first '$', max 8 chars */
 
-	if (salt.indexOf('$') != -1)
-	  {
-	    salt = salt.substring(0, salt.indexOf('$'));
-	  }
+        if (salt.indexOf('$') != -1)
+          {
+            salt = salt.substring(0, salt.indexOf('$'));
+          }
 
-	if (salt.length() > 8)
-	  {
-	    salt = salt.substring(0, 8);
-	  }
+        if (salt.length() > 8)
+          {
+            salt = salt.substring(0, 8);
+          }
 
-	return salt;
+        return salt;
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -1807,31 +1807,31 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (getFieldDef().isApacheMD5Crypted() && apacheMd5CryptPass != null)
       {
-	String salt = apacheMd5CryptPass;
-	String magic = "$apr1$";
+        String salt = apacheMd5CryptPass;
+        String magic = "$apr1$";
 
-	if (salt.startsWith(magic))
-	  {
-	    salt = salt.substring(magic.length());
-	  }
+        if (salt.startsWith(magic))
+          {
+            salt = salt.substring(magic.length());
+          }
 
-	/* It stops at the first '$', max 8 chars */
+        /* It stops at the first '$', max 8 chars */
 
-	if (salt.indexOf('$') != -1)
-	  {
-	    salt = salt.substring(0, salt.indexOf('$'));
-	  }
+        if (salt.indexOf('$') != -1)
+          {
+            salt = salt.substring(0, salt.indexOf('$'));
+          }
 
-	if (salt.length() > 8)
-	  {
-	    salt = salt.substring(0, 8);
-	  }
+        if (salt.length() > 8)
+          {
+            salt = salt.substring(0, 8);
+          }
 
-	return salt;
+        return salt;
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -1885,26 +1885,26 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     eObj = (DBEditObject) owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
-	// Wizard check
+        // Wizard check
 
-	retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
-							 DBEditObject.SETPASSPLAIN,
-							 plaintext,
-							 null));
+        retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+                                                         DBEditObject.SETPASSPLAIN,
+                                                         plaintext,
+                                                         null));
 
-	// if a wizard intercedes, we are going to let it take the ball.
+        // if a wizard intercedes, we are going to let it take the ball.
 
-	if (ReturnVal.wizardHandled(retVal))
-	  {
-	    return retVal;
-	  }
+        if (ReturnVal.wizardHandled(retVal))
+          {
+            return retVal;
+          }
       }
 
     // call finalizeSetValue to allow for chained reactions
@@ -1917,7 +1917,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     // reset all hashes to start things off
@@ -1928,9 +1928,9 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (plaintext == null || plaintext.equals(""))
       {
-	uncryptedPass = null;
+        uncryptedPass = null;
 
-	return retVal;
+        return retVal;
       }
 
     // else, go ahead and set everything
@@ -1993,34 +1993,34 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (!isEditable(local))
       {
-	// "Password Field Error"
-	// "Don''t have permission to edit field {0} in object {1}."
-	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-					  ts.l("global.perm_error_text", this.getName(), owner.getLabel()));
+        // "Password Field Error"
+        // "Don''t have permission to edit field {0} in object {1}."
+        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                                          ts.l("global.perm_error_text", this.getName(), owner.getLabel()));
       }
 
     if (!getFieldDef().isCrypted())
       {
-	// "Server: Error in PasswordDBField.setCryptTextPass()"
-	// "Password field not configured to support traditional Unix crypt hashing."
-	return Ganymede.createErrorDialog(ts.l("setCryptPass.error_title"),
-					  ts.l("setCryptPass.error_text"));
+        // "Server: Error in PasswordDBField.setCryptTextPass()"
+        // "Password field not configured to support traditional Unix crypt hashing."
+        return Ganymede.createErrorDialog(ts.l("setCryptPass.error_title"),
+                                          ts.l("setCryptPass.error_text"));
       }
 
     eObj = (DBEditObject) owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
-	// Wizard check
+        // Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.SETPASSCRYPT, text, null);
+        retVal = eObj.wizardHook(this, DBEditObject.SETPASSCRYPT, text, null);
 
-	// if a wizard intercedes, we are going to let it take the ball.
+        // if a wizard intercedes, we are going to let it take the ball.
 
-	if (ReturnVal.wizardHandled(retVal))
-	  {
-	    return retVal;
-	  }
+        if (ReturnVal.wizardHandled(retVal))
+          {
+            return retVal;
+          }
       }
 
     // call finalizeSetValue to allow for chained reactions
@@ -2029,19 +2029,19 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (ReturnVal.didSucceed(retVal))
       {
-	// whenever the crypt password is directly set, we lose
-	// plaintext and alternate hashes
+        // whenever the crypt password is directly set, we lose
+        // plaintext and alternate hashes
 
-	clear_stored();
+        clear_stored();
 
-	if ((text == null) || (text.equals("")))
-	  {
-	    cryptedPass = null;
-	  }
-	else
-	  {
-	    cryptedPass = text;
-	  }
+        if ((text == null) || (text.equals("")))
+          {
+            cryptedPass = null;
+          }
+        else
+          {
+            cryptedPass = text;
+          }
       }
 
     return retVal;
@@ -2099,42 +2099,42 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (!isEditable(local))
       {
-	// "Password Field Error"
-	// "Don''t have permission to edit field {0} in object {1}."
-	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-					  ts.l("global.perm_error_text", this.getName(), owner.getLabel()));
+        // "Password Field Error"
+        // "Don''t have permission to edit field {0} in object {1}."
+        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                                          ts.l("global.perm_error_text", this.getName(), owner.getLabel()));
       }
 
     if (!getFieldDef().isMD5Crypted())
       {
-	// "Server: Error in PasswordDBField.setMD5CryptPass()"
-	// "Password field not configured to support MD5Crypt hashing."
-	return Ganymede.createErrorDialog(ts.l("setMD5CryptPass.error_title"),
-					  ts.l("setMD5CryptPass.error_text"));
+        // "Server: Error in PasswordDBField.setMD5CryptPass()"
+        // "Password field not configured to support MD5Crypt hashing."
+        return Ganymede.createErrorDialog(ts.l("setMD5CryptPass.error_title"),
+                                          ts.l("setMD5CryptPass.error_text"));
       }
 
     if (text != null && !text.equals("") && (!text.startsWith("$1$") || (text.indexOf('$', 3) == -1)))
       {
-	// "Password Field Error"
-	// "The hash text passed to setMD5CryptPass(), "{0}", is not a well-formed MD5Crypt hash text."
-	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-					  ts.l("setMD5CryptPass.format_error", text));
+        // "Password Field Error"
+        // "The hash text passed to setMD5CryptPass(), "{0}", is not a well-formed MD5Crypt hash text."
+        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                                          ts.l("setMD5CryptPass.format_error", text));
       }
 
     eObj = (DBEditObject) owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
-	// Wizard check
+        // Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.SETPASSMD5, text, null);
+        retVal = eObj.wizardHook(this, DBEditObject.SETPASSMD5, text, null);
 
-	// if a wizard intercedes, we are going to let it take the ball.
+        // if a wizard intercedes, we are going to let it take the ball.
 
-	if (ReturnVal.wizardHandled(retVal))
-	  {
-	    return retVal;
-	  }
+        if (ReturnVal.wizardHandled(retVal))
+          {
+            return retVal;
+          }
       }
 
     // call finalizeSetValue to allow for chained reactions
@@ -2143,19 +2143,19 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (ReturnVal.didSucceed(retVal))
       {
-	// whenever the md5CryptPass password is directly set, we lose
-	// plaintext and alternate hashes
+        // whenever the md5CryptPass password is directly set, we lose
+        // plaintext and alternate hashes
 
-	clear_stored();
+        clear_stored();
 
-	if ((text == null) || (text.equals("")))
-	  {
-	    md5CryptPass = null;
-	  }
-	else
-	  {
-	    md5CryptPass = text;
-	  }
+        if ((text == null) || (text.equals("")))
+          {
+            md5CryptPass = null;
+          }
+        else
+          {
+            md5CryptPass = text;
+          }
       }
 
     return retVal;
@@ -2215,42 +2215,42 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (!isEditable(local))
       {
-	// "Password Field Error"
-	// "Don''t have permission to edit field {0} in object {1}."
-	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-					  ts.l("global.perm_error_text", this.getName(), owner.getLabel()));
+        // "Password Field Error"
+        // "Don''t have permission to edit field {0} in object {1}."
+        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                                          ts.l("global.perm_error_text", this.getName(), owner.getLabel()));
       }
 
     if (!getFieldDef().isApacheMD5Crypted())
       {
-	// "Server: Error in PasswordDBField.setApacheMD5CryptTextPass()"
-	// "Password field not configured to support ApacheMD5Crypt hashing."
-	return Ganymede.createErrorDialog(ts.l("setApacheMD5CryptPass.error_title"),
-					  ts.l("setApacheMD5CryptPass.error_text"));
+        // "Server: Error in PasswordDBField.setApacheMD5CryptTextPass()"
+        // "Password field not configured to support ApacheMD5Crypt hashing."
+        return Ganymede.createErrorDialog(ts.l("setApacheMD5CryptPass.error_title"),
+                                          ts.l("setApacheMD5CryptPass.error_text"));
       }
 
     if (text != null && !text.equals("") && (!text.startsWith("$apr1$") || (text.indexOf('$', 6) == -1)))
       {
-	// "Password Field Error"
-	// "The hash text passed to setMD5CryptPass(), "{0}", is not a well-formed ApacheMD5Crypt hash text."
-	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-					  ts.l("setApacheMD5CryptPass.format_error", text));
+        // "Password Field Error"
+        // "The hash text passed to setMD5CryptPass(), "{0}", is not a well-formed ApacheMD5Crypt hash text."
+        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                                          ts.l("setApacheMD5CryptPass.format_error", text));
       }
 
     eObj = (DBEditObject) owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
-	// Wizard check
+        // Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.SETPASSAPACHEMD5, text, null);
+        retVal = eObj.wizardHook(this, DBEditObject.SETPASSAPACHEMD5, text, null);
 
-	// if a wizard intercedes, we are going to let it take the ball.
+        // if a wizard intercedes, we are going to let it take the ball.
 
-	if (ReturnVal.wizardHandled(retVal))
-	  {
-	    return retVal;
-	  }
+        if (ReturnVal.wizardHandled(retVal))
+          {
+            return retVal;
+          }
       }
 
     // call finalizeSetValue to allow for chained reactions
@@ -2259,19 +2259,19 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (ReturnVal.didSucceed(retVal))
       {
-	// whenever the apacheMd5CryptPass password is directly set, we lose
-	// plaintext and alternate hashes
+        // whenever the apacheMd5CryptPass password is directly set, we lose
+        // plaintext and alternate hashes
 
-	clear_stored();
+        clear_stored();
 
-	if ((text == null) || (text.equals("")))
-	  {
-	    apacheMd5CryptPass = null;
-	  }
-	else
-	  {
-	    apacheMd5CryptPass = text;
-	  }
+        if ((text == null) || (text.equals("")))
+          {
+            apacheMd5CryptPass = null;
+          }
+        else
+          {
+            apacheMd5CryptPass = text;
+          }
       }
 
     return retVal;
@@ -2332,34 +2332,34 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (!isEditable(local))
       {
-	// "Password Field Error"
-	// "Don''t have permission to edit field {0} in object {1}."
-	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-					  ts.l("global.perm_error_text", this.getName(), owner.getLabel()));
+        // "Password Field Error"
+        // "Don''t have permission to edit field {0} in object {1}."
+        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                                          ts.l("global.perm_error_text", this.getName(), owner.getLabel()));
       }
 
     if (!getFieldDef().isWinHashed())
       {
-	// "Server: Error in PasswordDBField.setWinCryptedPass()"
-	// "Password field is not configured to accept Samba hashed password strings."
-	return Ganymede.createErrorDialog(ts.l("setWinCryptedPass.error_title"),
-					  ts.l("setWinCryptedPass.error_text"));
+        // "Server: Error in PasswordDBField.setWinCryptedPass()"
+        // "Password field is not configured to accept Samba hashed password strings."
+        return Ganymede.createErrorDialog(ts.l("setWinCryptedPass.error_title"),
+                                          ts.l("setWinCryptedPass.error_text"));
       }
 
     eObj = (DBEditObject) owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
-	// Wizard check
+        // Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.SETPASSWINHASHES, LANMAN, NTUnicodeMD4);
+        retVal = eObj.wizardHook(this, DBEditObject.SETPASSWINHASHES, LANMAN, NTUnicodeMD4);
 
-	// if a wizard intercedes, we are going to let it take the ball.
+        // if a wizard intercedes, we are going to let it take the ball.
 
-	if (ReturnVal.wizardHandled(retVal))
-	  {
-	    return retVal;
-	  }
+        if (ReturnVal.wizardHandled(retVal))
+          {
+            return retVal;
+          }
       }
 
     // call finalizeSetValue to allow for chained reactions
@@ -2368,28 +2368,28 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (ReturnVal.didSucceed(retVal))
       {
-	// whenever the windows hashes are set directly, we lose
-	// plaintext and alternate hashes
+        // whenever the windows hashes are set directly, we lose
+        // plaintext and alternate hashes
 
-	clear_stored();
+        clear_stored();
 
-	if ((LANMAN == null) || (LANMAN.equals("")))
-	  {
-	    lanHash = null;
-	  }
-	else
-	  {
-	    lanHash = LANMAN;
-	  }
+        if ((LANMAN == null) || (LANMAN.equals("")))
+          {
+            lanHash = null;
+          }
+        else
+          {
+            lanHash = LANMAN;
+          }
 
-	if ((NTUnicodeMD4 == null) || (NTUnicodeMD4.equals("")))
-	  {
-	    ntHash = null;
-	  }
-	else
-	  {
-	    ntHash = NTUnicodeMD4;
-	  }
+        if ((NTUnicodeMD4 == null) || (NTUnicodeMD4.equals("")))
+          {
+            ntHash = null;
+          }
+        else
+          {
+            ntHash = NTUnicodeMD4;
+          }
       }
 
     return retVal;
@@ -2447,42 +2447,42 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (!isEditable(local))
       {
-	// "Password Field Error"
-	// "Don''t have permission to edit field {0} in object {1}."
-	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-					  ts.l("global.perm_error_text", this.getName(), owner.getLabel()));
+        // "Password Field Error"
+        // "Don''t have permission to edit field {0} in object {1}."
+        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                                          ts.l("global.perm_error_text", this.getName(), owner.getLabel()));
       }
 
     if (!getFieldDef().isSSHAHashed())
       {
-	// "Server: Error in PasswordDBField.setSSHAPass()"
-	// "Password field is not configured to accept SSHA-1 hashed password strings."
-	return Ganymede.createErrorDialog(ts.l("setSSHAPass.error_title"),
-					  ts.l("setSSHAPass.error_text"));
+        // "Server: Error in PasswordDBField.setSSHAPass()"
+        // "Password field is not configured to accept SSHA-1 hashed password strings."
+        return Ganymede.createErrorDialog(ts.l("setSSHAPass.error_title"),
+                                          ts.l("setSSHAPass.error_text"));
       }
 
     if (text != null && !text.equals("") && !text.startsWith("{SSHA}"))
       {
-	// "Server: Error in PasswordDBField.setSSHAPass()"
-	// "The hash text passed to setSSHAPass(), "{0}", is not a well-formed, OpenLDAP-encoded SSHA-1 hash text."
-	return Ganymede.createErrorDialog(ts.l("setSSHAPass.error_title"),
-					  ts.l("setSSHAPass.format_error", this.getName()));
+        // "Server: Error in PasswordDBField.setSSHAPass()"
+        // "The hash text passed to setSSHAPass(), "{0}", is not a well-formed, OpenLDAP-encoded SSHA-1 hash text."
+        return Ganymede.createErrorDialog(ts.l("setSSHAPass.error_title"),
+                                          ts.l("setSSHAPass.format_error", this.getName()));
       }
 
     eObj = (DBEditObject) owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
-	// Wizard check
+        // Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.SETPASSSSHA, text, null);
+        retVal = eObj.wizardHook(this, DBEditObject.SETPASSSSHA, text, null);
 
-	// if a wizard intercedes, we are going to let it take the ball.
+        // if a wizard intercedes, we are going to let it take the ball.
 
-	if (ReturnVal.wizardHandled(retVal))
-	  {
-	    return retVal;
-	  }
+        if (ReturnVal.wizardHandled(retVal))
+          {
+            return retVal;
+          }
       }
 
     // call finalizeSetValue to allow for chained reactions
@@ -2491,19 +2491,19 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (ReturnVal.didSucceed(retVal))
       {
-	// whenever the SSHA password is directly set, we lose
-	// plaintext and alternate hashes
+        // whenever the SSHA password is directly set, we lose
+        // plaintext and alternate hashes
 
-	clear_stored();
+        clear_stored();
 
-	if ((text == null) || (text.equals("")))
-	  {
-	    sshaHash = null;
-	  }
-	else
-	  {
-	    sshaHash = text;
-	  }
+        if ((text == null) || (text.equals("")))
+          {
+            sshaHash = null;
+          }
+        else
+          {
+            sshaHash = text;
+          }
       }
 
     return retVal;
@@ -2597,43 +2597,43 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (!isEditable(local))
       {
-	// "Password Field Error"
-	// "Don''t have permission to edit field {0} in object {1}."
-	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-					  ts.l("global.perm_error_text", this.getName(), owner.getLabel()));
+        // "Password Field Error"
+        // "Don''t have permission to edit field {0} in object {1}."
+        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                                          ts.l("global.perm_error_text", this.getName(), owner.getLabel()));
       }
 
     if (!getFieldDef().isShaUnixCrypted())
       {
-	// "Server: Error in PasswordDBField.setShaUnixCryptPass()"
-	// "Password field not configured to accept SHA Unix Crypt hashed password strings."
-	return Ganymede.createErrorDialog(ts.l("setShaUnixCryptPass.error_title"),
-					  ts.l("setShaUnixCryptPass.error_text"));
+        // "Server: Error in PasswordDBField.setShaUnixCryptPass()"
+        // "Password field not configured to accept SHA Unix Crypt hashed password strings."
+        return Ganymede.createErrorDialog(ts.l("setShaUnixCryptPass.error_title"),
+                                          ts.l("setShaUnixCryptPass.error_text"));
       }
 
     if (!Sha256Crypt.verifyHashTextFormat(hashText) && !Sha512Crypt.verifyHashTextFormat(hashText))
       {
-	// "Server: Error in PasswordDBField.setShaUnixCryptPass()"
-	// "The hash text passed to setShaUnixCryptPass(), "{0}", is
-	// not a well-formed, SHA Unix Crypt hash text"
-	return Ganymede.createErrorDialog(ts.l("setShaUnixCryptPass.error_title"),
-					  ts.l("setShaUnixCryptPass.format_error", this.getName()));
+        // "Server: Error in PasswordDBField.setShaUnixCryptPass()"
+        // "The hash text passed to setShaUnixCryptPass(), "{0}", is
+        // not a well-formed, SHA Unix Crypt hash text"
+        return Ganymede.createErrorDialog(ts.l("setShaUnixCryptPass.error_title"),
+                                          ts.l("setShaUnixCryptPass.format_error", this.getName()));
       }
 
     eObj = (DBEditObject) owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
-	// Wizard check
+        // Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.SETPASS_SHAUNIXCRYPT, hashText, null);
+        retVal = eObj.wizardHook(this, DBEditObject.SETPASS_SHAUNIXCRYPT, hashText, null);
 
-	// if a wizard intercedes, we are going to let it take the ball.
+        // if a wizard intercedes, we are going to let it take the ball.
 
-	if (ReturnVal.wizardHandled(retVal))
-	  {
-	    return retVal;
-	  }
+        if (ReturnVal.wizardHandled(retVal))
+          {
+            return retVal;
+          }
       }
 
     // call finalizeSetValue to allow for chained reactions
@@ -2642,19 +2642,19 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (ReturnVal.didSucceed(retVal))
       {
-	// whenever the ShaUnixCrypt password is directly set, we lose
-	// plaintext and alternate hashes
+        // whenever the ShaUnixCrypt password is directly set, we lose
+        // plaintext and alternate hashes
 
-	clear_stored();
+        clear_stored();
 
-	if ((hashText == null) || (hashText.equals("")))
-	  {
-	    shaUnixCrypt = null;
-	  }
-	else
-	  {
-	    shaUnixCrypt = hashText;
-	  }
+        if ((hashText == null) || (hashText.equals("")))
+          {
+            shaUnixCrypt = null;
+          }
+        else
+          {
+            shaUnixCrypt = hashText;
+          }
       }
 
     return retVal;
@@ -2730,43 +2730,43 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (!isEditable(local))
       {
-	// "Password Field Error"
-	// "Don''t have permission to edit field {0} in object {1}."
-	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-					  ts.l("global.perm_error_text", this.getName(), owner.getLabel()));
+        // "Password Field Error"
+        // "Don''t have permission to edit field {0} in object {1}."
+        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                                          ts.l("global.perm_error_text", this.getName(), owner.getLabel()));
       }
 
     if (!getFieldDef().isBCrypted())
       {
-	// "Server: Error in PasswordDBField.setBCryptPass()"
-	// "Password field not configured to accept bCrypt hashed password strings."
-	return Ganymede.createErrorDialog(ts.l("setBCryptPass.error_title"),
-					  ts.l("setBCryptPass.error_text"));
+        // "Server: Error in PasswordDBField.setBCryptPass()"
+        // "Password field not configured to accept bCrypt hashed password strings."
+        return Ganymede.createErrorDialog(ts.l("setBCryptPass.error_title"),
+                                          ts.l("setBCryptPass.error_text"));
       }
 
     if (!BCrypt.verifyHashTextFormat(hashText))
       {
-	// "Server: Error in PasswordDBField.setBCryptPass()"
-	// "The hash text passed to setBCryptPass(), "{0}", is
-	// not a well-formed, bCrypt hash text"
-	return Ganymede.createErrorDialog(ts.l("setShaUnixCryptPass.error_title"),
-					  ts.l("setShaUnixCryptPass.format_error", this.getName()));
+        // "Server: Error in PasswordDBField.setBCryptPass()"
+        // "The hash text passed to setBCryptPass(), "{0}", is
+        // not a well-formed, bCrypt hash text"
+        return Ganymede.createErrorDialog(ts.l("setShaUnixCryptPass.error_title"),
+                                          ts.l("setShaUnixCryptPass.format_error", this.getName()));
       }
 
     eObj = (DBEditObject) owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
-	// Wizard check
+        // Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.SETPASS_BCRYPT, hashText, null);
+        retVal = eObj.wizardHook(this, DBEditObject.SETPASS_BCRYPT, hashText, null);
 
-	// if a wizard intercedes, we are going to let it take the ball.
+        // if a wizard intercedes, we are going to let it take the ball.
 
-	if (ReturnVal.wizardHandled(retVal))
-	  {
-	    return retVal;
-	  }
+        if (ReturnVal.wizardHandled(retVal))
+          {
+            return retVal;
+          }
       }
 
     // call finalizeSetValue to allow for chained reactions
@@ -2775,19 +2775,19 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (ReturnVal.didSucceed(retVal))
       {
-	// whenever the BCrypt password is directly set, we lose
-	// plaintext and alternate hashes
+        // whenever the BCrypt password is directly set, we lose
+        // plaintext and alternate hashes
 
-	clear_stored();
+        clear_stored();
 
-	if ((hashText == null) || (hashText.equals("")))
-	  {
-	    bCryptPass = null;
-	  }
-	else
-	  {
-	    bCryptPass = hashText;
-	  }
+        if ((hashText == null) || (hashText.equals("")))
+          {
+            bCryptPass = null;
+          }
+        else
+          {
+            bCryptPass = hashText;
+          }
       }
 
     return retVal;
@@ -2824,15 +2824,15 @@ public class PasswordDBField extends DBField implements pass_field {
    */
 
   public ReturnVal setAllHashes(String crypt,
-				String md5crypt,
-				String apacheMd5Crypt,
-				String LANMAN,
-				String NTUnicodeMD4,
-				String SSHAText,
-				String ShaUnixCryptText,
-				String bCryptText,
-				boolean local,
-				boolean noWizards)
+                                String md5crypt,
+                                String apacheMd5Crypt,
+                                String LANMAN,
+                                String NTUnicodeMD4,
+                                String SSHAText,
+                                String ShaUnixCryptText,
+                                String bCryptText,
+                                boolean local,
+                                boolean noWizards)
   {
     ReturnVal retVal = null;
     DBEditObject eObj;
@@ -2842,10 +2842,10 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (!isEditable(local))
       {
-	// "Password Field Error"
-	// "Don''t have permission to edit field {0} in object {1}."
-	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-					  ts.l("global.perm_error_text", this.getName(), owner.getLabel()));
+        // "Password Field Error"
+        // "Don''t have permission to edit field {0} in object {1}."
+        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                                          ts.l("global.perm_error_text", this.getName(), owner.getLabel()));
       }
 
     settingCrypt = (crypt != null && !crypt.equals(""));
@@ -2858,164 +2858,164 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (!settingCrypt && !settingWin && !settingMD5 && !settingApacheMD5 && !settingSSHA && !settingShaUnixCrypt && !settingBCrypt)
       {
-	// clear it!
+        // clear it!
 
-	return setPlainTextPass(null);
+        return setPlainTextPass(null);
       }
 
     // nope, we're setting something.. let's find out what
 
     if (settingSSHA)
       {
-	if (!SSHAText.startsWith("{SSHA}"))
-	  {
-	    // "Server: Error in PasswordDBField.setAllHashes()"
-	    // "The SSHA hash text passed to setAllHashes() is not a well-formed, OpenLDAP-encoded SSHA-1 hash text."
-	    return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
-					      ts.l("setAllHashes.ssha_format_error"));
-	  }
+        if (!SSHAText.startsWith("{SSHA}"))
+          {
+            // "Server: Error in PasswordDBField.setAllHashes()"
+            // "The SSHA hash text passed to setAllHashes() is not a well-formed, OpenLDAP-encoded SSHA-1 hash text."
+            return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
+                                              ts.l("setAllHashes.ssha_format_error"));
+          }
       }
 
     if (settingShaUnixCrypt)
       {
-	if (!Sha256Crypt.verifyHashTextFormat(ShaUnixCryptText) && !Sha512Crypt.verifyHashTextFormat(ShaUnixCryptText))
-	  {
-	    // "Server: Error in PasswordDBField.setAllHashes()"
-	    // "The hash text passed to setShaUnixCryptPass(), "{0}", is not a well-formed, SHA Unix Crypt hash text"
-	    return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
-					      ts.l("setShaUnixCryptPass.format_error", ShaUnixCryptText));
-	  }
+        if (!Sha256Crypt.verifyHashTextFormat(ShaUnixCryptText) && !Sha512Crypt.verifyHashTextFormat(ShaUnixCryptText))
+          {
+            // "Server: Error in PasswordDBField.setAllHashes()"
+            // "The hash text passed to setShaUnixCryptPass(), "{0}", is not a well-formed, SHA Unix Crypt hash text"
+            return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
+                                              ts.l("setShaUnixCryptPass.format_error", ShaUnixCryptText));
+          }
       }
 
     if (settingMD5)
       {
-	if (!md5crypt.startsWith("$1$") || (md5crypt.indexOf('$', 3) == -1))
-	  {
-	    // "Server: Error in PasswordDBField.setAllHashes()"
-	    // "The MD5Crypt hash text passed to setAllHashes(), "{0}", is not well-formed."
-	    return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
-					      ts.l("setAllHashes.md5_format_error", md5crypt));
-	  }
+        if (!md5crypt.startsWith("$1$") || (md5crypt.indexOf('$', 3) == -1))
+          {
+            // "Server: Error in PasswordDBField.setAllHashes()"
+            // "The MD5Crypt hash text passed to setAllHashes(), "{0}", is not well-formed."
+            return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
+                                              ts.l("setAllHashes.md5_format_error", md5crypt));
+          }
       }
 
     if (settingApacheMD5)
       {
-	if (!apacheMd5Crypt.startsWith("$apr1$") || (md5crypt.indexOf('$', 6) == -1))
-	  {
-	    // "Server: Error in PasswordDBField.setAllHashes()"
-	    // "The Apache MD5Crypt hash text passed to setAllHashes(), "{0}", is not well-formed."
-	    return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
-					      ts.l("setAllHashes.apache_format_error", apacheMd5Crypt));
-	  }
+        if (!apacheMd5Crypt.startsWith("$apr1$") || (md5crypt.indexOf('$', 6) == -1))
+          {
+            // "Server: Error in PasswordDBField.setAllHashes()"
+            // "The Apache MD5Crypt hash text passed to setAllHashes(), "{0}", is not well-formed."
+            return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
+                                              ts.l("setAllHashes.apache_format_error", apacheMd5Crypt));
+          }
       }
 
     eObj = (DBEditObject) owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
-	// Wizard check
+        // Wizard check
 
-	if (settingWin)
-	  {
-	    retVal = eObj.wizardHook(this, DBEditObject.SETPASSWINHASHES, LANMAN, NTUnicodeMD4);
+        if (settingWin)
+          {
+            retVal = eObj.wizardHook(this, DBEditObject.SETPASSWINHASHES, LANMAN, NTUnicodeMD4);
 
-	    // if a wizard intercedes, we are going to let it take the ball.
+            // if a wizard intercedes, we are going to let it take the ball.
 
-	    if (ReturnVal.wizardHandled(retVal))
-	      {
-		return retVal;
-	      }
-	  }
+            if (ReturnVal.wizardHandled(retVal))
+              {
+                return retVal;
+              }
+          }
 
-	if (settingMD5)
-	  {
-	    retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
-							     DBEditObject.SETPASSMD5,
-							     md5crypt,
-							     null));
+        if (settingMD5)
+          {
+            retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+                                                             DBEditObject.SETPASSMD5,
+                                                             md5crypt,
+                                                             null));
 
-	    // if a wizard intercedes, we are going to let it take the ball.
+            // if a wizard intercedes, we are going to let it take the ball.
 
-	    if (ReturnVal.wizardHandled(retVal))
-	      {
-		return retVal;
-	      }
-	  }
+            if (ReturnVal.wizardHandled(retVal))
+              {
+                return retVal;
+              }
+          }
 
-	if (settingApacheMD5)
-	  {
-	    retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
-							     DBEditObject.SETPASSAPACHEMD5,
-							     apacheMd5Crypt,
-							     null));
+        if (settingApacheMD5)
+          {
+            retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+                                                             DBEditObject.SETPASSAPACHEMD5,
+                                                             apacheMd5Crypt,
+                                                             null));
 
-	    // if a wizard intercedes, we are going to let it take the ball.
+            // if a wizard intercedes, we are going to let it take the ball.
 
-	    if (ReturnVal.wizardHandled(retVal))
-	      {
-		return retVal;
-	      }
-	  }
+            if (ReturnVal.wizardHandled(retVal))
+              {
+                return retVal;
+              }
+          }
 
-	if (settingCrypt)
-	  {
-	    retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
-							     DBEditObject.SETPASSCRYPT,
-							     crypt,
-							     null));
+        if (settingCrypt)
+          {
+            retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+                                                             DBEditObject.SETPASSCRYPT,
+                                                             crypt,
+                                                             null));
 
-	    // if a wizard intercedes, we are going to let it take the ball.
+            // if a wizard intercedes, we are going to let it take the ball.
 
-	    if (ReturnVal.wizardHandled(retVal))
-	      {
-		return retVal;
-	      }
-	  }
+            if (ReturnVal.wizardHandled(retVal))
+              {
+                return retVal;
+              }
+          }
 
-	if (settingSSHA)
-	  {
-	    retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
-							     DBEditObject.SETPASSSSHA,
-							     sshaHash,
-							     null));
+        if (settingSSHA)
+          {
+            retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+                                                             DBEditObject.SETPASSSSHA,
+                                                             sshaHash,
+                                                             null));
 
-	    // if a wizard intercedes, we are going to let it take the ball.
+            // if a wizard intercedes, we are going to let it take the ball.
 
-	    if (ReturnVal.wizardHandled(retVal))
-	      {
-		return retVal;
-	      }
-	  }
+            if (ReturnVal.wizardHandled(retVal))
+              {
+                return retVal;
+              }
+          }
 
-	if (settingShaUnixCrypt)
-	  {
-	    retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
-							     DBEditObject.SETPASS_SHAUNIXCRYPT,
-							     ShaUnixCryptText,
-							     null));
+        if (settingShaUnixCrypt)
+          {
+            retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+                                                             DBEditObject.SETPASS_SHAUNIXCRYPT,
+                                                             ShaUnixCryptText,
+                                                             null));
 
-	    // if a wizard intercedes, we are going to let it take the ball.
+            // if a wizard intercedes, we are going to let it take the ball.
 
-	    if (ReturnVal.wizardHandled(retVal))
-	      {
-		return retVal;
-	      }
-	  }
+            if (ReturnVal.wizardHandled(retVal))
+              {
+                return retVal;
+              }
+          }
 
-	if (settingBCrypt)
-	  {
-	    retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
-							     DBEditObject.SETPASS_BCRYPT,
-							     bCryptText,
-							     null));
+        if (settingBCrypt)
+          {
+            retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+                                                             DBEditObject.SETPASS_BCRYPT,
+                                                             bCryptText,
+                                                             null));
 
-	    // if a wizard intercedes, we are going to let it take the ball.
+            // if a wizard intercedes, we are going to let it take the ball.
 
-	    if (ReturnVal.wizardHandled(retVal))
-	      {
-		return retVal;
-	      }
-	  }
+            if (ReturnVal.wizardHandled(retVal))
+              {
+                return retVal;
+              }
+          }
       }
 
     // call finalizeSetValue to allow for chained reactions.  note
@@ -3027,58 +3027,58 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (ReturnVal.didSucceed(retVal))
       {
-	// whenever the hashes are set directly, we lose
-	// plaintext and alternate hashes
+        // whenever the hashes are set directly, we lose
+        // plaintext and alternate hashes
 
-	clear_stored();
+        clear_stored();
 
-	if ((LANMAN == null) || (LANMAN.equals("")))
-	  {
-	    lanHash = null;
-	  }
-	else
-	  {
-	    lanHash = LANMAN;
-	  }
+        if ((LANMAN == null) || (LANMAN.equals("")))
+          {
+            lanHash = null;
+          }
+        else
+          {
+            lanHash = LANMAN;
+          }
 
-	if ((NTUnicodeMD4 == null) || (NTUnicodeMD4.equals("")))
-	  {
-	    ntHash = null;
-	  }
-	else
-	  {
-	    ntHash = NTUnicodeMD4;
-	  }
+        if ((NTUnicodeMD4 == null) || (NTUnicodeMD4.equals("")))
+          {
+            ntHash = null;
+          }
+        else
+          {
+            ntHash = NTUnicodeMD4;
+          }
 
-	if (settingCrypt)
-	  {
-	    cryptedPass = crypt;
-	  }
+        if (settingCrypt)
+          {
+            cryptedPass = crypt;
+          }
 
-	if (settingMD5)
-	  {
-	    md5CryptPass = md5crypt;
-	  }
+        if (settingMD5)
+          {
+            md5CryptPass = md5crypt;
+          }
 
-	if (settingApacheMD5)
-	  {
-	    apacheMd5CryptPass = apacheMd5Crypt;
-	  }
+        if (settingApacheMD5)
+          {
+            apacheMd5CryptPass = apacheMd5Crypt;
+          }
 
-	if (settingSSHA)
-	  {
-	    sshaHash = SSHAText;
-	  }
+        if (settingSSHA)
+          {
+            sshaHash = SSHAText;
+          }
 
-	if (settingShaUnixCrypt)
-	  {
-	    shaUnixCrypt = ShaUnixCryptText;
-	  }
+        if (settingShaUnixCrypt)
+          {
+            shaUnixCrypt = ShaUnixCryptText;
+          }
 
-	if (settingBCrypt)
-	  {
-	    bCryptPass = bCryptText;
-	  }
+        if (settingBCrypt)
+          {
+            bCryptPass = bCryptText;
+          }
       }
 
     return retVal;
@@ -3108,146 +3108,146 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (!isEditable(true))
       {
-	// "Password Field Error"
-	// "Don''t have permission to edit field {0} in object {1}."
-	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-					  ts.l("global.perm_error_text", this.getName(), owner.getLabel()));
+        // "Password Field Error"
+        // "Don''t have permission to edit field {0} in object {1}."
+        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                                          ts.l("global.perm_error_text", this.getName(), owner.getLabel()));
       }
 
     eObj = (DBEditObject) owner;
 
     if (!verifyTypeMatch(o))
       {
-	// "Password Field Error"
-	// "Submitted value "{0}" is not a String object!  Major client error while trying to edit password field."
-	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-					  ts.l("verifyNewValue.type_error", o));
+        // "Password Field Error"
+        // "Submitted value "{0}" is not a String object!  Major client error while trying to edit password field."
+        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                                          ts.l("verifyNewValue.type_error", o));
       }
 
     if (o == null)
       {
-	return null; // assume we can null out this field
+        return null; // assume we can null out this field
       }
 
     s = (String) o;
 
     if (s.length() > maxSize())
       {
-	// string too long
+        // string too long
 
-	// "Password Field Error"
-	// "The submitted password is too long.  The maximum plaintext password length accepted is {0,number,#} characters."
-	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-					  ts.l("verifyNewValue.too_long", Integer.valueOf(this.maxSize())));
+        // "Password Field Error"
+        // "The submitted password is too long.  The maximum plaintext password length accepted is {0,number,#} characters."
+        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                                          ts.l("verifyNewValue.too_long", Integer.valueOf(this.maxSize())));
       }
 
     if (s.length() < minSize())
       {
-	// "Password Field Error"
-	// "The submitted password is too short.  The minimum plaintext password length accepted is {0,number,#} characters."
-	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-					  ts.l("verifyNewValue.too_short", Integer.valueOf(this.minSize())));
+        // "Password Field Error"
+        // "The submitted password is too short.  The minimum plaintext password length accepted is {0,number,#} characters."
+        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                                          ts.l("verifyNewValue.too_short", Integer.valueOf(this.minSize())));
       }
 
     if (allowedChars() != null)
       {
-	String okChars = allowedChars();
+        String okChars = allowedChars();
 
-	for (int i = 0; i < s.length(); i++)
-	  {
-	    if (okChars.indexOf(s.charAt(i)) == -1)
-	      {
-		// "Password Field Error"
-		// "Submitted password contains an unacceptable character ('{0}')."
-		return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-						  ts.l("verifyNewValue.bad_char",
-						       Character.valueOf(s.charAt(i))));
-	      }
-	  }
+        for (int i = 0; i < s.length(); i++)
+          {
+            if (okChars.indexOf(s.charAt(i)) == -1)
+              {
+                // "Password Field Error"
+                // "Submitted password contains an unacceptable character ('{0}')."
+                return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                                                  ts.l("verifyNewValue.bad_char",
+                                                       Character.valueOf(s.charAt(i))));
+              }
+          }
       }
 
     if (disallowedChars() != null)
       {
-	String badChars = disallowedChars();
+        String badChars = disallowedChars();
 
-	for (int i = 0; i < s.length(); i++)
-	  {
-	    if (badChars.indexOf(s.charAt(i)) != -1)
-	      {
-		// "Password Field Error"
-		// "Submitted password contains an unacceptable character ('{0}')."
-		return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-						  ts.l("verifyNewValue.bad_char",
-						       Character.valueOf(s.charAt(i))));
-	      }
-	  }
+        for (int i = 0; i < s.length(); i++)
+          {
+            if (badChars.indexOf(s.charAt(i)) != -1)
+              {
+                // "Password Field Error"
+                // "Submitted password contains an unacceptable character ('{0}')."
+                return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                                                  ts.l("verifyNewValue.bad_char",
+                                                       Character.valueOf(s.charAt(i))));
+              }
+          }
       }
 
     ReturnVal returnValInProgress = ReturnVal.success();
 
     if (getFieldDef().isCracklibChecked() && Ganymede.crackLibPacker != null)
       {
-	try
-	  {
-	    String cracklibCheck = CrackLib.fascistLook(Ganymede.crackLibPacker, s, owner.getLabel());
+        try
+          {
+            String cracklibCheck = CrackLib.fascistLook(Ganymede.crackLibPacker, s, owner.getLabel());
 
-	    if (cracklibCheck != null)
-	      {
-		if (getFieldDef().hasCracklibCheckException() && getGSession().getPermManager().isSuperGash())
-		  {
-		    // "Password Quality Problem"
-		    // "The password fails quality checking.\nThe checker reported the following problem:\n{0}"
-		    returnValInProgress = Ganymede.createInfoDialog(ts.l("verifyNewValue.cracklib_failure_title"),
-								    ts.l("verifyNewValue.cracklib_failure_error", cracklibCheck));
-		  }
-		else
-		  {
-		    // "Password Quality Problem"
-		    // "The password fails quality checking.\nThe checker reported the following problem:\n{0}"
-		    return Ganymede.createErrorDialog(ts.l("verifyNewValue.cracklib_failure_title"),
-						      ts.l("verifyNewValue.cracklib_failure_error", cracklibCheck));
-		  }
-	      }
-	  }
-	catch (IOException ex)
-	  {
-	    ex.printStackTrace();
-	  }
+            if (cracklibCheck != null)
+              {
+                if (getFieldDef().hasCracklibCheckException() && getGSession().getPermManager().isSuperGash())
+                  {
+                    // "Password Quality Problem"
+                    // "The password fails quality checking.\nThe checker reported the following problem:\n{0}"
+                    returnValInProgress = Ganymede.createInfoDialog(ts.l("verifyNewValue.cracklib_failure_title"),
+                                                                    ts.l("verifyNewValue.cracklib_failure_error", cracklibCheck));
+                  }
+                else
+                  {
+                    // "Password Quality Problem"
+                    // "The password fails quality checking.\nThe checker reported the following problem:\n{0}"
+                    return Ganymede.createErrorDialog(ts.l("verifyNewValue.cracklib_failure_title"),
+                                                      ts.l("verifyNewValue.cracklib_failure_error", cracklibCheck));
+                  }
+              }
+          }
+        catch (IOException ex)
+          {
+            ex.printStackTrace();
+          }
       }
 
     if (getFieldDef().isHistoryChecked())
       {
-	if (history != null)
-	  {
-	    Date previousDate = history.contains(s);
+        if (history != null)
+          {
+            Date previousDate = history.contains(s);
 
-	    if (previousDate != null)
-	      {
-		if (getFieldDef().hasHistoryCheckException() && getGSession().getPermManager().isSuperGash())
-		  {
-		    // "Password Used Before"
-		    // "This password has been used too recently with this account.\n\nIt was last used with this account at {0, time} on {0, date, full}."
-		    returnValInProgress = ReturnVal.merge(returnValInProgress,
-							  Ganymede.createInfoDialog(ts.l("verifyNewValue.history_reuse_title"),
-										    ts.l("verifyNewValue.history_reuse_error",
-											 previousDate)));
-		  }
-		else
-		  {
-		    // "Password Used Before"
-		    // "This password has been used too recently with this account.\n\nIt was last used with this account at {0, time} on {0, date, full}."
-		    return Ganymede.createErrorDialog(ts.l("verifyNewValue.history_reuse_title"),
-						      ts.l("verifyNewValue.history_reuse_error",
-							   previousDate));
-		  }
-	      }
-	  }
+            if (previousDate != null)
+              {
+                if (getFieldDef().hasHistoryCheckException() && getGSession().getPermManager().isSuperGash())
+                  {
+                    // "Password Used Before"
+                    // "This password has been used too recently with this account.\n\nIt was last used with this account at {0, time} on {0, date, full}."
+                    returnValInProgress = ReturnVal.merge(returnValInProgress,
+                                                          Ganymede.createInfoDialog(ts.l("verifyNewValue.history_reuse_title"),
+                                                                                    ts.l("verifyNewValue.history_reuse_error",
+                                                                                         previousDate)));
+                  }
+                else
+                  {
+                    // "Password Used Before"
+                    // "This password has been used too recently with this account.\n\nIt was last used with this account at {0, time} on {0, date, full}."
+                    return Ganymede.createErrorDialog(ts.l("verifyNewValue.history_reuse_title"),
+                                                      ts.l("verifyNewValue.history_reuse_error",
+                                                           previousDate));
+                  }
+              }
+          }
       }
 
     // have our parent make the final ok on the value
 
     return ReturnVal.merge(returnValInProgress,
-			   eObj.verifyNewValue(this, s));
+                           eObj.verifyNewValue(this, s));
   }
 
   /**
@@ -3267,27 +3267,27 @@ public class PasswordDBField extends DBField implements pass_field {
   private int getHashPrecision()
   {
     if (uncryptedPass != null || md5CryptPass != null ||
-	apacheMd5CryptPass != null || sshaHash != null || ntHash != null ||
-	shaUnixCrypt != null || bCryptPass != null)
+        apacheMd5CryptPass != null || sshaHash != null || ntHash != null ||
+        shaUnixCrypt != null || bCryptPass != null)
       {
-	return -1;		// full precision
+        return -1;              // full precision
       }
 
     if (lanHash != null)
       {
-	return 14;		// Old-school Windows hashes are good
-				// for 14 chars
+        return 14;              // Old-school Windows hashes are good
+                                // for 14 chars
       }
 
     if (cryptedPass != null)
       {
-	return 8;		// Old-school UNIX sux0rs.. we should
-				// only be using this for importing
-				// users from old /etc/passwd-style
-				// files
+        return 8;               // Old-school UNIX sux0rs.. we should
+                                // only be using this for importing
+                                // users from old /etc/passwd-style
+                                // files
       }
 
-    return 0;			// i got nothing, boss
+    return 0;                   // i got nothing, boss
   }
 
   /**
@@ -3303,35 +3303,35 @@ public class PasswordDBField extends DBField implements pass_field {
   {
     if (getFieldDef().isCrypted() && (forceChange || cryptedPass == null))
       {
-	cryptedPass = jcrypt.crypt(plaintext);
+        cryptedPass = jcrypt.crypt(plaintext);
       }
 
     if (getFieldDef().isMD5Crypted() && (forceChange || md5CryptPass == null))
       {
-	md5CryptPass = MD5Crypt.crypt(plaintext);
+        md5CryptPass = MD5Crypt.crypt(plaintext);
       }
 
     if (getFieldDef().isApacheMD5Crypted() && (forceChange || apacheMd5CryptPass == null))
       {
-	apacheMd5CryptPass = MD5Crypt.apacheCrypt(plaintext);
+        apacheMd5CryptPass = MD5Crypt.apacheCrypt(plaintext);
       }
 
     if (getFieldDef().isWinHashed())
       {
-	if (forceChange || lanHash == null)
-	  {
-	    lanHash = smbencrypt.LANMANHash(plaintext);
-	  }
+        if (forceChange || lanHash == null)
+          {
+            lanHash = smbencrypt.LANMANHash(plaintext);
+          }
 
-	if (forceChange || ntHash == null)
-	  {
-	    ntHash = smbencrypt.NTUNICODEHash(plaintext);
-	  }
+        if (forceChange || ntHash == null)
+          {
+            ntHash = smbencrypt.NTUNICODEHash(plaintext);
+          }
       }
 
     if (getFieldDef().isSSHAHashed() && (forceChange || sshaHash == null))
       {
-	sshaHash = SSHA.getLDAPSSHAHash(plaintext, null);
+        sshaHash = SSHA.getLDAPSSHAHash(plaintext, null);
       }
 
     if (getFieldDef().isShaUnixCrypted() && (forceChange || shaUnixCrypt == null))
@@ -3343,9 +3343,9 @@ public class PasswordDBField extends DBField implements pass_field {
 
     if (getFieldDef().isBCrypted() && (forceChange || bCryptPass == null))
       {
-	bCryptPass = null;	// force new hash
+        bCryptPass = null;      // force new hash
 
-	bCryptPass = getBCryptText();
+        bCryptPass = getBCryptText();
       }
   }
 
@@ -3400,26 +3400,26 @@ public class PasswordDBField extends DBField implements pass_field {
       pool = new ArrayList<passwordHistoryEntry>(count);
 
       for (int i = 0; i < count; i++)
-	{
-	  pool.add(new passwordHistoryEntry(in));
-	}
+        {
+          pool.add(new passwordHistoryEntry(in));
+        }
     }
 
     public synchronized void emit(DataOutput out) throws IOException
     {
       if (pool != null)
-	{
-	  out.writeInt(pool.size());
+        {
+          out.writeInt(pool.size());
 
-	  for (passwordHistoryEntry entry: pool)
-	    {
-	      entry.emit(out);
-	    }
-	}
+          for (passwordHistoryEntry entry: pool)
+            {
+              entry.emit(out);
+            }
+        }
       else
-	{
-	  out.writeInt(0);
-	}
+        {
+          out.writeInt(0);
+        }
     }
 
     /**
@@ -3446,12 +3446,12 @@ public class PasswordDBField extends DBField implements pass_field {
       this.poolSize = poolSize;
 
       if (pool != null)
-	{
-	  while (pool.size() > poolSize)
-	    {
-	      pool.remove(pool.size() - 1);
-	    }
-	}
+        {
+          while (pool.size() > poolSize)
+            {
+              pool.remove(pool.size() - 1);
+            }
+        }
     }
 
     /**
@@ -3465,28 +3465,28 @@ public class PasswordDBField extends DBField implements pass_field {
     public synchronized void add(String password, Date date)
     {
       if (pool == null)
-	{
-	  pool = new ArrayList<passwordHistoryEntry>();
-	}
+        {
+          pool = new ArrayList<passwordHistoryEntry>();
+        }
 
       // remove a password if it's already in the pool, so we can add
       // it back to the start of the queue with our new date.
 
       for (passwordHistoryEntry entry: pool)
-	{
-	  if (entry.matches(password))
-	    {
-	      pool.remove(entry);
-	      break;
-	    }
-	}
+        {
+          if (entry.matches(password))
+            {
+              pool.remove(entry);
+              break;
+            }
+        }
 
       pool.add(0, new passwordHistoryEntry(password, date));
 
       if (pool.size() > poolSize)
-	{
-	  pool.remove(pool.size() - 1);
-	}
+        {
+          pool.remove(pool.size() - 1);
+        }
     }
 
     /**
@@ -3502,17 +3502,17 @@ public class PasswordDBField extends DBField implements pass_field {
     public synchronized Date contains(String password)
     {
       if (pool == null)
-	{
-	  return null;
-	}
+        {
+          return null;
+        }
 
       for (passwordHistoryEntry entry: pool)
-	{
-	  if (entry.matches(password))
-	    {
-	      return entry.getDate();
-	    }
-	}
+        {
+          if (entry.matches(password))
+            {
+              return entry.getDate();
+            }
+        }
 
       return null;
     }

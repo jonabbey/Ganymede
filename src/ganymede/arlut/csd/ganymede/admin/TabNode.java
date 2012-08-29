@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -60,7 +60,7 @@ import arlut.csd.JTree.treeNode;
 class TabNode extends arlut.csd.JTree.treeNode {
 
   TabNode(treeNode parent, String text, treeNode insertAfter,
-	  boolean expandable, int openImage, int closedImage, treeMenu menu)
+          boolean expandable, int openImage, int closedImage, treeMenu menu)
   {
     super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
   }

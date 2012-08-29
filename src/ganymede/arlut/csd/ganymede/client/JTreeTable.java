@@ -1,5 +1,5 @@
 /*
- * @(#)JTreeTable.java	1.2 98/10/27
+ * @(#)JTreeTable.java  1.2 98/10/27
  *
  * Copyright 1997, 1998 by Sun Microsystems, Inc.,
  * 901 San Antonio Road, Palo Alto, California, 94303, U.S.A.
@@ -84,7 +84,7 @@ public class JTreeTable extends JTable {
     setShowGrid(false);
 
     // No intercell spacing
-    setIntercellSpacing(new Dimension(0, 0));	
+    setIntercellSpacing(new Dimension(0, 0));   
 
     // Increase the height of the rows to match the gclient tree. 
     setRowHeight(getRowHeight()+5);
@@ -108,13 +108,13 @@ public class JTreeTable extends JTable {
 
     if (tree != null)
       {
-	tree.updateUI();
+        tree.updateUI();
       }
 
     // Use the tree's default foreground and background colors in the
     // table. 
     LookAndFeel.installColorsAndFont(this, "Tree.background",
-				     "Tree.foreground", "Tree.font");
+                                     "Tree.foreground", "Tree.font");
   }
 
   /**
@@ -148,7 +148,7 @@ public class JTreeTable extends JTable {
 
     if (canEdit && column == 0)
       {
-	repaint(getCellRect(row, column, false));
+        repaint(getCellRect(row, column, false));
       }
     return canEdit;
   }
@@ -157,52 +157,52 @@ public class JTreeTable extends JTable {
   {
     if (e instanceof MouseEvent)
       {
-	MouseEvent me = (MouseEvent) e;
-	// If the modifiers are not 0 (or the left mouse button),
-	// tree may try and toggle the selection, and table
-	// will then try and toggle, resulting in the
-	// selection remaining the same. To avoid this, we
-	// only dispatch when the modifiers are 0 (or the left mouse
-	// button).
+        MouseEvent me = (MouseEvent) e;
+        // If the modifiers are not 0 (or the left mouse button),
+        // tree may try and toggle the selection, and table
+        // will then try and toggle, resulting in the
+        // selection remaining the same. To avoid this, we
+        // only dispatch when the modifiers are 0 (or the left mouse
+        // button).
 
-	if (me.getModifiers() == 0 || me.getModifiers() == InputEvent.BUTTON1_MASK)
-	  {
-	    final int count = getColumnCount();
+        if (me.getModifiers() == 0 || me.getModifiers() == InputEvent.BUTTON1_MASK)
+          {
+            final int count = getColumnCount();
 
-	    for (int i = count - 1; i >= 0; i--)
-	      {
-		if (isHierarchical(i))
-		  {
-		    int savedHeight = tree.getRowHeight();
-		    tree.setRowHeight(getRowHeight());
-		    MouseEvent pressed = new MouseEvent
-		      (tree,
-		       me.getID(),
-		       me.getWhen(),
-		       me.getModifiers(),
-		       me.getX() - getCellRect(0, i, false).x,
-		       me.getY(),
-		       me.getClickCount(),
-		       me.isPopupTrigger());
+            for (int i = count - 1; i >= 0; i--)
+              {
+                if (isHierarchical(i))
+                  {
+                    int savedHeight = tree.getRowHeight();
+                    tree.setRowHeight(getRowHeight());
+                    MouseEvent pressed = new MouseEvent
+                      (tree,
+                       me.getID(),
+                       me.getWhen(),
+                       me.getModifiers(),
+                       me.getX() - getCellRect(0, i, false).x,
+                       me.getY(),
+                       me.getClickCount(),
+                       me.isPopupTrigger());
 
-		    tree.dispatchEvent(pressed);
-		    // For Mac OS X, we need to dispatch a MOUSE_RELEASED as well
-		    MouseEvent released = new MouseEvent
-		      (tree,
-		       java.awt.event.MouseEvent.MOUSE_RELEASED,
-		       pressed.getWhen(),
-		       pressed.getModifiers(),
-		       pressed.getX(),
-		       pressed.getY(),
-		       pressed.getClickCount(),
-		       pressed.isPopupTrigger());
+                    tree.dispatchEvent(pressed);
+                    // For Mac OS X, we need to dispatch a MOUSE_RELEASED as well
+                    MouseEvent released = new MouseEvent
+                      (tree,
+                       java.awt.event.MouseEvent.MOUSE_RELEASED,
+                       pressed.getWhen(),
+                       pressed.getModifiers(),
+                       pressed.getX(),
+                       pressed.getY(),
+                       pressed.getClickCount(),
+                       pressed.isPopupTrigger());
 
-		    tree.dispatchEvent(released);
-		    tree.setRowHeight(savedHeight);
-		    break;
-		  }
-	      }
-	  }
+                    tree.dispatchEvent(released);
+                    tree.setRowHeight(savedHeight);
+                    break;
+                  }
+              }
+          }
       }
   }
   
@@ -227,7 +227,7 @@ public class JTreeTable extends JTable {
 
     if (tree != null && tree.getRowHeight() != rowHeight)
       {
-	tree.setRowHeight(getRowHeight()); 
+        tree.setRowHeight(getRowHeight()); 
       }
   }
 
@@ -265,18 +265,18 @@ public class JTreeTable extends JTable {
       TreeCellRenderer tcr = getCellRenderer();
 
       if (tcr instanceof DefaultTreeCellRenderer)
-	{
-	  DefaultTreeCellRenderer dtcr = ((DefaultTreeCellRenderer)tcr); 
-	  // For 1.1 uncomment this, 1.2 has a bug that will cause an
-	  // exception to be thrown if the border selection color is
-	  // null.
-	  // dtcr.setBorderSelectionColor(null);
-	  dtcr.setTextSelectionColor(UIManager.getColor("Table.selectionForeground"));
+        {
+          DefaultTreeCellRenderer dtcr = ((DefaultTreeCellRenderer)tcr); 
+          // For 1.1 uncomment this, 1.2 has a bug that will cause an
+          // exception to be thrown if the border selection color is
+          // null.
+          // dtcr.setBorderSelectionColor(null);
+          dtcr.setTextSelectionColor(UIManager.getColor("Table.selectionForeground"));
 
-	  dtcr.setBackgroundSelectionColor(UIManager.getColor("Table.selectionBackground"));
+          dtcr.setBackgroundSelectionColor(UIManager.getColor("Table.selectionBackground"));
 
-	  dtcr.setBackgroundNonSelectionColor(Color.white);
-	}
+          dtcr.setBackgroundNonSelectionColor(Color.white);
+        }
     }
 
     /**
@@ -286,15 +286,15 @@ public class JTreeTable extends JTable {
     public void setRowHeight(int rowHeight)
     {
       if (rowHeight > 0)
-	{
-	  super.setRowHeight(rowHeight); 
+        {
+          super.setRowHeight(rowHeight); 
 
-	  if (JTreeTable.this != null &&
-	      JTreeTable.this.getRowHeight() != rowHeight)
-	    {
-	      JTreeTable.this.setRowHeight(getRowHeight()); 
-	    }
-	}
+          if (JTreeTable.this != null &&
+              JTreeTable.this.getRowHeight() != rowHeight)
+            {
+              JTreeTable.this.setRowHeight(getRowHeight()); 
+            }
+        }
     }
     
     /**
@@ -319,10 +319,10 @@ public class JTreeTable extends JTable {
      * TreeCellRenderer method. Overridden to update the visible row.
      */
     public Component getTableCellRendererComponent(JTable table,
-						   Object value,
-						   boolean isSelected,
-						   boolean hasFocus,
-						   int row, int column)
+                                                   Object value,
+                                                   boolean isSelected,
+                                                   boolean hasFocus,
+                                                   int row, int column)
     {
       visibleRow = row;
       return this;
@@ -336,9 +336,9 @@ public class JTreeTable extends JTable {
    */
   public class TreeTableCellEditor extends AbstractCellEditor implements TableCellEditor {
     public Component getTableCellEditorComponent(JTable table,
-						 Object value,
-						 boolean isSelected,
-						 int r, int c)
+                                                 Object value,
+                                                 boolean isSelected,
+                                                 int r, int c)
     {
       return tree;
     }

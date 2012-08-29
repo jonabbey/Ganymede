@@ -101,20 +101,20 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
     if (session == null)
       {
-	session = Ganymede.internalSession.getDBSession();
+        session = Ganymede.internalSession.getDBSession();
       }
 
     ownerGroup = session.viewDBObject(ownerInvid);
 
     if (ownerGroup == null)
       {
-	if (debug)
-	  {
-	    System.err.println("getOwnerGroupAddresses(): Couldn't look up owner group " +
-			       ownerInvid.toString());
-	  }
+        if (debug)
+          {
+            System.err.println("getOwnerGroupAddresses(): Couldn't look up owner group " +
+                               ownerInvid.toString());
+          }
 
-	return result;
+        return result;
       }
 
     // should we cc: the admins?
@@ -123,28 +123,28 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
     if (cc != null && cc.booleanValue())
       {
-	Vector adminList = new Vector();
-	Vector adminInvidList;
-	Invid adminInvid;
-	String adminAddr;
+        Vector adminList = new Vector();
+        Vector adminInvidList;
+        Invid adminInvid;
+        String adminAddr;
 
-	adminInvidList = ownerGroup.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
+        adminInvidList = ownerGroup.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
 
-	if (adminInvidList != null)
-	  {
-	    for (int i = 0; i < adminInvidList.size(); i++)
-	      {
-		adminInvid = (Invid) adminInvidList.elementAt(i);
-		adminAddr = adminPersonaCustom.convertAdminInvidToString(adminInvid, session);
+        if (adminInvidList != null)
+          {
+            for (int i = 0; i < adminInvidList.size(); i++)
+              {
+                adminInvid = (Invid) adminInvidList.elementAt(i);
+                adminAddr = adminPersonaCustom.convertAdminInvidToString(adminInvid, session);
 
-		if (adminAddr != null)
-		  {
-		    adminList.addElement(adminAddr);
-		  }
-	      }
-	  }
+                if (adminAddr != null)
+                  {
+                    adminList.addElement(adminAddr);
+                  }
+              }
+          }
 
-	result = VectorUtils.union(result, adminList);
+        result = VectorUtils.union(result, adminList);
       }
 
     // do we have any external addresses?
@@ -153,13 +153,13 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
     if (externalAddresses != null)
       {
-	// we don't have to clone externalAddresses.getValuesLocal()
-	// since union() will copy the elements rather than just
-	// setting result to the vector returned by
-	// externalAddresses.getValuesLocal() if result is currently
-	// null.
+        // we don't have to clone externalAddresses.getValuesLocal()
+        // since union() will copy the elements rather than just
+        // setting result to the vector returned by
+        // externalAddresses.getValuesLocal() if result is currently
+        // null.
 
-	result = VectorUtils.union(result, externalAddresses.getValuesLocal());
+        result = VectorUtils.union(result, externalAddresses.getValuesLocal());
       }
 
     return result;
@@ -183,16 +183,16 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
   {
     if (_donateOK == null)
       {
-	String donateOKString = System.getProperty("ganymede.allowdonations");
+        String donateOKString = System.getProperty("ganymede.allowdonations");
 
-	if (donateOKString != null && donateOKString.equalsIgnoreCase("true"))
-	  {
-	    _donateOK = Boolean.valueOf(true);
-	  }
-	else
-	  {
-	    _donateOK = Boolean.valueOf(false);
-	  }
+        if (donateOKString != null && donateOKString.equalsIgnoreCase("true"))
+          {
+            _donateOK = Boolean.valueOf(true);
+          }
+        else
+          {
+            _donateOK = Boolean.valueOf(false);
+          }
       }
 
     return _donateOK.booleanValue();
@@ -262,26 +262,26 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
     try
       {
-	session = object.getGSession().getDBSession();
+        session = object.getGSession().getDBSession();
       }
     catch (NullPointerException ex)
       {
-	session = Ganymede.internalSession.getDBSession();
+        session = Ganymede.internalSession.getDBSession();
       }
 
     if (cc != null && cc.booleanValue())
       {
-	List<Invid> members = (List<Invid>) object.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
+        List<Invid> members = (List<Invid>) object.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
 
-	if (members != null)
-	  {
-	    for (Invid admin: members)
-	      {
-		DBObject adminObj = session.viewDBObject(admin, true);
+        if (members != null)
+          {
+            for (Invid admin: members)
+              {
+                DBObject adminObj = session.viewDBObject(admin, true);
 
-		set.addAll((List<String>)adminObj.getEmailTargets());
-	      }
-	  }
+                set.addAll((List<String>)adminObj.getEmailTargets());
+              }
+          }
       }
 
     set.addAll((List<String>) object.getFieldValuesLocal(SchemaConstants.OwnerExternalMail));
@@ -302,7 +302,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
     if (field.getID() == SchemaConstants.OwnerObjectsOwned)
       {
-	return false;
+        return false;
       }
 
     return super.mustChoose(field);
@@ -325,7 +325,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
     if (field.getID() == SchemaConstants.OwnerListField)
       {
-	return null;
+        return null;
       }
 
     return super.obtainChoicesKey(field);
@@ -351,15 +351,15 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
     if (field.getID() == SchemaConstants.OwnerListField)
       {
-	Invid testInvid = (Invid) value;
+        Invid testInvid = (Invid) value;
 
-	if (testInvid != null && testInvid.equals(field.getOwner().getInvid()))
-	  {
-	    // "Owner Object Error"
-	    // "Can''t make an owner group own itself.  All owner groups implicitly own themselves, anyway."
-	    return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
-					      ts.l("verifyNewValue.self_ownership"));
-	  }
+        if (testInvid != null && testInvid.equals(field.getOwner().getInvid()))
+          {
+            // "Owner Object Error"
+            // "Can''t make an owner group own itself.  All owner groups implicitly own themselves, anyway."
+            return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
+                                              ts.l("verifyNewValue.self_ownership"));
+          }
       }
 
     return super.verifyNewValue(field, value);
@@ -383,7 +383,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
     if (fieldID == SchemaConstants.OwnerMembersField)
       {
-	return false;
+        return false;
       }
 
     return super.anonymousUnlinkOK(object, fieldID);
@@ -441,7 +441,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
     if (donateOK() && targetFieldID == SchemaConstants.BackLinksField)
       {
-	return true;
+        return true;
       }
 
     return super.anonymousLinkOK(targetObject, targetFieldID);

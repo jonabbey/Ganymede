@@ -19,7 +19,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -173,7 +173,7 @@ public class serverClientAsyncResponder implements ClientAsyncResponder {
   {
     if (done)
       {
-	return;
+        return;
       }
 
     Object params[] = new Object[2];
@@ -192,13 +192,13 @@ public class serverClientAsyncResponder implements ClientAsyncResponder {
   {
     if (this.done)
       {
-	return;
+        return;
       }
 
     synchronized (eventBuffer)
       {
-	this.done = true;
-	eventBuffer.notifyAll(); // let the client drain and exit
+        this.done = true;
+        eventBuffer.notifyAll(); // let the client drain and exit
       }
   }
 
@@ -213,15 +213,15 @@ public class serverClientAsyncResponder implements ClientAsyncResponder {
   {
     if (done)
       {
-	return;
+        return;
       }
 
     addEvent(new clientAsyncMessage(clientAsyncMessage.SHUTDOWN, message));
 
     synchronized (eventBuffer)
       {
-	this.done = true;
-	eventBuffer.notifyAll(); // let the client drain and exit
+        this.done = true;
+        eventBuffer.notifyAll(); // let the client drain and exit
       }
   }
 
@@ -238,29 +238,29 @@ public class serverClientAsyncResponder implements ClientAsyncResponder {
 
     synchronized (eventBuffer)
       {
-	while (!done && ebSz == 0)
-	  {
-	    try
-	      {
-		eventBuffer.wait();
-	      }
-	    catch (InterruptedException ex)
-	      {
-	      }
-	  }
+        while (!done && ebSz == 0)
+          {
+            try
+              {
+                eventBuffer.wait();
+              }
+            catch (InterruptedException ex)
+              {
+              }
+          }
 
-	if (done && ebSz == 0)
-	  {
-	    return null;	// but see finally, below
-	  }
+        if (done && ebSz == 0)
+          {
+            return null;        // but see finally, below
+          }
 
-	event = dequeue();
+        event = dequeue();
 
-	// clear the direct pointer to this event so that
-	// replaceEvent() will know that we don't have an event of
-	// this kind in our buffer anymore.
-	
-	lookUp[event.getMethod()] = null;
+        // clear the direct pointer to this event so that
+        // replaceEvent() will know that we don't have an event of
+        // this kind in our buffer anymore.
+        
+        lookUp[event.getMethod()] = null;
       }
 
     return event;
@@ -277,19 +277,19 @@ public class serverClientAsyncResponder implements ClientAsyncResponder {
   {
     if (done)
       {
-	throw new RemoteException("serverClientAsyncResponder: console disconnected");
+        throw new RemoteException("serverClientAsyncResponder: console disconnected");
       }
 
     synchronized (eventBuffer)
       {
-	if (ebSz >= maxBufferSize)
-	  {
-	    throwOverflow();
-	  }
-	
-	enqueue(newEvent);
-	
-	eventBuffer.notify();	// wake up getNextMsg()
+        if (ebSz >= maxBufferSize)
+          {
+            throwOverflow();
+          }
+        
+        enqueue(newEvent);
+        
+        eventBuffer.notify();   // wake up getNextMsg()
       }
   }
 
@@ -305,36 +305,36 @@ public class serverClientAsyncResponder implements ClientAsyncResponder {
   {
     if (done)
       {
-	throw new RemoteException("serverClientAsyncResponder: console disconnected");
+        throw new RemoteException("serverClientAsyncResponder: console disconnected");
       }
 
     synchronized (eventBuffer)
       {
-	// if we have an instance of this event on our eventBuffer,
-	// update its parameter with the new event's info.
+        // if we have an instance of this event on our eventBuffer,
+        // update its parameter with the new event's info.
 
-	if (lookUp[newEvent.getMethod()] != null)
-	  {
-	    lookUp[newEvent.getMethod()] = newEvent;
-	    return;
-	  }
+        if (lookUp[newEvent.getMethod()] != null)
+          {
+            lookUp[newEvent.getMethod()] = newEvent;
+            return;
+          }
 
-	// okay, we don't have an event of matching type on our eventBuffer
-	// queue.  Check for overflow and add the element ourselves.
+        // okay, we don't have an event of matching type on our eventBuffer
+        // queue.  Check for overflow and add the element ourselves.
 
-	if (ebSz >= maxBufferSize)
-	  {
-	    throwOverflow();
-	  }
+        if (ebSz >= maxBufferSize)
+          {
+            throwOverflow();
+          }
 
-	enqueue(newEvent);
+        enqueue(newEvent);
 
-	// remember that we have an event of this type on our eventBuffer
-	// for direct lookup by later replaceEvent calls.
+        // remember that we have an event of this type on our eventBuffer
+        // for direct lookup by later replaceEvent calls.
 
-	lookUp[newEvent.getMethod()] = newEvent;
+        lookUp[newEvent.getMethod()] = newEvent;
 
-	eventBuffer.notify();	// wake up getNextMsg()
+        eventBuffer.notify();   // wake up getNextMsg()
       }
   }
 
@@ -350,24 +350,24 @@ public class serverClientAsyncResponder implements ClientAsyncResponder {
 
     synchronized (eventBuffer)
       {
-	int i = dequeuePtr;
-	int count = 0;
+        int i = dequeuePtr;
+        int count = 0;
 
-	while (count < ebSz)
-	  {
-	    buffer.append(i);
-	    buffer.append(": ");
-	    buffer.append(eventBuffer[i]);
-	    buffer.append("\n");
+        while (count < ebSz)
+          {
+            buffer.append(i);
+            buffer.append(": ");
+            buffer.append(eventBuffer[i]);
+            buffer.append("\n");
 
-	    count++;
-	    i++;
+            count++;
+            i++;
 
-	    if (i >= maxBufferSize)
-	      {
-		i = 0;
-	      }
-	  }
+            if (i >= maxBufferSize)
+              {
+                i = 0;
+              }
+          }
       }
     
     throw new RemoteException("serverClientAsyncResponder buffer overflow:" + buffer.toString());
@@ -381,14 +381,14 @@ public class serverClientAsyncResponder implements ClientAsyncResponder {
   {
     synchronized (eventBuffer)
       {
-	eventBuffer[enqueuePtr] = item;
-	
-	if (++enqueuePtr >= maxBufferSize)
-	  {
-	    enqueuePtr = 0;
-	  }
-	
-	ebSz++;
+        eventBuffer[enqueuePtr] = item;
+        
+        if (++enqueuePtr >= maxBufferSize)
+          {
+            enqueuePtr = 0;
+          }
+        
+        ebSz++;
       }
   }
 
@@ -401,17 +401,17 @@ public class serverClientAsyncResponder implements ClientAsyncResponder {
   {
     synchronized (eventBuffer)
       {
-	clientAsyncMessage result = eventBuffer[dequeuePtr];
-	eventBuffer[dequeuePtr] = null;
-	
-	if (++dequeuePtr >= maxBufferSize)
-	  {
-	    dequeuePtr = 0;
-	  }
-	
-	ebSz--;
-	
-	return result;
+        clientAsyncMessage result = eventBuffer[dequeuePtr];
+        eventBuffer[dequeuePtr] = null;
+        
+        if (++dequeuePtr >= maxBufferSize)
+          {
+            dequeuePtr = 0;
+          }
+        
+        ebSz--;
+        
+        return result;
       }
   }
 }

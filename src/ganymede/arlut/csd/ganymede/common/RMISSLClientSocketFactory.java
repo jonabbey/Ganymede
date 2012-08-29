@@ -7,7 +7,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -113,18 +113,18 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
   {
     synchronized (arlut.csd.ganymede.common.RMISSLClientSocketFactory.class)
       {
-	RMISSLClientSocketFactory.enabled = true;
+        RMISSLClientSocketFactory.enabled = true;
       }
 
     if (socketDebug)
       {
-	synchronized (arlut.csd.ganymede.common.RMISSLClientSocketFactory.class)
-	  {
-	    System.err.println("Creating client socket # " + counter + " to host " + host + " on port " + port);
-	    counter++;
-	  }
-	
-	RMISSLClientSocketFactory.printCallStack();
+        synchronized (arlut.csd.ganymede.common.RMISSLClientSocketFactory.class)
+          {
+            System.err.println("Creating client socket # " + counter + " to host " + host + " on port " + port);
+            counter++;
+          }
+        
+        RMISSLClientSocketFactory.printCallStack();
       }
 
     SSLSocket sock = (SSLSocket) getSF().createSocket(host, port);
@@ -134,16 +134,16 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
 
     if (mrShouty)
       {
-	System.err.println("RMISSLClientSocketFactory: created SSL socket to host " + host +
-			   " on port " + port + ", using " + cipherSuite);
+        System.err.println("RMISSLClientSocketFactory: created SSL socket to host " + host +
+                           " on port " + port + ", using " + cipherSuite);
       }
 
     synchronized (RMISSLClientSocketFactory.class)
       {
-	if (RMISSLClientSocketFactory.listener != null)
-	  {
-	    RMISSLClientSocketFactory.listener.notifySSLClient(host, port, cipherSuite);
-	  }
+        if (RMISSLClientSocketFactory.listener != null)
+          {
+            RMISSLClientSocketFactory.listener.notifySSLClient(host, port, cipherSuite);
+          }
       }
 
     return sock;
@@ -153,7 +153,7 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
   {
     if (object instanceof arlut.csd.ganymede.common.RMISSLClientSocketFactory)
       {
-	return true;
+        return true;
       }
 
     return false;
@@ -168,83 +168,83 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
   {
     if (sf != null)
       {
-	if (socketDebug)
-	  {
-	    System.err.println("getSF() returning a pre-existing SocketFactory");
-	  }
+        if (socketDebug)
+          {
+            System.err.println("getSF() returning a pre-existing SocketFactory");
+          }
 
-	return sf;
+        return sf;
       }
 
     if (socketDebug)
       {
-	System.err.println("Creating client socket factory");
-	RMISSLClientSocketFactory.printCallStack();
+        System.err.println("Creating client socket factory");
+        RMISSLClientSocketFactory.printCallStack();
       }
 
     try
       {
-	TrustManagerFactory tmf;
-	KeyStore ks;
-	SSLContext ctx;
+        TrustManagerFactory tmf;
+        KeyStore ks;
+        SSLContext ctx;
 
-	String factoryID = null;
+        String factoryID = null;
 
-	if (System.getProperty("java.vm.vendor").indexOf("IBM") != -1)
-	  {
-	    factoryID = "IbmX509"; // for IBM JVMs
-	  }
-	else
-	  {
-	    factoryID = "SunX509";
-	  }
+        if (System.getProperty("java.vm.vendor").indexOf("IBM") != -1)
+          {
+            factoryID = "IbmX509"; // for IBM JVMs
+          }
+        else
+          {
+            factoryID = "SunX509";
+          }
 
-	ctx = SSLContext.getInstance("TLS");
-	tmf = TrustManagerFactory.getInstance(factoryID);
-	ks = KeyStore.getInstance("JKS");
+        ctx = SSLContext.getInstance("TLS");
+        tmf = TrustManagerFactory.getInstance(factoryID);
+        ks = KeyStore.getInstance("JKS");
 
-	InputStream x = PackageResources.getPackageResourceAsStream(certsResource, this.getClass());
+        InputStream x = PackageResources.getPackageResourceAsStream(certsResource, this.getClass());
 
-	if (x == null)
-	  {
-	    throw new RuntimeException("Hey, couldn't load " + certsResource);
-	  }
-	else
-	  {
-	    if (socketDebug)
-	      {
-		int count = 0;
+        if (x == null)
+          {
+            throw new RuntimeException("Hey, couldn't load " + certsResource);
+          }
+        else
+          {
+            if (socketDebug)
+              {
+                int count = 0;
 
-		try
-		  {
-		    int i = x.read();
-		    
-		    while (i >= 0)
-		      {
-			count++;
-			i = x.read();
-		      }
-		  }
-		catch (IOException ex)
-		  {
-		    ex.printStackTrace();
-		  }
-		
-		System.err.println("Read " + count + " bytes from " + certsResource);
-	      }
+                try
+                  {
+                    int i = x.read();
+                    
+                    while (i >= 0)
+                      {
+                        count++;
+                        i = x.read();
+                      }
+                  }
+                catch (IOException ex)
+                  {
+                    ex.printStackTrace();
+                  }
+                
+                System.err.println("Read " + count + " bytes from " + certsResource);
+              }
 
             x.close();
-	  }
+          }
 
-	ks.load(PackageResources.getPackageResourceAsStream(certsResource, this.getClass()), null);
-	tmf.init(ks);
-	ctx.init(null, tmf.getTrustManagers(), null);
+        ks.load(PackageResources.getPackageResourceAsStream(certsResource, this.getClass()), null);
+        tmf.init(ks);
+        ctx.init(null, tmf.getTrustManagers(), null);
 
-	sf = ctx.getSocketFactory();
+        sf = ctx.getSocketFactory();
       }
     catch (Exception e)
       {
-	e.printStackTrace();
+        e.printStackTrace();
       }
 
     return sf;
@@ -259,11 +259,11 @@ public class RMISSLClientSocketFactory implements RMIClientSocketFactory, Serial
   {
     try
       {
-	throw new RuntimeException("TRACE");
+        throw new RuntimeException("TRACE");
       }
     catch (RuntimeException ex)
       {
-	ex.printStackTrace();
+        ex.printStackTrace();
       }
   }
 }

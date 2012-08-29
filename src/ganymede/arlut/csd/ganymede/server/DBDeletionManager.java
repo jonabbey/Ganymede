@@ -151,19 +151,19 @@ public class DBDeletionManager {
     // blocking out other sessions
 
     if (eObj != null &&
-	(eObj.getStatus() == DBEditObject.DROPPING ||
-	 eObj.getStatus() == DBEditObject.DELETING))
+        (eObj.getStatus() == DBEditObject.DROPPING ||
+         eObj.getStatus() == DBEditObject.DELETING))
       {
-	// just in case someone went to some effort to get around
-	// DBSession.viewDBObject()'s normal retrieval of an
-	// in-session DBEditObject, double check the session here,
-	// only reject if it's another session that has it marked for
-	// deletion
+        // just in case someone went to some effort to get around
+        // DBSession.viewDBObject()'s normal retrieval of an
+        // in-session DBEditObject, double check the session here,
+        // only reject if it's another session that has it marked for
+        // deletion
 
-	if (eObj.getDBSession() != session)
-	  {
-	    return false;
-	  }
+        if (eObj.getDBSession() != session)
+          {
+            return false;
+          }
       }
 
     // if this session already marked the object in question for
@@ -179,8 +179,8 @@ public class DBDeletionManager {
 
     if (invidSet == null)
       {
-	invidSet = new HashSet<Invid>();
-	sessions.put(session, invidSet);
+        invidSet = new HashSet<Invid>();
+        sessions.put(session, invidSet);
       }
 
     invidSet.add(objInvid);
@@ -192,8 +192,8 @@ public class DBDeletionManager {
 
     if (sessionSet == null)
       {
-	sessionSet = new HashSet<DBSession>();
-	invids.put(objInvid, sessionSet);
+        sessionSet = new HashSet<DBSession>();
+        invids.put(objInvid, sessionSet);
       }
 
     sessionSet.add(session);
@@ -223,32 +223,32 @@ public class DBDeletionManager {
 
     if (sessionSet != null)
       {
-	// if more than one session is associated with this invid, we
-	// can't allow deletion
+        // if more than one session is associated with this invid, we
+        // can't allow deletion
 
-	if (sessionSet.size() > 1)
-	  {
-	    return false;
-	  }
+        if (sessionSet.size() > 1)
+          {
+            return false;
+          }
 
-	// if that one session isn't the one requesting deletion privs,
-	// we can't allow it either
+        // if that one session isn't the one requesting deletion privs,
+        // we can't allow it either
 
-	if (!sessionSet.contains(session))
-	  {
-	    return false;
-	  }
+        if (!sessionSet.contains(session))
+          {
+            return false;
+          }
       }
 
     // okay, go ahead and flag the object for deletion
 
     if (obj.getStatus() == DBEditObject.CREATING)
       {
-	obj.setStatus(DBEditObject.DROPPING);
+        obj.setStatus(DBEditObject.DROPPING);
       }
     else if (obj.getStatus() == DBEditObject.EDITING)
       {
-	obj.setStatus(DBEditObject.DELETING);
+        obj.setStatus(DBEditObject.DELETING);
       }
 
     return true;
@@ -265,21 +265,21 @@ public class DBDeletionManager {
 
     if (invidSet == null)
       {
-	return;
+        return;
       }
 
     for (Invid invid: invidSet)
       {
-	Set<DBSession> sessionSet = invids.get(invid);
+        Set<DBSession> sessionSet = invids.get(invid);
 
-	if (sessionSet.size() == 1)
-	  {
-	    invids.remove(invid);
-	  }
-	else
-	  {
-	    sessionSet.remove(session);
-	  }
+        if (sessionSet.size() == 1)
+          {
+            invids.remove(invid);
+          }
+        else
+          {
+            sessionSet.remove(session);
+          }
       }
 
     sessions.remove(session);
@@ -299,7 +299,7 @@ public class DBDeletionManager {
 
     if (invidSet == null || invidSet.size() == 0)
       {
-	return true;
+        return true;
       }
 
     Set<Invid> currentSet = sessions.get(session);
@@ -307,27 +307,27 @@ public class DBDeletionManager {
 
     if (currentSet != null)
       {
-	toAdd.removeAll(currentSet);
+        toAdd.removeAll(currentSet);
       }
 
     for (Invid invid: toAdd)
       {
-	obj = session.viewDBObject(invid);
-	eObj = obj.shadowObject;
+        obj = session.viewDBObject(invid);
+        eObj = obj.shadowObject;
 
-	// N.B. the obj that we get from session.viewDBObject() may
-	// well be a DBEditObject already if this session has checked
-	// it out for editing, but in that case eObj will be null, as
-	// DBEditObjects always have no shadowObject, and the
-	// following check won't complain, which is appropriate, since
-	// we are only interested in blocking out other sessions
+        // N.B. the obj that we get from session.viewDBObject() may
+        // well be a DBEditObject already if this session has checked
+        // it out for editing, but in that case eObj will be null, as
+        // DBEditObjects always have no shadowObject, and the
+        // following check won't complain, which is appropriate, since
+        // we are only interested in blocking out other sessions
 
-	if (eObj != null &&
-	    (eObj.getStatus() == DBEditObject.DROPPING ||
-	     eObj.getStatus() == DBEditObject.DELETING))
-	  {
-	    return false;
-	  }
+        if (eObj != null &&
+            (eObj.getStatus() == DBEditObject.DROPPING ||
+             eObj.getStatus() == DBEditObject.DELETING))
+          {
+            return false;
+          }
       }
 
     // Okay, we know that we can safely delete lock all of the invids
@@ -335,14 +335,14 @@ public class DBDeletionManager {
 
     for (Invid invid: toAdd)
       {
-	obj = session.viewDBObject(invid);
+        obj = session.viewDBObject(invid);
 
-	if (!deleteLockObject(obj, session))
-	  {
-	    // eek, no way.  scream and whine!
+        if (!deleteLockObject(obj, session))
+          {
+            // eek, no way.  scream and whine!
 
-	    throw new Error("Error, addSessionInvids encountered an internal inconsistency");
-	  }
+            throw new Error("Error, addSessionInvids encountered an internal inconsistency");
+          }
       }
 
     return true;
@@ -365,7 +365,7 @@ public class DBDeletionManager {
 
     if (invidSet == null)
       {
-	return new HashSet<Invid>();
+        return new HashSet<Invid>();
       }
 
     return new HashSet<Invid>(invidSet);
@@ -385,10 +385,10 @@ public class DBDeletionManager {
 
     if (currentSet == null)
       {
-	// we won't necessarily have a Set<Invid> for the session
-	// unless an object has been delete-locked in that session
+        // we won't necessarily have a Set<Invid> for the session
+        // unless an object has been delete-locked in that session
 
-	return;
+        return;
       }
 
     Set<Invid> badItems = new HashSet<Invid>(invidSet); // copy
@@ -399,22 +399,22 @@ public class DBDeletionManager {
 
     if (badItems.size() != 0)
       {
-	throw new IllegalArgumentException("Error, DBDeletionManager.revertSessionCheckpoint() " +
-					   "fed invids that weren't deletion-locked");
+        throw new IllegalArgumentException("Error, DBDeletionManager.revertSessionCheckpoint() " +
+                                           "fed invids that weren't deletion-locked");
       }
 
     for (Invid invid: toRemove)
       {
-	Set<DBSession> sessionSet = invids.get(invid);
+        Set<DBSession> sessionSet = invids.get(invid);
 
-	if (sessionSet.size() == 1)
-	  {
-	    invids.remove(invid);
-	  }
-	else
-	  {
-	    sessionSet.remove(session);
-	  }
+        if (sessionSet.size() == 1)
+          {
+            invids.remove(invid);
+          }
+        else
+          {
+            sessionSet.remove(session);
+          }
       }
 
     sessions.put(session, invidSet);

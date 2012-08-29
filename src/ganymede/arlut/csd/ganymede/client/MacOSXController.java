@@ -8,7 +8,7 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -48,7 +48,7 @@ package arlut.csd.ganymede.client;
 
 /*------------------------------------------------------------------------------
                                                                            class
-								MacOSXController
+                                                                MacOSXController
 
 ------------------------------------------------------------------------------*/
 
@@ -78,7 +78,7 @@ public class MacOSXController {
   {
     if (client.OKToProceed())
       {
-	client.logout(true);
+        client.logout(true);
       }
   }
 }

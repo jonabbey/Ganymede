@@ -10,7 +10,7 @@
    Module By: Deepak Giridharagopal
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
 
    Copyright (C) 1996-2011
@@ -158,11 +158,11 @@ public class fieldoption_editor extends JFrame
    */
 
   public fieldoption_editor(field_option_field opField,
-			    boolean editable,
-			    boolean fullstate,
-			    gclient gc,
+                            boolean editable,
+                            boolean fullstate,
+                            gclient gc,
                             Frame parent,
-			    String DialogTitle)
+                            String DialogTitle)
   {
     super(DialogTitle);
 
@@ -174,16 +174,16 @@ public class fieldoption_editor extends JFrame
 
     if (!debug)
       {
-	this.debug = gc.debug;
+        this.debug = gc.debug;
       }
 
     this.addWindowListener(new WindowAdapter()
-			   {
-			     public void windowClosing(WindowEvent e)
-			       {
-				 myshow(false);
-			       }
-			   });
+                           {
+                             public void windowClosing(WindowEvent e)
+                               {
+                                 myshow(false);
+                               }
+                           });
 
     /* Change the images to match the client */
 
@@ -202,16 +202,16 @@ public class fieldoption_editor extends JFrame
         Choice_Buttons.setLayout(new GridLayout(1,2));
         Choice_Buttons.setBorder(new EmptyBorder(new Insets(5,5,5,5)));
 
-	if (glogin.isRunningOnMac())
-	  {
-	    Choice_Buttons.add(CancelButton);
-	    Choice_Buttons.add(OkButton);
-	  }
-	else
-	  {
-	    Choice_Buttons.add(OkButton);
-	    Choice_Buttons.add(CancelButton);
-	  }
+        if (glogin.isRunningOnMac())
+          {
+            Choice_Buttons.add(CancelButton);
+            Choice_Buttons.add(OkButton);
+          }
+        else
+          {
+            Choice_Buttons.add(OkButton);
+            Choice_Buttons.add(CancelButton);
+          }
       }
     else
       {
@@ -242,15 +242,15 @@ public class fieldoption_editor extends JFrame
       {
         rowRootNode = initRowTree();
 
-	if (rowRootNode == null)
-	  {
-	    this.dispose();
-	    return;
-	  }
+        if (rowRootNode == null)
+          {
+            this.dispose();
+            return;
+          }
       }
     catch (Exception ex)
       {
-	gc.processExceptionRethrow(ex);
+        gc.processExceptionRethrow(ex);
       }
     
     TreeTableModel model = new FieldOptionModel(rowRootNode, this);
@@ -264,9 +264,9 @@ public class fieldoption_editor extends JFrame
     fixObjectBaseNodes(rowRootNode, (FieldOptionModel)model);
 
     treeTable.setDefaultRenderer(Integer.class,
-				 new DelegateRenderer((TreeTableModelAdapter)treeTable.getModel(), editable, treeTable));
+                                 new DelegateRenderer((TreeTableModelAdapter)treeTable.getModel(), editable, treeTable));
     treeTable.setDefaultEditor(Integer.class,
-			       new DelegateEditor((TreeTableModelAdapter)treeTable.getModel(), editable, treeTable));
+                               new DelegateEditor((TreeTableModelAdapter)treeTable.getModel(), editable, treeTable));
 
     /* Expand only nodes with non-default values */
 
@@ -322,20 +322,20 @@ public class fieldoption_editor extends JFrame
                                    });
 
     ExpandButton.addActionListener(new ActionListener()
-				   {
-				     public void actionPerformed(ActionEvent e)
-				       {
+                                   {
+                                     public void actionPerformed(ActionEvent e)
+                                       {
                                          expandAllNodes();
-				       }
-				   });
+                                       }
+                                   });
  
     CollapseButton.addActionListener(new ActionListener()
-				     {
-				       public void actionPerformed(ActionEvent e)
-					 {
+                                     {
+                                       public void actionPerformed(ActionEvent e)
+                                         {
                                            collapseAllNodes();
-					 }
-				     });
+                                         }
+                                     });
  
     gc.setWaitCursor();
     setSize(550,550);
@@ -374,12 +374,12 @@ public class fieldoption_editor extends JFrame
 
     while (en.hasMoreElements())
       {
-	base = (BaseDump) en.nextElement();
-	id = base.getTypeID();
-	name = base.getName();
+        base = (BaseDump) en.nextElement();
+        id = base.getTypeID();
+        name = base.getName();
 
         /*
-	 * We'll go ahead and hard-code the option value of this object base as
+         * We'll go ahead and hard-code the option value of this object base as
          * "0", aka "Never". A future call to the fixObjectBaseNodes() method
          * will make sure that the checkbox for this object base has the
          * appropriate state.
@@ -388,36 +388,36 @@ public class fieldoption_editor extends JFrame
          * base to anything other than 0, the GUI will automatically flip all
          * of its constituent fields to "1", aka "When changed". We don't want
          * this, so we'll skip reading the object base's value from the db.
-	 */
+         */
 
         basevalue = SyncPrefEnum.NEVER;
 
-	baseNode = new DefaultMutableTreeNode(new FieldOptionRow(base, null, basevalue));
-	rootNode.add(baseNode);
+        baseNode = new DefaultMutableTreeNode(new FieldOptionRow(base, null, basevalue));
+        rootNode.add(baseNode);
 
-	/* Now add all of the fields for this base as child nodes */
-	fields = (Vector) gc.getTemplateVector(id);
+        /* Now add all of the fields for this base as child nodes */
+        fields = (Vector) gc.getTemplateVector(id);
 
-	for (int j=0; fields != null && (j < fields.size()); j++) 
-	  {
-	    /* get the field options for this field */
-	    template = (FieldTemplate) fields.elementAt(j);
+        for (int j=0; fields != null && (j < fields.size()); j++) 
+          {
+            /* get the field options for this field */
+            template = (FieldTemplate) fields.elementAt(j);
 
-	    if (base.isEmbedded() && template.getID() == SchemaConstants.ContainerField)
-	      {
-		continue;	// the container field is always implicit for embedded objects
-	      }
+            if (base.isEmbedded() && template.getID() == SchemaConstants.ContainerField)
+              {
+                continue;       // the container field is always implicit for embedded objects
+              }
 
-	    entry = matrix.getOption(id, template.getID());
+            entry = matrix.getOption(id, template.getID());
 
-	    if (entry == null)
-	      {
-		/* if no option is explicitly recorded for this
+            if (entry == null)
+              {
+                /* if no option is explicitly recorded for this
                  * field, use the record for the base */
                 fieldvalue = basevalue;
-	      }
-	    else 
-	      {
+              }
+            else 
+              {
                 /* FIXME: This assumes that the field options are stored in
                  * the database as Strings containing integers. At the moment,
                  * this is a totally hard-coded assumption. Presumably, this
@@ -425,18 +425,18 @@ public class fieldoption_editor extends JFrame
                  * constants or the like. */
 
                 fieldvalue = entry;
-	      }
+              }
 
             /* Create a new child node for this field and add it to the node
              * for the DBObjectBase. */
-	    fieldNode = new DefaultMutableTreeNode(new FieldOptionRow(base, template, fieldvalue));
-	    baseNode.add(fieldNode);
+            fieldNode = new DefaultMutableTreeNode(new FieldOptionRow(base, template, fieldvalue));
+            baseNode.add(fieldNode);
 
             if (debug)
-	      {
-		System.err.println("Reading " + name + "." + template.getName() + " from db, value of " + basevalue);
-	      }
-	  }
+              {
+                System.err.println("Reading " + name + "." + template.getName() + " from db, value of " + basevalue);
+              }
+          }
       }
     
     return rootNode;
@@ -455,9 +455,9 @@ public class fieldoption_editor extends JFrame
       FieldOptionRow myRow = (FieldOptionRow)child.getUserObject(); 
 
       if (myRow.isBase())
-	{
-	  model.fixObjectBaseNode(child);
-	}
+        {
+          model.fixObjectBaseNode(child);
+        }
     }
   }
 
@@ -474,7 +474,7 @@ public class fieldoption_editor extends JFrame
     else 
       {
         isActive = false;
-	cleanUp();
+        cleanUp();
       }
   }
 
@@ -505,10 +505,10 @@ public class fieldoption_editor extends JFrame
   {
     for (Enumeration e = (rowRootNode.children()); e.hasMoreElements();)
       {
-	DefaultMutableTreeNode node = (DefaultMutableTreeNode)e.nextElement();
-	FieldOptionRow myRow = (FieldOptionRow)node.getUserObject();
-	TreePath path = new TreePath(node.getPath());
-	tree.expandPath(path);
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode)e.nextElement();
+        FieldOptionRow myRow = (FieldOptionRow)node.getUserObject();
+        TreePath path = new TreePath(node.getPath());
+        tree.expandPath(path);
       }
   }
 
@@ -539,10 +539,10 @@ public class fieldoption_editor extends JFrame
         FieldOptionRow row = (FieldOptionRow)node.getUserObject();
 
         if (row.isBase() && (row.getOptionValue() != SyncPrefEnum.NEVER))
-	  {
-	    TreePath path = new TreePath(node.getPath());
-	    tree.expandPath(path);
-	  }
+          {
+            TreePath path = new TreePath(node.getPath());
+            tree.expandPath(path);
+          }
       }
   }
 
@@ -583,15 +583,15 @@ public class fieldoption_editor extends JFrame
                 try
                   {
                     if (debug)
-		      {
-			System.err.println("Setting " + bd.getName() + " to " + value);
-		      }
+                      {
+                        System.err.println("Setting " + bd.getName() + " to " + value);
+                      }
 
                     gc.handleReturnVal(opField.setOption(bd.getTypeID(), value));
                   }
                 catch (Exception ex)
                   {
-		    gc.processExceptionRethrow(ex);
+                    gc.processExceptionRethrow(ex);
                   }
               }
             else
@@ -602,9 +602,9 @@ public class fieldoption_editor extends JFrame
                 value = ref.getOptionValue();
 
                 if (debug)
-		  {
-		    System.err.println("Setting " + templateName + " to " + value);
-		  }
+                  {
+                    System.err.println("Setting " + templateName + " to " + value);
+                  }
 
                 try
                   {
@@ -612,7 +612,7 @@ public class fieldoption_editor extends JFrame
                   }
                 catch (Exception ex)
                   {
-		    gc.processExceptionRethrow(ex);
+                    gc.processExceptionRethrow(ex);
                   }
               }
           }
@@ -694,22 +694,22 @@ class FieldOptionRow
 
     if (base == null) 
       {
-	reference = null;
-	name = "Root";
+        reference = null;
+        name = "Root";
       }
     else
       {
-	if (field == null) 
-	  {
-	    reference = base;
-	    name = base.getName();
-	  } 
-	else 
-	  {
-	    reference = field;
-	    name = field.getName();
+        if (field == null) 
+          {
+            reference = base;
+            name = base.getName();
+          } 
+        else 
+          {
+            reference = field;
+            name = field.getName();
             builtin = field.isBuiltIn();
-	  }
+          }
       }
   }
   
@@ -765,11 +765,11 @@ class FieldOptionRow
   {
     if (reference instanceof BaseDump)
       {
-	return true;
+        return true;
       }
     else
       {
-	return false;
+        return false;
       }
   }
 }
@@ -854,7 +854,7 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel
     switch(column) 
       {
       case 1:
-	return myRow.getOptionValue();
+        return myRow.getOptionValue();
       }
 
     return null;
@@ -876,7 +876,7 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel
 
     if (fieldoption_editor.debug)
       {
-	System.err.println("SETVALUE: " + myRow.toString() + " :: " + value.toString());
+        System.err.println("SETVALUE: " + myRow.toString() + " :: " + value.toString());
       }
 
     SyncPrefEnum newVal;
@@ -885,50 +885,50 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel
 
     if (col == 1 && foe.isFullState())
       {
-	if (newVal == SyncPrefEnum.WHENCHANGED)
-	  {
-	    // we map the 2nd item in the full state list {never,
-	    // always} to the third on the server, so as to handle the
-	    // differing list of options applicable.
+        if (newVal == SyncPrefEnum.WHENCHANGED)
+          {
+            // we map the 2nd item in the full state list {never,
+            // always} to the third on the server, so as to handle the
+            // differing list of options applicable.
 
-	    newVal = SyncPrefEnum.ALWAYS;
-	  }
+            newVal = SyncPrefEnum.ALWAYS;
+          }
       }
 
     /* If we're not changing anything, then bail out */
     if (myRow.getOptionValue() == newVal)
       {
-	return;
+        return;
       }
 
     switch (col)
       {
-	/* case: 0 represents the column the tree is held in. You can't set that
-	 * value, so we'll ignore it */
+        /* case: 0 represents the column the tree is held in. You can't set that
+         * value, so we'll ignore it */
       case 1:
         myRow.setOptionValue(newVal);
-	myRow.setChanged(true);
+        myRow.setChanged(true);
       
-	if (myRow.isBase()) 
-	  {
+        if (myRow.isBase()) 
+          {
             setBaseChildren((DefaultMutableTreeNode)node, newVal);
 
-	    if (newVal == SyncPrefEnum.WHENCHANGED)
-	      {
-		TreePath path = new TreePath(((DefaultMutableTreeNode)node).getPath());
-		foe.tree.expandPath(path);
-	      }
-	    else
-	      {
-		TreePath path = new TreePath(((DefaultMutableTreeNode)node).getPath());
-		foe.tree.collapsePath(path);
-	      }
-	  }
+            if (newVal == SyncPrefEnum.WHENCHANGED)
+              {
+                TreePath path = new TreePath(((DefaultMutableTreeNode)node).getPath());
+                foe.tree.expandPath(path);
+              }
+            else
+              {
+                TreePath path = new TreePath(((DefaultMutableTreeNode)node).getPath());
+                foe.tree.collapsePath(path);
+              }
+          }
         else
-	  {
-	    fixObjectBaseNode((DefaultMutableTreeNode)((DefaultMutableTreeNode)node).getParent());
-	  }
-	break;
+          {
+            fixObjectBaseNode((DefaultMutableTreeNode)((DefaultMutableTreeNode)node).getParent());
+          }
+        break;
       }
     
     /* Update table to reflect these changes */
@@ -948,11 +948,11 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel
 
     if (((SyncPrefEnum) getValueAt(node, 1)) == SyncPrefEnum.NEVER)
       {
-	checked = false;
+        checked = false;
       }
     else
       {
-	checked = true;
+        checked = true;
       }
 
     /* How many nodes have values other than 0? */
@@ -961,22 +961,22 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel
     for (Enumeration e = ((DefaultMutableTreeNode)node).children(); e.hasMoreElements();) 
       {
         if (((SyncPrefEnum) getValueAt(e.nextElement(), 1)) != SyncPrefEnum.NEVER)
-	  {
-	    numNonZeroNodes++;
-	  }
+          {
+            numNonZeroNodes++;
+          }
       }
     
     if (checked && (numNonZeroNodes == 0))
       {
-	FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject(); 
-	myRow.setOptionValue(SyncPrefEnum.NEVER);
-	myRow.setChanged(true);
+        FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject(); 
+        myRow.setOptionValue(SyncPrefEnum.NEVER);
+        myRow.setChanged(true);
       }
     else if (!checked && (numNonZeroNodes > 0))
       {
-	FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject(); 
-	myRow.setOptionValue(SyncPrefEnum.WHENCHANGED);
-	myRow.setChanged(true);
+        FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject(); 
+        myRow.setOptionValue(SyncPrefEnum.WHENCHANGED);
+        myRow.setChanged(true);
       }
 
     /* Update table to reflect these changes */
@@ -1058,32 +1058,32 @@ class DelegateRenderer implements TableCellRenderer
 
     if (qrow.isBase())
       {
-	return new CheckBoxRenderer(editable, this.treetable, opvalue);
+        return new CheckBoxRenderer(editable, this.treetable, opvalue);
       }
     else
       {
-	if (this.editable)
-	  {
-	    if (((FieldOptionModel) this.model.getTreeModel()).foe.isFullState())
-	      {
-		return new FullStateComboRenderer(editable, this.treetable, opvalue);
-	      }
-	    else
-	      {
-		return new ComboRenderer(editable, this.treetable, opvalue);
-	      }
-	  }
-	else
-	  {
-	    return new JLabel(opvalue.toString());
-	  }
+        if (this.editable)
+          {
+            if (((FieldOptionModel) this.model.getTreeModel()).foe.isFullState())
+              {
+                return new FullStateComboRenderer(editable, this.treetable, opvalue);
+              }
+            else
+              {
+                return new ComboRenderer(editable, this.treetable, opvalue);
+              }
+          }
+        else
+          {
+            return new JLabel(opvalue.toString());
+          }
       }
   }
 }
 
 /*------------------------------------------------------------------------------
                                                                            class
-								  DelegateEditor
+                                                                  DelegateEditor
 
 ------------------------------------------------------------------------------*/
 
@@ -1137,18 +1137,18 @@ class DelegateEditor extends javax.swing.AbstractCellEditor implements TableCell
   {
     if (this.delegate instanceof JCheckBox)
       {
-	if (((JCheckBox)this.delegate).isSelected())
-	  {
-	    return SyncPrefEnum.WHENCHANGED.toString();
-	  }
-	else
-	  {
-	    return SyncPrefEnum.NEVER.toString();
-	  }
+        if (((JCheckBox)this.delegate).isSelected())
+          {
+            return SyncPrefEnum.WHENCHANGED.toString();
+          }
+        else
+          {
+            return SyncPrefEnum.NEVER.toString();
+          }
       }
     else
       {
-	return ((JComboBox)this.delegate).getSelectedItem();
+        return ((JComboBox)this.delegate).getSelectedItem();
       }
   }
 
@@ -1165,25 +1165,25 @@ class DelegateEditor extends javax.swing.AbstractCellEditor implements TableCell
 
     if (qrow.isBase())
       {
-	CheckBoxRenderer cb = new CheckBoxRenderer(editable, this.treetable, opvalue);
-	this.delegate = cb;
-	return cb;
+        CheckBoxRenderer cb = new CheckBoxRenderer(editable, this.treetable, opvalue);
+        this.delegate = cb;
+        return cb;
       }
     else
       {
-	Component cr = null;
+        Component cr = null;
 
-	if (((FieldOptionModel) this.model.getTreeModel()).foe.isFullState())
-	  {
-	    cr = new FullStateComboRenderer(editable, this.treetable, opvalue);
-	  }
-	else
-	  {
-	    cr = new ComboRenderer(editable, this.treetable, opvalue);
-	  }
+        if (((FieldOptionModel) this.model.getTreeModel()).foe.isFullState())
+          {
+            cr = new FullStateComboRenderer(editable, this.treetable, opvalue);
+          }
+        else
+          {
+            cr = new ComboRenderer(editable, this.treetable, opvalue);
+          }
 
-	this.delegate = cr;
-	return cr;
+        this.delegate = cr;
+        return cr;
       }
   }
 }
@@ -1217,11 +1217,11 @@ class CheckBoxRenderer extends JCheckBox implements TableCellRenderer, ActionLis
     /* Set the inital state of the checkbox */
     if (onOrOff == SyncPrefEnum.NEVER)
       {
-	setSelected(false);
+        setSelected(false);
       }
     else
       {
-	setSelected(true);
+        setSelected(true);
       }
 
     this.setBackground(treetable.getTree().getBackground());
@@ -1239,11 +1239,11 @@ class CheckBoxRenderer extends JCheckBox implements TableCellRenderer, ActionLis
 
     if (i == 0)
       {
-	return false;
+        return false;
       }
     else
       {
-	return true;
+        return true;
       }
   }
 
@@ -1321,18 +1321,18 @@ class ComboRenderer extends JComboBox implements TableCellRenderer, ItemListener
   {
     if (e.getStateChange() == ItemEvent.SELECTED)
       {
-	/*
-	 * Tell the tree table to call "setValueAt", since we've been edited.
-	 * Now, we'll only do this if the new item we've selected is different
-	 * from the originally selected item. Swing fires this even either way,
-	 * but we need to be more discriminating.
-	 */
+        /*
+         * Tell the tree table to call "setValueAt", since we've been edited.
+         * Now, we'll only do this if the new item we've selected is different
+         * from the originally selected item. Swing fires this even either way,
+         * but we need to be more discriminating.
+         */
 
-	if (this.selindex != getSelectedIndex())
-	  {
-	    this.treetable.editingStopped(new ChangeEvent(this));
-	    this.selindex = getSelectedIndex();
-	  }
+        if (this.selindex != getSelectedIndex())
+          {
+            this.treetable.editingStopped(new ChangeEvent(this));
+            this.selindex = getSelectedIndex();
+          }
       }
   }
 }
@@ -1371,7 +1371,7 @@ class FullStateComboRenderer extends JComboBox implements TableCellRenderer, Ite
 
     if (this.selindex == 2)
       {
-	this.selindex = 1;
+        this.selindex = 1;
       }
 
     setEnabled(editable);
@@ -1392,10 +1392,10 @@ class FullStateComboRenderer extends JComboBox implements TableCellRenderer, Ite
 
     if (labelIndex == 2)
       {
-	// the full state mode only has two labels, not three, let's
-	// fold it down into the available label.
+        // the full state mode only has two labels, not three, let's
+        // fold it down into the available label.
 
-	labelIndex = 1;
+        labelIndex = 1;
       }
 
     setSelectedIndex(labelIndex);
@@ -1407,18 +1407,18 @@ class FullStateComboRenderer extends JComboBox implements TableCellRenderer, Ite
   {
     if (e.getStateChange() == ItemEvent.SELECTED)
       {
-	/*
-	 * Tell the tree table to call "setValueAt", since we've been edited.
-	 * Now, we'll only do this if the new item we've selected is different
-	 * from the originally selected item. Swing fires this even either way,
-	 * but we need to be more discriminating.
-	 */
+        /*
+         * Tell the tree table to call "setValueAt", since we've been edited.
+         * Now, we'll only do this if the new item we've selected is different
+         * from the originally selected item. Swing fires this even either way,
+         * but we need to be more discriminating.
+         */
 
-	if (this.selindex != getSelectedIndex())
-	  {
-	    this.treetable.editingStopped(new ChangeEvent(this));
-	    this.selindex = getSelectedIndex();
-	  }
+        if (this.selindex != getSelectedIndex())
+          {
+            this.treetable.editingStopped(new ChangeEvent(this));
+            this.selindex = getSelectedIndex();
+          }
       }
   }
 }
@@ -1445,25 +1445,25 @@ class FieldOptionTreeRenderer extends DefaultTreeCellRenderer
   }
 
   public Component getTreeCellRendererComponent(JTree tree, Object value,
-						boolean selected,
-						boolean expanded,
-						boolean leaf,
-						int row,
-						boolean hasFocus)
+                                                boolean selected,
+                                                boolean expanded,
+                                                boolean leaf,
+                                                int row,
+                                                boolean hasFocus)
   {
     if (leaf)
       {
-	DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
-	FieldOptionRow myRow = (FieldOptionRow) node.getUserObject();
+        DefaultMutableTreeNode node = (DefaultMutableTreeNode) value;
+        FieldOptionRow myRow = (FieldOptionRow) node.getUserObject();
 
-	if (myRow.isBuiltIn())
-	  {
-	    setLeafIcon(builtInIcon);
-	  }
-	else
-	  {
-	    setLeafIcon(standardIcon);
-	  }
+        if (myRow.isBuiltIn())
+          {
+            setLeafIcon(builtInIcon);
+          }
+        else
+          {
+            setLeafIcon(standardIcon);
+          }
       }
 
     return super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);

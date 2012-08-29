@@ -97,14 +97,14 @@ public class InvidPool implements InvidAllocator {
   {
     if (initialCapacity < 0)
       {
-	throw new IllegalArgumentException("Illegal Initial Capacity: " +
-					   initialCapacity);
+        throw new IllegalArgumentException("Illegal Initial Capacity: " +
+                                           initialCapacity);
       }
 
     if (loadFactor <= 0 || Float.isNaN(loadFactor))
       {
-	throw new IllegalArgumentException("Illegal Load factor: " +
-					   loadFactor);
+        throw new IllegalArgumentException("Illegal Load factor: " +
+                                           loadFactor);
       }
 
     table = new InvidSlot[initialCapacity];
@@ -139,14 +139,14 @@ public class InvidPool implements InvidAllocator {
 
     while (s != null)
       {
-	Invid storedInvid = (Invid) s.get();
+        Invid storedInvid = (Invid) s.get();
 
-	if (newInvid.equals(storedInvid))
-	  {
-	    return storedInvid;
-	  }
+        if (newInvid.equals(storedInvid))
+          {
+            return storedInvid;
+          }
 
-	s = s.next;
+        s = s.next;
       }
 
     return null;
@@ -166,21 +166,21 @@ public class InvidPool implements InvidAllocator {
 
     while (s != null)
       {
-	Invid storedInvid = (Invid) s.get();
+        Invid storedInvid = (Invid) s.get();
 
-	if (newInvid.equals(storedInvid))
-	  {
-	    return;		// already stored
-	  }
+        if (newInvid.equals(storedInvid))
+          {
+            return;             // already stored
+          }
 
-	s = s.next;
+        s = s.next;
       }
 
     table[i] = new InvidSlot(newInvid, queue, table[i]);
 
     if (++size >= threshold)
       {
-	resize(table.length * 2 + 1);
+        resize(table.length * 2 + 1);
       }
   }
 
@@ -188,7 +188,7 @@ public class InvidPool implements InvidAllocator {
   {
     if (size == 0)
       {
-	return 0;
+        return 0;
       }
 
     expungeStaleEntries();
@@ -210,38 +210,38 @@ public class InvidPool implements InvidAllocator {
 
     while ((s = (InvidSlot) queue.poll()) != null)
       {
-	int i = (s.hashCode() & 0x7FFFFFFF) % table.length;
+        int i = (s.hashCode() & 0x7FFFFFFF) % table.length;
 
-	if (table[i] == s)
-	  {
-	    table[i] = s.next;
-	  }
-	else
-	  {
-	    InvidSlot prev = table[i];
-	    InvidSlot p = table[i].next;
+        if (table[i] == s)
+          {
+            table[i] = s.next;
+          }
+        else
+          {
+            InvidSlot prev = table[i];
+            InvidSlot p = table[i].next;
 
-	    while (p != null)
-	      {
-		if (p == s)
-		  {
-		    prev.next = p.next;
-		    p.next = null;
-		    size--;
-		    break;
-		  }
+            while (p != null)
+              {
+                if (p == s)
+                  {
+                    prev.next = p.next;
+                    p.next = null;
+                    size--;
+                    break;
+                  }
 
-		prev = p;
-		p = p.next;
-	      }
-	  }
+                prev = p;
+                p = p.next;
+              }
+          }
       }
 
     // if we've drastically shrunk, we'll collapse our table down
 
     if (floor < size && size < (table.length / 4))
       {
-	resize(size * 2 + 1);
+        resize(size * 2 + 1);
       }
   }
 
@@ -252,18 +252,18 @@ public class InvidPool implements InvidAllocator {
 
     for (int i = 0; i < table.length; i++)
       {
-	InvidSlot s = table[i];
+        InvidSlot s = table[i];
 
-	while (s != null)
-	  {
-	    InvidSlot next = s.next;
+        while (s != null)
+          {
+            InvidSlot next = s.next;
 
-	    int index = (s.hashCode() & 0x7FFFFFFF) % newCapacity;
-	    s.next = newMap[index];
-	    newMap[index] = s;
+            int index = (s.hashCode() & 0x7FFFFFFF) % newCapacity;
+            s.next = newMap[index];
+            newMap[index] = s;
 
-	    s = next;
-	  }
+            s = next;
+          }
       }
 
     this.table = newMap;

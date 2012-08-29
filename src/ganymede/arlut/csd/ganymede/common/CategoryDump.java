@@ -17,7 +17,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -103,12 +103,12 @@ public class CategoryDump implements Category, CategoryNode {
 
     if (parent == null)
       {
-	// skip the 'cat' chunk if we're the root
-	getChunk(src, index);
+        // skip the 'cat' chunk if we're the root
+        getChunk(src, index);
       }
     else
       {
-	lastIndex = index;
+        lastIndex = index;
       }
 
     this.name = getChunk(src, lastIndex);
@@ -119,38 +119,38 @@ public class CategoryDump implements Category, CategoryNode {
 
     if (token.equals("<"))
       {
-	// we've got contents
+        // we've got contents
 
-	token = getChunk(src, lastIndex);
+        token = getChunk(src, lastIndex);
 
-	while (!token.equals(">"))
-	  {
-	    if (token.equals("cat"))
-	      {
-		catChild = new CategoryDump(this, src, lastIndex);
-		lastIndex = catChild.getLastIndex();
-		contents.addElement(catChild);
-	      }
-	    else if (token.equals("base"))
-	      {
-		baseChild = new BaseDump(this, src, lastIndex);
-		lastIndex = baseChild.getLastIndex();
-		contents.addElement(baseChild);
-	      }
-	    else
-	      {
-		throw new RuntimeException("parse error, unrecognized chunk: " + token);
-	      }
-	    
-	    // get the next member chunk
-	    
-	    token = getChunk(src, lastIndex);
-	  }
+        while (!token.equals(">"))
+          {
+            if (token.equals("cat"))
+              {
+                catChild = new CategoryDump(this, src, lastIndex);
+                lastIndex = catChild.getLastIndex();
+                contents.addElement(catChild);
+              }
+            else if (token.equals("base"))
+              {
+                baseChild = new BaseDump(this, src, lastIndex);
+                lastIndex = baseChild.getLastIndex();
+                contents.addElement(baseChild);
+              }
+            else
+              {
+                throw new RuntimeException("parse error, unrecognized chunk: " + token);
+              }
+            
+            // get the next member chunk
+            
+            token = getChunk(src, lastIndex);
+          }
       }
     
     if (!token.equals(">"))
       {
-	throw new RuntimeException("parse error, couldn't find end of category in dump: " + token);
+        throw new RuntimeException("parse error, couldn't find end of category in dump: " + token);
       }
   }
 
@@ -181,11 +181,11 @@ public class CategoryDump implements Category, CategoryNode {
   {
     if (parent != null)
       {
-	return parent.getPath() + "/" + name;
+        return parent.getPath() + "/" + name;
       }
     else
       {
-	return "/" + name;
+        return "/" + name;
       }
   }
 
@@ -211,15 +211,15 @@ public class CategoryDump implements Category, CategoryNode {
   {
     for (int i = 0; i < contents.size(); i++)
       {
-	if (contents.elementAt(i) instanceof BaseDump)
-	  {
-	    inout.addElement(contents.elementAt(i));
-	  }
-	else
-	  {
-	    CategoryDump element = (CategoryDump) contents.elementAt(i);
-	    element.getBases(inout);
-	  }
+        if (contents.elementAt(i) instanceof BaseDump)
+          {
+            inout.addElement(contents.elementAt(i));
+          }
+        else
+          {
+            CategoryDump element = (CategoryDump) contents.elementAt(i);
+            element.getBases(inout);
+          }
       }
   }
 
@@ -285,19 +285,19 @@ public class CategoryDump implements Category, CategoryNode {
 
     for (int i = 0; i < contents.size(); i++)
       {
-	candidate = (CategoryNode) contents.elementAt(i);
-	
-	try
-	  {
-	    if (candidate.getName().equals(name))
-	      {
-		return candidate;
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("caught remote: " + ex);
-	  }
+        candidate = (CategoryNode) contents.elementAt(i);
+        
+        try
+          {
+            if (candidate.getName().equals(name))
+              {
+                return candidate;
+              }
+          }
+        catch (RemoteException ex)
+          {
+            throw new RuntimeException("caught remote: " + ex);
+          }
       }
 
     return null;
@@ -411,21 +411,21 @@ public class CategoryDump implements Category, CategoryNode {
   {
     if (cat == null)
       {
-	return false;
+        return false;
       }
 
     if (cat.equals(this))
       {
-	return true;
+        return true;
       }
 
     if (parent == null)
       {
-	return false;
+        return false;
       }
     else
       {
-	return parent.isUnder(cat);
+        return parent.isUnder(cat);
       }
   }
 
@@ -444,19 +444,19 @@ public class CategoryDump implements Category, CategoryNode {
 
     for (lastIndex = startDex; lastIndex < chars.length; lastIndex++)
       {
-	if (chars[lastIndex] == '|')
-	  {
-	    lastIndex++;
-	    return result.toString();
-	  }
-	else if (chars[lastIndex] == '\\')
-	  {
-	    result.append(chars[++lastIndex]);
-	  }
-	else
-	  {
-	    result.append(chars[lastIndex]);
-	  }
+        if (chars[lastIndex] == '|')
+          {
+            lastIndex++;
+            return result.toString();
+          }
+        else if (chars[lastIndex] == '\\')
+          {
+            result.append(chars[++lastIndex]);
+          }
+        else
+          {
+            result.append(chars[lastIndex]);
+          }
       }
 
     throw new RuntimeException("Ran out of chunk data: " + result.toString());

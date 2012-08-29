@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -121,122 +121,122 @@ class DBDumpLock extends DBLock {
 
     synchronized (lockSync)
       {
-	try
-	  {
-	    done = false;
+        try
+          {
+            done = false;
 
-	    if (lockSync.isLockHeld(key))
-	      {
-		throw new RuntimeException("Error: dump lock sought by owner of existing lockset.");
-	      }
+            if (lockSync.isLockHeld(key))
+              {
+                throw new RuntimeException("Error: dump lock sought by owner of existing lockset.");
+              }
 
-	    lockSync.setDumpLockHeld(key, this);
-	    this.key = key;
-	    inEstablish = true;
+            lockSync.setDumpLockHeld(key, this);
+            this.key = key;
+            inEstablish = true;
 
-	    // add ourselves to the ObjectBase dump queues..  we don't
-	    // have to wait for anything to do this.. it's up to the
-	    // writers to hold off on adding themselves to the
-	    // writerlists until the dumperlists are empty.
+            // add ourselves to the ObjectBase dump queues..  we don't
+            // have to wait for anything to do this.. it's up to the
+            // writers to hold off on adding themselves to the
+            // writerlists until the dumperlists are empty.
 
-	    for (int i = 0; i < baseSet.size(); i++)
-	      {
-		base = (DBObjectBase) baseSet.elementAt(i);
-		base.addDumper(this);
-	      }
+            for (int i = 0; i < baseSet.size(); i++)
+              {
+                base = (DBObjectBase) baseSet.elementAt(i);
+                base.addDumper(this);
+              }
 
-	    added = true;
+            added = true;
 
-	    while (!done)
-	      {
-		okay = true;
+            while (!done)
+              {
+                okay = true;
 
-		if (abort)
-		  {
-		    throw new InterruptedException("DBDumpLock (" + key + "):  establish aborting before permission granted");
-		  }
+                if (abort)
+                  {
+                    throw new InterruptedException("DBDumpLock (" + key + "):  establish aborting before permission granted");
+                  }
 
-		// see if we can establish a dump lock on all the bases.. if
-		// isWriterEmpty() is not true, that base needs to wait for
-		// its slate of writers to release and drain
+                // see if we can establish a dump lock on all the bases.. if
+                // isWriterEmpty() is not true, that base needs to wait for
+                // its slate of writers to release and drain
 
-		for (int i = 0; okay && (i < baseSet.size()); i++)
-		  {
-		    base = (DBObjectBase) baseSet.elementAt(i);
+                for (int i = 0; okay && (i < baseSet.size()); i++)
+                  {
+                    base = (DBObjectBase) baseSet.elementAt(i);
 
-		    // note that the writer locks are polite enough to
-		    // wait for us if we are queued in the dump wait
-		    // queue, which we are at this point.  so we just
-		    // have to wait for the writer that has this base
-		    // locked and any of his buddies on the write wait
-		    // list to finish up
+                    // note that the writer locks are polite enough to
+                    // wait for us if we are queued in the dump wait
+                    // queue, which we are at this point.  so we just
+                    // have to wait for the writer that has this base
+                    // locked and any of his buddies on the write wait
+                    // list to finish up
 
-		    if (!base.isWriterEmpty() || base.isWriteInProgress())
-		      {
-			okay = false;
-		      }
-		  }
+                    if (!base.isWriterEmpty() || base.isWriteInProgress())
+                      {
+                        okay = false;
+                      }
+                  }
 
-		// if okay, we know that none of the bases we're
-		// concerned with have writers queued or locked.. we
-		// can go ahead and lock the bases.
+                // if okay, we know that none of the bases we're
+                // concerned with have writers queued or locked.. we
+                // can go ahead and lock the bases.
 
-		if (okay)
-		  {
-		    for (int i = 0; i < baseSet.size(); i++)
-		      {
-			base = (DBObjectBase) baseSet.elementAt(i);
+                if (okay)
+                  {
+                    for (int i = 0; i < baseSet.size(); i++)
+                      {
+                        base = (DBObjectBase) baseSet.elementAt(i);
 
-			// base.addDumpLock() actually records this
-			// DBDumpLock as being established, and not
-			// just in the dumper wait queue
+                        // base.addDumpLock() actually records this
+                        // DBDumpLock as being established, and not
+                        // just in the dumper wait queue
 
-			base.addDumpLock(this);
-		      }
+                        base.addDumpLock(this);
+                      }
 
-		    done = true;
-		  }
-		else
-		  {
-		    try
-		      {
-			lockSync.wait(2500); // or until notify'ed
-		      }
-		    catch (InterruptedException ex)
-		      {
-			throw ex; // finally will clean up
-		      } 
-		  }
-	      }
+                    done = true;
+                  }
+                else
+                  {
+                    try
+                      {
+                        lockSync.wait(2500); // or until notify'ed
+                      }
+                    catch (InterruptedException ex)
+                      {
+                        throw ex; // finally will clean up
+                      } 
+                  }
+              }
 
-	    locked = true;
-	    lockSync.addLock();	// notify consoles
-	  }
-	finally
-	  {
-	    inEstablish = false;
+            locked = true;
+            lockSync.addLock(); // notify consoles
+          }
+        finally
+          {
+            inEstablish = false;
 
-	    if (added)
-	      {
-		// either we're locked or we're not going to lock,
-		// in either case we don't need to be on the dumper
-		// wait queues any more
+            if (added)
+              {
+                // either we're locked or we're not going to lock,
+                // in either case we don't need to be on the dumper
+                // wait queues any more
 
-		for (int i = 0; i < baseSet.size(); i++)
-		  {
-		    base = (DBObjectBase) baseSet.elementAt(i);
-		    base.removeDumper(this);
-		  }
-	      }
+                for (int i = 0; i < baseSet.size(); i++)
+                  {
+                    base = (DBObjectBase) baseSet.elementAt(i);
+                    base.removeDumper(this);
+                  }
+              }
 
-	    if (!locked)
-	      {
-		lockSync.clearLockHeld(key);
-		this.key = null;
-	      }
+            if (!locked)
+              {
+                lockSync.clearLockHeld(key);
+                this.key = null;
+              }
 
-	    lockSync.notifyAll(); // let a thread trying to release this lock proceed
-	  }
+            lockSync.notifyAll(); // let a thread trying to release this lock proceed
+          }
       } // synchronized (lockSync)
   }
 
@@ -252,38 +252,38 @@ class DBDumpLock extends DBLock {
 
     synchronized (lockSync)
       {
-	while (inEstablish)
-	  {
-	    try
-	      {
-		lockSync.wait(2500); // or until notify'ed
-	      } 
-	    catch (InterruptedException ex)
-	      {
-	      }
-	  }
-	
-	// note that we have to check locked here or else we might accidentally
-	// release somebody else's lock below
-	
-	if (!locked)
-	  {
-	    return;
-	  }
-	
-	for (int i = 0; i < baseSet.size(); i++)
-	  {
-	    base = (DBObjectBase) baseSet.elementAt(i);
-	    base.removeDumpLock(this);
-	  }
-	
-	locked = false;
-	lockSync.clearLockHeld(key);
-	
-	key = null;		// gc
-	
-	lockSync.removeLock();	// notify consoles
-	lockSync.notifyAll();	// many threads might want to check to see what we freed
+        while (inEstablish)
+          {
+            try
+              {
+                lockSync.wait(2500); // or until notify'ed
+              } 
+            catch (InterruptedException ex)
+              {
+              }
+          }
+        
+        // note that we have to check locked here or else we might accidentally
+        // release somebody else's lock below
+        
+        if (!locked)
+          {
+            return;
+          }
+        
+        for (int i = 0; i < baseSet.size(); i++)
+          {
+            base = (DBObjectBase) baseSet.elementAt(i);
+            base.removeDumpLock(this);
+          }
+        
+        locked = false;
+        lockSync.clearLockHeld(key);
+        
+        key = null;             // gc
+        
+        lockSync.removeLock();  // notify consoles
+        lockSync.notifyAll();   // many threads might want to check to see what we freed
       }
   }
 
@@ -304,8 +304,8 @@ class DBDumpLock extends DBLock {
   {
     synchronized (lockSync)
       {
-	abort = true;
-	release();
+        abort = true;
+        release();
       }
   }
 }

@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -114,8 +114,8 @@ public class DBLogEvent {
    */
 
   public DBLogEvent(Collection<String> addresses, String subject, String description,
-		    Invid admin, String adminName,
-		    List<Invid> objects)
+                    Invid admin, String adminName,
+                    List<Invid> objects)
   {
     this("mailout", description, admin, adminName, objects, addresses);
 
@@ -136,8 +136,8 @@ public class DBLogEvent {
    */
 
   public DBLogEvent(String eventClassToken, String description,
-		    Invid admin, String adminName,
-		    List<Invid> objects, Collection<String> notifyList)
+                    Invid admin, String adminName,
+                    List<Invid> objects, Collection<String> notifyList)
   {
     this.eventClassToken = eventClassToken;
     this.description = description;
@@ -181,11 +181,11 @@ public class DBLogEvent {
   {
     if (mailTargets != null)
       {
-	this.notifyList = new ArrayList<String>(mailTargets);
+        this.notifyList = new ArrayList<String>(mailTargets);
       }
     else
       {
-	this.notifyList = Collections.emptyList();
+        this.notifyList = Collections.emptyList();
       }
   }
 
@@ -219,12 +219,12 @@ public class DBLogEvent {
 
     for (int i = 0; i < notifyList.size(); i++)
       {
-	if (i > 0)
-	  {
-	    buffer.append(",");
-	  }
+        if (i > 0)
+          {
+            buffer.append(",");
+          }
 
-	buffer.append(notifyList.get(i));
+        buffer.append(notifyList.get(i));
       }
 
     return buffer.toString();
@@ -238,11 +238,11 @@ public class DBLogEvent {
 
     try
       {
-	controller.writeEvent(this);
+        controller.writeEvent(this);
       }
     finally
       {
-	controller.close();
+        controller.close();
       }
 
     return writer.toString();

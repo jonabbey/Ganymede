@@ -85,8 +85,8 @@ import java.util.regex.Pattern;
 import com.jclark.xml.output.UTF8XMLWriter;
 
 /*------------------------------------------------------------------------------
-									   class
-								      SyncRunner
+                                                                           class
+                                                                      SyncRunner
 
 ------------------------------------------------------------------------------*/
 
@@ -297,19 +297,19 @@ public class SyncRunner implements Runnable {
     public static SyncType get(int objectVal)
     {
       switch (objectVal)
-	{
-	case 0:
-	  return MANUAL;
+        {
+        case 0:
+          return MANUAL;
 
-	case 1:
-	  return INCREMENTAL;
+        case 1:
+          return INCREMENTAL;
 
-	case 2:
-	  return FULLSTATE;
+        case 2:
+          return FULLSTATE;
 
-	default:
-	  throw new IllegalArgumentException("Unrecognized integral value");
-	}
+        default:
+          throw new IllegalArgumentException("Unrecognized integral value");
+        }
     }
 
     private final int numVal;
@@ -422,8 +422,8 @@ public class SyncRunner implements Runnable {
   {
     if (syncChannel.getTypeID() != SchemaConstants.SyncChannelBase)
       {
-	// "Error, passed the wrong kind of DBObject."
-	throw new IllegalArgumentException(ts.l("updateInfo.typeError"));
+        // "Error, passed the wrong kind of DBObject."
+        throw new IllegalArgumentException(ts.l("updateInfo.typeError"));
       }
 
     name = (String) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelName);
@@ -436,48 +436,48 @@ public class SyncRunner implements Runnable {
 
     if (className != null)
       {
-	Class classdef;
+        Class classdef;
 
-	try
-	  {
-	    classdef = Class.forName(className);
+        try
+          {
+            classdef = Class.forName(className);
 
-	    Constructor c;
-	    Class[] cParams = new Class[0];
-	    Object[] params = new Object[0];
+            Constructor c;
+            Class[] cParams = new Class[0];
+            Object[] params = new Object[0];
 
-	    c = classdef.getDeclaredConstructor(cParams); // no param constructor
-	    master = (SyncMaster) c.newInstance(params);
-	  }
-	catch (ClassNotFoundException ex)
-	  {
-	    // "Couldn''t load SyncMaster class {0} for Sync Channel {1}"
-	    Ganymede.debug(ts.l("updateInfo.nosuchclass", className, name));
-	  }
-	catch (NoSuchMethodException ex)
-	  {
-	    // "Couldn''t find no-param constructor for SyncMaster class {0} for Sync Channel {1}"
-	    Ganymede.debug(ts.l("updateInfo.missingconstructor", className, name));
-	  }
-	catch (Exception ex)
-	  {
-	    // "Exception calling no-param constructor for SyncMaster class {0} for Sync Channel {1}: {2}"
-	    Ganymede.debug(ts.l("updateInfo.constructorerror", className, name, ex.toString()));
-	  }
+            c = classdef.getDeclaredConstructor(cParams); // no param constructor
+            master = (SyncMaster) c.newInstance(params);
+          }
+        catch (ClassNotFoundException ex)
+          {
+            // "Couldn''t load SyncMaster class {0} for Sync Channel {1}"
+            Ganymede.debug(ts.l("updateInfo.nosuchclass", className, name));
+          }
+        catch (NoSuchMethodException ex)
+          {
+            // "Couldn''t find no-param constructor for SyncMaster class {0} for Sync Channel {1}"
+            Ganymede.debug(ts.l("updateInfo.missingconstructor", className, name));
+          }
+        catch (Exception ex)
+          {
+            // "Exception calling no-param constructor for SyncMaster class {0} for Sync Channel {1}: {2}"
+            Ganymede.debug(ts.l("updateInfo.constructorerror", className, name, ex.toString()));
+          }
       }
 
     if (master == null)
       {
-	master = new NoopSyncMaster();
+        master = new NoopSyncMaster();
       }
 
     try
       {
-	this.mode = SyncType.get((Integer) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum));
+        this.mode = SyncType.get((Integer) syncChannel.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum));
       }
     catch (NullPointerException ex)
       {
-	this.mode = SyncType.INCREMENTAL; // the default old behavior
+        this.mode = SyncType.INCREMENTAL; // the default old behavior
       }
 
     FieldOptionDBField f = (FieldOptionDBField) syncChannel.getField(SchemaConstants.SyncChannelFields);
@@ -495,12 +495,12 @@ public class SyncRunner implements Runnable {
   {
     if (trans >= this.transactionNumber)
       {
-	this.transactionNumber = trans;
+        this.transactionNumber = trans;
       }
     else
       {
-	// "Error, can''t set the persisted transaction number to a lower number than previously seen."
-	throw new IllegalArgumentException(ts.l("setTransactionNumber.badNumber"));
+        // "Error, can''t set the persisted transaction number to a lower number than previously seen."
+        throw new IllegalArgumentException(ts.l("setTransactionNumber.badNumber"));
       }
   }
 
@@ -595,7 +595,7 @@ public class SyncRunner implements Runnable {
 
     if (this.mode == SyncType.INCREMENTAL)
       {
-	updateAdminConsole(false);
+        updateAdminConsole(false);
       }
   }
 
@@ -616,12 +616,12 @@ public class SyncRunner implements Runnable {
    */
 
   public void writeIncrementalSync(DBJournalTransaction transRecord,
-				   DBEditObject[] objectList,
-				   DBEditSet transaction) throws IOException
+                                   DBEditObject[] objectList,
+                                   DBEditSet transaction) throws IOException
   {
     if (!this.active.isSet())
       {
-	return;
+        return;
       }
 
     XMLDumpContext xmlOut = null;
@@ -630,195 +630,195 @@ public class SyncRunner implements Runnable {
 
     if (debug)
       {
-	System.err.println("SyncRunner.writeIncrementalSync: entering queueGrowthMonitor section");
+        System.err.println("SyncRunner.writeIncrementalSync: entering queueGrowthMonitor section");
       }
 
     try
       {
-	synchronized (queueGrowthMonitor)
-	  {
-	    if (debug)
-	      {
-		System.err.println("SyncRunner.writeIncrementalSync: inside queueGrowthMonitor section");
+        synchronized (queueGrowthMonitor)
+          {
+            if (debug)
+              {
+                System.err.println("SyncRunner.writeIncrementalSync: inside queueGrowthMonitor section");
 
-		for (DBEditObject eObj: objectList)
-		  {
-		    Ganymede.debug("SyncRunner.writeIncrementalSync(): we'll be processing object " + eObj);
-		  }
-	      }
+                for (DBEditObject eObj: objectList)
+                  {
+                    Ganymede.debug("SyncRunner.writeIncrementalSync(): we'll be processing object " + eObj);
+                  }
+              }
 
-	    FieldBook book = new FieldBook();
+            FieldBook book = new FieldBook();
 
-	    initializeFieldBook(objectList, book);
+            initializeFieldBook(objectList, book);
 
-	    int context_count = 0;
+            int context_count = 0;
 
-	    // we want to group the objects we write out by invid type
+            // we want to group the objects we write out by invid type
 
-	    Set<Short> typeSet = new HashSet<Short>();
+            Set<Short> typeSet = new HashSet<Short>();
 
-	    for (Invid invid: book.objects())
-	      {
-		typeSet.add(invid.getType());
-	      }
+            for (Invid invid: book.objects())
+              {
+                typeSet.add(invid.getType());
+              }
 
-	    // first write out the objects that we actually changed this
-	    // transaction
+            // first write out the objects that we actually changed this
+            // transaction
 
-	    for (Short type: typeSet)
-	      {
-		if (debug)
-		  {
-		    Ganymede.debug("SyncRunner.writeIncrementalSync(): examining type " + type + " from the typeSet.");
-		  }
+            for (Short type: typeSet)
+              {
+                if (debug)
+                  {
+                    Ganymede.debug("SyncRunner.writeIncrementalSync(): examining type " + type + " from the typeSet.");
+                  }
 
-		for (Invid invid: book.objects())
-		  {
-		    if (debug)
-		      {
-			Ganymede.debug("SyncRunner.writeIncrementalSync(): examining invid " + invid + " from the book.objects() set.");
-		      }
+                for (Invid invid: book.objects())
+                  {
+                    if (debug)
+                      {
+                        Ganymede.debug("SyncRunner.writeIncrementalSync(): examining invid " + invid + " from the book.objects() set.");
+                      }
 
-		    if (!type.equals(invid.getType()))
-		      {
-			continue;
-		      }
+                    if (!type.equals(invid.getType()))
+                      {
+                        continue;
+                      }
 
-		    if (!transaction.isEditingObject(invid) || !mayInclude(invid.getType()))
-		      {
-			if (debug)
-			  {
-			    if (!transaction.isEditingObject(invid))
-			      {
-				Ganymede.debug("Hey, SyncRunner says the transaction is not editing object " + invid);
-			      }
-			    else if (!mayInclude(invid.getType()))
-			      {
-				Ganymede.debug("Hey, SyncRunner says we may not include objects of type " + invid);
-			      }
-			  }
+                    if (!transaction.isEditingObject(invid) || !mayInclude(invid.getType()))
+                      {
+                        if (debug)
+                          {
+                            if (!transaction.isEditingObject(invid))
+                              {
+                                Ganymede.debug("Hey, SyncRunner says the transaction is not editing object " + invid);
+                              }
+                            else if (!mayInclude(invid.getType()))
+                              {
+                                Ganymede.debug("Hey, SyncRunner says we may not include objects of type " + invid);
+                              }
+                          }
 
-			context_count++;
+                        context_count++;
 
-			continue;
-		      }
+                        continue;
+                      }
 
-		    DBEditObject syncObject = transaction.findObject(invid);
+                    DBEditObject syncObject = transaction.findObject(invid);
 
-		    if (xmlOut == null)
-		      {
-			xmlOut = createXMLSync(transRecord);
-			xmlOut.setDeltaFieldBook(book);
-			xmlOut.setDBSession(transaction.getDBSession());
-		      }
+                    if (xmlOut == null)
+                      {
+                        xmlOut = createXMLSync(transRecord);
+                        xmlOut.setDeltaFieldBook(book);
+                        xmlOut.setDBSession(transaction.getDBSession());
+                      }
 
-		    switch (syncObject.getStatus())
-		      {
-		      case ObjectStatus.CREATING:
-			xmlOut.startElementIndent("object_delta");
+                    switch (syncObject.getStatus())
+                      {
+                      case ObjectStatus.CREATING:
+                        xmlOut.startElementIndent("object_delta");
 
-			xmlOut.indentOut();
+                        xmlOut.indentOut();
 
-			xmlOut.startElementIndent("before");
-			xmlOut.endElement("before");
+                        xmlOut.startElementIndent("before");
+                        xmlOut.endElement("before");
 
-			xmlOut.startElementIndent("after");
-			xmlOut.indentOut();
-			syncObject.emitXML(xmlOut);
-			xmlOut.indentIn();
-			xmlOut.endElementIndent("after");
+                        xmlOut.startElementIndent("after");
+                        xmlOut.indentOut();
+                        syncObject.emitXML(xmlOut);
+                        xmlOut.indentIn();
+                        xmlOut.endElementIndent("after");
 
-			xmlOut.indentIn();
-			xmlOut.endElementIndent("object_delta");
+                        xmlOut.indentIn();
+                        xmlOut.endElementIndent("object_delta");
 
-			break;
+                        break;
 
-		      case ObjectStatus.DELETING:
-			xmlOut.startElementIndent("object_delta");
+                      case ObjectStatus.DELETING:
+                        xmlOut.startElementIndent("object_delta");
 
-			xmlOut.indentOut();
+                        xmlOut.indentOut();
 
-			xmlOut.startElementIndent("before");
-			xmlOut.indentOut();
-			syncObject.getOriginal().emitXML(xmlOut);
-			xmlOut.indentIn();
-			xmlOut.endElementIndent("before");
+                        xmlOut.startElementIndent("before");
+                        xmlOut.indentOut();
+                        syncObject.getOriginal().emitXML(xmlOut);
+                        xmlOut.indentIn();
+                        xmlOut.endElementIndent("before");
 
-			xmlOut.startElementIndent("after");
-			xmlOut.endElement("after");
+                        xmlOut.startElementIndent("after");
+                        xmlOut.endElement("after");
 
-			xmlOut.indentIn();
-			xmlOut.endElementIndent("object_delta");
-			break;
+                        xmlOut.indentIn();
+                        xmlOut.endElementIndent("object_delta");
+                        break;
 
-		      case ObjectStatus.EDITING:
-			syncObject.emitXMLDelta(xmlOut);
-			break;
-		      }
-		  }
-	      }
+                      case ObjectStatus.EDITING:
+                        syncObject.emitXMLDelta(xmlOut);
+                        break;
+                      }
+                  }
+              }
 
-	    // then write out any objects that the SyncMaster has thrown in
-	    // for context
+            // then write out any objects that the SyncMaster has thrown in
+            // for context
 
-	    if (context_count > 0)
-	      {
-		if (xmlOut == null)
-		  {
-		    xmlOut = createXMLSync(transRecord);
-		    xmlOut.setDeltaFieldBook(book);
-		    xmlOut.setDBSession(transaction.getDBSession());
-		  }
+            if (context_count > 0)
+              {
+                if (xmlOut == null)
+                  {
+                    xmlOut = createXMLSync(transRecord);
+                    xmlOut.setDeltaFieldBook(book);
+                    xmlOut.setDBSession(transaction.getDBSession());
+                  }
 
-		xmlOut.startElementIndent("context_objects");
-		xmlOut.indentOut();
+                xmlOut.startElementIndent("context_objects");
+                xmlOut.indentOut();
 
-		for (Short type: typeSet)
-		  {
-		    for (Invid invid: book.objects())
-		      {
-			if (!type.equals(invid.getType()))
-			  {
-			    continue;   // skip
-			  }
+                for (Short type: typeSet)
+                  {
+                    for (Invid invid: book.objects())
+                      {
+                        if (!type.equals(invid.getType()))
+                          {
+                            continue;   // skip
+                          }
 
-			if (transaction.isEditingObject(invid) && mayInclude(invid.getType()))
-			  {
-			    continue;   // skip, we handled this in the delta section
-			  }
+                        if (transaction.isEditingObject(invid) && mayInclude(invid.getType()))
+                          {
+                            continue;   // skip, we handled this in the delta section
+                          }
 
-			DBObject refObject = transaction.getDBSession().viewDBObject(invid);
+                        DBObject refObject = transaction.getDBSession().viewDBObject(invid);
 
-			refObject.emitXML(xmlOut);
-		      }
-		  }
+                        refObject.emitXML(xmlOut);
+                      }
+                  }
 
-		xmlOut.indentIn();
-		xmlOut.endElementIndent("context_objects");
-	      }
+                xmlOut.indentIn();
+                xmlOut.endElementIndent("context_objects");
+              }
 
-	    if (xmlOut != null)
-	      {
-		xmlOut.indentIn();
-		xmlOut.endElementIndent("transaction");
-		xmlOut.skipLine();
-		xmlOut.close();         // close() automatically flushes before closing
-		xmlOut = null;
+            if (xmlOut != null)
+              {
+                xmlOut.indentIn();
+                xmlOut.endElementIndent("transaction");
+                xmlOut.skipLine();
+                xmlOut.close();         // close() automatically flushes before closing
+                xmlOut = null;
 
-		needBuild.set(true);
-	      }
+                needBuild.set(true);
+              }
 
-	    setTransactionNumber(transRecord.getTransactionNumber());
+            setTransactionNumber(transRecord.getTransactionNumber());
 
-	    queueGrowthSize = queueGrowthSize + 1; // count the one that we just wrote out
-	  }
+            queueGrowthSize = queueGrowthSize + 1; // count the one that we just wrote out
+          }
       }
     finally
       {
-	if (xmlOut != null)
-	  {
-	    xmlOut.close();
-	  }
+        if (xmlOut != null)
+          {
+            xmlOut.close();
+          }
       }
 
     updateAdminConsole(false);
@@ -840,15 +840,15 @@ public class SyncRunner implements Runnable {
    */
 
   public void checkBuildNeeded(DBJournalTransaction transRecord, DBEditObject[] objectList,
-			       DBEditSet transaction) throws IOException
+                               DBEditSet transaction) throws IOException
   {
     for (DBEditObject syncObject: objectList)
       {
-	if (shouldInclude(syncObject))
-	  {
-	    this.needBuild.set(true);
-	    return;
-	  }
+        if (shouldInclude(syncObject))
+          {
+            this.needBuild.set(true);
+            return;
+          }
       }
   }
 
@@ -868,13 +868,13 @@ public class SyncRunner implements Runnable {
 
     if (syncFile.exists())
       {
-	// "SyncRunner {0} deleting left over transaction fragment {1}"
-	Ganymede.debug(ts.l("unSync.deleting", this.getName(), syncFile.getPath()));
+        // "SyncRunner {0} deleting left over transaction fragment {1}"
+        Ganymede.debug(ts.l("unSync.deleting", this.getName(), syncFile.getPath()));
 
-	if (!syncFile.delete())
-	  {
-	    throw new IOException("Could not delete " + syncFile.getPath());
-	  }
+        if (!syncFile.delete())
+          {
+            throw new IOException("Could not delete " + syncFile.getPath());
+          }
       }
 
     this.transactionNumber = transRecord.getTransactionNumber() - 1;
@@ -898,10 +898,10 @@ public class SyncRunner implements Runnable {
     bufStream = new BufferedOutputStream(outStream);
 
     XMLDumpContext xmlOut = new XMLDumpContext(new UTF8XMLWriter(bufStream, UTF8XMLWriter.MINIMIZE_EMPTY_ELEMENTS),
-					       includePlaintextPasswords, // whether we include plaintext passwords when we have alternate hashes
-					       false, // don't include creator/modifier data
-					       this,
-					       true); // include oid's in the object to act as remote foreign keys
+                                               includePlaintextPasswords, // whether we include plaintext passwords when we have alternate hashes
+                                               false, // don't include creator/modifier data
+                                               this,
+                                               true); // include oid's in the object to act as remote foreign keys
 
     xmlOut.setDumpPasswords(true);
 
@@ -912,7 +912,7 @@ public class SyncRunner implements Runnable {
 
     if (transRecord.getUsername() != null)
       {
-	xmlOut.attribute("user", transRecord.getUsername());
+        xmlOut.attribute("user", transRecord.getUsername());
       }
 
     xmlOut.attribute("number", String.valueOf(transRecord.getTransactionNumber()));
@@ -933,132 +933,132 @@ public class SyncRunner implements Runnable {
   {
     for (DBEditObject syncObject: objectList)
       {
-	if (syncObject.getStatus() == ObjectStatus.DROPPING)
-	  {
-	    // Created and destroyed in this transaction.. no-op.
+        if (syncObject.getStatus() == ObjectStatus.DROPPING)
+          {
+            // Created and destroyed in this transaction.. no-op.
 
-	    continue;
-	  }
+            continue;
+          }
 
-	if (debug)
-	  {
-	    Ganymede.debug("SyncRunner.initializeFieldBook(): Contemplating " + syncObject);
-	  }
+        if (debug)
+          {
+            Ganymede.debug("SyncRunner.initializeFieldBook(): Contemplating " + syncObject);
+          }
 
-	if (mayInclude(syncObject))
-	  {
-	    if (debug)
-	      {
-		Ganymede.debug("SyncRunner.initializeFieldBook(): Good news we can consider including " + syncObject);
-	      }
+        if (mayInclude(syncObject))
+          {
+            if (debug)
+              {
+                Ganymede.debug("SyncRunner.initializeFieldBook(): Good news we can consider including " + syncObject);
+              }
 
-	    DBObject origObj = syncObject.getOriginal();
+            DBObject origObj = syncObject.getOriginal();
 
-	    // We know that checked-out DBEditObjects have a copy of
-	    // all defined fields, so we don't need to consult the
-	    // (possibly null) origObj reference looking for fields
-	    // that were deleted from syncObject.
+            // We know that checked-out DBEditObjects have a copy of
+            // all defined fields, so we don't need to consult the
+            // (possibly null) origObj reference looking for fields
+            // that were deleted from syncObject.
 
-	    for (DBField memberField: syncObject.getFieldVect())
-	      {
-		DBField origField;
+            for (DBField memberField: syncObject.getFieldVect())
+              {
+                DBField origField;
 
-		if (origObj == null)
-		  {
-		    origField = null;
-		  }
-		else
-		  {
-		    origField = (DBField) origObj.getField(memberField.getID());
-		  }
+                if (origObj == null)
+                  {
+                    origField = null;
+                  }
+                else
+                  {
+                    origField = (DBField) origObj.getField(memberField.getID());
+                  }
 
-		// created
+                // created
 
-		if (origField == null && memberField.isDefined())
-		  {
-		    if (debug)
-		      {
-			Ganymede.debug("SyncRunner.initializeFieldBook(): Created field " +
-				       memberField + " in " + syncObject);
-		      }
+                if (origField == null && memberField.isDefined())
+                  {
+                    if (debug)
+                      {
+                        Ganymede.debug("SyncRunner.initializeFieldBook(): Created field " +
+                                       memberField + " in " + syncObject);
+                      }
 
-		    SyncPrefEnum fieldOption = getOption(memberField);
+                    SyncPrefEnum fieldOption = getOption(memberField);
 
-		    if (fieldOption != null && fieldOption != SyncPrefEnum.NEVER)
-		      {
-			book.add(syncObject.getInvid(), memberField.getID());
-			continue;
-		      }
-		  }
+                    if (fieldOption != null && fieldOption != SyncPrefEnum.NEVER)
+                      {
+                        book.add(syncObject.getInvid(), memberField.getID());
+                        continue;
+                      }
+                  }
 
-		// deleted
+                // deleted
 
-		if (!memberField.isDefined() && origField != null)
-		  {
-		    if (debug)
-		      {
-			Ganymede.debug("SyncRunner.initializeFieldBook(): Deleted field " +
-				       memberField + " in " + syncObject);
-		      }
+                if (!memberField.isDefined() && origField != null)
+                  {
+                    if (debug)
+                      {
+                        Ganymede.debug("SyncRunner.initializeFieldBook(): Deleted field " +
+                                       memberField + " in " + syncObject);
+                      }
 
-		    SyncPrefEnum fieldOption = getOption(memberField);
+                    SyncPrefEnum fieldOption = getOption(memberField);
 
-		    if (fieldOption != null && fieldOption != SyncPrefEnum.NEVER)
-		      {
-			book.add(syncObject.getInvid(), memberField.getID());
-			continue;
-		      }
-		  }
+                    if (fieldOption != null && fieldOption != SyncPrefEnum.NEVER)
+                      {
+                        book.add(syncObject.getInvid(), memberField.getID());
+                        continue;
+                      }
+                  }
 
-		// changed
+                // changed
 
-		if (memberField.isDefined() && origField != null)
-		  {
-		    if (debug)
-		      {
-			Ganymede.debug("SyncRunner.initializeFieldBook(): Edited (maybe) field " +
-				       memberField + " in " + syncObject);
-		      }
+                if (memberField.isDefined() && origField != null)
+                  {
+                    if (debug)
+                      {
+                        Ganymede.debug("SyncRunner.initializeFieldBook(): Edited (maybe) field " +
+                                       memberField + " in " + syncObject);
+                      }
 
-		    // check to see if the field has changed and whether we
-		    // should include it.  The 'hasChanged()' check is
-		    // required because this shouldInclude() call will always
-		    // return true if memberField is defined as an 'always
-		    // include' field, whereas in this object-level
-		    // shouldInclude() check loop, we are looking to see
-		    // whether a field that we care about was changed.
+                    // check to see if the field has changed and whether we
+                    // should include it.  The 'hasChanged()' check is
+                    // required because this shouldInclude() call will always
+                    // return true if memberField is defined as an 'always
+                    // include' field, whereas in this object-level
+                    // shouldInclude() check loop, we are looking to see
+                    // whether a field that we care about was changed.
 
-		    // Basically the hasChanged() call checks to see if the
-		    // field changed, and the shouldInclude() call checks to
-		    // see if it's a field that we care about.
+                    // Basically the hasChanged() call checks to see if the
+                    // field changed, and the shouldInclude() call checks to
+                    // see if it's a field that we care about.
 
-		    if (debug)
-		      {
-			if (memberField.hasChanged(origField))
-			  {
-			    Ganymede.debug("SyncRunner.initializeFieldBook(): Hey field " +
-					   memberField + " really did change compared to the original " + origField);
-			  }
-			else
-			  {
-			    Ganymede.debug("SyncRunner.initializeFieldBook(): Hey I don't think field " +
-					   memberField + " changed at all compared to the original " + origField);
-			  }
-		      }
+                    if (debug)
+                      {
+                        if (memberField.hasChanged(origField))
+                          {
+                            Ganymede.debug("SyncRunner.initializeFieldBook(): Hey field " +
+                                           memberField + " really did change compared to the original " + origField);
+                          }
+                        else
+                          {
+                            Ganymede.debug("SyncRunner.initializeFieldBook(): Hey I don't think field " +
+                                           memberField + " changed at all compared to the original " + origField);
+                          }
+                      }
 
-		    if (memberField.hasChanged(origField) && shouldInclude(memberField, origField, null))
-		      {
-			book.add(syncObject.getInvid(), memberField.getID());
-			continue;
-		      }
-		  }
-	      }
-	  }
+                    if (memberField.hasChanged(origField) && shouldInclude(memberField, origField, null))
+                      {
+                        book.add(syncObject.getInvid(), memberField.getID());
+                        continue;
+                      }
+                  }
+              }
+          }
 
-	// give our plug-in management class the chance to extend the
-	// FieldBook that we're assembling with reference objects, etc.
+        // give our plug-in management class the chance to extend the
+        // FieldBook that we're assembling with reference objects, etc.
 
-	master.augment(book, syncObject);
+        master.augment(book, syncObject);
       }
   }
 
@@ -1114,12 +1114,12 @@ public class SyncRunner implements Runnable {
   {
     if (!mayInclude(object))
       {
-	return false;
+        return false;
       }
 
     if (object.getStatus() == ObjectStatus.DROPPING)
       {
-	return false;
+        return false;
       }
 
     DBObject origObj = object.getOriginal();
@@ -1131,62 +1131,62 @@ public class SyncRunner implements Runnable {
 
     for (DBField memberField: object.getFieldVect())
       {
-	DBField origField;
+        DBField origField;
 
-	if (origObj == null)
-	  {
-	    origField = null;
-	  }
-	else
-	  {
-	    origField = (DBField) origObj.getField(memberField.getID());
-	  }
+        if (origObj == null)
+          {
+            origField = null;
+          }
+        else
+          {
+            origField = (DBField) origObj.getField(memberField.getID());
+          }
 
-	// created
+        // created
 
-	if (origField == null && memberField.isDefined())
-	  {
-	    SyncPrefEnum fieldOption = getOption(memberField);
+        if (origField == null && memberField.isDefined())
+          {
+            SyncPrefEnum fieldOption = getOption(memberField);
 
-	    if (fieldOption != null && fieldOption != SyncPrefEnum.NEVER)
-	      {
-		return true;
-	      }
-	  }
+            if (fieldOption != null && fieldOption != SyncPrefEnum.NEVER)
+              {
+                return true;
+              }
+          }
 
-	// deleted
+        // deleted
 
-	if (!memberField.isDefined() && origField != null)
-	  {
-	    SyncPrefEnum fieldOption = getOption(memberField);
+        if (!memberField.isDefined() && origField != null)
+          {
+            SyncPrefEnum fieldOption = getOption(memberField);
 
-	    if (fieldOption != null && fieldOption != SyncPrefEnum.NEVER)
-	      {
-		return true;
-	      }
-	  }
+            if (fieldOption != null && fieldOption != SyncPrefEnum.NEVER)
+              {
+                return true;
+              }
+          }
 
-	// changed
+        // changed
 
-	if (memberField.isDefined() && origField != null)
-	  {
-	    // check to see if the field has changed and whether we
-	    // should include it.  The 'hasChanged()' check is
-	    // required because this shouldInclude() call will always
-	    // return true if memberField is defined as an 'always
-	    // include' field, whereas in this object-level
-	    // shouldInclude() check loop, we are looking to see
-	    // whether a field that we care about was changed.
+        if (memberField.isDefined() && origField != null)
+          {
+            // check to see if the field has changed and whether we
+            // should include it.  The 'hasChanged()' check is
+            // required because this shouldInclude() call will always
+            // return true if memberField is defined as an 'always
+            // include' field, whereas in this object-level
+            // shouldInclude() check loop, we are looking to see
+            // whether a field that we care about was changed.
 
-	    // Basically the hasChanged() call checks to see if the
-	    // field changed, and the shouldInclude() call checks to
-	    // see if it's a field that we care about.
+            // Basically the hasChanged() call checks to see if the
+            // field changed, and the shouldInclude() call checks to
+            // see if it's a field that we care about.
 
-	    if (memberField.hasChanged(origField) && shouldInclude(memberField, origField, null))
-	      {
-		return true;
-	      }
-	  }
+            if (memberField.hasChanged(origField) && shouldInclude(memberField, origField, null))
+              {
+                return true;
+              }
+          }
       }
 
     return false;
@@ -1209,74 +1209,74 @@ public class SyncRunner implements Runnable {
 
     if (debug)
       {
-	Ganymede.debug("SyncRunner.shouldInclude(" + newField + ", " + origField + ", book)");
+        Ganymede.debug("SyncRunner.shouldInclude(" + newField + ", " + origField + ", book)");
       }
 
     if (!newField.isDefined())
       {
-	// "newField is undefined"
-	throw new IllegalArgumentException(ts.l("shouldInclude.badNewField"));
+        // "newField is undefined"
+        throw new IllegalArgumentException(ts.l("shouldInclude.badNewField"));
       }
 
     if (origField == null)
       {
-	// "origField is null"
-	throw new NullPointerException(ts.l("shouldInclude.badOrigField"));
+        // "origField is null"
+        throw new NullPointerException(ts.l("shouldInclude.badOrigField"));
       }
 
     if (book != null)
       {
-	if (book.has(newField.getOwner().getInvid(), newField.getID()))
-	  {
-	    return true;
-	  }
+        if (book.has(newField.getOwner().getInvid(), newField.getID()))
+          {
+            return true;
+          }
       }
 
     fieldOption = getOption(newField);
 
     if (fieldOption == null || fieldOption == SyncPrefEnum.NEVER)
       {
-	if (debug)
-	  {
-	    Ganymede.debug("SyncRunner.shouldInclude(): nope, we don't care about field " + newField);
-	  }
+        if (debug)
+          {
+            Ganymede.debug("SyncRunner.shouldInclude(): nope, we don't care about field " + newField);
+          }
 
-	return false;
+        return false;
       }
     else if (fieldOption == SyncPrefEnum.ALWAYS)
       {
-	if (debug)
-	  {
-	    Ganymede.debug("SyncRunner.shouldInclude(): oh, hell yeah, we totally care about field " + newField);
-	  }
+        if (debug)
+          {
+            Ganymede.debug("SyncRunner.shouldInclude(): oh, hell yeah, we totally care about field " + newField);
+          }
 
-	return true;
+        return true;
       }
     else if (fieldOption == SyncPrefEnum.WHENCHANGED)
       {
-	if (debug)
-	  {
-	    Ganymede.debug("SyncRunner.shouldInclude(): Well, we might care about field " + newField);
-	  }
+        if (debug)
+          {
+            Ganymede.debug("SyncRunner.shouldInclude(): Well, we might care about field " + newField);
+          }
 
-	if (newField.hasChanged(origField))
-	  {
-	    return true;
-	  }
+        if (newField.hasChanged(origField))
+          {
+            return true;
+          }
 
-	if (debug)
-	  {
-	    Ganymede.debug("SyncRunner.shouldInclude(): But actually, we don't think that field " +
-			   newField + " changed in this transaction, so no.");
-	  }
+        if (debug)
+          {
+            Ganymede.debug("SyncRunner.shouldInclude(): But actually, we don't think that field " +
+                           newField + " changed in this transaction, so no.");
+          }
       }
     else
       {
-	if (debug)
-	  {
-	    Ganymede.debug("SyncRunner.shouldInclude(): WTF?  fieldOption == " +
-			   fieldOption + " for field " + newField);
-	  }
+        if (debug)
+          {
+            Ganymede.debug("SyncRunner.shouldInclude(): WTF?  fieldOption == " +
+                           fieldOption + " for field " + newField);
+          }
       }
 
     return false;
@@ -1313,23 +1313,23 @@ public class SyncRunner implements Runnable {
 
     if (x == null)
       {
-	return false;
+        return false;
       }
 
     switch (x)
       {
       case WHENCHANGED:
-	// hasChanged will be set to true by XMLDumpContext when doing
-	// a full state sync or dump, so WHENCHANGED is equivalent to
-	// ALWAYS in that case.
+        // hasChanged will be set to true by XMLDumpContext when doing
+        // a full state sync or dump, so WHENCHANGED is equivalent to
+        // ALWAYS in that case.
 
-	return hasChanged;
+        return hasChanged;
 
       case ALWAYS:
-	return true;
+        return true;
 
       default:
-	return false;
+        return false;
       }
   }
 
@@ -1442,27 +1442,27 @@ public class SyncRunner implements Runnable {
   {
     if (this.mode == SyncType.FULLSTATE)
       {
-	if (this.needBuild.isSet())
-	  {
-	    runFullState();
-	  }
-	else
-	  {
-	    // "{0} has not seen any changes that need to be processed."
-	    Ganymede.debug(ts.l("run.skipping_full", this.getName()));
-	  }
+        if (this.needBuild.isSet())
+          {
+            runFullState();
+          }
+        else
+          {
+            // "{0} has not seen any changes that need to be processed."
+            Ganymede.debug(ts.l("run.skipping_full", this.getName()));
+          }
       }
     else if (this.mode == SyncType.INCREMENTAL)
       {
-	if (this.needBuild.isSet() || getQueueSize() > 0)
-	  {
-	    runIncremental();
-	  }
-	else
-	  {
-	    // "{0} has no incremental transactions to process."
-	    Ganymede.debug(ts.l("run.skipping_incremental", this.getName()));
-	  }
+        if (this.needBuild.isSet() || getQueueSize() > 0)
+          {
+            runIncremental();
+          }
+        else
+          {
+            // "{0} has no incremental transactions to process."
+            Ganymede.debug(ts.l("run.skipping_incremental", this.getName()));
+          }
       }
   }
 
@@ -1486,84 +1486,84 @@ public class SyncRunner implements Runnable {
 
     if (shutdownState != null)
       {
-	// "Aborting full state sync channel {0} for shutdown condition: {1}"
-	Ganymede.debug(ts.l("runFullState.shutting_down", this.getClass().getName(), shutdownState));
-	return;
+        // "Aborting full state sync channel {0} for shutdown condition: {1}"
+        Ganymede.debug(ts.l("runFullState.shutting_down", this.getClass().getName(), shutdownState));
+        return;
       }
 
     try
       {
-	GanymedeBuilderTask.incPhase1(true);
+        GanymedeBuilderTask.incPhase1(true);
 
-	try
-	  {
-	    // XXX note: this string must not be changed because the
-	    // GanymedeSession constructor behaves in a special way
-	    // for "builder:" and "sync channel:" session labels.
+        try
+          {
+            // XXX note: this string must not be changed because the
+            // GanymedeSession constructor behaves in a special way
+            // for "builder:" and "sync channel:" session labels.
 
-	    session = new GanymedeSession("sync channel:");
+            session = new GanymedeSession("sync channel:");
 
-	    try
-	      {
-		lock = session.getDBSession().openDumpLock();
-	      }
-	    catch (InterruptedException ex)
-	      {
-		// "Could not run full state sync channel {0}, couldn''t get dump lock."
-		Ganymede.debug(ts.l("runFullState.failed_lock_acquisition", this.getClass().getName()));
-		return;
-	      }
+            try
+              {
+                lock = session.getDBSession().openDumpLock();
+              }
+            catch (InterruptedException ex)
+              {
+                // "Could not run full state sync channel {0}, couldn''t get dump lock."
+                Ganymede.debug(ts.l("runFullState.failed_lock_acquisition", this.getClass().getName()));
+                return;
+              }
 
-	    writeFullStateSync(session);
-	  }
-	catch (Exception ex)
-	  {
-	    GanymedeBuilderTask.decPhase1(true); // we're aborting, notify the consoles
-	    alreadyDecdCount = true;
+            writeFullStateSync(session);
+          }
+        catch (Exception ex)
+          {
+            GanymedeBuilderTask.decPhase1(true); // we're aborting, notify the consoles
+            alreadyDecdCount = true;
 
-	    Ganymede.debug(Ganymede.stackTrace(ex));
-	    return;
-	  }
-	finally
-	  {
-	    if (!alreadyDecdCount)
-	      {
-		GanymedeBuilderTask.decPhase1(false); // we'll roll directly into phase 2 on the admin consoles, etc.
-	      }
+            Ganymede.debug(Ganymede.stackTrace(ex));
+            return;
+          }
+        finally
+          {
+            if (!alreadyDecdCount)
+              {
+                GanymedeBuilderTask.decPhase1(false); // we'll roll directly into phase 2 on the admin consoles, etc.
+              }
 
-	    // release the lock, and so on
+            // release the lock, and so on
 
-	    if (session != null)
-	      {
-		session.logout();       // will clear the dump lock
+            if (session != null)
+              {
+                session.logout();       // will clear the dump lock
 
-		session = null;
-		lock = null;
-	      }
-	  }
+                session = null;
+                lock = null;
+              }
+          }
 
-	if (currentThread.isInterrupted())
-	  {
-	    // "Full state sync channel {0} interrupted, not doing network build."
-	    Ganymede.debug(ts.l("runFullState.task_interrupted", this.getClass().getName()));
-	    Ganymede.updateBuildStatus();
-	    return;
-	  }
+        if (currentThread.isInterrupted())
+          {
+            // "Full state sync channel {0} interrupted, not doing network build."
+            Ganymede.debug(ts.l("runFullState.task_interrupted", this.getClass().getName()));
+            Ganymede.updateBuildStatus();
+            return;
+          }
 
-	try
-	  {
-	    GanymedeBuilderTask.incPhase2(true);
+        try
+          {
+            GanymedeBuilderTask.incPhase2(true);
 
-	    runFullStateService();
-	  }
-	finally
-	  {
-	    GanymedeBuilderTask.decPhase2(true);
-	  }
+            runFullStateService();
+          }
+        finally
+          {
+            GanymedeBuilderTask.decPhase2(true);
+          }
       }
     finally
       {
-	GanymedeServer.shutdownSemaphore.decrement();
+        GanymedeServer.shutdownSemaphore.decrement();
       }
   }
 
@@ -1599,17 +1599,17 @@ public class SyncRunner implements Runnable {
 
     try
       {
-	byte[] chunk = transmitter.getNextChunk();
+        byte[] chunk = transmitter.getNextChunk();
 
-	while (chunk != null)
-	  {
-	    out.write(chunk, 0, chunk.length);
-	    chunk = transmitter.getNextChunk();
-	  }
+        while (chunk != null)
+          {
+            out.write(chunk, 0, chunk.length);
+            chunk = transmitter.getNextChunk();
+          }
       }
     finally
       {
-	out.close();
+        out.close();
       }
   }
 
@@ -1630,54 +1630,54 @@ public class SyncRunner implements Runnable {
 
     if (file.exists())
       {
-	try
-	  {
-	    resultCode = FileOps.runProcess(this.serviceProgram);
-	  }
-	catch (IOException ex)
-	  {
-	    // "Couldn''t exec full state sync channel build script {0} for Sync Channel {1}, due to IOException:\n{2}"
-	    Ganymede.debug(ts.l("runFullStateService.exception_running", this.serviceProgram,
-				this.name, Ganymede.stackTrace(ex)));
-	  }
-	catch (InterruptedException ex)
-	  {
-	    // "Failure during exec of full state sync channel build script {0} for Sync Channel {1}:\n{2}"
-	    Ganymede.debug(ts.l("runFullStateService.interrupted", this.serviceProgram,
-				this.name, Ganymede.stackTrace(ex)));
-	  }
+        try
+          {
+            resultCode = FileOps.runProcess(this.serviceProgram);
+          }
+        catch (IOException ex)
+          {
+            // "Couldn''t exec full state sync channel build script {0} for Sync Channel {1}, due to IOException:\n{2}"
+            Ganymede.debug(ts.l("runFullStateService.exception_running", this.serviceProgram,
+                                this.name, Ganymede.stackTrace(ex)));
+          }
+        catch (InterruptedException ex)
+          {
+            // "Failure during exec of full state sync channel build script {0} for Sync Channel {1}:\n{2}"
+            Ganymede.debug(ts.l("runFullStateService.interrupted", this.serviceProgram,
+                                this.name, Ganymede.stackTrace(ex)));
+          }
 
-	// "Full State Sync Channel {0} external build completed."
-	Ganymede.debug(ts.l("runFullStateService.ran", this.name));
+        // "Full State Sync Channel {0} external build completed."
+        Ganymede.debug(ts.l("runFullStateService.ran", this.name));
       }
     else
       {
-	// "Full State Sync Channel {1} error: external build script {0} does not exist."
-	Ganymede.debug(ts.l("runFullStateService.whaa", this.serviceProgram, this.name));
+        // "Full State Sync Channel {1} error: external build script {0} does not exist."
+        Ganymede.debug(ts.l("runFullStateService.whaa", this.serviceProgram, this.name));
       }
 
     if (resultCode != 0)
       {
-	String path = "";
+        String path = "";
 
-	try
-	  {
-	    path = file.getCanonicalPath();
-	  }
-	catch (IOException ex)
-	  {
-	    path = this.serviceProgram;
-	  }
+        try
+          {
+            path = file.getCanonicalPath();
+          }
+        catch (IOException ex)
+          {
+            path = this.serviceProgram;
+          }
 
-	// Error encountered running sync script "{0}" for the "{1}" Sync Channel.
-	//
-	// I got a result code of {2} when I tried to run it.
+        // Error encountered running sync script "{0}" for the "{1}" Sync Channel.
+        //
+        // I got a result code of {2} when I tried to run it.
 
-	String message = ts.l("runFullStateService.externalerror", path, this.getName(), Integer.valueOf(resultCode));
+        String message = ts.l("runFullStateService.externalerror", path, this.getName(), Integer.valueOf(resultCode));
 
-	DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
+        DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
 
-	Ganymede.log.logSystemEvent(event);
+        Ganymede.log.logSystemEvent(event);
       }
   }
 
@@ -1698,15 +1698,15 @@ public class SyncRunner implements Runnable {
 
     synchronized (queueGrowthMonitor)
       {
-	queueGrowthSize = 0;
+        queueGrowthSize = 0;
 
-	myName = getName();
-	myTransactionNumber = getTransactionNumber();
-	myServiceProgram = getServiceProgram();
-	invocation = new String[2];
-	invocation[0] = myServiceProgram;
-	invocation[1] = String.valueOf(myTransactionNumber);
-	needBuild.set(false);
+        myName = getName();
+        myTransactionNumber = getTransactionNumber();
+        myServiceProgram = getServiceProgram();
+        invocation = new String[2];
+        invocation[0] = myServiceProgram;
+        invocation[1] = String.valueOf(myTransactionNumber);
+        needBuild.set(false);
       }
 
     // increment the shutdownSemaphore so that the system knows we
@@ -1717,103 +1717,103 @@ public class SyncRunner implements Runnable {
 
     if (shutdownState != null)
       {
-	// "Refusing to run Sync Channel {0}, due to shutdown condition: {1}"
-	Ganymede.debug(ts.l("runIncremental.shutting_down", this.getName(), shutdownState));
-	return;
+        // "Refusing to run Sync Channel {0}, due to shutdown condition: {1}"
+        Ganymede.debug(ts.l("runIncremental.shutting_down", this.getName(), shutdownState));
+        return;
       }
 
     try
       {
-	GanymedeBuilderTask.incPhase2(true); // so that the client sees the phase 2 icon rolling
+        GanymedeBuilderTask.incPhase2(true); // so that the client sees the phase 2 icon rolling
 
-	// "SyncRunner {0} running"
-	Ganymede.debug(ts.l("runIncremental.running", myName));
+        // "SyncRunner {0} running"
+        Ganymede.debug(ts.l("runIncremental.running", myName));
 
-	if (getServiceProgram() != null)
-	  {
-	    file = new File(getServiceProgram());
+        if (getServiceProgram() != null)
+          {
+            file = new File(getServiceProgram());
 
-	    if (file.exists())
-	      {
-		try
-		  {
-		    results = FileOps.runCaptureOutputProcess(invocation);
-		  }
-		catch (IOException ex)
-		  {
-		    // "Couldn''t exec SyncRunner {0}''s service program "{1}" due to IOException: {2}"
-		    Ganymede.debug(ts.l("runIncremental.ioException", myName, myServiceProgram, ex));
-		  }
-		catch (InterruptedException ex)
-		  {
-		    // "Failure during exec of SyncRunner {0}''s service program "{1}""
-		    Ganymede.debug(ts.l("runIncremental.interrupted", myName, myServiceProgram));
-		  }
-	      }
-	    else
-	      {
-		// ""{0}" doesn''t exist, not running external service program for SyncRunner {1}"
-		Ganymede.debug(ts.l("runIncremental.nonesuch", myServiceProgram, myName));
-	      }
+            if (file.exists())
+              {
+                try
+                  {
+                    results = FileOps.runCaptureOutputProcess(invocation);
+                  }
+                catch (IOException ex)
+                  {
+                    // "Couldn''t exec SyncRunner {0}''s service program "{1}" due to IOException: {2}"
+                    Ganymede.debug(ts.l("runIncremental.ioException", myName, myServiceProgram, ex));
+                  }
+                catch (InterruptedException ex)
+                  {
+                    // "Failure during exec of SyncRunner {0}''s service program "{1}""
+                    Ganymede.debug(ts.l("runIncremental.interrupted", myName, myServiceProgram));
+                  }
+              }
+            else
+              {
+                // ""{0}" doesn''t exist, not running external service program for SyncRunner {1}"
+                Ganymede.debug(ts.l("runIncremental.nonesuch", myServiceProgram, myName));
+              }
 
-	    if (results == null || ((Integer) results.get(0)).intValue() != 0)
-	      {
-		String scriptPath = "";
+            if (results == null || ((Integer) results.get(0)).intValue() != 0)
+              {
+                String scriptPath = "";
 
-		try
-		  {
-		    scriptPath = file.getCanonicalPath();
-		  }
-		catch (IOException ex)
-		  {
-		    scriptPath = getServiceProgram();
-		  }
+                try
+                  {
+                    scriptPath = file.getCanonicalPath();
+                  }
+                catch (IOException ex)
+                  {
+                    scriptPath = getServiceProgram();
+                  }
 
-		String message = "";
+                String message = "";
 
-		if (results == null)
-		  {
-		    // Error encountered running sync script "{0}" for the "{1}" Sync Channel.
-		    //
-		    // I got a result code of {2} when I tried to run it.
-		    //
-		    // Queue size is {3}.
-		    //
-		    // {4}
+                if (results == null)
+                  {
+                    // Error encountered running sync script "{0}" for the "{1}" Sync Channel.
+                    //
+                    // I got a result code of {2} when I tried to run it.
+                    //
+                    // Queue size is {3}.
+                    //
+                    // {4}
 
-		    message = ts.l("runIncremental.externalerror", scriptPath, this.getName(), -999, Integer.valueOf(getQueueSize()), "");
-		  }
-		else
-		  {
-		    // Error encountered running sync script "{0}" for the "{1}" Sync Channel.
-		    //
-		    // I got a result code of {2} when I tried to run it.
-		    //
-		    // Queue size is {3}.
-		    //
-		    // {4}
+                    message = ts.l("runIncremental.externalerror", scriptPath, this.getName(), -999, Integer.valueOf(getQueueSize()), "");
+                  }
+                else
+                  {
+                    // Error encountered running sync script "{0}" for the "{1}" Sync Channel.
+                    //
+                    // I got a result code of {2} when I tried to run it.
+                    //
+                    // Queue size is {3}.
+                    //
+                    // {4}
 
-		    message = ts.l("runIncremental.externalerror", scriptPath, this.getName(), results.get(0), Integer.valueOf(getQueueSize()), (String) results.get(2));
-		  }
+                    message = ts.l("runIncremental.externalerror", scriptPath, this.getName(), results.get(0), Integer.valueOf(getQueueSize()), (String) results.get(2));
+                  }
 
-		DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
+                DBLogEvent event = new DBLogEvent("externalerror", message, null, null, null, null);
 
-		Ganymede.log.logSystemEvent(event);
-	      }
-	  }
-	else
-	  {
-	    // "No external service program defined for SyncRunner {0}, not servicing {0}!"
-	    Ganymede.debug(ts.l("runIncremental.undefined", myName));
-	  }
+                Ganymede.log.logSystemEvent(event);
+              }
+          }
+        else
+          {
+            // "No external service program defined for SyncRunner {0}, not servicing {0}!"
+            Ganymede.debug(ts.l("runIncremental.undefined", myName));
+          }
       }
     finally
       {
-	// decrement first, so that we won't lose if the less critical
-	// GanymedeBuilderTask.decPhase2() throws an exception
+        // decrement first, so that we won't lose if the less critical
+        // GanymedeBuilderTask.decPhase2() throws an exception
 
-	GanymedeServer.shutdownSemaphore.decrement();
-	GanymedeBuilderTask.decPhase2(true);
+        GanymedeServer.shutdownSemaphore.decrement();
+        GanymedeBuilderTask.decPhase2(true);
       }
 
     // "SyncRunner {0} finished"
@@ -1834,11 +1834,11 @@ public class SyncRunner implements Runnable {
 
     if (dirEntries == null)
       {
-	return 0;
+        return 0;
       }
     else
       {
-	return dirEntries.length;
+        return dirEntries.length;
       }
   }
 
@@ -1850,57 +1850,57 @@ public class SyncRunner implements Runnable {
   {
     if (handle == null)
       {
-	return;
+        return;
       }
 
     if (debug)
       {
-	System.err.println("SyncRunner.updateAdminConsole(): entering queueGrowthMonitor section");
+        System.err.println("SyncRunner.updateAdminConsole(): entering queueGrowthMonitor section");
       }
 
     synchronized (queueGrowthMonitor)
       {
-	if (debug)
-	  {
-	    System.err.println("SyncRunner.updateAdminConsole(): now in queueGrowthMonitor section");
-	  }
+        if (debug)
+          {
+            System.err.println("SyncRunner.updateAdminConsole(): now in queueGrowthMonitor section");
+          }
 
-	int currentQueueSize = getQueueSize();
+        int currentQueueSize = getQueueSize();
 
-	if (currentQueueSize == 0)
-	  {
-	    handle.setTaskStatus(scheduleHandle.TaskStatus.EMPTYQUEUE, 0, "");
-	  }
-	else
-	  {
-	    if (justRanQueue)
-	      {
-		if (currentQueueSize <= queueGrowthSize)
-		  {
-		    handle.setTaskStatus(scheduleHandle.TaskStatus.NONEMPTYQUEUE, currentQueueSize, "");
-		  }
-		else
-		  {
-		    handle.setTaskStatus(scheduleHandle.TaskStatus.STUCKQUEUE, currentQueueSize, "");
-		    needBuild.set(true);
-		  }
-	      }
-	    else
-	      {
-		// if we got set to STUCKQUEUE after running the
-		// service program, we'll stay stuck until
-		// updateAdminConsole(true) says otherwise.
+        if (currentQueueSize == 0)
+          {
+            handle.setTaskStatus(scheduleHandle.TaskStatus.EMPTYQUEUE, 0, "");
+          }
+        else
+          {
+            if (justRanQueue)
+              {
+                if (currentQueueSize <= queueGrowthSize)
+                  {
+                    handle.setTaskStatus(scheduleHandle.TaskStatus.NONEMPTYQUEUE, currentQueueSize, "");
+                  }
+                else
+                  {
+                    handle.setTaskStatus(scheduleHandle.TaskStatus.STUCKQUEUE, currentQueueSize, "");
+                    needBuild.set(true);
+                  }
+              }
+            else
+              {
+                // if we got set to STUCKQUEUE after running the
+                // service program, we'll stay stuck until
+                // updateAdminConsole(true) says otherwise.
 
-		if (handle.getTaskStatus() == scheduleHandle.TaskStatus.STUCKQUEUE)
-		  {
-		    handle.setTaskStatus(scheduleHandle.TaskStatus.STUCKQUEUE, currentQueueSize, "");
-		  }
-		else
-		  {
-		    handle.setTaskStatus(scheduleHandle.TaskStatus.NONEMPTYQUEUE, currentQueueSize, "");
-		  }
-	      }
-	  }
+                if (handle.getTaskStatus() == scheduleHandle.TaskStatus.STUCKQUEUE)
+                  {
+                    handle.setTaskStatus(scheduleHandle.TaskStatus.STUCKQUEUE, currentQueueSize, "");
+                  }
+                else
+                  {
+                    handle.setTaskStatus(scheduleHandle.TaskStatus.NONEMPTYQUEUE, currentQueueSize, "");
+                  }
+              }
+          }
       }
   }
 
@@ -1911,8 +1911,8 @@ public class SyncRunner implements Runnable {
 }
 
 /*------------------------------------------------------------------------------
-									   class
-								  QueueDirFilter
+                                                                           class
+                                                                  QueueDirFilter
 
 ------------------------------------------------------------------------------*/
 
@@ -1937,8 +1937,8 @@ class QueueDirFilter implements java.io.FilenameFilter {
 
 
 /*------------------------------------------------------------------------------
-									   class
-								  NoopSyncMaster
+                                                                           class
+                                                                  NoopSyncMaster
 
 ------------------------------------------------------------------------------*/
 

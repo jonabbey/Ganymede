@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -124,54 +124,54 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   {
     try
       {
-	name = fieldDef.getName();
-	comment = fieldDef.getComment();
-	type = fieldDef.getType();
-	fieldID = fieldDef.getID();
-	tabName = fieldDef.getTabName();
+        name = fieldDef.getName();
+        comment = fieldDef.getComment();
+        type = fieldDef.getType();
+        fieldID = fieldDef.getID();
+        tabName = fieldDef.getTabName();
 
-	Base base = fieldDef.getBase();
-	baseID = base.getTypeID();
+        Base base = fieldDef.getBase();
+        baseID = base.getTypeID();
 
-	vector = fieldDef.isArray();
+        vector = fieldDef.isArray();
 
-	if (vector)
-	  {
-	    limit = fieldDef.getMaxArraySize();
-	  }
+        if (vector)
+          {
+            limit = fieldDef.getMaxArraySize();
+          }
 
-	builtIn = fieldDef.isBuiltIn();
+        builtIn = fieldDef.isBuiltIn();
 
-	switch (type)
-	  {
-	  case BOOLEAN:
-	    labeled = fieldDef.isLabeled();
+        switch (type)
+          {
+          case BOOLEAN:
+            labeled = fieldDef.isLabeled();
 
-	    if (labeled)
-	      {
-		trueLabel = fieldDef.getTrueLabel();
-		falseLabel = fieldDef.getFalseLabel();
-	      }
-	    break;
+            if (labeled)
+              {
+                trueLabel = fieldDef.getTrueLabel();
+                falseLabel = fieldDef.getFalseLabel();
+              }
+            break;
 
-	  case STRING:
-	    minLength = fieldDef.getMinLength();
-	    maxLength = fieldDef.getMaxLength();
-	    okChars = fieldDef.getOKChars();
-	    badChars = fieldDef.getBadChars();
-	    multiLine = fieldDef.isMultiLine();
-	    regexpPat = fieldDef.getRegexpPat();
-	    break;
+          case STRING:
+            minLength = fieldDef.getMinLength();
+            maxLength = fieldDef.getMaxLength();
+            okChars = fieldDef.getOKChars();
+            badChars = fieldDef.getBadChars();
+            multiLine = fieldDef.isMultiLine();
+            regexpPat = fieldDef.getRegexpPat();
+            break;
 
-	  case INVID:
-	    editInPlace = fieldDef.isEditInPlace();
-	    allowedTarget = fieldDef.getTargetBase();
-	    break;
-	  }
+          case INVID:
+            editInPlace = fieldDef.isEditInPlace();
+            allowedTarget = fieldDef.getTargetBase();
+            break;
+          }
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException(ex.getMessage());
+        throw new RuntimeException(ex.getMessage());
       }
   }
 
@@ -529,7 +529,7 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
   {
     if (!isInvid())
       {
-	throw new IllegalArgumentException("not an invid field");
+        throw new IllegalArgumentException("not an invid field");
       }
 
     return allowedTarget;
@@ -553,50 +553,50 @@ public class FieldTemplate implements java.io.Serializable, FieldType {
 
     if (isBoolean())
       {
-	result.append(" boolean");
+        result.append(" boolean");
       }
     else if (isNumeric())
       {
-	result.append(" numeric");
+        result.append(" numeric");
       }
     else if (isDate())
       {
-	result.append(" date");
+        result.append(" date");
       }
     else if (isString())
       {
-	result.append(" string, ");
+        result.append(" string, ");
 
-	result.append("minlength = ");
-	result.append(getMinLength());
-	result.append(", maxlength = ");
-	result.append(getMaxLength());
-	result.append(", okChars = ");
-	result.append(getOKChars());
-	result.append(", badChars = ");
-	result.append(getBadChars());
-	result.append(", regexp = ");
-	result.append(getRegexpPat());
+        result.append("minlength = ");
+        result.append(getMinLength());
+        result.append(", maxlength = ");
+        result.append(getMaxLength());
+        result.append(", okChars = ");
+        result.append(getOKChars());
+        result.append(", badChars = ");
+        result.append(getBadChars());
+        result.append(", regexp = ");
+        result.append(getRegexpPat());
       }
     else if (isInvid())
       {
-	result.append(" invid");
+        result.append(" invid");
       }
     else if (isPermMatrix())
       {
-	result.append(" permmatrix");
+        result.append(" permmatrix");
       }
     else if (isPassword())
       {
-	result.append(" password");
+        result.append(" password");
       }
     else if (isIP())
       {
-	result.append(" ip");
+        result.append(" ip");
       }
     else if (isFloat())
       {
-	result.append(" float");
+        result.append(" float");
       }
 
     return result.toString();

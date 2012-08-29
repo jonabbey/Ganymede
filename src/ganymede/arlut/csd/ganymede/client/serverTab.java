@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2005
@@ -79,7 +79,7 @@ public class serverTab extends clientTab {
   {
     if (contentPane == null)
       {
-	contentPane = new JScrollPane();
+        contentPane = new JScrollPane();
       }
 
     return contentPane;
@@ -100,8 +100,8 @@ public class serverTab extends clientTab {
     contentPane.getVerticalScrollBar().setUnitIncrement(15);
 
     cp = new containerPanel(parent.getObject(), parent.getObjectInvid(), parent.isEditable(),
-			    parent.getgclient(), parent.getWindowPanel(), parent, parent.progressBar,
-			    false, parent.isCreating, null);
+                            parent.getgclient(), parent.getWindowPanel(), parent, parent.progressBar,
+                            false, parent.isCreating, null);
 
     cp.setTabName(tabName);
     cp.setInfoVector(infoVector);
@@ -132,14 +132,14 @@ public class serverTab extends clientTab {
   {
     if (cp != null)
       {
-	cp.cleanup();
-	cp = null;
+        cp.cleanup();
+        cp = null;
       }
 
     if (contentPane != null)
       {
-	contentPane.removeAll();
-	contentPane = null;
+        contentPane.removeAll();
+        contentPane = null;
       }
 
     infoVector = null;

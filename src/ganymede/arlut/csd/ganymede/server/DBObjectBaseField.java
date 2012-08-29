@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2011
@@ -197,7 +197,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * in {@link arlut.csd.ganymede.server.StringDBField}s.
    */
 
-  private String regexpPat = null;	// introduced in ganymede.db version 1.14
+  private String regexpPat = null;      // introduced in ganymede.db version 1.14
 
   /**
    * Text description of the meaning of the regexpPat,
@@ -216,8 +216,8 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   // invid attributes
 
   private boolean editInPlace = false;
-  private short allowedTarget = -1;	// no target restrictions
-  private short targetField = -1;	// no field symmetry.. we use the DBStore backPointers structure by default
+  private short allowedTarget = -1;     // no target restrictions
+  private short targetField = -1;       // no field symmetry.. we use the DBStore backPointers structure by default
 
   /**
    * If this is not null, then we have gotten information on this
@@ -277,13 +277,13 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
   private int history_depth = 0;
 
-  private boolean crypted = true;	// UNIX encryption is the default.
-  private boolean md5crypted = false;	// OpenBSD style md5crypt() is not
-  private boolean apachemd5crypted = false;	// Apache style md5crypt() is not
-  private boolean winHashed = false;	// Windows NT/Samba hashes are not
-  private boolean sshaHashed = false;	// SSHA hash is not either
-  private boolean bCrypted = false;	// OpenBSD BCrypt is not either
-  private boolean shaUnixCrypted = false;	// SHA Unix Crypt is not either
+  private boolean crypted = true;       // UNIX encryption is the default.
+  private boolean md5crypted = false;   // OpenBSD style md5crypt() is not
+  private boolean apachemd5crypted = false;     // Apache style md5crypt() is not
+  private boolean winHashed = false;    // Windows NT/Samba hashes are not
+  private boolean sshaHashed = false;   // SSHA hash is not either
+  private boolean bCrypted = false;     // OpenBSD BCrypt is not either
+  private boolean shaUnixCrypted = false;       // SHA Unix Crypt is not either
   private boolean storePlaintext = false; // nor is plaintext
 
   /**
@@ -375,7 +375,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     field_name = "";
     comment = "";
 
-    tabName = ts.l("receive.default_tab_name");	 // "General"
+    tabName = ts.l("receive.default_tab_name");  // "General"
     
     field_code = -1;
     field_type = -1;
@@ -418,7 +418,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     visibility = original.visibility;
 
     comment = original.comment;
-    array = original.array;	// true if this field is an array type
+    array = original.array;     // true if this field is an array type
     limit = original.limit;
 
     tabName = original.tabName;
@@ -515,20 +515,20 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (comment == null)
       {
-	out.writeUTF("");
+        out.writeUTF("");
       }
     else
       {
-	out.writeUTF(comment);
+        out.writeUTF(comment);
       }
 
     if (tabName == null)
       {
-	out.writeUTF("");
+        out.writeUTF("");
       }
     else
       {
-	out.writeUTF(tabName);	// added at file version 2.12
+        out.writeUTF(tabName);  // added at file version 2.12
       }
 
     out.writeBoolean(visibility); // added at file version 1.6
@@ -537,153 +537,153 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (array)
       {
-	out.writeShort(limit);
+        out.writeShort(limit);
       }
 
     if (isBoolean())
       {
-	out.writeBoolean(labeled);
+        out.writeBoolean(labeled);
 
-	if (labeled)
-	  {
-	    out.writeUTF(trueLabel);
-	    out.writeUTF(falseLabel);
-	  }
+        if (labeled)
+          {
+            out.writeUTF(trueLabel);
+            out.writeUTF(falseLabel);
+          }
       }
     else if (isString())
       {
-	out.writeShort(minLength);
-	out.writeShort(maxLength);
+        out.writeShort(minLength);
+        out.writeShort(maxLength);
 
-	if (okChars == null)
-	  {
-	    out.writeUTF("");
-	  }
-	else
-	  {
-	    out.writeUTF(okChars);
-	  }
-	
-	if (badChars == null)
-	  {
-	    out.writeUTF("");
-	  }
-	else
-	  {
-	    out.writeUTF(badChars);
-	  }
+        if (okChars == null)
+          {
+            out.writeUTF("");
+          }
+        else
+          {
+            out.writeUTF(okChars);
+          }
+        
+        if (badChars == null)
+          {
+            out.writeUTF("");
+          }
+        else
+          {
+            out.writeUTF(badChars);
+          }
 
-	if (namespace != null)
-	  {
-	    out.writeUTF(namespace.getName());
-	  }
-	else
-	  {
-	    out.writeUTF("");
-	  }
+        if (namespace != null)
+          {
+            out.writeUTF(namespace.getName());
+          }
+        else
+          {
+            out.writeUTF("");
+          }
 
-	out.writeBoolean(multiLine); // added at file version 1.9
+        out.writeBoolean(multiLine); // added at file version 1.9
 
-	if (regexpPat == null)
-	  {
-	    out.writeUTF("");	// added at file version 1.14
-	  }
-	else
-	  {
-	    out.writeUTF(regexpPat); // added at file version 1.14
-	  }
+        if (regexpPat == null)
+          {
+            out.writeUTF("");   // added at file version 1.14
+          }
+        else
+          {
+            out.writeUTF(regexpPat); // added at file version 1.14
+          }
 
-	if (regexpDesc == null)
-	  {
-	    out.writeUTF("");	// added at file version 2.2
-	  }
-	else
-	  {
-	    out.writeUTF(regexpDesc); // added at file version 2.2
-	  }
+        if (regexpDesc == null)
+          {
+            out.writeUTF("");   // added at file version 2.2
+          }
+        else
+          {
+            out.writeUTF(regexpDesc); // added at file version 2.2
+          }
       }
     else if (isNumeric())
       {
-	if (namespace != null)
-	  {
-	    out.writeUTF(namespace.getName());
-	  }
-	else
-	  {
-	    out.writeUTF("");
-	  }
+        if (namespace != null)
+          {
+            out.writeUTF(namespace.getName());
+          }
+        else
+          {
+            out.writeUTF("");
+          }
       }
     else if (isIP())
       {
-	if (namespace != null)
-	  {
-	    out.writeUTF(namespace.getName());
-	  }
-	else
-	  {
-	    out.writeUTF("");
-	  }
+        if (namespace != null)
+          {
+            out.writeUTF(namespace.getName());
+          }
+        else
+          {
+            out.writeUTF("");
+          }
       }
     else if (isInvid())
       {
-	out.writeShort(allowedTarget);
-	out.writeBoolean(editInPlace);
-	out.writeShort(targetField);
+        out.writeShort(allowedTarget);
+        out.writeBoolean(editInPlace);
+        out.writeShort(targetField);
       }
     else if (isPassword())
       {
-	out.writeShort(minLength);
-	out.writeShort(maxLength);
+        out.writeShort(minLength);
+        out.writeShort(maxLength);
 
-	if (okChars == null)
-	  {
-	    out.writeUTF("");
-	  }
-	else
-	  {
-	    out.writeUTF(okChars);
-	  }
-	
-	if (badChars == null)
-	  {
-	    out.writeUTF("");
-	  }
-	else
-	  {
-	    out.writeUTF(badChars);
-	  }
+        if (okChars == null)
+          {
+            out.writeUTF("");
+          }
+        else
+          {
+            out.writeUTF(okChars);
+          }
+        
+        if (badChars == null)
+          {
+            out.writeUTF("");
+          }
+        else
+          {
+            out.writeUTF(badChars);
+          }
 
-	// at 2.17 we introduce cracklib support for password fields
+        // at 2.17 we introduce cracklib support for password fields
 
-	out.writeBoolean(cracklib_check);
+        out.writeBoolean(cracklib_check);
 
-	// at 2.18 we introduce cracklib_supergash_exception,
-	// history_check, history_supergash_exception, and
-	// history_depth.
+        // at 2.18 we introduce cracklib_supergash_exception,
+        // history_check, history_supergash_exception, and
+        // history_depth.
 
-	out.writeBoolean(cracklib_supergash_exception);
-	out.writeBoolean(history_check);
-	out.writeBoolean(history_supergash_exception);
-	out.writeInt(history_depth);
+        out.writeBoolean(cracklib_supergash_exception);
+        out.writeBoolean(history_check);
+        out.writeBoolean(history_supergash_exception);
+        out.writeInt(history_depth);
 
-	out.writeBoolean(crypted);
-	out.writeBoolean(md5crypted);
-	out.writeBoolean(apachemd5crypted);
-	out.writeBoolean(winHashed);
-	out.writeBoolean(sshaHashed);
+        out.writeBoolean(crypted);
+        out.writeBoolean(md5crypted);
+        out.writeBoolean(apachemd5crypted);
+        out.writeBoolean(winHashed);
+        out.writeBoolean(sshaHashed);
 
-	// at 2.13 we introduce shaUnixCrypt support
+        // at 2.13 we introduce shaUnixCrypt support
 
-	out.writeBoolean(shaUnixCrypted);
-	out.writeBoolean(useShaUnixCrypted512);
-	out.writeInt(shaUnixCryptRounds);
+        out.writeBoolean(shaUnixCrypted);
+        out.writeBoolean(useShaUnixCrypted512);
+        out.writeInt(shaUnixCryptRounds);
 
-	// at 2.21 we introduce bCrypt support
+        // at 2.21 we introduce bCrypt support
 
-	out.writeBoolean(bCrypted);
-	out.writeInt(bCryptRounds);
+        out.writeBoolean(bCrypted);
+        out.writeInt(bCryptRounds);
 
-	out.writeBoolean(storePlaintext);
+        out.writeBoolean(storePlaintext);
       }
   }
 
@@ -703,7 +703,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (base.getStore().isLessThan(2,16))
       {
-	in.readUTF();		// vestigal classname
+        in.readUTF();           // vestigal classname
       }
 
     comment = in.readUTF();
@@ -713,8 +713,8 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (base.getStore().isLessThan(2,0))
       {
-	in.readBoolean();	// skip editable
-	in.readBoolean();	// skip removable
+        in.readBoolean();       // skip editable
+        in.readBoolean();       // skip removable
       }
 
     // at file version 2.12, we introduce tab names per object base
@@ -722,27 +722,27 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (base.getStore().isAtLeast(2,12))
       {
-	tabName = in.readUTF();
+        tabName = in.readUTF();
 
-	if (tabName.equals(""))
-	  {
-	    tabName = ts.l("receive.default_tab_name");	// "General"
-	  }
+        if (tabName.equals(""))
+          {
+            tabName = ts.l("receive.default_tab_name"); // "General"
+          }
       }
     else
       {
-	tabName = ts.l("receive.default_tab_name");	// "General"
+        tabName = ts.l("receive.default_tab_name");     // "General"
       }
 
     // at file version 1.6, we introduced field visibility
 
     if (base.getStore().isAtLeast(1,6))
       {
-	visibility = in.readBoolean();
+        visibility = in.readBoolean();
       }
     else
       {
-	visibility = true;
+        visibility = true;
       }
 
     // at file version 1.7, we introduced an explicit built-in flag
@@ -750,7 +750,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (base.getStore().isBetweenRevs(1,7,2,0))
       {
-	in.readBoolean();	// skip builtIn
+        in.readBoolean();       // skip builtIn
       }
 
     // between file versions 1.1 and 1.17, we had a field_order
@@ -758,285 +758,285 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (base.getStore().isBetweenRevs(1,1,2,0))
       {
-	tmp_displayOrder = in.readShort();		// skip field_order
+        tmp_displayOrder = in.readShort();              // skip field_order
       }
     else
       {
-	tmp_displayOrder = -1;
+        tmp_displayOrder = -1;
       }
 
     array = in.readBoolean();
 
     if (array)
       {
-	limit = in.readShort();
+        limit = in.readShort();
       }
     else
       {
-	limit = 1;
+        limit = 1;
       }
 
     if (isBoolean())
       {
-	labeled = in.readBoolean();
-	if (labeled)
-	  {
-	    trueLabel = in.readUTF();
-	    falseLabel = in.readUTF();
-	  }
+        labeled = in.readBoolean();
+        if (labeled)
+          {
+            trueLabel = in.readUTF();
+            falseLabel = in.readUTF();
+          }
       }
     else if (isString())
       {
-	String nameSpaceId;
+        String nameSpaceId;
 
-	/* - */
+        /* - */
 
-	minLength = in.readShort();
-	maxLength = in.readShort();
-	okChars = in.readUTF();
-	
-	if (okChars.equals(""))
-	  {
-	    okChars = null;
-	  }
+        minLength = in.readShort();
+        maxLength = in.readShort();
+        okChars = in.readUTF();
+        
+        if (okChars.equals(""))
+          {
+            okChars = null;
+          }
 
-	badChars = in.readUTF();
+        badChars = in.readUTF();
 
-	if (badChars.equals(""))
-	  {
-	    badChars = null;
-	  }
+        if (badChars.equals(""))
+          {
+            badChars = null;
+          }
 
-	nameSpaceId = in.readUTF();
-	
-	if (!nameSpaceId.equals(""))
-	  {
-	    setNameSpace(nameSpaceId);
-	  }
+        nameSpaceId = in.readUTF();
+        
+        if (!nameSpaceId.equals(""))
+          {
+            setNameSpace(nameSpaceId);
+          }
 
-	// at file version 1.9, we introduced multiLine
-	
-	if (base.getStore().isAtLeast(1,9))
-	  {
-	    multiLine = in.readBoolean();
-	  }
-	else
-	  {
-	    multiLine = false;
-	  }
+        // at file version 1.9, we introduced multiLine
+        
+        if (base.getStore().isAtLeast(1,9))
+          {
+            multiLine = in.readBoolean();
+          }
+        else
+          {
+            multiLine = false;
+          }
 
-	// at file version 1.14, we introduced regexps for string fields
-	
-	if (base.getStore().isAtLeast(1,14))
-	  {
-	    setRegexpPat(in.readUTF());
-	  }
-	else
-	  {
-	    setRegexpPat(null);
-	  }
+        // at file version 1.14, we introduced regexps for string fields
+        
+        if (base.getStore().isAtLeast(1,14))
+          {
+            setRegexpPat(in.readUTF());
+          }
+        else
+          {
+            setRegexpPat(null);
+          }
 
-	// at file version 2.2, we introduced a description field for regexps
+        // at file version 2.2, we introduced a description field for regexps
 
-	if (base.getStore().isAtLeast(2,2))
-	  {
-	    setRegexpDesc(in.readUTF());
-	  }
-	else
-	  {
-	    setRegexpDesc(null);
-	  }
+        if (base.getStore().isAtLeast(2,2))
+          {
+            setRegexpDesc(in.readUTF());
+          }
+        else
+          {
+            setRegexpDesc(null);
+          }
       }
     else if (isNumeric())
       {
-	String nameSpaceId;
+        String nameSpaceId;
 
-	/* - */
+        /* - */
 
-	// at 1.8 we introduced namespaces for number fields
+        // at 1.8 we introduced namespaces for number fields
 
-	if (base.getStore().isAtLeast(1,8))
-	  {
-	    nameSpaceId = in.readUTF();
-	    
-	    if (!nameSpaceId.equals(""))
-	      {
-		setNameSpace(nameSpaceId);
-	      }
-	  }
+        if (base.getStore().isAtLeast(1,8))
+          {
+            nameSpaceId = in.readUTF();
+            
+            if (!nameSpaceId.equals(""))
+              {
+                setNameSpace(nameSpaceId);
+              }
+          }
       }
     else if (isIP())
       {
-	String nameSpaceId;
+        String nameSpaceId;
 
-	/* - */
+        /* - */
 
-	// at 1.8 we introduced namespaces for IP fields
+        // at 1.8 we introduced namespaces for IP fields
 
-	if (base.getStore().isAtLeast(1,8))
-	  {
-	    nameSpaceId = in.readUTF();
-	    
-	    if (!nameSpaceId.equals(""))
-	      {
-		setNameSpace(nameSpaceId);
-	      }
-	  }
+        if (base.getStore().isAtLeast(1,8))
+          {
+            nameSpaceId = in.readUTF();
+            
+            if (!nameSpaceId.equals(""))
+              {
+                setNameSpace(nameSpaceId);
+              }
+          }
       }
     else if (isInvid())
       {
-	allowedTarget = in.readShort();
-	editInPlace = in.readBoolean();
+        allowedTarget = in.readShort();
+        editInPlace = in.readBoolean();
 
-	if (!editInPlace)
-	  {
-	    targetField = in.readShort();
-	  }
-	else
-	  {
-	    // we no longer allow edit-in-place invid fields to target
-	    // an explicit field in the embedded object.  the
-	    // relationship with the container field in the embedded
-	    // object is now always implicit.
+        if (!editInPlace)
+          {
+            targetField = in.readShort();
+          }
+        else
+          {
+            // we no longer allow edit-in-place invid fields to target
+            // an explicit field in the embedded object.  the
+            // relationship with the container field in the embedded
+            // object is now always implicit.
 
-	    in.readShort();
-	  }
+            in.readShort();
+          }
 
-	// In DBStore file version 1.17 we dropped the use of the back
-	// links field.  Some folks apparently used the schema editor
-	// to set an Invid Field to point to the backlinks field
-	// explicitly (rather than 'none').  We handle that here so
-	// that the code that takes care of handling asymmetric fields
-	// doesn't get confused.
+        // In DBStore file version 1.17 we dropped the use of the back
+        // links field.  Some folks apparently used the schema editor
+        // to set an Invid Field to point to the backlinks field
+        // explicitly (rather than 'none').  We handle that here so
+        // that the code that takes care of handling asymmetric fields
+        // doesn't get confused.
 
-	if (targetField == SchemaConstants.BackLinksField)
-	  {
-	    targetField = -1;
-	  }
+        if (targetField == SchemaConstants.BackLinksField)
+          {
+            targetField = -1;
+          }
       }
     else if (isPassword())
       {
-	minLength = in.readShort();
-	maxLength = in.readShort();
-	okChars = in.readUTF();
-	
-	if (okChars.equals(""))
-	  {
-	    okChars = null;
-	  }
+        minLength = in.readShort();
+        maxLength = in.readShort();
+        okChars = in.readUTF();
+        
+        if (okChars.equals(""))
+          {
+            okChars = null;
+          }
 
-	badChars = in.readUTF();
+        badChars = in.readUTF();
 
-	if (badChars.equals(""))
-	  {
-	    badChars = null;
-	  }
+        if (badChars.equals(""))
+          {
+            badChars = null;
+          }
 
-	// at 2.17 we introduce cracklib_check
+        // at 2.17 we introduce cracklib_check
 
-	if (base.getStore().isAtLeast(2,17))
-	  {
-	    cracklib_check = in.readBoolean();
-	  }
-	else
-	  {
-	    cracklib_check = false;
-	  }
+        if (base.getStore().isAtLeast(2,17))
+          {
+            cracklib_check = in.readBoolean();
+          }
+        else
+          {
+            cracklib_check = false;
+          }
 
-	// at 2.17, we introduce cracklib_supergash_exception,
-	// history_check, history_supergash_exception, and
-	// history_depth
+        // at 2.17, we introduce cracklib_supergash_exception,
+        // history_check, history_supergash_exception, and
+        // history_depth
 
-	if (base.getStore().isAtLeast(2,18))
-	  {
-	    cracklib_supergash_exception = in.readBoolean();
-	    history_check = in.readBoolean();
-	    history_supergash_exception = in.readBoolean();
-	    history_depth = in.readInt();
-	  }
+        if (base.getStore().isAtLeast(2,18))
+          {
+            cracklib_supergash_exception = in.readBoolean();
+            history_check = in.readBoolean();
+            history_supergash_exception = in.readBoolean();
+            history_depth = in.readInt();
+          }
 
-	crypted = in.readBoolean();
+        crypted = in.readBoolean();
 
-	// at 1.16 we introduce md5crypted
+        // at 1.16 we introduce md5crypted
 
-	if (base.getStore().isAtLeast(1,16))
-	  {
-	    md5crypted = in.readBoolean();
-	  }
-	else
-	  {
-	    md5crypted = false;
-	  }
+        if (base.getStore().isAtLeast(1,16))
+          {
+            md5crypted = in.readBoolean();
+          }
+        else
+          {
+            md5crypted = false;
+          }
 
-	// at 2.4 we introduce apachemd5crypted
+        // at 2.4 we introduce apachemd5crypted
 
-	if (base.getStore().isAtLeast(2,4))
-	  {
-	    apachemd5crypted = in.readBoolean();
-	  }
-	else
-	  {
-	    apachemd5crypted = false;
-	  }
+        if (base.getStore().isAtLeast(2,4))
+          {
+            apachemd5crypted = in.readBoolean();
+          }
+        else
+          {
+            apachemd5crypted = false;
+          }
 
-	// at 2.1 we introduced winHashed
+        // at 2.1 we introduced winHashed
 
-	if (base.getStore().isAtLeast(2,1))
-	  {
-	    winHashed = in.readBoolean();
-	  }
-	else
-	  {
-	    winHashed = false;
-	  }
+        if (base.getStore().isAtLeast(2,1))
+          {
+            winHashed = in.readBoolean();
+          }
+        else
+          {
+            winHashed = false;
+          }
 
-	// at 2.5 we introduced sshaHashed
+        // at 2.5 we introduced sshaHashed
 
-	if (base.getStore().isAtLeast(2,5))
-	  {
-	    sshaHashed = in.readBoolean();
-	  }
-	else
-	  {
-	    sshaHashed = false;
-	  }
+        if (base.getStore().isAtLeast(2,5))
+          {
+            sshaHashed = in.readBoolean();
+          }
+        else
+          {
+            sshaHashed = false;
+          }
 
-	// at 2.13 we introduce shaUnixCrypted
+        // at 2.13 we introduce shaUnixCrypted
 
-	if (base.getStore().isAtLeast(2,13))
-	  {
-	    shaUnixCrypted = in.readBoolean();
-	    useShaUnixCrypted512 = in.readBoolean();
-	    shaUnixCryptRounds = in.readInt();
-	  }
-	else
-	  {
-	    shaUnixCrypted = false;
-	    useShaUnixCrypted512 = false;
-	    shaUnixCryptRounds = 5000;
-	  }
+        if (base.getStore().isAtLeast(2,13))
+          {
+            shaUnixCrypted = in.readBoolean();
+            useShaUnixCrypted512 = in.readBoolean();
+            shaUnixCryptRounds = in.readInt();
+          }
+        else
+          {
+            shaUnixCrypted = false;
+            useShaUnixCrypted512 = false;
+            shaUnixCryptRounds = 5000;
+          }
 
-	if (base.getStore().isAtLeast(2,21))
-	  {
-	    bCrypted = in.readBoolean();
-	    bCryptRounds = in.readInt();
-	  }
-	else
-	  {
-	    bCrypted = false;
-	    bCryptRounds = 10;
-	  }
+        if (base.getStore().isAtLeast(2,21))
+          {
+            bCrypted = in.readBoolean();
+            bCryptRounds = in.readInt();
+          }
+        else
+          {
+            bCrypted = false;
+            bCryptRounds = 10;
+          }
 
-	// at 1.10 we introduced storePlaintext
+        // at 1.10 we introduced storePlaintext
 
-	if (base.getStore().isAtLeast(1,10))
-	  {
-	    storePlaintext = in.readBoolean();
-	  }
-	else
-	  {
-	    storePlaintext = false;
-	  }
+        if (base.getStore().isAtLeast(1,10))
+          {
+            storePlaintext = in.readBoolean();
+          }
+        else
+          {
+            storePlaintext = false;
+          }
       }
   }
 
@@ -1059,15 +1059,15 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (comment != null && !comment.equals(""))
       {
-	xmlOut.startElementIndent("comment");
-	xmlOut.write(comment);
-	xmlOut.endElement("comment");
+        xmlOut.startElementIndent("comment");
+        xmlOut.write(comment);
+        xmlOut.endElement("comment");
       }
 
     if (!visibility)
       {
-	xmlOut.startElementIndent("invisible");
-	xmlOut.endElement("invisible");
+        xmlOut.startElementIndent("invisible");
+        xmlOut.endElement("invisible");
       }
 
     xmlOut.startElementIndent("typedef");
@@ -1075,336 +1075,336 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     switch (field_type)
       {
       case FieldType.BOOLEAN:
-	xmlOut.attribute("type", "boolean");
-	break;
+        xmlOut.attribute("type", "boolean");
+        break;
       case FieldType.NUMERIC:
-	xmlOut.attribute("type", "numeric");
-	break;
+        xmlOut.attribute("type", "numeric");
+        break;
       case FieldType.FLOAT:
-	xmlOut.attribute("type", "float");
-	break;
+        xmlOut.attribute("type", "float");
+        break;
       case FieldType.FIELDOPTIONS:
-	xmlOut.attribute("type", "options");
-	break;
+        xmlOut.attribute("type", "options");
+        break;
       case FieldType.DATE:
-	xmlOut.attribute("type", "date");
-	break;
+        xmlOut.attribute("type", "date");
+        break;
       case FieldType.STRING:
-	xmlOut.attribute("type", "string");
-	break;
+        xmlOut.attribute("type", "string");
+        break;
       case FieldType.INVID:
-	xmlOut.attribute("type", "invid");
-	break;
+        xmlOut.attribute("type", "invid");
+        break;
       case FieldType.PERMISSIONMATRIX:
-	xmlOut.attribute("type", "permmatrix");
-	break;
+        xmlOut.attribute("type", "permmatrix");
+        break;
       case FieldType.PASSWORD:
-	xmlOut.attribute("type", "password");
-	break;
+        xmlOut.attribute("type", "password");
+        break;
       case FieldType.IP:
-	xmlOut.attribute("type", "ip");
-	break;
+        xmlOut.attribute("type", "ip");
+        break;
       default:
-	throw new RuntimeException("emitXML: unrecognized field type:" + field_type);
+        throw new RuntimeException("emitXML: unrecognized field type:" + field_type);
       }
 
     xmlOut.indentOut();
 
     if (array)
       {
-	nonEmpty = true;
-	xmlOut.startElementIndent("vector");
+        nonEmpty = true;
+        xmlOut.startElementIndent("vector");
 
-	// A limit of 32767 does not need to be specified, as that is
-	// the highest vector size allowed, and so is implicit.
+        // A limit of 32767 does not need to be specified, as that is
+        // the highest vector size allowed, and so is implicit.
 
-	if (limit != Short.MAX_VALUE)
-	  {
-	    xmlOut.attribute("maxSize", java.lang.Short.toString(limit));
-	  }
+        if (limit != Short.MAX_VALUE)
+          {
+            xmlOut.attribute("maxSize", java.lang.Short.toString(limit));
+          }
 
-	xmlOut.endElement("vector");
+        xmlOut.endElement("vector");
       }
 
     if (isBoolean())
       {
-	if (labeled)
-	  {
-	    nonEmpty = true;
-	    xmlOut.startElementIndent("labeled");
-	    xmlOut.attribute("true", trueLabel);
-	    xmlOut.attribute("false", falseLabel);
-	    xmlOut.endElement("labeled");
-	  }
+        if (labeled)
+          {
+            nonEmpty = true;
+            xmlOut.startElementIndent("labeled");
+            xmlOut.attribute("true", trueLabel);
+            xmlOut.attribute("false", falseLabel);
+            xmlOut.endElement("labeled");
+          }
       }
     else if (isString())
       {
-	nonEmpty = true;
+        nonEmpty = true;
 
-	if (minLength != 0)
-	  {
-	    xmlOut.startElementIndent("minlength");
-	    xmlOut.attribute("val", java.lang.Short.toString(minLength));
-	    xmlOut.endElement("minlength");
-	  }
+        if (minLength != 0)
+          {
+            xmlOut.startElementIndent("minlength");
+            xmlOut.attribute("val", java.lang.Short.toString(minLength));
+            xmlOut.endElement("minlength");
+          }
 
-	// A limit of 32767 does not need to be specified, as that is
-	// the largest string size allowed, and so is implicit.
+        // A limit of 32767 does not need to be specified, as that is
+        // the largest string size allowed, and so is implicit.
 
-	if (maxLength != Short.MAX_VALUE)
-	  {
-	    xmlOut.startElementIndent("maxlength");
-	    xmlOut.attribute("val", java.lang.Short.toString(maxLength));
-	    xmlOut.endElement("maxlength");
-	  }
+        if (maxLength != Short.MAX_VALUE)
+          {
+            xmlOut.startElementIndent("maxlength");
+            xmlOut.attribute("val", java.lang.Short.toString(maxLength));
+            xmlOut.endElement("maxlength");
+          }
 
-	if (okChars != null && !okChars.equals(""))
-	  {
-	    xmlOut.startElementIndent("okchars");
-	    xmlOut.attribute("val", okChars);
-	    xmlOut.endElement("okchars");
-	  }
+        if (okChars != null && !okChars.equals(""))
+          {
+            xmlOut.startElementIndent("okchars");
+            xmlOut.attribute("val", okChars);
+            xmlOut.endElement("okchars");
+          }
 
-	if (badChars != null && !badChars.equals(""))
-	  {
-	    xmlOut.startElementIndent("badchars");
-	    xmlOut.attribute("val", badChars);
-	    xmlOut.endElement("badchars");
-	  }
-	
-	if (namespace != null)
-	  {
-	    xmlOut.startElementIndent("namespace");
-	    xmlOut.attribute("val", namespace.getName());
-	    xmlOut.endElement("namespace");
-	  }
+        if (badChars != null && !badChars.equals(""))
+          {
+            xmlOut.startElementIndent("badchars");
+            xmlOut.attribute("val", badChars);
+            xmlOut.endElement("badchars");
+          }
+        
+        if (namespace != null)
+          {
+            xmlOut.startElementIndent("namespace");
+            xmlOut.attribute("val", namespace.getName());
+            xmlOut.endElement("namespace");
+          }
 
-	if (regexpPat != null && !regexpPat.equals(""))
-	  {
-	    xmlOut.startElementIndent("regexp");
-	    xmlOut.attribute("val", regexpPat);
+        if (regexpPat != null && !regexpPat.equals(""))
+          {
+            xmlOut.startElementIndent("regexp");
+            xmlOut.attribute("val", regexpPat);
 
-	    if (regexpDesc != null && !regexpDesc.equals(""))
-	      {
-		xmlOut.attribute("desc", regexpDesc);
-	      }
+            if (regexpDesc != null && !regexpDesc.equals(""))
+              {
+                xmlOut.attribute("desc", regexpDesc);
+              }
 
-	    xmlOut.endElement("regexp");
-	  }
+            xmlOut.endElement("regexp");
+          }
 
-	if (multiLine)
-	  {
-	    xmlOut.startElementIndent("multiline");
-	    xmlOut.endElement("multiline");
-	  }
+        if (multiLine)
+          {
+            xmlOut.startElementIndent("multiline");
+            xmlOut.endElement("multiline");
+          }
       }
     else if (isNumeric())
       {
-	if (namespace != null)
-	  {
-	    nonEmpty = true;
+        if (namespace != null)
+          {
+            nonEmpty = true;
 
-	    xmlOut.startElementIndent("namespace");
-	    xmlOut.attribute("val", namespace.getName());
-	    xmlOut.endElement("namespace");
-	  }
+            xmlOut.startElementIndent("namespace");
+            xmlOut.attribute("val", namespace.getName());
+            xmlOut.endElement("namespace");
+          }
       }
     else if (isIP())
       {
-	if (namespace != null)
-	  {
-	    nonEmpty = true;
+        if (namespace != null)
+          {
+            nonEmpty = true;
 
-	    xmlOut.startElementIndent("namespace");
-	    xmlOut.attribute("val", namespace.getName());
-	    xmlOut.endElement("namespace");
-	  }
+            xmlOut.startElementIndent("namespace");
+            xmlOut.attribute("val", namespace.getName());
+            xmlOut.endElement("namespace");
+          }
       }
     else if (isInvid())
       {
-	if (allowedTarget != -1)
-	  {
-	    DBObjectBase targetObjectBase = null;
-	    nonEmpty = true;
+        if (allowedTarget != -1)
+          {
+            DBObjectBase targetObjectBase = null;
+            nonEmpty = true;
 
-	    xmlOut.startElementIndent("targetobject");
+            xmlOut.startElementIndent("targetobject");
 
-	    if (allowedTarget == -2)
-	      {
-		xmlOut.attribute("name", "*any*");
-	      }
-	    else
-	      {
-		String targetObjectName = null;
-		targetObjectBase = base.getStore().getObjectBase(allowedTarget);
+            if (allowedTarget == -2)
+              {
+                xmlOut.attribute("name", "*any*");
+              }
+            else
+              {
+                String targetObjectName = null;
+                targetObjectBase = base.getStore().getObjectBase(allowedTarget);
 
-		if (targetObjectBase != null)
-		  {
-		    targetObjectName = targetObjectBase.getName();
-		  }
+                if (targetObjectBase != null)
+                  {
+                    targetObjectName = targetObjectBase.getName();
+                  }
 
-		if (targetObjectName != null)
-		  {
-		    xmlOut.attribute("name", XMLUtils.XMLEncode(targetObjectName));
-		  }
-		else
-		  {
-		    xmlOut.attribute("id", java.lang.Short.toString(allowedTarget));
-		  }
-	      }
+                if (targetObjectName != null)
+                  {
+                    xmlOut.attribute("name", XMLUtils.XMLEncode(targetObjectName));
+                  }
+                else
+                  {
+                    xmlOut.attribute("id", java.lang.Short.toString(allowedTarget));
+                  }
+              }
 
-	    xmlOut.endElement("targetobject");
+            xmlOut.endElement("targetobject");
 
-	    if (targetField != -1 && targetField != SchemaConstants.BackLinksField)
-	      {
-		boolean wroteLabel = false;
+            if (targetField != -1 && targetField != SchemaConstants.BackLinksField)
+              {
+                boolean wroteLabel = false;
 
-		xmlOut.startElementIndent("targetfield");
+                xmlOut.startElementIndent("targetfield");
 
-		if (targetObjectBase != null)
-		  {
-		    DBObjectBaseField targetFieldDef = (DBObjectBaseField) targetObjectBase.getField(targetField);
+                if (targetObjectBase != null)
+                  {
+                    DBObjectBaseField targetFieldDef = (DBObjectBaseField) targetObjectBase.getField(targetField);
 
-		    if (targetFieldDef != null)
-		      {
-			xmlOut.attribute("name", XMLUtils.XMLEncode(targetFieldDef.getName()));
-			wroteLabel = true;
-		      }
-		  }
+                    if (targetFieldDef != null)
+                      {
+                        xmlOut.attribute("name", XMLUtils.XMLEncode(targetFieldDef.getName()));
+                        wroteLabel = true;
+                      }
+                  }
 
-		if (!wroteLabel)
-		  {
-		    xmlOut.attribute("id", java.lang.Short.toString(targetField));
-		  }
+                if (!wroteLabel)
+                  {
+                    xmlOut.attribute("id", java.lang.Short.toString(targetField));
+                  }
 
-		xmlOut.endElement("targetfield");
-	      }
+                xmlOut.endElement("targetfield");
+              }
 
-	    if (editInPlace)
-	      {
-		xmlOut.startElementIndent("embedded");
-		xmlOut.endElement("embedded");
-	      }
-	  }
+            if (editInPlace)
+              {
+                xmlOut.startElementIndent("embedded");
+                xmlOut.endElement("embedded");
+              }
+          }
       }
     else if (isPassword())
       {
-	nonEmpty = true;
+        nonEmpty = true;
 
-	if (minLength != 0)
-	  {
-	    xmlOut.startElementIndent("minlength");
-	    xmlOut.attribute("val", java.lang.Short.toString(minLength));
-	    xmlOut.endElement("minlength");
-	  }
-	
-	if (maxLength != Short.MAX_VALUE)
-	  {
-	    xmlOut.startElementIndent("maxlength");
-	    xmlOut.attribute("val", java.lang.Short.toString(maxLength));
-	    xmlOut.endElement("maxlength");
-	  }
+        if (minLength != 0)
+          {
+            xmlOut.startElementIndent("minlength");
+            xmlOut.attribute("val", java.lang.Short.toString(minLength));
+            xmlOut.endElement("minlength");
+          }
+        
+        if (maxLength != Short.MAX_VALUE)
+          {
+            xmlOut.startElementIndent("maxlength");
+            xmlOut.attribute("val", java.lang.Short.toString(maxLength));
+            xmlOut.endElement("maxlength");
+          }
 
-	if (okChars != null && !okChars.equals(""))
-	  {
-	    xmlOut.startElementIndent("okchars");
-	    xmlOut.attribute("val", okChars);
-	    xmlOut.endElement("okchars");
-	  }
+        if (okChars != null && !okChars.equals(""))
+          {
+            xmlOut.startElementIndent("okchars");
+            xmlOut.attribute("val", okChars);
+            xmlOut.endElement("okchars");
+          }
 
-	if (badChars != null && !badChars.equals(""))
-	  {
-	    xmlOut.startElementIndent("badchars");
-	    xmlOut.attribute("val", badChars);
-	    xmlOut.endElement("badchars");
-	  }
+        if (badChars != null && !badChars.equals(""))
+          {
+            xmlOut.startElementIndent("badchars");
+            xmlOut.attribute("val", badChars);
+            xmlOut.endElement("badchars");
+          }
 
-	if (cracklib_check)
-	  {
-	    xmlOut.startElementIndent("cracklib_check");
+        if (cracklib_check)
+          {
+            xmlOut.startElementIndent("cracklib_check");
 
-	    if (cracklib_supergash_exception)
-	      {
-		xmlOut.attribute("exception", "supergash");
-	      }
+            if (cracklib_supergash_exception)
+              {
+                xmlOut.attribute("exception", "supergash");
+              }
 
-	    xmlOut.endElement("cracklib_check");
-	  }
+            xmlOut.endElement("cracklib_check");
+          }
 
-	if (history_check)
-	  {
-	    xmlOut.startElementIndent("history_check");
+        if (history_check)
+          {
+            xmlOut.startElementIndent("history_check");
 
-	    if (history_supergash_exception)
-	      {
-		xmlOut.attribute("exception", "supergash");
-	      }
+            if (history_supergash_exception)
+              {
+                xmlOut.attribute("exception", "supergash");
+              }
 
-	    if (history_depth > 0)
-	      {
-		xmlOut.attribute("depth", Integer.toString(history_depth));
-	      }
+            if (history_depth > 0)
+              {
+                xmlOut.attribute("depth", Integer.toString(history_depth));
+              }
 
-	    xmlOut.endElement("history_check");
-	  }
+            xmlOut.endElement("history_check");
+          }
 
-	if (crypted)
-	  {
-	    xmlOut.startElementIndent("crypted");
-	    xmlOut.endElement("crypted");
-	  }
+        if (crypted)
+          {
+            xmlOut.startElementIndent("crypted");
+            xmlOut.endElement("crypted");
+          }
 
-	if (md5crypted)
-	  {
-	    xmlOut.startElementIndent("md5crypted");
-	    xmlOut.endElement("md5crypted");
-	  }
+        if (md5crypted)
+          {
+            xmlOut.startElementIndent("md5crypted");
+            xmlOut.endElement("md5crypted");
+          }
 
-	if (apachemd5crypted)
-	  {
-	    xmlOut.startElementIndent("apacheMd5crypted");
-	    xmlOut.endElement("apacheMd5crypted");
-	  }
+        if (apachemd5crypted)
+          {
+            xmlOut.startElementIndent("apacheMd5crypted");
+            xmlOut.endElement("apacheMd5crypted");
+          }
 
-	if (winHashed)
-	  {
-	    xmlOut.startElementIndent("winHashed");
-	    xmlOut.endElement("winHashed");
-	  }
+        if (winHashed)
+          {
+            xmlOut.startElementIndent("winHashed");
+            xmlOut.endElement("winHashed");
+          }
 
-	if (sshaHashed)
-	  {
-	    xmlOut.startElementIndent("sshaHashed");
-	    xmlOut.endElement("sshaHashed");
-	  }
+        if (sshaHashed)
+          {
+            xmlOut.startElementIndent("sshaHashed");
+            xmlOut.endElement("sshaHashed");
+          }
 
-	if (bCrypted)
-	  {
-	    xmlOut.startElementIndent("bCrypted");
-	    xmlOut.attribute("rounds", java.lang.Integer.toString(bCryptRounds));
-	    xmlOut.endElement("bCrypted");
-	  }
+        if (bCrypted)
+          {
+            xmlOut.startElementIndent("bCrypted");
+            xmlOut.attribute("rounds", java.lang.Integer.toString(bCryptRounds));
+            xmlOut.endElement("bCrypted");
+          }
 
-	if (shaUnixCrypted)
-	  {
-	    xmlOut.startElementIndent("shaUnixCrypted");
-	    xmlOut.attribute("type", useShaUnixCrypted512 ? "512" : "256");
-	    xmlOut.attribute("rounds", java.lang.Integer.toString(shaUnixCryptRounds));
-	    xmlOut.endElement("shaUnixCrypted");
-	  }
+        if (shaUnixCrypted)
+          {
+            xmlOut.startElementIndent("shaUnixCrypted");
+            xmlOut.attribute("type", useShaUnixCrypted512 ? "512" : "256");
+            xmlOut.attribute("rounds", java.lang.Integer.toString(shaUnixCryptRounds));
+            xmlOut.endElement("shaUnixCrypted");
+          }
 
-	if (storePlaintext)
-	  {
-	    xmlOut.startElementIndent("plaintext");
-	    xmlOut.endElement("plaintext");
-	  }
+        if (storePlaintext)
+          {
+            xmlOut.startElementIndent("plaintext");
+            xmlOut.endElement("plaintext");
+          }
       }
     
     xmlOut.indentIn();
 
     if (nonEmpty)
       {
-	xmlOut.indent();
+        xmlOut.indent();
       }
 
     xmlOut.endElement("typedef");
@@ -1431,24 +1431,24 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isEditing())
       {
-	// "Not in a schema editing context."
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
+        // "Not in a schema editing context."
+        throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
 
     if (root == null || !root.matches("fielddef"))
       {
-	// "DBObjectBaseField.setXML(): next element != open fielddef: {0}"
-	throw new IllegalArgumentException(ts.l("setXML.bad_nextitem", root));
+        // "DBObjectBaseField.setXML(): next element != open fielddef: {0}"
+        throw new IllegalArgumentException(ts.l("setXML.bad_nextitem", root));
       }
 
     field_codeInt = root.getAttrInt("id");
 
     if (field_codeInt == null)
       {
-	// "XML"
-	// "fielddef does not define id attr:\n{0}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("setXML.no_id", root.getTreeString()));
+        // "XML"
+        // "fielddef does not define id attr:\n{0}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("setXML.no_id", root.getTreeString()));
       }
 
     // extract the short
@@ -1459,10 +1459,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (_fieldID < 100)
       {
-	// "XML"
-	// "fielddef defines an id attr out of range.. must be >= 100 for custom fields:\n{0}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("setXML.bad_id", root.getTreeString()));
+        // "XML"
+        // "fielddef defines an id attr out of range.. must be >= 100 for custom fields:\n{0}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("setXML.bad_id", root.getTreeString()));
       }
 
     // we have to set the id before we do anything else, since most
@@ -1472,10 +1472,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not have its id set:\n{0}\n{1}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("setXML.id_failure", root.getTreeString(), retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not have its id set:\n{0}\n{1}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("setXML.id_failure", root.getTreeString(), retVal.getDialogText()));
       }
 
     // swap names if needed.. the DBObjectBase.setXML() will have checked for unique field
@@ -1485,10 +1485,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not have its name set:\n{0}\n{1}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("setXML.name_failure", root.getTreeString(), retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not have its name set:\n{0}\n{1}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("setXML.name_failure", root.getTreeString(), retVal.getDialogText()));
       }
 
     // look at the nodes under root, set up this field def based on
@@ -1498,169 +1498,169 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     for (int i = 0; i < children.length; i++)
       {
-	item = children[i];
+        item = children[i];
 
-	if (item.matches("comment"))
-	  {
-	    XMLItem commentChildren[] = item.getChildren();
+        if (item.matches("comment"))
+          {
+            XMLItem commentChildren[] = item.getChildren();
 
-	    if (commentChildren == null)
-	      {
-		_comment = null;
-		continue;
-	      }
+            if (commentChildren == null)
+              {
+                _comment = null;
+                continue;
+              }
 
-	    if (commentChildren.length != 1)
-	      {
-		// "XML"
-		// "unrecognized children in comment block:\n{0}"
-		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  ts.l("setXML.bad_commentChild", root.getTreeString()));
-	      }
+            if (commentChildren.length != 1)
+              {
+                // "XML"
+                // "unrecognized children in comment block:\n{0}"
+                return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                  ts.l("setXML.bad_commentChild", root.getTreeString()));
+              }
 
-	    _comment = commentChildren[0].getString();
-	  }
-	else if (item.matches("invisible"))
-	  {
-	    _visibility = false;	// need a setter?
-	  }
-	else if (item.matches("typedef"))
-	  {
-	    if (typeRead)
-	      {
-		// "XML"
-		// "redundant type definition for this field:\n{0}"
-		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  ts.l("setXML.dup_type", root.getTreeString()));
-	      }
+            _comment = commentChildren[0].getString();
+          }
+        else if (item.matches("invisible"))
+          {
+            _visibility = false;        // need a setter?
+          }
+        else if (item.matches("typedef"))
+          {
+            if (typeRead)
+              {
+                // "XML"
+                // "redundant type definition for this field:\n{0}"
+                return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                  ts.l("setXML.dup_type", root.getTreeString()));
+              }
 
-	    if (item.getAttrStr("type") == null)
-	      {
-		// "XML"
-		// "typedef tag does not contain type attribute:\n{0}"
-		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  ts.l("setXML.missing_type", root.getTreeString()));
-	      }
+            if (item.getAttrStr("type") == null)
+              {
+                // "XML"
+                // "typedef tag does not contain type attribute:\n{0}"
+                return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                  ts.l("setXML.missing_type", root.getTreeString()));
+              }
 
-	    if (item.getAttrStr("type").equals("float"))
-	      {
-		// float has no subchildren, all we need to
-		// do is attempt to do a setType
+            if (item.getAttrStr("type").equals("float"))
+              {
+                // float has no subchildren, all we need to
+                // do is attempt to do a setType
 
-		retVal = setType(FieldType.FLOAT);
+                retVal = setType(FieldType.FLOAT);
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    return retVal;
-		  }
-	      }
-	    else if (item.getAttrStr("type").equals("options"))
-	      {
-		//  has no subchildren, all we need to
-		// do is attempt to do a setType
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    return retVal;
+                  }
+              }
+            else if (item.getAttrStr("type").equals("options"))
+              {
+                //  has no subchildren, all we need to
+                // do is attempt to do a setType
 
-		retVal = setType(FieldType.FIELDOPTIONS);
+                retVal = setType(FieldType.FIELDOPTIONS);
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    return retVal;
-		  }
-	      }
-	    else if (item.getAttrStr("type").equals("date"))
-	      {
-		// date has no subchildren, all we need to
-		// do is attempt to do a setType
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    return retVal;
+                  }
+              }
+            else if (item.getAttrStr("type").equals("date"))
+              {
+                // date has no subchildren, all we need to
+                // do is attempt to do a setType
 
-		retVal = setType(FieldType.DATE);
+                retVal = setType(FieldType.DATE);
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    return retVal;
-		  }
-	      }
-	    else if (item.getAttrStr("type").equals("permmatrix"))
-	      {
-		// permmatrix has no subchildren, all we need to
-		// do is attempt to do a setType
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    return retVal;
+                  }
+              }
+            else if (item.getAttrStr("type").equals("permmatrix"))
+              {
+                // permmatrix has no subchildren, all we need to
+                // do is attempt to do a setType
 
-		retVal = setType(FieldType.PERMISSIONMATRIX);
+                retVal = setType(FieldType.PERMISSIONMATRIX);
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    return retVal;
-		  }
-	      }
-	    else if (item.getAttrStr("type").equals("string"))
-	      {
-		retVal = doStringXML(item);
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    return retVal;
+                  }
+              }
+            else if (item.getAttrStr("type").equals("string"))
+              {
+                retVal = doStringXML(item);
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    return retVal;
-		  }
-	      }
-	    else if (item.getAttrStr("type").equals("invid"))
-	      {
-		retVal = doInvidXML(item, doLinkResolve);
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    return retVal;
+                  }
+              }
+            else if (item.getAttrStr("type").equals("invid"))
+              {
+                retVal = doInvidXML(item, doLinkResolve);
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    return retVal;
-		  }
-	      }
-	    else if (item.getAttrStr("type").equals("numeric"))
-	      {
-		retVal = doNumericXML(item);
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    return retVal;
+                  }
+              }
+            else if (item.getAttrStr("type").equals("numeric"))
+              {
+                retVal = doNumericXML(item);
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    return retVal;
-		  }
-	      }
-	    else if (item.getAttrStr("type").equals("password"))
-	      {
-		retVal = doPasswordXML(item);
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    return retVal;
+                  }
+              }
+            else if (item.getAttrStr("type").equals("password"))
+              {
+                retVal = doPasswordXML(item);
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    return retVal;
-		  }
-	      }
-	    else if (item.getAttrStr("type").equals("ip"))
-	      {		
-		retVal = doIPXML(item);
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    return retVal;
+                  }
+              }
+            else if (item.getAttrStr("type").equals("ip"))
+              {         
+                retVal = doIPXML(item);
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    return retVal;
-		  }
-	      }
-	    else if (item.getAttrStr("type").equals("boolean"))
-	      {
-		retVal = doBooleanXML(item);
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    return retVal;
+                  }
+              }
+            else if (item.getAttrStr("type").equals("boolean"))
+              {
+                retVal = doBooleanXML(item);
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    return retVal;
-		  }
-	      }
-	    else
-	      {
-		// "XML"
-		// "typedef tag does not contain recognizable type attribute: {0} in fielddef tree:\n{1}"
-		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  ts.l("setXML.unrecognized_type", item, root.getTreeString()));
-	      }
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    return retVal;
+                  }
+              }
+            else
+              {
+                // "XML"
+                // "typedef tag does not contain recognizable type attribute: {0} in fielddef tree:\n{1}"
+                return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                  ts.l("setXML.unrecognized_type", item, root.getTreeString()));
+              }
 
-	    typeRead = true;
-	  }
-	else
-	  {
-	    // "XML"
-	    // "unrecognized XML item: {0} in fielddef tree:\n{1}"
-	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					      ts.l("setXML.unrecognized_item", item, root.getTreeString()));
-	  }
+            typeRead = true;
+          }
+        else
+          {
+            // "XML"
+            // "unrecognized XML item: {0} in fielddef tree:\n{1}"
+            return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                              ts.l("setXML.unrecognized_item", item, root.getTreeString()));
+          }
       }
 
     // set the options
@@ -1669,10 +1669,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set comment:\n{0}\n{1}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("setXML.failed_field_comment", root.getTreeString(), retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set comment:\n{0}\n{1}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("setXML.failed_field_comment", root.getTreeString(), retVal.getDialogText()));
       }
 
     visibility = _visibility;
@@ -1707,15 +1707,15 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!root.getAttrStr("type").equals("string"))
       {
-	// "bad XMLItem tree:\n{0}"
-	throw new IllegalArgumentException(ts.l("global.badItemTree", root));
+        // "bad XMLItem tree:\n{0}"
+        throw new IllegalArgumentException(ts.l("global.badItemTree", root));
       }
 
     retVal = setType(FieldType.STRING);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     // the <typedef type="string"> node can have children
@@ -1725,70 +1725,70 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (typeChildren != null)
       {
-	for (int j = 0; j < typeChildren.length; j++)
-	  {
-	    XMLItem child = typeChildren[j];
+        for (int j = 0; j < typeChildren.length; j++)
+          {
+            XMLItem child = typeChildren[j];
 
-	    if (child.matches("vector"))
-	      {
-		_vect = true;
+            if (child.matches("vector"))
+              {
+                _vect = true;
 
-		Integer vectSize = child.getAttrInt("maxSize");
+                Integer vectSize = child.getAttrInt("maxSize");
 
-		if (vectSize != null)
-		  {
-		    _maxSize = vectSize.shortValue();
-		  }
-	      }
-	    else if (child.matches("minlength"))
-	      {
-		Integer val = child.getAttrInt("val");
+                if (vectSize != null)
+                  {
+                    _maxSize = vectSize.shortValue();
+                  }
+              }
+            else if (child.matches("minlength"))
+              {
+                Integer val = child.getAttrInt("val");
 
-		if (val != null)
-		  {
-		    _minlength = val.shortValue();
-		  }
-	      }
-	    else if (child.matches("maxlength"))
-	      {
-		Integer val = child.getAttrInt("val");
+                if (val != null)
+                  {
+                    _minlength = val.shortValue();
+                  }
+              }
+            else if (child.matches("maxlength"))
+              {
+                Integer val = child.getAttrInt("val");
 
-		if (val != null)
-		  {
-		    _maxlength = val.shortValue();
-		  }
-	      }
-	    else if (child.matches("okchars"))
-	      {
-		_okChars = child.getAttrStr("val");
-	      }
-	    else if (child.matches("badchars"))
-	      {
-		_badChars = child.getAttrStr("val");
-	      }
-	    else if (child.matches("regexp"))
-	      {
-		_regexp = child.getAttrStr("val");
-		_regexp_desc = child.getAttrStr("desc");
-	      }
-	    else if (child.matches("multiline"))
-	      {
-		_multiline = true;
-	      }
-	    else if (child.matches("namespace"))
-	      {
-		_namespace = child.getAttrStr("val");
-	      }
-	    else
-	      {
-		// "XML"
-		// "Unrecognized string typedef entity: {0}\nIn field def:\n{1}"
-		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  ts.l("doStringXML.bad_string_typedef_item",
-						       child,
-						       root.getTreeString()));
-	      }
-	  }
+                if (val != null)
+                  {
+                    _maxlength = val.shortValue();
+                  }
+              }
+            else if (child.matches("okchars"))
+              {
+                _okChars = child.getAttrStr("val");
+              }
+            else if (child.matches("badchars"))
+              {
+                _badChars = child.getAttrStr("val");
+              }
+            else if (child.matches("regexp"))
+              {
+                _regexp = child.getAttrStr("val");
+                _regexp_desc = child.getAttrStr("desc");
+              }
+            else if (child.matches("multiline"))
+              {
+                _multiline = true;
+              }
+            else if (child.matches("namespace"))
+              {
+                _namespace = child.getAttrStr("val");
+              }
+            else
+              {
+                // "XML"
+                // "Unrecognized string typedef entity: {0}\nIn field def:\n{1}"
+                return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                  ts.l("doStringXML.bad_string_typedef_item",
+                                                       child,
+                                                       root.getTreeString()));
+              }
+          }
       }
 
     // now do all the setting
@@ -1797,133 +1797,133 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set vector bit to {0}:\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_vector_op",
-					       Boolean.valueOf(_vect),
-					       root.getTreeString(),
-					       retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set vector bit to {0}:\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doStringXML.bad_vector_op",
+                                               Boolean.valueOf(_vect),
+                                               root.getTreeString(),
+                                               retVal.getDialogText()));
       }
-		
+                
     if (_vect)
       {
-	retVal = setMaxArraySize(_maxSize);
-	
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    // "XML"
-	    // "fielddef could not set vector maximum size: {0,number,#}\n{1}\n{2}"
-	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					      ts.l("doStringXML.bad_vector_limit",
-						   Integer.valueOf(_maxSize),
-						   root.getTreeString(),
-						   retVal.getDialogText()));
-	  }
+        retVal = setMaxArraySize(_maxSize);
+        
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            // "XML"
+            // "fielddef could not set vector maximum size: {0,number,#}\n{1}\n{2}"
+            return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                              ts.l("doStringXML.bad_vector_limit",
+                                                   Integer.valueOf(_maxSize),
+                                                   root.getTreeString(),
+                                                   retVal.getDialogText()));
+          }
       }
 
     retVal = setMinLength(_minlength);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set min length: {0,number,#}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_min_length",
-					       Integer.valueOf(_minlength),
-					       root.getTreeString(),
-					       retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set min length: {0,number,#}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doStringXML.bad_min_length",
+                                               Integer.valueOf(_minlength),
+                                               root.getTreeString(),
+                                               retVal.getDialogText()));
       }
 
     retVal = setMaxLength(_maxlength);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set max length: {0,number,#}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_max_length",
-					       Integer.valueOf(_maxlength),
-					       root.getTreeString(),
-					       retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set max length: {0,number,#}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doStringXML.bad_max_length",
+                                               Integer.valueOf(_maxlength),
+                                               root.getTreeString(),
+                                               retVal.getDialogText()));
       }
 
     retVal = setOKChars(_okChars);
     
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set ok chars: {0}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_ok_chars",
-					       _okChars,
-					       root.getTreeString(),
-					       retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set ok chars: {0}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doStringXML.bad_ok_chars",
+                                               _okChars,
+                                               root.getTreeString(),
+                                               retVal.getDialogText()));
       }
     
     retVal = setBadChars(_badChars);
     
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set bad chars: {0}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_bad_chars",
-					       _badChars,
-					       root.getTreeString(),
-					       retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set bad chars: {0}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doStringXML.bad_bad_chars",
+                                               _badChars,
+                                               root.getTreeString(),
+                                               retVal.getDialogText()));
       }
 
     retVal = setRegexpPat(_regexp);
     
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set regular expression: {0}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_regexp",
-					       _regexp,
-					       root.getTreeString(),
-					       retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set regular expression: {0}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doStringXML.bad_regexp",
+                                               _regexp,
+                                               root.getTreeString(),
+                                               retVal.getDialogText()));
       }
 
     retVal = setRegexpDesc(_regexp_desc);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set regular expression description: {0}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_regexp_desc",
-					       _regexp_desc,
-					       root.getTreeString(),
-					       retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set regular expression description: {0}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doStringXML.bad_regexp_desc",
+                                               _regexp_desc,
+                                               root.getTreeString(),
+                                               retVal.getDialogText()));
       }
 
     retVal = setMultiLine(_multiline);
     
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set multiline: {0}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_multiline",
-					       Boolean.valueOf(_multiline),
-					       root.getTreeString(),
-					       retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set multiline: {0}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doStringXML.bad_multiline",
+                                               Boolean.valueOf(_multiline),
+                                               root.getTreeString(),
+                                               retVal.getDialogText()));
       }
 
     retVal = setNameSpace(_namespace);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set namespace: {0}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doStringXML.bad_namespace",
-					       _namespace,
-					       root.getTreeString(),
-					       retVal.getDialogText()));					  
+        // "XML"
+        // "fielddef could not set namespace: {0}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doStringXML.bad_namespace",
+                                               _namespace,
+                                               root.getTreeString(),
+                                               retVal.getDialogText()));                                          
       }
 
     return null;
@@ -1949,15 +1949,15 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!root.getAttrStr("type").equals("boolean"))
       {
-	// "bad XMLItem tree:\n{0}"
-	throw new IllegalArgumentException(ts.l("global.badItemTree", root));
+        // "bad XMLItem tree:\n{0}"
+        throw new IllegalArgumentException(ts.l("global.badItemTree", root));
       }
 
     retVal = setType(FieldType.BOOLEAN);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     // the <typedef type="boolean"> node can have children
@@ -1967,26 +1967,26 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (typeChildren != null)
       {
-	for (int j = 0; j < typeChildren.length; j++)
-	  {
-	    XMLItem child = typeChildren[j];
+        for (int j = 0; j < typeChildren.length; j++)
+          {
+            XMLItem child = typeChildren[j];
 
-	    if (child.matches("labeled"))
-	      {
-		_labeled = true;
-		_trueLabel = child.getAttrStr("true");
-		_falseLabel = child.getAttrStr("true");
-	      }
-	    else
-	      {
-		// "XML"
-		// "Unrecognized boolean typedef entity: {0}\nIn field def:\n{1}"
-		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  ts.l("doBooleanXML.bad_boolean_typedef_item",
-						       child,
-						       root.getTreeString()));
-	      }
-	  }
+            if (child.matches("labeled"))
+              {
+                _labeled = true;
+                _trueLabel = child.getAttrStr("true");
+                _falseLabel = child.getAttrStr("true");
+              }
+            else
+              {
+                // "XML"
+                // "Unrecognized boolean typedef entity: {0}\nIn field def:\n{1}"
+                return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                  ts.l("doBooleanXML.bad_boolean_typedef_item",
+                                                       child,
+                                                       root.getTreeString()));
+              }
+          }
       }
 
     // now do all the setting
@@ -1995,42 +1995,42 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set labeled bit to {0}:\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doBooleanXML.bad_labeled_bit",
-					       Boolean.valueOf(_labeled),
-					       root.getTreeString(),
-					       retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set labeled bit to {0}:\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doBooleanXML.bad_labeled_bit",
+                                               Boolean.valueOf(_labeled),
+                                               root.getTreeString(),
+                                               retVal.getDialogText()));
       }
-		
+                
     if (_labeled)
       {
-	retVal = setTrueLabel(_trueLabel);
-	
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    // "XML"
-	    // "fielddef could not set true label to {0}\n{1}\n{2}"
-	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					      ts.l("doBooleanXML.bad_true_label",
-						   _trueLabel,
-						   root.getTreeString(),
-						   retVal.getDialogText()));
-	  }
+        retVal = setTrueLabel(_trueLabel);
+        
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            // "XML"
+            // "fielddef could not set true label to {0}\n{1}\n{2}"
+            return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                              ts.l("doBooleanXML.bad_true_label",
+                                                   _trueLabel,
+                                                   root.getTreeString(),
+                                                   retVal.getDialogText()));
+          }
 
-	retVal = setFalseLabel(_falseLabel);
-	
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    // "XML"
-	    // "fielddef could not set false label to {0}\n{1}\n{2}"
-	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					      ts.l("doBooleanXML.bad_false_label",
-						   _falseLabel,
-						   root.getTreeString(),
-						   retVal.getDialogText()));
-	  }
+        retVal = setFalseLabel(_falseLabel);
+        
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            // "XML"
+            // "fielddef could not set false label to {0}\n{1}\n{2}"
+            return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                              ts.l("doBooleanXML.bad_false_label",
+                                                   _falseLabel,
+                                                   root.getTreeString(),
+                                                   retVal.getDialogText()));
+          }
       }
 
     return null;
@@ -2073,15 +2073,15 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!root.getAttrStr("type").equals("password"))
       {
-	// "bad XMLItem tree:\n{0}"
-	throw new IllegalArgumentException(ts.l("global.badItemTree", root));
+        // "bad XMLItem tree:\n{0}"
+        throw new IllegalArgumentException(ts.l("global.badItemTree", root));
       }
 
     retVal = setType(FieldType.PASSWORD);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     // the <typedef type="password"> node can have children
@@ -2091,149 +2091,149 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (typeChildren != null)
       {
-	for (int j = 0; j < typeChildren.length; j++)
-	  {
-	    XMLItem child = typeChildren[j];
+        for (int j = 0; j < typeChildren.length; j++)
+          {
+            XMLItem child = typeChildren[j];
 
-	    if (child.matches("minlength"))
-	      {
-		Integer val = child.getAttrInt("val");
+            if (child.matches("minlength"))
+              {
+                Integer val = child.getAttrInt("val");
 
-		if (val != null)
-		  {
-		    _minlength = val.shortValue();
-		  }
-	      }
-	    else if (child.matches("maxlength"))
-	      {
-		Integer val = child.getAttrInt("val");
+                if (val != null)
+                  {
+                    _minlength = val.shortValue();
+                  }
+              }
+            else if (child.matches("maxlength"))
+              {
+                Integer val = child.getAttrInt("val");
 
-		if (val != null)
-		  {
-		    _maxlength = val.shortValue();
-		  }
-	      }
-	    else if (child.matches("okchars"))
-	      {
-		_okChars = child.getAttrStr("val");
-	      }
-	    else if (child.matches("badchars"))
-	      {
-		_badChars = child.getAttrStr("val");
-	      }
-	    else if (child.matches("cracklib_check"))
-	      {
-		_cracklib_check = true;
+                if (val != null)
+                  {
+                    _maxlength = val.shortValue();
+                  }
+              }
+            else if (child.matches("okchars"))
+              {
+                _okChars = child.getAttrStr("val");
+              }
+            else if (child.matches("badchars"))
+              {
+                _badChars = child.getAttrStr("val");
+              }
+            else if (child.matches("cracklib_check"))
+              {
+                _cracklib_check = true;
 
-		if ("supergash".equals(child.getAttrStr("exception")))
-		  {
-		    _cracklib_supergash_exception = true;
-		  }
-	      }
-	    else if (child.matches("history_check"))
-	      {
-		_history_check = true;
+                if ("supergash".equals(child.getAttrStr("exception")))
+                  {
+                    _cracklib_supergash_exception = true;
+                  }
+              }
+            else if (child.matches("history_check"))
+              {
+                _history_check = true;
 
-		if ("supergash".equals(child.getAttrStr("exception")))
-		  {
-		    _history_supergash_exception = true;
-		  }
+                if ("supergash".equals(child.getAttrStr("exception")))
+                  {
+                    _history_supergash_exception = true;
+                  }
 
-		Integer history_depth = child.getAttrInt("depth");
+                Integer history_depth = child.getAttrInt("depth");
 
-		if (history_depth != null)
-		  {
-		    _history_depth = history_depth.intValue();
-		  }
-	      }
-	    else if (child.matches("crypted"))
-	      {
-		_crypted = true;
-	      }
-	    else if (child.matches("md5crypted"))
-	      {
-		_md5crypted = true;
-	      }
-	    else if (child.matches("apacheMd5crypted"))
-	      {
-		_apachemd5crypted = true;
-	      }
-	    else if (child.matches("winHashed"))
-	      {
-		_winHashed = true;
-	      }
-	    else if (child.matches("sshaHashed"))
-	      {
-		_sshaHashed = true;
-	      }
-	    else if (child.matches("bCrypted"))
-	      {
-		_bCrypted = true;
+                if (history_depth != null)
+                  {
+                    _history_depth = history_depth.intValue();
+                  }
+              }
+            else if (child.matches("crypted"))
+              {
+                _crypted = true;
+              }
+            else if (child.matches("md5crypted"))
+              {
+                _md5crypted = true;
+              }
+            else if (child.matches("apacheMd5crypted"))
+              {
+                _apachemd5crypted = true;
+              }
+            else if (child.matches("winHashed"))
+              {
+                _winHashed = true;
+              }
+            else if (child.matches("sshaHashed"))
+              {
+                _sshaHashed = true;
+              }
+            else if (child.matches("bCrypted"))
+              {
+                _bCrypted = true;
 
-		Integer roundCount = child.getAttrInt("rounds");
+                Integer roundCount = child.getAttrInt("rounds");
 
-		if (roundCount != null)
-		  {
-		    _bCryptRounds = roundCount.intValue();
+                if (roundCount != null)
+                  {
+                    _bCryptRounds = roundCount.intValue();
 
-		    if (_bCryptRounds < 4 || _bCryptRounds > 31)
-		      {
-			// "fielddef tried to set an invalid bcrypt round count (must be >= 4 and <= 31): {0}\n{1}"
-			return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-							  ts.l("doPasswordXML.bad_bcrypt_rounds",
-							       child, root.getTreeString()));
-		      }
-		  }
-		
-	      }
-	    else if (child.matches("shaUnixCrypted"))
-	      {
-		_shaUnixCrypted = true;
+                    if (_bCryptRounds < 4 || _bCryptRounds > 31)
+                      {
+                        // "fielddef tried to set an invalid bcrypt round count (must be >= 4 and <= 31): {0}\n{1}"
+                        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                          ts.l("doPasswordXML.bad_bcrypt_rounds",
+                                                               child, root.getTreeString()));
+                      }
+                  }
+                
+              }
+            else if (child.matches("shaUnixCrypted"))
+              {
+                _shaUnixCrypted = true;
 
-		String typeVal = child.getAttrStr("type");
+                String typeVal = child.getAttrStr("type");
 
-		if (typeVal == null || typeVal.equals("256"))
-		  {
-		    _shaUnixCrypt512 = false;
-		  }
-		else if (typeVal.equals("512"))
-		  {
-		    _shaUnixCrypt512 = true;
-		  }
-		else
-		  {
-		    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						      ts.l("doPasswordXML.bad_sha_unix_type",
-							   child, root.getTreeString()));
-		  }
+                if (typeVal == null || typeVal.equals("256"))
+                  {
+                    _shaUnixCrypt512 = false;
+                  }
+                else if (typeVal.equals("512"))
+                  {
+                    _shaUnixCrypt512 = true;
+                  }
+                else
+                  {
+                    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                      ts.l("doPasswordXML.bad_sha_unix_type",
+                                                           child, root.getTreeString()));
+                  }
 
-		Integer roundCount = child.getAttrInt("rounds");
+                Integer roundCount = child.getAttrInt("rounds");
 
-		if (roundCount != null)
-		  {
-		    _shaUnixCryptRounds = roundCount.intValue();
+                if (roundCount != null)
+                  {
+                    _shaUnixCryptRounds = roundCount.intValue();
 
-		    if (_shaUnixCryptRounds < 1000 || _shaUnixCryptRounds > 999999999)
-		      {
-			return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-							  ts.l("doPasswordXML.bad_sha_unix_rounds",
-							       child, root.getTreeString()));
-		      }
-		  }
-	      }
-	    else if (child.matches("plaintext"))
-	      {
-		_plaintext = true;
-	      }
-	    else
-	      {
-		// "XML"
-		// "Unrecognized password typedef entity: {0}\nIn field def:\n{1}"
-		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  ts.l("doPasswordXML.bad_password_typedef_item",
-						       child, root.getTreeString()));
-	      }
-	  }
+                    if (_shaUnixCryptRounds < 1000 || _shaUnixCryptRounds > 999999999)
+                      {
+                        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                          ts.l("doPasswordXML.bad_sha_unix_rounds",
+                                                               child, root.getTreeString()));
+                      }
+                  }
+              }
+            else if (child.matches("plaintext"))
+              {
+                _plaintext = true;
+              }
+            else
+              {
+                // "XML"
+                // "Unrecognized password typedef entity: {0}\nIn field def:\n{1}"
+                return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                  ts.l("doPasswordXML.bad_password_typedef_item",
+                                                       child, root.getTreeString()));
+              }
+          }
       }
 
     // now do all the setting
@@ -2242,205 +2242,205 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set min length: {0,number,#}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_min_length",
-					       Integer.valueOf(_minlength),
-					       root.getTreeString(), retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set min length: {0,number,#}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doPasswordXML.bad_min_length",
+                                               Integer.valueOf(_minlength),
+                                               root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setMaxLength(_maxlength);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set max length: {0,number,#}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_max_length", Integer.valueOf(_maxlength),
-					       root.getTreeString(), retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set max length: {0,number,#}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doPasswordXML.bad_max_length", Integer.valueOf(_maxlength),
+                                               root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setOKChars(_okChars);
     
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set ok chars: {0}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_ok_chars", _okChars,
-					       root.getTreeString(), retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set ok chars: {0}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doPasswordXML.bad_ok_chars", _okChars,
+                                               root.getTreeString(), retVal.getDialogText()));
       }
     
     retVal = setBadChars(_badChars);
     
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set bad chars: {0}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_bad_chars", _badChars,
-					       root.getTreeString(), retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set bad chars: {0}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doPasswordXML.bad_bad_chars", _badChars,
+                                               root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setCracklibChecked(_cracklib_check, _cracklib_supergash_exception);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set cracklib_check flags: {0}, {1}\n{2}\n{3}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_cracklib",
-					       Boolean.valueOf(_cracklib_check), Boolean.valueOf(_cracklib_supergash_exception),
-					       root.getTreeString(), retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set cracklib_check flags: {0}, {1}\n{2}\n{3}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doPasswordXML.bad_cracklib",
+                                               Boolean.valueOf(_cracklib_check), Boolean.valueOf(_cracklib_supergash_exception),
+                                               root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setHistoryChecked(_history_check, _history_supergash_exception, _history_depth);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set history_check flags: {0}, {1}, {2}\n{3}\n{4}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_history_check",
-					       Boolean.valueOf(_history_check), Boolean.valueOf(_history_supergash_exception), _history_depth,
-					       root.getTreeString(), retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set history_check flags: {0}, {1}, {2}\n{3}\n{4}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doPasswordXML.bad_history_check",
+                                               Boolean.valueOf(_history_check), Boolean.valueOf(_history_supergash_exception), _history_depth,
+                                               root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setCrypted(_crypted);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set crypted flag: {0}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_crypted", Boolean.valueOf(_crypted),
-					       root.getTreeString(), retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set crypted flag: {0}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doPasswordXML.bad_crypted", Boolean.valueOf(_crypted),
+                                               root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setMD5Crypted(_md5crypted);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set md5 crypted flag: {0}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_md5_crypted", Boolean.valueOf(_md5crypted),
-					       root.getTreeString(), retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set md5 crypted flag: {0}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doPasswordXML.bad_md5_crypted", Boolean.valueOf(_md5crypted),
+                                               root.getTreeString(), retVal.getDialogText()));
       }
 
     retVal = setApacheMD5Crypted(_apachemd5crypted);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set md5 crypted flag: {0}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_apache_md5_crypted",
-					       Boolean.valueOf(_apachemd5crypted),
-					       root.getTreeString(),
-					       retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set md5 crypted flag: {0}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doPasswordXML.bad_apache_md5_crypted",
+                                               Boolean.valueOf(_apachemd5crypted),
+                                               root.getTreeString(),
+                                               retVal.getDialogText()));
       }
 
     retVal = setWinHashed(_winHashed);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set windows hashing flag: {0}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_windows_hashed",
-					       Boolean.valueOf(_winHashed),
-					       root.getTreeString(),
-					       retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set windows hashing flag: {0}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doPasswordXML.bad_windows_hashed",
+                                               Boolean.valueOf(_winHashed),
+                                               root.getTreeString(),
+                                               retVal.getDialogText()));
       }
 
     retVal = setSSHAHashed(_sshaHashed);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set SSHA hashing flag: {0}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_ssha_hashed",
-					       Boolean.valueOf(_sshaHashed),
-					       root.getTreeString(),
-					       retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set SSHA hashing flag: {0}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doPasswordXML.bad_ssha_hashed",
+                                               Boolean.valueOf(_sshaHashed),
+                                               root.getTreeString(),
+                                               retVal.getDialogText()));
       }
 
     retVal = setBCrypted(_bCrypted);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set BCrypt hashing flag: {0}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_bcrypt_hashed",
-					       Boolean.valueOf(_bCrypted),
-					       root.getTreeString(),
-					       retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set BCrypt hashing flag: {0}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doPasswordXML.bad_bcrypt_hashed",
+                                               Boolean.valueOf(_bCrypted),
+                                               root.getTreeString(),
+                                               retVal.getDialogText()));
       }
 
     if (_bCrypted)
       {
-	retVal = setBCryptRounds(_bCryptRounds);
+        retVal = setBCryptRounds(_bCryptRounds);
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    // we should already have caught any XML error above,
-	    // here, so I'm not going to bother wrapping the error
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            // we should already have caught any XML error above,
+            // here, so I'm not going to bother wrapping the error
 
-	    return retVal;
-	  }
+            return retVal;
+          }
       }
 
     retVal = setShaUnixCrypted(_shaUnixCrypted);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set SHA Unix Crypt hashing flag: {0}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_sha_unix_crypted",
-					       Boolean.valueOf(_shaUnixCrypted),
-					       root.getTreeString(),
-					       retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set SHA Unix Crypt hashing flag: {0}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doPasswordXML.bad_sha_unix_crypted",
+                                               Boolean.valueOf(_shaUnixCrypted),
+                                               root.getTreeString(),
+                                               retVal.getDialogText()));
       }
 
     if (_shaUnixCrypted)
       {
-	retVal = setShaUnixCrypted512(_shaUnixCrypt512);
+        retVal = setShaUnixCrypted512(_shaUnixCrypt512);
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    // we should already have caught any XML error above,
-	    // here, so I'm not going to bother wrapping the error
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            // we should already have caught any XML error above,
+            // here, so I'm not going to bother wrapping the error
 
-	    return retVal;
-	  }
-	
-	retVal = setShaUnixCryptRounds(_shaUnixCryptRounds);
+            return retVal;
+          }
+        
+        retVal = setShaUnixCryptRounds(_shaUnixCryptRounds);
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    // we should already have caught any XML error above,
-	    // here, so I'm not going to bother wrapping the error
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            // we should already have caught any XML error above,
+            // here, so I'm not going to bother wrapping the error
 
-	    return retVal;
-	  }
+            return retVal;
+          }
       }
 
     retVal = setPlainText(_plaintext);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set plaintext flag: {0}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doPasswordXML.bad_plaintext",
-					       Boolean.valueOf(_plaintext),
-					       root.getTreeString(),
-					       retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set plaintext flag: {0}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doPasswordXML.bad_plaintext",
+                                               Boolean.valueOf(_plaintext),
+                                               root.getTreeString(),
+                                               retVal.getDialogText()));
       }
 
     return null;
@@ -2466,15 +2466,15 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!root.getAttrStr("type").equals("ip"))
       {
-	// "bad XMLItem tree:\n{0}"
-	throw new IllegalArgumentException(ts.l("global.badItemTree", root));
+        // "bad XMLItem tree:\n{0}"
+        throw new IllegalArgumentException(ts.l("global.badItemTree", root));
       }
 
     retVal = setType(FieldType.IP);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     // the <typedef type="ip"> node can have children
@@ -2484,34 +2484,34 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (typeChildren != null)
       {
-	for (int j = 0; j < typeChildren.length; j++)
-	  {
-	    XMLItem child = typeChildren[j];
+        for (int j = 0; j < typeChildren.length; j++)
+          {
+            XMLItem child = typeChildren[j];
 
-	    if (child.matches("vector"))
-	      {
-		_vect = true;
+            if (child.matches("vector"))
+              {
+                _vect = true;
 
-		Integer vectSize = child.getAttrInt("maxSize");
+                Integer vectSize = child.getAttrInt("maxSize");
 
-		if (vectSize != null)
-		  {
-		    _maxSize = vectSize.shortValue();
-		  }
-	      }
-	    else if (child.matches("namespace"))
-	      {
-		_namespace = child.getAttrStr("val");
-	      }
-	    else
-	      {
-		// "XML"
-		// "Unrecognized IP typedef entity: {0}\nIn field def:\n{1}"
-		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  ts.l("doIPXML.bad_ip_typedef_item",
-						       child, root.getTreeString()));
-	      }
-	  }
+                if (vectSize != null)
+                  {
+                    _maxSize = vectSize.shortValue();
+                  }
+              }
+            else if (child.matches("namespace"))
+              {
+                _namespace = child.getAttrStr("val");
+              }
+            else
+              {
+                // "XML"
+                // "Unrecognized IP typedef entity: {0}\nIn field def:\n{1}"
+                return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                  ts.l("doIPXML.bad_ip_typedef_item",
+                                                       child, root.getTreeString()));
+              }
+          }
       }
 
     // now do all the setting
@@ -2520,42 +2520,42 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set vector bit to {0}:\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doIPXML.bad_vector_op",
-					       Boolean.valueOf(_vect),
-					       root.getTreeString(),
-					       retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set vector bit to {0}:\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doIPXML.bad_vector_op",
+                                               Boolean.valueOf(_vect),
+                                               root.getTreeString(),
+                                               retVal.getDialogText()));
       }
-		
+                
     if (_vect)
       {
-	retVal = setMaxArraySize(_maxSize);
-	
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    // "XML"
-	    // "fielddef could not set vector maximum size: {0,number,#}\n{1}\n{2}"
-	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					      ts.l("doIPXML.bad_vector_limit",
-						   Integer.valueOf(_maxSize),
-						   root.getTreeString(),
-						   retVal.getDialogText()));
-	  }
+        retVal = setMaxArraySize(_maxSize);
+        
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            // "XML"
+            // "fielddef could not set vector maximum size: {0,number,#}\n{1}\n{2}"
+            return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                              ts.l("doIPXML.bad_vector_limit",
+                                                   Integer.valueOf(_maxSize),
+                                                   root.getTreeString(),
+                                                   retVal.getDialogText()));
+          }
       }
 
     retVal = setNameSpace(_namespace);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set namespace: {0}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doIPXML.bad_namespace",
-					       _namespace,
-					       root.getTreeString(),
-					       retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set namespace: {0}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doIPXML.bad_namespace",
+                                               _namespace,
+                                               root.getTreeString(),
+                                               retVal.getDialogText()));
       }
 
     return null;
@@ -2579,15 +2579,15 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!root.getAttrStr("type").equals("numeric"))
       {
-	// "bad XMLItem tree:\n{0}"
-	throw new IllegalArgumentException(ts.l("global.badItemTree", root));
+        // "bad XMLItem tree:\n{0}"
+        throw new IllegalArgumentException(ts.l("global.badItemTree", root));
       }
 
     retVal = setType(FieldType.NUMERIC);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     // the <typedef type="numeric"> node can have children
@@ -2597,23 +2597,23 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (typeChildren != null)
       {
-	for (int j = 0; j < typeChildren.length; j++)
-	  {
-	    XMLItem child = typeChildren[j];
-	    
-	    if (child.matches("namespace"))
-	      {
-		_namespace = child.getAttrStr("val");
-	      }
-	    else
-	      {
-		// "XML"
-		// "Unrecognized numeric typedef entity: {0}\nIn field def:\n{1}"
-		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  ts.l("doNumericXML.bad_numeric_typedef_item",
-						       child, root.getTreeString()));
-	      }
-	  }
+        for (int j = 0; j < typeChildren.length; j++)
+          {
+            XMLItem child = typeChildren[j];
+            
+            if (child.matches("namespace"))
+              {
+                _namespace = child.getAttrStr("val");
+              }
+            else
+              {
+                // "XML"
+                // "Unrecognized numeric typedef entity: {0}\nIn field def:\n{1}"
+                return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                  ts.l("doNumericXML.bad_numeric_typedef_item",
+                                                       child, root.getTreeString()));
+              }
+          }
       }
 
     // now do all the setting
@@ -2622,11 +2622,11 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set namespace: {0}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doNumericXML.bad_namespace", _namespace,
-					       root.getTreeString(), retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set namespace: {0}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doNumericXML.bad_namespace", _namespace,
+                                               root.getTreeString(), retVal.getDialogText()));
       }
 
     return null;
@@ -2656,15 +2656,15 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!root.getAttrStr("type").equals("invid"))
       {
-	// "bad XMLItem tree:\n{0}"
-	throw new IllegalArgumentException(ts.l("global.badItemTree", root));
+        // "bad XMLItem tree:\n{0}"
+        throw new IllegalArgumentException(ts.l("global.badItemTree", root));
       }
 
     retVal = setType(FieldType.INVID);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     // the <typedef type="invid"> node can have children
@@ -2674,62 +2674,62 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (typeChildren != null)
       {
-	for (int j = 0; j < typeChildren.length; j++)
-	  {
-	    XMLItem child = typeChildren[j];
+        for (int j = 0; j < typeChildren.length; j++)
+          {
+            XMLItem child = typeChildren[j];
 
-	    if (child.matches("vector"))
-	      {
-		_vect = true;
+            if (child.matches("vector"))
+              {
+                _vect = true;
 
-		Integer vectSize = child.getAttrInt("maxSize");
+                Integer vectSize = child.getAttrInt("maxSize");
 
-		if (vectSize != null)
-		  {
-		    _maxSize = vectSize.shortValue();
-		  }
-	      }
-	    else if (child.matches("targetobject"))
-	      {
-		_targetobjectStr = XMLUtils.XMLDecode(child.getAttrStr("name"));
-		_targetobject = child.getAttrInt("id");
-	    
-		if (_targetobjectStr == null && _targetobject == null)
-		  {
-		    // "XML"
-		    // "targetobject item does not specify name or id: {0}\n{1}\n{2}"
-		    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						      ts.l("doInvidXML.bad_target_def",
-							   child, root.getTreeString(), retVal.getDialogText()));
-		  }
-	      }
-	    else if (child.matches("targetfield"))
-	      {
-		_targetfieldStr = XMLUtils.XMLDecode(child.getAttrStr("name"));
-		_targetfield = child.getAttrInt("id");
+                if (vectSize != null)
+                  {
+                    _maxSize = vectSize.shortValue();
+                  }
+              }
+            else if (child.matches("targetobject"))
+              {
+                _targetobjectStr = XMLUtils.XMLDecode(child.getAttrStr("name"));
+                _targetobject = child.getAttrInt("id");
+            
+                if (_targetobjectStr == null && _targetobject == null)
+                  {
+                    // "XML"
+                    // "targetobject item does not specify name or id: {0}\n{1}\n{2}"
+                    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                      ts.l("doInvidXML.bad_target_def",
+                                                           child, root.getTreeString(), retVal.getDialogText()));
+                  }
+              }
+            else if (child.matches("targetfield"))
+              {
+                _targetfieldStr = XMLUtils.XMLDecode(child.getAttrStr("name"));
+                _targetfield = child.getAttrInt("id");
 
-		if (_targetfieldStr == null && _targetfield == null)
-		  {
-		    // "XML"
-		    // "targetfield item does not specify name or id: {0}\n{1}\n{2}"
-		    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						      ts.l("doInvidXML.bad_target_field_def",
-							   child, root.getTreeString(), retVal.getDialogText()));
-		  }
-	      }
-	    else if (child.matches("embedded"))
-	      {
-		_embedded = true;
-	      }
-	    else
-	      {
-		// "XML"
-		// "Unrecognized invid typedef entity: {0}\nIn field def:\n{1}"
-		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  ts.l("doInvidXML.bad_invid_typedef_item",
-						       child, root.getTreeString()));
-	      }
-	  }
+                if (_targetfieldStr == null && _targetfield == null)
+                  {
+                    // "XML"
+                    // "targetfield item does not specify name or id: {0}\n{1}\n{2}"
+                    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                      ts.l("doInvidXML.bad_target_field_def",
+                                                           child, root.getTreeString(), retVal.getDialogText()));
+                  }
+              }
+            else if (child.matches("embedded"))
+              {
+                _embedded = true;
+              }
+            else
+              {
+                // "XML"
+                // "Unrecognized invid typedef entity: {0}\nIn field def:\n{1}"
+                return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                  ts.l("doInvidXML.bad_invid_typedef_item",
+                                                       child, root.getTreeString()));
+              }
+          }
       }
 
     // now do all the setting
@@ -2738,143 +2738,143 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set vector bit to {0}:\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doInvidXML.bad_vector_op",
-					       Boolean.valueOf(_vect), root.getTreeString(), retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set vector bit to {0}:\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doInvidXML.bad_vector_op",
+                                               Boolean.valueOf(_vect), root.getTreeString(), retVal.getDialogText()));
       }
-		
+                
     if (_vect)
       {
-	retVal = setMaxArraySize(_maxSize);
-	
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    // "XML"
-	    // "fielddef could not set vector maximum size: {0,number,#}\n{1}\n{2}"
-	    return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					      ts.l("doInvidXML.bad_vector_limit", Integer.valueOf(_maxSize),
-						   root.getTreeString(), retVal.getDialogText()));
-	  }
+        retVal = setMaxArraySize(_maxSize);
+        
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            // "XML"
+            // "fielddef could not set vector maximum size: {0,number,#}\n{1}\n{2}"
+            return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                              ts.l("doInvidXML.bad_vector_limit", Integer.valueOf(_maxSize),
+                                                   root.getTreeString(), retVal.getDialogText()));
+          }
       }
 
     if (doLinkResolve)
       {
-	// first we try to set the target object type, if any
+        // first we try to set the target object type, if any
 
-	if (_targetobjectStr != null)
-	  {
-	    if (_targetobjectStr.equals("*any*"))
-	      {
-		retVal = setTargetBase((short)-2);
-	      }
-	    else
-	      {
-		retVal = setTargetBase(_targetobjectStr);
-	      }
+        if (_targetobjectStr != null)
+          {
+            if (_targetobjectStr.equals("*any*"))
+              {
+                retVal = setTargetBase((short)-2);
+              }
+            else
+              {
+                retVal = setTargetBase(_targetobjectStr);
+              }
 
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		// "XML"
-		// "fielddef could not set invid target base: {0}\n{1}\n{2}"
-		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  ts.l("doInvidXML.bad_invid_target_base",
-						       _targetobjectStr,
-						       root.getTreeString(),
-						       retVal.getDialogText()));
-	      }
-	  }
-	else if (_targetobject != null)
-	  {
-	    retVal = setTargetBase(_targetobject.shortValue());
+            if (!ReturnVal.didSucceed(retVal))
+              {
+                // "XML"
+                // "fielddef could not set invid target base: {0}\n{1}\n{2}"
+                return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                  ts.l("doInvidXML.bad_invid_target_base",
+                                                       _targetobjectStr,
+                                                       root.getTreeString(),
+                                                       retVal.getDialogText()));
+              }
+          }
+        else if (_targetobject != null)
+          {
+            retVal = setTargetBase(_targetobject.shortValue());
 
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		// "XML"
-		// "fielddef could not set invid target base: {0,number,#}\n{1}\n{2}"
-		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  ts.l("doInvidXML.bad_invid_target_base_num",
-						       _targetobject,
-						       root.getTreeString(),
-						       retVal.getDialogText()));
-	      }
-	  }
-	else // both null
-	  {
-	    retVal = setTargetBase(null);
+            if (!ReturnVal.didSucceed(retVal))
+              {
+                // "XML"
+                // "fielddef could not set invid target base: {0,number,#}\n{1}\n{2}"
+                return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                  ts.l("doInvidXML.bad_invid_target_base_num",
+                                                       _targetobject,
+                                                       root.getTreeString(),
+                                                       retVal.getDialogText()));
+              }
+          }
+        else // both null
+          {
+            retVal = setTargetBase(null);
 
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		// "XML"
-		// "fielddef could not clear invid target base:\n{0}\n{1}"
-		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  ts.l("doInvidXML.bad_null_target_base",
-						       root.getTreeString(),
-						       retVal.getDialogText()));
-	      }
-	  }
+            if (!ReturnVal.didSucceed(retVal))
+              {
+                // "XML"
+                // "fielddef could not clear invid target base:\n{0}\n{1}"
+                return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                  ts.l("doInvidXML.bad_null_target_base",
+                                                       root.getTreeString(),
+                                                       retVal.getDialogText()));
+              }
+          }
 
-	// then we try to set the target field, if any.  we don't
-	// track target fields for edit-in-place invid fields, though.
+        // then we try to set the target field, if any.  we don't
+        // track target fields for edit-in-place invid fields, though.
 
-	if (_targetfieldStr != null && !_embedded)
-	  {
-	    retVal = setTargetField(_targetfieldStr);
+        if (_targetfieldStr != null && !_embedded)
+          {
+            retVal = setTargetField(_targetfieldStr);
 
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		// "XML"
-		// "fielddef could not set invid target field: {0}\n{1}\n{2}"
-		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  ts.l("doInvidXML.bad_invid_target_field",
-						       _targetfieldStr,
-						       root.getTreeString(),
-						       retVal.getDialogText()));
-	      }
-	  }
-	else if (_targetfield != null && !_embedded)
-	  {
-	    retVal = setTargetField(_targetfield.shortValue());
+            if (!ReturnVal.didSucceed(retVal))
+              {
+                // "XML"
+                // "fielddef could not set invid target field: {0}\n{1}\n{2}"
+                return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                  ts.l("doInvidXML.bad_invid_target_field",
+                                                       _targetfieldStr,
+                                                       root.getTreeString(),
+                                                       retVal.getDialogText()));
+              }
+          }
+        else if (_targetfield != null && !_embedded)
+          {
+            retVal = setTargetField(_targetfield.shortValue());
 
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		// "XML"
-		// "fielddef could not set invid target field: {0,number,#}\n{1}\n{2}"
-		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  ts.l("doInvidXML.bad_invid_target_field_num",
-						       _targetfield,
-						       root.getTreeString(),
-						       retVal.getDialogText()));
-	      }
-	  }
-	else // both null
-	  {
-	    retVal = setTargetField(null);
+            if (!ReturnVal.didSucceed(retVal))
+              {
+                // "XML"
+                // "fielddef could not set invid target field: {0,number,#}\n{1}\n{2}"
+                return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                  ts.l("doInvidXML.bad_invid_target_field_num",
+                                                       _targetfield,
+                                                       root.getTreeString(),
+                                                       retVal.getDialogText()));
+              }
+          }
+        else // both null
+          {
+            retVal = setTargetField(null);
 
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		// "XML"
-		// "fielddef could not clear invid target field:\n{0}\n{1}"
-		return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-						  ts.l("doInvidXML.bad_null_target_field",
-						       root.getTreeString(),
-						       retVal.getDialogText()));
-	      }
-	  }
+            if (!ReturnVal.didSucceed(retVal))
+              {
+                // "XML"
+                // "fielddef could not clear invid target field:\n{0}\n{1}"
+                return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                                  ts.l("doInvidXML.bad_null_target_field",
+                                                       root.getTreeString(),
+                                                       retVal.getDialogText()));
+              }
+          }
       }
 
     retVal = setEditInPlace(_embedded);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// "XML"
-	// "fielddef could not set embedded status: {0}\n{1}\n{2}"
-	return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
-					  ts.l("doInvidXML.bad_embedded_status",
-					       Boolean.valueOf(_embedded),
-					       root.getTreeString(),
-					       retVal.getDialogText()));
+        // "XML"
+        // "fielddef could not set embedded status: {0}\n{1}\n{2}"
+        return Ganymede.createErrorDialog(ts.l("global.xmlErrorTitle"),
+                                          ts.l("doInvidXML.bad_embedded_status",
+                                               Boolean.valueOf(_embedded),
+                                               root.getTreeString(),
+                                               retVal.getDialogText()));
       }
 
     return null;
@@ -2965,12 +2965,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       case CREATING:
       case INITIALIZING:
       case LOADING:
-	return false;
+        return false;
       }
 
     if (inUseCache == null)
       {
-	inUseCache = Boolean.valueOf(((DBObjectBase) this.getBase()).fieldInUse(this));
+        inUseCache = Boolean.valueOf(((DBObjectBase) this.getBase()).fieldInUse(this));
       }
 
     return inUseCache.booleanValue();
@@ -2996,7 +2996,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     if (template == null)
       {
-	template = new FieldTemplate(this);
+        template = new FieldTemplate(this);
       }
     
     return template;
@@ -3045,64 +3045,64 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (isEditingProtectedBuiltInField())
       {
-	// "Schema Editing Error"
-	// "Can''t change the name of a system field."
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setName.system_field"));
+        // "Schema Editing Error"
+        // "Can''t change the name of a system field."
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("setName.system_field"));
       }
     
     if (name == null || name.equals(""))
       {
-	// "Schema Editing Error"
-	// "Can''t have a null or empty name."
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setName.null_name"));
+        // "Schema Editing Error"
+        // "Can''t have a null or empty name."
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("setName.null_name"));
       }
 
     // no change, no problem
 
     if (name.equals(field_name))
       {
-	return null;
+        return null;
       }
 
     if (!XMLNameValidator.isValidGanymedeName(name))
       {
-	// "Schema Editing Error"
-	// ""{0}" is not an acceptable Ganymede field name.\n\nAll Ganymede field names must be acceptable XML element names, save that spaces are allowed and underscores are not."
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setName.invalid_ganymede_name", name));
+        // "Schema Editing Error"
+        // ""{0}" is not an acceptable Ganymede field name.\n\nAll Ganymede field names must be acceptable XML element names, save that spaces are allowed and underscores are not."
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("setName.invalid_ganymede_name", name));
       }
 
     DBObjectBaseField otherField = (DBObjectBaseField) ((DBObjectBase) getBase()).getField(name);
 
     if (otherField != null)
       {
-	if (!swapIfNeeded)
-	  {
-	    // "Schema Editing Error"
-	    // "Can''t set a duplicate field name, "{0}" is already taken."
-	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("setName.duplicate_name", name));
-	  }
-	else
-	  {
-	    // the xml schema code is setting this name, and it will have checked
-	    // to make sure the name is unique.. we'll give the field that already
-	    // has the name we want our name in trade, and then take the new name
-	    // ourselves.  the xml schema code will fix it up when it goes to
-	    // set the name on the other.
+        if (!swapIfNeeded)
+          {
+            // "Schema Editing Error"
+            // "Can''t set a duplicate field name, "{0}" is already taken."
+            return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                              ts.l("setName.duplicate_name", name));
+          }
+        else
+          {
+            // the xml schema code is setting this name, and it will have checked
+            // to make sure the name is unique.. we'll give the field that already
+            // has the name we want our name in trade, and then take the new name
+            // ourselves.  the xml schema code will fix it up when it goes to
+            // set the name on the other.
 
-	    String oldName = this.field_name;
-	    this.field_name = name;
+            String oldName = this.field_name;
+            this.field_name = name;
 
-	    ReturnVal retVal = otherField.setName(oldName);
+            ReturnVal retVal = otherField.setName(oldName);
 
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		return retVal;
-	      }
-	  }
+            if (!ReturnVal.didSucceed(retVal))
+              {
+                return retVal;
+              }
+          }
       }
 
     field_name = name;
@@ -3133,10 +3133,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (s == null || s.equals(""))
       {
-	// "Schema Editing Error"
-	// "Can''t have a null or empty tab name."
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setTabName.null_name"));
+        // "Schema Editing Error"
+        // "Can''t have a null or empty tab name."
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("setTabName.null_name"));
       }
 
     this.tabName = s;
@@ -3167,11 +3167,11 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (s == null || s.equals(""))
       {
-	comment = null;
+        comment = null;
       }
     else
       {
-	comment = s;
+        comment = s;
       }
     
     return null;
@@ -3226,36 +3226,36 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (type < FIRSTFIELD || type > LASTFIELD)
       {
-	// "Type argument out of range"
-	throw new IllegalStateException(ts.l("setType.bad_type"));
+        // "Type argument out of range"
+        throw new IllegalStateException(ts.l("setType.bad_type"));
       }
 
     // if no change, no problem.
 
     if (type == field_type)
       {
-	return null;
+        return null;
       }
 
     if (isEditingProtectedGanymedeDefinedField())
       {
-	// "Can''t change the type of a system field: {0}"
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("global.system_field_change_attempt", this.toString()));
+        // "Can''t change the type of a system field: {0}"
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("global.system_field_change_attempt", this.toString()));
       }
 
     if (isInUse())
       {
-	// "Can''t change the type of a field which is in use in the database: {0}"
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setType.in_use", this.toString()));
+        // "Can''t change the type of a field which is in use in the database: {0}"
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("setType.in_use", this.toString()));
       }
 
     if (isInvid())
       {
-	// need to check to make sure no other invid field definitions are
-	// pointing to this field somehow, else changing type might break
-	// that other field definition
+        // need to check to make sure no other invid field definitions are
+        // pointing to this field somehow, else changing type might break
+        // that other field definition
       }
 
     field_type = type;
@@ -3264,7 +3264,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!(isString() || isInvid() || isIP()))
       {
-	array = false;
+        array = false;
       }
 
     return null;
@@ -3414,31 +3414,31 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (array == b)
       {
-	return null;
+        return null;
       }
 
     if (isEditingProtectedGanymedeDefinedField())
       {
-	// array-ness is way too critical to be edited, even in mildly variable system
-	// fields like username in the user object
+        // array-ness is way too critical to be edited, even in mildly variable system
+        // fields like username in the user object
 
-	// "Can''t change the vector status of a system field: {0}"
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setArray.any_system_field", this.toString()));
+        // "Can''t change the vector status of a system field: {0}"
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("setArray.any_system_field", this.toString()));
       }
 
     if (b != array && isInUse())
       {
-	// "Can''t change the vector status of a field which is in use in the database: {0}"
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setArray.in_use", this.toString()));
+        // "Can''t change the vector status of a field which is in use in the database: {0}"
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("setArray.in_use", this.toString()));
       }
 
     if (b && !(isString() || isInvid() || isIP()))
       {
-	// "Can''t set this field type ({0}) to be a vector field: {1}"
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setArray.bad_type", this.getTypeDesc(), this.toString()));
+        // "Can''t set this field type ({0}) to be a vector field: {1}"
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("setArray.bad_type", this.getTypeDesc(), this.toString()));
       }
 
     array = b;
@@ -3475,32 +3475,32 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (id < 0)
       {
-	// "Field id number {0,number,#} is out of range: {1}."
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setID.out_of_range", Integer.valueOf(id),
-					       this.toString()));
+        // "Field id number {0,number,#} is out of range: {1}."
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("setID.out_of_range", Integer.valueOf(id),
+                                               this.toString()));
       }
 
     // no change, no problem
 
     if (id == field_code)
       {
-	return null;
+        return null;
       }
 
     if (field_code >= 0)
       {
-	// "Can''t change field id number for a previously created field definition: {0}."
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setID.already_set", this.toString()));
+        // "Can''t change field id number for a previously created field definition: {0}."
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("setID.already_set", this.toString()));
       }
 
     if (base.getField(id) != null)
       {
-	// "Can''t set field id number {0,number,#} on field {1}.  That field id number is already in use by another field definition."
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setID.in_use", Integer.valueOf(id),
-					       this.toString()));
+        // "Can''t set field id number {0,number,#} on field {1}.  That field id number is already in use by another field definition."
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("setID.in_use", Integer.valueOf(id),
+                                               this.toString()));
       }
 
     field_code = id;
@@ -3533,7 +3533,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     if (!array)
       {
-	throw new IllegalStateException(ts.l("global.not_array", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_array", this.toString()));
       }
 
     return limit;
@@ -3551,34 +3551,34 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!array)
       {
-	throw new IllegalStateException(ts.l("global.not_array", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_array", this.toString()));
       }
 
     // no change, no problem
 
     if (limit == this.limit)
       {
-	return null;
+        return null;
       }
 
     if (isEditingProtectedGanymedeDefinedField())
       {
-	// array sizes need not be screwed with in the system fields
+        // array sizes need not be screwed with in the system fields
 
-	// "Can''t change the vector limits of a system field: {0}"
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setMaxArraySize.any_system_field", this.toString()));
+        // "Can''t change the vector limits of a system field: {0}"
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("setMaxArraySize.any_system_field", this.toString()));
       }
 
     this.limit = limit;
 
     if (isEditing() && isInUse())
       {
-	return warning1;
+        return warning1;
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -3596,7 +3596,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     if (!isBoolean())
       {
-	throw new IllegalStateException(ts.l("global.not_boolean", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_boolean", this.toString()));
       }
     
     return labeled;
@@ -3617,13 +3617,13 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (isEditingProtectedBuiltInField())
       {
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("global.system_field", this.toString()));
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("global.system_field", this.toString()));
       }
 
     if (!isBoolean())
       {
-	throw new IllegalStateException(ts.l("global.not_boolean", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_boolean", this.toString()));
       }
     
     labeled = b;
@@ -3644,7 +3644,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     if (isLabeled())
       {
-	return trueLabel;
+        return trueLabel;
       }
 
     throw new IllegalStateException(ts.l("global.not_labeled_boolean", this.toString()));
@@ -3666,17 +3666,17 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (isEditingProtectedBuiltInField())
       {
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("global.system_field", this.toString()));
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("global.system_field", this.toString()));
       }
 
     if (isLabeled())
       {
-	trueLabel = label;
+        trueLabel = label;
       }
     else
       {
-	throw new IllegalStateException(ts.l("global.not_labeled_boolean", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_labeled_boolean", this.toString()));
       }
 
     return null;
@@ -3695,7 +3695,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     if (isLabeled())
       {
-	return falseLabel;
+        return falseLabel;
       }
 
     throw new IllegalStateException(ts.l("global.not_labeled_boolean", this.toString()));
@@ -3717,17 +3717,17 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (isEditingProtectedBuiltInField())
       {
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("global.system_field", this.toString()));
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("global.system_field", this.toString()));
       }
 
     if (isLabeled())
       {
-	falseLabel = label;
+        falseLabel = label;
       }
     else
       {
-	throw new IllegalStateException(ts.l("global.not_labeled_boolean", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_labeled_boolean", this.toString()));
       }
 
     return null;
@@ -3751,7 +3751,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     if (!isString() && !isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
       }
 
     return minLength;
@@ -3772,31 +3772,31 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isString() && !isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
       }
 
     // no change, no problem
 
     if (val == minLength)
       {
-	return null;
+        return null;
       }
 
     if (isEditingProtectedBuiltInField())
       {
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("global.system_field", this.toString()));
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("global.system_field", this.toString()));
       }
     
     minLength = val;
 
     if (isEditing() && isInUse())
       {
-	return warning1;
+        return warning1;
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -3814,7 +3814,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     if (!isString() && !isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
       }
 
     return maxLength;
@@ -3836,31 +3836,31 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isString() && !isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
       }
 
     // no change, no problem
 
     if (val == maxLength)
       {
-	return null;
+        return null;
       }
 
     if (isEditingProtectedBuiltInField())
       {
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("global.system_field", this.toString()));
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("global.system_field", this.toString()));
       }
     
     maxLength = val;
 
     if (isEditing() && isInUse())
       {
-	return warning1;
+        return warning1;
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -3877,7 +3877,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     if (!isString() && !isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
       }
 
     return okChars;
@@ -3900,31 +3900,31 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (isEditingProtectedBuiltInField())
       {
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("global.system_field", this.toString()));
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("global.system_field", this.toString()));
       }
 
     if (!isString() && !isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
       }
 
     if (s != null && s.equals(""))
       {
-	okChars = null;
+        okChars = null;
       }
     else
       {
-	okChars = s;
+        okChars = s;
       }
 
     if (isEditing() && isInUse())
       {
-	return warning1;
+        return warning1;
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -3942,7 +3942,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     if (!isString() && !isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
       }
 
     return badChars;
@@ -3964,31 +3964,31 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isString() && !isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_string_or_password", this.toString()));
       }
 
     if (isEditingProtectedBuiltInField())
       {
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("global.system_field", this.toString()));
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("global.system_field", this.toString()));
       }
 
     if (s != null && s.equals(""))
       {
-	badChars = null;
+        badChars = null;
       }
     else
       {
-	badChars = s;
+        badChars = s;
       }
 
     if (isEditing() && isInUse())
       {
-	return warning1;
+        return warning1;
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -4006,7 +4006,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     if (!isString())
       {
-	throw new IllegalStateException(ts.l("global.not_string", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_string", this.toString()));
       }
 
     return multiLine;
@@ -4028,13 +4028,13 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isString())
       {
-	throw new IllegalStateException(ts.l("global.not_string", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_string", this.toString()));
       }
 
     if (isEditingProtectedBuiltInField())
       {
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("global.system_field", this.toString()));
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("global.system_field", this.toString()));
       }
 
     multiLine = b;
@@ -4066,7 +4066,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     if (!isString())
       {
-	throw new IllegalStateException(ts.l("global.not_string", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_string", this.toString()));
       }
 
     return regexpPat;
@@ -4086,7 +4086,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     if (!isString())
       {
-	throw new IllegalStateException(ts.l("global.not_string", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_string", this.toString()));
       }
 
     return regexpDesc;
@@ -4107,46 +4107,46 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isString())
       {
-	throw new IllegalStateException(ts.l("global.not_string", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_string", this.toString()));
       }
 
     if (isEditingProtectedBuiltInField())
       {
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("global.system_field", this.toString()));
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("global.system_field", this.toString()));
       }
 
     if (s == null || s.equals(""))
       {
-	regexpPat = null;
-	regexp = null;
+        regexpPat = null;
+        regexp = null;
 
-	return null;
+        return null;
       }
     else
       {
-	try
-	  {
-	    regexp = java.util.regex.Pattern.compile(s);
-	  }
-	catch (java.util.regex.PatternSyntaxException ex)
-	  {
-	    // "Schema Editing Error"
-	    // "Bad regular expression syntax: {0}\n{1}"
-	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("setRegexpPat.bad_pattern", s, ex));
-	  }
+        try
+          {
+            regexp = java.util.regex.Pattern.compile(s);
+          }
+        catch (java.util.regex.PatternSyntaxException ex)
+          {
+            // "Schema Editing Error"
+            // "Bad regular expression syntax: {0}\n{1}"
+            return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                              ts.l("setRegexpPat.bad_pattern", s, ex));
+          }
 
-	regexpPat = s;
+        regexpPat = s;
 
-	if (isEditing() && isInUse())
-	  {
-	    return warning1;
-	  }
-	else
-	  {
-	    return null;
-	  }
+        if (isEditing() && isInUse())
+          {
+            return warning1;
+          }
+        else
+          {
+            return null;
+          }
       }
   }
 
@@ -4166,22 +4166,22 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isString())
       {
-	throw new IllegalStateException(ts.l("global.not_string", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_string", this.toString()));
       }
 
     if (isEditingProtectedBuiltInField())
       {
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("global.system_field", this.toString()));
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("global.system_field", this.toString()));
       }
 
     if (s == null || s.equals(""))
       {
-	regexpDesc = null;
+        regexpDesc = null;
       }
     else
       {
-	regexpDesc = s;
+        regexpDesc = s;
       }
 
     return null;
@@ -4215,11 +4215,11 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (namespace != null)
       {
-	return namespace.getName();
+        return namespace.getName();
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -4243,8 +4243,8 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isString() && !isNumeric() && !isIP())
       {
-	// "Can''t set a namespace constraint on this kind of field ({0}): {1}"
-	throw new IllegalStateException(ts.l("setNameSpace.bad_type", this.getTypeDesc(), this.toString()));
+        // "Can''t set a namespace constraint on this kind of field ({0}): {1}"
+        throw new IllegalStateException(ts.l("setNameSpace.bad_type", this.getTypeDesc(), this.toString()));
       }
 
     // if we are not loading, don't allow a built-in universal field
@@ -4252,161 +4252,161 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (isEditingProtectedBuiltInField())
       {
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("global.system_field", this.toString()));
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("global.system_field", this.toString()));
       }
 
     // no change, no problem
 
     if ((nameSpaceId == null || nameSpaceId.equals("")) && namespace == null)
       {
-	return null;
+        return null;
       }
 
     if (namespace != null && nameSpaceId != null && !nameSpaceId.equals(""))
       {
-	DBNameSpace matchingSpace = base.getStore().getNameSpace(nameSpaceId);
+        DBNameSpace matchingSpace = base.getStore().getNameSpace(nameSpaceId);
 
-	if (matchingSpace == namespace)
-	  {
-	    return null;
-	  }
+        if (matchingSpace == namespace)
+          {
+            return null;
+          }
       }
 
     // see about doing the setting
 
     if (nameSpaceId == null || nameSpaceId.equals(""))
       {
-	// wouldn't it be nice if java had decent support for declared data structures?
+        // wouldn't it be nice if java had decent support for declared data structures?
 
-	if ((base.getTypeID() == SchemaConstants.UserBase && getID() == SchemaConstants.UserUserName) ||
-	    (base.getTypeID() == SchemaConstants.PersonaBase && getID() == SchemaConstants.PersonaLabelField) ||
-	    (base.getTypeID() == SchemaConstants.OwnerBase && getID() == SchemaConstants.OwnerNameField) ||
-	    (base.getTypeID() == SchemaConstants.EventBase && getID() == SchemaConstants.EventToken) ||
-	    (base.getTypeID() == SchemaConstants.RoleBase && getID() == SchemaConstants.RoleName) ||
-	    (base.getTypeID() == SchemaConstants.TaskBase && getID() == SchemaConstants.TaskName) ||
-	    (base.getTypeID() == SchemaConstants.SyncChannelBase && getID() == SchemaConstants.SyncChannelName))
-	  {
-	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("setNameSpace.need_namespace", this.toString()));
-	  }
+        if ((base.getTypeID() == SchemaConstants.UserBase && getID() == SchemaConstants.UserUserName) ||
+            (base.getTypeID() == SchemaConstants.PersonaBase && getID() == SchemaConstants.PersonaLabelField) ||
+            (base.getTypeID() == SchemaConstants.OwnerBase && getID() == SchemaConstants.OwnerNameField) ||
+            (base.getTypeID() == SchemaConstants.EventBase && getID() == SchemaConstants.EventToken) ||
+            (base.getTypeID() == SchemaConstants.RoleBase && getID() == SchemaConstants.RoleName) ||
+            (base.getTypeID() == SchemaConstants.TaskBase && getID() == SchemaConstants.TaskName) ||
+            (base.getTypeID() == SchemaConstants.SyncChannelBase && getID() == SchemaConstants.SyncChannelName))
+          {
+            return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                              ts.l("setNameSpace.need_namespace", this.toString()));
+          }
 
-	if (isEditing())
-	  {
-	    if (!namespace.isSchemaEditInProgress())
-	      {
-		namespace.schemaEditCheckout();
-	      }
-	    
-	    namespace.schemaEditUnregister(base.getTypeID(), getID());
-	  }
+        if (isEditing())
+          {
+            if (!namespace.isSchemaEditInProgress())
+              {
+                namespace.schemaEditCheckout();
+              }
+            
+            namespace.schemaEditUnregister(base.getTypeID(), getID());
+          }
 
-	namespace = null;
+        namespace = null;
 
-	return null;
+        return null;
       }
     else
       {
-	// this field is associated with a namespace.
+        // this field is associated with a namespace.
 
-	Enumeration values;
-	DBNameSpace oldNamespace, tmpNS;
-	
-	/* -- */
+        Enumeration values;
+        DBNameSpace oldNamespace, tmpNS;
+        
+        /* -- */
 
-	oldNamespace = namespace;
-	
-	values = base.getStore().nameSpaces.elements();
-	namespace = null;
+        oldNamespace = namespace;
+        
+        values = base.getStore().nameSpaces.elements();
+        namespace = null;
 
-	while (values.hasMoreElements() && (namespace == null))
-	  {
-	    tmpNS = (DBNameSpace) values.nextElement();
+        while (values.hasMoreElements() && (namespace == null))
+          {
+            tmpNS = (DBNameSpace) values.nextElement();
 
-	    if (tmpNS.getName().equalsIgnoreCase(nameSpaceId))
-	      {
-		namespace = tmpNS;
-	      }
-	  }
+            if (tmpNS.getName().equalsIgnoreCase(nameSpaceId))
+              {
+                namespace = tmpNS;
+              }
+          }
 
-	if (isEditing())
-	  {
-	    if (oldNamespace != null && oldNamespace != namespace)
-	      {
-		if (!oldNamespace.isSchemaEditInProgress())
-		  {
-		    oldNamespace.schemaEditCheckout();
-		  }
-		
-		oldNamespace.schemaEditUnregister(base.getTypeID(), getID());
-	      }
-	    
-	    if (namespace != null && namespace != oldNamespace)
-	      {
-		if (!namespace.isSchemaEditInProgress())
-		  {
-		    namespace.schemaEditCheckout();
-		  }
-		
-		// make sure that we can allocate all values already attached to this
-		// field
-		
-		boolean success = true;
+        if (isEditing())
+          {
+            if (oldNamespace != null && oldNamespace != namespace)
+              {
+                if (!oldNamespace.isSchemaEditInProgress())
+                  {
+                    oldNamespace.schemaEditCheckout();
+                  }
+                
+                oldNamespace.schemaEditUnregister(base.getTypeID(), getID());
+              }
+            
+            if (namespace != null && namespace != oldNamespace)
+              {
+                if (!namespace.isSchemaEditInProgress())
+                  {
+                    namespace.schemaEditCheckout();
+                  }
+                
+                // make sure that we can allocate all values already attached to this
+                // field
+                
+                boolean success = true;
                 DBField lastFieldTried = null;
-		
-		for (DBObject obj: base.getObjects())
-		  {
-		    lastFieldTried = (DBField) obj.getField(getID());
-		    
-		    if (lastFieldTried == null)
-		      {
-			continue;
-		      }
-		    
-		    if (!this.isArray())
-		      {
-			success = namespace.schemaEditRegister(lastFieldTried.key(), lastFieldTried);
-		      }
-		    else
-		      {
-			for (int i = 0; success && i < lastFieldTried.size(); i++)
-			  {
-			    success = namespace.schemaEditRegister(lastFieldTried.key(i), lastFieldTried);
-			  }
-		      }
+                
+                for (DBObject obj: base.getObjects())
+                  {
+                    lastFieldTried = (DBField) obj.getField(getID());
+                    
+                    if (lastFieldTried == null)
+                      {
+                        continue;
+                      }
+                    
+                    if (!this.isArray())
+                      {
+                        success = namespace.schemaEditRegister(lastFieldTried.key(), lastFieldTried);
+                      }
+                    else
+                      {
+                        for (int i = 0; success && i < lastFieldTried.size(); i++)
+                          {
+                            success = namespace.schemaEditRegister(lastFieldTried.key(i), lastFieldTried);
+                          }
+                      }
 
-		    if (!success)
-		      {
-			String fieldDesc = lastFieldTried.toString();
-			String content = lastFieldTried.getValueString();
+                    if (!success)
+                      {
+                        String fieldDesc = lastFieldTried.toString();
+                        String content = lastFieldTried.getValueString();
 
-			namespace.schemaEditUnregister(base.getTypeID(), getID());
-			namespace = oldNamespace;
+                        namespace.schemaEditUnregister(base.getTypeID(), getID());
+                        namespace = oldNamespace;
 
-			// "Can''t set namespace constraint {0} on field
-			// {1} without violating namespace uniqueness
-			// constraint on previously registered
-			// values.\nField {2} had a conflict.\Value(s) in
-			// conflict:{3}"
-			return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-							  ts.l("setNameSpace.can_not_apply",
-							       nameSpaceId,
-							       this.toString(),
-							       fieldDesc,
-							       content));
-		      }
-		  }
-	      }
-	  }
+                        // "Can''t set namespace constraint {0} on field
+                        // {1} without violating namespace uniqueness
+                        // constraint on previously registered
+                        // values.\nField {2} had a conflict.\Value(s) in
+                        // conflict:{3}"
+                        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                                          ts.l("setNameSpace.can_not_apply",
+                                                               nameSpaceId,
+                                                               this.toString(),
+                                                               fieldDesc,
+                                                               content));
+                      }
+                  }
+              }
+          }
 
-	// if we didn't find it, complain.
+        // if we didn't find it, complain.
 
-	if (namespace == null)
-	  {
-	    // "Error, could not find a namespace called {0} to set on field {1}."
-	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("setNameSpace.no_such_namespace", nameSpaceId, this.toString()));
-	  }
+        if (namespace == null)
+          {
+            // "Error, could not find a namespace called {0} to set on field {1}."
+            return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                              ts.l("setNameSpace.no_such_namespace", nameSpaceId, this.toString()));
+          }
       }
 
     return null;
@@ -4444,42 +4444,42 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isInvid())
       {
-	throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
       }
 
     // no change, no harm
 
     if (b == editInPlace)
       {
-	return null;
+        return null;
       }
 
     if (isEditingProtectedGanymedeDefinedField())
       {
-	// "Schema Editing Error"
-	// "Can''t change the type of a system field: {0}."
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("global.system_field_change_attempt", this.toString()));
+        // "Schema Editing Error"
+        // "Can''t change the type of a system field: {0}."
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("global.system_field_change_attempt", this.toString()));
       }
 
     if (isInUse())
       {
-	// "Schema Editing Error"
-	// "Can''t change the editInPlace status type of an Invid field which is in use in the database: {0}."
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setEditInPlace.in_use", this.toString()));
+        // "Schema Editing Error"
+        // "Can''t change the editInPlace status type of an Invid field which is in use in the database: {0}."
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("setEditInPlace.in_use", this.toString()));
       }
     
     editInPlace = b;
 
     if (editInPlace)
       {
-	// we don't target specific fields with embedded invid
-	// fields.. the relationship with the container field in
-	// edit-in-place objects is implicit with embedded invid
-	// fields.
+        // we don't target specific fields with embedded invid
+        // fields.. the relationship with the container field in
+        // edit-in-place objects is implicit with embedded invid
+        // fields.
 
-	targetField = -1;
+        targetField = -1;
       }
 
     return null;
@@ -4498,7 +4498,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     if (!isInvid())
       {
-	throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
       }
 
     return (allowedTarget != -1);
@@ -4521,7 +4521,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     if (!isInvid())
       {
-	throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
       }
 
     return allowedTarget;
@@ -4543,28 +4543,28 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isInvid())
       {
-	throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
       }
 
     // no change, no harm
 
     if (val == allowedTarget)
       {
-	return null;
+        return null;
       }
 
     if (isEditingProtectedGanymedeDefinedField())
       {
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("global.system_field_change_attempt", this.toString()));
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("global.system_field_change_attempt", this.toString()));
       }
 
     // -1 and -2 are valid possible targets
 
     if (val == -1 || val == -2)
       {
-	allowedTarget = val;
-	return null;
+        allowedTarget = val;
+        return null;
       }
 
     // if we're field 0 (owner field) and we're being told to point to
@@ -4572,35 +4572,35 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (field_code == 0 && val == 0)
       {
-	allowedTarget = val;
-	return null;
+        allowedTarget = val;
+        return null;
       }
 
     if (isEditing())
       {
-	if (editor != null)
-	  {
-	    DBObjectBase b = (DBObjectBase) editor.getBase(val);
+        if (editor != null)
+          {
+            DBObjectBase b = (DBObjectBase) editor.getBase(val);
 
-	    if (b == null)
-	      {
-		// "Schema Editing Error"
-		// "Can''t set the target base to base number {0,number,#}.  No such base is defined: {0}."
-		return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-						  ts.l("setTargetBase.bad_target_num", Integer.valueOf(val)));
-	      }
-	  }
+            if (b == null)
+              {
+                // "Schema Editing Error"
+                // "Can''t set the target base to base number {0,number,#}.  No such base is defined: {0}."
+                return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                                  ts.l("setTargetBase.bad_target_num", Integer.valueOf(val)));
+              }
+          }
       }
 
     allowedTarget = val;
 
     if (isEditing() && isInUse())
       {
-	return warning2;
+        return warning2;
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -4620,85 +4620,85 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isInvid())
       {
-	throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
       }
 
     if (baseName == null)
       {
-	if (allowedTarget == -1)
-	  {
-	    return null;		// no change, no harm
-	  }
+        if (allowedTarget == -1)
+          {
+            return null;                // no change, no harm
+          }
 
-	if (isEditingProtectedGanymedeDefinedField())
-	  {
-	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("global.system_field_change_attempt", this.toString()));
-	  }
+        if (isEditingProtectedGanymedeDefinedField())
+          {
+            return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                              ts.l("global.system_field_change_attempt", this.toString()));
+          }
 
-	allowedTarget = -1;
+        allowedTarget = -1;
 
-	if (isEditing() && isInUse())
-	  {
-	    return warning2;
-	  }
-	else
-	  {
-	    return null;
-	  }
+        if (isEditing() && isInUse())
+          {
+            return warning2;
+          }
+        else
+          {
+            return null;
+          }
       }
 
     if (isEditing())
       {
-	// we know we're editing with an editor, since the schema
-	// loading / initialization logic never uses names to
-	// reference bases.
+        // we know we're editing with an editor, since the schema
+        // loading / initialization logic never uses names to
+        // reference bases.
 
-	DBObjectBase b = (DBObjectBase) editor.getBase(baseName);
+        DBObjectBase b = (DBObjectBase) editor.getBase(baseName);
 
-	if (b == null)
-	  {
-	    // "Schema Editing Error"
-	    // "Can''t set the target base for invid field {1} to base {0}.  No such base is defined."
-	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("setTargetBase.bad_target", baseName, this.toString()));
-	  }
+        if (b == null)
+          {
+            // "Schema Editing Error"
+            // "Can''t set the target base for invid field {1} to base {0}.  No such base is defined."
+            return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                              ts.l("setTargetBase.bad_target", baseName, this.toString()));
+          }
 
-	if (b.getTypeID() == allowedTarget)
-	  {
-	    return null;	// no change, no harm
-	  }
+        if (b.getTypeID() == allowedTarget)
+          {
+            return null;        // no change, no harm
+          }
 
-	if (isEditingProtectedGanymedeDefinedField())
-	  {
-	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("global.system_field_change_attempt", this.toString()));
-	  }
+        if (isEditingProtectedGanymedeDefinedField())
+          {
+            return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                              ts.l("global.system_field_change_attempt", this.toString()));
+          }
 
-	allowedTarget = b.getTypeID();
+        allowedTarget = b.getTypeID();
 
-	if (isInUse())
-	  {
-	    return warning2;
-	  }
-	else
-	  {
-	    return null;
-	  }
+        if (isInUse())
+          {
+            return warning2;
+          }
+        else
+          {
+            return null;
+          }
       }
     else
       {
-	DBObjectBase b = (DBObjectBase) base.getStore().getObjectBase(baseName);
+        DBObjectBase b = (DBObjectBase) base.getStore().getObjectBase(baseName);
 
-	// we're loading here.. i don't expect the DBStore
-	// initializeSchema() method to actually use base names, but
-	// if it does for some reason and that base hasn't been
-	// created yet, we're well within our rights to throw a
-	// NullPointerException here. -- jon
+        // we're loading here.. i don't expect the DBStore
+        // initializeSchema() method to actually use base names, but
+        // if it does for some reason and that base hasn't been
+        // created yet, we're well within our rights to throw a
+        // NullPointerException here. -- jon
 
-	allowedTarget = b.getTypeID();
+        allowedTarget = b.getTypeID();
 
-	return null;
+        return null;
       }
   }
 
@@ -4716,7 +4716,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     if (!isInvid())
       {
-	throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
       }
 
     return ((allowedTarget != -1) && (targetField != -1));
@@ -4737,7 +4737,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     if (!isInvid())
       {
-	throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
       }
 
     return targetField;
@@ -4761,75 +4761,75 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isInvid())
       {
-	throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
       }
 
     if (isEditInPlace() && val != -1)
       {
-	// "Can''t set target field on an embedded invid field {0}."
-	throw new IllegalStateException(ts.l("setTargetField.no_embedded_target_field", this.toString()));
+        // "Can''t set target field on an embedded invid field {0}."
+        throw new IllegalStateException(ts.l("setTargetField.no_embedded_target_field", this.toString()));
       }
 
     if (val == targetField)
       {
-	return null;		// no change, no harm
+        return null;            // no change, no harm
       }
 
     if (isEditingProtectedGanymedeDefinedField())
       {
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("global.system_field_change_attempt", this.toString()));
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("global.system_field_change_attempt", this.toString()));
       }
 
     if (val < 0)
       {
-	targetField = val;
+        targetField = val;
 
-	if (isEditing() && isInUse())
-	  {
-	    return warning2;
-	  }
-	else
-	  {
-	    return null;
-	  }
+        if (isEditing() && isInUse())
+          {
+            return warning2;
+          }
+        else
+          {
+            return null;
+          }
       }
 
     if (allowedTarget == -1)
       {
-	// "Can''t set target field on a non-symmetric invid field {0} to {1,number,#}"
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setTargetField.asymmetry_num", this.toString(), Integer.valueOf(val)));
+        // "Can''t set target field on a non-symmetric invid field {0} to {1,number,#}"
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("setTargetField.asymmetry_num", this.toString(), Integer.valueOf(val)));
       }
 
     if (isEditing())
       {
-	if (editor != null)
-	  {
-	    DBObjectBase b = (DBObjectBase) editor.getBase(allowedTarget);
+        if (editor != null)
+          {
+            DBObjectBase b = (DBObjectBase) editor.getBase(allowedTarget);
 
-	    // we're looking up the object that we have pre-selected.. we
-	    // should always set a target object before trying to set a
-	    // field
+            // we're looking up the object that we have pre-selected.. we
+            // should always set a target object before trying to set a
+            // field
 
-	    if (b == null)
-	      {
-		// "Can''t find object type {0,number,#} in order to set target field for {2} to {1,number,#}"
-		return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-						  ts.l("setTargetField.bad_base_num", Integer.valueOf(allowedTarget), Integer.valueOf(val),
-						       this.toString()));
-	      }
-	
-	    DBObjectBaseField bF = b.getFieldDef(val);
+            if (b == null)
+              {
+                // "Can''t find object type {0,number,#} in order to set target field for {2} to {1,number,#}"
+                return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                                  ts.l("setTargetField.bad_base_num", Integer.valueOf(allowedTarget), Integer.valueOf(val),
+                                                       this.toString()));
+              }
+        
+            DBObjectBaseField bF = b.getFieldDef(val);
 
-	    if (bF == null)
-	      {
-		// "Can''t find target field numbered {0,number,#} in order to set target field for {1}."
-		return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-						  ts.l("setTargetField.bad_target_field_num", Integer.valueOf(val),
-						       this.toString()));
-	      }
-	  }
+            if (bF == null)
+              {
+                // "Can''t find target field numbered {0,number,#} in order to set target field for {1}."
+                return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                                  ts.l("setTargetField.bad_target_field_num", Integer.valueOf(val),
+                                                       this.toString()));
+              }
+          }
       }
 
     // if we're loading rather than editing, we'll go ahead and set it
@@ -4840,11 +4840,11 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (isEditing() && isInUse())
       {
-	return warning2;
+        return warning2;
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -4870,32 +4870,32 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isInvid())
       {
-	throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_invid", this.toString()));
       }
 
     if (fieldName == null || fieldName.equals(""))
       {
-	if (targetField == -1)
-	  {
-	    return null;		// no change, no harm
-	  }
+        if (targetField == -1)
+          {
+            return null;                // no change, no harm
+          }
 
-	if (isEditingProtectedGanymedeDefinedField())
-	  {
-	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("global.system_field_change_attempt", this.toString()));
-	  }
+        if (isEditingProtectedGanymedeDefinedField())
+          {
+            return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                              ts.l("global.system_field_change_attempt", this.toString()));
+          }
 
-	targetField = -1;
+        targetField = -1;
 
-	if (isEditing() && isInUse())
-	  {
-	    return warning2;
-	  }
-	else
-	  {
-	    return null;
-	  }
+        if (isEditing() && isInUse())
+          {
+            return warning2;
+          }
+        else
+          {
+            return null;
+          }
       }
 
     // look for fieldName in the base currently specified in
@@ -4903,9 +4903,9 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (allowedTarget == -1 && fieldName != null && !fieldName.equals(""))
       {
-	// "Can''t set target field on a non-symmetric invid field {0} to {1}"
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setTargetField.asymmetry", this.toString(), fieldName));
+        // "Can''t set target field on a non-symmetric invid field {0} to {1}"
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("setTargetField.asymmetry", this.toString(), fieldName));
       }
 
     // The schema loading and initializing logic doesn't use field
@@ -4915,53 +4915,53 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     try
       {
-	if (b == null)
-	  {
-	    // "Can''t find object type {0,number,#} in order to set target field for {2} to {1}"
-	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("setTargetField.bad_base", Integer.valueOf(allowedTarget),
-						   fieldName, this.toString()));
-	  }
-	
-	bF = b.getField(fieldName);
+        if (b == null)
+          {
+            // "Can''t find object type {0,number,#} in order to set target field for {2} to {1}"
+            return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                              ts.l("setTargetField.bad_base", Integer.valueOf(allowedTarget),
+                                                   fieldName, this.toString()));
+          }
+        
+        bF = b.getField(fieldName);
 
-	if (bF == null)
-	  {
-	    // "Can''t find target field named {0} in order to set target field for {1}."
-	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("setTargetField.bad_target_field", fieldName, this.toString()));
-	  }
+        if (bF == null)
+          {
+            // "Can''t find target field named {0} in order to set target field for {1}."
+            return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                              ts.l("setTargetField.bad_target_field", fieldName, this.toString()));
+          }
 
-	if (bF.getID() == targetField)
-	  {
-	    return null;	// no change, no harm, no warning needed
-	  }
+        if (bF.getID() == targetField)
+          {
+            return null;        // no change, no harm, no warning needed
+          }
 
-	// remember, system fields are initialized outside of the
-	// context of the editing system, there should never be a
-	// reason to call setTargetField() on a system field when
-	// editing
+        // remember, system fields are initialized outside of the
+        // context of the editing system, there should never be a
+        // reason to call setTargetField() on a system field when
+        // editing
 
-	if (isEditingProtectedGanymedeDefinedField())
-	  {
-	    return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					      ts.l("global.system_field_change_attempt", this.toString()));
-	  }
+        if (isEditingProtectedGanymedeDefinedField())
+          {
+            return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                              ts.l("global.system_field_change_attempt", this.toString()));
+          }
 
-	targetField = bF.getID();
+        targetField = bF.getID();
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("caught remote: " + ex);
+        throw new RuntimeException("caught remote: " + ex);
       }
 
     if (isEditing() && isInUse())
       {
-	return warning2;
+        return warning2;
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -5013,18 +5013,18 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_password", this.toString()));
       }
 
     if (use_cracklib)
       {
-	cracklib_check = true;
-	cracklib_supergash_exception = supergash_exception;
+        cracklib_check = true;
+        cracklib_supergash_exception = supergash_exception;
       }
     else
       {
-	cracklib_check = false;
-	cracklib_supergash_exception = false;
+        cracklib_check = false;
+        cracklib_supergash_exception = false;
       }
 
     return null;
@@ -5094,20 +5094,20 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_password", this.toString()));
       }
 
     if (use_history)
       {
-	history_check = true;
-	history_supergash_exception = supergash_exception;
-	history_depth = depth;
+        history_check = true;
+        history_supergash_exception = supergash_exception;
+        history_depth = depth;
       }
     else
       {
-	history_check = false;
-	history_supergash_exception = false;
-	history_depth = 0;
+        history_check = false;
+        history_supergash_exception = false;
+        history_depth = 0;
       }
 
     return null;
@@ -5146,7 +5146,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_password", this.toString()));
       }
 
     crypted = b;
@@ -5188,7 +5188,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_password", this.toString()));
       }
 
     md5crypted = b;
@@ -5230,7 +5230,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_password", this.toString()));
       }
 
     apachemd5crypted = b;
@@ -5273,7 +5273,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_password", this.toString()));
       }
 
     winHashed = b;
@@ -5315,7 +5315,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_password", this.toString()));
       }
 
     sshaHashed = b;
@@ -5357,7 +5357,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_password", this.toString()));
       }
 
     bCrypted = b;
@@ -5397,22 +5397,22 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_password", this.toString()));
       }
 
     if (!bCrypted)
       {
-	// "Not a BCrypt-using password field: {0}"
-	throw new IllegalStateException(ts.l("global.not_bcrypt", this.toString()));
+        // "Not a BCrypt-using password field: {0}"
+        throw new IllegalStateException(ts.l("global.not_bcrypt", this.toString()));
       }
 
     if (n < 4)
       {
-	n = 4;
+        n = 4;
       }
     else if (n > 31)
       {
-	n = 31;
+        n = 31;
       }
 
     bCryptRounds = n;
@@ -5457,7 +5457,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_password", this.toString()));
       }
 
     shaUnixCrypted = b;
@@ -5497,12 +5497,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_password", this.toString()));
       }
 
     if (!shaUnixCrypted)
       {
-	throw new IllegalStateException(ts.l("global.not_shacrypt", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_shacrypt", this.toString()));
       }
 
     useShaUnixCrypted512 = b;
@@ -5544,21 +5544,21 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_password", this.toString()));
       }
 
     if (!shaUnixCrypted)
       {
-	throw new IllegalStateException(ts.l("global.not_shacrypt", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_shacrypt", this.toString()));
       }
 
     if (n < 1000)
       {
-	n = 1000;
+        n = 1000;
       }
     else if (n > 999999999)
       {
-	n = 999999999;
+        n = 999999999;
       }
 
     shaUnixCryptRounds = n;
@@ -5599,7 +5599,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     if (!isPassword())
       {
-	throw new IllegalStateException(ts.l("global.not_password", this.toString()));
+        throw new IllegalStateException(ts.l("global.not_password", this.toString()));
       }
 
     storePlaintext = b;
@@ -5644,15 +5644,15 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
       case LOCKED:
       case LOADING:
-	return false;
+        return false;
 
       case INITIALIZING:
       case CREATING:
       case EDITING:
-	return true;
+        return true;
 
       default:
-	throw new RuntimeException("Unrecognized editing mode");
+        throw new RuntimeException("Unrecognized editing mode");
       }
   }
 
@@ -5670,18 +5670,18 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     switch (base.getEditingMode())
       {
       case LOCKED:
-	return true;
+        return true;
 
       case INITIALIZING:
       case LOADING:
       case CREATING:
-	return false;
+        return false;
 
       case EDITING:
-	return getID() <= SchemaConstants.FinalSystemField;
+        return getID() <= SchemaConstants.FinalSystemField;
 
       default:
-	throw new RuntimeException("Unrecognized editing mode");
+        throw new RuntimeException("Unrecognized editing mode");
       }
   }
 
@@ -5707,18 +5707,18 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     switch (base.getEditingMode())
       {
       case LOCKED:
-	return true;
+        return true;
 
       case INITIALIZING:
       case LOADING:
       case CREATING:
-	return false;
+        return false;
 
       case EDITING:
-	return isSystemField();
+        return isSystemField();
 
       default:
-	throw new RuntimeException("Unrecognized editing mode");
+        throw new RuntimeException("Unrecognized editing mode");
       }
   }
 
@@ -5739,8 +5739,8 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     if (!isLoading() && !isEditing())
       {
-	// "Not in a schema editing context."
-	throw new IllegalStateException(ts.l("global.not_editing_schema"));
+        // "Not in a schema editing context."
+        throw new IllegalStateException(ts.l("global.not_editing_schema"));
       }
   }
 
@@ -5753,7 +5753,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     if (getID() <= SchemaConstants.FinalSystemField)
       {
-	return true;
+        return true;
       }
 
     // wouldn't it be nice if java had decent support for declared data structures?
@@ -5766,126 +5766,126 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
       case SchemaConstants.OwnerBase:
 
-	switch (getID())
-	  {
-	  case SchemaConstants.OwnerNameField:
-	  case SchemaConstants.OwnerMembersField:
-	  case SchemaConstants.OwnerObjectsOwned:
-	  case SchemaConstants.OwnerCcAdmins:
-	  case SchemaConstants.OwnerExternalMail:
-	    return true;
-	  }
+        switch (getID())
+          {
+          case SchemaConstants.OwnerNameField:
+          case SchemaConstants.OwnerMembersField:
+          case SchemaConstants.OwnerObjectsOwned:
+          case SchemaConstants.OwnerCcAdmins:
+          case SchemaConstants.OwnerExternalMail:
+            return true;
+          }
 
-	break;
+        break;
 
       case SchemaConstants.PersonaBase:
 
-	switch (getID())
-	  {
-	  case SchemaConstants.PersonaNameField:
-	  case SchemaConstants.PersonaPasswordField:
-	  case SchemaConstants.PersonaGroupsField:
-	  case SchemaConstants.PersonaAssocUser:
-	  case SchemaConstants.PersonaPrivs:
-	  case SchemaConstants.PersonaAdminConsole:
-	  case SchemaConstants.PersonaAdminPower:
-	  case SchemaConstants.PersonaMailAddr:
-	  case SchemaConstants.PersonaLabelField:
-	    return true;
-	  }
+        switch (getID())
+          {
+          case SchemaConstants.PersonaNameField:
+          case SchemaConstants.PersonaPasswordField:
+          case SchemaConstants.PersonaGroupsField:
+          case SchemaConstants.PersonaAssocUser:
+          case SchemaConstants.PersonaPrivs:
+          case SchemaConstants.PersonaAdminConsole:
+          case SchemaConstants.PersonaAdminPower:
+          case SchemaConstants.PersonaMailAddr:
+          case SchemaConstants.PersonaLabelField:
+            return true;
+          }
 
-	break;
+        break;
 
       case SchemaConstants.RoleBase:
 
-	switch (getID())
-	  {
-	  case SchemaConstants.RoleName:
-	  case SchemaConstants.RoleMatrix:
-	  case SchemaConstants.RolePersonae:
-	  case SchemaConstants.RoleDefaultMatrix:
-	  case SchemaConstants.RoleDelegatable:
-	    return true;
-	  }
+        switch (getID())
+          {
+          case SchemaConstants.RoleName:
+          case SchemaConstants.RoleMatrix:
+          case SchemaConstants.RolePersonae:
+          case SchemaConstants.RoleDefaultMatrix:
+          case SchemaConstants.RoleDelegatable:
+            return true;
+          }
 
-	break;
+        break;
 
       case SchemaConstants.UserBase:
 
-	switch (getID())
-	  {
-	  case SchemaConstants.UserUserName:
-	  case SchemaConstants.UserPassword:
-	  case SchemaConstants.UserAdminPersonae:
-	    return true;
-	  }
+        switch (getID())
+          {
+          case SchemaConstants.UserUserName:
+          case SchemaConstants.UserPassword:
+          case SchemaConstants.UserAdminPersonae:
+            return true;
+          }
 
-	break;
+        break;
 
       case SchemaConstants.EventBase:
 
-	switch (getID())
-	  {
-	  case SchemaConstants.EventToken:
-	  case SchemaConstants.EventName:
-	  case SchemaConstants.EventDescription:
-	  case SchemaConstants.EventMailBoolean:
-	  case SchemaConstants.EventMailToSelf:
-	  case SchemaConstants.EventMailOwners:
-	  case SchemaConstants.EventExternalMail:
-	    return true;
-	  }
+        switch (getID())
+          {
+          case SchemaConstants.EventToken:
+          case SchemaConstants.EventName:
+          case SchemaConstants.EventDescription:
+          case SchemaConstants.EventMailBoolean:
+          case SchemaConstants.EventMailToSelf:
+          case SchemaConstants.EventMailOwners:
+          case SchemaConstants.EventExternalMail:
+            return true;
+          }
 
-	break;
+        break;
 
       case SchemaConstants.ObjectEventBase:
 
-	switch (getID())
-	  {
-	  case SchemaConstants.ObjectEventToken:
-	  case SchemaConstants.ObjectEventName:
-	  case SchemaConstants.ObjectEventDescription:
-	  case SchemaConstants.ObjectEventMailToSelf:
-	  case SchemaConstants.ObjectEventObjectName:
-	  case SchemaConstants.ObjectEventMailOwners:
-	  case SchemaConstants.ObjectEventObjectType:
-	  case SchemaConstants.ObjectEventExternalMail:
-	    return true;
-	  }
+        switch (getID())
+          {
+          case SchemaConstants.ObjectEventToken:
+          case SchemaConstants.ObjectEventName:
+          case SchemaConstants.ObjectEventDescription:
+          case SchemaConstants.ObjectEventMailToSelf:
+          case SchemaConstants.ObjectEventObjectName:
+          case SchemaConstants.ObjectEventMailOwners:
+          case SchemaConstants.ObjectEventObjectType:
+          case SchemaConstants.ObjectEventExternalMail:
+            return true;
+          }
 
-	break;
+        break;
 
       case SchemaConstants.TaskBase:
 
-	switch (getID())
-	  {
-	  case SchemaConstants.TaskName:
-	  case SchemaConstants.TaskClass:
-	  case SchemaConstants.TaskRunOnCommit:
-	  case SchemaConstants.TaskRunPeriodically:
-	  case SchemaConstants.TaskPeriodUnit:
-	  case SchemaConstants.TaskPeriodCount:
-	  case SchemaConstants.TaskPeriodAnchor:
-	    return true;
-	  }
+        switch (getID())
+          {
+          case SchemaConstants.TaskName:
+          case SchemaConstants.TaskClass:
+          case SchemaConstants.TaskRunOnCommit:
+          case SchemaConstants.TaskRunPeriodically:
+          case SchemaConstants.TaskPeriodUnit:
+          case SchemaConstants.TaskPeriodCount:
+          case SchemaConstants.TaskPeriodAnchor:
+            return true;
+          }
 
-	break;
+        break;
 
       case SchemaConstants.SyncChannelBase:
 
-	switch (getID())
-	  {
-	  case SchemaConstants.SyncChannelName:
-	  case SchemaConstants.SyncChannelDirectory:
-	  case SchemaConstants.SyncChannelServicer:
-	  case SchemaConstants.SyncChannelFields:
-	  case SchemaConstants.SyncChannelPlaintextOK:
-	  case SchemaConstants.SyncChannelTypeString:
-	  case SchemaConstants.SyncChannelFullStateFile:
-	  case SchemaConstants.SyncChannelTypeNum:
-	  case SchemaConstants.SyncChannelClassName:
-	    return true;
-	  }
+        switch (getID())
+          {
+          case SchemaConstants.SyncChannelName:
+          case SchemaConstants.SyncChannelDirectory:
+          case SchemaConstants.SyncChannelServicer:
+          case SchemaConstants.SyncChannelFields:
+          case SchemaConstants.SyncChannelPlaintextOK:
+          case SchemaConstants.SyncChannelTypeString:
+          case SchemaConstants.SyncChannelFullStateFile:
+          case SchemaConstants.SyncChannelTypeNum:
+          case SchemaConstants.SyncChannelClassName:
+            return true;
+          }
       }
 
     return false;
@@ -5910,57 +5910,57 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     switch (field_type)
       {
       case BOOLEAN:
-	result = ts.l("getTypeDesc.boolean"); // "boolean"
-	break;
+        result = ts.l("getTypeDesc.boolean"); // "boolean"
+        break;
 
       case NUMERIC:
-	result = ts.l("getTypeDesc.numeric"); // "numeric"
-	break;
+        result = ts.l("getTypeDesc.numeric"); // "numeric"
+        break;
 
       case FLOAT:
-	result = ts.l("getTypeDesc.float"); // "float"
-	break;
+        result = ts.l("getTypeDesc.float"); // "float"
+        break;
 
       case FIELDOPTIONS:
-	result = ts.l("getTypeDesc.field_option"); // "field options"
-	break;
+        result = ts.l("getTypeDesc.field_option"); // "field options"
+        break;
 
       case DATE:
-	result = ts.l("getTypeDesc.date"); // "date"
-	break;
+        result = ts.l("getTypeDesc.date"); // "date"
+        break;
 
       case STRING:
-	result = ts.l("getTypeDesc.string"); // "string"
-	break;
+        result = ts.l("getTypeDesc.string"); // "string"
+        break;
 
       case INVID:
-	result = ts.l("getTypeDesc.invid"); // "invid"
-	break;
+        result = ts.l("getTypeDesc.invid"); // "invid"
+        break;
 
       case PERMISSIONMATRIX:
-	result = ts.l("getTypeDesc.permission_matrix"); // "permission matrix"
-	break;
+        result = ts.l("getTypeDesc.permission_matrix"); // "permission matrix"
+        break;
 
       case PASSWORD:
-	result = ts.l("getTypeDesc.password"); // "password"
-	break;
+        result = ts.l("getTypeDesc.password"); // "password"
+        break;
 
       case IP:
-	result = ts.l("getTypeDesc.ip_field"); // "i.p. field"
-	break;
+        result = ts.l("getTypeDesc.ip_field"); // "i.p. field"
+        break;
 
       default:
-	// "<<bad type code: " + field_type + " >>"
-	result = ts.l("getTypeDesc.bad_code", Integer.valueOf(field_type));
+        // "<<bad type code: " + field_type + " >>"
+        result = ts.l("getTypeDesc.bad_code", Integer.valueOf(field_type));
       }
 
     if (array)
       {
-	return result + "[]";
+        return result + "[]";
       }
     else
       {
-	return result;
+        return result;
       }
   }
 
@@ -5998,7 +5998,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     if (o instanceof DBObjectBaseField)
       {
-	return field_code == ((DBObjectBaseField) o).field_code;
+        return field_code == ((DBObjectBaseField) o).field_code;
       }
 
     return false;
@@ -6017,13 +6017,13 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     if (o instanceof Number)
       {
-	return field_code - ((Number) o).shortValue();
+        return field_code - ((Number) o).shortValue();
       }
     else
       {
-	DBObjectBaseField otherField = (DBObjectBaseField) o;
+        DBObjectBaseField otherField = (DBObjectBaseField) o;
 
-	return field_code - otherField.field_code;
+        return field_code - otherField.field_code;
       }
   }
 
@@ -6042,10 +6042,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     //
 
     retVal.setDialog(new JDialogBuff(ts.l("genWarning1.title"),
-				     ts.l("genWarning1.text"),
-				     ts.l("genWarning1.ok"), // "OK"
-				     null,
-				     "ok.gif"));
+                                     ts.l("genWarning1.text"),
+                                     ts.l("genWarning1.ok"), // "OK"
+                                     null,
+                                     "ok.gif"));
 
     return retVal;
   }
@@ -6063,10 +6063,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     //
 
     retVal.setDialog(new JDialogBuff(ts.l("genWarning2.title"),
-				     ts.l("genWarning2.text"),
-				     ts.l("genWarning2.ok"),
-				     null,
-				     "ok.gif"));
+                                     ts.l("genWarning2.text"),
+                                     ts.l("genWarning2.ok"),
+                                     null,
+                                     "ok.gif"));
 
     return retVal;
   }

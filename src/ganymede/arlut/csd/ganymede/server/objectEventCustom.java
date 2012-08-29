@@ -155,7 +155,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
       case SchemaConstants.ObjectEventToken:
       case SchemaConstants.ObjectEventName:
 
-	return true;
+        return true;
       }
 
     return false;
@@ -174,12 +174,12 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 
     if (field instanceof InvidDBField)
       {
-	return true;
+        return true;
       }
 
     if (field.getID() == SchemaConstants.ObjectEventObjectName)
       {
-	return true;
+        return true;
       }
 
     return false;
@@ -199,24 +199,24 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   {
     if (field.getID() == SchemaConstants.ObjectEventObjectName)
       {
-	if (objectTypeList == null)
-	  {
-	    Vector list = Ganymede.db.getBaseNameList();
+        if (objectTypeList == null)
+          {
+            Vector list = Ganymede.db.getBaseNameList();
 
-	    objectTypeList = new QueryResult(true);
+            objectTypeList = new QueryResult(true);
 
-	    for (int i = 0; i < list.size(); i++)
-	      {
-		objectTypeList.addRow(null, (String) list.elementAt(i), false);
-	      }
-	  }
+            for (int i = 0; i < list.size(); i++)
+              {
+                objectTypeList.addRow(null, (String) list.elementAt(i), false);
+              }
+          }
 
-	return objectTypeList;
+        return objectTypeList;
       }
 
     if (field.getID() == SchemaConstants.ObjectEventToken)
       {
-	return eventNames;
+        return eventNames;
       }
 
     return super.obtainChoiceList(field);
@@ -243,41 +243,41 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   {
     if (field.getID() == SchemaConstants.ObjectEventObjectName)
       {
-	// let the field be cleared if this object is being deleted.
+        // let the field be cleared if this object is being deleted.
 
-	if (value == null)
-	  {
-	    return null;
-	  }
+        if (value == null)
+          {
+            return null;
+          }
 
-	DBObjectBase base = Ganymede.db.getObjectBase((String) value);
+        DBObjectBase base = Ganymede.db.getObjectBase((String) value);
 
-	if (base == null)
-	  {
-	    // "Error, no object type matching "{0}" could be found.  This is probably an error in the Ganymede code."
-	    return Ganymede.createErrorDialog(ts.l("finalizeSetValue.bad_base", (String) value));
-	  }
+        if (base == null)
+          {
+            // "Error, no object type matching "{0}" could be found.  This is probably an error in the Ganymede code."
+            return Ganymede.createErrorDialog(ts.l("finalizeSetValue.bad_base", (String) value));
+          }
 
-	ReturnVal retVal = null;
+        ReturnVal retVal = null;
 
-	retVal = setFieldValueLocal(SchemaConstants.ObjectEventObjectType, Integer.valueOf(base.getTypeID()));
+        retVal = setFieldValueLocal(SchemaConstants.ObjectEventObjectType, Integer.valueOf(base.getTypeID()));
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    return retVal;
-	  }
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            return retVal;
+          }
 
-	// the change was accepted and made sense so far.. update our hidden label field
+        // the change was accepted and made sense so far.. update our hidden label field
 
-	return ReturnVal.merge(retVal,
-			       updateLabel((String) value,
-					   (String) field.getOwner().getFieldValueLocal(SchemaConstants.ObjectEventToken)));
+        return ReturnVal.merge(retVal,
+                               updateLabel((String) value,
+                                           (String) field.getOwner().getFieldValueLocal(SchemaConstants.ObjectEventToken)));
       }
 
     if (field.getID() == SchemaConstants.ObjectEventToken)
       {
-	return updateLabel((String) field.getOwner().getFieldValueLocal(SchemaConstants.ObjectEventObjectName),
-			   (String) value);
+        return updateLabel((String) field.getOwner().getFieldValueLocal(SchemaConstants.ObjectEventObjectName),
+                           (String) value);
       }
 
     return null;
@@ -303,13 +303,13 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   public ReturnVal preCommitHook()
   {
     if (this.getStatus() == ObjectStatus.DELETING ||
-	this.getStatus() == ObjectStatus.DROPPING)
+        this.getStatus() == ObjectStatus.DROPPING)
       {
-	return null;
+        return null;
       }
 
     return updateLabel((String) getFieldValueLocal(SchemaConstants.ObjectEventObjectName),
-		       (String) getFieldValueLocal(SchemaConstants.ObjectEventToken));
+                       (String) getFieldValueLocal(SchemaConstants.ObjectEventToken));
   }
 
   /**
@@ -331,7 +331,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 
     if (typeName == null || token == null)
       {
-	return setFieldValueLocal(SchemaConstants.ObjectEventLabel, null);
+        return setFieldValueLocal(SchemaConstants.ObjectEventLabel, null);
       }
 
     StringBuilder result = new StringBuilder();
@@ -365,7 +365,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 
     if (field.getObjTypeID() != getTypeID())
       {
-	throw new IllegalArgumentException("field/object mismatch");
+        throw new IllegalArgumentException("field/object mismatch");
       }
 
     // We don't want the user to see the ObjectEventObjectType
@@ -374,7 +374,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
 
     if (field.getID() == SchemaConstants.ObjectEventObjectType)
       {
-	return false;
+        return false;
       }
 
     return field.getFieldDef().isVisible();

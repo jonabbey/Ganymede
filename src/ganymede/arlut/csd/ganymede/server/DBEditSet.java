@@ -270,7 +270,7 @@ public class DBEditSet {
    */
 
   public DBEditSet(DBStore dbStore, DBSession session, String description,
-		   boolean interactive)
+                   boolean interactive)
   {
     this.session = session;
     this.dbStore = dbStore;
@@ -282,7 +282,7 @@ public class DBEditSet {
 
     if (session.GSession != null && session.GSession.isXMLSession() && Ganymede.allowMagicImport)
       {
-	this.allowXMLHistoryOverride = true;
+        this.allowXMLHistoryOverride = true;
       }
   }
 
@@ -317,7 +317,7 @@ public class DBEditSet {
   {
     if (this.session == null)
       {
-	return null;
+        return null;
       }
 
     return session.getGSession();
@@ -348,7 +348,7 @@ public class DBEditSet {
 
     if (gSession == null)
       {
-	return null;
+        return null;
       }
 
     return gSession.getPermManager().getIdentity();
@@ -382,7 +382,7 @@ public class DBEditSet {
   {
     synchronized (objects)
       {
-	return new HashMap<Invid,DBEditObject>(objects);
+        return new HashMap<Invid,DBEditObject>(objects);
       }
   }
 
@@ -447,7 +447,7 @@ public class DBEditSet {
 
     if (wLock != null)
       {
-	throw new RuntimeException(ts.l("addObject.cant_add"));
+        throw new RuntimeException(ts.l("addObject.cant_add"));
       }
 
     // remember that we are not allowing objects that this object is
@@ -457,18 +457,18 @@ public class DBEditSet {
 
     if (!DBDeletionManager.addSessionInvids(session, object.getASymmetricTargets()))
       {
-	return false;
+        return false;
       }
 
     if (!objects.containsKey(object.getInvid()))
       {
-	objects.put(object.getInvid(), object);
+        objects.put(object.getInvid(), object);
 
-	// just need something to mark the slot in the hash table, to
-	// indicate that this object's base is involved in the
-	// transaction.
+        // just need something to mark the slot in the hash table, to
+        // indicate that this object's base is involved in the
+        // transaction.
 
-	basesModified.add(object.objectBase);
+        basesModified.add(object.objectBase);
       }
 
     return true;
@@ -491,12 +491,12 @@ public class DBEditSet {
    */
 
   public void logEvent(String eventClassToken, String description,
-		       Invid admin, String adminName,
-		       List<Invid> objects, List<String> notifyList)
+                       Invid admin, String adminName,
+                       List<Invid> objects, List<String> notifyList)
   {
     DBLogEvent event = new DBLogEvent(eventClassToken, description,
-				      admin, adminName,
-				      objects, notifyList);
+                                      admin, adminName,
+                                      objects, notifyList);
     logEvents.add(event);
   }
 
@@ -527,7 +527,7 @@ public class DBEditSet {
    */
 
   public void logMail(Collection<String> addresses, String subject, String message,
-		      Invid admin, String adminName, Vector<Invid> objects)
+                      Invid admin, String adminName, Vector<Invid> objects)
   {
     logEvents.add(new DBLogEvent(addresses, subject, message, admin, adminName, objects));
   }
@@ -581,12 +581,12 @@ public class DBEditSet {
    */
 
   private void streamLogEvent(String eventClassToken, String description,
-			      Invid admin, String adminName,
-			      List<Invid> objects, List<String> notifyList)
+                              Invid admin, String adminName,
+                              List<Invid> objects, List<String> notifyList)
   {
     DBLogEvent event = new DBLogEvent(eventClassToken, description,
-				      admin, adminName,
-				      objects, notifyList);
+                                      admin, adminName,
+                                      objects, notifyList);
 
     Ganymede.log.streamEvent(event, this);
   }
@@ -617,7 +617,7 @@ public class DBEditSet {
    */
 
   private void streamLogMail(Vector<String> addresses, String subject, String message,
-			     Invid admin, String adminName, Vector<Invid> objects)
+                             Invid admin, String adminName, Vector<Invid> objects)
   {
     Ganymede.log.streamEvent(new DBLogEvent(addresses, subject, message, admin, adminName, objects), this);
   }
@@ -660,7 +660,7 @@ public class DBEditSet {
 
     if (!interactive)
       {
-	return;
+        return;
       }
 
     // checkpoint our objects, logEvents, and deletion locks
@@ -675,7 +675,7 @@ public class DBEditSet {
 
     for (DBNameSpace space: dbStore.nameSpaces)
       {
-	space.checkpoint(this, name);
+        space.checkpoint(this, name);
       }
 
     Ganymede.db.aSymLinkTracker.checkpoint(session, name);
@@ -740,7 +740,7 @@ public class DBEditSet {
 
     if (!interactive)
       {
-	return null;
+        return null;
       }
 
     // see if we can find the checkpoint
@@ -749,10 +749,10 @@ public class DBEditSet {
 
     if (point == null)
       {
-	System.err.println(ts.l("popCheckpoint.no_checkpoint", name));
-	System.err.println(checkpoints.toString());
+        System.err.println(ts.l("popCheckpoint.no_checkpoint", name));
+        System.err.println(checkpoints.toString());
 
-	return null;
+        return null;
       }
 
     // DBEditSet.rollback() calls us to take care of getting our
@@ -762,14 +762,14 @@ public class DBEditSet {
 
     if (!inRollback)
       {
-	// we don't synchronize on dbStore, the odds are zip that a
-	// namespace will be created or deleted while we are in the middle
-	// of a transaction.  Go ahead and clear out the namespace checkpoint.
+        // we don't synchronize on dbStore, the odds are zip that a
+        // namespace will be created or deleted while we are in the middle
+        // of a transaction.  Go ahead and clear out the namespace checkpoint.
 
-	for (DBNameSpace space: dbStore.nameSpaces)
-	  {
-	    space.popCheckpoint(this, name);
-	  }
+        for (DBNameSpace space: dbStore.nameSpaces)
+          {
+            space.popCheckpoint(this, name);
+          }
       }
 
     Ganymede.db.aSymLinkTracker.popCheckpoint(session, name);
@@ -779,7 +779,7 @@ public class DBEditSet {
 
     if (checkpoints.empty())
       {
-	this.notifyAll();
+        this.notifyAll();
       }
 
     return point;
@@ -806,30 +806,30 @@ public class DBEditSet {
 
     if (!interactive)
       {
-	// oops, we're non-interactive and we didn't actually do the
-	// checkpoint we're being asked to go back to.. set the
-	// mustAbort flag so the transaction will never commit
+        // oops, we're non-interactive and we didn't actually do the
+        // checkpoint we're being asked to go back to.. set the
+        // mustAbort flag so the transaction will never commit
 
-	this.mustAbort = true;
+        this.mustAbort = true;
 
-	try
-	  {
-	    // "rollback() called in non-interactive transaction"
-	    throw new RuntimeException(ts.l("rollback.non_interactive"));
-	  }
-	catch (RuntimeException ex)
-	  {
+        try
+          {
+            // "rollback() called in non-interactive transaction"
+            throw new RuntimeException(ts.l("rollback.non_interactive"));
+          }
+        catch (RuntimeException ex)
+          {
             Ganymede.logError(ex);
-	  }
+          }
 
-	return false;
+        return false;
       }
 
     point = popCheckpoint(name, true); // this may wake up blocking checkpointers
 
     if (point == null)
       {
-	return false;
+        return false;
       }
 
     // rollback our mail/log events
@@ -848,20 +848,20 @@ public class DBEditSet {
 
     for (DBCheckPointObj objck: point.objects)
       {
-	DBEditObject obj = findObject(objck.invid);
+        DBEditObject obj = findObject(objck.invid);
 
-	if (obj != null)
-	  {
-	    obj.rollback(objck.fields);
-	    obj.status = objck.status;
-	  }
-	else
-	  {
-	    // huh?  this shouldn't ever happen, unless maybe we have a rollback order
-	    // error or something.  Complain.
+        if (obj != null)
+          {
+            obj.rollback(objck.fields);
+            obj.status = objck.status;
+          }
+        else
+          {
+            // huh?  this shouldn't ever happen, unless maybe we have a rollback order
+            // error or something.  Complain.
 
-	    throw new RuntimeException("DBEditSet.rollback error.. we lost checked out objects in midstream?");
-	  }
+            throw new RuntimeException("DBEditSet.rollback error.. we lost checked out objects in midstream?");
+          }
       }
 
     // now, we have to sweep out any objects that are in the transaction now
@@ -877,56 +877,56 @@ public class DBEditSet {
 
     for (DBCheckPointObj obj: point.objects)
       {
-	oldvalues.add(obj.invid);
+        oldvalues.add(obj.invid);
       }
 
     ArrayList<DBEditObject> drop = new ArrayList<DBEditObject>();
 
     for (DBEditObject eobjRef: objects.values())
       {
-	Invid tmpvid = eobjRef.getInvid();
+        Invid tmpvid = eobjRef.getInvid();
 
-	if (!oldvalues.contains(tmpvid))
-	  {
-	    drop.add(eobjRef);
-	  }
+        if (!oldvalues.contains(tmpvid))
+          {
+            drop.add(eobjRef);
+          }
       }
 
     // and now we get rid of DBEditObjects we need to drop
 
     for (DBEditObject obj: drop)
       {
-	obj.release(true);
+        obj.release(true);
 
-	switch (obj.getStatus())
-	  {
-	  case ObjectStatus.CREATING:
-	  case ObjectStatus.DROPPING:
-	    obj.getBase().releaseId(obj.getID()); // relinquish the unused invid
+        switch (obj.getStatus())
+          {
+          case ObjectStatus.CREATING:
+          case ObjectStatus.DROPPING:
+            obj.getBase().releaseId(obj.getID()); // relinquish the unused invid
 
-	    session.GSession.checkIn();	// XXX *synchronized* on GanymedeSession
-	    obj.getBase().getStore().checkIn(); // update checked out count
-	    break;
+            session.GSession.checkIn(); // XXX *synchronized* on GanymedeSession
+            obj.getBase().getStore().checkIn(); // update checked out count
+            break;
 
-	  case ObjectStatus.EDITING:
-	  case ObjectStatus.DELETING:
+          case ObjectStatus.EDITING:
+          case ObjectStatus.DELETING:
 
-	    // note that clearShadow updates the checked out count for us.
+            // note that clearShadow updates the checked out count for us.
 
-	    if (!obj.original.clearShadow(this))
-	      {
-		throw new RuntimeException("editset ownership synchronization error");
-	      }
+            if (!obj.original.clearShadow(this))
+              {
+                throw new RuntimeException("editset ownership synchronization error");
+              }
 
-	    break;
-	  }
+            break;
+          }
       }
 
     // now go ahead and clean out the dropped objects
 
     for (DBEditObject obj: drop)
       {
-	objects.remove(obj.getInvid());
+        objects.remove(obj.getInvid());
       }
 
     // and our namespaces
@@ -939,10 +939,10 @@ public class DBEditSet {
 
     for (DBNameSpace space: dbStore.nameSpaces)
       {
-	if (!space.rollback(this, name))
-	  {
-	    success = false;
-	  }
+        if (!space.rollback(this, name))
+          {
+            success = false;
+          }
       }
 
     Ganymede.db.aSymLinkTracker.rollback(session, name);
@@ -985,61 +985,61 @@ public class DBEditSet {
   {
     if (objects == null)
       {
-	throw new RuntimeException(ts.l("global.already"));
+        throw new RuntimeException(ts.l("global.already"));
       }
 
     if (mustAbort)
       {
-	release();
+        release();
 
-	// "Forced Transaction Abort"
-	// "The server ran into a non-reversible error while processing this transaction and forced an abort."
-	return Ganymede.createErrorDialog(ts.l("commit.forced_abort"),
-					  ts.l("commit.forced_abort_text"));
+        // "Forced Transaction Abort"
+        // "The server ran into a non-reversible error while processing this transaction and forced an abort."
+        return Ganymede.createErrorDialog(ts.l("commit.forced_abort"),
+                                          ts.l("commit.forced_abort_text"));
       }
 
     this.comment = comment;
 
     try
       {
-	commit_run_precommit_hooks();
-	commit_lockBases(); // may block
-	commit_verifyNamespaces();
-	commit_handlePhase1();
-	commit_recordModificationDates();
-	commit_integrateChanges();
-	releaseWriteLock();
+        commit_run_precommit_hooks();
+        commit_lockBases(); // may block
+        commit_verifyNamespaces();
+        commit_handlePhase1();
+        commit_recordModificationDates();
+        commit_integrateChanges();
+        releaseWriteLock();
 
-	return null;
+        return null;
       }
     catch (CommitNonFatalException ex)
       {
-	return ex.getReturnVal();
+        return ex.getReturnVal();
       }
     catch (CommitFatalException ex)
       {
-	releaseWriteLock();
-	release();
-	return ex.getReturnVal();
+        releaseWriteLock();
+        release();
+        return ex.getReturnVal();
       }
     catch (Throwable ex)
       {
-	Ganymede.debug(Ganymede.stackTrace(ex));
+        Ganymede.debug(Ganymede.stackTrace(ex));
 
-	releaseWriteLock();
-	release();
+        releaseWriteLock();
+        release();
 
-	// "Transaction commit failure"
-	// "Couldn''t commit transaction, exception caught: {0}"
-	return Ganymede.createErrorDialog(ts.l("commit.commit_failure"),
-					  ts.l("commit.commit_failure_text", Ganymede.stackTrace(ex)));
+        // "Transaction commit failure"
+        // "Couldn''t commit transaction, exception caught: {0}"
+        return Ganymede.createErrorDialog(ts.l("commit.commit_failure"),
+                                          ts.l("commit.commit_failure_text", Ganymede.stackTrace(ex)));
       }
     finally
       {
-	// just to be sure we don't leave a write lock hanging somehow.
-	// if we successfully released before, this is a no-op
+        // just to be sure we don't leave a write lock hanging somehow.
+        // if we successfully released before, this is a no-op
 
-	releaseWriteLock();
+        releaseWriteLock();
       }
   }
 
@@ -1077,7 +1077,7 @@ public class DBEditSet {
 
     try
       {
-	for (DBEditObject eObj: myObjects)
+        for (DBEditObject eObj: myObjects)
           {
             try
               {
@@ -1085,8 +1085,8 @@ public class DBEditSet {
 
                 if (!ReturnVal.didSucceed(retVal))
                   {
-		    retVal.setErrorType(ErrorTypeEnum.SHOWOBJECT);
-		    retVal.setInvid(eObj.getInvid());
+                    retVal.setErrorType(ErrorTypeEnum.SHOWOBJECT);
+                    retVal.setInvid(eObj.getInvid());
 
                     throw new CommitNonFatalException(retVal);
                   }
@@ -1104,12 +1104,12 @@ public class DBEditSet {
       }
     catch (CommitNonFatalException ex)
       {
-	if (!rollback(checkpointKey))
-	  {
-	    throw new CommitFatalException(ex.getReturnVal());
-	  }
+        if (!rollback(checkpointKey))
+          {
+            throw new CommitFatalException(ex.getReturnVal());
+          }
 
-	throw ex;
+        throw ex;
       }
 
     popCheckpoint(checkpointKey);
@@ -1134,7 +1134,7 @@ public class DBEditSet {
 
     for (DBObjectBase base: basesModified)
       {
-	baseSet.add(base);
+        baseSet.add(base);
       }
 
     // and try to lock the bases down.
@@ -1142,7 +1142,7 @@ public class DBEditSet {
 
     if (wLock != null)
       {
-	throw new Error(ts.l("commit_lockBases.wLock", description));
+        throw new Error(ts.l("commit_lockBases.wLock", description));
       }
 
     // Create the lock on the bases changed and establish.  This
@@ -1151,17 +1151,17 @@ public class DBEditSet {
 
     try
       {
-	wLock = session.openWriteLock(baseSet);	// wait for write lock *synchronized*
+        wLock = session.openWriteLock(baseSet); // wait for write lock *synchronized*
       }
     catch (InterruptedException ex)
       {
-	Ganymede.debug(ts.l("commit_lockBases.interrupted", String.valueOf(session.key)));
+        Ganymede.debug(ts.l("commit_lockBases.interrupted", String.valueOf(session.key)));
 
-	releaseWriteLock();
+        releaseWriteLock();
 
-	ReturnVal retVal = Ganymede.createErrorDialog(ts.l("commit.commit_failure"),
-						      ts.l("commit_lockBases.wLock_refused"));
-	throw new CommitNonFatalException(retVal);
+        ReturnVal retVal = Ganymede.createErrorDialog(ts.l("commit.commit_failure"),
+                                                      ts.l("commit_lockBases.wLock_refused"));
+        throw new CommitNonFatalException(retVal);
       }
 
     return baseSet;
@@ -1188,7 +1188,7 @@ public class DBEditSet {
 
     if (isInteractive())
       {
-	return;
+        return;
       }
 
     // we don't synchronize on dbStore.nameSpaces, the nameSpaces
@@ -1200,22 +1200,22 @@ public class DBEditSet {
 
     for (DBNameSpace space: dbStore.nameSpaces)
       {
-	List<String> conflicts = space.verify_noninteractive(this);
+        List<String> conflicts = space.verify_noninteractive(this);
 
-	if (conflicts != null)
-	  {
-	    totalConflicts.addAll(conflicts);
-	  }
+        if (conflicts != null)
+          {
+            totalConflicts.addAll(conflicts);
+          }
       }
 
     if (totalConflicts.size() > 0)
       {
-	// "Error, namespace conflicts remaining at transaction commit time.
-	// The following values are in namespace conflict:\n\t{0}"
-	ReturnVal retVal = Ganymede.createErrorDialog("",
-						      ts.l("commit_verifyNamespaces.conflicts",
-							   VectorUtils.vectorString(totalConflicts, ",\n\t")));
-	throw new CommitNonFatalException(retVal);
+        // "Error, namespace conflicts remaining at transaction commit time.
+        // The following values are in namespace conflict:\n\t{0}"
+        ReturnVal retVal = Ganymede.createErrorDialog("",
+                                                      ts.l("commit_verifyNamespaces.conflicts",
+                                                           VectorUtils.vectorString(totalConflicts, ",\n\t")));
+        throw new CommitNonFatalException(retVal);
       }
   }
 
@@ -1236,68 +1236,68 @@ public class DBEditSet {
 
     for (DBEditObject eObj: this.objects.values())
       {
-	try
-	  {
-	    retVal = eObj.commitPhase1();
-	  }
-	catch (Throwable ex)
-	  {
-	    retVal = Ganymede.createErrorDialog(ts.l("commit_handlePhase1.exception"),
-						Ganymede.stackTrace(ex));
+        try
+          {
+            retVal = eObj.commitPhase1();
+          }
+        catch (Throwable ex)
+          {
+            retVal = Ganymede.createErrorDialog(ts.l("commit_handlePhase1.exception"),
+                                                Ganymede.stackTrace(ex));
 
-	    eObj.release(false);
+            eObj.release(false);
 
-	    for (DBEditObject eObj2: committedObjects)
-	      {
-		eObj2.release(false); // unlock commit mode
-	      }
+            for (DBEditObject eObj2: committedObjects)
+              {
+                eObj2.release(false); // unlock commit mode
+              }
 
-	    // let DBSession/the client know they can retry
-	    // things.. but if we've got an error in an object's
-	    // commitPhase1, committing again will probably just
-	    // repeat the problem.
+            // let DBSession/the client know they can retry
+            // things.. but if we've got an error in an object's
+            // commitPhase1, committing again will probably just
+            // repeat the problem.
 
-	    throw new CommitNonFatalException(retVal);
-	  }
+            throw new CommitNonFatalException(retVal);
+          }
 
-	// the object has now been locked to commit mode, and will not
-	// allow further modifications from the client
+        // the object has now been locked to commit mode, and will not
+        // allow further modifications from the client
 
-	if (ReturnVal.didSucceed(retVal))
-	  {
-	    try
-	      {
-		commit_checkObjectMissingFields(eObj);
-	      }
-	    catch (CommitNonFatalException ex)
-	      {
-		retVal = ex.getReturnVal();
-	      }
-	  }
+        if (ReturnVal.didSucceed(retVal))
+          {
+            try
+              {
+                commit_checkObjectMissingFields(eObj);
+              }
+            catch (CommitNonFatalException ex)
+              {
+                retVal = ex.getReturnVal();
+              }
+          }
 
-	// retVal could be set by either eObj.commitPhase1() or
-	// by commit_checkObjectMissingFields()
+        // retVal could be set by either eObj.commitPhase1() or
+        // by commit_checkObjectMissingFields()
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    retVal.setErrorType(ErrorTypeEnum.SHOWOBJECT);
-	    retVal.setInvid(eObj.getInvid());
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            retVal.setErrorType(ErrorTypeEnum.SHOWOBJECT);
+            retVal.setInvid(eObj.getInvid());
 
-	    eObj.release(false);
+            eObj.release(false);
 
-	    for (DBEditObject eObj2: committedObjects)
-	      {
-		eObj2.release(false); // unlock commit mode
-	      }
+            for (DBEditObject eObj2: committedObjects)
+              {
+                eObj2.release(false); // unlock commit mode
+              }
 
-	    // let DBSession/the client know they can retry things.
+            // let DBSession/the client know they can retry things.
 
-	    throw new CommitNonFatalException(retVal);
-	  }
-	else
-	  {
-	    committedObjects.add(eObj);
-	  }
+            throw new CommitNonFatalException(retVal);
+          }
+        else
+          {
+            committedObjects.add(eObj);
+          }
       }
   }
 
@@ -1321,9 +1321,9 @@ public class DBEditSet {
     // fields to be set
 
     if (eObj.getStatus() == ObjectStatus.DELETING ||
-	eObj.getStatus() == ObjectStatus.DROPPING)
+        eObj.getStatus() == ObjectStatus.DROPPING)
       {
-	return;
+        return;
       }
 
     // otherwise, we always insist on the label field being present.
@@ -1333,49 +1333,49 @@ public class DBEditSet {
 
     if (labelField == null || !labelField.isDefined())
       {
-	// the label field is missing.  look it up.
+        // the label field is missing.  look it up.
 
-	DBObjectBaseField fieldDef = (DBObjectBaseField) eObj.getBase().getField(eObj.getLabelFieldID());
+        DBObjectBaseField fieldDef = (DBObjectBaseField) eObj.getBase().getField(eObj.getLabelFieldID());
 
-	missingFields.add(fieldDef.getName());
+        missingFields.add(fieldDef.getName());
       }
 
     if (isOversightOn())
       {
-	Vector<String> missingRequiredFields = eObj.checkRequiredFields();
+        Vector<String> missingRequiredFields = eObj.checkRequiredFields();
 
-	if (missingRequiredFields != null)
-	  {
-	    missingFields.addAll(missingRequiredFields);
-	  }
+        if (missingRequiredFields != null)
+          {
+            missingFields.addAll(missingRequiredFields);
+          }
       }
 
     if (missingFields.size() > 0)
       {
-	StringBuilder errorBuf = new StringBuilder();
+        StringBuilder errorBuf = new StringBuilder();
 
-	errorBuf.append(ts.l("commit_checkObjectMissingFields.missing_fields_text",
-			     eObj.getTypeName(),
-			     eObj.getLabel()));
+        errorBuf.append(ts.l("commit_checkObjectMissingFields.missing_fields_text",
+                             eObj.getTypeName(),
+                             eObj.getLabel()));
 
-	for (String fieldName: missingFields)
-	  {
-	    errorBuf.append(fieldName);
-	    errorBuf.append("\n");
-	  }
+        for (String fieldName: missingFields)
+          {
+            errorBuf.append(fieldName);
+            errorBuf.append("\n");
+          }
 
-	retVal = Ganymede.createErrorDialog(ts.l("commit_checkObjectMissingFields.missing_fields"),
-					    errorBuf.toString());
+        retVal = Ganymede.createErrorDialog(ts.l("commit_checkObjectMissingFields.missing_fields"),
+                                            errorBuf.toString());
 
-	// put a reference to the object that tripped us up so that
-	// the client can bring the problematic window forward.
+        // put a reference to the object that tripped us up so that
+        // the client can bring the problematic window forward.
 
-	retVal.setErrorType(ErrorTypeEnum.SHOWOBJECT);
-	retVal.setInvid(eObj.getInvid());
+        retVal.setErrorType(ErrorTypeEnum.SHOWOBJECT);
+        retVal.setInvid(eObj.getInvid());
 
-	// let DBSession/the client know they can retry things.
+        // let DBSession/the client know they can retry things.
 
-	throw new CommitNonFatalException(retVal);
+        throw new CommitNonFatalException(retVal);
       }
   }
 
@@ -1401,66 +1401,66 @@ public class DBEditSet {
 
     for (DBEditObject eObj: objects.values())
       {
-	// force a change of date and modifier information
-	// into the object without using the normal field
-	// modification methods.. this lets us set field
-	// values at a time when the object would reject
-	// changes from the user because the committing flag
-	// is set.
+        // force a change of date and modifier information
+        // into the object without using the normal field
+        // modification methods.. this lets us set field
+        // values at a time when the object would reject
+        // changes from the user because the committing flag
+        // is set.
 
-	switch (eObj.getStatus())
-	  {
-	  case ObjectStatus.CREATING:
+        switch (eObj.getStatus())
+          {
+          case ObjectStatus.CREATING:
 
-	    if (!eObj.isEmbedded())
-	      {
-		df = (DateDBField) eObj.getField(SchemaConstants.CreationDateField);
+            if (!eObj.isEmbedded())
+              {
+                df = (DateDBField) eObj.getField(SchemaConstants.CreationDateField);
 
-		// If we're processing an XML transaction and the XML
-		// transaction already specified a creation date (the
-		// df field is not undefined), we'll go ahead and
-		// leave it alone.
+                // If we're processing an XML transaction and the XML
+                // transaction already specified a creation date (the
+                // df field is not undefined), we'll go ahead and
+                // leave it alone.
 
-		// this behavior is intended to allow data to be
-		// dumped from a Ganymede 1.0 server, manually
-		// massaged to bring it into compliance with a
-		// Ganymede 2.0 server's schema, and then reloaded
-		// without losing the original creation information.
+                // this behavior is intended to allow data to be
+                // dumped from a Ganymede 1.0 server, manually
+                // massaged to bring it into compliance with a
+                // Ganymede 2.0 server's schema, and then reloaded
+                // without losing the original creation information.
 
-		if (!allowXMLHistoryOverride || !df.isDefined())
-		  {
-		    df.value = modDate;
-		  }
+                if (!allowXMLHistoryOverride || !df.isDefined())
+                  {
+                    df.value = modDate;
+                  }
 
-		// ditto for the creator info field.
+                // ditto for the creator info field.
 
-		sf = (StringDBField) eObj.getField(SchemaConstants.CreatorField);
+                sf = (StringDBField) eObj.getField(SchemaConstants.CreatorField);
 
-		if (!allowXMLHistoryOverride || !sf.isDefined())
-		  {
-		    sf.value = result;
-		  }
-	      }
+                if (!allowXMLHistoryOverride || !sf.isDefined())
+                  {
+                    sf.value = result;
+                  }
+              }
 
-	    // * fall-through *
+            // * fall-through *
 
-	  case ObjectStatus.EDITING:
+          case ObjectStatus.EDITING:
 
-	    if (!eObj.isEmbedded())
-	      {
-		df = (DateDBField) eObj.getField(SchemaConstants.ModificationDateField);
-		if (!allowXMLHistoryOverride || !df.isDefined())
-		  {
-		    df.value = modDate;
-		  }
+            if (!eObj.isEmbedded())
+              {
+                df = (DateDBField) eObj.getField(SchemaConstants.ModificationDateField);
+                if (!allowXMLHistoryOverride || !df.isDefined())
+                  {
+                    df.value = modDate;
+                  }
 
-		sf = (StringDBField) eObj.getField(SchemaConstants.ModifierField);
-		if (!allowXMLHistoryOverride || !sf.isDefined())
-		  {
-		    sf.value = result;
-		  }
-	      }
-	  }
+                sf = (StringDBField) eObj.getField(SchemaConstants.ModifierField);
+                if (!allowXMLHistoryOverride || !sf.isDefined())
+                  {
+                    sf.value = result;
+                  }
+              }
+          }
       }
   }
 
@@ -1480,18 +1480,18 @@ public class DBEditSet {
 
     synchronized (dbStore.journal)
       {
-	commit_persistTransaction();
+        commit_persistTransaction();
 
-	// on first run we're initializing an empty database, and we
-	// won't have any sync channels registered, nor yet a
-	// scheduler to scan for them.
+        // on first run we're initializing an empty database, and we
+        // won't have any sync channels registered, nor yet a
+        // scheduler to scan for them.
 
-	if (!Ganymede.firstrun)
-	  {
-	    commit_writeSyncChannels();
-	  }
+        if (!Ganymede.firstrun)
+          {
+            commit_writeSyncChannels();
+          }
 
-	commit_finalizeTransaction();
+        commit_finalizeTransaction();
       }
 
     // we've successfully persisted the transaction, written the
@@ -1503,24 +1503,24 @@ public class DBEditSet {
 
     try
       {
-	// we sync on Ganymede global objects in the following, but we
-	// don't keep external sync for more than one step, so
-	// multiple transactions on non-overlapping DBObjectBases can
-	// proceed through this section concurrently
+        // we sync on Ganymede global objects in the following, but we
+        // don't keep external sync for more than one step, so
+        // multiple transactions on non-overlapping DBObjectBases can
+        // proceed through this section concurrently
 
-	commit_handlePhase2();
-	commit_logTransaction(fieldsTouched); // *sync* Ganymede.log
-	commit_replace_objects();
-	commit_updateNamespaces(); // *sync* over each namespace in Ganymede.db.nameSpaces
-	DBDeletionManager.releaseSession(session);   // *sync* static DBDeletionManager
-	Ganymede.db.aSymLinkTracker.commit(session); // *sync* Ganymede.db.aSymLinkTracker
-	commit_updateBases(fieldsTouched);
+        commit_handlePhase2();
+        commit_logTransaction(fieldsTouched); // *sync* Ganymede.log
+        commit_replace_objects();
+        commit_updateNamespaces(); // *sync* over each namespace in Ganymede.db.nameSpaces
+        DBDeletionManager.releaseSession(session);   // *sync* static DBDeletionManager
+        Ganymede.db.aSymLinkTracker.commit(session); // *sync* Ganymede.db.aSymLinkTracker
+        commit_updateBases(fieldsTouched);
       }
     catch (Throwable ex)
       {
-	// If we throw up here, we've got real problems
+        // If we throw up here, we've got real problems
 
-	throw new CommitError("Critical error: Intolerable exception during commit_integrateChanges().", ex);
+        throw new CommitError("Critical error: Intolerable exception during commit_integrateChanges().", ex);
       }
   }
 
@@ -1536,34 +1536,34 @@ public class DBEditSet {
   {
     try
       {
-	persistedTransaction = dbStore.journal.writeTransaction(this);
+        persistedTransaction = dbStore.journal.writeTransaction(this);
 
-	if (persistedTransaction == null)
-	  {
-	    // "Couldn''t commit transaction, couldn''t write transaction to disk"
-	    // "Couldn''t commit transaction, the server may have run out of disk space.  Couldn''t write transaction to disk."
-	    throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.error"),
-								      ts.l("commit_persistTransaction.error_text")));
-	  }
+        if (persistedTransaction == null)
+          {
+            // "Couldn''t commit transaction, couldn''t write transaction to disk"
+            // "Couldn''t commit transaction, the server may have run out of disk space.  Couldn''t write transaction to disk."
+            throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.error"),
+                                                                      ts.l("commit_persistTransaction.error_text")));
+          }
       }
     catch (Throwable ex)
       {
-	if (ex instanceof IOException)
-	  {
-	    // "Couldn''t commit transaction, Exception caught writing journal"
-	    // "Couldn''t commit transaction, the server may have run out of disk space.\n\n{0}"
-	    throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.exception"),
-								      ts.l("commit_persistTransaction.ioexception_text",
-									   Ganymede.stackTrace(ex))));
-	  }
-	else
-	  {
-	    // "Couldn''t commit transaction, Exception caught writing journal"
-	    // "Couldn''t commit transaction, an exception was caught persisting to the journal.\n\n{0}"
-	    throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.exception"),
-								      ts.l("commit_persistTransaction.exception_text",
-									   Ganymede.stackTrace(ex))));
-	  }
+        if (ex instanceof IOException)
+          {
+            // "Couldn''t commit transaction, Exception caught writing journal"
+            // "Couldn''t commit transaction, the server may have run out of disk space.\n\n{0}"
+            throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.exception"),
+                                                                      ts.l("commit_persistTransaction.ioexception_text",
+                                                                           Ganymede.stackTrace(ex))));
+          }
+        else
+          {
+            // "Couldn''t commit transaction, Exception caught writing journal"
+            // "Couldn''t commit transaction, an exception was caught persisting to the journal.\n\n{0}"
+            throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_persistTransaction.exception"),
+                                                                      ts.l("commit_persistTransaction.exception_text",
+                                                                           Ganymede.stackTrace(ex))));
+          }
       }
   }
 
@@ -1578,80 +1578,80 @@ public class DBEditSet {
 
     try
       {
-	for (scheduleHandle handle: Ganymede.scheduler.getTasksByClass(SyncRunner.class))
-	  {
-	    SyncRunner sync = (SyncRunner) handle.task;
+        for (scheduleHandle handle: Ganymede.scheduler.getTasksByClass(SyncRunner.class))
+          {
+            SyncRunner sync = (SyncRunner) handle.task;
 
-	    try
-	      {
-		if (sync.isIncremental())
-		  {
-		    sync.writeIncrementalSync(persistedTransaction, objectList, this);
-		  }
-		else if (sync.isFullState())
-		  {
-		    sync.checkBuildNeeded(persistedTransaction, objectList, this);
-		  }
-	      }
-	    catch (java.io.FileNotFoundException in_ex)
-	      {
-		// "Couldn''t write transaction to sync channel.  Exception caught writing to sync channel."
-		// "Couldn''t write transaction to sync channel {0} due to a FileNotFoundException.
-		//
-		// This sync channel is configured to write to {1}, but this directory does not exist or is not writable.
-		//
-		// Transaction Cancelled."
+            try
+              {
+                if (sync.isIncremental())
+                  {
+                    sync.writeIncrementalSync(persistedTransaction, objectList, this);
+                  }
+                else if (sync.isFullState())
+                  {
+                    sync.checkBuildNeeded(persistedTransaction, objectList, this);
+                  }
+              }
+            catch (java.io.FileNotFoundException in_ex)
+              {
+                // "Couldn''t write transaction to sync channel.  Exception caught writing to sync channel."
+                // "Couldn''t write transaction to sync channel {0} due to a FileNotFoundException.
+                //
+                // This sync channel is configured to write to {1}, but this directory does not exist or is not writable.
+                //
+                // Transaction Cancelled."
 
-		throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
-									  ts.l("commit_writeSyncChannels.no_sync_found", sync.getName(), sync.getDirectory())));
-	      }
-	  }
+                throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
+                                                                          ts.l("commit_writeSyncChannels.no_sync_found", sync.getName(), sync.getDirectory())));
+              }
+          }
       }
     catch (Throwable ex)
       {
-	undoSyncChannels();
+        undoSyncChannels();
 
-	try
-	  {
-	    dbStore.journal.undoTransaction(persistedTransaction);
-	  }
-	catch (IOException inex)
-	  {
-	    // This *really* shouldn't happen, since there's no writes involved
-	    // in truncating the journal.  If it did, we're kind of screwed, though.
+        try
+          {
+            dbStore.journal.undoTransaction(persistedTransaction);
+          }
+        catch (IOException inex)
+          {
+            // This *really* shouldn't happen, since there's no writes involved
+            // in truncating the journal.  If it did, we're kind of screwed, though.
 
-	    // ***
-	    // *** Error in commit_writeSyncChannels()!  Couldn''t undo a transaction in the
-	    // *** journal file after catching an exception!
-	    // ***
-	    // *** The journal may not be completely recoverable!
-	    // ***
-	    //
-	    // {0}
+            // ***
+            // *** Error in commit_writeSyncChannels()!  Couldn''t undo a transaction in the
+            // *** journal file after catching an exception!
+            // ***
+            // *** The journal may not be completely recoverable!
+            // ***
+            //
+            // {0}
 
-	    Ganymede.debug(ts.l("commit_writeSyncChannels.badundo", Ganymede.stackTrace(ex)));
-	  }
+            Ganymede.debug(ts.l("commit_writeSyncChannels.badundo", Ganymede.stackTrace(ex)));
+          }
 
-	if (ex instanceof CommitFatalException)
-	  {
-	    throw (CommitFatalException) ex;
-	  }
-	else if (ex instanceof IOException)
-	  {
-	    // "Couldn''t write transaction to sync channel.  Exception caught writing to sync channel."
-	    // "Couldn''t write transaction to sync channels due to an IOException.   The server may have run out of disk space.\n\n{0}"
-	    throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
-								      ts.l("commit_writeSyncChannels.ioexception_text",
-									   Ganymede.stackTrace(ex))));
-	  }
-	else
-	  {
-	    // "Couldn''t write transaction to sync channel.  Exception caught writing to sync channel."
-	    // "Exception caught while writing to sync channels.  Sync channels write aborted.\n\n{0}"
-	    throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
-								      ts.l("commit_writeSyncChannels.exception_text",
-									   Ganymede.stackTrace(ex))));
-	  }
+        if (ex instanceof CommitFatalException)
+          {
+            throw (CommitFatalException) ex;
+          }
+        else if (ex instanceof IOException)
+          {
+            // "Couldn''t write transaction to sync channel.  Exception caught writing to sync channel."
+            // "Couldn''t write transaction to sync channels due to an IOException.   The server may have run out of disk space.\n\n{0}"
+            throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
+                                                                      ts.l("commit_writeSyncChannels.ioexception_text",
+                                                                           Ganymede.stackTrace(ex))));
+          }
+        else
+          {
+            // "Couldn''t write transaction to sync channel.  Exception caught writing to sync channel."
+            // "Exception caught while writing to sync channels.  Sync channels write aborted.\n\n{0}"
+            throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_writeSyncChannels.exception"),
+                                                                      ts.l("commit_writeSyncChannels.exception_text",
+                                                                           Ganymede.stackTrace(ex))));
+          }
       }
   }
 
@@ -1666,22 +1666,22 @@ public class DBEditSet {
   {
     for (scheduleHandle handle: Ganymede.scheduler.getTasksByClass(SyncRunner.class))
       {
-	SyncRunner sync = (SyncRunner) handle.task;
+        SyncRunner sync = (SyncRunner) handle.task;
 
-	if (sync.isIncremental())
-	  {
-	    try
-	      {
-		sync.unSync(persistedTransaction);
-	      }
-	    catch (Throwable inex)
-	      {
-		// what can we do?  keep clearing them out as best we
-		// can
+        if (sync.isIncremental())
+          {
+            try
+              {
+                sync.unSync(persistedTransaction);
+              }
+            catch (Throwable inex)
+              {
+                // what can we do?  keep clearing them out as best we
+                // can
 
-		Ganymede.logError(inex);
-	      }
-	  }
+                Ganymede.logError(inex);
+              }
+          }
       }
   }
 
@@ -1698,41 +1698,41 @@ public class DBEditSet {
   {
     try
       {
-	dbStore.journal.finalizeTransaction(persistedTransaction);
+        dbStore.journal.finalizeTransaction(persistedTransaction);
       }
     catch (IOException ex)
       {
-	try
-	  {
-	    undoSyncChannels();
-	    dbStore.journal.undoTransaction(persistedTransaction);
-	  }
-	catch (IOException inex)
-	  {
-	    // This *really* shouldn't happen, since there's no writes involved
-	    // in truncating the journal.  If it did, we're kind of screwed, though.
+        try
+          {
+            undoSyncChannels();
+            dbStore.journal.undoTransaction(persistedTransaction);
+          }
+        catch (IOException inex)
+          {
+            // This *really* shouldn't happen, since there's no writes involved
+            // in truncating the journal.  If it did, we're kind of screwed, though.
 
-	    // ***
-	    // *** Error in commit_finalizeTransaction()!  Couldn''t undo a transaction in the
-	    // *** journal file after catching an exception!
-	    // ***
-	    // *** The journal may not be completely recoverable!
-	    // ***
-	    //
-	    // {0}
+            // ***
+            // *** Error in commit_finalizeTransaction()!  Couldn''t undo a transaction in the
+            // *** journal file after catching an exception!
+            // ***
+            // *** The journal may not be completely recoverable!
+            // ***
+            //
+            // {0}
 
-	    Ganymede.debug(ts.l("commit_finalizeTransaction.badundo", Ganymede.stackTrace(ex)));
-	  }
+            Ganymede.debug(ts.l("commit_finalizeTransaction.badundo", Ganymede.stackTrace(ex)));
+          }
 
-	// "Couldn''t finalize transaction to journal.  IOException caught writing to journal."
-	// "Couldn''t finalize transaction to journal, the server may have run out of disk space.\n\n{0}"
-	throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_finalizeTransaction.exception"),
-								  ts.l("commit_finalizeTransaction.exception_text",
-								       Ganymede.stackTrace(ex))));
+        // "Couldn''t finalize transaction to journal.  IOException caught writing to journal."
+        // "Couldn''t finalize transaction to journal, the server may have run out of disk space.\n\n{0}"
+        throw new CommitFatalException(Ganymede.createErrorDialog(ts.l("commit_finalizeTransaction.exception"),
+                                                                  ts.l("commit_finalizeTransaction.exception_text",
+                                                                       Ganymede.stackTrace(ex))));
       }
     finally
       {
-	persistedTransaction = null;
+        persistedTransaction = null;
       }
   }
 
@@ -1747,21 +1747,21 @@ public class DBEditSet {
   {
     for (DBEditObject eObj: objects.values())
       {
-	// tell the object to go ahead and do any external
-	// commit actions.
+        // tell the object to go ahead and do any external
+        // commit actions.
 
-	try
-	  {
-	    eObj.commitPhase2();
-	  }
-	catch (Throwable ex)
-	  {
-	    // if we get a runtime exception here, there's nothing to
-	    // do for it.. we're locked on course.  log the trace, but
-	    // stay on target.. stay on target..
+        try
+          {
+            eObj.commitPhase2();
+          }
+        catch (Throwable ex)
+          {
+            // if we get a runtime exception here, there's nothing to
+            // do for it.. we're locked on course.  log the trace, but
+            // stay on target.. stay on target..
 
-	    Ganymede.debug(Ganymede.stackTrace(ex));
-	  }
+            Ganymede.debug(Ganymede.stackTrace(ex));
+          }
       }
   }
 
@@ -1781,18 +1781,18 @@ public class DBEditSet {
   {
     for (DBEditObject eObj: objects.values())
       {
-	try
-	  {
-	    commit_log_event(eObj, fieldsTouched);
-	  }
-	catch (Throwable ex)
-	  {
-	    // we're already committed, so we just warn about the log
-	    // failure and move on
+        try
+          {
+            commit_log_event(eObj, fieldsTouched);
+          }
+        catch (Throwable ex)
+          {
+            // we're already committed, so we just warn about the log
+            // failure and move on
 
-	    // "Error!  Problem occured while writing log entry, continuing with transaction commit.\n{0}"
-	    Ganymede.debug(ts.l("commit_log_events.log_failure", Ganymede.stackTrace(ex)));
-	  }
+            // "Error!  Problem occured while writing log entry, continuing with transaction commit.\n{0}"
+            Ganymede.debug(ts.l("commit_log_events.log_failure", Ganymede.stackTrace(ex)));
+          }
       }
   }
 
@@ -1813,7 +1813,7 @@ public class DBEditSet {
   {
     if (Ganymede.log == null)
       {
-	return;
+        return;
       }
 
     Vector<Invid> invids;
@@ -1825,345 +1825,345 @@ public class DBEditSet {
 
     if (getGSession() != null)
       {
-	responsibleInvid = getGSession().getPermManager().getResponsibleInvid();
-	responsibleName = getGSession().getPermManager().getIdentity();
+        responsibleInvid = getGSession().getPermManager().getResponsibleInvid();
+        responsibleName = getGSession().getPermManager().getIdentity();
       }
     else
       {
-	responsibleInvid = null;
-	responsibleName = "system";
+        responsibleInvid = null;
+        responsibleName = "system";
       }
 
     switch (eObj.getStatus())
       {
       case ObjectStatus.EDITING:
 
-	invids = new Vector<Invid>();
-	invids.add(eObj.getInvid());
+        invids = new Vector<Invid>();
+        invids.add(eObj.getInvid());
 
-	// if we changed an embedded object, make a
-	// note that the containing object was
-	// involved so that we show changes to
-	// embedded objects in a log search for the
-	// containing object
+        // if we changed an embedded object, make a
+        // note that the containing object was
+        // involved so that we show changes to
+        // embedded objects in a log search for the
+        // containing object
 
-	if (eObj.isEmbedded())
-	  {
-	    DBObject container = session.getContainingObj(eObj);
+        if (eObj.isEmbedded())
+          {
+            DBObject container = session.getContainingObj(eObj);
 
-	    if (container != null)
-	      {
-		invids.add(container.getInvid());
-	      }
-	  }
+            if (container != null)
+              {
+                invids.add(container.getInvid());
+              }
+          }
 
-	diff = eObj.diff(fieldsTouched);
+        diff = eObj.diff(fieldsTouched);
 
-	if (diff != null)
-	  {
-	    boolean logNormal = true;
+        if (diff != null)
+          {
+            boolean logNormal = true;
 
-	    if (eObj.isEmbedded())
-	      {
-		try
-		  {
-		    DBObject parentObj = session.getContainingObj(eObj);
+            if (eObj.isEmbedded())
+              {
+                try
+                  {
+                    DBObject parentObj = session.getContainingObj(eObj);
 
-		    // "{0} {1}''s {2} ''{3}'', <{4}> was modified.\n\n{5}"
+                    // "{0} {1}''s {2} ''{3}'', <{4}> was modified.\n\n{5}"
 
-		    streamLogEvent("objectchanged",
-				   ts.l("commit_createLogEvent.embedded_modified",
-					parentObj.getTypeName(),
-					parentObj.getLabel(),
-					eObj.getTypeName(),
-					eObj.getLabel(),
-					eObj.getInvid(),
-					diff),
-				   responsibleInvid, responsibleName,
-				   invids, (List<String>) VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
+                    streamLogEvent("objectchanged",
+                                   ts.l("commit_createLogEvent.embedded_modified",
+                                        parentObj.getTypeName(),
+                                        parentObj.getLabel(),
+                                        eObj.getTypeName(),
+                                        eObj.getLabel(),
+                                        eObj.getInvid(),
+                                        diff),
+                                   responsibleInvid, responsibleName,
+                                   invids, (List<String>) VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
 
-		    logNormal = false;
-		  }
-		catch (IntegrityConstraintException ex)
-		  {
-		    // We might catch this from
-		    // getContainingObj if the
-		    // embedded object doesn't have a
-		    // proper container.  Won't be
-		    // fatal, as we'll just leave
-		    // logNormal true and handle it below
+                    logNormal = false;
+                  }
+                catch (IntegrityConstraintException ex)
+                  {
+                    // We might catch this from
+                    // getContainingObj if the
+                    // embedded object doesn't have a
+                    // proper container.  Won't be
+                    // fatal, as we'll just leave
+                    // logNormal true and handle it below
 
-		    Ganymede.debug(Ganymede.stackTrace(ex));
-		  }
-	      }
+                    Ganymede.debug(Ganymede.stackTrace(ex));
+                  }
+              }
 
-	    if (logNormal)
-	      {
-		streamLogEvent("objectchanged",
-			       ts.l("commit_createLogEvent.modified",
-				    eObj.getTypeName(),
-				    eObj.getLabel(),
-				    String.valueOf(eObj.getInvid()),
-				    diff),
-			       responsibleInvid, responsibleName,
-			       invids, (List<String>) eObj.getEmailTargets());
-	      }
-	  }
+            if (logNormal)
+              {
+                streamLogEvent("objectchanged",
+                               ts.l("commit_createLogEvent.modified",
+                                    eObj.getTypeName(),
+                                    eObj.getLabel(),
+                                    String.valueOf(eObj.getInvid()),
+                                    diff),
+                               responsibleInvid, responsibleName,
+                               invids, (List<String>) eObj.getEmailTargets());
+              }
+          }
 
-	break;
+        break;
 
       case ObjectStatus.CREATING:
 
-	invids = new Vector<Invid>();
-	invids.add(eObj.getInvid());
+        invids = new Vector<Invid>();
+        invids.add(eObj.getInvid());
 
-	// if we created an embedded object, make a
-	// note that the containing object was
-	// involved so that we show changes to
-	// embedded objects in a log search for the
-	// containing object
+        // if we created an embedded object, make a
+        // note that the containing object was
+        // involved so that we show changes to
+        // embedded objects in a log search for the
+        // containing object
 
-	if (eObj.isEmbedded())
-	  {
-	    DBObject container = session.getContainingObj(eObj);
+        if (eObj.isEmbedded())
+          {
+            DBObject container = session.getContainingObj(eObj);
 
-	    if (container != null)
-	      {
-		invids.add(container.getInvid());
-	      }
-	  }
+            if (container != null)
+              {
+                invids.add(container.getInvid());
+              }
+          }
 
-	// We'll call diff() to update the fieldsTouched hashtable,
-	// but we won't use the string generated, since
-	// getPrintString() does a better job of describing the
-	// contents of embedded objects.  This forced use of diff()
-	// isn't elegant, but as DBField was originally defined, it's
-	// only through the use of the diff strings that we have a
-	// unified way to determine change, and we don't want to have
-	// to re-do that work in all the DBField subclasses.
+        // We'll call diff() to update the fieldsTouched hashtable,
+        // but we won't use the string generated, since
+        // getPrintString() does a better job of describing the
+        // contents of embedded objects.  This forced use of diff()
+        // isn't elegant, but as DBField was originally defined, it's
+        // only through the use of the diff strings that we have a
+        // unified way to determine change, and we don't want to have
+        // to re-do that work in all the DBField subclasses.
 
-	eObj.diff(fieldsTouched);
+        eObj.diff(fieldsTouched);
 
-	diff = eObj.getPrintString();
+        diff = eObj.getPrintString();
 
-	if (diff != null)
-	  {
-	    boolean logNormal = true;
+        if (diff != null)
+          {
+            boolean logNormal = true;
 
-	    if (eObj.isEmbedded())
-	      {
-		try
-		  {
-		    DBObject parentObj = session.getContainingObj(eObj);
+            if (eObj.isEmbedded())
+              {
+                try
+                  {
+                    DBObject parentObj = session.getContainingObj(eObj);
 
                     // "{0} {1}''s {2} ''{3}'', <{4}> was created.\n\n{5}\n"
-		    streamLogEvent("objectcreated",
-				   ts.l("commit_createLogEvent.embedded_created",
-					parentObj.getTypeName(),
-					parentObj.getLabel(),
-					eObj.getTypeName(),
-					eObj.getLabel(),
-					eObj.getInvid(),
-					diff),
-				   responsibleInvid, responsibleName,
-				   invids, (List<String>) VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
+                    streamLogEvent("objectcreated",
+                                   ts.l("commit_createLogEvent.embedded_created",
+                                        parentObj.getTypeName(),
+                                        parentObj.getLabel(),
+                                        eObj.getTypeName(),
+                                        eObj.getLabel(),
+                                        eObj.getInvid(),
+                                        diff),
+                                   responsibleInvid, responsibleName,
+                                   invids, (List<String>) VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
 
-		    logNormal = false;
-		  }
-		catch (IntegrityConstraintException ex)
-		  {
-		    // We might catch this from
-		    // getContainingObj if the
-		    // embedded object doesn't have a
-		    // proper container.  Won't be
-		    // fatal, as we'll just leave
-		    // logNormal true and handle it below
+                    logNormal = false;
+                  }
+                catch (IntegrityConstraintException ex)
+                  {
+                    // We might catch this from
+                    // getContainingObj if the
+                    // embedded object doesn't have a
+                    // proper container.  Won't be
+                    // fatal, as we'll just leave
+                    // logNormal true and handle it below
 
-		    Ganymede.debug(Ganymede.stackTrace(ex));
-		  }
-	      }
+                    Ganymede.debug(Ganymede.stackTrace(ex));
+                  }
+              }
 
-	    if (logNormal)
-	      {
+            if (logNormal)
+              {
                 // "{0} {1}, <{2}> was created.\n\n{3}\n"
-		streamLogEvent("objectcreated",
-			       ts.l("commit_createLogEvent.created",
-				    eObj.getTypeName(),
-				    eObj.getLabel(),
-				    String.valueOf(eObj.getInvid()),
-				    diff),
-			       responsibleInvid, responsibleName,
-			       invids, eObj.getEmailTargets());
-	      }
-	  }
+                streamLogEvent("objectcreated",
+                               ts.l("commit_createLogEvent.created",
+                                    eObj.getTypeName(),
+                                    eObj.getLabel(),
+                                    String.valueOf(eObj.getInvid()),
+                                    diff),
+                               responsibleInvid, responsibleName,
+                               invids, eObj.getEmailTargets());
+              }
+          }
 
-	break;
+        break;
 
       case ObjectStatus.DELETING:
 
-	invids = new Vector<Invid>();
-	invids.add(eObj.getInvid());
+        invids = new Vector<Invid>();
+        invids.add(eObj.getInvid());
 
-	// if we deleted an embedded object, make a
-	// note that the containing object was
-	// involved so that we show changes to
-	// embedded objects in a log search for the
-	// containing object
+        // if we deleted an embedded object, make a
+        // note that the containing object was
+        // involved so that we show changes to
+        // embedded objects in a log search for the
+        // containing object
 
-	if (eObj.isEmbedded())
-	  {
-	    try
-	      {
-		DBObject container = session.getContainingObj(eObj);
+        if (eObj.isEmbedded())
+          {
+            try
+              {
+                DBObject container = session.getContainingObj(eObj);
 
-		if (container != null)
-		  {
-		    invids.add(container.getInvid());
-		  }
-	      }
-	    catch (IntegrityConstraintException ex)
-	      {
-		// GanymedeServer.sweepEmbeddedObjects() may need to
-		// delete an embedded object with no container
-		// registered if an error condition elsewhere in the
-		// Ganymede server left a dangling embedded object.
+                if (container != null)
+                  {
+                    invids.add(container.getInvid());
+                  }
+              }
+            catch (IntegrityConstraintException ex)
+              {
+                // GanymedeServer.sweepEmbeddedObjects() may need to
+                // delete an embedded object with no container
+                // registered if an error condition elsewhere in the
+                // Ganymede server left a dangling embedded object.
 
-		// So we'll ignore this here for the sake of getting
-		// the dangling embedded object properly flushed.
-	      }
-	  }
+                // So we'll ignore this here for the sake of getting
+                // the dangling embedded object properly flushed.
+              }
+          }
 
-	String oldVals = null;
+        String oldVals = null;
 
-	try
-	  {
-	    oldVals = eObj.getOriginal().getPrintString();
-	  }
-	catch (NullPointerException ex)
-	  {
-	    Ganymede.debug(Ganymede.stackTrace(ex));
-	  }
+        try
+          {
+            oldVals = eObj.getOriginal().getPrintString();
+          }
+        catch (NullPointerException ex)
+          {
+            Ganymede.debug(Ganymede.stackTrace(ex));
+          }
 
-	if (oldVals != null)
-	  {
-	    boolean logNormal = true;
+        if (oldVals != null)
+          {
+            boolean logNormal = true;
 
-	    if (eObj.isEmbedded())
-	      {
-		try
-		  {
-		    DBObject parentObj = session.getContainingObj(eObj);
+            if (eObj.isEmbedded())
+              {
+                try
+                  {
+                    DBObject parentObj = session.getContainingObj(eObj);
 
-		    streamLogEvent("deleteobject",
-				   ts.l("commit_createLogEvent.embedded_deleted",
-					parentObj.getTypeName(),
-					parentObj.getLabel(),
-					eObj.getTypeName(),
-					eObj.getLabel(),
-					eObj.getInvid(),
-					oldVals),
-				   responsibleInvid, responsibleName,
-				   invids, (List<String>) VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
+                    streamLogEvent("deleteobject",
+                                   ts.l("commit_createLogEvent.embedded_deleted",
+                                        parentObj.getTypeName(),
+                                        parentObj.getLabel(),
+                                        eObj.getTypeName(),
+                                        eObj.getLabel(),
+                                        eObj.getInvid(),
+                                        oldVals),
+                                   responsibleInvid, responsibleName,
+                                   invids, (List<String>) VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
 
-		    logNormal = false;
-		  }
-		catch (IntegrityConstraintException ex)
-		  {
-		    // We might catch this from
-		    // getContainingObj if the
-		    // embedded object doesn't have a
-		    // proper container.  Won't be
-		    // fatal, as we'll just leave
-		    // logNormal true and handle it below
+                    logNormal = false;
+                  }
+                catch (IntegrityConstraintException ex)
+                  {
+                    // We might catch this from
+                    // getContainingObj if the
+                    // embedded object doesn't have a
+                    // proper container.  Won't be
+                    // fatal, as we'll just leave
+                    // logNormal true and handle it below
 
-		    Ganymede.debug(Ganymede.stackTrace(ex));
-		  }
-	      }
+                    Ganymede.debug(Ganymede.stackTrace(ex));
+                  }
+              }
 
-	    if (logNormal)
-	      {
-		streamLogEvent("deleteobject",
-			       ts.l("commit_createLogEvent.deleted",
-				    eObj.getTypeName(),
-				    eObj.getLabel(),
-				    String.valueOf(eObj.getInvid()),
-				    oldVals),
-			       responsibleInvid, responsibleName,
-			       invids, eObj.getEmailTargets());
-	      }
+            if (logNormal)
+              {
+                streamLogEvent("deleteobject",
+                               ts.l("commit_createLogEvent.deleted",
+                                    eObj.getTypeName(),
+                                    eObj.getLabel(),
+                                    String.valueOf(eObj.getInvid()),
+                                    oldVals),
+                               responsibleInvid, responsibleName,
+                               invids, eObj.getEmailTargets());
+              }
 
-	    // and calculate the fields that we touched by losing them
+            // and calculate the fields that we touched by losing them
 
-	    DBObject origObj = eObj.getOriginal();
+            DBObject origObj = eObj.getOriginal();
 
-	    for (DBObjectBaseField fieldDef: origObj.objectBase.getFieldsInFieldOrder())
-	      {
-		// we don't care if certain fields change
+            for (DBObjectBaseField fieldDef: origObj.objectBase.getFieldsInFieldOrder())
+              {
+                // we don't care if certain fields change
 
-		if (fieldDef.getID() == SchemaConstants.CreationDateField ||
-		    fieldDef.getID() == SchemaConstants.CreatorField ||
-		    fieldDef.getID() == SchemaConstants.ModificationDateField ||
-		    fieldDef.getID() == SchemaConstants.ModifierField)
-		  {
-		    continue;
-		  }
+                if (fieldDef.getID() == SchemaConstants.CreationDateField ||
+                    fieldDef.getID() == SchemaConstants.CreatorField ||
+                    fieldDef.getID() == SchemaConstants.ModificationDateField ||
+                    fieldDef.getID() == SchemaConstants.ModifierField)
+                  {
+                    continue;
+                  }
 
-		DBField origField = (DBField) origObj.getField(fieldDef.getID());
+                DBField origField = (DBField) origObj.getField(fieldDef.getID());
 
-		if (origField != null && origField.isDefined())
-		  {
-		    fieldsTouched.add(fieldDef);
-		  }
-	      }
-	  }
-	else
-	  {
-	    boolean logNormal = true;
+                if (origField != null && origField.isDefined())
+                  {
+                    fieldsTouched.add(fieldDef);
+                  }
+              }
+          }
+        else
+          {
+            boolean logNormal = true;
 
-	    if (eObj.isEmbedded())
-	      {
-		try
-		  {
-		    DBObject parentObj = session.getContainingObj(eObj);
+            if (eObj.isEmbedded())
+              {
+                try
+                  {
+                    DBObject parentObj = session.getContainingObj(eObj);
 
-		    streamLogEvent("deleteobject",
-				   ts.l("commit_createLogEvent.embedded_deleted_nodiff",
-					parentObj.getTypeName(),
-					parentObj.getLabel(),
-					eObj.getTypeName(),
-					eObj.getLabel(),
-					eObj.getInvid()),
-				   responsibleInvid, responsibleName,
-				   invids, (List<String>) VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
+                    streamLogEvent("deleteobject",
+                                   ts.l("commit_createLogEvent.embedded_deleted_nodiff",
+                                        parentObj.getTypeName(),
+                                        parentObj.getLabel(),
+                                        eObj.getTypeName(),
+                                        eObj.getLabel(),
+                                        eObj.getInvid()),
+                                   responsibleInvid, responsibleName,
+                                   invids, (List<String>) VectorUtils.union(eObj.getEmailTargets(), parentObj.getEmailTargets()));
 
-		    logNormal = false;
-		  }
-		catch (IntegrityConstraintException ex)
-		  {
-		    // We might catch this from
-		    // getContainingObj if the
-		    // embedded object doesn't have a
-		    // proper container.  Won't be
-		    // fatal, as we'll just leave
-		    // logNormal true and handle it below
+                    logNormal = false;
+                  }
+                catch (IntegrityConstraintException ex)
+                  {
+                    // We might catch this from
+                    // getContainingObj if the
+                    // embedded object doesn't have a
+                    // proper container.  Won't be
+                    // fatal, as we'll just leave
+                    // logNormal true and handle it below
 
-		    Ganymede.debug(Ganymede.stackTrace(ex));
-		  }
-	      }
+                    Ganymede.debug(Ganymede.stackTrace(ex));
+                  }
+              }
 
-	    if (logNormal)
-	      {
-		streamLogEvent("deleteobject",
-			       ts.l("commit_createLogEvent.deleted_nodiff",
-				    eObj.getTypeName(),
-				    eObj.getLabel(),
-				    String.valueOf(eObj.getInvid())),
-			       responsibleInvid, responsibleName,
-			       invids, eObj.getEmailTargets());
-	      }
-	  }
+            if (logNormal)
+              {
+                streamLogEvent("deleteobject",
+                               ts.l("commit_createLogEvent.deleted_nodiff",
+                                    eObj.getTypeName(),
+                                    eObj.getLabel(),
+                                    String.valueOf(eObj.getInvid())),
+                               responsibleInvid, responsibleName,
+                               invids, eObj.getEmailTargets());
+              }
+          }
 
-	break;
+        break;
       }
   }
 
@@ -2181,31 +2181,31 @@ public class DBEditSet {
 
     if (Ganymede.log == null)
       {
-	// if our log is null, as it is with DBStore bootstrap, then
-	// we don't need to do any logging..  we'll just return.
-	//
-	// note that this means that when we have a log, we also won't
-	// be updating the per-field-type timestamps in
-	// DBObjectBaseField.
-	//
-	// This is acceptable, since the DBStore bootstrap is only for
-	// creating the mandatory Ganymede objects, which we shouldn't
-	// care about in a GanymedeBuilderTask context (the only thing
-	// that cares about the DBObjectBase/DBObjectBaseField
-	// timestamps).
+        // if our log is null, as it is with DBStore bootstrap, then
+        // we don't need to do any logging..  we'll just return.
+        //
+        // note that this means that when we have a log, we also won't
+        // be updating the per-field-type timestamps in
+        // DBObjectBaseField.
+        //
+        // This is acceptable, since the DBStore bootstrap is only for
+        // creating the mandatory Ganymede objects, which we shouldn't
+        // care about in a GanymedeBuilderTask context (the only thing
+        // that cares about the DBObjectBase/DBObjectBaseField
+        // timestamps).
 
-	return;
+        return;
       }
 
     if (getGSession() != null)
       {
-	responsibleName = getGSession().getPermManager().getIdentity();
-	responsibleInvid = getGSession().getPermManager().getResponsibleInvid();
+        responsibleName = getGSession().getPermManager().getIdentity();
+        responsibleInvid = getGSession().getPermManager().getResponsibleInvid();
       }
     else
       {
-	responsibleName = "system";
-	responsibleInvid = null;
+        responsibleName = "system";
+        responsibleInvid = null;
       }
 
     // collect the list of invids that we know were touched in this
@@ -2215,46 +2215,46 @@ public class DBEditSet {
 
     synchronized (Ganymede.log)
       {
-	try
-	  {
-	    Ganymede.log.startTransactionLog(invids, responsibleName, responsibleInvid, comment, this);
+        try
+          {
+            Ganymede.log.startTransactionLog(invids, responsibleName, responsibleInvid, comment, this);
 
-	    // then transmit/log any pre-recorded log events that we
-	    // have accumulated during the user's session/transaction
+            // then transmit/log any pre-recorded log events that we
+            // have accumulated during the user's session/transaction
 
-	    for (DBLogEvent event: logEvents)
-	      {
-		streamLogEvent(event);
-	      }
+            for (DBLogEvent event: logEvents)
+              {
+                streamLogEvent(event);
+              }
 
-	    // for garbage collection
+            // for garbage collection
 
-	    logEvents.clear();
+            logEvents.clear();
 
-	    // then create and stream log events describing the
-	    // objects that are in this transaction at the time of
-	    // commit
+            // then create and stream log events describing the
+            // objects that are in this transaction at the time of
+            // commit
 
-	    commit_log_events(fieldsTouched);
+            commit_log_events(fieldsTouched);
 
-	    // finish the transaction to disk and send out any email
-	    // that we need to send
+            // finish the transaction to disk and send out any email
+            // that we need to send
 
-	    Ganymede.log.endTransactionLog(invids, responsibleName, responsibleInvid, this);
-	  }
-	catch (Throwable ex)
-	  {
-	    // exceptions during logging aren't important enough to break a
-	    // transaction commit in progress, but we do want to record any
-	    // such
+            Ganymede.log.endTransactionLog(invids, responsibleName, responsibleInvid, this);
+          }
+        catch (Throwable ex)
+          {
+            // exceptions during logging aren't important enough to break a
+            // transaction commit in progress, but we do want to record any
+            // such
 
-	    Ganymede.debug(Ganymede.stackTrace(ex));
-	  }
-	finally
-	  {
-	    logEvents = null;
-	    Ganymede.log.cleanupTransaction();
-	  }
+            Ganymede.debug(Ganymede.stackTrace(ex));
+          }
+        finally
+          {
+            logEvents = null;
+            Ganymede.log.cleanupTransaction();
+          }
       }
   }
 
@@ -2268,7 +2268,7 @@ public class DBEditSet {
   {
     for (DBEditObject eObj: objects.values())
       {
-	commit_replace_object(eObj);
+        commit_replace_object(eObj);
       }
 
     objects.clear();
@@ -2301,61 +2301,61 @@ public class DBEditSet {
       case ObjectStatus.CREATING:
       case ObjectStatus.EDITING:
 
-	// Create a read-only version of eObj, with all fields
-	// reset to checked-in status, put it into our object hash
+        // Create a read-only version of eObj, with all fields
+        // reset to checked-in status, put it into our object hash
 
-	// note that this new DBObject will not include any
-	// transient fields which self-identify as undefined
+        // note that this new DBObject will not include any
+        // transient fields which self-identify as undefined
 
-	base.put(new DBObject(eObj));
+        base.put(new DBObject(eObj));
 
-	// (note that we can't use a no-sync put above, since
-	// we don't prevent asynchronous viewDBObject().
+        // (note that we can't use a no-sync put above, since
+        // we don't prevent asynchronous viewDBObject().
 
-	if (getGSession() != null)
-	  {
-	    getGSession().checkIn();
-	  }
+        if (getGSession() != null)
+          {
+            getGSession().checkIn();
+          }
 
-	base.getStore().checkIn(); // update checkout count
+        base.getStore().checkIn(); // update checkout count
 
-	break;
+        break;
 
       case ObjectStatus.DELETING:
 
-	// Deleted objects had their deletion finalization done before
-	// we ever got to this point.
+        // Deleted objects had their deletion finalization done before
+        // we ever got to this point.
 
-	// Note that we don't try to release the id for previously
-	// registered objects.. the base.releaseId() method really
-	// can only handle popping object id's off of a stack, and
-	// can't do anything for object id's unless the id was the
-	// last one allocated in that base, which is unlikely
-	// enough that we don't worry about it here.
+        // Note that we don't try to release the id for previously
+        // registered objects.. the base.releaseId() method really
+        // can only handle popping object id's off of a stack, and
+        // can't do anything for object id's unless the id was the
+        // last one allocated in that base, which is unlikely
+        // enough that we don't worry about it here.
 
-	base.remove(eObj.getID());
+        base.remove(eObj.getID());
 
-	// (note that we can't use a no-sync remove above, since
-	// we don't prevent asynchronous viewDBObject().
+        // (note that we can't use a no-sync remove above, since
+        // we don't prevent asynchronous viewDBObject().
 
-	session.GSession.checkIn(); // *synchronized*
-	base.getStore().checkIn(); // count it as checked in once it's deleted
-	break;
+        session.GSession.checkIn(); // *synchronized*
+        base.getStore().checkIn(); // count it as checked in once it's deleted
+        break;
 
       case ObjectStatus.DROPPING:
 
-	// dropped objects had their deletion finalization done before
-	// we ever got to this point..
+        // dropped objects had their deletion finalization done before
+        // we ever got to this point..
 
-	base.releaseId(eObj.getID()); // relinquish the unused invid
+        base.releaseId(eObj.getID()); // relinquish the unused invid
 
-	if (getGSession() != null)
-	  {
-	    getGSession().checkIn();
-	  }
+        if (getGSession() != null)
+          {
+            getGSession().checkIn();
+          }
 
-	base.getStore().checkIn(); // count it as checked in once it's deleted
-	break;
+        base.getStore().checkIn(); // count it as checked in once it's deleted
+        break;
       }
   }
 
@@ -2373,7 +2373,7 @@ public class DBEditSet {
 
     for (DBNameSpace space: dbStore.nameSpaces)
       {
-	space.commit(this);
+        space.commit(this);
       }
   }
 
@@ -2394,13 +2394,13 @@ public class DBEditSet {
   {
     for (DBObjectBase base: basesModified)
       {
-	base.updateTimeStamp();
+        base.updateTimeStamp();
 
-	// and, very important, update the base's snapshot vector
-	// so that any new queries that are issued will proceed
-	// against the new state of objects in this base
+        // and, very important, update the base's snapshot vector
+        // so that any new queries that are issued will proceed
+        // against the new state of objects in this base
 
-	base.updateIterationSet();
+        base.updateIterationSet();
       }
 
     // And in addition to updating the time stamps on the object
@@ -2408,7 +2408,7 @@ public class DBEditSet {
 
     for (DBObjectBaseField fieldDef: fieldsTouched)
       {
-	fieldDef.updateTimeStamp();
+        fieldDef.updateTimeStamp();
       }
   }
 
@@ -2430,15 +2430,15 @@ public class DBEditSet {
 
     synchronized (Ganymede.db.lockSync)
       {
-	if (wLock != null)
-	  {
-	    if (wLock.inEstablish)
-	      {
-		return false;
-	      }
+        if (wLock != null)
+          {
+            if (wLock.inEstablish)
+              {
+                return false;
+              }
 
-	    wLock.abort();
-	  }
+            wLock.abort();
+          }
       }
 
     release();
@@ -2463,38 +2463,38 @@ public class DBEditSet {
   {
     if (objects == null)
       {
-	throw new RuntimeException(ts.l("global.already"));
+        throw new RuntimeException(ts.l("global.already"));
       }
 
     for (DBEditObject eObj: objects.values())
       {
-	eObj.release(true);
+        eObj.release(true);
 
-	switch (eObj.getStatus())
-	  {
-	  case ObjectStatus.CREATING:
-	  case ObjectStatus.DROPPING:
-	    eObj.getBase().releaseId(eObj.getID()); // relinquish the unused invid
+        switch (eObj.getStatus())
+          {
+          case ObjectStatus.CREATING:
+          case ObjectStatus.DROPPING:
+            eObj.getBase().releaseId(eObj.getID()); // relinquish the unused invid
 
-	    if (getGSession() != null)
-	      {
-		getGSession().checkIn();
-	      }
+            if (getGSession() != null)
+              {
+                getGSession().checkIn();
+              }
 
-	    eObj.getBase().getStore().checkIn(); // update checked out count
-	    break;
+            eObj.getBase().getStore().checkIn(); // update checked out count
+            break;
 
-	  case ObjectStatus.EDITING:
-	  case ObjectStatus.DELETING:
+          case ObjectStatus.EDITING:
+          case ObjectStatus.DELETING:
 
-	    // note that clearShadow updates the checked out count for us.
+            // note that clearShadow updates the checked out count for us.
 
-	    if (!eObj.original.clearShadow(this))
-	      {
-		throw new RuntimeException("editset ownership synchronization error");
-	      }
-	    break;
-	  }
+            if (!eObj.original.clearShadow(this))
+              {
+                throw new RuntimeException("editset ownership synchronization error");
+              }
+            break;
+          }
       }
 
     // undo all namespace modifications associated with this editset
@@ -2505,7 +2505,7 @@ public class DBEditSet {
 
     for (DBNameSpace space: dbStore.nameSpaces)
       {
-	space.abort(this);
+        space.abort(this);
       }
 
     // release any deletion locks we have asserted
@@ -2540,20 +2540,20 @@ public class DBEditSet {
   {
     if (objects != null)
       {
-	objects.clear();
-	objects = null;
+        objects.clear();
+        objects = null;
       }
 
     if (logEvents != null)
       {
-	logEvents.clear();
-	logEvents = null;
+        logEvents.clear();
+        logEvents = null;
       }
 
     if (basesModified != null)
       {
-	basesModified.clear();
-	basesModified = null;
+        basesModified.clear();
+        basesModified = null;
       }
 
     dbStore = null;
@@ -2563,11 +2563,11 @@ public class DBEditSet {
 
     if (checkpoints != null)
       {
-	checkpoints.clear();
-	checkpoints = null;
+        checkpoints.clear();
+        checkpoints = null;
       }
 
-    this.notifyAll();		// wake up any late checkpointers
+    this.notifyAll();           // wake up any late checkpointers
   }
 
   /**
@@ -2583,8 +2583,8 @@ public class DBEditSet {
   {
     if (wLock != null)
       {
-	session.releaseLock(wLock);
-	wLock = null;
+        session.releaseLock(wLock);
+        wLock = null;
       }
   }
 }

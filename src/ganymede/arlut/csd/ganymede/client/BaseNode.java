@@ -9,7 +9,7 @@
    Module By: Mike Mulvaney, Jonathan Abbey, and Navin Manohar
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2009
@@ -81,7 +81,7 @@ class BaseNode extends arlut.csd.JTree.treeNode {
   /* -- */
 
   BaseNode(treeNode parent, String text, Base base, treeNode insertAfter,
-	   boolean expandable, int openImage, int closedImage, treeMenu menu, boolean canCreate)
+           boolean expandable, int openImage, int closedImage, treeMenu menu, boolean canCreate)
   {
     super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
     this.base = base;
@@ -89,11 +89,11 @@ class BaseNode extends arlut.csd.JTree.treeNode {
     
     try
       {
-	canBeInactivated = base.canInactivate();
+        canBeInactivated = base.canInactivate();
       }
     catch (Exception rx)
       {
-	gclient.client.processExceptionRethrow(rx);
+        gclient.client.processExceptionRethrow(rx);
       }
   }
 
@@ -101,14 +101,14 @@ class BaseNode extends arlut.csd.JTree.treeNode {
   {
     if (type == null)
       {
-	try
-	  {
-	    type = Short.valueOf(base.getTypeID());
-	  }
-	catch (Exception rx)
-	  {
-	    gclient.client.processExceptionRethrow(rx);
-	  }
+        try
+          {
+            type = Short.valueOf(base.getTypeID());
+          }
+        catch (Exception rx)
+          {
+            gclient.client.processExceptionRethrow(rx);
+          }
       }
 
     return type;
@@ -157,9 +157,9 @@ class BaseNode extends arlut.csd.JTree.treeNode {
   public Query getEditableQuery()
   {
     if (editableQuery == null)
-      {	
-	editableQuery = new Query(getTypeID().shortValue(), 
-				  null, true);// include all, even non-editables
+      { 
+        editableQuery = new Query(getTypeID().shortValue(), 
+                                  null, true);// include all, even non-editables
       }
 
     return editableQuery;

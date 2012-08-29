@@ -9,7 +9,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
@@ -110,7 +110,7 @@ public class eventCustom extends DBEditObject implements SchemaConstants {
       {
       case SchemaConstants.EventToken:
       case SchemaConstants.EventName:
-	return true;
+        return true;
       }
 
     return false;

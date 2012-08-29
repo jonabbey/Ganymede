@@ -306,12 +306,12 @@ public class DBPermissionManager {
   {
     if (sessionName == null)
       {
-	throw new IllegalArgumentException("sessionName may not be null");
+        throw new IllegalArgumentException("sessionName may not be null");
       }
 
     if (configured.set(true))
       {
-	throw new IllegalStateException("Reconfiguring a DBPermissionManager is not allowed.");
+        throw new IllegalStateException("Reconfiguring a DBPermissionManager is not allowed.");
       }
 
     this.sessionName = sessionName;
@@ -348,39 +348,39 @@ public class DBPermissionManager {
   {
     if (sessionName == null)
       {
-	throw new IllegalArgumentException("sessionLabel may not be null");
+        throw new IllegalArgumentException("sessionLabel may not be null");
       }
 
     if (configured.set(true))
       {
-	throw new IllegalStateException("Reconfiguring a DBPermissionManager is not allowed.");
+        throw new IllegalStateException("Reconfiguring a DBPermissionManager is not allowed.");
       }
 
     this.sessionName = sessionName;
 
     if (userObject != null)
       {
-	userInvid = userObject.getInvid();
-	username = userObject.getLabel();
+        userInvid = userObject.getInvid();
+        username = userObject.getLabel();
       }
     else
       {
-	userInvid = null;
+        userInvid = null;
       }
 
     if (personaObject != null)
       {
-	personaInvid = personaObject.getInvid();
-	personaName = personaObject.getLabel();
+        personaInvid = personaObject.getInvid();
+        personaName = personaObject.getLabel();
 
-	if (username == null)
-	  {
-	    username = personaName; // for supergash, monitor
-	  }
+        if (username == null)
+          {
+            username = personaName; // for supergash, monitor
+          }
       }
     else
       {
-	personaInvid = null;	// shouldn't happen
+        personaInvid = null;    // shouldn't happen
       }
 
     updatePerms(true);
@@ -457,11 +457,11 @@ public class DBPermissionManager {
   {
     if (userInvid != null)
       {
-	// okay to use session.viewDBObject() here, because getUser()
-	// is only used for internal purposes, and we don't need or
-	// want to do permissions checking
+        // okay to use session.viewDBObject() here, because getUser()
+        // is only used for internal purposes, and we don't need or
+        // want to do permissions checking
 
-	return dbSession.viewDBObject(userInvid);
+        return dbSession.viewDBObject(userInvid);
       }
 
     return null;
@@ -523,11 +523,11 @@ public class DBPermissionManager {
   {
     if (username != null && !username.equals(""))
       {
-	return username;
+        return username;
       }
     else
       {
-	return sessionName;
+        return sessionName;
       }
   }
 
@@ -542,14 +542,14 @@ public class DBPermissionManager {
   {
     if (personaName == null || personaName.equals(""))
       {
-	if (username != null && !username.equals(""))
-	  {
-	    return username;
-	  }
-	else
-	  {
-	    return sessionName;
-	  }
+        if (username != null && !username.equals(""))
+          {
+            return username;
+          }
+        else
+          {
+            return sessionName;
+          }
       }
     else
       {
@@ -570,7 +570,7 @@ public class DBPermissionManager {
   {
     if (userInvid != null)
       {
-	return userInvid;
+        return userInvid;
       }
 
     return personaInvid;
@@ -591,12 +591,12 @@ public class DBPermissionManager {
 
     if (userInvid != null)
       {
-	ids.add(userInvid);
+        ids.add(userInvid);
       }
 
     if (personaInvid != null)
       {
-	ids.add(personaInvid);
+        ids.add(personaInvid);
       }
 
     return ids;
@@ -616,30 +616,30 @@ public class DBPermissionManager {
 
     if (username == null || userInvid == null)
       {
-	// local server process or supergash/monitor
+        // local server process or supergash/monitor
 
-	returnAddr = Ganymede.returnaddrProperty;
+        returnAddr = Ganymede.returnaddrProperty;
       }
     else
       {
-	if (username.indexOf(':') == -1)
-	  {
-	    // real username, save it as is
+        if (username.indexOf(':') == -1)
+          {
+            // real username, save it as is
 
-	    returnAddr = username;
-	  }
-	else
-	  {
-	    // persona, extract the user's name out of it
-	    returnAddr = username.substring(0, username.indexOf(':'));
-	  }
+            returnAddr = username;
+          }
+        else
+          {
+            // persona, extract the user's name out of it
+            returnAddr = username.substring(0, username.indexOf(':'));
+          }
 
-	String mailsuffix = System.getProperty("ganymede.defaultmailsuffix");
+        String mailsuffix = System.getProperty("ganymede.defaultmailsuffix");
 
-	if (mailsuffix != null)
-	  {
-	    returnAddr += mailsuffix;
-	  }
+        if (mailsuffix != null)
+          {
+            returnAddr += mailsuffix;
+          }
       }
 
     return returnAddr;
@@ -655,7 +655,7 @@ public class DBPermissionManager {
   {
     if (personaInvid != null)
       {
-	return personaInvid;
+        return personaInvid;
       }
 
     return userInvid;
@@ -678,7 +678,7 @@ public class DBPermissionManager {
 
     if (user == null)
       {
-	return null;
+        return null;
       }
 
     results = new Vector<String>();
@@ -687,21 +687,21 @@ public class DBPermissionManager {
 
     if (inv != null)
       {
-	// it's okay to loop on this field since we should be looking
-	// at a DBObject and not a DBEditObject
+        // it's okay to loop on this field since we should be looking
+        // at a DBObject and not a DBEditObject
 
-	for (int i = 0; i < inv.size(); i++)
-	  {
-	    Invid invid = (Invid) inv.getElementLocal(i);
+        for (int i = 0; i < inv.size(); i++)
+          {
+            Invid invid = (Invid) inv.getElementLocal(i);
 
-	    try
-	      {
-		results.add(dbSession.viewDBObject(invid).getLabel());
-	      }
-	    catch (NullPointerException ex)
-	      {
-	      }
-	  }
+            try
+              {
+                results.add(dbSession.viewDBObject(invid).getLabel());
+              }
+            catch (NullPointerException ex)
+              {
+              }
+          }
       }
 
     results.add(user.getLabel()); // add their 'end-user' persona
@@ -751,10 +751,10 @@ public class DBPermissionManager {
 
     if (user == null)
       {
-	// they may be the special supergash account, but they can't
-	// change persona
+        // they may be the special supergash account, but they can't
+        // change persona
 
-	return false;
+        return false;
       }
 
     // if they are selecting their base username, go ahead and clear
@@ -762,54 +762,54 @@ public class DBPermissionManager {
 
     if (user.getLabel().equals(newPersona))
       {
-	if (password != null)
-	  {
-	    pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
+        if (password != null)
+          {
+            pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
 
-	    if (pdbf == null || !pdbf.matchPlainText(password))
-	      {
-		return false;
-	      }
-	  }
+            if (pdbf == null || !pdbf.matchPlainText(password))
+              {
+                return false;
+              }
+          }
 
-	// the GUI client will close transactions first, but since we
-	// might not be working on behalf of the GUI client, let's
-	// make sure
+        // the GUI client will close transactions first, but since we
+        // might not be working on behalf of the GUI client, let's
+        // make sure
 
-	if (dbSession.editSet != null)
-	  {
-	    String description = dbSession.editSet.description;
-	    boolean interactive = dbSession.editSet.isInteractive();
+        if (dbSession.editSet != null)
+          {
+            String description = dbSession.editSet.description;
+            boolean interactive = dbSession.editSet.isInteractive();
 
-	    // close the existing transaction
+            // close the existing transaction
 
-	    try
-	      {
-		gSession.abortTransaction();
+            try
+              {
+                gSession.abortTransaction();
 
-		// open a new one with the same description and
-		// interactivity
+                // open a new one with the same description and
+                // interactivity
 
-		gSession.openTransaction(description, interactive);
-	      }
-	    catch (NotLoggedInException ex)
-	      {
-		throw new RuntimeException(ex);
-	      }
-	  }
+                gSession.openTransaction(description, interactive);
+              }
+            catch (NotLoggedInException ex)
+              {
+                throw new RuntimeException(ex);
+              }
+          }
 
-	personaObject = null;
-	this.personaInvid = null;
-	this.personaName = null;
-	this.visibilityFilterInvids = null;
-	this.username = user.getLabel(); // in case they logged in directly as an admin account
+        personaObject = null;
+        this.personaInvid = null;
+        this.personaName = null;
+        this.visibilityFilterInvids = null;
+        this.username = user.getLabel(); // in case they logged in directly as an admin account
 
-	updatePerms(true);
+        updatePerms(true);
 
-	gSession.resetAdminEntry(); // null our admin console cache
-	gSession.setLastEvent("selectPersona: " + newPersona);
+        gSession.resetAdminEntry(); // null our admin console cache
+        gSession.setLastEvent("selectPersona: " + newPersona);
 
-	return true;
+        return true;
       }
 
     // ok, we need to find out persona they are trying to switch to
@@ -821,74 +821,74 @@ public class DBPermissionManager {
 
     for (int i = 0; i < inv.size(); i++)
       {
-	invid = (Invid) inv.getElementLocal(i);
+        invid = (Invid) inv.getElementLocal(i);
 
-	// it's okay to use the faster viewDBObject() here, because we
-	// are always going to be doing this for internal purposes
+        // it's okay to use the faster viewDBObject() here, because we
+        // are always going to be doing this for internal purposes
 
-	personaObject = dbSession.viewDBObject(invid);
+        personaObject = dbSession.viewDBObject(invid);
 
-	if (!personaObject.getLabel().equals(newPersona))
-	  {
-	    personaObject = null;
-	  }
-	else
-	  {
-	    break;
-	  }
+        if (!personaObject.getLabel().equals(newPersona))
+          {
+            personaObject = null;
+          }
+        else
+          {
+            break;
+          }
       }
 
     if (personaObject == null)
       {
-	// "Couldn''t find persona {0} for user: {1}"
-	Ganymede.debug(ts.l("selectPersona.no_persona", newPersona, this.username));
-	return false;
+        // "Couldn''t find persona {0} for user: {1}"
+        Ganymede.debug(ts.l("selectPersona.no_persona", newPersona, this.username));
+        return false;
       }
 
     pdbf = (PasswordDBField) personaObject.getField(SchemaConstants.PersonaPasswordField);
 
     if (pdbf != null && pdbf.matchPlainText(password))
       {
-	// "User {0} switched to persona {1}."
-	Ganymede.debug(ts.l("selectPersona.switched", this.username, newPersona));
+        // "User {0} switched to persona {1}."
+        Ganymede.debug(ts.l("selectPersona.switched", this.username, newPersona));
 
-	this.personaName = personaObject.getLabel();
+        this.personaName = personaObject.getLabel();
 
-	// the GUI client will close transactions first, but since we
-	// might not be working on behalf of the GUI client, let's
-	// make sure
+        // the GUI client will close transactions first, but since we
+        // might not be working on behalf of the GUI client, let's
+        // make sure
 
-	if (dbSession.editSet != null)
-	  {
-	    String description = dbSession.editSet.description;
-	    boolean interactive = dbSession.editSet.isInteractive();
+        if (dbSession.editSet != null)
+          {
+            String description = dbSession.editSet.description;
+            boolean interactive = dbSession.editSet.isInteractive();
 
-	    try
-	      {
-		// close the existing transaction
+            try
+              {
+                // close the existing transaction
 
-		gSession.abortTransaction();
+                gSession.abortTransaction();
 
-		// open a new one with the same description and
-		// interactivity
+                // open a new one with the same description and
+                // interactivity
 
-		gSession.openTransaction(description, interactive);
-	      }
-	    catch (NotLoggedInException ex)
-	      {
-		throw new RuntimeException(ex);
-	      }
-	  }
+                gSession.openTransaction(description, interactive);
+              }
+            catch (NotLoggedInException ex)
+              {
+                throw new RuntimeException(ex);
+              }
+          }
 
-	this.personaInvid = personaObject.getInvid();
-	this.username = user.getLabel(); // in case they logged in directly as an admin account
-	this.visibilityFilterInvids = null;
+        this.personaInvid = personaObject.getInvid();
+        this.username = user.getLabel(); // in case they logged in directly as an admin account
+        this.visibilityFilterInvids = null;
 
-	updatePerms(true);
+        updatePerms(true);
 
-	gSession.resetAdminEntry(); // null our admin console cache
-	gSession.setLastEvent("selectPersona: " + newPersona);
-	return true;
+        gSession.resetAdminEntry(); // null our admin console cache
+        gSession.setLastEvent("selectPersona: " + newPersona);
+        return true;
       }
 
     return false;
@@ -923,11 +923,11 @@ public class DBPermissionManager {
 
     try
       {
-	fullOwnerList = gSession.query(q);
+        fullOwnerList = gSession.query(q);
       }
     catch (NotLoggedInException ex)
       {
-	throw new RuntimeException(ex);
+        throw new RuntimeException(ex);
       }
 
     // if we're in supergash mode, return a complete list of owner groups
@@ -974,51 +974,51 @@ public class DBPermissionManager {
 
     if (ownerInvids == null)
       {
-	newObjectOwnerInvids = null;
-	return null;
+        newObjectOwnerInvids = null;
+        return null;
       }
 
     tmpInvids = new Vector<Invid>();
 
     for (Invid ownerInvidItem: ownerInvids)
       {
-	// this check is actually redundant, as the InvidDBField link
-	// logic would catch such for us, but it makes a nice couplet
-	// with the getNum() check below, so I'll leave it here.
+        // this check is actually redundant, as the InvidDBField link
+        // logic would catch such for us, but it makes a nice couplet
+        // with the getNum() check below, so I'll leave it here.
 
-	if (ownerInvidItem.getType() != SchemaConstants.OwnerBase)
-	  {
-	    return Ganymede.createErrorDialog(ts.l("setDefaultOwner.error_title"),
-					      ts.l("setDefaultOwner.error_text"));
-	  }
+        if (ownerInvidItem.getType() != SchemaConstants.OwnerBase)
+          {
+            return Ganymede.createErrorDialog(ts.l("setDefaultOwner.error_title"),
+                                              ts.l("setDefaultOwner.error_text"));
+          }
 
-	// we don't want to explicitly place the object in
-	// supergash.. all objects are implicitly availble to
-	// supergash, no sense in making a big deal of it.
+        // we don't want to explicitly place the object in
+        // supergash.. all objects are implicitly availble to
+        // supergash, no sense in making a big deal of it.
 
-	// this is also redundant, since DBSession.createDBObject()
-	// will filter this out as well.  Err.. I probably should
-	// have faith in DBSession.createDBObject() and take this
-	// whole loop out, but I'm gonna leave it for now.
+        // this is also redundant, since DBSession.createDBObject()
+        // will filter this out as well.  Err.. I probably should
+        // have faith in DBSession.createDBObject() and take this
+        // whole loop out, but I'm gonna leave it for now.
 
-	if (ownerInvidItem.getNum() == SchemaConstants.OwnerSupergash)
-	  {
-	    continue;
-	  }
+        if (ownerInvidItem.getNum() == SchemaConstants.OwnerSupergash)
+          {
+            continue;
+          }
 
-	tmpInvids.add(ownerInvidItem);
+        tmpInvids.add(ownerInvidItem);
       }
 
     if (!supergashMode && !isMemberAll(tmpInvids))
       {
-	return Ganymede.createErrorDialog(ts.l("setDefaultOwner.error_title"),
-					  ts.l("setDefaultOwner.error_text2"));
+        return Ganymede.createErrorDialog(ts.l("setDefaultOwner.error_title"),
+                                          ts.l("setDefaultOwner.error_text2"));
       }
     else
       {
-	newObjectOwnerInvids = tmpInvids;
-	gSession.setLastEvent("setDefaultOwner");
-	return null;
+        newObjectOwnerInvids = tmpInvids;
+        gSession.setLastEvent("setDefaultOwner");
+        return null;
       }
   }
 
@@ -1037,36 +1037,36 @@ public class DBPermissionManager {
   {
     if (newObjectOwnerInvids != null)
       {
-	return newObjectOwnerInvids;
+        return newObjectOwnerInvids;
       }
     else
       {
-	Vector<Invid> ownerInvids = new Vector<Invid>();
+        Vector<Invid> ownerInvids = new Vector<Invid>();
 
-	// supergash is allowed to create objects with no owners,
-	// so we won't worry about what supergash might try to do.
+        // supergash is allowed to create objects with no owners,
+        // so we won't worry about what supergash might try to do.
 
-	if (!isSuperGash())
-	  {
-	    QueryResult ownerList = getAvailableOwnerGroups();
+        if (!isSuperGash())
+          {
+            QueryResult ownerList = getAvailableOwnerGroups();
 
-	    if (ownerList.size() > 0)
-	      {
-		// If we're interactive, the client really should hav
-		// helped us out by prompting the user for their
-		// preferred default owner list, but if we are talking
-		// to a custom client, this might not be the case, in
-		// which case we'll just pick the first owner group we
-		// can put it into and put it there.
-		//
-		// The client can always manually set the owner group
-		// in a created object after we return it, of course.
+            if (ownerList.size() > 0)
+              {
+                // If we're interactive, the client really should hav
+                // helped us out by prompting the user for their
+                // preferred default owner list, but if we are talking
+                // to a custom client, this might not be the case, in
+                // which case we'll just pick the first owner group we
+                // can put it into and put it there.
+                //
+                // The client can always manually set the owner group
+                // in a created object after we return it, of course.
 
-		ownerInvids.add(ownerList.getInvid(0));
-	      }
-	  }
+                ownerInvids.add(ownerList.getInvid(0));
+              }
+          }
 
-	return ownerInvids;
+        return ownerInvids;
       }
   }
 
@@ -1095,20 +1095,20 @@ public class DBPermissionManager {
   {
     if (ownerInvids == null || ownerInvids.size() == 0)
       {
-	visibilityFilterInvids = null;
-	return null;
+        visibilityFilterInvids = null;
+        return null;
       }
 
     if (!supergashMode && !isMemberAll(ownerInvids))
       {
-	return Ganymede.createErrorDialog(ts.l("filterQueries.error"),
-					  ts.l("setDefaultOwner.error_text2"));
+        return Ganymede.createErrorDialog(ts.l("filterQueries.error"),
+                                          ts.l("setDefaultOwner.error_text2"));
       }
     else
       {
-	visibilityFilterInvids = ownerInvids;
-	gSession.setLastEvent("filterQueries");
-	return null;
+        visibilityFilterInvids = ownerInvids;
+        gSession.setLastEvent("filterQueries");
+        return null;
       }
   }
 
@@ -1133,49 +1133,49 @@ public class DBPermissionManager {
   {
     if (supergashMode)
       {
-	// XXX CACHE WARNING! XXX
+        // XXX CACHE WARNING! XXX
 
-	// All sessions with supergash privileges can use the cached
-	// full category tree transport object.. we'll build it here
-	// if we need to.
+        // All sessions with supergash privileges can use the cached
+        // full category tree transport object.. we'll build it here
+        // if we need to.
 
-	if (Ganymede.catTransport == null)
-	  {
-	    // pass Ganymede.internalSession so that the master
-	    // CategoryTransport object will correctly grant
-	    // object creation privs for all object types
+        if (Ganymede.catTransport == null)
+          {
+            // pass Ganymede.internalSession so that the master
+            // CategoryTransport object will correctly grant
+            // object creation privs for all object types
 
-	    Ganymede.catTransport = Ganymede.db.rootCategory.getTransport(Ganymede.internalSession, true);
-	  }
+            Ganymede.catTransport = Ganymede.db.rootCategory.getTransport(Ganymede.internalSession, true);
+          }
 
-	if (debug)
-	  {
-	    System.err.println("getCategoryTree(): returning system's complete category tree");
-	  }
+        if (debug)
+          {
+            System.err.println("getCategoryTree(): returning system's complete category tree");
+          }
 
-	return Ganymede.catTransport;
+        return Ganymede.catTransport;
       }
     else
       {
-	// not in supergash mode.. download a subset of the category tree to the user
+        // not in supergash mode.. download a subset of the category tree to the user
 
-	CategoryTransport transport = Ganymede.db.rootCategory.getTransport(gSession, hideNonEditables);
+        CategoryTransport transport = Ganymede.db.rootCategory.getTransport(gSession, hideNonEditables);
 
-	if (debug)
-	  {
-	    System.err.println("getCategoryTree(): generated custom category tree");
-	  }
+        if (debug)
+          {
+            System.err.println("getCategoryTree(): generated custom category tree");
+          }
 
-	if (false)
-	  {
-	    System.err.println("%%% Printing PersonaPerms");
-	    PermissionMatrixDBField.debugdump(personaPerms);
+        if (false)
+          {
+            System.err.println("%%% Printing PersonaPerms");
+            PermissionMatrixDBField.debugdump(personaPerms);
 
-	    System.err.println("%%% Printing DefaultPerms");
-	    PermissionMatrixDBField.debugdump(defaultPerms);
-	  }
+            System.err.println("%%% Printing DefaultPerms");
+            PermissionMatrixDBField.debugdump(defaultPerms);
+          }
 
-	return transport;
+        return transport;
       }
   }
 
@@ -1197,7 +1197,7 @@ public class DBPermissionManager {
   {
     if (supergashMode && Ganymede.baseTransport != null)
       {
-	return Ganymede.baseTransport;
+        return Ganymede.baseTransport;
       }
 
     BaseListTransport transport = new BaseListTransport();
@@ -1211,15 +1211,15 @@ public class DBPermissionManager {
 
     synchronized (Ganymede.db)
       {
-	for (DBObjectBase base: Ganymede.db.objectBases.values())
-	  {
-	    base.addBaseToTransport(transport, null);
-	  }
+        for (DBObjectBase base: Ganymede.db.objectBases.values())
+          {
+            base.addBaseToTransport(transport, null);
+          }
       }
 
     if (supergashMode)
       {
-	Ganymede.baseTransport = transport;
+        Ganymede.baseTransport = transport;
       }
 
     return transport;
@@ -1301,19 +1301,19 @@ public class DBPermissionManager {
 
     if (object == null)
       {
-	return null;
+        return null;
       }
 
     if (supergashMode)
       {
-	return PermEntry.fullPerms;
+        return PermEntry.fullPerms;
       }
 
     // find the top-level object if we were passed an embedded object
 
     if (doDebug)
       {
-	System.err.println("DBPermissionManager.getPerm(" + object + ")");
+        System.err.println("DBPermissionManager.getPerm(" + object + ")");
       }
 
     object = getContainingObj(object);
@@ -1324,12 +1324,12 @@ public class DBPermissionManager {
 
     if (result != null)
       {
-	if (doDebug)
-	  {
-	    System.err.println("getPerm(): found an object override, returning " + result);
-	  }
+        if (doDebug)
+          {
+            System.err.println("getPerm(): found an object override, returning " + result);
+          }
 
-	return result;
+        return result;
       }
 
     // no override.. do we have an expansion?
@@ -1338,12 +1338,12 @@ public class DBPermissionManager {
 
     if (result == null)
       {
-	result = PermEntry.noPerms;
+        result = PermEntry.noPerms;
       }
 
     // make sure we have personaPerms up to date
 
-    updatePerms(false);		// *sync*
+    updatePerms(false);         // *sync*
 
     // if we are operating on behalf of an end user and the object in
     // question happens to be that user's record, we'll act as if we
@@ -1358,12 +1358,12 @@ public class DBPermissionManager {
 
     if (!useSelfPerm && object.getBase().getObjectHook().grantOwnership(gSession, object))
       {
-	if (doDebug)
-	  {
-	    System.err.println("getPerm(): grantOwnership() returned true");
-	  }
+        if (doDebug)
+          {
+            System.err.println("getPerm(): grantOwnership() returned true");
+          }
 
-	useSelfPerm = true;
+        useSelfPerm = true;
       }
 
     // If the current persona owns the object, look to our
@@ -1372,55 +1372,55 @@ public class DBPermissionManager {
 
     if (useSelfPerm || personaMatch(object))
       {
-	if (doDebug)
-	  {
-	    System.err.println("getPerm(): personaMatch or useSelfPerm returned true");
-	  }
+        if (doDebug)
+          {
+            System.err.println("getPerm(): personaMatch or useSelfPerm returned true");
+          }
 
-	PermEntry temp = personaPerms.getPerm(object.getTypeID());
+        PermEntry temp = personaPerms.getPerm(object.getTypeID());
 
-	if (doDebug)
-	  {
-	    System.err.println("getPerm(): personaPerms.getPerm(" + object + ") returned " + temp);
+        if (doDebug)
+          {
+            System.err.println("getPerm(): personaPerms.getPerm(" + object + ") returned " + temp);
 
-	    System.err.println("%%% Printing PersonaPerms");
-	    PermissionMatrixDBField.debugdump(personaPerms);
-	  }
+            System.err.println("%%% Printing PersonaPerms");
+            PermissionMatrixDBField.debugdump(personaPerms);
+          }
 
-	PermEntry val = result.union(temp);
+        PermEntry val = result.union(temp);
 
-	if (doDebug)
-	  {
-	    System.err.println("getPerm(): returning " + val);
-	  }
+        if (doDebug)
+          {
+            System.err.println("getPerm(): returning " + val);
+          }
 
-	return val;
+        return val;
       }
     else
       {
-	if (doDebug)
-	  {
-	    System.err.println("getPerm(): personaMatch and useSelfPerm returned false");
-	  }
+        if (doDebug)
+          {
+            System.err.println("getPerm(): personaMatch and useSelfPerm returned false");
+          }
 
-	PermEntry temp = defaultPerms.getPerm(object.getTypeID());
+        PermEntry temp = defaultPerms.getPerm(object.getTypeID());
 
-	if (doDebug)
-	  {
-	    System.err.println("getPerm(): defaultPerms.getPerm(" + object + ") returned " + temp);
+        if (doDebug)
+          {
+            System.err.println("getPerm(): defaultPerms.getPerm(" + object + ") returned " + temp);
 
-	    System.err.println("%%% Printing DefaultPerms");
-	    PermissionMatrixDBField.debugdump(defaultPerms);
-	  }
+            System.err.println("%%% Printing DefaultPerms");
+            PermissionMatrixDBField.debugdump(defaultPerms);
+          }
 
-	PermEntry val = result.union(temp);
+        PermEntry val = result.union(temp);
 
-	if (doDebug)
-	  {
-	    System.err.println("getPerm(): returning " + val);
-	  }
+        if (doDebug)
+          {
+            System.err.println("getPerm(): returning " + val);
+          }
 
-	return val;
+        return val;
       }
   }
 
@@ -1480,12 +1480,12 @@ public class DBPermissionManager {
 
     if (permsdebug)
       {
-	System.err.println("Entering DBPermissionManager.getPerm(" + object + "," + fieldId + ")");
+        System.err.println("Entering DBPermissionManager.getPerm(" + object + "," + fieldId + ")");
       }
 
     if (supergashMode)
       {
-	return PermEntry.fullPerms;
+        return PermEntry.fullPerms;
       }
 
     objectHook = object.getBase().getObjectHook();
@@ -1498,88 +1498,88 @@ public class DBPermissionManager {
 
     if (overrideFieldPerm == null)
       {
-	expandFieldPerm = objectHook.permExpand(gSession, object, fieldId);
+        expandFieldPerm = objectHook.permExpand(gSession, object, fieldId);
       }
 
     overrideObjPerm = objectHook.permOverride(gSession, object);
 
     if (overrideObjPerm == null)
       {
-	expandObjPerm = objectHook.permExpand(gSession, object);
+        expandObjPerm = objectHook.permExpand(gSession, object);
       }
 
     // make sure we have personaPerms up to date
 
-    updatePerms(false);		// *sync*
+    updatePerms(false);         // *sync*
 
     // embedded object ownership is determined by the top-level object
 
     DBObject containingObj = getContainingObj(object);
 
     if ((userInvid != null && userInvid.equals(containingObj.getInvid())) ||
-	objectHook.grantOwnership(gSession, object) ||
-	objectHook.grantOwnership(gSession, containingObj) ||
-	personaMatch(containingObj))
+        objectHook.grantOwnership(gSession, object) ||
+        objectHook.grantOwnership(gSession, containingObj) ||
+        personaMatch(containingObj))
       {
-	if (permsdebug)
-	  {
-	    System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") choosing persona perms");
-	  }
+        if (permsdebug)
+          {
+            System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") choosing persona perms");
+          }
 
-	objectIsOwned = true;
+        objectIsOwned = true;
 
-	applicablePerms = personaPerms;	// superset of defaultPerms
+        applicablePerms = personaPerms; // superset of defaultPerms
       }
     else
       {
-	if (permsdebug)
-	  {
-	    System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") choosing default perms");
-	  }
+        if (permsdebug)
+          {
+            System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") choosing default perms");
+          }
 
-	applicablePerms = defaultPerms;
+        applicablePerms = defaultPerms;
       }
 
     if (overrideObjPerm != null)
       {
-	objectPerm = overrideObjPerm;
+        objectPerm = overrideObjPerm;
       }
     else
       {
-	objectPerm = applicablePerms.getPerm(object.getTypeID());
+        objectPerm = applicablePerms.getPerm(object.getTypeID());
 
-	if (objectPerm == null)
-	  {
-	    if (permsdebug)
-	      {
-		System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") found no object perm");
-	      }
+        if (objectPerm == null)
+          {
+            if (permsdebug)
+              {
+                System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") found no object perm");
+              }
 
-	    objectPerm = PermEntry.noPerms;
-	  }
+            objectPerm = PermEntry.noPerms;
+          }
 
-	objectPerm = objectPerm.union(expandObjPerm);
+        objectPerm = objectPerm.union(expandObjPerm);
       }
 
     if (overrideFieldPerm != null)
       {
-	if (permsdebug)
-	  {
-	    System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") returning override perm");
-	  }
+        if (permsdebug)
+          {
+            System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") returning override perm");
+          }
 
-	// allow field create perm even if they don't have object create perm
+        // allow field create perm even if they don't have object create perm
 
-	PermEntry temp = overrideFieldPerm.intersection(objectPerm);
+        PermEntry temp = overrideFieldPerm.intersection(objectPerm);
 
-	// add back the create bit if the field is creatable
+        // add back the create bit if the field is creatable
 
-	if (overrideFieldPerm.isCreatable())
-	  {
-	    temp = temp.union(PermEntry.getPermEntry(false, false, true, false));
-	  }
+        if (overrideFieldPerm.isCreatable())
+          {
+            temp = temp.union(PermEntry.getPermEntry(false, false, true, false));
+          }
 
-	return temp;
+        return temp;
       }
 
     fieldPerm = applicablePerms.getPerm(object.getTypeID(), fieldId);
@@ -1589,38 +1589,38 @@ public class DBPermissionManager {
 
     if (fieldPerm == null)
       {
-	if (permsdebug)
-	  {
-	    System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") returning object perms");
-	  }
+        if (permsdebug)
+          {
+            System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") returning object perms");
+          }
 
-	// if we are returning permissions for the owner list field
-	// and the object in question has not been granted owner ship
-	// privileges, make sure that we don't allow editing of the
-	// owner list field, which could be used to make the object
-	// owned, and thus gain privileges
+        // if we are returning permissions for the owner list field
+        // and the object in question has not been granted owner ship
+        // privileges, make sure that we don't allow editing of the
+        // owner list field, which could be used to make the object
+        // owned, and thus gain privileges
 
-	// likewise, we don't want to allow non-privileged end users
-	// to edit the owner list field at all.
+        // likewise, we don't want to allow non-privileged end users
+        // to edit the owner list field at all.
 
-	if (fieldId == SchemaConstants.OwnerListField &&
-	    (!objectIsOwned || personaObj == null))
-	  {
-	    return objectPerm.intersection(PermEntry.viewPerms);
-	  }
+        if (fieldId == SchemaConstants.OwnerListField &&
+            (!objectIsOwned || personaObj == null))
+          {
+            return objectPerm.intersection(PermEntry.viewPerms);
+          }
 
-	// nor do we want anyone to be able to modify the historical
-	// fields
+        // nor do we want anyone to be able to modify the historical
+        // fields
 
-	if (fieldId == SchemaConstants.CreationDateField ||
-	    fieldId == SchemaConstants.CreatorField ||
-	    fieldId == SchemaConstants.ModificationDateField ||
-	    fieldId == SchemaConstants.ModifierField)
-	  {
-	    return objectPerm.intersection(PermEntry.viewPerms);
-	  }
+        if (fieldId == SchemaConstants.CreationDateField ||
+            fieldId == SchemaConstants.CreatorField ||
+            fieldId == SchemaConstants.ModificationDateField ||
+            fieldId == SchemaConstants.ModifierField)
+          {
+            return objectPerm.intersection(PermEntry.viewPerms);
+          }
 
-	return objectPerm;
+        return objectPerm;
       }
 
     // we want to return the more restrictive permissions of the
@@ -1629,11 +1629,11 @@ public class DBPermissionManager {
 
     if (permsdebug)
       {
-	System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") returning field perms");
+        System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") returning field perms");
 
-	System.err.println("fieldPerm = " + fieldPerm);
-	System.err.println("objectPerm = " + objectPerm);
-	System.err.println("expandFieldPerm = " + expandFieldPerm);
+        System.err.println("fieldPerm = " + fieldPerm);
+        System.err.println("objectPerm = " + objectPerm);
+        System.err.println("expandFieldPerm = " + expandFieldPerm);
       }
 
     // we never want to allow users who don't own an object to edit
@@ -1643,29 +1643,29 @@ public class DBPermissionManager {
     // nor do we allow editing the historical fields
 
     if ((fieldId == SchemaConstants.OwnerListField &&
-	(!objectIsOwned || personaObj == null)) ||
-	(fieldId == SchemaConstants.CreationDateField ||
-	 fieldId == SchemaConstants.CreatorField ||
-	 fieldId == SchemaConstants.ModificationDateField ||
-	 fieldId == SchemaConstants.ModifierField))
+        (!objectIsOwned || personaObj == null)) ||
+        (fieldId == SchemaConstants.CreationDateField ||
+         fieldId == SchemaConstants.CreatorField ||
+         fieldId == SchemaConstants.ModificationDateField ||
+         fieldId == SchemaConstants.ModifierField))
       {
-	return fieldPerm.union(expandFieldPerm).intersection(objectPerm).intersection(PermEntry.viewPerms);
+        return fieldPerm.union(expandFieldPerm).intersection(objectPerm).intersection(PermEntry.viewPerms);
       }
     else
       {
-	// allow field create perm even if they don't have object create perm
+        // allow field create perm even if they don't have object create perm
 
-	PermEntry temp = fieldPerm.union(expandFieldPerm);
-	PermEntry temp2 = temp.intersection(objectPerm);
+        PermEntry temp = fieldPerm.union(expandFieldPerm);
+        PermEntry temp2 = temp.intersection(objectPerm);
 
-	// add back the create bit if the field is creatable
+        // add back the create bit if the field is creatable
 
-	if (temp.isCreatable())
-	  {
-	    temp = temp2.union(PermEntry.getPermEntry(false, false, true, false));
-	  }
+        if (temp.isCreatable())
+          {
+            temp = temp2.union(PermEntry.getPermEntry(false, false, true, false));
+          }
 
-	return temp;
+        return temp;
       }
   }
 
@@ -1694,7 +1694,7 @@ public class DBPermissionManager {
 
     if (supergashMode)
       {
-	return PermEntry.fullPerms;
+        return PermEntry.fullPerms;
       }
 
     updatePerms(false); // *sync* make sure we have personaPerms up to date
@@ -1705,20 +1705,20 @@ public class DBPermissionManager {
 
     if (includeOwnedPerms)
       {
-	result = personaPerms.getPerm(baseID);
+        result = personaPerms.getPerm(baseID);
       }
     else
       {
-	result = defaultPerms.getPerm(baseID);
+        result = defaultPerms.getPerm(baseID);
       }
 
     if (result == null)
       {
-	return PermEntry.noPerms;
+        return PermEntry.noPerms;
       }
     else
       {
-	return result;
+        return result;
       }
   }
 
@@ -1749,51 +1749,51 @@ public class DBPermissionManager {
 
     if (supergashMode)
       {
-	return PermEntry.fullPerms;
+        return PermEntry.fullPerms;
       }
 
     // make sure we have defaultPerms and personaPerms up to date
 
-    updatePerms(false);		// *sync*
+    updatePerms(false);         // *sync*
 
     // remember that personaPerms is a permissive superset of
     // defaultPerms
 
     if (includeOwnedPerms)
       {
-	if (personaPerms != null)
-	  {
-	    result = personaPerms.getPerm(baseID, fieldID);
+        if (personaPerms != null)
+          {
+            result = personaPerms.getPerm(baseID, fieldID);
 
-	    // if we don't have a specific permissions entry for
-	    // this field, inherit the one for the base
+            // if we don't have a specific permissions entry for
+            // this field, inherit the one for the base
 
-	    if (result == null)
-	      {
-		result = personaPerms.getPerm(baseID);
-	      }
-	  }
+            if (result == null)
+              {
+                result = personaPerms.getPerm(baseID);
+              }
+          }
       }
     else
       {
-	result = defaultPerms.getPerm(baseID, fieldID);
+        result = defaultPerms.getPerm(baseID, fieldID);
 
-	// if we don't have a specific permissions entry for
-	// this field, inherit the one for the base
+        // if we don't have a specific permissions entry for
+        // this field, inherit the one for the base
 
-	if (result == null)
-	  {
-	    result = defaultPerms.getPerm(baseID);
-	  }
+        if (result == null)
+          {
+            result = defaultPerms.getPerm(baseID);
+          }
       }
 
     if (result == null)
       {
-	return PermEntry.noPerms;
+        return PermEntry.noPerms;
       }
     else
       {
-	return result;
+        return result;
       }
   }
 
@@ -1812,16 +1812,16 @@ public class DBPermissionManager {
 
     if (pField == null)
       {
-	defaultPerms = new PermMatrix();
-	delegatableDefaultPerms = new PermMatrix();
+        defaultPerms = new PermMatrix();
+        delegatableDefaultPerms = new PermMatrix();
       }
     else
       {
-	defaultPerms = pField.getMatrix();
+        defaultPerms = pField.getMatrix();
 
-	// default permissions are implicitly delegatable
+        // default permissions are implicitly delegatable
 
-	delegatableDefaultPerms = pField.getMatrix();
+        delegatableDefaultPerms = pField.getMatrix();
       }
   }
 
@@ -1848,21 +1848,21 @@ public class DBPermissionManager {
 
     if (forceUpdate)
       {
-	// clear our time stamp to force an update further on
+        // clear our time stamp to force an update further on
 
-	personaTimeStamp = null;
+        personaTimeStamp = null;
 
-	if (permsdebug)
-	  {
-	    System.err.println("updatePerms(true)");
-	  }
+        if (permsdebug)
+          {
+            System.err.println("updatePerms(true)");
+          }
       }
     else
       {
-	if (permsdebug)
-	  {
-	    System.err.println("updatePerms(false)");
-	  }
+        if (permsdebug)
+          {
+            System.err.println("updatePerms(false)");
+          }
       }
 
     // first, make sure we have a copy of our default role
@@ -1870,37 +1870,37 @@ public class DBPermissionManager {
 
     if (permTimeStamp == null || !permTimeStamp.before(Ganymede.db.getObjectBase(SchemaConstants.RoleBase).getTimeStamp()))
       {
-	defaultObj = dbSession.viewDBObject(SchemaConstants.RoleBase,
-					    SchemaConstants.RoleDefaultObj);
+        defaultObj = dbSession.viewDBObject(SchemaConstants.RoleBase,
+                                            SchemaConstants.RoleDefaultObj);
 
-	if (defaultObj == null)
-	  {
-	    if (!Ganymede.firstrun)
-	      {
-		Ganymede.debug(ts.l("updatePerms.no_default_perms"));
-		throw new RuntimeException(ts.l("updatePerms.no_default_perms"));
-	      }
-	    else
-	      {
-		// we're loading the database with a bulk-loader
-		// linked to the server code.  Don't bother with
-		// permissions
+        if (defaultObj == null)
+          {
+            if (!Ganymede.firstrun)
+              {
+                Ganymede.debug(ts.l("updatePerms.no_default_perms"));
+                throw new RuntimeException(ts.l("updatePerms.no_default_perms"));
+              }
+            else
+              {
+                // we're loading the database with a bulk-loader
+                // linked to the server code.  Don't bother with
+                // permissions
 
-		supergashMode = true;
-		return;
-	      }
-	  }
+                supergashMode = true;
+                return;
+              }
+          }
 
-	// remember we update this so we don't need to do it again
+        // remember we update this so we don't need to do it again
 
-	if (permTimeStamp == null)
-	  {
-	    permTimeStamp = new Date();
-	  }
-	else
-	  {
-	    permTimeStamp.setTime(System.currentTimeMillis());
-	  }
+        if (permTimeStamp == null)
+          {
+            permTimeStamp = new Date();
+          }
+        else
+          {
+            permTimeStamp.setTime(System.currentTimeMillis());
+          }
       }
 
     // here's where we break out if nothing needs to be updated.. note
@@ -1908,13 +1908,13 @@ public class DBPermissionManager {
 
     if (personaTimeStamp != null && personaTimeStamp.after(Ganymede.db.getObjectBase(SchemaConstants.PersonaBase).getTimeStamp()))
       {
-	return;
+        return;
       }
 
     if (permsdebug)
       {
-	System.err.println("DBPermissionManager.updatePerms(): doing full permissions recalc for " +
-			   (personaName == null ? username : personaName));
+        System.err.println("DBPermissionManager.updatePerms(): doing full permissions recalc for " +
+                           (personaName == null ? username : personaName));
       }
 
     // persona invid may well have changed since we last loaded
@@ -1925,21 +1925,21 @@ public class DBPermissionManager {
 
     if (personaInvid != null)
       {
-	personaObj = dbSession.viewDBObject(personaInvid);
+        personaObj = dbSession.viewDBObject(personaInvid);
 
-	// if this session is editing the personaObj at the moment,
-	// let's make a point of getting the version that isn't
-	// checked out for editing so we don't risk inter-thread
-	// interactions below
+        // if this session is editing the personaObj at the moment,
+        // let's make a point of getting the version that isn't
+        // checked out for editing so we don't risk inter-thread
+        // interactions below
 
-	if (personaObj instanceof DBEditObject)
-	  {
-	    personaObj = ((DBEditObject) personaObj).getOriginal();
-	  }
+        if (personaObj instanceof DBEditObject)
+          {
+            personaObj = ((DBEditObject) personaObj).getOriginal();
+          }
       }
     else
       {
-	personaObj = null;
+        personaObj = null;
       }
 
     // if we're not locked into supergash mode (for internal sessions,
@@ -1947,271 +1947,271 @@ public class DBPermissionManager {
 
     if (!beforeversupergash)
       {
-	supergashMode = false;
+        supergashMode = false;
 
-	// ok, we're not supergash.. or at least, we might not be.  If
-	// we are not currently active as a persona, personaPerms will
-	// just be our defaultPerms
+        // ok, we're not supergash.. or at least, we might not be.  If
+        // we are not currently active as a persona, personaPerms will
+        // just be our defaultPerms
 
-	if (personaObj == null)
-	  {
-	    // ok, we're not only not supergash, but we're also not
-	    // even a privileged persona.  Load defaultPerms and
-	    // personaPerms with the two permission matrices from the
-	    // default permission object.
+        if (personaObj == null)
+          {
+            // ok, we're not only not supergash, but we're also not
+            // even a privileged persona.  Load defaultPerms and
+            // personaPerms with the two permission matrices from the
+            // default permission object.
 
-	    PermMatrix selfPerm = null;
+            PermMatrix selfPerm = null;
 
-	    /* -- */
+            /* -- */
 
-	    resetDefaultPerms();
+            resetDefaultPerms();
 
-	    permField = (PermissionMatrixDBField) defaultObj.getField(SchemaConstants.RoleMatrix);
+            permField = (PermissionMatrixDBField) defaultObj.getField(SchemaConstants.RoleMatrix);
 
-	    if (permField == null)
-	      {
-		selfPerm = new PermMatrix();
-	      }
-	    else
-	      {
-		// selfPerm is the permissions that the default
-		// permission object has for objects owned.
+            if (permField == null)
+              {
+                selfPerm = new PermMatrix();
+              }
+            else
+              {
+                // selfPerm is the permissions that the default
+                // permission object has for objects owned.
 
-		selfPerm = permField.getMatrix();
+                selfPerm = permField.getMatrix();
 
-		if (selfPerm == null)
-		  {
-		    System.err.println(ts.l("updatePerms.null_selfperm"));
-		  }
-	      }
+                if (selfPerm == null)
+                  {
+                    System.err.println(ts.l("updatePerms.null_selfperm"));
+                  }
+              }
 
-	    // personaPerms starts off as the union of permissions
-	    // applicable to all objects and all objects owned, from
-	    // the default permissions object.
+            // personaPerms starts off as the union of permissions
+            // applicable to all objects and all objects owned, from
+            // the default permissions object.
 
-	    personaPerms = new PermMatrix(defaultPerms).union(selfPerm);
-	    delegatablePersonaPerms = new PermMatrix(defaultPerms).union(selfPerm);
+            personaPerms = new PermMatrix(defaultPerms).union(selfPerm);
+            delegatablePersonaPerms = new PermMatrix(defaultPerms).union(selfPerm);
 
-	    if (permsdebug)
-	      {
-		System.err.println("DBPermissionManager.updatePerms(): returning.. no persona obj for " +
-				   (personaName == null ? username : personaName));
-	      }
+            if (permsdebug)
+              {
+                System.err.println("DBPermissionManager.updatePerms(): returning.. no persona obj for " +
+                                   (personaName == null ? username : personaName));
+              }
 
-	    // remember the last time we pulled personaPerms / defaultPerms
+            // remember the last time we pulled personaPerms / defaultPerms
 
-	    if (personaTimeStamp == null)
-	      {
-		personaTimeStamp = new Date();
-	      }
-	    else
-	      {
-		personaTimeStamp.setTime(System.currentTimeMillis());
-	      }
+            if (personaTimeStamp == null)
+              {
+                personaTimeStamp = new Date();
+              }
+            else
+              {
+                personaTimeStamp.setTime(System.currentTimeMillis());
+              }
 
-	    return;
-	  }
-	else
-	  {
-	    if (permsdebug)
-	      {
-		System.err.println("updatePerms(): calculating new personaPerms");;
-	      }
+            return;
+          }
+        else
+          {
+            if (permsdebug)
+              {
+                System.err.println("updatePerms(): calculating new personaPerms");;
+              }
 
-	    InvidDBField idbf = (InvidDBField) personaObj.getField(SchemaConstants.PersonaGroupsField);
+            InvidDBField idbf = (InvidDBField) personaObj.getField(SchemaConstants.PersonaGroupsField);
 
-	    if (idbf != null)
-	      {
-		Vector<Invid> vals = (Vector<Invid>) idbf.getValuesLocal();
+            if (idbf != null)
+              {
+                Vector<Invid> vals = (Vector<Invid>) idbf.getValuesLocal();
 
-		// *** Caution!  getValuesLocal() does not clone the
-		// field's contents, and neither do we, for speed
-		// reasons.  Since we get personaObj using
-		// viewDBObject(), and we made sure that we got a
-		// non-editable view, there's no chance that this loop
-		// will get trashed by another thread messing with
-		// vals.
+                // *** Caution!  getValuesLocal() does not clone the
+                // field's contents, and neither do we, for speed
+                // reasons.  Since we get personaObj using
+                // viewDBObject(), and we made sure that we got a
+                // non-editable view, there's no chance that this loop
+                // will get trashed by another thread messing with
+                // vals.
 
-		// DO NOT modify vals here!
+                // DO NOT modify vals here!
 
-		// loop over the owner groups this persona is a member
-		// of, see if it includes the supergash owner group
+                // loop over the owner groups this persona is a member
+                // of, see if it includes the supergash owner group
 
-		// it's okay to loop on this field since we should be looking
-		// at a DBObject and not a DBEditObject
+                // it's okay to loop on this field since we should be looking
+                // at a DBObject and not a DBEditObject
 
-		for (Invid inv: vals)
-		  {
-		    if (inv.getNum() == SchemaConstants.OwnerSupergash)
-		      {
-			supergashMode = true;
-			break;
-		      }
-		  }
-	      }
+                for (Invid inv: vals)
+                  {
+                    if (inv.getNum() == SchemaConstants.OwnerSupergash)
+                      {
+                        supergashMode = true;
+                        break;
+                      }
+                  }
+              }
 
-	    if (!supergashMode)
-	      {
-		// since we're not in supergash mode, we need to take
-		// into account the operational privileges granted us
-		// by the default permission matrix and all the
-		// permission matrices associated with this persona.
-		// Calculate the union of all of the applicable
-		// permission matrices.
+            if (!supergashMode)
+              {
+                // since we're not in supergash mode, we need to take
+                // into account the operational privileges granted us
+                // by the default permission matrix and all the
+                // permission matrices associated with this persona.
+                // Calculate the union of all of the applicable
+                // permission matrices.
 
-		// make sure that defaultPerms is reset to the
-		// baseline, and initialize personaPerms from it.
+                // make sure that defaultPerms is reset to the
+                // baseline, and initialize personaPerms from it.
 
-		resetDefaultPerms();
+                resetDefaultPerms();
 
-		// Personas do not get the default 'objects-owned'
-		// privileges for the wider range of objects under
-		// their ownership.  Any special privileges granted to
-		// admins over objects owned by them must be derived
-		// from a non-default role.
+                // Personas do not get the default 'objects-owned'
+                // privileges for the wider range of objects under
+                // their ownership.  Any special privileges granted to
+                // admins over objects owned by them must be derived
+                // from a non-default role.
 
-		// they do get the default permissions that all users have
-		// for non-owned objects, though.
+                // they do get the default permissions that all users have
+                // for non-owned objects, though.
 
-		personaPerms = new PermMatrix(defaultPerms);
+                personaPerms = new PermMatrix(defaultPerms);
 
-		// default permissions on non-owned are implicitly delegatable.
+                // default permissions on non-owned are implicitly delegatable.
 
-		delegatablePersonaPerms = new PermMatrix(defaultPerms);
+                delegatablePersonaPerms = new PermMatrix(defaultPerms);
 
-		// now we loop over all permissions objects referenced
-		// by our persona, or'ing in both the objects owned
-		// permissions and default permissions to augment defaultPerms
-		// and personaPerms.
+                // now we loop over all permissions objects referenced
+                // by our persona, or'ing in both the objects owned
+                // permissions and default permissions to augment defaultPerms
+                // and personaPerms.
 
-		idbf = (InvidDBField) personaObj.getField(SchemaConstants.PersonaPrivs);
+                idbf = (InvidDBField) personaObj.getField(SchemaConstants.PersonaPrivs);
 
-		if (idbf != null)
-		  {
-		    Vector<Invid> vals = (Vector<Invid>) idbf.getValuesLocal();
+                if (idbf != null)
+                  {
+                    Vector<Invid> vals = (Vector<Invid>) idbf.getValuesLocal();
 
-		    // *** Caution!  getValuesLocal() does not clone the field's contents..
-		    //
-		    // DO NOT modify vals here!
+                    // *** Caution!  getValuesLocal() does not clone the field's contents..
+                    //
+                    // DO NOT modify vals here!
 
-		    PermissionMatrixDBField pmdbf, pmdbf2;
-		    Hashtable<String, PermEntry> pmdbfMatrix1 = null, pmdbfMatrix2 = null;
-		    DBObject pObj;
+                    PermissionMatrixDBField pmdbf, pmdbf2;
+                    Hashtable<String, PermEntry> pmdbfMatrix1 = null, pmdbfMatrix2 = null;
+                    DBObject pObj;
 
-		    /* -- */
+                    /* -- */
 
-		    // it's okay to loop on this field since we should be looking
-		    // at a DBObject and not a DBEditObject
+                    // it's okay to loop on this field since we should be looking
+                    // at a DBObject and not a DBEditObject
 
-		    for (Invid inv: vals)
-		      {
-			pObj = dbSession.viewDBObject(inv);
+                    for (Invid inv: vals)
+                      {
+                        pObj = dbSession.viewDBObject(inv);
 
-			if (pObj != null)
-			  {
-			    if (permsdebug)
-			      {
-				System.err.println("updatePerms(): unioning " + pObj + " into personaPerms and defaultPerms");
+                        if (pObj != null)
+                          {
+                            if (permsdebug)
+                              {
+                                System.err.println("updatePerms(): unioning " + pObj + " into personaPerms and defaultPerms");
 
-				System.err.println("personaPerms is currently:");
+                                System.err.println("personaPerms is currently:");
 
-				PermissionMatrixDBField.debugdump(personaPerms);
-			      }
+                                PermissionMatrixDBField.debugdump(personaPerms);
+                              }
 
-			    // The default permissions for this
-			    // administrator consists of the union of
-			    // all default perms fields in all
-			    // permission matrices for this admin
-			    // persona.
+                            // The default permissions for this
+                            // administrator consists of the union of
+                            // all default perms fields in all
+                            // permission matrices for this admin
+                            // persona.
 
-			    // personaPerms is the union of all
-			    // permissions applicable to objects that
-			    // are owned by this persona
+                            // personaPerms is the union of all
+                            // permissions applicable to objects that
+                            // are owned by this persona
 
-			    pmdbf = (PermissionMatrixDBField) pObj.getField(SchemaConstants.RoleMatrix);
+                            pmdbf = (PermissionMatrixDBField) pObj.getField(SchemaConstants.RoleMatrix);
 
-			    if (pmdbf != null)
-			      {
-				pmdbfMatrix1 = pmdbf.getInnerMatrix();
-			      }
+                            if (pmdbf != null)
+                              {
+                                pmdbfMatrix1 = pmdbf.getInnerMatrix();
+                              }
 
-			    pmdbf2 = (PermissionMatrixDBField) pObj.getField(SchemaConstants.RoleDefaultMatrix);
+                            pmdbf2 = (PermissionMatrixDBField) pObj.getField(SchemaConstants.RoleDefaultMatrix);
 
-			    if (pmdbf2 != null)
-			      {
-				pmdbfMatrix2 = pmdbf2.getInnerMatrix();
-			      }
+                            if (pmdbf2 != null)
+                              {
+                                pmdbfMatrix2 = pmdbf2.getInnerMatrix();
+                              }
 
-			    if (permsdebug)
-			      {
-				PermMatrix pm = new PermMatrix(pmdbfMatrix1);
+                            if (permsdebug)
+                              {
+                                PermMatrix pm = new PermMatrix(pmdbfMatrix1);
 
-				System.err.println("updatePerms(): RoleMatrix for " + pObj + ":");
+                                System.err.println("updatePerms(): RoleMatrix for " + pObj + ":");
 
-				PermissionMatrixDBField.debugdump(pm);
+                                PermissionMatrixDBField.debugdump(pm);
 
-				pm = new PermMatrix(pmdbfMatrix2);
+                                pm = new PermMatrix(pmdbfMatrix2);
 
-				System.err.println("updatePerms(): RoleDefaultMatrix for " + pObj + ":");
+                                System.err.println("updatePerms(): RoleDefaultMatrix for " + pObj + ":");
 
-				PermissionMatrixDBField.debugdump(pm);
-			      }
+                                PermissionMatrixDBField.debugdump(pm);
+                              }
 
-			    personaPerms = personaPerms.union(pmdbfMatrix1);
+                            personaPerms = personaPerms.union(pmdbfMatrix1);
 
-			    if (permsdebug)
-			      {
-				System.err.println("updatePerms(): personaPerms after unioning with RoleMatrix is");
+                            if (permsdebug)
+                              {
+                                System.err.println("updatePerms(): personaPerms after unioning with RoleMatrix is");
 
-				PermissionMatrixDBField.debugdump(personaPerms);
-			      }
+                                PermissionMatrixDBField.debugdump(personaPerms);
+                              }
 
-			    personaPerms = personaPerms.union(pmdbfMatrix2);
+                            personaPerms = personaPerms.union(pmdbfMatrix2);
 
-			    if (permsdebug)
-			      {
-				System.err.println("updatePerms(): personaPerms after unioning with RoleDefaultMatrix is");
+                            if (permsdebug)
+                              {
+                                System.err.println("updatePerms(): personaPerms after unioning with RoleDefaultMatrix is");
 
-				PermissionMatrixDBField.debugdump(personaPerms);
-			      }
+                                PermissionMatrixDBField.debugdump(personaPerms);
+                              }
 
-			    defaultPerms = defaultPerms.union(pmdbfMatrix2);
+                            defaultPerms = defaultPerms.union(pmdbfMatrix2);
 
-			    // we want to maintain our notion of
-			    // delegatable permissions separately..
+                            // we want to maintain our notion of
+                            // delegatable permissions separately..
 
-			    Boolean delegatable = (Boolean) pObj.getFieldValueLocal(SchemaConstants.RoleDelegatable);
+                            Boolean delegatable = (Boolean) pObj.getFieldValueLocal(SchemaConstants.RoleDelegatable);
 
-			    if (delegatable != null && delegatable.booleanValue())
-			      {
-				delegatablePersonaPerms = delegatablePersonaPerms.union(pmdbfMatrix1).union(pmdbfMatrix2);
-				delegatableDefaultPerms = delegatableDefaultPerms.union(pmdbfMatrix2);
-			      }
-			  }
-		      }
-		  }
-	      }
-	  }
+                            if (delegatable != null && delegatable.booleanValue())
+                              {
+                                delegatablePersonaPerms = delegatablePersonaPerms.union(pmdbfMatrix1).union(pmdbfMatrix2);
+                                delegatableDefaultPerms = delegatableDefaultPerms.union(pmdbfMatrix2);
+                              }
+                          }
+                      }
+                  }
+              }
+          }
       }
 
     // remember the last time we pulled personaPerms / defaultPerms
 
     if (personaTimeStamp == null)
       {
-	personaTimeStamp = new Date();
+        personaTimeStamp = new Date();
       }
     else
       {
-	personaTimeStamp.setTime(System.currentTimeMillis());
+        personaTimeStamp.setTime(System.currentTimeMillis());
       }
 
     if (permsdebug)
       {
-	System.err.println("DBPermissionManager.updatePerms(): finished full permissions recalc for " +
-			   (personaName == null ? username : personaName));
+        System.err.println("DBPermissionManager.updatePerms(): finished full permissions recalc for " +
+                           (personaName == null ? username : personaName));
 
-	System.err.println("personaPerms = \n\n" + personaPerms);
-	System.err.println("\n\ndefaultPerms = \n\n" + defaultPerms);
+        System.err.println("personaPerms = \n\n" + personaPerms);
+        System.err.println("\n\ndefaultPerms = \n\n" + defaultPerms);
       }
 
     return;
@@ -2328,40 +2328,40 @@ public class DBPermissionManager {
 
     if (obj == null || personaInvid == null)
       {
-	//	Ganymede.debug("Null obj/personaInvid");
-	return false;
+        //      Ganymede.debug("Null obj/personaInvid");
+        return false;
       }
 
     inf = (InvidDBField) obj.getField(SchemaConstants.OwnerListField); // owner or container
 
     if (inf == null)
       {
-	owners = new Vector<Invid>();
+        owners = new Vector<Invid>();
       }
     else
       {
-	// we have to clone the value returned to us by
-	// getValuesLocal() because getValuesLocal() returns the
-	// actual vector held in the field, and if we were to change
-	// that, bad things would happen.
+        // we have to clone the value returned to us by
+        // getValuesLocal() because getValuesLocal() returns the
+        // actual vector held in the field, and if we were to change
+        // that, bad things would happen.
 
-	owners = (Vector<Invid>) inf.getValuesLocal().clone();
+        owners = (Vector<Invid>) inf.getValuesLocal().clone();
       }
 
     // All owner group objects are considered to be self-owning.
 
     if (obj.getTypeID() == SchemaConstants.OwnerBase)
       {
-	if (permsdebug)
-	  {
-	    System.err.println("** Augmenting owner group " + obj.getLabel() + " with self-ownership");
-	    showit = true;
-	  }
+        if (permsdebug)
+          {
+            System.err.println("** Augmenting owner group " + obj.getLabel() + " with self-ownership");
+            showit = true;
+          }
 
-	if (!owners.contains(obj.getInvid()))
-	  {
-	    owners.add(obj.getInvid());
-	  }
+        if (!owners.contains(obj.getInvid()))
+          {
+            owners.add(obj.getInvid());
+          }
       }
 
     // All admin personae are considered to be owned by the owner groups
@@ -2369,60 +2369,60 @@ public class DBPermissionManager {
 
     if (obj.getTypeID() == SchemaConstants.PersonaBase)
       {
-	if (permsdebug)
-	  {
-	    System.err.print("** Augmenting admin persona " + obj.getLabel() + " ");
-	    showit = true;
-	  }
+        if (permsdebug)
+          {
+            System.err.print("** Augmenting admin persona " + obj.getLabel() + " ");
+            showit = true;
+          }
 
-	InvidDBField inf2 = (InvidDBField) obj.getField(SchemaConstants.PersonaGroupsField);
+        InvidDBField inf2 = (InvidDBField) obj.getField(SchemaConstants.PersonaGroupsField);
 
-	if (inf2 != null)
-	  {
-	    if (permsdebug)
-	      {
+        if (inf2 != null)
+          {
+            if (permsdebug)
+              {
                 Vector<Invid> values = (Vector<Invid>) inf2.getValuesLocal();
 
                 // *** Caution!  getValuesLocal() does not clone the field's contents..
                 //
                 // DO NOT modify values here!
 
-		// it's okay to loop on this field since we should be
-		// looking at a DBObject and not a DBEditObject
+                // it's okay to loop on this field since we should be
+                // looking at a DBObject and not a DBEditObject
 
-		for (int i = 0; i < values.size(); i++)
-		  {
-		    if (i > 0)
-		      {
-			System.err.print(", ");
-		      }
+                for (int i = 0; i < values.size(); i++)
+                  {
+                    if (i > 0)
+                      {
+                        System.err.print(", ");
+                      }
 
-		    System.err.print(values.get(i));
-		  }
+                    System.err.print(values.get(i));
+                  }
 
-		System.err.println();
-	      }
+                System.err.println();
+              }
 
-	    // we don't have to clone inf2.getValuesLocal() since union() will copy
-	    // the elements rather than just setting owners to the vector returned
-	    // by inf2.getValuesLocal() if owners is currently null.
+            // we don't have to clone inf2.getValuesLocal() since union() will copy
+            // the elements rather than just setting owners to the vector returned
+            // by inf2.getValuesLocal() if owners is currently null.
 
-	    owners = arlut.csd.Util.VectorUtils.union(owners, (Vector<Invid>) inf2.getValuesLocal());
-	  }
-	else
-	  {
-	    if (permsdebug)
-	      {
-		System.err.println("<no owner groups in this persona>");
-	      }
-	  }
+            owners = arlut.csd.Util.VectorUtils.union(owners, (Vector<Invid>) inf2.getValuesLocal());
+          }
+        else
+          {
+            if (permsdebug)
+              {
+                System.err.println("<no owner groups in this persona>");
+              }
+          }
       }
 
     boolean result = recursePersonasMatch(owners, new Vector<Invid>());
 
     if (showit)
       {
-	System.err.println("++ Result = " + result);
+        System.err.println("++ Result = " + result);
       }
 
     return result;
@@ -2446,7 +2446,7 @@ public class DBPermissionManager {
 
     if (owners == null)
       {
-	return false;		// shouldn't happen in context
+        return false;           // shouldn't happen in context
       }
 
     // loop over all the owner groups in the vector, make sure
@@ -2456,46 +2456,46 @@ public class DBPermissionManager {
 
     for (Invid owner: owners)
       {
-	found = false;	// yes, but what have you done for me _lately_?
+        found = false;  // yes, but what have you done for me _lately_?
 
-	if (owner.getType() != SchemaConstants.OwnerBase)
-	  {
-	    Ganymede.debug("DBPermissionManager.isMemberAll(): bad invid passed " + owner.toString());
-	    return false;
-	  }
+        if (owner.getType() != SchemaConstants.OwnerBase)
+          {
+            Ganymede.debug("DBPermissionManager.isMemberAll(): bad invid passed " + owner.toString());
+            return false;
+          }
 
-	ownerObj = dbSession.viewDBObject(owner);
+        ownerObj = dbSession.viewDBObject(owner);
 
-	inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerMembersField);
+        inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerMembersField);
 
-	if (inf != null && inf.getValuesLocal().contains(personaInvid))
-	  {
-	    found = true;
-	  }
-	else
-	  {
-	    // didn't find, recurse up
+        if (inf != null && inf.getValuesLocal().contains(personaInvid))
+          {
+            found = true;
+          }
+        else
+          {
+            // didn't find, recurse up
 
-	    inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerListField);
+            inf = (InvidDBField) ownerObj.getField(SchemaConstants.OwnerListField);
 
-	    if (inf != null)
-	      {
-		// using getValuesLocal() here is safe only because
-		// recursePersonasMatch() never tries to modify the
-		// owners value passed in.  Otherwise, we'd have to
-		// clone the results from getValuesLocal().
+            if (inf != null)
+              {
+                // using getValuesLocal() here is safe only because
+                // recursePersonasMatch() never tries to modify the
+                // owners value passed in.  Otherwise, we'd have to
+                // clone the results from getValuesLocal().
 
-		if (recursePersonasMatch(inf.getValuesLocal(), new Vector<Invid>()))
-		  {
-		    found = true;
-		  }
-	      }
-	  }
+                if (recursePersonasMatch(inf.getValuesLocal(), new Vector<Invid>()))
+                  {
+                    found = true;
+                  }
+              }
+          }
 
-	if (!found)
-	  {
-	    return false;
-	  }
+        if (!found)
+          {
+            return false;
+          }
       }
 
     return true;
@@ -2517,19 +2517,19 @@ public class DBPermissionManager {
 
     if (obj == null)
       {
-	return false;
+        return false;
       }
 
     if (visibilityFilterInvids == null || visibilityFilterInvids.size() == 0)
       {
-	return true;		// no visibility restriction, go for it
+        return true;            // no visibility restriction, go for it
       }
 
     inf = (InvidDBField) obj.getField(SchemaConstants.OwnerListField);
 
     if (inf == null)
       {
-	return false;   // we have a restriction, but the object is only owned by supergash.. nope.
+        return false;   // we have a restriction, but the object is only owned by supergash.. nope.
       }
 
     owners = (Vector<Invid>) inf.getValuesLocal();
@@ -2540,7 +2540,7 @@ public class DBPermissionManager {
 
     if (owners == null)
       {
-	return false;   // we shouldn't get here, but we don't really care either
+        return false;   // we shouldn't get here, but we don't really care either
       }
 
     // we've got the owners for this object.. now, is there any match between our
@@ -2548,13 +2548,13 @@ public class DBPermissionManager {
 
     for (Invid tmpInvid: visibilityFilterInvids)
       {
-	for (Invid secondInvid: owners)
-	  {
-	    if (tmpInvid.equals(secondInvid))
-	      {
-		return true;
-	      }
-	  }
+        for (Invid secondInvid: owners)
+          {
+            if (tmpInvid.equals(secondInvid))
+              {
+                return true;
+              }
+          }
       }
 
     return false;

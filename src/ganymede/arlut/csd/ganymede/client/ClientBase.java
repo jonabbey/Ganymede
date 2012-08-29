@@ -12,7 +12,7 @@
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2011
@@ -158,7 +158,7 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   {
     if (listener == null || serverURL == null || serverURL.length() == 0)
       {
-	throw new IllegalArgumentException("bad argument");
+        throw new IllegalArgumentException("bad argument");
       }
     
     myServerURL = serverURL;
@@ -178,11 +178,11 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   public boolean connect() throws RemoteException, NotBoundException, MalformedURLException
   {
     Remote obj = Naming.lookup(myServerURL);
-	
+        
     if (obj instanceof Server)
       {
-	server = (Server) obj;
-	server.up();
+        server = (Server) obj;
+        server.up();
       }
 
     connected.set(true);
@@ -206,75 +206,75 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   {
     if (isLoggedIn())
       {
-	// "Already logged in.  Construct a new ClientBase if you need to open a second concurrent session."
-	throw new IllegalArgumentException(ts.l("global.logged_in_error"));
+        // "Already logged in.  Construct a new ClientBase if you need to open a second concurrent session."
+        throw new IllegalArgumentException(ts.l("global.logged_in_error"));
       }
 
     try
       {
-	// the server may send us a message using our
-	// forceDisconnect() method during the login process
+        // the server may send us a message using our
+        // forceDisconnect() method during the login process
 
-	ReturnVal retVal = server.login(username, password);
+        ReturnVal retVal = server.login(username, password);
 
-	if (retVal.didSucceed())
-	  {
-	    session = retVal.getSession();
-	  }
+        if (retVal.didSucceed())
+          {
+            session = retVal.getSession();
+          }
 
-	if (!retVal.didSucceed() || session == null)
-	  {
-	    String error = retVal.getDialogText();
+        if (!retVal.didSucceed() || session == null)
+          {
+            String error = retVal.getDialogText();
 
-	    if (error != null && !error.equals(""))
-	      {
-		sendErrorMessage(error);
-	      }
-	    else
-	      {
-		// "Couldn''t log in to server.  Bad username/password?"
-		sendErrorMessage(ts.l("global.login_failure_msg"));
-	      }
+            if (error != null && !error.equals(""))
+              {
+                sendErrorMessage(error);
+              }
+            else
+              {
+                // "Couldn''t log in to server.  Bad username/password?"
+                sendErrorMessage(ts.l("global.login_failure_msg"));
+              }
 
-	    return null;
-	  }
+            return null;
+          }
 
-	if (debug)
-	  {
-	    System.out.println("logged in");
-	  }
+        if (debug)
+          {
+            System.out.println("logged in");
+          }
 
-	asyncPort = session.getAsyncPort();
+        asyncPort = session.getAsyncPort();
 
-	if (asyncPort != null)
-	  {
-	    asyncThread = new Thread(this, "Ganymede Async Reader");
-	    asyncThread.start();
-	  }
+        if (asyncPort != null)
+          {
+            asyncThread = new Thread(this, "Ganymede Async Reader");
+            asyncThread.start();
+          }
       }
     catch (NullPointerException ex)
       {
-	connected.set(false);
+        connected.set(false);
 
-	if (debug)
-	  {
-	    System.err.println("Error: Didn't get server reference.  Exiting now.");
-	  }
+        if (debug)
+          {
+            System.err.println("Error: Didn't get server reference.  Exiting now.");
+          }
 
-	// "Error: ClientBase didn''t get server reference.  Giving up on login."
-	sendErrorMessage(ts.l("global.no_ref_msg"));
+        // "Error: ClientBase didn''t get server reference.  Giving up on login."
+        sendErrorMessage(ts.l("global.no_ref_msg"));
       }
     catch (Exception ex)
       {
-	connected.set(false);
+        connected.set(false);
 
-	if (debug)
-	  {
-	    System.err.println("Got some other exception: " + ex);
-	  }
+        if (debug)
+          {
+            System.err.println("Got some other exception: " + ex);
+          }
 
-	// "ClientBase login caught some other exception:\n{0}"
-	sendErrorMessage(ts.l("global.other_exception_msg", ex));
+        // "ClientBase login caught some other exception:\n{0}"
+        sendErrorMessage(ts.l("global.other_exception_msg", ex));
       }
   
     return session;
@@ -297,78 +297,78 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   {
     if (isLoggedIn())
       {
-	// "Already logged in.  Construct a new ClientBase if you need to open a second concurrent session."
-	throw new IllegalArgumentException(ts.l("global.logged_in_error"));
+        // "Already logged in.  Construct a new ClientBase if you need to open a second concurrent session."
+        throw new IllegalArgumentException(ts.l("global.logged_in_error"));
       }
 
     try
       {
-	// the server may send us a message using our
-	// forceDisconnect() method during the login process
+        // the server may send us a message using our
+        // forceDisconnect() method during the login process
 
-	ReturnVal retVal = server.xmlLogin(username, password);
+        ReturnVal retVal = server.xmlLogin(username, password);
 
-	if (retVal.didSucceed())
-	  {
-	    xSession = retVal.getXMLSession();
-	  }
+        if (retVal.didSucceed())
+          {
+            xSession = retVal.getXMLSession();
+          }
 
-	if (!retVal.didSucceed() || xSession == null)
-	  {
-	    String error = retVal.getDialogText();
+        if (!retVal.didSucceed() || xSession == null)
+          {
+            String error = retVal.getDialogText();
 
-	    if (error != null && !error.equals(""))
-	      {
-		sendErrorMessage(error);
-	      }
-	    else
-	      {
-		// "Couldn''t log in to server.  Bad username/password?"
-		sendErrorMessage(ts.l("global.login_failure_msg"));
-	      }
+            if (error != null && !error.equals(""))
+              {
+                sendErrorMessage(error);
+              }
+            else
+              {
+                // "Couldn''t log in to server.  Bad username/password?"
+                sendErrorMessage(ts.l("global.login_failure_msg"));
+              }
 
-	    return null;
-	  }
+            return null;
+          }
 
-	if (debug)
-	  {
-	    System.out.println("logged in");
-	  }
+        if (debug)
+          {
+            System.out.println("logged in");
+          }
 
-	session = xSession.getSession();
-	asyncPort = session.getAsyncPort();
+        session = xSession.getSession();
+        asyncPort = session.getAsyncPort();
 
-	if (asyncPort != null)
-	  {
-	    asyncThread = new Thread(this, "Ganymede Async Reader");
-	    asyncThread.start();
-	  }
-	
-	session = null;	// avoid lingering reference we don't need for xmlclient
+        if (asyncPort != null)
+          {
+            asyncThread = new Thread(this, "Ganymede Async Reader");
+            asyncThread.start();
+          }
+        
+        session = null; // avoid lingering reference we don't need for xmlclient
       }
     catch (NullPointerException ex)
       {
-	connected.set(false);
+        connected.set(false);
 
-	if (debug)
-	  {
-	    System.err.println("Error: Didn't get server reference.  Exiting now.");
-	  }
+        if (debug)
+          {
+            System.err.println("Error: Didn't get server reference.  Exiting now.");
+          }
 
-	// "Error: ClientBase didn''t get server reference.  Giving up on login."
-	sendErrorMessage(ts.l("global.no_ref_msg"));
+        // "Error: ClientBase didn''t get server reference.  Giving up on login."
+        sendErrorMessage(ts.l("global.no_ref_msg"));
       }
     catch (Exception ex)
       {
-	connected.set(false);
+        connected.set(false);
 
-	if (debug)
-	  {
-	    System.err.println("Got some other exception: " + ex);
-	  }
+        if (debug)
+          {
+            System.err.println("Got some other exception: " + ex);
+          }
 
-	// "ClientBase login caught some other exception:\n{0}"
-	sendErrorMessage(ts.l("global.other_exception_msg", ex));
+        // "ClientBase login caught some other exception:\n{0}"
+        sendErrorMessage(ts.l("global.other_exception_msg", ex));
       }
   
     return xSession;
@@ -417,16 +417,16 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   {
     if (!connected.isSet())
       {
-	return false;
+        return false;
       }
 
     try
       {
-	server.up();
+        server.up();
       }
     catch (Exception ex)
       {
-	return false;
+        return false;
       }
 
     return true;
@@ -464,8 +464,8 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   {
     if (session != null)
       {
-	session.logout();
-	session = null;
+        session.logout();
+        session = null;
       }
   }
 
@@ -493,7 +493,7 @@ public class ClientBase implements Runnable, RMISSLClientListener {
 
     for (int i = 0; i < myVect.size(); i++)
       {
-	((ClientListener)myVect.elementAt(i)).disconnected(e);
+        ((ClientListener)myVect.elementAt(i)).disconnected(e);
       }
   }
 
@@ -511,7 +511,7 @@ public class ClientBase implements Runnable, RMISSLClientListener {
 
     for (int i = 0; i < myVect.size(); i++)
       {
-	((ClientListener)myVect.elementAt(i)).messageReceived(e);
+        ((ClientListener)myVect.elementAt(i)).messageReceived(e);
       }
   }
 
@@ -561,40 +561,40 @@ public class ClientBase implements Runnable, RMISSLClientListener {
 
     if (asyncPort == null)
       {
-	return;
+        return;
       }
 
     try
       {
-	while (true)
-	  {
-	    event = asyncPort.getNextMsg(); // will block on server
+        while (true)
+          {
+            event = asyncPort.getNextMsg(); // will block on server
 
-	    if (event == null)
-	      {
-		return;
-	      }
+            if (event == null)
+              {
+                return;
+              }
 
-	    switch (event.getMethod())
-	      {
-	      case clientAsyncMessage.SHUTDOWN:
-		forceDisconnect(event.getString(0));
-		return;
+            switch (event.getMethod())
+              {
+              case clientAsyncMessage.SHUTDOWN:
+                forceDisconnect(event.getString(0));
+                return;
 
-	      case clientAsyncMessage.SENDMESSAGE:
-		sendMessage(event.getInt(0), event.getString(1));
-		break;
-	      }
-	  }
+              case clientAsyncMessage.SENDMESSAGE:
+                sendMessage(event.getInt(0), event.getString(1));
+                break;
+              }
+          }
       }
     catch (Exception ex)
       {
-	// "Exception caught in ClientBase's async message loop: {0}"
-	sendErrorMessage(ts.l("run.exception", ex.toString()));
+        // "Exception caught in ClientBase's async message loop: {0}"
+        sendErrorMessage(ts.l("run.exception", ex.toString()));
       }
     finally
       {
-	asyncPort = null;
+        asyncPort = null;
       }
   }
 
@@ -615,7 +615,7 @@ public class ClientBase implements Runnable, RMISSLClientListener {
 
     for (int i = 0; i < listeners.size(); i++)
       { 
-	((ClientListener)listeners.elementAt(i)).messageReceived(e);
+        ((ClientListener)listeners.elementAt(i)).messageReceived(e);
       }
   }
 }

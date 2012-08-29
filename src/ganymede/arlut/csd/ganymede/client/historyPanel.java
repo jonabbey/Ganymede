@@ -9,7 +9,7 @@
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -145,11 +145,11 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
   /* -- */
   
   public historyPanel(Invid invid, 
-		      gclient gc, 
-		      string_field    creator_field, 
-		      date_field      creation_date_field,
-		      string_field    modifier_field,
-		      date_field      modification_date_field)
+                      gclient gc, 
+                      string_field    creator_field, 
+                      date_field      creation_date_field,
+                      string_field    modifier_field,
+                      date_field      modification_date_field)
   {
     this.invid = invid;
     this.gc = gc;
@@ -158,10 +158,10 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 
     createdDate = (Date) FoxtrotAdapter.post(new foxtrot.Task()
       {
-	public Object run() throws Exception
-	{
-	  return myCreation_date_field.getValue();
-	}
+        public Object run() throws Exception
+        {
+          return myCreation_date_field.getValue();
+        }
       });
 
     selectedDate = createdDate;
@@ -184,18 +184,18 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 
     if (invid.getType() == SchemaConstants.PersonaBase)
       {
-	choices = new String[3];
+        choices = new String[3];
 
-	choices[0] = ts.l("global.show_history"); // "Show History"
-	choices[1] = ts.l("global.show_trans_history");	// "Show Transactional History"
-	choices[2] = ts.l("global.show_admin_history");	// "Show Admin History"
+        choices[0] = ts.l("global.show_history"); // "Show History"
+        choices[1] = ts.l("global.show_trans_history"); // "Show Transactional History"
+        choices[2] = ts.l("global.show_admin_history"); // "Show Admin History"
       }
     else
       {
-	choices = new String[2];
+        choices = new String[2];
 
-	choices[0] = ts.l("global.show_history"); // "Show History"
-	choices[1] = ts.l("global.show_trans_history");	// "Show Transactional History"
+        choices[0] = ts.l("global.show_history"); // "Show History"
+        choices[1] = ts.l("global.show_trans_history"); // "Show Transactional History"
       }
 
     int index = 0;
@@ -227,7 +227,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 
     JPanel midPanel = new JPanel(new BorderLayout());
     midPanel.add("West",  new datesPanel(creator_field, creation_date_field, 
-					 modifier_field, modification_date_field));;
+                                         modifier_field, modification_date_field));;
 
     topPanel.add("North", midPanel);
     // "Creation/Modification"
@@ -260,7 +260,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
     waitPanel.add("North", topwaitPanel);
     waitPanel.add("Center", waitLabel);
     waitPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createLineBorder(java.awt.Color.black),
-							   BorderFactory.createEmptyBorder(5,5,5,5)));
+                                                           BorderFactory.createEmptyBorder(5,5,5,5)));
 
     historyTextPanel.add("wait", waitPanel);
 
@@ -278,7 +278,7 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
   {
     if (e.getSource() == showHistory)
       {
-	loadHistory();
+        loadHistory();
       }
   }
 
@@ -301,38 +301,38 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 
     try
       {
-	String choice = (String) choiceBox.getSelectedItem();
+        String choice = (String) choiceBox.getSelectedItem();
 
-	if (choice.equals(ts.l("global.show_history")) ||
-	    choice.equals(ts.l("global.show_trans_history")))
-	  {
-	    final boolean showAll = choice.equals(ts.l("global.show_trans_history"));
+        if (choice.equals(ts.l("global.show_history")) ||
+            choice.equals(ts.l("global.show_trans_history")))
+          {
+            final boolean showAll = choice.equals(ts.l("global.show_trans_history"));
 
-	    historyBuffer = (StringBuffer) FoxtrotAdapter.post(new foxtrot.Task()
-	      {
-		public Object run() throws Exception
-		{
-		  // JAMES MODIFY
-		  return gc.getSession().viewObjectHistory(invid, startDateField.getDate(), showAll);
-		}
-	      });
+            historyBuffer = (StringBuffer) FoxtrotAdapter.post(new foxtrot.Task()
+              {
+                public Object run() throws Exception
+                {
+                  // JAMES MODIFY
+                  return gc.getSession().viewObjectHistory(invid, startDateField.getDate(), showAll);
+                }
+              });
 
-	    showText(historyBuffer.toString());
-	  }
-	else if (choice.equals(ts.l("global.show_admin_history")))
-	  {
-	    historyBuffer = (StringBuffer) FoxtrotAdapter.post(new foxtrot.Task()
-	      {
-		public Object run() throws Exception
-		{
-		  return gc.getSession().viewObjectHistory(invid, startDateField.getDate());
-		}
-	      });
-	  }
+            showText(historyBuffer.toString());
+          }
+        else if (choice.equals(ts.l("global.show_admin_history")))
+          {
+            historyBuffer = (StringBuffer) FoxtrotAdapter.post(new foxtrot.Task()
+              {
+                public Object run() throws Exception
+                {
+                  return gc.getSession().viewObjectHistory(invid, startDateField.getDate());
+                }
+              });
+          }
       }
     finally
       {
-	showText(historyBuffer.toString());
+        showText(historyBuffer.toString());
       }
   }
 
@@ -341,19 +341,19 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
   {
     if (e instanceof JSetValueObject)
       {
-	Date value = (Date)e.getValue();
+        Date value = (Date)e.getValue();
 
         if (value.before(createdDate))
           {
             return false;
           }
 
-	if (value.equals(selectedDate))
-	  {
-	    return false;
-	  }
+        if (value.equals(selectedDate))
+          {
+            return false;
+          }
 
-	selectedDate = value;
+        selectedDate = value;
       }
     else if (e instanceof JResetDateObject)
       {
@@ -379,8 +379,8 @@ public class historyPanel extends JPanel implements ActionListener, JsetValueCal
 
     if (historyTextPanel != null)
       {
-	historyTextPanel.removeAll();
-	historyTextPanel = null;
+        historyTextPanel.removeAll();
+        historyTextPanel = null;
       }
 
     startDateField = null;
@@ -433,13 +433,13 @@ class datesPanel extends JPanel {
   /* -- */
   
   public datesPanel(string_field    creator_field, 
-		    date_field      creation_date_field,
-		    string_field    modifier_field,
-		    date_field      modification_date_field)
+                    date_field      creation_date_field,
+                    string_field    modifier_field,
+                    date_field      modification_date_field)
   {
     if (debug)
       {
-	System.out.println("Creating dates panel");
+        System.out.println("Creating dates panel");
       }
 
     String creator = null;
@@ -460,39 +460,39 @@ class datesPanel extends JPanel {
     
     try
       {
-	if (creator_field != null)
-	  {
-	    creator = (String) creator_field.getValue();
-	  }
+        if (creator_field != null)
+          {
+            creator = (String) creator_field.getValue();
+          }
 
-	if (creation_date_field != null)
-	  {
-	    creation_date = (Date) creation_date_field.getValue();
-	  }
+        if (creation_date_field != null)
+          {
+            creation_date = (Date) creation_date_field.getValue();
+          }
 
-	if (modifier_field != null)
-	  {
-	    modifier = (String) modifier_field.getValue();
-	  }
+        if (modifier_field != null)
+          {
+            modifier = (String) modifier_field.getValue();
+          }
 
-	if (modification_date_field != null)
-	  {
-	    mod_date = (Date) modification_date_field.getValue();
-	  }
+        if (modification_date_field != null)
+          {
+            mod_date = (Date) modification_date_field.getValue();
+          }
       }
     catch (Exception rx)
       {
-	gclient.client.processExceptionRethrow(rx, "Could not get object creation info: ");
+        gclient.client.processExceptionRethrow(rx, "Could not get object creation info: ");
       }
     
     if (creator == null)
       {
-	// "No Creator set for this object."
-	createdBy = new JLabel(ts.l("init.no_creator"));
+        // "No Creator set for this object."
+        createdBy = new JLabel(ts.l("init.no_creator"));
       }
     else
       {
-	createdBy = new JLabel(creator);
+        createdBy = new JLabel(creator);
       }
 
     // "Created By:"
@@ -500,12 +500,12 @@ class datesPanel extends JPanel {
     
     if (creation_date == null)
       {
-	// "No Creation Date has been set for this object."
-	createdOn = new JLabel(ts.l("init.no_creation_date"));
+        // "No Creation Date has been set for this object."
+        createdOn = new JLabel(ts.l("init.no_creation_date"));
       }
     else
       {
-	createdOn = new JLabel(ts.l("init.time_date_format", creation_date));
+        createdOn = new JLabel(ts.l("init.time_date_format", creation_date));
       }
 
     // "Created On:"
@@ -513,12 +513,12 @@ class datesPanel extends JPanel {
     
     if (modifier == null)
       {
-	// "No information about the last modifier."
-	modifiedBy = new JLabel(ts.l("init.no_modifier"));
+        // "No information about the last modifier."
+        modifiedBy = new JLabel(ts.l("init.no_modifier"));
       }
     else
       {
-	modifiedBy = new JLabel(modifier);
+        modifiedBy = new JLabel(modifier);
       }
 
     // "Last Modified By:"
@@ -526,12 +526,12 @@ class datesPanel extends JPanel {
     
     if (mod_date == null)
       {
-	// "No last modification date"
-	modifiedOn = new JLabel(ts.l("init.no_modification_date"));
+        // "No last modification date"
+        modifiedOn = new JLabel(ts.l("init.no_modification_date"));
       }
     else
       {
-	modifiedOn = new JLabel(ts.l("init.time_date_format", mod_date));
+        modifiedOn = new JLabel(ts.l("init.time_date_format", mod_date));
       }
 
     // "Last Modified On:"

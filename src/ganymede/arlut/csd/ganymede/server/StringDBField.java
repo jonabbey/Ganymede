@@ -121,11 +121,11 @@ public class StringDBField extends DBField implements string_field {
     
     if (isVector())
       {
-	value = new Vector();
+        value = new Vector();
       }
     else
       {
-	value = null;
+        value = null;
       }
   }
 
@@ -140,11 +140,11 @@ public class StringDBField extends DBField implements string_field {
     
     if (isVector())
       {
-	value = field.getVectVal().clone();
+        value = field.getVectVal().clone();
       }
     else
       {
-	value = field.value;
+        value = field.value;
       }
   }
 
@@ -156,7 +156,7 @@ public class StringDBField extends DBField implements string_field {
   {
     if (definition.isArray())
       {
-	throw new IllegalArgumentException("scalar constructor called on vector field");
+        throw new IllegalArgumentException("scalar constructor called on vector field");
       }
 
     this.owner = owner;
@@ -172,7 +172,7 @@ public class StringDBField extends DBField implements string_field {
   {
     if (!definition.isArray())
       {
-	throw new IllegalArgumentException("vector constructor called on scalar field");
+        throw new IllegalArgumentException("vector constructor called on scalar field");
       }
 
     this.owner = owner;
@@ -180,11 +180,11 @@ public class StringDBField extends DBField implements string_field {
 
     if (values == null)
       {
-	value = new Vector();
+        value = new Vector();
       }
     else
       {
-	value = values.clone();
+        value = values.clone();
       }
   }
 
@@ -197,31 +197,31 @@ public class StringDBField extends DBField implements string_field {
   {
     if (isVector())
       {
-	Vector values = getVectVal();
+        Vector values = getVectVal();
 
-	int count = 0;
+        int count = 0;
 
-	for (int i = 0; i < values.size(); i++)
-	  {
-	    if (!values.elementAt(i).equals(""))
-	      {
-		count++;
-	      }
-	  }
+        for (int i = 0; i < values.size(); i++)
+          {
+            if (!values.elementAt(i).equals(""))
+              {
+                count++;
+              }
+          }
 
-	out.writeInt(count);
+        out.writeInt(count);
 
-	for (int i = 0; i < values.size(); i++)
-	  {
-	    if (!values.elementAt(i).equals(""))
-	      {
-		out.writeUTF((String) values.elementAt(i));
-	      }
-	  }
+        for (int i = 0; i < values.size(); i++)
+          {
+            if (!values.elementAt(i).equals(""))
+              {
+                out.writeUTF((String) values.elementAt(i));
+              }
+          }
       }
     else
       {
-	out.writeUTF((String)value);
+        out.writeUTF((String)value);
       }
   }
 
@@ -233,27 +233,27 @@ public class StringDBField extends DBField implements string_field {
 
     if (definition.isArray())
       {
-	if (Ganymede.db.isLessThan(2,3))
-	  {
-	    count = in.readShort();
-	  }
-	else
-	  {
-	    count = in.readInt();
-	  }
+        if (Ganymede.db.isLessThan(2,3))
+          {
+            count = in.readShort();
+          }
+        else
+          {
+            count = in.readInt();
+          }
 
-	value = new Vector(count);
+        value = new Vector(count);
 
-	Vector values = (Vector) value;
+        Vector values = (Vector) value;
 
-	for (int i = 0; i < count; i++)
-	  {
-	    values.addElement(in.readUTF().intern());
-	  }
+        for (int i = 0; i < count; i++)
+          {
+            values.addElement(in.readUTF().intern());
+          }
       }
     else
       {
-	value = in.readUTF().intern();
+        value = in.readUTF().intern();
       }
   }
 
@@ -268,21 +268,21 @@ public class StringDBField extends DBField implements string_field {
 
     if (!isVector())
       {
-	xmlOut.write(value());	// for scalar fields, just write the string in place
+        xmlOut.write(value());  // for scalar fields, just write the string in place
       }
     else
       {
-	Vector values = getVectVal();
+        Vector values = getVectVal();
 
-	for (int i = 0; i < values.size(); i++)
-	  {
-	    xmlOut.indentOut();
-	    xmlOut.indent();
-	    xmlOut.indentIn();
-	    emitStringXML(xmlOut, (String) values.elementAt(i));
-	  }
+        for (int i = 0; i < values.size(); i++)
+          {
+            xmlOut.indentOut();
+            xmlOut.indent();
+            xmlOut.indentIn();
+            emitStringXML(xmlOut, (String) values.elementAt(i));
+          }
 
-	xmlOut.indent();
+        xmlOut.indent();
       }
 
     xmlOut.endElement(this.getXMLName());
@@ -305,7 +305,7 @@ public class StringDBField extends DBField implements string_field {
   {
     if (isVector())
       {
-	throw new IllegalArgumentException("scalar accessor called on vector field");
+        throw new IllegalArgumentException("scalar accessor called on vector field");
       }
 
     return (String) value;
@@ -315,7 +315,7 @@ public class StringDBField extends DBField implements string_field {
   {
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar");
+        throw new IllegalArgumentException("vector accessor called on scalar");
       }
 
     return (String) getVectVal().elementAt(index);
@@ -343,53 +343,53 @@ public class StringDBField extends DBField implements string_field {
   {
     if (!isVector())
       {
-	if (value == null)
-	  {
-	    return "null";
-	  }
+        if (value == null)
+          {
+            return "null";
+          }
 
-	return this.value();
+        return this.value();
       }
 
     int size = size();
     
     if (size == 0)
       {
-	return "";
+        return "";
       }
     
     String entries[] = new String[size];
     
     for (int i = 0; i < size; i++)
       {
-	entries[i] = this.value(i);
+        entries[i] = this.value(i);
       }
     
     java.util.Arrays.sort(entries,
-			  new Comparator()
-			  {
-			    public int compare(Object a, Object b)
-			    {
-			      String aS, bS;
-			      
-			      aS = (String) a;
-			      bS = (String) b;
-			      
-			      return aS.compareTo(bS);
-			    }
-			  }
-			  );
+                          new Comparator()
+                          {
+                            public int compare(Object a, Object b)
+                            {
+                              String aS, bS;
+                              
+                              aS = (String) a;
+                              bS = (String) b;
+                              
+                              return aS.compareTo(bS);
+                            }
+                          }
+                          );
     
     StringBuilder result = new StringBuilder();
     
     for (int i = 0; i < entries.length; i++)
       {
-	if (i > 0)
-	  {
-	    result.append(",");
-	  }
-	
-	result.append(entries[i]);
+        if (i > 0)
+          {
+            result.append(",");
+          }
+        
+        result.append(entries[i]);
       }
     
     return result.toString();
@@ -425,143 +425,143 @@ public class StringDBField extends DBField implements string_field {
 
     if (!(orig instanceof StringDBField))
       {
-	throw new IllegalArgumentException("bad field comparison");
+        throw new IllegalArgumentException("bad field comparison");
       }
 
     origS = (StringDBField) orig;
 
     if (isVector())
       {
-	Vector 
-	  added = new Vector(),
-	  deleted = new Vector();
+        Vector 
+          added = new Vector(),
+          deleted = new Vector();
 
-	Vector values = getVectVal();
-	Vector origValues = origS.getVectVal();
+        Vector values = getVectVal();
+        Vector origValues = origS.getVectVal();
 
-	Enumeration en;
+        Enumeration en;
 
-	String elementA, elementB;
+        String elementA, elementB;
 
-	boolean found = false;
+        boolean found = false;
 
-	/* -- */
+        /* -- */
 
-	// find elements in the orig field that aren't in our present field
+        // find elements in the orig field that aren't in our present field
 
-	en = origValues.elements();
+        en = origValues.elements();
 
-	while (en.hasMoreElements())
-	  {
-	    elementA = (String) en.nextElement();
+        while (en.hasMoreElements())
+          {
+            elementA = (String) en.nextElement();
 
-	    found = false;
+            found = false;
 
-	    for (int i = 0; !found && i < values.size(); i++)
-	      {
-		elementB = (String) values.elementAt(i);
+            for (int i = 0; !found && i < values.size(); i++)
+              {
+                elementB = (String) values.elementAt(i);
 
-		if (elementA.equals(elementB))
-		  {
-		    found = true;
-		  }
-	      }
+                if (elementA.equals(elementB))
+                  {
+                    found = true;
+                  }
+              }
 
-	    if (!found)
-	      {
-		deleted.addElement(elementA);
-	      }
-	  }
+            if (!found)
+              {
+                deleted.addElement(elementA);
+              }
+          }
 
-	// find elements in present our field that aren't in the orig field
+        // find elements in present our field that aren't in the orig field
 
-	en = values.elements();
+        en = values.elements();
 
-	while (en.hasMoreElements())
-	  {
-	    elementA = (String) en.nextElement();
+        while (en.hasMoreElements())
+          {
+            elementA = (String) en.nextElement();
 
-	    found = false;
+            found = false;
 
-	    for (int i = 0; !found && i < origValues.size(); i++)
-	      {
-		elementB = (String) origValues.elementAt(i);
+            for (int i = 0; !found && i < origValues.size(); i++)
+              {
+                elementB = (String) origValues.elementAt(i);
 
-		if (elementA.equals(elementB))
-		  {
-		    found = true;
-		  }
-	      }
+                if (elementA.equals(elementB))
+                  {
+                    found = true;
+                  }
+              }
 
-	    if (!found)
-	      {
-		added.addElement(elementA);
-	      }
-	  }
+            if (!found)
+              {
+                added.addElement(elementA);
+              }
+          }
 
-	// were there any changes at all?
+        // were there any changes at all?
 
-	if (deleted.size() == 0 && added.size() == 0)
-	  {
-	    return null;
-	  }
-	else
-	  {
-	    if (deleted.size() != 0)
-	      {
-		StringBuilder itemList = new StringBuilder();
-	    
-		for (int i = 0; i < deleted.size(); i++)
-		  {
-		    if (i > 0)
-		      {
-			itemList.append(", ");
-		      }
+        if (deleted.size() == 0 && added.size() == 0)
+          {
+            return null;
+          }
+        else
+          {
+            if (deleted.size() != 0)
+              {
+                StringBuilder itemList = new StringBuilder();
+            
+                for (int i = 0; i < deleted.size(); i++)
+                  {
+                    if (i > 0)
+                      {
+                        itemList.append(", ");
+                      }
 
-		    itemList.append((String) deleted.elementAt(i));
-		  }
+                    itemList.append((String) deleted.elementAt(i));
+                  }
 
-		// "\tDeleted: {0}\n"
-		result.append(ts.l("getDiffString.deleted", itemList.toString()));
-	      }
+                // "\tDeleted: {0}\n"
+                result.append(ts.l("getDiffString.deleted", itemList.toString()));
+              }
 
-	    if (added.size() != 0)
-	      {
-		StringBuilder itemList = new StringBuilder();
+            if (added.size() != 0)
+              {
+                StringBuilder itemList = new StringBuilder();
 
-		for (int i = 0; i < added.size(); i++)
-		  {
-		    if (i > 0)
-		      {
-			itemList.append(", ");
-		      }
+                for (int i = 0; i < added.size(); i++)
+                  {
+                    if (i > 0)
+                      {
+                        itemList.append(", ");
+                      }
 
-		    itemList.append((String) added.elementAt(i));
-		  }
+                    itemList.append((String) added.elementAt(i));
+                  }
 
-		// "\tAdded: {0}\n"
-		result.append(ts.l("getDiffString.added", itemList.toString()));
-	      }
+                // "\tAdded: {0}\n"
+                result.append(ts.l("getDiffString.added", itemList.toString()));
+              }
 
-	    return result.toString();
-	  }
+            return result.toString();
+          }
       }
     else
       {
-	if (origS.value().equals(this.value()))
-	  {
-	    return null;
-	  }
-	else
-	  {
-	    // "\tOld: {0}\n"
-	    result.append(ts.l("getDiffString.old", origS.value()));
+        if (origS.value().equals(this.value()))
+          {
+            return null;
+          }
+        else
+          {
+            // "\tOld: {0}\n"
+            result.append(ts.l("getDiffString.old", origS.value()));
 
-	    // "\tNew: {0}\n"
-	    result.append(ts.l("getDiffString.new", this.value()));
-	
-	    return result.toString();
-	  }
+            // "\tNew: {0}\n"
+            result.append(ts.l("getDiffString.new", this.value()));
+        
+            return result.toString();
+          }
       }
   }
 
@@ -576,25 +576,25 @@ public class StringDBField extends DBField implements string_field {
   {
     if (isVector())
       {
-	if (value != null && getVectVal().size() > 0)
-	  {
-	    return true;
-	  }
-	else
-	  {
-	    return false;
-	  }
+        if (value != null && getVectVal().size() > 0)
+          {
+            return true;
+          }
+        else
+          {
+            return false;
+          }
       }
     else
       {
-	if (value != null && !((String) value).equals(""))
-	  {
-	    return true;
-	  }
-	else
-	  {
-	    return false;
-	  }
+        if (value != null && !((String) value).equals(""))
+          {
+            return true;
+          }
+        else
+          {
+            return false;
+          }
       }
   }
 
@@ -659,11 +659,11 @@ public class StringDBField extends DBField implements string_field {
   {
     if (owner instanceof DBEditObject)
       {
-	return (((DBEditObject) owner).obtainChoiceList(this) != null);
+        return (((DBEditObject) owner).obtainChoiceList(this) != null);
       }
     else
       {
-	return false;
+        return false;
       }
   }
 
@@ -681,12 +681,12 @@ public class StringDBField extends DBField implements string_field {
   {
     if (!canChoose())
       {
-	return false;
+        return false;
       }
 
     if (owner instanceof DBEditObject)
       {
-	return ((DBEditObject) owner).mustChoose(this);
+        return ((DBEditObject) owner).mustChoose(this);
       }
 
     return false;
@@ -719,7 +719,7 @@ public class StringDBField extends DBField implements string_field {
   {
     if (!(owner instanceof DBEditObject))
       {
-	throw new IllegalArgumentException("can't get choice list on non-editable object");
+        throw new IllegalArgumentException("can't get choice list on non-editable object");
       }
 
     return ((DBEditObject) owner).obtainChoiceList(this);
@@ -739,11 +739,11 @@ public class StringDBField extends DBField implements string_field {
   {
     if (owner instanceof DBEditObject)
       {
-	return ((DBEditObject) owner).obtainChoicesKey(this);
+        return ((DBEditObject) owner).obtainChoicesKey(this);
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -786,12 +786,12 @@ public class StringDBField extends DBField implements string_field {
   {
     if (allowedChars() != null && (allowedChars().indexOf(c) == -1))
       {
-	return false;
+        return false;
       }
 
     if (disallowedChars() != null && (disallowedChars().indexOf(c) != -1))
       {
-	return false;
+        return false;
       }
     
     return true;
@@ -829,99 +829,99 @@ public class StringDBField extends DBField implements string_field {
   {
     if (!verifyTypeMatch(o))
       {
-	// "Submitted value {0} is not a String!  Major client error while trying to edit field {1} in object {2}."
-	return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
-					  ts.l("verifyBasicConstraints.type_error",
-					       o, this.getName(), owner.getLabel()));
+        // "Submitted value {0} is not a String!  Major client error while trying to edit field {1} in object {2}."
+        return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+                                          ts.l("verifyBasicConstraints.type_error",
+                                               o, this.getName(), owner.getLabel()));
       }
 
     String s = (String) o;
 
     if (s.length() > maxSize())
       {
-	// string too long
+        // string too long
 
-	// "String value {0} is too long for field {1} in object {2}.  Strings in this field must be less than or equal to {3,number,#} characters long."
-	
-	return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
-					  ts.l("verifyBasicConstraints.overlength",
-					       s, this.getName(), owner.getLabel(), Integer.valueOf(this.maxSize())));
+        // "String value {0} is too long for field {1} in object {2}.  Strings in this field must be less than or equal to {3,number,#} characters long."
+        
+        return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+                                          ts.l("verifyBasicConstraints.overlength",
+                                               s, this.getName(), owner.getLabel(), Integer.valueOf(this.maxSize())));
       }
 
     if (s.length() < minSize())
       {
-	// string too short
+        // string too short
 
-	// "String value {0} is too short for field {1} in object {2}.  Strings in this field must be greater than or equal to {3,number,#} characters long."
-	
-	return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
-					  ts.l("verifyBasicConstraints.underlength",
-					       s, this.getName(), owner.getLabel(), Integer.valueOf(this.minSize())));
+        // "String value {0} is too short for field {1} in object {2}.  Strings in this field must be greater than or equal to {3,number,#} characters long."
+        
+        return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+                                          ts.l("verifyBasicConstraints.underlength",
+                                               s, this.getName(), owner.getLabel(), Integer.valueOf(this.minSize())));
       }
 
     if (getFieldDef().getRegexp() != null)
       {
-	if (!getFieldDef().getRegexp().matcher(s).find())
-	  {
-	    String desc = getFieldDef().getRegexpDesc();
+        if (!getFieldDef().getRegexp().matcher(s).find())
+          {
+            String desc = getFieldDef().getRegexpDesc();
 
-	    if (desc == null || desc.equals(""))
-	      {
-		/*
-		  String value "{0}" does not conform to the regular expression pattern established for string field {1} in object {2}.\n\n\
-		  This string field only accepts strings matching the following regular expression pattern:\n\n\
-		  "{3}"
-		*/
+            if (desc == null || desc.equals(""))
+              {
+                /*
+                  String value "{0}" does not conform to the regular expression pattern established for string field {1} in object {2}.\n\n\
+                  This string field only accepts strings matching the following regular expression pattern:\n\n\
+                  "{3}"
+                */
 
-		return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
-						  ts.l("verifyBasicConstraints.regexp_nodesc",
-						       s, this.getName(), owner.getLabel(), getFieldDef().getRegexpPat()));
-	      }
-	    else
-	      {
-		/*
-		  String value "{0}" does not conform to the regular expression pattern established for string field {1} in object {2}.\n\n\
-		  This string field only accepts strings matching the following criteria:\n\n\
-		  "{3}"
-		*/
+                return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+                                                  ts.l("verifyBasicConstraints.regexp_nodesc",
+                                                       s, this.getName(), owner.getLabel(), getFieldDef().getRegexpPat()));
+              }
+            else
+              {
+                /*
+                  String value "{0}" does not conform to the regular expression pattern established for string field {1} in object {2}.\n\n\
+                  This string field only accepts strings matching the following criteria:\n\n\
+                  "{3}"
+                */
 
-		return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
-						  ts.l("verifyBasicConstraints.regexp_desc",
-						       s, this.getName(), owner.getLabel(), desc));
-	      }
-	  }
+                return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+                                                  ts.l("verifyBasicConstraints.regexp_desc",
+                                                       s, this.getName(), owner.getLabel(), desc));
+              }
+          }
       }
 
     if (allowedChars() != null && !allowedChars().equals(""))
       {
-	String okChars = allowedChars();
-	
-	for (int i = 0; i < s.length(); i++)
-	  {
-	    if (okChars.indexOf(s.charAt(i)) == -1)
-	      {
-		// "String value "{0}" contains a character '{1}' which is not allowed in field {2} in object {3}."
-		return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
-						  ts.l("verifyBasicConstraints.bad_char",
-						       s, Character.valueOf(s.charAt(i)), this.getName(), owner.getLabel()));
-	      }
-	  }
+        String okChars = allowedChars();
+        
+        for (int i = 0; i < s.length(); i++)
+          {
+            if (okChars.indexOf(s.charAt(i)) == -1)
+              {
+                // "String value "{0}" contains a character '{1}' which is not allowed in field {2} in object {3}."
+                return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+                                                  ts.l("verifyBasicConstraints.bad_char",
+                                                       s, Character.valueOf(s.charAt(i)), this.getName(), owner.getLabel()));
+              }
+          }
       }
     
     if (disallowedChars() != null && !disallowedChars().equals(""))
       {
-	String badChars = disallowedChars();
-	
-	for (int i = 0; i < s.length(); i++)
-	  {
-	    if (badChars.indexOf(s.charAt(i)) != -1)
-	      {
-		// "String value "{0}" contains a character '{1}' which is not allowed in field {2} in object {3}."
-		return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
-						  ts.l("verifyBasicConstraints.bad_char",
-						       s, Character.valueOf(s.charAt(i)), this.getName(), owner.getLabel()));
-	      }
-	  }
+        String badChars = disallowedChars();
+        
+        for (int i = 0; i < s.length(); i++)
+          {
+            if (badChars.indexOf(s.charAt(i)) != -1)
+              {
+                // "String value "{0}" contains a character '{1}' which is not allowed in field {2} in object {3}."
+                return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+                                                  ts.l("verifyBasicConstraints.bad_char",
+                                                       s, Character.valueOf(s.charAt(i)), this.getName(), owner.getLabel()));
+              }
+          }
       }
 
     return null;
@@ -964,8 +964,8 @@ public class StringDBField extends DBField implements string_field {
 
     if (!isEditable(true))
       {
-	// "Don''t have permission to edit field {0} in object {1}."
-	return Ganymede.createErrorDialog(ts.l("verifyNewValue.non_editable", getName(), owner.getLabel()));
+        // "Don''t have permission to edit field {0} in object {1}."
+        return Ganymede.createErrorDialog(ts.l("verifyNewValue.non_editable", getName(), owner.getLabel()));
       }
 
     eObj = (DBEditObject) owner;
@@ -975,36 +975,36 @@ public class StringDBField extends DBField implements string_field {
 
     if (o == null)
       {
-	return eObj.verifyNewValue(this, null);  // explicit for FindBugs
+        return eObj.verifyNewValue(this, null);  // explicit for FindBugs
       }
 
     retVal = verifyBasicConstraints(o);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     s = (String) o;
 
     try
       {
-	if (mustChoose())
-	  {
-	    qr = choices();
-	    
-	    if (!qr.containsLabel(s))
-	      {
-		// "String value "{0}" is not a valid choice for field {1} in object {2}."
+        if (mustChoose())
+          {
+            qr = choices();
+            
+            if (!qr.containsLabel(s))
+              {
+                // "String value "{0}" is not a valid choice for field {1} in object {2}."
 
-		return Ganymede.createErrorDialog(ts.l("verifyNewValue.invalid_choice",
-						       s, getName(), owner.getLabel()));
-	      }
-	  }
+                return Ganymede.createErrorDialog(ts.l("verifyNewValue.invalid_choice",
+                                                       s, getName(), owner.getLabel()));
+              }
+          }
       }
     catch (NotLoggedInException ex)
       {
-	return Ganymede.loginError(ex);
+        return Ganymede.loginError(ex);
       }
 
     // have our parent make the final ok on the value

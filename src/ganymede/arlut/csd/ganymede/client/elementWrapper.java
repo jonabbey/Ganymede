@@ -134,7 +134,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   {
     if (comp == null)
       {
-	throw new IllegalArgumentException("Error: Component parameter is null");
+        throw new IllegalArgumentException("Error: Component parameter is null");
       }
 
     this.titleText = titleText;
@@ -146,7 +146,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
     if (debug)
       {
-	System.err.println("Adding new elementWrapper");
+        System.err.println("Adding new elementWrapper");
       }
 
     setLayout(new BorderLayout());
@@ -170,65 +170,65 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
     if (editable)
       {
-	remove = new JButton(vp.wp.removeImageIcon);
-	remove.setBorderPainted(false);
-	remove.setOpaque(false);
-	remove.setFocusPainted(false);
-	remove.setMargin(new Insets(0,0,0,0));
+        remove = new JButton(vp.wp.removeImageIcon);
+        remove.setBorderPainted(false);
+        remove.setOpaque(false);
+        remove.setFocusPainted(false);
+        remove.setMargin(new Insets(0,0,0,0));
 
-	// "Delete this element"
-	remove.setToolTipText(ts.l("init.remove_tooltip"));
-	remove.setContentAreaFilled(false);
-	remove.addActionListener(this);
+        // "Delete this element"
+        remove.setToolTipText(ts.l("init.remove_tooltip"));
+        remove.setContentAreaFilled(false);
+        remove.addActionListener(this);
       }
 
     if (comp instanceof containerPanel)
       {
-	if (titleText != null)
-	  {
-	    title = new JLabel(titleText);
-	  }
-	else
-	  {
-	    // "Component"
-	    title = new JLabel(ts.l("init.default_label"));
-	  }
+        if (titleText != null)
+          {
+            title = new JLabel(titleText);
+          }
+        else
+          {
+            // "Component"
+            title = new JLabel(ts.l("init.default_label"));
+          }
 
-	title.setForeground(Color.white);
-	title.addMouseListener(this);
+        title.setForeground(Color.white);
+        title.addMouseListener(this);
 
-	expand = new JButton(vp.wp.closeIcon);
-	expand.setPressedIcon(vp.wp.closePressedIcon);
+        expand = new JButton(vp.wp.closeIcon);
+        expand.setPressedIcon(vp.wp.closePressedIcon);
 
-	// "Expand this element"
-	expand.setToolTipText(ts.l("global.expand_tooltip"));
-	expand.setOpaque(false);
-	expand.setBorderPainted(false);
-	expand.setFocusPainted(false);
-	expand.addActionListener(this);
-	expand.setContentAreaFilled(false);
+        // "Expand this element"
+        expand.setToolTipText(ts.l("global.expand_tooltip"));
+        expand.setOpaque(false);
+        expand.setBorderPainted(false);
+        expand.setFocusPainted(false);
+        expand.addActionListener(this);
+        expand.setContentAreaFilled(false);
 
-	buttonPanel.add("West", expand);
-	buttonPanel.add("Center", title);
+        buttonPanel.add("West", expand);
+        buttonPanel.add("Center", title);
 
-	if (editable)
-	  {
-	    buttonPanel.add("East",remove);
-	  }
+        if (editable)
+          {
+            buttonPanel.add("East",remove);
+          }
       }
     else
       {
-	if (titleText != null)
-	  {
-	    buttonPanel.add("West", new JLabel(titleText));
-	  }
+        if (titleText != null)
+          {
+            buttonPanel.add("West", new JLabel(titleText));
+          }
 
-	buttonPanel.add("Center", comp);
+        buttonPanel.add("Center", comp);
 
-	if (editable)
-	  {
-	    buttonPanel.add("East", remove);
-	  }
+        if (editable)
+          {
+            buttonPanel.add("East", remove);
+          }
       }
 
     add("North",buttonPanel);
@@ -251,7 +251,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   {
     if (!(my_component instanceof containerPanel))
       {
-	return null;
+        return null;
       }
 
     return ((containerPanel)my_component).getObjectInvid();
@@ -261,12 +261,12 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   {
     if (my_component instanceof containerPanel)
       {
-	return getObjectInvid();
+        return getObjectInvid();
       }
 
     if (my_component instanceof JIPField)
       {
-	return ((JIPField) my_component).getValue();
+        return ((JIPField) my_component).getValue();
       }
 
     throw new RuntimeException("Unrecognized value wrapped in elementWrapper");
@@ -290,14 +290,14 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   {
     if (my_component instanceof containerPanel)
       {
-	try
-	  {
-	    setValidated(((containerPanel)my_component).getObject().isValid());
-	  }
-	catch (Exception ex)
-	  {
-	    gclient.client.processExceptionRethrow(ex);
-	  }
+        try
+          {
+            setValidated(((containerPanel)my_component).getObject().isValid());
+          }
+        catch (Exception ex)
+          {
+            gclient.client.processExceptionRethrow(ex);
+          }
       }
   }
 
@@ -305,13 +305,13 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   {
     if (valid)
       {
-	buttonPanel.setBackground(ClientColor.vectorTitles);
-	setBorder(vp.wp.eWrapperBorder);
+        buttonPanel.setBackground(ClientColor.vectorTitles);
+        setBorder(vp.wp.eWrapperBorder);
       }
     else
       {
-	buttonPanel.setBackground(ClientColor.vectorTitlesInvalid);
-	setBorder(vp.wp.eWrapperBorderInvalid);
+        buttonPanel.setBackground(ClientColor.vectorTitlesInvalid);
+        setBorder(vp.wp.eWrapperBorderInvalid);
       }
   }
 
@@ -319,16 +319,16 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   {
     if (my_component instanceof containerPanel)
       {
-	try
-	  {
-	    containerPanel cp = (containerPanel) my_component;
-	    titleText = cp.getObject().getEmbeddedObjectDisplayLabel();
-	    title.setText((index + 1) + ". " + titleText);
-	  }
-	catch (Exception rx)
-	  {
-	    gclient.client.processExceptionRethrow(rx);
-	  }
+        try
+          {
+            containerPanel cp = (containerPanel) my_component;
+            titleText = cp.getObject().getEmbeddedObjectDisplayLabel();
+            title.setText((index + 1) + ". " + titleText);
+          }
+        catch (Exception rx)
+          {
+            gclient.client.processExceptionRethrow(rx);
+          }
       }
   }
 
@@ -340,18 +340,18 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   {
     if (my_component instanceof containerPanel)
       {
-	containerPanel myContainerPanel = (containerPanel) my_component;
+        containerPanel myContainerPanel = (containerPanel) my_component;
 
-	if (!loaded)
-	  {
-	    if (!myContainerPanel.isLoaded())
-	      {
-		myContainerPanel.load();
-	      }
+        if (!loaded)
+          {
+            if (!myContainerPanel.isLoaded())
+              {
+                myContainerPanel.load();
+              }
 
-	    add("Center", my_component);
-	    loaded = true;
-	  }
+            add("Center", my_component);
+            loaded = true;
+          }
       }
 
     my_component.setVisible(true);
@@ -391,26 +391,26 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
 
     if (debug)
       {
-	System.err.println("toggle().");
+        System.err.println("toggle().");
       }
 
     if (expanded)
       {
-	if (debug)
-	  {
-	    System.err.println("remove");
-	  }
+        if (debug)
+          {
+            System.err.println("remove");
+          }
 
-	close();
+        close();
       }
     else
       {
-	open();
+        open();
       }
 
     if (debug)
       {
-	System.err.println("Done with toggle().");
+        System.err.println("Done with toggle().");
       }
 
     vp.wp.getgclient().setNormalCursor();
@@ -420,23 +420,23 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   {
     if (debug)
       {
-	System.err.println("Action performed: " + evt.getActionCommand());
+        System.err.println("Action performed: " + evt.getActionCommand());
       }
 
     if (evt.getSource() == remove)
       {
-	JValueObject v = new JSetValueObject(this,"remove");
-	vp.setValuePerformed(v);
+        JValueObject v = new JSetValueObject(this,"remove");
+        vp.setValuePerformed(v);
       }
     else if (evt.getSource() == expand)
       {
-	toggle();
-	invalidate();
-	vp.container.frame.validate();
+        toggle();
+        invalidate();
+        vp.container.frame.validate();
       }
     else
       {
-	throw new RuntimeException("actionPerformed invoked by ActionEvent from invalid source");
+        throw new RuntimeException("actionPerformed invoked by ActionEvent from invalid source");
       }
   }
 
@@ -444,9 +444,9 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener {
   {
     if (e.getWhen() - lastClick < 500)
       {
-	toggle();
-	invalidate();
-	vp.container.frame.validate();
+        toggle();
+        invalidate();
+        vp.container.frame.validate();
       }
 
     lastClick = e.getWhen();

@@ -167,39 +167,39 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Jse
 
     if (forMail)
       {
-	JPanel mailPanel = makeMailPanel();
-	subject.setText(mailSubj);
+        JPanel mailPanel = makeMailPanel();
+        subject.setText(mailSubj);
 
-	gbc.gridx = 0;
-	gbc.gridy = 0;
-	gbc.fill = GridBagConstraints.HORIZONTAL;
-	gbc.gridwidth = GridBagConstraints.REMAINDER;
-	gbl.setConstraints(mailPanel, gbc);
-	panel.add(mailPanel);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbl.setConstraints(mailPanel, gbc);
+        panel.add(mailPanel);
 
-	// and a separator
+        // and a separator
 
-	JSeparator sep = new JSeparator();
-	gbc.gridwidth = GridBagConstraints.REMAINDER;
-	gbc.fill = GridBagConstraints.HORIZONTAL;
-	gbc.gridx = 0;
-	gbc.gridy = 1;
-	gbl.setConstraints(sep, gbc);
-	panel.add(sep);
+        JSeparator sep = new JSeparator();
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        gbl.setConstraints(sep, gbc);
+        panel.add(sep);
       }
 
     // next the history info, if we will have it.
 
     if (historySave)
       {
-	JPanel historyPanel = makeHistoryPanel();
+        JPanel historyPanel = makeHistoryPanel();
 
-	gbc.gridx = 0;
-	gbc.gridy = 2;
-	gbc.gridwidth = GridBagConstraints.REMAINDER;
-	gbc.fill = GridBagConstraints.BOTH;
-	gbl.setConstraints(historyPanel, gbc);
-	panel.add(historyPanel);
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.fill = GridBagConstraints.BOTH;
+        gbl.setConstraints(historyPanel, gbc);
+        panel.add(historyPanel);
       }
 
     // and finally the ok/cancel buttons
@@ -296,13 +296,13 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Jse
   {
     if (e.getSource() == ok)
       {
-	returnValue = true;
-	setVisible(false);
+        returnValue = true;
+        setVisible(false);
       }
     else if (e.getSource() == cancel)
       {
-	returnValue = false;
-	setVisible(false);
+        returnValue = false;
+        setVisible(false);
       }
   }
 
@@ -405,12 +405,12 @@ public class SaveObjDialog extends StandardDialog implements ActionListener, Jse
 
     try
       {
-	date_field creation_date_field = (date_field) server_object.getField(SchemaConstants.CreationDateField);
+        date_field creation_date_field = (date_field) server_object.getField(SchemaConstants.CreationDateField);
 
-	if (creation_date_field != null)
-	  {
-	    creation_date = (Date) creation_date_field.getValue();
-	  }
+        if (creation_date_field != null)
+          {
+            creation_date = (Date) creation_date_field.getValue();
+          }
       }
     catch (RemoteException ex)
       {

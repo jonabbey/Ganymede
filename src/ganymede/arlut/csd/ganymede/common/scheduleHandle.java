@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -114,8 +114,8 @@ public class scheduleHandle implements java.io.Serializable {
     BUILDER         (ts.l("taskType.builderTask")),   // "Ganymede Builder Task"
     UNSCHEDULEDBUILDER (ts.l("taskType.unscheduledBuilderTask")), // "Unscheduled Ganymede Builder Task"
     SYNCINCREMENTAL (ts.l("taskType.incrementalSync")), // "Incremental Sync Channel"
-    SYNCFULLSTATE   (ts.l("taskType.fullstateSync")),	// "Full State Sync Channel"
-    SYNCMANUAL      (ts.l("taskType.manualSync"));	// "Manual Sync Channel"
+    SYNCFULLSTATE   (ts.l("taskType.fullstateSync")),   // "Full State Sync Channel"
+    SYNCMANUAL      (ts.l("taskType.manualSync"));      // "Manual Sync Channel"
 
     private final String name;
 
@@ -142,11 +142,11 @@ public class scheduleHandle implements java.io.Serializable {
 
     OK()
       {
-	@Override public String getMessage(int queueSize, String condition)
-	  {
-	    // "Good"
-	    return ts.l("taskStatus.ok");
-	  }
+        @Override public String getMessage(int queueSize, String condition)
+          {
+            // "Good"
+            return ts.l("taskStatus.ok");
+          }
       },
 
     /**
@@ -157,11 +157,11 @@ public class scheduleHandle implements java.io.Serializable {
 
     EMPTYQUEUE()
       {
-	@Override public String getMessage(int queueSize, String condition)
-	  {
-	    // "Good, Queue is empty"
-	    return ts.l("taskStatus.emptyQueue");
-	  }
+        @Override public String getMessage(int queueSize, String condition)
+          {
+            // "Good, Queue is empty"
+            return ts.l("taskStatus.emptyQueue");
+          }
       },
 
     /**
@@ -172,11 +172,11 @@ public class scheduleHandle implements java.io.Serializable {
 
     NONEMPTYQUEUE()
       {
-	@Override public String getMessage(int queueSize, String condition)
-	  {
-	    // "Good, Queue size is {0,number,#}"
-	    return ts.l("taskStatus.nonEmptyQueue", queueSize);
-	  }
+        @Override public String getMessage(int queueSize, String condition)
+          {
+            // "Good, Queue size is {0,number,#}"
+            return ts.l("taskStatus.nonEmptyQueue", queueSize);
+          }
       },
 
     /**
@@ -189,11 +189,11 @@ public class scheduleHandle implements java.io.Serializable {
 
     STUCKQUEUE()
       {
-	@Override public String getMessage(int queueSize, String condition)
-	  {
-	    // "Stuck, Queue size is {0,number,#}. {1}"
-	    return ts.l("taskStatus.stuckQueue", queueSize, condition);
-	  }
+        @Override public String getMessage(int queueSize, String condition)
+          {
+            // "Stuck, Queue size is {0,number,#}. {1}"
+            return ts.l("taskStatus.stuckQueue", queueSize, condition);
+          }
       },
 
     /**
@@ -206,11 +206,11 @@ public class scheduleHandle implements java.io.Serializable {
 
     SERVICEERROR()
       {
-	@Override public String getMessage(int queueSize, String condition)
-	  {
-	    // "Service program could not be run: {0}"
-	    return ts.l("taskStatus.serviceError", condition);
-	  }
+        @Override public String getMessage(int queueSize, String condition)
+          {
+            // "Service program could not be run: {0}"
+            return ts.l("taskStatus.serviceError", condition);
+          }
       },
 
     /**
@@ -222,11 +222,11 @@ public class scheduleHandle implements java.io.Serializable {
 
     SERVICEFAIL()
       {
-	@Override public String getMessage(int queueSize, String condition)
-	  {
-	    // "Service program failure: {0}"
-	    return ts.l("taskStatus.serviceFail", condition);
-	  }
+        @Override public String getMessage(int queueSize, String condition)
+          {
+            // "Service program failure: {0}"
+            return ts.l("taskStatus.serviceFail", condition);
+          }
       },
 
     /**
@@ -236,11 +236,11 @@ public class scheduleHandle implements java.io.Serializable {
 
     FAIL()
       {
-	@Override public String getMessage(int queueSize, String condition)
-	  {
-	    // "Error: {0}"
-	    return ts.l("taskStatus.fail", condition);
-	  }
+        @Override public String getMessage(int queueSize, String condition)
+          {
+            // "Error: {0}"
+            return ts.l("taskStatus.fail", condition);
+          }
       };
 
     TaskStatus()
@@ -419,13 +419,13 @@ public class scheduleHandle implements java.io.Serializable {
    */
 
   public scheduleHandle(GanymedeScheduler scheduler,
-			Date time, int interval, 
-			Runnable task, String name,
-			TaskType tasktype)
+                        Date time, int interval, 
+                        Runnable task, String name,
+                        TaskType tasktype)
   {
     if (scheduler == null)
       {
-	throw new IllegalArgumentException("can't create schedule handle without scheduler reference");
+        throw new IllegalArgumentException("can't create schedule handle without scheduler reference");
       }
 
     this.scheduler = scheduler;
@@ -473,70 +473,70 @@ public class scheduleHandle implements java.io.Serializable {
 
     if (scheduler == null)
       {
-	throw new IllegalArgumentException("can't run this method on the client");
+        throw new IllegalArgumentException("can't run this method on the client");
       }
 
     if (debug)
       {
-	System.err.println("Ganymede Scheduler: Starting task " + name + " at " + new Date());
+        System.err.println("Ganymede Scheduler: Starting task " + name + " at " + new Date());
       }
 
     try
       {
-	synchronized (this)
-	  {
-	    rerun.set(false);
+        synchronized (this)
+          {
+            rerun.set(false);
 
-	    if (suspend.isSet())
-	      {
-		Ganymede.debug("Ganymede Scheduler: Task " + name + " skipped at " + new Date());
+            if (suspend.isSet())
+              {
+                Ganymede.debug("Ganymede Scheduler: Task " + name + " skipped at " + new Date());
 
-		throw new suspendedTaskException(); // goto a-go-go
-	      }
+                throw new suspendedTaskException(); // goto a-go-go
+              }
 
-	    // grab options for this run
+            // grab options for this run
 
-	    if (options == null || (!(task instanceof GanymedeBuilderTask)))
-	      {
-		thread = new Thread(task, name);
-		thread.start();
-	      }
-	    else
-	      {
-		// we're running a GanymedeBuilderTask with options set
+            if (options == null || (!(task instanceof GanymedeBuilderTask)))
+              {
+                thread = new Thread(task, name);
+                thread.start();
+              }
+            else
+              {
+                // we're running a GanymedeBuilderTask with options set
 
-		final Object _options[] = options;
-		final GanymedeBuilderTask _task = (GanymedeBuilderTask) task;
+                final Object _options[] = options;
+                final GanymedeBuilderTask _task = (GanymedeBuilderTask) task;
 
-		thread = new Thread(new Runnable() {
-		    public void run() {
-		      _task.run(_options);
-		    }
-		  }, name);
+                thread = new Thread(new Runnable() {
+                    public void run() {
+                      _task.run(_options);
+                    }
+                  }, name);
 
-		thread.start();
+                thread.start();
 
-		// clear options
+                // clear options
 
-		this.options = null;
-	      }
+                this.options = null;
+              }
 
-	    isRunning.set(true);
+            isRunning.set(true);
 
-	    // and have our monitor watch for it
+            // and have our monitor watch for it
 
-	    monitor = new Thread(new taskMonitor(thread, this), name);
-	    monitor.start();
-	  }
+            monitor = new Thread(new taskMonitor(thread, this), name);
+            monitor.start();
+          }
       }
     catch (suspendedTaskException ex)
       {
-	// XXX must not be locally synchronized here, else possible
-	// nested monitor deadlock
+        // XXX must not be locally synchronized here, else possible
+        // nested monitor deadlock
 
-	scheduler.notifyCompletion(this); 
+        scheduler.notifyCompletion(this); 
 
-	return;
+        return;
       }
   }
 
@@ -552,16 +552,16 @@ public class scheduleHandle implements java.io.Serializable {
   {
     synchronized (this)
       {
-	if (scheduler == null)
-	  {
-	    throw new IllegalArgumentException("can't run this method on the client");
-	  }
+        if (scheduler == null)
+          {
+            throw new IllegalArgumentException("can't run this method on the client");
+          }
 
-	monitor = null;
-	thread = null;
+        monitor = null;
+        thread = null;
 
-	isRunning.set(false);
-	lastTime = new Date();
+        isRunning.set(false);
+        lastTime = new Date();
       }
 
     // XXX must not be synchronized on this scheduleHandle here,
@@ -580,17 +580,17 @@ public class scheduleHandle implements java.io.Serializable {
   {
     if (scheduler == null)
       {
-	throw new IllegalArgumentException("can't run this method on the client");
+        throw new IllegalArgumentException("can't run this method on the client");
       }
 
     if (startTime == null || interval == 0)
       {
-	return false;
+        return false;
       }
     else
       {
-	startTime.setTime(startTime.getTime() + (60000L * interval));
-	return true;
+        startTime.setTime(startTime.getTime() + (60000L * interval));
+        return true;
       }
   }
 
@@ -652,7 +652,7 @@ public class scheduleHandle implements java.io.Serializable {
   {
     if (scheduler == null)
       {
-	throw new IllegalArgumentException("can't run this method on the client");
+        throw new IllegalArgumentException("can't run this method on the client");
       }
 
     return interval == 0;
@@ -699,7 +699,7 @@ public class scheduleHandle implements java.io.Serializable {
   {
     if (scheduler == null)
       {
-	throw new IllegalArgumentException("can't run this method on the client");
+        throw new IllegalArgumentException("can't run this method on the client");
       }
 
     this.options = _options;
@@ -716,7 +716,7 @@ public class scheduleHandle implements java.io.Serializable {
   {
     if (scheduler == null)
       {
-	throw new IllegalArgumentException("can't run this method on the client");
+        throw new IllegalArgumentException("can't run this method on the client");
       }
 
     rerun.set(false);
@@ -731,13 +731,13 @@ public class scheduleHandle implements java.io.Serializable {
   {
     if (scheduler == null)
       {
-	throw new IllegalArgumentException("can't run this method on the client");
+        throw new IllegalArgumentException("can't run this method on the client");
       }
 
     if (thread != null)
       {
-	thread.interrupt();	// this used to be a stop, but stop is deprecated
-				// as unsafe in 1.2, so we do the next best thing
+        thread.interrupt();     // this used to be a stop, but stop is deprecated
+                                // as unsafe in 1.2, so we do the next best thing
       }
   }
 
@@ -749,7 +749,7 @@ public class scheduleHandle implements java.io.Serializable {
   {
     if (scheduler == null)
       {
-	throw new IllegalArgumentException("can't run this method on the client");
+        throw new IllegalArgumentException("can't run this method on the client");
       }
 
     suspend.set(true);
@@ -763,7 +763,7 @@ public class scheduleHandle implements java.io.Serializable {
   {
     if (scheduler == null)
       {
-	throw new IllegalArgumentException("can't run this method on the client");
+        throw new IllegalArgumentException("can't run this method on the client");
       }
 
     suspend.set(false);
@@ -779,7 +779,7 @@ public class scheduleHandle implements java.io.Serializable {
   {
     if (scheduler == null)
       {
-	throw new IllegalArgumentException("can't run this method on the client");
+        throw new IllegalArgumentException("can't run this method on the client");
       }
 
     // set the interval time
@@ -788,8 +788,8 @@ public class scheduleHandle implements java.io.Serializable {
 
     if (interval == 0)
       {
-	intervalString = "";
-	return;
+        intervalString = "";
+        return;
       }
 
     // ok, we need to calculate a description for how long
@@ -811,73 +811,73 @@ public class scheduleHandle implements java.io.Serializable {
 
     if (weeks != 0)
       {
-	if (weeks > 1)
-	  {
-	    // "{0,num,#} weeks"
-	    buff.append(ts.l("setInterval.weeks_pattern", Integer.valueOf(weeks)));
-	  }
-	else
-	  {
-	    // "1 week"
-	    buff.append(ts.l("setInterval.week_pattern"));
-	  }
+        if (weeks > 1)
+          {
+            // "{0,num,#} weeks"
+            buff.append(ts.l("setInterval.weeks_pattern", Integer.valueOf(weeks)));
+          }
+        else
+          {
+            // "1 week"
+            buff.append(ts.l("setInterval.week_pattern"));
+          }
       }
 
     if (days != 0)
       {
-	if (buff.length() != 0)
-	  {
-	    buff.append(", ");
-	  }
+        if (buff.length() != 0)
+          {
+            buff.append(", ");
+          }
 
-	if (days > 1)
-	  {
-	    // "{0,num,#} days"
-	    buff.append(ts.l("setInterval.days_pattern", Integer.valueOf(days)));
-	  }
-	else
-	  {
-	    // "1 day"
-	    buff.append(ts.l("setInterval.day_pattern"));
-	  }
+        if (days > 1)
+          {
+            // "{0,num,#} days"
+            buff.append(ts.l("setInterval.days_pattern", Integer.valueOf(days)));
+          }
+        else
+          {
+            // "1 day"
+            buff.append(ts.l("setInterval.day_pattern"));
+          }
       }
 
     if (hours != 0)
       {
-	if (buff.length() != 0)
-	  {
-	    buff.append(", ");
-	  }
+        if (buff.length() != 0)
+          {
+            buff.append(", ");
+          }
 
-	if (hours > 1)
-	  {
-	    // "{0,num,#} hours"
-	    buff.append(ts.l("setInterval.hours_pattern", Integer.valueOf(hours)));
-	  }
-	else
-	  {
-	    // "1 hour"
-	    buff.append(ts.l("setInterval.hour_pattern"));
-	  }
+        if (hours > 1)
+          {
+            // "{0,num,#} hours"
+            buff.append(ts.l("setInterval.hours_pattern", Integer.valueOf(hours)));
+          }
+        else
+          {
+            // "1 hour"
+            buff.append(ts.l("setInterval.hour_pattern"));
+          }
       }
 
     if (minutes != 0)
       {
-	if (buff.length() != 0)
-	  {
-	    buff.append(", ");
-	  }
+        if (buff.length() != 0)
+          {
+            buff.append(", ");
+          }
 
-	if (minutes > 1)
-	  {
-	    // "{0,num,#} minutes"
-	    buff.append(ts.l("setInterval.minutes_pattern", Integer.valueOf(minutes)));
-	  }
-	else
-	  {
-	    // "1 minute"
-	    buff.append(ts.l("setInterval.minute_pattern"));
-	  }
+        if (minutes > 1)
+          {
+            // "{0,num,#} minutes"
+            buff.append(ts.l("setInterval.minutes_pattern", Integer.valueOf(minutes)));
+          }
+        else
+          {
+            // "1 minute"
+            buff.append(ts.l("setInterval.minute_pattern"));
+          }
       }
 
     // and set the string

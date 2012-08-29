@@ -146,7 +146,7 @@ public class QueryParser extends Parser {
         catch (RecognitionException re) {
             reportError(re);
             recover(input,re);
-    	retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
+        retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
 
         }
         finally {
@@ -261,22 +261,22 @@ public class QueryParser extends Parser {
 
 
                         switch (alt3) {
-                    	case 1 :
-                    	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:69:35: COMMA token
-                    	    {
-                    	    COMMA8=(Token)match(input,COMMA,FOLLOW_COMMA_in_select_clause116); if (state.failed) return retval;
-                    	    pushFollow(FOLLOW_token_in_select_clause119);
-                    	    token9=token();
+                        case 1 :
+                            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:69:35: COMMA token
+                            {
+                            COMMA8=(Token)match(input,COMMA,FOLLOW_COMMA_in_select_clause116); if (state.failed) return retval;
+                            pushFollow(FOLLOW_token_in_select_clause119);
+                            token9=token();
 
-                    	    state._fsp--;
-                    	    if (state.failed) return retval;
-                    	    if ( state.backtracking==0 ) adaptor.addChild(root_0, token9.getTree());
+                            state._fsp--;
+                            if (state.failed) return retval;
+                            if ( state.backtracking==0 ) adaptor.addChild(root_0, token9.getTree());
 
-                    	    }
-                    	    break;
+                            }
+                            break;
 
-                    	default :
-                    	    break loop3;
+                        default :
+                            break loop3;
                         }
                     } while (true);
 
@@ -303,7 +303,7 @@ public class QueryParser extends Parser {
         catch (RecognitionException re) {
             reportError(re);
             recover(input,re);
-    	retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
+        retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
 
         }
         finally {
@@ -386,7 +386,7 @@ public class QueryParser extends Parser {
         catch (RecognitionException re) {
             reportError(re);
             recover(input,re);
-    	retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
+        retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
 
         }
         finally {
@@ -445,7 +445,7 @@ public class QueryParser extends Parser {
         catch (RecognitionException re) {
             reportError(re);
             recover(input,re);
-    	retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
+        retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
 
         }
         finally {
@@ -501,64 +501,64 @@ public class QueryParser extends Parser {
 
 
                 switch (alt7) {
-            	case 1 :
-            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:81:14: ( AND | OR ) atom
-            	    {
-            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:81:14: ( AND | OR )
-            	    int alt6=2;
-            	    int LA6_0 = input.LA(1);
+                case 1 :
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:81:14: ( AND | OR ) atom
+                    {
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:81:14: ( AND | OR )
+                    int alt6=2;
+                    int LA6_0 = input.LA(1);
 
-            	    if ( (LA6_0==AND) ) {
-            	        alt6=1;
-            	    }
-            	    else if ( (LA6_0==OR) ) {
-            	        alt6=2;
-            	    }
-            	    else {
-            	        if (state.backtracking>0) {state.failed=true; return retval;}
-            	        NoViableAltException nvae =
-            	            new NoViableAltException("", 6, 0, input);
+                    if ( (LA6_0==AND) ) {
+                        alt6=1;
+                    }
+                    else if ( (LA6_0==OR) ) {
+                        alt6=2;
+                    }
+                    else {
+                        if (state.backtracking>0) {state.failed=true; return retval;}
+                        NoViableAltException nvae =
+                            new NoViableAltException("", 6, 0, input);
 
-            	        throw nvae;
-            	    }
-            	    switch (alt6) {
-            	        case 1 :
-            	            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:81:15: AND
-            	            {
-            	            AND16=(Token)match(input,AND,FOLLOW_AND_in_expression201); if (state.failed) return retval;
-            	            if ( state.backtracking==0 ) {
-            	            AND16_tree = (CommonTree)adaptor.create(AND16);
-            	            root_0 = (CommonTree)adaptor.becomeRoot(AND16_tree, root_0);
-            	            }
+                        throw nvae;
+                    }
+                    switch (alt6) {
+                        case 1 :
+                            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:81:15: AND
+                            {
+                            AND16=(Token)match(input,AND,FOLLOW_AND_in_expression201); if (state.failed) return retval;
+                            if ( state.backtracking==0 ) {
+                            AND16_tree = (CommonTree)adaptor.create(AND16);
+                            root_0 = (CommonTree)adaptor.becomeRoot(AND16_tree, root_0);
+                            }
 
-            	            }
-            	            break;
-            	        case 2 :
-            	            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:81:22: OR
-            	            {
-            	            OR17=(Token)match(input,OR,FOLLOW_OR_in_expression206); if (state.failed) return retval;
-            	            if ( state.backtracking==0 ) {
-            	            OR17_tree = (CommonTree)adaptor.create(OR17);
-            	            root_0 = (CommonTree)adaptor.becomeRoot(OR17_tree, root_0);
-            	            }
+                            }
+                            break;
+                        case 2 :
+                            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:81:22: OR
+                            {
+                            OR17=(Token)match(input,OR,FOLLOW_OR_in_expression206); if (state.failed) return retval;
+                            if ( state.backtracking==0 ) {
+                            OR17_tree = (CommonTree)adaptor.create(OR17);
+                            root_0 = (CommonTree)adaptor.becomeRoot(OR17_tree, root_0);
+                            }
 
-            	            }
-            	            break;
+                            }
+                            break;
 
-            	    }
+                    }
 
-            	    pushFollow(FOLLOW_atom_in_expression210);
-            	    atom18=atom();
+                    pushFollow(FOLLOW_atom_in_expression210);
+                    atom18=atom();
 
-            	    state._fsp--;
-            	    if (state.failed) return retval;
-            	    if ( state.backtracking==0 ) adaptor.addChild(root_0, atom18.getTree());
+                    state._fsp--;
+                    if (state.failed) return retval;
+                    if ( state.backtracking==0 ) adaptor.addChild(root_0, atom18.getTree());
 
-            	    }
-            	    break;
+                    }
+                    break;
 
-            	default :
-            	    break loop7;
+                default :
+                    break loop7;
                 }
             } while (true);
 
@@ -576,7 +576,7 @@ public class QueryParser extends Parser {
         catch (RecognitionException re) {
             reportError(re);
             recover(input,re);
-    	retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
+        retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
 
         }
         finally {
@@ -736,7 +736,7 @@ public class QueryParser extends Parser {
         catch (RecognitionException re) {
             reportError(re);
             recover(input,re);
-    	retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
+        retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
 
         }
         finally {
@@ -849,7 +849,7 @@ public class QueryParser extends Parser {
         catch (RecognitionException re) {
             reportError(re);
             recover(input,re);
-    	retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
+        retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
 
         }
         finally {
@@ -916,7 +916,7 @@ public class QueryParser extends Parser {
         catch (RecognitionException re) {
             reportError(re);
             recover(input,re);
-    	retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
+        retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
 
         }
         finally {
@@ -974,7 +974,7 @@ public class QueryParser extends Parser {
         catch (RecognitionException re) {
             reportError(re);
             recover(input,re);
-    	retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
+        retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
 
         }
         finally {
@@ -1032,7 +1032,7 @@ public class QueryParser extends Parser {
         catch (RecognitionException re) {
             reportError(re);
             recover(input,re);
-    	retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
+        retval.tree = (CommonTree)adaptor.errorNode(input, retval.start, input.LT(-1), re);
 
         }
         finally {

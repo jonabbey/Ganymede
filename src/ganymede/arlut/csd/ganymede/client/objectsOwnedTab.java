@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2005
@@ -76,7 +76,7 @@ public class objectsOwnedTab extends clientTab {
   {
     if (contentPane == null)
       {
-	contentPane = new JScrollPane();
+        contentPane = new JScrollPane();
       }
 
     return contentPane;
@@ -97,14 +97,14 @@ public class objectsOwnedTab extends clientTab {
   {
     if (contentPane != null)
       {
-	contentPane.removeAll();
-	contentPane = null;
+        contentPane.removeAll();
+        contentPane = null;
       }
 
     if (objects_owned_panel != null)
       {
-	objects_owned_panel.dispose();
-	objects_owned_panel = null;
+        objects_owned_panel.dispose();
+        objects_owned_panel = null;
       }
 
     super.dispose();

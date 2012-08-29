@@ -12,7 +12,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2006
@@ -84,28 +84,28 @@ public class objectList {
   static Comparator comparator = new Comparator() 
     {
       public int compare(Object o_a, Object o_b) 
-	{
-	  ObjectHandle a, b;
-	  
-	  a = (ObjectHandle) o_a;
-	  b = (ObjectHandle) o_b;
-	  int comp = 0;
-	  
-	  comp = a.getLabel().compareToIgnoreCase(b.getLabel());
-	  
-	  if (comp < 0)
-	    {
-	      return -1;
-	    }
-	  else if (comp > 0)
-	    { 
-	      return 1;
-	    } 
-	  else
-	    { 
-	      return 0;
-	    }
-	}
+        {
+          ObjectHandle a, b;
+          
+          a = (ObjectHandle) o_a;
+          b = (ObjectHandle) o_b;
+          int comp = 0;
+          
+          comp = a.getLabel().compareToIgnoreCase(b.getLabel());
+          
+          if (comp < 0)
+            {
+              return -1;
+            }
+          else if (comp > 0)
+            { 
+              return 1;
+            } 
+          else
+            { 
+              return 0;
+            }
+        }
     };
 
   VecSortInsert inserter;
@@ -147,27 +147,27 @@ public class objectList {
 
     for (int i = activeHandles.size() - 1; i >= 0; i--)
       {
-	handle = (ObjectHandle) activeHandles.elementAt(i);
-	invids.put(handle.getInvid(), handle);
+        handle = (ObjectHandle) activeHandles.elementAt(i);
+        invids.put(handle.getInvid(), handle);
 
-	if (!handle.isEditable())
-	  {
-	    containsNonEditable = true;
-	  }
+        if (!handle.isEditable())
+          {
+            containsNonEditable = true;
+          }
 
-	if (handle.isInactive())
-	  {
-	    activeHandles.removeElementAt(i);
+        if (handle.isInactive())
+          {
+            activeHandles.removeElementAt(i);
 
-	    if (debug)
-	      {
-		System.err.println("objectList constructor: handle " + handle.debugDump() + " is inactive");
-	      }
-	  }
-	else if (debug)
-	  {
-	    System.err.println("objectList constructor: handle " + handle.debugDump() + " is not inactive");
-	  }
+            if (debug)
+              {
+                System.err.println("objectList constructor: handle " + handle.debugDump() + " is inactive");
+              }
+          }
+        else if (debug)
+          {
+            System.err.println("objectList constructor: handle " + handle.debugDump() + " is not inactive");
+          }
       }
 
     // create
@@ -204,7 +204,7 @@ public class objectList {
 
     if (containsNonEditable)
       {
-	throw new IllegalArgumentException("already contains non-editables");
+        throw new IllegalArgumentException("already contains non-editables");
       }
 
     if (result == null)
@@ -218,20 +218,20 @@ public class objectList {
 
     while (en.hasMoreElements())
       {
-	handle = (ObjectHandle) en.nextElement();
+        handle = (ObjectHandle) en.nextElement();
 
-	// we only want to add a handle if we don't have the
-	// invid in place already
+        // we only want to add a handle if we don't have the
+        // invid in place already
 
-	if (getObjectHandle(handle.getInvid()) == null)
-	  {
-	    if (!handle.isEditable())
-	      {
-		containsNonEditable = true;
-	      }
+        if (getObjectHandle(handle.getInvid()) == null)
+          {
+            if (!handle.isEditable())
+              {
+                containsNonEditable = true;
+              }
 
-	    addObjectHandle(handle);
-	  }
+            addObjectHandle(handle);
+          }
       }
   }
 
@@ -263,7 +263,7 @@ public class objectList {
    */
   
   public synchronized Vector getListHandles(boolean includeInactives,
-					    boolean includeNonEditables)
+                                            boolean includeNonEditables)
   {
     ObjectHandle handle;
     Vector results;
@@ -274,31 +274,31 @@ public class objectList {
 
     if (includeInactives)
       {
-	results = new Vector(handles.size());
+        results = new Vector(handles.size());
 
-	for (int i = 0; i < handles.size(); i++)
-	  {
-	    handle = (ObjectHandle) handles.elementAt(i);
+        for (int i = 0; i < handles.size(); i++)
+          {
+            handle = (ObjectHandle) handles.elementAt(i);
 
-	    if (includeNonEditables || handle.isEditable())
-	      {
-		results.addElement(handle.getListHandle());
-	      }
-	  }
+            if (includeNonEditables || handle.isEditable())
+              {
+                results.addElement(handle.getListHandle());
+              }
+          }
       }
     else
       {
-	results = new Vector(activeHandles.size());
+        results = new Vector(activeHandles.size());
 
-	for (int i = 0; i < activeHandles.size(); i++)
-	  {
-	    handle = (ObjectHandle) activeHandles.elementAt(i);
+        for (int i = 0; i < activeHandles.size(); i++)
+          {
+            handle = (ObjectHandle) activeHandles.elementAt(i);
 
-	    if (includeNonEditables || handle.isEditable())
-	      {
-		results.addElement(handle.getListHandle());
-	      }
-	  }
+            if (includeNonEditables || handle.isEditable())
+              {
+                results.addElement(handle.getListHandle());
+              }
+          }
       }
 
     return results;
@@ -335,7 +335,7 @@ public class objectList {
    */
 
   public synchronized Vector getLabels(boolean includeInactives,
-				       boolean includeNonEditables)
+                                       boolean includeNonEditables)
   {
     ObjectHandle handle;
     Vector results;
@@ -346,31 +346,31 @@ public class objectList {
 
     if (includeInactives)
       {
-	results = new Vector(handles.size());
+        results = new Vector(handles.size());
 
-	for (int i = 0; i < handles.size(); i++)
-	  {
-	    handle = (ObjectHandle) handles.elementAt(i);
+        for (int i = 0; i < handles.size(); i++)
+          {
+            handle = (ObjectHandle) handles.elementAt(i);
 
-	    if (includeNonEditables || handle.isEditable())
-	      {
-		results.addElement(handle.getLabel());
-	      }
-	  }
+            if (includeNonEditables || handle.isEditable())
+              {
+                results.addElement(handle.getLabel());
+              }
+          }
       }
     else
       {
-	results = new Vector(activeHandles.size());
+        results = new Vector(activeHandles.size());
 
-	for (int i = 0; i < handles.size(); i++)
-	  {
-	    handle = (ObjectHandle) activeHandles.elementAt(i);
+        for (int i = 0; i < handles.size(); i++)
+          {
+            handle = (ObjectHandle) activeHandles.elementAt(i);
 
-	    if (includeNonEditables || handle.isEditable())
-	      {
-		results.addElement(handle.getLabel());
-	      }
-	  }
+            if (includeNonEditables || handle.isEditable())
+              {
+                results.addElement(handle.getLabel());
+              }
+          }
       }
 
     return results;
@@ -402,54 +402,54 @@ public class objectList {
    */
 
   public synchronized Vector getObjectHandles(boolean includeInactives,
-					      boolean includeNonEditables)
+                                              boolean includeNonEditables)
   {
     //    sortHandles();
 
     if (includeNonEditables || !containsNonEditable)
       {
-	if (includeInactives)
-	  {
-	    return (Vector) handles.clone();
-	  }
-	else
-	  {
-	    return (Vector) activeHandles.clone();
-	  }
+        if (includeInactives)
+          {
+            return (Vector) handles.clone();
+          }
+        else
+          {
+            return (Vector) activeHandles.clone();
+          }
       }
     else
       {
-	ObjectHandle handle;
-	Vector result = new Vector();
+        ObjectHandle handle;
+        Vector result = new Vector();
 
-	/* -- */
+        /* -- */
 
-	if (includeInactives)
-	  {
-	    for (int i = 0; i < handles.size(); i++)
-	      {
-		handle = (ObjectHandle) handles.elementAt(i);
+        if (includeInactives)
+          {
+            for (int i = 0; i < handles.size(); i++)
+              {
+                handle = (ObjectHandle) handles.elementAt(i);
 
-		if (handle.isEditable())
-		  {
-		    result.addElement(handle);
-		  }
-	      }
-	  }
-	else
-	  {
-	    for (int i = 0; i < activeHandles.size(); i++)
-	      {
-		handle = (ObjectHandle) activeHandles.elementAt(i);
+                if (handle.isEditable())
+                  {
+                    result.addElement(handle);
+                  }
+              }
+          }
+        else
+          {
+            for (int i = 0; i < activeHandles.size(); i++)
+              {
+                handle = (ObjectHandle) activeHandles.elementAt(i);
 
-		if (handle.isEditable())
-		  {
-		    result.addElement(handle);
-		  }
-	      }
-	  }
+                if (handle.isEditable())
+                  {
+                    result.addElement(handle);
+                  }
+              }
+          }
 
-	return result;
+        return result;
       }
   }
 
@@ -469,7 +469,7 @@ public class objectList {
 
     if (handle == null)
       {
-	return;			// throw exception?
+        return;                 // throw exception?
       }
 
     handle.setLabel(newLabel);
@@ -490,7 +490,7 @@ public class objectList {
 
     if (!handle.isInactive())
       {
-	inserter.insert(activeHandles, handle);
+        inserter.insert(activeHandles, handle);
       }
   }
 
@@ -529,7 +529,7 @@ public class objectList {
 
     if (handle == null)
       {
-	return null;
+        return null;
       }
 
     handles.removeElement(handle);
@@ -544,8 +544,8 @@ public class objectList {
 
     for (int i = 0; handles != null && i < handles.size(); i++)
       {
-	tempBuf.append(handles.elementAt(i));
-	tempBuf.append("\n");
+        tempBuf.append(handles.elementAt(i));
+        tempBuf.append("\n");
       }
 
     return tempBuf.toString();
@@ -561,14 +561,14 @@ public class objectList {
   {
     if (!sorted)
       {
-	(new VecQuickSort(handles, comparator)).sort();
-	sorted = true;
+        (new VecQuickSort(handles, comparator)).sort();
+        sorted = true;
       }
 
     if (!activeSorted)
       {
-	(new VecQuickSort(activeHandles, comparator)).sort();
-	activeSorted = true;
+        (new VecQuickSort(activeHandles, comparator)).sort();
+        activeSorted = true;
       }
   }
 }

@@ -9,7 +9,7 @@
    Module By: Jonathan Abbey and Michael Mulvaney
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2011
@@ -110,11 +110,11 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
   static final String numericToken = ts.l("global.numeric"); // "Numeric"
   static final String fieldOptionToken = ts.l("global.fieldOption"); // "Field Options"
   static final String floatToken = ts.l("global.float"); // "Float"
-  static final String dateToken = ts.l("global.date");	 // "Date"
+  static final String dateToken = ts.l("global.date");   // "Date"
   static final String stringToken = ts.l("global.string"); // "String"
   static final String objectRefToken = ts.l("global.objectRef"); // "Object Reference"
-  static final String passwordToken = ts.l("global.password");	 // "Password"
-  static final String ipToken = ts.l("global.ip");		 // "I.P."
+  static final String passwordToken = ts.l("global.password");   // "Password"
+  static final String ipToken = ts.l("global.ip");               // "I.P."
   static final String permissionToken = ts.l("global.permission"); // "Permission Matrix"
 
   static final String allToken = ts.l("global.all"); // "<all>"
@@ -131,7 +131,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     fieldNode;
 
   BaseField 
-    fieldDef;			// remote reference
+    fieldDef;                   // remote reference
 
   //  java.awt.CardLayout
   // card;
@@ -146,54 +146,54 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     changeLabelTypeDialog;
 
   JstringArea
-    commentT;			// all
+    commentT;                   // all
 
   JstringField
-    nameS,			// all
-    trueLabelS,			// boolean
-    falseLabelS,		// boolean
-    OKCharS,			// string, password
-    BadCharS,			// string, password
-    regexpS,			// string
-    regexpDescS;		// string
+    nameS,                      // all
+    trueLabelS,                 // boolean
+    falseLabelS,                // boolean
+    OKCharS,                    // string, password
+    BadCharS,                   // string, password
+    regexpS,                    // string
+    regexpDescS;                // string
 
   JnumberField
-    idN,			// all
-    maxArrayN,			// all
-    minLengthN,			// string
-    maxLengthN,			// string
-    history_depthN,		// password
-    bCryptRoundsN,		// password
-    shaUnixCryptRoundsN;	// password
+    idN,                        // all
+    maxArrayN,                  // all
+    minLengthN,                 // string
+    maxLengthN,                 // string
+    history_depthN,             // password
+    bCryptRoundsN,              // password
+    shaUnixCryptRoundsN;        // password
 
   JcheckboxField
-    invisibleCF,		// all
-    vectorCF,			// invid, string, ip
-    labeledCF,			// boolean
-    editInPlaceCF,		// invid
-    cracklibCF,			// password
-    cracklib_exceptionCF,	// password
-    historyCF,			// password
-    history_exceptionCF,	// password
-    cryptedCF,			// password
-    md5cryptedCF,		// password
-    apachemd5cryptedCF,		// password
-    winHashcryptedCF,		// password
-    sshaHashcryptedCF,		// password
-    bCryptedCF,			// password
-    shaUnixCryptedCF,		// password
-    plainTextCF,		// password
-    multiLineCF;		// string
+    invisibleCF,                // all
+    vectorCF,                   // invid, string, ip
+    labeledCF,                  // boolean
+    editInPlaceCF,              // invid
+    cracklibCF,                 // password
+    cracklib_exceptionCF,       // password
+    historyCF,                  // password
+    history_exceptionCF,        // password
+    cryptedCF,                  // password
+    md5cryptedCF,               // password
+    apachemd5cryptedCF,         // password
+    winHashcryptedCF,           // password
+    sshaHashcryptedCF,          // password
+    bCryptedCF,                 // password
+    shaUnixCryptedCF,           // password
+    plainTextCF,                // password
+    multiLineCF;                // string
 
   JComboBox
-    typeC,			// all
-    shaUnixCryptTypeC,		// password
-    namespaceC,			// string, numeric, ip
-    targetC,			// invid
-    fieldC;			// invid
+    typeC,                      // all
+    shaUnixCryptTypeC,          // password
+    namespaceC,                 // string, numeric, ip
+    targetC,                    // invid
+    fieldC;                     // invid
 
   Hashtable
-    rowHash;			// to keep track of field labels
+    rowHash;                    // to keep track of field labels
 
   boolean
     booleanShowing,
@@ -219,7 +219,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
   {
     if (owner == null)
       {
-	throw new IllegalArgumentException("owner must not be null");
+        throw new IllegalArgumentException("owner must not be null");
       }
 
     rowHash = new Hashtable();
@@ -372,7 +372,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
     editPanel.addFillRow(ts.l("setupEditPanel.fieldNameRow"), nameS); // "Field Name:"
     editPanel.addFillRow(ts.l("setupEditPanel.commentRow"), commentT); // "Comment:"
     editPanel.addFillRow(ts.l("setupEditPanel.invisible"), invisibleCF); // "Invisible Field:"
-    editPanel.addFillRow(ts.l("setupEditPanel.vectorRow"), vectorCF);	// "Vector:"
+    editPanel.addFillRow(ts.l("setupEditPanel.vectorRow"), vectorCF);   // "Vector:"
     editPanel.addFillRow(ts.l("setupEditPanel.arraySizeRow"), maxArrayN); // "Max Array Size:"
     editPanel.addFillRow(ts.l("setupEditPanel.fieldTypeRow"), typeC); // "Field Type:"
     editPanel.addFillRow(ts.l("setupEditPanel.cracklibRow"), cracklibCF); // "Cracklib Checked:"
@@ -444,72 +444,72 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
   {
     if (debug)
       {
-	System.out.println(" Checking visibility");
+        System.out.println(" Checking visibility");
       }
 
     editPanel.setRowVisible(invisibleCF, true);
 
     if (stringShowing || ipShowing || referenceShowing)
       {
-	editPanel.setRowVisible(vectorCF, true);
-	editPanel.setRowVisible(maxArrayN, vectorCF.isSelected());
+        editPanel.setRowVisible(vectorCF, true);
+        editPanel.setRowVisible(maxArrayN, vectorCF.isSelected());
       }
-    else			// anything else can't be vector
+    else                        // anything else can't be vector
       {
-	editPanel.setRowVisible(vectorCF, false);
-	editPanel.setRowVisible(maxArrayN, false);
+        editPanel.setRowVisible(vectorCF, false);
+        editPanel.setRowVisible(maxArrayN, false);
       }
 
     if (passwordShowing)
       {
-	editPanel.setRowVisible(cracklibCF, true);
-	editPanel.setRowVisible(cracklib_exceptionCF, true);
-	editPanel.setRowVisible(historyCF, true);
-	editPanel.setRowVisible(history_exceptionCF, true);
-	editPanel.setRowVisible(history_depthN, true);
-	editPanel.setRowVisible(cryptedCF, true);
-	editPanel.setRowVisible(md5cryptedCF, true);
-	editPanel.setRowVisible(apachemd5cryptedCF, true);
-	editPanel.setRowVisible(winHashcryptedCF, true);
-	editPanel.setRowVisible(sshaHashcryptedCF, true);
-	editPanel.setRowVisible(shaUnixCryptedCF, true);
-	editPanel.setRowVisible(shaUnixCryptTypeC, true);
-	editPanel.setRowVisible(shaUnixCryptRoundsN, true);
-	editPanel.setRowVisible(bCryptedCF, true);
-	editPanel.setRowVisible(bCryptRoundsN, true);
-	editPanel.setRowVisible(plainTextCF, true);
+        editPanel.setRowVisible(cracklibCF, true);
+        editPanel.setRowVisible(cracklib_exceptionCF, true);
+        editPanel.setRowVisible(historyCF, true);
+        editPanel.setRowVisible(history_exceptionCF, true);
+        editPanel.setRowVisible(history_depthN, true);
+        editPanel.setRowVisible(cryptedCF, true);
+        editPanel.setRowVisible(md5cryptedCF, true);
+        editPanel.setRowVisible(apachemd5cryptedCF, true);
+        editPanel.setRowVisible(winHashcryptedCF, true);
+        editPanel.setRowVisible(sshaHashcryptedCF, true);
+        editPanel.setRowVisible(shaUnixCryptedCF, true);
+        editPanel.setRowVisible(shaUnixCryptTypeC, true);
+        editPanel.setRowVisible(shaUnixCryptRoundsN, true);
+        editPanel.setRowVisible(bCryptedCF, true);
+        editPanel.setRowVisible(bCryptRoundsN, true);
+        editPanel.setRowVisible(plainTextCF, true);
       }
     else
       {
-	editPanel.setRowVisible(cracklibCF, false);
-	editPanel.setRowVisible(cracklib_exceptionCF, false);
-	editPanel.setRowVisible(historyCF, false);
-	editPanel.setRowVisible(history_exceptionCF, false);
-	editPanel.setRowVisible(history_depthN, false);
-	editPanel.setRowVisible(cryptedCF, false);
-	editPanel.setRowVisible(md5cryptedCF, false);
-	editPanel.setRowVisible(apachemd5cryptedCF, false);
-	editPanel.setRowVisible(winHashcryptedCF, false);
-	editPanel.setRowVisible(sshaHashcryptedCF, false);
-	editPanel.setRowVisible(shaUnixCryptedCF, false);
-	editPanel.setRowVisible(shaUnixCryptTypeC, false);
-	editPanel.setRowVisible(shaUnixCryptRoundsN, false);
-	editPanel.setRowVisible(bCryptedCF, false);
-	editPanel.setRowVisible(bCryptRoundsN, false);
-	editPanel.setRowVisible(plainTextCF, false);
+        editPanel.setRowVisible(cracklibCF, false);
+        editPanel.setRowVisible(cracklib_exceptionCF, false);
+        editPanel.setRowVisible(historyCF, false);
+        editPanel.setRowVisible(history_exceptionCF, false);
+        editPanel.setRowVisible(history_depthN, false);
+        editPanel.setRowVisible(cryptedCF, false);
+        editPanel.setRowVisible(md5cryptedCF, false);
+        editPanel.setRowVisible(apachemd5cryptedCF, false);
+        editPanel.setRowVisible(winHashcryptedCF, false);
+        editPanel.setRowVisible(sshaHashcryptedCF, false);
+        editPanel.setRowVisible(shaUnixCryptedCF, false);
+        editPanel.setRowVisible(shaUnixCryptTypeC, false);
+        editPanel.setRowVisible(shaUnixCryptRoundsN, false);
+        editPanel.setRowVisible(bCryptedCF, false);
+        editPanel.setRowVisible(bCryptRoundsN, false);
+        editPanel.setRowVisible(plainTextCF, false);
       }
 
     editPanel.setRowVisible(labeledCF, booleanShowing);
 
     if (booleanShowing)
       {
-	editPanel.setRowVisible(trueLabelS, labeledCF.isSelected());
-	editPanel.setRowVisible(falseLabelS, labeledCF.isSelected());
+        editPanel.setRowVisible(trueLabelS, labeledCF.isSelected());
+        editPanel.setRowVisible(falseLabelS, labeledCF.isSelected());
       }
     else
       {
-	editPanel.setRowVisible(trueLabelS, false);
-	editPanel.setRowVisible(falseLabelS, false);
+        editPanel.setRowVisible(trueLabelS, false);
+        editPanel.setRowVisible(falseLabelS, false);
       }
 
     editPanel.setRowVisible(multiLineCF, stringShowing  && !vectorCF.isSelected());
@@ -526,32 +526,32 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
     if (referenceShowing)
       {
-	editPanel.setRowVisible(editInPlaceCF, true);
-	editPanel.setRowVisible(targetC, true);
+        editPanel.setRowVisible(editInPlaceCF, true);
+        editPanel.setRowVisible(targetC, true);
 
-	if (editInPlaceCF.isSelected())
-	  {
-	    // edit in place fields don't target specific fields.
+        if (editInPlaceCF.isSelected())
+          {
+            // edit in place fields don't target specific fields.
 
-	    editPanel.setRowVisible(fieldC, false);
-	  }
-	else
-	  {
-	    if (((String)targetC.getModel().getSelectedItem()).equalsIgnoreCase(anyToken))
-	      {
-		editPanel.setRowVisible(fieldC, false);
-	      }
-	    else
-	      {
-		editPanel.setRowVisible(fieldC, true);
-	      }
-	  }
+            editPanel.setRowVisible(fieldC, false);
+          }
+        else
+          {
+            if (((String)targetC.getModel().getSelectedItem()).equalsIgnoreCase(anyToken))
+              {
+                editPanel.setRowVisible(fieldC, false);
+              }
+            else
+              {
+                editPanel.setRowVisible(fieldC, true);
+              }
+          }
       }
     else
       {
-	editPanel.setRowVisible(editInPlaceCF, false);
-	editPanel.setRowVisible(targetC, false);
-	editPanel.setRowVisible(fieldC, false);
+        editPanel.setRowVisible(editInPlaceCF, false);
+        editPanel.setRowVisible(targetC, false);
+        editPanel.setRowVisible(fieldC, false);
       }
 
     editPanel.doLayout();
@@ -559,7 +559,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
     if (debug)
       {
-	System.out.println(" Done checking visibility");
+        System.out.println(" Done checking visibility");
       }
   }
 
@@ -571,57 +571,57 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
      try
        {
-	 namespaceC.removeAllItems();
+         namespaceC.removeAllItems();
        }
      catch (IndexOutOfBoundsException ex)
        {
-	 // Swing 1.1 beta 2 will do this to us, just
-	 // ignore it for now.
+         // Swing 1.1 beta 2 will do this to us, just
+         // ignore it for now.
 
-	 System.err.println("refreshNamespaceChoice(): Swing Bug Bites Again");
+         System.err.println("refreshNamespaceChoice(): Swing Bug Bites Again");
        }
 
      SchemaEdit test = owner.getSchemaEdit();
 
      if (test == null)
        {
-	 if (debug)
-	   {
-	     System.err.println("owner.editor is null");
-	   }
+         if (debug)
+           {
+             System.err.println("owner.editor is null");
+           }
        }
      
      try
        {
-	 nameSpaces = owner.getSchemaEdit().getNameSpaces();
+         nameSpaces = owner.getSchemaEdit().getNameSpaces();
        }
      catch (RemoteException rx)
        {
-	 System.err.println("RemoteException getting namespaces: " + rx);
+         System.err.println("RemoteException getting namespaces: " + rx);
        }
       
      namespaceC.addItem(noneToken);      
 
      if (nameSpaces == null || nameSpaces.length == 0)
        {
-	 if (debug)
-	   {
-	     System.err.println("No other namespaces to add");
-	   }
+         if (debug)
+           {
+             System.err.println("No other namespaces to add");
+           }
        }
      else
        {
-	 for (int i=0 ; i < nameSpaces.length ; i++)
-	   {
-	     try
-	       {
-		 namespaceC.addItem(nameSpaces[i].getName());
-	       }
-	     catch (RemoteException rx)
-	       {
-		 System.err.println("RemoteException getting namespace: " + rx);
-	       }    
-	   }
+         for (int i=0 ; i < nameSpaces.length ; i++)
+           {
+             try
+               {
+                 namespaceC.addItem(nameSpaces[i].getName());
+               }
+             catch (RemoteException rx)
+               {
+                 System.err.println("RemoteException getting namespace: " + rx);
+               }    
+           }
        }
    }
 
@@ -640,47 +640,47 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
     try
       {
-	targetC.removeAllItems();
+        targetC.removeAllItems();
       }     
     catch (IndexOutOfBoundsException ex)
       {
-	// Swing 1.1 beta 2 will do this to us, just
-	// ignore it.
+        // Swing 1.1 beta 2 will do this to us, just
+        // ignore it.
 
-	System.err.println("refreshTargetChoice(): Swing Bug Bites Again");
+        System.err.println("refreshTargetChoice(): Swing Bug Bites Again");
       }
 
     try
       {
-	// if this field is edit in place, we only want to list embeddable
-	// object types
-	
-	if (fieldDef.isEditInPlace())
-	  {
-	    baseList = owner.getSchemaEdit().getBases(fieldDef.isEditInPlace());
-	  }
-	else
-	  {
-	    baseList = owner.getSchemaEdit().getBases(); // list all object types
-	  }
+        // if this field is edit in place, we only want to list embeddable
+        // object types
+        
+        if (fieldDef.isEditInPlace())
+          {
+            baseList = owner.getSchemaEdit().getBases(fieldDef.isEditInPlace());
+          }
+        else
+          {
+            baseList = owner.getSchemaEdit().getBases(); // list all object types
+          }
       }
     catch (RemoteException rx)
       {
-	throw new IllegalArgumentException("Exception getting Bases: " + rx);
+        throw new IllegalArgumentException("Exception getting Bases: " + rx);
       }
 
     targetC.addItem(anyToken);
 
     for (int i = 0 ; i < baseList.length ; i++)
       {
-	try
-	  {
-	    targetC.addItem(baseList[i].getName());
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new IllegalArgumentException("Exception getting bases name: " + rx);
-	  }
+        try
+          {
+            targetC.addItem(baseList[i].getName());
+          }
+        catch (RemoteException rx)
+          {
+            throw new IllegalArgumentException("Exception getting bases name: " + rx);
+          }
       }
   }
 
@@ -708,114 +708,114 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
     try
       {
-	if (target.equals(allToken))
-	  {
-	    targetBase = owner.getSchemaEdit().getBase((short)0);
-	  }
-	else
-	  {
-	    targetBase = owner.getSchemaEdit().getBase(target);
-	  }
+        if (target.equals(allToken))
+          {
+            targetBase = owner.getSchemaEdit().getBase((short)0);
+          }
+        else
+          {
+            targetBase = owner.getSchemaEdit().getBase(target);
+          }
 
-	if (targetBase == null)
-	  {
-	    if (debug)
-	      {
-		System.out.println("targetBase is null");
-	      }
-	  }
-	else
-	  {
-	    fields = targetBase.getFields(true);
-	  }
+        if (targetBase == null)
+          {
+            if (debug)
+              {
+                System.out.println("targetBase is null");
+              }
+          }
+        else
+          {
+            fields = targetBase.getFields(true);
+          }
       }
     catch (RemoteException rx)
       {
-	throw new IllegalArgumentException("Exception getting bases in refreshFieldChoice " + rx);
+        throw new IllegalArgumentException("Exception getting bases in refreshFieldChoice " + rx);
       }
 
     try
       {
-	fieldC.removeAllItems();
+        fieldC.removeAllItems();
       }
     catch (IndexOutOfBoundsException ex)
       {
-	// Swing 1.1 beta 2 will do this to us, just
-	// ignore it.
-	System.err.println("refreshFieldChoice(): Swing Bug Bites Again");
+        // Swing 1.1 beta 2 will do this to us, just
+        // ignore it.
+        System.err.println("refreshFieldChoice(): Swing Bug Bites Again");
       }
 
     fieldC.addItem(noneToken);
     
     if (fields == null)
       {
-	if (debug)
-	  {
-	    System.out.println("fields == null");
-	  }
+        if (debug)
+          {
+            System.out.println("fields == null");
+          }
 
-	// By default, the Choice item will keep the
-	// first item added.. the following line is
-	// redundant, at least under JDK 1.1.2
-	//	fieldC.select(noneToken);
+        // By default, the Choice item will keep the
+        // first item added.. the following line is
+        // redundant, at least under JDK 1.1.2
+        //      fieldC.select(noneToken);
       }
     else
       {
-	for (int i = 0; i < fields.size(); ++i)
-	  {
-	    bf = (BaseField)fields.elementAt(i);
+        for (int i = 0; i < fields.size(); ++i)
+          {
+            bf = (BaseField)fields.elementAt(i);
 
-	    try
-	      {
-		type = bf.getType();
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new IllegalArgumentException("Exception getting type description " + rx);
-	      }
+            try
+              {
+                type = bf.getType();
+              }
+            catch (RemoteException rx)
+              {
+                throw new IllegalArgumentException("Exception getting type description " + rx);
+              }
 
-	    if (debug)
-	      {
-		System.out.println("checking type: " + type);
-	      }
+            if (debug)
+              {
+                System.out.println("checking type: " + type);
+              }
 
-	    try
-	      {
-		if (fieldDef.isEditInPlace())
-		  {
-		    // in an edit in place field, we can only
-		    // be linked to a target object's container link field
-		
-		    if (bf.getID() == SchemaConstants.ContainerField)
-		      {
-			fieldC.addItem(bf.getName());
-		      }
-		  }
-		else
-		  {
-		    if (type == FieldType.INVID)
-		      {
-			try
-			  {
-			    if (debug)
-			      {
-				System.out.println("adding " + bf.getName());
-			      }
+            try
+              {
+                if (fieldDef.isEditInPlace())
+                  {
+                    // in an edit in place field, we can only
+                    // be linked to a target object's container link field
+                
+                    if (bf.getID() == SchemaConstants.ContainerField)
+                      {
+                        fieldC.addItem(bf.getName());
+                      }
+                  }
+                else
+                  {
+                    if (type == FieldType.INVID)
+                      {
+                        try
+                          {
+                            if (debug)
+                              {
+                                System.out.println("adding " + bf.getName());
+                              }
 
-			    fieldC.addItem(bf.getName());
-			  }
-			catch (RemoteException rx)
-			  {
-			    throw new IllegalArgumentException("Exception getting base field name " + rx);
-			  }
-		      }
-		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-		throw new IllegalArgumentException("Exception getting base field edit in place status " + ex);
-	      }
-	  }
+                            fieldC.addItem(bf.getName());
+                          }
+                        catch (RemoteException rx)
+                          {
+                            throw new IllegalArgumentException("Exception getting base field name " + rx);
+                          }
+                      }
+                  }
+              }
+            catch (RemoteException ex)
+              {
+                throw new IllegalArgumentException("Exception getting base field edit in place status " + ex);
+              }
+          }
       }
   }
   
@@ -839,133 +839,133 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
     if (debug)
       {
-	System.err.println("changeTypeChoice(" + selectedItem + ")");
+        System.err.println("changeTypeChoice(" + selectedItem + ")");
       }
 
     try
       {
-	if (selectedItem.equalsIgnoreCase(booleanToken))
-	  {
-	    if (handleReturnVal(fieldDef.setType(FieldType.BOOLEAN)))
-	      {
-		clearTypeChoice();
-		booleanShowing = true;
-	      }
+        if (selectedItem.equalsIgnoreCase(booleanToken))
+          {
+            if (handleReturnVal(fieldDef.setType(FieldType.BOOLEAN)))
+              {
+                clearTypeChoice();
+                booleanShowing = true;
+              }
 
-	    refreshFieldEdit(true);
-	    return;
-	  }
-	else if (selectedItem.equalsIgnoreCase(numericToken))
-	  {
-	    if (handleReturnVal(fieldDef.setType(FieldType.NUMERIC)))
-	      {
-		clearTypeChoice();
-		numericShowing = true;
-	      }
+            refreshFieldEdit(true);
+            return;
+          }
+        else if (selectedItem.equalsIgnoreCase(numericToken))
+          {
+            if (handleReturnVal(fieldDef.setType(FieldType.NUMERIC)))
+              {
+                clearTypeChoice();
+                numericShowing = true;
+              }
 
-	    refreshFieldEdit(true);
-	    return;
-	  }
-	else if (selectedItem.equalsIgnoreCase(floatToken))
-	  {
-	    if (handleReturnVal(fieldDef.setType(FieldType.FLOAT)))
-	      {
-		clearTypeChoice();
-		floatShowing = true;
-	      }
+            refreshFieldEdit(true);
+            return;
+          }
+        else if (selectedItem.equalsIgnoreCase(floatToken))
+          {
+            if (handleReturnVal(fieldDef.setType(FieldType.FLOAT)))
+              {
+                clearTypeChoice();
+                floatShowing = true;
+              }
 
-	    refreshFieldEdit(true);
-	    return;
-	  }
-	else if (selectedItem.equalsIgnoreCase(fieldOptionToken))
-	  {
-	    if (handleReturnVal(fieldDef.setType(FieldType.FIELDOPTIONS)))
-	      {
-		clearTypeChoice();
-		fieldOptionShowing = true;
-	      }
+            refreshFieldEdit(true);
+            return;
+          }
+        else if (selectedItem.equalsIgnoreCase(fieldOptionToken))
+          {
+            if (handleReturnVal(fieldDef.setType(FieldType.FIELDOPTIONS)))
+              {
+                clearTypeChoice();
+                fieldOptionShowing = true;
+              }
 
-	    refreshFieldEdit(true);
-	    return;
-	  }
-	else if (selectedItem.equalsIgnoreCase(dateToken))
-	  {
-	    if (handleReturnVal(fieldDef.setType(FieldType.DATE)))
-	      {
-		clearTypeChoice();
-		dateShowing = true;
-	      }
+            refreshFieldEdit(true);
+            return;
+          }
+        else if (selectedItem.equalsIgnoreCase(dateToken))
+          {
+            if (handleReturnVal(fieldDef.setType(FieldType.DATE)))
+              {
+                clearTypeChoice();
+                dateShowing = true;
+              }
 
-	    refreshFieldEdit(true);
-	    return;
-	  }
-	else if (selectedItem.equalsIgnoreCase(stringToken))
-	  {
-	    if (handleReturnVal(fieldDef.setType(FieldType.STRING)))
-	      {
-		clearTypeChoice();
-		stringShowing = true;
-	      }
+            refreshFieldEdit(true);
+            return;
+          }
+        else if (selectedItem.equalsIgnoreCase(stringToken))
+          {
+            if (handleReturnVal(fieldDef.setType(FieldType.STRING)))
+              {
+                clearTypeChoice();
+                stringShowing = true;
+              }
 
-	    refreshFieldEdit(true);
-	    return;
-	  }
-	else if (selectedItem.equalsIgnoreCase(objectRefToken))
-	  {
-	    if (handleReturnVal(fieldDef.setType(FieldType.INVID)))
-	      {
-		clearTypeChoice();
-		referenceShowing = true;
-	      }
+            refreshFieldEdit(true);
+            return;
+          }
+        else if (selectedItem.equalsIgnoreCase(objectRefToken))
+          {
+            if (handleReturnVal(fieldDef.setType(FieldType.INVID)))
+              {
+                clearTypeChoice();
+                referenceShowing = true;
+              }
 
-	    refreshFieldEdit(true);
-	    return;
-	  }
-	else if (selectedItem.equalsIgnoreCase(passwordToken))
-	  {
-	    if (handleReturnVal(fieldDef.setType(FieldType.PASSWORD)))
-	      {
-		clearTypeChoice();
-		passwordShowing = true;
-	      }
+            refreshFieldEdit(true);
+            return;
+          }
+        else if (selectedItem.equalsIgnoreCase(passwordToken))
+          {
+            if (handleReturnVal(fieldDef.setType(FieldType.PASSWORD)))
+              {
+                clearTypeChoice();
+                passwordShowing = true;
+              }
 
-	    refreshFieldEdit(true);
-	    return;
-	  }
-	else if (selectedItem.equalsIgnoreCase(ipToken))
-	  {
-	    if (handleReturnVal(fieldDef.setType(FieldType.IP)))
-	      {
-		clearTypeChoice();
-		ipShowing = true;
-	      }
+            refreshFieldEdit(true);
+            return;
+          }
+        else if (selectedItem.equalsIgnoreCase(ipToken))
+          {
+            if (handleReturnVal(fieldDef.setType(FieldType.IP)))
+              {
+                clearTypeChoice();
+                ipShowing = true;
+              }
 
-	    refreshFieldEdit(true);
-	    return;
-	  }
-	else if (selectedItem.equalsIgnoreCase(permissionToken))
-	  {
-	    if (handleReturnVal(fieldDef.setType(FieldType.PERMISSIONMATRIX)))
-	      {
-		clearTypeChoice();
-		permissionShowing = true;
-	      }
+            refreshFieldEdit(true);
+            return;
+          }
+        else if (selectedItem.equalsIgnoreCase(permissionToken))
+          {
+            if (handleReturnVal(fieldDef.setType(FieldType.PERMISSIONMATRIX)))
+              {
+                clearTypeChoice();
+                permissionShowing = true;
+              }
 
-	    refreshFieldEdit(true);
-	    return;
-	  }
-	else
-	  {
-	    throw new RuntimeException("unrecognized selectedItem string: " + selectedItem);
-	  }
+            refreshFieldEdit(true);
+            return;
+          }
+        else
+          {
+            throw new RuntimeException("unrecognized selectedItem string: " + selectedItem);
+          }
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("changeTypeChoice: got RemoteException: " + ex);
+        throw new RuntimeException("changeTypeChoice: got RemoteException: " + ex);
       }
     catch (NullPointerException ex)
       {
-	// we don't have fieldDef set yet.  Just ignore.
+        // we don't have fieldDef set yet.  Just ignore.
       }
   }
 
@@ -999,7 +999,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
   {
     if (fieldNode == null)
       {
-	throw new IllegalArgumentException("null fieldNode");
+        throw new IllegalArgumentException("null fieldNode");
       }
 
     editField(fieldNode, forceRefresh, true);
@@ -1017,22 +1017,22 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
   {
     if (debug)
       {
-	System.err.println(" -in FieldEditor.editField()");
+        System.err.println(" -in FieldEditor.editField()");
       }
 
     if (fieldNode == null)
       {
-	throw new IllegalArgumentException("null fieldNode");
+        throw new IllegalArgumentException("null fieldNode");
       }
 
-    listenToCallbacks = false;	// so we don't get confused by programmatic edits
+    listenToCallbacks = false;  // so we don't get confused by programmatic edits
     owner.setWaitCursor();
 
     clearFields();
 
     if (!forceRefresh && (fieldNode == this.fieldNode))
       {
-    	return;
+        return;
       }
 
     this.fieldNode = fieldNode;
@@ -1049,487 +1049,487 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
     if (debug)
       {
-	System.out.println(" before try");
+        System.out.println(" before try");
       }
 
     try
       {
-	if (debug)
-	  {
-	    System.out.println(" in try");
-	  }
+        if (debug)
+          {
+            System.out.println(" in try");
+          }
 
-	idN.setValue(fieldDef.getID());
-	nameS.setText(fieldDef.getName());
-	commentT.setText(fieldDef.getComment());
+        idN.setValue(fieldDef.getID());
+        nameS.setText(fieldDef.getName());
+        commentT.setText(fieldDef.getComment());
 
-	invisibleCF.setSelected(!fieldDef.isVisible(), false);
+        invisibleCF.setSelected(!fieldDef.isVisible(), false);
 
         if (fieldDef.isArray())
-	  {
-	    vectorCF.setSelected(true, false);
-	    maxArrayN.setValue(fieldDef.getMaxArraySize());
-	  }
-	else
-	  {
-	    vectorCF.setSelected(false, false);
-	  }
+          {
+            vectorCF.setSelected(true, false);
+            maxArrayN.setValue(fieldDef.getMaxArraySize());
+          }
+        else
+          {
+            vectorCF.setSelected(false, false);
+          }
 
-	if (fieldDef.isString())
-	  {
-	    multiLineCF.setSelected(fieldDef.isMultiLine(), false);
-	    minLengthN.setValue(fieldDef.getMinLength());
-	    maxLengthN.setValue(fieldDef.getMaxLength());
-	    regexpS.setText(fieldDef.getRegexpPat());
-	    regexpDescS.setText(fieldDef.getRegexpDesc());
-	    OKCharS.setText(fieldDef.getOKChars());
-	    BadCharS.setText(fieldDef.getBadChars());
-	    
-	    typeC.getModel().setSelectedItem(stringToken);
-	    stringShowing = true;
+        if (fieldDef.isString())
+          {
+            multiLineCF.setSelected(fieldDef.isMultiLine(), false);
+            minLengthN.setValue(fieldDef.getMinLength());
+            maxLengthN.setValue(fieldDef.getMaxLength());
+            regexpS.setText(fieldDef.getRegexpPat());
+            regexpDescS.setText(fieldDef.getRegexpDesc());
+            OKCharS.setText(fieldDef.getOKChars());
+            BadCharS.setText(fieldDef.getBadChars());
+            
+            typeC.getModel().setSelectedItem(stringToken);
+            stringShowing = true;
 
-	    // add all defined namespaces here
+            // add all defined namespaces here
 
-	    refreshNamespaceChoice();
+            refreshNamespaceChoice();
 
-	    if (debug)
-	      {
-		System.out.println(fieldDef.getNameSpaceLabel());
-	      }
+            if (debug)
+              {
+                System.out.println(fieldDef.getNameSpaceLabel());
+              }
 
-	    if (fieldDef.getNameSpaceLabel() == null)
-	      {
-		namespaceC.getModel().setSelectedItem(noneToken);
+            if (fieldDef.getNameSpaceLabel() == null)
+              {
+                namespaceC.getModel().setSelectedItem(noneToken);
 
-		if (debug)
-		  {
-		    System.out.println("selecting <none> for NameSpace");
-		  }
-	      }
-	    else
-	      {
-		namespaceC.getModel().setSelectedItem(fieldDef.getNameSpaceLabel());
+                if (debug)
+                  {
+                    System.out.println("selecting <none> for NameSpace");
+                  }
+              }
+            else
+              {
+                namespaceC.getModel().setSelectedItem(fieldDef.getNameSpaceLabel());
 
-		if (debug)
-		  {
-		    System.out.println("selecting " + fieldDef.getNameSpaceLabel());
-		  }
-	      }
-	  }
-	else if (fieldDef.isPassword())
-	  {
-	    minLengthN.setValue(fieldDef.getMinLength());
-	    maxLengthN.setValue(fieldDef.getMaxLength());
-	    OKCharS.setText(fieldDef.getOKChars());
-	    BadCharS.setText(fieldDef.getBadChars());
-	    
-	    typeC.getModel().setSelectedItem(passwordToken);
-	    passwordShowing = true;
+                if (debug)
+                  {
+                    System.out.println("selecting " + fieldDef.getNameSpaceLabel());
+                  }
+              }
+          }
+        else if (fieldDef.isPassword())
+          {
+            minLengthN.setValue(fieldDef.getMinLength());
+            maxLengthN.setValue(fieldDef.getMaxLength());
+            OKCharS.setText(fieldDef.getOKChars());
+            BadCharS.setText(fieldDef.getBadChars());
+            
+            typeC.getModel().setSelectedItem(passwordToken);
+            passwordShowing = true;
 
-	    boolean crack_enabled = fieldDef.isCracklibChecked();
+            boolean crack_enabled = fieldDef.isCracklibChecked();
 
-	    cracklibCF.setValue(crack_enabled);
-	    editPanel.setRowVisible(cracklib_exceptionCF, crack_enabled);
-	    cracklib_exceptionCF.setValue(fieldDef.hasCracklibCheckException());
+            cracklibCF.setValue(crack_enabled);
+            editPanel.setRowVisible(cracklib_exceptionCF, crack_enabled);
+            cracklib_exceptionCF.setValue(fieldDef.hasCracklibCheckException());
 
-	    boolean history_enabled = fieldDef.isHistoryChecked();
+            boolean history_enabled = fieldDef.isHistoryChecked();
 
-	    historyCF.setValue(history_enabled);
-	    editPanel.setRowVisible(history_exceptionCF, history_enabled);
-	    editPanel.setRowVisible(history_depthN, history_enabled);
-	    history_exceptionCF.setValue(fieldDef.hasHistoryCheckException());
-	    history_depthN.setValue(fieldDef.getHistoryDepth());
+            historyCF.setValue(history_enabled);
+            editPanel.setRowVisible(history_exceptionCF, history_enabled);
+            editPanel.setRowVisible(history_depthN, history_enabled);
+            history_exceptionCF.setValue(fieldDef.hasHistoryCheckException());
+            history_depthN.setValue(fieldDef.getHistoryDepth());
 
-	    cryptedCF.setValue(fieldDef.isCrypted());
-	    md5cryptedCF.setValue(fieldDef.isMD5Crypted());
-	    apachemd5cryptedCF.setValue(fieldDef.isApacheMD5Crypted());
-	    winHashcryptedCF.setValue(fieldDef.isWinHashed());
-	    sshaHashcryptedCF.setValue(fieldDef.isSSHAHashed());
-	    shaUnixCryptedCF.setValue(fieldDef.isShaUnixCrypted());
+            cryptedCF.setValue(fieldDef.isCrypted());
+            md5cryptedCF.setValue(fieldDef.isMD5Crypted());
+            apachemd5cryptedCF.setValue(fieldDef.isApacheMD5Crypted());
+            winHashcryptedCF.setValue(fieldDef.isWinHashed());
+            sshaHashcryptedCF.setValue(fieldDef.isSSHAHashed());
+            shaUnixCryptedCF.setValue(fieldDef.isShaUnixCrypted());
 
-	    if (shaUnixCryptedCF.isSelected())
-	      {
-		if (fieldDef.isShaUnixCrypted512())
-		  {
-		    shaUnixCryptTypeC.getModel().setSelectedItem("SHA512");
-		  }
-		else
-		  {
-		    shaUnixCryptTypeC.getModel().setSelectedItem("SHA256");
-		  }
+            if (shaUnixCryptedCF.isSelected())
+              {
+                if (fieldDef.isShaUnixCrypted512())
+                  {
+                    shaUnixCryptTypeC.getModel().setSelectedItem("SHA512");
+                  }
+                else
+                  {
+                    shaUnixCryptTypeC.getModel().setSelectedItem("SHA256");
+                  }
 
-		shaUnixCryptRoundsN.setValue(fieldDef.getShaUnixCryptRounds());
-	      }
+                shaUnixCryptRoundsN.setValue(fieldDef.getShaUnixCryptRounds());
+              }
 
-	    bCryptedCF.setValue(fieldDef.isBCrypted());
+            bCryptedCF.setValue(fieldDef.isBCrypted());
 
-	    plainTextCF.setValue(fieldDef.isPlainText());
+            plainTextCF.setValue(fieldDef.isPlainText());
 
-	    // if a password is not crypted, it *must* keep
-	    // passwords in plaintext
-	  }
-	else if (fieldDef.isIP())
-	  {
-	    typeC.getModel().setSelectedItem(ipToken);
-	    ipShowing = true;
+            // if a password is not crypted, it *must* keep
+            // passwords in plaintext
+          }
+        else if (fieldDef.isIP())
+          {
+            typeC.getModel().setSelectedItem(ipToken);
+            ipShowing = true;
 
-	    // add all defined namespaces here
+            // add all defined namespaces here
 
-	    refreshNamespaceChoice();
+            refreshNamespaceChoice();
 
-	    if (debug)
-	      {
-		System.out.println(fieldDef.getNameSpaceLabel());
-	      }
+            if (debug)
+              {
+                System.out.println(fieldDef.getNameSpaceLabel());
+              }
 
-	    if (fieldDef.getNameSpaceLabel() == null)
-	      {
-		namespaceC.getModel().setSelectedItem(noneToken);
+            if (fieldDef.getNameSpaceLabel() == null)
+              {
+                namespaceC.getModel().setSelectedItem(noneToken);
 
-		if (debug)
-		  {
-		    System.out.println("selecting <none> for NameSpace");
-		  }
-	      }
-	    else
-	      {
-		namespaceC.getModel().setSelectedItem(fieldDef.getNameSpaceLabel());
+                if (debug)
+                  {
+                    System.out.println("selecting <none> for NameSpace");
+                  }
+              }
+            else
+              {
+                namespaceC.getModel().setSelectedItem(fieldDef.getNameSpaceLabel());
 
-		if (debug)
-		  {
-		    System.out.println("selecting " + fieldDef.getNameSpaceLabel());
-		  }
-	      }
-	  }
-	else if (fieldDef.isBoolean())
-	  {
-	    if (fieldDef.isLabeled())
-	      {
-		labeledCF.setValue(true);
-		trueLabelS.setText(fieldDef.getTrueLabel());
-		falseLabelS.setText(fieldDef.getFalseLabel());
-	      }
-	    else
-	      {
-		labeledCF.setValue(false);
-		trueLabelS.setText("");
-		falseLabelS.setText("");
-	      }
+                if (debug)
+                  {
+                    System.out.println("selecting " + fieldDef.getNameSpaceLabel());
+                  }
+              }
+          }
+        else if (fieldDef.isBoolean())
+          {
+            if (fieldDef.isLabeled())
+              {
+                labeledCF.setValue(true);
+                trueLabelS.setText(fieldDef.getTrueLabel());
+                falseLabelS.setText(fieldDef.getFalseLabel());
+              }
+            else
+              {
+                labeledCF.setValue(false);
+                trueLabelS.setText("");
+                falseLabelS.setText("");
+              }
 
-	    typeC.getModel().setSelectedItem(booleanToken);
-	    booleanShowing = true;
-	  }
-	else if (fieldDef.isInvid())
-	  {
-	    editInPlaceCF.setValue(fieldDef.isEditInPlace());
+            typeC.getModel().setSelectedItem(booleanToken);
+            booleanShowing = true;
+          }
+        else if (fieldDef.isInvid())
+          {
+            editInPlaceCF.setValue(fieldDef.isEditInPlace());
 
-	    // all edit in place references are vectors
+            // all edit in place references are vectors
 
-	    if (fieldDef.isEditInPlace())
-	      {
-		vectorCF.setSelected(true, false);
-		handleReturnVal(fieldDef.setArray(true));
-	      }
+            if (fieldDef.isEditInPlace())
+              {
+                vectorCF.setSelected(true, false);
+                handleReturnVal(fieldDef.setArray(true));
+              }
 
-	    // important.. we want to avoid mucking with the targetC GUI combobox if
-	    // our refresh is being initiated by actions on the targetC GUI.  Swing
-	    // 1.0.2 gets real, real cranky if we try that.
+            // important.. we want to avoid mucking with the targetC GUI combobox if
+            // our refresh is being initiated by actions on the targetC GUI.  Swing
+            // 1.0.2 gets real, real cranky if we try that.
 
-	    if (updateTargetC)
-	      {
-		refreshTargetChoice();
-	      }
+            if (updateTargetC)
+              {
+                refreshTargetChoice();
+              }
 
-	    SchemaEdit se = owner.getSchemaEdit();
-	    short targetB = fieldDef.getTargetBase();
-		
-	    if (targetB == -1)
-	      {
-		if (debug)
-		  {
-		    System.out.println("unknown target base");
-		  }
-		
-		if (updateTargetC)
-		  {
-		    targetC.getModel().setSelectedItem(anyToken);
-		  }
-	      }
-	    else
-	      {
-		Base targetBase = null;
-		String string = null;
-		    
-		if (targetB == -2)
-		  {
-		    // we're assuming that we've got a known target field in
-		    // all objects bases in the system.. this is mainly for
-		    // the 'owner list' field.. we'll just pick the field from
-		    // the current fieldDef and go with it.
-			
-		    if (debug)
-		      {
-			System.out.println("new 'alltarget' base");
-		      }
-		    
-		    if (updateTargetC)
-		      {
-			targetC.addItem(allToken);
-			targetC.getModel().setSelectedItem(allToken);
-		      }
-			
-		    string = allToken;
-			
-		    targetBase = se.getBase((short) 0);	// assume the field is present in first base
-		  }
-		else
-		  {
-		    targetBase = se.getBase(targetB);
-			
-		    if (targetBase == null)
-		      {
-			if (debug)
-			  {
-			    System.err.println("targetbase is null when it shouldn't be: server error : base id " + 
-					       targetB);
-			    
-			    System.out.println("Choosing <any>");
-			  }
-			    
-			// we want to clear this bad reference
-			    
-			try
-			  {
-			    handleReturnVal(fieldDef.setTargetBase(null));
-			  }
-			catch (RemoteException rx)
-			  {
-			    throw new IllegalArgumentException("Exception couldn't clear target base: " + rx);
-			  }
-			
-			if (updateTargetC)
-			  {
-			    targetC.getModel().setSelectedItem(anyToken);
-			  }
-		      }
-		    else
-		      {
-			string = targetBase.getName();
-			    
-			if (debug)
-			  {
-			    System.out.println("Choosing " + string);
-			  }
+            SchemaEdit se = owner.getSchemaEdit();
+            short targetB = fieldDef.getTargetBase();
+                
+            if (targetB == -1)
+              {
+                if (debug)
+                  {
+                    System.out.println("unknown target base");
+                  }
+                
+                if (updateTargetC)
+                  {
+                    targetC.getModel().setSelectedItem(anyToken);
+                  }
+              }
+            else
+              {
+                Base targetBase = null;
+                String string = null;
+                    
+                if (targetB == -2)
+                  {
+                    // we're assuming that we've got a known target field in
+                    // all objects bases in the system.. this is mainly for
+                    // the 'owner list' field.. we'll just pick the field from
+                    // the current fieldDef and go with it.
+                        
+                    if (debug)
+                      {
+                        System.out.println("new 'alltarget' base");
+                      }
+                    
+                    if (updateTargetC)
+                      {
+                        targetC.addItem(allToken);
+                        targetC.getModel().setSelectedItem(allToken);
+                      }
+                        
+                    string = allToken;
+                        
+                    targetBase = se.getBase((short) 0); // assume the field is present in first base
+                  }
+                else
+                  {
+                    targetBase = se.getBase(targetB);
+                        
+                    if (targetBase == null)
+                      {
+                        if (debug)
+                          {
+                            System.err.println("targetbase is null when it shouldn't be: server error : base id " + 
+                                               targetB);
+                            
+                            System.out.println("Choosing <any>");
+                          }
+                            
+                        // we want to clear this bad reference
+                            
+                        try
+                          {
+                            handleReturnVal(fieldDef.setTargetBase(null));
+                          }
+                        catch (RemoteException rx)
+                          {
+                            throw new IllegalArgumentException("Exception couldn't clear target base: " + rx);
+                          }
+                        
+                        if (updateTargetC)
+                          {
+                            targetC.getModel().setSelectedItem(anyToken);
+                          }
+                      }
+                    else
+                      {
+                        string = targetBase.getName();
+                            
+                        if (debug)
+                          {
+                            System.out.println("Choosing " + string);
+                          }
 
-			if (updateTargetC)
-			  {
-			    targetC.getModel().setSelectedItem(string);
-			  }
-		      }
-		  }
-		    
-		// regenerate the list of choices in fieldC
-		
-		refreshFieldChoice();
-		    
-		// Now that we have an appropriate list of
-		// choice items in the fieldC, let's see
-		// if we can't find something to select
-		// in fieldC
-		    
-		short targetF = fieldDef.getTargetField();
-		    
-		if (targetF == -1)
-		  {
-		    if (debug)
-		      {
-			System.out.println("unknown target field");
-		      }
+                        if (updateTargetC)
+                          {
+                            targetC.getModel().setSelectedItem(string);
+                          }
+                      }
+                  }
+                    
+                // regenerate the list of choices in fieldC
+                
+                refreshFieldChoice();
+                    
+                // Now that we have an appropriate list of
+                // choice items in the fieldC, let's see
+                // if we can't find something to select
+                // in fieldC
+                    
+                short targetF = fieldDef.getTargetField();
+                    
+                if (targetF == -1)
+                  {
+                    if (debug)
+                      {
+                        System.out.println("unknown target field");
+                      }
 
-		    fieldC.getModel().setSelectedItem(noneToken);
-		  }
-		else
-		  {
-		    BaseField targetField;
-		    
-		    // see if our old field target value is still
-		    // appropriate for the currently chosen base
-		    
-		    if (targetBase != null)
-		      {
-			try
-			  {
-			    targetField = targetBase.getField(targetF);
-			    
-			    if (targetField != null)
-			      {
-				string = targetField.getName();
+                    fieldC.getModel().setSelectedItem(noneToken);
+                  }
+                else
+                  {
+                    BaseField targetField;
+                    
+                    // see if our old field target value is still
+                    // appropriate for the currently chosen base
+                    
+                    if (targetBase != null)
+                      {
+                        try
+                          {
+                            targetField = targetBase.getField(targetF);
+                            
+                            if (targetField != null)
+                              {
+                                string = targetField.getName();
 
-				if (debug)
-				  {
-				    System.out.println("selecting " + string);
-				  }
+                                if (debug)
+                                  {
+                                    System.out.println("selecting " + string);
+                                  }
 
-				fieldC.getModel().setSelectedItem(string);
-			      }
-			  }
-			catch (RemoteException rx)
-			  {
-			    throw new IllegalArgumentException("exception getting field " + rx);
-			  }
-		      }
-		    else
-		      {
-			if (debug)
-			  {
-			    System.err.println("targetbase is null, clearing targetField.");
-			
-			    System.out.println("Choosing <none>");
-			  }
-			
-			// we want to clear this bad reference
-			
-			try
-			  {
-			    handleReturnVal(fieldDef.setTargetField(null));
-			  }
-			catch (RemoteException rx)
-			  {
-			    throw new IllegalArgumentException("Exception couldn't clear target base: " + rx);
-			  }
-			
-			fieldC.getModel().setSelectedItem(noneToken);
-		      }
-		  }
-	      } // else targetB != -1
-	    
-	    typeC.getModel().setSelectedItem(objectRefToken);
-	    referenceShowing = true;
-	  }
-	else if (fieldDef.isDate())
-	  {
-	    typeC.getModel().setSelectedItem(dateToken);
-	    dateShowing = true;
-	  }
-	else if (fieldDef.isNumeric())
-	  {
-	    typeC.getModel().setSelectedItem(numericToken);
-	    numericShowing = true;
+                                fieldC.getModel().setSelectedItem(string);
+                              }
+                          }
+                        catch (RemoteException rx)
+                          {
+                            throw new IllegalArgumentException("exception getting field " + rx);
+                          }
+                      }
+                    else
+                      {
+                        if (debug)
+                          {
+                            System.err.println("targetbase is null, clearing targetField.");
+                        
+                            System.out.println("Choosing <none>");
+                          }
+                        
+                        // we want to clear this bad reference
+                        
+                        try
+                          {
+                            handleReturnVal(fieldDef.setTargetField(null));
+                          }
+                        catch (RemoteException rx)
+                          {
+                            throw new IllegalArgumentException("Exception couldn't clear target base: " + rx);
+                          }
+                        
+                        fieldC.getModel().setSelectedItem(noneToken);
+                      }
+                  }
+              } // else targetB != -1
+            
+            typeC.getModel().setSelectedItem(objectRefToken);
+            referenceShowing = true;
+          }
+        else if (fieldDef.isDate())
+          {
+            typeC.getModel().setSelectedItem(dateToken);
+            dateShowing = true;
+          }
+        else if (fieldDef.isNumeric())
+          {
+            typeC.getModel().setSelectedItem(numericToken);
+            numericShowing = true;
 
-	    // add all defined namespaces here
+            // add all defined namespaces here
 
-	    refreshNamespaceChoice();
+            refreshNamespaceChoice();
 
-	    if (debug)
-	      {
-		System.out.println(fieldDef.getNameSpaceLabel());
-	      }
+            if (debug)
+              {
+                System.out.println(fieldDef.getNameSpaceLabel());
+              }
 
-	    if (fieldDef.getNameSpaceLabel() == null)
-	      {
-		namespaceC.getModel().setSelectedItem(noneToken);
+            if (fieldDef.getNameSpaceLabel() == null)
+              {
+                namespaceC.getModel().setSelectedItem(noneToken);
 
-		if (debug)
-		  {
-		    System.out.println("selecting <none> for NameSpace");
-		  }
-	      }
-	    else
-	      {
-		namespaceC.getModel().setSelectedItem(fieldDef.getNameSpaceLabel());
-		
-		if (debug)
-		  {
-		    System.out.println("selecting " + fieldDef.getNameSpaceLabel());
-		  }
-	      }
-	  }
- 	else if (fieldDef.isFloat())
- 	  {
- 	    typeC.getModel().setSelectedItem(floatToken);
- 	    floatShowing = true;
- 	  }
- 	else if (fieldDef.isFieldOptions())
- 	  {
- 	    typeC.getModel().setSelectedItem(fieldOptionToken);
- 	    fieldOptionShowing = true;
- 	  }
-	else if (fieldDef.isPermMatrix())
-	  {
-	    typeC.addItem(permissionToken);
-	    typeC.getModel().setSelectedItem(permissionToken);
-	  }
-	else
-	  {
-	    throw new RuntimeException("unrecognized field type");
-	  }
+                if (debug)
+                  {
+                    System.out.println("selecting <none> for NameSpace");
+                  }
+              }
+            else
+              {
+                namespaceC.getModel().setSelectedItem(fieldDef.getNameSpaceLabel());
+                
+                if (debug)
+                  {
+                    System.out.println("selecting " + fieldDef.getNameSpaceLabel());
+                  }
+              }
+          }
+        else if (fieldDef.isFloat())
+          {
+            typeC.getModel().setSelectedItem(floatToken);
+            floatShowing = true;
+          }
+        else if (fieldDef.isFieldOptions())
+          {
+            typeC.getModel().setSelectedItem(fieldOptionToken);
+            fieldOptionShowing = true;
+          }
+        else if (fieldDef.isPermMatrix())
+          {
+            typeC.addItem(permissionToken);
+            typeC.getModel().setSelectedItem(permissionToken);
+          }
+        else
+          {
+            throw new RuntimeException("unrecognized field type");
+          }
 
-	// Here is where the editability is checked.
+        // Here is where the editability is checked.
 
-	commentT.setEditable(true);
-	nameS.setEditable(true);
-	trueLabelS.setEditable(true);
-	falseLabelS.setEditable(true);
-	regexpS.setEditable(true);
-	regexpDescS.setEditable(true);
-	OKCharS.setEditable(true);
-	BadCharS.setEditable(true);
-	maxArrayN.setEditable(true);
-	minLengthN.setEditable(true);
-	maxLengthN.setEditable(true);
-	idN.setEditable(false);
+        commentT.setEditable(true);
+        nameS.setEditable(true);
+        trueLabelS.setEditable(true);
+        falseLabelS.setEditable(true);
+        regexpS.setEditable(true);
+        regexpDescS.setEditable(true);
+        OKCharS.setEditable(true);
+        BadCharS.setEditable(true);
+        maxArrayN.setEditable(true);
+        minLengthN.setEditable(true);
+        maxLengthN.setEditable(true);
+        idN.setEditable(false);
 
-	multiLineCF.setEnabled(true);
-	cracklibCF.setEnabled(true);
-	cracklib_exceptionCF.setEnabled(true);
-	historyCF.setEnabled(true);
-	history_exceptionCF.setEnabled(true);
-	history_depthN.setEnabled(true);
-	cryptedCF.setEnabled(true);
-	md5cryptedCF.setEnabled(true);
-	apachemd5cryptedCF.setEnabled(true);
-	winHashcryptedCF.setEnabled(true);
-	sshaHashcryptedCF.setEnabled(true);
-	shaUnixCryptedCF.setEnabled(true);
-	bCryptedCF.setEnabled(true);
+        multiLineCF.setEnabled(true);
+        cracklibCF.setEnabled(true);
+        cracklib_exceptionCF.setEnabled(true);
+        historyCF.setEnabled(true);
+        history_exceptionCF.setEnabled(true);
+        history_depthN.setEnabled(true);
+        cryptedCF.setEnabled(true);
+        md5cryptedCF.setEnabled(true);
+        apachemd5cryptedCF.setEnabled(true);
+        winHashcryptedCF.setEnabled(true);
+        sshaHashcryptedCF.setEnabled(true);
+        shaUnixCryptedCF.setEnabled(true);
+        bCryptedCF.setEnabled(true);
 
-	if (passwordShowing)
-	  {
-	    // if we aren't using a hashed form for password storage,
-	    // we have to use plaintext
+        if (passwordShowing)
+          {
+            // if we aren't using a hashed form for password storage,
+            // we have to use plaintext
 
-	    if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
-		  apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
-		  sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected() || bCryptedCF.isSelected())
-		&& plainTextCF.isSelected())
-	      {
-		plainTextCF.setEnabled(false);
-	      }
-	  }
-	else
-	  {
-	    plainTextCF.setEnabled(true);
-	  }
+            if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+                  apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
+                  sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected() || bCryptedCF.isSelected())
+                && plainTextCF.isSelected())
+              {
+                plainTextCF.setEnabled(false);
+              }
+          }
+        else
+          {
+            plainTextCF.setEnabled(true);
+          }
 
-	vectorCF.setEnabled(true);
-	labeledCF.setEnabled(true);
-	editInPlaceCF.setEnabled(true);
+        vectorCF.setEnabled(true);
+        labeledCF.setEnabled(true);
+        editInPlaceCF.setEnabled(true);
 
-	typeC.setEnabled(true);
-	namespaceC.setEnabled(true);
-	targetC.setEnabled(true);
-	fieldC.setEnabled(true);
+        typeC.setEnabled(true);
+        namespaceC.setEnabled(true);
+        targetC.setEnabled(true);
+        fieldC.setEnabled(true);
 
-	if (debug)
-	  {
-	    System.out.println(" calling checkVisibility");
-	  }
+        if (debug)
+          {
+            System.out.println(" calling checkVisibility");
+          }
 
-	checkVisibility();
+        checkVisibility();
       }
     catch (RemoteException ex)
       {
-	System.err.println("remote exception in FieldEditor.editField: " + ex);
+        System.err.println("remote exception in FieldEditor.editField: " + ex);
       }
 
     /*
@@ -1544,7 +1544,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
     if (debug)
       {
-	System.out.println(" done in editField");
+        System.out.println(" done in editField");
       }
   }
 
@@ -1580,515 +1580,515 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
   {
     if (!listenToCallbacks)
       {
-	if (debug)
-	  {
-	    System.out.println("I'm not listening!");
-	  }
+        if (debug)
+          {
+            System.out.println("I'm not listening!");
+          }
 
-	return true;  //return true because we want to component to change, just don't act on callback
+        return true;  //return true because we want to component to change, just don't act on callback
       }
 
     java.awt.Component comp = v.getSource();
 
     try
       {
-	if (comp == nameS)
-	  {
-	    if (debug)
-	      {
-		System.out.println("nameS");
-	      }
+        if (comp == nameS)
+          {
+            if (debug)
+              {
+                System.out.println("nameS");
+              }
 
-	    if (handleReturnVal(fieldDef.setName((String) v.getValue())))
-	      {
-		fieldNode.setText((String) v.getValue());
-		owner.tree.refresh();
-	      }
-	    else
-	      {
-		refreshFieldEdit(false);
-	      }
-	  }
-	else if (comp == commentT)
-	  {
-	    if (debug)
-	      {
-		System.out.println("commentT");
-	      }
+            if (handleReturnVal(fieldDef.setName((String) v.getValue())))
+              {
+                fieldNode.setText((String) v.getValue());
+                owner.tree.refresh();
+              }
+            else
+              {
+                refreshFieldEdit(false);
+              }
+          }
+        else if (comp == commentT)
+          {
+            if (debug)
+              {
+                System.out.println("commentT");
+              }
 
-	    if (!handleReturnVal(fieldDef.setComment((String) v.getValue())))
-	      {
-		refreshFieldEdit(false);
-	      }
-	  }
-	else if (comp == maxArrayN)
-	  {
-	    if (debug)
-	      {
-		System.out.println("maxArrayN");
-	      }
+            if (!handleReturnVal(fieldDef.setComment((String) v.getValue())))
+              {
+                refreshFieldEdit(false);
+              }
+          }
+        else if (comp == maxArrayN)
+          {
+            if (debug)
+              {
+                System.out.println("maxArrayN");
+              }
 
-	    if (!handleReturnVal(fieldDef.setMaxArraySize(((Integer)v.getValue()).shortValue())))
-	      {
-		refreshFieldEdit(false);
-	      }
-	  }
-	else if (comp == invisibleCF)
-	  {
-	    if (debug)
-	      {
-		System.out.println("vectorCF");
-	      }
+            if (!handleReturnVal(fieldDef.setMaxArraySize(((Integer)v.getValue()).shortValue())))
+              {
+                refreshFieldEdit(false);
+              }
+          }
+        else if (comp == invisibleCF)
+          {
+            if (debug)
+              {
+                System.out.println("vectorCF");
+              }
 
-	    fieldDef.setVisibility(!invisibleCF.isSelected());
-	  }
-	else if (comp == vectorCF)
-	  {
-	    //editPanel.setRowVisible(maxArrayN, vectorCF.getValue());
+            fieldDef.setVisibility(!invisibleCF.isSelected());
+          }
+        else if (comp == vectorCF)
+          {
+            //editPanel.setRowVisible(maxArrayN, vectorCF.getValue());
 
-	    if (debug)
-	      {
-		System.out.println("vectorCF");
-	      }
+            if (debug)
+              {
+                System.out.println("vectorCF");
+              }
 
-	    if (handleReturnVal(fieldDef.setArray(vectorCF.isSelected())))
-	      {
-		checkVisibility();
-	      }
-	    else
-	      {
-		refreshFieldEdit(false);
-	      }
-	  }
-	else if (comp == regexpS)
-	  {
-	    if (debug)
-	      {
-		System.out.println("regexpS");
-	      }
+            if (handleReturnVal(fieldDef.setArray(vectorCF.isSelected())))
+              {
+                checkVisibility();
+              }
+            else
+              {
+                refreshFieldEdit(false);
+              }
+          }
+        else if (comp == regexpS)
+          {
+            if (debug)
+              {
+                System.out.println("regexpS");
+              }
 
-	    // setting a regexp can fail if it can't be properly
-	    // parsed
+            // setting a regexp can fail if it can't be properly
+            // parsed
 
-	    if (!handleReturnVal(fieldDef.setRegexpPat((String) v.getValue())))
-	      {
-		regexpS.setText(fieldDef.getRegexpPat());
-	      }
-	  }
-	else if (comp == regexpDescS)
-	  {
-	    if (debug)
-	      {
-		System.out.println("regexpDescS");
-	      }
+            if (!handleReturnVal(fieldDef.setRegexpPat((String) v.getValue())))
+              {
+                regexpS.setText(fieldDef.getRegexpPat());
+              }
+          }
+        else if (comp == regexpDescS)
+          {
+            if (debug)
+              {
+                System.out.println("regexpDescS");
+              }
 
-	    if (!handleReturnVal(fieldDef.setRegexpDesc((String) v.getValue())))
-	      {
-		regexpDescS.setText(fieldDef.getRegexpDesc());
-	      }
-	  }
-	else if (comp == OKCharS)
-	  {
-	    if (debug)
-	      {
-		System.out.println("OkCharS");
-	      }
+            if (!handleReturnVal(fieldDef.setRegexpDesc((String) v.getValue())))
+              {
+                regexpDescS.setText(fieldDef.getRegexpDesc());
+              }
+          }
+        else if (comp == OKCharS)
+          {
+            if (debug)
+              {
+                System.out.println("OkCharS");
+              }
 
-	    if (!handleReturnVal(fieldDef.setOKChars((String) v.getValue())))
-	      {
-		refreshFieldEdit(false);
-	      }
-	  }
-	else if (comp == BadCharS)
-	  {
-	    if (debug)
-	      {
-		System.out.println("BadCharS");
-	      }
+            if (!handleReturnVal(fieldDef.setOKChars((String) v.getValue())))
+              {
+                refreshFieldEdit(false);
+              }
+          }
+        else if (comp == BadCharS)
+          {
+            if (debug)
+              {
+                System.out.println("BadCharS");
+              }
 
-	    if (!handleReturnVal(fieldDef.setBadChars((String) v.getValue())))
-	      {
-		refreshFieldEdit(false);
-	      }
-	  }
-	else if (comp == minLengthN)
-	  {
-	    if (debug)
-	      {
-		System.out.println("minLengthN");
-	      }
+            if (!handleReturnVal(fieldDef.setBadChars((String) v.getValue())))
+              {
+                refreshFieldEdit(false);
+              }
+          }
+        else if (comp == minLengthN)
+          {
+            if (debug)
+              {
+                System.out.println("minLengthN");
+              }
 
-	    if (!handleReturnVal(fieldDef.setMinLength(((Integer)v.getValue()).shortValue())))
-	      {
-		refreshFieldEdit(false);
-	      }
-	  }
-	else if (comp == maxLengthN)
-	  {
-	    if (debug)
-	      {
-		System.out.println("maxLengthN");
-	      }
+            if (!handleReturnVal(fieldDef.setMinLength(((Integer)v.getValue()).shortValue())))
+              {
+                refreshFieldEdit(false);
+              }
+          }
+        else if (comp == maxLengthN)
+          {
+            if (debug)
+              {
+                System.out.println("maxLengthN");
+              }
 
-	    if (!handleReturnVal(fieldDef.setMaxLength(((Integer)v.getValue()).shortValue())))
-	      {
-		refreshFieldEdit(false);
-	      }
-	  }
-	else if (comp == trueLabelS)
-	  {
-	    if (debug)
-	      {
-		System.out.println("trueLabelS");
-	      }
+            if (!handleReturnVal(fieldDef.setMaxLength(((Integer)v.getValue()).shortValue())))
+              {
+                refreshFieldEdit(false);
+              }
+          }
+        else if (comp == trueLabelS)
+          {
+            if (debug)
+              {
+                System.out.println("trueLabelS");
+              }
 
-	    if (!handleReturnVal(fieldDef.setTrueLabel((String) v.getValue())))
-	      {
-		refreshFieldEdit(false);
-	      }
-	  }
-	else if (comp == falseLabelS)
-	  {
-	    if (debug)
-	      {
-		System.out.println("falseLabelS");
-	      }
+            if (!handleReturnVal(fieldDef.setTrueLabel((String) v.getValue())))
+              {
+                refreshFieldEdit(false);
+              }
+          }
+        else if (comp == falseLabelS)
+          {
+            if (debug)
+              {
+                System.out.println("falseLabelS");
+              }
 
-	    if (!handleReturnVal(fieldDef.setFalseLabel((String) v.getValue())))
-	      {
-		refreshFieldEdit(false);
-	      }
-	  }
-	else if (comp == labeledCF)
-	  {
-	    if (debug)
-	      {
-		System.out.println("labeledCF");
-	      }
+            if (!handleReturnVal(fieldDef.setFalseLabel((String) v.getValue())))
+              {
+                refreshFieldEdit(false);
+              }
+          }
+        else if (comp == labeledCF)
+          {
+            if (debug)
+              {
+                System.out.println("labeledCF");
+              }
 
-	    owner.handleReturnVal(fieldDef.setLabeled(labeledCF.isSelected()));
-	    checkVisibility();
-	  }
-	else if (comp == editInPlaceCF)
-	  {
-	    if (debug)
-	      {
-		System.out.println("editInPlaceCF");
-	      }
+            owner.handleReturnVal(fieldDef.setLabeled(labeledCF.isSelected()));
+            checkVisibility();
+          }
+        else if (comp == editInPlaceCF)
+          {
+            if (debug)
+              {
+                System.out.println("editInPlaceCF");
+              }
 
-	    handleReturnVal(fieldDef.setEditInPlace(editInPlaceCF.isSelected()));
+            handleReturnVal(fieldDef.setEditInPlace(editInPlaceCF.isSelected()));
 
-	    refreshFieldEdit(true); // we need to refresh on success or failure here
-	  }
-	else if (comp == cracklibCF || comp == cracklib_exceptionCF)
-	  {
-	    if (debug)
-	      {
-		System.out.println("cryptedCF");
-	      }
+            refreshFieldEdit(true); // we need to refresh on success or failure here
+          }
+        else if (comp == cracklibCF || comp == cracklib_exceptionCF)
+          {
+            if (debug)
+              {
+                System.out.println("cryptedCF");
+              }
 
-	    if (handleReturnVal(fieldDef.setCracklibChecked(cracklibCF.isSelected(),
-							    cracklib_exceptionCF.isSelected())))
-	      {
-		refreshFieldEdit(false);
-	      }
-	  }
-	else if (comp == historyCF || comp == history_exceptionCF || comp == history_depthN)
-	  {
-	    if (debug)
-	      {
-		System.out.println("historyCF");
-	      }
+            if (handleReturnVal(fieldDef.setCracklibChecked(cracklibCF.isSelected(),
+                                                            cracklib_exceptionCF.isSelected())))
+              {
+                refreshFieldEdit(false);
+              }
+          }
+        else if (comp == historyCF || comp == history_exceptionCF || comp == history_depthN)
+          {
+            if (debug)
+              {
+                System.out.println("historyCF");
+              }
 
-	    if (handleReturnVal(fieldDef.setHistoryChecked(historyCF.isSelected(),
-							   history_exceptionCF.isSelected(),
-							   (Integer) history_depthN.getValue())))
-	      {
-		refreshFieldEdit(false);
-	      }
-	  }
-	else if (comp == cryptedCF)
-	  {
-	    if (debug)
-	      {
-		System.out.println("cryptedCF");
-	      }
+            if (handleReturnVal(fieldDef.setHistoryChecked(historyCF.isSelected(),
+                                                           history_exceptionCF.isSelected(),
+                                                           (Integer) history_depthN.getValue())))
+              {
+                refreshFieldEdit(false);
+              }
+          }
+        else if (comp == cryptedCF)
+          {
+            if (debug)
+              {
+                System.out.println("cryptedCF");
+              }
 
-	    if (handleReturnVal(fieldDef.setCrypted(cryptedCF.isSelected())))
-	      {
-		// a password field has to have plaintext stored if it
-		// is not to store the password in crypted form.
-		
-		if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && 
-		    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected() &&
-		    !sshaHashcryptedCF.isSelected() && !shaUnixCryptedCF.isSelected() && !bCryptedCF.isSelected() &&
-		    !plainTextCF.isSelected())
-		  {
-		    plainTextCF.setValue(true);
-		  }
+            if (handleReturnVal(fieldDef.setCrypted(cryptedCF.isSelected())))
+              {
+                // a password field has to have plaintext stored if it
+                // is not to store the password in crypted form.
+                
+                if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && 
+                    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected() &&
+                    !sshaHashcryptedCF.isSelected() && !shaUnixCryptedCF.isSelected() && !bCryptedCF.isSelected() &&
+                    !plainTextCF.isSelected())
+                  {
+                    plainTextCF.setValue(true);
+                  }
 
-		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
-		      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
-		      sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected() || bCryptedCF.isSelected()))
-		  {
-		    plainTextCF.setEnabled(false);
-		  }
-		else
-		  {
-		    plainTextCF.setEnabled(true);
-		  }
-	      }
-	    else
-	      {
-		refreshFieldEdit(false);
-	      }
-	  }
-	else if (comp == md5cryptedCF)
-	  {
-	    if (debug)
-	      {
-		System.out.println("md5cryptedCF");
-	      }
+                if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+                      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
+                      sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected() || bCryptedCF.isSelected()))
+                  {
+                    plainTextCF.setEnabled(false);
+                  }
+                else
+                  {
+                    plainTextCF.setEnabled(true);
+                  }
+              }
+            else
+              {
+                refreshFieldEdit(false);
+              }
+          }
+        else if (comp == md5cryptedCF)
+          {
+            if (debug)
+              {
+                System.out.println("md5cryptedCF");
+              }
 
-	    if (handleReturnVal(fieldDef.setMD5Crypted((md5cryptedCF.isSelected()))))
-	      {
-		// a password field has to have plaintext stored if it
-		// is not to store the password in crypted form.
+            if (handleReturnVal(fieldDef.setMD5Crypted((md5cryptedCF.isSelected()))))
+              {
+                // a password field has to have plaintext stored if it
+                // is not to store the password in crypted form.
 
-		if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
-		    && !sshaHashcryptedCF.isSelected()
-		    && !shaUnixCryptedCF.isSelected()
-		    && !plainTextCF.isSelected())
-		  {
-		    plainTextCF.setValue(true);
-		  }
+                if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
+                    && !sshaHashcryptedCF.isSelected()
+                    && !shaUnixCryptedCF.isSelected()
+                    && !plainTextCF.isSelected())
+                  {
+                    plainTextCF.setValue(true);
+                  }
 
-		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
-		      sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected()))
-		  {
-		    plainTextCF.setEnabled(false);
-		  }
-		else
-		  {
-		    plainTextCF.setEnabled(true);
-		  }
-	      }
-	    else
-	      {
-		refreshFieldEdit(false);
-	      }
-	  }
-	else if (comp == apachemd5cryptedCF)
-	  {
-	    if (debug)
-	      {
-		System.out.println("apachemd5cryptedCF");
-	      }
+                if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
+                      sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected()))
+                  {
+                    plainTextCF.setEnabled(false);
+                  }
+                else
+                  {
+                    plainTextCF.setEnabled(true);
+                  }
+              }
+            else
+              {
+                refreshFieldEdit(false);
+              }
+          }
+        else if (comp == apachemd5cryptedCF)
+          {
+            if (debug)
+              {
+                System.out.println("apachemd5cryptedCF");
+              }
 
-	    if (handleReturnVal(fieldDef.setApacheMD5Crypted((apachemd5cryptedCF.isSelected()))))
-	      {
-		// a password field has to have plaintext stored if it
-		// is not to store the password in crypted form.
-		
-		if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && 
-		    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected() &&
-		    !sshaHashcryptedCF.isSelected() && !shaUnixCryptedCF.isSelected()
-		    && !plainTextCF.isSelected())
-		  {
-		    plainTextCF.setValue(true);
-		  }
-		
-		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
-		      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
-		      sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected()))
-		  {
-		    plainTextCF.setEnabled(false);
-		  }
-		else
-		  {
-		    plainTextCF.setEnabled(true);
-		  }
-	      }
-	    else
-	      {
-		refreshFieldEdit(false);
-	      }
-	  }
-	else if (comp == winHashcryptedCF)
-	  {
-	    if (debug)
-	      {
-		System.out.println("winHashcryptedCF");
-	      }
+            if (handleReturnVal(fieldDef.setApacheMD5Crypted((apachemd5cryptedCF.isSelected()))))
+              {
+                // a password field has to have plaintext stored if it
+                // is not to store the password in crypted form.
+                
+                if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() && 
+                    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected() &&
+                    !sshaHashcryptedCF.isSelected() && !shaUnixCryptedCF.isSelected()
+                    && !plainTextCF.isSelected())
+                  {
+                    plainTextCF.setValue(true);
+                  }
+                
+                if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+                      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
+                      sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected()))
+                  {
+                    plainTextCF.setEnabled(false);
+                  }
+                else
+                  {
+                    plainTextCF.setEnabled(true);
+                  }
+              }
+            else
+              {
+                refreshFieldEdit(false);
+              }
+          }
+        else if (comp == winHashcryptedCF)
+          {
+            if (debug)
+              {
+                System.out.println("winHashcryptedCF");
+              }
 
-	    if (handleReturnVal(fieldDef.setWinHashed((winHashcryptedCF.isSelected()))))
-	      {
-		// a password field has to have plaintext stored if it
-		// is not to store the password in crypted form.
-		
-		if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() &&
-		    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
-		    && !plainTextCF.isSelected())
-		  {
-		    plainTextCF.setValue(true);
-		  }
-		
-		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
-		      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected()))
-		  {
-		    plainTextCF.setEnabled(false);
-		  }
-		else
-		  {
-		    plainTextCF.setEnabled(true);
-		  }
-	      }
-	    else
-	      {
-		refreshFieldEdit(false);
-	      }
-	  }
-	else if (comp == sshaHashcryptedCF)
-	  {
-	    if (debug)
-	      {
-		System.out.println("sshaHashcryptedCF");
-	      }
+            if (handleReturnVal(fieldDef.setWinHashed((winHashcryptedCF.isSelected()))))
+              {
+                // a password field has to have plaintext stored if it
+                // is not to store the password in crypted form.
+                
+                if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() &&
+                    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected()
+                    && !plainTextCF.isSelected())
+                  {
+                    plainTextCF.setValue(true);
+                  }
+                
+                if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+                      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected()))
+                  {
+                    plainTextCF.setEnabled(false);
+                  }
+                else
+                  {
+                    plainTextCF.setEnabled(true);
+                  }
+              }
+            else
+              {
+                refreshFieldEdit(false);
+              }
+          }
+        else if (comp == sshaHashcryptedCF)
+          {
+            if (debug)
+              {
+                System.out.println("sshaHashcryptedCF");
+              }
 
-	    if (handleReturnVal(fieldDef.setSSHAHashed((sshaHashcryptedCF.isSelected()))))
-	      {
-		// a password field has to have plaintext stored if it
-		// is not to store the password in crypted form.
-		
-		if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() &&
-		    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected() &&
-		    !sshaHashcryptedCF.isSelected()
-		    && !plainTextCF.isSelected())
-		  {
-		    plainTextCF.setValue(true);
-		  }
-		
-		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
-		      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
-		      sshaHashcryptedCF.isSelected()))
-		  {
-		    plainTextCF.setEnabled(false);
-		  }
-		else
-		  {
-		    plainTextCF.setEnabled(true);
-		  }
-	      }
-	    else
-	      {
-		refreshFieldEdit(false);
-	      }
-	  }
-	else if (comp == shaUnixCryptedCF)
-	  {
-	    if (debug)
-	      {
-		System.out.println("shaUnixCryptedCF");
-	      }
+            if (handleReturnVal(fieldDef.setSSHAHashed((sshaHashcryptedCF.isSelected()))))
+              {
+                // a password field has to have plaintext stored if it
+                // is not to store the password in crypted form.
+                
+                if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() &&
+                    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected() &&
+                    !sshaHashcryptedCF.isSelected()
+                    && !plainTextCF.isSelected())
+                  {
+                    plainTextCF.setValue(true);
+                  }
+                
+                if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+                      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
+                      sshaHashcryptedCF.isSelected()))
+                  {
+                    plainTextCF.setEnabled(false);
+                  }
+                else
+                  {
+                    plainTextCF.setEnabled(true);
+                  }
+              }
+            else
+              {
+                refreshFieldEdit(false);
+              }
+          }
+        else if (comp == shaUnixCryptedCF)
+          {
+            if (debug)
+              {
+                System.out.println("shaUnixCryptedCF");
+              }
 
-	    if (handleReturnVal(fieldDef.setShaUnixCrypted((shaUnixCryptedCF.isSelected()))))
-	      {
-		// a password field has to have plaintext stored if it
-		// is not to store the password in crypted form.
-		
-		if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() &&
-		    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected() &&
-		    !sshaHashcryptedCF.isSelected() && !shaUnixCryptedCF.isSelected()
-		    && !plainTextCF.isSelected())
-		  {
-		    plainTextCF.setValue(true);
-		  }
-		
-		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
-		      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
-		      sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected()))
-		  {
-		    plainTextCF.setEnabled(false);
-		  }
-		else
-		  {
-		    plainTextCF.setEnabled(true);
-		  }
-	      }
+            if (handleReturnVal(fieldDef.setShaUnixCrypted((shaUnixCryptedCF.isSelected()))))
+              {
+                // a password field has to have plaintext stored if it
+                // is not to store the password in crypted form.
+                
+                if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() &&
+                    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected() &&
+                    !sshaHashcryptedCF.isSelected() && !shaUnixCryptedCF.isSelected()
+                    && !plainTextCF.isSelected())
+                  {
+                    plainTextCF.setValue(true);
+                  }
+                
+                if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+                      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
+                      sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected()))
+                  {
+                    plainTextCF.setEnabled(false);
+                  }
+                else
+                  {
+                    plainTextCF.setEnabled(true);
+                  }
+              }
 
-	    refreshFieldEdit(false);
-	  }
-	else if (comp == shaUnixCryptRoundsN)
-	  {
-	    if (debug)
-	      {
-		System.out.println("shaUnixCryptRoundsN");
-	      }
+            refreshFieldEdit(false);
+          }
+        else if (comp == shaUnixCryptRoundsN)
+          {
+            if (debug)
+              {
+                System.out.println("shaUnixCryptRoundsN");
+              }
 
-	    handleReturnVal(fieldDef.setShaUnixCryptRounds(((Integer)v.getValue()).shortValue()));
-	  }
-	else if (comp == bCryptedCF)
-	  {
-	    if (handleReturnVal(fieldDef.setBCrypted(bCryptedCF.isSelected())))
-	      {
-		// a password field has to have plaintext stored if is
-		// not to store the password in some crypted form.
+            handleReturnVal(fieldDef.setShaUnixCryptRounds(((Integer)v.getValue()).shortValue()));
+          }
+        else if (comp == bCryptedCF)
+          {
+            if (handleReturnVal(fieldDef.setBCrypted(bCryptedCF.isSelected())))
+              {
+                // a password field has to have plaintext stored if is
+                // not to store the password in some crypted form.
 
-		if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() &&
-		    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected() &&
-		    !sshaHashcryptedCF.isSelected() && !shaUnixCryptedCF.isSelected()
-		    && !plainTextCF.isSelected())
-		  {
-		    plainTextCF.setValue(true);
-		  }
-		
-		if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
-		      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
-		      sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected()))
-		  {
-		    plainTextCF.setEnabled(false);
-		  }
-		else
-		  {
-		    plainTextCF.setEnabled(true);
-		  }
-	      }
+                if (!cryptedCF.isSelected() && !md5cryptedCF.isSelected() &&
+                    !apachemd5cryptedCF.isSelected() && !winHashcryptedCF.isSelected() &&
+                    !sshaHashcryptedCF.isSelected() && !shaUnixCryptedCF.isSelected()
+                    && !plainTextCF.isSelected())
+                  {
+                    plainTextCF.setValue(true);
+                  }
+                
+                if (!(cryptedCF.isSelected() || md5cryptedCF.isSelected() || 
+                      apachemd5cryptedCF.isSelected() || winHashcryptedCF.isSelected() ||
+                      sshaHashcryptedCF.isSelected() || shaUnixCryptedCF.isSelected()))
+                  {
+                    plainTextCF.setEnabled(false);
+                  }
+                else
+                  {
+                    plainTextCF.setEnabled(true);
+                  }
+              }
 
-	    refreshFieldEdit(false);
-	  }
-	else if (comp == bCryptRoundsN)
-	  {
-	    handleReturnVal(fieldDef.setBCryptRounds(((Integer)v.getValue()).shortValue()));
-	  }
-	else if (comp == plainTextCF)
-	  {
-	    if (debug)
-	      {
-		System.out.println("plainTextCF");
-	      }
+            refreshFieldEdit(false);
+          }
+        else if (comp == bCryptRoundsN)
+          {
+            handleReturnVal(fieldDef.setBCryptRounds(((Integer)v.getValue()).shortValue()));
+          }
+        else if (comp == plainTextCF)
+          {
+            if (debug)
+              {
+                System.out.println("plainTextCF");
+              }
 
-	    if (!handleReturnVal(fieldDef.setPlainText(plainTextCF.isSelected())))
-	      {
-		refreshFieldEdit(false);
-	      }
-	  }
-	else if (comp == multiLineCF)
-	  {
-	    if (debug)
-	      {
-		System.out.println("multiLineCF: " + multiLineCF.isSelected());
-	      }
+            if (!handleReturnVal(fieldDef.setPlainText(plainTextCF.isSelected())))
+              {
+                refreshFieldEdit(false);
+              }
+          }
+        else if (comp == multiLineCF)
+          {
+            if (debug)
+              {
+                System.out.println("multiLineCF: " + multiLineCF.isSelected());
+              }
 
-	    if (!handleReturnVal(fieldDef.setMultiLine(multiLineCF.isSelected())))
-	      {
-		refreshFieldEdit(false);
-	      }
-	  }
-	return true;
+            if (!handleReturnVal(fieldDef.setMultiLine(multiLineCF.isSelected())))
+              {
+                refreshFieldEdit(false);
+              }
+          }
+        return true;
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("caught remote exception in setting field value " + ex);
+        throw new RuntimeException("caught remote exception in setting field value " + ex);
       }
   }
 
@@ -2102,11 +2102,11 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
   {
     if (!listenToCallbacks)
       {
-	if (debug)
-	  {
-	    System.out.println("I'm not listening to callbacks right now.");
-	  }
-	return;
+        if (debug)
+          {
+            System.out.println("I'm not listening to callbacks right now.");
+          }
+        return;
       }
     String item = null;
     Base newBase = null;
@@ -2121,288 +2121,288 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
     if (e.getItemSelectable() == typeC)
       {
-	boolean okToChange = true;
-	item = (String)typeC.getModel().getSelectedItem();
+        boolean okToChange = true;
+        item = (String)typeC.getModel().getSelectedItem();
 
-	if (!item.equals(numericToken) && !item.equals(floatToken) && !item.equals(stringToken))
-	  {
-	    // Now it can't be a label.. was it a label before?
+        if (!item.equals(numericToken) && !item.equals(floatToken) && !item.equals(stringToken))
+          {
+            // Now it can't be a label.. was it a label before?
 
-	    try
-	      {
-		currentBase = fieldDef.getBase();
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new IllegalArgumentException("exception getting base: " + rx);
-	      }
+            try
+              {
+                currentBase = fieldDef.getBase();
+              }
+            catch (RemoteException rx)
+              {
+                throw new IllegalArgumentException("exception getting base: " + rx);
+              }
 
-	    try
-	      {
-		currentLabel = currentBase.getLabelFieldName();
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new IllegalArgumentException("exception getting label: " + rx);
-	      }
+            try
+              {
+                currentLabel = currentBase.getLabelFieldName();
+              }
+            catch (RemoteException rx)
+              {
+                throw new IllegalArgumentException("exception getting label: " + rx);
+              }
 
-	    try
-	      {
-		currentFieldName = fieldDef.getName();
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new IllegalArgumentException("exception getting field name: " + rx);
-	      }
+            try
+              {
+                currentFieldName = fieldDef.getName();
+              }
+            catch (RemoteException rx)
+              {
+                throw new IllegalArgumentException("exception getting field name: " + rx);
+              }
 
-	    if ((currentFieldName != null) && (currentLabel != null)  &&
-		currentLabel.equals(currentFieldName))
-	      {
-		// "Warning: Changing Object Type"
-		// "Changing the type of this field will invalidate the label for this base.\nAre you sure you want to continue?"
+            if ((currentFieldName != null) && (currentLabel != null)  &&
+                currentLabel.equals(currentFieldName))
+              {
+                // "Warning: Changing Object Type"
+                // "Changing the type of this field will invalidate the label for this base.\nAre you sure you want to continue?"
 
-		changeLabelTypeDialog = new StringDialog(owner, 
-							 ts.l("itemStateChanged.typeChangeWarningTitle"),
-							 ts.l("itemStateChanged.typeChangeLabelMessage"),
-							 StringDialog.getDefaultOk(),
-							 StringDialog.getDefaultCancel(), StandardDialog.ModalityType.DOCUMENT_MODAL);
-		
-		Hashtable answer = changeLabelTypeDialog.showDialog();
+                changeLabelTypeDialog = new StringDialog(owner, 
+                                                         ts.l("itemStateChanged.typeChangeWarningTitle"),
+                                                         ts.l("itemStateChanged.typeChangeLabelMessage"),
+                                                         StringDialog.getDefaultOk(),
+                                                         StringDialog.getDefaultCancel(), StandardDialog.ModalityType.DOCUMENT_MODAL);
+                
+                Hashtable answer = changeLabelTypeDialog.showDialog();
 
-		if (answer != null)  //Ok button was clicked
-		  {
-		    try
-		      {
-			if (debug)
-			  {
-			    System.out.println(" clicked ok");
-			  }
+                if (answer != null)  //Ok button was clicked
+                  {
+                    try
+                      {
+                        if (debug)
+                          {
+                            System.out.println(" clicked ok");
+                          }
 
-			// we're making this field unacceptable as a label
+                        // we're making this field unacceptable as a label
 
-			handleReturnVal(currentBase.setLabelField(null));
-		      }
-		    catch (RemoteException rx)
-		      {
-			throw new IllegalArgumentException("exception setting label to null: " + rx);
-		      }
-		  }
-		else
-		  {
-		    if (debug)
-		      {
-			System.out.println(" Canceled, not changing field type");
-		      }
+                        handleReturnVal(currentBase.setLabelField(null));
+                      }
+                    catch (RemoteException rx)
+                      {
+                        throw new IllegalArgumentException("exception setting label to null: " + rx);
+                      }
+                  }
+                else
+                  {
+                    if (debug)
+                      {
+                        System.out.println(" Canceled, not changing field type");
+                      }
 
-		    okToChange = false;
+                    okToChange = false;
 
-		    try 
-		      {
-			if (fieldDef.isNumeric())
-			  {
-			    typeC.getModel().setSelectedItem(numericToken);
-			  }
-			else if (fieldDef.isFloat())
-			  {
-			    typeC.getModel().setSelectedItem(floatToken);
-			  }
-			else if (fieldDef.isString())
-			  {
-			    typeC.getModel().setSelectedItem(stringToken);
-			  }
-			else
-			  {
-			    System.err.println("Field is not String, Float or Numeric, not changing type choice");
-			  }
-		      }
-		    catch (RemoteException rx)
-		      {
-			throw new IllegalArgumentException("exception getting old type");
-		      }
-		  }
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    System.out.println("not the label, ok to change");
-		  }
-	      }
-	  }
+                    try 
+                      {
+                        if (fieldDef.isNumeric())
+                          {
+                            typeC.getModel().setSelectedItem(numericToken);
+                          }
+                        else if (fieldDef.isFloat())
+                          {
+                            typeC.getModel().setSelectedItem(floatToken);
+                          }
+                        else if (fieldDef.isString())
+                          {
+                            typeC.getModel().setSelectedItem(stringToken);
+                          }
+                        else
+                          {
+                            System.err.println("Field is not String, Float or Numeric, not changing type choice");
+                          }
+                      }
+                    catch (RemoteException rx)
+                      {
+                        throw new IllegalArgumentException("exception getting old type");
+                      }
+                  }
+              }
+            else
+              {
+                if (debug)
+                  {
+                    System.out.println("not the label, ok to change");
+                  }
+              }
+          }
 
-	if (okToChange)
-	  {
-	    changeTypeChoice(item);	// switch the visible rows to fit the new type
-	    refreshFieldEdit(true);	// and refresh
-	  }
+        if (okToChange)
+          {
+            changeTypeChoice(item);     // switch the visible rows to fit the new type
+            refreshFieldEdit(true);     // and refresh
+          }
       }
     else if (e.getItemSelectable() == namespaceC)
       {
-	item = (String)namespaceC.getModel().getSelectedItem();
+        item = (String)namespaceC.getModel().getSelectedItem();
 
-	if (debug)
-	  {
-	    System.out.println("Namespace: " + item);
-	    System.out.println("Setting namespace to " + item);
-	  }
+        if (debug)
+          {
+            System.out.println("Namespace: " + item);
+            System.out.println("Setting namespace to " + item);
+          }
 
-	try 
-	  {
-	    if (item.equalsIgnoreCase(noneToken))
-	      {
-		if (!handleReturnVal(fieldDef.setNameSpace(null)))
-		  {
-		    refreshFieldEdit(true);
-		  }
-	      }
-	    else
-	      {
-		if (!handleReturnVal(fieldDef.setNameSpace(item)))
-		  {
-		    refreshFieldEdit(true);
-		  }
-	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Remote Exception setting NameSpace: " + rx);
-	  }
+        try 
+          {
+            if (item.equalsIgnoreCase(noneToken))
+              {
+                if (!handleReturnVal(fieldDef.setNameSpace(null)))
+                  {
+                    refreshFieldEdit(true);
+                  }
+              }
+            else
+              {
+                if (!handleReturnVal(fieldDef.setNameSpace(item)))
+                  {
+                    refreshFieldEdit(true);
+                  }
+              }
+          }
+        catch (RemoteException rx)
+          {
+            throw new RuntimeException("Remote Exception setting NameSpace: " + rx);
+          }
       }
     else if (e.getItemSelectable() == targetC)
       {
-	item = (String)targetC.getModel().getSelectedItem();
+        item = (String)targetC.getModel().getSelectedItem();
 
-	try
-	  {
-	    baseID = fieldDef.getTargetBase();
-	    oldBase = owner.getSchemaEdit().getBase(baseID);
+        try
+          {
+            baseID = fieldDef.getTargetBase();
+            oldBase = owner.getSchemaEdit().getBase(baseID);
 
-	    if (oldBase != null)
-	      {
-		oldBaseName = oldBase.getName();
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("couldn't get old base name " + ex);
-	  }
+            if (oldBase != null)
+              {
+                oldBaseName = oldBase.getName();
+              }
+          }
+        catch (RemoteException ex)
+          {
+            throw new RuntimeException("couldn't get old base name " + ex);
+          }
 
-	if (item.equalsIgnoreCase(anyToken))
-	  {
-	    try
-	      {
-		if (!handleReturnVal(fieldDef.setTargetBase(null)))
-		  {
-		    refreshFieldEdit(true);
-		  }
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new IllegalArgumentException("Exception couldn't clear target base: " + rx);
-	      }
-	  }
-	else
-	  {
-	    try
-	      {
-		newBase = owner.getSchemaEdit().getBase(item);
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new IllegalArgumentException("Exception getting base: " + rx);
-	      }
+        if (item.equalsIgnoreCase(anyToken))
+          {
+            try
+              {
+                if (!handleReturnVal(fieldDef.setTargetBase(null)))
+                  {
+                    refreshFieldEdit(true);
+                  }
+              }
+            catch (RemoteException rx)
+              {
+                throw new IllegalArgumentException("Exception couldn't clear target base: " + rx);
+              }
+          }
+        else
+          {
+            try
+              {
+                newBase = owner.getSchemaEdit().getBase(item);
+              }
+            catch (RemoteException rx)
+              {
+                throw new IllegalArgumentException("Exception getting base: " + rx);
+              }
 
-	    if (newBase == null)
-	      {
-		throw new IllegalArgumentException("Could not match selection with a Base");
-	      }
-	    else
-	      {
-		try
-		  {
-		    if (debug)
-		      {
-			System.out.println("Setting target base to " + item);
-		      }
+            if (newBase == null)
+              {
+                throw new IllegalArgumentException("Could not match selection with a Base");
+              }
+            else
+              {
+                try
+                  {
+                    if (debug)
+                      {
+                        System.out.println("Setting target base to " + item);
+                      }
 
-		    if (handleReturnVal(fieldDef.setTargetBase(item)))
-		      {
-			// if we've changed our target base, clear out the
-			// target field to avoid accidental confusion if our
-			// new target base has a valid target field with the
-			// same id code as our old target field.
-			
-			if ((oldBaseName != null) && !oldBaseName.equals(item))
-			  {
-			    handleReturnVal(fieldDef.setTargetField(null));
-			  }
-		      }
-		  }
-		catch (RemoteException rx)
-		  {
-		    throw new RuntimeException("Remote Exception setting Target: " + rx);
-		  }
-	      }
-	  }
+                    if (handleReturnVal(fieldDef.setTargetBase(item)))
+                      {
+                        // if we've changed our target base, clear out the
+                        // target field to avoid accidental confusion if our
+                        // new target base has a valid target field with the
+                        // same id code as our old target field.
+                        
+                        if ((oldBaseName != null) && !oldBaseName.equals(item))
+                          {
+                            handleReturnVal(fieldDef.setTargetField(null));
+                          }
+                      }
+                  }
+                catch (RemoteException rx)
+                  {
+                    throw new RuntimeException("Remote Exception setting Target: " + rx);
+                  }
+              }
+          }
 
-	refreshFieldEdit(false);
-	checkVisibility();
+        refreshFieldEdit(false);
+        checkVisibility();
       }
     else if (e.getItemSelectable() == fieldC)
       {
-	item = (String)fieldC.getSelectedItem();
+        item = (String)fieldC.getSelectedItem();
 
-	if (debug)
-	  {
-	    System.out.println("Setting field to " + item);
-	  }
+        if (debug)
+          {
+            System.out.println("Setting field to " + item);
+          }
 
-	try
-	  {
-	    if (item.equals(noneToken))
-	      {
-		if (!handleReturnVal(fieldDef.setTargetField(null)))
-		  {
-		    refreshFieldEdit(true);
-		  }
-	      }
-	    else
-	      {
-		if (!handleReturnVal(fieldDef.setTargetField(item)))
-		  {
-		    refreshFieldEdit(true);
-		  }
-	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new IllegalArgumentException ("Exception setting TargetField: " + rx);
-	  }
+        try
+          {
+            if (item.equals(noneToken))
+              {
+                if (!handleReturnVal(fieldDef.setTargetField(null)))
+                  {
+                    refreshFieldEdit(true);
+                  }
+              }
+            else
+              {
+                if (!handleReturnVal(fieldDef.setTargetField(item)))
+                  {
+                    refreshFieldEdit(true);
+                  }
+              }
+          }
+        catch (RemoteException rx)
+          {
+            throw new IllegalArgumentException ("Exception setting TargetField: " + rx);
+          }
       }
     else if (e.getItemSelectable() == shaUnixCryptTypeC)
       {
-	item = (String)shaUnixCryptTypeC.getSelectedItem();
+        item = (String)shaUnixCryptTypeC.getSelectedItem();
 
-	if (debug)
-	  {
-	    System.out.println("Setting sha unix crypt type to " + item);
-	  }
+        if (debug)
+          {
+            System.out.println("Setting sha unix crypt type to " + item);
+          }
 
-	try
-	  {
-	    if (item.equals("SHA512"))
-	      {
-		handleReturnVal(fieldDef.setShaUnixCrypted512(true));
-	      }
-	    else
-	      {
-		handleReturnVal(fieldDef.setShaUnixCrypted512(false));
-	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new IllegalArgumentException ("Exception setting sha unix crypt variant: " + rx);
-	  }
+        try
+          {
+            if (item.equals("SHA512"))
+              {
+                handleReturnVal(fieldDef.setShaUnixCrypted512(true));
+              }
+            else
+              {
+                handleReturnVal(fieldDef.setShaUnixCrypted512(false));
+              }
+          }
+        catch (RemoteException rx)
+          {
+            throw new IllegalArgumentException ("Exception setting sha unix crypt variant: " + rx);
+          }
       }
   }
 
@@ -2413,7 +2413,7 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
   public void cleanup()
   {
     this.fieldNode = null;
-    this.fieldDef = null;	// remote reference
+    this.fieldDef = null;       // remote reference
     this.owner = null;
     this.changeLabelTypeDialog = null;
     this.commentT = null;
@@ -2457,12 +2457,12 @@ class BaseFieldEditor extends JStretchPanel implements JsetValueCallback, ItemLi
 
     // and clean up the AWT's linkages
 
-    this.removeAll();		// should be done on GUI thread
+    this.removeAll();           // should be done on GUI thread
 
     if (editPanel != null)
       {
-	editPanel.cleanup();
-	editPanel = null;
+        editPanel.cleanup();
+        editPanel = null;
       }
   }
 

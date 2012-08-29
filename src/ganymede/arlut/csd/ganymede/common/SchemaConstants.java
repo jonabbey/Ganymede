@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -209,7 +209,7 @@ public interface SchemaConstants {
   final static short ModificationDateField = 6;
 
   /** string describing the administrator who last modified this object */
-  final static short ModifierField = 7;	
+  final static short ModifierField = 7; 
 
   /**
    * <p>any miscellaneous pointers pointing to us are kept track of in

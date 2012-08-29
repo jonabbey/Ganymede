@@ -197,7 +197,7 @@ public class NumericDBField extends DBField implements num_field {
   {
     if (isVector())
       {
-	throw new IllegalArgumentException("scalar accessor called on vector field");
+        throw new IllegalArgumentException("scalar accessor called on vector field");
       }
 
     return ((Integer) value).intValue();
@@ -214,7 +214,7 @@ public class NumericDBField extends DBField implements num_field {
   {
     if (value == null)
       {
-	return "null";
+        return "null";
       }
 
     return Integer.toString(this.value());
@@ -250,24 +250,24 @@ public class NumericDBField extends DBField implements num_field {
 
     if (!(orig instanceof NumericDBField))
       {
-	throw new IllegalArgumentException("bad field comparison");
+        throw new IllegalArgumentException("bad field comparison");
       }
 
     origN = (NumericDBField) orig;
 
     if (origN.value() != this.value())
       {
-	// "\tOld: {0,number,#}\n"
-	result.append(ts.l("getDiffString.old", origN.getValueLocal()));
+        // "\tOld: {0,number,#}\n"
+        result.append(ts.l("getDiffString.old", origN.getValueLocal()));
 
-	// "\tNew: {0,number,#}\n"
-	result.append(ts.l("getDiffString.new", this.getValueLocal()));
+        // "\tNew: {0,number,#}\n"
+        result.append(ts.l("getDiffString.new", this.getValueLocal()));
 
-	return result.toString();
+        return result.toString();
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -294,7 +294,7 @@ public class NumericDBField extends DBField implements num_field {
 
     if (!isEditable(true))
       {
-	throw new IllegalArgumentException("not applicable to a non-editable field/object");
+        throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
     eObj = (DBEditObject) owner;
@@ -319,7 +319,7 @@ public class NumericDBField extends DBField implements num_field {
 
     if (!isEditable(true))
       {
-	throw new IllegalArgumentException("not applicable to a non-editable field/object");
+        throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
     eObj = (DBEditObject) owner;
@@ -344,7 +344,7 @@ public class NumericDBField extends DBField implements num_field {
 
     if (!isEditable(true))
       {
-	throw new IllegalArgumentException("not applicable to a non-editable field/object");
+        throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
     eObj = (DBEditObject) owner;
@@ -383,10 +383,10 @@ public class NumericDBField extends DBField implements num_field {
   {
     if (!verifyTypeMatch(o))
       {
-	// "Submitted value {0} is not a number!  Major client error while trying to edit field {1} in object {2}."
-	return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
-					  ts.l("verifyBasicConstraints.type_error",
-					       o, this.getName(), owner.getLabel()));
+        // "Submitted value {0} is not a number!  Major client error while trying to edit field {1} in object {2}."
+        return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+                                          ts.l("verifyBasicConstraints.type_error",
+                                               o, this.getName(), owner.getLabel()));
       }
 
     return null;
@@ -404,35 +404,35 @@ public class NumericDBField extends DBField implements num_field {
 
     if (o == null)
       {
-	return eObj.verifyNewValue(this, null);  // explicit for FindBugs
+        return eObj.verifyNewValue(this, null);  // explicit for FindBugs
       }
 
     retVal = verifyBasicConstraints(o);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     I = (Integer) o;
 
     if (limited())
       {
-	if (getMinValue() > I.intValue())
-	  {
-	    return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
-					      ts.l("verifyNewValue.over_range",
-						   I, this.getName(), owner.getLabel(),
-						   Integer.valueOf(this.getMinValue())));
-	  }
+        if (getMinValue() > I.intValue())
+          {
+            return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
+                                              ts.l("verifyNewValue.over_range",
+                                                   I, this.getName(), owner.getLabel(),
+                                                   Integer.valueOf(this.getMinValue())));
+          }
 
-	if (getMaxValue() < I.intValue())
-	  {
-	    return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
-					      ts.l("verifyNewValue.under_range",
-						   I, this.getName(), owner.getLabel(),
-						   Integer.valueOf(this.getMinValue())));
-	  }
+        if (getMaxValue() < I.intValue())
+          {
+            return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
+                                              ts.l("verifyNewValue.under_range",
+                                                   I, this.getName(), owner.getLabel(),
+                                                   Integer.valueOf(this.getMinValue())));
+          }
       }
 
     // have our parent make the final ok on the value

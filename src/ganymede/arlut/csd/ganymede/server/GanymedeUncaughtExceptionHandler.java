@@ -123,19 +123,19 @@ public class GanymedeUncaughtExceptionHandler implements Thread.UncaughtExceptio
 
     for (StackTraceElement traceElement: traces)
       {
-	if (traceElement.getClassName().equals("arlut.csd.ganymede.server.GanymedeUncaughtExceptionHandler") &&
-	    traceElement.getMethodName().equals("uncaughtException"))
-	  {
-	    try
-	      {
-		System.err.println("Exception loop processing:\n");
-		ex.printStackTrace();
-	      }
-	    finally
-	      {
-		return;
-	      }
-	  }
+        if (traceElement.getClassName().equals("arlut.csd.ganymede.server.GanymedeUncaughtExceptionHandler") &&
+            traceElement.getMethodName().equals("uncaughtException"))
+          {
+            try
+              {
+                System.err.println("Exception loop processing:\n");
+                ex.printStackTrace();
+              }
+            finally
+              {
+                return;
+              }
+          }
       }
 
     String mesg = null;
@@ -143,43 +143,43 @@ public class GanymedeUncaughtExceptionHandler implements Thread.UncaughtExceptio
 
     if (contextMesg != null)
       {
-	mesg = contextMesg + "\n\n" + trace;
+        mesg = contextMesg + "\n\n" + trace;
       }
     else
       {
-	mesg = trace;
+        mesg = trace;
       }
 
     try
       {
-	// everything here may fail if the server hasn't proceeded far
-	// enough in startup.
+        // everything here may fail if the server hasn't proceeded far
+        // enough in startup.
 
-	if (!StringUtils.isEmpty(Ganymede.bugReportAddressProperty))
-	  {
-	    try
-	      {
-		StringBuffer bugReport = new StringBuffer();
+        if (!StringUtils.isEmpty(Ganymede.bugReportAddressProperty))
+          {
+            try
+              {
+                StringBuffer bugReport = new StringBuffer();
 
-		bugReport.append("\nSERVER ERROR DETECTED:\nexception trace == \"");
-		bugReport.append(trace);
-		bugReport.append("\"\n");
+                bugReport.append("\nSERVER ERROR DETECTED:\nexception trace == \"");
+                bugReport.append(trace);
+                bugReport.append("\"\n");
 
-		Ganymede.internalSession.sendMail(Ganymede.bugReportAddressProperty, "Ganymede Server Bug Report", bugReport);
-	      }
-	    catch (Throwable ex2)
-	      {
-	      }
-	  }
+                Ganymede.internalSession.sendMail(Ganymede.bugReportAddressProperty, "Ganymede Server Bug Report", bugReport);
+              }
+            catch (Throwable ex2)
+              {
+              }
+          }
 
-	GanymedeAdmin.logAppend(mesg);
+        GanymedeAdmin.logAppend(mesg);
       }
     catch (Throwable th)
       {
       }
     finally
       {
-	System.err.println(mesg);
+        System.err.println(mesg);
       }
   }
 }

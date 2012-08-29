@@ -241,8 +241,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
    */
 
   public vectorPanel(db_field field, FieldTemplate template, windowPanel parent,
-		     boolean editable, boolean isEditInPlace,
-		     containerPanel container, boolean isCreating)
+                     boolean editable, boolean isEditInPlace,
+                     containerPanel container, boolean isCreating)
   {
     this.my_field = field;
     this.template = template;
@@ -255,12 +255,12 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     if (!debug)
       {
-	debug = gc.debug;
+        debug = gc.debug;
       }
 
     if (debug)
       {
-	System.out.println("Adding new vectorPanel");
+        System.out.println("Adding new vectorPanel");
       }
 
     centerPanel = new JPanel(false);
@@ -330,136 +330,136 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   {
     if (my_field instanceof ip_field)
       {
-	if (debug)
-	  {
-	    System.out.println("Adding ip vector field");
-	  }
+        if (debug)
+          {
+            System.out.println("Adding ip vector field");
+          }
 
-	try
-	  {
-	    ip_field ipfield = (ip_field) my_field;
+        try
+          {
+            ip_field ipfield = (ip_field) my_field;
 
-	    int size = ipfield.size();
+            int size = ipfield.size();
 
-	    for (int i=0; (i < size) && container.keepLoading();i++)
-	      {
-		JIPField ipf = new JIPField(editable,
-					    ipfield.v6Allowed());
+            for (int i=0; (i < size) && container.keepLoading();i++)
+              {
+                JIPField ipf = new JIPField(editable,
+                                            ipfield.v6Allowed());
 
-		ipf.setValue((Byte[]) ipfield.getElement(i));
-		ipf.setCallback(this);
+                ipf.setValue((Byte[]) ipfield.getElement(i));
+                ipf.setCallback(this);
 
-		addElement(ipf, false);
-	      }
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx);
-	  }
+                addElement(ipf, false);
+              }
+          }
+        catch (Exception rx)
+          {
+            gc.processExceptionRethrow(rx);
+          }
       }
     else if (my_field instanceof invid_field)
       {
-	if (debug)
-	  {
-	    System.out.println("Adding vector invid_field");
-	  }
+        if (debug)
+          {
+            System.out.println("Adding vector invid_field");
+          }
 
-	try
-	  {
-	    invid_field invidfield = (invid_field) my_field;
-	    FieldInfo info = invidfield.getFieldInfo();
+        try
+          {
+            invid_field invidfield = (invid_field) my_field;
+            FieldInfo info = invidfield.getFieldInfo();
 
-	    if (!(info.getValue() instanceof Vector))
-	      {
-		throw new RuntimeException("Error, vectorPanel passed scalar invid_field");
-	      }
+            if (!(info.getValue() instanceof Vector))
+              {
+                throw new RuntimeException("Error, vectorPanel passed scalar invid_field");
+              }
 
-	    Vector values = (Vector) info.getValue();
+            Vector values = (Vector) info.getValue();
 
-	    if (!isEditInPlace)
-	      {
-		// The vectorPanel only handles edit-in-place fields.
-		// If it is not edit-in-place, then the field should
-		// just get a StringSelector.
+            if (!isEditInPlace)
+              {
+                // The vectorPanel only handles edit-in-place fields.
+                // If it is not edit-in-place, then the field should
+                // just get a StringSelector.
 
-		throw new RuntimeException("Don't give me(the vectorPanel!)  non edit-in-place invid_fields.");
-	      }
+                throw new RuntimeException("Don't give me(the vectorPanel!)  non edit-in-place invid_fields.");
+              }
 
-	    if (debug)
-	      {
-		System.out.println("Adding edit in place invid vector, size = " + invidfield.size());
-	      }
+            if (debug)
+              {
+                System.out.println("Adding edit in place invid vector, size = " + invidfield.size());
+              }
 
-	    int size = values.size();
+            int size = values.size();
 
-	    for (int i=0; (i < size) && container.keepLoading(); i++)
-	      {
-		if (debug)
-		  {
-		    System.out.println("Adding Invid to edit in place vector panel");
-		  }
+            for (int i=0; (i < size) && container.keepLoading(); i++)
+              {
+                if (debug)
+                  {
+                    System.out.println("Adding Invid to edit in place vector panel");
+                  }
 
-		Invid inv = (Invid)(values.elementAt(i));
+                Invid inv = (Invid)(values.elementAt(i));
 
-		// We need to get a server-side db_object reference to pass to the
-		// containerPanel.
+                // We need to get a server-side db_object reference to pass to the
+                // containerPanel.
 
-		db_object object = null;
+                db_object object = null;
 
-		if (editable)
-		  {
-		    ReturnVal rv = gc.handleReturnVal(gc.getSession().edit_db_object(inv));
-		    object = (db_object) rv.getObject();
-		  }
-		else
-		  {
-		    ReturnVal rv = gc.handleReturnVal(gc.getSession().view_db_object(inv));
-		    object = (db_object) rv.getObject();
-		  }
+                if (editable)
+                  {
+                    ReturnVal rv = gc.handleReturnVal(gc.getSession().edit_db_object(inv));
+                    object = (db_object) rv.getObject();
+                  }
+                else
+                  {
+                    ReturnVal rv = gc.handleReturnVal(gc.getSession().view_db_object(inv));
+                    object = (db_object) rv.getObject();
+                  }
 
-		// create a containerPanel, but don't load it yet.. the elementWrapper will
-		// load the containerPanel if the user actually opens it.
+                // create a containerPanel, but don't load it yet.. the elementWrapper will
+                // load the containerPanel if the user actually opens it.
 
-		containerPanel cp = new containerPanel(object,
-						       inv,
-						       editable,
-						       gc,
-						       wp, container.frame,
-						       null, false, null);
+                containerPanel cp = new containerPanel(object,
+                                                       inv,
+                                                       editable,
+                                                       gc,
+                                                       wp, container.frame,
+                                                       null, false, null);
 
-		cp.setBorder(wp.lineEmptyBorder);
+                cp.setBorder(wp.lineEmptyBorder);
 
-		addElement(object.getEmbeddedObjectDisplayLabel(), cp, false, false);
-	      }
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx);
-	  }
+                addElement(object.getEmbeddedObjectDisplayLabel(), cp, false, false);
+              }
+          }
+        catch (Exception rx)
+          {
+            gc.processExceptionRethrow(rx);
+          }
       }
     else if (debug)
       {
-	System.out.println("\n*** Error - inappropriate field type passed to vectorPanel constructor");
+        System.out.println("\n*** Error - inappropriate field type passed to vectorPanel constructor");
       }
 
     if (editable)
       {
-	if (debug)
-	  {
-	    System.out.println("Adding add button");
-	  }
+        if (debug)
+          {
+            System.out.println("Adding add button");
+          }
 
-	JPanel addPanel = new JPanel();
-	addPanel.setLayout(new BorderLayout());
-	addB.addActionListener(this);
+        JPanel addPanel = new JPanel();
+        addPanel.setLayout(new BorderLayout());
+        addB.addActionListener(this);
 
-	addPanel.add("East", addB);
+        addPanel.add("East", addB);
 
-	add("South", addPanel);
+        add("South", addPanel);
       }
     else if (debug)
       {
-	System.out.println("Field is not editable, no button added");
+        System.out.println("Field is not editable, no button added");
       }
   }
 
@@ -483,106 +483,106 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     if (debug)
       {
-	System.out.println("Adding new element");
+        System.out.println("Adding new element");
       }
 
     if (my_field instanceof invid_field)
       {
-	if (debug)
-	  {
-	    System.out.println("Adding new edit in place element");
-	  }
+        if (debug)
+          {
+            System.out.println("Adding new edit in place element");
+          }
 
-	try
-	  {
-	    retVal = ((invid_field)my_field).createNewEmbedded();
-	    gc.handleReturnVal(retVal);
+        try
+          {
+            retVal = ((invid_field)my_field).createNewEmbedded();
+            gc.handleReturnVal(retVal);
 
-	    if (retVal != null && retVal.didSucceed())
-	      {
-		if (local_debug)
-		  {
-		    System.err.println("XX** Hey.. got a result from the server to create a new embedded element");
-		  }
+            if (retVal != null && retVal.didSucceed())
+              {
+                if (local_debug)
+                  {
+                    System.err.println("XX** Hey.. got a result from the server to create a new embedded element");
+                  }
 
-		invid = retVal.getInvid();
+                invid = retVal.getInvid();
 
-		if (local_debug)
-		  {
-		    System.err.println("XX** Invid for new embedded object is " + invid);
-		  }
+                if (local_debug)
+                  {
+                    System.err.println("XX** Invid for new embedded object is " + invid);
+                  }
 
-		db_object object = retVal.getObject();
+                db_object object = retVal.getObject();
 
-		// create and load the new containerPanel.  Note that we are going to
-		// immediately show the new element open to the user, so we go ahead
-		// and use one of the default-valued containerPanel constructors that
-		// will immediately load the new containerPanel.
+                // create and load the new containerPanel.  Note that we are going to
+                // immediately show the new element open to the user, so we go ahead
+                // and use one of the default-valued containerPanel constructors that
+                // will immediately load the new containerPanel.
 
-		containerPanel cp = new containerPanel(object, invid,
-						       isFieldEditable() && editable,
-						       gc,
-						       wp,
-						       container.frame,
-						       null);
+                containerPanel cp = new containerPanel(object, invid,
+                                                       isFieldEditable() && editable,
+                                                       gc,
+                                                       wp,
+                                                       container.frame,
+                                                       null);
 
-		if (local_debug)
-		  {
-		    System.err.println("XX** Created container panel");
-		  }
+                if (local_debug)
+                  {
+                    System.err.println("XX** Created container panel");
+                  }
 
-		if (local_debug)
-		  {
-		    System.err.println("XX** Recorded containerpanel in our client");
-		  }
+                if (local_debug)
+                  {
+                    System.err.println("XX** Recorded containerpanel in our client");
+                  }
 
-		cp.setBorder(wp.lineEmptyBorder);
+                cp.setBorder(wp.lineEmptyBorder);
 
-		if (local_debug)
-		  {
-		    System.err.println("XX** Set border");
-		  }
+                if (local_debug)
+                  {
+                    System.err.println("XX** Set border");
+                  }
 
-		// display the new containerPanel pre-expanded
+                // display the new containerPanel pre-expanded
 
-		// "New Element"
-		addElement(ts.l("addNewElement.new_element"), cp, true);
+                // "New Element"
+                addElement(ts.l("addNewElement.new_element"), cp, true);
 
-		if (local_debug)
-		  {
-		    System.err.println("XX** Added element");
-		  }
-	      }
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx);
-	  }
+                if (local_debug)
+                  {
+                    System.err.println("XX** Added element");
+                  }
+              }
+          }
+        catch (Exception rx)
+          {
+            gc.processExceptionRethrow(rx);
+          }
       }
     else if (my_field instanceof ip_field)
       {
-	if (debug)
-	  {
-	    System.out.println("Adding new ip vector field");
-	  }
+        if (debug)
+          {
+            System.out.println("Adding new ip vector field");
+          }
 
-	ip_field ipfield = (ip_field) my_field;
+        ip_field ipfield = (ip_field) my_field;
 
-	try
-	  {
-	    JIPField ipf = new JIPField(true,
-					ipfield.v6Allowed());
-	    ipf.setCallback(this);
-	    addElement(ipf);
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx);
-	  }
+        try
+          {
+            JIPField ipf = new JIPField(true,
+                                        ipfield.v6Allowed());
+            ipf.setCallback(this);
+            addElement(ipf);
+          }
+        catch (Exception rx)
+          {
+            gc.processExceptionRethrow(rx);
+          }
       }
     else if (debug)
       {
-	System.out.println("vectorPanel.addNewElement(): This type is not supported yet.");
+        System.out.println("vectorPanel.addNewElement(): This type is not supported yet.");
       }
 
     gc.somethingChanged();
@@ -670,7 +670,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   {
     if (c == null)
       {
-	throw new IllegalArgumentException("vectorPanel.addElement(): Component parameter is null");
+        throw new IllegalArgumentException("vectorPanel.addElement(): Component parameter is null");
       }
 
     compVector.addElement(c);
@@ -734,36 +734,36 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   {
     if (debug)
       {
-	System.out.println("Deleting element");
+        System.out.println("Deleting element");
       }
 
     if (ew == null)
       {
-	throw new IllegalArgumentException("Component parameter is null");
+        throw new IllegalArgumentException("Component parameter is null");
       }
 
     try
       {
-	if (debug)
-	  {
-	    System.out.println("Deleting element number: " + ew.index + "(" + ew.getValue() + ")");
-	  }
+        if (debug)
+          {
+            System.out.println("Deleting element number: " + ew.index + "(" + ew.getValue() + ")");
+          }
 
-	// we use ew.getValue() rather than ew.index here so that we
-	// don't risk screwing things up if we get our index numbers
-	// misaligned.
+        // we use ew.getValue() rather than ew.index here so that we
+        // don't risk screwing things up if we get our index numbers
+        // misaligned.
 
         ReturnVal retVal = my_field.deleteElement(ew.getValue());
 
-	gc.handleReturnVal(retVal);
+        gc.handleReturnVal(retVal);
 
-	if (debug)
-	  {
-	    System.out.println("Deleting element (after handleReturnVal)");
-	  }
+        if (debug)
+          {
+            System.out.println("Deleting element (after handleReturnVal)");
+          }
 
         if (ReturnVal.didSucceed(retVal))
-	  {
+          {
             // removeElement will return false if the element was
             // already removed by handleReturnVal() above, due to a
             // server-ordered field refresh of this vectorPanel.
@@ -774,22 +774,22 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
                 container.frame.validate();
               }
 
-	    gc.somethingChanged();
+            gc.somethingChanged();
 
-	    if (debug)
-	      {
-		System.out.println("Deleting element (after revalidate)");
-	      }
-	  }
-	else
-	  {
-	    // "Server will not allow deletion of this element."
-	    showErrorMessage(ts.l("deleteElement.error"));
-	  }
+            if (debug)
+              {
+                System.out.println("Deleting element (after revalidate)");
+              }
+          }
+        else
+          {
+            // "Server will not allow deletion of this element."
+            showErrorMessage(ts.l("deleteElement.error"));
+          }
       }
     catch (Exception rx)
       {
-	gc.processExceptionRethrow(rx);
+        gc.processExceptionRethrow(rx);
       }
   }
 
@@ -809,7 +809,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   {
     if (debug)
       {
-	System.err.println("vectorPanel.refresh(" + name + ")");
+        System.err.println("vectorPanel.refresh(" + name + ")");
       }
 
     boolean needFullRefresh = false;
@@ -818,220 +818,220 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     try
       {
-	if (my_field instanceof invid_field)
-	  {
+        if (my_field instanceof invid_field)
+          {
             Invid invid = null;
             Hashtable serverInvids = new Hashtable();
             Hashtable localInvids = new Hashtable();
             containerPanel cp = null;
 
-	    // figure out what invids are currently in my_field
-	    // on the server, save them so we can scratch them off
-	    // as we sync this vector panel
+            // figure out what invids are currently in my_field
+            // on the server, save them so we can scratch them off
+            // as we sync this vector panel
 
-	    Vector serverValues = my_field.getValues();
+            Vector serverValues = my_field.getValues();
 
-	    if (debug)
-	      {
-		System.err.println("vectorPanel.refresh(): serverValues.size = " + serverValues.size());
-	      }
+            if (debug)
+              {
+                System.err.println("vectorPanel.refresh(): serverValues.size = " + serverValues.size());
+              }
 
-	    for (int i = 0; i < serverValues.size(); i++)
-	      {
-		invid = (Invid) serverValues.elementAt(i);
+            for (int i = 0; i < serverValues.size(); i++)
+              {
+                invid = (Invid) serverValues.elementAt(i);
 
-		serverInvids.put(invid, Integer.valueOf(i));
-	      }
+                serverInvids.put(invid, Integer.valueOf(i));
+              }
 
-	    // what invid's are currently in this vector panel?
+            // what invid's are currently in this vector panel?
 
-	    for (int i = 0; i < compVector.size(); i++)
-	      {
-		cp = (containerPanel) compVector.elementAt(i);
+            for (int i = 0; i < compVector.size(); i++)
+              {
+                cp = (containerPanel) compVector.elementAt(i);
 
-		if (cp != null)
-		  {
-		    invid = cp.getObjectInvid();
+                if (cp != null)
+                  {
+                    invid = cp.getObjectInvid();
 
-		    localInvids.put(invid, invid);
-		  }
-	      }
+                    localInvids.put(invid, invid);
+                  }
+              }
 
-	    // now, iterate through the invids being displayed, scratching
-	    // them out of serverInvids when we sync each containerPanel
+            // now, iterate through the invids being displayed, scratching
+            // them out of serverInvids when we sync each containerPanel
 
-	    int localIndex = 0;
+            int localIndex = 0;
 
-	    while (localInvids.size() > 0)
-	      {
-		cp = (containerPanel) compVector.elementAt(localIndex);
-		invid = cp.getObjectInvid();
+            while (localInvids.size() > 0)
+              {
+                cp = (containerPanel) compVector.elementAt(localIndex);
+                invid = cp.getObjectInvid();
 
-		if (serverInvids.containsKey(invid))
-		  {
-		    // the server has this invid, go ahead and update
-		    // this containerPanel's status
+                if (serverInvids.containsKey(invid))
+                  {
+                    // the server has this invid, go ahead and update
+                    // this containerPanel's status
 
-		    /*
-		      gclient.handleReturnVal() will update the
-		      containerPanel's contents if needed
+                    /*
+                      gclient.handleReturnVal() will update the
+                      containerPanel's contents if needed
 
-		      cp.updateAll();
-		      */
+                      cp.updateAll();
+                      */
 
-		    elementWrapper ew = (elementWrapper) ewHash.get(cp);
+                    elementWrapper ew = (elementWrapper) ewHash.get(cp);
 
-		    ew.setIndex(localIndex);
-		    ew.refreshTitle();
+                    ew.setIndex(localIndex);
+                    ew.refreshTitle();
 
-		    // we've updated this one.. scratch it off the server
-		    // and client list
+                    // we've updated this one.. scratch it off the server
+                    // and client list
 
-		    serverInvids.remove(invid);
-		    localInvids.remove(invid);
+                    serverInvids.remove(invid);
+                    localInvids.remove(invid);
 
-		    localIndex++;
+                    localIndex++;
 
-		    if (debug)
-		      {
-			System.err.println("vectorPanel.refresh(): updated " + ew.titleText);
-		      }
-		  }
-		else
-		  {
-		    // the server doesn't have this invid anymore, so
-		    // we need to take it out of this vector panel
+                    if (debug)
+                      {
+                        System.err.println("vectorPanel.refresh(): updated " + ew.titleText);
+                      }
+                  }
+                else
+                  {
+                    // the server doesn't have this invid anymore, so
+                    // we need to take it out of this vector panel
 
-		    elementWrapper ew = (elementWrapper) ewHash.get(cp);
+                    elementWrapper ew = (elementWrapper) ewHash.get(cp);
 
                     removeElement(ew);
 
-		    needFullRefresh = true;
-		    localInvids.remove(invid);
+                    needFullRefresh = true;
+                    localInvids.remove(invid);
 
-		    if (debug)
-		      {
-			System.err.println("vectorPanel.refresh(): removed " + ew.titleText);
-		      }
-		  }
-	      }
+                    if (debug)
+                      {
+                        System.err.println("vectorPanel.refresh(): removed " + ew.titleText);
+                      }
+                  }
+              }
 
-	    // take care of any new embedded objects to be displayed, adding
-	    // them to the end.  Note that we don't care about the ordering
-	    // of the invids in the client's vectorPanel, we just want to make
-	    // sure that we have the right (unordered) set, and that everything
-	    // is up-to-date.
+            // take care of any new embedded objects to be displayed, adding
+            // them to the end.  Note that we don't care about the ordering
+            // of the invids in the client's vectorPanel, we just want to make
+            // sure that we have the right (unordered) set, and that everything
+            // is up-to-date.
 
-	    Enumeration en = serverInvids.elements();
+            Enumeration en = serverInvids.elements();
 
-	    while (en.hasMoreElements())
-	      {
-		invid = (Invid) en.nextElement();
+            while (en.hasMoreElements())
+              {
+                invid = (Invid) en.nextElement();
 
-		localIndex = ((Integer) serverInvids.get(invid)).intValue();
+                localIndex = ((Integer) serverInvids.get(invid)).intValue();
 
-		if (debug)
-		  {
-		    System.out.println("VectorPanel.refresh(): adding new embedded object: " + invid);
-		  }
+                if (debug)
+                  {
+                    System.out.println("VectorPanel.refresh(): adding new embedded object: " + invid);
+                  }
 
-		ReturnVal rv = editable ? gc.getSession().edit_db_object(invid) :
-		  gc.getSession().view_db_object(invid);
+                ReturnVal rv = editable ? gc.getSession().edit_db_object(invid) :
+                  gc.getSession().view_db_object(invid);
 
-		rv = gc.handleReturnVal(rv);
+                rv = gc.handleReturnVal(rv);
 
-		if (ReturnVal.didSucceed(rv))
-		  {
-		    // create the new containerPanel.. don't pre-load it..
+                if (ReturnVal.didSucceed(rv))
+                  {
+                    // create the new containerPanel.. don't pre-load it..
 
-		    containerPanel newcp = new containerPanel(((db_object) rv.getObject()), invid,
-							      editable,
-							      gc,
-							      wp, container.frame,
-							      null, false, null);
+                    containerPanel newcp = new containerPanel(((db_object) rv.getObject()), invid,
+                                                              editable,
+                                                              gc,
+                                                              wp, container.frame,
+                                                              null, false, null);
 
-		    newcp.setBorder(wp.lineEmptyBorder);
+                    newcp.setBorder(wp.lineEmptyBorder);
 
-		    // the addElement call will take care of most of the niceties of
-		    // getting this containerPanel added.
+                    // the addElement call will take care of most of the niceties of
+                    // getting this containerPanel added.
 
-		    addElement(newcp);
-		  }
-	      }
-	  }
-	else if (my_field instanceof ip_field)
-	  {
-	    // this code branch hasn't been tested so well, since we
-	    // don't use an IP address vector in ARL's schema..
+                    addElement(newcp);
+                  }
+              }
+          }
+        else if (my_field instanceof ip_field)
+          {
+            // this code branch hasn't been tested so well, since we
+            // don't use an IP address vector in ARL's schema..
 
             int size = my_field.size();
 
-	    for (int i = 0; i < size; i++)
-	      {
-		if (i < compVector.size())
-		  {
-		    JIPField ipf = (JIPField) compVector.elementAt(i);
+            for (int i = 0; i < size; i++)
+              {
+                if (i < compVector.size())
+                  {
+                    JIPField ipf = (JIPField) compVector.elementAt(i);
 
-		    ipf.setValue((Byte[])my_field.getElement(i));
+                    ipf.setValue((Byte[])my_field.getElement(i));
 
-		    elementWrapper ew = (elementWrapper) ewHash.get(ipf);
+                    elementWrapper ew = (elementWrapper) ewHash.get(ipf);
 
-		    ew.setIndex(i);
-		  }
-		else
-		  {
-		    ip_field ipfield = (ip_field) my_field;
+                    ew.setIndex(i);
+                  }
+                else
+                  {
+                    ip_field ipfield = (ip_field) my_field;
 
-		    JIPField ipf = new JIPField(editable,
-						ipfield.v6Allowed());
+                    JIPField ipf = new JIPField(editable,
+                                                ipfield.v6Allowed());
 
-		    ipf.setValue((Byte[]) ipfield.getElement(i));
-		    ipf.setCallback(this);
+                    ipf.setValue((Byte[]) ipfield.getElement(i));
+                    ipf.setCallback(this);
 
-		    addElement(ipf, false);
-		  }
-	      }
+                    addElement(ipf, false);
+                  }
+              }
 
-	    // Now get rid of extra ip field components
+            // Now get rid of extra ip field components
 
-	    int fieldCount = compVector.size();
+            int fieldCount = compVector.size();
 
             if (fieldCount > 0)
               {
                 needFullRefresh = true;
               }
 
-	    // we count down so that we can remove extra fields off of the
-	    // end
+            // we count down so that we can remove extra fields off of the
+            // end
 
-	    for (int i = fieldCount; i >= size; i--)
-	      {
+            for (int i = fieldCount; i >= size; i--)
+              {
                 removeElement((elementWrapper) ewHash.get(compVector.elementAt(i)));
-	      }
-	  }
-	else
-	  {
-	    System.err.println("Unknown type in vectorPanel.refresh compVector: " + my_field.getClass());
-	  }
+              }
+          }
+        else
+          {
+            System.err.println("Unknown type in vectorPanel.refresh compVector: " + my_field.getClass());
+          }
       }
     catch (Exception rx)
       {
-	gc.processExceptionRethrow(rx, "vectorPanel.refresh(): ");
+        gc.processExceptionRethrow(rx, "vectorPanel.refresh(): ");
       }
 
     if (needFullRefresh)
       {
-	invalidate();
-	container.frame.validate();
+        invalidate();
+        container.frame.validate();
 
-	if (debug)
-	  {
-	    System.err.println("vectorPanel.refresh(): executed fullRefresh");
-	  }
+        if (debug)
+          {
+            System.err.println("vectorPanel.refresh(): executed fullRefresh");
+          }
       }
     else if (debug)
       {
-	System.err.println("vectorPanel.refresh(): skipped fullRefresh");
+        System.err.println("vectorPanel.refresh(): skipped fullRefresh");
       }
   }
 
@@ -1047,29 +1047,29 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     while (wrappers.hasMoreElements())
       {
-	elementWrapper ew = (elementWrapper)ewHash.get(wrappers.nextElement());
-	ew.open();
+        elementWrapper ew = (elementWrapper)ewHash.get(wrappers.nextElement());
+        ew.open();
 
-	Component comp = ew.getComponent();
+        Component comp = ew.getComponent();
 
-	if (comp instanceof containerPanel)
-	  {
-	    if (debug)
-	      {
-		System.out.println("Aye, it's a containerPanel");
-	      }
+        if (comp instanceof containerPanel)
+          {
+            if (debug)
+              {
+                System.out.println("Aye, it's a containerPanel");
+              }
 
-	    containerPanel cp = (containerPanel)comp;
+            containerPanel cp = (containerPanel)comp;
 
-	    for (int i = 0; i < cp.vectorPanelList.size(); i++)
-	      {
-		((vectorPanel)cp.vectorPanelList.elementAt(i)).expandLevels(true);
-	      }
-	  }
-	else if (debug)
-	  {
-	    System.out.println("The likes of this I have never seen: " + comp);
-	  }
+            for (int i = 0; i < cp.vectorPanelList.size(); i++)
+              {
+                ((vectorPanel)cp.vectorPanelList.elementAt(i)).expandLevels(true);
+              }
+          }
+        else if (debug)
+          {
+            System.out.println("The likes of this I have never seen: " + comp);
+          }
       }
 
     invalidate();
@@ -1090,29 +1090,29 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   {
     if (recursive)
       {
-	// ok, mike did this with threaded recursion, strangely enough.  Note
-	// that t.start() is equivalent to calling expandAllLevels() in a new
-	// thread, by way of this.run().
+        // ok, mike did this with threaded recursion, strangely enough.  Note
+        // that t.start() is equivalent to calling expandAllLevels() in a new
+        // thread, by way of this.run().
 
-	Thread t = new Thread(this);
-	t.setPriority(Thread.NORM_PRIORITY);
-	t.start();
+        Thread t = new Thread(this);
+        t.setPriority(Thread.NORM_PRIORITY);
+        t.start();
       }
     else
       {
-	setWaitCursor();
+        setWaitCursor();
 
-	Enumeration wrappers = ewHash.keys();
+        Enumeration wrappers = ewHash.keys();
 
-	/* -- */
+        /* -- */
 
-	while (wrappers.hasMoreElements())
-	  {
-	    elementWrapper ew = (elementWrapper)ewHash.get(wrappers.nextElement());
-	    ew.open();
-	  }
+        while (wrappers.hasMoreElements())
+          {
+            elementWrapper ew = (elementWrapper)ewHash.get(wrappers.nextElement());
+            ew.open();
+          }
 
-	setNormalCursor();
+        setNormalCursor();
       }
   }
 
@@ -1142,36 +1142,36 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     try
       {
-	while (wrappers.hasMoreElements())
-	  {
-	    elementWrapper ew = (elementWrapper)ewHash.get(wrappers.nextElement());
-	    ew.close();
+        while (wrappers.hasMoreElements())
+          {
+            elementWrapper ew = (elementWrapper)ewHash.get(wrappers.nextElement());
+            ew.close();
 
-	    if (recursive)
-	      {
-		Component comp = ew.getComponent();
+            if (recursive)
+              {
+                Component comp = ew.getComponent();
 
-		if (comp instanceof containerPanel)
-		  {
-		    containerPanel cp = (containerPanel)comp;
+                if (comp instanceof containerPanel)
+                  {
+                    containerPanel cp = (containerPanel)comp;
 
-		    for (int i = 0; i < cp.vectorPanelList.size(); i++)
-		      {
-			((vectorPanel)cp.vectorPanelList.elementAt(i)).closeLevels(true);
-		      }
-		  }
-	      }
-	  }
+                    for (int i = 0; i < cp.vectorPanelList.size(); i++)
+                      {
+                        ((vectorPanel)cp.vectorPanelList.elementAt(i)).closeLevels(true);
+                      }
+                  }
+              }
+          }
 
-	// This is necessary for the closing, but the expanding doesn't
-	// need validate stuff.  Pretty weird, but thus is swing.
+        // This is necessary for the closing, but the expanding doesn't
+        // need validate stuff.  Pretty weird, but thus is swing.
 
-	invalidate();
-	container.frame.validate();
+        invalidate();
+        container.frame.validate();
       }
     finally
       {
-	setNormalCursor();
+        setNormalCursor();
       }
   }
 
@@ -1179,33 +1179,33 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   {
     if ((e.getSource() == addB) && editable)
       {
-	setWaitCursor();
-	addNewElement();
-	setNormalCursor();
+        setWaitCursor();
+        addNewElement();
+        setNormalCursor();
       }
     else if (e.getSource() instanceof JMenuItem)
       {
-	if (debug)
-	  {
-	    System.out.println("JMenuItem: " + e.getActionCommand());
-	  }
+        if (debug)
+          {
+            System.out.println("JMenuItem: " + e.getActionCommand());
+          }
 
-	if (e.getActionCommand().equals("Expand all elements"))
-	  {
-	    expandLevels(true);
-	  }
-	else if (e.getActionCommand().equals("Expand this level"))
-	  {
-	    expandLevels(false);
-	  }
-	else if (e.getActionCommand().equals("Close this level"))
-	  {
-	    closeLevels(false);
-	  }
-	else if (e.getActionCommand().equals("Close all elements"))
-	  {
-	    closeLevels(true);
-	  }
+        if (e.getActionCommand().equals("Expand all elements"))
+          {
+            expandLevels(true);
+          }
+        else if (e.getActionCommand().equals("Expand this level"))
+          {
+            expandLevels(false);
+          }
+        else if (e.getActionCommand().equals("Close this level"))
+          {
+            closeLevels(false);
+          }
+        else if (e.getActionCommand().equals("Close all elements"))
+          {
+            closeLevels(true);
+          }
       }
   }
 
@@ -1219,7 +1219,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   {
     if (v == null)
       {
-	throw new IllegalArgumentException("ValueObject Argument is null");
+        throw new IllegalArgumentException("ValueObject Argument is null");
       }
 
     elementWrapper ew = (elementWrapper)v.getSource();
@@ -1227,67 +1227,67 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     if (v.getValue() == null)
       {
-	return false;
+        return false;
       }
     else if (v.getValue().equals("remove"))
       {
-	if (debug)
-	  {
-	    System.out.println("You clicked on an element closebox");
-	  }
+        if (debug)
+          {
+            System.out.println("You clicked on an element closebox");
+          }
 
-	if (editable)
-	  {
-	    deleteElement((elementWrapper)v.getSource());
-	  }
-	else
-	  {
-	    // "You can''t delete elements in a view window."
-	    setStatus(ts.l("setValuePerformed.nope_status"));
-	    returnValue = false;
-	  }
+        if (editable)
+          {
+            deleteElement((elementWrapper)v.getSource());
+          }
+        else
+          {
+            // "You can''t delete elements in a view window."
+            setStatus(ts.l("setValuePerformed.nope_status"));
+            returnValue = false;
+          }
       }
     else if (ew.getComponent() instanceof JIPField)
       {
-	if (debug)
-	  {
-	    System.out.println("IP field changed");
-	  }
+        if (debug)
+          {
+            System.out.println("IP field changed");
+          }
 
-	if (editable)
-	  {
-	    short index = (short)compVector.indexOf(ew.getComponent());
+        if (editable)
+          {
+            short index = (short)compVector.indexOf(ew.getComponent());
 
-	    if (v instanceof JErrorValueObject)
-	      {
-		setStatus((String)v.getValue());
-		returnValue = false;
-	      }
-	    else
-	      {
-		try
-		  {
-		    returnValue = changeElement((Byte[])v.getValue(), index);
-		  }
-		catch (Exception rx)
-		  {
-		    gc.processExceptionRethrow(rx);
-		  }
-	      }
-	  }
-	else     //editable == false, so can't make changes
-	  {
-	    returnValue = false;
-	  }
+            if (v instanceof JErrorValueObject)
+              {
+                setStatus((String)v.getValue());
+                returnValue = false;
+              }
+            else
+              {
+                try
+                  {
+                    returnValue = changeElement((Byte[])v.getValue(), index);
+                  }
+                catch (Exception rx)
+                  {
+                    gc.processExceptionRethrow(rx);
+                  }
+              }
+          }
+        else     //editable == false, so can't make changes
+          {
+            returnValue = false;
+          }
       }
     else if (debug)
       {
-	System.out.println("Value changed in field that is not yet supported");
+        System.out.println("Value changed in field that is not yet supported");
       }
 
     if (returnValue)
       {
-	gc.somethingChanged();
+        gc.somethingChanged();
       }
 
     return returnValue;
@@ -1309,74 +1309,74 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     if (index >= my_field.size())
       {
-	if (debug)
-	  {
-	    System.out.println("Adding new element");
-	  }
+        if (debug)
+          {
+            System.out.println("Adding new element");
+          }
 
-	retVal = my_field.addElement(obj);
+        retVal = my_field.addElement(obj);
 
-	succeeded = (retVal == null) ? true : retVal.didSucceed();
+        succeeded = (retVal == null) ? true : retVal.didSucceed();
 
-	if (retVal != null)
-	  {
-	    gc.handleReturnVal(retVal);
-	  }
+        if (retVal != null)
+          {
+            gc.handleReturnVal(retVal);
+          }
 
-	if (succeeded)
-	  {
-	    if (debug)
-	      {
-		System.out.println("Add Element returned true");
-		System.out.println("There are now " + my_field.size() + " elements in the field");
-	      }
+        if (succeeded)
+          {
+            if (debug)
+              {
+                System.out.println("Add Element returned true");
+                System.out.println("There are now " + my_field.size() + " elements in the field");
+              }
 
-	    return true;
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.out.println("Add Element returned false");
-	      }
+            return true;
+          }
+        else
+          {
+            if (debug)
+              {
+                System.out.println("Add Element returned false");
+              }
 
-	    return false;
-	  }
+            return false;
+          }
       }
     else
       {
-	if (debug)
-	  {
-	    System.out.println("Changing element " + index);
-	  }
+        if (debug)
+          {
+            System.out.println("Changing element " + index);
+          }
 
-	retVal = my_field.setElement(index, obj);
+        retVal = my_field.setElement(index, obj);
 
-	succeeded = (retVal == null) ? true : retVal.didSucceed();
+        succeeded = (retVal == null) ? true : retVal.didSucceed();
 
-	if (retVal != null)
-	  {
-	    gc.handleReturnVal(retVal);
-	  }
+        if (retVal != null)
+          {
+            gc.handleReturnVal(retVal);
+          }
 
-	if (succeeded)
-	  {
-	    if (debug)
-	      {
-		System.out.println("set Element returned true");
-	      }
+        if (succeeded)
+          {
+            if (debug)
+              {
+                System.out.println("set Element returned true");
+              }
 
-	    return true;
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.out.println("set Element returned false");
-	      }
+            return true;
+          }
+        else
+          {
+            if (debug)
+              {
+                System.out.println("set Element returned false");
+              }
 
-	    return false;
-	  }
+            return false;
+          }
       }
   }
 
@@ -1388,7 +1388,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   {
     if (e.isPopupTrigger())
       {
-	showPopupMenu(e.getX(), e.getY());
+        showPopupMenu(e.getX(), e.getY());
       }
   }
 
@@ -1430,14 +1430,14 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   {
     if (myFieldIsEditable == null)
       {
-	try
-	  {
-	    myFieldIsEditable = Boolean.valueOf(my_field.isEditable());
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx);
-	  }
+        try
+          {
+            myFieldIsEditable = Boolean.valueOf(my_field.isEditable());
+          }
+        catch (Exception rx)
+          {
+            gc.processExceptionRethrow(rx);
+          }
       }
 
     return myFieldIsEditable.booleanValue();

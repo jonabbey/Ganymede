@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey and Michael Mulvaney
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
 
    Copyright (C) 1996-2010
@@ -137,7 +137,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
   // --
 
-  SchemaEdit			// remote reference
+  SchemaEdit                    // remote reference
     editor;
 
   GASHAdminDispatch
@@ -150,15 +150,15 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   treeControl 
     tree;
 
-  Category			// remote reference
+  Category                      // remote reference
     rootCategory;
 
   CatTreeNode
-    objects;			// root category node
+    objects;                    // root category node
 
   treeNode
     nodeAfterCategories,
-    namespaces;			// top-level node for namespace listing
+    namespaces;                 // top-level node for namespace listing
 
   javax.swing.JMenuItem
     createCategoryMI = null,
@@ -201,16 +201,16 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     baseEditPane;
 
   BaseEditor
-    be;				// contains remote ref
+    be;                         // contains remote ref
 
   BaseFieldEditor
-    fe;				// contains remote ref
+    fe;                         // contains remote ref
 
   NameSpaceEditor
-    ne;				// contains remote ref
+    ne;                         // contains remote ref
 
   CategoryEditor
-    ce;				// contains remote ref
+    ce;                         // contains remote ref
 
   TabEditor
     te;
@@ -377,8 +377,8 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     treeImages[CLOSEDTAB] = PackageResources.getImageResource(this, "closedtab.gif", getClass());
 
     tree = new treeControl(new java.awt.Font("SansSerif",java.awt.Font.BOLD, 12),
-			   java.awt.Color.black, java.awt.Color.white, this, treeImages,
-			   null);
+                           java.awt.Color.black, java.awt.Color.white, this, treeImages,
+                           null);
     tree.setMinimumWidth(200);
     tree.setDrag(this, tree.DRAG_LINE | tree.DRAG_ICON);
 
@@ -509,26 +509,26 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     try
       {
-	rootCategory = editor.getRootCategory();
+        rootCategory = editor.getRootCategory();
 
-	objects = new CatTreeNode(null, rootCategory.getName(), rootCategory,
-				  null, true, 0, 1, categoryMenu);
+        objects = new CatTreeNode(null, rootCategory.getName(), rootCategory,
+                                  null, true, 0, 1, categoryMenu);
 
-	if (debug)
-	  {
-	    System.err.println("Created rootCategory node: " + rootCategory.getName());
-	  }
+        if (debug)
+          {
+            System.err.println("Created rootCategory node: " + rootCategory.getName());
+          }
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("couldn't get rootCategory " + ex);
+        throw new RuntimeException("couldn't get rootCategory " + ex);
       }
 
     tree.setRoot(objects);
 
     // create namespaces node
 
-    // "Namespaces"	
+    // "Namespaces"     
     namespaces = new treeNode(null, ts.l("init.namespaceNodeText"), objects, true, 0, 1, nameSpaceMenu);
     tree.insertNode(namespaces, false);
     
@@ -544,7 +544,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     if (debug)
       {
-	System.out.println("GASHSchema created");
+        System.out.println("GASHSchema created");
       }
 
     // along with processWindowEvent(), this method allows us
@@ -561,7 +561,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     if (editor == null)
       {
-	System.out.println("editor is null in GASHSchema");
+        System.out.println("editor is null in GASHSchema");
       }
     
     return editor;
@@ -571,11 +571,11 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     try
       {
-	recurseDownCategories(objects);
+        recurseDownCategories(objects);
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("couldn't refresh categories" + ex);
+        throw new RuntimeException("couldn't refresh categories" + ex);
       }
 
     refreshNamespaces();
@@ -609,16 +609,16 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     for (int i = 0; i < children.size(); i++)
       {
-	// find the CategoryNode at this point in the server's category tree
+        // find the CategoryNode at this point in the server's category tree
 
-	cNode = (CategoryNode) children.elementAt(i);
+        cNode = (CategoryNode) children.elementAt(i);
 
-	prevNode = insertCategoryNode(cNode, prevNode, node);
-	
-	if (prevNode instanceof CatTreeNode)
-	  {
-	    recurseDownCategories((CatTreeNode) prevNode);
-	  }
+        prevNode = insertCategoryNode(cNode, prevNode, node);
+        
+        if (prevNode instanceof CatTreeNode)
+          {
+            recurseDownCategories((CatTreeNode) prevNode);
+          }
       }
   }
 
@@ -637,25 +637,25 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     if (node instanceof Base)
       {
-	Base base = (Base) node;
+        Base base = (Base) node;
 
-	if (base.isEmbedded())
-	  {
-	    newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
-				   true, EMBEDDEDBASEICON, EMBEDDEDBASEICON, embeddedBaseMenu);
-	  }
-	else
-	  {
-	    newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
-				   true, BASEICON, BASEICON, baseMenu);
-	  }
+        if (base.isEmbedded())
+          {
+            newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
+                                   true, EMBEDDEDBASEICON, EMBEDDEDBASEICON, embeddedBaseMenu);
+          }
+        else
+          {
+            newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
+                                   true, BASEICON, BASEICON, baseMenu);
+          }
       }
     else if (node instanceof Category)
       {
-	Category category = (Category) node;
+        Category category = (Category) node;
 
-	newNode = new CatTreeNode(parentNode, category.getName(), category,
-				  prevNode, true, OPENFOLDERICON, CLOSEDFOLDERICON, categoryMenu);
+        newNode = new CatTreeNode(parentNode, category.getName(), category,
+                                  prevNode, true, OPENFOLDERICON, CLOSEDFOLDERICON, categoryMenu);
       }
     else
       {
@@ -666,7 +666,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     if (newNode instanceof BaseNode)
       {
-	refreshFields((BaseNode)newNode, false, true);
+        refreshFields((BaseNode)newNode, false, true);
       }
 
     return newNode;
@@ -701,14 +701,14 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     if (!openAllTabs && baseNode.getChild() instanceof TabNode)
       {
-	tabNodes = new Hashtable();
-	tabNode = (TabNode) baseNode.getChild();
+        tabNodes = new Hashtable();
+        tabNode = (TabNode) baseNode.getChild();
 
-	while (tabNode != null)
-	  {
-	    tabNodes.put(tabNode.getText(), Boolean.valueOf(tabNode.isOpen()));
-	    tabNode = (TabNode) tabNode.getNextSibling();
-	  }
+        while (tabNode != null)
+          {
+            tabNodes.put(tabNode.getText(), Boolean.valueOf(tabNode.isOpen()));
+            tabNode = (TabNode) tabNode.getNextSibling();
+          }
       }
 
     tree.removeChildren(baseNode, false);
@@ -717,7 +717,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     if (base.isEmbedded())
       {
-	needTabs = false;
+        needTabs = false;
       }
 
     // get the list of fields we want to display
@@ -743,63 +743,63 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     for (int i = 0; i < vect.size(); i++)
       {
-	field = (BaseField) vect.elementAt(i);
+        field = (BaseField) vect.elementAt(i);
 
-	if (needTabs)
-	  {
-	    tabString = field.getTabName();
+        if (needTabs)
+          {
+            tabString = field.getTabName();
 
-	    if (tabString == null || tabString.equals(""))
-	      {
-		tabString = ts.l("global.defaultTabName"); // "General"
-	      }
+            if (tabString == null || tabString.equals(""))
+              {
+                tabString = ts.l("global.defaultTabName"); // "General"
+              }
 
-	    if (!StringUtils.stringEquals(tabString, oldTabString))
-	      {
-		tabNode = new TabNode(baseNode, tabString, tabNode, // we insert after the old tabnode, if non-null
-				      true, OPENTAB, CLOSEDTAB, tabMenu);
+            if (!StringUtils.stringEquals(tabString, oldTabString))
+              {
+                tabNode = new TabNode(baseNode, tabString, tabNode, // we insert after the old tabnode, if non-null
+                                      true, OPENTAB, CLOSEDTAB, tabMenu);
 
-		tree.insertNode(tabNode, false);
+                tree.insertNode(tabNode, false);
 
-		// if we previously saw this tab node and it was open,
-		// keep it open here
+                // if we previously saw this tab node and it was open,
+                // keep it open here
 
-		if (openAllTabs || (tabNodes != null &&tabNodes.containsKey(tabString) && ((Boolean) tabNodes.get(tabString)).booleanValue()))
-		  {
-		    tree.expandNode(tabNode, false);
-		  }
+                if (openAllTabs || (tabNodes != null &&tabNodes.containsKey(tabString) && ((Boolean) tabNodes.get(tabString)).booleanValue()))
+                  {
+                    tree.expandNode(tabNode, false);
+                  }
 
-		// since we're creating a new tab node for the rest of the
-		// fields to be added with, we want to clear the oldNode
-		// reference which we are using to handle setting
-		// 'prevSibling' at field node creation time.
+                // since we're creating a new tab node for the rest of the
+                // fields to be added with, we want to clear the oldNode
+                // reference which we are using to handle setting
+                // 'prevSibling' at field node creation time.
 
-		oldNode = null;
-		oldTabString = tabString;
-	      }
+                oldNode = null;
+                oldTabString = tabString;
+              }
 
-	    newNode = new FieldNode(tabNode, field.getName(), field, oldNode,
-				    false, FIELDICON, FIELDICON, fieldMenu);
-	  }
-	else
-	  {
-	    newNode = new FieldNode(baseNode, field.getName(), field, oldNode,
-				    false, FIELDICON, FIELDICON, fieldMenu);
-	  }
+            newNode = new FieldNode(tabNode, field.getName(), field, oldNode,
+                                    false, FIELDICON, FIELDICON, fieldMenu);
+          }
+        else
+          {
+            newNode = new FieldNode(baseNode, field.getName(), field, oldNode,
+                                    false, FIELDICON, FIELDICON, fieldMenu);
+          }
 
-	tree.insertNode(newNode, false);
+        tree.insertNode(newNode, false);
 
-	oldNode = newNode;
+        oldNode = newNode;
       }
 
     if (openAtStart)
       {
-	tree.expandNode(baseNode, false, false);
+        tree.expandNode(baseNode, false, false);
       }
       
     if (doRefresh)
       {
-	tree.refresh();
+        tree.refresh();
       }
   }
 
@@ -822,41 +822,41 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     if (!base.isEmbedded())
       {
-	tNode = (TabNode) bNode.getChild();
-	previousFieldName = null;
+        tNode = (TabNode) bNode.getChild();
+        previousFieldName = null;
 
-	while (tNode != null)
-	  {
-	    fNode = (FieldNode) tNode.getChild();
+        while (tNode != null)
+          {
+            fNode = (FieldNode) tNode.getChild();
 
-	    while (fNode != null)
-	      {
-		BaseField bF = fNode.getField();
-		bF.setTabName(tNode.getText());
-		
-		base.moveFieldAfter(fNode.getText(), previousFieldName);
-		previousFieldName = fNode.getText();
-		
-		fNode = (FieldNode) fNode.getNextSibling();
-	      }
+            while (fNode != null)
+              {
+                BaseField bF = fNode.getField();
+                bF.setTabName(tNode.getText());
+                
+                base.moveFieldAfter(fNode.getText(), previousFieldName);
+                previousFieldName = fNode.getText();
+                
+                fNode = (FieldNode) fNode.getNextSibling();
+              }
 
-	    tNode = (TabNode) tNode.getNextSibling();
-	  }
+            tNode = (TabNode) tNode.getNextSibling();
+          }
       }
     else
       {
-	fNode = (FieldNode) bNode.getChild();
-	previousFieldName = null;
+        fNode = (FieldNode) bNode.getChild();
+        previousFieldName = null;
 
-	while (fNode != null)
-	  {
-	    BaseField bF = fNode.getField();
-		
-	    base.moveFieldAfter(fNode.getText(), previousFieldName);
-	    previousFieldName = fNode.getText();
-	    
-	    fNode = (FieldNode) fNode.getNextSibling();
-	  }
+        while (fNode != null)
+          {
+            BaseField bF = fNode.getField();
+                
+            base.moveFieldAfter(fNode.getText(), previousFieldName);
+            previousFieldName = fNode.getText();
+            
+            fNode = (FieldNode) fNode.getNextSibling();
+          }
       }
   }
 
@@ -870,23 +870,23 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
       {
         NameSpace[] spaces = null;
 
-	spaces = editor.getNameSpaces();
+        spaces = editor.getNameSpaces();
 
         for (int i = 0; i < spaces.length ; i++)
           {
-	    SpaceNode newNode = new SpaceNode(namespaces, spaces[i].getName(), spaces[i], 
-					      null, false, BASEICON, BASEICON, nameSpaceObjectMenu);
-	    tree.insertNode(newNode, true);
-	  }
+            SpaceNode newNode = new SpaceNode(namespaces, spaces[i].getName(), spaces[i], 
+                                              null, false, BASEICON, BASEICON, nameSpaceObjectMenu);
+            tree.insertNode(newNode, true);
+          }
       }
     catch (RemoteException e)
       {
-	System.out.println("Exception getting NameSpaces: " + e);
+        System.out.println("Exception getting NameSpaces: " + e);
       }
     
     if (isOpen)
       {
-	tree.expandNode(namespaces, false);
+        tree.expandNode(namespaces, false);
       }
 
     tree.refresh();
@@ -896,7 +896,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     if (showingField)
       {
-	fe.switchAway();
+        fe.switchAway();
       }
 
     be.editBase(node);
@@ -913,12 +913,12 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     if (showingField)
       {
-	fe.switchAway();
+        fe.switchAway();
       }
 
     if (debug)
       {
-	System.err.println("in GASHSchema.editField");
+        System.err.println("in GASHSchema.editField");
       }
 
     fe.editField(node, false);
@@ -938,7 +938,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     if (showingField)
       {
-	fe.switchAway();
+        fe.switchAway();
       }
 
     ne.editNameSpace(node);
@@ -960,7 +960,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     if (showingField)
       {
-	fe.switchAway();
+        fe.switchAway();
       }
 
     ce.editCategory(node);
@@ -983,7 +983,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     if (showingField)
       {
-	fe.switchAway();
+        fe.switchAway();
       }
 
     te.editTab(node);
@@ -1028,52 +1028,52 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     if (node == null)
       {
-	throw new IllegalArgumentException("null node");
+        throw new IllegalArgumentException("null node");
       }
 
     if (node instanceof BaseNode)
       {
-	editBase((BaseNode) node);
+        editBase((BaseNode) node);
       }
     else if (node instanceof FieldNode)
       {
-	editField((FieldNode) node);
+        editField((FieldNode) node);
       }
     else if (node instanceof SpaceNode)
       {
-	if (debug)
-	  {
-	    System.out.println("namespacenode selected");
-	  }
+        if (debug)
+          {
+            System.out.println("namespacenode selected");
+          }
 
-	editNameSpace((SpaceNode) node);
+        editNameSpace((SpaceNode) node);
       }
     else if (node instanceof TabNode)
       {
-	editTab((TabNode) node);
+        editTab((TabNode) node);
       }
     else if (node instanceof CatTreeNode)
       {
-	editCategory((CatTreeNode) node);
+        editCategory((CatTreeNode) node);
       }
     else
       {
-	if (showingField)
-	  {
-	    fe.switchAway();
-	  }
+        if (showingField)
+          {
+            fe.switchAway();
+          }
 
-	showingBase = false;
-	showingField = false;
+        showingBase = false;
+        showingField = false;
 
-	card.show(attribCardPane, "empty");
+        card.show(attribCardPane, "empty");
 
-	// if we switch back to the field editor
-	// or base editor, they need to know that they'll
-	// need to refresh
+        // if we switch back to the field editor
+        // or base editor, they need to know that they'll
+        // need to refresh
 
-	fe.fieldNode = null;
-	be.baseNode = null;
+        fe.fieldNode = null;
+        be.baseNode = null;
       }
   }
 
@@ -1081,15 +1081,15 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     if (!otherNode)
       {
-	if (attribCardPane != null)
-	  {
-	    card.show(attribCardPane, "empty");
-	  }
+        if (attribCardPane != null)
+          {
+            card.show(attribCardPane, "empty");
+          }
       }
 
     if (debug)
       {
-	System.out.println("node " + node.getText() + " unselected");
+        System.out.println("node " + node.getText() + " unselected");
       }
   }
 
@@ -1117,753 +1117,753 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     if (debug)
       {
-	System.out.println("node " + nodeText + ", action: " + event );
+        System.out.println("node " + nodeText + ", action: " + event );
       }
 
     if (event.getSource() == createCategoryMI)
       {
-	try
-	  {
-	    CatTreeNode cNode = (CatTreeNode) node;
-	    Category category = cNode.getCategory();
+        try
+          {
+            CatTreeNode cNode = (CatTreeNode) node;
+            Category category = cNode.getCategory();
 
-	    Category newCategory = category.newSubCategory();
+            Category newCategory = category.newSubCategory();
 
-	    // we want to insert at the bottom of the base
+            // we want to insert at the bottom of the base
 
-	    treeNode n = node.getChild();
+            treeNode n = node.getChild();
 
-	    if (n != null)
-	      {
-		while (n.getNextSibling() != null)
-		  {
-		    n = n.getNextSibling();
-		  }
-	      }
-	    
-	    CatTreeNode newNode = new CatTreeNode(node, newCategory.getName(), newCategory,
-						  n, true, OPENFOLDERICON, CLOSEDFOLDERICON, categoryMenu);
+            if (n != null)
+              {
+                while (n.getNextSibling() != null)
+                  {
+                    n = n.getNextSibling();
+                  }
+              }
+            
+            CatTreeNode newNode = new CatTreeNode(node, newCategory.getName(), newCategory,
+                                                  n, true, OPENFOLDERICON, CLOSEDFOLDERICON, categoryMenu);
 
-	    tree.insertNode(newNode, false);
-	    tree.expandNode(node, false);
-	    tree.refresh();
+            tree.insertNode(newNode, false);
+            tree.expandNode(node, false);
+            tree.refresh();
 
-	    editCategory(newNode);
-	  }
-	catch (RemoteException ex)
-	  {
-	    System.err.println("couldn't create new base." + ex);
-	  }
+            editCategory(newNode);
+          }
+        catch (RemoteException ex)
+          {
+            System.err.println("couldn't create new base." + ex);
+          }
       }
     else if (event.getSource() == deleteCategoryMI)
       {
-	CatTreeNode cNode = (CatTreeNode) node;
-	Category category = cNode.getCategory();
-	DialogRsrc dialogResource;
+        CatTreeNode cNode = (CatTreeNode) node;
+        Category category = cNode.getCategory();
+        DialogRsrc dialogResource;
 
-	if (node == objects)
-	  {
-	    // "Error: Category not removable"
-	    // "You are not allowed to remove the root category node."
-	    new StringDialog(this,
-			     ts.l("treeNodeMenuPerformed.mandatory_category"),
-			     ts.l("treeNodeMenuPerformed.root_category_delete"),
-			     ts.l("global.ok"),
-			     null, StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
-	    return;
-	  }
+        if (node == objects)
+          {
+            // "Error: Category not removable"
+            // "You are not allowed to remove the root category node."
+            new StringDialog(this,
+                             ts.l("treeNodeMenuPerformed.mandatory_category"),
+                             ts.l("treeNodeMenuPerformed.root_category_delete"),
+                             ts.l("global.ok"),
+                             null, StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
+            return;
+          }
 
-	try
-	  {
-	    if (category.getNodes().size() != 0)
-	      {
-		// "Error: Category not removable"
-		// "This category has nodes under it.  You must remove the contents before deleting this category."
-		new StringDialog(this,
-				 ts.l("treeNodeMenuPerformed.mandatory_category"),
-				 ts.l("treeNodeMenuPerformed.category_not_empty"),
-				 ts.l("global.ok"),
-				 null, StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
-		return;
-	      }
+        try
+          {
+            if (category.getNodes().size() != 0)
+              {
+                // "Error: Category not removable"
+                // "This category has nodes under it.  You must remove the contents before deleting this category."
+                new StringDialog(this,
+                                 ts.l("treeNodeMenuPerformed.mandatory_category"),
+                                 ts.l("treeNodeMenuPerformed.category_not_empty"),
+                                 ts.l("global.ok"),
+                                 null, StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
+                return;
+              }
 
-	    // "Delete Category"
-	    // "Are you sure you want to delete category {0}?"
-	    dialogResource = new DialogRsrc(this,
-					    ts.l("treeNodeMenuPerformed.delete_category"),
-					    ts.l("treeNodeMenuPerformed.verify_delete_category", node.getText()),
-					    ts.l("treeNodeMenuPerformed.deleteButton"), ts.l("global.cancel"),
-					    questionImage);
+            // "Delete Category"
+            // "Are you sure you want to delete category {0}?"
+            dialogResource = new DialogRsrc(this,
+                                            ts.l("treeNodeMenuPerformed.delete_category"),
+                                            ts.l("treeNodeMenuPerformed.verify_delete_category", node.getText()),
+                                            ts.l("treeNodeMenuPerformed.deleteButton"), ts.l("global.cancel"),
+                                            questionImage);
 
-	    Hashtable results = new StringDialog(dialogResource, StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
+            Hashtable results = new StringDialog(dialogResource, StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
 
-	    if (results != null)
-	      {
-		Category parent = category.getCategory();
-		parent.removeNode(category.getName());
-		tree.deleteNode(node, true);
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("caught remote " + ex);
-	  }
+            if (results != null)
+              {
+                Category parent = category.getCategory();
+                parent.removeNode(category.getName());
+                tree.deleteNode(node, true);
+              }
+          }
+        catch (RemoteException ex)
+          {
+            throw new RuntimeException("caught remote " + ex);
+          }
       }
     else if (event.getSource() == createObjectMI)
       {
-	try
-	  {
-	    CatTreeNode cNode = (CatTreeNode) node;
-	    Category category = cNode.getCategory();
-	    Base newBase = editor.createNewBase(category, false, false);
-	    
-	    BaseNode newNode = new BaseNode(node, newBase.getName(), newBase,
-					    null, true, BASEICON, BASEICON, baseMenu);
+        try
+          {
+            CatTreeNode cNode = (CatTreeNode) node;
+            Category category = cNode.getCategory();
+            Base newBase = editor.createNewBase(category, false, false);
+            
+            BaseNode newNode = new BaseNode(node, newBase.getName(), newBase,
+                                            null, true, BASEICON, BASEICON, baseMenu);
 
-	    tree.insertNode(newNode, false);
-	    tree.expandNode(node, false);
-	    refreshFields(newNode, true, false);
-	    tree.unselectAllNodes(true);
-	    tree.selectNode(newNode); // triggers an editBase call on the node
+            tree.insertNode(newNode, false);
+            tree.expandNode(node, false);
+            refreshFields(newNode, true, false);
+            tree.unselectAllNodes(true);
+            tree.selectNode(newNode); // triggers an editBase call on the node
 
-	    TabNode genTabNode = new TabNode(newNode, ts.l("global.defaultTabName"), null,
-					     true, OPENTAB, CLOSEDTAB, tabMenu);
-	    tree.expandNode(newNode, false);
-	    tree.insertNode(genTabNode, false);
-	    tree.refresh();
-	  }
-	catch (RemoteException ex)
-	  {
-	    System.err.println("couldn't create new base." + ex);
-	  }
+            TabNode genTabNode = new TabNode(newNode, ts.l("global.defaultTabName"), null,
+                                             true, OPENTAB, CLOSEDTAB, tabMenu);
+            tree.expandNode(newNode, false);
+            tree.insertNode(genTabNode, false);
+            tree.refresh();
+          }
+        catch (RemoteException ex)
+          {
+            System.err.println("couldn't create new base." + ex);
+          }
       }
     else if (event.getSource() == createInternalObjectMI)
       {
-	try
-	  {
-	    CatTreeNode cNode = (CatTreeNode) node;
-	    Category category = cNode.getCategory();
-	    Base newBase = editor.createNewBase(category, true, false);
-	    
-	    BaseNode newNode = new BaseNode(node, newBase.getName(), newBase,
-					    null, true, EMBEDDEDBASEICON, EMBEDDEDBASEICON, embeddedBaseMenu);
+        try
+          {
+            CatTreeNode cNode = (CatTreeNode) node;
+            Category category = cNode.getCategory();
+            Base newBase = editor.createNewBase(category, true, false);
+            
+            BaseNode newNode = new BaseNode(node, newBase.getName(), newBase,
+                                            null, true, EMBEDDEDBASEICON, EMBEDDEDBASEICON, embeddedBaseMenu);
 
-	    tree.insertNode(newNode, false);
-	    tree.expandNode(node, false);
-	    refreshFields(newNode, true, false);
-	    tree.unselectAllNodes(true);
-	    tree.selectNode(newNode); // triggers an editBase call on the node
-	    tree.refresh();
-	  }
-	catch (RemoteException ex)
-	  {
-	    System.err.println("couldn't create new base." + ex);
-	  }
+            tree.insertNode(newNode, false);
+            tree.expandNode(node, false);
+            refreshFields(newNode, true, false);
+            tree.unselectAllNodes(true);
+            tree.selectNode(newNode); // triggers an editBase call on the node
+            tree.refresh();
+          }
+        catch (RemoteException ex)
+          {
+            System.err.println("couldn't create new base." + ex);
+          }
       }
     else if (event.getSource() == createNameMI)
       {
-	if (debug)
-	  {
-	    System.out.println("Create namespace chosen");
-	  }
+        if (debug)
+          {
+            System.out.println("Create namespace chosen");
+          }
 
-	// "Create New Namespace"
-	// "Enter the name of the namespace you want to create, and select the checkbox if you want this namespace to be case insensitive."
-	DialogRsrc dialogResource = new DialogRsrc(this,
-						   ts.l("treeNodeMenuPerformed.create_namespace_title"),
-						   ts.l("treeNodeMenuPerformed.create_namespace_text"),
-						   ts.l("treeNodeMenuPerformed.createButton"),
-						   ts.l("global.cancel"),
-						   questionImage);
+        // "Create New Namespace"
+        // "Enter the name of the namespace you want to create, and select the checkbox if you want this namespace to be case insensitive."
+        DialogRsrc dialogResource = new DialogRsrc(this,
+                                                   ts.l("treeNodeMenuPerformed.create_namespace_title"),
+                                                   ts.l("treeNodeMenuPerformed.create_namespace_text"),
+                                                   ts.l("treeNodeMenuPerformed.createButton"),
+                                                   ts.l("global.cancel"),
+                                                   questionImage);
 
-	dialogResource.addString(ts.l("treeNodeMenuPerformed.namespace_name_field")); // "Namespace:"
-	dialogResource.addBoolean(ts.l("treeNodeMenuPerformed.namespace_case_field")); // "Case Insensitive:"
+        dialogResource.addString(ts.l("treeNodeMenuPerformed.namespace_name_field")); // "Namespace:"
+        dialogResource.addBoolean(ts.l("treeNodeMenuPerformed.namespace_case_field")); // "Case Insensitive:"
 
-	Hashtable results = new StringDialog(dialogResource,StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
+        Hashtable results = new StringDialog(dialogResource,StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
 
-	String newNameSpace = null;
-	Boolean insensitive = null;
-	
-	// Now check the hash
+        String newNameSpace = null;
+        Boolean insensitive = null;
+        
+        // Now check the hash
 
-	if (results == null)
-	  {
-	    if (debug)
-	      {
-		System.out.println("null hashtable, no action taken");
-	      }
-	  }
-	else 
-	  {
-	    if (debug)
-	      {
-		System.out.println("Printing the hash:");
-	      }
+        if (results == null)
+          {
+            if (debug)
+              {
+                System.out.println("null hashtable, no action taken");
+              }
+          }
+        else 
+          {
+            if (debug)
+              {
+                System.out.println("Printing the hash:");
+              }
 
-	    Enumeration en = results.keys();
+            Enumeration en = results.keys();
 
-	    while (en.hasMoreElements()) 
-	      {
-		String label = (String) en.nextElement();
-		Object ob = results.get(label);
+            while (en.hasMoreElements()) 
+              {
+                String label = (String) en.nextElement();
+                Object ob = results.get(label);
 
-		if (ob instanceof String) 
-		  {
-		    if (label.equals(ts.l("treeNodeMenuPerformed.namespace_name_field")))
-		      {
-			if (debug)
-			  {
-			    System.out.println("Namespace is " + (String)ob);
-			  }
+                if (ob instanceof String) 
+                  {
+                    if (label.equals(ts.l("treeNodeMenuPerformed.namespace_name_field")))
+                      {
+                        if (debug)
+                          {
+                            System.out.println("Namespace is " + (String)ob);
+                          }
 
-			newNameSpace = (String)ob;
-		      }
-		    else if (debug)
-		      {
-			System.out.println("Red alert!  unknown string returned: " + (String)ob);
-		      }
-		  }
-		else if (ob instanceof Boolean)
-		  {
-		    Boolean bool = (Boolean)ob;
+                        newNameSpace = (String)ob;
+                      }
+                    else if (debug)
+                      {
+                        System.out.println("Red alert!  unknown string returned: " + (String)ob);
+                      }
+                  }
+                else if (ob instanceof Boolean)
+                  {
+                    Boolean bool = (Boolean)ob;
 
-		    if (label.equals(ts.l("treeNodeMenuPerformed.namespace_case_field")))
-		      {
-			if (debug)
-			  {
-			    System.out.println("Sensitivity set to: " + bool);
-			  }
+                    if (label.equals(ts.l("treeNodeMenuPerformed.namespace_case_field")))
+                      {
+                        if (debug)
+                          {
+                            System.out.println("Sensitivity set to: " + bool);
+                          }
 
-			insensitive = bool;
-		      }
-		    else if (debug)
-		      {
-			System.out.println("Unknown Boolean returned by Dialog.");
-		      }
-		  }
-		else if (debug)
-		  {
-		    System.out.println("Unknown type returned by Dialog.");
-		  }
-	      }
+                        insensitive = bool;
+                      }
+                    else if (debug)
+                      {
+                        System.out.println("Unknown Boolean returned by Dialog.");
+                      }
+                  }
+                else if (debug)
+                  {
+                    System.out.println("Unknown type returned by Dialog.");
+                  }
+              }
 
-	    if ((newNameSpace != null) && (insensitive != null))
-	      {
-		try
-		  {
-		    if (debug)
-		      {
-			System.out.println("Adding new NameSpace: " + newNameSpace);
-		      }
+            if ((newNameSpace != null) && (insensitive != null))
+              {
+                try
+                  {
+                    if (debug)
+                      {
+                        System.out.println("Adding new NameSpace: " + newNameSpace);
+                      }
 
-		    editor.createNewNameSpace(newNameSpace, insensitive.booleanValue());
-		  }
-		catch (java.rmi.RemoteException e)
-		  {
-		    System.out.println("Exception while creating NameSpace: " + e);
-		  }
-	      }
-	  }
+                    editor.createNewNameSpace(newNameSpace, insensitive.booleanValue());
+                  }
+                catch (java.rmi.RemoteException e)
+                  {
+                    System.out.println("Exception while creating NameSpace: " + e);
+                  }
+              }
+          }
 
-	// List out the NameSpaces for testing
+        // List out the NameSpaces for testing
 
-	NameSpace[] spaces  = null;
+        NameSpace[] spaces  = null;
 
-	if (debug)
-	  {
-	    System.out.println("Actual NameSpaces:");
-	  }
+        if (debug)
+          {
+            System.out.println("Actual NameSpaces:");
+          }
 
-	try
-	  {
-	    spaces = editor.getNameSpaces();
-	  }
-	catch (java.rmi.RemoteException e)
-	  {
-	    System.out.println("Exception while listing NameSpace: " + e);
-	  }
-	
-	boolean Insensitive = false;
-	String name = null;
+        try
+          {
+            spaces = editor.getNameSpaces();
+          }
+        catch (java.rmi.RemoteException e)
+          {
+            System.out.println("Exception while listing NameSpace: " + e);
+          }
+        
+        boolean Insensitive = false;
+        String name = null;
 
-	for (int i = 0; i < spaces.length ; i++ )
-	  {
-	    try
-	      {
-		Insensitive = spaces[i].isCaseInsensitive();
-		name = spaces[i].getName();
-	      }
-	    catch (java.rmi.RemoteException e)
-	      {
-		System.out.println("Exception while listing NameSpace: " + e);
-	      }
+        for (int i = 0; i < spaces.length ; i++ )
+          {
+            try
+              {
+                Insensitive = spaces[i].isCaseInsensitive();
+                name = spaces[i].getName();
+              }
+            catch (java.rmi.RemoteException e)
+              {
+                System.out.println("Exception while listing NameSpace: " + e);
+              }
 
-	    if (debug)
-	      {
-		if (Insensitive)
-		  {
-		    System.out.println("   " + name + " is case insensitive.");
-		  }
-		else
-		  {
-		    System.out.println("   " + name + " is not case insensitive.");
-		  }
-	      }
-	  }
+            if (debug)
+              {
+                if (Insensitive)
+                  {
+                    System.out.println("   " + name + " is case insensitive.");
+                  }
+                else
+                  {
+                    System.out.println("   " + name + " is not case insensitive.");
+                  }
+              }
+          }
 
-	refreshNamespaces();
+        refreshNamespaces();
 
-	if (showingField)
-	  {
-	    fe.refreshFieldEdit(true);
-	  }
+        if (showingField)
+          {
+            fe.refreshFieldEdit(true);
+          }
       }
     else if (event.getSource() == deleteNameMI)
       {
-	if (debug)
-	  {
-	    System.out.println("deleting Namespace");
-	  }
+        if (debug)
+          {
+            System.out.println("deleting Namespace");
+          }
 
-	// "Confirm Name Space Deletion"
-	// "Are you sure you want to delete the {0} namespace?"
-	DialogRsrc dialogResource = new DialogRsrc(this,
-						   ts.l("treeNodeMenuPerformed.deleteNamespaceTitle"),
-						   ts.l("treeNodeMenuPerformed.deleteNamespaceText", node.getText()),
-						   ts.l("treeNodeMenuPerformed.deleteButton"),
-						   ts.l("global.cancel"),
-						   questionImage);
+        // "Confirm Name Space Deletion"
+        // "Are you sure you want to delete the {0} namespace?"
+        DialogRsrc dialogResource = new DialogRsrc(this,
+                                                   ts.l("treeNodeMenuPerformed.deleteNamespaceTitle"),
+                                                   ts.l("treeNodeMenuPerformed.deleteNamespaceText", node.getText()),
+                                                   ts.l("treeNodeMenuPerformed.deleteButton"),
+                                                   ts.l("global.cancel"),
+                                                   questionImage);
 
-	Hashtable results = new StringDialog(dialogResource, StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
+        Hashtable results = new StringDialog(dialogResource, StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
 
-	if (results != null)
-	  {
-	    try
-	      {
-		editor.deleteNameSpace(node.getText());
-	      }
-	    catch (RemoteException ex)
-	      {
-		throw new RuntimeException("Couldn't delete namespace: remote exception " + ex);
-	      }
+        if (results != null)
+          {
+            try
+              {
+                editor.deleteNameSpace(node.getText());
+              }
+            catch (RemoteException ex)
+              {
+                throw new RuntimeException("Couldn't delete namespace: remote exception " + ex);
+              }
 
-	    refreshNamespaces();
+            refreshNamespaces();
 
-	    if (showingField)
-	      {
-		fe.refreshFieldEdit(true);
-	      }
-	  }
+            if (showingField)
+              {
+                fe.refreshFieldEdit(true);
+              }
+          }
       }
     else if (event.getSource() == deleteObjectMI || event.getSource() == deleteEmbeddedObjectMI)
       {
-	BaseNode bNode = (BaseNode) node;
-	Base b = bNode.getBase();
+        BaseNode bNode = (BaseNode) node;
+        Base b = bNode.getBase();
 
-	// Check to see if this base is removable.  If it's not, then politely
-	// inform the user.  Otherwise, pop up a dialog to make them confirm 
-	// the deletion.
+        // Check to see if this base is removable.  If it's not, then politely
+        // inform the user.  Otherwise, pop up a dialog to make them confirm 
+        // the deletion.
 
-	boolean isRemovable = false;
+        boolean isRemovable = false;
 
-	try 
-	  {
-	    isRemovable = b.isRemovable();
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new IllegalArgumentException("exception in isRemovalbe(): " + rx);
-	  }
+        try 
+          {
+            isRemovable = b.isRemovable();
+          }
+        catch (RemoteException rx)
+          {
+            throw new IllegalArgumentException("exception in isRemovalbe(): " + rx);
+          }
 
-	if (isRemovable)
-	  {
-	    // "Confirm Object Type Deletion"
-	    // "Are you sure you want to delete the {0} object type?"
+        if (isRemovable)
+          {
+            // "Confirm Object Type Deletion"
+            // "Are you sure you want to delete the {0} object type?"
 
-	    if (new StringDialog(this,
-				 ts.l("treeNodeMenuPerformed.deleteObjectTitle"),
-				 ts.l("treeNodeMenuPerformed.deleteObjectText", node.getText()),
-				 ts.l("treeNodeMenuPerformed.deleteButton"),
-				 ts.l("global.cancel"), StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog() == null)
-	      {
-		if (debug)
-		  {
-		    System.out.println("Deletion canceled");
-		  }
-	      }
-	    else //Returned confirm
-	      {	    
-		try
-		  {
-		    if (debug)
-		      {
-			System.err.println("Deleting base " + b.getName());
-		      }
+            if (new StringDialog(this,
+                                 ts.l("treeNodeMenuPerformed.deleteObjectTitle"),
+                                 ts.l("treeNodeMenuPerformed.deleteObjectText", node.getText()),
+                                 ts.l("treeNodeMenuPerformed.deleteButton"),
+                                 ts.l("global.cancel"), StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog() == null)
+              {
+                if (debug)
+                  {
+                    System.out.println("Deletion canceled");
+                  }
+              }
+            else //Returned confirm
+              {     
+                try
+                  {
+                    if (debug)
+                      {
+                        System.err.println("Deleting base " + b.getName());
+                      }
 
-		    editor.deleteBase(b.getName());
-		  }
-		catch (RemoteException ex)
-		  {
-		    throw new RuntimeException("Couldn't delete base: remote exception " + ex);
-		  }
-		
-		tree.deleteNode(node, true);
-	      }
-	  }
-	else
-	  {
-	    // "Object Type Deletion Error"
-	    // "Sorry, you are not allowed to delete the {0} object type, as the Ganymede server is dependent on it for proper functioning."
+                    editor.deleteBase(b.getName());
+                  }
+                catch (RemoteException ex)
+                  {
+                    throw new RuntimeException("Couldn't delete base: remote exception " + ex);
+                  }
+                
+                tree.deleteNode(node, true);
+              }
+          }
+        else
+          {
+            // "Object Type Deletion Error"
+            // "Sorry, you are not allowed to delete the {0} object type, as the Ganymede server is dependent on it for proper functioning."
 
-	    new StringDialog(this,
-			     ts.l("treeNodeMenuPerformed.badDeleteObjectTitle"),
-			     ts.l("treeNodeMenuPerformed.badDeleteObjectText", node.getText()),
-			     ts.l("global.ok"), null, StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
-	  }
+            new StringDialog(this,
+                             ts.l("treeNodeMenuPerformed.badDeleteObjectTitle"),
+                             ts.l("treeNodeMenuPerformed.badDeleteObjectText", node.getText()),
+                             ts.l("global.ok"), null, StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
+          }
       }
     else if (event.getSource() == createTabMI)
       {
-	BaseNode bNode = (BaseNode) node;
+        BaseNode bNode = (BaseNode) node;
 
-	// create a name for the new tab
+        // create a name for the new tab
 
-	String name = null;
-	boolean safeName = false;
+        String name = null;
+        boolean safeName = false;
 
-	int i = 1;
+        int i = 1;
 
-	while (!safeName)
-	  {
-	    if (i < 2)
-	      {
-		name = ts.l("treeNodeMenuPerformed.newTabName");	// "New Tab"
-	      }
-	    else
-	      {
-		name = ts.l("treeNodeMenuPerformed.newTabNumName", Integer.valueOf(i)); // "New Tab {0}"
-	      }
+        while (!safeName)
+          {
+            if (i < 2)
+              {
+                name = ts.l("treeNodeMenuPerformed.newTabName");        // "New Tab"
+              }
+            else
+              {
+                name = ts.l("treeNodeMenuPerformed.newTabNumName", Integer.valueOf(i)); // "New Tab {0}"
+              }
 
-	    TabNode tabNode = (TabNode) bNode.getChild();
+            TabNode tabNode = (TabNode) bNode.getChild();
 
-	    safeName = true;
+            safeName = true;
 
-	    while (safeName && tabNode != null)
-	      {
-		if (tabNode.getText().equals(name))
-		  {
-		    safeName = false;
-		  }
+            while (safeName && tabNode != null)
+              {
+                if (tabNode.getText().equals(name))
+                  {
+                    safeName = false;
+                  }
 
-		tabNode = (TabNode) tabNode.getNextSibling();
-	      }
+                tabNode = (TabNode) tabNode.getNextSibling();
+              }
 
-	    i = i + 1;
-	  }
+            i = i + 1;
+          }
 
-	// we want to insert the new tab at the bottom of the object
-	// display order
+        // we want to insert the new tab at the bottom of the object
+        // display order
 
-	treeNode n = bNode.getChild();
-	    
-	if (n != null)
-	  {
-	    while (n.getNextSibling() != null)
-	      {
-		n = n.getNextSibling();
-	      }
-	  }
+        treeNode n = bNode.getChild();
+            
+        if (n != null)
+          {
+            while (n.getNextSibling() != null)
+              {
+                n = n.getNextSibling();
+              }
+          }
 
-	TabNode newNode = new TabNode(bNode, name, n,
-				      true, OPENTAB, CLOSEDTAB, tabMenu);
-	tree.insertNode(newNode, false);
-	tree.expandNode(bNode, false);
-	tree.unselectAllNodes(true);
-	tree.selectNode(newNode); // to trigger the call back and bring up the editTab() pane
-	tree.refresh();
+        TabNode newNode = new TabNode(bNode, name, n,
+                                      true, OPENTAB, CLOSEDTAB, tabMenu);
+        tree.insertNode(newNode, false);
+        tree.expandNode(bNode, false);
+        tree.unselectAllNodes(true);
+        tree.selectNode(newNode); // to trigger the call back and bring up the editTab() pane
+        tree.refresh();
       }
     else if (event.getSource() == deleteTabMI)
       {
-	TabNode tNode = (TabNode) node;
-	BaseNode bNode = (BaseNode) tNode.getParent();
+        TabNode tNode = (TabNode) node;
+        BaseNode bNode = (BaseNode) tNode.getParent();
 
-	if (tNode.getPrevSibling() == null)
-	  {
-	    // "Tab Deletion Error"
-	    // "Sorry, you are not allowed to delete the first tab in an object type."
-	    new JErrorDialog(this,
-			     ts.l("treeNodeMenuPerformed.badDeleteTabTitle"),
-			     ts.l("treeNodeMenuPerformed.badDeleteTabText"), StandardDialog.ModalityType.DOCUMENT_MODAL);
-	  }
-	else if (tNode.getChild() != null)
-	  {
-	    // "Tab Deletion Error"
-	    // "Error, the {0} tab in the {1} object type still contains fields."
-	    new JErrorDialog(this,
-			     ts.l("treeNodeMenuPerformed.badDeleteTabTitle"),
-			     ts.l("treeNodeMenuPerformed.nonEmptyDeleteTabText", tNode.getText(), bNode.getText()), StandardDialog.ModalityType.DOCUMENT_MODAL);
-	  }
-	else
-	  {
-	    if (new StringDialog(this,
-				 ts.l("treeNodeMenuPerformed.deleteTabTitle"),
-				 ts.l("treeNodeMenuPerformed.deleteTabText", tNode.getText(), bNode.getText()),
-				 ts.l("treeNodeMenuPerformed.deleteButton"),
-				 ts.l("global.cancel"), StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog() == null)
-	      {
-		if (debug)
-		  {
-		    System.out.println("Deletion canceled");
-		  }
-	      }
-	    else //Returned confirm
-	      {
-		// we want to delete the tab node from the tree, then call
-		// a function on the base node to fix up all of the tab
-		// names under the base node.
-		
-		tree.deleteNode(tNode, false);
+        if (tNode.getPrevSibling() == null)
+          {
+            // "Tab Deletion Error"
+            // "Sorry, you are not allowed to delete the first tab in an object type."
+            new JErrorDialog(this,
+                             ts.l("treeNodeMenuPerformed.badDeleteTabTitle"),
+                             ts.l("treeNodeMenuPerformed.badDeleteTabText"), StandardDialog.ModalityType.DOCUMENT_MODAL);
+          }
+        else if (tNode.getChild() != null)
+          {
+            // "Tab Deletion Error"
+            // "Error, the {0} tab in the {1} object type still contains fields."
+            new JErrorDialog(this,
+                             ts.l("treeNodeMenuPerformed.badDeleteTabTitle"),
+                             ts.l("treeNodeMenuPerformed.nonEmptyDeleteTabText", tNode.getText(), bNode.getText()), StandardDialog.ModalityType.DOCUMENT_MODAL);
+          }
+        else
+          {
+            if (new StringDialog(this,
+                                 ts.l("treeNodeMenuPerformed.deleteTabTitle"),
+                                 ts.l("treeNodeMenuPerformed.deleteTabText", tNode.getText(), bNode.getText()),
+                                 ts.l("treeNodeMenuPerformed.deleteButton"),
+                                 ts.l("global.cancel"), StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog() == null)
+              {
+                if (debug)
+                  {
+                    System.out.println("Deletion canceled");
+                  }
+              }
+            else //Returned confirm
+              {
+                // we want to delete the tab node from the tree, then call
+                // a function on the base node to fix up all of the tab
+                // names under the base node.
+                
+                tree.deleteNode(tNode, false);
 
-		try
-		  {
-		    syncFieldsFromTree(bNode);
-		  }
-		catch (RemoteException ex)
-		  {
-		    throw new RuntimeException(ex);
-		  }
-	      }
-	  }
+                try
+                  {
+                    syncFieldsFromTree(bNode);
+                  }
+                catch (RemoteException ex)
+                  {
+                    throw new RuntimeException(ex);
+                  }
+              }
+          }
       }
     else if (event.getSource() == createFieldMI || event.getSource() == createEmbeddedFieldMI)
       {
-	// createFieldMI is called on a tab node in the tree for
-	// non-embedded objects, and on a baseNode for embedded
-	// objects.
+        // createFieldMI is called on a tab node in the tree for
+        // non-embedded objects, and on a baseNode for embedded
+        // objects.
 
-	try
-	  {
-	    if (node instanceof TabNode)
-	      {
-		TabNode tNode = (TabNode) node;
-		BaseNode bNode = (BaseNode) tNode.getParent();
-		FieldNode newNode = null;
+        try
+          {
+            if (node instanceof TabNode)
+              {
+                TabNode tNode = (TabNode) node;
+                BaseNode bNode = (BaseNode) tNode.getParent();
+                FieldNode newNode = null;
 
-		if (debug)
-		  {
-		    System.err.println("Calling editField");
-		  }
+                if (debug)
+                  {
+                    System.err.println("Calling editField");
+                  }
 
-		// create a name for the new field
+                // create a name for the new field
 
-		BaseField bF;
-		Base b = bNode.getBase();
+                BaseField bF;
+                Base b = bNode.getBase();
 
-		bF = b.createNewField(); // the server picks a new default field name
+                bF = b.createNewField(); // the server picks a new default field name
 
-		String name = bF.getName();
+                String name = bF.getName();
 
-		bF.setTabName(tNode.getText());
+                bF.setTabName(tNode.getText());
 
-		// we want to insert the child's field node at the bottom
-		// of the tab, which is where createNewField() places it.
+                // we want to insert the child's field node at the bottom
+                // of the tab, which is where createNewField() places it.
 
-		treeNode pSiblingNode = tNode.getChild();
-	    
-		if (pSiblingNode != null)
-		  {
-		    while (pSiblingNode.getNextSibling() != null)
-		      {
-			pSiblingNode = pSiblingNode.getNextSibling();
-		      }
+                treeNode pSiblingNode = tNode.getChild();
+            
+                if (pSiblingNode != null)
+                  {
+                    while (pSiblingNode.getNextSibling() != null)
+                      {
+                        pSiblingNode = pSiblingNode.getNextSibling();
+                      }
 
-		    newNode = new FieldNode(tNode, name, bF, pSiblingNode,
-					    false, FIELDICON, FIELDICON, fieldMenu);
-		  }
-		else
-		  {
-		    // we're creating a field in an empty tab.  we
-		    // can't compare its position with other fields in
-		    // the tab, so we have to look around to find the
-		    // field that this new field will go after
+                    newNode = new FieldNode(tNode, name, bF, pSiblingNode,
+                                            false, FIELDICON, FIELDICON, fieldMenu);
+                  }
+                else
+                  {
+                    // we're creating a field in an empty tab.  we
+                    // can't compare its position with other fields in
+                    // the tab, so we have to look around to find the
+                    // field that this new field will go after
 
-		    if (tNode.getPrevSibling() != null)
-		      {
-			TabNode prevTabNode = (TabNode) tNode.getPrevSibling();
+                    if (tNode.getPrevSibling() != null)
+                      {
+                        TabNode prevTabNode = (TabNode) tNode.getPrevSibling();
 
-			while (prevTabNode.getChild() == null && prevTabNode.getPrevSibling() != null)
-			  {
-			    prevTabNode = (TabNode) prevTabNode.getPrevSibling();
-			  }
+                        while (prevTabNode.getChild() == null && prevTabNode.getPrevSibling() != null)
+                          {
+                            prevTabNode = (TabNode) prevTabNode.getPrevSibling();
+                          }
 
-			if (prevTabNode.getChild() == null)
-			  {
-			    pSiblingNode = null;
-			  }
-			else
-			  {
-			    // we've found the next most previous tab
-			    // node that has children.. find the last
-			    // node in the tab
+                        if (prevTabNode.getChild() == null)
+                          {
+                            pSiblingNode = null;
+                          }
+                        else
+                          {
+                            // we've found the next most previous tab
+                            // node that has children.. find the last
+                            // node in the tab
 
-			    pSiblingNode = prevTabNode.getChild();
-			    
-			    while (pSiblingNode.getNextSibling() != null)
-			      {
-				pSiblingNode = pSiblingNode.getNextSibling();
-			      }
-			  }
-		      }
+                            pSiblingNode = prevTabNode.getChild();
+                            
+                            while (pSiblingNode.getNextSibling() != null)
+                              {
+                                pSiblingNode = pSiblingNode.getNextSibling();
+                              }
+                          }
+                      }
 
-		    // The tree node we're creating has no previous
-		    // sibling under the tab node, so we'll pass null
-		    // as the fourth param.  We'll just use the
-		    // pSiblingNode below to figure out how to tell
-		    // the server to order the fields in the display
-		    // list.  Remember that tabs don't actually exist
-		    // as any kind of container in the server
-		    // structures.. we just mark each field in display
-		    // order with a string describing the tab it
-		    // belongs in
+                    // The tree node we're creating has no previous
+                    // sibling under the tab node, so we'll pass null
+                    // as the fourth param.  We'll just use the
+                    // pSiblingNode below to figure out how to tell
+                    // the server to order the fields in the display
+                    // list.  Remember that tabs don't actually exist
+                    // as any kind of container in the server
+                    // structures.. we just mark each field in display
+                    // order with a string describing the tab it
+                    // belongs in
 
-		    newNode = new FieldNode(tNode, name, bF, null,
-					    false, FIELDICON, FIELDICON, fieldMenu);
-		  }
+                    newNode = new FieldNode(tNode, name, bF, null,
+                                            false, FIELDICON, FIELDICON, fieldMenu);
+                  }
 
-		// we've put the node into the right place in the tree
+                // we've put the node into the right place in the tree
 
-		if (pSiblingNode == null)
-		  {
-		    b.moveFieldBefore(name, null);
-		  }
-		else
-		  {
-		    b.moveFieldAfter(name, pSiblingNode.getText());
-		  }
+                if (pSiblingNode == null)
+                  {
+                    b.moveFieldBefore(name, null);
+                  }
+                else
+                  {
+                    b.moveFieldAfter(name, pSiblingNode.getText());
+                  }
 
-		tree.insertNode(newNode, false);
-		tree.expandNode(tNode, false);
-		tree.unselectAllNodes(true);
-		tree.selectNode(newNode); // to trigger the editField() call that brings up the new field in the pane
-		tree.refresh();
+                tree.insertNode(newNode, false);
+                tree.expandNode(tNode, false);
+                tree.unselectAllNodes(true);
+                tree.selectNode(newNode); // to trigger the editField() call that brings up the new field in the pane
+                tree.refresh();
 
-		if (debug)
-		  {
-		    System.err.println("Called editField");
-		  }
-	      }
-	    else
-	      {
-		BaseNode bNode = (BaseNode) node;
+                if (debug)
+                  {
+                    System.err.println("Called editField");
+                  }
+              }
+            else
+              {
+                BaseNode bNode = (BaseNode) node;
 
-		if (debug)
-		  {
-		    System.err.println("Calling editField on embedded type");
-		  }
+                if (debug)
+                  {
+                    System.err.println("Calling editField on embedded type");
+                  }
 
-		// create a name for the new field
+                // create a name for the new field
 
-		BaseField bF;
-		Base b = bNode.getBase();
+                BaseField bF;
+                Base b = bNode.getBase();
 
-		bF = b.createNewField(); // the server picks a new default field name
+                bF = b.createNewField(); // the server picks a new default field name
 
-		String name = bF.getName();
+                String name = bF.getName();
 
-		// we want to insert the child's field node at the
-		// bottom of the object, which is where
-		// createNewField() places it.
+                // we want to insert the child's field node at the
+                // bottom of the object, which is where
+                // createNewField() places it.
 
-		treeNode n = bNode.getChild();
-	    
-		if (n != null)
-		  {
-		    while (n.getNextSibling() != null)
-		      {
-			n = n.getNextSibling();
-		      }
-		  }
+                treeNode n = bNode.getChild();
+            
+                if (n != null)
+                  {
+                    while (n.getNextSibling() != null)
+                      {
+                        n = n.getNextSibling();
+                      }
+                  }
 
-		FieldNode newNode = new FieldNode(bNode, name, bF, n,
-						  false, FIELDICON, FIELDICON, fieldMenu);
-		tree.insertNode(newNode, false);
-		tree.expandNode(bNode, false);
-		tree.unselectAllNodes(true);
-		tree.selectNode(newNode); // to trigger the editField() call that brings up the new field in the pane
-		tree.refresh();
+                FieldNode newNode = new FieldNode(bNode, name, bF, n,
+                                                  false, FIELDICON, FIELDICON, fieldMenu);
+                tree.insertNode(newNode, false);
+                tree.expandNode(bNode, false);
+                tree.unselectAllNodes(true);
+                tree.selectNode(newNode); // to trigger the editField() call that brings up the new field in the pane
+                tree.refresh();
 
-		if (debug)
-		  {
-		    System.err.println("Called editField");
-		  }
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    System.err.println("couldn't create new field" + ex);
-	  }
+                if (debug)
+                  {
+                    System.err.println("Called editField");
+                  }
+              }
+          }
+        catch (RemoteException ex)
+          {
+            System.err.println("couldn't create new field" + ex);
+          }
       }
     else if (event.getSource() == deleteFieldMI)
       {
-	String label, baseLabel;
-	TabNode tNode;
-	BaseNode bNode;
-	FieldNode fNode;
+        String label, baseLabel;
+        TabNode tNode;
+        BaseNode bNode;
+        FieldNode fNode;
 
-	/* -- */
+        /* -- */
 
-	if (node.getParent() instanceof BaseNode)
-	  {
-	    tNode = null;
-	    bNode = (BaseNode) node.getParent();
-	  }
-	else
-	  {
-	    tNode = (TabNode) node.getParent();
-	    bNode = (BaseNode) tNode.getParent();
-	  }
+        if (node.getParent() instanceof BaseNode)
+          {
+            tNode = null;
+            bNode = (BaseNode) node.getParent();
+          }
+        else
+          {
+            tNode = (TabNode) node.getParent();
+            bNode = (BaseNode) tNode.getParent();
+          }
 
-	fNode = (FieldNode) node;
+        fNode = (FieldNode) node;
 
-	label = fNode.getText();
-	baseLabel = bNode.getText();
+        label = fNode.getText();
+        baseLabel = bNode.getText();
 
-	// "Confirm Field Deletion"
-	// "Are you sure you want to delete the {0} field from the {1} object type?"
+        // "Confirm Field Deletion"
+        // "Are you sure you want to delete the {0} field from the {1} object type?"
 
-	DialogRsrc dialogResource = new DialogRsrc(this,
-						   ts.l("treeNodeMenuPerformed.deleteFieldTitle"),
-						   ts.l("treeNodeMenuPerformed.deleteFieldText", label, baseLabel),
-						   ts.l("treeNodeMenuPerformed.deleteButton"),
-						   ts.l("global.cancel"),
-						   questionImage);
+        DialogRsrc dialogResource = new DialogRsrc(this,
+                                                   ts.l("treeNodeMenuPerformed.deleteFieldTitle"),
+                                                   ts.l("treeNodeMenuPerformed.deleteFieldText", label, baseLabel),
+                                                   ts.l("treeNodeMenuPerformed.deleteButton"),
+                                                   ts.l("global.cancel"),
+                                                   questionImage);
 
-	Hashtable results = new StringDialog(dialogResource, StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
+        Hashtable results = new StringDialog(dialogResource, StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
 
-	if (results != null)
-	  {
-	    try
-	      {
-		ReturnVal retVal = bNode.getBase().deleteField(fNode.getText());
-		
-		if (retVal != null && !retVal.didSucceed())
-		  {
-		    handleReturnVal(retVal);
-		    return;
-		  }
-		
-		refreshFields(bNode, true, false);
-		ne.refreshSpaceList();
-		be.refreshLabelChoice();
-	      }
-	    catch (RemoteException ex)
-	      {
-		// "Field Deletion Error"
-		// "An exception was caught from the server while trying to delete the {0} field from the {1} object type:\n{2}"
-		new JErrorDialog(this,
-				 ts.l("treeNodeMenuPerformed.badDeleteFieldTitle"),
-				 ts.l("treeNodeMenuPerformed.badDeleteFieldText", label, baseLabel, ex), StandardDialog.ModalityType.DOCUMENT_MODAL);
-	      }
-	  }
+        if (results != null)
+          {
+            try
+              {
+                ReturnVal retVal = bNode.getBase().deleteField(fNode.getText());
+                
+                if (retVal != null && !retVal.didSucceed())
+                  {
+                    handleReturnVal(retVal);
+                    return;
+                  }
+                
+                refreshFields(bNode, true, false);
+                ne.refreshSpaceList();
+                be.refreshLabelChoice();
+              }
+            catch (RemoteException ex)
+              {
+                // "Field Deletion Error"
+                // "An exception was caught from the server while trying to delete the {0} field from the {1} object type:\n{2}"
+                new JErrorDialog(this,
+                                 ts.l("treeNodeMenuPerformed.badDeleteFieldTitle"),
+                                 ts.l("treeNodeMenuPerformed.badDeleteFieldText", label, baseLabel, ex), StandardDialog.ModalityType.DOCUMENT_MODAL);
+              }
+          }
       }
   }
 
@@ -1873,20 +1873,20 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     if (debug)
       {
-	System.out.println("event: " + event);
+        System.out.println("event: " + event);
       }
 
     if (event.getSource() == okButton)
       {
-	commit();
+        commit();
       }
     else if (event.getSource() == cancelButton)
       {
-	cancel();
+        cancel();
       }
     else
       {
-	System.err.println("Unknown Action Performed in GASHSchema");
+        System.err.println("Unknown Action Performed in GASHSchema");
       }
   }
 
@@ -1900,12 +1900,12 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     if (e.getID() == WindowEvent.WINDOW_CLOSING)
       {
-	super.processWindowEvent(e); // go ahead and close it, please
-	cleanup();
+        super.processWindowEvent(e); // go ahead and close it, please
+        cleanup();
       }
     else
       {
-	super.processWindowEvent(e);
+        super.processWindowEvent(e);
       }
   }
 
@@ -1913,24 +1913,24 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     if (editor == null)
       {
-	return;
+        return;
       }
 
     try
       {
-	ReturnVal retVal = editor.commit();
+        ReturnVal retVal = editor.commit();
 
-	if (retVal != null)
-	  {
-	    handleReturnVal(retVal);
-	    return;
-	  }
+        if (retVal != null)
+          {
+            handleReturnVal(retVal);
+            return;
+          }
 
-	editor = null;
+        editor = null;
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("Couldn't commit: " + ex);
+        throw new RuntimeException("Couldn't commit: " + ex);
       }
 
     setVisible(false);
@@ -1941,17 +1941,17 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     if (editor == null)
       {
-	return;
+        return;
       }
 
     try
       {
-	editor.release();
-	editor = null;
+        editor.release();
+        editor = null;
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("Couldn't release: " + ex);
+        throw new RuntimeException("Couldn't release: " + ex);
       }
 
     setVisible(false);
@@ -1968,46 +1968,46 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     if (this.editor != null)
       {
-	try
-	  {
-	    this.editor.release();
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("Couldn't release: " + ex);
-	  }
+        try
+          {
+            this.editor.release();
+          }
+        catch (RemoteException ex)
+          {
+            throw new RuntimeException("Couldn't release: " + ex);
+          }
 
-	this.editor = null;
+        this.editor = null;
       }
 
     if (this.attribCardPane != null)
       {
-	this.attribCardPane.removeAll();
-	this.attribCardPane = null;
+        this.attribCardPane.removeAll();
+        this.attribCardPane = null;
       }
 
     if (this.be != null)
       {
-	this.be.cleanup();
-	this.be = null;
+        this.be.cleanup();
+        this.be = null;
       }
 
     if (this.fe != null)
       {
-	this.fe.cleanup();
-	this.fe = null;
+        this.fe.cleanup();
+        this.fe = null;
       }
 
     if (this.ne != null)
       {
-	this.ne.cleanup();
-	this.ne = null;
+        this.ne.cleanup();
+        this.ne = null;
       }
     
     if (this.ce != null)
       {
-	this.ce.cleanup();
-	this.ce = null;
+        this.ce.cleanup();
+        this.ce = null;
       }
 
     this.rootCategory = null;
@@ -2027,7 +2027,7 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
     this.dispatch.clearSchemaEditor();
     this.dispatch = null;
 
-    this.removeAll();		// should be done on GUI thread
+    this.removeAll();           // should be done on GUI thread
   }
 
   // **
@@ -2045,12 +2045,12 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   public boolean startDrag(treeNode dragNode)
   {
     return ((dragNode instanceof FieldNode) ||
-	    ((dragNode instanceof TabNode &&
-	      (dragNode.getPrevSibling() != null ||
-	       dragNode.getNextSibling() != null))) ||
-	    (dragNode instanceof BaseNode) ||
-	    (dragNode instanceof CatTreeNode &&
-	     dragNode != objects));
+            ((dragNode instanceof TabNode &&
+              (dragNode.getPrevSibling() != null ||
+               dragNode.getNextSibling() != null))) ||
+            (dragNode instanceof BaseNode) ||
+            (dragNode instanceof CatTreeNode &&
+             dragNode != objects));
   }
 
   /**
@@ -2064,110 +2064,110 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     if (targetNode.isOpen())
       {
-	if (debug)
-	  {
-	    System.err.println("iconDragOver(): failing " + dragNode.getText() + 
-			       " over " + targetNode.getText() + " because node is open.");
-	  }
+        if (debug)
+          {
+            System.err.println("iconDragOver(): failing " + dragNode.getText() + 
+                               " over " + targetNode.getText() + " because node is open.");
+          }
 
-	return false;
+        return false;
       }
 
     if (dragNode instanceof FieldNode)
       {
-	if (dragNode.getParent() instanceof TabNode)
-	  {
-	    BaseNode bNode = (BaseNode) dragNode.getParent().getParent();
+        if (dragNode.getParent() instanceof TabNode)
+          {
+            BaseNode bNode = (BaseNode) dragNode.getParent().getParent();
 
-	    if (targetNode instanceof TabNode && targetNode.getParent() == bNode)
-	      {
-		return true;
-	      }
-	  }
+            if (targetNode instanceof TabNode && targetNode.getParent() == bNode)
+              {
+                return true;
+              }
+          }
 
-	if (debug)
-	  {
-	    System.err.println("iconDragOver(): failing " + dragNode.getText() + 
-			       " over " + targetNode.getText() + " because can't drag over field nodes");
-	  }
+        if (debug)
+          {
+            System.err.println("iconDragOver(): failing " + dragNode.getText() + 
+                               " over " + targetNode.getText() + " because can't drag over field nodes");
+          }
 
-	return false;
+        return false;
       }
 
     if (dragNode instanceof TabNode)
       {
-	return false;
+        return false;
       }
 
     if (dragNode instanceof BaseNode)
       {
-	boolean success = (targetNode instanceof CatTreeNode);
+        boolean success = (targetNode instanceof CatTreeNode);
 
-	if (debug)
-	  {
-	    if (success)
-	      {
-		System.err.println("iconDragOver(): succeeding base " + dragNode.getText() + 
-				   " over category " + targetNode.getText());
-	      }
-	    else
-	      {
-		System.err.println("iconDragOver(): failing base " + dragNode.getText() + 
-				   " over non-category " + targetNode.getText());
-	      }
-	  }
+        if (debug)
+          {
+            if (success)
+              {
+                System.err.println("iconDragOver(): succeeding base " + dragNode.getText() + 
+                                   " over category " + targetNode.getText());
+              }
+            else
+              {
+                System.err.println("iconDragOver(): failing base " + dragNode.getText() + 
+                                   " over non-category " + targetNode.getText());
+              }
+          }
 
-	return success;
+        return success;
       }
 
     if (dragNode instanceof CatTreeNode)
       {
-	if (!(targetNode instanceof CatTreeNode))
-	  {
-	    if (debug)
-	      {
-		System.err.println("iconDragOver(): failing " + dragNode.getText() + 
-				   " over " + targetNode.getText() + " because can't drag category over non-category");
-	      }
+        if (!(targetNode instanceof CatTreeNode))
+          {
+            if (debug)
+              {
+                System.err.println("iconDragOver(): failing " + dragNode.getText() + 
+                                   " over " + targetNode.getText() + " because can't drag category over non-category");
+              }
 
-	    return false;
-	  }
-	
-	CatTreeNode cNode = (CatTreeNode) dragNode;
-	CatTreeNode cNode1 = (CatTreeNode) targetNode;
+            return false;
+          }
+        
+        CatTreeNode cNode = (CatTreeNode) dragNode;
+        CatTreeNode cNode1 = (CatTreeNode) targetNode;
 
-	try
-	  {
-	    if (!cNode1.getCategory().isUnder(cNode.getCategory()))
-	      {
-		if (debug)
-		  {
-		    System.err.println("iconDragOver(): succeeding " + dragNode.getText() + 
-				       " over " + targetNode.getText());
-		  }
+        try
+          {
+            if (!cNode1.getCategory().isUnder(cNode.getCategory()))
+              {
+                if (debug)
+                  {
+                    System.err.println("iconDragOver(): succeeding " + dragNode.getText() + 
+                                       " over " + targetNode.getText());
+                  }
 
-		return true;
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    System.err.println("iconDragOver(): failing " + dragNode.getText() + 
-				       " over " + targetNode.getText() +
-				       " because move category into its own subcategory");
-		  }
+                return true;
+              }
+            else
+              {
+                if (debug)
+                  {
+                    System.err.println("iconDragOver(): failing " + dragNode.getText() + 
+                                       " over " + targetNode.getText() +
+                                       " because move category into its own subcategory");
+                  }
 
-		return false;
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("caught remote: " + ex);
-	  }
+                return false;
+              }
+          }
+        catch (RemoteException ex)
+          {
+            throw new RuntimeException("caught remote: " + ex);
+          }
       }
 
     System.err.println("iconDragOver(): failing " + dragNode.getText() + 
-		       " over " + targetNode.getText() + ", don't recognize the drag node type");
+                       " over " + targetNode.getText() + ", don't recognize the drag node type");
     
     return false;
   }
@@ -2184,123 +2184,123 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     if (debug)
       {
-	System.err.println("Dropping node " + dragNode.getText() + " on " + targetNode.getText());
+        System.err.println("Dropping node " + dragNode.getText() + " on " + targetNode.getText());
       }
 
     if (dragNode instanceof BaseNode)
       {
-	try
-	  {
-	    BaseNode bn = (BaseNode) dragNode;
-	    Base base = bn.getBase();
-	    Category oldCategory = base.getCategory();
+        try
+          {
+            BaseNode bn = (BaseNode) dragNode;
+            Base base = bn.getBase();
+            Category oldCategory = base.getCategory();
 
-	    Category newCategory = null;
+            Category newCategory = null;
 
-	    if (targetNode instanceof CatTreeNode)
-	      {
-		// it had better be
+            if (targetNode instanceof CatTreeNode)
+              {
+                // it had better be
 
-		newCategory = ((CatTreeNode) targetNode).getCategory();
+                newCategory = ((CatTreeNode) targetNode).getCategory();
 
-		if (debug)
-		  {
-		    System.err.println("Dropping base " + base.getName() + " from " +
-				       oldCategory.getName() + " onto " + newCategory.getName());
-		  }
+                if (debug)
+                  {
+                    System.err.println("Dropping base " + base.getName() + " from " +
+                                       oldCategory.getName() + " onto " + newCategory.getName());
+                  }
 
-		if (debug)
-		  {
-		    System.err.println("Removing " + base.getName() + " from " + oldCategory.getName());
-		  }
+                if (debug)
+                  {
+                    System.err.println("Removing " + base.getName() + " from " + oldCategory.getName());
+                  }
 
-		oldCategory.removeNode(base.getName());
+                oldCategory.removeNode(base.getName());
 
-		if (debug)
-		  {
-		    System.err.println("Adding " + base.getName() + " to " + newCategory.getName());
-		  }
+                if (debug)
+                  {
+                    System.err.println("Adding " + base.getName() + " to " + newCategory.getName());
+                  }
 
-		newCategory.addNodeBefore(base, null);
+                newCategory.addNodeBefore(base, null);
 
-		BaseNode newNode = (BaseNode) tree.moveNode(dragNode, targetNode, null, true);
+                BaseNode newNode = (BaseNode) tree.moveNode(dragNode, targetNode, null, true);
 
-		refreshFields(newNode, true, false);
+                refreshFields(newNode, true, false);
 
-		if (be.baseNode == dragNode)
-		  {
-		    be.baseNode = newNode;
-		  }
-	      }
-	    else
-	      {
-		throw new RuntimeException("what?  dropped on a non-category node..");
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("caught remote: " + ex);
-	  }
+                if (be.baseNode == dragNode)
+                  {
+                    be.baseNode = newNode;
+                  }
+              }
+            else
+              {
+                throw new RuntimeException("what?  dropped on a non-category node..");
+              }
+          }
+        catch (RemoteException ex)
+          {
+            throw new RuntimeException("caught remote: " + ex);
+          }
       }
     else if (dragNode instanceof CatTreeNode)
       {
-	try
-	  {
-	    CatTreeNode cn = (CatTreeNode) dragNode;
-	    Category category = cn.getCategory();
-	    
-	    Category newCategory = null;
+        try
+          {
+            CatTreeNode cn = (CatTreeNode) dragNode;
+            Category category = cn.getCategory();
+            
+            Category newCategory = null;
 
-	    if (targetNode instanceof CatTreeNode)
-	      {
-		// it had better be
+            if (targetNode instanceof CatTreeNode)
+              {
+                // it had better be
 
-		newCategory = ((CatTreeNode) targetNode).getCategory();
+                newCategory = ((CatTreeNode) targetNode).getCategory();
 
-		if (debug)
-		  {
-		    System.err.println("Dropping category " + category.getName() + " from " +
-				       category.getCategory().getName() + " onto " + newCategory.getName());
-		  }
+                if (debug)
+                  {
+                    System.err.println("Dropping category " + category.getName() + " from " +
+                                       category.getCategory().getName() + " onto " + newCategory.getName());
+                  }
 
-		newCategory.moveCategoryNode(category.getPath(), null);
+                newCategory.moveCategoryNode(category.getPath(), null);
 
-		CatTreeNode newNode = (CatTreeNode) tree.moveNode(dragNode, targetNode, null, true);
+                CatTreeNode newNode = (CatTreeNode) tree.moveNode(dragNode, targetNode, null, true);
 
-		if (ce.catNode == dragNode)
-		  {
-		    ce.catNode = newNode;
-		  }
-	      }
-	    else
-	      {
-		throw new RuntimeException("what?  dropped on a non-category node..");
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("caught remote: " + ex);
-	  }
+                if (ce.catNode == dragNode)
+                  {
+                    ce.catNode = newNode;
+                  }
+              }
+            else
+              {
+                throw new RuntimeException("what?  dropped on a non-category node..");
+              }
+          }
+        catch (RemoteException ex)
+          {
+            throw new RuntimeException("caught remote: " + ex);
+          }
       }
     else if (dragNode instanceof FieldNode)
       {
-	try
-	  {
-	    if (!(targetNode instanceof TabNode))
-	      {
-		throw new RuntimeException("what?  field node dropped on a non-tab node..");
-	      }
+        try
+          {
+            if (!(targetNode instanceof TabNode))
+              {
+                throw new RuntimeException("what?  field node dropped on a non-tab node..");
+              }
 
-	    FieldNode fNode = (FieldNode) dragNode;
-	    TabNode tNode = (TabNode) targetNode;
+            FieldNode fNode = (FieldNode) dragNode;
+            TabNode tNode = (TabNode) targetNode;
 
-	    tree.moveNode(dragNode, targetNode, null, true);
-	    syncFieldsFromTree((BaseNode) tNode.getParent());
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("caught remote: " + ex);
-	  }
+            tree.moveNode(dragNode, targetNode, null, true);
+            syncFieldsFromTree((BaseNode) tNode.getParent());
+          }
+        catch (RemoteException ex)
+          {
+            throw new RuntimeException("caught remote: " + ex);
+          }
       }
   }
 
@@ -2314,210 +2314,210 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     if (debug)
       {
-	if (aboveNode != null && belowNode != null)
-	  {
-	    System.err.println("dragLineTween(): " + dragNode.getText() +
-			       " above = " + aboveNode.getText() + ", below = " + belowNode.getText());
-	  }
-	else if (aboveNode != null)
-	  {
-	    System.err.println("dragLineTween(): " + dragNode.getText() +
-			       " above = " + aboveNode.getText());
-	  }
-	else
-	  {
-	    System.err.println("dragLineTween(): " + dragNode.getText() +
-			       " below = " + belowNode.getText());
-	  }
+        if (aboveNode != null && belowNode != null)
+          {
+            System.err.println("dragLineTween(): " + dragNode.getText() +
+                               " above = " + aboveNode.getText() + ", below = " + belowNode.getText());
+          }
+        else if (aboveNode != null)
+          {
+            System.err.println("dragLineTween(): " + dragNode.getText() +
+                               " above = " + aboveNode.getText());
+          }
+        else
+          {
+            System.err.println("dragLineTween(): " + dragNode.getText() +
+                               " below = " + belowNode.getText());
+          }
       }
 
     if (belowNode == objects)
       {
-	return false;
+        return false;
       }
 
     if (dragNode instanceof TabNode)
       {
-	BaseNode bNode = (BaseNode) dragNode.getParent();
+        BaseNode bNode = (BaseNode) dragNode.getParent();
 
-	if (aboveNode instanceof BaseNode)
-	  {
-	    return aboveNode == bNode;
-	  }
+        if (aboveNode instanceof BaseNode)
+          {
+            return aboveNode == bNode;
+          }
 
-	if (aboveNode instanceof TabNode)
-	  {
-	    return aboveNode.getParent() == bNode && !aboveNode.isOpen();
-	  }
+        if (aboveNode instanceof TabNode)
+          {
+            return aboveNode.getParent() == bNode && !aboveNode.isOpen();
+          }
 
-	if (aboveNode instanceof FieldNode)
-	  {
-	    if (belowNode instanceof TabNode)
-	      {
-		return belowNode.getParent() == bNode;
-	      }
-	    else if (aboveNode.getNextSibling() == null && aboveNode.getParent() != dragNode && aboveNode.getParent().getParent() == bNode)
-	      {
-		return true;
-	      }
-	    else
-	      {
-		return false;
-	      }
-	  }
+        if (aboveNode instanceof FieldNode)
+          {
+            if (belowNode instanceof TabNode)
+              {
+                return belowNode.getParent() == bNode;
+              }
+            else if (aboveNode.getNextSibling() == null && aboveNode.getParent() != dragNode && aboveNode.getParent().getParent() == bNode)
+              {
+                return true;
+              }
+            else
+              {
+                return false;
+              }
+          }
 
-	return false;
+        return false;
       }
     else if (dragNode instanceof FieldNode)
       {
-	TabNode tNode;
-	BaseNode bNode;
+        TabNode tNode;
+        BaseNode bNode;
 
-	if (dragNode.getParent() instanceof TabNode)
-	  {
-	    tNode = (TabNode) dragNode.getParent();
-	    bNode = (BaseNode) tNode.getParent();
-	  }
-	else
-	  {
-	    tNode = null;
-	    bNode = (BaseNode) dragNode.getParent();
-	  }
+        if (dragNode.getParent() instanceof TabNode)
+          {
+            tNode = (TabNode) dragNode.getParent();
+            bNode = (BaseNode) tNode.getParent();
+          }
+        else
+          {
+            tNode = null;
+            bNode = (BaseNode) dragNode.getParent();
+          }
 
-	if (aboveNode instanceof BaseNode && tNode != null)
-	  {
-	    return false;
-	  }
+        if (aboveNode instanceof BaseNode && tNode != null)
+          {
+            return false;
+          }
 
-	if (aboveNode instanceof BaseNode && aboveNode != bNode)
-	  {
-	    return false;
-	  }
-	
-	if (aboveNode instanceof TabNode)
-	  {
-	    TabNode aboveTabNode = (TabNode) aboveNode;
+        if (aboveNode instanceof BaseNode && aboveNode != bNode)
+          {
+            return false;
+          }
+        
+        if (aboveNode instanceof TabNode)
+          {
+            TabNode aboveTabNode = (TabNode) aboveNode;
 
-	    if (aboveTabNode.getParent() != bNode || !aboveTabNode.isOpen())
-	      {
-		return false;
-	      }
-	  }
+            if (aboveTabNode.getParent() != bNode || !aboveTabNode.isOpen())
+              {
+                return false;
+              }
+          }
 
-	if (aboveNode instanceof FieldNode)
-	  {
-	    BaseNode aboveBaseNode = null;
+        if (aboveNode instanceof FieldNode)
+          {
+            BaseNode aboveBaseNode = null;
 
-	    if (aboveNode.getParent() instanceof TabNode)
-	      {
-		// non-embedded field above
+            if (aboveNode.getParent() instanceof TabNode)
+              {
+                // non-embedded field above
 
-		aboveBaseNode = (BaseNode) aboveNode.getParent().getParent();
-	      }
-	    else if (aboveNode.getParent() instanceof BaseNode)
-	      {
-		// embedded field above
+                aboveBaseNode = (BaseNode) aboveNode.getParent().getParent();
+              }
+            else if (aboveNode.getParent() instanceof BaseNode)
+              {
+                // embedded field above
 
-		aboveBaseNode = (BaseNode) aboveNode.getParent();
-	      }
+                aboveBaseNode = (BaseNode) aboveNode.getParent();
+              }
 
-	    if (aboveBaseNode != bNode || !aboveBaseNode.isOpen())
-	      {
-		return false;
-	      }
-	  }
+            if (aboveBaseNode != bNode || !aboveBaseNode.isOpen())
+              {
+                return false;
+              }
+          }
 
-	if (!(aboveNode instanceof BaseNode || aboveNode instanceof TabNode || aboveNode instanceof FieldNode))
-	  {
-	    return false;
-	  }
+        if (!(aboveNode instanceof BaseNode || aboveNode instanceof TabNode || aboveNode instanceof FieldNode))
+          {
+            return false;
+          }
 
-	return true;
+        return true;
       }
     else if (dragNode instanceof BaseNode)
       {
-	if (belowNode instanceof FieldNode)
-	  {
-	    return false;
-	  }
+        if (belowNode instanceof FieldNode)
+          {
+            return false;
+          }
 
-	if (belowNode instanceof TabNode)
-	  {
-	    return false;
-	  }
+        if (belowNode instanceof TabNode)
+          {
+            return false;
+          }
 
-	if (belowNode == nodeAfterCategories)
-	  {
-	    return true;
-	  }
+        if (belowNode == nodeAfterCategories)
+          {
+            return true;
+          }
 
-	if (aboveNode instanceof FieldNode)
-	  {
-	    if (aboveNode.getParent() instanceof TabNode)
-	      {
-		if (aboveNode.getParent().getParent() == dragNode)
-		  {
-		    return false;
-		  }
-	      }
-	    else if (aboveNode.getParent() == dragNode)
-	      {
-		return false;
-	      }
+        if (aboveNode instanceof FieldNode)
+          {
+            if (aboveNode.getParent() instanceof TabNode)
+              {
+                if (aboveNode.getParent().getParent() == dragNode)
+                  {
+                    return false;
+                  }
+              }
+            else if (aboveNode.getParent() == dragNode)
+              {
+                return false;
+              }
 
-	    return true;
-	  }
+            return true;
+          }
 
-	return ((aboveNode instanceof BaseNode) || 
-		(aboveNode instanceof CatTreeNode) ||
-		(belowNode instanceof BaseNode) || 
-		(belowNode instanceof CatTreeNode));
+        return ((aboveNode instanceof BaseNode) || 
+                (aboveNode instanceof CatTreeNode) ||
+                (belowNode instanceof BaseNode) || 
+                (belowNode instanceof CatTreeNode));
       }
     else if (dragNode instanceof CatTreeNode)
       {
-	if (belowNode instanceof FieldNode)
-	  {
-	    return false;
-	  }
+        if (belowNode instanceof FieldNode)
+          {
+            return false;
+          }
 
-	if (belowNode instanceof TabNode)
-	  {
-	    return false;
-	  }
+        if (belowNode instanceof TabNode)
+          {
+            return false;
+          }
 
-	// if we're already the last category, we don't want to
-	// drag to the bottom
+        // if we're already the last category, we don't want to
+        // drag to the bottom
 
-	if (belowNode == nodeAfterCategories && dragNode.getNextSibling() != null)
-	  {
-	    return true;
-	  }
+        if (belowNode == nodeAfterCategories && dragNode.getNextSibling() != null)
+          {
+            return true;
+          }
 
-	if (aboveNode instanceof CatTreeNode)
-	  {
-	    return !aboveNode.isUnder(dragNode);
-	  }
-	    
-	if (belowNode instanceof CatTreeNode)
-	  {
-	    return !belowNode.isUnder(dragNode);
-	  }
+        if (aboveNode instanceof CatTreeNode)
+          {
+            return !aboveNode.isUnder(dragNode);
+          }
+            
+        if (belowNode instanceof CatTreeNode)
+          {
+            return !belowNode.isUnder(dragNode);
+          }
 
-	if (aboveNode instanceof BaseNode)
-	  {
-	    return !aboveNode.isUnder(dragNode);
-	  }
+        if (aboveNode instanceof BaseNode)
+          {
+            return !aboveNode.isUnder(dragNode);
+          }
   
-	if (belowNode instanceof BaseNode)
-	  {
-	    return !belowNode.isUnder(dragNode);
-	  }
-		    
-	return false;
+        if (belowNode instanceof BaseNode)
+          {
+            return !belowNode.isUnder(dragNode);
+          }
+                    
+        return false;
       }
     else
       {
-	return false;
+        return false;
       }
   }
 
@@ -2532,226 +2532,226 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
   {
     if (debug)
       {
-	System.out.println("dragNode = " + dragNode.getText());
-	System.out.println("aboveNode = " + aboveNode.getText());
-	System.out.println("belowNode = " + belowNode.getText());
+        System.out.println("dragNode = " + dragNode.getText());
+        System.out.println("aboveNode = " + aboveNode.getText());
+        System.out.println("belowNode = " + belowNode.getText());
       }
 
     if (aboveNode.equals(dragNode) || belowNode.equals(dragNode))
       {
-	if (debug)
-	  {
-	    System.err.println("No change necessary");
-	  }
+        if (debug)
+          {
+            System.err.println("No change necessary");
+          }
 
-	return;
+        return;
       }
 
     try
       {
-	if (dragNode instanceof FieldNode)
-	  {
-	    TabNode tNode;
-	    BaseNode bNode;
-	    FieldNode oldNode = (FieldNode) dragNode;
+        if (dragNode instanceof FieldNode)
+          {
+            TabNode tNode;
+            BaseNode bNode;
+            FieldNode oldNode = (FieldNode) dragNode;
 
-	    if (oldNode.getParent() instanceof TabNode)
-	      {
-		tNode = (TabNode) oldNode.getParent();
-		bNode = (BaseNode) tNode.getParent();
-	      }
-	    else
-	      {
-		tNode = null;
-		bNode = (BaseNode) oldNode.getParent();
-	      }
+            if (oldNode.getParent() instanceof TabNode)
+              {
+                tNode = (TabNode) oldNode.getParent();
+                bNode = (BaseNode) tNode.getParent();
+              }
+            else
+              {
+                tNode = null;
+                bNode = (BaseNode) oldNode.getParent();
+              }
 
-	    Base base = bNode.getBase();
+            Base base = bNode.getBase();
 
-	    if (debug)
-	      {
-		System.out.println("base = " + bNode);
-	      }
-	
-	    if (aboveNode instanceof FieldNode)
-	      {
-		TabNode aboveTabNode;
-		BaseNode aboveBaseNode;
+            if (debug)
+              {
+                System.out.println("base = " + bNode);
+              }
+        
+            if (aboveNode instanceof FieldNode)
+              {
+                TabNode aboveTabNode;
+                BaseNode aboveBaseNode;
 
-		/* -- */
+                /* -- */
 
-		if (aboveNode.getParent() instanceof TabNode)
-		  {
-		    aboveTabNode = (TabNode) aboveNode.getParent();
-		    aboveBaseNode = (BaseNode) aboveTabNode.getParent();
-		  }
-		else
-		  {
-		    aboveTabNode = null;
-		    aboveBaseNode = (BaseNode) aboveNode.getParent();
-		  }
+                if (aboveNode.getParent() instanceof TabNode)
+                  {
+                    aboveTabNode = (TabNode) aboveNode.getParent();
+                    aboveBaseNode = (BaseNode) aboveTabNode.getParent();
+                  }
+                else
+                  {
+                    aboveTabNode = null;
+                    aboveBaseNode = (BaseNode) aboveNode.getParent();
+                  }
 
-		base.moveFieldAfter(dragNode.getText(), aboveNode.getText());
+                base.moveFieldAfter(dragNode.getText(), aboveNode.getText());
 
-		FieldNode newNode = (FieldNode) tree.moveNode(dragNode, aboveTabNode != null ? (treeNode) aboveTabNode: (treeNode) aboveBaseNode, aboveNode, true);
+                FieldNode newNode = (FieldNode) tree.moveNode(dragNode, aboveTabNode != null ? (treeNode) aboveTabNode: (treeNode) aboveBaseNode, aboveNode, true);
 
-		if (aboveTabNode != null)
-		  {
-		    BaseField bF = newNode.getField();
-		    bF.setTabName(aboveTabNode.getText());
-		  }
+                if (aboveTabNode != null)
+                  {
+                    BaseField bF = newNode.getField();
+                    bF.setTabName(aboveTabNode.getText());
+                  }
 
-		if (fe.fieldNode == dragNode)
-		  {
-		    fe.fieldNode = newNode;
-		  }
-	      }
-	    else if (aboveNode instanceof TabNode)
-	      {
-		TabNode aboveTabNode = (TabNode) aboveNode;
+                if (fe.fieldNode == dragNode)
+                  {
+                    fe.fieldNode = newNode;
+                  }
+              }
+            else if (aboveNode instanceof TabNode)
+              {
+                TabNode aboveTabNode = (TabNode) aboveNode;
 
-		if (belowNode instanceof FieldNode)
-		  {
-		    base.moveFieldBefore(dragNode.getText(), belowNode.getText());
-		  }
-		else
-		  {
-		    // we need to make this field the first field in the
-		    // tab, but we don't know where the field goes in the
-		    // display order, since this tab has no fields under
-		    // it that we can easily use for comparison.
-		    //
-		    // so we'll have to root around a little bit to find
-		    // our bearings.
+                if (belowNode instanceof FieldNode)
+                  {
+                    base.moveFieldBefore(dragNode.getText(), belowNode.getText());
+                  }
+                else
+                  {
+                    // we need to make this field the first field in the
+                    // tab, but we don't know where the field goes in the
+                    // display order, since this tab has no fields under
+                    // it that we can easily use for comparison.
+                    //
+                    // so we'll have to root around a little bit to find
+                    // our bearings.
 
-		    TabNode prevTabNode = (TabNode) aboveTabNode.getPrevSibling();
+                    TabNode prevTabNode = (TabNode) aboveTabNode.getPrevSibling();
 
-		    while (prevTabNode != null && prevTabNode.getChild() == null)
-		      {
-			prevTabNode = (TabNode) prevTabNode.getPrevSibling();
-		      }
+                    while (prevTabNode != null && prevTabNode.getChild() == null)
+                      {
+                        prevTabNode = (TabNode) prevTabNode.getPrevSibling();
+                      }
 
-		    if (prevTabNode == null)
-		      {
-			// move the field to the top of the display list
-			base.moveFieldAfter(dragNode.getText(), null);
-		      }
-		    else
-		      {
-			// okay, we've got a preceding tab node that has
-			// fields under it.. find the last one
+                    if (prevTabNode == null)
+                      {
+                        // move the field to the top of the display list
+                        base.moveFieldAfter(dragNode.getText(), null);
+                      }
+                    else
+                      {
+                        // okay, we've got a preceding tab node that has
+                        // fields under it.. find the last one
 
-			FieldNode prevTabFNode = (FieldNode) prevTabNode.getChild();
-		    
-			while (prevTabFNode.getNextSibling() != null)
-			  {
-			    prevTabFNode = (FieldNode) prevTabFNode.getNextSibling();
-			  }
+                        FieldNode prevTabFNode = (FieldNode) prevTabNode.getChild();
+                    
+                        while (prevTabFNode.getNextSibling() != null)
+                          {
+                            prevTabFNode = (FieldNode) prevTabFNode.getNextSibling();
+                          }
 
-			base.moveFieldAfter(dragNode.getText(), prevTabFNode.getText());
-		      }
-		  }
+                        base.moveFieldAfter(dragNode.getText(), prevTabFNode.getText());
+                      }
+                  }
 
-		// okay, we've fixed up the field ordering on the server.
-		// go ahead and move the field node in the tree
+                // okay, we've fixed up the field ordering on the server.
+                // go ahead and move the field node in the tree
 
-		FieldNode newNode = (FieldNode) tree.moveNode(dragNode, aboveTabNode, null, true);
+                FieldNode newNode = (FieldNode) tree.moveNode(dragNode, aboveTabNode, null, true);
 
-		BaseField bF = newNode.getField();
-		bF.setTabName(tNode.getText());
+                BaseField bF = newNode.getField();
+                bF.setTabName(tNode.getText());
 
-		if (fe.fieldNode == dragNode)
-		  {
-		    fe.fieldNode = newNode;
-		  }
-	      }
-	    else if (aboveNode instanceof BaseNode)
-	      {
-		// the dragLineTween routine will only allow a field to be
-		// dragged under a an object base node if it is contained
-		// in an embedded object
+                if (fe.fieldNode == dragNode)
+                  {
+                    fe.fieldNode = newNode;
+                  }
+              }
+            else if (aboveNode instanceof BaseNode)
+              {
+                // the dragLineTween routine will only allow a field to be
+                // dragged under a an object base node if it is contained
+                // in an embedded object
 
-		BaseNode aboveBaseNode = (BaseNode) aboveNode;
+                BaseNode aboveBaseNode = (BaseNode) aboveNode;
 
-		base.moveFieldAfter(dragNode.getText(), null);
+                base.moveFieldAfter(dragNode.getText(), null);
 
-		FieldNode newNode = (FieldNode) tree.moveNode(dragNode, aboveBaseNode, null, true);
+                FieldNode newNode = (FieldNode) tree.moveNode(dragNode, aboveBaseNode, null, true);
 
-		if (fe.fieldNode == dragNode)
-		  {
-		    fe.fieldNode = newNode;
-		  }
-	      }
-	    else
-	      {
-		System.err.println("Dropped away from FieldNodes, shouldn't happen");
-	      }
-	  }
-	else if (dragNode instanceof BaseNode)
-	  {
-	    if (debug)
-	      {
-		System.err.println("Releasing baseNode");
-	      }
+                if (fe.fieldNode == dragNode)
+                  {
+                    fe.fieldNode = newNode;
+                  }
+              }
+            else
+              {
+                System.err.println("Dropped away from FieldNodes, shouldn't happen");
+              }
+          }
+        else if (dragNode instanceof BaseNode)
+          {
+            if (debug)
+              {
+                System.err.println("Releasing baseNode");
+              }
 
-	    BaseNode bn = (BaseNode) dragNode;
-	    Base base = bn.getBase();
+            BaseNode bn = (BaseNode) dragNode;
+            Base base = bn.getBase();
 
-	    Category newCategory = null;
-	    CatTreeNode newParent = null;
-	    treeNode previousNode = null;
+            Category newCategory = null;
+            CatTreeNode newParent = null;
+            treeNode previousNode = null;
 
-	    if (aboveNode instanceof CatTreeNode)
-	      {
-		if (aboveNode == objects)
-		  {
-		    newCategory = rootCategory;
-		    newParent = (CatTreeNode) aboveNode;
-		    previousNode = null;
-		  }
-		else
-		  {
-		    if (aboveNode.isOpen())
-		      {
-			// we want to place ourselves within the category whose
-			// node is right above the drop point
+            if (aboveNode instanceof CatTreeNode)
+              {
+                if (aboveNode == objects)
+                  {
+                    newCategory = rootCategory;
+                    newParent = (CatTreeNode) aboveNode;
+                    previousNode = null;
+                  }
+                else
+                  {
+                    if (aboveNode.isOpen())
+                      {
+                        // we want to place ourselves within the category whose
+                        // node is right above the drop point
 
-			newCategory = ((CatTreeNode) aboveNode).getCategory();
-			newParent = (CatTreeNode) aboveNode;
-			previousNode = null;
-		      }
-		    else
-		      {
-			// we want to place ourselves in the category
-			// containing the above node
+                        newCategory = ((CatTreeNode) aboveNode).getCategory();
+                        newParent = (CatTreeNode) aboveNode;
+                        previousNode = null;
+                      }
+                    else
+                      {
+                        // we want to place ourselves in the category
+                        // containing the above node
 
-			newParent = (CatTreeNode) aboveNode.getParent();
-			newCategory = newParent.getCategory();
-			previousNode = aboveNode;
-		      }
-		  }
-	      }
-	    else if (aboveNode instanceof BaseNode)
-	      {
-		newCategory = ((BaseNode) aboveNode).getBase().getCategory();
-		newParent = (CatTreeNode) aboveNode.getParent();
+                        newParent = (CatTreeNode) aboveNode.getParent();
+                        newCategory = newParent.getCategory();
+                        previousNode = aboveNode;
+                      }
+                  }
+              }
+            else if (aboveNode instanceof BaseNode)
+              {
+                newCategory = ((BaseNode) aboveNode).getBase().getCategory();
+                newParent = (CatTreeNode) aboveNode.getParent();
 
-		previousNode = aboveNode;
-	      }
-	    else if (aboveNode instanceof FieldNode)
-	      {
-		newCategory = ((FieldNode) aboveNode).getField().getBase().getCategory();
+                previousNode = aboveNode;
+              }
+            else if (aboveNode instanceof FieldNode)
+              {
+                newCategory = ((FieldNode) aboveNode).getField().getBase().getCategory();
 
-		if (aboveNode.getParent() instanceof TabNode)
-		  {
-		    newParent = (CatTreeNode) aboveNode.getParent().getParent().getParent();
-		  }
-		else
-		  {
-		    newParent = (CatTreeNode) aboveNode.getParent().getParent();
-		  }
-		previousNode = aboveNode.getParent();
-	      }
+                if (aboveNode.getParent() instanceof TabNode)
+                  {
+                    newParent = (CatTreeNode) aboveNode.getParent().getParent().getParent();
+                  }
+                else
+                  {
+                    newParent = (CatTreeNode) aboveNode.getParent().getParent();
+                  }
+                previousNode = aboveNode.getParent();
+              }
             else
               {
                 // for FindBugs' sake.. iconDragOver() and
@@ -2760,121 +2760,121 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
                 throw new RuntimeException("ASSERT: aboveNode is an invalid type");
               }
 
-	    if (debug)
-	      {
-		System.err.println("New Category = " + newCategory.getPath());
-		System.err.println("new parent = " + newParent.getText());
+            if (debug)
+              {
+                System.err.println("New Category = " + newCategory.getPath());
+                System.err.println("new parent = " + newParent.getText());
 
-		if (previousNode != null)
-		  {
-		    System.err.println("new prevNode = " + previousNode.getText());
-		  }
-	      }
+                if (previousNode != null)
+                  {
+                    System.err.println("new prevNode = " + previousNode.getText());
+                  }
+              }
 
-	    if (previousNode != null)
-	      {
-		newCategory.moveCategoryNode(base.getPath(), previousNode.getText());
-	      }
-	    else
-	      {
-		newCategory.moveCategoryNode(base.getPath(), null);
-	      }
+            if (previousNode != null)
+              {
+                newCategory.moveCategoryNode(base.getPath(), previousNode.getText());
+              }
+            else
+              {
+                newCategory.moveCategoryNode(base.getPath(), null);
+              }
 
-	    BaseNode newNode = (BaseNode) tree.moveNode(dragNode, newParent, previousNode, true);
+            BaseNode newNode = (BaseNode) tree.moveNode(dragNode, newParent, previousNode, true);
 
-	    refreshFields(newNode, true, false);
+            refreshFields(newNode, true, false);
 
-	    if (be.baseNode == dragNode)
-	      {
-		be.baseNode = newNode;
-	      }
+            if (be.baseNode == dragNode)
+              {
+                be.baseNode = newNode;
+              }
 
-	    if (debug)
-	      {
-		System.err.println("Reinserted base " + base.getName());
-		System.err.println("reinserted category = " + base.getCategory().getName());
-	      }
-	  }
-	else if (dragNode instanceof TabNode)
-	  {
-	    BaseNode bNode = (BaseNode) dragNode.getParent();
-	    TabNode newNode;
+            if (debug)
+              {
+                System.err.println("Reinserted base " + base.getName());
+                System.err.println("reinserted category = " + base.getCategory().getName());
+              }
+          }
+        else if (dragNode instanceof TabNode)
+          {
+            BaseNode bNode = (BaseNode) dragNode.getParent();
+            TabNode newNode;
 
-	    if (aboveNode instanceof TabNode)
-	      {
-		newNode = (TabNode) tree.moveNode(dragNode, bNode, aboveNode, true);
-	      }
-	    else if (aboveNode instanceof FieldNode)
-	      {
-		newNode = (TabNode) tree.moveNode(dragNode, bNode, aboveNode.getParent(), true);
-	      }
-	    else if (aboveNode instanceof BaseNode)
-	      {
-		newNode = (TabNode) tree.moveNode(dragNode, bNode, null, true);
-	      }
-	    else
-	      {
-		throw new RuntimeException("bad drag target location for tabnode tween drag");
-	      }
+            if (aboveNode instanceof TabNode)
+              {
+                newNode = (TabNode) tree.moveNode(dragNode, bNode, aboveNode, true);
+              }
+            else if (aboveNode instanceof FieldNode)
+              {
+                newNode = (TabNode) tree.moveNode(dragNode, bNode, aboveNode.getParent(), true);
+              }
+            else if (aboveNode instanceof BaseNode)
+              {
+                newNode = (TabNode) tree.moveNode(dragNode, bNode, null, true);
+              }
+            else
+              {
+                throw new RuntimeException("bad drag target location for tabnode tween drag");
+              }
 
-	    syncFieldsFromTree(bNode);
+            syncFieldsFromTree(bNode);
 
-	    if (te.tabNode == dragNode)
-	      {
-		te.tabNode = newNode;
-	      }
-	  }
-	else if (dragNode instanceof CatTreeNode)
-	  {
-	    if (debug)
-	      {
-		System.err.println("Releasing CatTreeNode");
-	      }
+            if (te.tabNode == dragNode)
+              {
+                te.tabNode = newNode;
+              }
+          }
+        else if (dragNode instanceof CatTreeNode)
+          {
+            if (debug)
+              {
+                System.err.println("Releasing CatTreeNode");
+              }
 
-	    CatTreeNode cn = (CatTreeNode) dragNode;
-	    Category category = cn.getCategory();
+            CatTreeNode cn = (CatTreeNode) dragNode;
+            Category category = cn.getCategory();
 
-	    Category newCategory = null;
-	    CatTreeNode newParent = null;
-	    treeNode previousNode = null;
+            Category newCategory = null;
+            CatTreeNode newParent = null;
+            treeNode previousNode = null;
 
-	    if (aboveNode instanceof CatTreeNode)
-	      {
-		if (aboveNode == objects)
-		  {
-		    newCategory = rootCategory;
-		    newParent = (CatTreeNode) aboveNode;
-		    previousNode = null;
-		  }
-		else
-		  {
-		    if (aboveNode.isOpen())
-		      {
-			newCategory = ((CatTreeNode) aboveNode).getCategory();
-			newParent = (CatTreeNode) aboveNode;
-			previousNode = null;
-		      }
-		    else
-		      {
-			newParent = (CatTreeNode) aboveNode.getParent();
-			newCategory = newParent.getCategory();
-			previousNode = aboveNode;
-		      }
-		  }
-	      }
-	    else if (aboveNode instanceof BaseNode)
-	      {
-		newCategory = ((BaseNode) aboveNode).getBase().getCategory();
-		newParent = (CatTreeNode) aboveNode.getParent();
+            if (aboveNode instanceof CatTreeNode)
+              {
+                if (aboveNode == objects)
+                  {
+                    newCategory = rootCategory;
+                    newParent = (CatTreeNode) aboveNode;
+                    previousNode = null;
+                  }
+                else
+                  {
+                    if (aboveNode.isOpen())
+                      {
+                        newCategory = ((CatTreeNode) aboveNode).getCategory();
+                        newParent = (CatTreeNode) aboveNode;
+                        previousNode = null;
+                      }
+                    else
+                      {
+                        newParent = (CatTreeNode) aboveNode.getParent();
+                        newCategory = newParent.getCategory();
+                        previousNode = aboveNode;
+                      }
+                  }
+              }
+            else if (aboveNode instanceof BaseNode)
+              {
+                newCategory = ((BaseNode) aboveNode).getBase().getCategory();
+                newParent = (CatTreeNode) aboveNode.getParent();
 
-		previousNode = aboveNode;
-	      }
-	    else if (aboveNode instanceof FieldNode)
-	      {
-		newCategory = ((FieldNode) aboveNode).getField().getBase().getCategory();
-		newParent = (CatTreeNode) aboveNode.getParent().getParent().getParent();
-		previousNode = aboveNode.getParent();
-	      }
+                previousNode = aboveNode;
+              }
+            else if (aboveNode instanceof FieldNode)
+              {
+                newCategory = ((FieldNode) aboveNode).getField().getBase().getCategory();
+                newParent = (CatTreeNode) aboveNode.getParent().getParent().getParent();
+                previousNode = aboveNode.getParent();
+              }
             else
               {
                 // for FindBugs' sake.. iconDragOver() and
@@ -2883,48 +2883,48 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
                 throw new RuntimeException("ASSERT: aboveNode is an invalid type");
               }
 
-	    if (debug)
-	      {
-		System.err.println("New Category = " + newCategory.getPath());
-		System.err.println("new parent = " + newParent.getText());
+            if (debug)
+              {
+                System.err.println("New Category = " + newCategory.getPath());
+                System.err.println("new parent = " + newParent.getText());
 
-		if (previousNode != null)
-		  {
-		    System.err.println("new prevNode = " + previousNode.getText());
-		  }
-	      }
+                if (previousNode != null)
+                  {
+                    System.err.println("new prevNode = " + previousNode.getText());
+                  }
+              }
 
-	    if (previousNode == null)
-	      {
-		newCategory.moveCategoryNode(category.getPath(), null);
-	      }
-	    else
-	      {
-		newCategory.moveCategoryNode(category.getPath(), previousNode.getText());
-	      }
+            if (previousNode == null)
+              {
+                newCategory.moveCategoryNode(category.getPath(), null);
+              }
+            else
+              {
+                newCategory.moveCategoryNode(category.getPath(), previousNode.getText());
+              }
 
-	    if (debug)
-	      {
-		System.err.println("Moved category " + category.getPath());
-	      }
+            if (debug)
+              {
+                System.err.println("Moved category " + category.getPath());
+              }
 
-	    CatTreeNode newNode = (CatTreeNode) tree.moveNode(dragNode, newParent, previousNode, true);
+            CatTreeNode newNode = (CatTreeNode) tree.moveNode(dragNode, newParent, previousNode, true);
 
-	    if (ce.catNode == dragNode)
-	      {
-		ce.catNode = newNode;
-	      }
+            if (ce.catNode == dragNode)
+              {
+                ce.catNode = newNode;
+              }
 
-	    if (debug)
-	      {
-		System.err.println("Reinserted category " + category.getName());
-		System.err.println("reinserted category = " + category.getCategory().getName());
-	      }
-	  }
+            if (debug)
+              {
+                System.err.println("Reinserted category " + category.getName());
+                System.err.println("reinserted category = " + category.getCategory().getName());
+              }
+          }
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException(ex);
+        throw new RuntimeException(ex);
       }
   }
 
@@ -2955,98 +2955,98 @@ public class GASHSchema extends JFrame implements treeCallback, treeDragDropCall
 
     if (debug)
       {
-	System.err.println("GASHSchema.handleReturnVal(): Entering");
+        System.err.println("GASHSchema.handleReturnVal(): Entering");
       }
 
     while ((retVal != null) && (retVal.getDialog() != null))
       {
-	if (debug)
-	  {
-	    System.err.println("GASHSchema.handleReturnVal(): retrieving dialog");
-	  }
+        if (debug)
+          {
+            System.err.println("GASHSchema.handleReturnVal(): retrieving dialog");
+          }
 
-	JDialogBuff jdialog = retVal.getDialog();
+        JDialogBuff jdialog = retVal.getDialog();
 
-	if (debug)
-	  {
-	    System.err.println("GASHSchema.handleReturnVal(): extracting dialog");
-	  }
+        if (debug)
+          {
+            System.err.println("GASHSchema.handleReturnVal(): extracting dialog");
+          }
 
-	DialogRsrc resource = jdialog.extractDialogRsrc(this, null);
+        DialogRsrc resource = jdialog.extractDialogRsrc(this, null);
 
-	if (debug)
-	  {
-	    System.err.println("GASHSchema.handleReturnVal(): constructing dialog");
-	  }
+        if (debug)
+          {
+            System.err.println("GASHSchema.handleReturnVal(): constructing dialog");
+          }
 
-	StringDialog dialog = new StringDialog(resource, StandardDialog.ModalityType.DOCUMENT_MODAL);
+        StringDialog dialog = new StringDialog(resource, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
-	if (debug)
-	  {
-	    System.err.println("GASHSchema.handleReturnVal(): displaying dialog");
-	  }
+        if (debug)
+          {
+            System.err.println("GASHSchema.handleReturnVal(): displaying dialog");
+          }
 
-	// display the Dialog sent to us by the server, get the
-	// result of the user's interaction with it.
-	    
-	dialogResults = dialog.showDialog();
+        // display the Dialog sent to us by the server, get the
+        // result of the user's interaction with it.
+            
+        dialogResults = dialog.showDialog();
 
-	if (debug)
-	  {
-	    System.err.println("GASHSchema.handleReturnVal(): dialog done");
-	  }
+        if (debug)
+          {
+            System.err.println("GASHSchema.handleReturnVal(): dialog done");
+          }
 
-	if (retVal.getCallback() != null)
-	  {
-	    try
-	      {
-		if (debug)
-		  {
-		    System.err.println("GASHSchema.handleReturnVal(): Sending result to callback: " + dialogResults);
-		  }
+        if (retVal.getCallback() != null)
+          {
+            try
+              {
+                if (debug)
+                  {
+                    System.err.println("GASHSchema.handleReturnVal(): Sending result to callback: " + dialogResults);
+                  }
 
-		// send the dialog results to the server
+                // send the dialog results to the server
 
-		retVal = retVal.getCallback().respond(dialogResults);
+                retVal = retVal.getCallback().respond(dialogResults);
 
-		if (debug)
-		  {
-		    System.err.println("GASHSchema.handleReturnVal(): Received result from callback.");
-		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-		throw new RuntimeException("Caught remote exception: " + ex.getMessage());
-	      }
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.err.println("GASHSchema.handleReturnVal(): No callback, breaking");
-	      }
+                if (debug)
+                  {
+                    System.err.println("GASHSchema.handleReturnVal(): Received result from callback.");
+                  }
+              }
+            catch (RemoteException ex)
+              {
+                throw new RuntimeException("Caught remote exception: " + ex.getMessage());
+              }
+          }
+        else
+          {
+            if (debug)
+              {
+                System.err.println("GASHSchema.handleReturnVal(): No callback, breaking");
+              }
 
-	    break;		// we're done
-	  }
+            break;              // we're done
+          }
       }
 
     if (debug)
       {
-	if (retVal != null)
-	  {
-	    if (retVal.didSucceed())
-	      {
-		System.err.println("GASHSchema.handleReturnVal(): returning success code");
-	      }
-	    else
-	      {
-		System.err.println("GASHSchema.handleReturnVal(): returning failure code");
-	      }
-	  }
-	else
-	  {
-	    System.err.println("GASHSchema.handleReturnVal(): returning null retVal (success)");
-	  }
+        if (retVal != null)
+          {
+            if (retVal.didSucceed())
+              {
+                System.err.println("GASHSchema.handleReturnVal(): returning success code");
+              }
+            else
+              {
+                System.err.println("GASHSchema.handleReturnVal(): returning failure code");
+              }
+          }
+        else
+          {
+            System.err.println("GASHSchema.handleReturnVal(): returning null retVal (success)");
+          }
       }
 
     return retVal;

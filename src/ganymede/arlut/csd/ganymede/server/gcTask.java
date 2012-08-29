@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -80,7 +80,7 @@ class gcTask implements Runnable {
   {
     if (ts == null)
       {
-	ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.gcTask");
+        ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.gcTask");
       }
   }
 
@@ -90,6 +90,6 @@ class gcTask implements Runnable {
     System.gc();
     Ganymede.debug(ts.l("completed"));
     GanymedeAdmin.updateMemState(Runtime.getRuntime().freeMemory(),
-				 Runtime.getRuntime().totalMemory());
+                                 Runtime.getRuntime().totalMemory());
   }
 }

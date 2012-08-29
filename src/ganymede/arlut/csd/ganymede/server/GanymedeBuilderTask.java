@@ -335,125 +335,125 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     if (shutdownState != null)
       {
-	// "Aborting builder task {0} for shutdown condition: {1}"
-	Ganymede.debug(ts.l("run.shutting_down", this.getClass().getName(), shutdownState));
-	return;
+        // "Aborting builder task {0} for shutdown condition: {1}"
+        Ganymede.debug(ts.l("run.shutting_down", this.getClass().getName(), shutdownState));
+        return;
       }
 
     if (options == null)
       {
-	this.forceAllBases = false;
+        this.forceAllBases = false;
       }
     else
       {
-	for (int i = 0; i < options.length; i++)
-	  {
-	    if (options[i] instanceof String)
-	      {
-		String x = (String) options[i];
+        for (int i = 0; i < options.length; i++)
+          {
+            if (options[i] instanceof String)
+              {
+                String x = (String) options[i];
 
-		if (x.equals("forcebuild"))
-		  {
-		    this.forceAllBases = true;
-		  }
-	      }
-	  }
+                if (x.equals("forcebuild"))
+                  {
+                    this.forceAllBases = true;
+                  }
+              }
+          }
       }
 
     try
       {
-	// the scheduler should make sure we are never in progress
-	// more than once concurrently, but it won't hurt to clear the
-	// optionsCache up front just in case
+        // the scheduler should make sure we are never in progress
+        // more than once concurrently, but it won't hurt to clear the
+        // optionsCache up front just in case
 
-	optionsCache = null;
+        optionsCache = null;
 
-	incPhase1(true);
+        incPhase1(true);
 
-	try
-	  {
-	    // XXX note: this string must not be changed because the
-	    // GanymedeSession constructor behaves in a special way
-	    // for "builder:" and "sync channel:" session labels.
+        try
+          {
+            // XXX note: this string must not be changed because the
+            // GanymedeSession constructor behaves in a special way
+            // for "builder:" and "sync channel:" session labels.
 
-	    session = new GanymedeSession("builder:");
+            session = new GanymedeSession("builder:");
 
-	    try
-	      {
-		lock = session.getDBSession().openDumpLock();
-	      }
-	    catch (InterruptedException ex)
-	      {
-		// "Could not run task {0}, couldn''t get dump lock."
-		Ganymede.debug(ts.l("run.failed_lock_acquisition", this.getClass().getName()));
-		return;
-	      }
+            try
+              {
+                lock = session.getDBSession().openDumpLock();
+              }
+            catch (InterruptedException ex)
+              {
+                // "Could not run task {0}, couldn''t get dump lock."
+                Ganymede.debug(ts.l("run.failed_lock_acquisition", this.getClass().getName()));
+                return;
+              }
 
-	    // update our time as soon as possible, so that any changes
-	    // that are made in the database after we release the dump
-	    // lock will have a time stamp after our 'last build' time
-	    // stamp.
+            // update our time as soon as possible, so that any changes
+            // that are made in the database after we release the dump
+            // lock will have a time stamp after our 'last build' time
+            // stamp.
 
-	    if (lastRunTime == null)
-	      {
-		lastRunTime = new Date();
-	      }
-	    else
-	      {
-		if (oldLastRunTime == null)
-		  {
-		    oldLastRunTime = new Date(lastRunTime.getTime());
-		  }
-		else
-		  {
-		    oldLastRunTime.setTime(lastRunTime.getTime());
-		  }
+            if (lastRunTime == null)
+              {
+                lastRunTime = new Date();
+              }
+            else
+              {
+                if (oldLastRunTime == null)
+                  {
+                    oldLastRunTime = new Date(lastRunTime.getTime());
+                  }
+                else
+                  {
+                    oldLastRunTime.setTime(lastRunTime.getTime());
+                  }
 
-		lastRunTime.setTime(System.currentTimeMillis());
-	      }
+                lastRunTime.setTime(System.currentTimeMillis());
+              }
 
-	    success1 = this.builderPhase1();
-	  }
-	catch (Exception ex)
-	  {
-	    decPhase1(true);
-	    alreadyDecdCount = true;
+            success1 = this.builderPhase1();
+          }
+        catch (Exception ex)
+          {
+            decPhase1(true);
+            alreadyDecdCount = true;
 
-	    Ganymede.logError(ex);
-	    return;
-	  }
-	finally
-	  {
-	    if (!alreadyDecdCount)
-	      {
-		decPhase1(false); // false since we don't want to force stat update yet
-	      }
+            Ganymede.logError(ex);
+            return;
+          }
+        finally
+          {
+            if (!alreadyDecdCount)
+              {
+                decPhase1(false); // false since we don't want to force stat update yet
+              }
 
-	    // release the lock, and so on
+            // release the lock, and so on
 
-	    if (session != null)
-	      {
-		session.logout();	// will clear the dump lock
+            if (session != null)
+              {
+                session.logout();       // will clear the dump lock
 
-		session = null;
-		lock = null;
-	      }
-	  }
+                session = null;
+                lock = null;
+              }
+          }
 
-	if (currentThread.isInterrupted())
-	  {
-	    // "Builder task {0} interrupted, not doing network build."
-	    Ganymede.debug(ts.l("run.task_interrupted", this.getClass().getName()));
-	    Ganymede.updateBuildStatus();
-	    return;
-	  }
+        if (currentThread.isInterrupted())
+          {
+            // "Builder task {0} interrupted, not doing network build."
+            Ganymede.debug(ts.l("run.task_interrupted", this.getClass().getName()));
+            Ganymede.updateBuildStatus();
+            return;
+          }
 
-	try
-	  {
-	    incPhase2(true);
+        try
+          {
+            incPhase2(true);
 
-	    if (success1)
-	      {
+            if (success1)
+              {
                 shutdownState = GanymedeServer.shutdownSemaphore.increment();
 
                 if (shutdownState != null)
@@ -463,55 +463,55 @@ public abstract class GanymedeBuilderTask implements Runnable {
                     return;
                   }
 
-		try
-		  {
-		    this.builderPhase2();
+                try
+                  {
+                    this.builderPhase2();
 
-		    handle.setTaskStatus(scheduleHandle.TaskStatus.OK, 0, "");
-		  }
-		catch (ServiceNotFoundException ex)
-		  {
-		    handle.setTaskStatus(scheduleHandle.TaskStatus.SERVICEERROR, 0, ex.getMessage());
-		  }
-		catch (ServiceFailedException ex)
-		  {
-		    handle.setTaskStatus(scheduleHandle.TaskStatus.SERVICEFAIL, 0, ex.getMessage());
-		  }
-		catch (Exception ex)
-		  {
-		    handle.setTaskStatus(scheduleHandle.TaskStatus.FAIL, 0, ex.getMessage());
-		  }
-		finally
-		  {
-		    GanymedeServer.shutdownSemaphore.decrement();
-		  }
-	      }
-	  }
-	finally
-	  {
-	    decPhase2(true);
-	  }
+                    handle.setTaskStatus(scheduleHandle.TaskStatus.OK, 0, "");
+                  }
+                catch (ServiceNotFoundException ex)
+                  {
+                    handle.setTaskStatus(scheduleHandle.TaskStatus.SERVICEERROR, 0, ex.getMessage());
+                  }
+                catch (ServiceFailedException ex)
+                  {
+                    handle.setTaskStatus(scheduleHandle.TaskStatus.SERVICEFAIL, 0, ex.getMessage());
+                  }
+                catch (Exception ex)
+                  {
+                    handle.setTaskStatus(scheduleHandle.TaskStatus.FAIL, 0, ex.getMessage());
+                  }
+                finally
+                  {
+                    GanymedeServer.shutdownSemaphore.decrement();
+                  }
+              }
+          }
+        finally
+          {
+            decPhase2(true);
+          }
       }
     finally
       {
-	// we need the finally in case our thread is stopped
+        // we need the finally in case our thread is stopped
 
-	if (session != null)
-	  {
-	    try
-	      {
-		session.logout();	// this will clear the dump lock if need be.
-	      }
-	    finally
-	      {
-		session = null;
-		lock = null;
-	      }
-	  }
+        if (session != null)
+          {
+            try
+              {
+                session.logout();       // this will clear the dump lock if need be.
+              }
+            finally
+              {
+                session = null;
+                lock = null;
+              }
+          }
 
-	// and again, just in case
+        // and again, just in case
 
-	optionsCache = null;
+        optionsCache = null;
       }
   }
 
@@ -542,11 +542,11 @@ public abstract class GanymedeBuilderTask implements Runnable {
   {
     if (forceAllBases || (oldLastRunTime == null))
       {
-	return true;
+        return true;
       }
     else
       {
-	DBObjectBase base = Ganymede.db.getObjectBase(baseid);
+        DBObjectBase base = Ganymede.db.getObjectBase(baseid);
 
         if (base == null)
           {
@@ -555,14 +555,14 @@ public abstract class GanymedeBuilderTask implements Runnable {
             return false;
           }
 
-	if (base.getTimeStamp() == null)
-	  {
-	    return false;
-	  }
-	else
-	  {
-	    return base.getTimeStamp().after(oldLastRunTime);
-	  }
+        if (base.getTimeStamp() == null)
+          {
+            return false;
+          }
+        else
+          {
+            return base.getTimeStamp().after(oldLastRunTime);
+          }
       }
   }
 
@@ -599,7 +599,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
   {
     if (baseid < 0 || baseid > Short.MAX_VALUE)
       {
-	throw new IllegalArgumentException("Out of range value: " + baseid);
+        throw new IllegalArgumentException("Out of range value: " + baseid);
       }
 
     return this.baseChanged((short) baseid);
@@ -637,7 +637,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
   {
     if (forceAllBases || (oldLastRunTime == null))
       {
-	return true;
+        return true;
       }
 
     DBObjectBase base = Ganymede.db.getObjectBase(baseid);
@@ -655,15 +655,15 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     if (base.getTimeStamp() == null || !base.getTimeStamp().after(oldLastRunTime))
       {
-	return false;
+        return false;
       }
 
     // now we check out each field
 
     if (fieldIds == null || fieldIds.size() == 0)
       {
-	// "Null or empty fieldIds arguments"
-	throw new IllegalArgumentException(ts.l("baseChanged.empty"));
+        // "Null or empty fieldIds arguments"
+        throw new IllegalArgumentException(ts.l("baseChanged.empty"));
       }
 
     DBObjectBaseField fieldDef = null;
@@ -672,13 +672,13 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     while (iterator.hasNext())
       {
-	Short idObj = (Short) iterator.next();
-	fieldDef = (DBObjectBaseField) base.getField(idObj);
+        Short idObj = (Short) iterator.next();
+        fieldDef = (DBObjectBaseField) base.getField(idObj);
 
-	if (fieldDef != null && fieldDef.getTimeStamp().after(oldLastRunTime))
-	  {
-	    return true;
-	  }
+        if (fieldDef != null && fieldDef.getTimeStamp().after(oldLastRunTime))
+          {
+            return true;
+          }
       }
 
     return false;
@@ -722,7 +722,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
   {
     if (baseid < 0 || baseid > Short.MAX_VALUE)
       {
-	throw new IllegalArgumentException("Out of range value: " + baseid);
+        throw new IllegalArgumentException("Out of range value: " + baseid);
       }
 
     return this.baseChanged((short) baseid, fieldIds);
@@ -751,8 +751,8 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     if (lock == null)
       {
-	// "Can''t call enumerateObjects without a lock."
-	throw new IllegalArgumentException(ts.l("enumerateObjects.no_lock"));
+        // "Can''t call enumerateObjects without a lock."
+        throw new IllegalArgumentException(ts.l("enumerateObjects.no_lock"));
       }
 
     DBObjectBase base = Ganymede.db.getObjectBase(baseid);
@@ -786,7 +786,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
   {
     if (baseid < 0 || baseid > Short.MAX_VALUE)
       {
-	throw new IllegalArgumentException("Out of range value: " + baseid);
+        throw new IllegalArgumentException("Out of range value: " + baseid);
       }
 
     return this.enumerateObjects((short) baseid);
@@ -816,8 +816,8 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     if (lock == null)
       {
-	// "Can''t call enumerateObjects without a lock."
-	throw new IllegalArgumentException(ts.l("enumerateObjects.no_lock"));
+        // "Can''t call enumerateObjects without a lock."
+        throw new IllegalArgumentException(ts.l("enumerateObjects.no_lock"));
       }
 
     DBObjectBase base = Ganymede.db.getObjectBase(baseid);
@@ -852,7 +852,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
   {
     if (baseid < 0 || baseid > Short.MAX_VALUE)
       {
-	throw new IllegalArgumentException("Out of range value: " + baseid);
+        throw new IllegalArgumentException("Out of range value: " + baseid);
       }
 
     return this.getObjects((short) baseid);
@@ -891,11 +891,11 @@ public abstract class GanymedeBuilderTask implements Runnable {
   {
     try
       {
-	return session.findLabeledObject(label, type);
+        return session.findLabeledObject(label, type);
       }
     catch (NotLoggedInException ex)
       {
-	throw new RuntimeException(ex);
+        throw new RuntimeException(ex);
       }
   }
 
@@ -993,28 +993,28 @@ public abstract class GanymedeBuilderTask implements Runnable {
   {
     if (option != null && !option.equals(""))
       {
-	Vector options = optionsCache;
+        Vector options = optionsCache;
 
-	if (options == null)
-	  {
-	    optionsCache = getOptionStrings();
-	    options = optionsCache;
-	  }
+        if (options == null)
+          {
+            optionsCache = getOptionStrings();
+            options = optionsCache;
+          }
 
-	if (options == null)
-	  {
-	    return false;
-	  }
+        if (options == null)
+          {
+            return false;
+          }
 
-	for (int i = 0; i < options.size(); i++)
-	  {
-	    String x = (String) options.elementAt(i);
+        for (int i = 0; i < options.size(); i++)
+          {
+            String x = (String) options.elementAt(i);
 
-	    if (x.equalsIgnoreCase(option))
-	      {
-		return true;
-	      }
-	  }
+            if (x.equalsIgnoreCase(option))
+              {
+                return true;
+              }
+          }
       }
 
     return false;
@@ -1051,34 +1051,34 @@ public abstract class GanymedeBuilderTask implements Runnable {
   {
     if (option != null && !option.equals(""))
       {
-	Vector options = optionsCache;
+        Vector options = optionsCache;
 
-	if (options == null)
-	  {
-	    optionsCache = getOptionStrings();
-	    options = optionsCache;
-	  }
+        if (options == null)
+          {
+            optionsCache = getOptionStrings();
+            options = optionsCache;
+          }
 
-	if (options == null)
-	  {
-	    return null;
-	  }
+        if (options == null)
+          {
+            return null;
+          }
 
-	// get the prefix we'll search for
+        // get the prefix we'll search for
 
-	String matchPat = option + "=";
+        String matchPat = option + "=";
 
-	// and spin til we find it
+        // and spin til we find it
 
-	for (int i = 0; i < options.size(); i++)
-	  {
-	    String x = (String) options.elementAt(i);
+        for (int i = 0; i < options.size(); i++)
+          {
+            String x = (String) options.elementAt(i);
 
-	    if (x.startsWith(matchPat))
-	      {
-		return x.substring(matchPat.length());
-	      }
-	  }
+            if (x.startsWith(matchPat))
+              {
+                return x.substring(matchPat.length());
+              }
+          }
       }
 
     return null;
@@ -1094,19 +1094,19 @@ public abstract class GanymedeBuilderTask implements Runnable {
   {
     if (taskDefObjInvid != null)
       {
-	DBObject taskDefObj = getObject(taskDefObjInvid);
+        DBObject taskDefObj = getObject(taskDefObjInvid);
 
-	Vector options = taskDefObj.getFieldValuesLocal(SchemaConstants.TaskOptionStrings);
+        Vector options = taskDefObj.getFieldValuesLocal(SchemaConstants.TaskOptionStrings);
 
-	if (options == null || options.size() == 0)
-	  {
-	    return null;
-	  }
+        if (options == null || options.size() == 0)
+          {
+            return null;
+          }
 
-	// dup the vector for safety, since we are getting direct
-	// access to the Vector in the database
+        // dup the vector for safety, since we are getting direct
+        // access to the Vector in the database
 
-	return (Vector) options.clone();
+        return (Vector) options.clone();
       }
 
     return null;
@@ -1190,67 +1190,67 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     synchronized (GanymedeBuilderTask.class)
       {
-	directory = currentBackUpDirectory;
+        directory = currentBackUpDirectory;
 
-	if (directory != null && !directory.equals(""))
-	  {
-	    incBusy(directory);
-	  }
+        if (directory != null && !directory.equals(""))
+          {
+            incBusy(directory);
+          }
       }
 
     if (directory != null && !directory.equals(""))
       {
-	try
-	  {
-	    // see if we have a file by the given name in the backup directory..
-	    // if we do, we can't overwrite it
+        try
+          {
+            // see if we have a file by the given name in the backup directory..
+            // if we do, we can't overwrite it
 
-	    file = new File(filename);
+            file = new File(filename);
 
-	    if (file.exists())
-	      {
-		Date oldTime = new Date(file.lastModified());
+            if (file.exists())
+              {
+                Date oldTime = new Date(file.lastModified());
 
-		DateFormat formatter = new SimpleDateFormat("yyyy_MM_dd-HH:mm:ss",
-							    java.util.Locale.US);
+                DateFormat formatter = new SimpleDateFormat("yyyy_MM_dd-HH:mm:ss",
+                                                            java.util.Locale.US);
 
-		String label = formatter.format(oldTime);
+                String label = formatter.format(oldTime);
 
-		if (taskName != null)
-		  {
-		    backupFileName = directory + File.separator + taskName + "_" + label + "_" + file.getName();
-		  }
-		else
-		  {
-		    backupFileName = directory + File.separator + label + "_" + file.getName();
-		  }
+                if (taskName != null)
+                  {
+                    backupFileName = directory + File.separator + taskName + "_" + label + "_" + file.getName();
+                  }
+                else
+                  {
+                    backupFileName = directory + File.separator + label + "_" + file.getName();
+                  }
 
-		backupFile = new File(backupFileName);
+                backupFile = new File(backupFileName);
 
-		// now, we could in principle have more than one copy
-		// of a given file name written out in the same
-		// second, so just for grins we'll make sure to
-		// distinguish
+                // now, we could in principle have more than one copy
+                // of a given file name written out in the same
+                // second, so just for grins we'll make sure to
+                // distinguish
 
-		char subSec = 'a';
+                char subSec = 'a';
 
-		while (backupFile.exists())
-		  {
-		    String extName = backupFileName + subSec++;
+                while (backupFile.exists())
+                  {
+                    String extName = backupFileName + subSec++;
 
-		    backupFile = new File(extName);
-		  }
+                    backupFile = new File(extName);
+                  }
 
-		if (!arlut.csd.Util.FileOps.copyFile(filename, backupFile.getCanonicalPath()))
-		  {
-		    return null;
-		  }
-	      }
-	  }
-	finally
-	  {
-	    decBusy(currentBackUpDirectory);
-	  }
+                if (!arlut.csd.Util.FileOps.copyFile(filename, backupFile.getCanonicalPath()))
+                  {
+                    return null;
+                  }
+              }
+          }
+        finally
+          {
+            decBusy(currentBackUpDirectory);
+          }
       }
 
     // we'll go ahead and write over the file if it exists.. that
@@ -1269,11 +1269,11 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     if (x == null)
       {
-	backupsBusy.put(path, Integer.valueOf(1));
+        backupsBusy.put(path, Integer.valueOf(1));
       }
     else
       {
-	backupsBusy.put(path, Integer.valueOf(x.intValue() + 1));
+        backupsBusy.put(path, Integer.valueOf(x.intValue() + 1));
       }
   }
 
@@ -1288,35 +1288,35 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     if (val == 1)
       {
-	backupsBusy.remove(path);
+        backupsBusy.remove(path);
       }
     else
       {
-	backupsBusy.put(path, Integer.valueOf(val - 1));
+        backupsBusy.put(path, Integer.valueOf(val - 1));
       }
 
     if (oldBackUpDirectory != null && oldBackUpDirectory.equals(path))
       {
-	if (val == 0)
-	  {
-	    // ah, no one is busy writing back ups into
-	    // path any more
+        if (val == 0)
+          {
+            // ah, no one is busy writing back ups into
+            // path any more
 
-	    String zipName = oldBackUpDirectory + ".zip";
+            String zipName = oldBackUpDirectory + ".zip";
 
-	    try
-	      {
-		if (zipIt.zipDirectory(oldBackUpDirectory, zipName))
-		  {
-		    FileOps.deleteDirectory(oldBackUpDirectory);
-		  }
+            try
+              {
+                if (zipIt.zipDirectory(oldBackUpDirectory, zipName))
+                  {
+                    FileOps.deleteDirectory(oldBackUpDirectory);
+                  }
 
-		oldBackUpDirectory = null;
-	      }
-	    catch (IOException ex)
-	      {
-	      }
-	  }
+                oldBackUpDirectory = null;
+              }
+            catch (IOException ex)
+              {
+              }
+          }
       }
   }
 
@@ -1326,7 +1326,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     if (x == null)
       {
-	return 0;
+        return 0;
       }
 
     return x.intValue();
@@ -1342,43 +1342,43 @@ public abstract class GanymedeBuilderTask implements Runnable {
   {
     if (basePath == null)
       {
-	basePath = System.getProperty("ganymede.builder.backups");
+        basePath = System.getProperty("ganymede.builder.backups");
 
-	if (basePath == null || basePath.equals(""))
-	  {
-	    // "GanymedeBuilderTask not able to determine backups directory from Ganymede property file."
-	    Ganymede.debug(ts.l("openBackupDirectory.no_directory_defined"));
+        if (basePath == null || basePath.equals(""))
+          {
+            // "GanymedeBuilderTask not able to determine backups directory from Ganymede property file."
+            Ganymede.debug(ts.l("openBackupDirectory.no_directory_defined"));
 
-	    return;
-	  }
+            return;
+          }
 
-	basePath = PathComplete.completePath(basePath);
+        basePath = PathComplete.completePath(basePath);
       }
 
     File directory = new File(basePath);
 
     if (!directory.exists())
       {
-	// "Warning, can''t find ganymede.builder.backup directory {0}.  Not backing up {1}."
-	Ganymede.debug(ts.l("openBackupDirectory.no_such_directory", basePath, filename));
+        // "Warning, can''t find ganymede.builder.backup directory {0}.  Not backing up {1}."
+        Ganymede.debug(ts.l("openBackupDirectory.no_such_directory", basePath, filename));
 
-	return;
+        return;
       }
 
     if (!directory.isDirectory())
       {
-	// "Warning, ganymede.builder.backup path {0} is not a directory.  Not backing up {1}."
-	Ganymede.debug(ts.l("openBackupDirectory.not_a_directory",  basePath, filename));
+        // "Warning, ganymede.builder.backup path {0} is not a directory.  Not backing up {1}."
+        Ganymede.debug(ts.l("openBackupDirectory.not_a_directory",  basePath, filename));
 
-	return;
+        return;
       }
 
     if (!directory.canWrite())
       {
-	// "Warning, can''t write to ganymede.builder.backup path {0}.  Not backing up {1}."
-	Ganymede.debug(ts.l("openBackupDirectory.not_writeable", basePath, filename));
+        // "Warning, can''t write to ganymede.builder.backup path {0}.  Not backing up {1}."
+        Ganymede.debug(ts.l("openBackupDirectory.not_writeable", basePath, filename));
 
-	return;
+        return;
       }
 
     // okay, we've located our backup directory.. now make sure we
@@ -1386,110 +1386,110 @@ public abstract class GanymedeBuilderTask implements Runnable {
     // backups
 
     if ((currentBackUpDirectory == null) ||
-	(System.currentTimeMillis() > rolloverTime) ||
-	(System.currentTimeMillis() < rollunderTime))
+        (System.currentTimeMillis() > rolloverTime) ||
+        (System.currentTimeMillis() < rollunderTime))
       {
-	Calendar nowCal = new GregorianCalendar();
+        Calendar nowCal = new GregorianCalendar();
 
-	int year = nowCal.get(Calendar.YEAR);
-	int month = nowCal.get(Calendar.MONTH);
-	int day = nowCal.get(Calendar.DAY_OF_MONTH);
+        int year = nowCal.get(Calendar.YEAR);
+        int month = nowCal.get(Calendar.MONTH);
+        int day = nowCal.get(Calendar.DAY_OF_MONTH);
 
-	// get a calendar representing 12am midnight local time
+        // get a calendar representing 12am midnight local time
 
-	Calendar cal = new GregorianCalendar(year, month, day);
+        Calendar cal = new GregorianCalendar(year, month, day);
 
-	// first get our roll under time, in case the system
-	// clock is ever set back
+        // first get our roll under time, in case the system
+        // clock is ever set back
 
-	Date todayMidnight = cal.getTime();
-	rollunderTime = todayMidnight.getTime();
+        Date todayMidnight = cal.getTime();
+        rollunderTime = todayMidnight.getTime();
 
-	// and now our roll over time
+        // and now our roll over time
 
-	cal.add(Calendar.DATE, 1);
+        cal.add(Calendar.DATE, 1);
 
-	Date tomorrowMidnight = cal.getTime();
-	rolloverTime = tomorrowMidnight.getTime();
+        Date tomorrowMidnight = cal.getTime();
+        rolloverTime = tomorrowMidnight.getTime();
 
-	// if this is our first run of a builder task's file io prep,
-	// sweep through the backup directory and zip up any directories
-	// that match our pattern for day directories, before we create
-	// one for today's date
+        // if this is our first run of a builder task's file io prep,
+        // sweep through the backup directory and zip up any directories
+        // that match our pattern for day directories, before we create
+        // one for today's date
 
-	if (firstRun)
-	  {
-	    try
-	      {
-		cleanBackupDirectory();
-	      }
-	    finally
-	      {
-		firstRun = false;
-	      }
-	  }
+        if (firstRun)
+          {
+            try
+              {
+                cleanBackupDirectory();
+              }
+            finally
+              {
+                firstRun = false;
+              }
+          }
 
-	// okay, we've got our goal posts fixed, now handle the
-	// old directory and get a label for the new
+        // okay, we've got our goal posts fixed, now handle the
+        // old directory and get a label for the new
 
-	DateFormat formatter = new SimpleDateFormat("yyyy_MM_dd", java.util.Locale.US);
+        DateFormat formatter = new SimpleDateFormat("yyyy_MM_dd", java.util.Locale.US);
 
-	oldBackUpDirectory = currentBackUpDirectory;
-	currentBackUpDirectory = basePath + File.separator + formatter.format(todayMidnight);
+        oldBackUpDirectory = currentBackUpDirectory;
+        currentBackUpDirectory = basePath + File.separator + formatter.format(todayMidnight);
 
-	File newDirectory = new File(currentBackUpDirectory);
+        File newDirectory = new File(currentBackUpDirectory);
 
-	if (!newDirectory.exists())
-	  {
-	    if (!newDirectory.mkdir())
+        if (!newDirectory.exists())
+          {
+            if (!newDirectory.mkdir())
               {
                 throw new IOException("Couldn't mkdir " + currentBackUpDirectory);
               }
-	  }
+          }
       }
 
     // if we haven't zipped up our old directory, do that
 
     if (oldBackUpDirectory != null)
       {
-	try
-	  {
-	    if (busyCount(oldBackUpDirectory) == 0)
-	      {
-		String zipName = oldBackUpDirectory + ".zip";
+        try
+          {
+            if (busyCount(oldBackUpDirectory) == 0)
+              {
+                String zipName = oldBackUpDirectory + ".zip";
 
-		// "GanymedeBuilderTask.openBackupDirectory(): trying to zip {0}."
-		Ganymede.debug(ts.l("openBackupDirectory.zipping", oldBackUpDirectory));
+                // "GanymedeBuilderTask.openBackupDirectory(): trying to zip {0}."
+                Ganymede.debug(ts.l("openBackupDirectory.zipping", oldBackUpDirectory));
 
-		if (zipIt.zipDirectory(oldBackUpDirectory, zipName))
-		  {
-		    // "GanymedeBuilderTask.openBackupDirectory(): zipped {0}."
-		    Ganymede.debug(ts.l("openBackupDirectory.zipped", zipName));
-		    FileOps.deleteDirectory(oldBackUpDirectory);
-		  }
-		else
-		  {
-		    File dirFile = new File(oldBackUpDirectory);
+                if (zipIt.zipDirectory(oldBackUpDirectory, zipName))
+                  {
+                    // "GanymedeBuilderTask.openBackupDirectory(): zipped {0}."
+                    Ganymede.debug(ts.l("openBackupDirectory.zipped", zipName));
+                    FileOps.deleteDirectory(oldBackUpDirectory);
+                  }
+                else
+                  {
+                    File dirFile = new File(oldBackUpDirectory);
 
-		    if (dirFile.canRead())
-		      {
-			String[] list = dirFile.list();
+                    if (dirFile.canRead())
+                      {
+                        String[] list = dirFile.list();
 
-			if (list == null || list.length == 0)
-			  {
-			    // "GanymedeBuilderTask.openBackupDirectory(): directory {0} is empty, deleting it."
-			    Ganymede.debug(ts.l("openBackupDirectory.skipping_empty", oldBackUpDirectory));
+                        if (list == null || list.length == 0)
+                          {
+                            // "GanymedeBuilderTask.openBackupDirectory(): directory {0} is empty, deleting it."
+                            Ganymede.debug(ts.l("openBackupDirectory.skipping_empty", oldBackUpDirectory));
 
-			    FileOps.deleteDirectory(oldBackUpDirectory);
-			  }
-		      }
-		  }
-	      }
-	  }
-	finally
-	  {
-	    oldBackUpDirectory = null;
-	  }
+                            FileOps.deleteDirectory(oldBackUpDirectory);
+                          }
+                      }
+                  }
+              }
+          }
+        finally
+          {
+            oldBackUpDirectory = null;
+          }
       }
   }
 
@@ -1504,163 +1504,163 @@ public abstract class GanymedeBuilderTask implements Runnable {
   {
     if (basePath == null || basePath.equals(""))
       {
-	return;
+        return;
       }
 
     File directory = new File(basePath);
 
     if (!directory.exists() || !directory.isDirectory() || !directory.canWrite())
       {
-	return;
+        return;
       }
 
     java.util.regex.Pattern regexp = null;
 
     try
       {
-	regexp = java.util.regex.Pattern.compile("(\\d\\d\\d\\d)_(\\d\\d)_(\\d\\d)");
+        regexp = java.util.regex.Pattern.compile("(\\d\\d\\d\\d)_(\\d\\d)_(\\d\\d)");
       }
     catch (java.util.regex.PatternSyntaxException ex)
       {
-	// assuming we get the pattern right, this shouldn't happen
+        // assuming we get the pattern right, this shouldn't happen
 
-	Ganymede.logError(ex);
-	return;
+        Ganymede.logError(ex);
+        return;
       }
 
     String names[] = directory.list();
 
     for (int i = 0; i < names.length; i++)
       {
-	String dirName = basePath + names[i];
+        String dirName = basePath + names[i];
 
-	if (names[i].endsWith(".zip"))
-	  {
-	    continue;
-	  }
+        if (names[i].endsWith(".zip"))
+          {
+            continue;
+          }
 
-	File test = new File(directory, names[i]);
+        File test = new File(directory, names[i]);
 
-	if (!test.isDirectory())
-	  {
-	    continue;
-	  }
+        if (!test.isDirectory())
+          {
+            continue;
+          }
 
-	if (debug)
-	  {
-	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): trying to match " + names[i]);
-	  }
+        if (debug)
+          {
+            Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): trying to match " + names[i]);
+          }
 
-	java.util.regex.Matcher match = regexp.matcher(names[i]);
+        java.util.regex.Matcher match = regexp.matcher(names[i]);
 
-	if (match == null || !match.find())
-	  {
-	    continue;
-	  }
+        if (match == null || !match.find())
+          {
+            continue;
+          }
 
-	if (debug)
-	  {
-	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): matched " + names[i]);
-	  }
+        if (debug)
+          {
+            Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): matched " + names[i]);
+          }
 
-	String yearString, monthString, dateString;
+        String yearString, monthString, dateString;
 
-	yearString = names[i].substring(match.start(1), match.end(1));
-	monthString = names[i].substring(match.start(2), match.end(2));
-	dateString = names[i].substring(match.start(3), match.end(3));
+        yearString = names[i].substring(match.start(1), match.end(1));
+        monthString = names[i].substring(match.start(2), match.end(2));
+        dateString = names[i].substring(match.start(3), match.end(3));
 
-	if (debug)
-	  {
-	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): yearString " + yearString);
-	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): monthString " + monthString);
-	    Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): dateString " + dateString);
-	  }
+        if (debug)
+          {
+            Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): yearString " + yearString);
+            Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): monthString " + monthString);
+            Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): dateString " + dateString);
+          }
 
-	try
-	  {
-	    if (debug)
-	      {
-		Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): trying to zip " + basePath + names[i]);
-	      }
+        try
+          {
+            if (debug)
+              {
+                Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): trying to zip " + basePath + names[i]);
+              }
 
-	    int year = Integer.parseInt(yearString);
-	    int month = Integer.parseInt(monthString);
-	    int date = Integer.parseInt(dateString);
+            int year = Integer.parseInt(yearString);
+            int month = Integer.parseInt(monthString);
+            int date = Integer.parseInt(dateString);
 
-	    Calendar cal = new GregorianCalendar(year, month-1, date-1); // midnight start of day
-	    cal.add(Calendar.DATE, 1); // end of day
+            Calendar cal = new GregorianCalendar(year, month-1, date-1); // midnight start of day
+            cal.add(Calendar.DATE, 1); // end of day
 
-	    if (debug)
-	      {
-		Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): old directory time is " + cal.getTime());
-		Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): rollunder time is " + new Date(rollunderTime));
-	      }
+            if (debug)
+              {
+                Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): old directory time is " + cal.getTime());
+                Ganymede.debug("GanymedeBuilderTask.cleanBackupDirectory(): rollunder time is " + new Date(rollunderTime));
+              }
 
-	    if (cal.getTime().getTime() < rollunderTime)
-	      {
-		String zipName = dirName + ".zip";
+            if (cal.getTime().getTime() < rollunderTime)
+              {
+                String zipName = dirName + ".zip";
 
-		// "GanymedeBuilderTask.cleanBackupDirectory(): zipping {0}."
-		Ganymede.debug(ts.l("cleanBackupDirectory.zipping", dirName));
+                // "GanymedeBuilderTask.cleanBackupDirectory(): zipping {0}."
+                Ganymede.debug(ts.l("cleanBackupDirectory.zipping", dirName));
 
-		// it is conceivable that we have successfully zipped
-		// a directory before, but did not delete the
-		// directory for some reason.. if so, just leave
-		// everything alone so that a human can deal with it
+                // it is conceivable that we have successfully zipped
+                // a directory before, but did not delete the
+                // directory for some reason.. if so, just leave
+                // everything alone so that a human can deal with it
 
-		File zipFile = new File(zipName);
+                File zipFile = new File(zipName);
 
-		if (!zipFile.exists())
-		  {
-		    if (zipIt.zipDirectory(dirName, zipName))
-		      {
-			// "GanymedeBuilderTask.cleanBackupDirectory(): zipped {0}."
-			Ganymede.debug(ts.l("cleanBackupDirectory.zipped", zipName));
+                if (!zipFile.exists())
+                  {
+                    if (zipIt.zipDirectory(dirName, zipName))
+                      {
+                        // "GanymedeBuilderTask.cleanBackupDirectory(): zipped {0}."
+                        Ganymede.debug(ts.l("cleanBackupDirectory.zipped", zipName));
 
-			try
-			  {
-			    FileOps.deleteDirectory(dirName);
-			  }
-			catch (IOException ex)
-			  {
-			    // "GanymedeBuilderTask.cleanBackupDirectory(): could not remove {0}."
-			    Ganymede.debug(ts.l("cleanBackupDirectory.bad_delete", dirName));
-			  }
-		      }
-		    else
-		      {
-			File dirFile = new File(dirName);
+                        try
+                          {
+                            FileOps.deleteDirectory(dirName);
+                          }
+                        catch (IOException ex)
+                          {
+                            // "GanymedeBuilderTask.cleanBackupDirectory(): could not remove {0}."
+                            Ganymede.debug(ts.l("cleanBackupDirectory.bad_delete", dirName));
+                          }
+                      }
+                    else
+                      {
+                        File dirFile = new File(dirName);
 
-			if (dirFile.canRead())
-			  {
-			    String[] list = dirFile.list();
+                        if (dirFile.canRead())
+                          {
+                            String[] list = dirFile.list();
 
-			    if (list == null || list.length == 0)
-			      {
-				// "GanymedeBuilderTask.cleanBackupDirectory(): directory {0} is empty, deleting it."
-				Ganymede.debug(ts.l("cleanBackupDirectory.skipping_empty", dirName));
+                            if (list == null || list.length == 0)
+                              {
+                                // "GanymedeBuilderTask.cleanBackupDirectory(): directory {0} is empty, deleting it."
+                                Ganymede.debug(ts.l("cleanBackupDirectory.skipping_empty", dirName));
 
-				FileOps.deleteDirectory(dirName);
-			      }
-			  }
-		      }
-		  }
-		else
-		  {
-		    // "GanymedeBuilderTask.cleanBackupDirectory(): {0} zip file already exists, not deleting."
-		    Ganymede.debug(ts.l("cleanBackupDirectory.zip_already", dirName));
-		  }
-	      }
-	    else
-	      {
-		// "GanymedeBuilderTask.cleanBackupDirectory(): don''t need to zip {0} yet."
-		Ganymede.debug(ts.l("cleanBackupDirectory.no_zip_yet", dirName));
-	      }
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    continue;
-	  }
+                                FileOps.deleteDirectory(dirName);
+                              }
+                          }
+                      }
+                  }
+                else
+                  {
+                    // "GanymedeBuilderTask.cleanBackupDirectory(): {0} zip file already exists, not deleting."
+                    Ganymede.debug(ts.l("cleanBackupDirectory.zip_already", dirName));
+                  }
+              }
+            else
+              {
+                // "GanymedeBuilderTask.cleanBackupDirectory(): don''t need to zip {0} yet."
+                Ganymede.debug(ts.l("cleanBackupDirectory.no_zip_yet", dirName));
+              }
+          }
+        catch (NumberFormatException ex)
+          {
+            continue;
+          }
       }
   }
 
@@ -1692,7 +1692,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     if (update)
       {
-	updateBuildStatus();
+        updateBuildStatus();
       }
   }
 
@@ -1702,7 +1702,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     if (update)
       {
-	updateBuildStatus();
+        updateBuildStatus();
       }
   }
 
@@ -1712,7 +1712,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     if (update)
       {
-	updateBuildStatus();
+        updateBuildStatus();
       }
   }
 
@@ -1722,7 +1722,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     if (update)
       {
-	updateBuildStatus();
+        updateBuildStatus();
       }
   }
 
@@ -1738,15 +1738,15 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
     if (phase1Count > 0)
       {
-	GanymedeServer.sendMessageToRemoteSessions(ClientMessage.BUILDSTATUS, "building");
+        GanymedeServer.sendMessageToRemoteSessions(ClientMessage.BUILDSTATUS, "building");
       }
     else if (phase2Count > 0)
       {
-	GanymedeServer.sendMessageToRemoteSessions(ClientMessage.BUILDSTATUS, "building2");
+        GanymedeServer.sendMessageToRemoteSessions(ClientMessage.BUILDSTATUS, "building2");
       }
     else
       {
-	GanymedeServer.sendMessageToRemoteSessions(ClientMessage.BUILDSTATUS, "idle");
+        GanymedeServer.sendMessageToRemoteSessions(ClientMessage.BUILDSTATUS, "idle");
       }
   }
 }

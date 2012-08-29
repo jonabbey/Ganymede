@@ -104,39 +104,39 @@ public class DumpResultBuilder {
 
     for (int i = 0; i < fieldDefs.size(); i++)
       {
-	field = (DBObjectBaseField) fieldDefs.elementAt(i);
+        field = (DBObjectBaseField) fieldDefs.elementAt(i);
 
-	// need to also check here for permission restrictions on 
-	// field visibility
+        // need to also check here for permission restrictions on 
+        // field visibility
 
-	chars = field.getName().toCharArray();
-	
-	for (int j = 0; j < chars.length; j++)
-	  {
-	    if (chars[j] == '|')
-	      {
-		buffer.append("\\|");
-	      }
-	    else if (chars[j] == '\n')
-	      {
-		buffer.append("\\\n");
-	      }
-	    else if (chars[j] == '\\')
-	      {
-		buffer.append("\\\\");
-	      }
-	    else
-	      {
-		buffer.append(chars[j]);
-	      }
-	  }
-	
-	buffer.append("|");
+        chars = field.getName().toCharArray();
+        
+        for (int j = 0; j < chars.length; j++)
+          {
+            if (chars[j] == '|')
+              {
+                buffer.append("\\|");
+              }
+            else if (chars[j] == '\n')
+              {
+                buffer.append("\\\n");
+              }
+            else if (chars[j] == '\\')
+              {
+                buffer.append("\\\\");
+              }
+            else
+              {
+                buffer.append(chars[j]);
+              }
+          }
+        
+        buffer.append("|");
 
         buffer.append(field.getID());
         buffer.append("|");
 
-	buffer.append(field.getType());
+        buffer.append(field.getType());
         buffer.append("|");
       }
 
@@ -185,7 +185,7 @@ public class DumpResultBuilder {
 
     if (debug)
       {
-	System.err.println("DumpResultBuilder: addRow(" + object.getLabel() + ")");
+        System.err.println("DumpResultBuilder: addRow(" + object.getLabel() + ")");
       }
 
     localBuffer.append(object.getInvid().toString());
@@ -193,98 +193,98 @@ public class DumpResultBuilder {
 
     for (int i = 0; i < fieldDefs.size(); i++)
       {
-	fieldDef = (DBObjectBaseField) fieldDefs.elementAt(i);
+        fieldDef = (DBObjectBaseField) fieldDefs.elementAt(i);
 
-	if (debug)
-	  {
-	    System.err.print("_");
-	  }
+        if (debug)
+          {
+            System.err.print("_");
+          }
 
-	// make sure we have permission to see this field
+        // make sure we have permission to see this field
 
-	if (owner != null && !owner.getPermManager().getPerm(object, fieldDef.getID()).isVisible())
-	  {
-	    // nope, no permission, just terminate this field and
-	    // continue
+        if (owner != null && !owner.getPermManager().getPerm(object, fieldDef.getID()).isVisible())
+          {
+            // nope, no permission, just terminate this field and
+            // continue
 
-	    localBuffer.append("|");
+            localBuffer.append("|");
 
-	    if (debug)
-	      {
-		System.err.println("n");
-	      }
+            if (debug)
+              {
+                System.err.println("n");
+              }
 
-	    continue;
-	  }
+            continue;
+          }
 
-	if (debug)
-	  {
-	    System.err.print("y");
-	  }
-	
-	field = (DBField) object.getField(fieldDef.getID());
+        if (debug)
+          {
+            System.err.print("y");
+          }
+        
+        field = (DBField) object.getField(fieldDef.getID());
 
-	if (field == null)
-	  {
-	    localBuffer.append("|");
+        if (field == null)
+          {
+            localBuffer.append("|");
 
-	    if (debug)
-	      {
-		System.err.println(" x");
-	      }
+            if (debug)
+              {
+                System.err.println(" x");
+              }
 
-	    continue;
-	  }
+            continue;
+          }
 
-	// we use getEncodingString() here primarily so that
-	// our dates are encoded in a fashion that can be
-	// sorted on the client, and which can be presented in
-	// whatever fashion the client chooses.
+        // we use getEncodingString() here primarily so that
+        // our dates are encoded in a fashion that can be
+        // sorted on the client, and which can be presented in
+        // whatever fashion the client chooses.
 
-	if (debug)
-	  {
-	    System.err.println("+");
-	  }
+        if (debug)
+          {
+            System.err.println("+");
+          }
 
-	String valString = field.getEncodingString();
+        String valString = field.getEncodingString();
 
-	// I got a null pointer exception here 
+        // I got a null pointer exception here 
 
-	if (valString == null)
-	  {
-	    Ganymede.debug("Error, DumpResultBuilder.addRow found null encoding string in field " + field);
-	    Ganymede.debug("Skipping data for object " + object);
-	    return;
-	  }
+        if (valString == null)
+          {
+            Ganymede.debug("Error, DumpResultBuilder.addRow found null encoding string in field " + field);
+            Ganymede.debug("Skipping data for object " + object);
+            return;
+          }
 
-	chars = valString.toCharArray();
+        chars = valString.toCharArray();
 
-	if (debug)
-	  {
-	    System.err.println(" ok");
-	  }
-		
-	for (int j = 0; j < chars.length; j++)
-	  {
-	    if (chars[j] == '|')
-	      {
-		localBuffer.append("\\|");
-	      }
-	    else if (chars[j] == '\n')
-	      {
-		localBuffer.append("\\\n");
-	      }
-	    else if (chars[j] == '\\')
-	      {
-		localBuffer.append("\\\\");
-	      }
-	    else
-	      {
-		localBuffer.append(chars[j]);
-	      }
-	  }
-	
-	localBuffer.append("|");
+        if (debug)
+          {
+            System.err.println(" ok");
+          }
+                
+        for (int j = 0; j < chars.length; j++)
+          {
+            if (chars[j] == '|')
+              {
+                localBuffer.append("\\|");
+              }
+            else if (chars[j] == '\n')
+              {
+                localBuffer.append("\\\n");
+              }
+            else if (chars[j] == '\\')
+              {
+                localBuffer.append("\\\\");
+              }
+            else
+              {
+                localBuffer.append(chars[j]);
+              }
+          }
+        
+        localBuffer.append("|");
       }
 
     localBuffer.append("\n");

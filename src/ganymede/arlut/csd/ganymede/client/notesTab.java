@@ -9,7 +9,7 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2005
@@ -80,7 +80,7 @@ public class notesTab extends clientTab {
   {
     if (contentPane == null)
       {
-	contentPane = new JScrollPane();
+        contentPane = new JScrollPane();
       }
 
     return contentPane;
@@ -90,14 +90,14 @@ public class notesTab extends clientTab {
   {
     try
       {
-	contentPane.getVerticalScrollBar().setUnitIncrement(15);
-	notes_field = (string_field) parent.getObject().getField(SchemaConstants.NotesField);
-	notes_panel = new notesPanel(notes_field, parent.isEditable(), parent);
-	contentPane.setViewportView(notes_panel);
+        contentPane.getVerticalScrollBar().setUnitIncrement(15);
+        notes_field = (string_field) parent.getObject().getField(SchemaConstants.NotesField);
+        notes_panel = new notesPanel(notes_field, parent.isEditable(), parent);
+        contentPane.setViewportView(notes_panel);
       }
     catch (RemoteException ex)
       {
-	parent.getgclient().processExceptionRethrow(ex);
+        parent.getgclient().processExceptionRethrow(ex);
       }
   }
 
@@ -116,14 +116,14 @@ public class notesTab extends clientTab {
 
     if (contentPane != null)
       {
-	contentPane.removeAll();
-	contentPane = null;
+        contentPane.removeAll();
+        contentPane = null;
       }
 
     if (notes_panel != null)
       {
-	notes_panel.dispose();
-	notes_panel = null;
+        notes_panel.dispose();
+        notes_panel = null;
       }
 
     super.dispose();

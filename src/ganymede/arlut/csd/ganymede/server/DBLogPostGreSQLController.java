@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -91,12 +91,12 @@ public class DBLogPostGreSQLController implements DBLogController {
    */
 
   public synchronized static DBLogPostGreSQLController createController(String hostname,
-									String databaseName, 
-									String username,
-									String password) throws ResourceInitializationException
+                                                                        String databaseName, 
+                                                                        String username,
+                                                                        String password) throws ResourceInitializationException
   {
     return new DBLogPostGreSQLController(hostname, databaseName,
-					 username, password);
+                                         username, password);
   }
 
   /**
@@ -106,13 +106,13 @@ public class DBLogPostGreSQLController implements DBLogController {
    */
 
   public synchronized static DBLogPostGreSQLController createController(String hostname,
-									String databaseName, 
-									int port,
-									String username,
-									String password) throws ResourceInitializationException
+                                                                        String databaseName, 
+                                                                        int port,
+                                                                        String username,
+                                                                        String password) throws ResourceInitializationException
   {
     return new DBLogPostGreSQLController(hostname, databaseName, port,
-					 username, password);
+                                         username, password);
   }
 
   // ---
@@ -142,58 +142,58 @@ public class DBLogPostGreSQLController implements DBLogController {
    */
 
   private DBLogPostGreSQLController(String hostname,
-				    String databaseName,
-				    String username, 
-				    String password) throws ResourceInitializationException
+                                    String databaseName,
+                                    String username, 
+                                    String password) throws ResourceInitializationException
   {
     /* -- */
 
     try
       {
-	Class.forName("org.postgresql.Driver");
+        Class.forName("org.postgresql.Driver");
       }
     catch (ClassNotFoundException ex)
       {
-	throw new ResourceInitializationException("Couldn't find org.postgresql.Driver class");
+        throw new ResourceInitializationException("Couldn't find org.postgresql.Driver class");
       }
     
     if (hostname == null)
       {
-	url = "jdbc:postgresql:" + databaseName;
+        url = "jdbc:postgresql:" + databaseName;
       }
     else
       {
-	url = "jdbc:postgresql://" + hostname + "/" + databaseName;
+        url = "jdbc:postgresql://" + hostname + "/" + databaseName;
       }
 
     if (databases.containsKey(url))
       {
-	throw new ResourceInitializationException("already have a DBLogPostGreSQLController open on url " + url);
+        throw new ResourceInitializationException("already have a DBLogPostGreSQLController open on url " + url);
       }
     else
       {
-	databases.put(url, Boolean.TRUE);
+        databases.put(url, Boolean.TRUE);
       }
 
     try
       {
-	con = DriverManager.getConnection(url, username, password);
+        con = DriverManager.getConnection(url, username, password);
       }
     catch (SQLException ex)
       {
-	throw new ResourceInitializationException("Couldn't get connection to database:\n" 
-						  + ex.getMessage());
+        throw new ResourceInitializationException("Couldn't get connection to database:\n" 
+                                                  + ex.getMessage());
       }
 
     try
       {
-	primaryKey = getNextKey();
+        primaryKey = getNextKey();
       }
     catch (SQLException ex)
       {
-	close();
-	throw new ResourceInitializationException("Couldn't successfully talk to database:\n"
-						  + ex.getMessage());
+        close();
+        throw new ResourceInitializationException("Couldn't successfully talk to database:\n"
+                                                  + ex.getMessage());
       }
   } 
 
@@ -211,10 +211,10 @@ public class DBLogPostGreSQLController implements DBLogController {
    */
 
   private DBLogPostGreSQLController(String hostname,
-				    String databaseName,
-				    int port,
-				    String username, 
-				    String password) throws ResourceInitializationException
+                                    String databaseName,
+                                    int port,
+                                    String username, 
+                                    String password) throws ResourceInitializationException
   {
     String url;
 
@@ -222,50 +222,50 @@ public class DBLogPostGreSQLController implements DBLogController {
 
     try
       {
-	Class.forName("org.postgresql.Driver");
+        Class.forName("org.postgresql.Driver");
       }
     catch (ClassNotFoundException ex)
       {
-	throw new ResourceInitializationException("Couldn't find org.postgresql.Driver class");
+        throw new ResourceInitializationException("Couldn't find org.postgresql.Driver class");
       }
     
     if (hostname == null)
       {
-	url = "jdbc:postgresql://localhost:" + port + "/" + databaseName;
+        url = "jdbc:postgresql://localhost:" + port + "/" + databaseName;
       }
     else
       {
-	url = "jdbc:postgresql://" + hostname + ":" + port + "/" + databaseName;
+        url = "jdbc:postgresql://" + hostname + ":" + port + "/" + databaseName;
       }
 
     if (databases.containsKey(url))
       {
-	throw new ResourceInitializationException("already have a DBLogPostGreSQLController open on url " + url);
+        throw new ResourceInitializationException("already have a DBLogPostGreSQLController open on url " + url);
       }
     else
       {
-	databases.put(url, Boolean.TRUE);
+        databases.put(url, Boolean.TRUE);
       }
 
     try
       {
-	con = DriverManager.getConnection(url, username, password);
+        con = DriverManager.getConnection(url, username, password);
       }
     catch (SQLException ex)
       {
-	throw new ResourceInitializationException("Couldn't get connection to database:\n" 
-						  + ex.getMessage());
+        throw new ResourceInitializationException("Couldn't get connection to database:\n" 
+                                                  + ex.getMessage());
       }
 
     try
       {
-	primaryKey = getNextKey();
+        primaryKey = getNextKey();
       }
     catch (SQLException ex)
       {
-	close();
-	throw new ResourceInitializationException("Couldn't successfully talk to database:\n"
-						  + ex.getMessage());
+        close();
+        throw new ResourceInitializationException("Couldn't successfully talk to database:\n"
+                                                  + ex.getMessage());
       }
   } 
 
@@ -308,117 +308,117 @@ public class DBLogPostGreSQLController implements DBLogController {
   {
     if (con == null)
       {
-	throw new IllegalArgumentException("no connection to postgres database");
+        throw new IllegalArgumentException("no connection to postgres database");
       }
 
     try
       {
-	if (statement == null)
-	  {
-	    statement = con.prepareStatement("insert into event (event_id, javatime, sqltime, classtoken, " +
-					     "admin_invid, admin_name, trans_id, text) " +
-					     "values (?,?,?,?,?,?,?,?)");
-	  }
+        if (statement == null)
+          {
+            statement = con.prepareStatement("insert into event (event_id, javatime, sqltime, classtoken, " +
+                                             "admin_invid, admin_name, trans_id, text) " +
+                                             "values (?,?,?,?,?,?,?,?)");
+          }
 
-	if (event.eventClassToken.equals("starttransaction"))
-	  {
-	    transactionID = event.transactionID;
-	  }
+        if (event.eventClassToken.equals("starttransaction"))
+          {
+            transactionID = event.transactionID;
+          }
 
-	primaryKey++;
-	statement.setInt(1, primaryKey);
-	statement.setLong(2, event.time.getTime());
-	statement.setTimestamp(3, new java.sql.Timestamp(event.time.getTime()));
-	statement.setString(4, event.eventClassToken);
-		
-	if (event.admin != null)
-	  {
-	    statement.setString(5, event.admin.toString());
-	  }
-	else
-	  {
-	    statement.setNull(5, java.sql.Types.VARCHAR);
-	  }
-		
-	if (event.adminName != null)
-	  {
-	    statement.setString(6, event.adminName);
-	  }
-	else
-	  {
-	    statement.setNull(5, java.sql.Types.VARCHAR);
-	  }
-		
-	if (event.transactionID != null)
-	  {
-	    statement.setString(7, event.transactionID);
-	  }
-	else
-	  {
-	    statement.setNull(5, java.sql.Types.VARCHAR);
-	  }
-		
-	if (event.description != null)
-	  {
-	    statement.setString(8, event.description);
-	  }
-	else
-	  {
-	    statement.setNull(5, java.sql.Types.VARCHAR);
-	  }
+        primaryKey++;
+        statement.setInt(1, primaryKey);
+        statement.setLong(2, event.time.getTime());
+        statement.setTimestamp(3, new java.sql.Timestamp(event.time.getTime()));
+        statement.setString(4, event.eventClassToken);
+                
+        if (event.admin != null)
+          {
+            statement.setString(5, event.admin.toString());
+          }
+        else
+          {
+            statement.setNull(5, java.sql.Types.VARCHAR);
+          }
+                
+        if (event.adminName != null)
+          {
+            statement.setString(6, event.adminName);
+          }
+        else
+          {
+            statement.setNull(5, java.sql.Types.VARCHAR);
+          }
+                
+        if (event.transactionID != null)
+          {
+            statement.setString(7, event.transactionID);
+          }
+        else
+          {
+            statement.setNull(5, java.sql.Types.VARCHAR);
+          }
+                
+        if (event.description != null)
+          {
+            statement.setString(8, event.description);
+          }
+        else
+          {
+            statement.setNull(5, java.sql.Types.VARCHAR);
+          }
 
-	statement.addBatch();
+        statement.addBatch();
 
-	for (String address: event.getMailTargets())
-	  {
-	    statement.addBatch("insert into email (event_id, address) values(" +
-			       primaryKey + ", '" + 
-			       address +
-			       "')");
-	  }
+        for (String address: event.getMailTargets())
+          {
+            statement.addBatch("insert into email (event_id, address) values(" +
+                               primaryKey + ", '" + 
+                               address +
+                               "')");
+          }
 
-	for (Invid invid: event.getInvids())
-	  {
-	    statement.addBatch("insert into invids (invid, event_id) values('" +
-			       invid.toString() + "'," + 
-			       primaryKey + ")");
-	  }
+        for (Invid invid: event.getInvids())
+          {
+            statement.addBatch("insert into invids (invid, event_id) values('" +
+                               invid.toString() + "'," + 
+                               primaryKey + ")");
+          }
 
-	// if we had successfully logged our entire transaction,
-	// record a mapping in the transactions table from each
-	// invid in the transaction (which are recorded in the
-	// starttransaction line) to the transaction id
-	//
-	// if we get a transactionID mismatch we won't record anything
-	//
-	// we reset the transactionID and transInvids List
-	// pointer in any event
-		
-	if (event.eventClassToken.equals("finishtransaction"))
-	  {
-	    if (transactionID != null && transactionID.equals(event.transactionID))
-	      {
-		for (Invid invid: event.getInvids())
-		  {
-		    statement.addBatch("insert into transactions (invid, trans_id) values('" +
-				       invid.toString() + "','" + transactionID + "')");
-		  }
-	      }
-		    
-	    transactionID = null;
-	  }
+        // if we had successfully logged our entire transaction,
+        // record a mapping in the transactions table from each
+        // invid in the transaction (which are recorded in the
+        // starttransaction line) to the transaction id
+        //
+        // if we get a transactionID mismatch we won't record anything
+        //
+        // we reset the transactionID and transInvids List
+        // pointer in any event
+                
+        if (event.eventClassToken.equals("finishtransaction"))
+          {
+            if (transactionID != null && transactionID.equals(event.transactionID))
+              {
+                for (Invid invid: event.getInvids())
+                  {
+                    statement.addBatch("insert into transactions (invid, trans_id) values('" +
+                                       invid.toString() + "','" + transactionID + "')");
+                  }
+              }
+                    
+            transactionID = null;
+          }
 
-	statement.executeBatch();
-	statement.clearParameters();
+        statement.executeBatch();
+        statement.clearParameters();
       }
     catch (SQLException ex)
       {
-	Ganymede.debug("SQLException in spinLog: " + ex.getMessage());
-	Ganymede.debug("** SQLState: " + ex.getSQLState());
-	Ganymede.debug("** SQL Error Code: " + ex.getErrorCode());
-	Ganymede.debug(Ganymede.stackTrace(ex));
-	Ganymede.debug("Event was " + event.toString() );
-	return;
+        Ganymede.debug("SQLException in spinLog: " + ex.getMessage());
+        Ganymede.debug("** SQLState: " + ex.getSQLState());
+        Ganymede.debug("** SQL Error Code: " + ex.getErrorCode());
+        Ganymede.debug(Ganymede.stackTrace(ex));
+        Ganymede.debug("Event was " + event.toString() );
+        return;
       }
   }
 
@@ -453,12 +453,12 @@ public class DBLogPostGreSQLController implements DBLogController {
 
   public StringBuffer retrieveHistory(Invid invid, Date sinceTime, Date beforeTime,
                                       boolean keyOnAdmin,
-				      boolean fullTransactions,
+                                      boolean fullTransactions,
                                       boolean getLoginEvents)
   {
     if (con == null)
       {
-	throw new IllegalArgumentException("no connection to postgres database");
+        throw new IllegalArgumentException("no connection to postgres database");
       }
 
     StringBuffer buffer = new StringBuffer();
@@ -473,26 +473,26 @@ public class DBLogPostGreSQLController implements DBLogController {
 
     try
       {
-	if (keyOnAdmin)
-	  {
-	    rs = queryEventsByAdmin(invid, sinceTime, beforeTime);
-	  }
-	else if (fullTransactions)
-	  {
-	    rs = queryEventsByTransactions(invid, sinceTime, beforeTime);
-	  }
-	else
-	  {
-	    rs = queryEvents(invid, sinceTime, beforeTime);
-	  }
+        if (keyOnAdmin)
+          {
+            rs = queryEventsByAdmin(invid, sinceTime, beforeTime);
+          }
+        else if (fullTransactions)
+          {
+            rs = queryEventsByTransactions(invid, sinceTime, beforeTime);
+          }
+        else
+          {
+            rs = queryEvents(invid, sinceTime, beforeTime);
+          }
 
-	while (rs.next())
-	  {
-	    long time = rs.getLong(1);
-	    String token = rs.getString(2);
-	    String adminName = rs.getString(3);
-	    String text = rs.getString(4);
-	    String transactionID = rs.getString(5);
+        while (rs.next())
+          {
+            long time = rs.getLong(1);
+            String token = rs.getString(2);
+            String adminName = rs.getString(3);
+            String text = rs.getString(4);
+            String transactionID = rs.getString(5);
 
             if (invid.getType() == SchemaConstants.UserBase)
               {
@@ -511,74 +511,74 @@ public class DBLogPostGreSQLController implements DBLogController {
                   }
               }
 
-	    if (prevTransID != null && !prevTransID.equals(transactionID))
-	      {
-		buffer.append("---------- End Transaction " + transDate.toString() + ": " + transAdmin + 
-			      " ----------\n\n");
+            if (prevTransID != null && !prevTransID.equals(transactionID))
+              {
+                buffer.append("---------- End Transaction " + transDate.toString() + ": " + transAdmin + 
+                              " ----------\n\n");
 
-		transAdmin = null;
-		transDate = null;
-		prevTransID = null;
-	      }
+                transAdmin = null;
+                transDate = null;
+                prevTransID = null;
+              }
 
-	    if (token.equals("starttransaction"))
-	      {
-		transDate = new Date(time);
+            if (token.equals("starttransaction"))
+              {
+                transDate = new Date(time);
 
-		String tmp2 = "---------- Transaction " + transDate.toString() + ": " + adminName + 
-		  " ----------\n";
+                String tmp2 = "---------- Transaction " + transDate.toString() + ": " + adminName + 
+                  " ----------\n";
 
-		// remember our admin name and transaction id so we
-		// can put out a notice about closing the previous
-		// transaction when we see it
+                // remember our admin name and transaction id so we
+                // can put out a notice about closing the previous
+                // transaction when we see it
 
-		transAdmin = adminName;
-		prevTransID = transactionID;
-		
-		buffer.append(tmp2);
-	      }
-	    else if (token.equals("finishtransaction"))
-	      {
-		String tmp2 = "---------- End Transaction " + new Date(time).toString() + ": " + adminName + 
-		  " ----------\n\n";
+                transAdmin = adminName;
+                prevTransID = transactionID;
+                
+                buffer.append(tmp2);
+              }
+            else if (token.equals("finishtransaction"))
+              {
+                String tmp2 = "---------- End Transaction " + new Date(time).toString() + ": " + adminName + 
+                  " ----------\n\n";
 
-		prevTransID = null;
-		transAdmin = null;
-		transDate = null;
-		
-		buffer.append(tmp2);
-	      }
-	    else
-	      {
-		String tmp = token + "\n" + WordWrap.wrap(text, 78, "\t") + "\n";
-		
-		buffer.append(tmp);
-	      }
-	  }
+                prevTransID = null;
+                transAdmin = null;
+                transDate = null;
+                
+                buffer.append(tmp2);
+              }
+            else
+              {
+                String tmp = token + "\n" + WordWrap.wrap(text, 78, "\t") + "\n";
+                
+                buffer.append(tmp);
+              }
+          }
       }
     catch (SQLException ex)
       {
-	Ganymede.debug("SQLException in retrieveHistory: " + ex.getMessage());
-	Ganymede.debug("** SQLState: " + ex.getSQLState());
-	Ganymede.debug("** SQL Error Code: " + ex.getErrorCode());
-	Ganymede.debug(Ganymede.stackTrace(ex));
-	return buffer;
+        Ganymede.debug("SQLException in retrieveHistory: " + ex.getMessage());
+        Ganymede.debug("** SQLState: " + ex.getSQLState());
+        Ganymede.debug("** SQL Error Code: " + ex.getErrorCode());
+        Ganymede.debug(Ganymede.stackTrace(ex));
+        return buffer;
       }
     finally
       {
         try
           {
-	    if (rs != null)
-	      {
-		rs.close();
+            if (rs != null)
+              {
+                rs.close();
 
-		Statement st = rs.getStatement();
+                Statement st = rs.getStatement();
 
-		if (st != null)
-		  {
-		    st.close();
-		  }
-	      }
+                if (st != null)
+                  {
+                    st.close();
+                  }
+              }
           }
         catch (SQLException ex)
           {
@@ -772,19 +772,19 @@ public class DBLogPostGreSQLController implements DBLogController {
 
     if (con != null)
       {
-	try
-	  {
-	    con.close();
-	  }
-	catch (SQLException ex)
-	  {
-	  }
+        try
+          {
+            con.close();
+          }
+        catch (SQLException ex)
+          {
+          }
 
-	con = null;
+        con = null;
 
-	databases.remove(url);
+        databases.remove(url);
 
-	url = null;
+        url = null;
       }
   }
 }

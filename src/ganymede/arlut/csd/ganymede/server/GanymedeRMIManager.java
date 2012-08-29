@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -104,14 +104,14 @@ public class GanymedeRMIManager {
 
     if (useSSL)
       {
-	this.useSSL = true;
+        this.useSSL = true;
 
-	// let's keep our SSL sockets open for 2 minutes even in the face
-	// of idle connections, as opposed to the 15 second default.
+        // let's keep our SSL sockets open for 2 minutes even in the face
+        // of idle connections, as opposed to the 15 second default.
 
-	System.getProperties().setProperty("sun.rmi.transport.connectionTimeout", "120000");
-	this.csf = new RMISSLClientSocketFactory();
-	this.ssf = new RMISSLServerSocketFactory();
+        System.getProperties().setProperty("sun.rmi.transport.connectionTimeout", "120000");
+        this.csf = new RMISSLClientSocketFactory();
+        this.ssf = new RMISSLServerSocketFactory();
       }
   }
   
@@ -139,20 +139,20 @@ public class GanymedeRMIManager {
   {
     try
       {
-	if (useSSL)
-	  {
-	    UnicastRemoteObject.exportObject(obj, this.port, this.csf, this.ssf);
-	  }
-	else
-	  {
-	    UnicastRemoteObject.exportObject(obj, this.port);
-	  }
+        if (useSSL)
+          {
+            UnicastRemoteObject.exportObject(obj, this.port, this.csf, this.ssf);
+          }
+        else
+          {
+            UnicastRemoteObject.exportObject(obj, this.port);
+          }
 
-	return true;
+        return true;
       }
     catch (RemoteException ex)
       {
-	return false;
+        return false;
       }
   }
 
@@ -170,11 +170,11 @@ public class GanymedeRMIManager {
   {
     try
       {
-	return UnicastRemoteObject.unexportObject(obj, force);
+        return UnicastRemoteObject.unexportObject(obj, force);
       }
     catch (NoSuchObjectException ex)
       {
-	return false;
+        return false;
       }
   }
 }

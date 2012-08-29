@@ -12,7 +12,7 @@
    Module By: Deepak Giridharagopal, Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -173,7 +173,7 @@ public class GanyQueryTransmuter {
 
     try
       {
-	myQueryTree = (CommonTree) parser.query().getTree();
+        myQueryTree = (CommonTree) parser.query().getTree();
       }
     catch (RecognitionException ex)
       {
@@ -181,36 +181,36 @@ public class GanyQueryTransmuter {
 
     if (myQueryTree == null)
       {
-	// "Error parsing GanyQL query string.  Make sure you've parenthesized and quoted everything properly.\n\n{0}"
-	throw new GanyParseException(ts.l("transmuteQueryString.global_parse_error", queryString));
+        // "Error parsing GanyQL query string.  Make sure you've parenthesized and quoted everything properly.\n\n{0}"
+        throw new GanyParseException(ts.l("transmuteQueryString.global_parse_error", queryString));
       }
 
     QueryNode root = null;
 
     try
       {
-	root = parse_tree(myQueryTree);
+        root = parse_tree(myQueryTree);
       }
     catch (RuntimeException ex)
       {
-	// "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
-	String mesg = ts.l("global.parse_exception", ex.getMessage(), queryString, myQueryTree.toStringTree());
-	throw new RuntimeException(mesg, ex);
+        // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
+        String mesg = ts.l("global.parse_exception", ex.getMessage(), queryString, myQueryTree.toStringTree());
+        throw new RuntimeException(mesg, ex);
       }
 
     Query query = new Query(objectBase.getName(), root, this.editableFilter);
 
     if (selectFields == null)
       {
-	query.resetPermitSet(); // return the default list of fields
+        query.resetPermitSet(); // return the default list of fields
       }
     else
       {
-	for (int i = 0; i < selectFields.size(); i ++)
-	  {
-	    DBObjectBaseField field = (DBObjectBaseField) selectFields.get(i);
-	    query.addField(field.getID());
-	  }
+        for (int i = 0; i < selectFields.size(); i ++)
+          {
+            DBObjectBaseField field = (DBObjectBaseField) selectFields.get(i);
+            query.addField(field.getID());
+          }
       }
 
     // clear out our refs for GC
@@ -219,8 +219,8 @@ public class GanyQueryTransmuter {
 
     if (selectFields != null)
       {
-	selectFields.clear();
-	selectFields = null;
+        selectFields.clear();
+        selectFields = null;
       }
 
     // et voila
@@ -235,19 +235,19 @@ public class GanyQueryTransmuter {
 
     if (ast.getChildCount() > 2)
       {
-	Tree whereTokenNode = ast.getChild(2);
+        Tree whereTokenNode = ast.getChild(2);
 
-	if (whereTokenNode != null && whereTokenNode.getType() == QueryParser.WHERE)
-	  {
-	    Tree where_node = whereTokenNode.getChild(0);
+        if (whereTokenNode != null && whereTokenNode.getType() == QueryParser.WHERE)
+          {
+            Tree where_node = whereTokenNode.getChild(0);
 
-	    if (where_node != null)
-	      {
-		QueryNode where_tree = parse_where_clause(where_node, objectBase);
-	    
-		return where_tree;
-	      }
-	  }
+            if (where_node != null)
+              {
+                QueryNode where_tree = parse_where_clause(where_node, objectBase);
+            
+                return where_tree;
+              }
+          }
       }
 
     return null;
@@ -255,59 +255,59 @@ public class GanyQueryTransmuter {
 
   private DBObjectBase parse_from_tree(Tree ast) throws GanyParseException
   {
-    if (ast.getChildCount() == 0)		// the grammar _should_ prevent this
+    if (ast.getChildCount() == 0)               // the grammar _should_ prevent this
       {
-	// "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
-	// "Missing from clause."
-	throw new GanyParseException(ts.l("global.parse_exception", ts.l("parse_from_tree.missing_from"), myQueryString, myQueryTree.toStringTree()));
+        // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
+        // "Missing from clause."
+        throw new GanyParseException(ts.l("global.parse_exception", ts.l("parse_from_tree.missing_from"), myQueryString, myQueryTree.toStringTree()));
       }
 
     String from_objectbase = null;
 
     for (int i = 0; i < ast.getChildCount(); i++)
       {
-	Tree node = ast.getChild(i);
+        Tree node = ast.getChild(i);
 
-	if (node.getType() == QueryParser.EDITABLE)
-	  {
-	    this.editableFilter = true;
-	  }
-	else
-	  {
-	    if (node.getType() == QueryParser.STRING_VALUE)
-	      {
-		from_objectbase = StringUtils.dequote(node.getText());
-	      }
-	    else if (node.getType() == QueryParser.TOKEN)
-	      {
-		from_objectbase = node.getText();
-	      }
+        if (node.getType() == QueryParser.EDITABLE)
+          {
+            this.editableFilter = true;
+          }
+        else
+          {
+            if (node.getType() == QueryParser.STRING_VALUE)
+              {
+                from_objectbase = StringUtils.dequote(node.getText());
+              }
+            else if (node.getType() == QueryParser.TOKEN)
+              {
+                from_objectbase = node.getText();
+              }
 
-	    // we don't allow underscores in object and field type names,
-	    // because we reserve that character for representing spaces
-	    // in our XML.  A user might be querying using the underscore
-	    // variant, so take care of that here.
+            // we don't allow underscores in object and field type names,
+            // because we reserve that character for representing spaces
+            // in our XML.  A user might be querying using the underscore
+            // variant, so take care of that here.
 
-	    from_objectbase = from_objectbase.replace('_', ' ');
-	  }
+            from_objectbase = from_objectbase.replace('_', ' ');
+          }
       }
 
     if (from_objectbase == null) // the grammar _should_ prevent this
       {
-	// "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
-	// "From clause does not contain an object type to search."
-	throw new GanyParseException(ts.l("global.parse_exception", ts.l("parse_from_tree.no_objectbase"), myQueryString, myQueryTree.toStringTree()));
+        // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
+        // "From clause does not contain an object type to search."
+        throw new GanyParseException(ts.l("global.parse_exception", ts.l("parse_from_tree.no_objectbase"), myQueryString, myQueryTree.toStringTree()));
       }
 
     this.objectBase = Ganymede.db.getObjectBase(from_objectbase);
 
     if (objectBase == null)
       {
-	// "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
-	// "The object type "{0}" in the query''s from clause does not exist."
-	throw new GanyParseException(ts.l("global.parse_exception", 
-					  ts.l("parse_from_tree.bad_objectbase", from_objectbase),
-					  myQueryString, myQueryTree.toStringTree()));
+        // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
+        // "The object type "{0}" in the query''s from clause does not exist."
+        throw new GanyParseException(ts.l("global.parse_exception", 
+                                          ts.l("parse_from_tree.bad_objectbase", from_objectbase),
+                                          myQueryString, myQueryTree.toStringTree()));
       }
 
     return this.objectBase;
@@ -317,37 +317,37 @@ public class GanyQueryTransmuter {
   {
     if (ast.getChildCount() == 0)
       {
-	return null;		// "select from", with no field list
+        return null;            // "select from", with no field list
       }
 
     if (ast.getChild(0).getType() == QueryParser.OBJECT)
       {
-	return null; 		// "select object from", also no field list.
+        return null;            // "select object from", also no field list.
       }
 
     ArrayList selectFields = new ArrayList();
 
     for (int i = 0; i < ast.getChildCount(); i++)
       {
-	Tree select_node = ast.getChild(i);
+        Tree select_node = ast.getChild(i);
 
-	String field_name = StringUtils.dequote(select_node.getText());
+        String field_name = StringUtils.dequote(select_node.getText());
 
-	field_name = field_name.replace('_', ' ');
+        field_name = field_name.replace('_', ' ');
 
-	DBObjectBaseField field = (DBObjectBaseField) objectBase.getField(field_name);
+        DBObjectBaseField field = (DBObjectBaseField) objectBase.getField(field_name);
 
-	if (field == null)
-	  {
-	    // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
-	    // "Can''t find field "{0}" in the "{1}" object type.  Make sure you have capitalized the field name correctly."
-	    throw new GanyParseException(ts.l("global.parse_exception",
-					      ts.l("global.no_such_field", field_name, objectBase.getName()),
-					      myQueryString,
-					      myQueryTree.toStringTree()));
-	  }
+        if (field == null)
+          {
+            // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
+            // "Can''t find field "{0}" in the "{1}" object type.  Make sure you have capitalized the field name correctly."
+            throw new GanyParseException(ts.l("global.parse_exception",
+                                              ts.l("global.no_such_field", field_name, objectBase.getName()),
+                                              myQueryString,
+                                              myQueryTree.toStringTree()));
+          }
 
-	selectFields.add(field);
+        selectFields.add(field);
       }
 
     return selectFields;
@@ -373,105 +373,105 @@ public class GanyQueryTransmuter {
     switch (root_type)
       {
       case QueryParser.NOT:
-	return new QueryNotNode(parse_where_clause(ast.getChild(0), base));
+        return new QueryNotNode(parse_where_clause(ast.getChild(0), base));
 
       case QueryParser.AND:
-	child1 = parse_where_clause(ast.getChild(0), base);
-	child2 = parse_where_clause(ast.getChild(1), base);
-	return new QueryAndNode(child1, child2);
+        child1 = parse_where_clause(ast.getChild(0), base);
+        child2 = parse_where_clause(ast.getChild(1), base);
+        return new QueryAndNode(child1, child2);
 
       case QueryParser.OR:
-	child1 = parse_where_clause(ast.getChild(0), base);
-	child2 = parse_where_clause(ast.getChild(1), base);
-	return new QueryOrNode(child1, child2);
+        child1 = parse_where_clause(ast.getChild(0), base);
+        child2 = parse_where_clause(ast.getChild(1), base);
+        return new QueryOrNode(child1, child2);
 
       case QueryParser.DEREF:
-	field_name = StringUtils.dequote(ast.getChild(0).getText());
-	field_name = field_name.replace('_', ' ');
+        field_name = StringUtils.dequote(ast.getChild(0).getText());
+        field_name = field_name.replace('_', ' ');
 
-	if (base != null)
-	  {
-	    field = (DBObjectBaseField) base.getField(field_name);
+        if (base != null)
+          {
+            field = (DBObjectBaseField) base.getField(field_name);
 
-	    if (field == null)
-	      {
-		// "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
-		// "Can''t find field "{0}" in the "{1}" object type.  Make sure you have capitalized the field name correctly."
-		throw new GanyParseException(ts.l("global.parse_exception",
-						  ts.l("global.no_such_field", field_name, base.getName()),
-						  myQueryString,
-						  myQueryTree.toStringTree()));
-	      }
-	    
-	    if (field.getType() != FieldType.INVID)
-	      {
-		// "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
-		// "The "{0}" field can''t be dereferenced.  Not an invid field."
-		throw new GanyParseException(ts.l("global.parse_exception",
-						  ts.l("parse_where_clause.not_invid", field_name),
-						  myQueryString,
-						  myQueryTree.toStringTree()));
-	      }
+            if (field == null)
+              {
+                // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
+                // "Can''t find field "{0}" in the "{1}" object type.  Make sure you have capitalized the field name correctly."
+                throw new GanyParseException(ts.l("global.parse_exception",
+                                                  ts.l("global.no_such_field", field_name, base.getName()),
+                                                  myQueryString,
+                                                  myQueryTree.toStringTree()));
+              }
+            
+            if (field.getType() != FieldType.INVID)
+              {
+                // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
+                // "The "{0}" field can''t be dereferenced.  Not an invid field."
+                throw new GanyParseException(ts.l("global.parse_exception",
+                                                  ts.l("parse_where_clause.not_invid", field_name),
+                                                  myQueryString,
+                                                  myQueryTree.toStringTree()));
+              }
 
-	    short target_objectbase_id = field.getTargetBase();
+            short target_objectbase_id = field.getTargetBase();
 
-	    if (target_objectbase_id >= 0)
-	      {
-		target_objectbase = Ganymede.db.getObjectBase(target_objectbase_id);
-	      }
-	    else
-	      {
-		target_objectbase = null;
-	      }
-	  }
-	else
-	  {
-	    target_objectbase = null;
-	  }
+            if (target_objectbase_id >= 0)
+              {
+                target_objectbase = Ganymede.db.getObjectBase(target_objectbase_id);
+              }
+            else
+              {
+                target_objectbase = null;
+              }
+          }
+        else
+          {
+            target_objectbase = null;
+          }
 
-	child2 = parse_where_clause(ast.getChild(1), target_objectbase);
-	
-	return new QueryDeRefNode(field_name, child2);
+        child2 = parse_where_clause(ast.getChild(1), target_objectbase);
+        
+        return new QueryDeRefNode(field_name, child2);
 
       case QueryParser.BINARY_OPERATOR:
       case QueryParser.UNARY_OPERATOR:
 
-	op = ast.getText();
-	field_node = ast.getChild(0);
-	field_name = StringUtils.dequote(field_node.getText());
-	field_name = field_name.replace('_', ' ');
+        op = ast.getText();
+        field_node = ast.getChild(0);
+        field_name = StringUtils.dequote(field_node.getText());
+        field_name = field_name.replace('_', ' ');
 
-	if (base == null)
-	  {
-	    field = null;
-	  }
-	else
-	  {
-	    field = (DBObjectBaseField) base.getField(field_name);
-	    
-	    if (field == null)
-	      {
-		// "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
-		// "Can''t find field "{0}" in the "{1}" object type.  Make sure you have capitalized the field name correctly."
-		throw new GanyParseException(ts.l("global.parse_exception",
-						  ts.l("global.no_such_field", field_name, base.getName()),
-						  myQueryString,
-						  myQueryTree.toStringTree()));
-	      }
+        if (base == null)
+          {
+            field = null;
+          }
+        else
+          {
+            field = (DBObjectBaseField) base.getField(field_name);
+            
+            if (field == null)
+              {
+                // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
+                // "Can''t find field "{0}" in the "{1}" object type.  Make sure you have capitalized the field name correctly."
+                throw new GanyParseException(ts.l("global.parse_exception",
+                                                  ts.l("global.no_such_field", field_name, base.getName()),
+                                                  myQueryString,
+                                                  myQueryTree.toStringTree()));
+              }
 
-	    field_type = field.getType();
-	  }
+            field_type = field.getType();
+          }
 
-	if (root_type == QueryParser.BINARY_OPERATOR)
-	  {
-	    argument_node = ast.getChild(1);
-	    argument_type = argument_node.getType();
-	    argument = parse_argument(op, argument_node.getText(), argument_type, field);
-	  }
-	else
-	  {
-	    argument = null;
-	  }
+        if (root_type == QueryParser.BINARY_OPERATOR)
+          {
+            argument_node = ast.getChild(1);
+            argument_type = argument_node.getType();
+            argument = parse_argument(op, argument_node.getText(), argument_type, field);
+          }
+        else
+          {
+            argument = null;
+          }
 
         /*
          * If we don't know the objectbase, then we are chasing a
@@ -483,7 +483,7 @@ public class GanyQueryTransmuter {
          * its best to figure out what the user really meant.
          */
          
-	if (base == null)
+        if (base == null)
           {
             if (op_vector_mapping.containsKey(op))
               {
@@ -499,12 +499,12 @@ public class GanyQueryTransmuter {
               }
             else
               {
-		// "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
-		// "The "{0}" operator makes no sense to me.  GanyQueryTransmuter.java has not been kept up to date with the grammar."
-		throw new GanyParseException(ts.l("global.parse_exception",
-						  ts.l("parse_where_clause.mystery_operator", op),
-						  myQueryString,
-						  myQueryTree.toStringTree()));
+                // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
+                // "The "{0}" operator makes no sense to me.  GanyQueryTransmuter.java has not been kept up to date with the grammar."
+                throw new GanyParseException(ts.l("global.parse_exception",
+                                                  ts.l("parse_where_clause.mystery_operator", op),
+                                                  myQueryString,
+                                                  myQueryTree.toStringTree()));
               }
           }
         else
@@ -526,12 +526,12 @@ public class GanyQueryTransmuter {
                   }
                 else
                   {
-		    // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
-		    // "The "{0}" operator makes no sense to me.  GanyQueryTransmuter.java has not been kept up to date with the grammar."
-		    throw new GanyParseException(ts.l("global.parse_exception",
-						      ts.l("parse_where_clause.mystery_operator", op),
-						      myQueryString,
-						      myQueryTree.toStringTree()));
+                    // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
+                    // "The "{0}" operator makes no sense to me.  GanyQueryTransmuter.java has not been kept up to date with the grammar."
+                    throw new GanyParseException(ts.l("global.parse_exception",
+                                                      ts.l("parse_where_clause.mystery_operator", op),
+                                                      myQueryString,
+                                                      myQueryTree.toStringTree()));
                   }
               }
             else
@@ -544,27 +544,27 @@ public class GanyQueryTransmuter {
                   }
               }
           }
-	
-	if (base != null && scalar_operator != QueryDataNode.NONE && !valid_op(op, field_type))
-	  {
-	    // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
-	    // "The "{0}" operator is not valid on a "{1}" object''s "{2}" field.  {2} is of type {3}."
-	    throw new GanyParseException(ts.l("global.parse_exception",
-					      ts.l("parse_where_clause.bad_operator", op, base.getName(), field_name, field.getTypeDesc()),
-					      myQueryString,
-					      myQueryTree.toStringTree()));
-	  }
+        
+        if (base != null && scalar_operator != QueryDataNode.NONE && !valid_op(op, field_type))
+          {
+            // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
+            // "The "{0}" operator is not valid on a "{1}" object''s "{2}" field.  {2} is of type {3}."
+            throw new GanyParseException(ts.l("global.parse_exception",
+                                              ts.l("parse_where_clause.bad_operator", op, base.getName(), field_name, field.getTypeDesc()),
+                                              myQueryString,
+                                              myQueryTree.toStringTree()));
+          }
 
-	return new QueryDataNode(field_name, scalar_operator, vector_operator, argument);
+        return new QueryDataNode(field_name, scalar_operator, vector_operator, argument);
 
       default:
 
-	// "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
-	// "I couldn''t process parser node type {0}.  GanyQueryTransmuter.java has probably not been kept up to date with the grammar."
-	throw new GanyParseException(ts.l("global.parse_exception",
-					  ts.l("parse_where_clause.bad_type", Integer.valueOf(root_type)),
-					  myQueryString,
-					  myQueryTree.toStringTree()));
+        // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
+        // "I couldn''t process parser node type {0}.  GanyQueryTransmuter.java has probably not been kept up to date with the grammar."
+        throw new GanyParseException(ts.l("global.parse_exception",
+                                          ts.l("parse_where_clause.bad_type", Integer.valueOf(root_type)),
+                                          myQueryString,
+                                          myQueryTree.toStringTree()));
       }
   }
 
@@ -572,17 +572,17 @@ public class GanyQueryTransmuter {
   {
     String[] ops = (String[]) validity_mapping.get(Integer.valueOf(field_type));
 
-    if (ops == null)		// should only happen if field_type is invalid
+    if (ops == null)            // should only happen if field_type is invalid
       {
-	return false;
+        return false;
       }
 
     for (int i = 0; i < ops.length; i++)
       {
-	if (ops[i].equals(op))
-	  {
-	    return true;
-	  }
+        if (ops[i].equals(op))
+          {
+            return true;
+          }
       }
 
     return false;
@@ -592,87 +592,87 @@ public class GanyQueryTransmuter {
   {
     if (field == null)
       {
-	switch (argument_type)
-	  {
-	  case QueryParser.INT_VALUE:
-	    return Integer.valueOf(argument);
+        switch (argument_type)
+          {
+          case QueryParser.INT_VALUE:
+            return Integer.valueOf(argument);
 
-	  case QueryParser.DECIMAL_VALUE:
-	    return Double.valueOf(argument);
+          case QueryParser.DECIMAL_VALUE:
+            return Double.valueOf(argument);
 
-	  case QueryParser.STRING_VALUE:
-	    return StringUtils.dequote(argument);
+          case QueryParser.STRING_VALUE:
+            return StringUtils.dequote(argument);
 
-	  default:
+          default:
 
-	    // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
-	    // "Unrecognized argument type parsing argument {0}."
-	    throw new GanyParseException(ts.l("global.parse_exception",
-					      ts.l("parse_argument.unrecognized_argument", Integer.valueOf(argument)),
-					      myQueryString,
-					      myQueryTree.toStringTree()));
-	  }
+            // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
+            // "Unrecognized argument type parsing argument {0}."
+            throw new GanyParseException(ts.l("global.parse_exception",
+                                              ts.l("parse_argument.unrecognized_argument", Integer.valueOf(argument)),
+                                              myQueryString,
+                                              myQueryTree.toStringTree()));
+          }
       }
 
     if (field.isArray() && argument_type == QueryParser.INT_VALUE &&
-	op_vector_mapping.containsKey(operator))
+        op_vector_mapping.containsKey(operator))
       {
-	return Integer.valueOf(argument);
+        return Integer.valueOf(argument);
       } 
 
     int field_type = field.getType();
 
     if (field_type == FieldType.NUMERIC && argument_type == QueryParser.INT_VALUE)
       {
-	return Integer.valueOf(argument);
+        return Integer.valueOf(argument);
       }
     else if (field_type == FieldType.FLOAT && argument_type == QueryParser.DECIMAL_VALUE)
       {
-	return new Double(argument);
+        return new Double(argument);
       }
     else if (argument_type == QueryParser.BOOLEAN_VALUE)
       {
-	if (argument.toLowerCase().equals("true"))
-	  {
-	    return Boolean.TRUE;
-	  }
-	else
-	  {
-	    return Boolean.FALSE;
-	  }
+        if (argument.toLowerCase().equals("true"))
+          {
+            return Boolean.TRUE;
+          }
+        else
+          {
+            return Boolean.FALSE;
+          }
       }
     else if (argument_type == QueryParser.STRING_VALUE)
       {
-	switch (field_type)
-	  {
-	  case FieldType.STRING:
-	  case FieldType.INVID:
-	  case FieldType.IP:
-	    return StringUtils.dequote(argument);
+        switch (field_type)
+          {
+          case FieldType.STRING:
+          case FieldType.INVID:
+          case FieldType.IP:
+            return StringUtils.dequote(argument);
 
-	  case FieldType.DATE:
-	    DateFormat format = DateFormat.getInstance();
-	    try
-	      {
-		return format.parse(StringUtils.dequote(argument));
-	      }
-	    catch (ParseException ex)
-	      {
-		// "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
-		// "I couldn''t make any sense of "{0}" as a date value."
-		throw new GanyParseException(ts.l("global.parse_exception",
-						  ts.l("parse_argument.bad_date", argument),
-						  myQueryString,
-						  myQueryTree.toStringTree()));
-	      }
-	  }
+          case FieldType.DATE:
+            DateFormat format = DateFormat.getInstance();
+            try
+              {
+                return format.parse(StringUtils.dequote(argument));
+              }
+            catch (ParseException ex)
+              {
+                // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
+                // "I couldn''t make any sense of "{0}" as a date value."
+                throw new GanyParseException(ts.l("global.parse_exception",
+                                                  ts.l("parse_argument.bad_date", argument),
+                                                  myQueryString,
+                                                  myQueryTree.toStringTree()));
+              }
+          }
       }
 
     // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
     // "Error, field "{0}" requires a {1} argument type."
     throw new GanyParseException(ts.l("global.parse_exception",
-				      ts.l("parse_argument.bad_argument_type", field.getName(), field.getTypeDesc()),
-				      myQueryString,
-				      myQueryTree.toStringTree()));
+                                      ts.l("parse_argument.bad_argument_type", field.getName(), field.getTypeDesc()),
+                                      myQueryString,
+                                      myQueryTree.toStringTree()));
   }
 }

@@ -14,7 +14,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
 
    Copyright (C) 1996-2010
@@ -121,24 +121,24 @@ public final class Invid implements java.io.Serializable {
   {
     if (allocator == null)
       {
-	counter++;
-	return new Invid(type, num);
+        counter++;
+        return new Invid(type, num);
       }
     else
       {
-	Invid newInvid = new Invid(type, num);
-	Invid internedInvid = newInvid.intern();
+        Invid newInvid = new Invid(type, num);
+        Invid internedInvid = newInvid.intern();
 
-	if (newInvid == internedInvid)
-	  {
-	    counter++;		// we're the initial creation of this invid
-	  }
-	else
-	  {
-	    reuseCounter++;
-	  }
+        if (newInvid == internedInvid)
+          {
+            counter++;          // we're the initial creation of this invid
+          }
+        else
+          {
+            reuseCounter++;
+          }
 
-	return internedInvid;
+        return internedInvid;
       }
   }
 
@@ -168,12 +168,12 @@ public final class Invid implements java.io.Serializable {
 
     try
       {
-	return createInvid(Short.valueOf(first).shortValue(), 
-			   Integer.valueOf(last).intValue());
+        return createInvid(Short.valueOf(first).shortValue(), 
+                           Integer.valueOf(last).intValue());
       }
     catch (NumberFormatException ex)
       {
-	throw new IllegalArgumentException("bad string format " + ex);
+        throw new IllegalArgumentException("bad string format " + ex);
       }
   }
 
@@ -212,16 +212,16 @@ public final class Invid implements java.io.Serializable {
   {
     if (obj == null)
       {
-	return false;
+        return false;
       }
 
     if (obj instanceof Invid)
       {
-	return equals((Invid) obj);
+        return equals((Invid) obj);
       }
     else
       {
-	return false;
+        return false;
       }
   }
 
@@ -231,13 +231,13 @@ public final class Invid implements java.io.Serializable {
 
     if (invid == null)
       {
-	return false;
+        return false;
       }
 
     if ((invid.type == type) &&
-	(invid.num == num))
+        (invid.num == num))
       {
-	return true;
+        return true;
       }
 
     return false;
@@ -284,24 +284,24 @@ public final class Invid implements java.io.Serializable {
   {
     if (interned || allocator == null)
       {
-	return this;
+        return this;
       }
     else
       {
-	Invid result = allocator.findInvid(this);
+        Invid result = allocator.findInvid(this);
 
-	if (result == null)
-	  {
-	    counter++;
-	    allocator.storeInvid(this);
-	    this.interned = true;
-	    return this;
-	  }
-	else
-	  {
-	    reuseCounter++;
-	    return result;
-	  }
+        if (result == null)
+          {
+            counter++;
+            allocator.storeInvid(this);
+            this.interned = true;
+            return this;
+          }
+        else
+          {
+            reuseCounter++;
+            return result;
+          }
       }
   }
 

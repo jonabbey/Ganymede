@@ -9,7 +9,7 @@
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2004
@@ -94,25 +94,25 @@ public class helpPanel extends JDialog implements ActionListener{
 
     if (glogin.helpBase != null)
       {
-	INDEX = glogin.helpBase + "help_index.html";
-	SEARCH = glogin.helpBase + "help_search.html";
-	START = glogin.helpBase + "help_start.html";
+        INDEX = glogin.helpBase + "help_index.html";
+        SEARCH = glogin.helpBase + "help_search.html";
+        START = glogin.helpBase + "help_start.html";
       }
     else
       {
-	throw new RuntimeException("no help base set on server");
+        throw new RuntimeException("no help base set on server");
       }
 
     getContentPane().setLayout(new BorderLayout());
 
     try
       {
-	document = new JEditorPane(START);
-	document.setEditable(false);
+        document = new JEditorPane(START);
+        document.setEditable(false);
       }
     catch (java.io.IOException x)
       {
-	throw new RuntimeException("Could not load page: " + x);
+        throw new RuntimeException("Could not load page: " + x);
       }
 
     currentPage = START;
@@ -154,13 +154,13 @@ public class helpPanel extends JDialog implements ActionListener{
   {
     if (history.empty())
       {
-	System.out.println("History is empty");
+        System.out.println("History is empty");
       }
     else
       {
-	String newPage = (String)history.pop();
-	System.out.println("loading page: " + newPage);
-	loadPage(newPage, false);
+        String newPage = (String)history.pop();
+        System.out.println("loading page: " + newPage);
+        loadPage(newPage, false);
       }
   }
 
@@ -178,25 +178,25 @@ public class helpPanel extends JDialog implements ActionListener{
 
     if (currentPage.equals(page))
       {
-	System.out.println("Can't fool me, Eric!  You are trying to load the page you are on.");
+        System.out.println("Can't fool me, Eric!  You are trying to load the page you are on.");
       }
     else
       {
-	try
-	  {
-	    document.setPage(page);
+        try
+          {
+            document.setPage(page);
 
-	    if (keepInHistory)
-	      {
-		history.push(currentPage);
-	      }
+            if (keepInHistory)
+              {
+                history.push(currentPage);
+              }
 
-	    currentPage = page;
-	  }
-	catch (java.io.IOException e)
-	  {
-	    throw new RuntimeException("Could not change page to " + page + ": " + e);
-	  }
+            currentPage = page;
+          }
+        catch (java.io.IOException e)
+          {
+            throw new RuntimeException("Could not change page to " + page + ": " + e);
+          }
       }
   }
 
@@ -204,24 +204,24 @@ public class helpPanel extends JDialog implements ActionListener{
   {
     if (e.getSource() == close)
       {
-	this.setVisible(false);
-	this.dispose();
+        this.setVisible(false);
+        this.dispose();
       }
     else if (e.getSource() == back)
       {
-	goBack();
+        goBack();
       }
     else if (e.getSource() == index)
       {
-	loadPage(INDEX);
+        loadPage(INDEX);
       }
     else if (e.getSource() == search)
       {
-	loadPage(SEARCH);
+        loadPage(SEARCH);
       }
     else
       {
-	System.out.println("action from unknown source");
+        System.out.println("action from unknown source");
       }
   }
 

@@ -9,7 +9,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -118,7 +118,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 
     if (!getGSession().enableOversight)
       {
-	return null;
+        return null;
       }
 
     // a newly created Sync Channel object have its type set to manual
@@ -140,9 +140,9 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
   {
     if (field.getID() == SchemaConstants.SyncChannelTypeString)
       {
-	// we want to force type choosing
+        // we want to force type choosing
 
-	return true;
+        return true;
       }
 
     return super.mustChoose(field);
@@ -159,13 +159,13 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
   {
     if (field.getID() == SchemaConstants.SyncChannelTypeString)
       {
-	QueryResult syncTypes = new QueryResult(true);
+        QueryResult syncTypes = new QueryResult(true);
 
-	syncTypes.addRow(ts.l("global.manual"));
-	syncTypes.addRow(ts.l("global.incremental"));
-	syncTypes.addRow(ts.l("global.fullstate"));
-	
-	return syncTypes;
+        syncTypes.addRow(ts.l("global.manual"));
+        syncTypes.addRow(ts.l("global.incremental"));
+        syncTypes.addRow(ts.l("global.fullstate"));
+        
+        return syncTypes;
       }
     
     return super.obtainChoiceList(field);
@@ -196,7 +196,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
       case SchemaConstants.SyncChannelName:
       case SchemaConstants.SyncChannelTypeString:
       case SchemaConstants.SyncChannelTypeNum:
-	return true;
+        return true;
       }
 
     SyncType type = SyncType.get(((Integer) object.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum)).intValue());
@@ -204,13 +204,13 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
     switch (fieldid)
       {
       case SchemaConstants.SyncChannelDirectory:
-	return type == SyncType.INCREMENTAL;
+        return type == SyncType.INCREMENTAL;
 
       case SchemaConstants.SyncChannelFullStateFile:
-	return type == SyncType.FULLSTATE;
+        return type == SyncType.FULLSTATE;
 
       case SchemaConstants.SyncChannelServicer:
-	return type != SyncType.MANUAL;
+        return type != SyncType.MANUAL;
       }
 
     // We'll allow SyncChannelFields and SyncChannelPlaintextOK to be
@@ -269,48 +269,48 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 
     if (field.getID() == SchemaConstants.SyncChannelTypeString)
       {
-	NumericDBField indexField = (NumericDBField) getField(SchemaConstants.SyncChannelTypeNum);
+        NumericDBField indexField = (NumericDBField) getField(SchemaConstants.SyncChannelTypeNum);
 
-	String type = (String) value;
+        String type = (String) value;
 
-	if (type == null)
-	  {
-	    if (this.isDeleting())
-	      {
-		indexField.setValueLocal(Integer.valueOf(-1));
-	      }
-	    else
-	      {
-		// "Error, couldn''t set Sync Channel type string to null when not deleting the object."
-		return Ganymede.createErrorDialog(ts.l("finalizeSetValue.null_token"));
-	      }
-	  }
-	else
-	  {
-	    if (type.equals(ts.l("global.manual")))
-	      {
-		indexField.setValueLocal(SyncType.MANUAL.Val());
-	      }
-	    else if (type.equals(ts.l("global.incremental")))
-	      {
-		indexField.setValueLocal(SyncType.INCREMENTAL.Val());
-	      }
-	    else if (type.equals(ts.l("global.fullstate")))
-	      {
-		indexField.setValueLocal(SyncType.FULLSTATE.Val());
-	      }
-	    else
-	      {
-		/* this shouldn't happen if mustChoose is set, but just in case.. */
+        if (type == null)
+          {
+            if (this.isDeleting())
+              {
+                indexField.setValueLocal(Integer.valueOf(-1));
+              }
+            else
+              {
+                // "Error, couldn''t set Sync Channel type string to null when not deleting the object."
+                return Ganymede.createErrorDialog(ts.l("finalizeSetValue.null_token"));
+              }
+          }
+        else
+          {
+            if (type.equals(ts.l("global.manual")))
+              {
+                indexField.setValueLocal(SyncType.MANUAL.Val());
+              }
+            else if (type.equals(ts.l("global.incremental")))
+              {
+                indexField.setValueLocal(SyncType.INCREMENTAL.Val());
+              }
+            else if (type.equals(ts.l("global.fullstate")))
+              {
+                indexField.setValueLocal(SyncType.FULLSTATE.Val());
+              }
+            else
+              {
+                /* this shouldn't happen if mustChoose is set, but just in case.. */
 
-		// Error, couldn''t recognize Sync Channel type string "{0}".
-		return Ganymede.createErrorDialog(ts.l("finalizeSetValue.unrecognized_type_token", type));
-	      }
-	  }
+                // Error, couldn''t recognize Sync Channel type string "{0}".
+                return Ganymede.createErrorDialog(ts.l("finalizeSetValue.unrecognized_type_token", type));
+              }
+          }
 
-	ReturnVal result = new ReturnVal(true);
-	result.setRescanAll(field.getOwner().getInvid());
-	return result;
+        ReturnVal result = new ReturnVal(true);
+        result.setRescanAll(field.getOwner().getInvid());
+        return result;
       }
 
     return null;
@@ -339,33 +339,33 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
   {
     if (field.getFieldDef().base() != this.objectBase)
       {
-	throw new IllegalArgumentException("field/object mismatch");
+        throw new IllegalArgumentException("field/object mismatch");
       }
 
     try
       {
-	DBObject myObj = field.getOwner();
-	int typeVal = -1;
+        DBObject myObj = field.getOwner();
+        int typeVal = -1;
 
-	// this may throw a NullPointerException if there is no
-	// numeric type index set
+        // this may throw a NullPointerException if there is no
+        // numeric type index set
  
-	typeVal = ((Integer) myObj.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum)).intValue();
+        typeVal = ((Integer) myObj.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum)).intValue();
 
-	SyncType type = SyncType.get(typeVal);
+        SyncType type = SyncType.get(typeVal);
 
-	switch (field.getID())
-	  {
-	  case SchemaConstants.SyncChannelClassName:
-	  case SchemaConstants.SyncChannelDirectory:
-	    return type == SyncType.INCREMENTAL;
+        switch (field.getID())
+          {
+          case SchemaConstants.SyncChannelClassName:
+          case SchemaConstants.SyncChannelDirectory:
+            return type == SyncType.INCREMENTAL;
 
-	  case SchemaConstants.SyncChannelFullStateFile:
-	    return type == SyncType.FULLSTATE;
+          case SchemaConstants.SyncChannelFullStateFile:
+            return type == SyncType.FULLSTATE;
 
-	  case SchemaConstants.SyncChannelServicer:
-	    return type != SyncType.MANUAL;
-	  }
+          case SchemaConstants.SyncChannelServicer:
+            return type != SyncType.MANUAL;
+          }
       }
     catch (Throwable ex)
       {
@@ -376,7 +376,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 
     if (field.getID() == SchemaConstants.SyncChannelTypeNum)
       {
-	return false;
+        return false;
       }
 
     // by default, return the field definition's visibility
@@ -395,7 +395,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
   {
     if (field.getID() == SchemaConstants.SyncChannelTypeNum)
       {
-	return true;
+        return true;
       }
 
     return super.isIntLimited(field);
@@ -411,7 +411,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
   {
     if (field.getID() == SchemaConstants.SyncChannelTypeNum)
       {
-	return 0;
+        return 0;
       }
 
     return super.minInt(field);
@@ -427,7 +427,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
   {
     if (field.getID() == SchemaConstants.SyncChannelTypeNum)
       {
-	return 2;
+        return 2;
       }
 
     return super.maxInt(field);
@@ -477,25 +477,25 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 
     if (original != null)
       {
-	origName = (String) original.getFieldValueLocal(SchemaConstants.SyncChannelName);
+        origName = (String) original.getFieldValueLocal(SchemaConstants.SyncChannelName);
       }
 
     switch (getStatus())
       {
       case DROPPING:
-	return;
+        return;
 
       case DELETING:
-	Ganymede.unregisterSyncChannel(origName);
-	break;
+        Ganymede.unregisterSyncChannel(origName);
+        break;
 
       case EDITING:
-	Ganymede.unregisterSyncChannel(origName);
-	Ganymede.registerSyncChannel(new SyncRunner(this));
-	break;
+        Ganymede.unregisterSyncChannel(origName);
+        Ganymede.registerSyncChannel(new SyncRunner(this));
+        break;
 
       case CREATING:
-	Ganymede.registerSyncChannel(new SyncRunner(this));
+        Ganymede.registerSyncChannel(new SyncRunner(this));
       }
   }
 }

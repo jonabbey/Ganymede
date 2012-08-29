@@ -56,8 +56,8 @@ import java.util.Map;
 import java.util.Set;
 
 /*------------------------------------------------------------------------------
-									   class
-								       FieldBook
+                                                                           class
+                                                                       FieldBook
 
 ------------------------------------------------------------------------------*/
 
@@ -90,36 +90,36 @@ public class FieldBook {
 
   public void add(Invid invid)
   {
-    map.put(invid, null);	// full object
+    map.put(invid, null);       // full object
   }
 
   public void add(Invid invid, short fieldId)
   {
     if (invid == null)
       {
-	throw new IllegalArgumentException("Null invid in FieldBook.add()");
+        throw new IllegalArgumentException("Null invid in FieldBook.add()");
       }
 
     Set<Short> set;
 
     if (map.containsKey(invid))
       {
-	set = map.get(invid);
+        set = map.get(invid);
 
-	if (set == null)
-	  {
-	    return;		// we've already got the whole object
-	  }
+        if (set == null)
+          {
+            return;             // we've already got the whole object
+          }
 
-	set.add(fieldId);
+        set.add(fieldId);
       }
     else
       {
-	set = new HashSet<Short>();
+        set = new HashSet<Short>();
 
-	set.add(fieldId);
+        set.add(fieldId);
 
-	map.put(invid, set);
+        map.put(invid, set);
       }
   }
 
@@ -129,20 +129,20 @@ public class FieldBook {
 
     if (map.containsKey(invid))
       {
-	set = map.get(invid);
+        set = map.get(invid);
 
-	if (set == null)
-	  {
-	    return;		// we've already got the whole object
-	  }
+        if (set == null)
+          {
+            return;             // we've already got the whole object
+          }
 
-	set.addAll(fieldIds);
+        set.addAll(fieldIds);
       }
     else
       {
-	set = new HashSet<Short>(fieldIds);
+        set = new HashSet<Short>(fieldIds);
 
-	map.put(invid, set);
+        map.put(invid, set);
       }
   }
   
@@ -154,16 +154,16 @@ public class FieldBook {
   {
     for (Invid invid: book.map.keySet())
       {
-	Set<Short> set = book.map.get(invid);
+        Set<Short> set = book.map.get(invid);
 
-	if (set == null)
-	  {
-	    map.put(invid, null);
-	  }
-	else
-	  {
-	    add(invid, set);
-	  }
+        if (set == null)
+          {
+            map.put(invid, null);
+          }
+        else
+          {
+            add(invid, set);
+          }
       }
   }
 
@@ -194,14 +194,14 @@ public class FieldBook {
   {
     if (!map.containsKey(invid))
       {
-	return false;
+        return false;
       }
 
     Set<Short> set = map.get(invid);
 
     if (set == null)
       {
-	return true;
+        return true;
       }
 
     return set.contains(fieldId);
@@ -220,14 +220,14 @@ public class FieldBook {
   {
     if (!map.containsKey(invid))
       {
-	throw new IllegalArgumentException("No fields for invid " + invid);
+        throw new IllegalArgumentException("No fields for invid " + invid);
       }
 
     Set<Short> set = map.get(invid);
 
     if (set == null)
       {
-	return null;
+        return null;
       }
 
     return Collections.unmodifiableSet(set);

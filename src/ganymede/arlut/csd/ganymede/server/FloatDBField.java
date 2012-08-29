@@ -10,7 +10,7 @@
    Module By: John Knutson, johnk@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -198,7 +198,7 @@ public class FloatDBField extends DBField implements float_field {
   {
     if (isVector())
       {
-	throw new IllegalArgumentException("scalar accessor called on vector field");
+        throw new IllegalArgumentException("scalar accessor called on vector field");
       }
 
     return ((Double) value).doubleValue();
@@ -215,7 +215,7 @@ public class FloatDBField extends DBField implements float_field {
   {
     if (value == null)
       {
-	return "null";
+        return "null";
       }
 
     return Double.toString(this.value());
@@ -250,19 +250,19 @@ public class FloatDBField extends DBField implements float_field {
 
     if (!(orig instanceof FloatDBField))
       {
-	throw new IllegalArgumentException("bad field comparison");
+        throw new IllegalArgumentException("bad field comparison");
       }
 
     origN = (FloatDBField) orig;
 
     if (origN.value() != this.value())
       {
-	// "\tOld: {0,number}\n\tNew: {1,number}\n"
-	return ts.l("getDiffString.pattern", new Double(origN.value()), new Double(this.value()));
+        // "\tOld: {0,number}\n\tNew: {1,number}\n"
+        return ts.l("getDiffString.pattern", new Double(origN.value()), new Double(this.value()));
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -289,7 +289,7 @@ public class FloatDBField extends DBField implements float_field {
 
     if (!isEditable(true))
       {
-	throw new IllegalArgumentException("not applicable to a non-editable field/object");
+        throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
     eObj = (DBEditObject) owner;
@@ -314,7 +314,7 @@ public class FloatDBField extends DBField implements float_field {
 
     if (!isEditable(true))
       {
-	throw new IllegalArgumentException("not applicable to a non-editable field/object");
+        throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
     eObj = (DBEditObject) owner;
@@ -339,7 +339,7 @@ public class FloatDBField extends DBField implements float_field {
 
     if (!isEditable(true))
       {
-	throw new IllegalArgumentException("not applicable to a non-editable field/object");
+        throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
     eObj = (DBEditObject) owner;
@@ -369,36 +369,36 @@ public class FloatDBField extends DBField implements float_field {
 
     if (!verifyTypeMatch(o))
       {
-	// "Float Field Error"
-	// "Submitted value {0} is not a Double!  Major client error while trying to edit field {1} in object {2}."
-	return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-					  ts.l("verifyNewValue.type_error", o, getName(), owner.getLabel()));
+        // "Float Field Error"
+        // "Submitted value {0} is not a Double!  Major client error while trying to edit field {1} in object {2}."
+        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                                          ts.l("verifyNewValue.type_error", o, getName(), owner.getLabel()));
       }
 
     if (o == null)
       {
-	return eObj.verifyNewValue(this, null);  // explicit for FindBugs
+        return eObj.verifyNewValue(this, null);  // explicit for FindBugs
       }
 
     I = (Double) o;
 
     if (limited())
       {
-	if (getMinValue() > I.doubleValue())
-	  {
-	    // "Float Field Error"
-	    // "Submitted float {0} is out of range for field {1} in object {2}.  This field will not accept floats less than {3}."
-	    return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-					      ts.l("verifyNewValue.low_value_error", I, getName(), owner.getLabel(), new Double(getMinValue())));
-	  }
+        if (getMinValue() > I.doubleValue())
+          {
+            // "Float Field Error"
+            // "Submitted float {0} is out of range for field {1} in object {2}.  This field will not accept floats less than {3}."
+            return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                                              ts.l("verifyNewValue.low_value_error", I, getName(), owner.getLabel(), new Double(getMinValue())));
+          }
 
-	if (getMaxValue() < I.doubleValue())
-	  {
-	    // "Float Field Error"
-	    // "Submitted float {0} is out of range for field {1} in object {2}.  This field will not accept floats greater than {3}."
-	    return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-					      ts.l("verifyNewValue.high_value_error", I, getName(), owner.getLabel(), new Double(getMaxValue())));
-	  }
+        if (getMaxValue() < I.doubleValue())
+          {
+            // "Float Field Error"
+            // "Submitted float {0} is out of range for field {1} in object {2}.  This field will not accept floats greater than {3}."
+            return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                                              ts.l("verifyNewValue.high_value_error", I, getName(), owner.getLabel(), new Double(getMaxValue())));
+          }
       }
 
     // have our parent make the final ok on the value

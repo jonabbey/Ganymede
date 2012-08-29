@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -111,40 +111,40 @@ public class FieldInfo implements java.io.Serializable {
 
     try
       {
-	defined = field.isDefined();
-	editable = field.isEditable();
-	visible = field.isVisible();
-	
-	ID = field.getID();
+        defined = field.isDefined();
+        editable = field.isEditable();
+        visible = field.isVisible();
+        
+        ID = field.getID();
 
-	if (field instanceof PasswordDBField)
-	  {
-	    // n.b. getValueString() returns a description of what
-	    // types of password encodings are present in the password
-	    // field, but doesn't return any actual plain or hashtext
-	    //
-	    // getValueString() is actually not part of the db_field
-	    // interface, as it is a server-side only method, so we
-	    // have to cast.
+        if (field instanceof PasswordDBField)
+          {
+            // n.b. getValueString() returns a description of what
+            // types of password encodings are present in the password
+            // field, but doesn't return any actual plain or hashtext
+            //
+            // getValueString() is actually not part of the db_field
+            // interface, as it is a server-side only method, so we
+            // have to cast.
 
-	    value = ((PasswordDBField) field).getValueString();
-	  }
-	else if (!field.isVector())
-	  {
-	    value = field.getValue(); // can throw IllegalArgumentException on perms failure
-	  }
-	else
-	  {
-	    value = field.getValues();// can throw IllegalArgumentException on perms failure
-	  }
+            value = ((PasswordDBField) field).getValueString();
+          }
+        else if (!field.isVector())
+          {
+            value = field.getValue(); // can throw IllegalArgumentException on perms failure
+          }
+        else
+          {
+            value = field.getValues();// can throw IllegalArgumentException on perms failure
+          }
       }
     catch (GanyPermissionsException ex)
       {
-	throw ex;
+        throw ex;
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException(ex.getMessage());
+        throw new RuntimeException(ex.getMessage());
       }
   }
 

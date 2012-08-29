@@ -9,7 +9,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
 
    Copyright (C) 1996-2010
@@ -67,12 +67,12 @@ import arlut.csd.ganymede.rmi.Category;
 
 public class CatTreeNode extends arlut.csd.JTree.treeNode {
 
-  private Category category;	// remote reference
+  private Category category;    // remote reference
 
   /* -- */
 
   public CatTreeNode(treeNode parent, String text, Category category, treeNode insertAfter,
-		     boolean expandable, int openImage, int closedImage, treeMenu menu)
+                     boolean expandable, int openImage, int closedImage, treeMenu menu)
   {
     super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
     this.category = category;

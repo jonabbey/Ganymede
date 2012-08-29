@@ -9,7 +9,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -58,12 +58,12 @@ import arlut.csd.ganymede.rmi.BaseField;
 
 class FieldNode extends arlut.csd.JTree.treeNode {
 
-  private BaseField field;	// remote reference
+  private BaseField field;      // remote reference
 
   /* -- */
 
   FieldNode(treeNode parent, String text, BaseField field, treeNode insertAfter,
-	    boolean expandable, int openImage, int closedImage, treeMenu menu)
+            boolean expandable, int openImage, int closedImage, treeMenu menu)
   {
     super(parent, text, insertAfter, expandable, openImage, closedImage, menu);
     this.field = field;

@@ -9,7 +9,7 @@
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2009
@@ -147,32 +147,32 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
     
     try
       {
-	fieldIsEditable = field.isEditable();
+        fieldIsEditable = field.isEditable();
       }
     catch (Exception rx)
       {
-	gc.processExceptionRethrow(rx, "Could not call field.isEditable() in personaPanel: ");
+        gc.processExceptionRethrow(rx, "Could not call field.isEditable() in personaPanel: ");
       }
 
     if (editable && fieldIsEditable)
       {
-	// Create the button panel for the bottom
-	JPanel bottom = new JPanel(false);
+        // Create the button panel for the bottom
+        JPanel bottom = new JPanel(false);
 
-	// "Create"
-	add = new JButton(ts.l("init.create_button"));
-	add.setActionCommand("Create");
-	add.addActionListener(this);
+        // "Create"
+        add = new JButton(ts.l("init.create_button"));
+        add.setActionCommand("Create");
+        add.addActionListener(this);
 
-	// "Delete"
-	delete = new JButton(ts.l("init.delete_button"));
-	delete.setActionCommand("Delete");
-	delete.addActionListener(this);
+        // "Delete"
+        delete = new JButton(ts.l("init.delete_button"));
+        delete.setActionCommand("Delete");
+        delete.addActionListener(this);
 
-	bottom.add(add);
-	bottom.add(delete);
-	
-	add("South", bottom);
+        bottom.add(add);
+        bottom.add(delete);
+        
+        add("South", bottom);
       }
 
     // Create the middle, content pane
@@ -188,83 +188,83 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 
     try
       {
-	personas = field.getValues();
+        personas = field.getValues();
       }
     catch (Exception rx)
       {
-	gc.processExceptionRethrow(rx, "Could not get values for persona field: ");
+        gc.processExceptionRethrow(rx, "Could not get values for persona field: ");
       }
 
     total = personas.size();
 
     for (int i = 0; i< total; i++)
       {
-	personaContainer pc = null;
-	boolean thisOneEditable = false;
+        personaContainer pc = null;
+        boolean thisOneEditable = false;
 
-	try
-	  {
-	    thisOneEditable = editable && field.isEditable();
+        try
+          {
+            thisOneEditable = editable && field.isEditable();
 
-	    Invid thisInvid = (Invid)personas.elementAt(i);
+            Invid thisInvid = (Invid)personas.elementAt(i);
 
-	    if (thisOneEditable)
-	      {
-		ReturnVal rv = gc.handleReturnVal(gc.getSession().edit_db_object(thisInvid));
-		db_object ob = (db_object) rv.getObject();
+            if (thisOneEditable)
+              {
+                ReturnVal rv = gc.handleReturnVal(gc.getSession().edit_db_object(thisInvid));
+                db_object ob = (db_object) rv.getObject();
 
-		if (ob == null)
-		  {
-		    if (debug)
-		      {
-			System.err.println("Whoa, got a null object(edit), trying to go to non-editable, cover me.");
-		      }
-		    
-		    ReturnVal Vrv = gc.handleReturnVal(gc.getSession().view_db_object(thisInvid));
-		    ob = (db_object) Vrv.getObject();
-		    
-		    if (ob == null)
-		      {
-			System.err.println("That didn't work...its still not giving me anything back.  Giving up.");
-		      }
-		    else
-		      {
-			pc = new personaContainer(thisInvid, false, this, ob); //Now I know it is not editable
-		      }
-		  }
-		else
-		  {
-		    pc = new personaContainer(thisInvid, thisOneEditable, this, ob);
-		  }
-	      }
-	    else
-	      {
-		ReturnVal rv = gc.handleReturnVal(gc.getSession().view_db_object(thisInvid));
-		db_object ob = (db_object) rv.getObject();
+                if (ob == null)
+                  {
+                    if (debug)
+                      {
+                        System.err.println("Whoa, got a null object(edit), trying to go to non-editable, cover me.");
+                      }
+                    
+                    ReturnVal Vrv = gc.handleReturnVal(gc.getSession().view_db_object(thisInvid));
+                    ob = (db_object) Vrv.getObject();
+                    
+                    if (ob == null)
+                      {
+                        System.err.println("That didn't work...its still not giving me anything back.  Giving up.");
+                      }
+                    else
+                      {
+                        pc = new personaContainer(thisInvid, false, this, ob); //Now I know it is not editable
+                      }
+                  }
+                else
+                  {
+                    pc = new personaContainer(thisInvid, thisOneEditable, this, ob);
+                  }
+              }
+            else
+              {
+                ReturnVal rv = gc.handleReturnVal(gc.getSession().view_db_object(thisInvid));
+                db_object ob = (db_object) rv.getObject();
 
-		if (ob == null)
-		  {
-		    System.err.println("Whoa, got a null object(view), skipping.");
-		  }
-		else
-		  {
-		    pc = new personaContainer(thisInvid, thisOneEditable, this, ob);
-		  }
-	      }		
-      	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx);
-	  }
-	
-	panels.addElement(pc);
+                if (ob == null)
+                  {
+                    System.err.println("Whoa, got a null object(view), skipping.");
+                  }
+                else
+                  {
+                    pc = new personaContainer(thisInvid, thisOneEditable, this, ob);
+                  }
+              }         
+          }
+        catch (Exception rx)
+          {
+            gc.processExceptionRethrow(rx);
+          }
+        
+        panels.addElement(pc);
 
-	// We need to have a default name for tabs we create, even
-	// though the personaContainer will forcibly set the title to
-	// the persona object's actual title upon loading.
+        // We need to have a default name for tabs we create, even
+        // though the personaContainer will forcibly set the title to
+        // the persona object's actual title upon loading.
 
-	// "Persona {0,number,#}"
-	middle.addTab(ts.l("init.default_tab_title", Integer.valueOf(i)), pc);
+        // "Persona {0,number,#}"
+        middle.addTab(ts.l("init.default_tab_title", Integer.valueOf(i)), pc);
 
         SwingUtilities.invokeLater(pc);
       }
@@ -275,7 +275,7 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 
     if (total > 0)
       {
-	middle.setSelectedIndex(0);
+        middle.setSelectedIndex(0);
       }
   }
 
@@ -287,196 +287,196 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 
     if (debug)
       {
-	System.err.println(e.getActionCommand());
+        System.err.println(e.getActionCommand());
       }
 
     if (e.getActionCommand().equals("Create"))
       {
-	gc.setWaitCursor();
-	int index = middle.getTabCount();
-	// Make sure the default owner is chosen
- 	    
-	try
-	  {
-	    if (!fp.getgclient().defaultOwnerChosen())
-	      {
-		fp.getgclient().chooseDefaultOwner(false);
-	      }
-	    
-	    // Create the object
-	    ReturnVal rv = fp.getgclient().handleReturnVal(fp.getgclient().getSession().create_db_object(SchemaConstants.PersonaBase));
-	    db_object newObject = (db_object) rv.getObject();
+        gc.setWaitCursor();
+        int index = middle.getTabCount();
+        // Make sure the default owner is chosen
+            
+        try
+          {
+            if (!fp.getgclient().defaultOwnerChosen())
+              {
+                fp.getgclient().chooseDefaultOwner(false);
+              }
+            
+            // Create the object
+            ReturnVal rv = fp.getgclient().handleReturnVal(fp.getgclient().getSession().create_db_object(SchemaConstants.PersonaBase));
+            db_object newObject = (db_object) rv.getObject();
 
-	    if (newObject == null)
-	      {
-		// "You don''t have permission to create objects of this type."
-		gc.showErrorMessage(ts.l("actionPerformed.null_object_created"));
-		add.setEnabled(false);
-		return;
-	      }
+            if (newObject == null)
+              {
+                // "You don''t have permission to create objects of this type."
+                gc.showErrorMessage(ts.l("actionPerformed.null_object_created"));
+                add.setEnabled(false);
+                return;
+              }
 
-	    Invid user = fp.getObjectInvid();
+            Invid user = fp.getObjectInvid();
 
-	    gc.somethingChanged();
-	    
-	    // Tell the user about the persona
+            gc.somethingChanged();
+            
+            // Tell the user about the persona
 
-	    fp.getObject().getField(SchemaConstants.UserAdminPersonae).addElement(newObject.getInvid());
+            fp.getObject().getField(SchemaConstants.UserAdminPersonae).addElement(newObject.getInvid());
 
-	    // Tell the persona about the user
+            // Tell the persona about the user
 
-	    newObject.getField(SchemaConstants.PersonaAssocUser).setValue(user);
-	    
-	    personaContainer pc = new personaContainer(newObject.getInvid(), editable, this, newObject);
+            newObject.getField(SchemaConstants.PersonaAssocUser).setValue(user);
+            
+            personaContainer pc = new personaContainer(newObject.getInvid(), editable, this, newObject);
 
-	    // "New Persona {0,number,#}"
-	    middle.addTab(ts.l("actionPerformed.new_tab_title", Integer.valueOf(index)), pc);
+            // "New Persona {0,number,#}"
+            middle.addTab(ts.l("actionPerformed.new_tab_title", Integer.valueOf(index)), pc);
 
-	    panels.addElement(pc);
+            panels.addElement(pc);
 
-	    pc.run();
+            pc.run();
 
-	    //Thread t = new Thread(pc);
-	    //t.start();
+            //Thread t = new Thread(pc);
+            //t.start();
 
-	    pc.waitForLoad();
-	    
-	    if (debug)
-	      {
-		System.err.println("Showing: " + index);
-	      }
-	    
-	    middle.setSelectedIndex(index);
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx, "Could not create new persona: ");
-	  }
-	finally
-	  {
-	    gc.setNormalCursor();
-	  }
+            pc.waitForLoad();
+            
+            if (debug)
+              {
+                System.err.println("Showing: " + index);
+              }
+            
+            middle.setSelectedIndex(index);
+          }
+        catch (Exception rx)
+          {
+            gc.processExceptionRethrow(rx, "Could not create new persona: ");
+          }
+        finally
+          {
+            gc.setNormalCursor();
+          }
       }
     else if (e.getActionCommand().equals("Delete"))
       {
-	gc.setWaitCursor();
-	boolean removed = false;
-	boolean deleted = false;
+        gc.setWaitCursor();
+        boolean removed = false;
+        boolean deleted = false;
 
-	personaContainer pc = (personaContainer)panels.elementAt(middle.getSelectedIndex());
+        personaContainer pc = (personaContainer)panels.elementAt(middle.getSelectedIndex());
 
-	Invid invid = pc.getInvid();
+        Invid invid = pc.getInvid();
 
-	if (invid == null) 
-	  {
-	    throw new NullPointerException("invid is null");
-	  }
+        if (invid == null) 
+          {
+            throw new NullPointerException("invid is null");
+          }
 
-	// "Confirm Deletion"
-	// "Are you sure you want to delete persona {0}?"
-	StringDialog d = new StringDialog(gc,
-					  ts.l("actionPerformed.deletion_title"),
-					  ts.l("actionPerformed.deletion_mesg", middle.getTitleAt(middle.getSelectedIndex())),
-					  true,
-					  StandardDialog.ModalityType.DOCUMENT_MODAL);
+        // "Confirm Deletion"
+        // "Are you sure you want to delete persona {0}?"
+        StringDialog d = new StringDialog(gc,
+                                          ts.l("actionPerformed.deletion_title"),
+                                          ts.l("actionPerformed.deletion_mesg", middle.getTitleAt(middle.getSelectedIndex())),
+                                          true,
+                                          StandardDialog.ModalityType.DOCUMENT_MODAL);
 
-	gc.setNormalCursor();
+        gc.setNormalCursor();
 
-	if (d.showDialog() == null)
-	  {
-	    if (debug)
-	      {
-		System.err.println("Cancelled.");
-	      }
+        if (d.showDialog() == null)
+          {
+            if (debug)
+              {
+                System.err.println("Cancelled.");
+              }
 
-	    return;
-	  }
+            return;
+          }
 
-	gc.somethingChanged();
+        gc.somethingChanged();
 
-	if (debug)
-	  {
-	    System.err.println("invid to delete: " + invid);
-	  }
-		
-	gc.setWaitCursor();
+        if (debug)
+          {
+            System.err.println("invid to delete: " + invid);
+          }
+                
+        gc.setWaitCursor();
 
-	try
-	  {
-	    retVal = fp.getObject().getField(SchemaConstants.UserAdminPersonae).deleteElement(invid);
+        try
+          {
+            retVal = fp.getObject().getField(SchemaConstants.UserAdminPersonae).deleteElement(invid);
 
-	    removed = (retVal == null) ? true : retVal.didSucceed();
+            removed = (retVal == null) ? true : retVal.didSucceed();
 
-	    if (retVal != null)
-	      {
-		gc.handleReturnVal(retVal);
-	      }
+            if (retVal != null)
+              {
+                gc.handleReturnVal(retVal);
+              }
 
-	    if (removed)
-	      {
-		if (debug)
-		  {
-		    System.err.println("removed the element from the field ok");
-		  }
+            if (removed)
+              {
+                if (debug)
+                  {
+                    System.err.println("removed the element from the field ok");
+                  }
 
-		retVal = fp.getgclient().getSession().remove_db_object(invid);
+                retVal = fp.getgclient().getSession().remove_db_object(invid);
 
-		deleted = (retVal == null) ? true : retVal.didSucceed();
-		
-		if (retVal != null)
-		  {
-		    gc.handleReturnVal(retVal);
-		  }
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    System.err.println("could not remove the element from the field");
-		  }
-	      }
+                deleted = (retVal == null) ? true : retVal.didSucceed();
+                
+                if (retVal != null)
+                  {
+                    gc.handleReturnVal(retVal);
+                  }
+              }
+            else
+              {
+                if (debug)
+                  {
+                    System.err.println("could not remove the element from the field");
+                  }
+              }
 
-	    if (deleted)
-	      {
-		// "Deleted the object ok."
-		gc.setStatus(ts.l("actionPerformed.deleted_ok"));
-	      }
-	    else
-	      {
-		// "Could not delete the object."
-		gc.setStatus(ts.l("actionPerformed.deleted_bad"));
-	      }
-	  }
-	catch (Exception rx)
-	  {
-	    // "Could not delete persona"
-	    gc.processExceptionRethrow(rx, ts.l("actionPerformed.deletion_exception"));
-	  }
+            if (deleted)
+              {
+                // "Deleted the object ok."
+                gc.setStatus(ts.l("actionPerformed.deleted_ok"));
+              }
+            else
+              {
+                // "Could not delete the object."
+                gc.setStatus(ts.l("actionPerformed.deleted_bad"));
+              }
+          }
+        catch (Exception rx)
+          {
+            // "Could not delete persona"
+            gc.processExceptionRethrow(rx, ts.l("actionPerformed.deletion_exception"));
+          }
 
-	if (deleted && removed)
-	  {
-	    int x = middle.getSelectedIndex();
-	    if (debug)
-	      {
-		System.err.println("Selected number: " + x);
-		//		System.err.println("Deleting number: " + pc.index);
-	      }
+        if (deleted && removed)
+          {
+            int x = middle.getSelectedIndex();
+            if (debug)
+              {
+                System.err.println("Selected number: " + x);
+                //              System.err.println("Deleting number: " + pc.index);
+              }
 
-	    middle.removeTabAt(x);
-	    panels.removeElementAt(x);
+            middle.removeTabAt(x);
+            panels.removeElementAt(x);
 
-	    //middle.invalidate();
-	    //validate();
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.err.println("Could not fully remove the object.");
-	      }
-	  }
-	
-	gc.setNormalCursor();
+            //middle.invalidate();
+            //validate();
+          }
+        else
+          {
+            if (debug)
+              {
+                System.err.println("Could not fully remove the object.");
+              }
+          }
+        
+        gc.setNormalCursor();
       }
   }
 
@@ -485,12 +485,12 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
     personaContainer pc = (personaContainer)middle.getSelectedComponent();
     if (pc == null)
       {
-	return;
+        return;
       }
 
     if (delete != null)
       {
-	delete.setEnabled(pc.isEditable());
+        delete.setEnabled(pc.isEditable());
       }
   }
 
@@ -506,14 +506,14 @@ public class personaPanel extends JPanel implements ActionListener, ChangeListen
 
     if (personas != null)
       {
-	personas.clear();
-	personas = null;
+        personas.clear();
+        personas = null;
       }
 
     if (panels != null)
       {
-	panels.clear();
-	panels = null;
+        panels.clear();
+        panels = null;
       }
 
     empty = null;

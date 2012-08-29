@@ -16,7 +16,7 @@
    Module By: Erik Grostic and Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2011
@@ -190,7 +190,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
   JButton 
     OkButton = new JButton(ts.l("global.submit_button")), // "Submit"
     CancelButton = new JButton(ts.l("global.cancel_button")), // "Cancel"
-    addButton = new JButton(ts.l("global.add_choices_button")),	// "Add Filter"
+    addButton = new JButton(ts.l("global.add_choices_button")), // "Add Filter"
     removeButton = new JButton(ts.l("global.remove_choices_button")); // "Remove Filter"
 
   GridBagLayout gbl = new GridBagLayout();
@@ -219,8 +219,8 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
   Vector
     fieldChoices = new Vector(), // A vector of strings for the field choice menus in QueryRow
-    Rows = new Vector(),	// store the QueryRows
-    fields;			// FieldTemplates for the selectedBase
+    Rows = new Vector(),        // store the QueryRows
+    fields;                     // FieldTemplates for the selectedBase
 
   BaseDump selectedBase = null;
 
@@ -253,7 +253,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
    */
 
   public querybox (BaseDump defaultBase, gclient gc,
-		   Frame parent, String DialogTitle)
+                   Frame parent, String DialogTitle)
   {
     super(parent, DialogTitle, false); // the boolean value is to make the dialog non-modal
 
@@ -294,13 +294,13 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
     if (glogin.isRunningOnMac())
       {
-	Choice_Buttons.add(CancelButton);
-	Choice_Buttons.add(OkButton);
+        Choice_Buttons.add(CancelButton);
+        Choice_Buttons.add(OkButton);
       }
     else
       {
-	Choice_Buttons.add(OkButton);
-	Choice_Buttons.add(CancelButton);
+        Choice_Buttons.add(OkButton);
+        Choice_Buttons.add(CancelButton);
       }
 
     editBox.addItemListener(this);
@@ -337,24 +337,24 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
       
     while (en.hasMoreElements())
       {
-	BaseDump key = (BaseDump) en.nextElement();
+        BaseDump key = (BaseDump) en.nextElement();
 
-	// we want to ignore embedded objects -- for now
-	    
-	if (key.isEmbedded())
-	  {
-	    // get a base that works...this embedded would cause
-	    // problems [null pointer exceptions, that kind of thing]
-		
-	    continue;
-	  }
-	else
-	  {
-	    String choiceToAdd = key.getName();
+        // we want to ignore embedded objects -- for now
+            
+        if (key.isEmbedded())
+          {
+            // get a base that works...this embedded would cause
+            // problems [null pointer exceptions, that kind of thing]
+                
+            continue;
+          }
+        else
+          {
+            String choiceToAdd = key.getName();
 
-	    baseNames.addElement(choiceToAdd);
-	    mapNameToBase(choiceToAdd, key);
-	  }
+            baseNames.addElement(choiceToAdd);
+            mapNameToBase(choiceToAdd, key);
+          }
       }
 
     // load baseChoice combo box.
@@ -365,7 +365,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
     
     for (int i = 0; i < baseNames.size(); i++)
       {
-	baseChoice.addItem((String) baseNames.elementAt(i));
+        baseChoice.addItem((String) baseNames.elementAt(i));
       }
       
     // set the selected base in the baseChoice before we add the item
@@ -373,28 +373,28 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
     if (defaultBase == null)
       {
-	String defaultBaseName = gclient.prefs.get(OBJECT_CHOICE, null);
+        String defaultBaseName = gclient.prefs.get(OBJECT_CHOICE, null);
 
-	if (defaultBaseName != null)
-	  {
-	    // we had a default object query choice, make sure it's still valid
+        if (defaultBaseName != null)
+          {
+            // we had a default object query choice, make sure it's still valid
 
-	    for (int i = 0; i < baseNames.size(); i++)
-	      {
-		if (defaultBaseName.equals(baseNames.elementAt(i)))
-		  {
-		    defaultBase = getBaseFromName(defaultBaseName);
-		    break;
-		  }
-	      }
-	  }
+            for (int i = 0; i < baseNames.size(); i++)
+              {
+                if (defaultBaseName.equals(baseNames.elementAt(i)))
+                  {
+                    defaultBase = getBaseFromName(defaultBaseName);
+                    break;
+                  }
+              }
+          }
 
-	if (defaultBase == null)
-	  {
-	    // no default given. take whatever the choice control picked
-	
-	    defaultBase = getBaseFromName((String) baseChoice.getSelectedItem());
-	  }
+        if (defaultBase == null)
+          {
+            // no default given. take whatever the choice control picked
+        
+            defaultBase = getBaseFromName((String) baseChoice.getSelectedItem());
+          }
       }
 
     baseChoice.setSelectedItem(defaultBase.getName());
@@ -468,8 +468,8 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
     if (!gc.sizer.restoreSize(this))
       {
-	setSize(800,400);
-	setLocationRelativeTo(parent);
+        setSize(800,400);
+        setLocationRelativeTo(parent);
       }
   }
 
@@ -487,7 +487,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
   public querybox (gclient gc,
                    Frame parent,
-		   String dialogTitle) 
+                   String dialogTitle) 
   {
     this(null, gc, parent, dialogTitle);
   } 
@@ -519,103 +519,103 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
     synchronized (fieldChoices)
       {
-	fieldChoices.removeAllElements();
+        fieldChoices.removeAllElements();
 
-	for (int i=0; fields != null && (i < fields.size()); i++) 
-	  {
-	    template = (FieldTemplate) fields.elementAt(i);
+        for (int i=0; fields != null && (i < fields.size()); i++) 
+          {
+            template = (FieldTemplate) fields.elementAt(i);
 
-	    // ignore containing objects and the like...
-	
-	    if ((selectedBase.isEmbedded() && template.getID() == SchemaConstants.OwnerListField) ||
-		template.getID() == SchemaConstants.BackLinksField)
-	      {
-		continue;
-	      }
+            // ignore containing objects and the like...
+        
+            if ((selectedBase.isEmbedded() && template.getID() == SchemaConstants.OwnerListField) ||
+                template.getID() == SchemaConstants.BackLinksField)
+              {
+                continue;
+              }
 
-	    String name = template.getName();
+            String name = template.getName();
 
-	    if (template.isEditInPlace())
-	      {
-		// We're an edit in place.. we want to recurse down to the
-		// bottom of this edit-in-place tree, and add all of the
-		// nodes to our Embedded vector.
-		//
-		// The recursive method takes a Vector of
-		// FieldTemplates as its first parameter.  We'll add
-		// to and remove from EIPfields so that we can cheaply
-		// re-use the Vector.
+            if (template.isEditInPlace())
+              {
+                // We're an edit in place.. we want to recurse down to the
+                // bottom of this edit-in-place tree, and add all of the
+                // nodes to our Embedded vector.
+                //
+                // The recursive method takes a Vector of
+                // FieldTemplates as its first parameter.  We'll add
+                // to and remove from EIPfields so that we can cheaply
+                // re-use the Vector.
 
-		EIPfields.addElement(template);
-		getEmbedded(EIPfields, null, Short.valueOf(selectedBase.getTypeID()), Embedded);
-		EIPfields.removeElement(template);
+                EIPfields.addElement(template);
+                getEmbedded(EIPfields, null, Short.valueOf(selectedBase.getTypeID()), Embedded);
+                EIPfields.removeElement(template);
 
-		if (!Embedded.isEmpty())
-		  {
-		    for (int j = 0; (j < Embedded.size()); j++)
-		      {
-			String embedName = (String) Embedded.elementAt(j);
+                if (!Embedded.isEmpty())
+                  {
+                    for (int j = 0; (j < Embedded.size()); j++)
+                      {
+                        String embedName = (String) Embedded.elementAt(j);
 
-			// Ok, let's do our string processing for our field name,
-			// once and for all by removing the slashes and saving
-			// the result. Erik again.
+                        // Ok, let's do our string processing for our field name,
+                        // once and for all by removing the slashes and saving
+                        // the result. Erik again.
 
-			String noSlash = embedName.substring(embedName.lastIndexOf("/") + 1,
-							     embedName.length());
+                        String noSlash = embedName.substring(embedName.lastIndexOf("/") + 1,
+                                                             embedName.length());
 
-			// Add the slash-less name to the name hash, with the key
-			// being the slash filled name
+                        // Add the slash-less name to the name hash, with the key
+                        // being the slash filled name
 
-			mapEmbeddedToField(embedName, noSlash);
+                        mapEmbeddedToField(embedName, noSlash);
 
-			// and finally add to fieldChoices
+                        // and finally add to fieldChoices
 
-			fieldChoices.addElement(embedName);
-		      }
+                        fieldChoices.addElement(embedName);
+                      }
 
-		    // and we're done with Embedded.  Clear it out.
+                    // and we're done with Embedded.  Clear it out.
 
-		    Embedded.removeAllElements();
-		  }
-	      }
-	    else
-	      {
-		// Keep a shortcut for our later fieldname parsing
-		// This was Erik's idea.. 
-	    
-		mapEmbeddedToField(name, name);
+                    Embedded.removeAllElements();
+                  }
+              }
+            else
+              {
+                // Keep a shortcut for our later fieldname parsing
+                // This was Erik's idea.. 
+            
+                mapEmbeddedToField(name, name);
 
-		// And keep a map from the elaborated field name to
-		// the field template.
-	    
-		mapNameToTemplate(name, template);
-	    
-		// and to the base
-	    
-		mapNameToId(name, Short.valueOf(selectedBase.getTypeID()));
+                // And keep a map from the elaborated field name to
+                // the field template.
+            
+                mapNameToTemplate(name, template);
+            
+                // and to the base
+            
+                mapNameToId(name, Short.valueOf(selectedBase.getTypeID()));
 
-		// and finally add to fieldChoices
-		fieldChoices.addElement(name);
-	      }
-	  }
+                // and finally add to fieldChoices
+                fieldChoices.addElement(name);
+              }
+          }
     
-	// If we wound up with any embedded (edit-in-place) fields from
-	// contained objects, add those fields to our embedded map.
-	//
-	// Note that we don't try to get fancy with where these extra
-	// field possibilities are added in the fieldChoices vector at
-	// this point.  We'll sort them, after.
+        // If we wound up with any embedded (edit-in-place) fields from
+        // contained objects, add those fields to our embedded map.
+        //
+        // Note that we don't try to get fancy with where these extra
+        // field possibilities are added in the fieldChoices vector at
+        // this point.  We'll sort them, after.
 
-	// sort fieldChoices
+        // sort fieldChoices
 
-        //	gc.sortStringVector(fieldChoices);
+        //      gc.sortStringVector(fieldChoices);
 
-	// and reset the options panel checkboxes.
+        // and reset the options panel checkboxes.
 
-	if (fieldsPanel != null)
-	  {
-	    fieldsPanel.resetBoxes();
-	  }
+        if (fieldsPanel != null)
+          {
+            fieldsPanel.resetBoxes();
+          }
       }
   }
 
@@ -643,7 +643,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
    */
   
   private void getEmbedded(Vector fields, String basePrefix, 
-			   Short lowestBase, Vector Embedded)
+                           Short lowestBase, Vector Embedded)
   {
     FieldTemplate tempField;
     String myName;
@@ -657,57 +657,57 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
     
     for (int j=0; fields != null && (j < fields.size()); j++)
       { 
-	tempField = (FieldTemplate) fields.elementAt(j);
+        tempField = (FieldTemplate) fields.elementAt(j);
 
-	// ignore containing objects and the like...
+        // ignore containing objects and the like...
 
-	if (tempField.getID() == SchemaConstants.OwnerListField ||
-	    tempField.getID() == SchemaConstants.BackLinksField)
-	  {
-	    continue;
-	  }
+        if (tempField.getID() == SchemaConstants.OwnerListField ||
+            tempField.getID() == SchemaConstants.BackLinksField)
+          {
+            continue;
+          }
 
-	if (basePrefix != null)
-	  {
-	    myName = basePrefix + "/" + tempField.getName();  // slap on the prefix
-	  }
-	else
-	  {
-	    myName = tempField.getName();
-	  }
+        if (basePrefix != null)
+          {
+            myName = basePrefix + "/" + tempField.getName();  // slap on the prefix
+          }
+        else
+          {
+            myName = tempField.getName();
+          }
 
-	// save the embedded information in our Embedded vector
+        // save the embedded information in our Embedded vector
 
-	Embedded.addElement(myName);
+        Embedded.addElement(myName);
 
-	mapNameToTemplate(myName, tempField);
+        mapNameToTemplate(myName, tempField);
 
-	// Also, save the information on the target base
-	// in a hashtable
+        // Also, save the information on the target base
+        // in a hashtable
 
-	// the ID will be used in creating the query for the 
-	// edit-in-place
+        // the ID will be used in creating the query for the 
+        // edit-in-place
 
-	mapNameToId(myName, lowestBase);
+        mapNameToId(myName, lowestBase);
 
-	if (tempField.isEditInPlace())
-	  {
-	    // we've got an edit-in-place invid field.  if it is
-	    // constrained to point to a specific type, go ahead and
-	    // recurse down to look at its children
+        if (tempField.isEditInPlace())
+          {
+            // we've got an edit-in-place invid field.  if it is
+            // constrained to point to a specific type, go ahead and
+            // recurse down to look at its children
 
-	    tempID = tempField.getTargetBase();
+            tempID = tempField.getTargetBase();
 
-	    if (tempID >= 0)
-	      {
-		tempIDobj = Short.valueOf(tempID);
+            if (tempID >= 0)
+              {
+                tempIDobj = Short.valueOf(tempID);
 
-		// process embedded fields for target
+                // process embedded fields for target
 
-		getEmbedded(gc.getTemplateVector(tempID), 
-			    myName, tempIDobj, Embedded);
-	      }
-	  }
+                getEmbedded(gc.getTemplateVector(tempID), 
+                            myName, tempIDobj, Embedded);
+              }
+          }
       }
   }
 
@@ -736,23 +736,23 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
     if (showAllItems)
       {
-	return new Query((String)baseChoice.getSelectedItem(), null, editOnly);
+        return new Query((String)baseChoice.getSelectedItem(), null, editOnly);
       }
 
     qNodes = new Vector();
 
     for (int i = 0; i < Rows.size(); i++)
       {
-	row = (QueryRow) Rows.elementAt(i);
+        row = (QueryRow) Rows.elementAt(i);
 
-	qNodes.addElement(row.getQueryNode());
+        qNodes.addElement(row.getQueryNode());
       }
 
     myNode = (QueryNode) qNodes.elementAt(0);
 
     for (int i = 1; i < qNodes.size(); i++)
       {
-	myNode = new QueryAndNode(myNode, (QueryNode) qNodes.elementAt(i));
+        myNode = new QueryAndNode(myNode, (QueryNode) qNodes.elementAt(i));
       }
 
     result = new Query(selectedBase.getName(), myNode, editOnly);
@@ -780,20 +780,20 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
     if (fieldsPanel != null)
       {
-	fieldsToReturn = fieldsPanel.getReturnFields();
+        fieldsToReturn = fieldsPanel.getReturnFields();
       }
     
     if (fieldsToReturn == null)
       {
-	return someQuery;
+        return someQuery;
       }
 
     for (int i = 0; i < fieldsToReturn.size(); i++)
       {
-	tempString = (String) fieldsToReturn.elementAt(i);
-	tempField = getTemplateFromName(tempString);
-	
-	someQuery.addField(tempField.getID());
+        tempString = (String) fieldsToReturn.elementAt(i);
+        tempField = getTemplateFromName(tempString);
+        
+        someQuery.addField(tempField.getID());
       }
 
     return someQuery;
@@ -812,61 +812,61 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
   {
     if (e.getSource() == OkButton) 
       {
-	query = createQuery();
-	query = setFields(query);
-	query.setFiltered(true); // filter against the owner list filters
+        query = createQuery();
+        query = setFields(query);
+        query.setFiltered(true); // filter against the owner list filters
 
-	setVisible(false);	// close down
-	doQuery();
+        setVisible(false);      // close down
+        doQuery();
       } 
     
     if (e.getSource() == CancelButton)
       {
-	if (debug)
-	  {
-	    System.out.println("Cancel was pushed");
-	  }
+        if (debug)
+          {
+            System.out.println("Cancel was pushed");
+          }
 
-	query = null;
+        query = null;
 
-	setVisible(false);
+        setVisible(false);
       } 
 
     if (e.getSource() == addButton)
       {
-	addRow();
-	// If delete button is disabled b/c there's only one row,
-	// enable it 'cause there is now something to delete.
-	if (!removeButton.isEnabled()) {
-	  removeButton.setEnabled(true);
-	}
+        addRow();
+        // If delete button is disabled b/c there's only one row,
+        // enable it 'cause there is now something to delete.
+        if (!removeButton.isEnabled()) {
+          removeButton.setEnabled(true);
+        }
       }
     
     if (e.getSource() == removeButton)
       {
-	if (Rows.size() <= 1)
-	  {
-	    // need some sort of gui notify here
-	    System.out.println("Error: cannot remove any more rows");
-	  }  
-	else
-	  {
-	    removeRow();
-	    // If only one row left then disable delete button
-	    if (Rows.size() <= 1) {
-	      removeButton.setEnabled(false);
-	    }
-	  }
+        if (Rows.size() <= 1)
+          {
+            // need some sort of gui notify here
+            System.out.println("Error: cannot remove any more rows");
+          }  
+        else
+          {
+            removeRow();
+            // If only one row left then disable delete button
+            if (Rows.size() <= 1) {
+              removeButton.setEnabled(false);
+            }
+          }
       }
 
     // if the user hit enter in one of the operand components that we have
     // registered ourselves for, submit the query
 
     if (e.getSource() instanceof JstringField ||
-	e.getSource() instanceof JnumberField ||
-	e.getSource() instanceof JfloatField)
+        e.getSource() instanceof JnumberField ||
+        e.getSource() instanceof JfloatField)
       {
-	OkButton.doClick();
+        OkButton.doClick();
       }
   }
 
@@ -874,57 +874,57 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
   {
     if (query == null)
       {
-	return;
+        return;
       }
 
     Thread t = new Thread(new Runnable() {
       public void run() {
 
-	final Runnable runnableKey = this;
+        final Runnable runnableKey = this;
 
-	EventQueue.invokeLater(new Runnable() {
-	  public void run() {
-	    gc.wp.addWaitWindow(runnableKey);
-	  }
-	});
+        EventQueue.invokeLater(new Runnable() {
+          public void run() {
+            gc.wp.addWaitWindow(runnableKey);
+          }
+        });
 
-	DumpResult buffer = null;
-		
-	try
-	  {
-	    try
-	      {
-		buffer = gc.session.dump(query);
-	      }
-	    catch (Exception ex)
-	      {
-		gc.processExceptionRethrow(ex);
-	      }
-	    catch (Error ex)
-	      {
-		// "Could not complete query.  Possible memory exhaustion problem.\n\n{0}"
-		new JErrorDialog(gc,
-				 ts.l("doQuery.error_caught",
-				      ex.getMessage()), StandardDialog.ModalityType.DOCUMENT_MODAL);
-		throw ex;
-	      }
-	    
-	    final DumpResult bufferRef = buffer;
+        DumpResult buffer = null;
+                
+        try
+          {
+            try
+              {
+                buffer = gc.session.dump(query);
+              }
+            catch (Exception ex)
+              {
+                gc.processExceptionRethrow(ex);
+              }
+            catch (Error ex)
+              {
+                // "Could not complete query.  Possible memory exhaustion problem.\n\n{0}"
+                new JErrorDialog(gc,
+                                 ts.l("doQuery.error_caught",
+                                      ex.getMessage()), StandardDialog.ModalityType.DOCUMENT_MODAL);
+                throw ex;
+              }
+            
+            final DumpResult bufferRef = buffer;
 
-	    EventQueue.invokeLater(new Runnable() {
-	      public void run() {
-		gc.wp.addTableWindow(gc.session, query, bufferRef);
-	      }
-	    });
-	  }
-	finally
-	  {
-	    EventQueue.invokeLater(new Runnable() {
-	      public void run() {
-		gc.wp.removeWaitWindow(runnableKey);
-	      }
-	    });
-	  }
+            EventQueue.invokeLater(new Runnable() {
+              public void run() {
+                gc.wp.addTableWindow(gc.session, query, bufferRef);
+              }
+            });
+          }
+        finally
+          {
+            EventQueue.invokeLater(new Runnable() {
+              public void run() {
+                gc.wp.removeWaitWindow(runnableKey);
+              }
+            });
+          }
       }});
 
     t.setPriority(Thread.NORM_PRIORITY);
@@ -959,56 +959,56 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
     if (e.getSource() == editBox)
       {
-	this.editOnly = editBox.isSelected();
+        this.editOnly = editBox.isSelected();
 
-	if (debug)
-	  {
-	    System.out.println("Edit Box Clicked: " + editOnly);
-	  }
+        if (debug)
+          {
+            System.out.println("Edit Box Clicked: " + editOnly);
+          }
       }
 
     else if (e.getSource() == allBox)
       {
-	this.showAllItems = allBox.isSelected();
+        this.showAllItems = allBox.isSelected();
 
-	if (debug)
-	  {
-	    System.out.println("Show all items is selected: " + allBox.isSelected());
-	  }
+        if (debug)
+          {
+            System.out.println("Show all items is selected: " + allBox.isSelected());
+          }
 
-	if (showAllItems)
-	  {
-	    if (debug)
-	      {
-		System.out.println("Showing blank");
-	      }
+        if (showAllItems)
+          {
+            if (debug)
+              {
+                System.out.println("Showing blank");
+              }
 
-	    card_layout.show(card_panel, "blank");
-	    query_Buttons.setVisible(false);
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.out.println("Showing main.");
-	      }
+            card_layout.show(card_panel, "blank");
+            query_Buttons.setVisible(false);
+          }
+        else
+          {
+            if (debug)
+              {
+                System.out.println("Showing main.");
+              }
 
-	    card_layout.show(card_panel, "main");
-	    query_Buttons.setVisible(true);
-	  }
-	getContentPane().invalidate();
-	getContentPane().validate();
+            card_layout.show(card_panel, "main");
+            query_Buttons.setVisible(true);
+          }
+        getContentPane().invalidate();
+        getContentPane().validate();
       }
     else if (e.getSource() == baseChoice)
       {
-	if (debug)
-	  {
-	    System.out.println("Base selected");
-	  }
+        if (debug)
+          {
+            System.out.println("Base selected");
+          }
 
-	String selectedBaseName = (String) baseChoice.getSelectedItem();
+        String selectedBaseName = (String) baseChoice.getSelectedItem();
 
-	selectBase(getBaseFromName(selectedBaseName));
+        selectBase(getBaseFromName(selectedBaseName));
       }
   }
 
@@ -1021,12 +1021,12 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
   {
     if (base == null)
       {
-	throw new IllegalArgumentException();
+        throw new IllegalArgumentException();
       }
 
     if (selectedBase == base)
       {
-	return;
+        return;
       }
 
     selectedBase = base;
@@ -1041,7 +1041,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
     
     while (Rows.size() > 0)
       {
-	removeRow();
+        removeRow();
       }
     
     addRow();
@@ -1082,7 +1082,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
   {
     if (id != null)
       {
-	baseIDHash.put(name, id);
+        baseIDHash.put(name, id);
       }
   }
 
@@ -1116,13 +1116,13 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
     
     if (fields != null)
       {
-	fieldHash.clear();
+        fieldHash.clear();
 
-	for (int i = 0; i < fields.size(); i++)
-	  {
-	    template = (FieldTemplate) fields.elementAt(i);
-	    mapNameToTemplate(template.getName(), template);
-	  }
+        for (int i = 0; i < fields.size(); i++)
+          {
+            template = (FieldTemplate) fields.elementAt(i);
+            mapNameToTemplate(template.getName(), template);
+          }
       }
   }
 
@@ -1238,29 +1238,29 @@ class QueryRow implements ItemListener {
     start_with = ts.l("global.start_with"), // "Start With"
     end_with = ts.l("global.end_with"), // "End With"
     contain = ts.l("global.contain"), // "Contain"
-    contain_matching = ts.l("global.contain_matching"),	// "Contain Matching"
+    contain_matching = ts.l("global.contain_matching"), // "Contain Matching"
     contain_matching_ci = ts.l("global.contain_matching_ci"), // "Contain Matching [Case Insensitive]"
-    matching = ts.l("global.matching"),	// "matching"
+    matching = ts.l("global.matching"), // "matching"
     matching_ci = ts.l("global.matching_ci"), // "matching [Case Insensitive]"
     equals = ts.l("global.equals"), // "=="
     equals_ci = ts.l("global.equals_ci"), // "== [Case Insensitive]"
     defined = ts.l("global.defined"); // "Defined"
 
   static final public String
-    does = ts.l("global.does"),	// "does"
-    does_not = ts.l("global.does_not"),	// does not"
-    is = ts.l("global.is"),	// "is"
+    does = ts.l("global.does"), // "does"
+    does_not = ts.l("global.does_not"), // does not"
+    is = ts.l("global.is"),     // "is"
     is_not = ts.l("global.is_not"); // "is not"
 
   static final public String
     length_less = ts.l("global.length_less"), // "Length <"
     length_greater = ts.l("global.length_greater"), // "Length >"
-    length_equal = ts.l("global.length_equal");	// "Length =="
+    length_equal = ts.l("global.length_equal"); // "Length =="
 
   static final public String
     before = ts.l("global.before"), // "Before"
     after = ts.l("global.after"), // "After"
-    same_day = ts.l("global.same_day"),	// "Same Day As"
+    same_day = ts.l("global.same_day"), // "Same Day As"
     same_week = ts.l("global.same_week"), // "Same Week As"
     same_month = ts.l("global.same_month"); // "Same Month As"
 
@@ -1291,11 +1291,11 @@ class QueryRow implements ItemListener {
 
     try
       {
-	resetFieldChoices();
+        resetFieldChoices();
       }
     catch (Exception ex)
       {
-	parent.gc.processExceptionRethrow(ex, "Remote exception in QueryRow constructor: ");
+        parent.gc.processExceptionRethrow(ex, "Remote exception in QueryRow constructor: ");
       }
 
     GridBagConstraints gbc = parent.gbc;
@@ -1347,14 +1347,14 @@ class QueryRow implements ItemListener {
 
     if (fieldChoice.getItemCount() > 0)
       {
-	try
-	  {
-	    fieldChoice.removeAllItems();
-	  }
-	catch (IndexOutOfBoundsException e)
-	  {
-	    System.out.println("IndexOfOutBounds: " + e);
-	  }
+        try
+          {
+            fieldChoice.removeAllItems();
+          }
+        catch (IndexOutOfBoundsException e)
+          {
+            System.out.println("IndexOfOutBounds: " + e);
+          }
       }
 
     // we want to be able to allow the user to search on fields in
@@ -1362,13 +1362,13 @@ class QueryRow implements ItemListener {
 
     for (int i = 0; i < parent.fieldChoices.size(); i++)
       {
-	if (debug)
-	  {
-	    System.err.println("QueryRow: adding field choice <" + i + ">:" + 
-			       parent.fieldChoices.elementAt(i));
-	  }
+        if (debug)
+          {
+            System.err.println("QueryRow: adding field choice <" + i + ">:" + 
+                               parent.fieldChoices.elementAt(i));
+          }
 
-	fieldChoice.addItem(parent.fieldChoices.elementAt(i));
+        fieldChoice.addItem(parent.fieldChoices.elementAt(i));
       }
 
     // We want to show the label field for the selected object base by
@@ -1399,16 +1399,16 @@ class QueryRow implements ItemListener {
 
     if (fieldName == null)
       {
-	this.fieldName = field.getName();
+        this.fieldName = field.getName();
       }
     else
       {
-	this.fieldName = fieldName;
+        this.fieldName = fieldName;
       }
 
     if (debug)
       {
-	System.err.println("QueryRow.setField(" + fieldName + ")");
+        System.err.println("QueryRow.setField(" + fieldName + ")");
       }
 
     resetCompare(field);
@@ -1431,7 +1431,7 @@ class QueryRow implements ItemListener {
 
     if (debug)
       {
-	System.err.println("QueryRow.resetBoolean(" + field.getName() + ", " + opName + ")");
+        System.err.println("QueryRow.resetBoolean(" + field.getName() + ", " + opName + ")");
       }
 
     // don't show us changing it
@@ -1447,32 +1447,32 @@ class QueryRow implements ItemListener {
 
     if (does_flag && (!showDoes || boolChoice.getItemCount() == 0))
       {
-	boolChoice.setVisible(false);
+        boolChoice.setVisible(false);
 
-	if (boolChoice.getItemCount() > 0)
-	  {
-	    boolChoice.removeAllItems();
-	  }
+        if (boolChoice.getItemCount() > 0)
+          {
+            boolChoice.removeAllItems();
+          }
 
-	boolChoice.addItem(does);
-	boolChoice.addItem(does_not);
+        boolChoice.addItem(does);
+        boolChoice.addItem(does_not);
 
-	boolChoice.setVisible(true);
-	showDoes = true;
+        boolChoice.setVisible(true);
+        showDoes = true;
       }
     else if (!does_flag && (showDoes || boolChoice.getItemCount() == 0))
       {
-	boolChoice.setVisible(false);
-	if (boolChoice.getItemCount() > 0)
-	  {
-	    boolChoice.removeAllItems();
-	  }
+        boolChoice.setVisible(false);
+        if (boolChoice.getItemCount() > 0)
+          {
+            boolChoice.removeAllItems();
+          }
 
-	boolChoice.addItem(is);
-	boolChoice.addItem(is_not);
+        boolChoice.addItem(is);
+        boolChoice.addItem(is_not);
 
-	boolChoice.setVisible(true);
-	showDoes = false;
+        boolChoice.setVisible(true);
+        showDoes = false;
       }
   }
 
@@ -1486,7 +1486,7 @@ class QueryRow implements ItemListener {
   {
     if (debug)
       {
-	System.err.println("QueryRow.resetCompare(" + field.getName() + ")");
+        System.err.println("QueryRow.resetCompare(" + field.getName() + ")");
       }
 
     compareChoice.removeItemListener(this);
@@ -1497,74 +1497,74 @@ class QueryRow implements ItemListener {
     
     if (compareChoice.getItemCount() > 0)
       {
-	compareChoice.removeAllItems();
+        compareChoice.removeAllItems();
       }
 
     if (field.isEditInPlace())
       {
-	compareChoice.addItem(length_less);
-	compareChoice.addItem(length_greater);
-	compareChoice.addItem(length_equal);
+        compareChoice.addItem(length_less);
+        compareChoice.addItem(length_greater);
+        compareChoice.addItem(length_equal);
       }
     else if (field.isArray())
       {
-	compareChoice.addItem("Contain");
-	
-	if (field.isString() || field.isInvid() || field.isIP())
-	  {
-	    compareChoice.addItem(contain_matching_ci);
-	    compareChoice.addItem(contain_matching);
-	  }
+        compareChoice.addItem("Contain");
+        
+        if (field.isString() || field.isInvid() || field.isIP())
+          {
+            compareChoice.addItem(contain_matching_ci);
+            compareChoice.addItem(contain_matching);
+          }
 
-	compareChoice.addItem(length_less);
-	compareChoice.addItem(length_greater);
-	compareChoice.addItem(length_equal);
+        compareChoice.addItem(length_less);
+        compareChoice.addItem(length_greater);
+        compareChoice.addItem(length_equal);
 
-	if (field.isString() || field.isInvid() || field.isIP())
-	  {
-	    compareChoice.setSelectedItem(contain_matching_ci);
-	  }
+        if (field.isString() || field.isInvid() || field.isIP())
+          {
+            compareChoice.setSelectedItem(contain_matching_ci);
+          }
       }
     else if (field.isDate())
       {
-	compareChoice.addItem(before);
-	compareChoice.addItem(after);
-	compareChoice.addItem(same_day);
-	compareChoice.addItem(same_week);
-	compareChoice.addItem(same_month);
+        compareChoice.addItem(before);
+        compareChoice.addItem(after);
+        compareChoice.addItem(same_day);
+        compareChoice.addItem(same_week);
+        compareChoice.addItem(same_month);
       }
     else if (field.isNumeric() || field.isFloat())
       {
-	compareChoice.addItem(equals);
-	compareChoice.addItem("<");
-	compareChoice.addItem(">");
-	compareChoice.addItem("<=");
-	compareChoice.addItem(">=");
+        compareChoice.addItem(equals);
+        compareChoice.addItem("<");
+        compareChoice.addItem(">");
+        compareChoice.addItem("<=");
+        compareChoice.addItem(">=");
       }
     else if (field.isBoolean())
       {
-	compareChoice.addItem(equals);
+        compareChoice.addItem(equals);
       }
     else if (field.isIP())
       {
-	compareChoice.addItem(equals);
-	compareChoice.addItem(matching_ci);
-	compareChoice.addItem(matching);
-	compareChoice.addItem(start_with);
-	compareChoice.addItem(end_with);
+        compareChoice.addItem(equals);
+        compareChoice.addItem(matching_ci);
+        compareChoice.addItem(matching);
+        compareChoice.addItem(start_with);
+        compareChoice.addItem(end_with);
       }
     else if (field.isString() || field.isInvid())
       {
-	compareChoice.addItem(matching_ci);
-	compareChoice.addItem(matching);
-	compareChoice.addItem(equals);
-	compareChoice.addItem(equals_ci);
-	compareChoice.addItem("<");
-	compareChoice.addItem(">");
-	compareChoice.addItem("<=");
-	compareChoice.addItem(">=");
-	compareChoice.addItem(start_with);
-	compareChoice.addItem(end_with);
+        compareChoice.addItem(matching_ci);
+        compareChoice.addItem(matching);
+        compareChoice.addItem(equals);
+        compareChoice.addItem(equals_ci);
+        compareChoice.addItem("<");
+        compareChoice.addItem(">");
+        compareChoice.addItem("<=");
+        compareChoice.addItem(">=");
+        compareChoice.addItem(start_with);
+        compareChoice.addItem(end_with);
       }
 
     compareChoice.addItem(defined);
@@ -1586,94 +1586,94 @@ class QueryRow implements ItemListener {
 
     if (debug)
       {
-	System.err.println("QueryRow.resetOperand(" + field.getName() + ", " + opName + ")");
+        System.err.println("QueryRow.resetOperand(" + field.getName() + ", " + opName + ")");
       }
 
     // when we test for defined, we won't have an operand value
 
     if (opName.equals(defined))
       {
-	removeOperand();
-	return;
+        removeOperand();
+        return;
       }
 
     if (opName.equals(length_less) ||
-	opName.equals(length_greater) ||
-	opName.equals(length_equal))
+        opName.equals(length_greater) ||
+        opName.equals(length_equal))
       {
-	if (!(operand instanceof JnumberField))
-	  {
-	    removeOperand();
+        if (!(operand instanceof JnumberField))
+          {
+            removeOperand();
 
-	    operand = new JnumberField();
-	    ((JnumberField) operand).setEnterHandler(parent);
-	    addOperand = true;
-	  }
+            operand = new JnumberField();
+            ((JnumberField) operand).setEnterHandler(parent);
+            addOperand = true;
+          }
       }
     else if (field.isDate())
       {
-	if (!(operand instanceof JdateField))
-	  {
-	    removeOperand();
+        if (!(operand instanceof JdateField))
+          {
+            removeOperand();
 
-	    operand = new JdateField(new Date(), true, false, false, null, null);
-	    addOperand = true;
-	  }
+            operand = new JdateField(new Date(), true, false, false, null, null);
+            addOperand = true;
+          }
       }
     else if (field.isString())
       {
-	if (!(operand instanceof JstringField))
-	  {
-	    removeOperand();
+        if (!(operand instanceof JstringField))
+          {
+            removeOperand();
 
-	    operand = new JstringField();
-	    ((JstringField) operand).setEnterHandler(parent);
-	    addOperand = true;
-	  }
+            operand = new JstringField();
+            ((JstringField) operand).setEnterHandler(parent);
+            addOperand = true;
+          }
       }
     else if (field.isNumeric())
       {
-	if (!(operand instanceof JnumberField))
-	  {
-	    removeOperand();
+        if (!(operand instanceof JnumberField))
+          {
+            removeOperand();
 
-	    operand = new JnumberField();
-	    ((JnumberField) operand).setEnterHandler(parent);
-	    addOperand = true;
-	  }
+            operand = new JnumberField();
+            ((JnumberField) operand).setEnterHandler(parent);
+            addOperand = true;
+          }
       }
     else if (field.isFloat())
       {
- 	if (!(operand instanceof JfloatField))
- 	  {
-	    removeOperand();
+        if (!(operand instanceof JfloatField))
+          {
+            removeOperand();
 
- 	    operand = new JfloatField();
-	    ((JfloatField) operand).setEnterHandler(parent);
- 	    addOperand = true;
- 	  }
+            operand = new JfloatField();
+            ((JfloatField) operand).setEnterHandler(parent);
+            addOperand = true;
+          }
       }
     else if (field.isBoolean())
       {
-	if (!(operand instanceof JCheckBox))
-	  {
-	    removeOperand();
+        if (!(operand instanceof JCheckBox))
+          {
+            removeOperand();
 
-	    operand = new JCheckBox();
-	    addOperand = true;
-	  }
+            operand = new JCheckBox();
+            addOperand = true;
+          }
       }
     else if (field.isInvid())
       {
-	// right now we have this commented out because we don't want
-	// to always force the JInvidChooser.. it will often take
-	// longer to use the chooser to select a user name (for
-	// instance), not to mention the query time to get the list
-	// from the server. thankfully, the server can use either a
-	// label string or an invid for invid fields
+        // right now we have this commented out because we don't want
+        // to always force the JInvidChooser.. it will often take
+        // longer to use the chooser to select a user name (for
+        // instance), not to mention the query time to get the list
+        // from the server. thankfully, the server can use either a
+        // label string or an invid for invid fields
         //
-	// in the long run, i'm not sure what to do here.. use the
-	// chooser sometimes, but not others based on some criteria?
+        // in the long run, i'm not sure what to do here.. use the
+        // chooser sometimes, but not others based on some criteria?
 
         if (!(operand instanceof JstringField))
           {
@@ -1686,25 +1686,25 @@ class QueryRow implements ItemListener {
       }
     else if (field.isIP())
       {
-	if (!(operand instanceof JstringField))
-	  {
-	    removeOperand();
-	    
-	    operand = new JstringField();
-	    ((JstringField) operand).setEnterHandler(parent);
-	    addOperand = true;
-	  }
+        if (!(operand instanceof JstringField))
+          {
+            removeOperand();
+            
+            operand = new JstringField();
+            ((JstringField) operand).setEnterHandler(parent);
+            addOperand = true;
+          }
       }
 
     if (operand == null)
       {
-	throw new NullPointerException("null operand");
+        throw new NullPointerException("null operand");
       }
 
     if (addOperand)
       {
-	operandContainer.add(operand);
-	operand.setVisible(true);
+        operandContainer.add(operand);
+        operand.setVisible(true);
       }
   }
 
@@ -1717,24 +1717,24 @@ class QueryRow implements ItemListener {
   {
     if (operand != null)
       {
-	if (operand instanceof JstringField)
-	  {
-	    ((JstringField) operand).setEnterHandler(null);
-	  }
+        if (operand instanceof JstringField)
+          {
+            ((JstringField) operand).setEnterHandler(null);
+          }
 
-	if (operand instanceof JnumberField)
-	  {
-	    ((JnumberField) operand).setEnterHandler(null);
-	  }
+        if (operand instanceof JnumberField)
+          {
+            ((JnumberField) operand).setEnterHandler(null);
+          }
 
-	if (operand instanceof JfloatField)
-	  {
-	    ((JfloatField) operand).setEnterHandler(null);
-	  }
-	
-	operand.setVisible(false);
-	operandContainer.remove(operand);
-	operand = null;
+        if (operand instanceof JfloatField)
+          {
+            ((JfloatField) operand).setEnterHandler(null);
+          }
+        
+        operand.setVisible(false);
+        operandContainer.remove(operand);
+        operand = null;
       }
   }
 
@@ -1767,8 +1767,8 @@ class QueryRow implements ItemListener {
   {
     if (debug)
       {
-	System.err.println("querybox: getBase(): fieldName = " + fieldName);
-	System.err.println("Id = " + parent.getIdFromName(fieldName));
+        System.err.println("querybox: getBase(): fieldName = " + fieldName);
+        System.err.println("Id = " + parent.getIdFromName(fieldName));
       }
 
     return parent.getBaseFromShort(parent.getIdFromName(fieldName));
@@ -1801,96 +1801,96 @@ class QueryRow implements ItemListener {
 
     if (this.fieldName.indexOf('/') > -1)
       {
-	pathElements = StringUtils.split(this.fieldName, "/");
+        pathElements = StringUtils.split(this.fieldName, "/");
 
-	for (int i = 0; i < (pathElements.length-1); i++)
-	  {
-	    if (rootNode == null)
-	      {
-		rootNode = new QueryDeRefNode(pathElements[i], null);
-		deRefNode = rootNode;
-	      }
-	    else
-	      {
-		QueryDeRefNode nextLinkNode = new QueryDeRefNode(pathElements[i], null);
-		deRefNode.queryTree = nextLinkNode;
-		deRefNode = nextLinkNode;
-	      }
-	  }
+        for (int i = 0; i < (pathElements.length-1); i++)
+          {
+            if (rootNode == null)
+              {
+                rootNode = new QueryDeRefNode(pathElements[i], null);
+                deRefNode = rootNode;
+              }
+            else
+              {
+                QueryDeRefNode nextLinkNode = new QueryDeRefNode(pathElements[i], null);
+                deRefNode.queryTree = nextLinkNode;
+                deRefNode = nextLinkNode;
+              }
+          }
       }
 
     if (operand instanceof JnumberField)
       {
-	JnumberField numField = (JnumberField) operand;
-	value = numField.getValue(); // Integer
+        JnumberField numField = (JnumberField) operand;
+        value = numField.getValue(); // Integer
       }
     else if (operand instanceof JfloatField)
       {
-	JfloatField floatField = (JfloatField) operand;
-	value = floatField.getValue(); // Double
+        JfloatField floatField = (JfloatField) operand;
+        value = floatField.getValue(); // Double
       }
     else if (operand instanceof JdateField)
       {
-	JdateField dateField = (JdateField) operand;
-	value = dateField.getDate(); // java.util.Date
+        JdateField dateField = (JdateField) operand;
+        value = dateField.getDate(); // java.util.Date
       }
     else if (operand instanceof JCheckBox)
       {
-	JCheckBox boolField = (JCheckBox) operand;
-	value = Boolean.valueOf(boolField.isSelected());
+        JCheckBox boolField = (JCheckBox) operand;
+        value = Boolean.valueOf(boolField.isSelected());
       }
     else if (operand instanceof JstringField)
       { 
-	JstringField stringField = (JstringField) operand;
-	value = stringField.getValue();
+        JstringField stringField = (JstringField) operand;
+        value = stringField.getValue();
 
-	String strValue = (String) value;
+        String strValue = (String) value;
 
-	if (field.isIP())
-	  {
-	    String opName = (String) compareChoice.getSelectedItem();
+        if (field.isIP())
+          {
+            String opName = (String) compareChoice.getSelectedItem();
 
-	    // we only do a string operation if our operator is
-	    // "matching" or "matching [Case Insensitive]", otherwise
-	    // we'll send a binary array of Byte objects up to the
-	    // server for the IP match.
+            // we only do a string operation if our operator is
+            // "matching" or "matching [Case Insensitive]", otherwise
+            // we'll send a binary array of Byte objects up to the
+            // server for the IP match.
 
-	    if (!opName.equals(matching) && 
-		!opName.equals(matching_ci) &&
-		!opName.equals(contain_matching_ci) &&
-		!opName.equals(contain_matching))
-	      {
-		if (strValue.indexOf(':') != -1)
-		  {
-		    try
-		      {
-			value = JIPField.genIPV6bytes(strValue);
-		      }
-		    catch (IllegalArgumentException ex)
-		      {
-		      }
-		  }
-		else
-		  {
-		    try
-		      {
-			value = JIPField.genIPV4bytes(strValue);
-		      }
-		    catch (IllegalArgumentException ex)
-		      {
-		      }
-		  }
-	      }
-	  }
+            if (!opName.equals(matching) && 
+                !opName.equals(matching_ci) &&
+                !opName.equals(contain_matching_ci) &&
+                !opName.equals(contain_matching))
+              {
+                if (strValue.indexOf(':') != -1)
+                  {
+                    try
+                      {
+                        value = JIPField.genIPV6bytes(strValue);
+                      }
+                    catch (IllegalArgumentException ex)
+                      {
+                      }
+                  }
+                else
+                  {
+                    try
+                      {
+                        value = JIPField.genIPV4bytes(strValue);
+                      }
+                    catch (IllegalArgumentException ex)
+                      {
+                      }
+                  }
+              }
+          }
       }
     else if (operand instanceof JInvidChooser)
       {
-	JInvidChooser invidChooser = (JInvidChooser) operand;
-	value = invidChooser.getSelectedInvid();
+        JInvidChooser invidChooser = (JInvidChooser) operand;
+        value = invidChooser.getSelectedInvid();
       }
     else if (operand != null)
       {
-	System.err.println("Couldn't get a value.. unknown operand type! " + operand.getClass().toString());
+        System.err.println("Couldn't get a value.. unknown operand type! " + operand.getClass().toString());
       }
 
     String operator = (String) compareChoice.getSelectedItem();
@@ -1899,222 +1899,222 @@ class QueryRow implements ItemListener {
     
     if (field.isArray())
       {
-	if (operator.equals(contain))
-	  {
-	    opValue = QueryDataNode.EQUALS;
-	    arrayOp = QueryDataNode.CONTAINS;
-	  }
-	else if (operator.equals(contain_matching))
-	  {
-	    opValue = QueryDataNode.MATCHES;
-	    arrayOp = QueryDataNode.CONTAINS;
-	  }
-	else if (operator.equals(contain_matching_ci))
-	  {
-	    opValue = QueryDataNode.NOCASEMATCHES;
-	    arrayOp = QueryDataNode.CONTAINS;
-	  }
-	else if (operator.equals(length_equal))
-	  {
-	    arrayOp = QueryDataNode.LENGTHEQ;
-	  } 
-	else if (operator.equals(length_greater))
-	  {
-	    arrayOp = QueryDataNode.LENGTHGR;
-	  } 
-	else if (operator.equals(length_less))
-	  {
-	    arrayOp = QueryDataNode.LENGTHLE;
-	  }
-	else if (operator.equals(defined))
-	  {
-	    opValue = QueryDataNode.DEFINED;
-	  }
+        if (operator.equals(contain))
+          {
+            opValue = QueryDataNode.EQUALS;
+            arrayOp = QueryDataNode.CONTAINS;
+          }
+        else if (operator.equals(contain_matching))
+          {
+            opValue = QueryDataNode.MATCHES;
+            arrayOp = QueryDataNode.CONTAINS;
+          }
+        else if (operator.equals(contain_matching_ci))
+          {
+            opValue = QueryDataNode.NOCASEMATCHES;
+            arrayOp = QueryDataNode.CONTAINS;
+          }
+        else if (operator.equals(length_equal))
+          {
+            arrayOp = QueryDataNode.LENGTHEQ;
+          } 
+        else if (operator.equals(length_greater))
+          {
+            arrayOp = QueryDataNode.LENGTHGR;
+          } 
+        else if (operator.equals(length_less))
+          {
+            arrayOp = QueryDataNode.LENGTHLE;
+          }
+        else if (operator.equals(defined))
+          {
+            opValue = QueryDataNode.DEFINED;
+          }
 
-	if (opValue == QueryDataNode.NONE && arrayOp == QueryDataNode.NONE)
-	  {
-	    System.err.println("QueryRow.getQueryNode(): Unknown array comparator");
-	    return null;
-	  }
+        if (opValue == QueryDataNode.NONE && arrayOp == QueryDataNode.NONE)
+          {
+            System.err.println("QueryRow.getQueryNode(): Unknown array comparator");
+            return null;
+          }
 
-	terminalNode = new QueryDataNode(localFieldName, opValue, arrayOp, value);
+        terminalNode = new QueryDataNode(localFieldName, opValue, arrayOp, value);
 
-	if (debug)
-	  {
-	    System.err.println("QueryDataNode: " + terminalNode.toString());
-	  }
-	    
-	// -- if not is true then add a not node
-	    
-	if (isNot())
-	  {
-	    terminalNode = new QueryNotNode(terminalNode); // if NOT then add NOT node
-	  } 
+        if (debug)
+          {
+            System.err.println("QueryDataNode: " + terminalNode.toString());
+          }
+            
+        // -- if not is true then add a not node
+            
+        if (isNot())
+          {
+            terminalNode = new QueryNotNode(terminalNode); // if NOT then add NOT node
+          } 
 
-	if (deRefNode != null)
-	  {
-	    deRefNode.queryTree = terminalNode;
-	    return rootNode;
-	  }
-	else
-	  {
-	    return terminalNode;
-	  }
+        if (deRefNode != null)
+          {
+            deRefNode.queryTree = terminalNode;
+            return rootNode;
+          }
+        else
+          {
+            return terminalNode;
+          }
       }
     else if (!(operator.equals(same_day) ||
-	       operator.equals(same_week) ||
-	       operator.equals(same_month)))
+               operator.equals(same_week) ||
+               operator.equals(same_month)))
        {
-	// ok, normal scalar field, not a time window comparison
+        // ok, normal scalar field, not a time window comparison
 
-	if (operator.equals("=="))
-	  {
-	    opValue = QueryDataNode.EQUALS;
-	  } 
-	else if (operator.equals("<") || operator.equals(before))
-	  {
-	    opValue = QueryDataNode.LESS;
-	  } 
-	else if (operator.equals("<="))
-	  {
-	    opValue = QueryDataNode.LESSEQ;
-	  } 
-	else if (operator.equals(">") || operator.equals(after))
-	  {
-	    opValue = QueryDataNode.GREAT;
-	  } 
-	else if (operator.equals(">="))
-	  {
-	    opValue = QueryDataNode.GREATEQ;
-	  } 
-	else if (operator.equals(equals_ci))
-	  {
-	    opValue = QueryDataNode.NOCASEEQ;
-	  }
-	else if (operator.equals(start_with))
-	  {
-	    opValue = QueryDataNode.STARTSWITH;
-	  }
-	else if (operator.equals(end_with))
-	  {
-	    opValue = QueryDataNode.ENDSWITH;
-	  }
-	else if (operator.equals(defined))
-	  {
-	    opValue = QueryDataNode.DEFINED;
-	  }
-	else if (operator.equals(matching))
-	  {
-	    opValue = QueryDataNode.MATCHES;
-	  }
-	else if (operator.equals(matching_ci))
-	  {
-	    opValue = QueryDataNode.NOCASEMATCHES;
-	  }
+        if (operator.equals("=="))
+          {
+            opValue = QueryDataNode.EQUALS;
+          } 
+        else if (operator.equals("<") || operator.equals(before))
+          {
+            opValue = QueryDataNode.LESS;
+          } 
+        else if (operator.equals("<="))
+          {
+            opValue = QueryDataNode.LESSEQ;
+          } 
+        else if (operator.equals(">") || operator.equals(after))
+          {
+            opValue = QueryDataNode.GREAT;
+          } 
+        else if (operator.equals(">="))
+          {
+            opValue = QueryDataNode.GREATEQ;
+          } 
+        else if (operator.equals(equals_ci))
+          {
+            opValue = QueryDataNode.NOCASEEQ;
+          }
+        else if (operator.equals(start_with))
+          {
+            opValue = QueryDataNode.STARTSWITH;
+          }
+        else if (operator.equals(end_with))
+          {
+            opValue = QueryDataNode.ENDSWITH;
+          }
+        else if (operator.equals(defined))
+          {
+            opValue = QueryDataNode.DEFINED;
+          }
+        else if (operator.equals(matching))
+          {
+            opValue = QueryDataNode.MATCHES;
+          }
+        else if (operator.equals(matching_ci))
+          {
+            opValue = QueryDataNode.NOCASEMATCHES;
+          }
 
-	if (opValue == 0)
-	  {
-	    System.err.println("QueryRow.getQueryNode(): Unknown scalar comparator");
-	    return null;
-	  }
-	    
-	terminalNode = new QueryDataNode(localFieldName, opValue, value);
+        if (opValue == 0)
+          {
+            System.err.println("QueryRow.getQueryNode(): Unknown scalar comparator");
+            return null;
+          }
+            
+        terminalNode = new QueryDataNode(localFieldName, opValue, value);
 
-	if (debug)
-	  {
-	    System.err.println("QueryDataNode: " + terminalNode.toString());
-	  }
-	    
-	// -- if not is true then add a not node
-	    
-	if (isNot())
-	  {
-	    terminalNode = new QueryNotNode(terminalNode); // if NOT then add NOT node
-	  } 
+        if (debug)
+          {
+            System.err.println("QueryDataNode: " + terminalNode.toString());
+          }
+            
+        // -- if not is true then add a not node
+            
+        if (isNot())
+          {
+            terminalNode = new QueryNotNode(terminalNode); // if NOT then add NOT node
+          } 
 
-	if (deRefNode != null)
-	  {
-	    deRefNode.queryTree = terminalNode;
-	    return rootNode;
-	  }
-	else
-	  {
-	    return terminalNode;
-	  }
+        if (deRefNode != null)
+          {
+            deRefNode.queryTree = terminalNode;
+            return rootNode;
+          }
+        else
+          {
+            return terminalNode;
+          }
       }
     else
       {
-	if (!(value instanceof Date))
-	  {
-	    System.err.println("QueryRow.getQueryNode(): Don't have a proper date value");
-	    return null;
-	  }
+        if (!(value instanceof Date))
+          {
+            System.err.println("QueryRow.getQueryNode(): Don't have a proper date value");
+            return null;
+          }
 
-	Date
-	  lowDate,
-	  hiDate,
-	  dateValue = (Date) value;
+        Date
+          lowDate,
+          hiDate,
+          dateValue = (Date) value;
 
-	Calendar cal = Calendar.getInstance();
+        Calendar cal = Calendar.getInstance();
 
-	cal.setTime(dateValue);
+        cal.setTime(dateValue);
 
-	cal.set(Calendar.HOUR, 0);
-	cal.set(Calendar.MINUTE, 0);
-	cal.set(Calendar.SECOND, 0);
-	cal.set(Calendar.MILLISECOND, 0);
+        cal.set(Calendar.HOUR, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
 
-	if (operator.equals(same_day))
-	  {
-	    lowDate = cal.getTime();
+        if (operator.equals(same_day))
+          {
+            lowDate = cal.getTime();
 
-	    cal.roll(Calendar.DATE, true);
+            cal.roll(Calendar.DATE, true);
 
-	    hiDate = cal.getTime();
-	  }
-	else if (operator.equals(same_week))
-	  {
-	    cal.set(Calendar.DAY_OF_WEEK, 0);
-	    lowDate = cal.getTime();
-		
-	    cal.roll(Calendar.WEEK_OF_YEAR, true);
+            hiDate = cal.getTime();
+          }
+        else if (operator.equals(same_week))
+          {
+            cal.set(Calendar.DAY_OF_WEEK, 0);
+            lowDate = cal.getTime();
+                
+            cal.roll(Calendar.WEEK_OF_YEAR, true);
 
-	    hiDate = cal.getTime();
-	  }
-	else if (operator.equals(same_month))
-	  {
-	    cal.set(Calendar.DAY_OF_MONTH, 0);
-	    lowDate = cal.getTime();
-		
-	    cal.roll(Calendar.MONTH, true);
+            hiDate = cal.getTime();
+          }
+        else if (operator.equals(same_month))
+          {
+            cal.set(Calendar.DAY_OF_MONTH, 0);
+            lowDate = cal.getTime();
+                
+            cal.roll(Calendar.MONTH, true);
 
-	    hiDate = cal.getTime();
-	  }
-	else
-	  {
-	    System.err.println("QueryRow.getQueryNode(): Don't have a proper date comparator");
-	    return null;
-	  }
+            hiDate = cal.getTime();
+          }
+        else
+          {
+            System.err.println("QueryRow.getQueryNode(): Don't have a proper date comparator");
+            return null;
+          }
 
-	terminalNode = new QueryAndNode(new QueryDataNode(localFieldName, QueryDataNode.GREATEQ, lowDate),
-					new QueryDataNode(localFieldName, QueryDataNode.LESS, hiDate));
-	    
-	// -- if not is true then add a not node
-	    
-	if (isNot())
-	  {
-	    terminalNode = new QueryNotNode(terminalNode); // if NOT then add NOT node
-	  } 
-	    
-	if (deRefNode != null)
-	  {
-	    deRefNode.queryTree = terminalNode;
-	    return rootNode;
-	  }
-	else
-	  {
-	    return terminalNode;
-	  }
+        terminalNode = new QueryAndNode(new QueryDataNode(localFieldName, QueryDataNode.GREATEQ, lowDate),
+                                        new QueryDataNode(localFieldName, QueryDataNode.LESS, hiDate));
+            
+        // -- if not is true then add a not node
+            
+        if (isNot())
+          {
+            terminalNode = new QueryNotNode(terminalNode); // if NOT then add NOT node
+          } 
+            
+        if (deRefNode != null)
+          {
+            deRefNode.queryTree = terminalNode;
+            return rootNode;
+          }
+        else
+          {
+            return terminalNode;
+          }
       }
   }
 
@@ -2127,7 +2127,7 @@ class QueryRow implements ItemListener {
   private boolean isNot()
   {
     return (boolChoice.getSelectedItem().equals(is_not) ||
-	    boolChoice.getSelectedItem().equals(does_not));
+            boolChoice.getSelectedItem().equals(does_not));
   }
 
   /**
@@ -2145,20 +2145,20 @@ class QueryRow implements ItemListener {
 
     if (e.getStateChange() == e.DESELECTED)
       {
-	return;
+        return;
       }
 
     if (e.getSource() == fieldChoice)
       {
-	setField(parent.getTemplateFromName((String) fieldChoice.getSelectedItem()), 
-		 (String) fieldChoice.getSelectedItem());
+        setField(parent.getTemplateFromName((String) fieldChoice.getSelectedItem()), 
+                 (String) fieldChoice.getSelectedItem());
       }
     else if (e.getSource() == compareChoice)
       {
-	String compareOperator = (String) compareChoice.getSelectedItem();
-	resetBoolean(field, compareOperator);
-	resetOperand(field, compareOperator);
-	panel.revalidate();
+        String compareOperator = (String) compareChoice.getSelectedItem();
+        resetBoolean(field, compareOperator);
+        resetOperand(field, compareOperator);
+        panel.revalidate();
       }
   }
 }
@@ -2195,7 +2195,7 @@ class queryFieldsPanel extends JPanel {
   JPanel customPanel = new JPanel();
 
   StringSelector builtInSelector, 
-		 customSelector;
+                 customSelector;
 
   int numBuiltInChoices,
       numCustomChoices;
@@ -2272,18 +2272,18 @@ class queryFieldsPanel extends JPanel {
     fields = parent.gc.getTemplateVector(parent.selectedBase.getTypeID());
 
     for (int i=0; fields != null && (i < fields.size()); i++) 
-      {	
-	template = (FieldTemplate) fields.elementAt(i);
+      { 
+        template = (FieldTemplate) fields.elementAt(i);
 
-	if (template.isBuiltIn())
-	  {
-	    builtInItems_Vect.addElement( template.getName() );
-	  }
-	else
-	  {
-	    customItems_Vect.addElement( template.getName() );
-	  }
-	
+        if (template.isBuiltIn())
+          {
+            builtInItems_Vect.addElement( template.getName() );
+          }
+        else
+          {
+            customItems_Vect.addElement( template.getName() );
+          }
+        
       }
 
     numBuiltInChoices = builtInItems_Vect.size();
@@ -2297,15 +2297,15 @@ class queryFieldsPanel extends JPanel {
 
     for (int i = 0; i < builtInItems_Vect.size(); i++)
       {
-	String x = (String) builtInItems_Vect.elementAt(i);
+        String x = (String) builtInItems_Vect.elementAt(i);
 
-	builtInHandles.addElement(new listHandle(x, x));
+        builtInHandles.addElement(new listHandle(x, x));
       }
 
     FixedListCompare builtInComparator = new FixedListCompare(builtInHandles, null);
 
     builtInSelector.update(builtInItems_Vect, true, builtInComparator, 
-			   new Vector(), true, builtInComparator);
+                           new Vector(), true, builtInComparator);
 
     // create and load the StringSelector for the custom fields
 
@@ -2315,15 +2315,15 @@ class queryFieldsPanel extends JPanel {
 
     for (int i = 0; i < customItems_Vect.size(); i++)
       {
-	String x = (String) customItems_Vect.elementAt(i);
+        String x = (String) customItems_Vect.elementAt(i);
 
-	customHandles.addElement(new listHandle(x, x));
+        customHandles.addElement(new listHandle(x, x));
       }
 
     FixedListCompare customComparator = new FixedListCompare(customHandles, null);
 
     customSelector.update(new Vector(), true, customComparator, 
-			  customItems_Vect, true, customComparator);
+                          customItems_Vect, true, customComparator);
 
     builtInPanel.add( builtInSelector, BorderLayout.CENTER );
     customPanel.add( customSelector, BorderLayout.CENTER );
@@ -2352,18 +2352,18 @@ class queryFieldsPanel extends JPanel {
 
     for (int i = 0; i < vectA.size(); i++)
       {
-	fieldsToReturn.addElement(vectA.elementAt(i));
+        fieldsToReturn.addElement(vectA.elementAt(i));
       }
 
     for (int i = 0; i < vectB.size(); i++)
       {
-	fieldsToReturn.addElement(vectB.elementAt(i));
+        fieldsToReturn.addElement(vectB.elementAt(i));
       }
 
     // if we are returning all fields, we can use null to indicate that
 
     if ( fieldsToReturn.size() == (numBuiltInChoices + numCustomChoices) ) 
-	fieldsToReturn = null; 
+        fieldsToReturn = null; 
 
     return fieldsToReturn; 
   }

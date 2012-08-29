@@ -153,8 +153,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     if (isEditable(local))
       {
-	matrix.clear();
-	return null;
+        matrix.clear();
+        return null;
       }
 
     // "Don''t have permission to clear this permission matrix field\n{0}"
@@ -182,28 +182,28 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     if (sepIndex != -1)
       {
-	try
-	  {
-	    basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
-	    base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+        try
+          {
+            basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
+            base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
 
-	    if (base == null)
-	      {
-		basename = "INVALID: " + entry;
-	      }
-	    else
-	      {
-		basename = base.getName();
-	      }
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    basename = entry;
-	  }
+            if (base == null)
+              {
+                basename = "INVALID: " + entry;
+              }
+            else
+              {
+                basename = base.getName();
+              }
+          }
+        catch (NumberFormatException ex)
+          {
+            basename = entry;
+          }
       }
     else
       {
-	basename = entry;
+        basename = entry;
       }
 
     return basename;
@@ -234,55 +234,55 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     if (sepIndex != -1)
       {
-	try
-	  {
-	    basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
-	    base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+        try
+          {
+            basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
+            base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
 
-	    if (base == null)
-	      {
-		fieldname = "[error " + entry + "]";
-	      }
-	    else
-	      {
-		fieldId = entry.substring(sepIndex+1);
+            if (base == null)
+              {
+                fieldname = "[error " + entry + "]";
+              }
+            else
+              {
+                fieldId = entry.substring(sepIndex+1);
 
-		if (fieldId.equals(":"))
-		  {
-		    fieldname = "[base]";
-		  }
-		else
-		  {
-		    try
-		      {
-			fieldnum = Short.valueOf(fieldId).shortValue();
+                if (fieldId.equals(":"))
+                  {
+                    fieldname = "[base]";
+                  }
+                else
+                  {
+                    try
+                      {
+                        fieldnum = Short.valueOf(fieldId).shortValue();
 
-			field = (DBObjectBaseField) base.getField(fieldnum);
+                        field = (DBObjectBaseField) base.getField(fieldnum);
 
-			if (field == null)
-			  {
-			    fieldname = "invalid:" + fieldId;
-			  }
-			else
-			  {
-			    fieldname = field.getName();
-			  }
-		      }
-		    catch (NumberFormatException ex)
-		      {
-			fieldname = fieldId;
-		      }
-		  }
-	      }
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    fieldname = "[error " + entry + "]";
-	  }
+                        if (field == null)
+                          {
+                            fieldname = "invalid:" + fieldId;
+                          }
+                        else
+                          {
+                            fieldname = field.getName();
+                          }
+                      }
+                    catch (NumberFormatException ex)
+                      {
+                        fieldname = fieldId;
+                      }
+                  }
+              }
+          }
+        catch (NumberFormatException ex)
+          {
+            fieldname = "[error " + entry + "]";
+          }
       }
     else
       {
-	fieldname = "[error " + entry + "]";
+        fieldname = "[error " + entry + "]";
       }
 
     return fieldname;
@@ -324,45 +324,45 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     if (sepIndex == -1)
       {
-	return false;
+        return false;
       }
 
     try
       {
-	basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
-	base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+        basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
+        base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
 
-	if (base == null)
-	  {
-	    return false;
-	  }
-	else
-	  {
-	    fieldId = entry.substring(sepIndex+1);
+        if (base == null)
+          {
+            return false;
+          }
+        else
+          {
+            fieldId = entry.substring(sepIndex+1);
 
-	    if (!fieldId.equals(":"))
-	      {
-		try
-		  {
-		    fieldnum = Short.valueOf(fieldId).shortValue();
+            if (!fieldId.equals(":"))
+              {
+                try
+                  {
+                    fieldnum = Short.valueOf(fieldId).shortValue();
 
-		    field = (DBObjectBaseField) base.getField(fieldnum);
+                    field = (DBObjectBaseField) base.getField(fieldnum);
 
-		    if (field == null)
-		      {
-			return false;
-		      }
-		  }
-		catch (NumberFormatException ex)
-		  {
-		    return false;
-		  }
-	      }
-	  }
+                    if (field == null)
+                      {
+                        return false;
+                      }
+                  }
+                catch (NumberFormatException ex)
+                  {
+                    return false;
+                  }
+              }
+          }
       }
     catch (NumberFormatException ex)
       {
-	return false;
+        return false;
       }
 
     return true;
@@ -413,33 +413,33 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     for (String key: matrix.keySet())
       {
-	entry = matrix.get(key);
+        entry = matrix.get(key);
 
-	basename = decodeBaseName(key);
+        basename = decodeBaseName(key);
 
-	if (baseHash.containsKey(basename))
-	  {
-	    vec = baseHash.get(basename);
-	  }
-	else
-	  {
-	    vec = new Vector<String>();
-	    baseHash.put(basename, vec);
-	  }
+        if (baseHash.containsKey(basename))
+          {
+            vec = baseHash.get(basename);
+          }
+        else
+          {
+            vec = new Vector<String>();
+            baseHash.put(basename, vec);
+          }
 
-	vec.add(decodeFieldName(key) + " -- " + entry.toString());
+        vec.add(decodeFieldName(key) + " -- " + entry.toString());
       }
 
     for (String key: baseHash.keySet())
       {
-	vec = baseHash.get(key);
+        vec = baseHash.get(key);
 
-	for (String val: vec)
-	  {
-	    result.append(key + ":" + val + "\n");
-	  }
+        for (String val: vec)
+          {
+            result.append(key + ":" + val + "\n");
+          }
 
-	result.append("\n");
+        result.append("\n");
       }
 
     return result.toString();
@@ -458,8 +458,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    */
 
   PermissionMatrixDBField(DBObject owner,
-			  DataInput in,
-			  DBObjectBaseField definition) throws IOException
+                          DataInput in,
+                          DBObjectBaseField definition) throws IOException
   {
     value = null;
     this.owner = owner;
@@ -498,7 +498,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     if (debug)
       {
-	System.err.println("PermissionMatrixDBField: Copy constructor");
+        System.err.println("PermissionMatrixDBField: Copy constructor");
       }
 
     this.fieldcode = field.getID();
@@ -507,14 +507,14 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     for (String key: field.matrix.keySet())
       {
-	PermEntry entry = field.matrix.get(key);
+        PermEntry entry = field.matrix.get(key);
 
-	if (debug)
-	  {
-	    System.err.println("PermissionMatrixDBField: copying " + key + ", contents: " + entry);
-	  }
+        if (debug)
+          {
+            System.err.println("PermissionMatrixDBField: copying " + key + ", contents: " + entry);
+          }
 
-	this.matrix.put(key, entry);
+        this.matrix.put(key, entry);
       }
   }
 
@@ -530,7 +530,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   public ReturnVal verifyNewValue(Object v)
   {
     return Ganymede.createErrorDialog("Permission Matrix Field Error",
-				      "setValue() not allowed on PermissionMatrixDBField.");
+                                      "setValue() not allowed on PermissionMatrixDBField.");
   }
 
   /**
@@ -559,29 +559,29 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     if (!(obj.getClass().equals(this.getClass())))
       {
-	return false;
+        return false;
       }
 
     pmdb = (PermissionMatrixDBField) obj;
 
     if (matrix.size() != pmdb.matrix.size())
       {
-	return false;
+        return false;
       }
 
     for (String key: matrix.keySet())
       {
-	try
-	  {
-	    if (!(matrix.get(key).equals(pmdb.matrix.get(key))))
-	      {
-		return false;
-	      }
-	  }
-	catch (NullPointerException ex)
-	  {
-	    return false;
-	  }
+        try
+          {
+            if (!(matrix.get(key).equals(pmdb.matrix.get(key))))
+              {
+                return false;
+              }
+          }
+        catch (NullPointerException ex)
+          {
+            return false;
+          }
       }
 
     return true;
@@ -602,29 +602,29 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     if (!local)
       {
-	if (!verifyReadPermission())
-	  {
-	    // "Copy Field Error"
-	    // "Can''t copy field {0}, no read privileges."
-	    return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
-					      ts.l("copyFieldTo.no_read", getName()));
-	  }
+        if (!verifyReadPermission())
+          {
+            // "Copy Field Error"
+            // "Can''t copy field {0}, no read privileges."
+            return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
+                                              ts.l("copyFieldTo.no_read", getName()));
+          }
       }
 
     if (!target.isEditable(local))
       {
-	// "Copy Field Error"
-	// "Can''t copy field {0}, no write privileges."
-	return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
-					  ts.l("copyFieldTo.no_write", getName()));
+        // "Copy Field Error"
+        // "Can''t copy field {0}, no write privileges."
+        return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
+                                          ts.l("copyFieldTo.no_write", getName()));
       }
 
     if (!(target instanceof PermissionMatrixDBField))
       {
-	// "Copy Field Error"
-	// "Can''t copy field {0}, target is not a PermissionMatrixDBField"
-	return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
-					  ts.l("copyFieldTo.bad_param", getName()));
+        // "Copy Field Error"
+        // "Can''t copy field {0}, target is not a PermissionMatrixDBField"
+        return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
+                                          ts.l("copyFieldTo.bad_param", getName()));
       }
 
     // doing a simple clone of the hashtable is okay, since both the
@@ -681,7 +681,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     // "Server: Error in PermissionMatrixDBField.setValue()"
     // "Error.. can''t call setValue() on a PermissionMatrixDBField."
     return Ganymede.createErrorDialog(ts.l("setValue.error_subj"),
-				      ts.l("setValue.error_text"));
+                                      ts.l("setValue.error_text"));
   }
 
   public Object clone() throws CloneNotSupportedException
@@ -693,7 +693,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     if (debug)
       {
-	debugdump(matrix);
+        debugdump(matrix);
       }
 
     // If we have invalid entries, we're just going to throw them out,
@@ -715,10 +715,10 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     for (String key: matrix.keySet())
       {
-	PermEntry pe = matrix.get(key);
+        PermEntry pe = matrix.get(key);
 
-	out.writeUTF(key);
-	pe.emit(out);
+        out.writeUTF(key);
+        pe.emit(out);
       }
   }
 
@@ -734,18 +734,18 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     if (tableSize <= 0)
       {
-	matrix = new Hashtable<String, PermEntry>();
+        matrix = new Hashtable<String, PermEntry>();
       }
     else
       {
-	matrix = new Hashtable<String, PermEntry>(tableSize);
+        matrix = new Hashtable<String, PermEntry>(tableSize);
       }
 
     for (int i = 0; i < tableSize; i++)
       {
-	key = in.readUTF();
-	pe = PermEntry.getPermEntry(in);
-	matrix.put(key, pe);
+        key = in.readUTF();
+        pe = PermEntry.getPermEntry(in);
+        matrix.put(key, pe);
       }
   }
 
@@ -769,27 +769,27 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     for (String key: matrix.keySet())
       {
-	entry = matrix.get(key);
+        entry = matrix.get(key);
 
-	basename = decodeBaseName(key);
+        basename = decodeBaseName(key);
 
-	if (baseHash.containsKey(basename))
-	  {
-	    innerTable = baseHash.get(basename);
-	  }
-	else
-	  {
-	    innerTable = new Hashtable<String, PermEntry>();
-	    baseHash.put(basename, innerTable);
-	  }
+        if (baseHash.containsKey(basename))
+          {
+            innerTable = baseHash.get(basename);
+          }
+        else
+          {
+            innerTable = new Hashtable<String, PermEntry>();
+            baseHash.put(basename, innerTable);
+          }
 
-	innerTable.put(decodeFieldName(key), entry);
+        innerTable.put(decodeFieldName(key), entry);
       }
 
     if (writeSurroundContext)
       {
-	xmlOut.startElementIndent(this.getXMLName());
-	xmlOut.indentOut();
+        xmlOut.startElementIndent(this.getXMLName());
+        xmlOut.indentOut();
       }
 
     xmlOut.startElementIndent("permissions");
@@ -797,33 +797,33 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     for (String key: baseHash.keySet())
       {
-	innerTable = baseHash.get(key);
-	entry = innerTable.get("[base]");
+        innerTable = baseHash.get(key);
+        entry = innerTable.get("[base]");
 
-	xmlOut.startElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(key));
-	xmlOut.indentOut();
+        xmlOut.startElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(key));
+        xmlOut.indentOut();
 
-	if (entry != null)
-	  {
-	    xmlOut.attribute("perm", entry.getXMLCode());
-	  }
+        if (entry != null)
+          {
+            xmlOut.attribute("perm", entry.getXMLCode());
+          }
 
-	for (String fieldKey: innerTable.keySet())
-	  {
-	    if (fieldKey.equals("[base]"))
-	      {
-		continue;	// we've already wrote perms for the base
-	      }
+        for (String fieldKey: innerTable.keySet())
+          {
+            if (fieldKey.equals("[base]"))
+              {
+                continue;       // we've already wrote perms for the base
+              }
 
-	    PermEntry fieldEntry = innerTable.get(fieldKey);
+            PermEntry fieldEntry = innerTable.get(fieldKey);
 
-	    xmlOut.startElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(fieldKey));
-	    xmlOut.attribute("perm", fieldEntry.getXMLCode());
-	    xmlOut.endElement(arlut.csd.Util.XMLUtils.XMLEncode(fieldKey));
-	  }
+            xmlOut.startElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(fieldKey));
+            xmlOut.attribute("perm", fieldEntry.getXMLCode());
+            xmlOut.endElement(arlut.csd.Util.XMLUtils.XMLEncode(fieldKey));
+          }
 
-	xmlOut.indentIn();
-	xmlOut.endElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(key));
+        xmlOut.indentIn();
+        xmlOut.endElementIndent(arlut.csd.Util.XMLUtils.XMLEncode(key));
       }
 
     xmlOut.indentIn();
@@ -831,8 +831,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     if (writeSurroundContext)
       {
-	xmlOut.indentIn();
-	xmlOut.endElementIndent(this.getXMLName());
+        xmlOut.indentIn();
+        xmlOut.endElementIndent(this.getXMLName());
       }
   }
 
@@ -846,20 +846,20 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     for (String key: matrix.keySet())
       {
-	PermEntry entry = matrix.get(key);
+        PermEntry entry = matrix.get(key);
 
-	if (isBasePerm(key))
-	  {
-	    result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
-			  " -- " + entry.difference(null));
-	    result.append("\n");
-	  }
-	else
-	  {
-	    result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
-			  " -- " + entry.difference(null));
-	    result.append("\n");
-	  }
+        if (isBasePerm(key))
+          {
+            result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
+                          " -- " + entry.difference(null));
+            result.append("\n");
+          }
+        else
+          {
+            result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
+                          " -- " + entry.difference(null));
+            result.append("\n");
+          }
       }
 
     return result.toString();
@@ -874,7 +874,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     if (!verifyReadPermission())
       {
-	throw new IllegalArgumentException("permission denied to read this field");
+        throw new IllegalArgumentException("permission denied to read this field");
       }
 
     return "PermissionMatrix";
@@ -899,7 +899,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     if (!(orig instanceof PermissionMatrixDBField))
       {
-	throw new IllegalArgumentException("bad field comparison");
+        throw new IllegalArgumentException("bad field comparison");
       }
 
     clean();
@@ -908,7 +908,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     if (origP.equals(this))
       {
-	return null;
+        return null;
       }
 
     Vector<String> myKeys = new Vector<String>();
@@ -916,12 +916,12 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     for (String key: matrix.keySet())
       {
-	myKeys.add(key);
+        myKeys.add(key);
       }
 
     for (String key: origP.matrix.keySet())
       {
-	origKeys.add(key);
+        origKeys.add(key);
       }
 
     Vector<String> keptKeys = arlut.csd.Util.VectorUtils.intersection(myKeys, origKeys);
@@ -930,37 +930,37 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     for (String key: keptKeys)
       {
-	PermEntry entryA = matrix.get(key);
-	PermEntry entryB = origP.matrix.get(key);
+        PermEntry entryA = matrix.get(key);
+        PermEntry entryB = origP.matrix.get(key);
 
-	if (!entryA.equals(entryB))
-	  {
-	    result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
-			  " -- " + entryA.difference(entryB));
-	    result.append("\n");
-	  }
+        if (!entryA.equals(entryB))
+          {
+            result.append(decodeBaseName(key) + " " + decodeFieldName(key) +
+                          " -- " + entryA.difference(entryB));
+            result.append("\n");
+          }
       }
 
     for (String key: newKeys)
       {
-	PermEntry entryA = matrix.get(key);
+        PermEntry entryA = matrix.get(key);
 
-	// "{0} {1} -- {2}\n"
-	result.append(ts.l("getValueString.new_pattern",
-			   decodeBaseName(key),
-			   decodeFieldName(key),
-			   entryA.difference(null)));
+        // "{0} {1} -- {2}\n"
+        result.append(ts.l("getValueString.new_pattern",
+                           decodeBaseName(key),
+                           decodeFieldName(key),
+                           entryA.difference(null)));
       }
 
     for (String key: lostKeys)
       {
-	PermEntry entryB = origP.matrix.get(key);
+        PermEntry entryB = origP.matrix.get(key);
 
-	// "{0} {1} -- {2}\n"
-	result.append(ts.l("getValueString.old_pattern",
-			   decodeBaseName(key),
-			   decodeFieldName(key),
-			   entryB));
+        // "{0} {1} -- {2}\n"
+        result.append(ts.l("getValueString.old_pattern",
+                           decodeBaseName(key),
+                           decodeFieldName(key),
+                           entryB));
       }
 
     return result.toString();
@@ -995,22 +995,22 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     if (!(owner instanceof DBEditObject))
       {
-	return null;
+        return null;
       }
 
     if (owner.gSession.getPermManager().isSuperGash())
       {
-	return null;
+        return null;
       }
 
     if (getID() == SchemaConstants.RoleMatrix)
       {
-	return owner.gSession.getPermManager().getDelegatablePersonaPerms();
+        return owner.gSession.getPermManager().getDelegatablePersonaPerms();
       }
 
     if (getID() == SchemaConstants.RoleDefaultMatrix)
       {
-	return owner.gSession.getPermManager().getDelegatableDefaultPerms();
+        return owner.gSession.getPermManager().getDelegatableDefaultPerms();
       }
 
     return null;
@@ -1055,12 +1055,12 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     try
       {
-	return matrix.get(matrixEntry(base.getTypeID(),
-				      field.getID()));
+        return matrix.get(matrixEntry(base.getTypeID(),
+                                      field.getID()));
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("caught remote: " + ex);
+        throw new RuntimeException("caught remote: " + ex);
       }
   }
 
@@ -1076,11 +1076,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     try
       {
-	return matrix.get(matrixEntry(base.getTypeID()));
+        return matrix.get(matrixEntry(base.getTypeID()));
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("caught remote: " + ex);
+        throw new RuntimeException("caught remote: " + ex);
       }
   }
 
@@ -1100,16 +1100,16 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     if (isEditable())
       {
-	matrix.clear();
-	matrix = new Hashtable<String, PermEntry>();
-	return null;
+        matrix.clear();
+        matrix = new Hashtable<String, PermEntry>();
+        return null;
       }
     else
       {
-	// "Permissions Failure"
-	// "You don''t have permissions to reset {0}''s permission matrix."
-	return Ganymede.createErrorDialog(ts.l("resetPerms.error_subj"),
-					  ts.l("resetPerms.error_text", toString()));
+        // "Permissions Failure"
+        // "You don''t have permissions to reset {0}''s permission matrix."
+        return Ganymede.createErrorDialog(ts.l("resetPerms.error_subj"),
+                                          ts.l("resetPerms.error_text", toString()));
       }
   }
 
@@ -1128,12 +1128,12 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     try
       {
-	return setPerm(base.getTypeID(), field.getID(), entry);
+        return setPerm(base.getTypeID(), field.getID(), entry);
       }
     catch (RemoteException ex)
       {
-	// "Couldn''t process setPerm(): {0}"
-	return Ganymede.createErrorDialog(ts.l("setPerm.error_text", ex.getMessage()));
+        // "Couldn''t process setPerm(): {0}"
+        return Ganymede.createErrorDialog(ts.l("setPerm.error_text", ex.getMessage()));
       }
   }
 
@@ -1157,31 +1157,31 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     if (isEditable())
       {
-	if (allowablePermEntry(baseID, fieldID, entry))
-	  {
-	    matrix.put(matrixEntry(baseID, fieldID), entry);
-	  }
-	else
-	  {
-	    DBObjectBase base = Ganymede.db.getObjectBase(baseID);
-	    DBObjectBaseField field = (DBObjectBaseField) base.getField(fieldID);
+        if (allowablePermEntry(baseID, fieldID, entry))
+          {
+            matrix.put(matrixEntry(baseID, fieldID), entry);
+          }
+        else
+          {
+            DBObjectBase base = Ganymede.db.getObjectBase(baseID);
+            DBObjectBaseField field = (DBObjectBaseField) base.getField(fieldID);
 
-	    String baseName = base.getName();
-	    String fieldName = field.getName();
+            String baseName = base.getName();
+            String fieldName = field.getName();
 
-	    // "You can''t set privileges for base {0}, field {1}, that you yourself do not have."
-	    return Ganymede.createErrorDialog(ts.l("setPerm.delegation_error", baseName, fieldName));
-	  }
+            // "You can''t set privileges for base {0}, field {1}, that you yourself do not have."
+            return Ganymede.createErrorDialog(ts.l("setPerm.delegation_error", baseName, fieldName));
+          }
       }
     else
       {
-	throw new IllegalArgumentException("not an editable field");
+        throw new IllegalArgumentException("not an editable field");
       }
 
     if (debug)
       {
-	System.err.println("PermissionMatrixDBField: base " +
-			   baseID + ", field " + fieldID + " set to " + entry);
+        System.err.println("PermissionMatrixDBField: base " +
+                           baseID + ", field " + fieldID + " set to " + entry);
       }
 
     return null;
@@ -1205,12 +1205,12 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     try
       {
-	return setPerm(base.getTypeID(), entry);
+        return setPerm(base.getTypeID(), entry);
       }
     catch (RemoteException ex)
       {
-	// "Couldn''t process setPerm(): {0}"
-	return Ganymede.createErrorDialog(ts.l("setPerm.error_text", ex.getMessage()));
+        // "Couldn''t process setPerm(): {0}"
+        return Ganymede.createErrorDialog(ts.l("setPerm.error_text", ex.getMessage()));
       }
   }
 
@@ -1229,27 +1229,27 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     if (isEditable())
       {
-	if (allowablePermEntry(baseID, (short) -1, entry))
-	  {
-	    matrix.put(matrixEntry(baseID), entry);
-	  }
-	else
-	  {
-	    DBObjectBase base = Ganymede.db.getObjectBase(baseID);
-	    String baseName = base.getName();
+        if (allowablePermEntry(baseID, (short) -1, entry))
+          {
+            matrix.put(matrixEntry(baseID), entry);
+          }
+        else
+          {
+            DBObjectBase base = Ganymede.db.getObjectBase(baseID);
+            String baseName = base.getName();
 
-	    // "You can''t set privileges for base {0} that you yourself do not have."
-	    return Ganymede.createErrorDialog(ts.l("setPerm.base_delegation_error", baseName));
-	  }
+            // "You can''t set privileges for base {0} that you yourself do not have."
+            return Ganymede.createErrorDialog(ts.l("setPerm.base_delegation_error", baseName));
+          }
       }
     else
       {
-	throw new IllegalArgumentException("not an editable field");
+        throw new IllegalArgumentException("not an editable field");
       }
 
     if (debug)
       {
-	System.err.println("PermissionMatrixDBField: base " + baseID + " set to " + entry);
+        System.err.println("PermissionMatrixDBField: base " + baseID + " set to " + entry);
       }
 
     return null;
@@ -1265,28 +1265,28 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     for (String key: matrix.keySet())
       {
-	PermEntry pe = matrix.get(key);
+        PermEntry pe = matrix.get(key);
 
-	// If we have invalid entries, we're just going to throw them out,
-	// forget they even existed..  this is only remotely reasonable
-	// because matrix is private to this class, and because these
-	// invalid entries could serve no useful purpose, and will only
-	// become invalid after schema editing in any case.  Since
-	// normally the database/schema needs to be dumped after changing
-	// the schema, this is an appropriate place to do the cleanup.
+        // If we have invalid entries, we're just going to throw them out,
+        // forget they even existed..  this is only remotely reasonable
+        // because matrix is private to this class, and because these
+        // invalid entries could serve no useful purpose, and will only
+        // become invalid after schema editing in any case.  Since
+        // normally the database/schema needs to be dumped after changing
+        // the schema, this is an appropriate place to do the cleanup.
 
-	if (!isValidCode(key))
-	  {
-	    matrix.remove(key);
+        if (!isValidCode(key))
+          {
+            matrix.remove(key);
 
-	    if (debug)
-	      {
-		System.err.println("**** PermissionMatrixDBField.clean(): throwing out invalid entry " +
-				   decodeBaseName(key) + " " +
-				   decodeFieldName(key) + " ---- " +
-				   pe.toString());
-	      }
-	  }
+            if (debug)
+              {
+                System.err.println("**** PermissionMatrixDBField.clean(): throwing out invalid entry " +
+                                   decodeBaseName(key) + " " +
+                                   decodeFieldName(key) + " ---- " +
+                                   pe.toString());
+              }
+          }
       }
   }
 
@@ -1327,11 +1327,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     if (matrix != null)
       {
-	return new PermMatrixCkPoint(this);
+        return new PermMatrixCkPoint(this);
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -1347,13 +1347,13 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     if (!(owner instanceof DBEditObject))
       {
-	throw new RuntimeException("Invalid rollback on field " +
-				   getName() + ", not in an editable context");
+        throw new RuntimeException("Invalid rollback on field " +
+                                   getName() + ", not in an editable context");
       }
 
     if (oldval == null)
       {
-	this.setUndefined(true);
+        this.setUndefined(true);
         return;
       }
 
@@ -1381,67 +1381,67 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     if (owner.gSession == null)
       {
-	return false;
+        return false;
       }
 
     if (owner.gSession.getPermManager().isSuperGash())
       {
-	return true;
+        return true;
       }
 
     if (entry == null)
       {
-	throw new IllegalArgumentException("entry is null");
+        throw new IllegalArgumentException("entry is null");
       }
 
     if (getID() == SchemaConstants.RoleMatrix)
       {
-	if (owner.gSession.getPermManager().getPersonaPerms() == null)
-	  {
-	    return false;
-	  }
+        if (owner.gSession.getPermManager().getPersonaPerms() == null)
+          {
+            return false;
+          }
 
-	PermEntry adminPriv;
+        PermEntry adminPriv;
 
-	if (fieldID < 0)
-	  {
-	    adminPriv = (PermEntry) owner.gSession.getPermManager().getDelegatablePersonaPerms().getPerm(baseID);
-	  }
-	else
-	  {
-	    adminPriv = (PermEntry) owner.gSession.getPermManager().getDelegatablePersonaPerms().getPerm(baseID, fieldID);
-	  }
+        if (fieldID < 0)
+          {
+            adminPriv = (PermEntry) owner.gSession.getPermManager().getDelegatablePersonaPerms().getPerm(baseID);
+          }
+        else
+          {
+            adminPriv = (PermEntry) owner.gSession.getPermManager().getDelegatablePersonaPerms().getPerm(baseID, fieldID);
+          }
 
-	// the adminPriv should have all the bits set that we are seeking to set
+        // the adminPriv should have all the bits set that we are seeking to set
 
-	return entry.equals(entry.intersection(adminPriv));
+        return entry.equals(entry.intersection(adminPriv));
       }
     else if (getID() == SchemaConstants.RoleDefaultMatrix)
       {
-	if (owner.gSession.getPermManager().getDefaultPerms() == null)
-	  {
-	    return false;
-	  }
+        if (owner.gSession.getPermManager().getDefaultPerms() == null)
+          {
+            return false;
+          }
 
-	PermEntry adminPriv;
+        PermEntry adminPriv;
 
-	if (fieldID < 0)
-	  {
-	    adminPriv = (PermEntry) owner.gSession.getPermManager().getDelegatableDefaultPerms().getPerm(baseID);
-	  }
-	else
-	  {
-	    adminPriv = (PermEntry) owner.gSession.getPermManager().getDelegatableDefaultPerms().getPerm(baseID, fieldID);
-	  }
+        if (fieldID < 0)
+          {
+            adminPriv = (PermEntry) owner.gSession.getPermManager().getDelegatableDefaultPerms().getPerm(baseID);
+          }
+        else
+          {
+            adminPriv = (PermEntry) owner.gSession.getPermManager().getDelegatableDefaultPerms().getPerm(baseID, fieldID);
+          }
 
-	// the adminPriv should have all the bits set that we are seeking to set
+        // the adminPriv should have all the bits set that we are seeking to set
 
-	return entry.equals(entry.intersection(adminPriv));
+        return entry.equals(entry.intersection(adminPriv));
       }
     else
       {
-	throw new RuntimeException("Error, don't recognize field id.. should be 'Owned Object Bits' or " +
-				   "'Default Bits'.");
+        throw new RuntimeException("Error, don't recognize field id.. should be 'Owned Object Bits' or " +
+                                   "'Default Bits'.");
       }
   }
 

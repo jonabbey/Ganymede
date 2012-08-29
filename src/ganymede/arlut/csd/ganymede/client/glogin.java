@@ -237,7 +237,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   {
     if (runningOnMac == null)
       {
-	runningOnMac = "Mac OS X".equals(System.getProperty("os.name"));
+        runningOnMac = "Mac OS X".equals(System.getProperty("os.name"));
       }
 
     return runningOnMac;
@@ -306,15 +306,15 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
         {
           my_glogin = new glogin();
 
-          my_frame = new gloginFrame(ts.l("main.frame_name"),	// "Ganymede Client"
+          my_frame = new gloginFrame(ts.l("main.frame_name"),   // "Ganymede Client"
                                      my_glogin);
 
           my_frame.getContentPane().setLayout(new BorderLayout());
           my_frame.getContentPane().add("Center", my_glogin);
 
-          my_glogin.init();		// init before we setVisible(), so startup is smoother
+          my_glogin.init();             // init before we setVisible(), so startup is smoother
 
-          my_frame.pack();		// pack so that we fit everything properly
+          my_frame.pack();              // pack so that we fit everything properly
 
           my_frame.setLocationRelativeTo(null); // center on the screen, please
 
@@ -352,67 +352,67 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   {
     if (WeAreApplet)
       {
-	return my_glogin.getParameter(configKey);
+        return my_glogin.getParameter(configKey);
       }
     else
       {
-	if (properties_file != null)
-	  {
-	    if (ganymedeProperties == null)
-	      {
-		// declare a local Properties object while we're
-		// initializing it so that the static
-		// ganymedeProperties field is not visible externally
-		// in mid-configuration.  FindBugs.
+        if (properties_file != null)
+          {
+            if (ganymedeProperties == null)
+              {
+                // declare a local Properties object while we're
+                // initializing it so that the static
+                // ganymedeProperties field is not visible externally
+                // in mid-configuration.  FindBugs.
 
-		Properties myGanymedeProperties = new Properties();
+                Properties myGanymedeProperties = new Properties();
 
-		if (debug)
-		  {
-		    System.out.println("Loading properties from: " + properties_file);
-		  }
+                if (debug)
+                  {
+                    System.out.println("Loading properties from: " + properties_file);
+                  }
 
-		if (properties_file != null)
-		  {
-		    BufferedInputStream bis = null;
+                if (properties_file != null)
+                  {
+                    BufferedInputStream bis = null;
 
-		    try
-		      {
-			bis = new BufferedInputStream(new FileInputStream(properties_file));
-			myGanymedeProperties.load(bis);
-		      }
-		    catch (java.io.FileNotFoundException e)
-		      {
-			throw new RuntimeException("File not found: " + e);
-		      }
-		    catch (java.io.IOException e)
-		      {
-			throw new RuntimeException("Whoa, io exception: " + e);
-		      }
-		    finally
-		      {
-			if (bis != null)
-			  {
-			    try
-			      {
-				bis.close();
-			      }
-			    catch (java.io.IOException ex)
-			      {
-			      }
-			  }
-		      }
-		  }
+                    try
+                      {
+                        bis = new BufferedInputStream(new FileInputStream(properties_file));
+                        myGanymedeProperties.load(bis);
+                      }
+                    catch (java.io.FileNotFoundException e)
+                      {
+                        throw new RuntimeException("File not found: " + e);
+                      }
+                    catch (java.io.IOException e)
+                      {
+                        throw new RuntimeException("Whoa, io exception: " + e);
+                      }
+                    finally
+                      {
+                        if (bis != null)
+                          {
+                            try
+                              {
+                                bis.close();
+                              }
+                            catch (java.io.IOException ex)
+                              {
+                              }
+                          }
+                      }
+                  }
 
-		ganymedeProperties = myGanymedeProperties;
-	      }
+                ganymedeProperties = myGanymedeProperties;
+              }
 
-	    return ganymedeProperties.getProperty(configKey);
-	  }
-	else
-	  {
-	    return java.lang.System.getProperty(configKey);
-	  }
+            return ganymedeProperties.getProperty(configKey);
+          }
+        else
+          {
+            return java.lang.System.getProperty(configKey);
+          }
       }
   }
 
@@ -464,18 +464,18 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     if (val == null)
       {
-	return defaultValue;
+        return defaultValue;
       }
     else
       {
-	if (val.equals("true"))
-	  {
-	    return true;
-	  }
-	else
-	  {
-	    return false;
-	  }
+        if (val.equals("true"))
+          {
+            return true;
+          }
+        else
+          {
+            return false;
+          }
       }
   }
 
@@ -490,12 +490,12 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     try
       {
-	Thread.setDefaultUncaughtExceptionHandler(handler);
+        Thread.setDefaultUncaughtExceptionHandler(handler);
       }
     catch (SecurityException ex)
       {
-	// running in a browser, presumably.. not much we can do about
-	// it.
+        // running in a browser, presumably.. not much we can do about
+        // it.
       }
   }
 
@@ -507,7 +507,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   {
     if (debug)
       {
-	System.out.println("init in glogin");
+        System.out.println("init in glogin");
       }
 
     // Look up our saved look and feel, if any
@@ -521,19 +521,19 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     if (WeAreApplet)
       {
-	my_glogin = this;
-	my_frame = new JFrame(); // we need an invisible frame to attach pop-up dialogs to
+        my_glogin = this;
+        my_frame = new JFrame(); // we need an invisible frame to attach pop-up dialogs to
       }
 
     serverhost = getConfigString("ganymede.serverhost");
 
     try
       {
-	registryPort = getConfigInteger("ganymede.registryPort");
+        registryPort = getConfigInteger("ganymede.registryPort");
       }
     catch (NumberFormatException ex)
       {
-	registryPort = registryPortProperty; // default
+        registryPort = registryPortProperty; // default
       }
 
     server_url = "rmi://" + serverhost + ":" + registryPort + "/ganymede.server";
@@ -589,8 +589,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     // "{0}, port {1,number,#}"
     JLabel hostLabel = new JLabel(ts.l("createLoginPanel.server_label2",
-				       serverhost,
-				       Integer.valueOf(registryPort)));
+                                       serverhost,
+                                       Integer.valueOf(registryPort)));
     Font x = new Font("Courier", Font.ITALIC, 14);
     hostLabel.setFont(x);
     hostLabel.setForeground(Color.black);
@@ -658,8 +658,8 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     if (pre_username != null)
       {
-	username.setText(pre_username);
-	passwd.requestFocus();
+        username.setText(pre_username);
+        passwd.requestFocus();
       }
 
     gbc.ipady = 0;
@@ -669,7 +669,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     // "Connecting... {0}"
     connector = new JButton(ts.l("global.connecting_text",
-				 Character.valueOf(spinAry[spindex])));
+                                 Character.valueOf(spinAry[spindex])));
     connector.setOpaque(true);
     connector.addActionListener(this);
 
@@ -679,7 +679,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     if (!WeAreApplet)
       {
-	buttonPanel.add("East", _quitButton);
+        buttonPanel.add("East", _quitButton);
       }
 
     gbc.gridx = 0;
@@ -711,147 +711,147 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     if (connecting.set(true))
       {
-	return;			// we already have a thread running
+        return;                 // we already have a thread running
       }
 
     try
       {
-	while (!connected.isSet())
-	  {
-	    if (try_number++ > 20)
-	      {
-		break;
-	      }
+        while (!connected.isSet())
+          {
+            if (try_number++ > 20)
+              {
+                break;
+              }
 
-	    try
-	      {
-		EventQueue.invokeAndWait(new Runnable()
-		  {
-		    public void run()
-		    {
-		      // "Connecting... {0}"
-		      connector.setText(ts.l("global.connecting_text",
-					     Character.valueOf(spinAry[spindex])));
-		    }
-		  });
-	      }
-	    catch (Exception ex)
-	      {
-		ex.printStackTrace();
-	      }
+            try
+              {
+                EventQueue.invokeAndWait(new Runnable()
+                  {
+                    public void run()
+                    {
+                      // "Connecting... {0}"
+                      connector.setText(ts.l("global.connecting_text",
+                                             Character.valueOf(spinAry[spindex])));
+                    }
+                  });
+              }
+            catch (Exception ex)
+              {
+                ex.printStackTrace();
+              }
 
-	    try
-	      {
-		my_client.connect();	// exceptions ahoy!
+            try
+              {
+                my_client.connect();    // exceptions ahoy!
 
-		connected.set(true);
-		break;
-	      }
-	    catch (Throwable ex)
-	      {
-		connectError = ex.getMessage();
+                connected.set(true);
+                break;
+              }
+            catch (Throwable ex)
+              {
+                connectError = ex.getMessage();
 
-		if (debug)
-		  {
-		    ex.printStackTrace();
-		  }
-	      }
+                if (debug)
+                  {
+                    ex.printStackTrace();
+                  }
+              }
 
-	    try
-	      {
-		spindex++;
+            try
+              {
+                spindex++;
 
-		if (spindex >= spinAry.length)
-		  {
-		    spindex = 0;
-		  }
+                if (spindex >= spinAry.length)
+                  {
+                    spindex = 0;
+                  }
 
-		// Wait for 1/4 sec before retrying to connect to server
+                // Wait for 1/4 sec before retrying to connect to server
 
-		Thread.sleep(250);
-	      }
-	    catch (InterruptedException e)
-	      {
-	      }
-	  }
+                Thread.sleep(250);
+              }
+            catch (InterruptedException e)
+              {
+              }
+          }
 
-	if (connected.isSet())
-	  {
-	    if (my_client.isSSLEnabled() && !ssl)
-	      {
-		ssl = true;
-		image.setIcon(new ImageIcon(ganymede_ssl_logo));
-	      }
+        if (connected.isSet())
+          {
+            if (my_client.isSSLEnabled() && !ssl)
+              {
+                ssl = true;
+                image.setIcon(new ImageIcon(ganymede_ssl_logo));
+              }
 
-	    EventQueue.invokeLater(new Runnable() {
-		public void run() {
-		  if (ssl)
-		    {
-		      // "Login to server"
-		      connector.setText(ts.l("run.login_ssl"));
-		    }
-		  else
-		    {
-		      // "Login to server (NO SSL)"
-		      connector.setText(ts.l("run.login_nossl"));
-		    }
+            EventQueue.invokeLater(new Runnable() {
+                public void run() {
+                  if (ssl)
+                    {
+                      // "Login to server"
+                      connector.setText(ts.l("run.login_ssl"));
+                    }
+                  else
+                    {
+                      // "Login to server (NO SSL)"
+                      connector.setText(ts.l("run.login_nossl"));
+                    }
 
-		  enableButtons(true);
-		  connector.paintImmediately(connector.getVisibleRect());
-		  setNormalCursor();
+                  enableButtons(true);
+                  connector.paintImmediately(connector.getVisibleRect());
+                  setNormalCursor();
 
-		  username.setEnabled(true);
-		  passwd.setEnabled(true);
-		  username.paintImmediately(username.getVisibleRect());
-		  passwd.paintImmediately(passwd.getVisibleRect());
+                  username.setEnabled(true);
+                  passwd.setEnabled(true);
+                  username.paintImmediately(username.getVisibleRect());
+                  passwd.paintImmediately(passwd.getVisibleRect());
 
-		  String pre_username = username.getText();
+                  String pre_username = username.getText();
 
-		  if (pre_username != null && !pre_username.equals(""))
-		    {
-		      passwd.requestFocus();
-		    }
-		  else
-		    {
-		      username.requestFocus();
-		    }
+                  if (pre_username != null && !pre_username.equals(""))
+                    {
+                      passwd.requestFocus();
+                    }
+                  else
+                    {
+                      username.requestFocus();
+                    }
 
-		  invalidate();
-		  validate();
-		}
-	      });
-	  }
-	else
-	  {
-	    // "Login Error"
-	    // "Couldn''t locate Ganymede server.  Perhaps it is down?\n\n{0}"
-	    // "OK"
-	    new StringDialog(my_frame,
-			     ts.l("run.login_error"),
-			     ts.l("run.login_error_text", connectError),
-			     ts.l("global.ok"),
-			     null,
-			     getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
+                  invalidate();
+                  validate();
+                }
+              });
+          }
+        else
+          {
+            // "Login Error"
+            // "Couldn''t locate Ganymede server.  Perhaps it is down?\n\n{0}"
+            // "OK"
+            new StringDialog(my_frame,
+                             ts.l("run.login_error"),
+                             ts.l("run.login_error_text", connectError),
+                             ts.l("global.ok"),
+                             null,
+                             getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
 
-	    EventQueue.invokeLater(new Runnable()
-	      {
-		public void run()
-		{
-		  // "Connect"
-		  connector.setText(ts.l("global.connect_text"));
-		  username.setEnabled(false);
-		  passwd.setEnabled(false);
+            EventQueue.invokeLater(new Runnable()
+              {
+                public void run()
+                {
+                  // "Connect"
+                  connector.setText(ts.l("global.connect_text"));
+                  username.setEnabled(false);
+                  passwd.setEnabled(false);
 
-		  username.requestFocus();
-		  invalidate();
-		  validate();
-		}
-	      });
-	  }
+                  username.requestFocus();
+                  invalidate();
+                  validate();
+                }
+              });
+          }
       }
     finally
       {
-	connecting.set(false);
+        connecting.set(false);
       }
   }
 
@@ -876,63 +876,63 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   {
     try
       {
-	my_client.disconnect();
+        my_client.disconnect();
       }
     catch (Exception ex)
       {
-	if (glogin.g_client != null)
-	  {
-	    glogin.g_client.processException(ex);
-	  }
-	else
-	  {
-	    ex.printStackTrace();
-	  }
+        if (glogin.g_client != null)
+          {
+            glogin.g_client.processException(ex);
+          }
+        else
+          {
+            ex.printStackTrace();
+          }
       }
     finally
       {
-	// clean everything up on the gui thread
+        // clean everything up on the gui thread
 
-	final boolean myAndQuit = andQuit;
+        final boolean myAndQuit = andQuit;
 
-	try
-	  {
-	    EventQueue.invokeLater(new Runnable() {
-	      public void run() {
-		gclient x = null;
+        try
+          {
+            EventQueue.invokeLater(new Runnable() {
+              public void run() {
+                gclient x = null;
 
-		synchronized (glogin.class)
-		  {
-		    if (glogin.g_client != null)
-		      {
-			x = glogin.g_client;
-			glogin.g_client = null;
-		      }
-		  }
+                synchronized (glogin.class)
+                  {
+                    if (glogin.g_client != null)
+                      {
+                        x = glogin.g_client;
+                        glogin.g_client = null;
+                      }
+                  }
 
-		if (x != null)
-		  {
-		    x.setVisible(false);
-		    x.dispose();
-		    x.cleanUp();
-		  }
+                if (x != null)
+                  {
+                    x.setVisible(false);
+                    x.dispose();
+                    x.cleanUp();
+                  }
 
-		if (myAndQuit)
-		  {
-		    System.exit(0);
-		  }
-	      }
-	    });
-	  }
-	catch (NullPointerException ex)
-	  {
-	  }
+                if (myAndQuit)
+                  {
+                    System.exit(0);
+                  }
+              }
+            });
+          }
+        catch (NullPointerException ex)
+          {
+          }
 
-	if (!andQuit)
-	  {
-	    showLoginBox();
-	    enableButtons(true);
-	  }
+        if (!andQuit)
+          {
+            showLoginBox();
+            enableButtons(true);
+          }
       }
   }
 
@@ -989,115 +989,115 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   {
     if (e.getSource() == username)
       {
-	passwd.requestFocus();
+        passwd.requestFocus();
       }
     else if (e.getSource() == passwd)
       {
-	connector.doClick();
+        connector.doClick();
       }
     else if (e.getSource() == connector)
       {
-	setWaitCursor();
+        setWaitCursor();
 
-	try
-	  {
-	    if (!my_client.isConnected())
-	      {
-		if (connecting.isSet())
-		  {
-		    return;		// our connection thread is still trying to connect
-		  }
-		else
-		  {
-		    // looks like the ClientBase object lost connection to
-		    // the RMI server.. let's try to re-acquire.
+        try
+          {
+            if (!my_client.isConnected())
+              {
+                if (connecting.isSet())
+                  {
+                    return;             // our connection thread is still trying to connect
+                  }
+                else
+                  {
+                    // looks like the ClientBase object lost connection to
+                    // the RMI server.. let's try to re-acquire.
 
-		    Thread reconnectThread = new Thread(this);
-		    reconnectThread.setPriority(Thread.NORM_PRIORITY);
-		    reconnectThread.start();
+                    Thread reconnectThread = new Thread(this);
+                    reconnectThread.setPriority(Thread.NORM_PRIORITY);
+                    reconnectThread.start();
 
-		    return;
-		  }
-	      }
+                    return;
+                  }
+              }
 
-	    String uname = username.getText().trim();
-	    String pword = new String(passwd.getPassword());
+            String uname = username.getText().trim();
+            String pword = new String(passwd.getPassword());
 
-	    my_passwd = pword;
+            my_passwd = pword;
             active_passwd = pword;
-	    my_session = null;
+            my_session = null;
 
-	    try
-	      {
-		my_session = my_client.login(uname, pword);
-	      }
-	    catch (Exception ex)
-	      {
-		// "Couldn''t log into server: \n{0}"
-		new JErrorDialog(my_frame,
-				 ts.l("actionPerformed.login_failure", ex.getMessage()),
-				 getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL);
+            try
+              {
+                my_session = my_client.login(uname, pword);
+              }
+            catch (Exception ex)
+              {
+                // "Couldn''t log into server: \n{0}"
+                new JErrorDialog(my_frame,
+                                 ts.l("actionPerformed.login_failure", ex.getMessage()),
+                                 getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL);
 
-		enableButtons(true);
-	      }
+                enableButtons(true);
+              }
 
-	    if (my_session != null)
-	      {
-		// we need to look up our real username from the
-		// server, since we might have been logged in using a
-		// composite username:persona string.
+            if (my_session != null)
+              {
+                // we need to look up our real username from the
+                // server, since we might have been logged in using a
+                // composite username:persona string.
 
                 active_username = uname;
 
-		try
-		  {
-		    my_username = my_session.getMyUserName();
-		  }
-		catch (Exception ex)
-		  {
-		  }
+                try
+                  {
+                    my_username = my_session.getMyUserName();
+                  }
+                catch (Exception ex)
+                  {
+                  }
 
-		enableButtons(false);
+                enableButtons(false);
 
-		// remember last login name.
+                // remember last login name.
 
-		gclient.prefs.put("login_user", active_username);
+                gclient.prefs.put("login_user", active_username);
 
-		startSession(my_session);
-	      }
-	    else
-	      {
-		// This means that the user was not able to log into the server properly.
+                startSession(my_session);
+              }
+            else
+              {
+                // This means that the user was not able to log into the server properly.
 
-		if (!my_client.isConnected() && !connecting.isSet())
-		  {
-		    // looks like the ClientBase object lost connection to
-		    // the RMI server.. let's try to re-acquire.
+                if (!my_client.isConnected() && !connecting.isSet())
+                  {
+                    // looks like the ClientBase object lost connection to
+                    // the RMI server.. let's try to re-acquire.
 
-		    Thread reconnectThread = new Thread(this);
-		    reconnectThread.setPriority(Thread.NORM_PRIORITY);
-		    reconnectThread.start();
+                    Thread reconnectThread = new Thread(this);
+                    reconnectThread.setPriority(Thread.NORM_PRIORITY);
+                    reconnectThread.start();
 
-		    return;
-		  }
-		else
-		  {
-		    // We are connected to the server.. bad password?
-		    // re-enable the "Login to server" button so that the
-		    // user can try again.
+                    return;
+                  }
+                else
+                  {
+                    // We are connected to the server.. bad password?
+                    // re-enable the "Login to server" button so that the
+                    // user can try again.
 
-		    enableButtons(true);
-		  }
-	      }
-	  }
-	finally
-	  {
-	    setNormalCursor();
-	  }
+                    enableButtons(true);
+                  }
+              }
+          }
+        finally
+          {
+            setNormalCursor();
+          }
       }
     else if (e.getSource() == _quitButton)
       {
-	System.exit(0);
+        System.exit(0);
       }
   }
 
@@ -1111,12 +1111,12 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     try
       {
-	glogin.helpBase = session.getHelpBase();
+        glogin.helpBase = session.getHelpBase();
       }
     catch (Exception ex)
       {
-	ex.printStackTrace();
-	glogin.helpBase = null;
+        ex.printStackTrace();
+        glogin.helpBase = null;
       }
 
     // create the thread in our thread group that the disconnected()
@@ -1147,10 +1147,10 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   {
     if (hideLoginWhenApplication)
       {
-	if (!isApplet() && my_frame != null)
-	  {
-	    my_frame.setVisible(false);
-	  }
+        if (!isApplet() && my_frame != null)
+          {
+            my_frame.setVisible(false);
+          }
       }
   }
 
@@ -1158,12 +1158,12 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   {
     if (hideLoginWhenApplication)
       {
-	if (!isApplet() && my_frame != null)
-	  {
-	    my_frame.setVisible(true);
+        if (!isApplet() && my_frame != null)
+          {
+            my_frame.setVisible(true);
             passwd.setText(""); // clear the passwd field when we return
             passwd.paintImmediately(passwd.getVisibleRect());
-	  }
+          }
       }
   }
 
@@ -1178,38 +1178,38 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   {
     if (debug)
       {
-	System.out.println(e.getMessage());
+        System.out.println(e.getMessage());
       }
 
     // constructing a JErrorDialog causes it to be shown.
 
     if (e.getType() == ClientMessage.ERROR)
       {
-	new JErrorDialog(my_frame, e.getMessage(), getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL);
+        new JErrorDialog(my_frame, e.getMessage(), getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL);
       }
     else if (e.getType() == ClientMessage.BUILDSTATUS)
       {
-	if (g_client != null)
-	  {
-	    g_client.setBuildStatus(e.getMessage());
-	  }
+        if (g_client != null)
+          {
+            g_client.setBuildStatus(e.getMessage());
+          }
       }
     else if (e.getType() == ClientMessage.LOGIN ||
              e.getType() == ClientMessage.LOGOUT ||
              e.getType() == ClientMessage.COMMITNOTIFY ||
              e.getType() == ClientMessage.ABORTNOTIFY)
       {
-	if (g_client != null)
-	  {
-	    g_client.setStatus(e.getMessage());
-	  }
+        if (g_client != null)
+          {
+            g_client.setStatus(e.getMessage());
+          }
       }
     else if (e.getType() == ClientMessage.LOGINCOUNT)
       {
-	if (g_client != null)
-	  {
-	    g_client.setLoginCount(Integer.valueOf(e.getMessage()).intValue());
-	  }
+        if (g_client != null)
+          {
+            g_client.setLoginCount(Integer.valueOf(e.getMessage()).intValue());
+          }
         else
           {
             this.initialLoginCount = Integer.valueOf(e.getMessage()).intValue();
@@ -1217,10 +1217,10 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
       }
     else if (e.getType() == ClientMessage.SOFTTIMEOUT)
       {
-	if (g_client != null)
-	  {
-	    g_client.softTimeout();
-	  }
+        if (g_client != null)
+          {
+            g_client.softTimeout();
+          }
       }
   }
 
@@ -1238,7 +1238,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   {
     try
       {
-	deathThread.die(e.getMessage());
+        deathThread.die(e.getMessage());
       }
     catch (NullPointerException ex)
       {
@@ -1257,7 +1257,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
   {
     if (errorImage == null)
       {
-	errorImage = PackageResources.getImageResource(this, "error.gif", getClass());
+        errorImage = PackageResources.getImageResource(this, "error.gif", getClass());
       }
 
     return errorImage;
@@ -1307,17 +1307,17 @@ class DeathWatcherThread extends Thread {
   {
     while (message == null)
       {
-	try
-	  {
-	    wait();
-	  }
-	catch (InterruptedException ex)
-	  {
-	    if (message == null)
-	      {
-		return;
-	      }
-	  }
+        try
+          {
+            wait();
+          }
+        catch (InterruptedException ex)
+          {
+            if (message == null)
+              {
+                return;
+              }
+          }
       }
 
     // if the user was stuck at the modal persona selection dialog,
@@ -1325,8 +1325,8 @@ class DeathWatcherThread extends Thread {
 
     try
       {
-	glogin.g_client.getPersonaDialog().changedOK = true;
-	glogin.g_client.getPersonaDialog().setHidden(true);
+        glogin.g_client.getPersonaDialog().changedOK = true;
+        glogin.g_client.getPersonaDialog().setHidden(true);
       }
     catch (NullPointerException ex)
       {
@@ -1345,8 +1345,8 @@ class DeathWatcherThread extends Thread {
 
     // "The Ganymede Server is disconnecting us:\n\n{0} "
     new JErrorDialog(glogin.g_client,
-		     ts.l("run.kicked_off", message),
-		     glogin.g_client.getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL);
+                     ts.l("run.kicked_off", message),
+                     glogin.g_client.getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL);
 
     // if we get here, the dialog has been put down
 
@@ -1407,41 +1407,41 @@ class ExitThread extends Thread {
   {
     if (debug)
       {
-	System.out.println("ExitThread: running");
+        System.out.println("ExitThread: running");
       }
 
     int i = 30;
 
     if (debug)
       {
-	System.out.print("System shutting down in 30 seconds");
+        System.out.print("System shutting down in 30 seconds");
       }
 
     try
       {
-	while (!dieNow && i > 0)
-	  {
-	    sleep(1000);
+        while (!dieNow && i > 0)
+          {
+            sleep(1000);
 
-	    if (debug)
-	      {
-		System.out.print(".");
-	      }
+            if (debug)
+              {
+                System.out.print(".");
+              }
 
-	    i--;
-	  }
+            i--;
+          }
       }
     catch (InterruptedException ie)
       {
-	if (debug)
-	  {
-	    System.out.println("glogin: Interupted trying to sleep and quit: " + ie);
-	  }
+        if (debug)
+          {
+            System.out.println("glogin: Interupted trying to sleep and quit: " + ie);
+          }
       }
 
     if (debug)
       {
-	System.out.println("\nGanymede disconnected: " + message);
+        System.out.println("\nGanymede disconnected: " + message);
       }
 
     glogin.my_glogin.logout();
@@ -1455,7 +1455,7 @@ class ExitThread extends Thread {
 
 /*------------------------------------------------------------------------------
                                                                            class
-							             gloginFrame
+                                                                     gloginFrame
 
 ------------------------------------------------------------------------------*/
 
@@ -1483,29 +1483,29 @@ class gloginFrame extends JFrame {
   {
     if (e.getID() == WindowEvent.WINDOW_CLOSING)
       {
-	if (debug)
-	  {
-	    System.out.println("Window closing");
-	  }
+        if (debug)
+          {
+            System.out.println("Window closing");
+          }
 
-	if (client._quitButton.isEnabled())
-	  {
-	    if (debug)
-	      {
-		System.out.println("It's ok to log out.");
-	      }
+        if (client._quitButton.isEnabled())
+          {
+            if (debug)
+              {
+                System.out.println("It's ok to log out.");
+              }
 
-	    System.exit(0);
-	    super.processWindowEvent(e);
-	  }
-	else if (debug)
-	  {
-	    System.out.println("No log out!");
-	  }
+            System.exit(0);
+            super.processWindowEvent(e);
+          }
+        else if (debug)
+          {
+            System.out.println("No log out!");
+          }
       }
     else
       {
-	super.processWindowEvent(e);
+        super.processWindowEvent(e);
       }
   }
 }

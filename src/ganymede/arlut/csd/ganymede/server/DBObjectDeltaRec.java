@@ -13,7 +13,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -98,14 +98,14 @@ public final class DBObjectDeltaRec implements FieldType {
   {
     if (oldObj == null || newObj == null)
       {
-	throw new IllegalArgumentException("Got a null object parameter" +
-					   ((oldObj == null) ? " old " : "") +
-					   ((newObj == null) ? " new " : ""));
+        throw new IllegalArgumentException("Got a null object parameter" +
+                                           ((oldObj == null) ? " old " : "") +
+                                           ((newObj == null) ? " new " : ""));
       }
 
     if (!oldObj.getInvid().equals(newObj.getInvid()))
       {
-	throw new IllegalArgumentException("Old and New object id's don't match");
+        throw new IllegalArgumentException("Old and New object id's don't match");
       }
 
     /* - */
@@ -129,72 +129,72 @@ public final class DBObjectDeltaRec implements FieldType {
     
     if (debug)
       {
-	System.err.println("Entering deltarec creation for objects " + 
-			   oldObj.getLabel() + " and " + newObj.getLabel());
+        System.err.println("Entering deltarec creation for objects " + 
+                           oldObj.getLabel() + " and " + newObj.getLabel());
       }
 
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
       {
-	if (debug)
-	  {
-	    System.err.println("Comparing field " + fieldDef.getName());
-	  }
+        if (debug)
+          {
+            System.err.println("Comparing field " + fieldDef.getName());
+          }
 
-	origField = (DBField) oldObj.getField(fieldDef.getID());
-	currentField = (DBField) newObj.getField(fieldDef.getID());
+        origField = (DBField) oldObj.getField(fieldDef.getID());
+        currentField = (DBField) newObj.getField(fieldDef.getID());
 
-	if ((origField == null || !origField.isDefined()) && 
-	    (currentField == null || !currentField.isDefined()))
-	  {
-	    // no change.. was null/undefined, still is.
+        if ((origField == null || !origField.isDefined()) && 
+            (currentField == null || !currentField.isDefined()))
+          {
+            // no change.. was null/undefined, still is.
 
-	    continue;
-	  }
+            continue;
+          }
 
-	if (currentField == null || !currentField.isDefined())
-	  {
-	    // lost this field
+        if (currentField == null || !currentField.isDefined())
+          {
+            // lost this field
 
-	    fieldRecs.addElement(new fieldDeltaRec(fieldDef.getID(), null));
+            fieldRecs.addElement(new fieldDeltaRec(fieldDef.getID(), null));
 
-	    continue;
-	  }
+            continue;
+          }
 
-	if (origField == null || !origField.isDefined())
-	  {
-	    // we gained this field
+        if (origField == null || !origField.isDefined())
+          {
+            // we gained this field
 
-	    fieldRecs.addElement(new fieldDeltaRec(fieldDef.getID(), currentField));
+            fieldRecs.addElement(new fieldDeltaRec(fieldDef.getID(), currentField));
 
-	    continue;
-	  }
+            continue;
+          }
 
-	if (currentField.equals(origField))
-	  {
-	    // no changes, we don't need to write this one out.
+        if (currentField.equals(origField))
+          {
+            // no changes, we don't need to write this one out.
 
-	    continue;
-	  }
+            continue;
+          }
 
-	// at this point, we know we need to write out a change
-	// record..  the only question now is whether it is for a
-	// scalar or a vector.
+        // at this point, we know we need to write out a change
+        // record..  the only question now is whether it is for a
+        // scalar or a vector.
 
-	if (!fieldDef.isArray())
-	  {
-	    // got a scalar.. save this field entire to write out
-	    // when we emit to the journal
+        if (!fieldDef.isArray())
+          {
+            // got a scalar.. save this field entire to write out
+            // when we emit to the journal
 
-	    fieldRecs.addElement(new fieldDeltaRec(fieldDef.getID(),
-						   currentField));
+            fieldRecs.addElement(new fieldDeltaRec(fieldDef.getID(),
+                                                   currentField));
 
-	    continue;
-	  }
+            continue;
+          }
 
-	// it's a vector.. use the DBField.getVectorDiff() method
-	// to generate a vector diff.
+        // it's a vector.. use the DBField.getVectorDiff() method
+        // to generate a vector diff.
 
-	fieldRecs.addElement(currentField.getVectorDiff(origField));
+        fieldRecs.addElement(currentField.getVectorDiff(origField));
       }
   }
 
@@ -223,65 +223,65 @@ public final class DBObjectDeltaRec implements FieldType {
 
     try
       {
-	invid = Invid.createInvid(in);
-	baseDef = Ganymede.db.getObjectBase(invid.getType());
-	obj = Ganymede.db.viewDBObject(invid);
+        invid = Invid.createInvid(in);
+        baseDef = Ganymede.db.getObjectBase(invid.getType());
+        obj = Ganymede.db.viewDBObject(invid);
 
-	if (debug)
-	  {
-	    System.err.println("\n>*> Reading delta rec for " + baseDef.getName() +
-			       " <" + invid.getNum() + ">");
-	  }
+        if (debug)
+          {
+            System.err.println("\n>*> Reading delta rec for " + baseDef.getName() +
+                               " <" + invid.getNum() + ">");
+          }
 
-	status = "Reading field count";
-	int fieldcount = in.readInt();
+        status = "Reading field count";
+        int fieldcount = in.readInt();
 
-	if (debug)
-	  {
-	    System.err.println(">> DBObjectDeltaRec(): " + fieldcount + 
-			       " fields in on-disk delta rec.");
-	  }
+        if (debug)
+          {
+            System.err.println(">> DBObjectDeltaRec(): " + fieldcount + 
+                               " fields in on-disk delta rec.");
+          }
 
-	for (int i = 0; i < fieldcount; i++)
-	  {
-	    status = "\nReading field code for field " + i;
-	    if (debug)
-	      {
-		System.err.println(status);
-	      }
-	    fieldcode = in.readShort();
-	    fieldDef = (DBObjectBaseField) baseDef.getField(fieldcode);
-	    typecode = fieldDef.getType();
-	    fieldName = fieldDef.getName();
-	    status = "Reading deletion boolean for field " + i;
-	    if (in.readBoolean())
-	      {
-		// we're deleting this field
-		if (debug)
-		  {
-		    System.err.println("Reading field deletion record field (" + fieldName + ":" + fieldcode + ") for field " + i);
-		  }
+        for (int i = 0; i < fieldcount; i++)
+          {
+            status = "\nReading field code for field " + i;
+            if (debug)
+              {
+                System.err.println(status);
+              }
+            fieldcode = in.readShort();
+            fieldDef = (DBObjectBaseField) baseDef.getField(fieldcode);
+            typecode = fieldDef.getType();
+            fieldName = fieldDef.getName();
+            status = "Reading deletion boolean for field " + i;
+            if (in.readBoolean())
+              {
+                // we're deleting this field
+                if (debug)
+                  {
+                    System.err.println("Reading field deletion record field (" + fieldName + ":" + fieldcode + ") for field " + i);
+                  }
 
-		fieldRecs.addElement(new fieldDeltaRec(fieldcode, null));
-		continue;
-	      }
+                fieldRecs.addElement(new fieldDeltaRec(fieldcode, null));
+                continue;
+              }
 
-	    // okay, we've got a field redefinition.. check the type
-	    // code to make sure we don't have an incompatible journal
-	    // entry
-	    status = "Reading type code for field " + i;
-	    if (in.readShort() != typecode)
-	      {
-		throw new RuntimeException("Error, field type mismatch in journal file");
-	      }
+            // okay, we've got a field redefinition.. check the type
+            // code to make sure we don't have an incompatible journal
+            // entry
+            status = "Reading type code for field " + i;
+            if (in.readShort() != typecode)
+              {
+                throw new RuntimeException("Error, field type mismatch in journal file");
+              }
 
-	    // ok.. now, is it a total redefinition, or a vector delta record?
-	    status = "Reading scalar/vector delta boolean for field " + i;
-	    scalar = in.readBoolean();
+            // ok.. now, is it a total redefinition, or a vector delta record?
+            status = "Reading scalar/vector delta boolean for field " + i;
+            scalar = in.readBoolean();
 
-	    if (scalar)
-	      {
-		fieldDeltaRec f_r = null;
+            if (scalar)
+              {
+                fieldDeltaRec f_r = null;
                 status = "Reading field (" + fieldName + ":" + fieldcode +") for field " + i;
                 if (debug)
                   {
@@ -289,124 +289,124 @@ public final class DBObjectDeltaRec implements FieldType {
                   }
 
                 f_r = new fieldDeltaRec(fieldcode, DBField.readField(obj, in, fieldDef));
-		fieldRecs.addElement(f_r);
-		if (debug)
-		  {
-		    System.err.println("Value: " + f_r.toString());
-		  }
-	      }
-	    else
-	      {
-		// ok, we have a vector delta chunk
-		fieldDeltaRec fieldRec = new fieldDeltaRec(fieldcode);
-		Object value = null;
+                fieldRecs.addElement(f_r);
+                if (debug)
+                  {
+                    System.err.println("Value: " + f_r.toString());
+                  }
+              }
+            else
+              {
+                // ok, we have a vector delta chunk
+                fieldDeltaRec fieldRec = new fieldDeltaRec(fieldcode);
+                Object value = null;
 
-		// read in the additions
-		status = "Reading vector addition count for field " + fieldName + "(" + i + ")";
-		if (debug)
-		  {
-		    System.err.println(status);
-		  }
+                // read in the additions
+                status = "Reading vector addition count for field " + fieldName + "(" + i + ")";
+                if (debug)
+                  {
+                    System.err.println(status);
+                  }
 
-		int size = in.readInt();
+                int size = in.readInt();
 
-		if (debug)
-		  {
-		    System.err.println(">> DBObjectDeltaRec(): reading " + size + " additions.");
-		  }
+                if (debug)
+                  {
+                    System.err.println(">> DBObjectDeltaRec(): reading " + size + " additions.");
+                  }
 
-		for (int j = 0; j < size; j++)
-		  {
-		    // we only support 3 vector field types
-		    switch (typecode)
-		      {
-		      case STRING:
-			status = "Reading string addition " + j + " for field " + i + ":" + fieldName;
-			if (debug)
-			  {
-			    System.err.println(status);
-			  }
-			value = in.readUTF();
-			break;
+                for (int j = 0; j < size; j++)
+                  {
+                    // we only support 3 vector field types
+                    switch (typecode)
+                      {
+                      case STRING:
+                        status = "Reading string addition " + j + " for field " + i + ":" + fieldName;
+                        if (debug)
+                          {
+                            System.err.println(status);
+                          }
+                        value = in.readUTF();
+                        break;
 
-		      case INVID:
-			status = "Reading invid addition " + j + " for field " + i + ":" + fieldName;
-			if (debug)
-			  {
-			    System.err.println(status);
-			  }
-			value = Invid.createInvid(in);
-			break;
+                      case INVID:
+                        status = "Reading invid addition " + j + " for field " + i + ":" + fieldName;
+                        if (debug)
+                          {
+                            System.err.println(status);
+                          }
+                        value = Invid.createInvid(in);
+                        break;
 
-		      case IP:
-			status = "Reading ip addition " + j + " for field " + i + ":" + fieldName;
-			if (debug)
-			  {
-			    System.err.println(status);
-			  }
-			byte bytelength = in.readByte();
-			Byte[] bytes = new Byte[bytelength];
-			for (int k = 0; k < bytelength; k++)
-			  {
-			    bytes[k] = Byte.valueOf(in.readByte());
-			  }
-			value = bytes;
-		      }
-		
-		    fieldRec.addValue(value);
-		  }
+                      case IP:
+                        status = "Reading ip addition " + j + " for field " + i + ":" + fieldName;
+                        if (debug)
+                          {
+                            System.err.println(status);
+                          }
+                        byte bytelength = in.readByte();
+                        Byte[] bytes = new Byte[bytelength];
+                        for (int k = 0; k < bytelength; k++)
+                          {
+                            bytes[k] = Byte.valueOf(in.readByte());
+                          }
+                        value = bytes;
+                      }
+                
+                    fieldRec.addValue(value);
+                  }
 
-		// read in the deletions
-		status = "Reading vector deletion count for field " + i;
-		if (debug)
-		  {
-		    System.err.println(status);
-		  }
+                // read in the deletions
+                status = "Reading vector deletion count for field " + i;
+                if (debug)
+                  {
+                    System.err.println(status);
+                  }
 
-		size = in.readInt();
-		if (debug)
-		  {
-		    System.err.println(">> DBObjectDeltaRec(): reading " + size + " deletions.");
-		  }
+                size = in.readInt();
+                if (debug)
+                  {
+                    System.err.println(">> DBObjectDeltaRec(): reading " + size + " deletions.");
+                  }
 
-		for (int j = 0; j < size; j++)
-		  {
-		    // we only support 3 vector field types
+                for (int j = 0; j < size; j++)
+                  {
+                    // we only support 3 vector field types
 
-		    switch (typecode)
-		      {
-		      case STRING:
-			status = "Reading string deletion " + j + " for field " + i + ":" + fieldName;
-			value = in.readUTF();
-			break;
+                    switch (typecode)
+                      {
+                      case STRING:
+                        status = "Reading string deletion " + j + " for field " + i + ":" + fieldName;
+                        value = in.readUTF();
+                        break;
 
-		      case INVID:
-			status = "Reading invid deletion " + j + " for field " + i + ":" + fieldName;
-			value = Invid.createInvid(in);
-			break;
+                      case INVID:
+                        status = "Reading invid deletion " + j + " for field " + i + ":" + fieldName;
+                        value = Invid.createInvid(in);
+                        break;
 
-		      case IP:
-			status = "Reading IP deletion " + j + " for field " + i + ":" + fieldName;
-			byte bytelength = in.readByte();
-			Byte[] bytes = new Byte[bytelength];
-			for (int k = 0; k < bytelength; k++)
-			  {
-			    bytes[k] = Byte.valueOf(in.readByte());
-			  }
-			value = bytes;
-		      }
-		    fieldRec.delValue(value);
-		  }
-		// and save this field
-		fieldRecs.addElement(fieldRec);
-	      }
-	  }
+                      case IP:
+                        status = "Reading IP deletion " + j + " for field " + i + ":" + fieldName;
+                        byte bytelength = in.readByte();
+                        Byte[] bytes = new Byte[bytelength];
+                        for (int k = 0; k < bytelength; k++)
+                          {
+                            bytes[k] = Byte.valueOf(in.readByte());
+                          }
+                        value = bytes;
+                      }
+                    fieldRec.delValue(value);
+                  }
+                // and save this field
+                fieldRecs.addElement(fieldRec);
+              }
+          }
       }
     catch (IOException ex)
       {
-	System.err.println("DBObjectDeltaRec constructor: IOException in state " + status);
+        System.err.println("DBObjectDeltaRec constructor: IOException in state " + status);
         Ganymede.logError(ex);
-	throw ex;
+        throw ex;
       }
   }
 
@@ -429,7 +429,7 @@ public final class DBObjectDeltaRec implements FieldType {
 
     if (debug)
       {
-	System.err.println("Emitting delta rec for invid " + invid.toString());
+        System.err.println("Emitting delta rec for invid " + invid.toString());
       }
 
     invid.emit(out);
@@ -440,7 +440,7 @@ public final class DBObjectDeltaRec implements FieldType {
 
     if (debug)
       {
-	System.err.println("Emitting " + fieldRecs.size() + " field records for invid " + invid.toString());
+        System.err.println("Emitting " + fieldRecs.size() + " field records for invid " + invid.toString());
       }
     
     // now let's write out the fields
@@ -450,136 +450,136 @@ public final class DBObjectDeltaRec implements FieldType {
 
     for (int i = 0; i < fieldRecs.size(); i++)
       {
-	fdRec = (fieldDeltaRec) fieldRecs.elementAt(i);
+        fdRec = (fieldDeltaRec) fieldRecs.elementAt(i);
 
-	// write out our field code.. this will be used by the loader
-	// code to determine what kind of field this is, and what
-	// kind of data types need to be loaded.
+        // write out our field code.. this will be used by the loader
+        // code to determine what kind of field this is, and what
+        // kind of data types need to be loaded.
 
-	if (debug)
-	  {
-	    System.err.println("Emitting fieldDeltaRec:\n\t" + fdRec.toString());
-	  }
+        if (debug)
+          {
+            System.err.println("Emitting fieldDeltaRec:\n\t" + fdRec.toString());
+          }
 
-	out.writeShort(fdRec.fieldcode);
+        out.writeShort(fdRec.fieldcode);
 
-	// are we deleting?
+        // are we deleting?
 
-	if (!fdRec.vector && fdRec.scalarValue == null)
-	  {
-	    // yes, we're deleting this field
-	    out.writeBoolean(true);
-	    continue;
-	  }
+        if (!fdRec.vector && fdRec.scalarValue == null)
+          {
+            // yes, we're deleting this field
+            out.writeBoolean(true);
+            continue;
+          }
 
-	// no, we're redefining this field
+        // no, we're redefining this field
 
-	out.writeBoolean(false);
+        out.writeBoolean(false);
 
-	// write out our field type code.. this will be used by the loader
-	// to verify that the schema hasn't undergone an incompatible
-	// change since the journal was written.
+        // write out our field type code.. this will be used by the loader
+        // to verify that the schema hasn't undergone an incompatible
+        // change since the journal was written.
 
-	fieldDef = (DBObjectBaseField) baseDef.getField(fdRec.fieldcode);
+        fieldDef = (DBObjectBaseField) baseDef.getField(fdRec.fieldcode);
 
-	out.writeShort(fieldDef.getType());
-	
-	if (fdRec.scalarValue != null)
-	  {
-	    out.writeBoolean(true); // scalar redefinition
-	    fdRec.scalarValue.emit(out);
-	    continue;
-	  }
+        out.writeShort(fieldDef.getType());
+        
+        if (fdRec.scalarValue != null)
+          {
+            out.writeBoolean(true); // scalar redefinition
+            fdRec.scalarValue.emit(out);
+            continue;
+          }
 
-	out.writeBoolean(false); // vector mod
+        out.writeBoolean(false); // vector mod
 
-	// write out what is being added to this vector
+        // write out what is being added to this vector
 
-	if (debug)
-	  {
-	    System.err.println("====== Emitting " + fdRec.addValues.size() + " addition elements");
-	  }
+        if (debug)
+          {
+            System.err.println("====== Emitting " + fdRec.addValues.size() + " addition elements");
+          }
 
-	if (fdRec.addValues == null)
-	  {
-	    out.writeInt(0);
-	  }
-	else
-	  {
-	    out.writeInt(fdRec.addValues.size());
+        if (fdRec.addValues == null)
+          {
+            out.writeInt(0);
+          }
+        else
+          {
+            out.writeInt(fdRec.addValues.size());
 
-	    for (int j = 0; j < fdRec.addValues.size(); j++)
-	      {
-		value = fdRec.addValues.elementAt(j);
+            for (int j = 0; j < fdRec.addValues.size(); j++)
+              {
+                value = fdRec.addValues.elementAt(j);
 
-		// we only support 3 vector field types
+                // we only support 3 vector field types
 
-		if (value instanceof String)
-		  {
-		    out.writeUTF((String) value);
-		  }
-		else if (value instanceof Invid)
-		  {
-		    ((Invid) value).emit(out);
-		  }
-		else if (value instanceof IPwrap)
-		  {
-		    Byte[] bytes = ((IPwrap) value).address;
-		    
-		    out.writeByte(bytes.length);
-		    
-		    for (int k = 0; k < bytes.length; k++)
-		      {
-			out.writeByte(bytes[k].byteValue());
-		      }
-		  }
-		else
-		  {
-		    Ganymede.debug("DBObjectDeltaRec.emit(): Error!  Unrecognized element in vector!");
-		  }
-	      }
-	  }
+                if (value instanceof String)
+                  {
+                    out.writeUTF((String) value);
+                  }
+                else if (value instanceof Invid)
+                  {
+                    ((Invid) value).emit(out);
+                  }
+                else if (value instanceof IPwrap)
+                  {
+                    Byte[] bytes = ((IPwrap) value).address;
+                    
+                    out.writeByte(bytes.length);
+                    
+                    for (int k = 0; k < bytes.length; k++)
+                      {
+                        out.writeByte(bytes[k].byteValue());
+                      }
+                  }
+                else
+                  {
+                    Ganymede.debug("DBObjectDeltaRec.emit(): Error!  Unrecognized element in vector!");
+                  }
+              }
+          }
 
-	// write out what is being removed from this vector
+        // write out what is being removed from this vector
 
-	if (fdRec.delValues == null)
-	  {
-	    out.writeInt(0);
-	  }
-	else
-	  {
-	    out.writeInt(fdRec.delValues.size());
+        if (fdRec.delValues == null)
+          {
+            out.writeInt(0);
+          }
+        else
+          {
+            out.writeInt(fdRec.delValues.size());
 
-	    for (int j = 0; j < fdRec.delValues.size(); j++)
-	      {
-		value = fdRec.delValues.elementAt(j);
-		
-		// we only support 3 vector field types
-		
-		if (value instanceof String)
-		  {
-		    out.writeUTF((String) value);
-		  }
-		else if (value instanceof Invid)
-		  {
-		    Invid invid = (Invid) value;
-		    
-		    out.writeShort(invid.getType());
-		    out.writeInt(invid.getNum());
-		  }
-		else if (value instanceof IPwrap)
-		  {
-		    Byte[] bytes = ((IPwrap) value).address;
-		    
-		    out.writeByte(bytes.length);
-		    
-		    for (int k = 0; k < bytes.length; k++)
-		      {
-			out.writeByte(bytes[k].byteValue());
-		      }
-		  }
-	      }
-	  }
+            for (int j = 0; j < fdRec.delValues.size(); j++)
+              {
+                value = fdRec.delValues.elementAt(j);
+                
+                // we only support 3 vector field types
+                
+                if (value instanceof String)
+                  {
+                    out.writeUTF((String) value);
+                  }
+                else if (value instanceof Invid)
+                  {
+                    Invid invid = (Invid) value;
+                    
+                    out.writeShort(invid.getType());
+                    out.writeInt(invid.getNum());
+                  }
+                else if (value instanceof IPwrap)
+                  {
+                    Byte[] bytes = ((IPwrap) value).address;
+                    
+                    out.writeByte(bytes.length);
+                    
+                    for (int k = 0; k < bytes.length; k++)
+                      {
+                        out.writeByte(bytes[k].byteValue());
+                      }
+                  }
+              }
+          }
       }
   }
 
@@ -595,7 +595,7 @@ public final class DBObjectDeltaRec implements FieldType {
   {
     if (!original.getInvid().equals(invid))
       {
-	throw new IllegalArgumentException("Error, object identity mismatch");
+        throw new IllegalArgumentException("Error, object identity mismatch");
       }
 
     /* - */
@@ -612,76 +612,76 @@ public final class DBObjectDeltaRec implements FieldType {
 
     for (int i = 0; i < fieldRecs.size(); i++)
       {
-	fieldRec = (fieldDeltaRec) fieldRecs.elementAt(i);
+        fieldRec = (fieldDeltaRec) fieldRecs.elementAt(i);
 
-	// are we clearing this field?
+        // are we clearing this field?
 
-	if (!fieldRec.vector && fieldRec.scalarValue == null)
-	  {
-	    copy.clearField(fieldRec.fieldcode);
+        if (!fieldRec.vector && fieldRec.scalarValue == null)
+          {
+            copy.clearField(fieldRec.fieldcode);
 
-	    continue;
-	  }
+            continue;
+          }
 
-	// are we doing a replace or add?
+        // are we doing a replace or add?
 
-	if (!fieldRec.vector)
-	  {
-	    fieldRec.scalarValue.setOwner(copy);
+        if (!fieldRec.vector)
+          {
+            fieldRec.scalarValue.setOwner(copy);
 
-	    if (copy.getField(fieldRec.fieldcode) != null)
-	      {
-		copy.replaceField(fieldRec.scalarValue);
-	      }
-	    else
-	      {
-		copy.addField(fieldRec.scalarValue);
-	      }
+            if (copy.getField(fieldRec.fieldcode) != null)
+              {
+                copy.replaceField(fieldRec.scalarValue);
+              }
+            else
+              {
+                copy.addField(fieldRec.scalarValue);
+              }
 
-	    continue;
-	  }
+            continue;
+          }
 
-	// ok, we must be doing a vector mod
+        // ok, we must be doing a vector mod
 
-	// remember that we are intentionally bypassing the DBField's
-	// add/remove logic, as we assume that this DBObjectDeltaRec
-	// was generated as a result of a properly checked operation.
+        // remember that we are intentionally bypassing the DBField's
+        // add/remove logic, as we assume that this DBObjectDeltaRec
+        // was generated as a result of a properly checked operation.
 
-	// Also, since we know that only string, invid, and IP fields
-	// can be vectors, we don't have to worry about the password
-	// and permission matrix special-case logic.
+        // Also, since we know that only string, invid, and IP fields
+        // can be vectors, we don't have to worry about the password
+        // and permission matrix special-case logic.
 
-	DBField field = copy.retrieveField(fieldRec.fieldcode);
+        DBField field = copy.retrieveField(fieldRec.fieldcode);
 
-	if (fieldRec.addValues != null)
-	  {
-	    for (int j = 0; j < fieldRec.addValues.size(); j++)
-	      {
-		value = fieldRec.addValues.elementAt(j);
-		
-		if (value instanceof IPwrap)
-		  {
-		    value = ((IPwrap) value).address;
-		  }
-		
-		field.getVectVal().addElement(value);
-	      }
-	  }
+        if (fieldRec.addValues != null)
+          {
+            for (int j = 0; j < fieldRec.addValues.size(); j++)
+              {
+                value = fieldRec.addValues.elementAt(j);
+                
+                if (value instanceof IPwrap)
+                  {
+                    value = ((IPwrap) value).address;
+                  }
+                
+                field.getVectVal().addElement(value);
+              }
+          }
 
-	if (fieldRec.delValues != null)
-	  {
-	    for (int j = 0; j < fieldRec.delValues.size(); j++)
-	      {
-		value = fieldRec.delValues.elementAt(j);
-		
-		if (value instanceof IPwrap)
-		  {
-		    value = ((IPwrap) value).address;
-		  }
-		
-		field.getVectVal().removeElement(value);
-	      }
-	  }
+        if (fieldRec.delValues != null)
+          {
+            for (int j = 0; j < fieldRec.delValues.size(); j++)
+              {
+                value = fieldRec.delValues.elementAt(j);
+                
+                if (value instanceof IPwrap)
+                  {
+                    value = ((IPwrap) value).address;
+                  }
+                
+                field.getVectVal().removeElement(value);
+              }
+          }
       }
 
     return copy;
@@ -697,9 +697,9 @@ public final class DBObjectDeltaRec implements FieldType {
 
     for (int i = 0; i < fieldRecs.size(); i++)
       {
-	fieldDeltaRec fr = (fieldDeltaRec) fieldRecs.elementAt(i);
-	buf.append(fr.toString());
-	buf.append("\n");
+        fieldDeltaRec fr = (fieldDeltaRec) fieldRecs.elementAt(i);
+        buf.append(fr.toString());
+        buf.append("\n");
       }
 
     return buf.toString();

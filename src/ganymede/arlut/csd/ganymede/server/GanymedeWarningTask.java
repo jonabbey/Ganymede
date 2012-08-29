@@ -144,112 +144,112 @@ public class GanymedeWarningTask implements Runnable {
       {
         Ganymede.debug("Warning Task: Starting");
 
-	try
-	  {
-	    mySession = new GanymedeSession("warning");	// supergash
-	  }
-	catch (RemoteException ex)
-	  {
-	    Ganymede.debug("Warning Task: Couldn't establish session");
-	    return;
-	  }
+        try
+          {
+            mySession = new GanymedeSession("warning"); // supergash
+          }
+        catch (RemoteException ex)
+          {
+            Ganymede.debug("Warning Task: Couldn't establish session");
+            return;
+          }
 
-	started = true;
+        started = true;
 
-	Query q;
-	Vector results;
-	Result result;
-	Invid invid;
-	Date currentTime = new Date();
-	Calendar cal = Calendar.getInstance();
-	Calendar cal2;
-	Date loTime, hiTime;
-	DBObjectBase base;
-	Enumeration baseEnum, en;
-	QueryNode expireNode, removeNode;
-	String title;
-	StringBuilder tempString = new StringBuilder();
-	Vector objects = new Vector();
-	DBObject obj;
+        Query q;
+        Vector results;
+        Result result;
+        Invid invid;
+        Date currentTime = new Date();
+        Calendar cal = Calendar.getInstance();
+        Calendar cal2;
+        Date loTime, hiTime;
+        DBObjectBase base;
+        Enumeration baseEnum, en;
+        QueryNode expireNode, removeNode;
+        String title;
+        StringBuilder tempString = new StringBuilder();
+        Vector objects = new Vector();
+        DBObject obj;
         DBEditObject objectHook;
 
-	// --
+        // --
 
-	cal.setTime(currentTime);
+        cal.setTime(currentTime);
 
-	// do the weekly warnings
+        // do the weekly warnings
 
-	for (int i = 0; i < 3; i++)
-	  {
-	    if (currentThread.isInterrupted())
-	      {
-		throw new InterruptedException("scheduler ordering shutdown");
-	      }
+        for (int i = 0; i < 3; i++)
+          {
+            if (currentThread.isInterrupted())
+              {
+                throw new InterruptedException("scheduler ordering shutdown");
+              }
 
-	    cal.add(Calendar.DATE, 7);
-	    loTime = cal.getTime();
+            cal.add(Calendar.DATE, 7);
+            loTime = cal.getTime();
 
-	    cal2 = Calendar.getInstance();
-	    cal2.setTime(loTime);
-	    cal2.add(Calendar.DATE, 1);
-	    hiTime = cal2.getTime();
+            cal2 = Calendar.getInstance();
+            cal2.setTime(loTime);
+            cal2.add(Calendar.DATE, 1);
+            hiTime = cal2.getTime();
 
-	    expireNode = new QueryAndNode(new QueryDataNode(SchemaConstants.ExpirationField,
-							    QueryDataNode.GREATEQ,
-							    loTime),
-					  new QueryDataNode(SchemaConstants.ExpirationField,
-							    QueryDataNode.LESSEQ,
-							    hiTime));
+            expireNode = new QueryAndNode(new QueryDataNode(SchemaConstants.ExpirationField,
+                                                            QueryDataNode.GREATEQ,
+                                                            loTime),
+                                          new QueryDataNode(SchemaConstants.ExpirationField,
+                                                            QueryDataNode.LESSEQ,
+                                                            hiTime));
 
-	    baseEnum = Ganymede.db.objectBases.elements();
+            baseEnum = Ganymede.db.objectBases.elements();
 
-	    while (baseEnum.hasMoreElements())
-	      {
-		base = (DBObjectBase) baseEnum.nextElement();
+            while (baseEnum.hasMoreElements())
+              {
+                base = (DBObjectBase) baseEnum.nextElement();
 
-		if (base.isEmbedded())
-		  {
-		    continue;
-		  }
+                if (base.isEmbedded())
+                  {
+                    continue;
+                  }
 
                 objectHook = base.getObjectHook();
 
-		if (currentThread.isInterrupted())
-		  {
-		    throw new InterruptedException("scheduler ordering shutdown");
-		  }
+                if (currentThread.isInterrupted())
+                  {
+                    throw new InterruptedException("scheduler ordering shutdown");
+                  }
 
-		q = new Query(base.getTypeID(), expireNode, false);
+                q = new Query(base.getTypeID(), expireNode, false);
 
-		results = mySession.internalQuery(q);
+                results = mySession.internalQuery(q);
 
-		en = results.elements();
+                en = results.elements();
 
-		while (en.hasMoreElements())
-		  {
-		    if (currentThread.isInterrupted())
-		      {
-			throw new InterruptedException("scheduler ordering shutdown");
-		      }
+                while (en.hasMoreElements())
+                  {
+                    if (currentThread.isInterrupted())
+                      {
+                        throw new InterruptedException("scheduler ordering shutdown");
+                      }
 
-		    result = (Result) en.nextElement();
+                    result = (Result) en.nextElement();
 
-		    invid = result.getInvid();
+                    invid = result.getInvid();
 
-		    if (i == 0)
-		      {
-			// "{0} {1} expires in one week"
-			title = ts.l("run.expire_one_week_email_subj",
-				     base.getName(), mySession.getDBSession().getObjectLabel(invid));
-		      }
-		    else
-		      {
-			// "{0} {1} expires in {2,num,#} weeks"
-			title = ts.l("run.expire_multi_week_email_subj",
-				     base.getName(), mySession.getDBSession().getObjectLabel(invid), Integer.valueOf(i+1));
-		      }
+                    if (i == 0)
+                      {
+                        // "{0} {1} expires in one week"
+                        title = ts.l("run.expire_one_week_email_subj",
+                                     base.getName(), mySession.getDBSession().getObjectLabel(invid));
+                      }
+                    else
+                      {
+                        // "{0} {1} expires in {2,num,#} weeks"
+                        title = ts.l("run.expire_multi_week_email_subj",
+                                     base.getName(), mySession.getDBSession().getObjectLabel(invid), Integer.valueOf(i+1));
+                      }
 
-		    obj = mySession.getDBSession().viewDBObject(invid);
+                    obj = mySession.getDBSession().viewDBObject(invid);
 
                     if (!objectHook.reactToExpirationWarning(obj, 7 * i))
                       {
@@ -263,65 +263,65 @@ public class GanymedeWarningTask implements Runnable {
 
                         sendMail("expirationwarn", title, tempString.toString(), objects);
                       }
-		  }
-	      }
+                  }
+              }
 
-	    // now the removals
+            // now the removals
 
-	    removeNode = new QueryAndNode(new QueryDataNode(SchemaConstants.RemovalField,
-							    QueryDataNode.GREATEQ,
-							    loTime),
-					  new QueryDataNode(SchemaConstants.RemovalField,
-							    QueryDataNode.LESSEQ,
-							    hiTime));
+            removeNode = new QueryAndNode(new QueryDataNode(SchemaConstants.RemovalField,
+                                                            QueryDataNode.GREATEQ,
+                                                            loTime),
+                                          new QueryDataNode(SchemaConstants.RemovalField,
+                                                            QueryDataNode.LESSEQ,
+                                                            hiTime));
 
-	    baseEnum = Ganymede.db.objectBases.elements();
+            baseEnum = Ganymede.db.objectBases.elements();
 
-	    while (baseEnum.hasMoreElements())
-	      {
-		if (currentThread.isInterrupted())
-		  {
-		    throw new InterruptedException("scheduler ordering shutdown");
-		  }
+            while (baseEnum.hasMoreElements())
+              {
+                if (currentThread.isInterrupted())
+                  {
+                    throw new InterruptedException("scheduler ordering shutdown");
+                  }
 
-		base = (DBObjectBase) baseEnum.nextElement();
+                base = (DBObjectBase) baseEnum.nextElement();
 
-		if (base.isEmbedded())
-		  {
-		    continue;
-		  }
+                if (base.isEmbedded())
+                  {
+                    continue;
+                  }
 
                 objectHook = base.getObjectHook();
 
-		q = new Query(base.getTypeID(), removeNode, false);
+                q = new Query(base.getTypeID(), removeNode, false);
 
-		results = mySession.internalQuery(q);
+                results = mySession.internalQuery(q);
 
-		en = results.elements();
+                en = results.elements();
 
-		while (en.hasMoreElements())
-		  {
-		    if (currentThread.isInterrupted())
-		      {
-			throw new InterruptedException("scheduler ordering shutdown");
-		      }
+                while (en.hasMoreElements())
+                  {
+                    if (currentThread.isInterrupted())
+                      {
+                        throw new InterruptedException("scheduler ordering shutdown");
+                      }
 
-		    result = (Result) en.nextElement();
+                    result = (Result) en.nextElement();
 
-		    invid = result.getInvid();
+                    invid = result.getInvid();
 
-		    if (i == 0)
-		      {
-			// "{0} {1} will be removed in one week"
-			title = ts.l("run.remove_one_week_email_subj",
-				     base.getName(), mySession.getDBSession().getObjectLabel(invid));
-		      }
-		    else
-		      {
-			// "{0} {1} will be removed in {2,num,#} weeks"
-			title = ts.l("run.remove_multi_week_email_subj",
-				     base.getName(), mySession.getDBSession().getObjectLabel(invid), Integer.valueOf(i+1));
-		      }
+                    if (i == 0)
+                      {
+                        // "{0} {1} will be removed in one week"
+                        title = ts.l("run.remove_one_week_email_subj",
+                                     base.getName(), mySession.getDBSession().getObjectLabel(invid));
+                      }
+                    else
+                      {
+                        // "{0} {1} will be removed in {2,num,#} weeks"
+                        title = ts.l("run.remove_multi_week_email_subj",
+                                     base.getName(), mySession.getDBSession().getObjectLabel(invid), Integer.valueOf(i+1));
+                      }
 
                     obj = mySession.getDBSession().viewDBObject(invid);
 
@@ -339,164 +339,164 @@ public class GanymedeWarningTask implements Runnable {
 
                         sendMail("removalwarn", title, tempString.toString(), objects);
                       }
-		  }
-	      }
-	  }
+                  }
+              }
+          }
 
-	// now the next-day warnings
+        // now the next-day warnings
 
-	loTime = currentTime;
+        loTime = currentTime;
 
-	cal2 = Calendar.getInstance();
-	cal2.setTime(loTime);
-	cal2.add(Calendar.DATE, 1);
-	hiTime = cal2.getTime();
+        cal2 = Calendar.getInstance();
+        cal2.setTime(loTime);
+        cal2.add(Calendar.DATE, 1);
+        hiTime = cal2.getTime();
 
-	expireNode = new QueryAndNode(new QueryDataNode(SchemaConstants.ExpirationField,
-							QueryDataNode.GREATEQ,
-							loTime),
-				      new QueryDataNode(SchemaConstants.ExpirationField,
-							QueryDataNode.LESSEQ,
-							hiTime));
+        expireNode = new QueryAndNode(new QueryDataNode(SchemaConstants.ExpirationField,
+                                                        QueryDataNode.GREATEQ,
+                                                        loTime),
+                                      new QueryDataNode(SchemaConstants.ExpirationField,
+                                                        QueryDataNode.LESSEQ,
+                                                        hiTime));
 
-	baseEnum = Ganymede.db.objectBases.elements();
+        baseEnum = Ganymede.db.objectBases.elements();
 
-	while (baseEnum.hasMoreElements())
-	  {
-	    if (currentThread.isInterrupted())
-	      {
-		throw new InterruptedException("scheduler ordering shutdown");
-	      }
+        while (baseEnum.hasMoreElements())
+          {
+            if (currentThread.isInterrupted())
+              {
+                throw new InterruptedException("scheduler ordering shutdown");
+              }
 
-	    base = (DBObjectBase) baseEnum.nextElement();
+            base = (DBObjectBase) baseEnum.nextElement();
 
-	    if (base.isEmbedded())
-	      {
-		continue;
-	      }
+            if (base.isEmbedded())
+              {
+                continue;
+              }
 
-	    q = new Query(base.getTypeID(), expireNode, false);
+            q = new Query(base.getTypeID(), expireNode, false);
 
-	    results = mySession.internalQuery(q);
+            results = mySession.internalQuery(q);
 
-	    en = results.elements();
+            en = results.elements();
 
-	    while (en.hasMoreElements())
-	      {
-		if (currentThread.isInterrupted())
-		  {
-		    throw new InterruptedException("scheduler ordering shutdown");
-		  }
+            while (en.hasMoreElements())
+              {
+                if (currentThread.isInterrupted())
+                  {
+                    throw new InterruptedException("scheduler ordering shutdown");
+                  }
 
-		result = (Result) en.nextElement();
+                result = (Result) en.nextElement();
 
-		invid = result.getInvid();
+                invid = result.getInvid();
 
-		// "** {0} {1} expires within 24 hours **"
-		title = ts.l("run.expire_real_soon_now", base.getName(), mySession.getDBSession().getObjectLabel(invid));
+                // "** {0} {1} expires within 24 hours **"
+                title = ts.l("run.expire_real_soon_now", base.getName(), mySession.getDBSession().getObjectLabel(invid));
 
-		tempString.setLength(0);
-		tempString.append(title);
+                tempString.setLength(0);
+                tempString.append(title);
 
-		obj = mySession.getDBSession().viewDBObject(invid);
+                obj = mySession.getDBSession().viewDBObject(invid);
 
-		tempString.append(getExpirationWarningMesg(obj));
+                tempString.append(getExpirationWarningMesg(obj));
 
-		objects.setSize(0);
-		objects.addElement(invid);
+                objects.setSize(0);
+                objects.addElement(invid);
 
-		sendMail("expirationwarn", title, tempString.toString(), objects);
-	      }
-	  }
+                sendMail("expirationwarn", title, tempString.toString(), objects);
+              }
+          }
 
-	// now the removals
+        // now the removals
 
-	removeNode = new QueryAndNode(new QueryDataNode(SchemaConstants.RemovalField,
-							QueryDataNode.GREATEQ,
-							loTime),
-				      new QueryDataNode(SchemaConstants.RemovalField,
-							QueryDataNode.LESSEQ,
-							hiTime));
+        removeNode = new QueryAndNode(new QueryDataNode(SchemaConstants.RemovalField,
+                                                        QueryDataNode.GREATEQ,
+                                                        loTime),
+                                      new QueryDataNode(SchemaConstants.RemovalField,
+                                                        QueryDataNode.LESSEQ,
+                                                        hiTime));
 
-	baseEnum = Ganymede.db.objectBases.elements();
+        baseEnum = Ganymede.db.objectBases.elements();
 
-	while (baseEnum.hasMoreElements())
-	  {
-	    if (currentThread.isInterrupted())
-	      {
-		throw new InterruptedException("scheduler ordering shutdown");
-	      }
+        while (baseEnum.hasMoreElements())
+          {
+            if (currentThread.isInterrupted())
+              {
+                throw new InterruptedException("scheduler ordering shutdown");
+              }
 
-	    base = (DBObjectBase) baseEnum.nextElement();
+            base = (DBObjectBase) baseEnum.nextElement();
 
-	    if (base.isEmbedded())
-	      {
-		continue;
-	      }
+            if (base.isEmbedded())
+              {
+                continue;
+              }
 
-	    q = new Query(base.getTypeID(), removeNode, false);
+            q = new Query(base.getTypeID(), removeNode, false);
 
-	    results = mySession.internalQuery(q);
+            results = mySession.internalQuery(q);
 
-	    en = results.elements();
+            en = results.elements();
 
-	    while (en.hasMoreElements())
-	      {
-		if (currentThread.isInterrupted())
-		  {
-		    throw new InterruptedException("scheduler ordering shutdown");
-		  }
+            while (en.hasMoreElements())
+              {
+                if (currentThread.isInterrupted())
+                  {
+                    throw new InterruptedException("scheduler ordering shutdown");
+                  }
 
-		result = (Result) en.nextElement();
+                result = (Result) en.nextElement();
 
-		invid = result.getInvid();
+                invid = result.getInvid();
 
-		// "** {0} {1} will be removed within the next 24 hours! **"
-		title = ts.l("run.remove_real_soon_now", base.getName(), mySession.getDBSession().getObjectLabel(invid));
+                // "** {0} {1} will be removed within the next 24 hours! **"
+                title = ts.l("run.remove_real_soon_now", base.getName(), mySession.getDBSession().getObjectLabel(invid));
 
-		obj = mySession.getDBSession().viewDBObject(invid);
-		Date actionDate = (Date) obj.getFieldValueLocal(SchemaConstants.RemovalField);
+                obj = mySession.getDBSession().viewDBObject(invid);
+                Date actionDate = (Date) obj.getFieldValueLocal(SchemaConstants.RemovalField);
 
-		tempString.setLength(0);
-		tempString.append(title);
+                tempString.setLength(0);
+                tempString.append(title);
 
-		// "\n\nRemoval scheduled to take place on or after {0,date}."
-		tempString.append(ts.l("run.removal_scheduled", actionDate));
+                // "\n\nRemoval scheduled to take place on or after {0,date}."
+                tempString.append(ts.l("run.removal_scheduled", actionDate));
 
-		objects.setSize(0);
-		objects.addElement(invid);
+                objects.setSize(0);
+                objects.addElement(invid);
 
-		sendMail("removalwarn", title, tempString.toString(), objects);
-	      }
-	  }
+                sendMail("removalwarn", title, tempString.toString(), objects);
+              }
+          }
 
-	mySession.logout();
+        mySession.logout();
 
-	finished = true;
+        finished = true;
       }
     catch (InterruptedException ex)
       {
-	Ganymede.debug("Warning task aborted due to task stop command.");
+        Ganymede.debug("Warning task aborted due to task stop command.");
       }
     finally
       {
-	GanymedeServer.lSemaphore.decrement();
+        GanymedeServer.lSemaphore.decrement();
 
-	if (started && !finished)
-	  {
-	    // we'll get here if this task's thread is stopped early
+        if (started && !finished)
+          {
+            // we'll get here if this task's thread is stopped early
 
-	    Ganymede.debug("Warning Task: Forced to terminate early, aborting.");
+            Ganymede.debug("Warning Task: Forced to terminate early, aborting.");
 
-	    if (mySession != null)
-	      {
-		mySession.logout();
-	      }
-	  }
-	else
-	  {
-	    Ganymede.debug("Warning Task: Completed");
-	  }
+            if (mySession != null)
+              {
+                mySession.logout();
+              }
+          }
+        else
+          {
+            Ganymede.debug("Warning Task: Completed");
+          }
       }
   }
 

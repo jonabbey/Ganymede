@@ -125,22 +125,22 @@ public class PermEntry implements java.io.Serializable {
 
     if (visible)
       {
-	result++;
+        result++;
       }
 
     if (editable)
       {
-	result += 2;
+        result += 2;
       }
 
     if (create)
       {
-	result += 4;
+        result += 4;
       }
 
     if (delete)
       {
-	result += 8;
+        result += 8;
       }
 
     return permObs[result];
@@ -179,11 +179,11 @@ public class PermEntry implements java.io.Serializable {
 
     if (entrySize >= 4)
       {
-	delete = in.readBoolean();
+        delete = in.readBoolean();
       }
     else
       {
-	delete = false;
+        delete = false;
       }
 
     return getPermEntry(visible, editable, create, delete);
@@ -246,20 +246,20 @@ public class PermEntry implements java.io.Serializable {
 
     if (obj == null)
       {
-	return false;
+        return false;
       }
 
     if (!(obj.getClass().equals(this.getClass())))
       {
-	return false;
+        return false;
       }
 
     pe = (PermEntry) obj;
 
     return ((visible == pe.visible) &&
-	    (editable == pe.editable) &&
-	    (create == pe.create) &&
-	    (delete == pe.delete));
+            (editable == pe.editable) &&
+            (create == pe.create) &&
+            (delete == pe.delete));
   }
 
   public void emit(DataOutput out) throws IOException
@@ -292,11 +292,11 @@ public class PermEntry implements java.io.Serializable {
 
     if (entrySize >= 4)
       {
-	delete = in.readBoolean();
+        delete = in.readBoolean();
       }
     else
       {
-	delete = false;
+        delete = false;
       }
 
     calcIndex();
@@ -358,8 +358,8 @@ public class PermEntry implements java.io.Serializable {
   {
     if (!indexSet)
       {
-	calcIndex();
-	indexSet = true;
+        calcIndex();
+        indexSet = true;
       }
 
     return index;
@@ -375,7 +375,7 @@ public class PermEntry implements java.io.Serializable {
   {
     if (p == null)
       {
-	return this;
+        return this;
       }
 
     byte pVal = p.indexNum();
@@ -394,7 +394,7 @@ public class PermEntry implements java.io.Serializable {
   {
     if (p == null)
       {
-	return PermEntry.noPerms;
+        return PermEntry.noPerms;
       }
 
     byte pVal = p.indexNum();
@@ -414,42 +414,42 @@ public class PermEntry implements java.io.Serializable {
 
     if (visible && (p == null || !p.visible))
       {
-	addString(result, "+ visible");
+        addString(result, "+ visible");
       }
 
     if (p != null && p.visible && !visible)
       {
-	addString(result, "- visible");
+        addString(result, "- visible");
       }
 
     if (editable && (p == null || !p.editable))
       {
-	addString(result, "+ editable");
+        addString(result, "+ editable");
       }
 
     if (p != null && p.editable && !editable)
       {
-	addString(result, "- editable");
+        addString(result, "- editable");
       }
 
     if (create && (p == null || !p.create))
       {
-	addString(result, "+ create");
+        addString(result, "+ create");
       }
 
     if (p != null && p.create && !create)
       {
-	addString(result, "- create");
+        addString(result, "- create");
       }
 
     if (delete && (p == null || !p.delete))
       {
-	addString(result, "+ delete");
+        addString(result, "+ delete");
       }
 
     if (p != null && p.delete && !delete)
       {
-	addString(result, "- delete");
+        addString(result, "- delete");
       }
 
     return result.toString();
@@ -459,7 +459,7 @@ public class PermEntry implements java.io.Serializable {
   {
     if (x.length() > 0)
       {
-	x.append(", ");
+        x.append(", ");
       }
 
     x.append(y);
@@ -477,22 +477,22 @@ public class PermEntry implements java.io.Serializable {
 
     if (visible)
       {
-	result.append("visible ");
+        result.append("visible ");
       }
 
     if (editable)
       {
-	result.append("editable ");
+        result.append("editable ");
       }
 
     if (create)
       {
-	result.append("create ");
+        result.append("create ");
       }
 
     if (delete)
       {
-	result.append("delete ");
+        result.append("delete ");
       }
 
     return result.toString();
@@ -504,22 +504,22 @@ public class PermEntry implements java.io.Serializable {
 
     if (visible)
       {
-	result.append("V");
+        result.append("V");
       }
 
     if (editable)
       {
-	result.append("E");
+        result.append("E");
       }
 
     if (create)
       {
-	result.append("C");
+        result.append("C");
       }
 
     if (delete)
       {
-	result.append("D");
+        result.append("D");
       }
 
     return result.toString();
@@ -531,22 +531,22 @@ public class PermEntry implements java.io.Serializable {
 
     if (visible)
       {
-	index++;
+        index++;
       }
 
     if (editable)
       {
-	index += 2;
+        index += 2;
       }
 
     if (create)
       {
-	index += 4;
+        index += 4;
       }
 
     if (delete)
       {
-	index += 8;
+        index += 8;
       }
   }
 }

@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -106,14 +106,14 @@ public class ExceptionDialog {
   public ExceptionDialog(Frame parent, String title, String message, Image icon)
   {
     d = new StringDialog(parent, title, message, ts.l("init.reportException"), ts.l("init.cancel"), icon, StandardDialog.ModalityType.DOCUMENT_MODAL);
-    d.setWrapLength(180);	// give a generous wrap length so that
-				// we size our dialog reasonably
+    d.setWrapLength(180);       // give a generous wrap length so that
+                                // we size our dialog reasonably
 
-    Hashtable results = d.showDialog();	// StringDialog is modal, so we'll block here
+    Hashtable results = d.showDialog(); // StringDialog is modal, so we'll block here
 
     if (results != null)
       {
-	this.requestedReport = true;
+        this.requestedReport = true;
       }
   }
 

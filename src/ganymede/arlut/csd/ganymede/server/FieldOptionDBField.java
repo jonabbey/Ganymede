@@ -14,7 +14,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -156,14 +156,14 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   {
     if (isEditable(local))
       {
-	matrix.clear();
-	return null;
+        matrix.clear();
+        return null;
       }
 
     // "Field Option Field Error"
     // "Don''t have permission to clear field options field "{0}"."
     return Ganymede.createErrorDialog(ts.l("global.error_title"),
-				      ts.l("setUndefined.error", getName()));
+                                      ts.l("setUndefined.error", getName()));
   }
 
   /**
@@ -186,28 +186,28 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     if (sepIndex != -1)
       {
-	try
-	  {
-	    basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
-	    base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+        try
+          {
+            basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
+            base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
 
-	    if (base == null)
-	      {
-		basename = "INVALID: " + entry;
-	      }
-	    else
-	      {
-		basename = base.getName();
-	      }
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    basename = entry;
-	  }
+            if (base == null)
+              {
+                basename = "INVALID: " + entry;
+              }
+            else
+              {
+                basename = base.getName();
+              }
+          }
+        catch (NumberFormatException ex)
+          {
+            basename = entry;
+          }
       }
     else
       {
-	basename = entry;
+        basename = entry;
       }
 
     return basename;
@@ -236,55 +236,55 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     if (sepIndex != -1)
       {
-	try
-	  {
-	    basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
-	    base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+        try
+          {
+            basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
+            base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
 
-	    if (base == null)
-	      {
-		fieldname = "[error " + entry + "]";
-	      }
-	    else
-	      {
-		fieldId = entry.substring(sepIndex+1);
-	    
-		if (fieldId.equals(":"))
-		  {
-		    fieldname = "[base]";
-		  }
-		else
-		  {
-		    try
-		      {
-			fieldnum = Short.valueOf(fieldId).shortValue();
+            if (base == null)
+              {
+                fieldname = "[error " + entry + "]";
+              }
+            else
+              {
+                fieldId = entry.substring(sepIndex+1);
+            
+                if (fieldId.equals(":"))
+                  {
+                    fieldname = "[base]";
+                  }
+                else
+                  {
+                    try
+                      {
+                        fieldnum = Short.valueOf(fieldId).shortValue();
 
-			field = (DBObjectBaseField) base.getField(fieldnum);
+                        field = (DBObjectBaseField) base.getField(fieldnum);
 
-			if (field == null)
-			  {
-			    fieldname = "invalid:" + fieldId;
-			  }
-			else
-			  {
-			    fieldname = field.getName();
-			  }
-		      }
-		    catch (NumberFormatException ex)
-		      {
-			fieldname = fieldId;
-		      }
-		  }
-	      }
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    fieldname = "[error " + entry + "]";
-	  }
+                        if (field == null)
+                          {
+                            fieldname = "invalid:" + fieldId;
+                          }
+                        else
+                          {
+                            fieldname = field.getName();
+                          }
+                      }
+                    catch (NumberFormatException ex)
+                      {
+                        fieldname = fieldId;
+                      }
+                  }
+              }
+          }
+        catch (NumberFormatException ex)
+          {
+            fieldname = "[error " + entry + "]";
+          }
       }
     else
       {
-	fieldname = "[error " + entry + "]";
+        fieldname = "[error " + entry + "]";
       }
 
     return fieldname;
@@ -325,45 +325,45 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     if (sepIndex == -1)
       {
-	return false;
+        return false;
       }
 
     try
       {
-	basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
-	base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
+        basenum = Short.valueOf(entry.substring(0, sepIndex)).shortValue();
+        base = (DBObjectBase) Ganymede.db.getObjectBase(basenum);
 
-	if (base == null)
-	  {
-	    return false;
-	  }
-	else
-	  {
-	    fieldId = entry.substring(sepIndex+1);
-	    
-	    if (!fieldId.equals(":"))
-	      {
-		try
-		  {
-		    fieldnum = Short.valueOf(fieldId).shortValue();
-		    
-		    field = (DBObjectBaseField) base.getField(fieldnum);
-		    
-		    if (field == null)
-		      {
-			return false;
-		      }
-		  }
-		catch (NumberFormatException ex)
-		  {
-		    return false;
-		  }
-	      }
-	  }
+        if (base == null)
+          {
+            return false;
+          }
+        else
+          {
+            fieldId = entry.substring(sepIndex+1);
+            
+            if (!fieldId.equals(":"))
+              {
+                try
+                  {
+                    fieldnum = Short.valueOf(fieldId).shortValue();
+                    
+                    field = (DBObjectBaseField) base.getField(fieldnum);
+                    
+                    if (field == null)
+                      {
+                        return false;
+                      }
+                  }
+                catch (NumberFormatException ex)
+                  {
+                    return false;
+                  }
+              }
+          }
       }
     catch (NumberFormatException ex)
       {
-	return false;
+        return false;
       }
 
     return true;
@@ -411,29 +411,29 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     for (Map.Entry<String, SyncPrefEnum> entry : matrix.entrySet())
       {
-	String basename = decodeBaseName(entry.getKey());
+        String basename = decodeBaseName(entry.getKey());
 
-	if (baseHash.containsKey(basename))
-	  {
-	    list = baseHash.get(basename);
-	  }
-	else
-	  {
-	    list = new ArrayList<String>();
-	    baseHash.put(basename, list);
-	  }
+        if (baseHash.containsKey(basename))
+          {
+            list = baseHash.get(basename);
+          }
+        else
+          {
+            list = new ArrayList<String>();
+            baseHash.put(basename, list);
+          }
 
-	list.add(decodeFieldName(entry.getKey()) + " -- " + entry.getValue());
+        list.add(decodeFieldName(entry.getKey()) + " -- " + entry.getValue());
       }
 
     for (Map.Entry<String, List<String>> entry : baseHash.entrySet())
       {
-	for (int i = 0; i < entry.getValue().size(); i++)
-	  {
-	    result.append(entry.getKey() + ":" + entry.getValue().get(i) + "\n");
-	  }
+        for (int i = 0; i < entry.getValue().size(); i++)
+          {
+            result.append(entry.getKey() + ":" + entry.getValue().get(i) + "\n");
+          }
 
-	result.append("\n");
+        result.append("\n");
       }
 
     return result.toString();
@@ -452,8 +452,8 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    */
 
   FieldOptionDBField(DBObject owner, 
-		     DataInput in,
-		     DBObjectBaseField definition) throws IOException
+                     DataInput in,
+                     DBObjectBaseField definition) throws IOException
   {
     value = null;
     this.owner = owner;
@@ -497,7 +497,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     if (debug)
       {
-	System.err.println("FieldOptionDBField: Copy constructor");
+        System.err.println("FieldOptionDBField: Copy constructor");
       }
 
     this.fieldcode = field.getID();
@@ -507,7 +507,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     synchronized (field.matrix)
       {
-	this.matrix = new HashMap<String, SyncPrefEnum>(field.matrix);
+        this.matrix = new HashMap<String, SyncPrefEnum>(field.matrix);
       }
   }
 
@@ -525,7 +525,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     // "Field Option Field Error"
     // "Error.. verifyNewValue() method not supported on FieldOptionDBField."
     return Ganymede.createErrorDialog(ts.l("global.error_title"),
-				      ts.l("verifyNewValue.error_text"));
+                                      ts.l("verifyNewValue.error_text"));
   }
 
   /**
@@ -554,14 +554,14 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     if (!(obj.getClass().equals(this.getClass())))
       {
-	return false;
+        return false;
       }
 
     fodb = (FieldOptionDBField) obj;
 
     synchronized (fodb.matrix)
       {
-	return this.matrix.equals(fodb.matrix); 
+        return this.matrix.equals(fodb.matrix); 
       }
   }
 
@@ -580,29 +580,29 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   {
     if (!local)
       {
-	if (!verifyReadPermission())
-	  {
-	    // "Error Copying Field Option Field"
-	    // "Can''t copy field {0}, no read privileges on source."
-	    return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
-					      ts.l("copyFieldTo.no_read", getName()));
-	  }
+        if (!verifyReadPermission())
+          {
+            // "Error Copying Field Option Field"
+            // "Can''t copy field {0}, no read privileges on source."
+            return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
+                                              ts.l("copyFieldTo.no_read", getName()));
+          }
       }
 
     if (!target.isEditable(local))
       {
-	// "Error Copying Field Option Field"
-	// "Can''t copy field {0}, no write privileges on target."
-	return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
-					  ts.l("copyFieldTo.no_write", getName()));
+        // "Error Copying Field Option Field"
+        // "Can''t copy field {0}, no write privileges on target."
+        return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
+                                          ts.l("copyFieldTo.no_write", getName()));
       }
 
     if (!(target instanceof FieldOptionDBField))
       {
-	// "Error Copying Field Option Field"
-	// "Can''t copy field {0}, target is not a FieldOptionDBField."
-	return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
-					  ts.l("copyFieldTo.bad_param", getName()));
+        // "Error Copying Field Option Field"
+        // "Can''t copy field {0}, target is not a FieldOptionDBField."
+        return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
+                                          ts.l("copyFieldTo.bad_param", getName()));
       }
 
     // doing a simple clone of the hashtable is okay, since both the
@@ -657,7 +657,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     // "Field Option Field Error"
     // "Error.. setValue() on method not supported on FieldOptionDBField."
     return Ganymede.createErrorDialog(ts.l("global.error_title"),
-				      ts.l("setValue.error_text"));
+                                      ts.l("setValue.error_text"));
   }
 
   public Object clone() throws CloneNotSupportedException
@@ -669,7 +669,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   {
     if (debug)
       {
-	debugdump(matrix);
+        debugdump(matrix);
       }
 
     // If we have invalid entries, we're just going to throw them out,
@@ -691,8 +691,8 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     for (Map.Entry<String, SyncPrefEnum> entry : matrix.entrySet())
       {
-	out.writeUTF(entry.getKey());
-	out.writeUTF(entry.getValue().str());
+        out.writeUTF(entry.getKey());
+        out.writeUTF(entry.getValue().str());
       }
   }
 
@@ -706,16 +706,16 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     if (tableSize <= 0)
       {
-	matrix = new HashMap<String, SyncPrefEnum>();
+        matrix = new HashMap<String, SyncPrefEnum>();
       }
     else
       {
-	matrix = new HashMap<String, SyncPrefEnum>(tableSize * 2 + 1);
+        matrix = new HashMap<String, SyncPrefEnum>(tableSize * 2 + 1);
       }
     
     for (int i = 0; i < tableSize; i++)
       {
-	matrix.put(in.readUTF(), SyncPrefEnum.find(in.readUTF()));
+        matrix.put(in.readUTF(), SyncPrefEnum.find(in.readUTF()));
       }
   }
 
@@ -746,26 +746,26 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     for (Map.Entry<String, SyncPrefEnum> entry: matrix.entrySet())
       {
-	String basename = decodeBaseName(entry.getKey());
-	String fieldname = decodeFieldName(entry.getKey());
+        String basename = decodeBaseName(entry.getKey());
+        String fieldname = decodeFieldName(entry.getKey());
 
-	if (baseHash.containsKey(basename))
-	  {
-	    innerTable = baseHash.get(basename);
-	  }
-	else
-	  {
-	    innerTable = new HashMap<String, SyncPrefEnum>();
-	    baseHash.put(basename, innerTable);
-	  }
+        if (baseHash.containsKey(basename))
+          {
+            innerTable = baseHash.get(basename);
+          }
+        else
+          {
+            innerTable = new HashMap<String, SyncPrefEnum>();
+            baseHash.put(basename, innerTable);
+          }
 
-	innerTable.put(fieldname, entry.getValue());
+        innerTable.put(fieldname, entry.getValue());
       }
 
     if (writeSurroundContext)
       {
-	xmlOut.startElementIndent(this.getXMLName());
-	xmlOut.indentOut();
+        xmlOut.startElementIndent(this.getXMLName());
+        xmlOut.indentOut();
       }
 
     xmlOut.startElementIndent("options");
@@ -773,34 +773,34 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     for (Map.Entry<String, Map<String, SyncPrefEnum>> entry: baseHash.entrySet())
       {
-	innerTable = entry.getValue();
+        innerTable = entry.getValue();
 
-	String outerElementName = arlut.csd.Util.XMLUtils.XMLEncode(entry.getKey());
+        String outerElementName = arlut.csd.Util.XMLUtils.XMLEncode(entry.getKey());
 
-	xmlOut.startElementIndent(outerElementName);
-	xmlOut.indentOut();
+        xmlOut.startElementIndent(outerElementName);
+        xmlOut.indentOut();
 
-	if (innerTable.containsKey("[base]"))
-	  {
-	    xmlOut.attribute("option", innerTable.get("[base]").toString());
-	  }
+        if (innerTable.containsKey("[base]"))
+          {
+            xmlOut.attribute("option", innerTable.get("[base]").toString());
+          }
 
-	for (Map.Entry<String, SyncPrefEnum> innerEntry: innerTable.entrySet())
-	  {
-	    if (innerEntry.getKey().equals("[base]"))
-	      {
-		continue;	// we've already written field options for the base
-	      }
+        for (Map.Entry<String, SyncPrefEnum> innerEntry: innerTable.entrySet())
+          {
+            if (innerEntry.getKey().equals("[base]"))
+              {
+                continue;       // we've already written field options for the base
+              }
 
-	    String elementName = arlut.csd.Util.XMLUtils.XMLEncode(innerEntry.getKey());
+            String elementName = arlut.csd.Util.XMLUtils.XMLEncode(innerEntry.getKey());
 
-	    xmlOut.startElementIndent(elementName);
-	    xmlOut.attribute("option", innerEntry.getValue().str());
-	    xmlOut.endElement(elementName);
-	  }
+            xmlOut.startElementIndent(elementName);
+            xmlOut.attribute("option", innerEntry.getValue().str());
+            xmlOut.endElement(elementName);
+          }
 
-	xmlOut.indentIn();
-	xmlOut.endElementIndent(outerElementName);
+        xmlOut.indentIn();
+        xmlOut.endElementIndent(outerElementName);
       }
 
     xmlOut.indentIn();
@@ -808,8 +808,8 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     if (writeSurroundContext)
       {
-	xmlOut.indentIn();
-	xmlOut.endElementIndent(this.getXMLName());
+        xmlOut.indentIn();
+        xmlOut.endElementIndent(this.getXMLName());
       }
   }
 
@@ -823,9 +823,9 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     for (Map.Entry<String, SyncPrefEnum> entry: matrix.entrySet())
       {
-	result.append(decodeBaseName(entry.getKey()) + " " + decodeFieldName(entry.getKey()) +
-		      " -- " + entry.getValue());
-	result.append("\n");
+        result.append(decodeBaseName(entry.getKey()) + " " + decodeFieldName(entry.getKey()) +
+                      " -- " + entry.getValue());
+        result.append("\n");
       }
 
     return result.toString();
@@ -840,7 +840,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   {
     if (!verifyReadPermission())
       {
-	throw new IllegalArgumentException("permission denied to read this field");
+        throw new IllegalArgumentException("permission denied to read this field");
       }
 
     return "FieldOptions";
@@ -865,7 +865,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     if (!(orig instanceof FieldOptionDBField))
       {
-	throw new IllegalArgumentException("bad field comparison");
+        throw new IllegalArgumentException("bad field comparison");
       }
 
     clean();
@@ -874,7 +874,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     if (origFO.equals(this))
       {
-	return null;
+        return null;
       }
     
     Set<String> myKeys = new HashSet<String>(matrix.keySet());
@@ -890,42 +890,42 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     for (String key : keptKeys)
       {
-	SyncPrefEnum optionA = matrix.get(key);
-	SyncPrefEnum optionB = origFO.matrix.get(key);
+        SyncPrefEnum optionA = matrix.get(key);
+        SyncPrefEnum optionB = origFO.matrix.get(key);
 
-	if (optionA != optionB)
-	  {
-	    // "\t{0} {1} -- "{2}", was "{3}"\n"
-	    result.append(ts.l("getDiffString.changed_pattern",
-			       decodeBaseName(key), decodeFieldName(key),
-			       optionA, optionB));
-	  }
+        if (optionA != optionB)
+          {
+            // "\t{0} {1} -- "{2}", was "{3}"\n"
+            result.append(ts.l("getDiffString.changed_pattern",
+                               decodeBaseName(key), decodeFieldName(key),
+                               optionA, optionB));
+          }
       }
 
     for (String key : newKeys)
       {
-	SyncPrefEnum optionA = matrix.get(key);
+        SyncPrefEnum optionA = matrix.get(key);
 
-	if (isBase(key))
-	  {
-	    // "\t{0} {1} -- {2}\n"
-	    result.append(ts.l("getDiffString.new_pattern",
-			       decodeBaseName(key), decodeFieldName(key), optionA));
-	  }
-	else
-	  {
-	    // "\t{0} {1} -- {2} (was undefined)\n"
-	    result.append(ts.l("getDiffString.new_pattern2",
-			       decodeBaseName(key), decodeFieldName(key), optionA));
-	  }
+        if (isBase(key))
+          {
+            // "\t{0} {1} -- {2}\n"
+            result.append(ts.l("getDiffString.new_pattern",
+                               decodeBaseName(key), decodeFieldName(key), optionA));
+          }
+        else
+          {
+            // "\t{0} {1} -- {2} (was undefined)\n"
+            result.append(ts.l("getDiffString.new_pattern2",
+                               decodeBaseName(key), decodeFieldName(key), optionA));
+          }
       }
 
     for (String key : lostKeys)
       {
-	SyncPrefEnum optionB = origFO.matrix.get(key);
+        SyncPrefEnum optionB = origFO.matrix.get(key);
 
-	// "\t{0} {1} -- Lost {2}\n"
-	result.append(ts.l("getDiffString.old_pattern", decodeBaseName(key), decodeFieldName(key), optionB));
+        // "\t{0} {1} -- Lost {2}\n"
+        result.append(ts.l("getDiffString.old_pattern", decodeBaseName(key), decodeFieldName(key), optionB));
       }
 
     return result.toString();
@@ -979,11 +979,11 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   {
     try
       {
-	return matrix.get(matrixEntry(base.getTypeID(), field.getID()));
+        return matrix.get(matrixEntry(base.getTypeID(), field.getID()));
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("caught remote: " + ex);
+        throw new RuntimeException("caught remote: " + ex);
       }
   }
 
@@ -998,11 +998,11 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   {
     try
       {
-	return matrix.get(matrixEntry(base.getTypeID()));
+        return matrix.get(matrixEntry(base.getTypeID()));
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("caught remote: " + ex);
+        throw new RuntimeException("caught remote: " + ex);
       }
   }
 
@@ -1019,16 +1019,16 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   {
     if (isEditable())
       {
-	matrix.clear();
-	matrix = new HashMap<String, SyncPrefEnum>();
-	return null;
+        matrix.clear();
+        matrix = new HashMap<String, SyncPrefEnum>();
+        return null;
       }
     else
       {
-	// "Field Option Field Error"
-	// "You don''t have permissions to reset {0}''s field options."
-	return Ganymede.createErrorDialog(ts.l("global.error_title"),
-					  ts.l("resetOptions.error_text", toString()));
+        // "Field Option Field Error"
+        // "You don''t have permissions to reset {0}''s field options."
+        return Ganymede.createErrorDialog(ts.l("global.error_title"),
+                                          ts.l("resetOptions.error_text", toString()));
       }
   }
 
@@ -1047,13 +1047,13 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   {
     try
       {
-	return setOption(base.getTypeID(), field.getID(), option);
+        return setOption(base.getTypeID(), field.getID(), option);
       }
     catch (RemoteException ex)
       {
-	// "FieldOptionDBField couldn''t process setOption()"
-	return Ganymede.createErrorDialog(ts.l("setOption.error_title"),
-					  ex.getMessage());
+        // "FieldOptionDBField couldn''t process setOption()"
+        return Ganymede.createErrorDialog(ts.l("setOption.error_title"),
+                                          ex.getMessage());
       }
   }
 
@@ -1072,31 +1072,31 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   {
     if (!isEditable())
       {
-	// "Field Option Permissions Error"
-	// "You don''t have permission to edit this field."
-	return Ganymede.createErrorDialog(ts.l("global.perm_error_title"),
-					  ts.l("global.perm_error_text"));
+        // "Field Option Permissions Error"
+        // "You don''t have permission to edit this field."
+        return Ganymede.createErrorDialog(ts.l("global.perm_error_title"),
+                                          ts.l("global.perm_error_text"));
       }
 
     if (option == null)
       {
-	matrix.remove(matrixEntry(baseID, fieldID));
+        matrix.remove(matrixEntry(baseID, fieldID));
 
-	if (debug)
-	  {
-	    System.err.println("FieldOptionDBField: base " + 
-			       baseID + ", field " + fieldID + " cleared.");
-	  }
+        if (debug)
+          {
+            System.err.println("FieldOptionDBField: base " + 
+                               baseID + ", field " + fieldID + " cleared.");
+          }
       }
     else
       {
-	matrix.put(matrixEntry(baseID, fieldID), option);
+        matrix.put(matrixEntry(baseID, fieldID), option);
 
-	if (debug)
-	  {
-	    System.err.println("FieldOptionDBField: base " + 
-			       baseID + ", field " + fieldID + " set to \"" + option + "\"");
-	  }
+        if (debug)
+          {
+            System.err.println("FieldOptionDBField: base " + 
+                               baseID + ", field " + fieldID + " set to \"" + option + "\"");
+          }
       }
 
     return null;
@@ -1120,12 +1120,12 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     try
       {
-	return setOption(base.getTypeID(), option);
+        return setOption(base.getTypeID(), option);
       }
     catch (RemoteException ex)
       {
-	// "FieldOptionDBField couldn''t process setOption()."
-	return Ganymede.createErrorDialog(ts.l("setOption.error_title"), ex.getMessage());
+        // "FieldOptionDBField couldn''t process setOption()."
+        return Ganymede.createErrorDialog(ts.l("setOption.error_title"), ex.getMessage());
       }
   }
 
@@ -1144,31 +1144,31 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   {
     if (!isEditable())
       {
-	// "Field Option Permissions Error"
-	// "You don''t have permission to edit this field."
-	return Ganymede.createErrorDialog(ts.l("global.perm_error_title"),
-					  ts.l("global.perm_error_text"));
+        // "Field Option Permissions Error"
+        // "You don''t have permission to edit this field."
+        return Ganymede.createErrorDialog(ts.l("global.perm_error_title"),
+                                          ts.l("global.perm_error_text"));
       }
 
     if (option == null)
       {
-	matrix.remove(matrixEntry(baseID));
+        matrix.remove(matrixEntry(baseID));
 
-	if (debug)
-	  {
-	    System.err.println("FieldOptionDBField: base " + 
-			       baseID + " cleared.");
-	  }
+        if (debug)
+          {
+            System.err.println("FieldOptionDBField: base " + 
+                               baseID + " cleared.");
+          }
       }
     else
       {
-	matrix.put(matrixEntry(baseID), option);
-	
-	if (debug)
-	  {
-	    System.err.println("FieldOptionDBField: base " + 
-			       baseID + " set to \"" + option + "\"");
-	  }
+        matrix.put(matrixEntry(baseID), option);
+        
+        if (debug)
+          {
+            System.err.println("FieldOptionDBField: base " + 
+                               baseID + " set to \"" + option + "\"");
+          }
       }
 
     return null;
@@ -1187,28 +1187,28 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     while (iterator.hasNext())
       {
-	String key = iterator.next();
+        String key = iterator.next();
 
-	// If we have invalid entries, we're just going to throw them out,
-	// forget they even existed..  this is only remotely reasonable
-	// because matrix is private to this class, and because these
-	// invalid entries could serve no useful purpose, and will only
-	// become invalid after schema editing in any case.  Since
-	// normally the database/schema needs to be dumped after changing
-	// the schema, this is an appropriate place to do the cleanup.
+        // If we have invalid entries, we're just going to throw them out,
+        // forget they even existed..  this is only remotely reasonable
+        // because matrix is private to this class, and because these
+        // invalid entries could serve no useful purpose, and will only
+        // become invalid after schema editing in any case.  Since
+        // normally the database/schema needs to be dumped after changing
+        // the schema, this is an appropriate place to do the cleanup.
 
-	if (!isValidCode(key))
-	  {
-	    if (debug)
-	      {
-		System.err.println("**** FieldOptionDBField.clean(): throwing out invalid entry " + 
-				   decodeBaseName(key) + " " + 
-				   decodeFieldName(key) + " ---- " + 
-				   matrix.get(key));
-	      }
+        if (!isValidCode(key))
+          {
+            if (debug)
+              {
+                System.err.println("**** FieldOptionDBField.clean(): throwing out invalid entry " + 
+                                   decodeBaseName(key) + " " + 
+                                   decodeFieldName(key) + " ---- " + 
+                                   matrix.get(key));
+              }
 
-	    iterator.remove();
-	  }
+            iterator.remove();
+          }
       }
   }
 
@@ -1248,11 +1248,11 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   {
     if (matrix != null)
       {
-	return new FieldOptionMatrixCkPoint(this);
+        return new FieldOptionMatrixCkPoint(this);
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -1268,19 +1268,19 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   {
     if (!(owner instanceof DBEditObject))
       {
-	throw new RuntimeException("Invalid rollback on field " + 
-				   getName() + ", not in an editable context");
+        throw new RuntimeException("Invalid rollback on field " + 
+                                   getName() + ", not in an editable context");
       }
 
     if (oldval == null)
       {
-	this.setUndefined(true);
+        this.setUndefined(true);
         return;
       }
 
     if (oldval instanceof FieldOptionMatrixCkPoint)
       {
-	this.matrix = ((FieldOptionMatrixCkPoint) oldval).matrix;
+        this.matrix = ((FieldOptionMatrixCkPoint) oldval).matrix;
         return;
       }
 

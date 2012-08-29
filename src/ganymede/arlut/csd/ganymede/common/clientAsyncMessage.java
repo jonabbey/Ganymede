@@ -7,7 +7,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -93,7 +93,7 @@ public class clientAsyncMessage implements java.io.Serializable {
   {
     if (method < FIRST || method > LAST)
       {
-	throw new IllegalArgumentException("bad method code: " + method);
+        throw new IllegalArgumentException("bad method code: " + method);
       }
 
     this.method = method;
@@ -105,7 +105,7 @@ public class clientAsyncMessage implements java.io.Serializable {
   {
     if (method < FIRST || method > LAST)
       {
-	throw new IllegalArgumentException("bad method code: " + method);
+        throw new IllegalArgumentException("bad method code: " + method);
       }
 
     this.method = method;
@@ -119,27 +119,27 @@ public class clientAsyncMessage implements java.io.Serializable {
     switch (method)
       {
       case SENDMESSAGE:
-	result.append("sendMessage");
-	break;
+        result.append("sendMessage");
+        break;
 
       case SHUTDOWN:
-	result.append("shutdown");
-	break;
-	
+        result.append("shutdown");
+        break;
+        
       default:
-	result.append("??");
+        result.append("??");
       }
 
     result.append("(");
 
     for (int i = 0; i < params.length; i++)
       {
-	if (i > 0)
-	  {
-	    result.append(", ");
-	  }
-	
-	result.append(params[i]);
+        if (i > 0)
+          {
+            result.append(", ");
+          }
+        
+        result.append(params[i]);
       }
 
     result.append(")");

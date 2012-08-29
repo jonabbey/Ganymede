@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -121,26 +121,26 @@ class fieldDeltaRec {
   {
     if (!this.vector)
       {
-	throw new IllegalStateException();
+        throw new IllegalStateException();
       }
 
     if (addValues == null)
       {
-	addValues = new Vector();
+        addValues = new Vector();
       }
 
     if (value instanceof Byte[])
       {
-	value = new IPwrap((Byte []) value);
+        value = new IPwrap((Byte []) value);
       }
 
     if (delValues != null && delValues.contains(value))
       {
-	delValues.removeElement(value);
+        delValues.removeElement(value);
       }
     else if (!addValues.contains(value))
       {
-	addValues.addElement(value);
+        addValues.addElement(value);
       }
   }
 
@@ -155,7 +155,7 @@ class fieldDeltaRec {
   {
     if (!this.vector)
       {
-	throw new IllegalStateException();
+        throw new IllegalStateException();
       }
 
     if (delValues == null)
@@ -165,16 +165,16 @@ class fieldDeltaRec {
 
     if (value instanceof Byte[])
       {
-	value = new IPwrap((Byte []) value);
+        value = new IPwrap((Byte []) value);
       }
 
     if (addValues != null && addValues.contains(value))
       {
-	addValues.removeElement(value);
+        addValues.removeElement(value);
       }
     else if (!delValues.contains(value))
       {
-	delValues.addElement(value);
+        delValues.addElement(value);
       }
   }
 
@@ -189,12 +189,12 @@ class fieldDeltaRec {
   {
     if (!vector)
       {
-	if (scalarValue == null)
-	  {
-	    return "<field: " + fieldcode + ", *deleting*>";
-	  }
+        if (scalarValue == null)
+          {
+            return "<field: " + fieldcode + ", *deleting*>";
+          }
 
-	return "<field: " + fieldcode + ", new val = " + scalarValue.getValueString() + ">";
+        return "<field: " + fieldcode + ", new val = " + scalarValue.getValueString() + ">";
       }
 
     StringBuilder result = new StringBuilder();

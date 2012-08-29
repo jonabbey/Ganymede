@@ -117,7 +117,7 @@ public class notesPanel extends JPanel implements KeyListener {
 
     if (debug)
       {
-	System.out.println("Creating notes panel");
+        System.out.println("Creating notes panel");
       }
 
     this.fp = fp;
@@ -136,23 +136,23 @@ public class notesPanel extends JPanel implements KeyListener {
 
     if (local_editable)
       {
-	try
-	  {
-	    local_editable = notes_field.isEditable();
-	  }
-	catch (Exception ex)
-	  {
-	    gclient.client.processException(ex);
+        try
+          {
+            local_editable = notes_field.isEditable();
+          }
+        catch (Exception ex)
+          {
+            gclient.client.processException(ex);
 
-	    local_editable = false;
-	  }
+            local_editable = false;
+          }
       }
 
     notesArea.setEditable(local_editable);
 
     if (local_editable)
       {
-	notesArea.addKeyListener(this);
+        notesArea.addKeyListener(this);
       }
 
     JScrollPane notesScroll = new JScrollPane(notesArea);
@@ -160,19 +160,19 @@ public class notesPanel extends JPanel implements KeyListener {
 
     if (notes_field != null)
       {
-	try
-	  {
-	    String s = (String)notes_field.getValue();
+        try
+          {
+            String s = (String)notes_field.getValue();
 
-	    if (s != null)
-	      {
-		notesArea.append(s);
-	      }
-	  }
-	catch (Exception rx)
-	  {
-	    gclient.client.processExceptionRethrow(rx, "Could not get note text: ");
-	  }
+            if (s != null)
+              {
+                notesArea.append(s);
+              }
+          }
+        catch (Exception rx)
+          {
+            gclient.client.processExceptionRethrow(rx, "Could not get note text: ");
+          }
       }
   }
 
@@ -185,28 +185,28 @@ public class notesPanel extends JPanel implements KeyListener {
   {
     if (!local_editable)
       {
-	return;
+        return;
       }
 
     try
       {
-	if (notes_field != null)
-	  {
-	    if (debug)
-	      {
-		System.out.println("Updating notes: " + notesArea.getText().trim());
-	      }
+        if (notes_field != null)
+          {
+            if (debug)
+              {
+                System.out.println("Updating notes: " + notesArea.getText().trim());
+              }
 
-	    notes_field.setValue(notesArea.getText().trim());
-	  }
-	else if (debug)
-	  {
-	    System.out.println("notes_field is null, not updating.");
-	  }
+            notes_field.setValue(notesArea.getText().trim());
+          }
+        else if (debug)
+          {
+            System.out.println("notes_field is null, not updating.");
+          }
       }
     catch (Exception rx)
       {
-	gclient.client.processExceptionRethrow(rx, "Could not set notes field: ");
+        gclient.client.processExceptionRethrow(rx, "Could not set notes field: ");
       }
   }
 

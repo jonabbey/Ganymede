@@ -152,46 +152,46 @@ public class SaveDialog extends JDialog implements ActionListener {
 
     if (forMail)
       {
-	gbc.anchor = GridBagConstraints.WEST;
+        gbc.anchor = GridBagConstraints.WEST;
 
-	gbc.gridy = 0;
-	gbc.gridx = 0;
-	gbc.gridheight = 2;
-	JLabel image = new JLabel(new ImageIcon(saveImage));
-	gbl.setConstraints(image, gbc);
-	panel.add(image);
+        gbc.gridy = 0;
+        gbc.gridx = 0;
+        gbc.gridheight = 2;
+        JLabel image = new JLabel(new ImageIcon(saveImage));
+        gbl.setConstraints(image, gbc);
+        panel.add(image);
 
-	gbc.gridheight = 1;
-	gbc.gridx = 1;
-	gbc.gridy = 0;
-	gbc.fill = GridBagConstraints.NONE;
-	// "To:"
-	JLabel rec = new JLabel(ts.l("init.to_label"));
-	gbl.setConstraints(rec, gbc);
-	panel.add(rec);
+        gbc.gridheight = 1;
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbc.fill = GridBagConstraints.NONE;
+        // "To:"
+        JLabel rec = new JLabel(ts.l("init.to_label"));
+        gbl.setConstraints(rec, gbc);
+        panel.add(rec);
 
-	gbc.gridx = 2;
-	gbc.fill = GridBagConstraints.HORIZONTAL;
-	gbc.weightx = 1;
-	gbl.setConstraints(recipients, gbc);
-	panel.add(recipients);
+        gbc.gridx = 2;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1;
+        gbl.setConstraints(recipients, gbc);
+        panel.add(recipients);
 
-	gbc.gridy = 1;
-	gbc.gridx = 1;
-	gbc.weightx = 0;
-	gbc.fill = GridBagConstraints.NONE;
-	// "Subject:"
-	JLabel sub = new JLabel(ts.l("init.subject_label"));
-	gbl.setConstraints(sub, gbc);
-	panel.add(sub);
+        gbc.gridy = 1;
+        gbc.gridx = 1;
+        gbc.weightx = 0;
+        gbc.fill = GridBagConstraints.NONE;
+        // "Subject:"
+        JLabel sub = new JLabel(ts.l("init.subject_label"));
+        gbl.setConstraints(sub, gbc);
+        panel.add(sub);
 
-	gbc.gridx = 2;
-	gbc.weightx = 1;
-	gbc.fill = GridBagConstraints.HORIZONTAL;
-	// "Query Report"
-	subject.setText(ts.l("init.default_subject"));
-	gbl.setConstraints(subject, gbc);
-	panel.add(subject);
+        gbc.gridx = 2;
+        gbc.weightx = 1;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        // "Query Report"
+        subject.setText(ts.l("init.default_subject"));
+        gbl.setConstraints(subject, gbc);
+        panel.add(subject);
       }
 
     // Row 3 is for the format choices
@@ -245,7 +245,7 @@ public class SaveDialog extends JDialog implements ActionListener {
 
     if (debug)
       {
-	System.err.println("Returning " + returnValue);
+        System.err.println("Returning " + returnValue);
       }
 
     return returnValue;
@@ -284,7 +284,7 @@ public class SaveDialog extends JDialog implements ActionListener {
   {
     if (!addedFormatChoice)
       {
-	addFormatChoiceButtons(choices);
+        addFormatChoiceButtons(choices);
       }
   }
 
@@ -342,23 +342,23 @@ public class SaveDialog extends JDialog implements ActionListener {
   {
     if (e.getSource() == ok)
       {
-	if (debug)
-	  {
-	    System.err.println("ok");
-	  }
+        if (debug)
+          {
+            System.err.println("ok");
+          }
 
-	returnValue = true;
-	setVisible(false);
+        returnValue = true;
+        setVisible(false);
       }
     else if (e.getSource() == cancel)
       {
-	if (debug)
-	  {
-	    System.err.println("cancel");
-	  }
+        if (debug)
+          {
+            System.err.println("cancel");
+          }
 
-	returnValue = false;
-	setVisible(false);
+        returnValue = false;
+        setVisible(false);
       }
   }
 }
@@ -407,21 +407,21 @@ class formatButtonPanel extends JPanel {
 
     for (int i = 0; i < choices.size(); i++)
       {
-	s = (String)choices.elementAt(i);
+        s = (String)choices.elementAt(i);
 
-	JRadioButton b = new JRadioButton(s);
+        JRadioButton b = new JRadioButton(s);
 
-	if (i == 0)
-	  {
-	    b.setSelected(true);
-	  }
+        if (i == 0)
+          {
+            b.setSelected(true);
+          }
 
-	modelToLabel.put(b.getModel(), s);
-	group.add(b);
+        modelToLabel.put(b.getModel(), s);
+        group.add(b);
 
-	constraints.gridy = i;
-	layout.setConstraints(b, constraints);
-	add(b);
+        constraints.gridy = i;
+        layout.setConstraints(b, constraints);
+        add(b);
       }
   }
 

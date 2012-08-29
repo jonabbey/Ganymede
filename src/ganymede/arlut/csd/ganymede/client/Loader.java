@@ -10,7 +10,7 @@
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -123,7 +123,7 @@ public class Loader extends Thread {
   {
     if (debug)
       {
-	System.err.println("Initializing Loader");
+        System.err.println("Initializing Loader");
       }
 
     /*    this.debug = debug; */
@@ -132,7 +132,7 @@ public class Loader extends Thread {
 
     if (session == null)
       {
-	throw new NullPointerException("Null session parameter in Loader constructor");
+        throw new NullPointerException("Null session parameter in Loader constructor");
       }
   }
 
@@ -140,7 +140,7 @@ public class Loader extends Thread {
   {
     if (debug)
       {
-	System.err.println("Starting thread in loader");
+        System.err.println("Starting thread in loader");
       }
 
     try
@@ -177,7 +177,7 @@ public class Loader extends Thread {
               {
                 System.err.println("**Stopping before baseMap is loaded");
               }
-		
+                
             baseMapLoaded = true;
           }
 
@@ -185,12 +185,12 @@ public class Loader extends Thread {
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("Could not load base hash/map in Loader: " + rx);
+        throw new RuntimeException("Could not load base hash/map in Loader: " + rx);
       }
 
     if (debug)
       {
-	System.err.println("Done with thread in loader.");
+        System.err.println("Done with thread in loader.");
       }
   }
 
@@ -206,7 +206,7 @@ public class Loader extends Thread {
 
     if (debug)
       {
-	System.err.println("Starting to load the loader again");
+        System.err.println("Starting to load the loader again");
       }
 
     isShutdown = false;
@@ -226,34 +226,34 @@ public class Loader extends Thread {
   {
     if (debug)
       {
-	System.err.println("** Loader cleanUp()");
+        System.err.println("** Loader cleanUp()");
       }
 
     isShutdown = true;
 
     synchronized (this) 
       {
-	// setting isShutdown to true should cause the loader run
-	// method to quickly drop out and set the loader flags to
-	// true, so we wait until all of the boolean loaded flags are
-	// set
+        // setting isShutdown to true should cause the loader run
+        // method to quickly drop out and set the loader flags to
+        // true, so we wait until all of the boolean loaded flags are
+        // set
 
-	while (!(baseNamesLoaded && baseListLoaded && baseMapLoaded && !templateLoading))
-	  {
-	    if (debug)
-	      {
-		System.err.println("Loader waiting for previous method to stop.");
-	      }
+        while (!(baseNamesLoaded && baseListLoaded && baseMapLoaded && !templateLoading))
+          {
+            if (debug)
+              {
+                System.err.println("Loader waiting for previous method to stop.");
+              }
 
-	    try
-	      {
-		this.wait();
-	      }
-	    catch (InterruptedException x)
-	      {
-		throw new RuntimeException("Interrupted while waiting for previous loader to finish. " + x);
-	      }
-	  }
+            try
+              {
+                this.wait();
+              }
+            catch (InterruptedException x)
+              {
+                throw new RuntimeException("Interrupted while waiting for previous loader to finish. " + x);
+              }
+          }
       }
 
     baseNamesLoaded = false;
@@ -262,8 +262,8 @@ public class Loader extends Thread {
 
     if (baseList != null)
       {
-	baseList.setSize(0);
-	baseList = null;
+        baseList.setSize(0);
+        baseList = null;
       }
 
     // many of these hashes have values that are themselves hashes,
@@ -273,26 +273,26 @@ public class Loader extends Thread {
 
     if (baseNames != null)
       {
-	baseNames.clear();
-	baseNames = null;
+        baseNames.clear();
+        baseNames = null;
       }
 
     if (baseMap != null)
       {
-	baseMap.clear();
-	baseMap = null;
+        baseMap.clear();
+        baseMap = null;
       }
 
     if (templateHash != null)
       {
-	templateHash.clear();
-	templateHash = null;
+        templateHash.clear();
+        templateHash = null;
       }
 
     if (templateNameHash != null)
       {
-	templateNameHash.clear();
-	templateNameHash = null;
+        templateNameHash.clear();
+        templateNameHash = null;
       }
   }
 
@@ -319,14 +319,14 @@ public class Loader extends Thread {
   {
     try
       {
-	Hashtable baseMap = getBaseMap(); // block
-	BaseDump base = (BaseDump) baseMap.get(Short.valueOf(typeId));
+        Hashtable baseMap = getBaseMap(); // block
+        BaseDump base = (BaseDump) baseMap.get(Short.valueOf(typeId));
 
-	return base.getName();
+        return base.getName();
       }
     catch (NullPointerException ex)
       {
-	return "<unknown>";
+        return "<unknown>";
       }
   }
 
@@ -344,37 +344,37 @@ public class Loader extends Thread {
   {
     if (!baseListLoaded && !isShutdown)
       {
-	synchronized (this)
-	  {
-	    while (!baseListLoaded && !isShutdown)
-	      {
-		if (debug)
-		  {
-		    System.err.println("Dang, have to wait to get the base list");
-		  }
-		
-		try
-		  {
-		    this.wait();
-		  }
-		catch (InterruptedException x)
-		  {
-		    throw new RuntimeException("Interrupted while waiting for base list to load: " + x);
-		  }
-	      }
-	  }
+        synchronized (this)
+          {
+            while (!baseListLoaded && !isShutdown)
+              {
+                if (debug)
+                  {
+                    System.err.println("Dang, have to wait to get the base list");
+                  }
+                
+                try
+                  {
+                    this.wait();
+                  }
+                catch (InterruptedException x)
+                  {
+                    throw new RuntimeException("Interrupted while waiting for base list to load: " + x);
+                  }
+              }
+          }
       }
 
     if (debug)
       {
-	if (baseList == null)
-	  {
-	    System.err.println("baseList is null");
-	  }
-	else
-	  {
-	    System.err.println("returning baseList");
-	  }
+        if (baseList == null)
+          {
+            System.err.println("baseList is null");
+          }
+        else
+          {
+            System.err.println("returning baseList");
+          }
       }
 
     return baseList;
@@ -393,40 +393,40 @@ public class Loader extends Thread {
   {
     if (!baseNamesLoaded && !isShutdown)
       {
-	synchronized (this)
-	  {
-	    // we have to check baseNamesLoaded inside the
-	    // synchronization loop or else we can get deadlocked
+        synchronized (this)
+          {
+            // we have to check baseNamesLoaded inside the
+            // synchronization loop or else we can get deadlocked
 
-	    while (!baseNamesLoaded && !isShutdown)
-	      {
-		if (debug)
-		  {
-		    System.err.println("Dang, have to wait to get the base names list");
-		  }
+            while (!baseNamesLoaded && !isShutdown)
+              {
+                if (debug)
+                  {
+                    System.err.println("Dang, have to wait to get the base names list");
+                  }
 
-		try
-		  {
-		    this.wait();
-		  }
-		catch (InterruptedException x)
-		  {
-		    throw new RuntimeException("Interrupted while waiting for base names to load: " + x);
-		  }
-	      }
-	  }
+                try
+                  {
+                    this.wait();
+                  }
+                catch (InterruptedException x)
+                  {
+                    throw new RuntimeException("Interrupted while waiting for base names to load: " + x);
+                  }
+              }
+          }
       }
     
     if (debug)
       {
-	if (baseNames == null)
-	  {
-	    System.err.println("baseNames is null");
-	  }
-	else
-	  {
-	    System.err.println("returning baseNames");
-	  }
+        if (baseNames == null)
+          {
+            System.err.println("baseNames is null");
+          }
+        else
+          {
+            System.err.println("returning baseNames");
+          }
       }
 
     return baseNames;
@@ -445,40 +445,40 @@ public class Loader extends Thread {
   {
     if (!baseMapLoaded && !isShutdown)
       {
-	synchronized (this)
-	  {
-	    // we have to check baseMapLoaded inside the
-	    // synchronization loop or else we can get deadlocked
+        synchronized (this)
+          {
+            // we have to check baseMapLoaded inside the
+            // synchronization loop or else we can get deadlocked
 
-	    while (!baseMapLoaded && !isShutdown)
-	      {
-		if (debug)
-		  {
-		    System.err.println("Loader: waiting for base map");
-		  }
+            while (!baseMapLoaded && !isShutdown)
+              {
+                if (debug)
+                  {
+                    System.err.println("Loader: waiting for base map");
+                  }
 
-		try
-		  {
-		    this.wait();
-		  }
-		catch (InterruptedException x)
-		  {
-		    throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
-		  }
-	      }
-	  }
+                try
+                  {
+                    this.wait();
+                  }
+                catch (InterruptedException x)
+                  {
+                    throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
+                  }
+              }
+          }
       }
 
     if (debug)
       {
-	if (baseMap == null)
-	  {
-	    System.err.println("baseMap is null");
-	  }
-	else
-	  {
-	    System.err.println("returning baseMap");
-	  }
+        if (baseMap == null)
+          {
+            System.err.println("baseMap is null");
+          }
+        else
+          {
+            System.err.println("returning baseMap");
+          }
       }
 
     return baseMap;
@@ -502,40 +502,40 @@ public class Loader extends Thread {
 
     if (!baseMapLoaded && !isShutdown)
       {
-	synchronized (this)
-	  {
-	    // we have to check baseMapLoaded inside the
-	    // synchronization loop or else we can get deadlocked
+        synchronized (this)
+          {
+            // we have to check baseMapLoaded inside the
+            // synchronization loop or else we can get deadlocked
 
-	    while (!baseMapLoaded && !isShutdown)
-	      {
-		if (debug)
-		  {
-		    System.err.println("Loader: waiting for base hash");
-		  }
+            while (!baseMapLoaded && !isShutdown)
+              {
+                if (debug)
+                  {
+                    System.err.println("Loader: waiting for base hash");
+                  }
 
-		try
-		  {
-		    this.wait();
-		  }
-		catch (InterruptedException x)
-		  {
-		    throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
-		  }
-	      }
-	  }
+                try
+                  {
+                    this.wait();
+                  }
+                catch (InterruptedException x)
+                  {
+                    throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
+                  }
+              }
+          }
       }
 
     if (debug)
       {
-	if (baseToShort == null)
-	  {
-	    System.err.println("baseToShort is null");
-	  }
-	else
-	  {
-	    System.err.println("returning baseToShort");
-	  }
+        if (baseToShort == null)
+          {
+            System.err.println("baseToShort is null");
+          }
+        else
+          {
+            System.err.println("returning baseToShort");
+          }
       }
 
     return baseToShort;
@@ -557,40 +557,40 @@ public class Loader extends Thread {
 
     if (!baseMapLoaded && !isShutdown)
       {
-	synchronized (this)
-	  {
-	    // we have to check baseMapLoaded inside the
-	    // synchronization loop or else we can get deadlocked
+        synchronized (this)
+          {
+            // we have to check baseMapLoaded inside the
+            // synchronization loop or else we can get deadlocked
 
-	    while (!baseMapLoaded && !isShutdown)
-	      {
-		if (debug)
-		  {
-		    System.err.println("Loader: waiting for base hash");
-		  }
+            while (!baseMapLoaded && !isShutdown)
+              {
+                if (debug)
+                  {
+                    System.err.println("Loader: waiting for base hash");
+                  }
 
-		try
-		  {
-		    this.wait();
-		  }
-		catch (InterruptedException x)
-		  {
-		    throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
-		  }
-	      }
-	  }
+                try
+                  {
+                    this.wait();
+                  }
+                catch (InterruptedException x)
+                  {
+                    throw new RuntimeException("Interrupted while waiting for base hash to load: " + x);
+                  }
+              }
+          }
       }
 
     if (false)
       {
-	if (nameShorts == null)
-	  {
-	    System.err.println("nameShorts is null");
-	  }
-	else
-	  {
-	    System.err.println("returning nameShorts");
-	  }
+        if (nameShorts == null)
+          {
+            System.err.println("nameShorts is null");
+          }
+        else
+          {
+            System.err.println("returning nameShorts");
+          }
       }
 
     return nameShorts;
@@ -615,21 +615,21 @@ public class Loader extends Thread {
   {
     if (templateNameHash == null)
       {
-	templateNameHash = new Hashtable();
+        templateNameHash = new Hashtable();
       }
 
     Hashtable nameHash = (Hashtable) templateNameHash.get(objectid);
 
     if (nameHash == null)
       {
-	getTemplateVector(objectid);
+        getTemplateVector(objectid);
 
-	nameHash = (Hashtable) templateNameHash.get(objectid);
+        nameHash = (Hashtable) templateNameHash.get(objectid);
 
-	if (nameHash == null)
-	  {
-	    return null;
-	  }
+        if (nameHash == null)
+          {
+            return null;
+          }
       }
 
     return (FieldTemplate) nameHash.get(fieldname);
@@ -664,46 +664,46 @@ public class Loader extends Thread {
 
     if (isShutdown)
       {
-	if (debug)
-	  {
-	    System.err.println("Loader.getTemplateVector() -- isShutdown is true");
-	  }
+        if (debug)
+          {
+            System.err.println("Loader.getTemplateVector() -- isShutdown is true");
+          }
 
-	return null;
+        return null;
       }
 
     try
       {
-	templateLoading = true;
+        templateLoading = true;
 
-	if (templateHash == null)
-	  {
-	    templateHash = new Hashtable();
-	  }
-	
-	if (templateHash.containsKey(id))
-	  {
-	    result = (Vector) templateHash.get(id);
-	  }
-	else
-	  {
-	    try
-	      {
-		result = session.getFieldTemplateVector(id.shortValue());
-		templateHash.put(id, result);
-		constructTemplateNameHash(id, result);
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not get field templates: " + rx);
-	      }
-	  }
-	
-	return result;
+        if (templateHash == null)
+          {
+            templateHash = new Hashtable();
+          }
+        
+        if (templateHash.containsKey(id))
+          {
+            result = (Vector) templateHash.get(id);
+          }
+        else
+          {
+            try
+              {
+                result = session.getFieldTemplateVector(id.shortValue());
+                templateHash.put(id, result);
+                constructTemplateNameHash(id, result);
+              }
+            catch (RemoteException rx)
+              {
+                throw new RuntimeException("Could not get field templates: " + rx);
+              }
+          }
+        
+        return result;
       }
     finally
       {
-	templateLoading = false;
+        templateLoading = false;
       }
   }
 
@@ -715,13 +715,13 @@ public class Loader extends Thread {
 
     for (int i = 0; i < fieldTemplates.size(); i++)
       {
-	FieldTemplate x = (FieldTemplate) fieldTemplates.elementAt(i);
-	nameHash.put(x.getName(), x);
+        FieldTemplate x = (FieldTemplate) fieldTemplates.elementAt(i);
+        nameHash.put(x.getName(), x);
       }
 
     if (templateNameHash == null)
       {
-	templateNameHash = new Hashtable();
+        templateNameHash = new Hashtable();
       }
 
     templateNameHash.put(objectId, nameHash);
@@ -737,16 +737,16 @@ public class Loader extends Thread {
 
     if (debug)
       {
-	System.err.println("Finished loading base list");
+        System.err.println("Finished loading base list");
 
-	if (baseList == null)
-	  {
-	    System.err.println("****** BaseList is null after loading!!!! *****");
-	  }
-	else
-	  {
-	    System.err.println("*** BaseList is not null.");
-	  }
+        if (baseList == null)
+          {
+            System.err.println("****** BaseList is null after loading!!!! *****");
+          }
+        else
+          {
+            System.err.println("*** BaseList is not null.");
+          }
       }
 
     (new VecQuickSort(baseList, null)).sort();
@@ -771,13 +771,13 @@ public class Loader extends Thread {
 
     for (int i = 0; i < list.size(); i++)
       {
-	b = (Base)list.elementAt(i);
-	baseNames.put(b, b.getName());
+        b = (Base)list.elementAt(i);
+        baseNames.put(b, b.getName());
       }
       
     if (debug)
       {
-	System.err.println("Finished loading base list");
+        System.err.println("Finished loading base list");
       }
 
     baseNamesLoaded = true;
@@ -806,12 +806,12 @@ public class Loader extends Thread {
 
     for (int i = 0; i < size; i++)
       {
-	base = (Base) myBaseList.elementAt(i);
-	Short id = Short.valueOf(base.getTypeID());
+        base = (Base) myBaseList.elementAt(i);
+        Short id = Short.valueOf(base.getTypeID());
 
-	baseMap.put(id, base);
-	baseToShort.put(base, id);
-	nameShorts.put(base.getName(), id);
+        baseMap.put(id, base);
+        baseToShort.put(base, id);
+        nameShorts.put(base.getName(), id);
       }
 
     baseMapLoaded = true;

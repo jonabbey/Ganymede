@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -107,11 +107,11 @@ public class FieldOptionMatrix implements java.io.Serializable {
   {
     if (orig == null)
       {
-	this.matrix = new HashMap<String, SyncPrefEnum>();
+        this.matrix = new HashMap<String, SyncPrefEnum>();
       }
     else
       {
-	this.matrix = new HashMap<String, SyncPrefEnum>(orig);
+        this.matrix = new HashMap<String, SyncPrefEnum>(orig);
       }
   }
 
@@ -152,11 +152,11 @@ public class FieldOptionMatrix implements java.io.Serializable {
   {
     try
       {
-	return getOption(base.getTypeID(), field.getID());
+        return getOption(base.getTypeID(), field.getID());
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("caught remote: " + ex);
+        throw new RuntimeException("caught remote: " + ex);
       }
   }
 
@@ -169,11 +169,11 @@ public class FieldOptionMatrix implements java.io.Serializable {
   {
     try
       {
-	return matrix.get(matrixEntry(base.getTypeID()));
+        return matrix.get(matrixEntry(base.getTypeID()));
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("caught remote: " + ex);
+        throw new RuntimeException("caught remote: " + ex);
       }
   }
 
@@ -225,18 +225,18 @@ public class FieldOptionMatrix implements java.io.Serializable {
   {
     if (matrixKey.indexOf(':') == -1)
       {
-	throw new IllegalArgumentException("not a valid matrixEntry");
+        throw new IllegalArgumentException("not a valid matrixEntry");
       }
 
     String baseStr = matrixKey.substring(0, matrixKey.indexOf(':'));
 
     try
       {
-	return Short.parseShort(baseStr);
+        return Short.parseShort(baseStr);
       }
     catch (NumberFormatException ex)
       {
-	throw new RuntimeException("bad string format:" + ex);
+        throw new RuntimeException("bad string format:" + ex);
       }
   }
 
@@ -253,23 +253,23 @@ public class FieldOptionMatrix implements java.io.Serializable {
   {
     if (matrixKey.indexOf(':') == -1)
       {
-	throw new IllegalArgumentException("not a valid matrixEntry");
+        throw new IllegalArgumentException("not a valid matrixEntry");
       }
 
     if (isBase(matrixKey))
       {
-	throw new IllegalArgumentException("not a field matrixEntry");
+        throw new IllegalArgumentException("not a field matrixEntry");
       }
 
     String fieldStr = matrixKey.substring(matrixKey.lastIndexOf(':')+1);
 
     try
       {
-	return Short.parseShort(fieldStr);
+        return Short.parseShort(fieldStr);
       }
     catch (NumberFormatException ex)
       {
-	throw new RuntimeException("bad string format:" + ex);
+        throw new RuntimeException("bad string format:" + ex);
       }
   }
 
@@ -283,11 +283,11 @@ public class FieldOptionMatrix implements java.io.Serializable {
   {
     if (isBase(matrixKey))
       {
-	return matrixKey;
+        return matrixKey;
       }
     else
       {
-	return matrixEntry(entryBase(matrixKey));
+        return matrixEntry(entryBase(matrixKey));
       }
   }
 
@@ -299,11 +299,11 @@ public class FieldOptionMatrix implements java.io.Serializable {
   {
     try
       {
-	return FieldOptionDBField.debugdecode(matrix);
+        return FieldOptionDBField.debugdecode(matrix);
       }
     catch (Throwable ex)
       {
-	return super.toString();
+        return super.toString();
       }
   }
 }

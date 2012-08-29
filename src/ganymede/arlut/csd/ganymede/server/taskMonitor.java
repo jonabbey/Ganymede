@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -80,14 +80,14 @@ public class taskMonitor implements Runnable {
   {
     try
       {
-	task.join();		// wait for our task to finish
+        task.join();            // wait for our task to finish
       }
     catch (InterruptedException ex)
       {
       }
     finally
       {
-	handle.notifyCompletion(); // tell the scheduler it has completed
+        handle.notifyCompletion(); // tell the scheduler it has completed
       }
 
     // we're a one-shot monitor, forget everything for GC

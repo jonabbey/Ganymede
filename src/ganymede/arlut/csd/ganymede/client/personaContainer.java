@@ -10,7 +10,7 @@
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2005
@@ -109,7 +109,7 @@ class personaContainer extends JScrollPane implements Runnable{
   {
     if (object == null)
       {
-	throw new IllegalArgumentException("Got a null object in personaContainer.");
+        throw new IllegalArgumentException("Got a null object in personaContainer.");
       }
 
     this.invid = invid;
@@ -137,41 +137,41 @@ class personaContainer extends JScrollPane implements Runnable{
   {
     if (debug)
       {
-	System.err.println("Starting new thread");
+        System.err.println("Starting new thread");
       }
 
     try
       {
-	String label = object.getLabel();
+        String label = object.getLabel();
 
-	if ((label != null) && (!label.equals("null")))
-	  {
-	    pp.middle.setTitleAt(pp.panels.indexOf(this), label);
-	  }
+        if ((label != null) && (!label.equals("null")))
+          {
+            pp.middle.setTitleAt(pp.panels.indexOf(this), label);
+          }
 
-	pp.middle.repaint();
-	
-	containerPanel cp = new containerPanel(object, invid,
-					       editable,
-					       pp.fp.getgclient(), 
-					       pp.fp.getWindowPanel(), 
-					       pp.fp,
-					       progressBar,
-					       this);
-	cp.setBorder(pp.empty);
-	setViewportView(cp);
+        pp.middle.repaint();
+        
+        containerPanel cp = new containerPanel(object, invid,
+                                               editable,
+                                               pp.fp.getgclient(), 
+                                               pp.fp.getWindowPanel(), 
+                                               pp.fp,
+                                               progressBar,
+                                               this);
+        cp.setBorder(pp.empty);
+        setViewportView(cp);
       }
     catch (Exception rx)
       {
-	// "Exception caught in the client while trying to load a persona from the server into a container panel."
-	gclient.client.processExceptionRethrow(rx, ts.l("run.exception"));
+        // "Exception caught in the client while trying to load a persona from the server into a container panel."
+        gclient.client.processExceptionRethrow(rx, ts.l("run.exception"));
       }
 
     loaded = true;
 
     if (debug)
       {
-	System.err.println("Done with thread in personaPanel");
+        System.err.println("Done with thread in personaPanel");
       }
 
     pp.invalidate();
@@ -184,26 +184,26 @@ class personaContainer extends JScrollPane implements Runnable{
 
     while (!loaded)
       {
-	try
-	  {
-	    if (debug)
-	      {
-		System.err.println("presona panel waiting for load!");
-	      }
+        try
+          {
+            if (debug)
+              {
+                System.err.println("presona panel waiting for load!");
+              }
 
-	    this.wait(1000);
+            this.wait(1000);
 
-	    if (System.currentTimeMillis() - startTime > 200000)
-	      {
-		System.err.println("Something went wrong loading the persona panel. " +
-				   " The wait for load thread was taking too long, so I gave up on it.");
-		break;
-	      }
-	  }
-	catch (InterruptedException e)
-	  {
-	    throw new RuntimeException("Interrupted while waiting for personaContainer to load: " + e);
-	  }
+            if (System.currentTimeMillis() - startTime > 200000)
+              {
+                System.err.println("Something went wrong loading the persona panel. " +
+                                   " The wait for load thread was taking too long, so I gave up on it.");
+                break;
+              }
+          }
+        catch (InterruptedException e)
+          {
+            throw new RuntimeException("Interrupted while waiting for personaContainer to load: " + e);
+          }
       }
   }
 

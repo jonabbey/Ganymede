@@ -10,7 +10,7 @@
    Module By: Deepak Giridharagopal
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2011
@@ -112,18 +112,18 @@ class fieldoption_button extends JButton implements ActionListener {
    */
 
   public fieldoption_button(field_option_field field,
-			    db_object object_ref,
-			    boolean enabled,
-			    gclient gc,
-			    String title)
+                            db_object object_ref,
+                            boolean enabled,
+                            gclient gc,
+                            String title)
   {
     if (enabled)
       {
-	setText(ts.l("global.edit")); // "Edit Field Options"
+        setText(ts.l("global.edit")); // "Edit Field Options"
       }
     else
       {
-	setText(ts.l("global.view")); // "View Field Options"
+        setText(ts.l("global.view")); // "View Field Options"
       }
       
     this.field = field;
@@ -144,52 +144,52 @@ class fieldoption_button extends JButton implements ActionListener {
   {
     if (e.getSource() == this)
       {
-	if (debug)
-	  {
-	    System.out.println("Edit Button was pushed- table not selected");
-	  }
-	  
-	// Need to take care of accidental double clicks resulting
-	// in two or more instances of fieldoption_editor being
-	// created. Even though queue_editor is modal, there is a
-	// small gap in time between clicking the perm button and
-	// the modal state taking effect- enough time for multiple
-	// clicks on the button to create multiple editors.
+        if (debug)
+          {
+            System.out.println("Edit Button was pushed- table not selected");
+          }
+          
+        // Need to take care of accidental double clicks resulting
+        // in two or more instances of fieldoption_editor being
+        // created. Even though queue_editor is modal, there is a
+        // small gap in time between clicking the perm button and
+        // the modal state taking effect- enough time for multiple
+        // clicks on the button to create multiple editors.
 
-	if ((editor == null) || (!editor.isActiveEditor())) 
-	  { 
-	    int channelType = 0;
+        if ((editor == null) || (!editor.isActiveEditor())) 
+          { 
+            int channelType = 0;
 
-	    try
-	      {
-		channelType = ((Integer) object_ref.getFieldValue(SchemaConstants.SyncChannelTypeNum)).intValue();
-	      }
-	    catch (RemoteException ex)
-	      {
-		gc.processExceptionRethrow(ex);
-	      }
+            try
+              {
+                channelType = ((Integer) object_ref.getFieldValue(SchemaConstants.SyncChannelTypeNum)).intValue();
+              }
+            catch (RemoteException ex)
+              {
+                gc.processExceptionRethrow(ex);
+              }
 
-	    boolean fullState = (channelType == 2); // cf. arlut.csd.ganymede.server.SyncRunner.SyncType
+            boolean fullState = (channelType == 2); // cf. arlut.csd.ganymede.server.SyncRunner.SyncType
 
-	    Frame parent = new Frame();
-	    editor = new fieldoption_editor(field, 
-				            enabled,
-					    fullState,
-					    gc,
-				            parent, "Field Options Editor: " + title);
-	    
-	    if (debug)
-	      {
-		System.out.println("Editor Created by field options button");
-	      }
-	  } 
-	else 
-	  {
-	    if (debug)
-	      {
-		System.out.println("An editor already exists- new one not created");
-	      }
-	  }
+            Frame parent = new Frame();
+            editor = new fieldoption_editor(field, 
+                                            enabled,
+                                            fullState,
+                                            gc,
+                                            parent, "Field Options Editor: " + title);
+            
+            if (debug)
+              {
+                System.out.println("Editor Created by field options button");
+              }
+          } 
+        else 
+          {
+            if (debug)
+              {
+                System.out.println("An editor already exists- new one not created");
+              }
+          }
       }
   }
 
@@ -202,8 +202,8 @@ class fieldoption_button extends JButton implements ActionListener {
   {
     if (editor != null)
       {
-	editor.cleanUp();
-	editor = null;
+        editor.cleanUp();
+        editor = null;
       }
 
     gc = null;

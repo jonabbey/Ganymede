@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2012
@@ -339,7 +339,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (field1 == null || field2 == null)
       {
-	return false;
+        return false;
       }
 
     return field1.matches(field2);
@@ -431,13 +431,13 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (o instanceof Number)
       {
-	return fieldcode - ((Number) o).shortValue();
+        return fieldcode - ((Number) o).shortValue();
       }
     else
       {
-	DBField otherField = (DBField) o;
+        DBField otherField = (DBField) o;
 
-	return fieldcode - otherField.fieldcode;
+        return fieldcode - otherField.fieldcode;
       }
   }
 
@@ -452,7 +452,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (isVector())
       {
-	throw new IllegalArgumentException(ts.l("global.oops_vector", getName(), owner.getLabel()));
+        throw new IllegalArgumentException(ts.l("global.oops_vector", getName(), owner.getLabel()));
       }
 
     return value;
@@ -469,8 +469,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (!isVector())
       {
-	// "Vector method called on a scalar field: {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        // "Vector method called on a scalar field: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     return getVectVal().elementAt(index);
@@ -481,15 +481,15 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * this is not a vector field, will return 1. (Should throw exception?)
    */
 
-  public int size()		// returns number of elements in array
+  public int size()             // returns number of elements in array
   {
     if (!isVector())
       {
-	return 1;
+        return 1;
       }
     else
       {
-	return getVectVal().size();
+        return getVectVal().size();
       }
   }
 
@@ -503,11 +503,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (!isVector())
       {
-	return 1;		// should throw exception?
+        return 1;               // should throw exception?
       }
     else
       {
-	return getFieldDef().getMaxArraySize();
+        return getFieldDef().getMaxArraySize();
       }     
   }      
 
@@ -573,31 +573,31 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (!(obj.getClass().equals(this.getClass())))
       {
-	return false;
+        return false;
       }
 
     DBField f = (DBField) obj;
 
     if (!isVector())
       {
-	return f.key().equals(this.key());
+        return f.key().equals(this.key());
       }
     else
       {
-	if (f.size() != this.size())
-	  {
-	    return false;
-	  }
+        if (f.size() != this.size())
+          {
+            return false;
+          }
 
-	for (int i = 0; i < size(); i++)
-	  {
-	    if (!f.key(i).equals(this.key(i)))
-	      {
-		return false;
-	      }
-	  }
+        for (int i = 0; i < size(); i++)
+          {
+            if (!f.key(i).equals(this.key(i)))
+              {
+                return false;
+              }
+          }
 
-	return true;
+        return true;
       }
   }
 
@@ -635,50 +635,50 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (!local)
       {
-	if (!verifyReadPermission())
-	  {
-	    // "Copy field error"
-	    // "Can''t copy from field {0} in object {1}, due to a lack of read privileges."
-	    return Ganymede.createErrorDialog(ts.l("copyFieldTo.copy_error_sub"),
-					      ts.l("copyFieldTo.no_read", getName(), owner.getLabel()));
-	  }
+        if (!verifyReadPermission())
+          {
+            // "Copy field error"
+            // "Can''t copy from field {0} in object {1}, due to a lack of read privileges."
+            return Ganymede.createErrorDialog(ts.l("copyFieldTo.copy_error_sub"),
+                                              ts.l("copyFieldTo.no_read", getName(), owner.getLabel()));
+          }
       }
-	
+        
     if (!target.isEditable(local))
       {
-	// "Copy field error"
-	// "Can''t copy to field {0} in object {1}, due to a lack of write privileges."
-	return Ganymede.createErrorDialog(ts.l("copyFieldTo.copy_error_sub"),
-					  ts.l("copyFieldTo.no_write",
-					       target.getName(), target.owner.getLabel()));
+        // "Copy field error"
+        // "Can''t copy to field {0} in object {1}, due to a lack of write privileges."
+        return Ganymede.createErrorDialog(ts.l("copyFieldTo.copy_error_sub"),
+                                          ts.l("copyFieldTo.no_write",
+                                               target.getName(), target.owner.getLabel()));
       }
 
     if (!isVector())
       {
-	return target.setValueLocal(getValueLocal(), true); // inhibit wizards..
+        return target.setValueLocal(getValueLocal(), true); // inhibit wizards..
       }
     else
       {
-	Vector valuesToCopy;
+        Vector valuesToCopy;
 
-	/* -- */
+        /* -- */
 
-	valuesToCopy = getValuesLocal();
+        valuesToCopy = getValuesLocal();
 
-	// We want to inhibit wizards and allow partial failure.
-	//
-	// We'll use addElementsLocal() here because we've already
-	// verified read permission and write permission, above.
+        // We want to inhibit wizards and allow partial failure.
+        //
+        // We'll use addElementsLocal() here because we've already
+        // verified read permission and write permission, above.
 
-	retVal = target.addElementsLocal(valuesToCopy, true, true);
+        retVal = target.addElementsLocal(valuesToCopy, true, true);
 
-	// the above operation could fail if we don't have write
-	// privileges for the target field, so we'll return an error
-	// code back to the cloneFromObject() method, which will pass
-	// it in an over-all advisory (non-fatal) warning back to the
-	// client
-	
-	return retVal;
+        // the above operation could fail if we don't have write
+        // privileges for the target field, so we'll return an error
+        // code back to the cloneFromObject() method, which will pass
+        // it in an over-all advisory (non-fatal) warning back to the
+        // client
+        
+        return retVal;
       }
   }
 
@@ -697,39 +697,39 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (!isVector())
       {
-	return this.verifyBasicConstraints(this.value);
+        return this.verifyBasicConstraints(this.value);
       }
     else
       {
-	if (isVector())
-	  {
-	    Vector values = (Vector) this.value;
+        if (isVector())
+          {
+            Vector values = (Vector) this.value;
 
-	    synchronized (values)
-	      {
-		for (int i = 0; i < values.size(); i++)
-		  {
-		    Object element = values.elementAt(i);
+            synchronized (values)
+              {
+                for (int i = 0; i < values.size(); i++)
+                  {
+                    Object element = values.elementAt(i);
 
-		    ReturnVal retVal = this.verifyBasicConstraints(element);
+                    ReturnVal retVal = this.verifyBasicConstraints(element);
 
-		    if (!ReturnVal.didSucceed(retVal))
-		      {
-			return retVal;
-		      }
-		  }
-	      }
+                    if (!ReturnVal.didSucceed(retVal))
+                      {
+                        return retVal;
+                      }
+                  }
+              }
 
-	    if (size() > getMaxArraySize())
-	      {
-		// "Field {0} in object {1} contains more elements ({2,number,#}) than is allowed ({3,number,#})."
-		return Ganymede.createErrorDialog(ts.l("validateContents.too_big_array",
-						       this.getName(),
-						       owner.getLabel(),
-						       Integer.valueOf(size()),
-						       Integer.valueOf(getMaxArraySize())));
-	      }
-	  }
+            if (size() > getMaxArraySize())
+              {
+                // "Field {0} in object {1} contains more elements ({2,number,#}) than is allowed ({3,number,#})."
+                return Ganymede.createErrorDialog(ts.l("validateContents.too_big_array",
+                                                       this.getName(),
+                                                       owner.getLabel(),
+                                                       Integer.valueOf(size()),
+                                                       Integer.valueOf(getMaxArraySize())));
+              }
+          }
       }
 
     return null;
@@ -756,11 +756,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     try
       {
-	return owner.getDBSession();
+        return owner.getDBSession();
       }
     catch (NullPointerException ex)
       {
-	return null;
+        return null;
       }
   }
 
@@ -773,11 +773,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     try
       {
-	return owner.getDBSession();
+        return owner.getDBSession();
       }
     catch (NullPointerException ex)
       {
-	return null;
+        return null;
       }
   }
 
@@ -791,11 +791,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     try
       {
-	return getDBSession().getGSession();
+        return getDBSession().getGSession();
       }
     catch (NullPointerException ex)
       {
-	return null;
+        return null;
       }
   }
 
@@ -970,14 +970,14 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (!(getOwner() instanceof DBEditObject))
       {
-	return false;
+        return false;
       }
 
     DBObject orig = ((DBEditObject) getOwner()).getOriginal();
 
     if (orig == null)
       {
-	return true;
+        return true;
       }
 
     return hasChanged((DBField) orig.getField(getID()));
@@ -993,12 +993,12 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (orig == null)
       {
-	return true;
+        return true;
       }
 
     if (!(orig.getClass().equals(this.getClass())))
       {
-	throw new IllegalArgumentException("bad field comparison");
+        throw new IllegalArgumentException("bad field comparison");
       }
 
     return (!this.equals(orig));
@@ -1017,27 +1017,27 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (isVector())
       {
-	Vector values = getVectVal();
+        Vector values = getVectVal();
 
-	if (values != null && values.size() > 0)
-	  {
-	    return true;
-	  }
-	else
-	  {
-	    return false;
-	  }
+        if (values != null && values.size() > 0)
+          {
+            return true;
+          }
+        else
+          {
+            return false;
+          }
       }
     else
       {
-	if (value != null)
-	  {
-	    return true;
-	  }
-	else
-	  {
-	    return false;
-	  }
+        if (value != null)
+          {
+            return true;
+          }
+        else
+          {
+            return false;
+          }
       }
   }
 
@@ -1070,29 +1070,29 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (isVector())
       {
-	if (!isEditable(local))	// *sync* GanymedeSession possible
-	  {
-	    // "DBField.setUndefined(): couldn''t clear vector elements from field {0} in object {1}, due to a lack of write permissions."
-	    throw new GanyPermissionsException(ts.l("setUndefined.no_perm_vect", getName(), owner.getLabel()));
-	  }
+        if (!isEditable(local)) // *sync* GanymedeSession possible
+          {
+            // "DBField.setUndefined(): couldn''t clear vector elements from field {0} in object {1}, due to a lack of write permissions."
+            throw new GanyPermissionsException(ts.l("setUndefined.no_perm_vect", getName(), owner.getLabel()));
+          }
 
-	// we have to clone our values Vector in order to use
-	// deleteElements().
+        // we have to clone our values Vector in order to use
+        // deleteElements().
 
-	Vector currentValues = (Vector) getVectVal().clone();
+        Vector currentValues = (Vector) getVectVal().clone();
 
-	if (currentValues.size() != 0)
-	  {
-	    return deleteElementsLocal(currentValues);
-	  }
-	else
-	  {
-	    return null;	// success
-	  }
+        if (currentValues.size() != 0)
+          {
+            return deleteElementsLocal(currentValues);
+          }
+        else
+          {
+            return null;        // success
+          }
       }
     else
       {
-	return setValue(null, local, false);
+        return setValue(null, local, false);
       }
   }
 
@@ -1149,7 +1149,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (!(owner instanceof DBEditObject))
       {
-	return false;
+        return false;
       }
 
     eObj = (DBEditObject) owner;
@@ -1159,12 +1159,12 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (eObj.isCommitting())
       {
-	return false;
+        return false;
       }
 
     if (!local && !verifyWritePermission()) // *sync* possible on GanymedeSession
       {
-	return false;
+        return false;
       }
 
     return true;
@@ -1253,7 +1253,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (base == null)
       {
-	return null;
+        return null;
       }
 
     return (DBObjectBaseField) base.getField(fieldcode);
@@ -1271,7 +1271,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (base == null)
       {
-	return null;
+        return null;
       }
 
     return (DBObjectBaseField) base.getField(fieldcode);
@@ -1292,14 +1292,14 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (!verifyReadPermission())
       {
-	// "Don''t have permission to read field {0} in object {1}"
-	throw new GanyPermissionsException(ts.l("global.no_read_perms", getName(), owner.getLabel()));
+        // "Don''t have permission to read field {0} in object {1}"
+        throw new GanyPermissionsException(ts.l("global.no_read_perms", getName(), owner.getLabel()));
       }
 
     if (isVector())
       {
-	// "Scalar method called on a vector field: {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("global.oops_vector", getName(), owner.getLabel()));
+        // "Scalar method called on a vector field: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("global.oops_vector", getName(), owner.getLabel()));
       }
 
     return value;
@@ -1337,7 +1337,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (ReturnVal.hasTransformedValue(result))
       {
-	result = rescanThisField(result);
+        result = rescanThisField(result);
       }
 
     return result;
@@ -1362,11 +1362,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     try
       {
-	return setValue(value, true, false);
+        return setValue(value, true, false);
       }
     catch (GanyPermissionsException ex)
       {
-	throw new RuntimeException(ex);
+        throw new RuntimeException(ex);
       }
   }
 
@@ -1391,11 +1391,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     try
       {
-	return setValue(value, true, noWizards);
+        return setValue(value, true, noWizards);
       }
     catch (GanyPermissionsException ex)
       {
-	throw new RuntimeException(ex);
+        throw new RuntimeException(ex);
       }
   }
 
@@ -1450,62 +1450,62 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (isVector())
       {
-	// "Scalar method called on a vector field: {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("global.oops_vector", getName(), owner.getLabel()));
+        // "Scalar method called on a vector field: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("global.oops_vector", getName(), owner.getLabel()));
       }
 
     if (this.value == submittedValue || (this.value != null && this.value.equals(submittedValue)))
       {
-	return null;		// no change (useful for null and for xmlclient)
+        return null;            // no change (useful for null and for xmlclient)
       }
 
-    if (!isEditable(local))	// *sync* possible
+    if (!isEditable(local))     // *sync* possible
       {
-	// "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
-	throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
+        // "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
+        throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
       }
 
     if (submittedValue instanceof String)
       {
-	submittedValue = ((String) submittedValue).intern();
+        submittedValue = ((String) submittedValue).intern();
       }
     else if (submittedValue instanceof Invid)
       {
-	submittedValue = ((Invid) submittedValue).intern();
+        submittedValue = ((Invid) submittedValue).intern();
       }
 
     retVal = verifyNewValue(submittedValue);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     /* check to see if verifyNewValue canonicalized the submittedValue */
 
     if (ReturnVal.hasTransformedValue(retVal))
       {
-	submittedValue = retVal.getTransformedValueObject();
+        submittedValue = retVal.getTransformedValueObject();
       }
 
     eObj = (DBEditObject) owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
-	// Wizard check
-	
-	retVal = ReturnVal.merge(retVal, eObj.wizardHook(this, DBEditObject.SETVAL, submittedValue, null));
+        // Wizard check
+        
+        retVal = ReturnVal.merge(retVal, eObj.wizardHook(this, DBEditObject.SETVAL, submittedValue, null));
 
-	// if a wizard intercedes, we are going to let it take the
-	// ball.  we'll lose any transformation/rescan from the
-	// verifyNewValue() call above, but the fact that the wizard
-	// is taking over means that we're not directly accepting
-	// whatever the user gave us, anyway.
+        // if a wizard intercedes, we are going to let it take the
+        // ball.  we'll lose any transformation/rescan from the
+        // verifyNewValue() call above, but the fact that the wizard
+        // is taking over means that we're not directly accepting
+        // whatever the user gave us, anyway.
 
-	if (ReturnVal.wizardHandled(retVal))
-	  {
-	    return retVal;
-	  }
+        if (ReturnVal.wizardHandled(retVal))
+          {
+            return retVal;
+          }
       }
 
     // check to see if we can do the namespace manipulations implied by this
@@ -1515,23 +1515,23 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (ns != null)
       {
-	unmark(this.value);
+        unmark(this.value);
 
-	// if we're not being told to clear this field, try to mark the
-	// new value
+        // if we're not being told to clear this field, try to mark the
+        // new value
 
-	if (submittedValue != null)
-	  {
-	    if (!mark(submittedValue))
-	      {
-		if (this.value != null)
-		  {
-		    mark(this.value); // we aren't clearing the old value after all
-		  }
-		
-		return getConflictDialog("DBField.setValue()", submittedValue);
-	      }
-	  }
+        if (submittedValue != null)
+          {
+            if (!mark(submittedValue))
+              {
+                if (this.value != null)
+                  {
+                    mark(this.value); // we aren't clearing the old value after all
+                  }
+                
+                return getConflictDialog("DBField.setValue()", submittedValue);
+              }
+          }
       }
 
     // check our owner, do it.  Checking our owner should
@@ -1542,19 +1542,19 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (ReturnVal.didSucceed(retVal))
       {
-	this.value = submittedValue;
+        this.value = submittedValue;
       }
     else
       {
-	// our owner disapproved of the operation,
-	// undo the namespace manipulations, if any,
-	// and finish up.
+        // our owner disapproved of the operation,
+        // undo the namespace manipulations, if any,
+        // and finish up.
 
-	if (ns != null)
-	  {
-	    unmark(submittedValue);
-	    mark(this.value);
-	  }
+        if (ns != null)
+          {
+            unmark(submittedValue);
+            mark(this.value);
+          }
       }
 
     // go ahead and return the dialog that was set by finalizeSetValue().
@@ -1584,14 +1584,14 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (!verifyReadPermission())
       {
-	// "Don''t have permission to read field {0} in object {1}"
-	throw new GanyPermissionsException(ts.l("global.no_read_perms", getName(), owner.getLabel()));
+        // "Don''t have permission to read field {0} in object {1}"
+        throw new GanyPermissionsException(ts.l("global.no_read_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	// "Vector method called on a scalar field: {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        // "Vector method called on a scalar field: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     return getVectVal();
@@ -1610,23 +1610,23 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (!verifyReadPermission())
       {
-	// "Don''t have permission to read field {0} in object {1}"
-	throw new GanyPermissionsException(ts.l("global.no_read_perms", getName(), owner.getLabel()));
+        // "Don''t have permission to read field {0} in object {1}"
+        throw new GanyPermissionsException(ts.l("global.no_read_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	// "Vector method called on a scalar field: {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        // "Vector method called on a scalar field: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (index < 0)
       {
-	// "Invalid index {0,num,#} for array access on field {0} in object {1}."
-	throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range",
-						      Integer.valueOf(index),
-						      getName(),
-						      owner.getLabel()));
+        // "Invalid index {0,num,#} for array access on field {0} in object {1}."
+        throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range",
+                                                      Integer.valueOf(index),
+                                                      getName(),
+                                                      owner.getLabel()));
       }
 
     return getVectVal().elementAt(index);
@@ -1641,17 +1641,17 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (!isVector())
       {
-	// "Vector method called on a scalar field: {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        // "Vector method called on a scalar field: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (index < 0)
       {
-	// "Invalid index {0,num,#} for array access on field {0} in object {1}."
-	throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range",
-						      Integer.valueOf(index),
-						      getName(),
-						      owner.getLabel()));
+        // "Invalid index {0,num,#} for array access on field {0} in object {1}."
+        throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range",
+                                                      Integer.valueOf(index),
+                                                      getName(),
+                                                      owner.getLabel()));
       }
 
     return getVectVal().elementAt(index);
@@ -1681,30 +1681,30 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (!isVector())
       {
-	throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
+        throw new IllegalArgumentException("vector accessor called on scalar field " + getName());
       }
 
     if (value == null)
       {
-	return Ganymede.createErrorDialog("Field Error",
-					  "Null value passed to " + owner.getLabel() + ":" + 
-					  getName() + ".setElement()");
+        return Ganymede.createErrorDialog("Field Error",
+                                          "Null value passed to " + owner.getLabel() + ":" + 
+                                          getName() + ".setElement()");
       }
 
     if ((index < 0) || (index > getVectVal().size()))
       {
-	// "Invalid index {0,num,#} for array access on field {0} in object {1}."
-	throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range",
-						      Integer.valueOf(index),
-						      getName(),
-						      owner.getLabel()));
+        // "Invalid index {0,num,#} for array access on field {0} in object {1}."
+        throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range",
+                                                      Integer.valueOf(index),
+                                                      getName(),
+                                                      owner.getLabel()));
       }
 
     ReturnVal result = setElement(index, value, false, false);
 
     if (ReturnVal.hasTransformedValue(result))
       {
-	result = rescanThisField(result);
+        result = rescanThisField(result);
       }
 
     return result;
@@ -1734,32 +1734,32 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (!isVector())
       {
-	// "Vector method called on a scalar field: {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        // "Vector method called on a scalar field: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (value == null)
       {
-	// "Null value passed to setElement() on field {0} in object {1}."
-	return Ganymede.createErrorDialog(ts.l("setElementLocal.bad_null", getName(), owner.getLabel()));
+        // "Null value passed to setElement() on field {0} in object {1}."
+        return Ganymede.createErrorDialog(ts.l("setElementLocal.bad_null", getName(), owner.getLabel()));
       }
 
     if ((index < 0) || (index > getVectVal().size()))
       {
-	// "Invalid index {0,num,#} for array access on field {0} in object {1}."
-	throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range",
-						      Integer.valueOf(index),
-						      getName(),
-						      owner.getLabel()));
+        // "Invalid index {0,num,#} for array access on field {0} in object {1}."
+        throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range",
+                                                      Integer.valueOf(index),
+                                                      getName(),
+                                                      owner.getLabel()));
       }
 
     try
       {
-	return setElement(index, value, true, false);
+        return setElement(index, value, true, false);
       }
     catch (GanyPermissionsException ex)
       {
-	throw new RuntimeException(ex);	// should not happen
+        throw new RuntimeException(ex); // should not happen
       }
   }
 
@@ -1806,14 +1806,14 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (!isVector())
       {
-	// "Vector method called on a scalar field: {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        // "Vector method called on a scalar field: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
-    if (!isEditable(local))	// *sync* on GanymedeSession possible.
+    if (!isEditable(local))     // *sync* on GanymedeSession possible.
       {
-	// "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
-	throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
+        // "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
+        throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
       }
 
     Vector values = getVectVal();
@@ -1824,11 +1824,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (oldIndex == index)
       {
-	return null;		// no-op
+        return null;            // no-op
       }
     else if (oldIndex != -1)
       {
-	return getDuplicateValueDialog("setElement", submittedValue); // duplicate
+        return getDuplicateValueDialog("setElement", submittedValue); // duplicate
       }
 
     // make sure that the constraints on this field don't rule out, prima facie, the proposed value
@@ -1837,14 +1837,14 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     /* check to see if verifyNewValue canonicalized the submittedValue */
 
     if (ReturnVal.hasTransformedValue(retVal))
       {
-	submittedValue = retVal.getTransformedValueObject();
+        submittedValue = retVal.getTransformedValueObject();
       }
 
     // allow the plugin class to review the operation
@@ -1853,23 +1853,23 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
-	// Wizard check
+        // Wizard check
 
-	retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+        retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
                                                          DBEditObject.SETELEMENT,
                                                          Integer.valueOf(index),
                                                          submittedValue));
 
-	// if a wizard intercedes, we are going to let it take the
-	// ball.  we'll lose any transformation/rescan from the
-	// verifyNewValue() call above, but the fact that the wizard
-	// is taking over means that we're not directly accepting
-	// whatever the user gave us, anyway.
+        // if a wizard intercedes, we are going to let it take the
+        // ball.  we'll lose any transformation/rescan from the
+        // verifyNewValue() call above, but the fact that the wizard
+        // is taking over means that we're not directly accepting
+        // whatever the user gave us, anyway.
 
-	if (ReturnVal.wizardHandled(retVal))
-	  {
-	    return retVal;
-	  }
+        if (ReturnVal.wizardHandled(retVal))
+          {
+            return retVal;
+          }
       }
 
     // okay, we're going to proceed.. unless there's a namespace
@@ -1879,14 +1879,14 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (ns != null)
       {
-	unmark(values.elementAt(index));
+        unmark(values.elementAt(index));
 
-	if (!mark(submittedValue))
-	  {
-	    mark(values.elementAt(index)); // we aren't clearing the old value after all
+        if (!mark(submittedValue))
+          {
+            mark(values.elementAt(index)); // we aren't clearing the old value after all
 
-	    return getConflictDialog("DBField.setElement()", submittedValue);
-	  }
+            return getConflictDialog("DBField.setElement()", submittedValue);
+          }
       }
 
     // check our owner, do it.  Checking our owner should be the last
@@ -1897,29 +1897,29 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (ReturnVal.didSucceed(retVal))
       {
-	values.setElementAt(submittedValue, index);
+        values.setElementAt(submittedValue, index);
       }
     else
       {
-	// our owner disapproved of the operation,
-	// undo the namespace manipulations, if any,
-	// and finish up.
+        // our owner disapproved of the operation,
+        // undo the namespace manipulations, if any,
+        // and finish up.
 
-	if (ns != null)
-	  {
-	    // values is in its final state.. if the submittedValue
-	    // isn't in it anywhere, unmark it in the namespace
+        if (ns != null)
+          {
+            // values is in its final state.. if the submittedValue
+            // isn't in it anywhere, unmark it in the namespace
 
-	    if (!values.contains(submittedValue))
-	      {
-		unmark(submittedValue);
-	      }
+            if (!values.contains(submittedValue))
+              {
+                unmark(submittedValue);
+              }
 
-	    // mark the old value.. we can always do this safely, even
-	    // if the value was already marked
+            // mark the old value.. we can always do this safely, even
+            // if the value was already marked
 
-	    mark(values.elementAt(index));
-	  }
+            mark(values.elementAt(index));
+          }
       }
 
     return retVal;
@@ -1950,7 +1950,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (ReturnVal.hasTransformedValue(result))
       {
-	result = rescanThisField(result);
+        result = rescanThisField(result);
       }
 
     return result;
@@ -1977,11 +1977,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     try
       {
-	return addElement(value, true, false);
+        return addElement(value, true, false);
       }
     catch (GanyPermissionsException ex)
       {
-	throw new RuntimeException(ex);	// should never happen
+        throw new RuntimeException(ex); // should never happen
       }
   }
 
@@ -2039,38 +2039,38 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     /* -- */
 
-    if (!isEditable(local))	// *sync* on GanymedeSession possible
+    if (!isEditable(local))     // *sync* on GanymedeSession possible
       {
-	// "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
-	throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
+        // "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
+        throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	// "Vector method called on a scalar field: {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        // "Vector method called on a scalar field: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (submittedValue == null)
       {
-	// "Null value passed to addElement() on field {0} in object {1}."
-	throw new IllegalArgumentException(ts.l("addElement.bad_null", getName(), owner.getLabel()));
+        // "Null value passed to addElement() on field {0} in object {1}."
+        throw new IllegalArgumentException(ts.l("addElement.bad_null", getName(), owner.getLabel()));
       }
 
     if (submittedValue instanceof String)
       {
-	submittedValue = ((String) submittedValue).intern();
+        submittedValue = ((String) submittedValue).intern();
       }
     else if (submittedValue instanceof Invid)
       {
-	submittedValue = ((Invid) submittedValue).intern();
+        submittedValue = ((Invid) submittedValue).intern();
       }
 
     // make sure we're not duplicating an item
 
     if (getVectVal().contains(submittedValue))
       {
-	return getDuplicateValueDialog("addElement", submittedValue); // duplicate
+        return getDuplicateValueDialog("addElement", submittedValue); // duplicate
       }
 
     // verifyNewValue should setLastError for us.
@@ -2079,74 +2079,74 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     /* check to see if verifyNewValue canonicalized the submittedValue */
 
     if (ReturnVal.hasTransformedValue(retVal))
       {
-	submittedValue = retVal.getTransformedValueObject();
+        submittedValue = retVal.getTransformedValueObject();
       }
 
     if (size() >= getMaxArraySize())
       {
-	// "addElement() Error: Field {0} in object {1} is already at or beyond its maximum allowed size."
-	return Ganymede.createErrorDialog(ts.l("addElement.overflow", getName(), owner.getLabel()));
+        // "addElement() Error: Field {0} in object {1} is already at or beyond its maximum allowed size."
+        return Ganymede.createErrorDialog(ts.l("addElement.overflow", getName(), owner.getLabel()));
       }
 
     eObj = (DBEditObject) owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
-	// Wizard check
+        // Wizard check
 
-	retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+        retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
                                                          DBEditObject.ADDELEMENT,
                                                          submittedValue,
                                                          null));
 
-	// if a wizard intercedes, we are going to let it take the
-	// ball.  we'll lose any transformation/rescan from the
-	// verifyNewValue() call above, but the fact that the wizard
-	// is taking over means that we're not directly accepting
-	// whatever the user gave us, anyway.
+        // if a wizard intercedes, we are going to let it take the
+        // ball.  we'll lose any transformation/rescan from the
+        // verifyNewValue() call above, but the fact that the wizard
+        // is taking over means that we're not directly accepting
+        // whatever the user gave us, anyway.
 
-	if (ReturnVal.wizardHandled(retVal))
-	  {
-	    return retVal;
-	  }
+        if (ReturnVal.wizardHandled(retVal))
+          {
+            return retVal;
+          }
       }
 
     ns = getNameSpace();
 
     if (ns != null)
       {
-	if (!mark(submittedValue))	// *sync* DBNameSpace
-	  {
-	    return getConflictDialog("DBField.addElement()", submittedValue);
-	  }
+        if (!mark(submittedValue))      // *sync* DBNameSpace
+          {
+            return getConflictDialog("DBField.addElement()", submittedValue);
+          }
       }
 
     retVal = ReturnVal.merge(retVal, eObj.finalizeAddElement(this, submittedValue));
 
     if (ReturnVal.didSucceed(retVal))
       {
-	getVectVal().addElement(submittedValue);
+        getVectVal().addElement(submittedValue);
       } 
     else
       {
-	if (ns != null)
-	  {
-	    // if the value that we were going to add is not
-	    // left in our vector, unmark the to-be-added
-	    // value
+        if (ns != null)
+          {
+            // if the value that we were going to add is not
+            // left in our vector, unmark the to-be-added
+            // value
 
-	    if (!getVectVal().contains(submittedValue))
-	      {
-		unmark(submittedValue);	// *sync* DBNameSpace
-	      }
-	  }
+            if (!getVectVal().contains(submittedValue))
+              {
+                unmark(submittedValue); // *sync* DBNameSpace
+              }
+          }
       }
 
     return retVal;
@@ -2212,11 +2212,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     try
       {
-	return addElements(values, true, false);
+        return addElements(values, true, false);
       }
     catch (GanyPermissionsException ex)
       {
-	throw new RuntimeException(ex);	// should never happen
+        throw new RuntimeException(ex); // should never happen
       }
   }
 
@@ -2255,11 +2255,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     try
       {
-	return addElements(submittedValues, true, noWizards, copyFieldMode);
+        return addElements(submittedValues, true, noWizards, copyFieldMode);
       }
     catch (GanyPermissionsException ex)
       {
-	throw new RuntimeException(ex);	// should never happen
+        throw new RuntimeException(ex); // should never happen
       }
   }
 
@@ -2320,7 +2320,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    */
 
   public final ReturnVal addElements(Vector submittedValues, boolean local,
-				     boolean noWizards) throws GanyPermissionsException
+                                     boolean noWizards) throws GanyPermissionsException
   {
     return addElements(submittedValues, local, noWizards, false);
   }
@@ -2356,7 +2356,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    */
 
   public synchronized ReturnVal addElements(Vector submittedValues, boolean local, 
-					    boolean noWizards, boolean copyFieldMode) throws GanyPermissionsException
+                                            boolean noWizards, boolean copyFieldMode) throws GanyPermissionsException
   {
     ReturnVal retVal = null;
     DBNameSpace ns;
@@ -2367,56 +2367,56 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     /* -- */
 
-    if (!isEditable(local))	// *sync* on GanymedeSession possible
+    if (!isEditable(local))     // *sync* on GanymedeSession possible
       {
-	// "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
-	throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
+        // "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
+        throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	// "Vector method called on a scalar field: {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        // "Vector method called on a scalar field: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (submittedValues == null || submittedValues.size() == 0)
       {
-	// "Null or empty Vector passed to addElements() on field {0} in object {1}."
-	return Ganymede.createErrorDialog(ts.l("addElements.bad_null", getName(), owner.getLabel()));
+        // "Null or empty Vector passed to addElements() on field {0} in object {1}."
+        return Ganymede.createErrorDialog(ts.l("addElements.bad_null", getName(), owner.getLabel()));
       }
 
     if (submittedValues == getVectVal())
       {
-	// "Error, attempt to add self elements to field {0} in object {1}."
-	throw new IllegalArgumentException(ts.l("addElements.self_add", getName(), owner.getLabel()));
+        // "Error, attempt to add self elements to field {0} in object {1}."
+        throw new IllegalArgumentException(ts.l("addElements.self_add", getName(), owner.getLabel()));
       }
 
     Vector duplicateValues = VectorUtils.intersection(getVectVal(), submittedValues);
 
     if (duplicateValues.size() > 0)
       {
-	if (!copyFieldMode)
-	  {
-	    return getDuplicateValuesDialog("addElements", VectorUtils.vectorString(duplicateValues));
-	  }
-	else
-	  {
-	    submittedValues = VectorUtils.difference(submittedValues, getVectVal());
-	  }
+        if (!copyFieldMode)
+          {
+            return getDuplicateValuesDialog("addElements", VectorUtils.vectorString(duplicateValues));
+          }
+        else
+          {
+            submittedValues = VectorUtils.difference(submittedValues, getVectVal());
+          }
       }
 
     // can we add this many values?
 
     if (size() + submittedValues.size() > getMaxArraySize())
       {
-	// "addElements() Error: Field {0} in object {1} can''t take {2,number,#} new values..\n
-	// It already has {3,number,#} elements, and may not have more than {4,number,#} total."
-	return Ganymede.createErrorDialog(ts.l("addElements.overflow",
-					       getName(),
-					       owner.getLabel(),
-					       Integer.valueOf(submittedValues.size()),
-					       Integer.valueOf(size()),
-					       Integer.valueOf(getMaxArraySize())));
+        // "addElements() Error: Field {0} in object {1} can''t take {2,number,#} new values..\n
+        // It already has {3,number,#} elements, and may not have more than {4,number,#} total."
+        return Ganymede.createErrorDialog(ts.l("addElements.overflow",
+                                               getName(),
+                                               owner.getLabel(),
+                                               Integer.valueOf(submittedValues.size()),
+                                               Integer.valueOf(size()),
+                                               Integer.valueOf(getMaxArraySize())));
       }
 
     // check to see if all of the submitted values are acceptable in
@@ -2427,57 +2427,57 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     for (int i = 0; i < submittedValues.size(); i++)
       {
-	Object submittedValue = submittedValues.elementAt(i);
+        Object submittedValue = submittedValues.elementAt(i);
 
-	// intern our strings and invids
+        // intern our strings and invids
 
-	if (submittedValue instanceof String)
-	  {
-	    submittedValues.set(i, ((String) submittedValue).intern());
-	  }
-	else if (submittedValue instanceof Invid)
-	  {
-	    submittedValues.set(i, ((Invid) submittedValue).intern());
-	  }
-	
-	retVal = verifyNewValue(submittedValue);
+        if (submittedValue instanceof String)
+          {
+            submittedValues.set(i, ((String) submittedValue).intern());
+          }
+        else if (submittedValue instanceof Invid)
+          {
+            submittedValues.set(i, ((Invid) submittedValue).intern());
+          }
+        
+        retVal = verifyNewValue(submittedValue);
 
-	if (ReturnVal.hasTransformedValue(retVal))
-	  {
-	    submittedValue = retVal.getTransformedValueObject();
-	    transformed = true;
-	  }
+        if (ReturnVal.hasTransformedValue(retVal))
+          {
+            submittedValue = retVal.getTransformedValueObject();
+            transformed = true;
+          }
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    if (!copyFieldMode)
-	      {
-		return retVal;
-	      }
-	    else
-	      {
-		if (retVal.getDialog() != null)
-		  {
-		    if (errorBuf.length() != 0)
-		      {
-			errorBuf.append("\n\n");
-		      }
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            if (!copyFieldMode)
+              {
+                return retVal;
+              }
+            else
+              {
+                if (retVal.getDialog() != null)
+                  {
+                    if (errorBuf.length() != 0)
+                      {
+                        errorBuf.append("\n\n");
+                      }
 
-		    errorBuf.append(retVal.getDialog().getText());
-		  }
-	      }
-	  }
-	else
-	  {
-	    approvedValues.addElement(submittedValue);
-	  }
+                    errorBuf.append(retVal.getDialog().getText());
+                  }
+              }
+          }
+        else
+          {
+            approvedValues.addElement(submittedValue);
+          }
       }
 
     if (approvedValues.size() == 0)
       {
-	// "addElements() Error"
-	return Ganymede.createErrorDialog(ts.l("addElements.unapproved_title"),
-					  errorBuf.toString());
+        // "addElements() Error"
+        return Ganymede.createErrorDialog(ts.l("addElements.unapproved_title"),
+                                          errorBuf.toString());
       }
 
     // see if our container wants to intercede in the adding operation
@@ -2487,16 +2487,16 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
-	// Wizard check
+        // Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENTS, approvedValues, null);
+        retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENTS, approvedValues, null);
 
-	// if a wizard intercedes, we are going to let it take the ball.
+        // if a wizard intercedes, we are going to let it take the ball.
 
-	if (ReturnVal.wizardHandled(retVal))
-	  {
-	    return retVal;
-	  }
+        if (ReturnVal.wizardHandled(retVal))
+          {
+            return retVal;
+          }
       }
 
     // check to see if all of the values being added are acceptable to
@@ -2506,24 +2506,24 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (ns != null)
       {
-	synchronized (ns)
-	  {
-	    for (int i = 0; i < approvedValues.size(); i++)
-	      {
-		if (!ns.testmark(editset, approvedValues.elementAt(i)))
-		  {
-		    return getConflictDialog("DBField.addElements()", approvedValues.elementAt(i));
-		  }
-	      }
-	
-	    for (int i = 0; i < approvedValues.size(); i++)
-	      {
-		if (!ns.mark(editset, approvedValues.elementAt(i), this))
-		  {
-		    throw new RuntimeException("error: testmark / mark inconsistency");
-		  }
-	      }
-	  }
+        synchronized (ns)
+          {
+            for (int i = 0; i < approvedValues.size(); i++)
+              {
+                if (!ns.testmark(editset, approvedValues.elementAt(i)))
+                  {
+                    return getConflictDialog("DBField.addElements()", approvedValues.elementAt(i));
+                  }
+              }
+        
+            for (int i = 0; i < approvedValues.size(); i++)
+              {
+                if (!ns.mark(editset, approvedValues.elementAt(i), this))
+                  {
+                    throw new RuntimeException("error: testmark / mark inconsistency");
+                  }
+              }
+          }
       }
 
     // okay, see if the DBEditObject is willing to allow all of these
@@ -2533,76 +2533,76 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (ReturnVal.didSucceed(retVal))
       {
-	// okay, we're allowed to do it, so we add them all
+        // okay, we're allowed to do it, so we add them all
 
-	for (int i = 0; i < approvedValues.size(); i++)
-	  {
-	    getVectVal().addElement(approvedValues.elementAt(i));
-	  }
+        for (int i = 0; i < approvedValues.size(); i++)
+          {
+            getVectVal().addElement(approvedValues.elementAt(i));
+          }
 
-	if (retVal == null)
-	  {
+        if (retVal == null)
+          {
             retVal = ReturnVal.success();
-	  }
+          }
 
-	// if we were not able to copy some of the values (and we
-	// had copyFieldMode set), encode a description of what
-	// happened along with the success code
-	
-	if (errorBuf.length() != 0)
-	  {
-	    // "Warning"
-	    retVal.setDialog(new JDialogBuff(ts.l("addElements.warning"),
-						errorBuf.toString(),
-						Ganymede.OK, // localized
-						null,
-						"ok.gif"));
-	  }
+        // if we were not able to copy some of the values (and we
+        // had copyFieldMode set), encode a description of what
+        // happened along with the success code
+        
+        if (errorBuf.length() != 0)
+          {
+            // "Warning"
+            retVal.setDialog(new JDialogBuff(ts.l("addElements.warning"),
+                                                errorBuf.toString(),
+                                                Ganymede.OK, // localized
+                                                null,
+                                                "ok.gif"));
+          }
 
-	if (transformed)
-	  {
-	    // one or more of the values we were given to add was
-	    // canonicalized or otherwise transformed.  let the client
-	    // know it will need to ask us for the final state of the
-	    // field.
+        if (transformed)
+          {
+            // one or more of the values we were given to add was
+            // canonicalized or otherwise transformed.  let the client
+            // know it will need to ask us for the final state of the
+            // field.
 
-	    retVal.requestRefresh(owner.getInvid(), this.getID());
-	  }
+            retVal.requestRefresh(owner.getInvid(), this.getID());
+          }
       } 
     else
       {
-	if (ns != null)
-	  {
-	    // for each value that we were going to add (and which we
-	    // marked in our namespace above), we need to unmark it if
-	    // it is not contained in our vector at this point.
+        if (ns != null)
+          {
+            // for each value that we were going to add (and which we
+            // marked in our namespace above), we need to unmark it if
+            // it is not contained in our vector at this point.
 
-	    Vector currentValues = getVectVal();
+            Vector currentValues = getVectVal();
 
-	    // build up a hashtable of our current values so we can
-	    // efficiently do membership checks for our namespace
+            // build up a hashtable of our current values so we can
+            // efficiently do membership checks for our namespace
 
-	    Hashtable valuesLeft = new Hashtable(currentValues.size());
+            Hashtable valuesLeft = new Hashtable(currentValues.size());
 
-	    for (int i = 0; i < currentValues.size(); i++)
-	      {
-		valuesLeft.put(currentValues.elementAt(i), currentValues.elementAt(i));
-	      }
+            for (int i = 0; i < currentValues.size(); i++)
+              {
+                valuesLeft.put(currentValues.elementAt(i), currentValues.elementAt(i));
+              }
 
-	    // for each item we were submitted, unmark it in our
-	    // namespace if we don't have it left in our vector.
+            // for each item we were submitted, unmark it in our
+            // namespace if we don't have it left in our vector.
 
-	    for (int i = 0; i < approvedValues.size(); i++)
-	      {
-		if (!valuesLeft.containsKey(approvedValues.elementAt(i)))
-		  {
-		    if (!ns.unmark(editset, approvedValues.elementAt(i), this))
-		      {
-			throw new RuntimeException(ts.l("global.bad_unmark", approvedValues.elementAt(i), this));
-		      }
-		  }
-	      }
-	  }
+            for (int i = 0; i < approvedValues.size(); i++)
+              {
+                if (!valuesLeft.containsKey(approvedValues.elementAt(i)))
+                  {
+                    if (!ns.unmark(editset, approvedValues.elementAt(i), this))
+                      {
+                        throw new RuntimeException(ts.l("global.bad_unmark", approvedValues.elementAt(i), this));
+                      }
+                  }
+              }
+          }
       }
 
     return retVal;
@@ -2646,11 +2646,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     try
       {
-	return deleteElement(index, true, false);
+        return deleteElement(index, true, false);
       }
     catch (GanyPermissionsException ex)
       {
-	throw new RuntimeException(ex);	// should never happen
+        throw new RuntimeException(ex); // should never happen
       }
   }
 
@@ -2692,57 +2692,57 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     /* -- */
 
-    if (!isEditable(local))	// *sync* GanymedeSession possible
+    if (!isEditable(local))     // *sync* GanymedeSession possible
       {
-	// "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
-	throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
+        // "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
+        throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	// "Vector method called on a scalar field: {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        // "Vector method called on a scalar field: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     Vector values = getVectVal();
 
     if ((index < 0) || (index >= values.size()))
       {
-	// "Invalid index {0,number,#} for array access on field {0} in object {1}."
-	throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range", Integer.valueOf(index), getName(), owner.getLabel()));
+        // "Invalid index {0,number,#} for array access on field {0} in object {1}."
+        throw new ArrayIndexOutOfBoundsException(ts.l("global.out_of_range", Integer.valueOf(index), getName(), owner.getLabel()));
       }
 
     eObj = (DBEditObject) owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
-	// Wizard check
+        // Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.DELELEMENT, Integer.valueOf(index), null);
+        retVal = eObj.wizardHook(this, DBEditObject.DELELEMENT, Integer.valueOf(index), null);
 
-	// if a wizard intercedes, we are going to let it take the ball.
+        // if a wizard intercedes, we are going to let it take the ball.
 
-	if (ReturnVal.wizardHandled(retVal))
-	  {
-	    return retVal;
-	  }
+        if (ReturnVal.wizardHandled(retVal))
+          {
+            return retVal;
+          }
       }
 
     retVal = ReturnVal.merge(retVal, eObj.finalizeDeleteElement(this, index));
 
     if (ReturnVal.didSucceed(retVal))
       {
-	Object valueToDelete = values.elementAt(index);
-	values.removeElementAt(index);
+        Object valueToDelete = values.elementAt(index);
+        values.removeElementAt(index);
 
-	// if this field no longer contains the element that
-	// we are deleting, we're going to unmark that value
-	// in our namespace
-	
-	if (!values.contains(valueToDelete))
-	  {
-	    unmark(valueToDelete);
-	  }
+        // if this field no longer contains the element that
+        // we are deleting, we're going to unmark that value
+        // in our namespace
+        
+        if (!values.contains(valueToDelete))
+          {
+            unmark(valueToDelete);
+          }
       }
 
     return retVal;    
@@ -2786,11 +2786,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     try
       {
-	return deleteElement(value, true, false);
+        return deleteElement(value, true, false);
       }
     catch (GanyPermissionsException ex)
       {
-	throw new RuntimeException(ex);	// should never happen
+        throw new RuntimeException(ex); // should never happen
       }
   }
 
@@ -2827,33 +2827,33 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
   public synchronized ReturnVal deleteElement(Object value, boolean local, boolean noWizards) throws GanyPermissionsException
   {
-    if (!isEditable(local))	// *sync* GanymedeSession possible
+    if (!isEditable(local))     // *sync* GanymedeSession possible
       {
-	// "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
-	throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
+        // "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
+        throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	// "Vector method called on a scalar field: {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        // "Vector method called on a scalar field: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (value == null)
       {
-	// "deleteElement() Error: Can''t delete null value from field {0} in object {1}."
-	return Ganymede.createErrorDialog(ts.l("deleteElement.bad_null", getName(), owner.getLabel()));
+        // "deleteElement() Error: Can''t delete null value from field {0} in object {1}."
+        return Ganymede.createErrorDialog(ts.l("deleteElement.bad_null", getName(), owner.getLabel()));
       }
 
     int index = indexOfValue(value);
 
     if (index == -1)
       {
-	// "deleteElement() Error: Value ''{0}'' not present to be deleted from field {1} in object {2}."
-	return Ganymede.createErrorDialog(ts.l("deleteElement.missing_element", value, getName(), owner.getLabel()));
+        // "deleteElement() Error: Value ''{0}'' not present to be deleted from field {1} in object {2}."
+        return Ganymede.createErrorDialog(ts.l("deleteElement.missing_element", value, getName(), owner.getLabel()));
       }
 
-    return deleteElement(index, local, noWizards);	// *sync* DBNameSpace possible
+    return deleteElement(index, local, noWizards);      // *sync* DBNameSpace possible
   }
 
   /**
@@ -2930,11 +2930,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     try
       {
-	return deleteElements(values, true, false);
+        return deleteElements(values, true, false);
       }
     catch (GanyPermissionsException ex)
       {
-	throw new RuntimeException(ex);	// should never happen
+        throw new RuntimeException(ex); // should never happen
       }
   }
 
@@ -2991,22 +2991,22 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     /* -- */
 
-    if (!isEditable(local))	// *sync* on GanymedeSession possible
+    if (!isEditable(local))     // *sync* on GanymedeSession possible
       {
-	// "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
-	throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
+        // "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
+        throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	// "Vector method called on a scalar field: {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        // "Vector method called on a scalar field: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (valuesToDelete == null || valuesToDelete.size() == 0)
       {
-	// "Null or empty Vector passed to deleteElements() on field {0} in object {1}."
-	return Ganymede.createErrorDialog(ts.l("deleteElements.bad_null", getName(), owner.getLabel()));
+        // "Null or empty Vector passed to deleteElements() on field {0} in object {1}."
+        return Ganymede.createErrorDialog(ts.l("deleteElements.bad_null", getName(), owner.getLabel()));
       }
 
     // get access to our value vector.
@@ -3018,8 +3018,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (valuesToDelete == currentValues)
       {
-	// "Error, attempt to delete self elements from field {0} in object {1}."
-	throw new IllegalArgumentException(ts.l("deleteElements.self_delete", getName(), owner.getLabel()));
+        // "Error, attempt to delete self elements from field {0} in object {1}."
+        throw new IllegalArgumentException(ts.l("deleteElements.self_delete", getName(), owner.getLabel()));
       }
 
     // see if we are being asked to remove items not in our vector
@@ -3028,10 +3028,10 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (notPresent.size() != 0)
       {
-	// "deleteElements() Error: Values ''{0}'' not present to be deleted from field {1} in object {2}."
-	return Ganymede.createErrorDialog(ts.l("deleteElements.missing_elements",
-					       VectorUtils.vectorString(notPresent),
-					       getName(), owner.getLabel()));
+        // "deleteElements() Error: Values ''{0}'' not present to be deleted from field {1} in object {2}."
+        return Ganymede.createErrorDialog(ts.l("deleteElements.missing_elements",
+                                               VectorUtils.vectorString(notPresent),
+                                               getName(), owner.getLabel()));
       }
 
     // see if our container wants to intercede in the removing operation
@@ -3041,16 +3041,16 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
-	// Wizard check
+        // Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.DELELEMENTS, valuesToDelete, null);
+        retVal = eObj.wizardHook(this, DBEditObject.DELELEMENTS, valuesToDelete, null);
 
-	// if a wizard intercedes, we are going to let it take the ball.
+        // if a wizard intercedes, we are going to let it take the ball.
 
-	if (ReturnVal.wizardHandled(retVal))
-	  {
-	    return retVal;
-	  }
+        if (ReturnVal.wizardHandled(retVal))
+          {
+            return retVal;
+          }
       }
 
     // okay, see if the DBEditObject is willing to allow all of these
@@ -3060,54 +3060,54 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (ReturnVal.didSucceed(retVal))
       {
-	// okay, we're allowed to remove, so take the items out
+        // okay, we're allowed to remove, so take the items out
 
-	for (int i = 0; i < valuesToDelete.size(); i++)
-	  {
-	    currentValues.removeElement(valuesToDelete.elementAt(i));
-	  }
+        for (int i = 0; i < valuesToDelete.size(); i++)
+          {
+            currentValues.removeElement(valuesToDelete.elementAt(i));
+          }
 
-	// if this vector is connected to a namespace, clear out what
-	// we've left out from the namespace
+        // if this vector is connected to a namespace, clear out what
+        // we've left out from the namespace
 
-	ns = getNameSpace();
+        ns = getNameSpace();
 
-	if (ns != null)
-	  {
-	    // build up a hashtable of our current values so we can
-	    // efficiently do membership checks for our namespace
+        if (ns != null)
+          {
+            // build up a hashtable of our current values so we can
+            // efficiently do membership checks for our namespace
 
-	    Hashtable valuesLeft = new Hashtable(currentValues.size());
+            Hashtable valuesLeft = new Hashtable(currentValues.size());
 
-	    for (int i = 0; i < currentValues.size(); i++)
-	      {
-		valuesLeft.put(currentValues.elementAt(i), currentValues.elementAt(i));
-	      }
+            for (int i = 0; i < currentValues.size(); i++)
+              {
+                valuesLeft.put(currentValues.elementAt(i), currentValues.elementAt(i));
+              }
 
-	    // for each item we were submitted, unmark it in our
-	    // namespace if we don't have it left in our vector.
+            // for each item we were submitted, unmark it in our
+            // namespace if we don't have it left in our vector.
 
-	    for (int i = 0; i < valuesToDelete.size(); i++)
-	      {
-		if (!valuesLeft.containsKey(valuesToDelete.elementAt(i)))
-		  {
-		    if (!ns.unmark(editset, valuesToDelete.elementAt(i), this))
-		      {
-			// "Error encountered attempting to dissociate
-			// reserved value {0} from field {1}.  This
-			// may be due to a server error, or it may be
-			// due to a non-interactive transaction
-			// currently at work trying to shuffle
-			// namespace values between multiple objects.
-			// In the latter case, you may be able to
-			// succeed at this operation after the
-			// non-interactive transaction gives up."
+            for (int i = 0; i < valuesToDelete.size(); i++)
+              {
+                if (!valuesLeft.containsKey(valuesToDelete.elementAt(i)))
+                  {
+                    if (!ns.unmark(editset, valuesToDelete.elementAt(i), this))
+                      {
+                        // "Error encountered attempting to dissociate
+                        // reserved value {0} from field {1}.  This
+                        // may be due to a server error, or it may be
+                        // due to a non-interactive transaction
+                        // currently at work trying to shuffle
+                        // namespace values between multiple objects.
+                        // In the latter case, you may be able to
+                        // succeed at this operation after the
+                        // non-interactive transaction gives up."
 
-			throw new RuntimeException(ts.l("global.bad_unmark", valuesToDelete.elementAt(i), this));
-		      }
-		  }
-	      }
-	  }
+                        throw new RuntimeException(ts.l("global.bad_unmark", valuesToDelete.elementAt(i), this));
+                      }
+                  }
+              }
+          }
       }
 
     return retVal;
@@ -3143,11 +3143,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     try
       {
-	return containsElement(value, true);
+        return containsElement(value, true);
       }
     catch (GanyPermissionsException ex)
       {
-	throw new RuntimeException(ex);	// should never happen
+        throw new RuntimeException(ex); // should never happen
       }
   }
 
@@ -3165,14 +3165,14 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (!local && !verifyReadPermission())
       {
-	// "Don''t have permission to read field {0} in object {1}"
-	throw new GanyPermissionsException(ts.l("global.no_read_perms", getName(), owner.getLabel()));
+        // "Don''t have permission to read field {0} in object {1}"
+        throw new GanyPermissionsException(ts.l("global.no_read_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	// "Vector method called on a scalar field: {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        // "Vector method called on a scalar field: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     return (indexOfValue(value) != -1);
@@ -3188,21 +3188,21 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (!isVector())
       {
-	// "Vector method called on a scalar field: {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        // "Vector method called on a scalar field: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (oldField == null)
       {
-	// "Bad call to getVectorDiff() on field {0} in object {1}.  oldField is null."
-	throw new IllegalArgumentException(ts.l("getVectorDiff.null_old", getName(), owner.getLabel()));
+        // "Bad call to getVectorDiff() on field {0} in object {1}.  oldField is null."
+        throw new IllegalArgumentException(ts.l("getVectorDiff.null_old", getName(), owner.getLabel()));
       }
 
     if ((oldField.getID() != getID()) ||
-	(oldField.getObjTypeID() != getObjTypeID()))
+        (oldField.getObjTypeID() != getObjTypeID()))
       {
-	// "Bad call to getVectorDiff() on field {0} in object {1}.  Incompatible fields."
-	throw new IllegalArgumentException(ts.l("getVectorDiff.bad_type", getName(), owner.getLabel()));
+        // "Bad call to getVectorDiff() on field {0} in object {1}.  Incompatible fields."
+        throw new IllegalArgumentException(ts.l("getVectorDiff.bad_type", getName(), owner.getLabel()));
       }
 
     /* - */
@@ -3215,12 +3215,12 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     for (int i = 0; i < addedValues.size(); i++)
       {
-	deltaRec.addValue(addedValues.elementAt(i));
+        deltaRec.addValue(addedValues.elementAt(i));
       }
 
     for (int i = 0; i < deletedValues.size(); i++)
       {
-	deltaRec.delValue(deletedValues.elementAt(i));
+        deltaRec.delValue(deletedValues.elementAt(i));
       }
 
     return deltaRec;
@@ -3264,39 +3264,39 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (namespace == null)
       {
-	return;
+        return;
       }
 
     if (!isVector())
       {
-	if (!namespace.unmark(editset, this.key(), this))
-	  {
-	    throw new RuntimeException(ts.l("global.bad_unmark", this.key(), this));
-	  }
+        if (!namespace.unmark(editset, this.key(), this))
+          {
+            throw new RuntimeException(ts.l("global.bad_unmark", this.key(), this));
+          }
       }
     else
       {
-	synchronized (namespace)
-	  {
-	    for (int i = 0; i < size(); i++)
-	      {
-		if (!namespace.testunmark(editset, key(i), this))
-		  {
-		    throw new RuntimeException(ts.l("global.bad_unmark", this.key(), this));
-		  }
-	      }
-	
-	    for (int i = 0; i < size(); i++)
-	      {
-		if (!namespace.unmark(editset, key(i), this))
-		  {
-		    // "Error: testunmark() / unmark() inconsistency"
-		    throw new RuntimeException(ts.l("unmark.testunmark_problem"));
-		  }
-	      }
+        synchronized (namespace)
+          {
+            for (int i = 0; i < size(); i++)
+              {
+                if (!namespace.testunmark(editset, key(i), this))
+                  {
+                    throw new RuntimeException(ts.l("global.bad_unmark", this.key(), this));
+                  }
+              }
+        
+            for (int i = 0; i < size(); i++)
+              {
+                if (!namespace.unmark(editset, key(i), this))
+                  {
+                    // "Error: testunmark() / unmark() inconsistency"
+                    throw new RuntimeException(ts.l("unmark.testunmark_problem"));
+                  }
+              }
 
-	    return;
-	  }
+            return;
+          }
       }
   }
 
@@ -3327,12 +3327,12 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (namespace == null)
       {
-	return true;		// do a no-op
+        return true;            // do a no-op
       }
 
     if (value == null)
       {
-	return true;		// no previous value
+        return true;            // no previous value
       }
 
     return namespace.unmark(editset, value, this);
@@ -3362,37 +3362,37 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (namespace == null)
       {
-	return true;		// do a no-op
+        return true;            // do a no-op
       }
 
     editset = ((DBEditObject) owner).getEditSet();
 
     if (!isVector())
       {
-	return namespace.mark(editset, this.key(), this);
+        return namespace.mark(editset, this.key(), this);
       }
     else
       {
-	synchronized (namespace)
-	  {
-	    for (int i = 0; i < size(); i++)
-	      {
-		if (!namespace.testmark(editset, key(i)))
-		  {
-		    return false;
-		  }
-	      }
-	
-	    for (int i = 0; i < size(); i++)
-	      {
-		if (!namespace.mark(editset, key(i), this))
-		  {
-		    throw new RuntimeException("error: testmark / mark inconsistency");
-		  }
-	      }
+        synchronized (namespace)
+          {
+            for (int i = 0; i < size(); i++)
+              {
+                if (!namespace.testmark(editset, key(i)))
+                  {
+                    return false;
+                  }
+              }
+        
+            for (int i = 0; i < size(); i++)
+              {
+                if (!namespace.mark(editset, key(i), this))
+                  {
+                    throw new RuntimeException("error: testmark / mark inconsistency");
+                  }
+              }
 
-	    return true;
-	  }
+            return true;
+          }
       }
   }
 
@@ -3419,18 +3419,18 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (namespace == null)
       {
-	return false;		// should we throw an exception?
+        return false;           // should we throw an exception?
       }
 
     if (value == null)
       {
-	return false;
-	//	throw new NullPointerException("null value in mark()");
+        return false;
+        //      throw new NullPointerException("null value in mark()");
       }
 
     if (editset == null)
       {
-	throw new NullPointerException("null editset in mark()");
+        throw new NullPointerException("null editset in mark()");
       }
 
     return namespace.mark(editset, value, this);
@@ -3517,14 +3517,14 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    {
      if (owner.getGSession() == null)
        {
-	 return true; // we don't know who is looking at us, assume it's a server-local access
+         return true; // we don't know who is looking at us, assume it's a server-local access
        }
 
      PermEntry pe = owner.getFieldPerm(getID());
 
      if (pe == null)
        {
-	 return false;
+         return false;
        }
 
      return pe.isVisible();
@@ -3548,7 +3548,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    {
      if (gSession == null)
        {
-	 return true; // we don't know who is looking at us, assume it's a server-local access
+         return true; // we don't know who is looking at us, assume it's a server-local access
        }
 
      PermEntry pe = gSession.getPermManager().getPerm(owner, getID());
@@ -3558,12 +3558,12 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
      if (pe == null)
        {
-	 pe = gSession.getPermManager().getPerm(owner);
+         pe = gSession.getPermManager().getPerm(owner);
        }
 
      if (pe == null)
        {
-	 return false;
+         return false;
        }
 
      return pe.isVisible();
@@ -3579,7 +3579,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (!(owner instanceof DBEditObject))
       {
-	return false;  // if we're not in a transaction, we certainly can't be edited.
+        return false;  // if we're not in a transaction, we certainly can't be edited.
       }
 
     if (owner.getGSession() != null)
@@ -3642,8 +3642,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (!isVector())
       {
-	// "Vector method called on a scalar field: {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        // "Vector method called on a scalar field: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     return getVectVal();
@@ -3660,8 +3660,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (isVector())
       {
-	// "Scalar method called on a vector field: {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("global.oops_vector", getName(), owner.getLabel()));
+        // "Scalar method called on a vector field: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("global.oops_vector", getName(), owner.getLabel()));
       }
 
     return value;
@@ -3696,11 +3696,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (isVector())
       {
-	return getVectVal().clone();
+        return getVectVal().clone();
       }
     else
       {
-	return value;
+        return value;
       }
   }
 
@@ -3730,43 +3730,43 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (!(owner instanceof DBEditObject))
       {
-	throw new RuntimeException("Invalid rollback on field " + 
-				   getName() + ", not in an editable context");
+        throw new RuntimeException("Invalid rollback on field " + 
+                                   getName() + ", not in an editable context");
       }
 
     if (isVector())
       {
-	if (!(oldval instanceof Vector))
-	  {
-	    throw new RuntimeException("Invalid vector rollback on field " + 
-				       getName());
-	  }
-	else
-	  {
-	    // in theory we perhaps should iterate through the oldval
-	    // Vector to make sure that each element is of the right
-	    // type.. in practice, that would be a lot of overhead to
-	    // guard against something that should never happen,
-	    // anyway.
-	    //
-	    // i'm just saying this to cover my ass in case it does,
-	    // so i'll know that i was deliberately rather than
-	    // accidentally stupid.
+        if (!(oldval instanceof Vector))
+          {
+            throw new RuntimeException("Invalid vector rollback on field " + 
+                                       getName());
+          }
+        else
+          {
+            // in theory we perhaps should iterate through the oldval
+            // Vector to make sure that each element is of the right
+            // type.. in practice, that would be a lot of overhead to
+            // guard against something that should never happen,
+            // anyway.
+            //
+            // i'm just saying this to cover my ass in case it does,
+            // so i'll know that i was deliberately rather than
+            // accidentally stupid.
 
-	    this.value = oldval;
-	  }
+            this.value = oldval;
+          }
       }
     else
       {
-	if (!verifyTypeMatch(oldval))
-	  {
-	    throw new RuntimeException("Invalid scalar rollback on field " + 
-				       getName());
-	  }
-	else
-	  {
-	    this.value = oldval;
-	  }
+        if (!verifyTypeMatch(oldval))
+          {
+            throw new RuntimeException("Invalid scalar rollback on field " + 
+                                       getName());
+          }
+        else
+          {
+            this.value = oldval;
+          }
       }
   }
 
@@ -3806,12 +3806,12 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (original == null)
       {
-	original = ReturnVal.success();
+        original = ReturnVal.success();
       }
 
     if (this.getID() == owner.getLabelFieldID())
       {
-	original.setObjectLabelChanged(owner.getInvid(), this.getValueString());
+        original.setObjectLabelChanged(owner.getInvid(), this.getValueString());
       }
       
     original.addRescanField(getOwner().getInvid(), getID());
@@ -3843,49 +3843,49 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     try
       {
-	DBField conflictField = ns.lookupPersistent(conflictValue);
+        DBField conflictField = ns.lookupPersistent(conflictValue);
 
-	if (conflictField != null)
-	  {
-	    DBObject conflictObject = conflictField.getOwner();
-	    String conflictLabel = conflictObject.getLabel();
-	    String conflictClassName = conflictObject.getTypeName();
+        if (conflictField != null)
+          {
+            DBObject conflictObject = conflictField.getOwner();
+            String conflictLabel = conflictObject.getLabel();
+            String conflictClassName = conflictObject.getTypeName();
 
-	    // This action could not be completed because "{0}" is already being used.
-	    //
-	    // {1} "{2}" contains this value in its {3} field.
-	    //
-	    // You can choose a different value here, or you can try to edit or delete the "{2}" object to remove the conflict.
+            // This action could not be completed because "{0}" is already being used.
+            //
+            // {1} "{2}" contains this value in its {3} field.
+            //
+            // You can choose a different value here, or you can try to edit or delete the "{2}" object to remove the conflict.
 
-	    return Ganymede.createErrorDialog(ts.l("getConflictDialog.errorTitle", methodName),
-					      ts.l("getConflictDialog.persistentError",
-						   conflictValue, conflictClassName, conflictLabel, conflictField.getName()));
-	  }
-	else
-	  {
-	    conflictField = ns.lookupShadow(conflictValue);
+            return Ganymede.createErrorDialog(ts.l("getConflictDialog.errorTitle", methodName),
+                                              ts.l("getConflictDialog.persistentError",
+                                                   conflictValue, conflictClassName, conflictLabel, conflictField.getName()));
+          }
+        else
+          {
+            conflictField = ns.lookupShadow(conflictValue);
 
-	    DBObject conflictObject = conflictField.getOwner();
-	    String conflictLabel = conflictObject.getLabel();
-	    String conflictClassName = conflictObject.getTypeName();
+            DBObject conflictObject = conflictField.getOwner();
+            String conflictLabel = conflictObject.getLabel();
+            String conflictClassName = conflictObject.getTypeName();
 
-	    // This action could not be completed because "{0}" is currently being manipulated in a concurrent transaction.
-	    //
-	    // {1} "{2}" contains this value in its {3} field.
-	    //
-	    // You can choose a different value here, or you can try to edit or delete the "{2}" object to remove the conflict.
+            // This action could not be completed because "{0}" is currently being manipulated in a concurrent transaction.
+            //
+            // {1} "{2}" contains this value in its {3} field.
+            //
+            // You can choose a different value here, or you can try to edit or delete the "{2}" object to remove the conflict.
 
-	    return Ganymede.createErrorDialog(ts.l("getConflictDialog.errorTitle", methodName),
-					      ts.l("getConflictDialog.transactionError",
-						   conflictValue, conflictClassName, conflictLabel, conflictField.getName()));
-	  }
+            return Ganymede.createErrorDialog(ts.l("getConflictDialog.errorTitle", methodName),
+                                              ts.l("getConflictDialog.transactionError",
+                                                   conflictValue, conflictClassName, conflictLabel, conflictField.getName()));
+          }
       }
     catch (NullPointerException ex)
       {
         Ganymede.logError(ex);
 
-	return Ganymede.createErrorDialog(ts.l("getConflictDialog.errorTitle", methodName),
-					  ts.l("getConflictDialog.simpleError", conflictValue));
+        return Ganymede.createErrorDialog(ts.l("getConflictDialog.errorTitle", methodName),
+                                          ts.l("getConflictDialog.simpleError", conflictValue));
       }
   }
 
@@ -3899,8 +3899,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     // "Server: Error in {0}"
     // "This action could not be performed because "{0}" is already contained in field {1} in object {2}."
     return Ganymede.createErrorDialog(ts.l("getDuplicateValueDialog.error_in_method_title", methodName),
-				      ts.l("getDuplicateValueDialog.error_body",
-					   String.valueOf(conflictValue), getName(), owner.getLabel()));
+                                      ts.l("getDuplicateValueDialog.error_body",
+                                           String.valueOf(conflictValue), getName(), owner.getLabel()));
   }
 
   /**
@@ -3913,8 +3913,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     // "Server: Error in {0}"
     // "This action could not be performed because "{0}" are already contained in field {1} in object {2}."
     return Ganymede.createErrorDialog(ts.l("getDuplicateValueDialog.error_in_method_title", methodName),
-				      ts.l("getDuplicateValuesDialog.error_body",
-					   conflictValues, getName(), owner.getLabel()));
+                                      ts.l("getDuplicateValuesDialog.error_body",
+                                           conflictValues, getName(), owner.getLabel()));
   }
 
   /**

@@ -131,7 +131,7 @@ public class DBLinkTracker {
   {
     if (session == null)
       {
-	throw new NullPointerException();
+        throw new NullPointerException();
       }
 
     DBLinkTrackerSession tracker = getSession(session);
@@ -149,7 +149,7 @@ public class DBLinkTracker {
   {
     if (session == null)
       {
-	throw new NullPointerException();
+        throw new NullPointerException();
       }
 
     DBLinkTrackerSession tracker = getSession(session);
@@ -166,7 +166,7 @@ public class DBLinkTracker {
   {
     if (session == null)
       {
-	throw new NullPointerException();
+        throw new NullPointerException();
       }
 
     DBLinkTrackerSession tracker = getSession(session);
@@ -183,7 +183,7 @@ public class DBLinkTracker {
   {
     if (session == null)
       {
-	throw new NullPointerException();
+        throw new NullPointerException();
       }
 
     DBLinkTrackerSession tracker = getSession(session);
@@ -202,7 +202,7 @@ public class DBLinkTracker {
   {
     if (session == null)
       {
-	throw new NullPointerException();
+        throw new NullPointerException();
       }
 
     sessionOverlays.remove(session);
@@ -221,12 +221,12 @@ public class DBLinkTracker {
   {
     if (target == null || source == null)
       {
-	throw new NullPointerException();
+        throw new NullPointerException();
       }
 
     if (debug)
       {
-	System.err.println("DBLinkTracker.linkObject(" + session + ", " + target + ", " + source + ")");
+        System.err.println("DBLinkTracker.linkObject(" + session + ", " + target + ", " + source + ")");
       }
 
     return getContext(session).linkObject(target, source);
@@ -244,12 +244,12 @@ public class DBLinkTracker {
   {
     if (target == null || source == null)
       {
-	throw new NullPointerException();
+        throw new NullPointerException();
       }
 
     if (debug)
       {
-	System.err.println("DBLinkTracker.unlinkObject(" + session + ", " + target + ", " + source + ")");
+        System.err.println("DBLinkTracker.unlinkObject(" + session + ", " + target + ", " + source + ")");
       }
 
     return getContext(session).unlinkObject(target, source);
@@ -264,12 +264,12 @@ public class DBLinkTracker {
   {
     if (targets == null || source == null)
       {
-	throw new NullPointerException();
+        throw new NullPointerException();
       }
 
     if (debug)
       {
-	System.err.println("DBLinkTracker.registerObject(" + session + ", " + targets + ", " + source + ")");
+        System.err.println("DBLinkTracker.registerObject(" + session + ", " + targets + ", " + source + ")");
       }
 
     getContext(session).registerObject(targets, source);
@@ -284,12 +284,12 @@ public class DBLinkTracker {
   {
     if (targets == null || source == null)
       {
-	throw new NullPointerException();
+        throw new NullPointerException();
       }
 
     if (debug)
       {
-	System.err.println("DBLinkTracker.unregisterObject(" + session + ", " + targets + ", " + source + ")");
+        System.err.println("DBLinkTracker.unregisterObject(" + session + ", " + targets + ", " + source + ")");
       }
 
     getContext(session).unregisterObject(targets, source);
@@ -306,7 +306,7 @@ public class DBLinkTracker {
   {
     if (target == null)
       {
-	throw new NullPointerException();
+        throw new NullPointerException();
       }
 
     return getContext(session).getForwardLinkSources(target);
@@ -323,7 +323,7 @@ public class DBLinkTracker {
   {
     if (target == null)
       {
-	throw new NullPointerException();
+        throw new NullPointerException();
       }
 
     return getContext(session).forwardAsymmetricLinksToString(target);
@@ -339,7 +339,7 @@ public class DBLinkTracker {
   {
     if (target == null || source == null)
       {
-	throw new NullPointerException();
+        throw new NullPointerException();
       }
 
     return getContext(session).linkExists(source, target);
@@ -374,60 +374,60 @@ public class DBLinkTracker {
 
     for (DBObjectBase base: Ganymede.db.objectBases.values())
       {
-	for (DBObject object: base.getObjects())
-	  {
-	    realLinks.registerObject(object.getASymmetricTargets(), object.getInvid());
-	  }
+        for (DBObject object: base.getObjects())
+          {
+            realLinks.registerObject(object.getASymmetricTargets(), object.getInvid());
+          }
       }
 
     if (realLinks.targetToSourcesMap.equals(persistentLinks.targetToSourcesMap))
       {
-	return true;
+        return true;
       }
 
     for (Invid target: realLinks.targetToSourcesMap.keySet())
       {
-	Set<Invid> realSources = realLinks.targetToSourcesMap.get(target);
+        Set<Invid> realSources = realLinks.targetToSourcesMap.get(target);
 
-	if (!persistentLinks.targetToSourcesMap.containsKey(target))
-	  {
-	    // "** DBLinkTracker.checkInvids() target object {0} is not listed in the DBLinkTracker structures."
-	    Ganymede.debug(ts.l("checkInvids.missingTarget", describe(null, target)));
+        if (!persistentLinks.targetToSourcesMap.containsKey(target))
+          {
+            // "** DBLinkTracker.checkInvids() target object {0} is not listed in the DBLinkTracker structures."
+            Ganymede.debug(ts.l("checkInvids.missingTarget", describe(null, target)));
 
-	    ok = false;
+            ok = false;
 
-	    continue;
-	  }
+            continue;
+          }
 
-	Set<Invid> trackedSources = persistentLinks.targetToSourcesMap.get(target);
+        Set<Invid> trackedSources = persistentLinks.targetToSourcesMap.get(target);
 
-	Set<Invid> extraReal = new HashSet<Invid>(realSources);
-	extraReal.removeAll(trackedSources);
+        Set<Invid> extraReal = new HashSet<Invid>(realSources);
+        extraReal.removeAll(trackedSources);
 
-	Set<Invid> extraTracked = new HashSet<Invid>(trackedSources);
-	extraTracked.removeAll(realSources);
+        Set<Invid> extraTracked = new HashSet<Invid>(trackedSources);
+        extraTracked.removeAll(realSources);
 
-	if (extraReal.size() > 0)
-	  {
-	    for (Invid extraSource: extraReal)
-	      {
-		// "** DBLinkTracker.checkInvids(): DBObject {0} ({1}) has a forward asymmetric link to invid {2} ({3}) that is not present in the DBLinkTracker structures!"
-		Ganymede.debug(ts.l("checkInvids.extraLink", extraSource, describe(session, extraSource), target, describe(session, target)));
+        if (extraReal.size() > 0)
+          {
+            for (Invid extraSource: extraReal)
+              {
+                // "** DBLinkTracker.checkInvids(): DBObject {0} ({1}) has a forward asymmetric link to invid {2} ({3}) that is not present in the DBLinkTracker structures!"
+                Ganymede.debug(ts.l("checkInvids.extraLink", extraSource, describe(session, extraSource), target, describe(session, target)));
 
-		ok = false;
-	      }
-	  }
+                ok = false;
+              }
+          }
 
-	if (extraTracked.size() > 0)
-	  {
-	    for (Invid missingSource: extraTracked)
-	      {
-		// "** DBLinkTracker.checkInvids(): DBObject {0} ({1}) is lacking a forward asymmetric link to invid {2} ({3}) that the DBLinkTracker thinks should be there!"
-		Ganymede.debug(ts.l("checkInvids.missingLink", missingSource, describe(session, missingSource), target, describe(session, target)));
+        if (extraTracked.size() > 0)
+          {
+            for (Invid missingSource: extraTracked)
+              {
+                // "** DBLinkTracker.checkInvids(): DBObject {0} ({1}) is lacking a forward asymmetric link to invid {2} ({3}) that the DBLinkTracker thinks should be there!"
+                Ganymede.debug(ts.l("checkInvids.missingLink", missingSource, describe(session, missingSource), target, describe(session, target)));
 
-		ok = false;
-	      }
-	  }
+                ok = false;
+              }
+          }
       }
 
     return ok;
@@ -441,11 +441,11 @@ public class DBLinkTracker {
 
     if (session != null)
       {
-	return session.describe(invid);
+        return session.describe(invid);
       }
     else
       {
-	return Ganymede.internalSession.describe(invid);
+        return Ganymede.internalSession.describe(invid);
       }
   }
 
@@ -458,15 +458,15 @@ public class DBLinkTracker {
   {
     if (sessionOverlays.containsKey(session))
       {
-	return sessionOverlays.get(session);
+        return sessionOverlays.get(session);
       }
     else
       {
-	DBLinkTrackerSession sessionObj = new DBLinkTrackerSession(session);
+        DBLinkTrackerSession sessionObj = new DBLinkTrackerSession(session);
 
-	sessionOverlays.put(session, sessionObj);
+        sessionOverlays.put(session, sessionObj);
 
-	return sessionObj;
+        return sessionObj;
       }
   }
 
@@ -486,22 +486,22 @@ public class DBLinkTracker {
   {
     if (session == null)
       {
-	return persistentLinks;
+        return persistentLinks;
       }
 
     if (sessionOverlays.containsKey(session))
       {
-	DBLinkTrackerSession sessionObj = sessionOverlays.get(session);
+        DBLinkTrackerSession sessionObj = sessionOverlays.get(session);
 
-	return sessionObj.getCurrentContext();
+        return sessionObj.getCurrentContext();
       }
     else
       {
-	DBLinkTrackerSession sessionObj = new DBLinkTrackerSession(session);
+        DBLinkTrackerSession sessionObj = new DBLinkTrackerSession(session);
 
-	sessionOverlays.put(session, sessionObj);
+        sessionOverlays.put(session, sessionObj);
 
-	return sessionObj.getCurrentContext();
+        return sessionObj.getCurrentContext();
       }
   }
 
@@ -616,9 +616,9 @@ public class DBLinkTracker {
       DBLinkTrackerContext consolidationContext = getCurrentContext();
 
       if (contexts.pop(ckp_key) != null)
-	{
-	  getCurrentContext().transferFrom(consolidationContext);
-	}
+        {
+          getCurrentContext().transferFrom(consolidationContext);
+        }
     }
   }
 
@@ -733,9 +733,9 @@ public class DBLinkTracker {
       DBLinkTrackerContext c = otherContext;
 
       while (c != this && c != null)
-	{
-	  c = c.parent;
-	}
+        {
+          c = c.parent;
+        }
 
       return c != null;
     }
@@ -760,19 +760,19 @@ public class DBLinkTracker {
     public void transferFrom(DBLinkTrackerContext otherContext)
     {
       if (otherContext.sessionTracker == null)
-	{
-	  throw new RuntimeException("Can't transfer changes from a context that is not associated with a session tracker.");
-	}
+        {
+          throw new RuntimeException("Can't transfer changes from a context that is not associated with a session tracker.");
+        }
 
       if (!isAncestorOf(otherContext))
-	{
-	  throw new RuntimeException("Can't transfer changes from a non-descendant context.");
-	}
+        {
+          throw new RuntimeException("Can't transfer changes from a non-descendant context.");
+        }
 
       if (!isRootNode() && sessionTracker != otherContext.sessionTracker)
-	{
-	  throw new RuntimeException("We can't transfer from one session to another.");
-	}
+        {
+          throw new RuntimeException("We can't transfer from one session to another.");
+        }
 
       rollupMerge(otherContext);
     }
@@ -790,38 +790,38 @@ public class DBLinkTracker {
     private void rollupMerge(DBLinkTrackerContext otherContext)
     {
       if (otherContext == null || otherContext.parent == null || otherContext == this)
-	{
-	  throw new RuntimeException("invalid recursion case");
-	}
+        {
+          throw new RuntimeException("invalid recursion case");
+        }
 
       if (otherContext.parent != this)
-	{
-	  rollupMerge(otherContext.parent);
-	}
+        {
+          rollupMerge(otherContext.parent);
+        }
 
       if (otherContext.sourcesTouched == null)
-	{
-	  return;		// no changes made in otherContext
-	}
+        {
+          return;               // no changes made in otherContext
+        }
 
       for (Invid target: otherContext.targetToSourcesMap.keySet())
-	{
-	  for (Invid source: otherContext.sourcesTouched)
-	    {
-	      // calling otherContext.linkExists() is safe because we
-	      // only call it for targets we know are in
-	      // otherContext's targetToSourcesMap.
+        {
+          for (Invid source: otherContext.sourcesTouched)
+            {
+              // calling otherContext.linkExists() is safe because we
+              // only call it for targets we know are in
+              // otherContext's targetToSourcesMap.
 
-	      if (otherContext.linkExists(source, target))
-		{
-		  linkObject(target, source);
-		}
-	      else
-		{
-		  unlinkObject(target, source);
-		}
-	    }
-	}
+              if (otherContext.linkExists(source, target))
+                {
+                  linkObject(target, source);
+                }
+              else
+                {
+                  unlinkObject(target, source);
+                }
+            }
+        }
     }
 
     /**
@@ -836,9 +836,9 @@ public class DBLinkTracker {
     public boolean linkObject(Invid target, Invid source)
     {
       if (target == null || source == null)
-	{
-	  throw new NullPointerException();
-	}
+        {
+          throw new NullPointerException();
+        }
 
       touchSource(source);
 
@@ -856,9 +856,9 @@ public class DBLinkTracker {
     public boolean unlinkObject(Invid target, Invid source)
     {
       if (target == null || source == null)
-	{
-	  throw new NullPointerException();
-	}
+        {
+          throw new NullPointerException();
+        }
 
       touchSource(source);
 
@@ -867,13 +867,13 @@ public class DBLinkTracker {
       boolean result = sources.remove(source);
 
       if (isRootNode() && sources.size() == 0)
-	{
-	  // we can only remove a target from the targetToSourcesMap
-	  // if we are the root node, else transferFrom() will not
-	  // know that we made any changes to links pointing to target
+        {
+          // we can only remove a target from the targetToSourcesMap
+          // if we are the root node, else transferFrom() will not
+          // know that we made any changes to links pointing to target
 
-	  targetToSourcesMap.remove(target);
-	}
+          targetToSourcesMap.remove(target);
+        }
 
       return result;
     }
@@ -886,16 +886,16 @@ public class DBLinkTracker {
     public void registerObject(Set<Invid> targets, Invid source)
     {
       if (targets == null || source == null)
-	{
-	  throw new NullPointerException();
-	}
+        {
+          throw new NullPointerException();
+        }
 
       touchSource(source);
 
       for (Invid target: targets)
-	{
-	  linkObject(target, source);
-	}
+        {
+          linkObject(target, source);
+        }
     }
 
     /**
@@ -907,16 +907,16 @@ public class DBLinkTracker {
     public void unregisterObject(Set<Invid> targets, Invid source)
     {
       if (targets == null || source == null)
-	{
-	  throw new NullPointerException();
-	}
+        {
+          throw new NullPointerException();
+        }
 
       touchSource(source);
 
       for (Invid target: targets)
-	{
-	  unlinkObject(target, source);
-	}
+        {
+          unlinkObject(target, source);
+        }
     }
 
     /**
@@ -928,9 +928,9 @@ public class DBLinkTracker {
     public boolean linkExists(Invid source, Invid target)
     {
       if (target == null || source == null)
-	{
-	  throw new NullPointerException();
-	}
+        {
+          throw new NullPointerException();
+        }
 
       return getForwardLinkSources(target).contains(source);
     }
@@ -943,9 +943,9 @@ public class DBLinkTracker {
     public String forwardAsymmetricLinksToString(Invid target)
     {
       if (target == null)
-	{
-	  throw new NullPointerException();
-	}
+        {
+          throw new NullPointerException();
+        }
 
       StringBuilder builder = new StringBuilder();
 
@@ -956,30 +956,30 @@ public class DBLinkTracker {
       Set<Invid> sources = targetToSourcesMap.get(target);
 
       if (sources == null && parent != null)
-	{
-	  DBLinkTrackerContext p = parent;
+        {
+          DBLinkTrackerContext p = parent;
 
-	  while (sources == null && p != null)
-	    {
-	      sources = p.targetToSourcesMap.get(target);
+          while (sources == null && p != null)
+            {
+              sources = p.targetToSourcesMap.get(target);
 
-	      p = p.parent;
-	    }
-	}
+              p = p.parent;
+            }
+        }
 
       if (sources == null)
-	{
-	  builder.append("-> ** empty ** \n");
-	}
+        {
+          builder.append("-> ** empty ** \n");
+        }
       else
-	{
-	  for (Invid source: sources)
-	    {
-	      builder.append("<--- ");
-	      builder.append(describe(sessionTracker.session, source));
-	      builder.append("\n");
-	    }
-	}
+        {
+          for (Invid source: sources)
+            {
+              builder.append("<--- ");
+              builder.append(describe(sessionTracker.session, source));
+              builder.append("\n");
+            }
+        }
 
       return builder.toString();
     }
@@ -1001,28 +1001,28 @@ public class DBLinkTracker {
       Set<Invid> sources = targetToSourcesMap.get(target);
 
       if (sources == null)
-	{
-	  DBLinkTrackerContext p = parent;
+        {
+          DBLinkTrackerContext p = parent;
 
-	  while (p != null)
-	    {
-	      if (p.targetToSourcesMap.containsKey(target))
-		{
-		  sources = new HashSet<Invid>(p.targetToSourcesMap.get(target));
+          while (p != null)
+            {
+              if (p.targetToSourcesMap.containsKey(target))
+                {
+                  sources = new HashSet<Invid>(p.targetToSourcesMap.get(target));
 
-		  break;
-		}
+                  break;
+                }
 
-	      p = p.parent;
-	    }
+              p = p.parent;
+            }
 
-	  if (p == null)
-	    {
-	      sources = new HashSet<Invid>();
-	    }
+          if (p == null)
+            {
+              sources = new HashSet<Invid>();
+            }
 
-	  targetToSourcesMap.put(target, sources);
-	}
+          targetToSourcesMap.put(target, sources);
+        }
 
       return sources;
     }
@@ -1034,14 +1034,14 @@ public class DBLinkTracker {
     private void touchSource(Invid source)
     {
       if (isRootNode())
-	{
-	  return;
-	}
+        {
+          return;
+        }
 
       if (sourcesTouched == null)
-	{
-	  sourcesTouched = new HashSet<Invid>();
-	}
+        {
+          sourcesTouched = new HashSet<Invid>();
+        }
 
       sourcesTouched.add(source);
     }

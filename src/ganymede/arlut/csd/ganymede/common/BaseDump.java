@@ -17,7 +17,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -126,20 +126,20 @@ public class BaseDump implements Base, CategoryNode {
 
     try
       {
-	this.type_code = Short.valueOf(getChunk(src, lastIndex)).shortValue();
+        this.type_code = Short.valueOf(getChunk(src, lastIndex)).shortValue();
       }
     catch (NumberFormatException ex)
       {
-	throw new RuntimeException("couldn't parse type code chunk " + ex);
+        throw new RuntimeException("couldn't parse type code chunk " + ex);
       }
 
     try
       {
-	this.label_id = Short.valueOf(getChunk(src, lastIndex)).shortValue();
+        this.label_id = Short.valueOf(getChunk(src, lastIndex)).shortValue();
       }
     catch (NumberFormatException ex)
       {
-	throw new RuntimeException("couldn't parse label id chunk " + ex);
+        throw new RuntimeException("couldn't parse label id chunk " + ex);
       }
 
     labelFieldName = getChunk(src, lastIndex);
@@ -171,20 +171,20 @@ public class BaseDump implements Base, CategoryNode {
 
     try
       {
-	this.type_code = Short.valueOf(getChunk(src, lastIndex)).shortValue();
+        this.type_code = Short.valueOf(getChunk(src, lastIndex)).shortValue();
       }
     catch (NumberFormatException ex)
       {
-	throw new RuntimeException("couldn't parse type code chunk " + ex);
+        throw new RuntimeException("couldn't parse type code chunk " + ex);
       }
 
     try
       {
-	this.label_id = Short.valueOf(getChunk(src, lastIndex)).shortValue();
+        this.label_id = Short.valueOf(getChunk(src, lastIndex)).shortValue();
       }
     catch (NumberFormatException ex)
       {
-	throw new RuntimeException("couldn't parse label id chunk " + ex);
+        throw new RuntimeException("couldn't parse label id chunk " + ex);
       }
 
     labelFieldName = getChunk(src, lastIndex);
@@ -379,19 +379,19 @@ public class BaseDump implements Base, CategoryNode {
 
     for (lastIndex = startDex; lastIndex < chars.length; lastIndex++)
       {
-	if (chars[lastIndex] == '|')
-	  {
-	    lastIndex++;
-	    return result.toString();
-	  }
-	else if (chars[lastIndex] == '\\')
-	  {
-	    result.append(chars[++lastIndex]);
-	  }
-	else
-	  {
-	    result.append(chars[lastIndex]);
-	  }
+        if (chars[lastIndex] == '|')
+          {
+            lastIndex++;
+            return result.toString();
+          }
+        else if (chars[lastIndex] == '\\')
+          {
+            result.append(chars[++lastIndex]);
+          }
+        else
+          {
+            result.append(chars[lastIndex]);
+          }
       }
 
     throw new RuntimeException("Ran out of chunk data: " + result.toString());

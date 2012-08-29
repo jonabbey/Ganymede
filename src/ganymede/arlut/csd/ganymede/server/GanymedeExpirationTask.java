@@ -118,283 +118,283 @@ public class GanymedeExpirationTask implements Runnable {
 
     if (error != null)
       {
-	Ganymede.debug("Deferring expiration task - semaphore disabled: " + error);
-	return;
+        Ganymede.debug("Deferring expiration task - semaphore disabled: " + error);
+        return;
       }
 
     try
       {
-	try
-	  {
-	    mySession = new GanymedeSession("expiration");
-	    myDBSession = mySession.getDBSession();
-	  }
-	catch (RemoteException ex)
-	  {
-	    Ganymede.debug("Expiration Task: Couldn't establish session");
-	    return;
-	  }
+        try
+          {
+            mySession = new GanymedeSession("expiration");
+            myDBSession = mySession.getDBSession();
+          }
+        catch (RemoteException ex)
+          {
+            Ganymede.debug("Expiration Task: Couldn't establish session");
+            return;
+          }
 
-	// we don't want no wizards
+        // we don't want no wizards
 
-	mySession.enableWizards(false);
+        mySession.enableWizards(false);
 
-	// and we don't want forced required fields oversight..  this
-	// can leave us with some invalid objects, but we can do a
-	// query to scan for them, and if someone edits the objects
-	// later, they'll be requested to fix the problem.
+        // and we don't want forced required fields oversight..  this
+        // can leave us with some invalid objects, but we can do a
+        // query to scan for them, and if someone edits the objects
+        // later, they'll be requested to fix the problem.
 
-	mySession.enableOversight(false);
+        mySession.enableOversight(false);
 
-	ReturnVal retVal = mySession.openTransaction("expiration task", false); // non-interactive
+        ReturnVal retVal = mySession.openTransaction("expiration task", false); // non-interactive
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    Ganymede.debug("Expiration Task: Couldn't open transaction");
-	    return;
-	  }
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            Ganymede.debug("Expiration Task: Couldn't open transaction");
+            return;
+          }
 
-	started = true;
+        started = true;
 
-	Query q;
-	Vector results;
-	Result result;
-	Invid invid;
-	Date currentTime = new Date();
-	DBObjectBase base;
-	Enumeration baseEnum, en;
-	QueryDataNode expireNode = new QueryDataNode(SchemaConstants.ExpirationField,
-						     QueryDataNode.LESSEQ,
-						     currentTime);
+        Query q;
+        Vector results;
+        Result result;
+        Invid invid;
+        Date currentTime = new Date();
+        DBObjectBase base;
+        Enumeration baseEnum, en;
+        QueryDataNode expireNode = new QueryDataNode(SchemaConstants.ExpirationField,
+                                                     QueryDataNode.LESSEQ,
+                                                     currentTime);
 
-	QueryDataNode removeNode = new QueryDataNode(SchemaConstants.RemovalField,
-						     QueryDataNode.LESSEQ,
-						     currentTime);
+        QueryDataNode removeNode = new QueryDataNode(SchemaConstants.RemovalField,
+                                                     QueryDataNode.LESSEQ,
+                                                     currentTime);
 
-	// --
+        // --
 
-	// we do each query on one object type.. we have to iterate
-	// over all the object types defined in the server and scan
-	// each for objects to be inactivated and/or removed.
+        // we do each query on one object type.. we have to iterate
+        // over all the object types defined in the server and scan
+        // each for objects to be inactivated and/or removed.
 
-	baseEnum = Ganymede.db.objectBases.elements();
+        baseEnum = Ganymede.db.objectBases.elements();
 
-	while (baseEnum.hasMoreElements())
-	  {
-	    if (currentThread.isInterrupted())
-	      {
-		throw new InterruptedException("scheduler ordering shutdown");
-	      }
+        while (baseEnum.hasMoreElements())
+          {
+            if (currentThread.isInterrupted())
+              {
+                throw new InterruptedException("scheduler ordering shutdown");
+              }
 
-	    base = (DBObjectBase) baseEnum.nextElement();
+            base = (DBObjectBase) baseEnum.nextElement();
 
-	    // embedded objects are inactivated with their parents, we don't
-	    // handle them separately
+            // embedded objects are inactivated with their parents, we don't
+            // handle them separately
 
-	    if (base.isEmbedded())
-	      {
-		continue;
-	      }
+            if (base.isEmbedded())
+              {
+                continue;
+              }
 
-	    if (debug)
-	      {
-		Ganymede.debug("Sweeping base " + base.getName() + " for expired objects");
-	      }
+            if (debug)
+              {
+                Ganymede.debug("Sweeping base " + base.getName() + " for expired objects");
+              }
 
-	    q = new Query(base.getTypeID(), expireNode, false);
+            q = new Query(base.getTypeID(), expireNode, false);
 
-	    results = mySession.internalQuery(q);
+            results = mySession.internalQuery(q);
 
-	    en = results.elements();
+            en = results.elements();
 
-	    while (en.hasMoreElements())
-	      {
-		if (currentThread.isInterrupted())
-		  {
-		    throw new InterruptedException("scheduler ordering shutdown");
-		  }
+            while (en.hasMoreElements())
+              {
+                if (currentThread.isInterrupted())
+                  {
+                    throw new InterruptedException("scheduler ordering shutdown");
+                  }
 
-		result = (Result) en.nextElement();
+                result = (Result) en.nextElement();
 
-		invid = result.getInvid();
+                invid = result.getInvid();
 
-		if (debug)
-		  {
-		    Ganymede.debug("Need to inactivate object " + base.getName() + ":" +
-				   result.toString());
-		  }
+                if (debug)
+                  {
+                    Ganymede.debug("Need to inactivate object " + base.getName() + ":" +
+                                   result.toString());
+                  }
 
-		String checkpointKey = "inactivating " + invid.toString();
+                String checkpointKey = "inactivating " + invid.toString();
 
-		myDBSession.checkpoint(checkpointKey);
+                myDBSession.checkpoint(checkpointKey);
 
-		try
-		  {
-		    retVal = mySession.inactivate_db_object(invid);
-		  }
-		catch (Throwable ex)
-		  {
-		    myDBSession.rollback(checkpointKey);
+                try
+                  {
+                    retVal = mySession.inactivate_db_object(invid);
+                  }
+                catch (Throwable ex)
+                  {
+                    myDBSession.rollback(checkpointKey);
 
-		    throw new RuntimeException(ex);
-		  }
+                    throw new RuntimeException(ex);
+                  }
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    myDBSession.rollback(checkpointKey);
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    myDBSession.rollback(checkpointKey);
 
-		    Ganymede.debug("Expiration task was not able to inactivate object " +
-				   base.getName() + ":" + result.toString());
-		  }
-		else
-		  {
-		    myDBSession.popCheckpoint(checkpointKey);
+                    Ganymede.debug("Expiration task was not able to inactivate object " +
+                                   base.getName() + ":" + result.toString());
+                  }
+                else
+                  {
+                    myDBSession.popCheckpoint(checkpointKey);
 
-		    Ganymede.debug("Expiration task inactivated object " +
-				   base.getName() + ":" + result.toString());
-		  }
-	      }
-	  }
+                    Ganymede.debug("Expiration task inactivated object " +
+                                   base.getName() + ":" + result.toString());
+                  }
+              }
+          }
 
-	// now the removals
+        // now the removals
 
-	baseEnum = Ganymede.db.objectBases.elements();
+        baseEnum = Ganymede.db.objectBases.elements();
 
-	while (baseEnum.hasMoreElements())
-	  {
-	    if (currentThread.isInterrupted())
-	      {
-		throw new InterruptedException("scheduler ordering shutdown");
-	      }
+        while (baseEnum.hasMoreElements())
+          {
+            if (currentThread.isInterrupted())
+              {
+                throw new InterruptedException("scheduler ordering shutdown");
+              }
 
-	    base = (DBObjectBase) baseEnum.nextElement();
+            base = (DBObjectBase) baseEnum.nextElement();
 
-	    // embedded objects are removed with their parents, we don't
-	    // handle them separately
+            // embedded objects are removed with their parents, we don't
+            // handle them separately
 
-	    if (base.isEmbedded())
-	      {
-		continue;
-	      }
+            if (base.isEmbedded())
+              {
+                continue;
+              }
 
-	    if (debug)
-	      {
-		Ganymede.debug("Sweeping base " + base.getName() +
-			       " for objects to be removed");
-	      }
+            if (debug)
+              {
+                Ganymede.debug("Sweeping base " + base.getName() +
+                               " for objects to be removed");
+              }
 
-	    q = new Query(base.getTypeID(), removeNode, false);
+            q = new Query(base.getTypeID(), removeNode, false);
 
-	    results = mySession.internalQuery(q);
+            results = mySession.internalQuery(q);
 
-	    en = results.elements();
+            en = results.elements();
 
-	    while (en.hasMoreElements())
-	      {
-		if (currentThread.isInterrupted())
-		  {
-		    throw new InterruptedException("scheduler ordering shutdown");
-		  }
+            while (en.hasMoreElements())
+              {
+                if (currentThread.isInterrupted())
+                  {
+                    throw new InterruptedException("scheduler ordering shutdown");
+                  }
 
-		result = (Result) en.nextElement();
+                result = (Result) en.nextElement();
 
-		invid = result.getInvid();
+                invid = result.getInvid();
 
-		if (debug)
-		  {
-		    Ganymede.debug("Need to remove object " + base.getName() + ":" +
-				   result.toString());
-		  }
+                if (debug)
+                  {
+                    Ganymede.debug("Need to remove object " + base.getName() + ":" +
+                                   result.toString());
+                  }
 
-		String checkpointKey = "removing " + invid.toString();
+                String checkpointKey = "removing " + invid.toString();
 
-		myDBSession.checkpoint(checkpointKey);
+                myDBSession.checkpoint(checkpointKey);
 
-		try
-		  {
-		    retVal = mySession.remove_db_object(invid);
-		  }
-		catch (Throwable ex)
-		  {
-		    myDBSession.rollback(checkpointKey);
+                try
+                  {
+                    retVal = mySession.remove_db_object(invid);
+                  }
+                catch (Throwable ex)
+                  {
+                    myDBSession.rollback(checkpointKey);
 
-		    throw new RuntimeException(ex);
-		  }
+                    throw new RuntimeException(ex);
+                  }
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    myDBSession.rollback(checkpointKey);
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    myDBSession.rollback(checkpointKey);
 
-		    Ganymede.debug("Expiration task was not able to remove object " +
-				   base.getName() + ":" + result.toString());
-		  }
-		else
-		  {
-		    myDBSession.popCheckpoint(checkpointKey);
+                    Ganymede.debug("Expiration task was not able to remove object " +
+                                   base.getName() + ":" + result.toString());
+                  }
+                else
+                  {
+                    myDBSession.popCheckpoint(checkpointKey);
 
-		    Ganymede.debug("Expiration task deleted object " +
-				   base.getName() + ":" + result.toString());
-		  }
-	      }
-	  }
+                    Ganymede.debug("Expiration task deleted object " +
+                                   base.getName() + ":" + result.toString());
+                  }
+              }
+          }
 
-	retVal = mySession.commitTransaction();
+        retVal = mySession.commitTransaction();
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    // if doNormalProcessing is true, the
-	    // transaction was not cleared, but was
-	    // left open for a re-try.  Abort it.
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            // if doNormalProcessing is true, the
+            // transaction was not cleared, but was
+            // left open for a re-try.  Abort it.
 
-	    if (retVal.doNormalProcessing)
-	      {
-		Ganymede.debug("Expiration Task: couldn't fully commit, trying to abort.");
+            if (retVal.doNormalProcessing)
+              {
+                Ganymede.debug("Expiration Task: couldn't fully commit, trying to abort.");
 
-		mySession.abortTransaction();
-	      }
-	  }
+                mySession.abortTransaction();
+              }
+          }
 
-	mySession.logout();
+        mySession.logout();
 
-	finished = true;	// minimize chance of attempting to abort an open transaction in finally
+        finished = true;        // minimize chance of attempting to abort an open transaction in finally
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    Ganymede.debug("Expiration Task: Couldn't successfully commit transaction");
-	  }
-	else
-	  {
-	    Ganymede.debug("Expiration Task: Transaction committed");
-	  }
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            Ganymede.debug("Expiration Task: Couldn't successfully commit transaction");
+          }
+        else
+          {
+            Ganymede.debug("Expiration Task: Transaction committed");
+          }
       }
     catch (NotLoggedInException ex)
       {
-	Ganymede.debug("Mysterious not logged in exception: " + ex.getMessage());
+        Ganymede.debug("Mysterious not logged in exception: " + ex.getMessage());
       }
     catch (InterruptedException ex)
       {
       }
     finally
       {
-	if (started && !finished)
-	  {
-	    // we'll get here if this task's thread is stopped early
+        if (started && !finished)
+          {
+            // we'll get here if this task's thread is stopped early
 
-	    Ganymede.debug("Expiration Task: Forced to terminate early, aborting transaction");
+            Ganymede.debug("Expiration Task: Forced to terminate early, aborting transaction");
 
-	    if (mySession != null)
-	      {
-		try
-		  {
-		    mySession.abortTransaction();
-		    Ganymede.debug("Expiration Task: Transaction aborted");
-		    mySession.logout();
-		  }
-		catch (NotLoggedInException ex)
-		  {
-		  }
-	      }
-	  }
+            if (mySession != null)
+              {
+                try
+                  {
+                    mySession.abortTransaction();
+                    Ganymede.debug("Expiration Task: Transaction aborted");
+                    mySession.logout();
+                  }
+                catch (NotLoggedInException ex)
+                  {
+                  }
+              }
+          }
       }
   }
 }

@@ -10,7 +10,7 @@
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -175,25 +175,25 @@ public class ownershipPanel extends JPanel implements ItemListener {
 
     try
       {
-	for (int i = 0; i < baseList.size(); i++)
-	  {
-	    Base b = (Base)baseList.elementAt(i);
+        for (int i = 0; i < baseList.size(); i++)
+          {
+            Base b = (Base)baseList.elementAt(i);
 
-	    if (!b.isEmbedded())
-	      {
-		String name = (String)baseNames.get(b);
-		bases.addItem (name);
-		objectPane p = new objectPane(editable, 
-					      this,
-					      ((Short)baseToShort.get(b)).shortValue());
-		paneHash.put(name, p);
-		center.add(name, p);
-	      }
-	  }
+            if (!b.isEmbedded())
+              {
+                String name = (String)baseNames.get(b);
+                bases.addItem (name);
+                objectPane p = new objectPane(editable, 
+                                              this,
+                                              ((Short)baseToShort.get(b)).shortValue());
+                paneHash.put(name, p);
+                center.add(name, p);
+              }
+          }
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("could not load the combobox: " + rx);
+        throw new RuntimeException("could not load the combobox: " + rx);
       }
 
     bases.addItemListener(this);
@@ -215,18 +215,18 @@ public class ownershipPanel extends JPanel implements ItemListener {
   {
     if (event.getStateChange() == ItemEvent.SELECTED)
       {
-	String item = (String)event.getItem();
-	
-	objectPane op = (objectPane) paneHash.get(item);
-	
-	if (!op.isStarted())
-	  {
-	    Thread thread = new Thread(op);
-	    thread.setPriority(Thread.NORM_PRIORITY);
-	    thread.start();
-	  }
-	
-	cards.show(center, item);
+        String item = (String)event.getItem();
+        
+        objectPane op = (objectPane) paneHash.get(item);
+        
+        if (!op.isStarted())
+          {
+            Thread thread = new Thread(op);
+            thread.setPriority(Thread.NORM_PRIORITY);
+            thread.start();
+          }
+        
+        cards.show(center, item);
       }
   }
 
@@ -243,42 +243,42 @@ public class ownershipPanel extends JPanel implements ItemListener {
 
     if (center != null)
       {
-	center.removeAll();
-	center = null;
+        center.removeAll();
+        center = null;
       }
 
     bases = null;
 
     if (objects_owned != null)
       {
-	objects_owned.clear();
-	objects_owned = null;
+        objects_owned.clear();
+        objects_owned = null;
       }
 
     if (paneHash != null)
       {
-	paneHash.clear();
-	paneHash = null;
+        paneHash.clear();
+        paneHash = null;
       }
 
     cards = null;
 
     if (owners != null)
       {
-	owners.clear();
-	owners = null;
+        owners.clear();
+        owners = null;
       }
 
     if (result != null)
       {
-	result.clear();
-	result = null;
+        result.clear();
+        result = null;
       }
 
     if (holder != null)
       {
-	holder.removeAll();
-	holder = null;
+        holder.removeAll();
+        holder = null;
       }
 
     node = null;
@@ -379,23 +379,23 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 
     try
       {
-	QueryResult qResult;
+        QueryResult qResult;
 
-	// go back to the framePanel to get the invid for this owner
-	// group
+        // go back to the framePanel to get the invid for this owner
+        // group
 
-	QueryDataNode node = new QueryDataNode(SchemaConstants.OwnerListField,
-					       QueryDataNode.EQUALS, 
-					       QueryDataNode.CONTAINS, 
-					       parent.parent.getObjectInvid());
+        QueryDataNode node = new QueryDataNode(SchemaConstants.OwnerListField,
+                                               QueryDataNode.EQUALS, 
+                                               QueryDataNode.CONTAINS, 
+                                               parent.parent.getObjectInvid());
 
-	qResult = gc.getSession().query(new Query(type, node, false));	// no filtering, allow non-editables
+        qResult = gc.getSession().query(new Query(type, node, false));  // no filtering, allow non-editables
 
-	owned = new objectList(qResult).getListHandles(false, true); // include non-editables
+        owned = new objectList(qResult).getListHandles(false, true); // include non-editables
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("Could not get Query: " + rx);
+        throw new RuntimeException("Could not get Query: " + rx);
       }
 
     // Get the list of possible objects
@@ -404,27 +404,27 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 
     try
       {
-	if (gc.cachedLists.containsList(key))
-	  {
-	    list = gc.cachedLists.getList(key);
-	    possible = list.getListHandles(false);
-	  }
-	else
-	  {
-	    // "Downloading list of owned objects."
-	    gc.setStatus(ts.l("run.downloading_status"));
+        if (gc.cachedLists.containsList(key))
+          {
+            list = gc.cachedLists.getList(key);
+            possible = list.getListHandles(false);
+          }
+        else
+          {
+            // "Downloading list of owned objects."
+            gc.setStatus(ts.l("run.downloading_status"));
 
-	    result = gc.getSession().query(new Query(type)); // no filtering
+            result = gc.getSession().query(new Query(type)); // no filtering
 
-	    list = new objectList(result);
-	    possible = list.getListHandles(false);
+            list = new objectList(result);
+            possible = list.getListHandles(false);
     
-	    gc.cachedLists.putList(key, list);
-	  }
+            gc.cachedLists.putList(key, list);
+          }
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("Could not get QueryResult for all objects: " + rx);
+        throw new RuntimeException("Could not get QueryResult for all objects: " + rx);
       }
 
     ss = new StringSelector(this, editable, true, true);
@@ -504,145 +504,145 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
     
     if (e instanceof JParameterValueObject)
       {
-	if (debug)
-	  {
-	    println("MenuItem selected in a StringSelector");
-	  }
+        if (debug)
+          {
+            println("MenuItem selected in a StringSelector");
+          }
 
-	String command = (String) e.getParameter();
+        String command = (String) e.getParameter();
 
-	if (command.equals("Edit object"))
-	  {
-	    if (debug)
-	      {
-		println("Edit object: " + e.getValue());
-	      }
+        if (command.equals("Edit object"))
+          {
+            if (debug)
+              {
+                println("Edit object: " + e.getValue());
+              }
 
-	    Invid invid = (Invid) e.getValue();
-		    
-	    gc.editObject(invid);
+            Invid invid = (Invid) e.getValue();
+                    
+            gc.editObject(invid);
 
-	    return true;
-	  }
-	else if (command.equals("View object"))
-	  {
-	    if (debug)
-	      {
-		println("View object: " + e.getValue());
-	      }
+            return true;
+          }
+        else if (command.equals("View object"))
+          {
+            if (debug)
+              {
+                println("View object: " + e.getValue());
+              }
 
-	    Invid invid = (Invid) e.getValue();
-		    
-	    gc.viewObject(invid);
+            Invid invid = (Invid) e.getValue();
+                    
+            gc.viewObject(invid);
 
-	    return true;
-	  }
-	else
-	  {
-	    println("Unknown action command from popup: " + command);
-	  }
+            return true;
+          }
+        else
+          {
+            println("Unknown action command from popup: " + command);
+          }
       }
     else if (e instanceof JAddValueObject)
       {
-	if (debug)
-	  {
-	    println("Adding object to list");
-	  }
+        if (debug)
+          {
+            println("Adding object to list");
+          }
 
-	try
-	  {
-	    retVal = addToOwnerGroup((Invid) e.getValue());
+        try
+          {
+            retVal = addToOwnerGroup((Invid) e.getValue());
 
-	    if (retVal != null)
-	      {
-		gc.handleReturnVal(retVal);
-	      }
+            if (retVal != null)
+              {
+                gc.handleReturnVal(retVal);
+              }
 
-	    succeeded = (retVal == null) ? true : retVal.didSucceed();
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not add value to list: " + rx);
-	  }
+            succeeded = (retVal == null) ? true : retVal.didSucceed();
+          }
+        catch (RemoteException rx)
+          {
+            throw new RuntimeException("Could not add value to list: " + rx);
+          }
       }
     else if (e instanceof JAddVectorValueObject)
       {
-	if (debug)
-	  {
-	    println("Adding objects to list");
-	  }
+        if (debug)
+          {
+            println("Adding objects to list");
+          }
 
-	try
-	  {
-	    retVal = addToOwnerGroup((Vector)e.getValue());
+        try
+          {
+            retVal = addToOwnerGroup((Vector)e.getValue());
 
-	    if (retVal != null)
-	      {
-		gc.handleReturnVal(retVal);
-	      }
+            if (retVal != null)
+              {
+                gc.handleReturnVal(retVal);
+              }
 
-	    succeeded = (retVal == null) ? true : retVal.didSucceed();
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not add values to list: " + rx);
-	  }
+            succeeded = (retVal == null) ? true : retVal.didSucceed();
+          }
+        catch (RemoteException rx)
+          {
+            throw new RuntimeException("Could not add values to list: " + rx);
+          }
       }
     else if (e instanceof JDeleteValueObject)
       {
-	if (debug)
-	  {
-	    println("Deleting object from list");
-	  }
+        if (debug)
+          {
+            println("Deleting object from list");
+          }
 
-	try
-	  {
-	    retVal = removeFromOwnerGroup((Invid) e.getValue());
+        try
+          {
+            retVal = removeFromOwnerGroup((Invid) e.getValue());
 
-	    if (retVal != null)
-	      {
-		gc.handleReturnVal(retVal);
-	      }
+            if (retVal != null)
+              {
+                gc.handleReturnVal(retVal);
+              }
 
-	    succeeded = (retVal == null) ? true : retVal.didSucceed();
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not delete value from list: " + rx);
-	  }
+            succeeded = (retVal == null) ? true : retVal.didSucceed();
+          }
+        catch (RemoteException rx)
+          {
+            throw new RuntimeException("Could not delete value from list: " + rx);
+          }
       }
     else if (e instanceof JDeleteVectorValueObject)
       {
-	if (debug)
-	  {
-	    println("Adding objects to list");
-	  }
+        if (debug)
+          {
+            println("Adding objects to list");
+          }
 
-	try
-	  {
-	    retVal = removeFromOwnerGroup((Vector)e.getValue());
+        try
+          {
+            retVal = removeFromOwnerGroup((Vector)e.getValue());
 
-	    if (retVal != null)
-	      {
-		gc.handleReturnVal(retVal);
-	      }
+            if (retVal != null)
+              {
+                gc.handleReturnVal(retVal);
+              }
 
-	    succeeded = (retVal == null) ? true : retVal.didSucceed();
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not remove values from list: " + rx);
-	  }
+            succeeded = (retVal == null) ? true : retVal.didSucceed();
+          }
+        catch (RemoteException rx)
+          {
+            throw new RuntimeException("Could not remove values from list: " + rx);
+          }
       }
 
     if (debug)
       {
-	println("returnValue = " + succeeded);
+        println("returnValue = " + succeeded);
       }
     
     if (succeeded)
       {
-	gc.somethingChanged();
+        gc.somethingChanged();
       }
     
     return succeeded;
@@ -663,7 +663,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 
     if (!retVal.didSucceed())
       {
-	return retVal;
+        return retVal;
       }
 
     db_object my_object = retVal.getObject();
@@ -694,69 +694,69 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 
     for (i = 0; success && i < objectsToAdd.size(); i++)
       {
-	Invid objectToAdd = (Invid) objectsToAdd.elementAt(i);
+        Invid objectToAdd = (Invid) objectsToAdd.elementAt(i);
 
-	retVal = session.edit_db_object(objectToAdd);
+        retVal = session.edit_db_object(objectToAdd);
 
-	if (!retVal.didSucceed())
-	  {
-	    success = false;
-	    break;
-	  }
+        if (!retVal.didSucceed())
+          {
+            success = false;
+            break;
+          }
 
-	db_object my_object = retVal.getObject();
-	db_field my_field = my_object.getField(SchemaConstants.OwnerListField);
+        db_object my_object = retVal.getObject();
+        db_field my_field = my_object.getField(SchemaConstants.OwnerListField);
 
-	// "Adding object {0} to owner group."
-	gc.setStatus(ts.l("addToOwnerGroup.adding_status", my_object.getLabel()));
+        // "Adding object {0} to owner group."
+        gc.setStatus(ts.l("addToOwnerGroup.adding_status", my_object.getLabel()));
 
-	retVal = my_field.addElement(parent.parent.getObjectInvid());
+        retVal = my_field.addElement(parent.parent.getObjectInvid());
 
-	if (retVal != null && !retVal.didSucceed())
-	  {
-	    success = false;
-	  }
+        if (retVal != null && !retVal.didSucceed())
+          {
+            success = false;
+          }
       }
 
     if (!success)
       {
-	// "Error encountered adding objects to owner group.  Reverting."
-	gc.setStatus(ts.l("addToOwnerGroup.failure_status"), 0);
+        // "Error encountered adding objects to owner group.  Reverting."
+        gc.setStatus(ts.l("addToOwnerGroup.failure_status"), 0);
 
-	// we couldn't add all of these objects to the owner group.
-	// Go ahead and revert all the ones we successfully added.
+        // we couldn't add all of these objects to the owner group.
+        // Go ahead and revert all the ones we successfully added.
 
-	for (int j = 0; j < i; j++)
-	  {
-	    Invid objectToAdd = (Invid) objectsToAdd.elementAt(j);
+        for (int j = 0; j < i; j++)
+          {
+            Invid objectToAdd = (Invid) objectsToAdd.elementAt(j);
 
-	    ReturnVal retVal2 = session.edit_db_object(objectToAdd);
+            ReturnVal retVal2 = session.edit_db_object(objectToAdd);
 
-	    if (!retVal2.didSucceed())
-	      {
-		// weird!  go ahead and try to undo the rest
-		continue;
-	      }
-	    
-	    db_object my_object = retVal2.getObject();
-	    db_field my_field = my_object.getField(SchemaConstants.OwnerListField);
+            if (!retVal2.didSucceed())
+              {
+                // weird!  go ahead and try to undo the rest
+                continue;
+              }
+            
+            db_object my_object = retVal2.getObject();
+            db_field my_field = my_object.getField(SchemaConstants.OwnerListField);
 
-	    // we won't bother checking for success, if we fail here,
-	    // we've got big problems.
+            // we won't bother checking for success, if we fail here,
+            // we've got big problems.
 
-	    my_field.deleteElement(parent.parent.getObjectInvid());
-	  }
+            my_field.deleteElement(parent.parent.getObjectInvid());
+          }
 
-	// clear the status display
+        // clear the status display
 
-	gc.setStatus("");
+        gc.setStatus("");
 
-	// and return our original error message
+        // and return our original error message
 
-	return retVal;
+        return retVal;
       }
 
-    return null;		// success
+    return null;                // success
   }
 
   /**
@@ -774,7 +774,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 
     if (!retVal.didSucceed())
       {
-	return retVal;
+        return retVal;
       }
 
     db_object my_object = retVal.getObject();
@@ -805,68 +805,68 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 
     for (i = 0; success && i < objectsToRemove.size(); i++)
       {
-	Invid objectToRemove = (Invid) objectsToRemove.elementAt(i);
+        Invid objectToRemove = (Invid) objectsToRemove.elementAt(i);
 
-	retVal = session.edit_db_object(objectToRemove);
+        retVal = session.edit_db_object(objectToRemove);
 
-	if (!retVal.didSucceed())
-	  {
-	    success = false;
-	    break;
-	  }
+        if (!retVal.didSucceed())
+          {
+            success = false;
+            break;
+          }
 
-	db_object my_object = retVal.getObject();
-	db_field my_field = my_object.getField(SchemaConstants.OwnerListField);
+        db_object my_object = retVal.getObject();
+        db_field my_field = my_object.getField(SchemaConstants.OwnerListField);
 
-	// "Removing object {0} from owner group."
-	gc.setStatus(ts.l("removeFromOwnerGroup.removing_status", my_object.getLabel()));
+        // "Removing object {0} from owner group."
+        gc.setStatus(ts.l("removeFromOwnerGroup.removing_status", my_object.getLabel()));
 
-	retVal = my_field.deleteElement(parent.parent.getObjectInvid());
+        retVal = my_field.deleteElement(parent.parent.getObjectInvid());
 
-	if (retVal != null && !retVal.didSucceed())
-	  {
-	    success = false;
-	  }
+        if (retVal != null && !retVal.didSucceed())
+          {
+            success = false;
+          }
       }
 
     if (!success)
       {
-	// we couldn't remove all of these objects to the owner group.
-	// Go ahead and try to revert all the ones we successfully
-	// removed.
+        // we couldn't remove all of these objects to the owner group.
+        // Go ahead and try to revert all the ones we successfully
+        // removed.
 
-	// "Error encountered removing objects from owner group.  Reverting."
-	gc.setStatus(ts.l("removeFromOwnerGroup.failure_status"), 0);
+        // "Error encountered removing objects from owner group.  Reverting."
+        gc.setStatus(ts.l("removeFromOwnerGroup.failure_status"), 0);
 
-	for (int j = 0; j < i; j++)
-	  {
-	    Invid objectToRemove = (Invid) objectsToRemove.elementAt(j);
+        for (int j = 0; j < i; j++)
+          {
+            Invid objectToRemove = (Invid) objectsToRemove.elementAt(j);
 
-	    ReturnVal retVal2 = session.edit_db_object(objectToRemove);
+            ReturnVal retVal2 = session.edit_db_object(objectToRemove);
 
-	    if (!retVal2.didSucceed())
-	      {
-		// weird!  go ahead and try to undo the rest
-		continue;
-	      }
-	    
-	    db_object my_object = retVal2.getObject();
-	    db_field my_field = my_object.getField(SchemaConstants.OwnerListField);
+            if (!retVal2.didSucceed())
+              {
+                // weird!  go ahead and try to undo the rest
+                continue;
+              }
+            
+            db_object my_object = retVal2.getObject();
+            db_field my_field = my_object.getField(SchemaConstants.OwnerListField);
 
-	    // we won't bother checking for success, if we fail here,
-	    // we've got big problems.
+            // we won't bother checking for success, if we fail here,
+            // we've got big problems.
 
-	    my_field.addElement(parent.parent.getObjectInvid());
-	  }
+            my_field.addElement(parent.parent.getObjectInvid());
+          }
 
-	gc.setStatus("");
+        gc.setStatus("");
 
-	// and return our original error message
+        // and return our original error message
 
-	return retVal;
+        return retVal;
       }
 
-    return null;		// success
+    return null;                // success
   }
 
   private void println(String s)

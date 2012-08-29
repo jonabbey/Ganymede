@@ -20,7 +20,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -155,7 +155,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
 
     for (int i = 0; i < lookUp.length; i++)
       {
-	lookUp[i] = -1;
+        lookUp[i] = -1;
       }
 
     Ganymede.rmi.publishObject(this);
@@ -179,13 +179,13 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
   {
     if (this.done)
       {
-	return;
+        return;
       }
 
     synchronized (eventBuffer)
       {
-	this.done = true;
-	eventBuffer.notifyAll(); // let the client drain and exit
+        this.done = true;
+        eventBuffer.notifyAll(); // let the client drain and exit
       }
   }
 
@@ -203,34 +203,34 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
 
     synchronized (eventBuffer)
       {
-	while (!done && ebSz == 0)
-	  {
-	    try
-	      {
-		eventBuffer.wait();
-	      }
-	    catch (InterruptedException ex)
-	      {
-	      }
-	  }
+        while (!done && ebSz == 0)
+          {
+            try
+              {
+                eventBuffer.wait();
+              }
+            catch (InterruptedException ex)
+              {
+              }
+          }
 
-	if (done && ebSz == 0)
-	  {
-	    return null;	// but see finally, below
-	  }
+        if (done && ebSz == 0)
+          {
+            return null;        // but see finally, below
+          }
 
-	while (ebSz > 0)
-	  {
-	    event = dequeue();
-	    items.addElement(event);
-	  }
+        while (ebSz > 0)
+          {
+            event = dequeue();
+            items.addElement(event);
+          }
       }
 
     adminAsyncMessage[] events = new adminAsyncMessage[items.size()];
 
     for (int i = 0; i < events.length; i++)
       {
-	events[i] = (adminAsyncMessage) items.elementAt(i);
+        events[i] = (adminAsyncMessage) items.elementAt(i);
       }
 
     return events;
@@ -347,37 +347,37 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
 
     if (done)
       {
-	// we have to throw a remote exception, since that's what
-	// the GanymedeAdmin code expects to receive as a signal
-	// that an admin console needs to be dropped
-	
-	throw new RemoteException("serverAdminProxy: console disconnected");
+        // we have to throw a remote exception, since that's what
+        // the GanymedeAdmin code expects to receive as a signal
+        // that an admin console needs to be dropped
+        
+        throw new RemoteException("serverAdminProxy: console disconnected");
       }
 
     synchronized (eventBuffer)
       {
-	// if we have another logAppend event in the eventBuffer,
-	// go ahead and append the new log entry directly to its
-	// StringBuffer
+        // if we have another logAppend event in the eventBuffer,
+        // go ahead and append the new log entry directly to its
+        // StringBuffer
 
-	if (lookUp[adminAsyncMessage.LOGAPPEND] != -1)
-	  {
-	    // coalesce this append to the log message
+        if (lookUp[adminAsyncMessage.LOGAPPEND] != -1)
+          {
+            // coalesce this append to the log message
 
-	    StringBuffer buffer = (StringBuffer) eventBuffer[lookUp[adminAsyncMessage.LOGAPPEND]].getParam(0);
-	    buffer.append(status);
-	    return;
-	  }
+            StringBuffer buffer = (StringBuffer) eventBuffer[lookUp[adminAsyncMessage.LOGAPPEND]].getParam(0);
+            buffer.append(status);
+            return;
+          }
 
-	// if we didn't find an event to append to, go ahead and add a
-	// new LOGAPPEND log update event to the eventBuffer
+        // if we didn't find an event to append to, go ahead and add a
+        // new LOGAPPEND log update event to the eventBuffer
 
-	newLogEvent = new adminAsyncMessage(adminAsyncMessage.LOGAPPEND, new StringBuffer().append(status));
+        newLogEvent = new adminAsyncMessage(adminAsyncMessage.LOGAPPEND, new StringBuffer().append(status));
 
-	// queue the log event, keep a pointer to it in lookUp so we
-	// can quickly find it next time
+        // queue the log event, keep a pointer to it in lookUp so we
+        // can quickly find it next time
 
-	lookUp[adminAsyncMessage.LOGAPPEND] = addEvent(newLogEvent);
+        lookUp[adminAsyncMessage.LOGAPPEND] = addEvent(newLogEvent);
       }
   }
 
@@ -439,19 +439,19 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
 
     if (done)
       {
-	throw new RemoteException("serverAdminAsyncResponder: console disconnected");
+        throw new RemoteException("serverAdminAsyncResponder: console disconnected");
       }
 
     synchronized (eventBuffer)
       {
-	if (ebSz >= maxBufferSize)
-	  {
-	    throwOverflow();
-	  }
-	
-	result = enqueue(newEvent);
-	
-	eventBuffer.notify();	// wake up getNextMsg()
+        if (ebSz >= maxBufferSize)
+          {
+            throwOverflow();
+          }
+        
+        result = enqueue(newEvent);
+        
+        eventBuffer.notify();   // wake up getNextMsg()
       }
 
     return result;
@@ -469,34 +469,34 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
   {
     if (done)
       {
-	throw new RemoteException("serverAdminAsyncResponder: console disconnected");
+        throw new RemoteException("serverAdminAsyncResponder: console disconnected");
       }
 
     synchronized (eventBuffer)
       {
-	// if we have an instance of this event type on our
-	// eventBuffer, replace it
+        // if we have an instance of this event type on our
+        // eventBuffer, replace it
 
-	if (lookUp[newEvent.getMethod()] != -1)
-	  {
-	    eventBuffer[lookUp[newEvent.getMethod()]] = newEvent;
-	    return;
-	  }
+        if (lookUp[newEvent.getMethod()] != -1)
+          {
+            eventBuffer[lookUp[newEvent.getMethod()]] = newEvent;
+            return;
+          }
 
-	// okay, we don't have an event of matching type on our eventBuffer
-	// queue.  Check for overflow and add the element ourselves.
+        // okay, we don't have an event of matching type on our eventBuffer
+        // queue.  Check for overflow and add the element ourselves.
 
-	if (ebSz >= maxBufferSize)
-	  {
-	    throwOverflow();
-	  }
+        if (ebSz >= maxBufferSize)
+          {
+            throwOverflow();
+          }
 
-	// remember that we have an event of this type on our eventBuffer
-	// for direct lookup by later replaceEvent calls.
+        // remember that we have an event of this type on our eventBuffer
+        // for direct lookup by later replaceEvent calls.
 
-	lookUp[newEvent.getMethod()] = enqueue(newEvent);
+        lookUp[newEvent.getMethod()] = enqueue(newEvent);
 
-	eventBuffer.notify();	// wake up getNextMsg()
+        eventBuffer.notify();   // wake up getNextMsg()
       }
   }
 
@@ -512,24 +512,24 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
 
     synchronized (eventBuffer)
       {
-	int i = dequeuePtr;
-	int count = 0;
+        int i = dequeuePtr;
+        int count = 0;
 
-	while (count < ebSz)
-	  {
-	    buffer.append(i);
-	    buffer.append(": ");
-	    buffer.append(eventBuffer[i]);
-	    buffer.append("\n");
+        while (count < ebSz)
+          {
+            buffer.append(i);
+            buffer.append(": ");
+            buffer.append(eventBuffer[i]);
+            buffer.append("\n");
 
-	    count++;
-	    i++;
+            count++;
+            i++;
 
-	    if (i >= maxBufferSize)
-	      {
-		i = 0;
-	      }
-	  }
+            if (i >= maxBufferSize)
+              {
+                i = 0;
+              }
+          }
       }
     
     throw new RemoteException("serverAdminAsyncResponder buffer overflow:" + buffer.toString());
@@ -549,15 +549,15 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
 
     synchronized (eventBuffer)
       {
-	result = enqueuePtr;
-	eventBuffer[enqueuePtr] = item;
-	
-	if (++enqueuePtr >= maxBufferSize)
-	  {
-	    enqueuePtr = 0;
-	  }
-	
-	ebSz++;
+        result = enqueuePtr;
+        eventBuffer[enqueuePtr] = item;
+        
+        if (++enqueuePtr >= maxBufferSize)
+          {
+            enqueuePtr = 0;
+          }
+        
+        ebSz++;
       }
 
     return result;
@@ -572,30 +572,30 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
   {
     synchronized (eventBuffer)
       {
-	adminAsyncMessage result = eventBuffer[dequeuePtr];
-	eventBuffer[dequeuePtr] = null;
+        adminAsyncMessage result = eventBuffer[dequeuePtr];
+        eventBuffer[dequeuePtr] = null;
 
-	// if we're dequeueing something that we've been using
-	// replaceEvent with, replace the dequeue'd event with the
-	// latest of that type from the lookUp array.
+        // if we're dequeueing something that we've been using
+        // replaceEvent with, replace the dequeue'd event with the
+        // latest of that type from the lookUp array.
 
-	if (lookUp[result.getMethod()] != -1)
-	  {
-	    if (lookUp[result.getMethod()] != dequeuePtr)
-	      {
-		System.err.println("serverAdminAsyncResponder:dequeue() lookUp mismatch");
-	      }
+        if (lookUp[result.getMethod()] != -1)
+          {
+            if (lookUp[result.getMethod()] != dequeuePtr)
+              {
+                System.err.println("serverAdminAsyncResponder:dequeue() lookUp mismatch");
+              }
 
-	    lookUp[result.getMethod()] = -1;
-	  }
-	
-	if (++dequeuePtr >= maxBufferSize)
-	  {
-	    dequeuePtr = 0;
-	  }
-	
-	ebSz--;
-	return result;
+            lookUp[result.getMethod()] = -1;
+          }
+        
+        if (++dequeuePtr >= maxBufferSize)
+          {
+            dequeuePtr = 0;
+          }
+        
+        ebSz--;
+        return result;
       }
   }
 }

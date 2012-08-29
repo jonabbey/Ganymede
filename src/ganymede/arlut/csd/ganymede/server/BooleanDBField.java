@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -210,7 +210,7 @@ public class BooleanDBField extends DBField implements boolean_field {
   {
     if (value == null)
       {
-	return false;
+        return false;
       }
     
     return ((Boolean) value).booleanValue();
@@ -243,7 +243,7 @@ public class BooleanDBField extends DBField implements boolean_field {
   {
     if (value == null)
       {
-	return "null";
+        return "null";
       }
     
     return (this.value() ? trueStr: falseStr);
@@ -279,21 +279,21 @@ public class BooleanDBField extends DBField implements boolean_field {
 
     if (!(orig instanceof BooleanDBField))
       {
-	throw new IllegalArgumentException("bad field comparison");
+        throw new IllegalArgumentException("bad field comparison");
       }
 
     origB = (BooleanDBField) orig;
 
     if (origB.value() != this.value())
       {
-	// "\tOld: {0}\n\tNew: {1}"
-	return ts.l("getDiffString.comparison",
-		    origB.value() ? trueStr: falseStr,
-		    this.value() ? trueStr: falseStr);
+        // "\tOld: {0}\n\tNew: {1}"
+        return ts.l("getDiffString.comparison",
+                    origB.value() ? trueStr: falseStr,
+                    this.value() ? trueStr: falseStr);
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -361,20 +361,20 @@ public class BooleanDBField extends DBField implements boolean_field {
 
     if (!isEditable(true))
       {
-	// "Boolean Field Error"
-	// "Don''t have permission to edit field {0} in object {1}."
-	return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_subj"),
-					  ts.l("verifyNewValue.error_perm", getName(), owner.getLabel()));
+        // "Boolean Field Error"
+        // "Don''t have permission to edit field {0} in object {1}."
+        return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_subj"),
+                                          ts.l("verifyNewValue.error_perm", getName(), owner.getLabel()));
       }
 
     eObj = (DBEditObject) owner;
 
     if (!verifyTypeMatch(o))
       {
-	// "Boolean Field Error"
-	// "Submitted value {0} is not a boolean!  Major client error while trying to edit field {0} in object {1}."
-	return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_subj"),
-					  ts.l("verifyNewValue.error_type", getName(), owner.getLabel()));
+        // "Boolean Field Error"
+        // "Submitted value {0} is not a boolean!  Major client error while trying to edit field {0} in object {1}."
+        return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_subj"),
+                                          ts.l("verifyNewValue.error_type", getName(), owner.getLabel()));
       }
 
     // have our parent make the final ok on the value

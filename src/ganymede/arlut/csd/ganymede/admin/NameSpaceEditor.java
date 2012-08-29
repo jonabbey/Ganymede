@@ -9,7 +9,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -91,12 +91,12 @@ public class NameSpaceEditor extends JStretchPanel implements ActionListener {
   {
     if (owner == null)
       {
-	throw new IllegalArgumentException("owner must not be null");
+        throw new IllegalArgumentException("owner must not be null");
       }
 
     if (debug)
       {
-	System.err.println("NameSpaceEditor constructed");
+        System.err.println("NameSpaceEditor constructed");
       }
 
     this.owner = owner;
@@ -125,14 +125,14 @@ public class NameSpaceEditor extends JStretchPanel implements ActionListener {
     
     try
       {
-	nameS.setText(space.getName());
-	caseCB.setSelected(space.isCaseInsensitive());
-	currentNameSpaceLabel = space.getName();
-	refreshSpaceList();
+        nameS.setText(space.getName());
+        caseCB.setSelected(space.isCaseInsensitive());
+        currentNameSpaceLabel = space.getName();
+        refreshSpaceList();
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("Remote Exception gettin gNameSpace attributes " + rx);
+        throw new RuntimeException("Remote Exception gettin gNameSpace attributes " + rx);
       }
   }
 
@@ -140,7 +140,7 @@ public class NameSpaceEditor extends JStretchPanel implements ActionListener {
   {
     if (debug)
       {
-	System.out.println("action Performed in NameSpaceEditor");
+        System.out.println("action Performed in NameSpaceEditor");
       }
   }
 
@@ -152,11 +152,11 @@ public class NameSpaceEditor extends JStretchPanel implements ActionListener {
 
     try
       {
-	bases = se.getBases(); // we want to find all fields that refer to this namespace
+        bases = se.getBases(); // we want to find all fields that refer to this namespace
       }
     catch (RemoteException rx)
       {
-	throw new IllegalArgumentException("Exception: can't get bases: " + rx);
+        throw new IllegalArgumentException("Exception: can't get bases: " + rx);
       }
 
     Vector fields = null;
@@ -167,65 +167,65 @@ public class NameSpaceEditor extends JStretchPanel implements ActionListener {
 
     if ((bases == null) || (currentNameSpaceLabel == null))
       {
-	System.out.println("bases or currentNameSpaceLabel is null");
+        System.out.println("bases or currentNameSpaceLabel is null");
       }
     else
       {
-	if (debug)
-	  {
-	    System.out.println("currentNameSpaceLabel= " + currentNameSpaceLabel);
-	  }
-	  
-	for (int i = 0; i < bases.length; i++)
-	  {
-	    try
-	      {
-		thisBase = bases[i].getName();
-		fields = bases[i].getFields();
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new IllegalArgumentException("exception getting fields: " + rx);
-	      }
+        if (debug)
+          {
+            System.out.println("currentNameSpaceLabel= " + currentNameSpaceLabel);
+          }
+          
+        for (int i = 0; i < bases.length; i++)
+          {
+            try
+              {
+                thisBase = bases[i].getName();
+                fields = bases[i].getFields();
+              }
+            catch (RemoteException rx)
+              {
+                throw new IllegalArgumentException("exception getting fields: " + rx);
+              }
 
-	    if (fields == null)
-	      {
-		if (debug)
-		  {
-		    System.out.println("fields == null");
-		  }
-	      }
-	    else
-	      {
-		for (int j = 0; j < fields.size(); j++)
-		  {
-		    try 
-		      {
-			currentField = (BaseField)fields.elementAt(j);
+            if (fields == null)
+              {
+                if (debug)
+                  {
+                    System.out.println("fields == null");
+                  }
+              }
+            else
+              {
+                for (int j = 0; j < fields.size(); j++)
+                  {
+                    try 
+                      {
+                        currentField = (BaseField)fields.elementAt(j);
 
-			thisSpace = currentField.getNameSpaceLabel();
-			
-			if ((thisSpace != null) && (thisSpace.equals(currentNameSpaceLabel)))
-			  {
-			    if (debug)
-			      {
-				System.out.println("Adding to spaceV: " + thisBase +
-						   ":" + currentField.getName());;
-			      }
+                        thisSpace = currentField.getNameSpaceLabel();
+                        
+                        if ((thisSpace != null) && (thisSpace.equals(currentNameSpaceLabel)))
+                          {
+                            if (debug)
+                              {
+                                System.out.println("Adding to spaceV: " + thisBase +
+                                                   ":" + currentField.getName());;
+                              }
 
-			    spaceV.addElement(thisBase + ":" + currentField.getName());
-			  }
-		      }
-		    catch (RemoteException rx)
-		      {
-			throw new IllegalArgumentException("Exception generating spaceL: " + rx);
-		      }
-		    
-		  }
+                            spaceV.addElement(thisBase + ":" + currentField.getName());
+                          }
+                      }
+                    catch (RemoteException rx)
+                      {
+                        throw new IllegalArgumentException("Exception generating spaceL: " + rx);
+                      }
+                    
+                  }
 
-		spaceL.setListData(spaceV);
-	      }
-	  }
+                spaceL.setListData(spaceV);
+              }
+          }
       }
   }
 
@@ -236,15 +236,15 @@ public class NameSpaceEditor extends JStretchPanel implements ActionListener {
   public void cleanup()
   {
     this.node = null;
-    this.space = null;	// remote reference
+    this.space = null;  // remote reference
     this.nameS = null;
     this.spaceL = null;
     this.caseCB = null;
 
     if (this.nameJPanel != null)
       {
-	this.nameJPanel.cleanup();
-	this.nameJPanel = null;
+        this.nameJPanel.cleanup();
+        this.nameJPanel = null;
       }
 
     this.owner = null;
@@ -253,6 +253,6 @@ public class NameSpaceEditor extends JStretchPanel implements ActionListener {
 
     // and clean up the AWT's linkages
 
-    this.removeAll();		// should be done on GUI thread
+    this.removeAll();           // should be done on GUI thread
   }
 }

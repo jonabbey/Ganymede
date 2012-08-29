@@ -51,8 +51,8 @@ import arlut.csd.ganymede.common.FieldBook;
 import arlut.csd.ganymede.common.Invid;
 
 /*------------------------------------------------------------------------------
-								       interface
-								      SyncMaster
+                                                                       interface
+                                                                      SyncMaster
 
 ------------------------------------------------------------------------------*/
 

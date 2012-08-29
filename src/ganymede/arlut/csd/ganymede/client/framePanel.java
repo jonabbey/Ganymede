@@ -125,7 +125,7 @@ import arlut.csd.ganymede.rmi.Session;
  */
 
 public class framePanel extends JInternalFrame implements ChangeListener, ActionListener,
-							  VetoableChangeListener, InternalFrameListener {
+                                                          VetoableChangeListener, InternalFrameListener {
   /**
    * TranslationService object for handling string localization in
    * the Ganymede client.
@@ -329,7 +329,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     if (!debug)
       {
-	debug = wp.gc.debug;
+        debug = wp.gc.debug;
       }
 
     // "Building window."
@@ -398,83 +398,83 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     try
       {
-	// windowPanel wants to know if framePanel is changed
+        // windowPanel wants to know if framePanel is changed
 
-	addInternalFrameListener(getWindowPanel());
+        addInternalFrameListener(getWindowPanel());
 
-	// Now setup the framePanel layout
+        // Now setup the framePanel layout
 
-	pane = new JTabbedPane();
-	pane.setOpaque(true);
+        pane = new JTabbedPane();
+        pane.setOpaque(true);
 
-	// the client Loader thread should have already downloaded and
-	// cached the field template vector we're getting here.  If not,
-	// we'll block here while the Loader gets the information we need.
+        // the client Loader thread should have already downloaded and
+        // cached the field template vector we're getting here.  If not,
+        // we'll block here while the Loader gets the information we need.
 
-	short id = getObjectInvid().getType();
+        short id = getObjectInvid().getType();
 
-	templates = gc.getTemplateVector(id);
+        templates = gc.getTemplateVector(id);
 
-	try
-	  {
-	    infoVector = getObject().getFieldInfoVector();
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx);
-	  }
+        try
+          {
+            infoVector = getObject().getFieldInfoVector();
+          }
+        catch (Exception rx)
+          {
+            gc.processExceptionRethrow(rx);
+          }
 
-	// loop over the field templates and identify the
-	// server-defined tabs
+        // loop over the field templates and identify the
+        // server-defined tabs
 
-	serverTab newTab = null;
-	serverTab oldTab = null;
+        serverTab newTab = null;
+        serverTab oldTab = null;
 
-	for (int i = 0; i < templates.size(); i++)
-	  {
-	    FieldTemplate template = (FieldTemplate) templates.elementAt(i);
+        for (int i = 0; i < templates.size(); i++)
+          {
+            FieldTemplate template = (FieldTemplate) templates.elementAt(i);
 
-	    // make sure that we don't create a tab if the field isn't
-	    // actually present in this instance of the object
+            // make sure that we don't create a tab if the field isn't
+            // actually present in this instance of the object
 
-	    short fieldID = template.getID();
-	    boolean field_present = false;
+            short fieldID = template.getID();
+            boolean field_present = false;
 
-	    for (int j = 0; !field_present && j < infoVector.size(); j++)
-	      {
-		FieldInfo field_info = (FieldInfo) infoVector.elementAt(j);
+            for (int j = 0; !field_present && j < infoVector.size(); j++)
+              {
+                FieldInfo field_info = (FieldInfo) infoVector.elementAt(j);
 
-		if (field_info.getID() == fieldID)
-		  {
-		    field_present = true;
-		  }
-	      }
+                if (field_info.getID() == fieldID)
+                  {
+                    field_present = true;
+                  }
+              }
 
-	    if (field_present && !template.isBuiltIn() &&
-		(id != SchemaConstants.UserBase || fieldID != SchemaConstants.UserAdminPersonae))
-	      {
-		if (oldTab == null)
-		  {
-		    oldTab = new serverTab(this, pane, template.getTabName());
-		    oldTab.setInfoVector(infoVector);
-		    oldTab.addToPane(tabList);
-		  }
-		else
-		  {
-		    if (!StringUtils.stringEquals(template.getTabName(), oldTab.getTabName()))
-		      {
-			newTab = new serverTab(this, pane, template.getTabName());
-			newTab.setInfoVector(infoVector);
-			newTab.addToPane(tabList);
+            if (field_present && !template.isBuiltIn() &&
+                (id != SchemaConstants.UserBase || fieldID != SchemaConstants.UserAdminPersonae))
+              {
+                if (oldTab == null)
+                  {
+                    oldTab = new serverTab(this, pane, template.getTabName());
+                    oldTab.setInfoVector(infoVector);
+                    oldTab.addToPane(tabList);
+                  }
+                else
+                  {
+                    if (!StringUtils.stringEquals(template.getTabName(), oldTab.getTabName()))
+                      {
+                        newTab = new serverTab(this, pane, template.getTabName());
+                        newTab.setInfoVector(infoVector);
+                        newTab.addToPane(tabList);
 
-			oldTab = newTab;
-		      }
-		  }
-	      }
-	  }
+                        oldTab = newTab;
+                      }
+                  }
+              }
+          }
 
-	// okay, now we we've added the server--side tabs.  time to
-	// start in on the predefined tabs.
+        // okay, now we we've added the server--side tabs.  time to
+        // start in on the predefined tabs.
 
         // for user objects, see if we have an image to display
 
@@ -493,145 +493,145 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
           }
         catch (RemoteException ex)
           {
-	    gc.processExceptionRethrow(ex, "Could not check for user image: ");
+            gc.processExceptionRethrow(ex, "Could not check for user image: ");
           }
 
-	// Check to see if this gets an objects_owned panel (for Owner
-	// Group objects) or an Admin Personae panel (for User
-	// objects)
-	//
-	// Note that the supergash OwnerBase does not get an
-	// objects_owned panel.
+        // Check to see if this gets an objects_owned panel (for Owner
+        // Group objects) or an Admin Personae panel (for User
+        // objects)
+        //
+        // Note that the supergash OwnerBase does not get an
+        // objects_owned panel.
 
-	try
-	  {
-	    if (id == SchemaConstants.OwnerBase)
-	      {
-		if (!getObjectInvid().equals(Invid.createInvid((short)0, 1)))
-		  {
-		    if (stopped.isSet())
-		      {
-			return;
-		      }
+        try
+          {
+            if (id == SchemaConstants.OwnerBase)
+              {
+                if (!getObjectInvid().equals(Invid.createInvid((short)0, 1)))
+                  {
+                    if (stopped.isSet())
+                      {
+                        return;
+                      }
 
-		    objects_owned_tab = new objectsOwnedTab(this, pane, ts.l("load.objects_owned_tab")); // "Objects Owned"
-		    objects_owned_tab.addToPane(tabList);
-		  }
-	      }
-	    else if (id == SchemaConstants.UserBase)
-	      {
-		invid_field persona_field = (invid_field)getObject().getField(SchemaConstants.UserAdminPersonae);
+                    objects_owned_tab = new objectsOwnedTab(this, pane, ts.l("load.objects_owned_tab")); // "Objects Owned"
+                    objects_owned_tab.addToPane(tabList);
+                  }
+              }
+            else if (id == SchemaConstants.UserBase)
+              {
+                invid_field persona_field = (invid_field)getObject().getField(SchemaConstants.UserAdminPersonae);
 
-		// If the field is null, then this must be a view-only
-		// object with no persona field defined (because
-		// editable objects always have all valid fields
-		// instantiated)
+                // If the field is null, then this must be a view-only
+                // object with no persona field defined (because
+                // editable objects always have all valid fields
+                // instantiated)
 
-		if (persona_field != null)
-		  {
-		    if (stopped.isSet())
-		      {
-			return;
-		      }
+                if (persona_field != null)
+                  {
+                    if (stopped.isSet())
+                      {
+                        return;
+                      }
 
-		    personae_tab = new personaeTab(this, pane, ts.l("load.personae_tab")); // "Personae"
-		    personae_tab.addToPane(tabList);
-		  }
-	      }
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx, "Could not process object-specific tab: ");
-	  }
+                    personae_tab = new personaeTab(this, pane, ts.l("load.personae_tab")); // "Personae"
+                    personae_tab.addToPane(tabList);
+                  }
+              }
+          }
+        catch (Exception rx)
+          {
+            gc.processExceptionRethrow(rx, "Could not process object-specific tab: ");
+          }
 
-	// Only add the expiration and removal date panels if the date
-	// has been set.  In order to set the date, use the menu
-	// items.
+        // Only add the expiration and removal date panels if the date
+        // has been set.  In order to set the date, use the menu
+        // items.
 
-	if (stopped.isSet())
-	  {
-	    return;
-	  }
+        if (stopped.isSet())
+          {
+            return;
+          }
 
-	try
-	  {
-	    exp_field = (date_field)getObject().getField(SchemaConstants.ExpirationField);
-	    rem_field = (date_field)getObject().getField(SchemaConstants.RemovalField);
+        try
+          {
+            exp_field = (date_field)getObject().getField(SchemaConstants.ExpirationField);
+            rem_field = (date_field)getObject().getField(SchemaConstants.RemovalField);
 
-	    expiration_Editable = editable && exp_field.isEditable();
-	    removal_Editable = editable && rem_field.isEditable();
+            expiration_Editable = editable && exp_field.isEditable();
+            removal_Editable = editable && rem_field.isEditable();
 
-	    if ((exp_field != null) && (exp_field.getValue() != null))
-	      {
-		addExpirationDateTab();
-	      }
+            if ((exp_field != null) && (exp_field.getValue() != null))
+              {
+                addExpirationDateTab();
+              }
 
-	    if ((rem_field != null) && (rem_field.getValue() != null))
-	      {
-		addRemovalDateTab();
-	      }
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx, "Could not get date fields");
-	  }
+            if ((rem_field != null) && (rem_field.getValue() != null))
+              {
+                addRemovalDateTab();
+              }
+          }
+        catch (Exception rx)
+          {
+            gc.processExceptionRethrow(rx, "Could not get date fields");
+          }
 
-	// then the always present tabs.. owner, notes, history.
+        // then the always present tabs.. owner, notes, history.
 
-	if (stopped.isSet())
-	  {
-	    return;
-	  }
+        if (stopped.isSet())
+          {
+            return;
+          }
 
-	owner_tab = new ownerTab(this, pane, ts.l("load.owner_tab"));	// "Owner"
-	owner_tab.addToPane(tabList);
+        owner_tab = new ownerTab(this, pane, ts.l("load.owner_tab"));   // "Owner"
+        owner_tab.addToPane(tabList);
 
-	// Add the notes panel
+        // Add the notes panel
 
-	if (stopped.isSet())
-	  {
-	    return;
-	  }
+        if (stopped.isSet())
+          {
+            return;
+          }
 
-	addNotesTab();
+        addNotesTab();
 
-	// Add the history tab
+        // Add the history tab
 
-	if (stopped.isSet())
-	  {
-	    return;
-	  }
+        if (stopped.isSet())
+          {
+            return;
+          }
 
-	history_tab = new historyTab(this, pane, ts.l("load.history_tab")); // "History"
-	history_tab.addToPane(tabList);
+        history_tab = new historyTab(this, pane, ts.l("load.history_tab")); // "History"
+        history_tab.addToPane(tabList);
 
-	pane.addChangeListener(this);
+        pane.addChangeListener(this);
 
-	if (stopped.isSet())
-	  {
-	    return;
-	  }
+        if (stopped.isSet())
+          {
+            return;
+          }
 
-	// and let's initialize and show our main tab before we make
-	// the tab set visible
+        // and let's initialize and show our main tab before we make
+        // the tab set visible
 
-	((clientTab) tabList.elementAt(0)).showTab();
+        ((clientTab) tabList.elementAt(0)).showTab();
 
-	setContentPane(pane);
+        setContentPane(pane);
 
-	setJMenuBar(createMenuBar(editable));
+        setJMenuBar(createMenuBar(editable));
 
-	pane.invalidate();
-	validate();
+        pane.invalidate();
+        validate();
       }
     finally
       {
-	if (closed.isSet())
-	  {
-	    cleanUp();
-	  }
+        if (closed.isSet())
+          {
+            cleanUp();
+          }
 
-	running.set(false);
+        running.set(false);
       }
   }
 
@@ -667,15 +667,15 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     if (invid == null)
       {
-	try
-	  {
-	    invid = getObject().getInvid().intern();
-	  }
-	catch (Exception rx)
-	  {
-	    // "Could not get object invid"
-	    gc.processExceptionRethrow(rx, ts.l("getObjectInvid.error_msg"));
-	  }
+        try
+          {
+            invid = getObject().getInvid().intern();
+          }
+        catch (Exception rx)
+          {
+            // "Could not get object invid"
+            gc.processExceptionRethrow(rx, ts.l("getObjectInvid.error_msg"));
+          }
       }
 
     return invid;
@@ -711,7 +711,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     if (notes_tab == null)
       {
-	return null;
+        return null;
       }
 
     return notes_tab.getNotesPanel();
@@ -737,53 +737,53 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     // "Mail Object XML for {0} {1}"
     // "Object XML for {0} {1}"
     dialog = new SaveObjDialog(gc,
-			       ts.l("mail_obj.mailobj_title", getObjectType(), getObjectLabel()),
-			       false, true,
-			       ts.l("mail_obj.mailobj_subject", getObjectType(), getObjectLabel()),
-			       server_object);
+                               ts.l("mail_obj.mailobj_title", getObjectType(), getObjectLabel()),
+                               false, true,
+                               ts.l("mail_obj.mailobj_subject", getObjectType(), getObjectLabel()),
+                               server_object);
 
     gc.setWaitCursor();
 
     try
       {
-	if (!dialog.showDialog())
-	  {
-	    return;
-	  }
+        if (!dialog.showDialog())
+          {
+            return;
+          }
 
-	showTransactions = dialog.isShowTransactions();
-	startDate = dialog.getStartDate();
+        showTransactions = dialog.isShowTransactions();
+        startDate = dialog.getStartDate();
 
-	subject = dialog.getSubject();
-	address = dialog.getRecipients();
+        subject = dialog.getSubject();
+        address = dialog.getRecipients();
 
-	if ((address == null) || (address.equals("")))
-	  {
-	    // "You must specify at least one recipient."
-	    gc.showErrorMessage(ts.l("mail_obj.no_recipient_msg"));
-	    return;
-	  }
+        if ((address == null) || (address.equals("")))
+          {
+            // "You must specify at least one recipient."
+            gc.showErrorMessage(ts.l("mail_obj.no_recipient_msg"));
+            return;
+          }
 
-	body = encodeObjectToXML();
+        body = encodeObjectToXML();
 
-	if (debug)
-	  {
-	    System.out.println("Mailing: \nTo: " + address + "\n\n" + body.toString());
-	  }
+        if (debug)
+          {
+            System.out.println("Mailing: \nTo: " + address + "\n\n" + body.toString());
+          }
 
-	try
-	  {
-	    gc.getSession().sendMail(address, subject, body);
-	  }
-	catch (Exception rx)
-	  {
-	    // "Sending Mail"
-	    gc.processExceptionRethrow(rx, ts.l("mail_obj.error_rethrow"));
-	  }
+        try
+          {
+            gc.getSession().sendMail(address, subject, body);
+          }
+        catch (Exception rx)
+          {
+            // "Sending Mail"
+            gc.processExceptionRethrow(rx, ts.l("mail_obj.error_rethrow"));
+          }
       }
     finally
       {
-	gc.setNormalCursor();
+        gc.setNormalCursor();
       }
   }
 
@@ -806,66 +806,66 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
     // "Mail History for {0} {1}"
     // "Object History for {0} {1}"
     dialog = new SaveObjDialog(gc, ts.l("mail_history.dialog_title", getObjectType(), getObjectLabel()),
-			       true, true, ts.l("mail_history.mail_subject", getObjectType(), getObjectLabel()),
-			       server_object);
+                               true, true, ts.l("mail_history.mail_subject", getObjectType(), getObjectLabel()),
+                               server_object);
 
     gc.setWaitCursor();
 
     try
       {
-	if (!dialog.showDialog())
-	  {
-	    return;
-	  }
+        if (!dialog.showDialog())
+          {
+            return;
+          }
 
-	showTransactions = dialog.isShowTransactions();
-	startDate = dialog.getStartDate();
+        showTransactions = dialog.isShowTransactions();
+        startDate = dialog.getStartDate();
 
-	subject = dialog.getSubject();
-	address = dialog.getRecipients();
+        subject = dialog.getSubject();
+        address = dialog.getRecipients();
 
-	if ((address == null) || (address.equals("")))
-	  {
-	    // "You must specify at least one recipient."
-	    gc.showErrorMessage(ts.l("mail_obj.no_recipient_msg"));
-	    return;
-	  }
+        if ((address == null) || (address.equals("")))
+          {
+            // "You must specify at least one recipient."
+            gc.showErrorMessage(ts.l("mail_obj.no_recipient_msg"));
+            return;
+          }
 
-	StringWriter writer = null;
-	PrintWriter pWriter = null;
+        StringWriter writer = null;
+        PrintWriter pWriter = null;
 
-	writer = new StringWriter();
-	pWriter = new PrintWriter(writer);
+        writer = new StringWriter();
+        pWriter = new PrintWriter(writer);
 
-	try
-	  {
-	    pWriter.println(gc.getSession().viewObjectHistory(getObjectInvid(),
-							      startDate, showTransactions));
-	  }
-	catch (RemoteException ex)
-	  {
-	    gc.processExceptionRethrow(ex, "Couldn't receive history from server.");
-	  }
-	finally
-	  {
-	    pWriter.close();
-	  }
+        try
+          {
+            pWriter.println(gc.getSession().viewObjectHistory(getObjectInvid(),
+                                                              startDate, showTransactions));
+          }
+        catch (RemoteException ex)
+          {
+            gc.processExceptionRethrow(ex, "Couldn't receive history from server.");
+          }
+        finally
+          {
+            pWriter.close();
+          }
 
-	body = new StringBuffer(writer.toString());
+        body = new StringBuffer(writer.toString());
 
-	try
-	  {
-	    gc.getSession().sendMail(address, subject, body);
-	  }
-	catch (Exception rx)
-	  {
-	    // "Sending Mail"
-	    gc.processExceptionRethrow(rx, ts.l("mail_obj.error_rethrow"));
-	  }
+        try
+          {
+            gc.getSession().sendMail(address, subject, body);
+          }
+        catch (Exception rx)
+          {
+            // "Sending Mail"
+            gc.processExceptionRethrow(rx, ts.l("mail_obj.error_rethrow"));
+          }
       }
     finally
       {
-	gc.setNormalCursor();
+        gc.setNormalCursor();
       }
   }
 
@@ -892,88 +892,88 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     try
       {
-	chooser.setDialogType(JFileChooser.SAVE_DIALOG);
-	chooser.setDialogTitle(ts.l("save.file_dialog_title")); // "Save Object XML as"
+        chooser.setDialogType(JFileChooser.SAVE_DIALOG);
+        chooser.setDialogTitle(ts.l("save.file_dialog_title")); // "Save Object XML as"
 
-	if (gclient.prefs != null)
-	  {
-	    String defaultPath = gclient.prefs.get(OBJECT_SAVE, null);
+        if (gclient.prefs != null)
+          {
+            String defaultPath = gclient.prefs.get(OBJECT_SAVE, null);
 
-	    if (defaultPath != null)
-	      {
-		chooser.setCurrentDirectory(new File(defaultPath));
-	      }
-	  }
+            if (defaultPath != null)
+              {
+                chooser.setCurrentDirectory(new File(defaultPath));
+              }
+          }
 
-	returnValue = chooser.showDialog(gc, null);
+        returnValue = chooser.showDialog(gc, null);
 
-	if (!(returnValue == JFileChooser.APPROVE_OPTION))
-	  {
-	    return;
-	  }
+        if (!(returnValue == JFileChooser.APPROVE_OPTION))
+          {
+            return;
+          }
 
-	file = chooser.getSelectedFile();
+        file = chooser.getSelectedFile();
 
-	File directory = chooser.getCurrentDirectory();
+        File directory = chooser.getCurrentDirectory();
 
-	if (gclient.prefs != null)
-	  {
-	    try
-	      {
-		gclient.prefs.put(OBJECT_SAVE, directory.getCanonicalPath());
-	      }
-	    catch (java.io.IOException ex)
-	      {
-		// we don't really care if we can't save the directory
-		// path in our preferences all that much.
-	      }
-	  }
+        if (gclient.prefs != null)
+          {
+            try
+              {
+                gclient.prefs.put(OBJECT_SAVE, directory.getCanonicalPath());
+              }
+            catch (java.io.IOException ex)
+              {
+                // we don't really care if we can't save the directory
+                // path in our preferences all that much.
+              }
+          }
 
-	if (file.exists())
-	  {
-	    // "Warning"
-	    // "{0} already exists.  Are you sure you want to replace this file?"
-	    // "Overwrite"
-	    // "Cancel"
-	    StringDialog d = new StringDialog(gc,
-					      ts.l("save.warning_title"),
-					      ts.l("save.conflict_warning", file.getName()),
-					      ts.l("save.overwrite_button"),
-					      ts.l("global.cancel"),
-					      null, StandardDialog.ModalityType.DOCUMENT_MODAL);
-	    Hashtable result = d.showDialog();
+        if (file.exists())
+          {
+            // "Warning"
+            // "{0} already exists.  Are you sure you want to replace this file?"
+            // "Overwrite"
+            // "Cancel"
+            StringDialog d = new StringDialog(gc,
+                                              ts.l("save.warning_title"),
+                                              ts.l("save.conflict_warning", file.getName()),
+                                              ts.l("save.overwrite_button"),
+                                              ts.l("global.cancel"),
+                                              null, StandardDialog.ModalityType.DOCUMENT_MODAL);
+            Hashtable result = d.showDialog();
 
-	    if (result == null)
-	      {
-		if (debug)
-		  {
-		    System.out.println("The file exists, and I am backing out.");
-		  }
+            if (result == null)
+              {
+                if (debug)
+                  {
+                    System.out.println("The file exists, and I am backing out.");
+                  }
 
-		return;
-	      }
-	  }
+                return;
+              }
+          }
 
-	try
-	  {
-	    fos = new FileOutputStream(file);
-	    writer = new PrintWriter(fos);
-	  }
-	catch (java.io.IOException e)
-	  {
-	    // "Save Error"
-	    // "Could not open the file for writing:\n{0}"
-	    gc.showErrorMessage(ts.l("save.io_error_title"),
-				ts.l("save.io_error_text", e.toString()));
-	    return;
-	  }
+        try
+          {
+            fos = new FileOutputStream(file);
+            writer = new PrintWriter(fos);
+          }
+        catch (java.io.IOException e)
+          {
+            // "Save Error"
+            // "Could not open the file for writing:\n{0}"
+            gc.showErrorMessage(ts.l("save.io_error_title"),
+                                ts.l("save.io_error_text", e.toString()));
+            return;
+          }
 
-	writer.println(encodeObjectToXML());
-	writer.close();
+        writer.println(encodeObjectToXML());
+        writer.close();
       }
     finally
       {
-	gc.setNormalCursor();
+        gc.setNormalCursor();
       }
   }
 
@@ -1000,17 +1000,17 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     // "Save Object History for {0} {1}"
     dialog = new SaveObjDialog(gc,
-			       ts.l("save_history.saveobj_title", getObjectType(), getObjectLabel()),
-			       true, false, null, server_object);
+                               ts.l("save_history.saveobj_title", getObjectType(), getObjectLabel()),
+                               true, false, null, server_object);
 
     if (!dialog.showDialog())
       {
-	if (debug)
-	  {
-	    System.out.println("dialog returned false, returning");
-	  }
+        if (debug)
+          {
+            System.out.println("dialog returned false, returning");
+          }
 
-	return;
+        return;
       }
 
     gc.setWaitCursor();
@@ -1023,19 +1023,19 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     if (gclient.prefs != null)
       {
-	String defaultPath = gclient.prefs.get(OBJECT_SAVE, null);
+        String defaultPath = gclient.prefs.get(OBJECT_SAVE, null);
 
-	if (defaultPath != null)
-	  {
-	    chooser.setCurrentDirectory(new File(defaultPath));
-	  }
+        if (defaultPath != null)
+          {
+            chooser.setCurrentDirectory(new File(defaultPath));
+          }
       }
 
     returnValue = chooser.showDialog(gc, null);
 
     if (!(returnValue == JFileChooser.APPROVE_OPTION))
       {
-	return;
+        return;
       }
 
     file = chooser.getSelectedFile();
@@ -1044,70 +1044,70 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     if (gclient.prefs != null)
       {
-	try
-	  {
-	    gclient.prefs.put(OBJECT_SAVE, directory.getCanonicalPath());
-	  }
-	catch (java.io.IOException ex)
-	  {
-	    // we don't really care if we can't save the directory
-	    // path in our preferences all that much.
-	  }
+        try
+          {
+            gclient.prefs.put(OBJECT_SAVE, directory.getCanonicalPath());
+          }
+        catch (java.io.IOException ex)
+          {
+            // we don't really care if we can't save the directory
+            // path in our preferences all that much.
+          }
       }
 
     if (file.exists())
       {
-	// "Warning"
-	// "{0} already exists.  Are you sure you want to replace this file?"
-	// "Overwrite"
-	// "Cancel"
-	StringDialog d = new StringDialog(gc,
-					  ts.l("save.warning_title"),
-					  ts.l("save.conflict_warning", file.getName()),
-					  ts.l("save.overwrite_button"),
-					  ts.l("global.cancel"),
-					  null, StandardDialog.ModalityType.DOCUMENT_MODAL);
-	Hashtable result = d.showDialog();
+        // "Warning"
+        // "{0} already exists.  Are you sure you want to replace this file?"
+        // "Overwrite"
+        // "Cancel"
+        StringDialog d = new StringDialog(gc,
+                                          ts.l("save.warning_title"),
+                                          ts.l("save.conflict_warning", file.getName()),
+                                          ts.l("save.overwrite_button"),
+                                          ts.l("global.cancel"),
+                                          null, StandardDialog.ModalityType.DOCUMENT_MODAL);
+        Hashtable result = d.showDialog();
 
-	if (result == null)
-	  {
-	    if (debug)
-	      {
-		System.out.println("The file exists, and I am backing out.");
-	      }
+        if (result == null)
+          {
+            if (debug)
+              {
+                System.out.println("The file exists, and I am backing out.");
+              }
 
-	    return;
-	  }
+            return;
+          }
       }
 
     try
       {
-	fos = new FileOutputStream(file);
+        fos = new FileOutputStream(file);
         writer = new PrintWriter(fos);
       }
     catch (java.io.IOException e)
       {
-	// "Save Error"
-	// "Could not open the file for writing:\n{0}"
-	gc.showErrorMessage(ts.l("save.io_error_title"),
-			    ts.l("save.io_error_text", e.toString()));
-	return;
+        // "Save Error"
+        // "Could not open the file for writing:\n{0}"
+        gc.showErrorMessage(ts.l("save.io_error_title"),
+                            ts.l("save.io_error_text", e.toString()));
+        return;
       }
 
     try
       {
-	writer.println(gc.getSession().viewObjectHistory(getObjectInvid(),
-							 startDate, showTransactions));
+        writer.println(gc.getSession().viewObjectHistory(getObjectInvid(),
+                                                         startDate, showTransactions));
       }
     catch (RemoteException ex)
       {
-	gc.processExceptionRethrow(ex, "Couldn't receive history from server.");
+        gc.processExceptionRethrow(ex, "Couldn't receive history from server.");
       }
     finally
       {
-	writer.close();
+        writer.close();
 
-	gc.setNormalCursor();
+        gc.setNormalCursor();
       }
   }
 
@@ -1124,34 +1124,34 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     try
       {
-	ReturnVal retVal = session.runXMLQuery(query);
+        ReturnVal retVal = session.runXMLQuery(query);
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    return null;
-	  }
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            return null;
+          }
 
-	FileTransmitter transmitter = retVal.getFileTransmitter();
+        FileTransmitter transmitter = retVal.getFileTransmitter();
 
-	if (transmitter != null)
-	  {
-	    ByteArrayOutputStream outstream = new ByteArrayOutputStream();
-	    byte[] chunk = transmitter.getNextChunk();
+        if (transmitter != null)
+          {
+            ByteArrayOutputStream outstream = new ByteArrayOutputStream();
+            byte[] chunk = transmitter.getNextChunk();
 
-	    while (chunk != null)
-	      {
-		outstream.write(chunk, 0, chunk.length);
-		chunk = transmitter.getNextChunk();
-	      }
+            while (chunk != null)
+              {
+                outstream.write(chunk, 0, chunk.length);
+                chunk = transmitter.getNextChunk();
+              }
 
-	    transmitter.end();
+            transmitter.end();
 
-	    buffer = new StringBuffer(outstream.toString());
-	  }
+            buffer = new StringBuffer(outstream.toString());
+          }
       }
     catch (Exception rx)
       {
-	gc.processExceptionRethrow(rx);
+        gc.processExceptionRethrow(rx);
       }
 
     return buffer;
@@ -1167,23 +1167,23 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     if (showTransactions)
       {
-	// "\nTransactional History:\n\n"
-	buffer.append(ts.l("encodeObjectToStringBuffer.transaction_history_header"));
+        // "\nTransactional History:\n\n"
+        buffer.append(ts.l("encodeObjectToStringBuffer.transaction_history_header"));
       }
     else
       {
-	// "\nHistory:\n\n"
-	buffer.append(ts.l("encodeObjectToStringBuffer.history_header"));
+        // "\nHistory:\n\n"
+        buffer.append(ts.l("encodeObjectToStringBuffer.history_header"));
       }
 
     try
       {
-	buffer.append(gc.getSession().viewObjectHistory(getObjectInvid(),
-							startDate, showTransactions).toString());
+        buffer.append(gc.getSession().viewObjectHistory(getObjectInvid(),
+                                                        startDate, showTransactions).toString());
       }
     catch (Exception rx)
       {
-	gc.processExceptionRethrow(rx);
+        gc.processExceptionRethrow(rx);
       }
 
     return buffer;
@@ -1205,235 +1205,235 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     if (ts.hasPattern("createMenuBar.object_menu_key_optional"))
       {
-	fileM.setMnemonic((int) ts.l("createMenuBar.object_menu_key_optional").charAt(0)); // "o"
+        fileM.setMnemonic((int) ts.l("createMenuBar.object_menu_key_optional").charAt(0)); // "o"
       }
 
     menuBar.add(fileM);
 
     if (gc.isApplet())
       {
-	JMenuItem mailXmlMI = new JMenuItem(ts.l("createMenuBar.object_menu_1a"));  // "Mail XML..";
+        JMenuItem mailXmlMI = new JMenuItem(ts.l("createMenuBar.object_menu_1a"));  // "Mail XML..";
 
-	mailXmlMI.setActionCommand("mail_obj");
+        mailXmlMI.setActionCommand("mail_obj");
 
-	if (ts.hasPattern("createMenuBar.object_menu_1a_key_optional"))
-	  {
-	    mailXmlMI.setMnemonic((int) ts.l("createMenuBar.object_menu_1_key_optional").charAt(0)); // "m"
-	  }
+        if (ts.hasPattern("createMenuBar.object_menu_1a_key_optional"))
+          {
+            mailXmlMI.setMnemonic((int) ts.l("createMenuBar.object_menu_1_key_optional").charAt(0)); // "m"
+          }
 
-	if (ts.hasPattern("createMenuBar.object_menu_1a_tip_optional"))
-	  {
-	    // "Mails an XML dump of this object''s state"
-	    mailXmlMI.setToolTipText(ts.l("createMenuBar.object_menu_1a_tip_optional"));
-	  }
+        if (ts.hasPattern("createMenuBar.object_menu_1a_tip_optional"))
+          {
+            // "Mails an XML dump of this object''s state"
+            mailXmlMI.setToolTipText(ts.l("createMenuBar.object_menu_1a_tip_optional"));
+          }
 
-	mailXmlMI.addActionListener(this);
-	fileM.add(mailXmlMI);
+        mailXmlMI.addActionListener(this);
+        fileM.add(mailXmlMI);
 
-	JMenuItem mailHistoryMI = new JMenuItem(ts.l("createMenuBar.object_menu_2a")); // "Mail History.."
+        JMenuItem mailHistoryMI = new JMenuItem(ts.l("createMenuBar.object_menu_2a")); // "Mail History.."
 
-	mailHistoryMI.setActionCommand("mail_history");
+        mailHistoryMI.setActionCommand("mail_history");
 
-	if (ts.hasPattern("createMenuBar.object_menu_2_key_optional"))
-	  {
-	    mailHistoryMI.setMnemonic((int) ts.l("createMenuBar.object_menu_2a_key_optional").charAt(0)); // "h"
-	  }
+        if (ts.hasPattern("createMenuBar.object_menu_2_key_optional"))
+          {
+            mailHistoryMI.setMnemonic((int) ts.l("createMenuBar.object_menu_2a_key_optional").charAt(0)); // "h"
+          }
 
-	if (ts.hasPattern("createMenuBar.object_menu_2_tip_optional"))
-	  {
-	    // "Mails the history of this object"
-	    mailHistoryMI.setToolTipText(ts.l("createMenuBar.object_menu_2a_tip_optional"));
-	  }
+        if (ts.hasPattern("createMenuBar.object_menu_2_tip_optional"))
+          {
+            // "Mails the history of this object"
+            mailHistoryMI.setToolTipText(ts.l("createMenuBar.object_menu_2a_tip_optional"));
+          }
 
-	mailHistoryMI.addActionListener(this);
-	fileM.add(mailHistoryMI);
+        mailHistoryMI.addActionListener(this);
+        fileM.add(mailHistoryMI);
       }
     else
       {
-	JMenuItem saveMI = new JMenuItem(ts.l("createMenuBar.object_menu_1"));  // "Save XML..";
+        JMenuItem saveMI = new JMenuItem(ts.l("createMenuBar.object_menu_1"));  // "Save XML..";
 
-	saveMI.setActionCommand("save_obj");
+        saveMI.setActionCommand("save_obj");
 
-	if (ts.hasPattern("createMenuBar.object_menu_1_key_optional"))
-	  {
-	    saveMI.setMnemonic((int) ts.l("createMenuBar.object_menu_1_key_optional").charAt(0)); // "s"
-	  }
+        if (ts.hasPattern("createMenuBar.object_menu_1_key_optional"))
+          {
+            saveMI.setMnemonic((int) ts.l("createMenuBar.object_menu_1_key_optional").charAt(0)); // "s"
+          }
 
-	if (ts.hasPattern("createMenuBar.object_menu_1_tip_optional"))
-	  {
-	    // "Saves an XML dump of this object''s state to disk"
-	    saveMI.setToolTipText(ts.l("createMenuBar.object_menu_1_tip_optional"));
-	  }
+        if (ts.hasPattern("createMenuBar.object_menu_1_tip_optional"))
+          {
+            // "Saves an XML dump of this object''s state to disk"
+            saveMI.setToolTipText(ts.l("createMenuBar.object_menu_1_tip_optional"));
+          }
 
-	saveMI.addActionListener(this);
-	fileM.add(saveMI);
+        saveMI.addActionListener(this);
+        fileM.add(saveMI);
 
-	JMenuItem historyMI = new JMenuItem(ts.l("createMenuBar.object_menu_2")); // "Save History.."
+        JMenuItem historyMI = new JMenuItem(ts.l("createMenuBar.object_menu_2")); // "Save History.."
 
-	historyMI.setActionCommand("save_history");
+        historyMI.setActionCommand("save_history");
 
-	if (ts.hasPattern("createMenuBar.object_menu_2_key_optional"))
-	  {
-	    historyMI.setMnemonic((int) ts.l("createMenuBar.object_menu_2_key_optional").charAt(0)); // "h"
-	  }
+        if (ts.hasPattern("createMenuBar.object_menu_2_key_optional"))
+          {
+            historyMI.setMnemonic((int) ts.l("createMenuBar.object_menu_2_key_optional").charAt(0)); // "h"
+          }
 
-	if (ts.hasPattern("createMenuBar.object_menu_2_tip_optional"))
-	  {
-	    // "Saves the history of this object to disk"
-	    historyMI.setToolTipText(ts.l("createMenuBar.object_menu_2_tip_optional"));
-	  }
+        if (ts.hasPattern("createMenuBar.object_menu_2_tip_optional"))
+          {
+            // "Saves the history of this object to disk"
+            historyMI.setToolTipText(ts.l("createMenuBar.object_menu_2_tip_optional"));
+          }
 
-	historyMI.addActionListener(this);
-	fileM.add(historyMI);
+        historyMI.addActionListener(this);
+        fileM.add(historyMI);
       }
 
     if (editable)
       {
-	boolean sepAdded = false;
+        boolean sepAdded = false;
 
-	try
-	  {
-	    if (expiration_Editable && getObject().canInactivate())
-	      {
-		fileM.addSeparator();
-		sepAdded = true;
+        try
+          {
+            if (expiration_Editable && getObject().canInactivate())
+              {
+                fileM.addSeparator();
+                sepAdded = true;
 
-		// "Set Expiration Date"
-		JMenuItem setExpirationMI = new JMenuItem(ts.l("createMenuBar.object_menu_3"));
+                // "Set Expiration Date"
+                JMenuItem setExpirationMI = new JMenuItem(ts.l("createMenuBar.object_menu_3"));
 
-		setExpirationMI.setActionCommand("set_expiration");
+                setExpirationMI.setActionCommand("set_expiration");
 
-		if (ts.hasPattern("createMenuBar.object_menu_3_key_optional"))
-		  {
-		    setExpirationMI.setMnemonic((int) ts.l("createMenuBar.object_menu_3_key_optional").charAt(0)); // "x"
-		  }
+                if (ts.hasPattern("createMenuBar.object_menu_3_key_optional"))
+                  {
+                    setExpirationMI.setMnemonic((int) ts.l("createMenuBar.object_menu_3_key_optional").charAt(0)); // "x"
+                  }
 
-		if (ts.hasPattern("createMenuBar.object_menu_3_tip_optional"))
-		  {
-		    // "Set a date for this object to be inactivated"
-		    setExpirationMI.setToolTipText(ts.l("createMenuBar.object_menu_3_tip_optional"));
-		  }
+                if (ts.hasPattern("createMenuBar.object_menu_3_tip_optional"))
+                  {
+                    // "Set a date for this object to be inactivated"
+                    setExpirationMI.setToolTipText(ts.l("createMenuBar.object_menu_3_tip_optional"));
+                  }
 
-		setExpirationMI.addActionListener(this);
-		fileM.add(setExpirationMI);
-	      }
-	  }
-	catch (Exception ex)
-	  {
-	    gc.processExceptionRethrow(ex);
-	  }
+                setExpirationMI.addActionListener(this);
+                fileM.add(setExpirationMI);
+              }
+          }
+        catch (Exception ex)
+          {
+            gc.processExceptionRethrow(ex);
+          }
 
-	if (removal_Editable)
-	  {
-	    if (!sepAdded)
-	      {
-		fileM.addSeparator();
-	      }
+        if (removal_Editable)
+          {
+            if (!sepAdded)
+              {
+                fileM.addSeparator();
+              }
 
-	    // "Set Removal Date"
-	    JMenuItem setRemovalMI = new JMenuItem(ts.l("createMenuBar.object_menu_4"));
+            // "Set Removal Date"
+            JMenuItem setRemovalMI = new JMenuItem(ts.l("createMenuBar.object_menu_4"));
 
-	    setRemovalMI.setActionCommand("set_removal");
+            setRemovalMI.setActionCommand("set_removal");
 
-	    if (ts.hasPattern("createMenuBar.object_menu_4_key_optional"))
-	      {
-		setRemovalMI.setMnemonic((int) ts.l("createMenuBar.object_menu_4_key_optional").charAt(0)); // "v"
-	      }
+            if (ts.hasPattern("createMenuBar.object_menu_4_key_optional"))
+              {
+                setRemovalMI.setMnemonic((int) ts.l("createMenuBar.object_menu_4_key_optional").charAt(0)); // "v"
+              }
 
-	    if (ts.hasPattern("createMenuBar.object_menu_4_tip_optional"))
-	      {
-		// "Set a date for this object to be removed from the database"
-		setRemovalMI.setToolTipText(ts.l("createMenuBar.object_menu_4_tip_optional"));
-	      }
+            if (ts.hasPattern("createMenuBar.object_menu_4_tip_optional"))
+              {
+                // "Set a date for this object to be removed from the database"
+                setRemovalMI.setToolTipText(ts.l("createMenuBar.object_menu_4_tip_optional"));
+              }
 
-	    setRemovalMI.addActionListener(this);
-	    fileM.add(setRemovalMI);
-	  }
+            setRemovalMI.addActionListener(this);
+            fileM.add(setRemovalMI);
+          }
       }
 
     if (!editable)
       {
-	fileM.addSeparator();
+        fileM.addSeparator();
 
-	String typeName = getObjectTypeName();
+        String typeName = getObjectTypeName();
 
-	// "Edit this {0}"
-	JMenuItem editObjMI = new JMenuItem(ts.l("createMenuBar.object_menu_5", typeName));
+        // "Edit this {0}"
+        JMenuItem editObjMI = new JMenuItem(ts.l("createMenuBar.object_menu_5", typeName));
 
-	if (ts.hasPattern("createMenuBar.object_menu_5_key_optional"))
-	  {
-	    editObjMI.setMnemonic((int) ts.l("createMenuBar.object_menu_5_key_optional").charAt(0)); // "e"
-	  }
+        if (ts.hasPattern("createMenuBar.object_menu_5_key_optional"))
+          {
+            editObjMI.setMnemonic((int) ts.l("createMenuBar.object_menu_5_key_optional").charAt(0)); // "e"
+          }
 
-	if (ts.hasPattern("createMenuBar.object_menu_5_tip_optional"))
-	  {
-	    editObjMI.setToolTipText(ts.l("createMenuBar.object_menu_5_tip_optional"));
-	  }
+        if (ts.hasPattern("createMenuBar.object_menu_5_tip_optional"))
+          {
+            editObjMI.setToolTipText(ts.l("createMenuBar.object_menu_5_tip_optional"));
+          }
 
-	editObjMI.setActionCommand("edit_obj");
-	editObjMI.addActionListener(this);
-	fileM.add(editObjMI);
+        editObjMI.setActionCommand("edit_obj");
+        editObjMI.addActionListener(this);
+        fileM.add(editObjMI);
 
-	BaseDump bd = (BaseDump) gc.getBaseMap().get(Short.valueOf(getObjectInvid().getType()));
+        BaseDump bd = (BaseDump) gc.getBaseMap().get(Short.valueOf(getObjectInvid().getType()));
 
-	if (bd.canInactivate())
-	  {
-	    // "Inactivate this {0}"
-	    JMenuItem inactObjMI = new JMenuItem(ts.l("createMenuBar.object_menu_6", typeName));
+        if (bd.canInactivate())
+          {
+            // "Inactivate this {0}"
+            JMenuItem inactObjMI = new JMenuItem(ts.l("createMenuBar.object_menu_6", typeName));
 
-	    if (ts.hasPattern("createMenuBar.object_menu_6_key_optional"))
-	      {
-		inactObjMI.setMnemonic((int) ts.l("createMenuBar.object_menu_6_key_optional").charAt(0)); // "i"
-	      }
+            if (ts.hasPattern("createMenuBar.object_menu_6_key_optional"))
+              {
+                inactObjMI.setMnemonic((int) ts.l("createMenuBar.object_menu_6_key_optional").charAt(0)); // "i"
+              }
 
-	    if (ts.hasPattern("createMenuBar.object_menu_6_tip_optional"))
-	      {
-		inactObjMI.setToolTipText(ts.l("createMenuBar.object_menu_6_tip_optional"));
-	      }
+            if (ts.hasPattern("createMenuBar.object_menu_6_tip_optional"))
+              {
+                inactObjMI.setToolTipText(ts.l("createMenuBar.object_menu_6_tip_optional"));
+              }
 
-	    inactObjMI.setActionCommand("inact_obj");
-	    inactObjMI.addActionListener(this);
-	    fileM.add(inactObjMI);
-	  }
+            inactObjMI.setActionCommand("inact_obj");
+            inactObjMI.addActionListener(this);
+            fileM.add(inactObjMI);
+          }
 
-	// "Delete this {0}"
-	JMenuItem delObjMI = new JMenuItem(ts.l("createMenuBar.object_menu_7", typeName));
+        // "Delete this {0}"
+        JMenuItem delObjMI = new JMenuItem(ts.l("createMenuBar.object_menu_7", typeName));
 
-	if (ts.hasPattern("createMenuBar.object_menu_7_key_optional"))
-	  {
-	    delObjMI.setMnemonic((int) ts.l("createMenuBar.object_menu_7_key_optional").charAt(0)); // "d"
-	  }
+        if (ts.hasPattern("createMenuBar.object_menu_7_key_optional"))
+          {
+            delObjMI.setMnemonic((int) ts.l("createMenuBar.object_menu_7_key_optional").charAt(0)); // "d"
+          }
 
-	if (ts.hasPattern("createMenuBar.object_menu_7_tip_optional"))
-	  {
-	    delObjMI.setToolTipText(ts.l("createMenuBar.object_menu_7_tip_optional"));
-	  }
+        if (ts.hasPattern("createMenuBar.object_menu_7_tip_optional"))
+          {
+            delObjMI.setToolTipText(ts.l("createMenuBar.object_menu_7_tip_optional"));
+          }
 
-	delObjMI.setActionCommand("del_obj");
-	delObjMI.addActionListener(this);
-	fileM.add(delObjMI);
+        delObjMI.setActionCommand("del_obj");
+        delObjMI.addActionListener(this);
+        fileM.add(delObjMI);
 
-	// "Clone this {0}"
-	JMenuItem cloneObjMI = new JMenuItem(ts.l("createMenuBar.object_menu_8", typeName));
+        // "Clone this {0}"
+        JMenuItem cloneObjMI = new JMenuItem(ts.l("createMenuBar.object_menu_8", typeName));
 
-	if (ts.hasPattern("createMenuBar.object_menu_8_key_optional"))
-	  {
-	    cloneObjMI.setMnemonic((int) ts.l("createMenuBar.object_menu_8_key_optional").charAt(0)); // "c"
-	  }
+        if (ts.hasPattern("createMenuBar.object_menu_8_key_optional"))
+          {
+            cloneObjMI.setMnemonic((int) ts.l("createMenuBar.object_menu_8_key_optional").charAt(0)); // "c"
+          }
 
-	if (ts.hasPattern("createMenuBar.object_menu_8_tip_optional"))
-	  {
-	    cloneObjMI.setToolTipText(ts.l("createMenuBar.object_menu_8_tip_optional"));
-	  }
+        if (ts.hasPattern("createMenuBar.object_menu_8_tip_optional"))
+          {
+            cloneObjMI.setToolTipText(ts.l("createMenuBar.object_menu_8_tip_optional"));
+          }
 
-	cloneObjMI.setActionCommand("clone_obj");
-	cloneObjMI.addActionListener(this);
-	fileM.add(cloneObjMI);
+        cloneObjMI.setActionCommand("clone_obj");
+        cloneObjMI.addActionListener(this);
+        fileM.add(cloneObjMI);
       }
 
     if (debug)
       {
-	println("Returning menubar.");
+        println("Returning menubar.");
       }
 
     return menuBar;
@@ -1450,18 +1450,18 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     if (expiration_tab != null)
       {
-	return;
+        return;
       }
 
     if (debug)
       {
-	println("Adding expiration tab");
+        println("Adding expiration tab");
       }
 
     expiration_tab = new expirationRemovalTab(this, pane, ts.l("addExpirationDateTab.expiration_tab")); // "Expiration"
     expiration_tab.setImageIcon(new ImageIcon((Image) PackageResources.getImageResource(this,
-											"expire.gif",
-											getClass())));
+                                                                                        "expire.gif",
+                                                                                        getClass())));
     expiration_tab.setPanelTitle(ts.l("addExpirationDateTab.panel_title")); // "Expiration date"
     expiration_tab.setDateField(exp_field);
     expiration_tab.addToPane(tabList);
@@ -1471,18 +1471,18 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     if (removal_tab != null)
       {
-	return;
+        return;
       }
 
     if (debug)
       {
-	println("Adding removal date tabs");
+        println("Adding removal date tabs");
       }
 
     removal_tab = new expirationRemovalTab(this, pane, ts.l("addRemovalDateTab.removal_tab")); // "Expiration"
     removal_tab.setImageIcon(new ImageIcon((Image) PackageResources.getImageResource(this,
-										     "expire.gif",
-										     getClass())));
+                                                                                     "expire.gif",
+                                                                                     getClass())));
     removal_tab.setPanelTitle(ts.l("addRemovalDateTab.panel_title")); // "Expiration date"
     removal_tab.setDateField(rem_field);
     removal_tab.addToPane(tabList);
@@ -1492,52 +1492,52 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     if (notes_tab != null)
       {
-	return;
+        return;
       }
 
     if (debug)
       {
-	println("Adding notes tab");
+        println("Adding notes tab");
       }
 
     string_field notes_field = null;
 
     try
       {
-	notes_field = (string_field)getObject().getField(SchemaConstants.NotesField);
+        notes_field = (string_field)getObject().getField(SchemaConstants.NotesField);
       }
     catch (Exception rx)
       {
-	gc.processExceptionRethrow(rx, "Could not get notes_field: ");
+        gc.processExceptionRethrow(rx, "Could not get notes_field: ");
       }
 
     ImageIcon noteIcon = null;
 
     try
       {
-	if (notes_field != null)
-	  {
-	    String notesText = (String)notes_field.getValue();
+        if (notes_field != null)
+          {
+            String notesText = (String)notes_field.getValue();
 
-	    if ((notesText != null) && (!notesText.trim().equals("")))
-	      {
-		if (debug)
-		  {
-		    println("Setting notes test to *" + notesText + "*.");
-		  }
+            if ((notesText != null) && (!notesText.trim().equals("")))
+              {
+                if (debug)
+                  {
+                    println("Setting notes test to *" + notesText + "*.");
+                  }
 
-		noteIcon = new ImageIcon((Image) PackageResources.getImageResource(this,
-										   "note02.gif",
-										   getClass()));
-	      }
-	  }
+                noteIcon = new ImageIcon((Image) PackageResources.getImageResource(this,
+                                                                                   "note02.gif",
+                                                                                   getClass()));
+              }
+          }
       }
     catch (Exception rx)
       {
-	gc.processExceptionRethrow(rx);
+        gc.processExceptionRethrow(rx);
       }
 
-    notes_tab = new notesTab(this, pane, ts.l("addNotesTab.notes_panel_name"));	// "Notes"
+    notes_tab = new notesTab(this, pane, ts.l("addNotesTab.notes_panel_name")); // "Notes"
     notes_tab.setImageIcon(noteIcon);
     notes_tab.addToPane(tabList);
   }
@@ -1554,11 +1554,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     if (expiration_tab != null)
       {
-	expiration_tab.update();
+        expiration_tab.update();
       }
     else
       {
-	addExpirationDateTab();
+        addExpirationDateTab();
       }
   }
 
@@ -1574,11 +1574,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     if (removal_tab != null)
       {
-	removal_tab.update();
+        removal_tab.update();
       }
     else
       {
-	addRemovalDateTab();
+        addRemovalDateTab();
       }
   }
 
@@ -1586,59 +1586,59 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     if (debug)
       {
-	println("Menu item action: " + e.getActionCommand());
+        println("Menu item action: " + e.getActionCommand());
       }
 
     if (e.getActionCommand().equals("save_obj"))
       {
-	if (debug)
-	  {
-	    println("Saving...:");
-	  }
+        if (debug)
+          {
+            println("Saving...:");
+          }
 
-	save();
+        save();
       }
     else if (e.getActionCommand().equals("save_history"))
       {
-	save_history();
+        save_history();
       }
     else if (e.getActionCommand().equals("mail_obj"))
       {
-	mail_obj();
+        mail_obj();
       }
     else if (e.getActionCommand().equals("mail_history"))
       {
-	mail_history();
+        mail_history();
       }
     else if (e.getActionCommand().equals("set_expiration"))
       {
-	addExpirationDateTab();
-	expiration_tab.showTab();
+        addExpirationDateTab();
+        expiration_tab.showTab();
       }
     else if (e.getActionCommand().equals("set_removal"))
       {
-	addRemovalDateTab();
-	removal_tab.showTab();
+        addRemovalDateTab();
+        removal_tab.showTab();
       }
     else if (e.getActionCommand().equals("edit_obj"))
       {
-	gc.editObject(getObjectInvid(), this);
+        gc.editObject(getObjectInvid(), this);
       }
     else if (e.getActionCommand().equals("inact_obj"))
       {
-	gc.inactivateObject(getObjectInvid());
+        gc.inactivateObject(getObjectInvid());
       }
     else if (e.getActionCommand().equals("del_obj"))
       {
-	gc.deleteObject(getObjectInvid(), true);
+        gc.deleteObject(getObjectInvid(), true);
       }
     else if (e.getActionCommand().equals("clone_obj"))
       {
-	gc.cloneObject(getObjectInvid());
+        gc.cloneObject(getObjectInvid());
       }
     else
       {
-	System.err.println("Unknown action event: " + e);
+        System.err.println("Unknown action event: " + e);
       }
   }
 
@@ -1652,8 +1652,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     clientTab tab = (clientTab) tabList.elementAt(index);
 
-    tab.showTab();		// causes the tab's contents to be
-				// created if it is not already
+    tab.showTab();              // causes the tab's contents to be
+                                // created if it is not already
   }
 
   // Convienence methods
@@ -1684,11 +1684,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     try
       {
-	result = getObject().getTypeName();
+        result = getObject().getTypeName();
       }
     catch (Exception ex)
       {
-	gc.processExceptionRethrow(ex, "Problem in getObjectType()");
+        gc.processExceptionRethrow(ex, "Problem in getObjectType()");
       }
 
     return result;
@@ -1700,11 +1700,11 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     try
       {
-	result = getObject().getLabel();
+        result = getObject().getLabel();
       }
     catch (Exception ex)
       {
-	gc.processExceptionRethrow(ex, "Problem in getObjectLabel()");
+        gc.processExceptionRethrow(ex, "Problem in getObjectLabel()");
       }
 
     return result;
@@ -1729,7 +1729,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     if (containerPanels != null)
       {
-	containerPanels.addElement(cp);
+        containerPanels.addElement(cp);
       }
   }
 
@@ -1737,7 +1737,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     if (containerPanels != null)
       {
-	containerPanels.removeElement(cp);
+        containerPanels.removeElement(cp);
       }
   }
 
@@ -1764,7 +1764,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     if (containerPanels == null)
       {
-	return;
+        return;
       }
 
     // Loop over each containerPanel in the framePanel window.. there
@@ -1782,37 +1782,37 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     for (int i = containerPanels.size() - 1; i >= 0; i--)
       {
-	if (i > containerPanels.size() - 1)
-	  {
-	    i = containerPanels.size() - 1;
-	  }
+        if (i > containerPanels.size() - 1)
+          {
+            i = containerPanels.size() - 1;
+          }
 
-	containerPanel cp = (containerPanel) containerPanels.elementAt(i);
+        containerPanel cp = (containerPanel) containerPanels.elementAt(i);
 
-	if (debug)
-	  {
-	    System.out.println("gclient.handleReturnVal(): Checking containerPanel number " + i);
-	    System.out.println("\tcp.invid= " + cp.getObjectInvid() +
-			       " lookng for: " + invid);
-	  }
+        if (debug)
+          {
+            System.out.println("gclient.handleReturnVal(): Checking containerPanel number " + i);
+            System.out.println("\tcp.invid= " + cp.getObjectInvid() +
+                               " lookng for: " + invid);
+          }
 
-	if (invid == null || cp.getObjectInvid().equals(invid))
-	  {
-	    if (debug)
-	      {
-		System.out.println("  Found container panel for " + invid +
-				   ": " + cp.frame.getTitle());
-	      }
+        if (invid == null || cp.getObjectInvid().equals(invid))
+          {
+            if (debug)
+              {
+                System.out.println("  Found container panel for " + invid +
+                                   ": " + cp.frame.getTitle());
+              }
 
-	    if (retVal == null || retVal.rescanAll(invid))
-	      {
-		cp.updateAll();
-	      }
-	    else
-	      {
-		cp.update(retVal.getRescanList(invid));
-	      }
-	  }
+            if (retVal == null || retVal.rescanAll(invid))
+              {
+                cp.updateAll();
+              }
+            else
+              {
+                cp.update(retVal.getRescanList(invid));
+              }
+          }
       }
   }
 
@@ -1829,18 +1829,18 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     if (this.invid.equals(invid))
       {
-	if (editable)
-	  {
-	    String newTitle = wp.getWindowTitle(editable, isCreating, gc.getObjectType(invid), newLabel);
-	    wp.setWindowTitle(this, newTitle);
-	  }
+        if (editable)
+          {
+            String newTitle = wp.getWindowTitle(editable, isCreating, gc.getObjectType(invid), newLabel);
+            wp.setWindowTitle(this, newTitle);
+          }
 
-	return;	// don't bother trying to relabel fields in self, though
+        return; // don't bother trying to relabel fields in self, though
       }
 
     if (containerPanels == null)
       {
-	return;
+        return;
       }
 
     // Loop over each containerPanel in the framePanel window.. there
@@ -1858,14 +1858,14 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     for (int i = containerPanels.size() - 1; i >= 0; i--)
       {
-	if (i > containerPanels.size() - 1)
-	  {
-	    i = containerPanels.size() - 1;
-	  }
+        if (i > containerPanels.size() - 1)
+          {
+            i = containerPanels.size() - 1;
+          }
 
-	containerPanel cp = (containerPanel) containerPanels.elementAt(i);
+        containerPanel cp = (containerPanel) containerPanels.elementAt(i);
 
-	cp.updateInvidLabels(invid, newLabel);
+        cp.updateInvidLabels(invid, newLabel);
       }
   }
 
@@ -1884,27 +1884,27 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     if (debug)
       {
-	System.err.println("framePanel.internalFrameClosed(): frame closed");
+        System.err.println("framePanel.internalFrameClosed(): frame closed");
       }
 
     if (this.closed.set(true))
       {
-	if (debug)
-	  {
-	    System.err.println("framePanel.internalFrameClosed(): frame already closed, doing nothing.");
-	  }
+        if (debug)
+          {
+            System.err.println("framePanel.internalFrameClosed(): frame already closed, doing nothing.");
+          }
 
-	return;
+        return;
       }
 
     if (debug)
       {
-	System.err.println("framePanel.internalFrameClosed(): going invisible");
+        System.err.println("framePanel.internalFrameClosed(): going invisible");
       }
 
     if (debug)
       {
-	System.err.println("framePanel.internalFrameClosed(): disposing");
+        System.err.println("framePanel.internalFrameClosed(): disposing");
       }
 
     this.cleanUp();
@@ -1913,7 +1913,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     if (debug)
       {
-	System.err.println("framePanel.internalFrameClosed(): disposed");
+        System.err.println("framePanel.internalFrameClosed(): disposed");
       }
 
     // finally, shut down any secondary windows and null out all
@@ -1923,7 +1923,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     if (!running.isSet())
       {
-	cleanUp();
+        cleanUp();
       }
   }
 
@@ -1931,17 +1931,17 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     if (debug)
       {
-	System.err.println("framePanel.internalFrameClosing(): Called");
+        System.err.println("framePanel.internalFrameClosing(): Called");
       }
 
     if (!closingApproved)
       {
-	return;
+        return;
       }
 
     if (debug)
       {
-	System.err.println("framePanel.internalFrameClosing(): Ok, closing the created window");
+        System.err.println("framePanel.internalFrameClosing(): Ok, closing the created window");
       }
   }
 
@@ -1973,53 +1973,53 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     if (debug)
       {
-	System.err.println("framePanel.vetoableChange()");
+        System.err.println("framePanel.vetoableChange()");
       }
 
     if (pce.getPropertyName().equals(IS_CLOSED_PROPERTY) &&
-	pce.getOldValue().equals(Boolean.FALSE) &&
-	pce.getNewValue().equals(Boolean.TRUE))
+        pce.getOldValue().equals(Boolean.FALSE) &&
+        pce.getNewValue().equals(Boolean.TRUE))
       {
-	if (!closingApproved && editable)
-	  {
-	    StringDialog okToKill;
+        if (!closingApproved && editable)
+          {
+            StringDialog okToKill;
 
-	    if (isCreating)
-	      {
-		// "Ok to discard {0}?"
+            if (isCreating)
+              {
+                // "Ok to discard {0}?"
 
-		// "If you close this newly created window before
-		// committing this transaction, this newly created
-		// object will be forgotten and abandoned on commit."
+                // "If you close this newly created window before
+                // committing this transaction, this newly created
+                // object will be forgotten and abandoned on commit."
 
-		okToKill = new StringDialog(gclient.client,
-					    ts.l("vetoableChange.discard_title", getTitle()),
-					    ts.l("vetoableChange.discard_text"),
-					    ts.l("vetoableChange.discard_button"),
-					    ts.l("global.cancel"),
-					    gclient.client.getQuestionImage(), StandardDialog.ModalityType.DOCUMENT_MODAL);
+                okToKill = new StringDialog(gclient.client,
+                                            ts.l("vetoableChange.discard_title", getTitle()),
+                                            ts.l("vetoableChange.discard_text"),
+                                            ts.l("vetoableChange.discard_button"),
+                                            ts.l("global.cancel"),
+                                            gclient.client.getQuestionImage(), StandardDialog.ModalityType.DOCUMENT_MODAL);
 
-		Hashtable result = okToKill.showDialog();
+                Hashtable result = okToKill.showDialog();
 
-		if (result == null)
-		  {
-		    throw new PropertyVetoException("Cancelled", null);
-		  }
+                if (result == null)
+                  {
+                    throw new PropertyVetoException("Cancelled", null);
+                  }
 
-		if (debug)
-		  {
-		    System.err.println("framePanel.vetoableChange(): setting closingApproved true");
-		  }
+                if (debug)
+                  {
+                    System.err.println("framePanel.vetoableChange(): setting closingApproved true");
+                  }
 
-		// set closingApproved to true before we call
-		// deleteObject() so that the gclient class will
-		// consider this deletion approved.
+                // set closingApproved to true before we call
+                // deleteObject() so that the gclient class will
+                // consider this deletion approved.
 
-		closingApproved = true;
+                closingApproved = true;
 
-		gclient.client.deleteObject(getObjectInvid(), false);
-	      }
-	  }
+                gclient.client.deleteObject(getObjectInvid(), false);
+              }
+          }
       }
   }
 
@@ -2063,12 +2063,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     if (debug)
       {
-	System.err.println("framePanel.cleanUp()");
+        System.err.println("framePanel.cleanUp()");
       }
 
     if (isCleaned)
       {
-	return;
+        return;
       }
 
     // let everyone know that we'll do no more loading in this window
@@ -2082,27 +2082,27 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     if (getWindowPanel() != null)
       {
-	this.removeInternalFrameListener(getWindowPanel());
+        this.removeInternalFrameListener(getWindowPanel());
       }
 
     if (pane != null)
       {
-	pane.removeChangeListener(this);
-	pane = null;
+        pane.removeChangeListener(this);
+        pane = null;
       }
 
     if (tabList != null)
       {
-	synchronized (tabList)
-	  {
-	    for (int i = 0; i < tabList.size(); i++)
-	      {
-		clientTab tab = (clientTab) tabList.elementAt(i);
-		tab.dispose();
-	      }
-	  }
+        synchronized (tabList)
+          {
+            for (int i = 0; i < tabList.size(); i++)
+              {
+                clientTab tab = (clientTab) tabList.elementAt(i);
+                tab.dispose();
+              }
+          }
 
-	tabList = null;
+        tabList = null;
       }
 
     progressBar = null;
@@ -2117,13 +2117,13 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     if (containerPanels != null)
       {
-	for (int i = 0; i < containerPanels.size(); i++)
-	  {
-	    containerPanel cp = (containerPanel)containerPanels.elementAt(i);
-	    cp.cleanup();
-	  }
+        for (int i = 0; i < containerPanels.size(); i++)
+          {
+            containerPanel cp = (containerPanel)containerPanels.elementAt(i);
+            cp.cleanup();
+          }
 
-	containerPanels = null;
+        containerPanels = null;
       }
 
     templates = null;

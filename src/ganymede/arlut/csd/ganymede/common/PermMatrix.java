@@ -113,11 +113,11 @@ public class PermMatrix implements java.io.Serializable {
   {
     if (orig == null)
       {
-	this.matrix = new Hashtable<String, PermEntry>();
+        this.matrix = new Hashtable<String, PermEntry>();
       }
     else
       {
-	this.matrix = (Hashtable<String, PermEntry>) orig.clone();
+        this.matrix = (Hashtable<String, PermEntry>) orig.clone();
       }
   }
 
@@ -162,7 +162,7 @@ public class PermMatrix implements java.io.Serializable {
 
   public PermMatrix union(Hashtable<String, PermEntry> orig)
   {
-    return union(new PermMatrix(orig));	// this will cause a redundant copy, but who cares?
+    return union(new PermMatrix(orig)); // this will cause a redundant copy, but who cares?
   }
 
   /**
@@ -189,7 +189,7 @@ public class PermMatrix implements java.io.Serializable {
 
     if (orig == null)
       {
-	return new PermMatrix(this);
+        return new PermMatrix(this);
       }
 
     // duplicate orig as our starting point.  we'll then union
@@ -204,40 +204,40 @@ public class PermMatrix implements java.io.Serializable {
 
     for (String key: this.matrix.keySet())
       {
-	entry1 = this.matrix.get(key);
-	entry2 = orig.matrix.get(key);
+        entry1 = this.matrix.get(key);
+        entry2 = orig.matrix.get(key);
 
-	if (entry2 != null)
-	  {
-	    result.matrix.put(key, entry1.union(entry2));
-	  }
-	else
-	  {
-	    // okay, orig didn't have any entry for key
+        if (entry2 != null)
+          {
+            result.matrix.put(key, entry1.union(entry2));
+          }
+        else
+          {
+            // okay, orig didn't have any entry for key
 
-	    if (!isBasePerm(key))
-	      {
-		// We are union'ing a field entry.. since orig doesn't
-		// contain an explicit record for this field while our
-		// matrix does, see if we can find a record for the
-		// containing base in field and union that with this entry..
-		// this will serve to maintain the permission inheritance
-		// issues
+            if (!isBasePerm(key))
+              {
+                // We are union'ing a field entry.. since orig doesn't
+                // contain an explicit record for this field while our
+                // matrix does, see if we can find a record for the
+                // containing base in field and union that with this entry..
+                // this will serve to maintain the permission inheritance
+                // issues
 
-		entry3 = orig.matrix.get(baseEntry(key));
+                entry3 = orig.matrix.get(baseEntry(key));
 
-		// union will handle a null entry3
+                // union will handle a null entry3
 
-		result.matrix.put(key, entry1.union(entry3));
-	      }
-	    else
-	      {
-		// we've got a base entry from this.matrix that wasn't in orig,
-		// so we need to just copy it into result
+                result.matrix.put(key, entry1.union(entry3));
+              }
+            else
+              {
+                // we've got a base entry from this.matrix that wasn't in orig,
+                // so we need to just copy it into result
 
-		result.matrix.put(key, entry1);
-	      }
-	  }
+                result.matrix.put(key, entry1);
+              }
+          }
       }
 
     // result now contains all of the records from this.matrix,
@@ -248,34 +248,34 @@ public class PermMatrix implements java.io.Serializable {
 
     for (String key: orig.matrix.keySet())
       {
-	entry1 = orig.matrix.get(key);
-	entry2 = this.matrix.get(key);
+        entry1 = orig.matrix.get(key);
+        entry2 = this.matrix.get(key);
 
-	if (entry2 != null)
-	  {
-	    result.matrix.put(key, entry1.union(entry2));
-	  }
-	else
-	  {
-	    if (!isBasePerm(key))
-	      {
-		// the orig matrix has a field entry that we didn't
-		// have a match for in this.matrix.. we need to check
-		// to see if we have a base entry for the corresponding
-		// base that we need to union in to reflect the default
-		// base -> field inheritance
+        if (entry2 != null)
+          {
+            result.matrix.put(key, entry1.union(entry2));
+          }
+        else
+          {
+            if (!isBasePerm(key))
+              {
+                // the orig matrix has a field entry that we didn't
+                // have a match for in this.matrix.. we need to check
+                // to see if we have a base entry for the corresponding
+                // base that we need to union in to reflect the default
+                // base -> field inheritance
 
-		entry3 = this.matrix.get(baseEntry(key));
+                entry3 = this.matrix.get(baseEntry(key));
 
-		// union will handle a null entry3
+                // union will handle a null entry3
 
-		result.matrix.put(key, entry1.union(entry3));
-	      }
-	    else
-	      {
-		result.matrix.put(key, entry1);
-	      }
-	  }
+                result.matrix.put(key, entry1.union(entry3));
+              }
+            else
+              {
+                result.matrix.put(key, entry1);
+              }
+          }
       }
 
     return result;
@@ -319,11 +319,11 @@ public class PermMatrix implements java.io.Serializable {
   {
     try
       {
-	return getPerm(base.getTypeID(), field.getID());
+        return getPerm(base.getTypeID(), field.getID());
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("caught remote: " + ex);
+        throw new RuntimeException("caught remote: " + ex);
       }
   }
 
@@ -338,11 +338,11 @@ public class PermMatrix implements java.io.Serializable {
   {
     try
       {
-	return matrix.get(matrixEntry(base.getTypeID()));
+        return matrix.get(matrixEntry(base.getTypeID()));
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("caught remote: " + ex);
+        throw new RuntimeException("caught remote: " + ex);
       }
   }
 
@@ -394,18 +394,18 @@ public class PermMatrix implements java.io.Serializable {
   {
     if (matrixEntry.indexOf(':') == -1)
       {
-	throw new IllegalArgumentException("not a valid matrixEntry");
+        throw new IllegalArgumentException("not a valid matrixEntry");
       }
 
     String baseStr = matrixEntry.substring(0, matrixEntry.indexOf(':'));
 
     try
       {
-	return Short.parseShort(baseStr);
+        return Short.parseShort(baseStr);
       }
     catch (NumberFormatException ex)
       {
-	throw new RuntimeException("bad string format:" + ex);
+        throw new RuntimeException("bad string format:" + ex);
       }
   }
 
@@ -422,23 +422,23 @@ public class PermMatrix implements java.io.Serializable {
   {
     if (matrixEntry.indexOf(':') == -1)
       {
-	throw new IllegalArgumentException("not a valid matrixEntry");
+        throw new IllegalArgumentException("not a valid matrixEntry");
       }
 
     if (isBasePerm(matrixEntry))
       {
-	throw new IllegalArgumentException("not a field matrixEntry");
+        throw new IllegalArgumentException("not a field matrixEntry");
       }
 
     String fieldStr = matrixEntry.substring(matrixEntry.lastIndexOf(':')+1);
 
     try
       {
-	return Short.parseShort(fieldStr);
+        return Short.parseShort(fieldStr);
       }
     catch (NumberFormatException ex)
       {
-	throw new RuntimeException("bad string format:" + ex);
+        throw new RuntimeException("bad string format:" + ex);
       }
   }
 
@@ -452,11 +452,11 @@ public class PermMatrix implements java.io.Serializable {
   {
     if (isBasePerm(matrixEntry))
       {
-	return matrixEntry;
+        return matrixEntry;
       }
     else
       {
-	return matrixEntry(entryBase(matrixEntry));
+        return matrixEntry(entryBase(matrixEntry));
       }
   }
 
@@ -468,13 +468,13 @@ public class PermMatrix implements java.io.Serializable {
   {
     try
       {
-	return PermissionMatrixDBField.debugdecode(matrix);
+        return PermissionMatrixDBField.debugdecode(matrix);
       }
     catch (Throwable ex)
       {
-	// the client will get a ClassNotFoundException on PermissionMatrixDBField.
+        // the client will get a ClassNotFoundException on PermissionMatrixDBField.
 
-	return super.toString();
+        return super.toString();
       }
   }
 

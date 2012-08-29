@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2011
@@ -187,7 +187,7 @@ public abstract class DBLock {
   {
     synchronized (lockSync)
       {
-	return locked;
+        return locked;
       }
   }
 
@@ -201,18 +201,18 @@ public abstract class DBLock {
   {
     synchronized (lockSync)
       {
-	if (!locked)
-	  {
-	    return false;
-	  }
+        if (!locked)
+          {
+            return false;
+          }
 
-	for (int i=0; i < baseSet.size(); i++)
-	  {
-	    if (baseSet.elementAt(i) == base)
-	      {
-		return true;
-	      }
-	  }
+        for (int i=0; i < baseSet.size(); i++)
+          {
+            if (baseSet.elementAt(i) == base)
+              {
+                return true;
+              }
+          }
       }
 
     return false;
@@ -228,7 +228,7 @@ public abstract class DBLock {
   {
     synchronized (lockSync)
       {
-	return arlut.csd.Util.VectorUtils.difference(bases, baseSet).size() == 0;
+        return arlut.csd.Util.VectorUtils.difference(bases, baseSet).size() == 0;
       }
   }
 
@@ -242,7 +242,7 @@ public abstract class DBLock {
   {
     synchronized (lockSync)
       {
-	return arlut.csd.Util.VectorUtils.overlaps(bases, baseSet);
+        return arlut.csd.Util.VectorUtils.overlaps(bases, baseSet);
       }
   }
 
@@ -295,11 +295,11 @@ public abstract class DBLock {
   {
     if (locked)
       {
-	return key;
+        return key;
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -320,31 +320,31 @@ public abstract class DBLock {
 
     if (inEstablish)
       {
-	returnString.append(", establishing");
+        returnString.append(", establishing");
       }
 
     if (abort)
       {
-	returnString.append(", aborted");
+        returnString.append(", aborted");
       }
 
     if (locked)
       {
-	returnString.append(", locked on: ");
+        returnString.append(", locked on: ");
       }
     else
       {
-	returnString.append(", currently unlocked on: ");
+        returnString.append(", currently unlocked on: ");
       }
 
     for (int i = 0; i < baseSet.size(); i++)
       {
-	if (i>0)
-	  {
-	    returnString.append(", ");
-	  }
+        if (i>0)
+          {
+            returnString.append(", ");
+          }
 
-	returnString.append(baseSet.elementAt(i).toString());
+        returnString.append(baseSet.elementAt(i).toString());
       }
 
     return returnString.toString();

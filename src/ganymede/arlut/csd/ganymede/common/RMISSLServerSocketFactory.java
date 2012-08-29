@@ -7,7 +7,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -87,13 +87,13 @@ public class RMISSLServerSocketFactory implements RMIServerSocketFactory, Serial
   {
     if (socketDebug)
       {
-	synchronized (arlut.csd.ganymede.common.RMISSLServerSocketFactory.class)
-	  {
-	    System.err.println("Creating server socket # " + counter + " on port " + port);
-	    counter++;
-	  }
+        synchronized (arlut.csd.ganymede.common.RMISSLServerSocketFactory.class)
+          {
+            System.err.println("Creating server socket # " + counter + " on port " + port);
+            counter++;
+          }
 
-	Ganymede.printCallStack();
+        Ganymede.printCallStack();
       }
 
     return getSSF().createServerSocket(port);
@@ -103,7 +103,7 @@ public class RMISSLServerSocketFactory implements RMIServerSocketFactory, Serial
   {
     if (object instanceof arlut.csd.ganymede.common.RMISSLServerSocketFactory)
       {
-	return true;
+        return true;
       }
 
     return false;
@@ -118,80 +118,80 @@ public class RMISSLServerSocketFactory implements RMIServerSocketFactory, Serial
   {
     if (ssf != null)
       {
-	return ssf;
+        return ssf;
       }
 
     if (socketDebug)
       {
-	System.err.println("Creating server socket factory");
-	Ganymede.printCallStack();
+        System.err.println("Creating server socket factory");
+        Ganymede.printCallStack();
       }
 
     try
       {
-	// set up key manager to do server authentication
-	SSLContext ctx;
-	KeyManagerFactory kmf;
-	KeyStore ks;
-	char[] pass = passphrase.toCharArray();
+        // set up key manager to do server authentication
+        SSLContext ctx;
+        KeyManagerFactory kmf;
+        KeyStore ks;
+        char[] pass = passphrase.toCharArray();
 
-	String factoryID = null;
+        String factoryID = null;
 
-	if (System.getProperty("java.vm.vendor").indexOf("IBM") != -1)
-	  {
-	    factoryID = "IbmX509"; // for IBM JVMs
-	  }
-	else
-	  {
-	    factoryID = "SunX509";
-	  }
+        if (System.getProperty("java.vm.vendor").indexOf("IBM") != -1)
+          {
+            factoryID = "IbmX509"; // for IBM JVMs
+          }
+        else
+          {
+            factoryID = "SunX509";
+          }
 
-	ctx = SSLContext.getInstance("TLS");
-	kmf = KeyManagerFactory.getInstance(factoryID);
-	ks = KeyStore.getInstance("JKS");
+        ctx = SSLContext.getInstance("TLS");
+        kmf = KeyManagerFactory.getInstance(factoryID);
+        ks = KeyStore.getInstance("JKS");
 
-	InputStream x = PackageResources.getPackageResourceAsStream(keysResource, this.getClass());
+        InputStream x = PackageResources.getPackageResourceAsStream(keysResource, this.getClass());
 
-	if (x == null)
-	  {
-	    throw new RuntimeException("Hey, couldn't load " + keysResource);
-	  }
-	else
-	  {
-	    if (socketDebug)
-	      {
-		int count = 0;
+        if (x == null)
+          {
+            throw new RuntimeException("Hey, couldn't load " + keysResource);
+          }
+        else
+          {
+            if (socketDebug)
+              {
+                int count = 0;
 
-		try
-		  {
-		    int i = x.read();
+                try
+                  {
+                    int i = x.read();
 
-		    while (i >= 0)
-		      {
-			count++;
-			i = x.read();
-		      }
-		  }
-		catch (IOException ex)
-		  {
-		    ex.printStackTrace();
-		  }
-		
-		System.err.println("Read " + count + " bytes from " + keysResource);
-	      }
+                    while (i >= 0)
+                      {
+                        count++;
+                        i = x.read();
+                      }
+                  }
+                catch (IOException ex)
+                  {
+                    ex.printStackTrace();
+                  }
+                
+                System.err.println("Read " + count + " bytes from " + keysResource);
+              }
 
             x.close();
-	  }
+          }
       
-	ks.load(PackageResources.getPackageResourceAsStream(keysResource, this.getClass()), pass);
-	kmf.init(ks, pass);
-	ctx.init(kmf.getKeyManagers(), null, null);
-	
-	ssf = ctx.getServerSocketFactory();
+        ks.load(PackageResources.getPackageResourceAsStream(keysResource, this.getClass()), pass);
+        kmf.init(ks, pass);
+        ctx.init(kmf.getKeyManagers(), null, null);
+        
+        ssf = ctx.getServerSocketFactory();
       }
     catch (Exception e)
       {
-	e.printStackTrace();
+        e.printStackTrace();
       }
 
     return ssf;

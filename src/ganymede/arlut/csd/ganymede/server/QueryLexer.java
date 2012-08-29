@@ -1362,25 +1362,25 @@ public class QueryLexer extends Lexer {
 
 
                 switch (alt3) {
-            	case 1 :
-            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:
-            	    {
-            	    if ( (input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||input.LA(1)=='_'||(input.LA(1)>='a' && input.LA(1)<='z')||(input.LA(1)>='\u0080' && input.LA(1)<='\u009F')||(input.LA(1)>='\u00A1' && input.LA(1)<='\u167F')||(input.LA(1)>='\u1681' && input.LA(1)<='\u180D')||(input.LA(1)>='\u180F' && input.LA(1)<='\u1FFF')||input.LA(1)=='\u2007'||(input.LA(1)>='\u200B' && input.LA(1)<='\u202E')||(input.LA(1)>='\u2030' && input.LA(1)<='\u205E')||(input.LA(1)>='\u2060' && input.LA(1)<='\u2FFF')||(input.LA(1)>='\u3001' && input.LA(1)<='\uD7FF')||(input.LA(1)>='\uE000' && input.LA(1)<='\uFFFE') ) {
-            	        input.consume();
-            	    state.failed=false;
-            	    }
-            	    else {
-            	        if (state.backtracking>0) {state.failed=true; return ;}
-            	        MismatchedSetException mse = new MismatchedSetException(null,input);
-            	        recover(mse);
-            	        throw mse;}
+                case 1 :
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:
+                    {
+                    if ( (input.LA(1)>='0' && input.LA(1)<='9')||(input.LA(1)>='A' && input.LA(1)<='Z')||input.LA(1)=='_'||(input.LA(1)>='a' && input.LA(1)<='z')||(input.LA(1)>='\u0080' && input.LA(1)<='\u009F')||(input.LA(1)>='\u00A1' && input.LA(1)<='\u167F')||(input.LA(1)>='\u1681' && input.LA(1)<='\u180D')||(input.LA(1)>='\u180F' && input.LA(1)<='\u1FFF')||input.LA(1)=='\u2007'||(input.LA(1)>='\u200B' && input.LA(1)<='\u202E')||(input.LA(1)>='\u2030' && input.LA(1)<='\u205E')||(input.LA(1)>='\u2060' && input.LA(1)<='\u2FFF')||(input.LA(1)>='\u3001' && input.LA(1)<='\uD7FF')||(input.LA(1)>='\uE000' && input.LA(1)<='\uFFFE') ) {
+                        input.consume();
+                    state.failed=false;
+                    }
+                    else {
+                        if (state.backtracking>0) {state.failed=true; return ;}
+                        MismatchedSetException mse = new MismatchedSetException(null,input);
+                        recover(mse);
+                        throw mse;}
 
 
-            	    }
-            	    break;
+                    }
+                    break;
 
-            	default :
-            	    break loop3;
+                default :
+                    break loop3;
                 }
             } while (true);
 
@@ -1535,32 +1535,32 @@ public class QueryLexer extends Lexer {
                         int alt5=3;
                         alt5 = dfa5.predict(input);
                         switch (alt5) {
-                    	case 1 :
-                    	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:184:10: ( ESC )=> ESC
-                    	    {
-                    	    mESC(); if (state.failed) return ;
+                        case 1 :
+                            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:184:10: ( ESC )=> ESC
+                            {
+                            mESC(); if (state.failed) return ;
 
-                    	    }
-                    	    break;
-                    	case 2 :
-                    	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:184:24: ~ '\"'
-                    	    {
-                    	    if ( (input.LA(1)>='\u0000' && input.LA(1)<='!')||(input.LA(1)>='#' && input.LA(1)<='\uFFFF') ) {
-                    	        input.consume();
-                    	    state.failed=false;
-                    	    }
-                    	    else {
-                    	        if (state.backtracking>0) {state.failed=true; return ;}
-                    	        MismatchedSetException mse = new MismatchedSetException(null,input);
-                    	        recover(mse);
-                    	        throw mse;}
+                            }
+                            break;
+                        case 2 :
+                            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:184:24: ~ '\"'
+                            {
+                            if ( (input.LA(1)>='\u0000' && input.LA(1)<='!')||(input.LA(1)>='#' && input.LA(1)<='\uFFFF') ) {
+                                input.consume();
+                            state.failed=false;
+                            }
+                            else {
+                                if (state.backtracking>0) {state.failed=true; return ;}
+                                MismatchedSetException mse = new MismatchedSetException(null,input);
+                                recover(mse);
+                                throw mse;}
 
 
-                    	    }
-                    	    break;
+                            }
+                            break;
 
-                    	default :
-                    	    break loop5;
+                        default :
+                            break loop5;
                         }
                     } while (true);
 
@@ -1578,32 +1578,32 @@ public class QueryLexer extends Lexer {
                         int alt6=3;
                         alt6 = dfa6.predict(input);
                         switch (alt6) {
-                    	case 1 :
-                    	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:185:11: ( ESC )=> ESC
-                    	    {
-                    	    mESC(); if (state.failed) return ;
+                        case 1 :
+                            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:185:11: ( ESC )=> ESC
+                            {
+                            mESC(); if (state.failed) return ;
 
-                    	    }
-                    	    break;
-                    	case 2 :
-                    	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:185:25: ~ '\\''
-                    	    {
-                    	    if ( (input.LA(1)>='\u0000' && input.LA(1)<='&')||(input.LA(1)>='(' && input.LA(1)<='\uFFFF') ) {
-                    	        input.consume();
-                    	    state.failed=false;
-                    	    }
-                    	    else {
-                    	        if (state.backtracking>0) {state.failed=true; return ;}
-                    	        MismatchedSetException mse = new MismatchedSetException(null,input);
-                    	        recover(mse);
-                    	        throw mse;}
+                            }
+                            break;
+                        case 2 :
+                            // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:185:25: ~ '\\''
+                            {
+                            if ( (input.LA(1)>='\u0000' && input.LA(1)<='&')||(input.LA(1)>='(' && input.LA(1)<='\uFFFF') ) {
+                                input.consume();
+                            state.failed=false;
+                            }
+                            else {
+                                if (state.backtracking>0) {state.failed=true; return ;}
+                                MismatchedSetException mse = new MismatchedSetException(null,input);
+                                recover(mse);
+                                throw mse;}
 
 
-                    	    }
-                    	    break;
+                            }
+                            break;
 
-                    	default :
-                    	    break loop6;
+                        default :
+                            break loop6;
                         }
                     } while (true);
 
@@ -1676,17 +1676,17 @@ public class QueryLexer extends Lexer {
 
 
                 switch (alt9) {
-            	case 1 :
-            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:193:10: DIGIT
-            	    {
-            	    mDIGIT(); if (state.failed) return ;
+                case 1 :
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:193:10: DIGIT
+                    {
+                    mDIGIT(); if (state.failed) return ;
 
-            	    }
-            	    break;
+                    }
+                    break;
 
-            	default :
-            	    if ( cnt9 >= 1 ) break loop9;
-            	    if (state.backtracking>0) {state.failed=true; return ;}
+                default :
+                    if ( cnt9 >= 1 ) break loop9;
+                    if (state.backtracking>0) {state.failed=true; return ;}
                         EarlyExitException eee =
                             new EarlyExitException(9, input);
                         throw eee;
@@ -1728,17 +1728,17 @@ public class QueryLexer extends Lexer {
 
 
                 switch (alt10) {
-            	case 1 :
-            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:197:19: DIGIT
-            	    {
-            	    mDIGIT(); if (state.failed) return ;
+                case 1 :
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:197:19: DIGIT
+                    {
+                    mDIGIT(); if (state.failed) return ;
 
-            	    }
-            	    break;
+                    }
+                    break;
 
-            	default :
-            	    if ( cnt10 >= 1 ) break loop10;
-            	    if (state.backtracking>0) {state.failed=true; return ;}
+                default :
+                    if ( cnt10 >= 1 ) break loop10;
+                    if (state.backtracking>0) {state.failed=true; return ;}
                         EarlyExitException eee =
                             new EarlyExitException(10, input);
                         throw eee;
@@ -1795,39 +1795,39 @@ public class QueryLexer extends Lexer {
                 }
 
                 switch (alt11) {
-            	case 1 :
-            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:201:7: ' '
-            	    {
-            	    match(' '); if (state.failed) return ;
+                case 1 :
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:201:7: ' '
+                    {
+                    match(' '); if (state.failed) return ;
 
-            	    }
-            	    break;
-            	case 2 :
-            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:202:7: '\\t'
-            	    {
-            	    match('\t'); if (state.failed) return ;
+                    }
+                    break;
+                case 2 :
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:202:7: '\\t'
+                    {
+                    match('\t'); if (state.failed) return ;
 
-            	    }
-            	    break;
-            	case 3 :
-            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:203:7: '\\r' '\\n'
-            	    {
-            	    match('\r'); if (state.failed) return ;
-            	    match('\n'); if (state.failed) return ;
+                    }
+                    break;
+                case 3 :
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:203:7: '\\r' '\\n'
+                    {
+                    match('\r'); if (state.failed) return ;
+                    match('\n'); if (state.failed) return ;
 
-            	    }
-            	    break;
-            	case 4 :
-            	    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:204:7: '\\n'
-            	    {
-            	    match('\n'); if (state.failed) return ;
+                    }
+                    break;
+                case 4 :
+                    // /home/broccol/ganymede/src/trunk/src/ganymede/arlut/csd/ganymede/server/Query.g:204:7: '\\n'
+                    {
+                    match('\n'); if (state.failed) return ;
 
-            	    }
-            	    break;
+                    }
+                    break;
 
-            	default :
-            	    if ( cnt11 >= 1 ) break loop11;
-            	    if (state.backtracking>0) {state.failed=true; return ;}
+                default :
+                    if ( cnt11 >= 1 ) break loop11;
+                    if (state.backtracking>0) {state.failed=true; return ;}
                         EarlyExitException eee =
                             new EarlyExitException(11, input);
                         throw eee;
@@ -2208,7 +2208,7 @@ public class QueryLexer extends Lexer {
         }
         public int specialStateTransition(int s, IntStream _input) throws NoViableAltException {
             IntStream input = _input;
-        	int _s = s;
+                int _s = s;
             switch ( s ) {
                     case 0 : 
                         int LA5_5 = input.LA(1);
@@ -2389,7 +2389,7 @@ public class QueryLexer extends Lexer {
         }
         public int specialStateTransition(int s, IntStream _input) throws NoViableAltException {
             IntStream input = _input;
-        	int _s = s;
+                int _s = s;
             switch ( s ) {
                     case 0 : 
                         int LA6_8 = input.LA(1);

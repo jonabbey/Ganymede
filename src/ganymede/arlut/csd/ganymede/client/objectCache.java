@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2008
@@ -104,7 +104,7 @@ public class objectCache {
 
     if (list == null)
       {
-	throw new IllegalArgumentException("no such list in cache: " + key);
+        throw new IllegalArgumentException("no such list in cache: " + key);
       }
 
     return list.containsNonEditable();
@@ -141,13 +141,13 @@ public class objectCache {
    */
 
   public Vector getListHandles(Object key, boolean includeInactives,
-			       boolean includeNonEditables)
+                               boolean includeNonEditables)
   {
     objectList list = getList(key);
 
     if (list == null)
       {
-	return null;
+        return null;
       }
 
     return list.getListHandles(includeInactives, includeNonEditables);
@@ -180,13 +180,13 @@ public class objectCache {
    */
 
   public Vector getLabels(Object key, boolean includeInactives,
-			  boolean includeNonEditables)
+                          boolean includeNonEditables)
   {
     objectList list = getList(key);
 
     if (list == null)
       {
-	return null;
+        return null;
       }
 
     return list.getLabels(includeInactives, includeNonEditables);
@@ -207,7 +207,7 @@ public class objectCache {
 
     if (list == null)
       {
-	return null;
+        return null;
       }
 
     return list.getObjectHandle(invid);
@@ -217,7 +217,7 @@ public class objectCache {
   {
     if (debug)
       {
-	System.err.println("objectCache: caching key " + key);
+        System.err.println("objectCache: caching key " + key);
       }
 
     idMap.put(key, new objectList(qr));
@@ -234,12 +234,12 @@ public class objectCache {
 
     if (list == null)
       {
-	throw new RuntimeException("error, no list found with key " + key);
+        throw new RuntimeException("error, no list found with key " + key);
       }
 
     if (debug)
       {
-	System.err.println("objectCache: augmenting key " + key);
+        System.err.println("objectCache: augmenting key " + key);
       }
 
     list.augmentListWithNonEditables(qr);
@@ -249,7 +249,7 @@ public class objectCache {
   {
     if (debug)
       {
-	System.err.println("objectCache: caching key " + key + " (2)");
+        System.err.println("objectCache: caching key " + key + " (2)");
       }
 
     idMap.put(key, list);

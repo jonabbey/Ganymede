@@ -336,7 +336,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     if (objectBase == null)
       {
-	throw new RuntimeException("Error, null object base");
+        throw new RuntimeException("Error, null object base");
       }
 
     this.objectBase = objectBase;
@@ -376,74 +376,74 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (eObj.fieldAry == null)
       {
-	// "Error, tried to call the DBObject view-copy constructor with a pseudo-static DBEditObject"
-	throw new NullPointerException(ts.l("global.pseudostatic_constructor"));
+        // "Error, tried to call the DBObject view-copy constructor with a pseudo-static DBEditObject"
+        throw new NullPointerException(ts.l("global.pseudostatic_constructor"));
       }
 
     synchronized (eObj.fieldAry)
       {
-	for (short i = 0; i < eObj.fieldAry.length; i++)
-	  {
-	    field = eObj.fieldAry[i];
+        for (short i = 0; i < eObj.fieldAry.length; i++)
+          {
+            field = eObj.fieldAry[i];
 
-	    if (field != null && field.isDefined())
-	      {
-		count++;
-	      }
-	  }
+            if (field != null && field.isDefined())
+              {
+                count++;
+              }
+          }
 
-	// put any defined fields into the object we're going
-	// to commit back into our DBStore
+        // put any defined fields into the object we're going
+        // to commit back into our DBStore
 
-	fieldAry = new DBField[count];
+        fieldAry = new DBField[count];
 
-	int j = 0;
+        int j = 0;
 
-	for (short i = 0; i < eObj.fieldAry.length; i++)
-	  {
-	    field = eObj.fieldAry[i];
+        for (short i = 0; i < eObj.fieldAry.length; i++)
+          {
+            field = eObj.fieldAry[i];
 
-	    if (field != null && field.isDefined())
-	      {
-		// clean up any cached data the field was holding during
-		// editing
+            if (field != null && field.isDefined())
+              {
+                // clean up any cached data the field was holding during
+                // editing
 
-		try
-		  {
-		    field.cleanup();
-		  }
-		catch (Exception ex)
-		  {
-		    // we don't want to throw an uncaught exception in
-		    // the check-in constructor, because we'll break
-		    // the transaction commit in a really bad way if
-		    // that happens.
-		    //
-		    // field cleanup should be a
-		    // fail-without-consequence kind of thing, so
-		    // we'll just carry on if it happens
+                try
+                  {
+                    field.cleanup();
+                  }
+                catch (Exception ex)
+                  {
+                    // we don't want to throw an uncaught exception in
+                    // the check-in constructor, because we'll break
+                    // the transaction commit in a really bad way if
+                    // that happens.
+                    //
+                    // field cleanup should be a
+                    // fail-without-consequence kind of thing, so
+                    // we'll just carry on if it happens
 
-		    ex.printStackTrace();
-		  }
+                    ex.printStackTrace();
+                  }
 
-		// Create a new copy and save it in the new DBObject.  We
-		// *must not* directly save the field from the DBEditObject,
-		// because that field has likely been RMI exported to a
-		// remote client, and if we keep the exported field in
-		// local use, all of the extra bulk of the RMI mechanism
-		// will also be retained, as the DBField's Stub and Skel
-		// are associated with the field through a weak hash ref.  By
-		// letting the old field from the DBEditObject get locally
-		// garbage collected, we make it possible for all the RMI
-		// stuff to get garbage collected as well.
+                // Create a new copy and save it in the new DBObject.  We
+                // *must not* directly save the field from the DBEditObject,
+                // because that field has likely been RMI exported to a
+                // remote client, and if we keep the exported field in
+                // local use, all of the extra bulk of the RMI mechanism
+                // will also be retained, as the DBField's Stub and Skel
+                // are associated with the field through a weak hash ref.  By
+                // letting the old field from the DBEditObject get locally
+                // garbage collected, we make it possible for all the RMI
+                // stuff to get garbage collected as well.
 
-		// Making a copy here rather than saving a ref to the
-		// exported field makes a *huge* difference in overall
-		// memory usage on the Ganymede server.
+                // Making a copy here rather than saving a ref to the
+                // exported field makes a *huge* difference in overall
+                // memory usage on the Ganymede server.
 
-		fieldAry[j++] = field.getCopy(this); // safe since we started with an empty fieldAry
-	      }
-	  }
+                fieldAry[j++] = field.getCopy(this); // safe since we started with an empty fieldAry
+              }
+          }
       }
 
     gSession = null;
@@ -473,32 +473,32 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (original.fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic_constructor"));
+        throw new NullPointerException(ts.l("global.pseudostatic_constructor"));
       }
 
     synchronized (original.fieldAry)
       {
-	// make fieldAry big enough to hold all fields defined, because
-	// DBObjectDeltaRec uses this constructor when doing
-	// journal edits to an object
+        // make fieldAry big enough to hold all fields defined, because
+        // DBObjectDeltaRec uses this constructor when doing
+        // journal edits to an object
 
-	fieldAry = new DBField[original.fieldAry.length];
+        fieldAry = new DBField[original.fieldAry.length];
 
-	for (int i = 0; i < original.fieldAry.length; i++)
-	  {
-	    fieldAry[i] = original.fieldAry[i].getCopy(this);
-	  }
+        for (int i = 0; i < original.fieldAry.length; i++)
+          {
+            fieldAry[i] = original.fieldAry[i].getCopy(this);
+          }
       }
 
     this.gSession = gSession;
 
     if (gSession == null)
       {
-	this.permManager = null;
+        this.permManager = null;
       }
     else
       {
-	this.permManager = gSession.getPermManager();
+        this.permManager = gSession.getPermManager();
       }
   }
 
@@ -516,23 +516,23 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     synchronized (fieldAry)
       {
-	for (int i = 0; i < fieldAry.length; i++)
-	  {
-	    field = fieldAry[i];
+        for (int i = 0; i < fieldAry.length; i++)
+          {
+            field = fieldAry[i];
 
-	    // export can fail if the object has already
-	    // been exported.. don't worry about it if
-	    // it happens.. the client will know about it
-	    // if we try to pass a non-exported object
-	    // back to it, anyway.
+            // export can fail if the object has already
+            // been exported.. don't worry about it if
+            // it happens.. the client will know about it
+            // if we try to pass a non-exported object
+            // back to it, anyway.
 
-	    Ganymede.rmi.publishObject(field);
-	  }
+            Ganymede.rmi.publishObject(field);
+          }
       }
   }
 
@@ -551,22 +551,22 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     synchronized (fieldAry)
       {
-	for (int i = 0; i < fieldAry.length; i++)
-	  {
-	    field = fieldAry[i];
+        for (int i = 0; i < fieldAry.length; i++)
+          {
+            field = fieldAry[i];
 
-	    // unexport can fail (return false) if the object has
-	    // already been unexported, or if it was never exported,
-	    // but we don't care as long as it's not exported after
-	    // this point.
+            // unexport can fail (return false) if the object has
+            // already been unexported, or if it was never exported,
+            // but we don't care as long as it's not exported after
+            // this point.
 
-	    Ganymede.rmi.unpublishObject(field, true);
-	  }
+            Ganymede.rmi.unpublishObject(field, true);
+          }
       }
   }
 
@@ -664,8 +664,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (f == null)
       {
-	// "Can''t find permissions for non-existent field "{0}""
-	throw new IllegalArgumentException(ts.l("getFieldPerm.nofield", fieldName));
+        // "Can''t find permissions for non-existent field "{0}""
+        throw new IllegalArgumentException(ts.l("getFieldPerm.nofield", fieldName));
       }
 
     return this.getFieldPerm(f.getID());
@@ -688,39 +688,39 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     if (permManager == null)
       {
-	return PermEntry.fullPerms; // assume supergash if we have no session
+        return PermEntry.fullPerms; // assume supergash if we have no session
       }
 
     short index = findField(fieldcode);
 
     if (index == -1)
       {
-	// "Unrecognized fieldcode: {0}"
-	throw new IllegalArgumentException(ts.l("getFieldPerm.nofield", Integer.valueOf(fieldcode)));
+        // "Unrecognized fieldcode: {0}"
+        throw new IllegalArgumentException(ts.l("getFieldPerm.nofield", Integer.valueOf(fieldcode)));
       }
 
     if (permCacheAry == null)
       {
-	permCacheAry = new PermEntry[fieldAry.length];
+        permCacheAry = new PermEntry[fieldAry.length];
       }
     else
       {
-	result = permCacheAry[index];
+        result = permCacheAry[index];
       }
 
     if (result == null)
       {
-	result = permManager.getPerm(this, fieldcode);
+        result = permManager.getPerm(this, fieldcode);
 
-	if (result == null)
-	  {
-	    result = permManager.getPerm(this);
-	  }
+        if (result == null)
+          {
+            result = permManager.getPerm(this);
+          }
       }
 
     permCacheAry[index] = result;
@@ -749,11 +749,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     try
       {
-	return gSession.getDBSession();
+        return gSession.getDBSession();
       }
     catch (NullPointerException ex)
       {
-	return null;
+        return null;
       }
   }
 
@@ -766,11 +766,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     try
       {
-	return gSession.getDBSession();
+        return gSession.getDBSession();
       }
     catch (NullPointerException ex)
       {
-	return null;
+        return null;
       }
   }
 
@@ -793,16 +793,16 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     if (!(param instanceof DBObject))
       {
-	return false;
+        return false;
       }
 
     try
       {
-	return (getInvid().equals(((DBObject) param).getInvid()));
+        return (getInvid().equals(((DBObject) param).getInvid()));
       }
     catch (NullPointerException ex)
       {
-	return false;
+        return false;
       }
   }
 
@@ -824,27 +824,27 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (f != null && f.isDefined())
       {
-	String result = f.getValueString();
+        String result = f.getValueString();
 
-	// the label must be unique, but if we're a newly created
-	// object, we won't have any label value yet.  Go ahead and
-	// synthesize one for the time being.
+        // the label must be unique, but if we're a newly created
+        // object, we won't have any label value yet.  Go ahead and
+        // synthesize one for the time being.
 
-	if (result == null || result.length() == 0)
-	  {
-	    // "New {0}: {1,number,#}"
-	    result = ts.l("getLabel.null_label", getTypeName(), Integer.valueOf(getID()));
-	  }
+        if (result == null || result.length() == 0)
+          {
+            // "New {0}: {1,number,#}"
+            result = ts.l("getLabel.null_label", getTypeName(), Integer.valueOf(getID()));
+          }
 
-	return result;
+        return result;
       }
     else
       {
-	// we should never get here.. objects shouldn't be in the
-	// database without their label field.
+        // we should never get here.. objects shouldn't be in the
+        // database without their label field.
 
-	// "New {0}: {1,number,#}"
-	return ts.l("getLabel.null_label", getTypeName(), Integer.valueOf(getID()));
+        // "New {0}: {1,number,#}"
+        return ts.l("getLabel.null_label", getTypeName(), Integer.valueOf(getID()));
       }
   }
 
@@ -918,44 +918,44 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
-    out.writeInt(getID());	// write out our object id
+    out.writeInt(getID());      // write out our object id
 
     synchronized (fieldAry)
       {
-	short count = 0;
+        short count = 0;
 
-	for (int i = 0; i < fieldAry.length; i++)
-	  {
-	    field = fieldAry[i];
+        for (int i = 0; i < fieldAry.length; i++)
+          {
+            field = fieldAry[i];
 
-	    if (field != null && field.isDefined())
-	      {
-		count++;
-	      }
-	  }
+            if (field != null && field.isDefined())
+              {
+                count++;
+              }
+          }
 
-	if (count == 0)
-	  {
-	    // "**** Error: writing object with no fields: {0}"
-	    Ganymede.debug(ts.l("emit.nofields",
-				objectBase.getName() + " <" + getID() + ">"));
-	  }
+        if (count == 0)
+          {
+            // "**** Error: writing object with no fields: {0}"
+            Ganymede.debug(ts.l("emit.nofields",
+                                objectBase.getName() + " <" + getID() + ">"));
+          }
 
-	out.writeShort(count);
+        out.writeShort(count);
 
-	for (int i = 0; i < fieldAry.length; i++)
-	  {
-	    field = fieldAry[i];
+        for (int i = 0; i < fieldAry.length; i++)
+          {
+            field = fieldAry[i];
 
-	    if (field != null && field.isDefined())
-	      {
-		out.writeShort(field.getID());
-		field.emit(out);
-	      }
-	  }
+            if (field != null && field.isDefined())
+              {
+                out.writeShort(field.getID());
+                field.emit(out);
+              }
+          }
       }
   }
 
@@ -997,7 +997,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (debugReceive)
       {
-	System.err.println("Reading invid " + myInvid);
+        System.err.println("Reading invid " + myInvid);
       }
 
     // get number of fields
@@ -1006,164 +1006,164 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (debug && tmp_count == 0)
       {
-	// "DBObject.receive(): No fields reading object {0}"
-	System.err.println(ts.l("receive.nofields", Integer.valueOf(getID())));
+        // "DBObject.receive(): No fields reading object {0}"
+        System.err.println(ts.l("receive.nofields", Integer.valueOf(getID())));
       }
 
     fieldAry = new DBField[tmp_count];
-    permCacheAry = null;	// okay in synchronized block
+    permCacheAry = null;        // okay in synchronized block
 
     for (int i = 0; i < tmp_count; i++)
       {
-	// read our field code, look it up in our
-	// DBObjectBase
+        // read our field code, look it up in our
+        // DBObjectBase
 
-	fieldcode = in.readShort();
+        fieldcode = in.readShort();
 
-	definition = objectBase.getFieldDef(fieldcode);
+        definition = objectBase.getFieldDef(fieldcode);
 
-	// we used to have a couple of Invid vector fields that we
-	// have gotten rid of, for the sake of improving Ganymede's
-	// concurrency and reducing inter-object lock contention.  The
-	// BackLinksField we got rid of a long time ago, the
-	// OwnerBase's OwnerObjectsOwned field we got rid of at
-	// DBStore 2.7.
+        // we used to have a couple of Invid vector fields that we
+        // have gotten rid of, for the sake of improving Ganymede's
+        // concurrency and reducing inter-object lock contention.  The
+        // BackLinksField we got rid of a long time ago, the
+        // OwnerBase's OwnerObjectsOwned field we got rid of at
+        // DBStore 2.7.
 
-	if ((fieldcode == SchemaConstants.BackLinksField) ||
-	    (getTypeID() == SchemaConstants.OwnerBase && fieldcode == SchemaConstants.OwnerObjectsOwned))
-	  {
-	    // the backlinks field was always a vector of invids, so
-	    // now that we are no longer explicitly recording
-	    // asymmetric relationships with the backlinks field, we
-	    // can just skip forward in the database file and skip the
-	    // backlinks info
+        if ((fieldcode == SchemaConstants.BackLinksField) ||
+            (getTypeID() == SchemaConstants.OwnerBase && fieldcode == SchemaConstants.OwnerObjectsOwned))
+          {
+            // the backlinks field was always a vector of invids, so
+            // now that we are no longer explicitly recording
+            // asymmetric relationships with the backlinks field, we
+            // can just skip forward in the database file and skip the
+            // backlinks info
 
-	    // Ditto, starting at DBStore version 2.7, with the
-	    // OwnerBase's OwnerObjectsOwned
+            // Ditto, starting at DBStore version 2.7, with the
+            // OwnerBase's OwnerObjectsOwned
 
-	    if (Ganymede.db.isLessThan(2,3))
-	      {
-		upgradeSkipCount = in.readShort();
-	      }
-	    else
-	      {
-		upgradeSkipCount = in.readInt();
-	      }
+            if (Ganymede.db.isLessThan(2,3))
+              {
+                upgradeSkipCount = in.readShort();
+              }
+            else
+              {
+                upgradeSkipCount = in.readInt();
+              }
 
-	    int count = upgradeSkipCount; // our vector count
+            int count = upgradeSkipCount; // our vector count
 
-	    while (count-- > 0)
-	      {
-		in.readShort();
-		in.readInt();
-	      }
+            while (count-- > 0)
+              {
+                in.readShort();
+                in.readInt();
+              }
 
-	    continue;
-	  }
-	else if (definition == null)
-	  {
-	    // "What the heck?  Null definition for {0}, fieldcode = {1}, {2}th field in object"
-	    throw new RuntimeException(ts.l("receive.nulldef",
-					    this.getTypeName(),
-					    Integer.valueOf(fieldcode),
-					    Integer.valueOf(i)));
-	  }
+            continue;
+          }
+        else if (definition == null)
+          {
+            // "What the heck?  Null definition for {0}, fieldcode = {1}, {2}th field in object"
+            throw new RuntimeException(ts.l("receive.nulldef",
+                                            this.getTypeName(),
+                                            Integer.valueOf(fieldcode),
+                                            Integer.valueOf(i)));
+          }
 
-	if (debugReceive)
-	  {
-	    System.err.println("Reading field " + definition);
-	  }
+        if (debugReceive)
+          {
+            System.err.println("Reading field " + definition);
+          }
 
         tmp = DBField.readField(this, in, definition);
 
-	if (tmp == null)
-	  {
-	    // "Don't recognize field type in datastore."
-	    throw new Error(ts.l("receive.badfieldtype"));
-	  }
+        if (tmp == null)
+          {
+            // "Don't recognize field type in datastore."
+            throw new Error(ts.l("receive.badfieldtype"));
+          }
 
-	if (!journalProcessing && (definition.getNameSpace() != null))
-	  {
-	    if (tmp.isVector())
-	      {
-		// mark the elements in the vector in the namespace
-		// note that we don't use the namespace mark method here,
-		// because we are just setting up the namespace, not
-		// manipulating it in the context of an editset
+        if (!journalProcessing && (definition.getNameSpace() != null))
+          {
+            if (tmp.isVector())
+              {
+                // mark the elements in the vector in the namespace
+                // note that we don't use the namespace mark method here,
+                // because we are just setting up the namespace, not
+                // manipulating it in the context of an editset
 
-		for (int j = 0; j < tmp.size(); j++)
-		  {
-		    if (definition.getNameSpace().containsKey(tmp.key(j)))
-		      {
-			try
-			  {
-			    // "Non-unique value {0} detected in vector field {1} which is constrained by namespace {2}"
-			    throw new RuntimeException(ts.l("receive.vectornamespace",
-							    GHashtable.keyString(tmp.key(j)),
-							    definition, definition.getNameSpace()));
-			  }
-			catch (RuntimeException ex)
-			  {
-			    ex.printStackTrace();
-			  }
-		      }
+                for (int j = 0; j < tmp.size(); j++)
+                  {
+                    if (definition.getNameSpace().containsKey(tmp.key(j)))
+                      {
+                        try
+                          {
+                            // "Non-unique value {0} detected in vector field {1} which is constrained by namespace {2}"
+                            throw new RuntimeException(ts.l("receive.vectornamespace",
+                                                            GHashtable.keyString(tmp.key(j)),
+                                                            definition, definition.getNameSpace()));
+                          }
+                        catch (RuntimeException ex)
+                          {
+                            ex.printStackTrace();
+                          }
+                      }
 
-		    definition.getNameSpace().receiveValue(tmp.key(j), tmp);
-		  }
-	      }
-	    else
-	      {
-		// mark the scalar value in the namespace
+                    definition.getNameSpace().receiveValue(tmp.key(j), tmp);
+                  }
+              }
+            else
+              {
+                // mark the scalar value in the namespace
 
-		if (definition.getNameSpace().containsKey(tmp.key()))
-		  {
-		    // "Non-unique value {0} detected in scalar field {1} which is constrained by namespace {2}"
-		    try
-		      {
-			throw new RuntimeException(ts.l("receive.scalarnamespace",
-							GHashtable.keyString(tmp.key()),
-							definition, definition.getNameSpace()));
-		      }
-		    catch (RuntimeException ex)
-		      {
-			ex.printStackTrace();
-		      }
-		  }
+                if (definition.getNameSpace().containsKey(tmp.key()))
+                  {
+                    // "Non-unique value {0} detected in scalar field {1} which is constrained by namespace {2}"
+                    try
+                      {
+                        throw new RuntimeException(ts.l("receive.scalarnamespace",
+                                                        GHashtable.keyString(tmp.key()),
+                                                        definition, definition.getNameSpace()));
+                      }
+                    catch (RuntimeException ex)
+                      {
+                        ex.printStackTrace();
+                      }
+                  }
 
-		definition.getNameSpace().receiveValue(tmp.key(), tmp);
-	      }
-	  }
+                definition.getNameSpace().receiveValue(tmp.key(), tmp);
+              }
+          }
 
-	// now add the field to our fields table
+        // now add the field to our fields table
 
-	if (Ganymede.db.isAtLeast(2, 15))
-	  {
-	    // starting at DBStore 2.15, we know that the fields are
-	    // coming from the db file ordered by ascending field code
+        if (Ganymede.db.isAtLeast(2, 15))
+          {
+            // starting at DBStore 2.15, we know that the fields are
+            // coming from the db file ordered by ascending field code
 
-	    fieldAry[i] = tmp;
-	  }
-	else
-	  {
-	    // we have to be more conservative when loading an older
-	    // db or journal block.
+            fieldAry[i] = tmp;
+          }
+        else
+          {
+            // we have to be more conservative when loading an older
+            // db or journal block.
 
-	    if (tmp.isDefined())
-	      {
-		saveField(tmp);
-	      }
-	    else
-	      {
-		// "%%% Loader skipping empty field {0}"
-		System.err.println(ts.l("receive.skipping", definition.getName()));
-	      }
-	  }
+            if (tmp.isDefined())
+              {
+                saveField(tmp);
+              }
+            else
+              {
+                // "%%% Loader skipping empty field {0}"
+                System.err.println(ts.l("receive.skipping", definition.getName()));
+              }
+          }
       }
 
     if (getTypeID() == SchemaConstants.OwnerBase && upgradeSkipCount != 0)
       {
-	// "Skipped over {0} objects in deprecated OwnerObjectsOwned field while reading owner group {1}"
-	System.err.println(ts.l("receive.upgradeSkippingOwned", Integer.valueOf(upgradeSkipCount), this.getLabel()));
+        // "Skipped over {0} objects in deprecated OwnerObjectsOwned field while reading owner group {1}"
+        System.err.println(ts.l("receive.upgradeSkippingOwned", Integer.valueOf(upgradeSkipCount), this.getLabel()));
       }
   }
 
@@ -1179,7 +1179,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (xmlOut.isDumpingOid())
       {
-	xmlOut.attribute("oid", this.getInvid().toString());
+        xmlOut.attribute("oid", this.getInvid().toString());
       }
 
     xmlOut.indentOut();
@@ -1191,15 +1191,15 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     for (int i = 0; i < fieldVec.size(); i++)
       {
-	DBField field = (DBField) fieldVec.elementAt(i);
+        DBField field = (DBField) fieldVec.elementAt(i);
 
-	if (field.isDefined())
-	  {
-	    if (xmlOut.mayInclude(field))
-	      {
-		field.emitXML(xmlOut);
-	      }
-	  }
+        if (field.isDefined())
+          {
+            if (xmlOut.mayInclude(field))
+              {
+                field.emitXML(xmlOut);
+              }
+          }
       }
 
     xmlOut.indentIn();
@@ -1229,10 +1229,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     if (shadowObject != null)
       {
-	// this object has already been checked out
-	// for editing / deleting
+        // this object has already been checked out
+        // for editing / deleting
 
-	return null;
+        return null;
       }
 
     shadowObject = objectBase.createNewObject(this, editset);
@@ -1244,8 +1244,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (!editset.addObject(shadowObject))
       {
-	shadowObject = null;
-	return null;
+        shadowObject = null;
+        return null;
       }
 
     // update the session's checkout count first, then
@@ -1254,7 +1254,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (editset.session.GSession != null)
       {
-	editset.session.GSession.checkOut(); // update session checked out count
+        editset.session.GSession.checkOut(); // update session checked out count
       }
 
     objectBase.getStore().checkOut(); // update checked out count
@@ -1275,20 +1275,20 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     if (editset != shadowObject.editset)
       {
-	// couldn't clear the shadow..  this editSet
-	// wasn't the one to create the shadow
+        // couldn't clear the shadow..  this editSet
+        // wasn't the one to create the shadow
 
-	// "DBObject.clearShadow(): couldn't clear, editset mismatch"
-	Ganymede.debug(ts.l("clearShadow.mismatch"));
+        // "DBObject.clearShadow(): couldn't clear, editset mismatch"
+        Ganymede.debug(ts.l("clearShadow.mismatch"));
 
-	return false;
+        return false;
       }
 
     shadowObject = null;
 
     if (editset.session.GSession != null)
       {
-	editset.session.GSession.checkIn();
+        editset.session.GSession.checkIn();
       }
 
     objectBase.getStore().checkIn(); // update checked out count
@@ -1318,35 +1318,35 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     synchronized (fieldAry)
       {
-	for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
-	  {
-	    field = retrieveField(fieldDef.getID());
+        for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
+          {
+            field = retrieveField(fieldDef.getID());
 
-	    if (field != null)
-	      {
-		try
-		  {
-		    results.addElement(new FieldInfo(field));
-		  }
-		catch (GanyPermissionsException ex)
-		  {
-		    // swallow the exception without comment, we'll
-		    // just leave the field out of the vector
-		  }
-		catch (RemoteException ex)
-		  {
+            if (field != null)
+              {
+                try
+                  {
+                    results.addElement(new FieldInfo(field));
+                  }
+                catch (GanyPermissionsException ex)
+                  {
+                    // swallow the exception without comment, we'll
+                    // just leave the field out of the vector
+                  }
+                catch (RemoteException ex)
+                  {
                     // scream a bit about this exception so someone
                     // can take a look at it.
 
                     Ganymede.debug("Error in getFieldInfoVector():\n" + Ganymede.stackTrace(ex));
-		  }
-	      }
-	  }
+                  }
+              }
+          }
       }
 
     return results;
@@ -1365,10 +1365,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     synchronized (fieldAry)
       {
-	for (int i = 0; i < fieldAry.length; i++)
-	  {
-	    fieldVect.addElement(fieldAry[i]);
-	  }
+        for (int i = 0; i < fieldAry.length; i++)
+          {
+            fieldVect.addElement(fieldAry[i]);
+          }
       }
 
     return fieldVect;
@@ -1386,19 +1386,19 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     if (field == null)
       {
-	// "null value passed to addField"
-	throw new IllegalArgumentException(ts.l("addField.null"));
+        // "null value passed to addField"
+        throw new IllegalArgumentException(ts.l("addField.null"));
       }
 
     if (retrieveField(field.getID()) != null)
       {
-	// "Error, field {0} is already present in object {1}."
-	throw new IllegalArgumentException(ts.l("addField.preexisting", field.getID(), this.toString()));
+        // "Error, field {0} is already present in object {1}."
+        throw new IllegalArgumentException(ts.l("addField.preexisting", field.getID(), this.toString()));
       }
 
     DBField[] newFieldAry = new DBField[fieldAry.length + 1];
@@ -1431,52 +1431,52 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     if (field == null)
       {
-	// "null value passed to saveField"
-	throw new IllegalArgumentException(ts.l("saveField.null"));
+        // "null value passed to saveField"
+        throw new IllegalArgumentException(ts.l("saveField.null"));
       }
 
     synchronized (fieldAry)
       {
-	int i = 0;
+        int i = 0;
 
-	while (i < fieldAry.length)
-	  {
-	    if (fieldAry[i] == null)
-	      {
-		fieldAry[i] = field;
+        while (i < fieldAry.length)
+          {
+            if (fieldAry[i] == null)
+              {
+                fieldAry[i] = field;
 
-		return;
-	      }
+                return;
+              }
 
-	    if (fieldAry[i].getID() > field.getID())
-	      {
-		break;
-	      }
+            if (fieldAry[i].getID() > field.getID())
+              {
+                break;
+              }
 
-	    i++;
-	  }
+            i++;
+          }
 
-	if (i == fieldAry.length)
-	  {
-	    throw new ArrayIndexOutOfBoundsException("saveField overran field array length");
-	  }
+        if (i == fieldAry.length)
+          {
+            throw new ArrayIndexOutOfBoundsException("saveField overran field array length");
+          }
 
-	DBField currentField = null;
-	DBField bubbleField = field;
+        DBField currentField = null;
+        DBField bubbleField = field;
 
-	while (i < fieldAry.length)
-	  {
-	    currentField = fieldAry[i];
-	    fieldAry[i] = bubbleField;
-	    bubbleField = currentField;
+        while (i < fieldAry.length)
+          {
+            currentField = fieldAry[i];
+            fieldAry[i] = bubbleField;
+            bubbleField = currentField;
 
-	    i++;
-	  }
+            i++;
+          }
       }
   }
 
@@ -1496,31 +1496,31 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     if (field == null)
       {
-	// "null value passed to replaceField"
-	throw new IllegalArgumentException(ts.l("replaceField.null"));
+        // "null value passed to replaceField"
+        throw new IllegalArgumentException(ts.l("replaceField.null"));
       }
 
     synchronized (fieldAry)
       {
-	int index = java.util.Arrays.binarySearch(fieldAry, field);
+        int index = java.util.Arrays.binarySearch(fieldAry, field);
 
-	if (index < 0)
-	  {
-	    // "Error, DBObject.replaceField could not find matching field"
-	    throw new IllegalArgumentException(ts.l("replaceField.none"));
-	  }
+        if (index < 0)
+          {
+            // "Error, DBObject.replaceField could not find matching field"
+            throw new IllegalArgumentException(ts.l("replaceField.none"));
+          }
 
-	fieldAry[index] = field;
+        fieldAry[index] = field;
 
-	if (permCacheAry != null)
-	  {
-	    permCacheAry[index] = null;
-	  }
+        if (permCacheAry != null)
+          {
+            permCacheAry[index] = null;
+          }
       }
   }
 
@@ -1535,25 +1535,25 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     synchronized (fieldAry)
       {
-	int index = java.util.Arrays.binarySearch(fieldAry, id);
+        int index = java.util.Arrays.binarySearch(fieldAry, id);
 
-	if (index < 0)
-	  {
-	    // "Error, DBObject.replaceField could not find matching field"
-	    throw new IllegalArgumentException(ts.l("replaceField.none"));
-	  }
+        if (index < 0)
+          {
+            // "Error, DBObject.replaceField could not find matching field"
+            throw new IllegalArgumentException(ts.l("replaceField.none"));
+          }
 
-	fieldAry[index] = null;
+        fieldAry[index] = null;
 
-	if (permCacheAry != null)
-	  {
-	    permCacheAry[index] = null;
-	  }
+        if (permCacheAry != null)
+          {
+            permCacheAry[index] = null;
+          }
       }
   }
 
@@ -1568,19 +1568,19 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     synchronized (fieldAry)
       {
-	int index = java.util.Arrays.binarySearch(fieldAry, id);
+        int index = java.util.Arrays.binarySearch(fieldAry, id);
 
-	if (index < 0)
-	  {
-	    return null;
-	  }
+        if (index < 0)
+          {
+            return null;
+          }
 
-	return fieldAry[index];
+        return fieldAry[index];
       }
   }
 
@@ -1595,18 +1595,18 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     synchronized (fieldAry)
       {
-	for (int i = 0; i < fieldAry.length; i++)
-	  {
-	    if (fieldAry[i] != null && fieldAry[i].getName().equalsIgnoreCase(fieldName))
-	      {
-		return fieldAry[i];
-	      }
-	  }
+        for (int i = 0; i < fieldAry.length; i++)
+          {
+            if (fieldAry[i] != null && fieldAry[i].getName().equalsIgnoreCase(fieldName))
+              {
+                return fieldAry[i];
+              }
+          }
       }
 
     return null;
@@ -1623,12 +1623,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     synchronized (fieldAry)
       {
-	return (short) java.util.Arrays.binarySearch(fieldAry, id);
+        return (short) java.util.Arrays.binarySearch(fieldAry, id);
       }
   }
 
@@ -1641,22 +1641,22 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     synchronized (fieldAry)
       {
-	int index = java.util.Arrays.binarySearch(fieldAry, id);
+        int index = java.util.Arrays.binarySearch(fieldAry, id);
 
-	if (index < 0)
-	  {
-	    return;
-	  }
+        if (index < 0)
+          {
+            return;
+          }
 
-	if (permCacheAry != null)
-	  {
-	    permCacheAry[index] = null;
-	  }
+        if (permCacheAry != null)
+          {
+            permCacheAry[index] = null;
+          }
       }
   }
 
@@ -1701,7 +1701,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (field != null)
       {
-	return field.toString();
+        return field.toString();
       }
 
     return "<<" + id + ">>";
@@ -1723,20 +1723,20 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     synchronized (fieldAry)
       {
-	for (int i = 0; i < fieldAry.length; i++)
-	  {
-	    field = fieldAry[i];
+        for (int i = 0; i < fieldAry.length; i++)
+          {
+            field = fieldAry[i];
 
-	    if (field != null && field.getName().equalsIgnoreCase(fieldname))
-	      {
-		return field.getID();
-	      }
-	  }
+            if (field != null && field.getName().equalsIgnoreCase(fieldname))
+              {
+                return field.getID();
+              }
+          }
       }
 
     return -1;
@@ -1756,30 +1756,30 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     synchronized (fieldAry)
       {
-	for (int i = 0; i < fieldAry.length; i++)
-	  {
-	    if (fieldAry[i] != null)
-	      {
-		count++;
-	      }
-	  }
+        for (int i = 0; i < fieldAry.length; i++)
+          {
+            if (fieldAry[i] != null)
+              {
+                count++;
+              }
+          }
 
-	result = new db_field[count];
+        result = new db_field[count];
 
-	count = 0;
+        count = 0;
 
-	for (int i = 0; i < fieldAry.length; i++)
-	  {
-	    if (fieldAry[i] != null)
-	      {
-		result[count++] = fieldAry[i];
-	      }
-	  }
+        for (int i = 0; i < fieldAry.length; i++)
+          {
+            if (fieldAry[i] != null)
+              {
+                result[count++] = fieldAry[i];
+              }
+          }
       }
 
     return result;
@@ -1807,7 +1807,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   public boolean isInactivated()
   {
     return (objectBase.canInactivate() &&
-	    (getFieldValueLocal(SchemaConstants.RemovalField) != null));
+            (getFieldValueLocal(SchemaConstants.RemovalField) != null));
   }
 
   /**
@@ -1831,7 +1831,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     // sync on fieldAry since we are looping over our fields and since
@@ -1840,44 +1840,44 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     synchronized (fieldAry)
       {
-	// loop over the fields in display order (rather than the hash
-	// order in the fieldAry)
+        // loop over the fields in display order (rather than the hash
+        // order in the fieldAry)
 
-	Vector fieldTemplates = objectBase.getFieldTemplateVector();
+        Vector fieldTemplates = objectBase.getFieldTemplateVector();
 
-	for (int i = 0; i < fieldTemplates.size(); i++)
-	  {
-	    FieldTemplate template = (FieldTemplate) fieldTemplates.elementAt(i);
+        for (int i = 0; i < fieldTemplates.size(); i++)
+          {
+            FieldTemplate template = (FieldTemplate) fieldTemplates.elementAt(i);
 
-	    field = retrieveField(template.getID());
+            field = retrieveField(template.getID());
 
-	    if (field != null && field.isDefined())
-	      {
-		ReturnVal retVal = field.validateContents();
+            if (field != null && field.isDefined())
+              {
+                ReturnVal retVal = field.validateContents();
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    if (resultBuffer.length() > 0)
-		      {
-			resultBuffer.append("\n");
-		      }
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    if (resultBuffer.length() > 0)
+                      {
+                        resultBuffer.append("\n");
+                      }
 
-		    resultBuffer.append(retVal.getDialogText());
-		  }
-	      }
-	  }
+                    resultBuffer.append(retVal.getDialogText());
+                  }
+              }
+          }
       }
 
     if (resultBuffer.length() > 0)
       {
-	// we're using the non-logging ReturnVal.setErrorText() rather
-	// than using Ganymede.createErrorDialog() because the
-	// DBField.validateContents() call itself uses
-	// Ganymede.createErrorDialog().
+        // we're using the non-logging ReturnVal.setErrorText() rather
+        // than using Ganymede.createErrorDialog() because the
+        // DBField.validateContents() call itself uses
+        // Ganymede.createErrorDialog().
 
-	ReturnVal retVal = new ReturnVal(false);
-	retVal.setErrorText(resultBuffer.toString());
-	return retVal;
+        ReturnVal retVal = new ReturnVal(false);
+        retVal.setErrorText(resultBuffer.toString());
+        return retVal;
       }
 
     return null;
@@ -1923,52 +1923,52 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     synchronized (fieldAry)
       {
-	// assume that the object type's fields will not be changed at a
-	// time when this method is called.  A reasonable assumption,
-	// as the objectbase field table is only altered when the
-	// schema is being edited.
+        // assume that the object type's fields will not be changed at a
+        // time when this method is called.  A reasonable assumption,
+        // as the objectbase field table is only altered when the
+        // schema is being edited.
 
-	for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
-	  {
-	    try
-	      {
-		// nota bene: calling fieldRequired here could
-		// potentially leave us open for threadlock, depending
-		// on how the fieldRequired method is written.  I
-		// think this is a low-level risk, but not zero.
+        for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
+          {
+            try
+              {
+                // nota bene: calling fieldRequired here could
+                // potentially leave us open for threadlock, depending
+                // on how the fieldRequired method is written.  I
+                // think this is a low-level risk, but not zero.
 
-		if (objectBase.getObjectHook().fieldRequired(this, fieldDef.getID()))
-		  {
-		    DBField field = retrieveField(fieldDef.getID());
+                if (objectBase.getObjectHook().fieldRequired(this, fieldDef.getID()))
+                  {
+                    DBField field = retrieveField(fieldDef.getID());
 
-		    if (field == null || !field.isDefined())
-		      {
-			localFields.addElement(fieldDef.getName());
-		      }
-		  }
-	      }
-	    catch (NullPointerException ex)
-	      {
-		Ganymede.logError(ex, "Null pointer exception in checkRequiredFields().\n" +
+                    if (field == null || !field.isDefined())
+                      {
+                        localFields.addElement(fieldDef.getName());
+                      }
+                  }
+              }
+            catch (NullPointerException ex)
+              {
+                Ganymede.logError(ex, "Null pointer exception in checkRequiredFields().\n" +
                                   "My type is " + getTypeName() + "\nMy invid is " + getInvid());
-	      }
-	  }
+              }
+          }
       }
 
     // if all required fields checked out, return null to signify success
 
     if (localFields.size() == 0)
       {
-	return null;
+        return null;
       }
     else
       {
-	return localFields;
+        return localFields;
       }
   }
 
@@ -1985,7 +1985,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (dbf == null)
       {
-	return null;
+        return null;
       }
 
     return dbf.value();
@@ -2026,7 +2026,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (dbf == null)
       {
-	return null;
+        return null;
       }
 
     return dbf.value();
@@ -2080,8 +2080,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (field == null)
       {
-	// "Error, object {0} does not contain a field named "{1}"."
-	return Ganymede.createErrorDialog(ts.l("global.bad_field_name", this.getTypeName(), fieldName));
+        // "Error, object {0} does not contain a field named "{1}"."
+        return Ganymede.createErrorDialog(ts.l("global.bad_field_name", this.getTypeName(), fieldName));
       }
 
     // NB: we would go ahead and do like we did for getFieldValue(),
@@ -2111,7 +2111,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     // "setFieldValue called on a non-editable object"
 
     return Ganymede.createErrorDialog(ts.l("setFieldValue.noneditable"),
-				      ts.l("setFieldValue.noneditabletext"));
+                                      ts.l("setFieldValue.noneditabletext"));
   }
 
   /**
@@ -2144,13 +2144,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     if (f == null)
       {
-	return null;
+        return null;
       }
 
     if (f.isVector())
       {
-	// "Couldn't get scalar value on vector field {0}"
-	throw new IllegalArgumentException(ts.l("getFieldValue.badtype", f.getName()));
+        // "Couldn't get scalar value on vector field {0}"
+        throw new IllegalArgumentException(ts.l("getFieldValue.badtype", f.getName()));
       }
 
     return f.getValue();
@@ -2180,13 +2180,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     if (f == null)
       {
-	return null;
+        return null;
       }
 
     if (f.isVector())
       {
-	// "Couldn't get scalar value on vector field {0}"
-	throw new IllegalArgumentException(ts.l("getFieldValue.badtype", f.getName()));
+        // "Couldn't get scalar value on vector field {0}"
+        throw new IllegalArgumentException(ts.l("getFieldValue.badtype", f.getName()));
       }
 
     return f.getValueLocal();
@@ -2287,36 +2287,36 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (session == null)
       {
-	if (this.gSession != null)
-	  {
-	    session = this.gSession.getDBSession();
-	  }
+        if (this.gSession != null)
+          {
+            session = this.gSession.getDBSession();
+          }
       }
 
     if (session != null)
       {
-	DBObject retObj = session.viewDBObject(target);
+        DBObject retObj = session.viewDBObject(target);
 
-	if (retObj == null)
-	  {
-	    return null;
-	  }
+        if (retObj == null)
+          {
+            return null;
+          }
 
-	if (retObj instanceof DBEditObject && forceOriginal)
-	  {
-	    return ((DBEditObject) retObj).getOriginal();
-	  }
-	else
-	  {
-	    return retObj;
-	  }
+        if (retObj instanceof DBEditObject && forceOriginal)
+          {
+            return ((DBEditObject) retObj).getOriginal();
+          }
+        else
+          {
+            return retObj;
+          }
       }
     else
       {
-	// we're not being viewed in a session context.. go ahead and
-	// look it up in the DBStore directly
+        // we're not being viewed in a session context.. go ahead and
+        // look it up in the DBStore directly
 
-	return Ganymede.db.getObject(target);
+        return Ganymede.db.getObject(target);
       }
   }
 
@@ -2473,13 +2473,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     if (f == null)
       {
-	return false;
+        return false;
       }
 
     if (f.isVector())
       {
-	// "Can't call isSet on a vector field."
-	throw new RuntimeException(ts.l("isSet.vector"));
+        // "Can't call isSet on a vector field."
+        throw new RuntimeException(ts.l("isSet.vector"));
       }
 
     Boolean bool = (Boolean) f.getValueLocal();
@@ -2517,13 +2517,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     if (f == null)
       {
-	return null;
+        return null;
       }
 
     if (!f.isVector())
       {
-	// "Couldn't get vector values on scalar field {0}"
-	throw new IllegalArgumentException(ts.l("getFieldValues.badtype", f.getName()));
+        // "Couldn't get vector values on scalar field {0}"
+        throw new IllegalArgumentException(ts.l("getFieldValues.badtype", f.getName()));
       }
 
     return f.getValues();
@@ -2567,13 +2567,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     if (f == null)
       {
-	return null;
+        return null;
       }
 
     if (!f.isVector())
       {
-	// "Couldn't get vector values on scalar field {0}"
-	throw new IllegalArgumentException(ts.l("getFieldValues.badtype", f.getName()));
+        // "Couldn't get vector values on scalar field {0}"
+        throw new IllegalArgumentException(ts.l("getFieldValues.badtype", f.getName()));
       }
 
     return f.getValuesLocal();
@@ -2598,51 +2598,51 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     synchronized (fieldAry)
       {
-	if (customOnly)
-	  {
-	    // return the custom fields only, in display order
+        if (customOnly)
+          {
+            // return the custom fields only, in display order
 
-	    for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
-	      {
-		field = retrieveField(fieldDef.getID());
+            for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
+              {
+                field = retrieveField(fieldDef.getID());
 
-		if (field != null)
-		  {
-		    results.addElement(field);
-		  }
-	      }
-	  }
-	else			// all fields in this object
-	  {
-	    // first the display fields, in display order
+                if (field != null)
+                  {
+                    results.addElement(field);
+                  }
+              }
+          }
+        else                    // all fields in this object
+          {
+            // first the display fields, in display order
 
-	    for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
-	      {
-		field = retrieveField(fieldDef.getID());
+            for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
+              {
+                field = retrieveField(fieldDef.getID());
 
-		if (field != null)
-		  {
-		    results.addElement(field);
-		  }
-	      }
+                if (field != null)
+                  {
+                    results.addElement(field);
+                  }
+              }
 
-	    // then tack on the built-in fields
+            // then tack on the built-in fields
 
-	    for (int i = 0; i < fieldAry.length; i++)
-	      {
-		field = fieldAry[i];
+            for (int i = 0; i < fieldAry.length; i++)
+              {
+                field = fieldAry[i];
 
-		if (field != null && field.isBuiltIn())
-		  {
-		    results.addElement(field);
-		  }
-	      }
-	  }
+                if (field != null && field.isBuiltIn())
+                  {
+                    results.addElement(field);
+                  }
+              }
+          }
       }
 
     return results;
@@ -2763,7 +2763,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public String lookupLabel(DBObject object)
   {
-    return object.getLabel();	// default
+    return object.getLabel();   // default
   }
 
   /**
@@ -2789,55 +2789,55 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     DBField oldAry[] = fieldAry;
 
     synchronized (oldAry)
       {
-	for (int i = 0; i < fieldAry.length; i++)
-	  {
-	    field = fieldAry[i];
+        for (int i = 0; i < fieldAry.length; i++)
+          {
+            field = fieldAry[i];
 
-	    if (field == null)
-	      {
-		continue;
-	      }
+            if (field == null)
+              {
+                continue;
+              }
 
-	    if (newBase.getField(field.getID()) != null && field.isDefined())
-	      {
-		count++;
-	      }
-	  }
+            if (newBase.getField(field.getID()) != null && field.isDefined())
+              {
+                count++;
+              }
+          }
 
-	DBField tmpFieldAry[] = new DBField[count];
+        DBField tmpFieldAry[] = new DBField[count];
 
-	// we sync on the new field ary before we update the fieldAry ref so
-	// that we can preemptively block other threads from messing
-	// with fieldAry until we get it set the way we want
+        // we sync on the new field ary before we update the fieldAry ref so
+        // that we can preemptively block other threads from messing
+        // with fieldAry until we get it set the way we want
 
-	synchronized (tmpFieldAry)
-	  {
-	    fieldAry = tmpFieldAry;
+        synchronized (tmpFieldAry)
+          {
+            fieldAry = tmpFieldAry;
 
-	    permCacheAry = null;	// okay in synchronized block
+            permCacheAry = null;        // okay in synchronized block
 
-	    for (int i = 0; i < oldAry.length; i++)
-	      {
-		field = oldAry[i];
+            for (int i = 0; i < oldAry.length; i++)
+              {
+                field = oldAry[i];
 
-		if (field == null)
-		  {
-		    continue;
-		  }
+                if (field == null)
+                  {
+                    continue;
+                  }
 
-		if (newBase.getField(field.getID()) != null && field.isDefined())
-		  {
-		    saveField(field); // safe since we start with an empty fieldAry
-		  }
-	      }
-	  }
+                if (newBase.getField(field.getID()) != null && field.isDefined())
+                  {
+                    saveField(field); // safe since we start with an empty fieldAry
+                  }
+              }
+          }
       }
   }
 
@@ -2853,14 +2853,14 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     if (!isEmbedded())
       {
-	return null;
+        return null;
       }
 
     InvidDBField field = (InvidDBField) getField(SchemaConstants.ContainerField);
 
     if (field == null)
       {
-	return null;
+        return null;
       }
 
     return field.getValueString();
@@ -2877,41 +2877,41 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     HashSet<Invid> results = new HashSet<Invid>();
 
     synchronized (fieldAry)
       {
-	for (int i = 0; i < fieldAry.length; i++)
-	  {
-	    DBField field = fieldAry[i];
+        for (int i = 0; i < fieldAry.length; i++)
+          {
+            DBField field = fieldAry[i];
 
-	    if (field == null)
-	      {
-		continue;
-	      }
+            if (field == null)
+              {
+                continue;
+              }
 
-	    if (field instanceof InvidDBField)
-	      {
-		InvidDBField invField = (InvidDBField) field;
+            if (field instanceof InvidDBField)
+              {
+                InvidDBField invField = (InvidDBField) field;
 
-		if (!invField.isDefined() || invField.getFieldDef().isSymmetric())
-		  {
-		    continue;
-		  }
+                if (!invField.isDefined() || invField.getFieldDef().isSymmetric())
+                  {
+                    continue;
+                  }
 
-		if (invField.isVector())
-		  {
-		    results.addAll((Vector<Invid>) invField.getValuesLocal());
-		  }
-		else
-		  {
-		    results.add((Invid) invField.value);
-		  }
-	      }
-	  }
+                if (invField.isVector())
+                  {
+                    results.addAll((Vector<Invid>) invField.getValuesLocal());
+                  }
+                else
+                  {
+                    results.add((Invid) invField.value);
+                  }
+              }
+          }
       }
 
     return results;
@@ -3027,7 +3027,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (permManager != null && !permManager.getPerm(this).isVisible())
       {
-	return result;
+        return result;
       }
 
     this.appendObjectInfo(result, null, false);
@@ -3056,125 +3056,125 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
       {
-	DBField field = retrieveField(fieldDef.getID());
+        DBField field = retrieveField(fieldDef.getID());
 
-	if (field != null && field.isDefined() && (local || field.isVisible()))
-	  {
-	    if (!field.isEditInPlace())
-	      {
-		if (prefix != null)
-		  {
-		    buffer.append(prefix);
-		  }
+        if (field != null && field.isDefined() && (local || field.isVisible()))
+          {
+            if (!field.isEditInPlace())
+              {
+                if (prefix != null)
+                  {
+                    buffer.append(prefix);
+                  }
 
-		buffer.append(field.getName());
-		buffer.append(" : ");
-		buffer.append(field.getValueString());
-		buffer.append("\n");
-	      }
-	    else
-	      {
-		InvidDBField invField = (InvidDBField) field;
+                buffer.append(field.getName());
+                buffer.append(" : ");
+                buffer.append(field.getValueString());
+                buffer.append("\n");
+              }
+            else
+              {
+                InvidDBField invField = (InvidDBField) field;
 
-		for (int j = 0; j < invField.size(); j++)
-		  {
-		    if (prefix != null)
-		      {
-			buffer.append(prefix);
-		      }
+                for (int j = 0; j < invField.size(); j++)
+                  {
+                    if (prefix != null)
+                      {
+                        buffer.append(prefix);
+                      }
 
-		    buffer.append(field.getName());
-		    buffer.append("[");
-		    buffer.append(j);
-		    buffer.append("]");
-		    buffer.append("\n");
+                    buffer.append(field.getName());
+                    buffer.append("[");
+                    buffer.append(j);
+                    buffer.append("]");
+                    buffer.append("\n");
 
-		    Invid x = invField.value(j);
+                    Invid x = invField.value(j);
 
-		    DBObject remObj = null;
+                    DBObject remObj = null;
 
-		    if (gSession != null)
-		      {
-			// if this object has been checked out for
-			// viewing by a session, we'll use
-			// view_db_object() so that we don't
-			// reveal fields that should not be seen.
+                    if (gSession != null)
+                      {
+                        // if this object has been checked out for
+                        // viewing by a session, we'll use
+                        // view_db_object() so that we don't
+                        // reveal fields that should not be seen.
 
-			try
-			  {
-			    ReturnVal retVal = gSession.view_db_object(x);
-			    remObj = (DBObject) retVal.getObject();
-			  }
-			catch (NotLoggedInException ex)
-			  {
-			  }
-		      }
+                        try
+                          {
+                            ReturnVal retVal = gSession.view_db_object(x);
+                            remObj = (DBObject) retVal.getObject();
+                          }
+                        catch (NotLoggedInException ex)
+                          {
+                          }
+                      }
 
-		    if (remObj == null)
-		      {
-			// we use DBStore's static viewDBObject
-			// method so that we can call this even
-			// before the GanymedeServer object is
-			// initialized
+                    if (remObj == null)
+                      {
+                        // we use DBStore's static viewDBObject
+                        // method so that we can call this even
+                        // before the GanymedeServer object is
+                        // initialized
 
-			remObj = DBStore.viewDBObject(x);
-		      }
+                        remObj = DBStore.viewDBObject(x);
+                      }
 
-		    if (remObj instanceof DBEditObject)
-		      {
-			DBEditObject eO = (DBEditObject) remObj;
+                    if (remObj instanceof DBEditObject)
+                      {
+                        DBEditObject eO = (DBEditObject) remObj;
 
-			if (eO.getStatus() == ObjectStatus.DELETING)
-			  {
-			    remObj = eO.getOriginal();
-			  }
-		      }
+                        if (eO.getStatus() == ObjectStatus.DELETING)
+                          {
+                            remObj = eO.getOriginal();
+                          }
+                      }
 
-		    if (prefix != null)
-		      {
-			remObj.appendObjectInfo(buffer, prefix + "\t", local);
-		      }
-		    else
-		      {
-			remObj.appendObjectInfo(buffer, "\t", local);
-		      }
-		  }
-	      }
-	  }
+                    if (prefix != null)
+                      {
+                        remObj.appendObjectInfo(buffer, prefix + "\t", local);
+                      }
+                    else
+                      {
+                        remObj.appendObjectInfo(buffer, "\t", local);
+                      }
+                  }
+              }
+          }
       }
 
     if (fieldAry == null)
       {
-	throw new NullPointerException(ts.l("global.pseudostatic"));
+        throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
     synchronized (fieldAry)
       {
-	// okay, got all the custom fields.. now we need to summarize all the
-	// built-in fields that were not listed in customFields.
+        // okay, got all the custom fields.. now we need to summarize all the
+        // built-in fields that were not listed in customFields.
 
-	for (int i = 0; i < fieldAry.length; i++)
-	  {
-	    DBField field = fieldAry[i];
+        for (int i = 0; i < fieldAry.length; i++)
+          {
+            DBField field = fieldAry[i];
 
-	    if (field == null || !field.isBuiltIn() || !field.isDefined())
-	      {
-		continue;
-	      }
+            if (field == null || !field.isBuiltIn() || !field.isDefined())
+              {
+                continue;
+              }
 
-	    if (local || field.isVisible())
-	      {
-		if (prefix != null)
-		  {
-		    buffer.append(prefix);
-		  }
+            if (local || field.isVisible())
+              {
+                if (prefix != null)
+                  {
+                    buffer.append(prefix);
+                  }
 
-		buffer.append(field.getName());
-		buffer.append(" : ");
-		buffer.append(field.getValueString());
-		buffer.append("\n");
-	      }
-	  }
+                buffer.append(field.getName());
+                buffer.append(" : ");
+                buffer.append(field.getValueString());
+                buffer.append("\n");
+              }
+          }
       }
   }
 

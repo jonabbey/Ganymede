@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -107,35 +107,35 @@ public class CategoryTransport implements java.io.Serializable {
 
     if (buffer == null)
       {
-	buffer = new StringBuffer();
+        buffer = new StringBuffer();
       }
 
     // add our label
 
     if (text != null)
       {
-	chars = text.toCharArray();
+        chars = text.toCharArray();
       }
     else
       {
-	buffer.append("|");
-	return;
+        buffer.append("|");
+        return;
       }
-	
+        
     for (int j = 0; j < chars.length; j++)
       {
-	if (chars[j] == '|')
-	  {
-	    buffer.append("\\|");
-	  }
-	else if (chars[j] == '\\')
-	  {
-	    buffer.append("\\\\");
-	  }
-	else
-	  {
-	    buffer.append(chars[j]);
-	  }
+        if (chars[j] == '|')
+          {
+            buffer.append("\\|");
+          }
+        else if (chars[j] == '\\')
+          {
+            buffer.append("\\\\");
+          }
+        else
+          {
+            buffer.append(chars[j]);
+          }
       }
 
     buffer.append("|");

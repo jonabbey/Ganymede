@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -174,23 +174,23 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     new Comparator() {
     public int compare(Object a, Object b) 
       {
-	DBObjectBaseField aF, bF;
+        DBObjectBaseField aF, bF;
 
-	aF = (DBObjectBaseField) a;
-	bF = (DBObjectBaseField) b;
+        aF = (DBObjectBaseField) a;
+        bF = (DBObjectBaseField) b;
 
-	if (aF.tmp_displayOrder < bF.tmp_displayOrder)
-	  {
-	    return -1;
-	  }
-	else if (bF.tmp_displayOrder > aF.tmp_displayOrder)
-	  { 
-	    return 1;
-	  } 
-	else
-	  { 
-	    return 0;
-	  }
+        if (aF.tmp_displayOrder < bF.tmp_displayOrder)
+          {
+            return -1;
+          }
+        else if (bF.tmp_displayOrder > aF.tmp_displayOrder)
+          { 
+            return 1;
+          } 
+        else
+          { 
+            return 0;
+          }
       }
   };
 
@@ -206,13 +206,13 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     if (upgradeClassMap == null)
       {
-	upgradeClassMap = new Hashtable();
-	upgradeClassMap.put("arlut.csd.ganymede.eventCustom", "arlut.csd.ganymede.server.eventCustom");
-	upgradeClassMap.put("arlut.csd.ganymede.objectEventCustom", "arlut.csd.ganymede.server.objectEventCustom");
-	upgradeClassMap.put("arlut.csd.ganymede.ownerCustom", "arlut.csd.ganymede.server.ownerCustom");
-	upgradeClassMap.put("arlut.csd.ganymede.adminPersonaCustom", "arlut.csd.ganymede.server.adminPersonaCustom");
-	upgradeClassMap.put("arlut.csd.ganymede.permCustom", "arlut.csd.ganymede.server.permCustom");
-	upgradeClassMap.put("arlut.csd.ganymede.taskCustom", "arlut.csd.ganymede.server.taskCustom");
+        upgradeClassMap = new Hashtable();
+        upgradeClassMap.put("arlut.csd.ganymede.eventCustom", "arlut.csd.ganymede.server.eventCustom");
+        upgradeClassMap.put("arlut.csd.ganymede.objectEventCustom", "arlut.csd.ganymede.server.objectEventCustom");
+        upgradeClassMap.put("arlut.csd.ganymede.ownerCustom", "arlut.csd.ganymede.server.ownerCustom");
+        upgradeClassMap.put("arlut.csd.ganymede.adminPersonaCustom", "arlut.csd.ganymede.server.adminPersonaCustom");
+        upgradeClassMap.put("arlut.csd.ganymede.permCustom", "arlut.csd.ganymede.server.permCustom");
+        upgradeClassMap.put("arlut.csd.ganymede.taskCustom", "arlut.csd.ganymede.server.taskCustom");
       }
   }
 
@@ -543,7 +543,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * more details on the use of DBEditObjects as objectHooks.</p>
    */
 
-  private DBEditObject objectHook;	
+  private DBEditObject objectHook;      
 
   /* -- */
 
@@ -630,38 +630,38 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     synchronized (original)
       {
-	object_name = original.object_name;
-	classname = original.classname;
-	classOptionString = original.classOptionString;
-	classdef = original.classdef;
-	type_code = original.type_code;
-	label_id = original.label_id;
-	category = original.category;
-	embedded = original.embedded;
+        object_name = original.object_name;
+        classname = original.classname;
+        classOptionString = original.classOptionString;
+        classdef = original.classdef;
+        type_code = original.type_code;
+        label_id = original.label_id;
+        category = original.category;
+        embedded = original.embedded;
     
-	// make copies of all the custom field definitions for this
-	// object type, and save them into our own field hash.
+        // make copies of all the custom field definitions for this
+        // object type, and save them into our own field hash.
     
-	for (DBObjectBaseField fieldDef: original.customFields)
-	  {
-	    DBObjectBaseField bf = new DBObjectBaseField(fieldDef, this);
+        for (DBObjectBaseField fieldDef: original.customFields)
+          {
+            DBObjectBaseField bf = new DBObjectBaseField(fieldDef, this);
 
-	    addFieldToEnd(bf);
-	  }
+            addFieldToEnd(bf);
+          }
 
-	// remember the objects.. note that we don't at this point notify
-	// the objects that this new DBObjectBase is their owner.. we'll
-	// take care of that when and if the DBSchemaEdit base editing session
-	// commits this copy
+        // remember the objects.. note that we don't at this point notify
+        // the objects that this new DBObjectBase is their owner.. we'll
+        // take care of that when and if the DBSchemaEdit base editing session
+        // commits this copy
 
-	objectTable = original.objectTable;
-	iterationList = original.iterationList; // this is safe to do only in the schema editing context
+        objectTable = original.objectTable;
+        iterationList = original.iterationList; // this is safe to do only in the schema editing context
 
-	maxid = original.maxid;
+        maxid = original.maxid;
     
-	objectHook = original.objectHook;
+        objectHook = original.objectHook;
 
-	lastChange = new Date();
+        lastChange = new Date();
       }
 
     editingMode = EditingMode.EDITING;
@@ -692,7 +692,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     if (editor == null && !store.isLoading())
       {
-	throw new IllegalStateException("Can't create a DBObjectBase unless loading or editing.");
+        throw new IllegalStateException("Can't create a DBObjectBase unless loading or editing.");
       }
 
     editingMode = EditingMode.INITIALIZING;
@@ -724,7 +724,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (createFields)
       {
-	createBuiltIns(embedded);
+        createBuiltIns(embedded);
       }
 
     objectHook = this.createHook();
@@ -742,20 +742,20 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (classname == null)
       {
-	out.writeUTF("");
+        out.writeUTF("");
       }
     else
       {
-	out.writeUTF(classname);
+        out.writeUTF(classname);
       }
 
     if (classOptionString == null) // added at file version 2.6
       {
-	out.writeUTF("");
+        out.writeUTF("");
       }
     else
       {
-	out.writeUTF(classOptionString);
+        out.writeUTF(classOptionString);
       }
 
     out.writeShort(type_code);
@@ -766,31 +766,31 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     for (DBObjectBaseField fieldDef: customFields)
       {
-	fieldDef.emit(out);
+        fieldDef.emit(out);
       }
     
-    out.writeShort(label_id);	// added at file version 1.1
+    out.writeShort(label_id);   // added at file version 1.1
 
-    out.writeBoolean(embedded);	// added at file version 1.5
+    out.writeBoolean(embedded); // added at file version 1.5
 
     if (dumpObjects)
       {
-	out.writeInt(maxid);	// added at file version 1.12
+        out.writeInt(maxid);    // added at file version 1.12
 
-	out.writeInt(objectTable.size());
+        out.writeInt(objectTable.size());
    
-	baseEnum = objectTable.elements();
+        baseEnum = objectTable.elements();
 
-	while (baseEnum.hasMoreElements())
-	  {
-	    ((DBObject) baseEnum.nextElement()).emit(out);
-	  }
+        while (baseEnum.hasMoreElements())
+          {
+            ((DBObject) baseEnum.nextElement()).emit(out);
+          }
       }
     else
       {
-	out.writeInt(0);	// maxid added at file version 1.12
+        out.writeInt(0);        // maxid added at file version 1.12
 
-	out.writeInt(0);	// table size
+        out.writeInt(0);        // table size
       }
   }
 
@@ -804,7 +804,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     /* -- */
 
-    setName(in.readUTF());	// we use setName to filter out any bad chars in transition to 1.0
+    setName(in.readUTF());      // we use setName to filter out any bad chars in transition to 1.0
     classname = in.readUTF();
 
     // if we're reading a ganymede.db file from before the DBStore 2.7
@@ -812,35 +812,35 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (store.isLessThan(2,7))
       {
-	prepClassMap();
-	
-	if (upgradeClassMap.containsKey(classname))
-	  {
-	    String newclassname = (String) upgradeClassMap.get(classname);
+        prepClassMap();
+        
+        if (upgradeClassMap.containsKey(classname))
+          {
+            String newclassname = (String) upgradeClassMap.get(classname);
 
-	    if (debug)
-	      {
-		// "DBObjectBase.receive(): loading {0}"
-		System.err.println(ts.l("receive.basename", object_name));
+            if (debug)
+              {
+                // "DBObjectBase.receive(): loading {0}"
+                System.err.println(ts.l("receive.basename", object_name));
 
-		// "DBObjectBase.receive(): Rewriting old system class name: {0} as {1}"
-		System.err.println(ts.l("receive.rewritingClassname", classname, newclassname));
-	      }
+                // "DBObjectBase.receive(): Rewriting old system class name: {0} as {1}"
+                System.err.println(ts.l("receive.rewritingClassname", classname, newclassname));
+              }
 
-	    classname = newclassname;
-	  }
+            classname = newclassname;
+          }
       }
 
     if (store.isAtLeast(2,6))
       {
-	classOptionString = in.readUTF();
+        classOptionString = in.readUTF();
       }
     else
       {
-	classOptionString = null;
+        classOptionString = null;
       }
 
-    type_code = in.readShort();	// read our index for the DBStore's objectbase hash
+    type_code = in.readShort(); // read our index for the DBStore's objectbase hash
 
     // how many field definitions?
 
@@ -851,22 +851,22 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     for (int i = 0; i < size; i++)
       {
-	field = new DBObjectBaseField(in, this);
+        field = new DBObjectBaseField(in, this);
 
-	// skip any system standard field definitions, which will
-	// be created in the field table separately
+        // skip any system standard field definitions, which will
+        // be created in the field table separately
 
-	if (field.getID() <= SchemaConstants.FinalSystemField)
-	  {
-	    continue;		// don't save the db's version of a system standard field
-	  }
+        if (field.getID() <= SchemaConstants.FinalSystemField)
+          {
+            continue;           // don't save the db's version of a system standard field
+          }
 
-	if (type_code == SchemaConstants.OwnerBase && field.getID() == SchemaConstants.OwnerObjectsOwned)
-	  {
-	    continue;		// as of DBStore 2.7, we no longer symmetrically link owner groups to owned objects
-	  }
+        if (type_code == SchemaConstants.OwnerBase && field.getID() == SchemaConstants.OwnerObjectsOwned)
+          {
+            continue;           // as of DBStore 2.7, we no longer symmetrically link owner groups to owned objects
+          }
 
-	addFieldToEnd(field);
+        addFieldToEnd(field);
       }
 
     // if we're reading an old ganymede.db file, sort the customFields
@@ -874,18 +874,18 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (store.isLessThan(2,0))
       {
-	new VecQuickSort(customFields, comparator).sort();
+        new VecQuickSort(customFields, comparator).sort();
       }
 
     // at file version 1.1, we introduced label_id's.
 
     if (store.isAtLeast(1,1))
       {
-	label_id = in.readShort();
+        label_id = in.readShort();
       }
     else
       {
-	label_id = -1;
+        label_id = -1;
       }
 
     // at file version 1.3, we introduced object base categories's.
@@ -895,14 +895,14 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (store.isBetweenRevs(1,3,2,0))
       {
-	String categoryName = in.readUTF();
+        String categoryName = in.readUTF();
 
-	category = (DBBaseCategory) store.getCategoryNode(categoryName);
+        category = (DBBaseCategory) store.getCategoryNode(categoryName);
 
-	if (category != null)
-	  {
-	    category.addNodeAfter(this, null); // add to end of category
-	  }
+        if (category != null)
+          {
+            category.addNodeAfter(this, null); // add to end of category
+          }
       }
 
     // if we're reading an old ganymede.db file, read in the display
@@ -912,16 +912,16 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (store.isBetweenRevs(1,4,2,0))
       {
-	tmp_displayOrder = in.readInt();
+        tmp_displayOrder = in.readInt();
       }
     else
       {
-	tmp_displayOrder = -1;
+        tmp_displayOrder = -1;
       }
 
     if (store.isAtLeast(1,5))
       {
-	embedded = in.readBoolean(); // added at file version 1.5
+        embedded = in.readBoolean(); // added at file version 1.5
       }
 
     // create the system standard fields for this object definition
@@ -931,7 +931,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (store.isAtLeast(1,12))
       {
-	maxid = in.readInt(); // added at file version 1.12
+        maxid = in.readInt(); // added at file version 1.12
       }
 
     // read in the objects belonging to this ObjectBase
@@ -940,35 +940,35 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (debug)
       {
-	// "DBObjectBase.receive(): Loading {0,number,#} {1} objects"
-	System.err.println(ts.l("receive.debug", Integer.valueOf(object_count), object_name));
+        // "DBObjectBase.receive(): Loading {0,number,#} {1} objects"
+        System.err.println(ts.l("receive.debug", Integer.valueOf(object_count), object_name));
       }
 
     List<DBObject> tmpIterationList = new ArrayList<DBObject>(object_count);
 
     if (object_count > 0)
       {
-	temp_val = gnu.trove.PrimeFinder.nextPrime((int) Math.ceil((object_count + GROWTHSPACE) / 0.75f));
+        temp_val = gnu.trove.PrimeFinder.nextPrime((int) Math.ceil((object_count + GROWTHSPACE) / 0.75f));
       }
     else
       {
-	temp_val = gnu.trove.PrimeFinder.nextPrime((int) Math.ceil(500 / 0.75f));
+        temp_val = gnu.trove.PrimeFinder.nextPrime((int) Math.ceil(500 / 0.75f));
       }
 
     objectTable = new DBObjectTable(temp_val,  0.75f);
 
     for (int i = 0; i < object_count; i++)
       {
-	tempObject = new DBObject(this, in, false);
+        tempObject = new DBObject(this, in, false);
 
-	if (tempObject.getID() > maxid)
-	  {
-	    maxid = tempObject.getID();
-	  }
+        if (tempObject.getID() > maxid)
+          {
+            maxid = tempObject.getID();
+          }
 
-	tmpIterationList.add(tempObject);
-	objectTable.putNoSyncNoRemove(tempObject);
-	tempObject.registerAsymmetricLinks(); // register anonymous invid fields
+        tmpIterationList.add(tempObject);
+        objectTable.putNoSyncNoRemove(tempObject);
+        tempObject.registerAsymmetricLinks(); // register anonymous invid fields
       }
     
     // lock and load
@@ -994,11 +994,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (session != null)
       {
-	transport.addChunk(String.valueOf(this.canCreate(session)));
+        transport.addChunk(String.valueOf(this.canCreate(session)));
       }
     else
       {
-	transport.addChunk(String.valueOf(true));
+        transport.addChunk(String.valueOf(true));
       }
 
     transport.addChunk(String.valueOf(this.isEmbedded()));
@@ -1022,11 +1022,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (session != null)
       {
-	transport.addChunk(String.valueOf(this.canCreate(session)));
+        transport.addChunk(String.valueOf(this.canCreate(session)));
       }
     else
       {
-	transport.addChunk(String.valueOf(true));
+        transport.addChunk(String.valueOf(true));
       }
 
     transport.addChunk(String.valueOf(this.isEmbedded()));
@@ -1045,58 +1045,58 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (embedded)
       {
-	/* Set up our 0 field, the containing object owning us */
+        /* Set up our 0 field, the containing object owning us */
 
-	bf = addSystemField("Containing Object",
-			    SchemaConstants.ContainerField,
-			    FieldType.INVID);
+        bf = addSystemField("Containing Object",
+                            SchemaConstants.ContainerField,
+                            FieldType.INVID);
 
-	bf.setTargetBase((short) -1);	// we can point at anything, but there'll be a special
-	bf.setTargetField((short) -1);	// procedure for handling deletion and what not..
-	bf.setVisibility(false); // we don't want the client to show the owner link
+        bf.setTargetBase((short) -1);   // we can point at anything, but there'll be a special
+        bf.setTargetField((short) -1);  // procedure for handling deletion and what not..
+        bf.setVisibility(false); // we don't want the client to show the owner link
 
-	// note that we won't have an expiration date or removal date
-	// for an embedded object
+        // note that we won't have an expiration date or removal date
+        // for an embedded object
       }
     else
       {
-	/* Set up our 0 field, the owner list. */
+        /* Set up our 0 field, the owner list. */
 
-	bf = addSystemField("Owner list",
-			    SchemaConstants.OwnerListField,
-			    FieldType.INVID);
+        bf = addSystemField("Owner list",
+                            SchemaConstants.OwnerListField,
+                            FieldType.INVID);
 
-	bf.setTargetBase(SchemaConstants.OwnerBase);
-	bf.setTargetField((short) -1);
-	bf.setArray(true);
+        bf.setTargetBase(SchemaConstants.OwnerBase);
+        bf.setTargetField((short) -1);
+        bf.setArray(true);
 
-	addSystemField("Expiration Date",
-		       SchemaConstants.ExpirationField,
-		       FieldType.DATE);
+        addSystemField("Expiration Date",
+                       SchemaConstants.ExpirationField,
+                       FieldType.DATE);
 
-	addSystemField("Removal Date",
-		       SchemaConstants.RemovalField,
-		       FieldType.DATE);
+        addSystemField("Removal Date",
+                       SchemaConstants.RemovalField,
+                       FieldType.DATE);
 
-	addSystemField("Notes",
-		       SchemaConstants.NotesField,
-		       FieldType.STRING);
+        addSystemField("Notes",
+                       SchemaConstants.NotesField,
+                       FieldType.STRING);
 
-	addSystemField("Creation Date",
-		       SchemaConstants.CreationDateField,
-		       FieldType.DATE);
+        addSystemField("Creation Date",
+                       SchemaConstants.CreationDateField,
+                       FieldType.DATE);
 
-	addSystemField("Creator Info",
-		       SchemaConstants.CreatorField,
-		       FieldType.STRING);
+        addSystemField("Creator Info",
+                       SchemaConstants.CreatorField,
+                       FieldType.STRING);
 
-	addSystemField("Modification Date",
-		       SchemaConstants.ModificationDateField,
-		       FieldType.DATE);
+        addSystemField("Modification Date",
+                       SchemaConstants.ModificationDateField,
+                       FieldType.DATE);
 
-	addSystemField("Modifier Info",
-		       SchemaConstants.ModifierField,
-		       FieldType.STRING);
+        addSystemField("Modifier Info",
+                       SchemaConstants.ModifierField,
+                       FieldType.STRING);
       }
   }
 
@@ -1113,28 +1113,28 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (classname != null && !classname.equals(""))
       {
-	xmlOut.startElementIndent("classdef");
-	xmlOut.attribute("name", classname);
+        xmlOut.startElementIndent("classdef");
+        xmlOut.attribute("name", classname);
 
-	if (classOptionString != null)
-	  {
-	    xmlOut.attribute("optionString", classOptionString);
-	  }
+        if (classOptionString != null)
+          {
+            xmlOut.attribute("optionString", classOptionString);
+          }
 
-	xmlOut.endElement("classdef");
+        xmlOut.endElement("classdef");
       }
 
     if (embedded)
       {
-	xmlOut.startElementIndent("embedded");
-	xmlOut.endElement("embedded");
+        xmlOut.startElementIndent("embedded");
+        xmlOut.endElement("embedded");
       }
 
     if (label_id != -1)
       {
-	xmlOut.startElementIndent("label");
-	xmlOut.attribute("fieldid", java.lang.Integer.toString(label_id));
-	xmlOut.endElement("label");
+        xmlOut.startElementIndent("label");
+        xmlOut.attribute("fieldid", java.lang.Integer.toString(label_id));
+        xmlOut.endElement("label");
       }
 
     emitXML_fields(xmlOut);
@@ -1158,39 +1158,39 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     synchronized (customFields)
       {
-	String lastTabName = null;
-	boolean first = true;
+        String lastTabName = null;
+        boolean first = true;
 
-	for (DBObjectBaseField fieldDef: customFields)
-	  {
-	    String currentTabName = fieldDef.getTabName();
+        for (DBObjectBaseField fieldDef: customFields)
+          {
+            String currentTabName = fieldDef.getTabName();
 
-	    if (currentTabName == null)
-	      {
-		currentTabName = ts.l("global.default_tab"); // "General"
-	      }
+            if (currentTabName == null)
+              {
+                currentTabName = ts.l("global.default_tab"); // "General"
+              }
 
-	    if (!StringUtils.stringEquals(currentTabName, lastTabName))
-	      {
-		if (lastTabName != null)
-		  {
-		    xmlOut.indentIn();
-		    xmlOut.endElementIndent("tab");
-		  }
+            if (!StringUtils.stringEquals(currentTabName, lastTabName))
+              {
+                if (lastTabName != null)
+                  {
+                    xmlOut.indentIn();
+                    xmlOut.endElementIndent("tab");
+                  }
 
-		xmlOut.startElementIndent("tab");
+                xmlOut.startElementIndent("tab");
 
-		xmlOut.attribute("name", currentTabName);
-		xmlOut.indentOut();
-	      }
+                xmlOut.attribute("name", currentTabName);
+                xmlOut.indentOut();
+              }
 
-	    fieldDef.emitXML(xmlOut);
+            fieldDef.emitXML(xmlOut);
 
-	    lastTabName = currentTabName;
-	  }
+            lastTabName = currentTabName;
+          }
 
-	xmlOut.indentIn();
-	xmlOut.endElementIndent("tab");
+        xmlOut.indentIn();
+        xmlOut.endElementIndent("tab");
       }
   }
 
@@ -1222,14 +1222,14 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (root == null || !root.matches("objectdef"))
       {
-	// "DBObjectBase.setXML(): root element != open objectdef: {0}"
-	throw new IllegalArgumentException(ts.l("setXML.baddoc", root));
+        // "DBObjectBase.setXML(): root element != open objectdef: {0}"
+        throw new IllegalArgumentException(ts.l("setXML.baddoc", root));
       }
 
     if (xmldebug)
       {
-	// "Setting XML for object Base..{0}"
-	err.println(ts.l("setXML.debugroot", root));
+        // "Setting XML for object Base..{0}"
+        err.println(ts.l("setXML.debugroot", root));
       }
 
     // GanymedeXMLSession.processSchema does a handleBaseRenaming up
@@ -1240,9 +1240,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (_objectName == null || _objectName.equals(""))
       {
-	return Ganymede.createErrorDialog("xml",
-					  // "DBObjectBase.setXML(): objectdef missing name attribute:\n {0}"
-					  ts.l("setXML.missingname", root.getTreeString()));
+        return Ganymede.createErrorDialog("xml",
+                                          // "DBObjectBase.setXML(): objectdef missing name attribute:\n {0}"
+                                          ts.l("setXML.missingname", root.getTreeString()));
       }
 
     // we call setName() at the bottom, after we know for sure what our
@@ -1252,22 +1252,22 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (_idInt == null)
       {
-	return Ganymede.createErrorDialog("xml",
-					  // "DBObjectBase.setXML(): objectdef missing id attribute:\n {0}"
-					  ts.l("setXML.missingid", root.getTreeString()));
+        return Ganymede.createErrorDialog("xml",
+                                          // "DBObjectBase.setXML(): objectdef missing id attribute:\n {0}"
+                                          ts.l("setXML.missingid", root.getTreeString()));
       }
 
     if (xmldebug)
       {
-	// "Setting id"
-	err.println(ts.l("setXML.debugid"));
+        // "Setting id"
+        err.println(ts.l("setXML.debugid"));
       }
 
     retVal = setTypeID(_idInt.shortValue());
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     // first scan the children nodes, make sure all fields have unique
@@ -1276,8 +1276,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (xmldebug)
       {
-	// "Scanning fields"
-	err.println(ts.l("setXML.debugscanning"));
+        // "Scanning fields"
+        err.println(ts.l("setXML.debugscanning"));
       }
 
     /*
@@ -1292,86 +1292,86 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     for (int i = 0; i < children.length; i++)
       {
-	XMLItem item = children[i];
+        XMLItem item = children[i];
 
-	if (item.matches("tab"))
-	  {
-	    fieldDefV.add(item);
+        if (item.matches("tab"))
+          {
+            fieldDefV.add(item);
 
-	    XMLItem tabChildren[] = item.getChildren();
+            XMLItem tabChildren[] = item.getChildren();
 
-	    for (int j = 0; j < tabChildren.length; j++)
-	      {
-		item = tabChildren[j];
+            for (int j = 0; j < tabChildren.length; j++)
+              {
+                item = tabChildren[j];
 
-		if (item.matches("fielddef"))
-		  {
-		    fieldDefV.add(item);
-		  }
-	      }
-	  }
-	else
-	  {
-	    fieldDefV.add(item);
-	  }
+                if (item.matches("fielddef"))
+                  {
+                    fieldDefV.add(item);
+                  }
+              }
+          }
+        else
+          {
+            fieldDefV.add(item);
+          }
       }
 
     for (XMLItem item: fieldDefV)
       {
-	if (item.matches("fielddef"))
-	  {
-	    String _fieldNameStr = XMLUtils.XMLDecode(item.getAttrStr("name"));
-	    Integer _fieldIDInt = item.getAttrInt("id");
+        if (item.matches("fielddef"))
+          {
+            String _fieldNameStr = XMLUtils.XMLDecode(item.getAttrStr("name"));
+            Integer _fieldIDInt = item.getAttrInt("id");
 
-	    if (_fieldNameStr == null || _fieldIDInt == null)
-	      {
-		return Ganymede.createErrorDialog("xml",
-						  // "Field definition missing name and/or id: {0}"
-						  ts.l("setXML.noid", item.getTreeString()));
-	      }
+            if (_fieldNameStr == null || _fieldIDInt == null)
+              {
+                return Ganymede.createErrorDialog("xml",
+                                                  // "Field definition missing name and/or id: {0}"
+                                                  ts.l("setXML.noid", item.getTreeString()));
+              }
 
-	    if (nameTable.containsKey(_fieldNameStr))
-	      {
-		return Ganymede.createErrorDialog("xml",
-						  // "More than one field in objectdef: {0}\ncontains field name {1}"
-						  ts.l("setXML.dupfieldname", root.getTreeString(), _fieldNameStr));
-	      }
+            if (nameTable.containsKey(_fieldNameStr))
+              {
+                return Ganymede.createErrorDialog("xml",
+                                                  // "More than one field in objectdef: {0}\ncontains field name {1}"
+                                                  ts.l("setXML.dupfieldname", root.getTreeString(), _fieldNameStr));
+              }
 
-	    DBObjectBaseField _field = getFieldDef(_fieldNameStr);
+            DBObjectBaseField _field = getFieldDef(_fieldNameStr);
 
-	    if (_field != null && _field.isBuiltIn())
-	      {
-		return Ganymede.createErrorDialog("xml",
-						  // "Can't set a field:\n{0}\nwith the same name as a pre-existing built-in field in objectdef:\n{1}"
-						  ts.l("setXML.sysfield", item.getTreeString(), root.getTreeString()));
-	      }
+            if (_field != null && _field.isBuiltIn())
+              {
+                return Ganymede.createErrorDialog("xml",
+                                                  // "Can't set a field:\n{0}\nwith the same name as a pre-existing built-in field in objectdef:\n{1}"
+                                                  ts.l("setXML.sysfield", item.getTreeString(), root.getTreeString()));
+              }
 
-	    nameTable.put(_fieldNameStr, item);
+            nameTable.put(_fieldNameStr, item);
 
-	    if (_fieldIDInt.shortValue() < 100)
-	      {
-		return Ganymede.createErrorDialog("xml",
-						  // "Can't modify or set a field:\n{0}\nwith a field id in the global field range:\n{1}"
-						  ts.l("setXML.noglobals", item.getTreeString(), root.getTreeString()));
-	      }
+            if (_fieldIDInt.shortValue() < 100)
+              {
+                return Ganymede.createErrorDialog("xml",
+                                                  // "Can't modify or set a field:\n{0}\nwith a field id in the global field range:\n{1}"
+                                                  ts.l("setXML.noglobals", item.getTreeString(), root.getTreeString()));
+              }
 
-	    if (idTable.containsKey(_fieldIDInt))
-	      {
-		return Ganymede.createErrorDialog("xml",
-						  // "More than one field in objectdef: {0}\ncontains field id {1}"
-						  ts.l("setXML.dupfieldid", root.getTreeString(), _fieldIDInt));
-	      }
+            if (idTable.containsKey(_fieldIDInt))
+              {
+                return Ganymede.createErrorDialog("xml",
+                                                  // "More than one field in objectdef: {0}\ncontains field id {1}"
+                                                  ts.l("setXML.dupfieldid", root.getTreeString(), _fieldIDInt));
+              }
 
-	    idTable.put(_fieldIDInt, item);
+            idTable.put(_fieldIDInt, item);
 
-	    fieldsInXML.add(_fieldIDInt);
-	  }
+            fieldsInXML.add(_fieldIDInt);
+          }
       }
 
     if (xmldebug)
       {
-	// "Calculating fields to delete"
-	err.println(ts.l("setXML.debugdels"));
+        // "Calculating fields to delete"
+        err.println(ts.l("setXML.debugdels"));
       }
 
     // we've got a vector of Integers for the field id's we are going to be
@@ -1380,22 +1380,22 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     for (DBObjectBaseField _field: customFields)
       {
-	fieldsInBase.add(Integer.valueOf(_field.getID()));
+        fieldsInBase.add(Integer.valueOf(_field.getID()));
       }
 
     for (Integer _fieldID: (Vector<Integer>) VectorUtils.difference(fieldsInBase, fieldsInXML))
       {
-	DBObjectBaseField _field = getFieldDef(_fieldID.shortValue());
+        DBObjectBaseField _field = getFieldDef(_fieldID.shortValue());
 
-	// "\t\tDeleting field {0}"
-	err.println(ts.l("setXML.deleting", _field.getName()));
+        // "\t\tDeleting field {0}"
+        err.println(ts.l("setXML.deleting", _field.getName()));
 
-	retVal = deleteField(_field.getName());
+        retVal = deleteField(_field.getName());
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    return retVal;
-	  }
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            return retVal;
+          }
       }
 
     // we've done our first data integrity test and we've figured out
@@ -1409,165 +1409,165 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     for (int i = 0; i < fieldDefV.size(); i++)
       {
-	XMLItem item = fieldDefV.get(i);
+        XMLItem item = fieldDefV.get(i);
 
-	if (item.matches("classdef"))
-	  {
-	    if (classSet)
-	      {
-		return Ganymede.createErrorDialog("xml",
-						  // "Objectdef contains more than one classdef element:\n{0}"
-						  ts.l("setXML.dupclassdef", root.getTreeString()));
-	      }
+        if (item.matches("classdef"))
+          {
+            if (classSet)
+              {
+                return Ganymede.createErrorDialog("xml",
+                                                  // "Objectdef contains more than one classdef element:\n{0}"
+                                                  ts.l("setXML.dupclassdef", root.getTreeString()));
+              }
 
-	    _classStr = item.getAttrStr("name");
+            _classStr = item.getAttrStr("name");
 
-	    _classOptionStr = item.getAttrStr("optionString");
+            _classOptionStr = item.getAttrStr("optionString");
 
-	    classSet = true;
-	  }
-	else if (item.matches("embedded"))
-	  {
-	    _embedded = true;
-	  }
-	else if (item.matches("label"))
-	  {
-	    if (labelSet)
-	      {
-		return Ganymede.createErrorDialog("xml",
-						  // "Objectdef contains more than one label element:\n{0}"
-						  ts.l("setXML.duplabel", root.getTreeString()));
-	      }
+            classSet = true;
+          }
+        else if (item.matches("embedded"))
+          {
+            _embedded = true;
+          }
+        else if (item.matches("label"))
+          {
+            if (labelSet)
+              {
+                return Ganymede.createErrorDialog("xml",
+                                                  // "Objectdef contains more than one label element:\n{0}"
+                                                  ts.l("setXML.duplabel", root.getTreeString()));
+              }
 
-	    _labelInt = item.getAttrInt("fieldid");
+            _labelInt = item.getAttrInt("fieldid");
 
-	    labelSet = true;
-	  }
-	else if (item.matches("tab"))
-	  {
-	    currentTabName = item.getAttrStr("name");
-	    continue;
-	  }
-	else if (item.matches("fielddef"))
-	  {
-	    newField = getFieldDef(item.getAttrInt("id").shortValue());
+            labelSet = true;
+          }
+        else if (item.matches("tab"))
+          {
+            currentTabName = item.getAttrStr("name");
+            continue;
+          }
+        else if (item.matches("fielddef"))
+          {
+            newField = getFieldDef(item.getAttrInt("id").shortValue());
 
-	    if (newField == null)
-	      {
-		err.println("\t\tCreating field " + item.getAttrStr("name"));
+            if (newField == null)
+              {
+                err.println("\t\tCreating field " + item.getAttrStr("name"));
 
-		try
-		  {
-		    newField = new DBObjectBaseField(this);
-		    newField.setIsInUse(false);
-		  }
-		catch (RemoteException ex)
-		  {
+                try
+                  {
+                    newField = new DBObjectBaseField(this);
+                    newField.setIsInUse(false);
+                  }
+                catch (RemoteException ex)
+                  {
                     Ganymede.logError(ex);
-		    throw new RuntimeException("Publishing error " + ex.getMessage());
-		  }
+                    throw new RuntimeException("Publishing error " + ex.getMessage());
+                  }
 
-		if (xmldebug)
-		  {
-		    // "Setting XML on new field {0}"
-		    err.println(ts.l("setXML.debugnew", item));
-		  }
+                if (xmldebug)
+                  {
+                    // "Setting XML on new field {0}"
+                    err.println(ts.l("setXML.debugnew", item));
+                  }
 
-		retVal = newField.setXML(item, resolveInvidLinks, err);
-		
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    return retVal;
-		  }
+                retVal = newField.setXML(item, resolveInvidLinks, err);
+                
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    return retVal;
+                  }
 
-		retVal = newField.setTabName(currentTabName);
+                retVal = newField.setTabName(currentTabName);
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    return retVal;
-		  }
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    return retVal;
+                  }
 
-		addFieldToEnd(newField);
-	      }
-	    else
-	      {
-		// "\t\tEditing field {0}"
-		err.println(ts.l("setXML.editing", item.getAttrStr("name")));
-		
-		retVal = newField.setXML(item, resolveInvidLinks, err);
+                addFieldToEnd(newField);
+              }
+            else
+              {
+                // "\t\tEditing field {0}"
+                err.println(ts.l("setXML.editing", item.getAttrStr("name")));
+                
+                retVal = newField.setXML(item, resolveInvidLinks, err);
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    return retVal;
-		  }
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    return retVal;
+                  }
 
-		retVal = newField.setTabName(currentTabName);
+                retVal = newField.setTabName(currentTabName);
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    return retVal;
-		  }
-	      }
-	  }
-	else
-	  {
-	    return Ganymede.createErrorDialog("xml",
-					      // "Unrecognized XML item: {0} in objectdef:\n{1}"
-					      ts.l("setXML.unrecognized", item, root.getTreeString()));
-	  }
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    return retVal;
+                  }
+              }
+          }
+        else
+          {
+            return Ganymede.createErrorDialog("xml",
+                                              // "Unrecognized XML item: {0} in objectdef:\n{1}"
+                                              ts.l("setXML.unrecognized", item, root.getTreeString()));
+          }
       }
 
     // and set or clear the label and class options
 
     if (xmldebug)
       {
-	// "Setting label field"
-	err.println(ts.l("setXML.debuglabel"));
+        // "Setting label field"
+        err.println(ts.l("setXML.debuglabel"));
       }
 
     if (_labelInt == null)
       {
-	retVal = setLabelField(null);
+        retVal = setLabelField(null);
       }
     else
       {
-	retVal = setLabelField(_labelInt.shortValue());
+        retVal = setLabelField(_labelInt.shortValue());
       }
     
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     if (xmldebug)
       {
-	// "Setting class name"
-	err.println(ts.l("setXML.debugclass"));
+        // "Setting class name"
+        err.println(ts.l("setXML.debugclass"));
       }
     
     retVal = setClassInfo(_classStr, _classOptionStr);
     
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     // we have to set embedded before calling setName() so that
     // setName() can enforce the embedded object naming convention
 
-    embedded = _embedded;	// XXX need to work on this
+    embedded = _embedded;       // XXX need to work on this
 
     if (xmldebug)
       {
-	// "Setting object name"
-	err.println(ts.l("setXML.debugname"));
+        // "Setting object name"
+        err.println(ts.l("setXML.debugname"));
       }
     
     retVal = setName(_objectName);
     
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     // and we need to order the fields in customFields in the same
@@ -1575,24 +1575,24 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (xmldebug)
       {
-	// "Sorting fields"
-	err.println(ts.l("setXML.debugsorting"));
+        // "Sorting fields"
+        err.println(ts.l("setXML.debugsorting"));
       }
 
     List<DBObjectBaseField> _newCustom = new ArrayList<DBObjectBaseField>();
 
     for (Integer _fieldID: fieldsInXML)
       {
-	DBObjectBaseField _field = getFieldDef(_fieldID.shortValue());
+        DBObjectBaseField _field = getFieldDef(_fieldID.shortValue());
 
-	if (_field == null)
-	  {
-	    return Ganymede.createErrorDialog("xml",
-					      // "Couldn't find field {0} while resorting customFields."
-					      ts.l("setXML.mysteryfield", _fieldID));
-	  }
+        if (_field == null)
+          {
+            return Ganymede.createErrorDialog("xml",
+                                              // "Couldn't find field {0} while resorting customFields."
+                                              ts.l("setXML.mysteryfield", _fieldID));
+          }
 
-	_newCustom.add(_field);
+        _newCustom.add(_field);
       }
 
     // make sure we are consistent like we think we should be
@@ -1600,18 +1600,18 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     Vector _intersection = VectorUtils.intersection(customFields, _newCustom);
 
     if ((_intersection.size() != customFields.size()) ||
-	(_intersection.size() != _newCustom.size()))
+        (_intersection.size() != _newCustom.size()))
       {
-	// "Consistency error while resorting customFields in base {0}"
-	err.println(ts.l("setXML.inconsistent", getName()));
+        // "Consistency error while resorting customFields in base {0}"
+        err.println(ts.l("setXML.inconsistent", getName()));
 
-	err.println("customFields.size() = " + customFields.size());
-	err.println("_newCustom.size() = " + _newCustom.size());
-	err.println("_intersection.size() = " + _intersection.size());
+        err.println("customFields.size() = " + customFields.size());
+        err.println("_newCustom.size() = " + _newCustom.size());
+        err.println("_intersection.size() = " + _intersection.size());
 
-	return Ganymede.createErrorDialog("xml",
-					  // "Consistency error while resorting customFields."
-					  ts.l("setXML.consistencyerror"));
+        return Ganymede.createErrorDialog("xml",
+                                          // "Consistency error while resorting customFields."
+                                          ts.l("setXML.consistencyerror"));
       }
     
     customFields = _newCustom;
@@ -1620,8 +1620,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (xmldebug)
       {
-	// "Done processing object base {0}"
-	err.println(ts.l("setXML.debugdone", root));
+        // "Done processing object base {0}"
+        err.println(ts.l("setXML.debugdone", root));
       }
 
     return null;
@@ -1687,11 +1687,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     try
       {
-	this.objectHook = this.createHook();
+        this.objectHook = this.createHook();
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException("Unexpected remote exception.. RMI init prob? " + ex);
+        throw new RuntimeException("Unexpected remote exception.. RMI init prob? " + ex);
       }
   }
 
@@ -1761,32 +1761,32 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     if (classdef == null)
       {
-	if (classname != null && !classname.equals(""))
-	  {
-	    try
-	      {
-		classdef = Class.forName(classname);
-	      }
-	    catch (ClassNotFoundException ex)
-	      {
-		// it might seem like we would emit this message a lot
-		// if a class file wasn't in our custom.jar file, but
-		// in fact createHook only gets called once
-		// usually.. even if we can't find the class, we'll
-		// pass back a default DBEditObject
+        if (classname != null && !classname.equals(""))
+          {
+            try
+              {
+                classdef = Class.forName(classname);
+              }
+            catch (ClassNotFoundException ex)
+              {
+                // it might seem like we would emit this message a lot
+                // if a class file wasn't in our custom.jar file, but
+                // in fact createHook only gets called once
+                // usually.. even if we can't find the class, we'll
+                // pass back a default DBEditObject
 
-		// "DBObjectBase.createHook(): class definition could not be found: {0}"
-		System.err.println(ts.l("createHook.noclass", ex));
-		classdef = null;
-	      }
-	  }
+                // "DBObjectBase.createHook(): class definition could not be found: {0}"
+                System.err.println(ts.l("createHook.noclass", ex));
+                classdef = null;
+              }
+          }
 
-	// if we don't have a custom object hook, use the default
-	
-	if (classdef == null)
-	  {
-	    return new DBEditObject(this);
-	  }
+        // if we don't have a custom object hook, use the default
+        
+        if (classdef == null)
+          {
+            return new DBEditObject(this);
+          }
       }
 
     Constructor c;
@@ -1804,49 +1804,49 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
          * If that doesn't work (if the classdef has no factory methods, for
          * example), then use a default constructor. */
 
-	e_object = invokeFactory(cParams, params);
+        e_object = invokeFactory(cParams, params);
 
-	if (e_object == null)
-	  {
-	    c = classdef.getDeclaredConstructor(cParams); // DBObjectBase constructor
-	    e_object = (DBEditObject) c.newInstance(params);
-	  }
+        if (e_object == null)
+          {
+            c = classdef.getDeclaredConstructor(cParams); // DBObjectBase constructor
+            e_object = (DBEditObject) c.newInstance(params);
+          }
       }
     catch (NoSuchMethodException ex)
       {
-	System.err.println("NoSuchMethodException " + ex);
+        System.err.println("NoSuchMethodException " + ex);
       }
     catch (SecurityException ex)
       {
-	System.err.println("SecurityException " + ex);
+        System.err.println("SecurityException " + ex);
       }
     catch (IllegalAccessException ex)
       {
-	System.err.println("IllegalAccessException " + ex);
+        System.err.println("IllegalAccessException " + ex);
       }
     catch (IllegalArgumentException ex)
       {
-	System.err.println("IllegalArgumentException " + ex);
+        System.err.println("IllegalArgumentException " + ex);
       }
     catch (InstantiationException ex)
       {
-	System.err.println("InstantiationException " + ex);
+        System.err.println("InstantiationException " + ex);
       }
     catch (InvocationTargetException ex)
       {
-	System.err.println("InvocationTargetException " + ex);
+        System.err.println("InvocationTargetException " + ex);
       }
     finally
       {
-	if (e_object == null)
-	  {
-	    e_object = new DBEditObject(this);
-	  }
+        if (e_object == null)
+          {
+            e_object = new DBEditObject(this);
+          }
       }
 
     if (debug2)
       {
-	System.err.println("Created objectHook: object of type " + e_object.getClass());
+        System.err.println("Created objectHook: object of type " + e_object.getClass());
       }
 
     return e_object;
@@ -1897,43 +1897,43 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (editset == null)
       {
-	// "null editset in createNewObject"
-	throw new NullPointerException(ts.l("createNewObject.noeditset"));
+        // "null editset in createNewObject"
+        throw new NullPointerException(ts.l("createNewObject.noeditset"));
       }
 
     if (chosenSlot == null)
       {
-	invid = Invid.createInvid(getTypeID(), getNextID());
+        invid = Invid.createInvid(getTypeID(), getNextID());
 
-	if (debug2)
-	  {
-	    if (objectTable.containsKey(invid.getNum()))
-	      {
-		// "bad invid chosen in createNewObject: num already taken"
-		throw new IllegalArgumentException(ts.l("createNewObject.badinvid"));
-	      }
-	  }
+        if (debug2)
+          {
+            if (objectTable.containsKey(invid.getNum()))
+              {
+                // "bad invid chosen in createNewObject: num already taken"
+                throw new IllegalArgumentException(ts.l("createNewObject.badinvid"));
+              }
+          }
       }
     else
       {
-	if (chosenSlot.getType() != type_code)
-	  {
-	    // "bad chosen_slot passed into createNewObject: bad type"
-	    throw new IllegalArgumentException(ts.l("createNewObject.badslottype"));
-	  }
+        if (chosenSlot.getType() != type_code)
+          {
+            // "bad chosen_slot passed into createNewObject: bad type"
+            throw new IllegalArgumentException(ts.l("createNewObject.badslottype"));
+          }
 
-	if (objectTable.containsKey(chosenSlot.getNum()))
-	  {
-	    // "bad chosen_slot passed into createNewObject: num already taken"
-	    throw new IllegalArgumentException(ts.l("createNewObject.badslotnum"));
-	  }
+        if (objectTable.containsKey(chosenSlot.getNum()))
+          {
+            // "bad chosen_slot passed into createNewObject: num already taken"
+            throw new IllegalArgumentException(ts.l("createNewObject.badslotnum"));
+          }
 
-	invid = chosenSlot;
+        invid = chosenSlot;
 
-	if (maxid < invid.getNum())
-	  {
-	    maxid = invid.getNum();
-	  }
+        if (maxid < invid.getNum())
+          {
+            maxid = invid.getNum();
+          }
       }
 
     // it is crucial that we will have called createHook() before
@@ -1942,33 +1942,33 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (classdef == null)
       {
-	e_object = new DBEditObject(this, invid, editset);
+        e_object = new DBEditObject(this, invid, editset);
       }
     else
       {
-	Constructor c;
-	Class classArray[];
-	Object parameterArray[];
+        Constructor c;
+        Class classArray[];
+        Object parameterArray[];
 
-	classArray = new Class[3];
+        classArray = new Class[3];
 
-	classArray[0] = this.getClass();
-	classArray[1] = invid.getClass();
-	classArray[2] = editset.getClass();
+        classArray[0] = this.getClass();
+        classArray[1] = invid.getClass();
+        classArray[2] = editset.getClass();
 
-	parameterArray = new Object[3];
+        parameterArray = new Object[3];
 
-	parameterArray[0] = this;
-	parameterArray[1] = invid;
-	parameterArray[2] = editset;
+        parameterArray[0] = this;
+        parameterArray[1] = invid;
+        parameterArray[2] = editset;
 
-	String error_code = null;
+        String error_code = null;
 
-	try
-	  {
-	    /* First, try to use classdef's factory method to create the object. If
-	     * that doesn't work (if the classdef has no factory methods, for
-	     * example), then use a default constructor. */
+        try
+          {
+            /* First, try to use classdef's factory method to create the object. If
+             * that doesn't work (if the classdef has no factory methods, for
+             * example), then use a default constructor. */
 
             e_object = invokeFactory(classArray, parameterArray);
 
@@ -1977,51 +1977,51 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
                 c = classdef.getDeclaredConstructor(classArray); 
                 e_object = (DBEditObject) c.newInstance(parameterArray);
               } 
-	  }
-	catch (NoSuchMethodException ex)
-	  {
-	    error_code = "NoSuchMethod Exception";
-	  }
-	catch (SecurityException ex)
-	  {
-	    error_code = "Security Exception";
-	  }
-	catch (IllegalAccessException ex)
-	  {
-	    error_code = "Illegal Access Exception";
-	  }
-	catch (IllegalArgumentException ex)
-	  {
-	    error_code = "Illegal Argument Exception";
-	  }
-	catch (InstantiationException ex)
-	  {
-	    error_code = "Instantiation Exception";
-	  }
-	catch (InvocationTargetException ex)
-	  {
-	    error_code = "Invocation Target Exception: " + 
-	      ex.getTargetException() + "\n" + 
-	      ex.getMessage() + "\n\n" +
-	      Ganymede.stackTrace(ex) + "\n";
           }
-	finally
-	  {
-	    if (e_object == null)
-	      {
-		if (error_code != null)
-		  {
-		    // "createNewObject failure: {0} in trying to construct custom object"
-		    String errormsg = ts.l("createNewObject.failure1", error_code);
-		    Ganymede.debug(errormsg);
-		    throw new GanymedeManagementException(errormsg);
-		  }
-		else
-		  {
-		    throw new GanymedeManagementException();
-		  }
-	      }
-	  }
+        catch (NoSuchMethodException ex)
+          {
+            error_code = "NoSuchMethod Exception";
+          }
+        catch (SecurityException ex)
+          {
+            error_code = "Security Exception";
+          }
+        catch (IllegalAccessException ex)
+          {
+            error_code = "Illegal Access Exception";
+          }
+        catch (IllegalArgumentException ex)
+          {
+            error_code = "Illegal Argument Exception";
+          }
+        catch (InstantiationException ex)
+          {
+            error_code = "Instantiation Exception";
+          }
+        catch (InvocationTargetException ex)
+          {
+            error_code = "Invocation Target Exception: " + 
+              ex.getTargetException() + "\n" + 
+              ex.getMessage() + "\n\n" +
+              Ganymede.stackTrace(ex) + "\n";
+          }
+        finally
+          {
+            if (e_object == null)
+              {
+                if (error_code != null)
+                  {
+                    // "createNewObject failure: {0} in trying to construct custom object"
+                    String errormsg = ts.l("createNewObject.failure1", error_code);
+                    Ganymede.debug(errormsg);
+                    throw new GanymedeManagementException(errormsg);
+                  }
+                else
+                  {
+                    throw new GanymedeManagementException();
+                  }
+              }
+          }
       }
 
     return e_object;
@@ -2105,25 +2105,25 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
             error_code = "Invocation Target Exception "
                 + tex.getTargetException();
           }
-	finally
-	  {
-	    if (shadowObject == null)
-	      {
-		if (error_code != null)
-		  {
-		    // "createNewObject failure: {0} in trying to check out custom object"
-		    String errormsg = ts.l("createNewObject.failure2", error_code);
-		    Ganymede.debug(errormsg);
-		    throw new GanymedeManagementException(errormsg);
-		  }
-		else
-		  {
-		    throw new GanymedeManagementException();
-		  }
-	      }
-	  }
+        finally
+          {
+            if (shadowObject == null)
+              {
+                if (error_code != null)
+                  {
+                    // "createNewObject failure: {0} in trying to check out custom object"
+                    String errormsg = ts.l("createNewObject.failure2", error_code);
+                    Ganymede.debug(errormsg);
+                    throw new GanymedeManagementException(errormsg);
+                  }
+                else
+                  {
+                    throw new GanymedeManagementException();
+                  }
+              }
+          }
 
-	return shadowObject;
+        return shadowObject;
       }
     else
       {
@@ -2157,7 +2157,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     if (id==maxid)
       {
-	maxid--;
+        maxid--;
       }
   }
 
@@ -2201,16 +2201,16 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     if (category == null)
       {
-	return "./" + getName();
+        return "./" + getName();
       }
 
     try
       {
-	return category.getPath() + "/" + object_name;
+        return category.getPath() + "/" + object_name;
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException(ex.getMessage());
+        throw new RuntimeException(ex.getMessage());
       }
   }
 
@@ -2232,15 +2232,15 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (newName.equals(object_name))
       {
-	return null;
+        return null;
       }
 
     if (!XMLNameValidator.isValidGanymedeName(newName))
       {
-	// "Schema Editing Error"
-	// ""{0}" is not an acceptable Ganymede type name.\n\nAll Ganymede type names must be acceptable XML element names, save that spaces are allowed and underscores are not."
-	return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
-					  ts.l("setName.invalid_ganymede_name", newName));
+        // "Schema Editing Error"
+        // ""{0}" is not an acceptable Ganymede type name.\n\nAll Ganymede type names must be acceptable XML element names, save that spaces are allowed and underscores are not."
+        return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
+                                          ts.l("setName.invalid_ganymede_name", newName));
       }
 
     // check to make sure another object type isn't using the proposed
@@ -2248,21 +2248,21 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (isEditing())
       {
-	if (this.editor.getBase(newName) != null)
-	  {
-	    return Ganymede.createErrorDialog("Schema Editing Error",
-					      // "Can't rename base {0} to {1}, that name is already taken."
-					      ts.l("setName.norename", object_name, newName));
-	  }
+        if (this.editor.getBase(newName) != null)
+          {
+            return Ganymede.createErrorDialog("Schema Editing Error",
+                                              // "Can't rename base {0} to {1}, that name is already taken."
+                                              ts.l("setName.norename", object_name, newName));
+          }
       }
     else
       {
-	if (this.store.getObjectBase(newName) != null)
-	  {
-	    return Ganymede.createErrorDialog("Schema Editing Error",
-					      // "Can't rename base {0} to {1}, that name is already taken."
-					      ts.l("setName.norename", object_name, newName));
-	  }
+        if (this.store.getObjectBase(newName) != null)
+          {
+            return Ganymede.createErrorDialog("Schema Editing Error",
+                                              // "Can't rename base {0} to {1}, that name is already taken."
+                                              ts.l("setName.norename", object_name, newName));
+          }
       }
 
     // ok, go for it
@@ -2339,30 +2339,30 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
        null or identity, and we do the equals() test as well. */
 
     if ((newClassName == classname ||
-	 (newClassName != null && newClassName.equals(classname))) &&
-	(newOptionString == classOptionString ||
-	 (newOptionString != null && newOptionString.equals(classOptionString))))
+         (newClassName != null && newClassName.equals(classname))) &&
+        (newOptionString == classOptionString ||
+         (newOptionString != null && newOptionString.equals(classOptionString))))
       {
-	return null;		// no change
+        return null;            // no change
       }
 
     if (newClassName == null || newClassName.equals(""))
       {
-	classname = "";
-	classdef = null;
-	objectHook = null;
-	return null;
+        classname = "";
+        classdef = null;
+        objectHook = null;
+        return null;
       }
 
     classname = newClassName;
 
     if (newOptionString != null && newOptionString.equals(""))
       {
-	newOptionString = null;
+        newOptionString = null;
       }
 
     classOptionString = newOptionString;
-      	
+        
     // Reset the classdef so that createHook can load the newly specified
     // class via class.forName()
 
@@ -2374,58 +2374,58 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     try
       {
-	objectHook = this.createHook();
+        objectHook = this.createHook();
       }
     catch (RemoteException ex)
       {
-	// Restore our state back to the way it was originally
-	
-	classname = originalClassName;
-	classdef = originalClassDef;
-	objectHook = originalObjectHook;
-		
-	return Ganymede.createErrorDialog("setClassInfo Failure",
-					  // "Internal RemoteException in setClassInfo: {0}"
-					  ts.l("setClassInfo.internalError", Ganymede.stackTrace(ex)));
+        // Restore our state back to the way it was originally
+        
+        classname = originalClassName;
+        classdef = originalClassDef;
+        objectHook = originalObjectHook;
+                
+        return Ganymede.createErrorDialog("setClassInfo Failure",
+                                          // "Internal RemoteException in setClassInfo: {0}"
+                                          ts.l("setClassInfo.internalError", Ganymede.stackTrace(ex)));
       }
 
     // if the objectHook returned the default DBEditObject class even
     // though we asked for something different, we'll need to complain
 
     if (objectHook.getClass().getName().equals("arlut.csd.ganymede.server.DBEditObject") &&
-	!classname.equals("arlut.csd.ganymede.server.DBEditObject"))
+        !classname.equals("arlut.csd.ganymede.server.DBEditObject"))
       {
-	ReturnVal retVal = new ReturnVal(false);
+        ReturnVal retVal = new ReturnVal(false);
 
-	if (classOptionString == null)
-	  {
-	    retVal.setDialog(new JDialogBuff("Schema Editor Warning",
-					     // "Couldn't find class {0} in the server's CLASSPATH.  This probably means
-					     // that you have not yet rebuilt the custom.jar file with this class added."
-					     ts.l("setClassInfo.noclass", classname),
-					     Ganymede.OK,
-					     null,
-					     "error.gif"));
-	  }
-	else
-	  {
-	    retVal.setDialog(new JDialogBuff("Schema Editor Warning",
-					     // "Couldn't load custom management logic from class {0} using class option string '\
-					     // {1}'.\n\nThis may mean that you have not yet rebuilt the custom jar file with the {0} class added, or that \
-					     // the resource specified in the option string can not be found by {0}'s factory methods."
-					     ts.l("setClassInfo.noclassoption", classname, classOptionString),
-					     Ganymede.OK,
-					     null,
-					     "error.gif"));
-	  }
+        if (classOptionString == null)
+          {
+            retVal.setDialog(new JDialogBuff("Schema Editor Warning",
+                                             // "Couldn't find class {0} in the server's CLASSPATH.  This probably means
+                                             // that you have not yet rebuilt the custom.jar file with this class added."
+                                             ts.l("setClassInfo.noclass", classname),
+                                             Ganymede.OK,
+                                             null,
+                                             "error.gif"));
+          }
+        else
+          {
+            retVal.setDialog(new JDialogBuff("Schema Editor Warning",
+                                             // "Couldn't load custom management logic from class {0} using class option string '\
+                                             // {1}'.\n\nThis may mean that you have not yet rebuilt the custom jar file with the {0} class added, or that \
+                                             // the resource specified in the option string can not be found by {0}'s factory methods."
+                                             ts.l("setClassInfo.noclassoption", classname, classOptionString),
+                                             Ganymede.OK,
+                                             null,
+                                             "error.gif"));
+          }
 
-	// Restore our state back to the way it was originally
-	
-	classname = originalClassName;
-	classdef = originalClassDef;
-	objectHook = originalObjectHook;
-	
-	return retVal;
+        // Restore our state back to the way it was originally
+        
+        classname = originalClassName;
+        classdef = originalClassDef;
+        objectHook = originalObjectHook;
+        
+        return retVal;
       }
 
     return null;
@@ -2458,25 +2458,25 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (oldField == null)
       {
-	return Ganymede.createErrorDialog("Schema Editing Error",
-					  // "Error, can't move field {0}, no such field in object type."
-					  ts.l("moveFieldAfter.nomove", fieldName));
+        return Ganymede.createErrorDialog("Schema Editing Error",
+                                          // "Error, can't move field {0}, no such field in object type."
+                                          ts.l("moveFieldAfter.nomove", fieldName));
       }
 
     if (previousFieldName == null || previousFieldName.equals(""))
       {
-	customFields.remove(oldField);
-	customFields.add(0, oldField);
-	return null;
+        customFields.remove(oldField);
+        customFields.add(0, oldField);
+        return null;
       }
 
     DBObjectBaseField prevField = getFieldDef(previousFieldName);
 
     if (prevField == null || !customFields.contains(prevField))
       {
-	return Ganymede.createErrorDialog("Schema Editing Error",
-					  // "Error, can't move field {0} after {1}, no such field in object type."
-					  ts.l("moveFieldAfter.nofield", fieldName, previousFieldName));
+        return Ganymede.createErrorDialog("Schema Editing Error",
+                                          // "Error, can't move field {0} after {1}, no such field in object type."
+                                          ts.l("moveFieldAfter.nofield", fieldName, previousFieldName));
       }
 
     customFields.remove(oldField);
@@ -2503,25 +2503,25 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (oldField == null)
       {
-	return Ganymede.createErrorDialog("Schema Editing Error",
-					  // "Error, can't move field {0}, no such field in object type."
-					  ts.l("moveFieldBefore.nomove", fieldName));
+        return Ganymede.createErrorDialog("Schema Editing Error",
+                                          // "Error, can't move field {0}, no such field in object type."
+                                          ts.l("moveFieldBefore.nomove", fieldName));
       }
 
     if (nextFieldName == null || nextFieldName.equals(""))
       {
-	customFields.remove(oldField);
-	customFields.add(oldField);
-	return null;
+        customFields.remove(oldField);
+        customFields.add(oldField);
+        return null;
       }
 
     DBObjectBaseField nextField = getFieldDef(nextFieldName);
 
     if (nextField == null || !customFields.contains(nextField))
       {
-	return Ganymede.createErrorDialog("Schema Editing Error",
-					  // "Error, can't move field {0} before {1}, no such field in object type."
-					  ts.l("moveFieldBefore.nofield", fieldName, nextFieldName));
+        return Ganymede.createErrorDialog("Schema Editing Error",
+                                          // "Error, can't move field {0} before {1}, no such field in object type."
+                                          ts.l("moveFieldBefore.nofield", fieldName, nextFieldName));
       }
 
     customFields.remove(oldField);
@@ -2574,21 +2574,21 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (objectId == type_code)
       {
-	return null;
+        return null;
       }
 
     if ((objectId != type_code) && (type_code != -1))
       {
-	return Ganymede.createErrorDialog("xml",
-					  // "Can't change the type_code for an existing object base"
-					  ts.l("setTypeID.notypemutation"));
+        return Ganymede.createErrorDialog("xml",
+                                          // "Can't change the type_code for an existing object base"
+                                          ts.l("setTypeID.notypemutation"));
       }
 
     if (store.getObjectBase(objectId) != null)
       {
-	return Ganymede.createErrorDialog("xml",
-					  // "Can't set the type_code for object base {0} to that of an existing object base"
-					  ts.l("setTypeID.typeconflict", this.toString()));
+        return Ganymede.createErrorDialog("xml",
+                                          // "Can't set the type_code for object base {0} to that of an existing object base"
+                                          ts.l("setTypeID.typeconflict", this.toString()));
       }
 
     type_code = objectId;
@@ -2620,7 +2620,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     if (label_id == -1)
       {
-	return null;
+        return null;
       }
     
     return getFieldDef(label_id);
@@ -2642,14 +2642,14 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (label_id == -1)
       {
-	return null;
+        return null;
       }
     
     fieldDef = getFieldDef(label_id);
 
     if (fieldDef == null)
       {
-	return null;
+        return null;
       }
 
     return fieldDef.getName();
@@ -2727,7 +2727,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     for (DBObjectBaseField field: customFields)
       {
-	result.addElement(field);
+        result.addElement(field);
       }
 
     // now if we are to return the built-in fields, go ahead and add
@@ -2735,10 +2735,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (includeBuiltIns)
       {
-	for (DBObjectBaseField field: getStandardFields())
-	  {
-	    result.addElement(field);
-	  }
+        for (DBObjectBaseField field: getStandardFields())
+          {
+            result.addElement(field);
+          }
       }
 
     return result;
@@ -2828,15 +2828,15 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (bF == null)
       {
-	return Ganymede.createErrorDialog("Schema Editing Error",
-					  // "setLabelField() called with an unrecognized field name."
-					  ts.l("setLabelField.badfieldname"));
+        return Ganymede.createErrorDialog("Schema Editing Error",
+                                          // "setLabelField() called with an unrecognized field name."
+                                          ts.l("setLabelField.badfieldname"));
       }
 
     if (bF.getNameSpace() == null)
       {
-	// "Error, label fields must be namespace-constrained."
-	return Ganymede.createErrorDialog(ts.l("setLabelField.nonamespace"));
+        // "Error, label fields must be namespace-constrained."
+        return Ganymede.createErrorDialog(ts.l("setLabelField.nonamespace"));
       }
 
     label_id = bF.getID();
@@ -2862,15 +2862,15 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (bF == null)
       {
-	return Ganymede.createErrorDialog("Schema Editing Error",
-					  // "setLabelField() called with an unrecognized field id."
-					  ts.l("setLabelField.badfieldid"));
+        return Ganymede.createErrorDialog("Schema Editing Error",
+                                          // "setLabelField() called with an unrecognized field id."
+                                          ts.l("setLabelField.badfieldid"));
       }
 
     if (bF.getNameSpace() == null)
       {
-	// "Error, label fields must be namespace-constrained."
-	return Ganymede.createErrorDialog(ts.l("setLabelField.nonamespace"));
+        // "Error, label fields must be namespace-constrained."
+        return Ganymede.createErrorDialog(ts.l("setLabelField.nonamespace"));
       }
 
     label_id = fieldID;
@@ -2937,13 +2937,13 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     try
       {
-	field = new DBObjectBaseField(this);
-	field.setIsInUse(false);
+        field = new DBObjectBaseField(this);
+        field.setIsInUse(false);
       }
     catch (RemoteException ex)
       {
-	// "Couldn't create field due to initialization error: {0}"
-	throw new RuntimeException(ts.l("createNewField.noluck", ex));
+        // "Couldn't create field due to initialization error: {0}"
+        throw new RuntimeException(ts.l("createNewField.noluck", ex));
       }
 
     // set its id
@@ -2958,7 +2958,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     while (getField(newName) != null)
       {
-	newName = ts.l("createNewField.defaultname") + i++;
+        newName = ts.l("createNewField.defaultname") + i++;
       }
 
     field.setName(newName);
@@ -2997,37 +2997,37 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (fieldInUse(fieldName))
       {
-	return Ganymede.createErrorDialog("Schema Editing Error",
-					  // "deleteField() called on object type {0} with a field name ({1}) that is in use in the database."
-					  ts.l("deleteField.fieldused", getName(), fieldName));
+        return Ganymede.createErrorDialog("Schema Editing Error",
+                                          // "deleteField() called on object type {0} with a field name ({1}) that is in use in the database."
+                                          ts.l("deleteField.fieldused", getName(), fieldName));
       }
 
     field = getFieldDef(fieldName);
 
     if (field == null)
       {
-	return Ganymede.createErrorDialog("Schema Editing Error",
-					  // "deleteField() called on object type {0} with an unrecognized field name ({1})."
-					  ts.l("deleteField.fieldunknown", getName(), fieldName));
+        return Ganymede.createErrorDialog("Schema Editing Error",
+                                          // "deleteField() called on object type {0} with an unrecognized field name ({1})."
+                                          ts.l("deleteField.fieldunknown", getName(), fieldName));
       }
 
     if (!field.isRemovable())
       {
-	return Ganymede.createErrorDialog("Schema Editing Error",
-					  // "deleteField() called on object type {0} with a system field name ({1}) that may not be deleted."
-					  ts.l("deleteField.sysfield", getName(), fieldName));
+        return Ganymede.createErrorDialog("Schema Editing Error",
+                                          // "deleteField() called on object type {0} with a system field name ({1}) that may not be deleted."
+                                          ts.l("deleteField.sysfield", getName(), fieldName));
       }
 
     removeField(field);
 
     if (debug2)
       {
-	Ganymede.debug("field definition " + getName() + ":" + field.getName() + " removed");
+        Ganymede.debug("field definition " + getName() + ":" + field.getName() + " removed");
       }
 
     if (id == label_id)
       {
-	label_id = -1;
+        label_id = -1;
       }
 
     return null;
@@ -3048,17 +3048,17 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     synchronized (objectTable)
       {
-	en = objectTable.elements();
-	    
-	while (en.hasMoreElements())
-	  {
-	    DBObject obj = (DBObject) en.nextElement();
-	    
-	    if (obj.getField(bF.getID()) != null)
-	      {
-		return true;
-	      }
-	  }
+        en = objectTable.elements();
+            
+        while (en.hasMoreElements())
+          {
+            DBObject obj = (DBObject) en.nextElement();
+            
+            if (obj.getField(bF.getID()) != null)
+              {
+                return true;
+              }
+          }
       }
 
     return false;
@@ -3080,25 +3080,25 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (fieldDef == null)
       {
-	// "Can't check for non-existent field: {0}"
-	throw new RuntimeException(ts.l("fieldInUse.nofield", fieldName));
+        // "Can't check for non-existent field: {0}"
+        throw new RuntimeException(ts.l("fieldInUse.nofield", fieldName));
       }
 
     id = fieldDef.getID();
 
     synchronized (objectTable)
       {
-	en = objectTable.elements();
-	    
-	while (en.hasMoreElements())
-	  {
-	    DBObject obj = (DBObject) en.nextElement();
-	    
-	    if (obj.getField(id) != null)
-	      {
-		return true;
-	      }
-	  }
+        en = objectTable.elements();
+            
+        while (en.hasMoreElements())
+          {
+            DBObject obj = (DBObject) en.nextElement();
+            
+            if (obj.getField(id) != null)
+              {
+                return true;
+              }
+          }
       }
 
     return false;
@@ -3112,15 +3112,15 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     if (objectHook == null)
       {
-	try
-	  {
-	    objectHook = createHook();
-	  }
-	catch (RemoteException ex)
-	  {
-	    // "Error, couldn't create hook in getObjectHook().\n{0}"
-	    throw new RuntimeException(ts.l("getObjectHook.error", Ganymede.stackTrace(ex)));
-	  }
+        try
+          {
+            objectHook = createHook();
+          }
+        catch (RemoteException ex)
+          {
+            // "Error, couldn't create hook in getObjectHook().\n{0}"
+            throw new RuntimeException(ts.l("getObjectHook.error", Ganymede.stackTrace(ex)));
+          }
       }
 
     return objectHook;
@@ -3132,7 +3132,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   synchronized short getNextFieldID()
   {
-    short id = 256;		// below 256 reserved for future server-mandatory fields
+    short id = 256;             // below 256 reserved for future server-mandatory fields
     Enumeration en;
     DBObjectBaseField fieldDef;
 
@@ -3142,12 +3142,12 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     while (en.hasMoreElements())
       {
-	fieldDef = (DBObjectBaseField) en.nextElement();
+        fieldDef = (DBObjectBaseField) en.nextElement();
 
-	if (fieldDef.getID() >= id)
-	  {
-	    id = (short) (fieldDef.getID() + 1);
-	  }
+        if (fieldDef.getID() >= id)
+          {
+            id = (short) (fieldDef.getID() + 1);
+          }
       }
 
     return id;
@@ -3162,8 +3162,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     if (invid.getType() != this.getTypeID())
       {
-	// "Wrong Invid type"
-	throw new IllegalArgumentException(ts.l("getObject.badtype"));
+        // "Wrong Invid type"
+        throw new IllegalArgumentException(ts.l("getObject.badtype"));
       }
 
     return objectTable.get(invid.getNum());
@@ -3190,7 +3190,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (newObject.getID() > maxid)
       {
-	maxid = newObject.getID();
+        maxid = newObject.getID();
       }
   }
 
@@ -3219,7 +3219,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     return new Iterable<DBObject>() {
       public Iterator<DBObject> iterator()
       {
-	return objectTable.iterator();
+        return objectTable.iterator();
       }
     };
   }
@@ -3235,7 +3235,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     return new Iterable<DBObjectBaseField>() {
       public Iterator<DBObjectBaseField> iterator()
       {
-	return Collections.unmodifiableList(customFields).iterator();
+        return Collections.unmodifiableList(customFields).iterator();
       }
     };
   }
@@ -3251,7 +3251,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     return new Iterable<DBObjectBaseField>() {
       public Iterator<DBObjectBaseField> iterator()
       {
-	return fieldTable.builtInIterator();
+        return fieldTable.builtInIterator();
       }
     };
   }
@@ -3267,7 +3267,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     return new Iterable<DBObjectBaseField>() {
       public Iterator<DBObjectBaseField> iterator()
       {
-	return fieldTable.iterator();
+        return fieldTable.iterator();
       }
     };
   }
@@ -3288,39 +3288,39 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
       public Iterator<DBObjectBaseField> iterator()
       {
-	return new Iterator<DBObjectBaseField>() {
+        return new Iterator<DBObjectBaseField>() {
 
-	  public boolean hasNext()
-	  {
-	    if (inStandard)
-	      {
-		return it.hasNext();
-	      }
-	    else
-	      {
-		if (it.hasNext())
-		  {
-		    return true;
-		  }
-		else
-		  {
-		    inStandard = true;
-		    it = getStandardFields().iterator();
-		    return it.hasNext();
-		  }
-	      }
-	  }
+          public boolean hasNext()
+          {
+            if (inStandard)
+              {
+                return it.hasNext();
+              }
+            else
+              {
+                if (it.hasNext())
+                  {
+                    return true;
+                  }
+                else
+                  {
+                    inStandard = true;
+                    it = getStandardFields().iterator();
+                    return it.hasNext();
+                  }
+              }
+          }
 
-	  public DBObjectBaseField next()
-	  {
-	    return it.next();
-	  }
+          public DBObjectBaseField next()
+          {
+            return it.next();
+          }
 
-	  public void remove()
-	  {
-	    throw new UnsupportedOperationException();
-	  }
-	};
+          public void remove()
+          {
+            throw new UnsupportedOperationException();
+          }
+        };
       }
     };
   }
@@ -3339,17 +3339,17 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     if (label_id == -1)
       {
-	// "Error, object type {0} has no label field defined."
-	return Ganymede.createErrorDialog(ts.l("checkSchemaState.nolabel", this.getName()));
+        // "Error, object type {0} has no label field defined."
+        return Ganymede.createErrorDialog(ts.l("checkSchemaState.nolabel", this.getName()));
       }
 
     DBObjectBaseField labelFieldDef = getFieldDef(label_id);
 
     if (labelFieldDef.getNameSpace() == null)
       {
-	// Error, object type {0}''s label field ({1}) is not unique value-constrained.
-	// You must set a namespace constraint for this field before committing this schema change.
-	return Ganymede.createErrorDialog(ts.l("checkSchemaState.notunique", this.getName(), labelFieldDef.getName()));
+        // Error, object type {0}''s label field ({1}) is not unique value-constrained.
+        // You must set a namespace constraint for this field before committing this schema change.
+        return Ganymede.createErrorDialog(ts.l("checkSchemaState.notunique", this.getName(), labelFieldDef.getName()));
       }
 
     return null;
@@ -3371,13 +3371,13 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (DBSchemaEdit.debug)
       {
-	// "DBObjectBase.clearEditor(): clearing editor for {0}"
-	Ganymede.debug(ts.l("clearEditor.clearing", getName()));
+        // "DBObjectBase.clearEditor(): clearing editor for {0}"
+        Ganymede.debug(ts.l("clearEditor.clearing", getName()));
       }
 
     if (!isEditing())
       {
-	throw new IllegalArgumentException(ts.l("global.notediting"));
+        throw new IllegalArgumentException(ts.l("global.notediting"));
       }
     
     this.editor = null;
@@ -3398,29 +3398,29 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     synchronized (fieldTable)
       {
-	en = fieldTable.elements();
-	
-	while (en.hasMoreElements())
-	  {
-	    fieldDef = (DBObjectBaseField) en.nextElement();
-	    fieldDef.clearEditor();
-	  }
+        en = fieldTable.elements();
+        
+        while (en.hasMoreElements())
+          {
+            fieldDef = (DBObjectBaseField) en.nextElement();
+            fieldDef.clearEditor();
+          }
       }
 
     if (debug2)
       {
-	if (customFields == null)
-	  {
-	    System.err.println("DBObjectBase.clearEditor(): customFields (" + this.toString() + "== null!!!");
-	  }
-	else
-	  {
-	    for (int i = 0; i <customFields.size(); i++)
-	      {
-		System.err.println("DBObjectBase.clearEditor(): customFields[" + i + "(" + 
-				   this.toString() + ")] = " + customFields.get(i));
-	      }
-	  }
+        if (customFields == null)
+          {
+            System.err.println("DBObjectBase.clearEditor(): customFields (" + this.toString() + "== null!!!");
+          }
+        else
+          {
+            for (int i = 0; i <customFields.size(); i++)
+              {
+                System.err.println("DBObjectBase.clearEditor(): customFields[" + i + "(" + 
+                                   this.toString() + ")] = " + customFields.get(i));
+              }
+          }
       }
   }
 
@@ -3439,12 +3439,12 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     synchronized (objectTable)
       {
-	newIterationList = new ArrayList<DBObject>(objectTable.size());
+        newIterationList = new ArrayList<DBObject>(objectTable.size());
 
-	for (DBObject object: getObjects())
-	  {
-	    newIterationList.add(object);
-	  }
+        for (DBObject object: getObjects())
+          {
+            newIterationList.add(object);
+          }
       }
 
     this.iterationList = Collections.unmodifiableList(newIterationList);
@@ -3473,16 +3473,16 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     synchronized (objectTable)
       {
-	for (DBObject obj: objectTable)
-	  {
-	    if (DBSchemaEdit.debug)
-	      {
-		// "Updating base reference on {0}"
-		System.err.println(ts.l("updateBaseRefs.updating", obj));
-	      }
+        for (DBObject obj: objectTable)
+          {
+            if (DBSchemaEdit.debug)
+              {
+                // "Updating base reference on {0}"
+                System.err.println(ts.l("updateBaseRefs.updating", obj));
+              }
 
-	    obj.updateBaseRefs(this);
-	  }
+            obj.updateBaseRefs(this);
+          }
       }
   }
 
@@ -3526,7 +3526,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     synchronized (store.lockSync)
       {
-	return (!isReaderEmpty() || writeInProgress.isSet() || !isDumpLockListEmpty());
+        return (!isReaderEmpty() || writeInProgress.isSet() || !isDumpLockListEmpty());
       }
   }
 
@@ -3547,18 +3547,18 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     if (writeInProgress.set(state) == state)
       {
-	// assert
+        // assert
 
-	if (state)
-	  {
-	    // "double write lock in DBObjectBase"
-	    Ganymede.logAssert(ts.l("setWriteInProgress.doublelock"));
-	  }
-	else
-	  {
-	    // "double write unlock in DBObjectBase"
-	    Ganymede.logAssert(ts.l("setWriteInProgress.doubleunlock"));
-	  }
+        if (state)
+          {
+            // "double write lock in DBObjectBase"
+            Ganymede.logAssert(ts.l("setWriteInProgress.doublelock"));
+          }
+        else
+          {
+            // "double write unlock in DBObjectBase"
+            Ganymede.logAssert(ts.l("setWriteInProgress.doubleunlock"));
+          }
       }
   }
 
@@ -3581,7 +3581,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     synchronized (store.lockSync)
       {
-	writerList.addElement(writer);
+        writerList.addElement(writer);
       }
 
     return true;
@@ -3597,10 +3597,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     synchronized (store.lockSync)
       {
-	result = writerList.removeElement(writer);
-	store.lockSync.notifyAll();
+        result = writerList.removeElement(writer);
+        store.lockSync.notifyAll();
 
-	return result;
+        return result;
       }
   }
 
@@ -3630,7 +3630,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     synchronized (store.lockSync)
       {
-	readerList.addElement(reader);
+        readerList.addElement(reader);
       }
 
     return true;
@@ -3646,10 +3646,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     synchronized (store.lockSync)
       {
-	result = readerList.removeElement(reader);
+        result = readerList.removeElement(reader);
 
-	store.lockSync.notifyAll();
-	return result;
+        store.lockSync.notifyAll();
+        return result;
       }
   }
 
@@ -3680,7 +3680,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     synchronized (store.lockSync)
       {
-	dumperList.addElement(dumper);
+        dumperList.addElement(dumper);
       }
 
     return true;
@@ -3698,10 +3698,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     synchronized (store.lockSync)
       {
-	result = dumperList.removeElement(dumper);
-	
-	store.lockSync.notifyAll();
-	return result;
+        result = dumperList.removeElement(dumper);
+        
+        store.lockSync.notifyAll();
+        return result;
       }
   }
 
@@ -3731,7 +3731,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     synchronized (store.lockSync)
       {
-	dumpLockList.addElement(dumper);
+        dumpLockList.addElement(dumper);
       }
 
     return true;
@@ -3747,10 +3747,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     synchronized (store.lockSync)
       {
-	result = dumpLockList.removeElement(dumper);
+        result = dumpLockList.removeElement(dumper);
 
-	store.lockSync.notifyAll();
-	return result;
+        store.lockSync.notifyAll();
+        return result;
       }
   }
 
@@ -3786,21 +3786,21 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     if (templateVector == null)
       {
-	templateVector = new Vector<FieldTemplate>();
+        templateVector = new Vector<FieldTemplate>();
 
-	// first load our custom fields, in display sorted order
+        // first load our custom fields, in display sorted order
 
-	for (DBObjectBaseField fieldDef: getCustomFields())
-	  {
-	    templateVector.addElement(fieldDef.getTemplate());
-	  }
+        for (DBObjectBaseField fieldDef: getCustomFields())
+          {
+            templateVector.addElement(fieldDef.getTemplate());
+          }
 
-	// then load our system fields
+        // then load our system fields
 
-	for (DBObjectBaseField fieldDef: getStandardFields())
-	  {
-	    templateVector.addElement(fieldDef.getTemplate());
-	  }
+        for (DBObjectBaseField fieldDef: getStandardFields())
+          {
+            templateVector.addElement(fieldDef.getTemplate());
+          }
       }
 
     return templateVector;
@@ -3815,8 +3815,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     if (field.getID() <= SchemaConstants.FinalSystemField)
       {
-	// "Error, attempted to add a system field using addFieldToStart()."
-	throw new IllegalArgumentException(ts.l("addFieldToStart.sysfield"));
+        // "Error, attempted to add a system field using addFieldToStart()."
+        throw new IllegalArgumentException(ts.l("addFieldToStart.sysfield"));
       }
 
     fieldTable.put(field);
@@ -3835,25 +3835,25 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     if (field.getID() <= SchemaConstants.FinalSystemField)
       {
-	// "Error, attempted to add a system field using addFieldToStart()."
-	throw new IllegalArgumentException(ts.l("addFieldAfter.sysfield"));
+        // "Error, attempted to add a system field using addFieldToStart()."
+        throw new IllegalArgumentException(ts.l("addFieldAfter.sysfield"));
       }
 
     synchronized (customFields)
       {
-	for (int i = 0; i < customFields.size(); i++)
-	  {
-	    DBObjectBaseField myDef = customFields.get(i);
+        for (int i = 0; i < customFields.size(); i++)
+          {
+            DBObjectBaseField myDef = customFields.get(i);
 
-	    if (myDef.getID() == previousField)
-	      {
-		customFields.add(i+1, field);
+            if (myDef.getID() == previousField)
+              {
+                customFields.add(i+1, field);
 
-		fieldTable.put(field);
+                fieldTable.put(field);
 
-		return;
-	      }
-	  }
+                return;
+              }
+          }
       }
 
     // "Error, couldn''t add field def {0} after field {1}, field {1} was not found in object base."
@@ -3870,8 +3870,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     if (field.getID() <= SchemaConstants.FinalSystemField)
       {
-	// "Error, attempted to add a system field using addFieldToEnd()."
-	throw new IllegalArgumentException(ts.l("addFieldToEnd.sysfield"));
+        // "Error, attempted to add a system field using addFieldToEnd()."
+        throw new IllegalArgumentException(ts.l("addFieldToEnd.sysfield"));
       }
 
     fieldTable.put(field);
@@ -3889,11 +3889,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     try
       {
-	bf = new DBObjectBaseField(this);
+        bf = new DBObjectBaseField(this);
       }
     catch (RemoteException ex)
       {
-	throw new RuntimeException(ex.getMessage());
+        throw new RuntimeException(ex.getMessage());
       }
 
     // we use direct assignment for these fields to avoid schema
@@ -3916,8 +3916,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     if (field.getID() > SchemaConstants.FinalSystemField)
       {
-	// "Error, attempted to add a non-system field using addSystemField()."
-	throw new IllegalArgumentException(ts.l("addSystemField.nonsysfield"));
+        // "Error, attempted to add a non-system field using addSystemField()."
+        throw new IllegalArgumentException(ts.l("addSystemField.nonsysfield"));
       }
 
     fieldTable.put(field);
@@ -3937,7 +3937,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     if (field.getID() > SchemaConstants.FinalSystemField)
       {
-	customFields.remove(field);
+        customFields.remove(field);
       }
   }
   
@@ -3993,8 +3993,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     if (!isLoading() && !isEditing())
       {
-	// "not in a schema editing context"
-	throw new IllegalStateException(ts.l("global.notediting"));
+        // "not in a schema editing context"
+        throw new IllegalStateException(ts.l("global.notediting"));
       }
   }
 
@@ -4023,7 +4023,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     
     for (DBObject obj: getIterationSet())
       {
-	Object[] tuple = new Object[2];
+        Object[] tuple = new Object[2];
         tuple[0] = obj.getLabel();
         tuple[1] = obj;
         list.add(tuple);
@@ -4087,10 +4087,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
       }
     else if (key instanceof String)
       {
-	// 
-	// XXX I can't make heads or tails out of what Deepak was trying to do 
-	// XXX in this section.. wtf?  - jon 19 aug 2005
-	//
+        // 
+        // XXX I can't make heads or tails out of what Deepak was trying to do 
+        // XXX in this section.. wtf?  - jon 19 aug 2005
+        //
 
         /* Snag this object's label field */
         String labelFieldName = getLabelFieldName();

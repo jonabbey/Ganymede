@@ -11,7 +11,7 @@
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -74,7 +74,7 @@ public class ClientEvent implements arlut.csd.ganymede.common.ClientMessage {
   public ClientEvent(String message)
   {
     this.message = message;
-    this.type = ERROR;		// this used to be the only kind
+    this.type = ERROR;          // this used to be the only kind
   }
 
   public ClientEvent(int type, String message)

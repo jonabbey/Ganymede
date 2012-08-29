@@ -7,7 +7,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -99,20 +99,20 @@ public class QueryDeRefNode extends QueryNode {
 
     if (fieldname != null)
       {
-	result.append(fieldname);
+        result.append(fieldname);
       }
     else
       {
-	result.append("<");
-	result.append(Short.toString(fieldId));
-	result.append(">");
+        result.append("<");
+        result.append(Short.toString(fieldId));
+        result.append(">");
       }
 
     result.append("->");
 
     if (queryTree != null)
       {
-	result.append(queryTree.toString());
+        result.append(queryTree.toString());
       }
 
     return result.toString();

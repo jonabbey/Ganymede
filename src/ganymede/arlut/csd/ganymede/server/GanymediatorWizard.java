@@ -21,7 +21,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2010
@@ -163,7 +163,7 @@ import arlut.csd.ganymede.rmi.Ganymediator;
 public abstract class GanymediatorWizard implements Ganymediator {
 
   public final static int STARTUP = 0;
-  public final static int DONE = 99;	// we'll never have a wizard with > 99 steps, right?
+  public final static int DONE = 99;    // we'll never have a wizard with > 99 steps, right?
 
   /**
    * TranslationService object for handling string localization in the
@@ -194,7 +194,7 @@ public abstract class GanymediatorWizard implements Ganymediator {
   {
     if (session == null)
       {
-	throw new IllegalArgumentException("can't construct: null session");
+        throw new IllegalArgumentException("can't construct: null session");
       }
 
     this.session = session;
@@ -203,7 +203,7 @@ public abstract class GanymediatorWizard implements Ganymediator {
 
     if (!active)
       {
-	throw new RuntimeException("error, couldn't register wizard with session");
+        throw new RuntimeException("error, couldn't register wizard with session");
       }
 
     state = 0;
@@ -249,43 +249,43 @@ public abstract class GanymediatorWizard implements Ganymediator {
 
     if (state == 0 || returnHash != null)
       {
-	try
-	  {
-	    result = callDialog(state);
-	  }
-	catch (Throwable x)
-	  {
-	    this.unregister();
+        try
+          {
+            result = callDialog(state);
+          }
+        catch (Throwable x)
+          {
+            this.unregister();
 
-	    // "Ganymede Wizard Error"
-	    // "This GanymediatorWizard has thrown an exception!\n\n{0}"
-	    return Ganymede.createErrorDialog(ts.l("global.wizard_error"),
-					      ts.l("respond.exception", x.getMessage()));
-	  }
+            // "Ganymede Wizard Error"
+            // "This GanymediatorWizard has thrown an exception!\n\n{0}"
+            return Ganymede.createErrorDialog(ts.l("global.wizard_error"),
+                                              ts.l("respond.exception", x.getMessage()));
+          }
 
-	if (ReturnVal.didSucceed(result) || result.getCallback() == null)
-	  {
-	    this.unregister();
-	  }
-	else if (!stateSet)
-	  {
-	    state++;
-	  }
+        if (ReturnVal.didSucceed(result) || result.getCallback() == null)
+          {
+            this.unregister();
+          }
+        else if (!stateSet)
+          {
+            state++;
+          }
 
-	stateSet = false;
-	
-	return result;
+        stateSet = false;
+        
+        return result;
       }
     else
-      {	
-	result = cancel();
+      { 
+        result = cancel();
 
-	if (ReturnVal.didSucceed(result) || result.getCallback() == null)
-	  {
-	    this.unregister();
-	  }
+        if (ReturnVal.didSucceed(result) || result.getCallback() == null)
+          {
+            this.unregister();
+          }
 
-	return result;
+        return result;
       }
   }
 
@@ -300,9 +300,9 @@ public abstract class GanymediatorWizard implements Ganymediator {
   {
     // "Operation Canceled"
     return fail(ts.l("cancel.canceled"),
-		ts.l("cancel.canceled"),
-		Ganymede.OK,	// localized ok
-		null, "ok.gif");
+                ts.l("cancel.canceled"),
+                Ganymede.OK,    // localized ok
+                null, "ok.gif");
   }
 
   /**
@@ -328,7 +328,7 @@ public abstract class GanymediatorWizard implements Ganymediator {
    */
 
   protected ReturnVal continueOn(String title, String body,
-				 String ok, String cancel, String image)
+                                 String ok, String cancel, String image)
   {
     result.clear();
     result.setSuccess(false);
@@ -344,7 +344,7 @@ public abstract class GanymediatorWizard implements Ganymediator {
    */
 
   protected ReturnVal fail(String title, String body,
-			   String ok, String cancel, String image)
+                           String ok, String cancel, String image)
   {
     unregister();
 
@@ -362,7 +362,7 @@ public abstract class GanymediatorWizard implements Ganymediator {
    */
 
   protected ReturnVal success(String title, String body,
-			      String ok, String cancel, String image)
+                              String ok, String cancel, String image)
   {
     unregister();
 
@@ -424,37 +424,37 @@ public abstract class GanymediatorWizard implements Ganymediator {
 
     try
       {
-	dialogMethod = this.getClass().getDeclaredMethod("processDialog" + state, ((java.lang.Class[]) null));
+        dialogMethod = this.getClass().getDeclaredMethod("processDialog" + state, ((java.lang.Class[]) null));
       }
     catch (NoSuchMethodException ex)
       {
-	// "Ganymede Wizard Error"
-	// "GanymediatorWizard.callDialog(): Couldn''t find a processDialog{0,number,#}() method in the wizard subclass!"
-	return Ganymede.createErrorDialog(ts.l("global.wizard_error"),
-					  ts.l("callDialog.state_error", Integer.valueOf(state)));
+        // "Ganymede Wizard Error"
+        // "GanymediatorWizard.callDialog(): Couldn''t find a processDialog{0,number,#}() method in the wizard subclass!"
+        return Ganymede.createErrorDialog(ts.l("global.wizard_error"),
+                                          ts.l("callDialog.state_error", Integer.valueOf(state)));
       }
 
     try
       {
-	localResult = (ReturnVal) dialogMethod.invoke(this, ((java.lang.Object[]) null));
+        localResult = (ReturnVal) dialogMethod.invoke(this, ((java.lang.Object[]) null));
       }
     catch (InvocationTargetException ex)
       {
-	Throwable original = ex.getTargetException();
+        Throwable original = ex.getTargetException();
 
-	unregister();
-	// "Ganymede Wizard Error"
-	// "GanymediatorWizard.callDialog(): Invocation error in state {0,number,#}:\n\n{1}"
-	return Ganymede.createErrorDialog(ts.l("global.wizard_error"),
-					  ts.l("callDialog.invocation_error", Integer.valueOf(state), Ganymede.stackTrace(original)));
+        unregister();
+        // "Ganymede Wizard Error"
+        // "GanymediatorWizard.callDialog(): Invocation error in state {0,number,#}:\n\n{1}"
+        return Ganymede.createErrorDialog(ts.l("global.wizard_error"),
+                                          ts.l("callDialog.invocation_error", Integer.valueOf(state), Ganymede.stackTrace(original)));
       }
     catch (IllegalAccessException ex)
       {
-	unregister();
-	// "Ganymede Wizard Error"
-	// "GanymediatorWizard.callDialog(): Illegal Access error in state {0,number,#}:\n\n{1}"
-	return Ganymede.createErrorDialog(ts.l("global.wizard_error"),
-					  ts.l("callDialog.illegal_error", Integer.valueOf(state), ex.getMessage()));
+        unregister();
+        // "Ganymede Wizard Error"
+        // "GanymediatorWizard.callDialog(): Illegal Access error in state {0,number,#}:\n\n{1}"
+        return Ganymede.createErrorDialog(ts.l("global.wizard_error"),
+                                          ts.l("callDialog.illegal_error", Integer.valueOf(state), ex.getMessage()));
       }
 
     return localResult;
@@ -471,9 +471,9 @@ public abstract class GanymediatorWizard implements Ganymediator {
   {
     if (session.isWizardActive(this))
       {
-	active = false;
-	session.unregisterWizard(this);
-	state = DONE;
+        active = false;
+        session.unregisterWizard(this);
+        state = DONE;
       }
   }
 
@@ -513,6 +513,6 @@ public abstract class GanymediatorWizard implements Ganymediator {
   public final ReturnVal getStartDialog()
   {
     return Ganymede.createErrorDialog("error, getStartDialog has been deprecated",
-				      "error, getStartDialog has been deprecated");
+                                      "error, getStartDialog has been deprecated");
   }
 }

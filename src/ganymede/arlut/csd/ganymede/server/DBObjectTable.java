@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2009
@@ -108,7 +108,7 @@ public class DBObjectTable implements Iterable<DBObject> {
   {
     if ((initialCapacity <= 0) || (loadFactor <= 0.0) || (loadFactor > 1.0)) 
       {
-	throw new IllegalArgumentException();
+        throw new IllegalArgumentException();
       }
 
     this.loadFactor = loadFactor;
@@ -209,7 +209,7 @@ public class DBObjectTable implements Iterable<DBObject> {
   {
     if (value == null) 
       {
-	throw new NullPointerException();
+        throw new NullPointerException();
       }
 
     return containsKey(value.hashCode());
@@ -230,10 +230,10 @@ public class DBObjectTable implements Iterable<DBObject> {
 
     for (DBObject e = tab[index] ; e != null ; e = e.next) 
       {
-	if (e.hashCode() == key)
-	  {
-	    return true;
-	  }
+        if (e.hashCode() == key)
+          {
+            return true;
+          }
       }
     
     return false;
@@ -254,10 +254,10 @@ public class DBObjectTable implements Iterable<DBObject> {
 
     for (DBObject e = tab[index] ; e != null ; e = e.next) 
       {
-	if (e.hashCode() == key)
-	  {
-	    return e;
-	  }
+        if (e.hashCode() == key)
+          {
+            return e;
+          }
       }
 
     return null;
@@ -278,10 +278,10 @@ public class DBObjectTable implements Iterable<DBObject> {
 
     for (DBObject e = tab[index] ; e != null ; e = e.next) 
       {
-	if (e.hashCode() == key)
-	  {
-	    return e;
-	  }
+        if (e.hashCode() == key)
+          {
+            return e;
+          }
       }
 
     return null;
@@ -312,15 +312,15 @@ public class DBObjectTable implements Iterable<DBObject> {
 
     for (int i = oldCapacity ; i-- > 0 ;) 
       {
-	for (DBObject old = oldTable[i] ; old != null ; ) 
-	  {
-	    DBObject e = old;
-	    old = old.next;
-	    
-	    int index = (e.hashCode() & 0x7FFFFFFF) % newCapacity;
-	    e.next = newTable[index];
-	    newTable[index] = e;
-	  }
+        for (DBObject old = oldTable[i] ; old != null ; ) 
+          {
+            DBObject e = old;
+            old = old.next;
+            
+            int index = (e.hashCode() & 0x7FFFFFFF) % newCapacity;
+            e.next = newTable[index];
+            newTable[index] = e;
+          }
       }
   }
 
@@ -339,7 +339,7 @@ public class DBObjectTable implements Iterable<DBObject> {
 
     if (value == null) 
       {
-	throw new NullPointerException();
+        throw new NullPointerException();
       }
 
     // Makes sure the object is not already in the hashtable.
@@ -352,10 +352,10 @@ public class DBObjectTable implements Iterable<DBObject> {
 
     if (count > threshold) 
       {
-	rehash();
-	putNoSync(value);
+        rehash();
+        putNoSync(value);
 
-	return;
+        return;
       } 
 
     // Insert the new entry.
@@ -378,7 +378,7 @@ public class DBObjectTable implements Iterable<DBObject> {
 
     if (value == null) 
       {
-	throw new NullPointerException();
+        throw new NullPointerException();
       }
 
     // Makes sure the object is not already in the hashtable.
@@ -389,7 +389,7 @@ public class DBObjectTable implements Iterable<DBObject> {
 
     if (count > threshold) 
       {
-	rehash();
+        rehash();
       }
 
     DBObject tab[] = table;
@@ -420,7 +420,7 @@ public class DBObjectTable implements Iterable<DBObject> {
 
     if (value == null) 
       {
-	throw new NullPointerException();
+        throw new NullPointerException();
       }
 
     DBObject tab[] = table;
@@ -429,10 +429,10 @@ public class DBObjectTable implements Iterable<DBObject> {
 
     if (count > threshold) 
       {
-	rehash();
-	putNoSync(value);
+        rehash();
+        putNoSync(value);
 
-	return;
+        return;
       } 
 
     // Insert the new entry.
@@ -456,21 +456,21 @@ public class DBObjectTable implements Iterable<DBObject> {
 
     for (DBObject e = tab[index], prev = null ; e != null ; prev = e, e = e.next) 
       {
-	if (e.hashCode() == key)
-	  {
-	    if (prev != null) 
-	      {
-		prev.next = e.next;
-	      } 
-	    else
-	      {
-		tab[index] = e.next;
-	      }
+        if (e.hashCode() == key)
+          {
+            if (prev != null) 
+              {
+                prev.next = e.next;
+              } 
+            else
+              {
+                tab[index] = e.next;
+              }
 
-	    count--;
+            count--;
 
-	    return;
-	  }
+            return;
+          }
       }
 
     return;
@@ -489,21 +489,21 @@ public class DBObjectTable implements Iterable<DBObject> {
 
     for (DBObject e = tab[index], prev = null ; e != null ; prev = e, e = e.next) 
       {
-	if (e.hashCode() == key)
-	  {
-	    if (prev != null) 
-	      {
-		prev.next = e.next;
-	      } 
-	    else
-	      {
-		tab[index] = e.next;
-	      }
+        if (e.hashCode() == key)
+          {
+            if (prev != null) 
+              {
+                prev.next = e.next;
+              } 
+            else
+              {
+                tab[index] = e.next;
+              }
 
-	    count--;
+            count--;
 
-	    return;
-	  }
+            return;
+          }
       }
 
     return;
@@ -523,7 +523,7 @@ public class DBObjectTable implements Iterable<DBObject> {
 
     for (int index = tab.length; --index >= 0; )
       {
-	tab[index] = null;
+        tab[index] = null;
       }
 
     count = 0;
@@ -555,20 +555,20 @@ class DBObjectTableEnumerator implements Enumeration {
     this.table = table;
     this.index = table.length;
   }
-	
+        
   public boolean hasMoreElements() 
   {
     if (entry != null) 
       {
-	return true;
+        return true;
       }
 
     while (index-- > 0) 
       {
-	if ((entry = table[index]) != null) 
-	  {
-	    return true;
-	  }
+        if ((entry = table[index]) != null) 
+          {
+            return true;
+          }
       }
 
     return false;
@@ -578,14 +578,14 @@ class DBObjectTableEnumerator implements Enumeration {
   {
     if (entry == null) 
       {
-	while ((index-- > 0) && ((entry = table[index]) == null));
+        while ((index-- > 0) && ((entry = table[index]) == null));
       }
 
     if (entry != null) 
       {
-	DBObject e = entry;
-	entry = e.next;
-	return e;
+        DBObject e = entry;
+        entry = e.next;
+        return e;
       }
 
     throw new NoSuchElementException("HashtableEnumerator");
@@ -618,20 +618,20 @@ class DBObjectTableIterator implements Iterator<DBObject> {
     this.table = table;
     this.index = table.length;
   }
-	
+        
   public boolean hasNext() 
   {
     if (entry != null) 
       {
-	return true;
+        return true;
       }
 
     while (index-- > 0) 
       {
-	if ((entry = table[index]) != null) 
-	  {
-	    return true;
-	  }
+        if ((entry = table[index]) != null) 
+          {
+            return true;
+          }
       }
 
     return false;
@@ -641,14 +641,14 @@ class DBObjectTableIterator implements Iterator<DBObject> {
   {
     if (entry == null) 
       {
-	while ((index-- > 0) && ((entry = table[index]) == null));
+        while ((index-- > 0) && ((entry = table[index]) == null));
       }
 
     if (entry != null) 
       {
-	DBObject e = entry;
-	entry = e.next;
-	return e;
+        DBObject e = entry;
+        entry = e.next;
+        return e;
       }
 
     throw new NoSuchElementException("HashtableEnumerator");

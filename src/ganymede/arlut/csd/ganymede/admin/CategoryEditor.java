@@ -85,12 +85,12 @@ public class CategoryEditor extends JStretchPanel implements JsetValueCallback {
   {
     if (owner == null)
       {
-	throw new IllegalArgumentException("owner must not be null");
+        throw new IllegalArgumentException("owner must not be null");
       }
     
     if (debug)
       {
-	System.err.println("CategoryEditor constructed");
+        System.err.println("CategoryEditor constructed");
       }
 
     this.owner = owner;
@@ -112,11 +112,11 @@ public class CategoryEditor extends JStretchPanel implements JsetValueCallback {
 
     try
       {
-	catNameS.setText(category.getName());
+        catNameS.setText(category.getName());
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("Remote Exception gettin gNameSpace attributes " + rx);
+        throw new RuntimeException("Remote Exception gettin gNameSpace attributes " + rx);
       }
   }
 
@@ -124,58 +124,58 @@ public class CategoryEditor extends JStretchPanel implements JsetValueCallback {
   {
     if (v.getSource() == catNameS)
       {
-	try
-	  {
-	    String newValue = (String) v.getValue();
+        try
+          {
+            String newValue = (String) v.getValue();
 
-	    // we can't allow categories to have null names, because
-	    // if they do, trying to delete the category would
-	    // be.. unfortunate.  We really should have some way of
-	    // *telling* the user why we're not letting them do this,
-	    // but I don't know if we have a handy way of doing that
-	    // from this class.
+            // we can't allow categories to have null names, because
+            // if they do, trying to delete the category would
+            // be.. unfortunate.  We really should have some way of
+            // *telling* the user why we're not letting them do this,
+            // but I don't know if we have a handy way of doing that
+            // from this class.
 
-	    if (newValue.equals(""))
-	      {
-		return false;
-	      }
+            if (newValue.equals(""))
+              {
+                return false;
+              }
 
-	    if (debug)
-	      {
-		System.err.println("Trying to set category name to " + newValue);
-	      }
+            if (debug)
+              {
+                System.err.println("Trying to set category name to " + newValue);
+              }
 
-	    if (category.setName(newValue))
-	      {
-		// update the node in the tree
+            if (category.setName(newValue))
+              {
+                // update the node in the tree
 
-		catNode.setText(newValue);
-		owner.tree.refresh();
+                catNode.setText(newValue);
+                owner.tree.refresh();
 
-		if (debug)
-		  {
-		    System.err.println("Was able to set category name to " + newValue);
-		  }
+                if (debug)
+                  {
+                    System.err.println("Was able to set category name to " + newValue);
+                  }
 
-		return true;
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    System.err.println("Was not able to set category name to " + newValue);
-		  }
+                return true;
+              }
+            else
+              {
+                if (debug)
+                  {
+                    System.err.println("Was not able to set category name to " + newValue);
+                  }
 
-		return false;
-	      }
-	  }
-	catch (RemoteException ex)
-	  {
-	    return false;
-	  }
+                return false;
+              }
+          }
+        catch (RemoteException ex)
+          {
+            return false;
+          }
       }
 
-    return true;		// what the?
+    return true;                // what the?
   }
 
   /**
@@ -188,17 +188,17 @@ public class CategoryEditor extends JStretchPanel implements JsetValueCallback {
 
     if (this.catJPanel != null)
       {
-	this.catJPanel.cleanup();
-	this.catJPanel = null;
+        this.catJPanel.cleanup();
+        this.catJPanel = null;
       }
 
     this.catNameS = null;
     this.catNode = null;
 
-    this.category = null;	// remote reference
+    this.category = null;       // remote reference
 
     // and clean up the AWT's linkages
 
-    this.removeAll();		// should be done on GUI thread
+    this.removeAll();           // should be done on GUI thread
   }
 }

@@ -219,10 +219,10 @@ public final class xmlclient implements ClientListener, Runnable {
           }
         else if (xc.queryString != null)
           {
-	    if (debug)
-	      {
-		System.err.println("xmlclient: xc.queryString = " + xc.queryString);
-	      }
+            if (debug)
+              {
+                System.err.println("xmlclient: xc.queryString = " + xc.queryString);
+              }
 
             if (xc.doQuery(xc.queryString))
               {
@@ -334,8 +334,8 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (!inFile.exists())
       {
-	// "Ganymede xmlclient: Error, file {0} does not exist"
-	err.println(ts.l("init.badFile", xmlFilename));
+        // "Ganymede xmlclient: Error, file {0} does not exist"
+        err.println(ts.l("init.badFile", xmlFilename));
       }
   }
 
@@ -361,14 +361,14 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (propFilename == null)
       {
-	// "Ganymede xmlclient: Error, must specify properties on Java invocation line"
-	err.println(ts.l("init.noprops"));
+        // "Ganymede xmlclient: Error, must specify properties on Java invocation line"
+        err.println(ts.l("init.noprops"));
         err.flush();
-	System.exit(1);
+        System.exit(1);
       }
     else
       {
-	ok = loadProperties(propFilename);
+        ok = loadProperties(propFilename);
       }
 
     // "username"
@@ -376,7 +376,7 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (username == null)
       {
-	username = "supergash";
+        username = "supergash";
       }
 
     // "password"
@@ -387,75 +387,75 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (bufferString != null)
       {
-	try
-	  {
-	    bufferSize = Integer.parseInt(bufferString);
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    // "Couldn''t recognize bufsize argument: {0}"
-	    err.println(ts.l("init.badBuf", bufferString));
-	    ok = false;
-	  }
+        try
+          {
+            bufferSize = Integer.parseInt(bufferString);
+          }
+        catch (NumberFormatException ex)
+          {
+            // "Couldn''t recognize bufsize argument: {0}"
+            err.println(ts.l("init.badBuf", bufferString));
+            ok = false;
+          }
       }
 
     // "dumpschema"
     if (ParseArgs.switchExists(ts.l("global.dumpSchemaArg"), argv))
       {
-	dumpSchema = true;
-	dumpData = false;
-	return;
+        dumpSchema = true;
+        dumpData = false;
+        return;
       }
 
     // "dumpdata"
     if (ParseArgs.switchExists(ts.l("global.dumpDataArg"), argv))
       {
-	dumpData = true;
-	dumpSchema = false;
+        dumpData = true;
+        dumpSchema = false;
 
-	// "sync"
-	syncChannel = ParseArgs.getArg(ts.l("global.syncArg"), argv);
+        // "sync"
+        syncChannel = ParseArgs.getArg(ts.l("global.syncArg"), argv);
 
-	// "includeHistory"
-	includeHistory = ParseArgs.switchExists(ts.l("global.includeHistory"), argv);
+        // "includeHistory"
+        includeHistory = ParseArgs.switchExists(ts.l("global.includeHistory"), argv);
 
-	// "includeOid"
-	includeOid = ParseArgs.switchExists(ts.l("global.includeOid"), argv);
+        // "includeOid"
+        includeOid = ParseArgs.switchExists(ts.l("global.includeOid"), argv);
 
-	return;
+        return;
       }
 
     // "dump"
     if (ParseArgs.switchExists(ts.l("global.dumpArg"), argv))
       {
-	dumpData = true;
-	dumpSchema = true;
+        dumpData = true;
+        dumpSchema = true;
 
-	// "includeHistory"
-	includeHistory = ParseArgs.switchExists(ts.l("global.includeHistory"), argv);
+        // "includeHistory"
+        includeHistory = ParseArgs.switchExists(ts.l("global.includeHistory"), argv);
 
-	// "includeOid"
-	includeOid = ParseArgs.switchExists(ts.l("global.includeOid"), argv);
+        // "includeOid"
+        includeOid = ParseArgs.switchExists(ts.l("global.includeOid"), argv);
 
-	return;
+        return;
       }
 
     if (ParseArgs.switchExists(ts.l("global.queryArg"), argv))
       {
-	queryString = ParseArgs.decodeArg(argv[argv.length-1]);
-	return;
+        queryString = ParseArgs.decodeArg(argv[argv.length-1]);
+        return;
       }
 
     if (ParseArgs.switchExists(ts.l("global.queryfileArg"), argv))
       {
-	queryFilename = ParseArgs.decodeArg(argv[argv.length-1]);
-	return;
+        queryFilename = ParseArgs.decodeArg(argv[argv.length-1]);
+        return;
       }
 
     // "test"
     if (ParseArgs.switchExists(ts.l("global.testArg"), argv))
       {
-	doTest = true;
+        doTest = true;
       }
 
     xmlFilename = ParseArgs.decodeArg(argv[argv.length-1]);
@@ -464,16 +464,16 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (!xmlFile.exists())
       {
-	// "Ganymede xmlclient: Error, file {0} does not exist"
-	err.println(ts.l("init.badFile", xmlFilename));
-	ok = false;
+        // "Ganymede xmlclient: Error, file {0} does not exist"
+        err.println(ts.l("init.badFile", xmlFilename));
+        ok = false;
       }
 
     if (!ok)
       {
-	printUsage();
+        printUsage();
         err.flush();
-	System.exit(1);
+        System.exit(1);
       }
   }
 
@@ -497,18 +497,18 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (username == null)
       {
-	// we would prompt for the username here, but java gives us no
-	// portable way to turn character echo on and off.. the script
-	// that runs us has character echo off so that we can prompt
-	// for the user's password, but since it is off, we can't
-	// really prompt for a missing user name here.
+        // we would prompt for the username here, but java gives us no
+        // portable way to turn character echo on and off.. the script
+        // that runs us has character echo off so that we can prompt
+        // for the user's password, but since it is off, we can't
+        // really prompt for a missing user name here.
 
-	username = "supergash";
+        username = "supergash";
       }
 
     if (password == null)
       {
-	password = getPassword();
+        password = getPassword();
       }
 
     // find the server
@@ -517,13 +517,13 @@ public final class xmlclient implements ClientListener, Runnable {
 
     try
       {
-	client.connect();
+        client.connect();
       }
     catch (Throwable ex)
       {
-	// "Error connecting to the server:\n{0}"
-	err.println(ts.l("global.errorConnecting", stackTrace(ex)));
-	return false;
+        // "Error connecting to the server:\n{0}"
+        err.println(ts.l("global.errorConnecting", stackTrace(ex)));
+        return false;
       }
 
     // since we're only doing data or schema dumping, we don't
@@ -533,66 +533,66 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (session == null)
       {
-	// "Error, couldn''t log in to server.. bad username or password?"
-	err.println(ts.l("global.badLogin"));
-	return false;
+        // "Error, couldn''t log in to server.. bad username or password?"
+        err.println(ts.l("global.badLogin"));
+        return false;
       }
 
     try
       {
-	// now do what we came for
+        // now do what we came for
 
-	ReturnVal retVal = null;
+        ReturnVal retVal = null;
 
-	if (sendData && !sendSchema)
-	  {
-	    retVal = session.getDataXML(syncChannel, includeHistory, includeOid);
-	  }
-	else if (sendSchema && !sendData)
-	  {
-	    retVal = session.getSchemaXML();
-	  }
-	else if (sendSchema && sendData)
-	  {
-	    retVal = session.getXMLDump(includeHistory, includeOid);
-	  }
-	else
-	  {
-	    throw new RuntimeException("ASSERT: neither sendSchema nor sendData set");
-	  }
+        if (sendData && !sendSchema)
+          {
+            retVal = session.getDataXML(syncChannel, includeHistory, includeOid);
+          }
+        else if (sendSchema && !sendData)
+          {
+            retVal = session.getSchemaXML();
+          }
+        else if (sendSchema && sendData)
+          {
+            retVal = session.getXMLDump(includeHistory, includeOid);
+          }
+        else
+          {
+            throw new RuntimeException("ASSERT: neither sendSchema nor sendData set");
+          }
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    String errorMessage = retVal.getDialogText();
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            String errorMessage = retVal.getDialogText();
 
-	    if (errorMessage != null)
-	      {
-		err.println(errorMessage);
-	      }
+            if (errorMessage != null)
+              {
+                err.println(errorMessage);
+              }
 
-	    return false;
-	  }
+            return false;
+          }
 
-	FileTransmitter transmitter = retVal.getFileTransmitter();
+        FileTransmitter transmitter = retVal.getFileTransmitter();
 
-	byte[] bytes = transmitter.getNextChunk();
+        byte[] bytes = transmitter.getNextChunk();
 
-	while (bytes != null)
-	  {
-	    System.out.write(bytes);
+        while (bytes != null)
+          {
+            System.out.write(bytes);
 
-	    bytes = transmitter.getNextChunk();
-	  }
+            bytes = transmitter.getNextChunk();
+          }
       }
     catch (Exception ex)
       {
-	ex.printStackTrace(err);
+        ex.printStackTrace(err);
       }
     finally
       {
-	// and say goodbye
+        // and say goodbye
 
-	session.logout();
+        session.logout();
       }
 
     return true;
@@ -606,49 +606,49 @@ public final class xmlclient implements ClientListener, Runnable {
   {
     try
       {
-	reader = new arlut.csd.Util.XMLReader(xmlFilename, bufferSize, true); // skip meaningless whitespace
+        reader = new arlut.csd.Util.XMLReader(xmlFilename, bufferSize, true); // skip meaningless whitespace
 
-	XMLItem startDocument = getNextItem();
+        XMLItem startDocument = getNextItem();
 
-	if (!(startDocument instanceof XMLStartDocument))
-	  {
-	    // "XML parser error: first element {0} is not XMLStartDocument"
-	    err.println(ts.l("global.badBeginParse", startDocument));
-	    return;
-	  }
-
-	XMLItem docElement = reader.getNextTree();
-
-	if (docElement == null)
-	  {
-	    // "Error, {0} does not contain an XML file."
-	    err.println(ts.l("global.nullDocElement", xmlFilename));
+        if (!(startDocument instanceof XMLStartDocument))
+          {
+            // "XML parser error: first element {0} is not XMLStartDocument"
+            err.println(ts.l("global.badBeginParse", startDocument));
             return;
-	  }
+          }
 
-	if (!docElement.matches("ganymede"))
-	  {
-	    // "Error, {0} does not contain a Ganymede XML file.\nUnrecognized XML element: {1}"
-	    err.println(ts.l("global.badDocElement", xmlFilename, docElement));
-	    return;
-	  }
-	else
-	  {
-	    docElement.debugPrintTree(0);
-	  }
+        XMLItem docElement = reader.getNextTree();
+
+        if (docElement == null)
+          {
+            // "Error, {0} does not contain an XML file."
+            err.println(ts.l("global.nullDocElement", xmlFilename));
+            return;
+          }
+
+        if (!docElement.matches("ganymede"))
+          {
+            // "Error, {0} does not contain a Ganymede XML file.\nUnrecognized XML element: {1}"
+            err.println(ts.l("global.badDocElement", xmlFilename, docElement));
+            return;
+          }
+        else
+          {
+            docElement.debugPrintTree(0);
+          }
       }
     catch (Exception ex)
       {
-	ex.printStackTrace(err);
+        ex.printStackTrace(err);
 
-	return;
+        return;
       }
     finally
       {
-	if (reader != null)
-	  {
-	    reader.close();
-	  }
+        if (reader != null)
+          {
+            reader.close();
+          }
       }
   }
 
@@ -664,18 +664,18 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (username == null)
       {
-	// we would prompt for the username here, but java gives us no
-	// portable way to turn character echo on and off.. the script
-	// that runs us has character echo off so that we can prompt
-	// for the user's password, but since it is off, we can't
-	// really prompt for a missing user name here.
+        // we would prompt for the username here, but java gives us no
+        // portable way to turn character echo on and off.. the script
+        // that runs us has character echo off so that we can prompt
+        // for the user's password, but since it is off, we can't
+        // really prompt for a missing user name here.
 
-	username = "supergash";
+        username = "supergash";
       }
 
     if (password == null)
       {
-	password = getPassword();
+        password = getPassword();
       }
 
     // find the server
@@ -684,13 +684,13 @@ public final class xmlclient implements ClientListener, Runnable {
 
     try
       {
-	client.connect();
+        client.connect();
       }
     catch (Throwable ex)
       {
-	// "Error connecting to the server:\n{0}"
-	err.println(ts.l("global.errorConnecting", stackTrace(ex)));
-	return false;
+        // "Error connecting to the server:\n{0}"
+        err.println(ts.l("global.errorConnecting", stackTrace(ex)));
+        return false;
       }
 
     // since we're only doing data or schema dumping, we don't
@@ -700,9 +700,9 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (session == null)
       {
-	// "Error, couldn''t log in to server.. bad username or password?"
-	err.println(ts.l("global.badLogin"));
-	return false;
+        // "Error, couldn''t log in to server.. bad username or password?"
+        err.println(ts.l("global.badLogin"));
+        return false;
       }
 
     try
@@ -766,8 +766,8 @@ public final class xmlclient implements ClientListener, Runnable {
 
     while (c != -1)
       {
-	buffer.append((char) c);
-	c = inBuf.read();
+        buffer.append((char) c);
+        c = inBuf.read();
       }
 
     inBuf.close();
@@ -788,12 +788,12 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (!scanXML(inFile))
       {
-	// "Bad XML integrity"
-	err.println(ts.l("doSendChanges.badScan"));
+        // "Bad XML integrity"
+        err.println(ts.l("doSendChanges.badScan"));
 
-	finishedErrStream = true;
+        finishedErrStream = true;
 
-	return false;		// malformed in some way
+        return false;           // malformed in some way
       }
 
     if (username == null || password == null)
@@ -812,13 +812,13 @@ public final class xmlclient implements ClientListener, Runnable {
 
     try
       {
-	client.connect();
+        client.connect();
       }
     catch (Throwable ex)
       {
-	// "Error connecting to the server:\n{0}"
-	err.println(ts.l("global.errorConnecting", stackTrace(ex)));
-	return false;
+        // "Error connecting to the server:\n{0}"
+        err.println(ts.l("global.errorConnecting", stackTrace(ex)));
+        return false;
       }
 
     // since we're transmitting changes, we'll need a
@@ -831,9 +831,9 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (xSession == null)
       {
-	// "Error, couldn''t log in to server.. bad username or password?"
-	err.println(ts.l("global.badLogin"));
-	return false;
+        // "Error, couldn''t log in to server.. bad username or password?"
+        err.println(ts.l("global.badLogin"));
+        return false;
       }
 
     // "Sending XML to server."
@@ -864,10 +864,10 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (!scanXML(null))
       {
-	// "Bad XML integrity"
-	err.println(ts.l("doSendChanges.badScan"));
+        // "Bad XML integrity"
+        err.println(ts.l("doSendChanges.badScan"));
 
-	return false;		// malformed in some way
+        return false;           // malformed in some way
       }
 
     // now we should have the username and password if we are going to
@@ -875,22 +875,22 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (username == null)
       {
-	// we would prompt for the username here, but java gives us no
-	// portable way to turn character echo on and off.. the script
-	// that runs us has character echo off so that we can prompt
-	// for the user's password, but since it is off, we can't
-	// really prompt for a missing user name here.
+        // we would prompt for the username here, but java gives us no
+        // portable way to turn character echo on and off.. the script
+        // that runs us has character echo off so that we can prompt
+        // for the user's password, but since it is off, we can't
+        // really prompt for a missing user name here.
 
-	// "Ganymede xmlclient: Error, must specify Ganymede account name in <ganymede> element or on\ncommand line."
+        // "Ganymede xmlclient: Error, must specify Ganymede account name in <ganymede> element or on\ncommand line."
 
-	err.println(ts.l("doSendChanges.noUsername"));
-	printUsage();
-	return false;
+        err.println(ts.l("doSendChanges.noUsername"));
+        printUsage();
+        return false;
       }
 
     if (password == null)
       {
-	password = getPassword();
+        password = getPassword();
       }
 
     // find the server
@@ -899,13 +899,13 @@ public final class xmlclient implements ClientListener, Runnable {
 
     try
       {
-	client.connect();
+        client.connect();
       }
     catch (Throwable ex)
       {
-	// "Error connecting to the server:\n{0}"
-	err.println(ts.l("global.errorConnecting", stackTrace(ex)));
-	return false;
+        // "Error connecting to the server:\n{0}"
+        err.println(ts.l("global.errorConnecting", stackTrace(ex)));
+        return false;
       }
 
     // since we're transmitting changes, we'll need a
@@ -915,9 +915,9 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (xSession == null)
       {
-	// "Error, couldn''t log in to server.. bad username or password?"
-	err.println(ts.l("global.badLogin"));
-	return false;
+        // "Error, couldn''t log in to server.. bad username or password?"
+        err.println(ts.l("global.badLogin"));
+        return false;
       }
 
     // "Sending XML to server."
@@ -948,80 +948,80 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (schemaOnly)
       {
-	String startWrap = "<ganymede major=\"" + majorVersion + "\" minor=\"" + minorVersion + "\">\n";
-	data = startWrap.getBytes();
+        String startWrap = "<ganymede major=\"" + majorVersion + "\" minor=\"" + minorVersion + "\">\n";
+        data = startWrap.getBytes();
 
-	if (!submitChunk(data))
-	  {
-	    return false;
-	  }
+        if (!submitChunk(data))
+          {
+            return false;
+          }
       }
 
     int avail = inStream.available();
 
     while (avail > 0)
       {
-	if (avail > 65536)
-	  {
-	    avail = 65536;
-	  }
+        if (avail > 65536)
+          {
+            avail = 65536;
+          }
 
-	if (oldavail != avail)
-	  {
-	    data = new byte[avail];
-	  }
+        if (oldavail != avail)
+          {
+            data = new byte[avail];
+          }
 
-	inStream.read(data);
+        inStream.read(data);
 
-	if (!submitChunk(data))
-	  {
-	    return false;
-	  }
+        if (!submitChunk(data))
+          {
+            return false;
+          }
 
-	// and round and round we go
+        // and round and round we go
 
-	avail = inStream.available();
+        avail = inStream.available();
       }
 
     if (schemaOnly)
       {
-	String endWrap = "\n</ganymede>";
-	data = endWrap.getBytes();
+        String endWrap = "\n</ganymede>";
+        data = endWrap.getBytes();
 
-	if (!submitChunk(data))
-	  {
-	    return false;
-	  }
+        if (!submitChunk(data))
+          {
+            return false;
+          }
       }
 
     try
       {
-	retVal = xSession.xmlEnd();
+        retVal = xSession.xmlEnd();
 
-	if (retVal != null)
-	  {
-	    String message = retVal.getDialogText();
+        if (retVal != null)
+          {
+            String message = retVal.getDialogText();
 
-	    if (message != null)
-	      {
-		err.println(message);
-	      }
+            if (message != null)
+              {
+                err.println(message);
+              }
 
-	    return retVal.didSucceed();
-	  }
-	else
-	  {
-	    // a null ReturnVal signifies a successful result
+            return retVal.didSucceed();
+          }
+        else
+          {
+            // a null ReturnVal signifies a successful result
 
-	    return true;
-	  }
+            return true;
+          }
       }
     catch (Exception ex)
       {
-	// for remote and other
-	ex.printStackTrace(err);
+        // for remote and other
+        ex.printStackTrace(err);
 
-	return false;
+        return false;
       }
   }
 
@@ -1034,36 +1034,36 @@ public final class xmlclient implements ClientListener, Runnable {
   {
     if (password != null)
       {
-	return password;
+        return password;
       }
 
     if (this.commandLine)
       {
-	java.io.BufferedReader in;
+        java.io.BufferedReader in;
 
-	// get an input stream so we can get the password from the user if we have to
+        // get an input stream so we can get the password from the user if we have to
 
-	in = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
+        in = new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
 
-	try
-	  {
-	    // Password for "{0}":
-	    err.print(ts.l("global.passPrompt", username));
+        try
+          {
+            // Password for "{0}":
+            err.print(ts.l("global.passPrompt", username));
             err.flush();
-	    password = in.readLine();
-	    err.println();
+            password = in.readLine();
+            err.println();
             err.flush();
-	  }
-	catch (java.io.IOException ex)
-	  {
-	    // "Exception getting input: {0}"
-	    throw new RuntimeException(ts.l("global.inputException", ex.toString()));
-	  }
+          }
+        catch (java.io.IOException ex)
+          {
+            // "Exception getting input: {0}"
+            throw new RuntimeException(ts.l("global.inputException", ex.toString()));
+          }
       }
     else
       {
-	// "Error, could not acquire password."
-	throw new RuntimeException(ts.l("global.nopass"));
+        // "Error, could not acquire password."
+        throw new RuntimeException(ts.l("global.nopass"));
       }
 
     return password;
@@ -1077,41 +1077,41 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (debug)
       {
-	err.println("submitChunk call");
+        err.println("submitChunk call");
       }
 
     try
       {
-	retVal = xSession.xmlSubmit(data);
+        retVal = xSession.xmlSubmit(data);
 
-	if (debug)
-	  {
-	    err.println("submitChunk completed");
-	  }
+        if (debug)
+          {
+            err.println("submitChunk completed");
+          }
 
-	if (retVal != null)
-	  {
-	    String message = retVal.getDialogText();
+        if (retVal != null)
+          {
+            String message = retVal.getDialogText();
 
-	    if (message != null)
-	      {
-		err.println(message);
-	      }
+            if (message != null)
+              {
+                err.println(message);
+              }
 
-	    if (!retVal.didSucceed())
-	      {
-		xSession.abort();
-		return false;
-	      }
-	  }
+            if (!retVal.didSucceed())
+              {
+                xSession.abort();
+                return false;
+              }
+          }
 
-	return true;
+        return true;
       }
     catch (Exception ex)
       {
-	// for remote and other
-	ex.printStackTrace(err);
-	return false;
+        // for remote and other
+        ex.printStackTrace(err);
+        return false;
       }
   }
 
@@ -1129,86 +1129,86 @@ public final class xmlclient implements ClientListener, Runnable {
       {
         if (inFile == null)
           {
-	    myFilename = xmlFilename;
+            myFilename = xmlFilename;
             reader = new arlut.csd.Util.XMLReader(xmlFilename, bufferSize, true, err); // skip meaningless whitespace
           }
         else
           {
-	    myFilename = inFile.getName();
+            myFilename = inFile.getName();
             reader = new arlut.csd.Util.XMLReader(inFile, bufferSize, true, err); // skip meaningless whitespace
           }
 
-	XMLItem startDocument = getNextItem();
+        XMLItem startDocument = getNextItem();
 
-	if (!(startDocument instanceof XMLStartDocument))
-	  {
-	    // "XML parser error: first element {0} is not XMLStartDocument"
-	    err.println(ts.l("global.badBeginParse", startDocument));
-	    return false;
-	  }
+        if (!(startDocument instanceof XMLStartDocument))
+          {
+            // "XML parser error: first element {0} is not XMLStartDocument"
+            err.println(ts.l("global.badBeginParse", startDocument));
+            return false;
+          }
 
-	XMLItem docElement = getNextItem();
+        XMLItem docElement = getNextItem();
 
-	if (docElement == null)
-	  {
-	    // "Error, {0} does not contain an XML file."
-	    err.println(ts.l("global.nullDocElement", myFilename));
-	    return false;
-	  }
+        if (docElement == null)
+          {
+            // "Error, {0} does not contain an XML file."
+            err.println(ts.l("global.nullDocElement", myFilename));
+            return false;
+          }
 
-	if (docElement.matches("ganyschema"))
-	  {
-	    schemaOnly = true;
-	    return true;
-	  }
-	else if (!docElement.matches("ganymede"))
-	  {
-	    // "Error, {0} does not contain a Ganymede XML file.\nUnrecognized XML element: {1}"
-	    err.println(ts.l("global.badDocElement", myFilename, docElement));
-	    return false;
-	  }
+        if (docElement.matches("ganyschema"))
+          {
+            schemaOnly = true;
+            return true;
+          }
+        else if (!docElement.matches("ganymede"))
+          {
+            // "Error, {0} does not contain a Ganymede XML file.\nUnrecognized XML element: {1}"
+            err.println(ts.l("global.badDocElement", myFilename, docElement));
+            return false;
+          }
 
-	Integer majorI = docElement.getAttrInt("major");
-	Integer minorI = docElement.getAttrInt("minor");
+        Integer majorI = docElement.getAttrInt("major");
+        Integer minorI = docElement.getAttrInt("minor");
 
-	if (majorI == null || majorI.intValue() > majorVersion)
-	  {
-	    // "Error, the ganymede Document Element {0} does not contain a compatible major version number."
-	    err.println(ts.l("scanXML.badMajor", docElement));
-	    return false;
-	  }
+        if (majorI == null || majorI.intValue() > majorVersion)
+          {
+            // "Error, the ganymede Document Element {0} does not contain a compatible major version number."
+            err.println(ts.l("scanXML.badMajor", docElement));
+            return false;
+          }
 
-	if (minorI == null)
-	  {
-	    // "Error, the ganymede Document Element {0} does not contain a minor version number."
-	    err.println(ts.l("scanXML.badMinor", docElement));
-	    return false;
-	  }
+        if (minorI == null)
+          {
+            // "Error, the ganymede Document Element {0} does not contain a minor version number."
+            err.println(ts.l("scanXML.badMinor", docElement));
+            return false;
+          }
 
-	if (docElement.getAttrStr("persona") != null)
-	  {
-	    username = docElement.getAttrStr("persona");
-	  }
+        if (docElement.getAttrStr("persona") != null)
+          {
+            username = docElement.getAttrStr("persona");
+          }
 
-	if (docElement.getAttrStr("password") != null)
-	  {
-	    password = docElement.getAttrStr("password");
-	  }
+        if (docElement.getAttrStr("password") != null)
+          {
+            password = docElement.getAttrStr("password");
+          }
 
-	return true;
+        return true;
       }
     catch (Exception ex)
       {
-	ex.printStackTrace(err);
+        ex.printStackTrace(err);
 
-	return false;
+        return false;
       }
     finally
       {
-	if (reader != null)
-	  {
-	    reader.close();
-	  }
+        if (reader != null)
+          {
+            reader.close();
+          }
       }
   }
 
@@ -1232,25 +1232,25 @@ public final class xmlclient implements ClientListener, Runnable {
 
     try
       {
-	bis = new BufferedInputStream(new FileInputStream(filename));
-	props.load(bis);
+        bis = new BufferedInputStream(new FileInputStream(filename));
+        props.load(bis);
       }
     catch (IOException ex)
       {
-	return false;
+        return false;
       }
     finally
       {
-	if (bis != null)
-	  {
-	    try
-	      {
-		bis.close();
-	      }
-	    catch (IOException e)
-	      {
-	      }
-	  }
+        if (bis != null)
+          {
+            try
+              {
+                bis.close();
+              }
+            catch (IOException e)
+              {
+              }
+          }
       }
 
     // make the combined properties file accessible throughout our
@@ -1262,9 +1262,9 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (serverHostProperty == null)
       {
-	// "Couldn''t get the server host property"
-	err.println(ts.l("loadProperties.noServerHost"));
-	success = false;
+        // "Couldn''t get the server host property"
+        err.println(ts.l("loadProperties.noServerHost"));
+        success = false;
       }
 
     // get the registry port number
@@ -1273,20 +1273,20 @@ public final class xmlclient implements ClientListener, Runnable {
 
     if (registryPort != null)
       {
-	try
-	  {
-	    registryPortProperty = java.lang.Integer.parseInt(registryPort);
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    // "Couldn''t parse the ganymede.registryPort property"
-	    err.println(ts.l("loadProperties.noRegistryPort", registryPort));
-	  }
+        try
+          {
+            registryPortProperty = java.lang.Integer.parseInt(registryPort);
+          }
+        catch (NumberFormatException ex)
+          {
+            // "Couldn''t parse the ganymede.registryPort property"
+            err.println(ts.l("loadProperties.noRegistryPort", registryPort));
+          }
       }
 
     if (success)
       {
-	server_url = "rmi://" + serverHostProperty + ":" + registryPortProperty + "/ganymede.server";
+        server_url = "rmi://" + serverHostProperty + ":" + registryPortProperty + "/ganymede.server";
       }
 
     return success;
@@ -1305,25 +1305,25 @@ public final class xmlclient implements ClientListener, Runnable {
 
     while (item == null)
       {
-	item = reader.getNextItem();
+        item = reader.getNextItem();
 
-	if (item == null)
-	  {
-	    return null;
-	  }
+        if (item == null)
+          {
+            return null;
+          }
 
-	if (item instanceof XMLError)
-	  {
-	    err.println(item);
-	    throw new SAXException(item.toString());
-	  }
+        if (item instanceof XMLError)
+          {
+            err.println(item);
+            throw new SAXException(item.toString());
+          }
 
-	if (item instanceof XMLWarning)
-	  {
-	    // "Warning!: {0}"
-	    err.println(ts.l("getNextItem.warning", item));
-	    item = null;	// trigger retrieval of next, and check for warning
-	  }
+        if (item instanceof XMLWarning)
+          {
+            // "Warning!: {0}"
+            err.println(ts.l("getNextItem.warning", item));
+            item = null;        // trigger retrieval of next, and check for warning
+          }
       }
 
     return item;
@@ -1344,7 +1344,7 @@ public final class xmlclient implements ClientListener, Runnable {
 
     while (!item.matchesClose(name) && !(item instanceof XMLEndDocument))
       {
-	item = getNextItem();
+        item = getNextItem();
       }
   }
 
@@ -1359,7 +1359,7 @@ public final class xmlclient implements ClientListener, Runnable {
   {
     if (e.getType() == e.ERROR)
       {
-	err.println(e.getMessage());
+        err.println(e.getMessage());
       }
   }
 
@@ -1392,42 +1392,42 @@ public final class xmlclient implements ClientListener, Runnable {
 
     while (!this.finishedErrStream)
       {
-	try
-	  {
-	    result = xSession.getNextErrChunk();
+        try
+          {
+            result = xSession.getNextErrChunk();
 
-	    if (result != null)
-	      {
-		err.print(result);
+            if (result != null)
+              {
+                err.print(result);
                 err.flush();    // the server will keep things
                                 // efficient by the sleeping it does
                                 // in getNextErrChunk
-	      }
-	    else
-	      {
-		this.finishedErrStream = true;
+              }
+            else
+              {
+                this.finishedErrStream = true;
                 this.notifyAll();
-	      }
-	  }
-	catch (Exception ex)
-	  {
-	    // for remote and other
+              }
+          }
+        catch (Exception ex)
+          {
+            // for remote and other
 
-	    ex.printStackTrace(err);
-	    err.flush();
+            ex.printStackTrace(err);
+            err.flush();
 
-	    this.finishedErrStream = true;
-	    this.notifyAll();
+            this.finishedErrStream = true;
+            this.notifyAll();
 
-	    // we won't exit our err stream thread on one or two
-	    // errors, but if we get a bunch, assume we've lost the
-	    // connection and end the thread.
+            // we won't exit our err stream thread on one or two
+            // errors, but if we get a bunch, assume we've lost the
+            // connection and end the thread.
 
-	    if (count++ > 3)
-	      {
-		return;
-	      }
-	  }
+            if (count++ > 3)
+              {
+                return;
+              }
+          }
       }
   }
 

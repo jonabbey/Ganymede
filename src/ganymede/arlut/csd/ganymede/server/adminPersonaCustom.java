@@ -103,14 +103,14 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
     /* -- */
 
     if (adminInvid.getType() != SchemaConstants.PersonaBase &&
-	adminInvid.getType() != SchemaConstants.UserBase)
+        adminInvid.getType() != SchemaConstants.UserBase)
       {
-	throw new RuntimeException("not an administrator or user invid");
+        throw new RuntimeException("not an administrator or user invid");
       }
 
     if (session == null)
       {
-	session = Ganymede.internalSession.getDBSession();
+        session = Ganymede.internalSession.getDBSession();
       }
 
     admin = session.viewDBObject(adminInvid);
@@ -119,7 +119,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     if (addresses == null || addresses.size() == 0)
       {
-	return null;
+        return null;
       }
 
     return addresses.get(0);
@@ -193,30 +193,30 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     if (address == null || address.trim().equals(""))
       {
-	// okay, we got no address pre-registered for this
-	// admin.. we need now to try to guess at one, by looking
-	// to see this admin's name is of the form user:role, in
-	// which case we can just try to send to 'user', which will
-	// work as long as Ganymede's users cohere with the user names
-	// at Ganymede.mailHostProperty.
+        // okay, we got no address pre-registered for this
+        // admin.. we need now to try to guess at one, by looking
+        // to see this admin's name is of the form user:role, in
+        // which case we can just try to send to 'user', which will
+        // work as long as Ganymede's users cohere with the user names
+        // at Ganymede.mailHostProperty.
 
-	String adminName = object.getLabel();
+        String adminName = object.getLabel();
 
-	int colondex = adminName.indexOf(':');
+        int colondex = adminName.indexOf(':');
 
-	if (colondex == -1)
-	  {
-	    // supergash?
+        if (colondex == -1)
+          {
+            // supergash?
 
-	    return null;
-	  }
+            return null;
+          }
 
-	address = adminName.substring(0, colondex);
+        address = adminName.substring(0, colondex);
       }
 
     if (x != null)
       {
-	x.add(address);
+        x.add(address);
       }
 
     return x;
@@ -236,32 +236,32 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
   {
     if (field.getID() == SchemaConstants.PersonaNameField)
       {
-	if (debug)
-	  {
-	    System.err.println("adminPersonaCustom.finalizeSetValue(): setting persona name, refreshing label");
-	  }
+        if (debug)
+          {
+            System.err.println("adminPersonaCustom.finalizeSetValue(): setting persona name, refreshing label");
+          }
 
-	return refreshLabelField((String) value, null, null);
+        return refreshLabelField((String) value, null, null);
       }
 
     if (field.getID() == SchemaConstants.PersonaAssocUser)
       {
-	if (debug)
-	  {
-	    System.err.println("adminPersonaCustom.finalizeSetValue(): setting persona user, refreshing label");
-	  }
+        if (debug)
+          {
+            System.err.println("adminPersonaCustom.finalizeSetValue(): setting persona user, refreshing label");
+          }
 
-	// Hide the associated user field if we are looking at the
-	// supergash or monitor persona objects.
+        // Hide the associated user field if we are looking at the
+        // supergash or monitor persona objects.
 
-	if ((field.getID() == SchemaConstants.PersonaAssocUser) &&
-	    (getID() <= 2))
-	  {
-	    // "It is not permitted (or necessary) to set an associated user on the supergash or monitor persona objects."
-	    return Ganymede.createErrorDialog(ts.l("finalizeSetValue.restricted_persona"));
-	  }
+        if ((field.getID() == SchemaConstants.PersonaAssocUser) &&
+            (getID() <= 2))
+          {
+            // "It is not permitted (or necessary) to set an associated user on the supergash or monitor persona objects."
+            return Ganymede.createErrorDialog(ts.l("finalizeSetValue.restricted_persona"));
+          }
 
-	return refreshLabelField(null, (Invid) value, null);
+        return refreshLabelField(null, (Invid) value, null);
       }
 
     return null;
@@ -277,22 +277,22 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
   {
     if (descrip == null)
       {
-	StringDBField nameField = (StringDBField) getField(SchemaConstants.PersonaNameField);
+        StringDBField nameField = (StringDBField) getField(SchemaConstants.PersonaNameField);
 
-	if (nameField != null)
-	  {
-	    descrip = (String) nameField.getValueLocal();
-	  }
+        if (nameField != null)
+          {
+            descrip = (String) nameField.getValueLocal();
+          }
       }
 
     if ((userInvid == null) && (newName == null))
       {
-	InvidDBField assocUserField = (InvidDBField) getField(SchemaConstants.PersonaAssocUser);
+        InvidDBField assocUserField = (InvidDBField) getField(SchemaConstants.PersonaAssocUser);
 
-	if (assocUserField != null)
-	  {
-	    userInvid = (Invid) assocUserField.getValueLocal();
-	  }
+        if (assocUserField != null)
+          {
+            userInvid = (Invid) assocUserField.getValueLocal();
+          }
       }
 
     // if we are messing with the supergash or monitor persona
@@ -300,22 +300,22 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     if (getID() <= 2)
       {
-	return setFieldValueLocal(SchemaConstants.PersonaLabelField, descrip);
+        return setFieldValueLocal(SchemaConstants.PersonaLabelField, descrip);
       }
 
     if ((newName == null && userInvid == null) || descrip == null)
       {
-	return setFieldValueLocal(SchemaConstants.PersonaLabelField, null);
+        return setFieldValueLocal(SchemaConstants.PersonaLabelField, null);
       }
 
     if (newName == null)
       {
-	newName = this.getGSession().getDBSession().getObjectLabel(userInvid);
+        newName = this.getGSession().getDBSession().getObjectLabel(userInvid);
       }
 
     if (debug)
       {
-	System.err.println("Trying to set label to " + newName + ":" + descrip);
+        System.err.println("Trying to set label to " + newName + ":" + descrip);
       }
 
     return setFieldValueLocal(SchemaConstants.PersonaLabelField, newName + ":" + descrip);
@@ -340,10 +340,10 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     if (field.getID() != SchemaConstants.PersonaPrivs)
       {
-	return super.obtainChoicesKey(field);
+        return super.obtainChoicesKey(field);
       }
 
-    return null;		// not going to cache PersonaPrivs field
+    return null;                // not going to cache PersonaPrivs field
   }
 
   /**
@@ -362,55 +362,55 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
   {
     if (debug)
       {
-	System.err.println("Entering adminPersona obtainChoiceList for field " +
-			   field.getName());
+        System.err.println("Entering adminPersona obtainChoiceList for field " +
+                           field.getName());
       }
 
     if (field.getID() != SchemaConstants.PersonaPrivs)
       {
-	return super.obtainChoiceList(field);
+        return super.obtainChoiceList(field);
       }
 
     if (debug)
       {
-	System.err.println("Returning adminPersona restricted list");
+        System.err.println("Returning adminPersona restricted list");
       }
 
     if (field.isEditable() && (field instanceof InvidDBField) &&
-	!field.isEditInPlace())
+        !field.isEditInPlace())
       {
-	DBObjectBaseField fieldDef;
-	short baseId;
+        DBObjectBaseField fieldDef;
+        short baseId;
 
-	/* -- */
+        /* -- */
 
-	fieldDef = field.getFieldDef();
+        fieldDef = field.getFieldDef();
 
-	baseId = fieldDef.getTargetBase();
+        baseId = fieldDef.getTargetBase();
 
-	if (baseId < 0)
-	  {
-	    return null;
-	  }
+        if (baseId < 0)
+          {
+            return null;
+          }
 
-	if (Ganymede.internalSession == null)
-	  {
-	    return null;
-	  }
+        if (Ganymede.internalSession == null)
+          {
+            return null;
+          }
 
-	// We don't want the Default Role to be shown as a valid
-	// choice for this.. everyone has Default implicitly, no point
-	// in showing it.
+        // We don't want the Default Role to be shown as a valid
+        // choice for this.. everyone has Default implicitly, no point
+        // in showing it.
 
-	QueryNode root = new QueryNotNode(new QueryDataNode(QueryDataNode.INVIDVAL,
-							    QueryDataNode.EQUALS,
-							    Invid.createInvid(SchemaConstants.RoleBase,
-									      SchemaConstants.RoleDefaultObj)));
+        QueryNode root = new QueryNotNode(new QueryDataNode(QueryDataNode.INVIDVAL,
+                                                            QueryDataNode.EQUALS,
+                                                            Invid.createInvid(SchemaConstants.RoleBase,
+                                                                              SchemaConstants.RoleDefaultObj)));
 
-	// note that the query we are submitting here *will* be filtered by the
-	// current visibilityFilterInvid field in GanymedeSession.
+        // note that the query we are submitting here *will* be filtered by the
+        // current visibilityFilterInvid field in GanymedeSession.
 
-	return editset.getDBSession().getGSession().query(new Query(baseId, root, true));
+        return editset.getDBSession().getGSession().query(new Query(baseId, root, true));
       }
 
     return null;
@@ -452,7 +452,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     if (supergashPersona.equals(object.getInvid()) || monitor.equals(object.getInvid()))
       {
-	return null;
+        return null;
       }
 
     Invid supergashOwner = Invid.createInvid(SchemaConstants.OwnerBase, SchemaConstants.OwnerSupergash);
@@ -484,18 +484,18 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
       {
       case SchemaConstants.PersonaAssocUser:
 
-	// supergash and monitor don't have to have associated users
-	// defined.
+        // supergash and monitor don't have to have associated users
+        // defined.
 
-	if (object.getID() <= 2)
-	  {
-	    return false;
-	  }
+        if (object.getID() <= 2)
+          {
+            return false;
+          }
 
       case SchemaConstants.PersonaNameField:
       case SchemaConstants.PersonaPasswordField:
       case SchemaConstants.PersonaLabelField:
-	return true;
+        return true;
       }
 
     return false;
@@ -529,7 +529,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     if (field.getID() == SchemaConstants.PersonaLabelField)
       {
-	return false;
+        return false;
       }
 
     // Hide the associated user field if we are looking at the
@@ -537,12 +537,12 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     if (field.getID() == SchemaConstants.PersonaAssocUser)
       {
-	DBObject object = field.getOwner();
+        DBObject object = field.getOwner();
 
-	if (object.getID() <= 2)
-	  {
-	    return false;
-	  }
+        if (object.getID() <= 2)
+          {
+            return false;
+          }
       }
 
     return super.canSeeField(session, field);
@@ -567,9 +567,9 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     if (fieldID == SchemaConstants.PersonaGroupsField)
       {
-	return true;
+        return true;
       }
 
-    return false;		// by default, permission is denied
+    return false;               // by default, permission is denied
   }
 }

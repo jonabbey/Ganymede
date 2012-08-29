@@ -9,7 +9,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -90,8 +90,8 @@ public class TabEditor extends JStretchPanel implements JsetValueCallback {
   {
     if (owner == null)
       {
-	// "Error, null owner"
-	throw new IllegalArgumentException(ts.l("init.null_param"));
+        // "Error, null owner"
+        throw new IllegalArgumentException(ts.l("init.null_param"));
       }
 
     this.owner = owner;
@@ -128,20 +128,20 @@ public class TabEditor extends JStretchPanel implements JsetValueCallback {
 
     if (node == null)
       {
-	tabNameS.setText(ts.l("editTab.new_tab")); // "New Tab"
+        tabNameS.setText(ts.l("editTab.new_tab")); // "New Tab"
       }
     else if (node instanceof FieldNode)
       {
-	BaseField field = ((FieldNode) node).getField();
+        BaseField field = ((FieldNode) node).getField();
 
-	try
-	  {
-	    tabNameS.setText(field.getTabName());
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException(rx);
-	  }
+        try
+          {
+            tabNameS.setText(field.getTabName());
+          }
+        catch (RemoteException rx)
+          {
+            throw new RuntimeException(rx);
+          }
       }
     */
   }
@@ -150,42 +150,42 @@ public class TabEditor extends JStretchPanel implements JsetValueCallback {
   {
     if (v.getSource() == tabNameS)
       {
-	try
-	  {
-	    String newValue = (String) v.getValue();
+        try
+          {
+            String newValue = (String) v.getValue();
 
-	    // we can't allow fields to have empty/null tab names
-	    // because if they do, that would just be too crazy.  We
-	    // really should have some way of *telling* the user why
-	    // we're not letting them do this, but I don't know if we
-	    // have a handy way of doing that from this class.
+            // we can't allow fields to have empty/null tab names
+            // because if they do, that would just be too crazy.  We
+            // really should have some way of *telling* the user why
+            // we're not letting them do this, but I don't know if we
+            // have a handy way of doing that from this class.
 
-	    if (newValue == null || newValue.equals(""))
-	      {
-		return false;
-	      }
+            if (newValue == null || newValue.equals(""))
+              {
+                return false;
+              }
 
-	    treeNode node = tabNode.getChild();
+            treeNode node = tabNode.getChild();
 
-	    while (node != null)
-	      {
-		if (node instanceof FieldNode)
-		  {
-		    BaseField field = ((FieldNode) node).getField();
+            while (node != null)
+              {
+                if (node instanceof FieldNode)
+                  {
+                    BaseField field = ((FieldNode) node).getField();
 
-		    field.setTabName(newValue);
-		    
-		    node = node.getNextSibling();
-		  }
-	      }
+                    field.setTabName(newValue);
+                    
+                    node = node.getNextSibling();
+                  }
+              }
 
-	    tabNode.setText(newValue);
-	    owner.tree.refresh();
-	  }
-	catch (RemoteException ex)
-	  {
-	    return false;
-	  }
+            tabNode.setText(newValue);
+            owner.tree.refresh();
+          }
+        catch (RemoteException ex)
+          {
+            return false;
+          }
       }
 
     return true;
@@ -201,8 +201,8 @@ public class TabEditor extends JStretchPanel implements JsetValueCallback {
 
     if (this.tabJPanel != null)
       {
-	this.tabJPanel.cleanup();
-	this.tabJPanel = null;
+        this.tabJPanel.cleanup();
+        this.tabJPanel = null;
       }
 
     this.tabNameS = null;
@@ -210,6 +210,6 @@ public class TabEditor extends JStretchPanel implements JsetValueCallback {
 
     // and clean up the AWT's linkages
 
-    this.removeAll();		// should be done on GUI thread
+    this.removeAll();           // should be done on GUI thread
   }
 }

@@ -1,5 +1,5 @@
 /*
- * @(#)TreeTableModelAdapter.java	1.2 98/10/27
+ * @(#)TreeTableModelAdapter.java       1.2 98/10/27
  *
  * Copyright 1997, 1998 by Sun Microsystems, Inc.,
  * 901 San Antonio Road, Palo Alto, California, 94303, U.S.A.
@@ -61,14 +61,14 @@ public class TreeTableModelAdapter extends AbstractTableModel
     this.treeTableModel = treeTableModel;
 
     tree.addTreeExpansionListener(new TreeExpansionListener() {
-	// Don't use fireTableRowsInserted() here; the selection model
-	// would get updated twice. 
-	public void treeExpanded(TreeExpansionEvent event) {  
-	  fireTableDataChanged(); 
-	}
-	public void treeCollapsed(TreeExpansionEvent event) {  
-	  fireTableDataChanged(); 
-	}
+        // Don't use fireTableRowsInserted() here; the selection model
+        // would get updated twice. 
+        public void treeExpanded(TreeExpansionEvent event) {  
+          fireTableDataChanged(); 
+        }
+        public void treeCollapsed(TreeExpansionEvent event) {  
+          fireTableDataChanged(); 
+        }
       });
 
     // Install a TreeModelListener that can update the table when
@@ -76,22 +76,22 @@ public class TreeTableModelAdapter extends AbstractTableModel
     // not be guaranteed the tree will have finished processing
     // the event before us.
     treeTableModel.addTreeModelListener(new TreeModelListener() {
-	public void treeNodesChanged(TreeModelEvent e) {
-	  delayedFireTableDataChanged();
-	  //fireTableDataChanged();
-	}
+        public void treeNodesChanged(TreeModelEvent e) {
+          delayedFireTableDataChanged();
+          //fireTableDataChanged();
+        }
 
-	public void treeNodesInserted(TreeModelEvent e) {
-	  delayedFireTableDataChanged();
-	}
+        public void treeNodesInserted(TreeModelEvent e) {
+          delayedFireTableDataChanged();
+        }
 
-	public void treeNodesRemoved(TreeModelEvent e) {
-	  delayedFireTableDataChanged();
-	}
+        public void treeNodesRemoved(TreeModelEvent e) {
+          delayedFireTableDataChanged();
+        }
 
-	public void treeStructureChanged(TreeModelEvent e) {
-	  delayedFireTableDataChanged();
-	}
+        public void treeStructureChanged(TreeModelEvent e) {
+          delayedFireTableDataChanged();
+        }
       });
   }
   
@@ -154,9 +154,9 @@ public class TreeTableModelAdapter extends AbstractTableModel
   protected void delayedFireTableDataChanged()
   {
     EventQueue.invokeLater(new Runnable() {
-	public void run() {
-	  fireTableDataChanged();
-	}
+        public void run() {
+          fireTableDataChanged();
+        }
       });
   }
 }

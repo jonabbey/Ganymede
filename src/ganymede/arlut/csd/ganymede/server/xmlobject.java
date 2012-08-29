@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -222,45 +222,45 @@ public class xmlobject {
 
     if (actionMode != null)
       {
-	actionMode = actionMode.intern();
+        actionMode = actionMode.intern();
       }
 
     typeString = openElement.getAttrStr("type");
 
     if (typeString != null)
       {
-	typeString = typeString.intern();
+        typeString = typeString.intern();
       }
 
     try
       {
-	type = Short.valueOf(xSession.getTypeNum(typeString));
+        type = Short.valueOf(xSession.getTypeNum(typeString));
       }
     catch (NullPointerException ex)
       {
-	// "\n\nERROR: Unrecognized object type "{0}""
-	xSession.err.println(ts.l("init.unrecognized_type", openElement.getAttrStr("type")));
+        // "\n\nERROR: Unrecognized object type "{0}""
+        xSession.err.println(ts.l("init.unrecognized_type", openElement.getAttrStr("type")));
       }
 
     id = openElement.getAttrStr("id"); // may be null
 
     if (id != null)
       {
-	id = id.intern();
+        id = id.intern();
       }
 
     Integer numInt = openElement.getAttrInt("num");
 
     if (numInt != null)
       {
-	num = numInt.intValue();
+        num = numInt.intValue();
       }
 
     Integer indexInt = openElement.getAttrInt("index");
 
     if (ownerField != null && indexInt != null)
       {
-	index = indexInt.intValue();
+        index = indexInt.intValue();
       }
 
     // If the server was run with the -magic_import flag, we'll record
@@ -276,12 +276,12 @@ public class xmlobject {
 
     if (Ganymede.allowMagicImport)
       {
-	String oidString = openElement.getAttrStr("oid");
+        String oidString = openElement.getAttrStr("oid");
 
-	if (oidString != null)
-	  {
-	    oidCreateInvid = Invid.createInvid(oidString);
-	  }
+        if (oidString != null)
+          {
+            oidCreateInvid = Invid.createInvid(oidString);
+          }
       }
 
     // if we get an inactivate or delete request, our object element
@@ -289,7 +289,7 @@ public class xmlobject {
 
     if (openElement.isEmpty())
       {
-	return;
+        return;
       }
 
     // if we're deleting or inactivating an object, we can't handle
@@ -297,8 +297,8 @@ public class xmlobject {
 
     if ("delete".equals(actionMode) || "inactivate".equals(actionMode))
       {
-	// "XMLObject error: can''t {0} a non-empty <object> element."
-	throw new NullPointerException(ts.l("init.cant_operate", actionMode));
+        // "XMLObject error: can''t {0} a non-empty <object> element."
+        throw new NullPointerException(ts.l("init.cant_operate", actionMode));
       }
 
     // okay, we should contain some fields, then
@@ -309,30 +309,30 @@ public class xmlobject {
 
     while (!nextItem.matchesClose("object") && !(nextItem instanceof XMLEndDocument))
       {
-	if (nextItem instanceof XMLElement)
-	  {
-	    // the xmlfield constructor will consume all elements up
-	    // to and including the matching field close element
+        if (nextItem instanceof XMLElement)
+          {
+            // the xmlfield constructor will consume all elements up
+            // to and including the matching field close element
 
-	    xmlfield field = new xmlfield(this, (XMLElement) nextItem);
+            xmlfield field = new xmlfield(this, (XMLElement) nextItem);
 
-	    //	    xSession.err.println("Added new field: " + field.toString());	
+            //      xSession.err.println("Added new field: " + field.toString());       
 
-	    fields.put(field.getName(), field);
-	  }
-	else
-	  {
-	    // "Unrecognized XML content in object {0}: {1}"
-	    xSession.err.println(ts.l("init.unrecognized_xml", openElement, nextItem));
-	  }
+            fields.put(field.getName(), field);
+          }
+        else
+          {
+            // "Unrecognized XML content in object {0}: {1}"
+            xSession.err.println(ts.l("init.unrecognized_xml", openElement, nextItem));
+          }
 
-	nextItem = xSession.getNextItem();
+        nextItem = xSession.getNextItem();
       }
 
     if (nextItem instanceof XMLEndDocument)
       {
-	// "Ran into end of XML file while parsing data object {0}"
-	throw new RuntimeException(ts.l("init.early_end", this.toString()));
+        // "Ran into end of XML file while parsing data object {0}"
+        throw new RuntimeException(ts.l("init.early_end", this.toString()));
       }
   }
 
@@ -359,7 +359,7 @@ public class xmlobject {
 
     if (!ReturnVal.didSucceed(result))
       {
-	return result;
+        return result;
       }
 
     objref = result.getObject();
@@ -401,8 +401,8 @@ public class xmlobject {
 
     if (objref != null)
       {
-	// "xmlobject editOnServer(): Encountered duplicate xmlobject for creating or editing: {0}"
-	return Ganymede.createErrorDialog(ts.l("editOnServer.duplicate", this.toString()));
+        // "xmlobject editOnServer(): Encountered duplicate xmlobject for creating or editing: {0}"
+        return Ganymede.createErrorDialog(ts.l("editOnServer.duplicate", this.toString()));
       }
 
     localInvid = getInvid();
@@ -411,33 +411,33 @@ public class xmlobject {
       {
         result = session.edit_db_object(localInvid);
 
-	if (ReturnVal.didSucceed(result))
-	  {
-	    objref = result.getObject();
+        if (ReturnVal.didSucceed(result))
+          {
+            objref = result.getObject();
 
-	    // We'll check for duplicates here.  This check is subtly
-	    // different from the one above, and its purpose is to make
-	    // sure that the GanymedeXMLSession storeObject() wasn't
-	    // fooled by a case sensitivity issue.  Different case labels
-	    // may or may not map to the same Invid in the DBStore,
-	    // depending on the configuration of the object's label
-	    // handling.
+            // We'll check for duplicates here.  This check is subtly
+            // different from the one above, and its purpose is to make
+            // sure that the GanymedeXMLSession storeObject() wasn't
+            // fooled by a case sensitivity issue.  Different case labels
+            // may or may not map to the same Invid in the DBStore,
+            // depending on the configuration of the object's label
+            // handling.
 
-	    if (xSession.haveSeenInvid(localInvid))
-	      {
-		// "xmlobject editOnServer(): Encountered duplicate xmlobject for creating or editing: {0}"
-		return Ganymede.createErrorDialog(ts.l("editOnServer.duplicate", objref.toString()));
-	      }
+            if (xSession.haveSeenInvid(localInvid))
+              {
+                // "xmlobject editOnServer(): Encountered duplicate xmlobject for creating or editing: {0}"
+                return Ganymede.createErrorDialog(ts.l("editOnServer.duplicate", objref.toString()));
+              }
 
-	    xSession.rememberSeenInvid(localInvid);
+            xSession.rememberSeenInvid(localInvid);
           }
 
         return result;
       }
     else
       {
-	throw new RuntimeException("Couldn't find object on server to edit it: " + 
-				   this.toString());
+        throw new RuntimeException("Couldn't find object on server to edit it: " + 
+                                   this.toString());
       }
   }
 
@@ -461,12 +461,12 @@ public class xmlobject {
 
     if (mode < 0 || mode > 2)
       {
-	throw new IllegalArgumentException("mode must be 0, 1, or 2.");
+        throw new IllegalArgumentException("mode must be 0, 1, or 2.");
       }
 
     if (debug)
       {
-	xSession.err.println("Registering fields [" + mode + "] for object " + this.toString(false));
+        xSession.err.println("Registering fields [" + mode + "] for object " + this.toString(false));
       }
 
     // we want to create/register the fields in their display order..
@@ -478,41 +478,41 @@ public class xmlobject {
 
     for (int i = 0; i < templateVector.size(); i++)
       {
-	FieldTemplate template = (FieldTemplate) templateVector.elementAt(i);
+        FieldTemplate template = (FieldTemplate) templateVector.elementAt(i);
 
-	xmlfield field = (xmlfield) fields.get(template.getName());
+        xmlfield field = (xmlfield) fields.get(template.getName());
 
-	if (field == null)
-	  {
-	    // missing field, no big deal.  just skip it.
+        if (field == null)
+          {
+            // missing field, no big deal.  just skip it.
 
-	    continue;
-	  }
+            continue;
+          }
 
-	// on mode 0, we register everything but invid's (embedded
-	// objects do not count as invids for this purpose).  on mode
-	// 1, we only register invid's.  on mode 2, we register
-	// everything.
+        // on mode 0, we register everything but invid's (embedded
+        // objects do not count as invids for this purpose).  on mode
+        // 1, we only register invid's.  on mode 2, we register
+        // everything.
 
-	if (field.fieldDef.isInvid() && !field.fieldDef.isEditInPlace() && mode == 0)
-	  {
-	    // skip invid's
+        if (field.fieldDef.isInvid() && !field.fieldDef.isEditInPlace() && mode == 0)
+          {
+            // skip invid's
 
-	    continue;
-	  }
-	else if ((!field.fieldDef.isInvid() || field.fieldDef.isEditInPlace()) && mode == 1)
-	  {
-	    // skip non-invid's
+            continue;
+          }
+        else if ((!field.fieldDef.isInvid() || field.fieldDef.isEditInPlace()) && mode == 1)
+          {
+            // skip non-invid's
 
-	    continue;
-	  }
+            continue;
+          }
 
-	result = field.registerOnServer();
+        result = field.registerOnServer();
 
-	if (!ReturnVal.didSucceed(result))
-	  {
-	    return result;
-	  }
+        if (!ReturnVal.didSucceed(result))
+          {
+            return result;
+          }
       }
 
     return null;
@@ -537,69 +537,69 @@ public class xmlobject {
   {
     if (invid != null || knownNonExistent)
       {
-	return invid;
+        return invid;
       }
 
     /* We haven't established an Invid for this object yet.  Let's figure it out. */
 
     if (num != -1)
       {
-	// if we were given a number, assume they really do
-	// mean for us to edit a pre-existing object with
-	// that number, and don't argue
+        // if we were given a number, assume they really do
+        // mean for us to edit a pre-existing object with
+        // that number, and don't argue
 
-	invid = Invid.createInvid(type.shortValue(), num);
+        invid = Invid.createInvid(type.shortValue(), num);
       }
     else if (id != null)
       {
-	// try to look it up on the server
+        // try to look it up on the server
 
-	if (debug)
-	  {
-	    xSession.err.println("xmlobject.getInvid() calling findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
-	  }
+        if (debug)
+          {
+            xSession.err.println("xmlobject.getInvid() calling findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
+          }
 
-	invid = xSession.session.findLabeledObject(id, type.shortValue());
+        invid = xSession.session.findLabeledObject(id, type.shortValue());
 
-	if (invid == null)
-	  {
-	    if (debug)
-	      {
-		xSession.err.println("xmlobject.getInvid() deciding known non existent on " + type + ":" + id);
-	      }
+        if (invid == null)
+          {
+            if (debug)
+              {
+                xSession.err.println("xmlobject.getInvid() deciding known non existent on " + type + ":" + id);
+              }
 
-	    knownNonExistent = true;
-	  }
+            knownNonExistent = true;
+          }
 
-	if (debug)
-	  {
-	    xSession.err.println("xmlobject called findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
-	    xSession.err.println("findLabeledObject() returned " + invid + "[3]");
-	  }
+        if (debug)
+          {
+            xSession.err.println("xmlobject called findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
+            xSession.err.println("findLabeledObject() returned " + invid + "[3]");
+          }
       }
     else if (ownerField != null && index != -1)
       {
-	// if we've got no id but we do have an index, we must be an
-	// embedded object that already existed on the server.  Let's
-	// find our containing field and parent object and get the
-	// invid for the embedded object with matching index.
+        // if we've got no id but we do have an index, we must be an
+        // embedded object that already existed on the server.  Let's
+        // find our containing field and parent object and get the
+        // invid for the embedded object with matching index.
 
-	xmlobject ownerObject = ownerField.owner;
-	Invid parentInvid = ownerObject.getInvid();
+        xmlobject ownerObject = ownerField.owner;
+        Invid parentInvid = ownerObject.getInvid();
 
-	try
-	  {
-	    ReturnVal parentResult = xSession.session.view_db_object(parentInvid);
-	    db_object parentObject = parentResult.getObject();
-	    InvidDBField containerField = (InvidDBField) parentObject.getField(ownerField.fieldDef.getID());
-	    invid = (Invid) containerField.getElementLocal(index);
-	  }
-	catch (RemoteException ex)
-	  {
-	  }
-	catch (NullPointerException ex)
-	  {
-	  }
+        try
+          {
+            ReturnVal parentResult = xSession.session.view_db_object(parentInvid);
+            db_object parentObject = parentResult.getObject();
+            InvidDBField containerField = (InvidDBField) parentObject.getField(ownerField.fieldDef.getID());
+            invid = (Invid) containerField.getElementLocal(index);
+          }
+        catch (RemoteException ex)
+          {
+          }
+        catch (NullPointerException ex)
+          {
+          }
       }
 
     return invid;
@@ -643,45 +643,45 @@ public class xmlobject {
 
     if (id != null)
       {
-	result.append(" id=\"");
-	result.append(id);
-	result.append("\"");
+        result.append(" id=\"");
+        result.append(id);
+        result.append("\"");
       }
 
     if (num != -1)
       {
-	result.append(" num=\"");
-	result.append(num);
-	result.append("\"");
+        result.append(" num=\"");
+        result.append(num);
+        result.append("\"");
       }
 
     result.append(">");
 
     if (showAll)
       {
-	result.append("\n");
+        result.append("\n");
 
-	// add the fields in the server's display order
+        // add the fields in the server's display order
 
-	Vector templateVector = xSession.getTemplateVector(type);
+        Vector templateVector = xSession.getTemplateVector(type);
 
-	for (int i = 0; i < templateVector.size(); i++)
-	  {
-	    FieldTemplate template = (FieldTemplate) templateVector.elementAt(i);
+        for (int i = 0; i < templateVector.size(); i++)
+          {
+            FieldTemplate template = (FieldTemplate) templateVector.elementAt(i);
 
-	    xmlfield field = (xmlfield) fields.get(template.getName());
+            xmlfield field = (xmlfield) fields.get(template.getName());
 
-	    if (field == null)
-	      {
-		// missing field, no big deal.  just skip it.
+            if (field == null)
+              {
+                // missing field, no big deal.  just skip it.
 
-		continue;
-	      }
+                continue;
+              }
 
-	    result.append("\t" + field + "\n");
-	  }
+            result.append("\t" + field + "\n");
+          }
 
-	result.append("</object>");
+        result.append("</object>");
       }
 
     return result.toString();

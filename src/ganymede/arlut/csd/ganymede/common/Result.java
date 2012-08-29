@@ -12,7 +12,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -70,7 +70,7 @@ public class Result implements java.io.Serializable {
 
   // ---
   
-  Invid invid;	// remote reference to an object on the server
+  Invid invid;  // remote reference to an object on the server
   String label = null;
 
   /* -- */
@@ -102,22 +102,22 @@ public class Result implements java.io.Serializable {
     
     for (int j = 0; j < chars.length; j++)
       {
-	if (chars[j] == '|')
-	  {
-	    buffer.append("\\|");
-	  }
-	else if (chars[j] == '\n')
-	  {
-	    buffer.append("\\\n");
-	  }
-	else if (chars[j] == '\\')
-	  {
-	    buffer.append("\\\\");
-	  }
-	else
-	  {
-	    buffer.append(chars[j]);
-	  }
+        if (chars[j] == '|')
+          {
+            buffer.append("\\|");
+          }
+        else if (chars[j] == '\n')
+          {
+            buffer.append("\\\n");
+          }
+        else if (chars[j] == '\\')
+          {
+            buffer.append("\\\\");
+          }
+        else
+          {
+            buffer.append(chars[j]);
+          }
       }
 
     buffer.append("|");
@@ -126,22 +126,22 @@ public class Result implements java.io.Serializable {
     
     for (int j = 0; j < chars.length; j++)
       {
-	if (chars[j] == '|')
-	  {
-	    buffer.append("\\|");
-	  }
-	else if (chars[j] == '\n')
-	  {
-	    buffer.append("\\\n");
-	  }
-	else if (chars[j] == '\\')
-	  {
-	    buffer.append("\\\\");
-	  }
-	else
-	  {
-	    buffer.append(chars[j]);
-	  }
+        if (chars[j] == '|')
+          {
+            buffer.append("\\|");
+          }
+        else if (chars[j] == '\n')
+          {
+            buffer.append("\\\n");
+          }
+        else if (chars[j] == '\\')
+          {
+            buffer.append("\\\\");
+          }
+        else
+          {
+            buffer.append(chars[j]);
+          }
       }
 
     buffer.append("\n");

@@ -288,8 +288,8 @@ public class DumpResult implements java.io.Serializable, List {
 
     for (iter = headerObjects.iterator(); iter.hasNext();)
       {
-      	currentHeader = ((DumpResultCol) iter.next()).getName();
-      	row.add(rowMap.get(currentHeader));
+        currentHeader = ((DumpResultCol) iter.next()).getName();
+        row.add(rowMap.get(currentHeader));
       }
 
     return row;
@@ -352,7 +352,7 @@ public class DumpResult implements java.io.Serializable, List {
 
     if (debug)
       {
-	System.err.println("*** unpacking buffer");
+        System.err.println("*** unpacking buffer");
       }
 
     while (chars[index] != '\n')
@@ -361,49 +361,49 @@ public class DumpResult implements java.io.Serializable, List {
         short fieldId;
         short fieldType;
 
-	tempString.setLength(0); // truncate the buffer
+        tempString.setLength(0); // truncate the buffer
 
-	while (chars[index] != '|')
-	  {
-	    if (chars[index] == '\n')
-	      {
-		throw new RuntimeException("parse error in header list");
-	      }
+        while (chars[index] != '|')
+          {
+            if (chars[index] == '\n')
+              {
+                throw new RuntimeException("parse error in header list");
+              }
 
-	    // if we have a backslashed character, take the backslashed char
-	    // as a literal
+            // if we have a backslashed character, take the backslashed char
+            // as a literal
 
-	    if (chars[index] == '\\')
-	      {
-		index++;
-	      }
+            if (chars[index] == '\\')
+              {
+                index++;
+              }
 
-	    tempString.append(chars[index++]);
-	  }
+            tempString.append(chars[index++]);
+          }
 
-	index++;		// skip past |
+        index++;                // skip past |
 
         fieldName = tempString.toString();
 
         tempString.setLength(0);  // truncate the buffer again
 
-	while (chars[index] != '|')
-	  {
-	    if (chars[index] == '\n')
-	      {
-		throw new RuntimeException("parse error in header list");
-	      }
+        while (chars[index] != '|')
+          {
+            if (chars[index] == '\n')
+              {
+                throw new RuntimeException("parse error in header list");
+              }
 
-	    // if we have a backslashed character, take the backslashed char
-	    // as a literal
+            // if we have a backslashed character, take the backslashed char
+            // as a literal
 
-	    if (chars[index] == '\\')
-	      {
-		index++;
-	      }
+            if (chars[index] == '\\')
+              {
+                index++;
+              }
 
-	    tempString.append(chars[index++]);
-	  }
+            tempString.append(chars[index++]);
+          }
 
         index++;                // skip trailing | marker
 
@@ -411,23 +411,23 @@ public class DumpResult implements java.io.Serializable, List {
 
         tempString.setLength(0);  // truncate the buffer again
 
-	while (chars[index] != '|')
-	  {
-	    if (chars[index] == '\n')
-	      {
-		throw new RuntimeException("parse error in header list");
-	      }
+        while (chars[index] != '|')
+          {
+            if (chars[index] == '\n')
+              {
+                throw new RuntimeException("parse error in header list");
+              }
 
-	    // if we have a backslashed character, take the backslashed char
-	    // as a literal
+            // if we have a backslashed character, take the backslashed char
+            // as a literal
 
-	    if (chars[index] == '\\')
-	      {
-		index++;
-	      }
+            if (chars[index] == '\\')
+              {
+                index++;
+              }
 
-	    tempString.append(chars[index++]);
-	  }
+            tempString.append(chars[index++]);
+          }
 
         index++;                // skip trailing | marker
 
@@ -436,147 +436,147 @@ public class DumpResult implements java.io.Serializable, List {
         headerObjects.addElement(new DumpResultCol(fieldName, fieldId, fieldType));
       }
 
-    index++;			// skip past \n
+    index++;                    // skip past \n
 
     // now read in all the result lines
 
     while (index < chars.length)
       {
-	// first read in the Invid
+        // first read in the Invid
 
-	tempString.setLength(0); // truncate the buffer
+        tempString.setLength(0); // truncate the buffer
 
-	if (debug)
-	  {
-	    System.err.println("*** Unpacking row " + rows.size());
-	  }
+        if (debug)
+          {
+            System.err.println("*** Unpacking row " + rows.size());
+          }
 
-	while (chars[index] != '|')
-	  {
-	    // if we have a backslashed character, take the backslashed char
-	    // as a literal
+        while (chars[index] != '|')
+          {
+            // if we have a backslashed character, take the backslashed char
+            // as a literal
 
-	    if (chars[index] == '\n')
-	      {
-		throw new RuntimeException("parse error in row");
-	      }
+            if (chars[index] == '\n')
+              {
+                throw new RuntimeException("parse error in row");
+              }
 
-	    tempString.append(chars[index++]);
-	  }
+            tempString.append(chars[index++]);
+          }
 
-	invids.addElement(Invid.createInvid(tempString.toString()));
+        invids.addElement(Invid.createInvid(tempString.toString()));
 
-	index++;		// skip over |
+        index++;                // skip over |
 
-	// now read in the fields for this invid
+        // now read in the fields for this invid
 
-	rowMap = new HashMap(headerObjects.size());
+        rowMap = new HashMap(headerObjects.size());
 
-	while (chars[index] != '\n')
-	  {
-	    tempString.setLength(0); // truncate the buffer
+        while (chars[index] != '\n')
+          {
+            tempString.setLength(0); // truncate the buffer
 
-	    while (chars[index] != '|')
-	      {
-		// if we have a backslashed character, take the backslashed char
-		// as a literal
+            while (chars[index] != '|')
+              {
+                // if we have a backslashed character, take the backslashed char
+                // as a literal
 
-		if (chars[index] == '\n')
-		  {
-		    throw new RuntimeException("parse error in header list");
-		  }
+                if (chars[index] == '\n')
+                  {
+                    throw new RuntimeException("parse error in header list");
+                  }
 
-		if (chars[index] == '\\')
-		  {
-		    index++;
-		  }
+                if (chars[index] == '\\')
+                  {
+                    index++;
+                  }
 
-		tempString.append(chars[index++]);
-	      }
+                tempString.append(chars[index++]);
+              }
 
-	    index++;		// skip |
+            index++;            // skip |
 
             DumpResultCol header = (DumpResultCol) headerObjects.elementAt(rowMap.size());
 
-	    currentFieldType = header.getFieldType();
-	    currentHeader = header.getName();
+            currentFieldType = header.getFieldType();
+            currentHeader = header.getName();
 
-	    switch (currentFieldType)
-	      {
-	      case FieldType.DATE:
+            switch (currentFieldType)
+              {
+              case FieldType.DATE:
 
-		if (debug)
-		  {
-		    System.err.println("parsing date: " + tempString.toString());
-		  }
+                if (debug)
+                  {
+                    System.err.println("parsing date: " + tempString.toString());
+                  }
 
-		if (tempString.toString().equals("null") || tempString.toString().equals(""))
-		  {
-		    rowMap.put(currentHeader, null);
-		  }
-		else
-		  {
-		    try
-		      {
-			rowMap.put(currentHeader, new Date(Long.parseLong(tempString.toString())));
-		      }
-		    catch (NumberFormatException ex)
-		      {
-			throw new RuntimeException("couldn't parse Long encoding (" + tempString.toString()+"): " + ex);
-		      }
-		  }
-		break;
+                if (tempString.toString().equals("null") || tempString.toString().equals(""))
+                  {
+                    rowMap.put(currentHeader, null);
+                  }
+                else
+                  {
+                    try
+                      {
+                        rowMap.put(currentHeader, new Date(Long.parseLong(tempString.toString())));
+                      }
+                    catch (NumberFormatException ex)
+                      {
+                        throw new RuntimeException("couldn't parse Long encoding (" + tempString.toString()+"): " + ex);
+                      }
+                  }
+                break;
 
-	      case FieldType.NUMERIC:
+              case FieldType.NUMERIC:
 
-		if (tempString.toString().equals("null") ||
-		    tempString.toString().equals(""))
-		  {
-		    rowMap.put(currentHeader, null);
-		  }
-		else
-		  {
-		    try
-		      {
-			rowMap.put(currentHeader, Integer.valueOf(tempString.toString()));
-		      }
-		    catch (NumberFormatException ex)
-		      {
-			throw new RuntimeException("couldn't parse numeric encoding for string *" +
-						   tempString.toString() + "* :" + ex);
-		      }
-		  }
-		break;
+                if (tempString.toString().equals("null") ||
+                    tempString.toString().equals(""))
+                  {
+                    rowMap.put(currentHeader, null);
+                  }
+                else
+                  {
+                    try
+                      {
+                        rowMap.put(currentHeader, Integer.valueOf(tempString.toString()));
+                      }
+                    catch (NumberFormatException ex)
+                      {
+                        throw new RuntimeException("couldn't parse numeric encoding for string *" +
+                                                   tempString.toString() + "* :" + ex);
+                      }
+                  }
+                break;
 
- 	      case FieldType.FLOAT:
+              case FieldType.FLOAT:
 
- 		if (tempString.toString().equals("null") ||
- 		    tempString.toString().equals(""))
- 		  {
- 		    rowMap.put(currentHeader, null);
- 		  }
- 		else
- 		  {
- 		    try
- 		      {
- 			rowMap.put(currentHeader, new Double(tempString.toString()));
- 		      }
- 		    catch (NumberFormatException ex)
- 		      {
- 			throw new RuntimeException("couldn't parse float encoding for string *" +
- 						   tempString.toString() + "* :" + ex);
- 		      }
- 		  }
- 		break;
+                if (tempString.toString().equals("null") ||
+                    tempString.toString().equals(""))
+                  {
+                    rowMap.put(currentHeader, null);
+                  }
+                else
+                  {
+                    try
+                      {
+                        rowMap.put(currentHeader, new Double(tempString.toString()));
+                      }
+                    catch (NumberFormatException ex)
+                      {
+                        throw new RuntimeException("couldn't parse float encoding for string *" +
+                                                   tempString.toString() + "* :" + ex);
+                      }
+                  }
+                break;
 
-	      default:
-		rowMap.put(currentHeader, tempString.toString());
-	      }
-	  }
+              default:
+                rowMap.put(currentHeader, tempString.toString());
+              }
+          }
 
-	rows.addElement(rowMap);
+        rows.addElement(rowMap);
 
-	index++; // skip newline
+        index++; // skip newline
       }
 
     unpacked = true;
@@ -593,26 +593,26 @@ public class DumpResult implements java.io.Serializable, List {
   {
     if (headerObjects != null)
       {
-	headerObjects.removeAllElements();
-	headerObjects = null;
+        headerObjects.removeAllElements();
+        headerObjects = null;
       }
 
     if (headers != null)
       {
-	headers.removeAllElements();
-	headers = null;
+        headers.removeAllElements();
+        headers = null;
       }
 
     if (invids != null)
       {
-	invids.removeAllElements();
-	invids = null;
+        invids.removeAllElements();
+        invids = null;
       }
 
     if (rows != null)
       {
-	rows.removeAllElements();
-	rows = null;
+        rows.removeAllElements();
+        rows = null;
       }
   }
 

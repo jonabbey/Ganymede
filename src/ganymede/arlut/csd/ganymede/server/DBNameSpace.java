@@ -243,11 +243,11 @@ public final class DBNameSpace implements NameSpace {
 
     if (Ganymede.db.isAtLeast(2, 14))
       {
-	hashSize = gnu.trove.PrimeFinder.nextPrime((int)Math.ceil((in.readInt() + GROWTHSPACE) / 0.75f));
+        hashSize = gnu.trove.PrimeFinder.nextPrime((int)Math.ceil((in.readInt() + GROWTHSPACE) / 0.75f));
       }
     else
       {
-	hashSize = DEFAULTSIZE;
+        hashSize = DEFAULTSIZE;
       }
   }
 
@@ -273,11 +273,11 @@ public final class DBNameSpace implements NameSpace {
 
     if (caseInsensitive)
       {
-	xDump.attribute("case-sensitive", "false");
+        xDump.attribute("case-sensitive", "false");
       }
     else
       {
-	xDump.attribute("case-sensitive", "true");
+        xDump.attribute("case-sensitive", "true");
       }
 
     xDump.endElement("namespace");
@@ -333,7 +333,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (b == this.caseInsensitive)
       {
-	return;
+        return;
       }
 
     // let's see if we can do this safely.. we'll throw an
@@ -410,7 +410,7 @@ public final class DBNameSpace implements NameSpace {
 
     if (handle == null)
       {
-	return null;
+        return null;
       }
 
     return handle.getPersistentField();
@@ -439,7 +439,7 @@ public final class DBNameSpace implements NameSpace {
 
     if (handle == null)
       {
-	return null;
+        return null;
       }
 
     return handle.getShadowField();
@@ -476,12 +476,12 @@ public final class DBNameSpace implements NameSpace {
 
     if (handle == null)
       {
-	return null;
+        return null;
       }
 
     if (handle.isEditedByUs(session))
       {
-	return handle.getShadowField();
+        return handle.getShadowField();
       }
 
     return handle.getPersistentField(session);
@@ -513,7 +513,7 @@ public final class DBNameSpace implements NameSpace {
 
     if (editSet == null || value == null)
       {
-	throw new IllegalArgumentException();
+        throw new IllegalArgumentException();
       }
 
     DBNameSpaceHandle handle;
@@ -524,31 +524,31 @@ public final class DBNameSpace implements NameSpace {
 
     if (uniqueHash.containsKey(value))
       {
-	handle = (DBNameSpaceHandle) uniqueHash.get(value);
+        handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
-	if (!handle.isCheckedOut())
-	  {
-	    return false;
-	  }
-	else
-	  {
-	    if (!handle.isEditedByUs(editSet))
-	      {
-		return false;
-	      }
+        if (!handle.isCheckedOut())
+          {
+            return false;
+          }
+        else
+          {
+            if (!handle.isEditedByUs(editSet))
+              {
+                return false;
+              }
 
-	    if (handle.getShadowField() != null)
-	      {
-		return false;
-	      }
+            if (handle.getShadowField() != null)
+              {
+                return false;
+              }
 
-	    if (handle.isReserved())
-	      {
-		return false;
-	      }
-	  }
+            if (handle.isReserved())
+              {
+                return false;
+              }
+          }
 
-	return true;
+        return true;
       }
 
     handle = new DBNameSpaceEditingHandle(editSet, null);
@@ -596,7 +596,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (onlyUnused != true)
       {
-	throw new UnsupportedOperationException("reserve() no longer accepts a false onlyUnused parameter");
+        throw new UnsupportedOperationException("reserve() no longer accepts a false onlyUnused parameter");
       }
 
     return this.reserve(editSet, value);
@@ -631,7 +631,7 @@ public final class DBNameSpace implements NameSpace {
 
     if (editSet == null || value == null)
       {
-	throw new IllegalArgumentException();
+        throw new IllegalArgumentException();
       }
 
     DBNameSpaceHandle handle;
@@ -640,20 +640,20 @@ public final class DBNameSpace implements NameSpace {
 
     if (!uniqueHash.containsKey(value))
       {
-	return true;
+        return true;
       }
 
     handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
     if (handle.isEditedByOtherTransaction(editSet))
       {
-	return false;
+        return false;
       }
 
     if (handle.getShadowField() == null ||
-	(!editSet.isInteractive() && handle.getShadowFieldB() == null))
+        (!editSet.isInteractive() && handle.getShadowFieldB() == null))
       {
-	return true;
+        return true;
       }
 
     return false;
@@ -679,7 +679,7 @@ public final class DBNameSpace implements NameSpace {
 
     if (editSet == null || value == null || field == null)
       {
-	throw new IllegalArgumentException();
+        throw new IllegalArgumentException();
       }
 
     DBNameSpaceHandle handle;
@@ -688,62 +688,62 @@ public final class DBNameSpace implements NameSpace {
 
     if (!uniqueHash.containsKey(value))
       {
-	handle = new DBNameSpaceEditingHandle(editSet, null);
-	handle.setShadowField(field);
+        handle = new DBNameSpaceEditingHandle(editSet, null);
+        handle.setShadowField(field);
 
-	putHandle(value, handle);
+        putHandle(value, handle);
 
-	remember(editSet, value);
+        remember(editSet, value);
 
-	return true;
+        return true;
       }
 
     handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
     if (handle.isEditedByOtherTransaction(editSet))
       {
-	return false;
+        return false;
       }
 
     if (editSet.isInteractive())
       {
-	if (!handle.isCheckedOut() || handle.getShadowField() != null)
-	  {
-	    return false;
-	  }
+        if (!handle.isCheckedOut() || handle.getShadowField() != null)
+          {
+            return false;
+          }
 
-	handle.setShadowField(field);
+        handle.setShadowField(field);
 
-	return true;
+        return true;
       }
     else
       {
-	if (!handle.isCheckedOut())
-	  {
-	    handle = handle.checkout(editSet);
+        if (!handle.isCheckedOut())
+          {
+            handle = handle.checkout(editSet);
 
-	    putHandle(value, handle);
-	    remember(editSet, value);
+            putHandle(value, handle);
+            remember(editSet, value);
 
-	    handle.setShadowField(handle.getPersistentField(editSet));
-	    handle.setShadowFieldB(field);
+            handle.setShadowField(handle.getPersistentField(editSet));
+            handle.setShadowFieldB(field);
 
-	    return true;
-	  }
-	else if (handle.getShadowField() == null)
-	  {
-	    handle.setShadowField(field);
+            return true;
+          }
+        else if (handle.getShadowField() == null)
+          {
+            handle.setShadowField(field);
 
-	    return true;
-	  }
-	else if (!field.matches(handle.getShadowField()) &&
-		 (handle.getShadowFieldB() == null ||
-		  field.matches(handle.getShadowFieldB())))
-	  {
-	    handle.setShadowFieldB(field);
+            return true;
+          }
+        else if (!field.matches(handle.getShadowField()) &&
+                 (handle.getShadowFieldB() == null ||
+                  field.matches(handle.getShadowFieldB())))
+          {
+            handle.setShadowFieldB(field);
 
-	    return true;
-	  }
+            return true;
+          }
       }
 
     return false;
@@ -774,28 +774,28 @@ public final class DBNameSpace implements NameSpace {
 
     if (oldField == null || editSet == null || value == null)
       {
-	throw new IllegalArgumentException();
+        throw new IllegalArgumentException();
       }
 
     if (!uniqueHash.containsKey(value))
       {
-	throw new RuntimeException("ASSERT: testunmark called on value '" + GHashtable.keyString(value) +
-				   "' not in namespace: " + this.getName());
+        throw new RuntimeException("ASSERT: testunmark called on value '" + GHashtable.keyString(value) +
+                                   "' not in namespace: " + this.getName());
       }
 
     DBNameSpaceHandle handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
     if (handle.isEditedByOtherTransaction(editSet))
       {
-	throw new RuntimeException("ASSERT: testunmark called on value '" + GHashtable.keyString(value) +
-				   "' that namespace: " + this.getName() +
-				   " believes is being edited by another transaction.  Field is " + oldField);
+        throw new RuntimeException("ASSERT: testunmark called on value '" + GHashtable.keyString(value) +
+                                   "' that namespace: " + this.getName() +
+                                   " believes is being edited by another transaction.  Field is " + oldField);
       }
 
     if (!handle.matchesAnySlot(oldField))
       {
-	throw new RuntimeException("ASSERT: testunmark called on value '" + GHashtable.keyString(value) +
-				   "' that namespace: " + this.getName() + " believes is not in field " + oldField);
+        throw new RuntimeException("ASSERT: testunmark called on value '" + GHashtable.keyString(value) +
+                                   "' that namespace: " + this.getName() + " believes is not in field " + oldField);
       }
 
     return true;
@@ -819,78 +819,78 @@ public final class DBNameSpace implements NameSpace {
 
     if (editSet == null || value == null || oldField == null)
       {
-	throw new IllegalArgumentException();
+        throw new IllegalArgumentException();
       }
 
     if (!uniqueHash.containsKey(value))
       {
-	throw new RuntimeException("ASSERT: unmark called on value '" + GHashtable.keyString(value) +
-				   "' not in namespace: " + this.getName());
+        throw new RuntimeException("ASSERT: unmark called on value '" + GHashtable.keyString(value) +
+                                   "' not in namespace: " + this.getName());
       }
 
     DBNameSpaceHandle handle = (DBNameSpaceHandle) uniqueHash.get(value);
 
     if (handle.isEditedByOtherTransaction(editSet))
       {
-	throw new RuntimeException("ASSERT: unmark called on value '" + GHashtable.keyString(value) +
-				   "' that namespace: " + this.getName() +
-				   " believes is being edited by another transaction.  Field is " + oldField);
+        throw new RuntimeException("ASSERT: unmark called on value '" + GHashtable.keyString(value) +
+                                   "' that namespace: " + this.getName() +
+                                   " believes is being edited by another transaction.  Field is " + oldField);
       }
 
     if (!handle.matchesAnySlot(oldField))
       {
-	throw new RuntimeException("ASSERT: unmark called on value '" + GHashtable.keyString(value) +
-				   "' that namespace: " + this.getName() + " believes is not in field " + oldField);
+        throw new RuntimeException("ASSERT: unmark called on value '" + GHashtable.keyString(value) +
+                                   "' that namespace: " + this.getName() + " believes is not in field " + oldField);
       }
 
     if (!handle.isCheckedOut())
       {
-	handle = handle.checkout(editSet);
+        handle = handle.checkout(editSet);
 
-	putHandle(value, handle);
+        putHandle(value, handle);
         remember(editSet, value);
 
-	return true;
+        return true;
       }
 
     if (!editSet.isInteractive())
       {
-	if (!oldField.matches(handle.getShadowFieldB()) &&
-	    !oldField.matches(handle.getShadowField()))
-	  {
-	    throw new RuntimeException("ASSERT: mismatched field in non-interactive unmark");
-	  }
+        if (!oldField.matches(handle.getShadowFieldB()) &&
+            !oldField.matches(handle.getShadowField()))
+          {
+            throw new RuntimeException("ASSERT: mismatched field in non-interactive unmark");
+          }
 
-	if (oldField.matches(handle.getShadowFieldB()))
-	  {
-	    // I really don't expect getShadowFieldB() to be equal to
-	    // the oldField, given how the non-interactive xmlclient
-	    // works, but we'll handle that case in the event we do
-	    // have some very weird non-interactive client talking to
-	    // us which decided to set a prospective mark and then
-	    // clear it
+        if (oldField.matches(handle.getShadowFieldB()))
+          {
+            // I really don't expect getShadowFieldB() to be equal to
+            // the oldField, given how the non-interactive xmlclient
+            // works, but we'll handle that case in the event we do
+            // have some very weird non-interactive client talking to
+            // us which decided to set a prospective mark and then
+            // clear it
 
-	    handle.setShadowFieldB(null);
+            handle.setShadowFieldB(null);
 
-	    return true;
-	  }
+            return true;
+          }
 
-	if (handle.getShadowFieldB() != null)
-	  {
-	    // promote B to A
+        if (handle.getShadowFieldB() != null)
+          {
+            // promote B to A
 
-	    handle.setShadowField(handle.getShadowFieldB());
-	    handle.setShadowFieldB(null);
+            handle.setShadowField(handle.getShadowFieldB());
+            handle.setShadowFieldB(null);
 
-	    return true;
-	  }
+            return true;
+          }
       }
 
     if (oldField.matches(handle.getShadowField()))
       {
-	handle.setShadowField(null);
+        handle.setShadowField(null);
 
-	return true;
+        return true;
       }
 
     return false;
@@ -963,43 +963,43 @@ public final class DBNameSpace implements NameSpace {
 
     if (point == null)
       {
-	throw new RuntimeException("ASSERT: couldn't find checkpoint for " + name + "\n" +
-				   "In transaction " + editSet.description + "\n\n" +
-				   "Currently registered checkpoints:\n" +
-				   tRecord.getCheckpointStack());
+        throw new RuntimeException("ASSERT: couldn't find checkpoint for " + name + "\n" +
+                                   "In transaction " + editSet.description + "\n\n" +
+                                   "Currently registered checkpoints:\n" +
+                                   tRecord.getCheckpointStack());
       }
 
     en = tRecord.getReservedEnum();
 
     while (en.hasMoreElements())
       {
-	value = en.nextElement();
-	handle = (DBNameSpaceEditingHandle) uniqueHash.get(value);
+        value = en.nextElement();
+        handle = (DBNameSpaceEditingHandle) uniqueHash.get(value);
 
-	if (!point.containsValue(value))
-	  {
-	    DBNameSpaceHandle oldHandle = handle.getOriginal();
+        if (!point.containsValue(value))
+          {
+            DBNameSpaceHandle oldHandle = handle.getOriginal();
 
-	    if (oldHandle == null)
-	      {
-		removeHandle(value);
-	      }
-	    else
-	      {
-		putHandle(value, oldHandle);
-	      }
+            if (oldHandle == null)
+              {
+                removeHandle(value);
+              }
+            else
+              {
+                putHandle(value, oldHandle);
+              }
 
-	    elementsToRemove.addElement(value);
-	  }
-	else
-	  {
-	    putHandle(value, point.getValueHandle(value));
-	  }
+            elementsToRemove.addElement(value);
+          }
+        else
+          {
+            putHandle(value, point.getValueHandle(value));
+          }
       }
 
     for (Object element: elementsToRemove)
       {
-	tRecord.forget(element);
+        tRecord.forget(element);
       }
 
     return true;
@@ -1034,46 +1034,46 @@ public final class DBNameSpace implements NameSpace {
 
     while (en.hasMoreElements())
       {
-	value = en.nextElement();
-	handle = (DBNameSpaceEditingHandle) getHandle(value);
+        value = en.nextElement();
+        handle = (DBNameSpaceEditingHandle) getHandle(value);
 
-	if (handle.getShadowFieldB() == null)
-	  {
-	    continue;
-	  }
+        if (handle.getShadowFieldB() == null)
+          {
+            continue;
+          }
 
-	// we've got a shadowFieldB, which we ought not to have.
+        // we've got a shadowFieldB, which we ought not to have.
 
-	if (results == null)
-	  {
-	    results = new Vector();
-	  }
+        if (results == null)
+          {
+            results = new Vector();
+          }
 
-	if (handle.getShadowField() != null)
-	  {
-	    // "{0}, value in conflict = {1}"
-	    results.addElement(ts.l("verify_noninteractive.template",
-				    handle.getConflictString(), GHashtable.keyString(value)));
-	  }
-	else
-	  {
-	    // we've got a conflict between a checked-in object in
-	    // the datastore and an object we're creating or
-	    // editing in the xml session.  shadowFieldB() points
-	    // to the in-xml session object.
+        if (handle.getShadowField() != null)
+          {
+            // "{0}, value in conflict = {1}"
+            results.addElement(ts.l("verify_noninteractive.template",
+                                    handle.getConflictString(), GHashtable.keyString(value)));
+          }
+        else
+          {
+            // we've got a conflict between a checked-in object in
+            // the datastore and an object we're creating or
+            // editing in the xml session.  shadowFieldB() points
+            // to the in-xml session object.
 
-	    String editingRefStr = String.valueOf(handle.getShadowFieldB());
-	    DBField conflictField = handle.getPersistentField(editSet);
+            String editingRefStr = String.valueOf(handle.getShadowFieldB());
+            DBField conflictField = handle.getPersistentField(editSet);
 
-	    // "{0} conflicts with checked-in {1}"
-	    String checkedInConflictStr = ts.l("verify_noninteractive.persistent_conflict",
-					       String.valueOf(handle.getShadowFieldB()),
-					       String.valueOf(conflictField));
+            // "{0} conflicts with checked-in {1}"
+            String checkedInConflictStr = ts.l("verify_noninteractive.persistent_conflict",
+                                               String.valueOf(handle.getShadowFieldB()),
+                                               String.valueOf(conflictField));
 
-	    // "{0}, value in conflict = {1}"
-	    results.addElement(ts.l("verify_noninteractive.template",
-				    checkedInConflictStr, GHashtable.keyString(value)));
-	  }
+            // "{0}, value in conflict = {1}"
+            results.addElement(ts.l("verify_noninteractive.template",
+                                    checkedInConflictStr, GHashtable.keyString(value)));
+          }
       }
 
     return results;
@@ -1115,36 +1115,36 @@ public final class DBNameSpace implements NameSpace {
 
     while (en.hasMoreElements())
       {
-	value = en.nextElement();
-	handle = (DBNameSpaceEditingHandle) getHandle(value);
+        value = en.nextElement();
+        handle = (DBNameSpaceEditingHandle) getHandle(value);
 
-	if (!handle.isEditedByUs(editSet))
-	  {
-	    if (debug)
-	      {
-		Ganymede.debug("DBNameSpace.commit(): trying to commit handle for value " + GHashtable.keyString(value) +
-			       " that is being edited by another transaction.");
-	      }
+        if (!handle.isEditedByUs(editSet))
+          {
+            if (debug)
+              {
+                Ganymede.debug("DBNameSpace.commit(): trying to commit handle for value " + GHashtable.keyString(value) +
+                               " that is being edited by another transaction.");
+              }
 
-	    continue;
-	  }
+            continue;
+          }
 
-	if (handle.getShadowFieldB() != null)
-	  {
-	    throw new RuntimeException("ASSERT: lingering shadowFieldB at commit time for transaction " +
-				       editSet.session.key);
-	  }
+        if (handle.getShadowFieldB() != null)
+          {
+            throw new RuntimeException("ASSERT: lingering shadowFieldB at commit time for transaction " +
+                                       editSet.session.key);
+          }
 
-	DBNameSpaceHandle newHandle = handle.getNewHandle();
+        DBNameSpaceHandle newHandle = handle.getNewHandle();
 
-	if (newHandle == null)
-	  {
-	    removeHandle(value);
-	  }
-	else
-	  {
-	    putHandle(value, newHandle);
-	  }
+        if (newHandle == null)
+          {
+            removeHandle(value);
+          }
+        else
+          {
+            putHandle(value, newHandle);
+          }
       }
 
     tRecord.cleanup();
@@ -1181,30 +1181,30 @@ public final class DBNameSpace implements NameSpace {
 
     while (en.hasMoreElements())
       {
-	value = en.nextElement();
-	handle = (DBNameSpaceEditingHandle) getHandle(value);
+        value = en.nextElement();
+        handle = (DBNameSpaceEditingHandle) getHandle(value);
 
-	if (!handle.isEditedByUs(editSet))
-	  {
-	    if (debug)
-	      {
-		Ganymede.debug("DBNameSpace.abort(): trying to abort handle for value" + GHashtable.keyString(value) +
-			       " that is being edited by another transaction.");
-	      }
+        if (!handle.isEditedByUs(editSet))
+          {
+            if (debug)
+              {
+                Ganymede.debug("DBNameSpace.abort(): trying to abort handle for value" + GHashtable.keyString(value) +
+                               " that is being edited by another transaction.");
+              }
 
-	    continue;
-	  }
+            continue;
+          }
 
-	DBNameSpaceHandle oldHandle = handle.getOriginal();
+        DBNameSpaceHandle oldHandle = handle.getOriginal();
 
-	if (oldHandle == null)
-	  {
-	    removeHandle(value);
-	  }
-	else
-	  {
-	    putHandle(value, oldHandle);
-	  }
+        if (oldHandle == null)
+          {
+            removeHandle(value);
+          }
+        else
+          {
+            putHandle(value, oldHandle);
+          }
       }
 
     tRecord.cleanup();
@@ -1238,29 +1238,29 @@ public final class DBNameSpace implements NameSpace {
 
     while (en.hasMoreElements())
       {
-	Object key = en.nextElement();
+        Object key = en.nextElement();
 
-	DBNameSpaceHandle handle = (DBNameSpaceHandle) saveHash.get(key);
+        DBNameSpaceHandle handle = (DBNameSpaceHandle) saveHash.get(key);
 
-	DBNameSpaceHandle handleCopy = (DBNameSpaceHandle) handle.clone();
+        DBNameSpaceHandle handleCopy = (DBNameSpaceHandle) handle.clone();
 
-	if (handleCopy.isCheckedOut())
-	  {
-	    // "Error, non-null handle owner found during copy of namespace {0} for key: {1}."
-	    throw new RuntimeException(ts.l("schemaEditCheckout.non_null_owner",
-					    this.toString(),
-					    key));
-	  }
+        if (handleCopy.isCheckedOut())
+          {
+            // "Error, non-null handle owner found during copy of namespace {0} for key: {1}."
+            throw new RuntimeException(ts.l("schemaEditCheckout.non_null_owner",
+                                            this.toString(),
+                                            key));
+          }
 
-	if (handleCopy.getShadowField() != null)
-	  {
-	    // "Error, non-null handle shadowField found during copy of namespace {0} for key {1}."
-	    throw new RuntimeException(ts.l("schemaEditCheckout.non_null_shadowField",
-					    this.toString(),
-					    key));
-	  }
+        if (handleCopy.getShadowField() != null)
+          {
+            // "Error, non-null handle shadowField found during copy of namespace {0} for key {1}."
+            throw new RuntimeException(ts.l("schemaEditCheckout.non_null_shadowField",
+                                            this.toString(),
+                                            key));
+          }
 
-	putHandle(key, handleCopy);
+        putHandle(key, handleCopy);
       }
   }
 
@@ -1277,19 +1277,19 @@ public final class DBNameSpace implements NameSpace {
   {
     if (expecting)
       {
-	if (this.saveHash == null)
-	  {
-	    // "Can''t perform, not in schema edit."
-	    throw new RuntimeException(ts.l("global.not_editing"));
-	  }
+        if (this.saveHash == null)
+          {
+            // "Can''t perform, not in schema edit."
+            throw new RuntimeException(ts.l("global.not_editing"));
+          }
       }
     else
       {
-	if (this.saveHash != null)
-	  {
-	    // "Can''t perform, still in schema edit."
-	    throw new RuntimeException(ts.l("global.editing"));
-	  }
+        if (this.saveHash != null)
+          {
+            // "Can''t perform, still in schema edit."
+            throw new RuntimeException(ts.l("global.editing"));
+          }
       }
   }
 
@@ -1301,7 +1301,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash == null)
       {
-	return;
+        return;
       }
 
     this.saveHash = null;
@@ -1315,7 +1315,7 @@ public final class DBNameSpace implements NameSpace {
   {
     if (this.saveHash == null)
       {
-	return;
+        return;
       }
 
     this.uniqueHash = this.saveHash;
@@ -1337,7 +1337,7 @@ public final class DBNameSpace implements NameSpace {
 
     if (uniqueHash.containsKey(value))
       {
-	return false;
+        return false;
       }
 
     putHandle(value, new DBNameSpaceHandle(field));
@@ -1362,12 +1362,12 @@ public final class DBNameSpace implements NameSpace {
 
     if (handle == null)
       {
-	return false;
+        return false;
       }
 
     if (!handle.matches(objid, field))
       {
-	return false;
+        return false;
       }
 
     removeHandle(value);
@@ -1389,18 +1389,18 @@ public final class DBNameSpace implements NameSpace {
 
     while (en.hasMoreElements())
       {
-	Object value = en.nextElement();
-	DBNameSpaceHandle handle = (DBNameSpaceHandle) this.uniqueHash.get(value);
+        Object value = en.nextElement();
+        DBNameSpaceHandle handle = (DBNameSpaceHandle) this.uniqueHash.get(value);
 
-	if (handle.matchesFieldType(objectType, fieldId))
-	  {
-	    elementsToRemove.addElement(value);
-	  }
+        if (handle.matchesFieldType(objectType, fieldId))
+          {
+            elementsToRemove.addElement(value);
+          }
       }
 
     for (Object element: elementsToRemove)
       {
-	removeHandle(element);
+        removeHandle(element);
       }
   }
 
@@ -1494,8 +1494,8 @@ public final class DBNameSpace implements NameSpace {
 
     if (transRecord == null)
       {
-	transRecord = new DBNameSpaceTransaction(transaction, caseInsensitive);
-	transactions.put(transaction, transRecord);
+        transRecord = new DBNameSpaceTransaction(transaction, caseInsensitive);
+        transactions.put(transaction, transRecord);
       }
 
     return transRecord;
@@ -1548,12 +1548,12 @@ public final class DBNameSpace implements NameSpace {
     public synchronized void remember(Object value)
     {
       if (reservedValues.containsKey(value))
-	{
-	  Ganymede.logAssert("ASSERT: DBNameSpaceTransaction.remember(): transaction " + transaction +
-			     " already contains value " + GHashtable.keyString(value));
+        {
+          Ganymede.logAssert("ASSERT: DBNameSpaceTransaction.remember(): transaction " + transaction +
+                             " already contains value " + GHashtable.keyString(value));
 
-	  return;
-	}
+          return;
+        }
 
       reservedValues.put(value, value);
     }
@@ -1561,12 +1561,12 @@ public final class DBNameSpace implements NameSpace {
     public synchronized void forget(Object value)
     {
       if (!reservedValues.containsKey(value))
-	{
-	  Ganymede.logAssert("ASSERT: DBNameSpaceTransaction.forget(): transaction " + transaction +
-			     " does not contain value " + GHashtable.keyString(value));
+        {
+          Ganymede.logAssert("ASSERT: DBNameSpaceTransaction.forget(): transaction " + transaction +
+                             " does not contain value " + GHashtable.keyString(value));
 
-	  return;
-	}
+          return;
+        }
 
       reservedValues.remove(value);
     }
@@ -1579,21 +1579,21 @@ public final class DBNameSpace implements NameSpace {
     public synchronized void cleanup()
     {
       if (checkpointStack != null)
-	{
-	  while (checkpointStack.size() != 0)
-	    {
-	      DBNameSpaceCkPoint ckpoint = (DBNameSpaceCkPoint) checkpointStack.pop();
-	      ckpoint.cleanup();
-	    }
+        {
+          while (checkpointStack.size() != 0)
+            {
+              DBNameSpaceCkPoint ckpoint = (DBNameSpaceCkPoint) checkpointStack.pop();
+              ckpoint.cleanup();
+            }
 
-	  checkpointStack = null;
-	}
+          checkpointStack = null;
+        }
 
       if (reservedValues != null)
-	{
-	  reservedValues.clear();
-	  reservedValues = null;
-	}
+        {
+          reservedValues.clear();
+          reservedValues = null;
+        }
 
       transaction = null;
     }
@@ -1623,10 +1623,10 @@ public final class DBNameSpace implements NameSpace {
       DBNameSpaceCkPoint point = (DBNameSpaceCkPoint) checkpointStack.pop(name);
 
       if (point == null)
-	{
-	  Ganymede.logAssert("ASSERT: DBNameSpaceTransaction.popCheckpoint(): transaction " + transaction +
-			     " does not contain a checkpoint named " + name);
-	}
+        {
+          Ganymede.logAssert("ASSERT: DBNameSpaceTransaction.popCheckpoint(): transaction " + transaction +
+                             " does not contain a checkpoint named " + name);
+        }
 
       return point;
     }
@@ -1664,33 +1664,33 @@ public final class DBNameSpace implements NameSpace {
       reserved = tRecord.getReservedHash();
 
       if (reserved == null)
-	{
-	  return;
-	}
+        {
+          return;
+        }
 
       // clone the hash to avoid sync problems with other threads
 
       reserved = (GHashtable) reserved.clone();
 
       if (reserved.size() > 0)
-	{
-	  uniqueHash = new Hashtable(reserved.size(), 1.0f);
-	}
+        {
+          uniqueHash = new Hashtable(reserved.size(), 1.0f);
+        }
       else
-	{
-	  uniqueHash = new Hashtable(10);
-	}
+        {
+          uniqueHash = new Hashtable(10);
+        }
 
       // now copy our hash to preserve the namespace handles
 
       for (Object value: reserved.values())
-	{
-	  DBNameSpaceHandle handle = space.getHandle(value);
+        {
+          DBNameSpaceHandle handle = space.getHandle(value);
 
-	  handle = (DBNameSpaceHandle) handle.clone();
+          handle = (DBNameSpaceHandle) handle.clone();
 
-	  uniqueHash.put(value, handle);
-	}
+          uniqueHash.put(value, handle);
+        }
     }
 
     public boolean containsValue(Object value)
@@ -1711,16 +1711,16 @@ public final class DBNameSpace implements NameSpace {
     public synchronized void cleanup()
     {
       if (reserved != null)
-	{
-	  reserved.clear();
-	  reserved = null;
-	}
+        {
+          reserved.clear();
+          reserved = null;
+        }
 
       if (uniqueHash != null)
-	{
-	  uniqueHash.clear();
-	  uniqueHash = null;
-	}
+        {
+          uniqueHash.clear();
+          uniqueHash = null;
+        }
     }
   }
 }
@@ -1835,13 +1835,13 @@ class DBNameSpaceHandle implements Cloneable {
   {
     if (field != null)
       {
-	persistentFieldInvid = field.getOwner().getInvid();
-	persistentFieldId = field.getID();
+        persistentFieldInvid = field.getOwner().getInvid();
+        persistentFieldId = field.getID();
       }
     else
       {
-	persistentFieldInvid = null;
-	persistentFieldId = -1;
+        persistentFieldInvid = null;
+        persistentFieldId = -1;
       }
   }
 
@@ -1917,32 +1917,32 @@ class DBNameSpaceHandle implements Cloneable {
   {
     if (persistentFieldInvid == null)
       {
-	return null;
+        return null;
       }
 
     if (session != null)
       {
-	DBObject _obj = session.viewDBObject(persistentFieldInvid);
+        DBObject _obj = session.viewDBObject(persistentFieldInvid);
 
-	if (_obj == null)
-	  {
-	    return null;
-	  }
+        if (_obj == null)
+          {
+            return null;
+          }
 
-	return (DBField) _obj.getField(persistentFieldId);
+        return (DBField) _obj.getField(persistentFieldId);
       }
     else
       {
-	// during start-up, before we have a session available
+        // during start-up, before we have a session available
 
-	DBObject _obj = Ganymede.db.viewDBObject(persistentFieldInvid);
+        DBObject _obj = Ganymede.db.viewDBObject(persistentFieldInvid);
 
-	if (_obj == null)
-	  {
-	    return null;
-	  }
+        if (_obj == null)
+          {
+            return null;
+          }
 
-	return (DBField) _obj.getField(persistentFieldId);
+        return (DBField) _obj.getField(persistentFieldId);
       }
   }
 
@@ -2107,11 +2107,11 @@ class DBNameSpaceHandle implements Cloneable {
   {
     try
       {
-	return super.clone();
+        return super.clone();
       }
     catch (CloneNotSupportedException ex)
       {
-	throw new RuntimeException(ex.getMessage());
+        throw new RuntimeException(ex.getMessage());
       }
   }
 }
@@ -2247,11 +2247,11 @@ class DBNameSpaceEditingHandle extends DBNameSpaceHandle {
   {
     if (getShadowField() == null)
       {
-	return null;
+        return null;
       }
     else
       {
-	return new DBNameSpaceHandle(getShadowField());
+        return new DBNameSpaceHandle(getShadowField());
       }
   }
 
@@ -2406,22 +2406,22 @@ class DBNameSpaceEditingHandle extends DBNameSpaceHandle {
 
     if (editingTransaction != null)
       {
-	result.append("editingTransaction == " + editingTransaction.toString());
+        result.append("editingTransaction == " + editingTransaction.toString());
       }
 
     if (result.length() != 0)
       {
-	result.append(", ");
+        result.append(", ");
       }
 
     if (shadowField != null)
       {
-	result.append(", shadowField == " + shadowField.toString());
+        result.append(", shadowField == " + shadowField.toString());
       }
 
     if (shadowFieldB != null)
       {
-	result.append(", shadowFieldB == " + shadowFieldB.toString());
+        result.append(", shadowFieldB == " + shadowFieldB.toString());
       }
 
     return result.toString();

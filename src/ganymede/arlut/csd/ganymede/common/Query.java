@@ -286,7 +286,7 @@ public class Query implements java.io.Serializable {
   {
     if (permitSet == null)
       {
-	permitSet = new HashSet<Short>();
+        permitSet = new HashSet<Short>();
       }
 
     permitSet.add(Short.valueOf(id));
@@ -321,7 +321,7 @@ public class Query implements java.io.Serializable {
   {
     if (permitSet == null)
       {
-	return true;
+        return true;
       }
 
     return permitSet.contains(Short.valueOf(id));
@@ -336,7 +336,7 @@ public class Query implements java.io.Serializable {
   {
     if (permitSet == null)
       {
-	return true;
+        return true;
       }
 
     return permitSet.contains(value);
@@ -365,16 +365,16 @@ public class Query implements java.io.Serializable {
 
     if (objectType != -1)
       {
-	result.append("objectType = ");
-	result.append(objectType);
-	result.append("\n");
+        result.append("objectType = ");
+        result.append(objectType);
+        result.append("\n");
       }
 
     if (objectName != null)
       {
-	result.append("objectName = ");
-	result.append(objectName);
-	result.append("\n");
+        result.append("objectName = ");
+        result.append(objectName);
+        result.append("\n");
       }
 
     result.append("editableOnly = ");

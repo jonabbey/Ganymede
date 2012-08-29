@@ -399,18 +399,18 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (disabledMessage != null)
       {
-	// we'll still run the builder / sync channels if we're
-	// waiting for a deferred shutdown
+        // we'll still run the builder / sync channels if we're
+        // waiting for a deferred shutdown
 
-	if ((!sessionName.startsWith("builder:") && !sessionName.startsWith("sync channel:")) ||
-	    !disabledMessage.equals("shutdown"))
-	  {
-	    // "Couldn''t create {0} GanymedeSession.. semaphore disabled: {1}"
-	    Ganymede.debug(ts.l("init.no_semaphore", sessionName, disabledMessage));
+        if ((!sessionName.startsWith("builder:") && !sessionName.startsWith("sync channel:")) ||
+            !disabledMessage.equals("shutdown"))
+          {
+            // "Couldn''t create {0} GanymedeSession.. semaphore disabled: {1}"
+            Ganymede.debug(ts.l("init.no_semaphore", sessionName, disabledMessage));
 
-	    // "semaphore error: {0}"
-	    throw new RuntimeException(ts.l("init.semaphore_error", disabledMessage));
-	  }
+            // "semaphore error: {0}"
+            throw new RuntimeException(ts.l("init.semaphore_error", disabledMessage));
+          }
       }
 
     // make sure our session name is unique for locking in builder tasks, etc.
@@ -454,7 +454,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    */
 
   public GanymedeSession(String loginName, DBObject userObject,
-			 DBObject personaObject, boolean exportObjects) throws RemoteException
+                         DBObject personaObject, boolean exportObjects) throws RemoteException
   {
     this.userSession = true;
 
@@ -464,9 +464,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (this.exportObjects)
       {
-	asyncPort = new serverClientAsyncResponder();
+        asyncPort = new serverClientAsyncResponder();
 
-	Ganymede.rmi.publishObject(this);
+        Ganymede.rmi.publishObject(this);
       }
 
     // find a unique name for this user session
@@ -477,21 +477,21 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     try
       {
-	String ipAddress = java.rmi.server.RemoteServer.getClientHost();
+        String ipAddress = java.rmi.server.RemoteServer.getClientHost();
 
-	try
-	  {
-	    java.net.InetAddress addr = java.net.InetAddress.getByName(ipAddress);
-	    clienthost = addr.getHostName();
-	  }
-	catch (java.net.UnknownHostException ex)
-	  {
-	    clienthost = ipAddress;
-	  }
+        try
+          {
+            java.net.InetAddress addr = java.net.InetAddress.getByName(ipAddress);
+            clienthost = addr.getHostName();
+          }
+        catch (java.net.UnknownHostException ex)
+          {
+            clienthost = ipAddress;
+          }
       }
     catch (ServerNotActiveException ex)
       {
-	clienthost = "(unknown)";
+        clienthost = "(unknown)";
       }
 
     // record our login time
@@ -535,15 +535,15 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     try
       {
-	checklogin();
+        checklogin();
       }
     catch (NotLoggedInException ex)
       {
-	// the only RMI-accessible method on GanymedeSession not to
-	// throw a NotLoggedInException, for backwards compatibility
-	// reasons.
+        // the only RMI-accessible method on GanymedeSession not to
+        // throw a NotLoggedInException, for backwards compatibility
+        // reasons.
 
-	return;
+        return;
       }
 
     this.logout(false);
@@ -611,7 +611,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (onlyShowIfNew)
       {
-	invidToCompare = permManager.getIdentityInvid();
+        invidToCompare = permManager.getIdentityInvid();
       }
 
     return GanymedeServer.getTextMessage(key, invidToCompare, false);
@@ -644,7 +644,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (onlyShowIfNew)
       {
-	invidToCompare = permManager.getIdentityInvid();
+        invidToCompare = permManager.getIdentityInvid();
       }
 
     return GanymedeServer.getTextMessage(key, invidToCompare, true);
@@ -669,7 +669,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (asyncPort != null)
       {
-	return asyncPort;
+        return asyncPort;
       }
 
     asyncPort = new serverClientAsyncResponder();
@@ -716,7 +716,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public synchronized String getActivePersonaName() throws NotLoggedInException
   {
-    checklogin();		// this resets lastAction
+    checklogin();               // this resets lastAction
 
     return permManager.getPersonaName();
   }
@@ -731,7 +731,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
   public synchronized boolean selectPersona(String newPersona, String password) throws NotLoggedInException
   {
-    checklogin();		// this resets lastAction
+    checklogin();               // this resets lastAction
 
     boolean success = false;
 
@@ -739,49 +739,49 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (getUser() == null)
       {
-	// this session is not associated with a user in the ganymede
-	// datastore.. we don't support persona changing in such
-	// GanymedeSessions.
+        // this session is not associated with a user in the ganymede
+        // datastore.. we don't support persona changing in such
+        // GanymedeSessions.
 
-	return false;
+        return false;
       }
 
     if (getUser().getLabel().equals(newPersona) && timedout)
       {
-	// if we've timed out and we're switching to our base user
-	// privileges, one of two things might be happening here.  if
-	// the client gave us a password, they may be revalidating
-	// their login for end-user access.
-	//
-	// if they gave us no password, the client is itself
-	// downshifting to the non-privileged level.
+        // if we've timed out and we're switching to our base user
+        // privileges, one of two things might be happening here.  if
+        // the client gave us a password, they may be revalidating
+        // their login for end-user access.
+        //
+        // if they gave us no password, the client is itself
+        // downshifting to the non-privileged level.
 
-	if (password == null)
-	  {
-	    // "User {0}''s privileged login as {1} timed out.  Downshifting to non-privileged access."
-	    Ganymede.debug(ts.l("selectPersona.giving_up",
-				permManager.getUserName(),
-				permManager.getPersonaName()));
-	  }
-	else
-	  {
-	    // "User {0} attempting to re-authenticate non-privileged login after being timed out."
-	    Ganymede.debug(ts.l("selectPersona.attempting_timecheck",
-				permManager.getUserName()));
-	  }
+        if (password == null)
+          {
+            // "User {0}''s privileged login as {1} timed out.  Downshifting to non-privileged access."
+            Ganymede.debug(ts.l("selectPersona.giving_up",
+                                permManager.getUserName(),
+                                permManager.getPersonaName()));
+          }
+        else
+          {
+            // "User {0} attempting to re-authenticate non-privileged login after being timed out."
+            Ganymede.debug(ts.l("selectPersona.attempting_timecheck",
+                                permManager.getUserName()));
+          }
       }
 
     success = permManager.selectPersona(newPersona, password);
 
     if (success)
       {
-	timedout = false;
+        timedout = false;
       }
     else if (timedout)
       {
-	// "User {0} failed to re-authenticate a login that timed out."
-	Ganymede.debug(ts.l("selectPersona.failed_timecheck", permManager.getUserName()));
-	return false;
+        // "User {0} failed to re-authenticate a login that timed out."
+        Ganymede.debug(ts.l("selectPersona.failed_timecheck", permManager.getUserName()));
+        return false;
       }
 
     return success;
@@ -1012,34 +1012,34 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (interactive)
       {
-	// the client will perform an openTransaction as soon as it is
-	// ready to talk to the server.  By sending a building message to
-	// the client here, we allow it to set the initial state of the
-	// building/idle icon in the client's display
+        // the client will perform an openTransaction as soon as it is
+        // ready to talk to the server.  By sending a building message to
+        // the client here, we allow it to set the initial state of the
+        // building/idle icon in the client's display
 
-	// note that since we don't sync on GanymedeBuilderTask in any
-	// way, we could maybe conceivably get out of sync a bit.
+        // note that since we don't sync on GanymedeBuilderTask in any
+        // way, we could maybe conceivably get out of sync a bit.
 
-	if (GanymedeBuilderTask.getPhase1Count() > 0)
-	  {
-	    sendMessage(ClientMessage.BUILDSTATUS, "building");
-	  }
-	else if (GanymedeBuilderTask.getPhase2Count() > 0)
-	  {
-	    sendMessage(ClientMessage.BUILDSTATUS, "building2");
-	  }
-	else
-	  {
-	    sendMessage(ClientMessage.BUILDSTATUS, "idle");
-	  }
+        if (GanymedeBuilderTask.getPhase1Count() > 0)
+          {
+            sendMessage(ClientMessage.BUILDSTATUS, "building");
+          }
+        else if (GanymedeBuilderTask.getPhase2Count() > 0)
+          {
+            sendMessage(ClientMessage.BUILDSTATUS, "building2");
+          }
+        else
+          {
+            sendMessage(ClientMessage.BUILDSTATUS, "idle");
+          }
       }
 
     if (dbSession.editSet != null)
       {
         // "Server: Error in openTransaction()"
         // "Error.. transaction already opened"
-	return Ganymede.createErrorDialog(ts.l("openTransaction.error"),
-					  ts.l("openTransaction.error_text"));
+        return Ganymede.createErrorDialog(ts.l("openTransaction.error"),
+                                          ts.l("openTransaction.error_text"));
       }
 
     /* - */
@@ -1165,8 +1165,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (dbSession.editSet == null)
       {
-	return Ganymede.createErrorDialog(ts.l("commitTransaction.error"),
-					  ts.l("commitTransaction.error_text"));
+        return Ganymede.createErrorDialog(ts.l("commitTransaction.error"),
+                                          ts.l("commitTransaction.error_text"));
       }
 
     /* - */
@@ -1177,7 +1177,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (debug)
       {
-	Ganymede.debug("commitTransaction(" + abortOnFail +")");
+        Ganymede.debug("commitTransaction(" + abortOnFail +")");
       }
 
     this.status = "";
@@ -1190,40 +1190,40 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (ReturnVal.didSucceed(retVal))
       {
-	if (isWizardActive())
-	  {
-	    getWizard().unregister();
+        if (isWizardActive())
+          {
+            getWizard().unregister();
 
-	    // and just in case unregister() was overridden
+            // and just in case unregister() was overridden
 
-	    if (this.wizard != null)
-	      {
-		this.wizard = null;
-	      }
-	  }
+            if (this.wizard != null)
+              {
+                this.wizard = null;
+              }
+          }
 
         // "User {0} committed transaction."
         GanymedeServer.sendMessageToRemoteSessions(ClientMessage.COMMITNOTIFY,
-						   ts.l("commitTransaction.user_committed",
-							permManager.getIdentity()),
-						   this);
-	Ganymede.runBuilderTasks();
-	unexportObjects(false);
+                                                   ts.l("commitTransaction.user_committed",
+                                                        permManager.getIdentity()),
+                                                   this);
+        Ganymede.runBuilderTasks();
+        unexportObjects(false);
       }
     else
       {
-	// We are only calling abortTransaction() here if the
-	// transaction failed, and we were asked to do a full abort on
-	// any failure, *and* if the commitTransaction() logic didn't
-	// itself clear out the transaction.  If doNormalProcessing
-	// were false here, we wouldn't call abortTransaction(),
-	// because the DBSession.commitTransaction() method would have
-	// done that for us.
+        // We are only calling abortTransaction() here if the
+        // transaction failed, and we were asked to do a full abort on
+        // any failure, *and* if the commitTransaction() logic didn't
+        // itself clear out the transaction.  If doNormalProcessing
+        // were false here, we wouldn't call abortTransaction(),
+        // because the DBSession.commitTransaction() method would have
+        // done that for us.
 
-	if (abortOnFail && retVal.doNormalProcessing)
-	  {
-	    abortTransaction();
-	  }
+        if (abortOnFail && retVal.doNormalProcessing)
+          {
+            abortTransaction();
+          }
       }
 
     return retVal;
@@ -1245,7 +1245,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (dbSession.editSet == null)
       {
-	throw new IllegalArgumentException(ts.l("abortTransaction.exception"));
+        throw new IllegalArgumentException(ts.l("abortTransaction.exception"));
       }
 
     /* - */
@@ -1255,14 +1255,14 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (isWizardActive())
       {
-	getWizard().unregister();
+        getWizard().unregister();
 
-	// and just in case unregister() was overridden
+        // and just in case unregister() was overridden
 
-	if (this.wizard != null)
-	  {
-	    this.wizard = null;
-	  }
+        if (this.wizard != null)
+          {
+            this.wizard = null;
+          }
       }
 
     unexportObjects(false);
@@ -1271,9 +1271,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     // "User {0} cancelled transaction."
     GanymedeServer.sendMessageToRemoteSessions(ClientMessage.ABORTNOTIFY,
-					       ts.l("abortTransaction.user_aborted",
-						    permManager.getIdentity()),
-					       this);
+                                               ts.l("abortTransaction.user_aborted",
+                                                    permManager.getIdentity()),
+                                               this);
 
     return retVal;
   }
@@ -1306,12 +1306,12 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (Ganymede.suppressEmail)
       {
-      	return;
+        return;
       }
 
     if (StringUtils.isEmpty(address))
       {
-	return;
+        return;
       }
 
     /* - */
@@ -1334,16 +1334,16 @@ final public class GanymedeSession implements Session, Unreferenced {
 
         // create the signature
 
-	if (exportObjects)
-	  {
-	    // "This message was sent by {0}, who is running the Ganymede client on {1}."
-	    signature.append(ts.l("sendMail.signature", permManager.getUserName(), getClientHostName()));
-	  }
-	else
-	  {
-	    // "This message was sent by the {0} process, running inside the Ganymede server."
-	    signature.append(ts.l("sendMail.local_signature", permManager.getSessionName()));
-	  }
+        if (exportObjects)
+          {
+            // "This message was sent by {0}, who is running the Ganymede client on {1}."
+            signature.append(ts.l("sendMail.signature", permManager.getUserName(), getClientHostName()));
+          }
+        else
+          {
+            // "This message was sent by the {0} process, running inside the Ganymede server."
+            signature.append(ts.l("sendMail.local_signature", permManager.getSessionName()));
+          }
 
         body.append("\n--------------------------------------------------------------------------------\n");
         body.append(WordWrap.wrap(signature.toString(), 78, null));
@@ -1399,7 +1399,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (Ganymede.suppressEmail)
       {
-      	return;
+        return;
       }
 
     /* - */
@@ -1429,16 +1429,16 @@ final public class GanymedeSession implements Session, Unreferenced {
             asciiContent.append("\n\n");
           }
 
-	if (exportObjects)
-	  {
-	    // "This message was sent by {0}, who is running the Ganymede client on {1}."
-	    signature.append(ts.l("sendMail.signature", permManager.getUserName(), getClientHostName()));
-	  }
-	else
-	  {
-	    // "This message was sent by the {0} process, running inside the Ganymede server."
-	    signature.append(ts.l("sendMail.local_signature", permManager.getSessionName()));
-	  }
+        if (exportObjects)
+          {
+            // "This message was sent by {0}, who is running the Ganymede client on {1}."
+            signature.append(ts.l("sendMail.signature", permManager.getUserName(), getClientHostName()));
+          }
+        else
+          {
+            // "This message was sent by the {0} process, running inside the Ganymede server."
+            signature.append(ts.l("sendMail.local_signature", permManager.getSessionName()));
+          }
 
         asciiContent.append("\n--------------------------------------------------------------------------------\n");
         asciiContent.append(WordWrap.wrap(signature.toString(), 78, null));
@@ -1496,16 +1496,16 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     // "\nCLIENT ERROR DETECTED:\nuser == "{0}"\nhost == "{1}"\nclient id string == "{2}"\nexception trace == "{3}"\n"
     report.append(ts.l("reportClientBug.logPattern",
-		       permManager.getIdentity(),
-		       getClientHostName(),
-		       clientIdentifier,
-		       exceptionReport));
+                       permManager.getIdentity(),
+                       getClientHostName(),
+                       clientIdentifier,
+                       exceptionReport));
 
     Ganymede.debug(report.toString());
 
     if (Ganymede.bugReportAddressProperty != null && !Ganymede.bugReportAddressProperty.equals(""))
       {
-	sendMail(Ganymede.bugReportAddressProperty, "Ganymede Client Bug Report", report);
+        sendMail(Ganymede.bugReportAddressProperty, "Ganymede Client Bug Report", report);
       }
   }
 
@@ -1529,9 +1529,9 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     // "\nClient Version Report:\nuser == "{0}"\nhost == "{1}"\nclient id string == "{2}"
     report.append(ts.l("reportClientVersion.logPattern",
-		       permManager.getIdentity(),
-		       getClientHostName(),
-		       clientIdentifier));
+                       permManager.getIdentity(),
+                       getClientHostName(),
+                       clientIdentifier));
 
     Ganymede.debug(report.toString());
   }
@@ -1709,8 +1709,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (base == null)
       {
-	// "Error, "{0}" is not a valid object type in this Ganymede server."
-	throw new RuntimeException(ts.l("global.no_such_object_type", objectType));
+        // "Error, "{0}" is not a valid object type in this Ganymede server."
+        throw new RuntimeException(ts.l("global.no_such_object_type", objectType));
       }
 
     return this.findLabeledObject(objectName, base.getTypeID(), allowAliases);
@@ -1835,8 +1835,8 @@ final public class GanymedeSession implements Session, Unreferenced {
     if (invid == null)
       {
         // "Null invid passed into viewObjectHistory"
-	setLastError(ts.l("viewObjectHistory.null_invid"));
-	return null;
+        setLastError(ts.l("viewObjectHistory.null_invid"));
+        return null;
       }
 
     // If we're not supergash, we'll need to get a reference to the
@@ -1917,14 +1917,14 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (invid == null)
       {
-	setLastError(ts.l("viewAdminHistory.null_invid"));
-	return null;
+        setLastError(ts.l("viewAdminHistory.null_invid"));
+        return null;
       }
 
     if (invid.getType() != SchemaConstants.PersonaBase)
       {
-	setLastError(ts.l("viewAdminHistory.wrong_invid"));
-	return null;
+        setLastError(ts.l("viewAdminHistory.wrong_invid"));
+        return null;
       }
 
     // we do our own permissions checking, so we can use dbSession.viewDBObject().
@@ -1933,19 +1933,19 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (obj == null)
       {
-	throw new NullPointerException(ts.l("viewAdminHistory.null_pointer", String.valueOf(invid)));
+        throw new NullPointerException(ts.l("viewAdminHistory.null_pointer", String.valueOf(invid)));
       }
 
     if (!permManager.getPerm(obj).isVisible())
       {
-	setLastError(ts.l("viewObjectHistory.permissions"));
-	return null;
+        setLastError(ts.l("viewObjectHistory.permissions"));
+        return null;
       }
 
     if (Ganymede.log == null)
       {
-	setLastError(ts.l("viewObjectHistory.no_log"));
-	return null;
+        setLastError(ts.l("viewObjectHistory.no_log"));
+        return null;
       }
 
     // don't bother looking for anything in the log before the admin
@@ -2007,51 +2007,51 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (obj == null)
       {
-	// "Object Not Found"
-	// "Could not find object {0} in the database.  Perhaps the object does not exist?"
+        // "Object Not Found"
+        // "Could not find object {0} in the database.  Perhaps the object does not exist?"
 
-	return Ganymede.createErrorDialog(ts.l("view_db_object.no_object_error"),
-					  ts.l("view_db_object.no_object_error_text", String.valueOf(invid)));
+        return Ganymede.createErrorDialog(ts.l("view_db_object.no_object_error"),
+                                          ts.l("view_db_object.no_object_error_text", String.valueOf(invid)));
       }
 
     if (permManager.getPerm(obj).isVisible())
       {
-	if (!obj.isEmbedded())
-	  {
-	    setLastEvent("view " + obj.getTypeName() + ":" + obj.getLabel());
-	  }
+        if (!obj.isEmbedded())
+          {
+            setLastEvent("view " + obj.getTypeName() + ":" + obj.getLabel());
+          }
 
-	// return a copy that knows what GanymedeSession is
-	// looking at it so that it can do per-field visibility
-	// checks.
+        // return a copy that knows what GanymedeSession is
+        // looking at it so that it can do per-field visibility
+        // checks.
 
-	// copying the object also guarantees that if the
-	// DBSession has checked out the object for editing
-	// (possibly in a way that the user wouldn't normally have
-	// permission to do, as in anonymous invid
-	// linking/unlinking), that the client won't be able to
-	// directly manipulate the DBEditObject in the transaction
-	// to get around permission enforcement.
+        // copying the object also guarantees that if the
+        // DBSession has checked out the object for editing
+        // (possibly in a way that the user wouldn't normally have
+        // permission to do, as in anonymous invid
+        // linking/unlinking), that the client won't be able to
+        // directly manipulate the DBEditObject in the transaction
+        // to get around permission enforcement.
 
-	db_object objref = new DBObject(obj, this);
+        db_object objref = new DBObject(obj, this);
 
-	ReturnVal result = new ReturnVal(true); // success
+        ReturnVal result = new ReturnVal(true); // success
 
-	result.setInvid(((DBObject) objref).getInvid());
+        result.setInvid(((DBObject) objref).getInvid());
 
-	if (this.exportObjects)
-	  {
-	    exportObject((DBObject) objref);
-	  }
+        if (this.exportObjects)
+          {
+            exportObject((DBObject) objref);
+          }
 
-	result.setObject(objref);
+        result.setObject(objref);
 
-	return result;
+        return result;
       }
     else
       {
-	return Ganymede.createErrorDialog(ts.l("global.permissions_error"),
-					  ts.l("view_db_object.permissions_error_text", viewObjectLabel(invid), String.valueOf(invid)));
+        return Ganymede.createErrorDialog(ts.l("global.permissions_error"),
+                                          ts.l("view_db_object.permissions_error_text", viewObjectLabel(invid), String.valueOf(invid)));
       }
   }
 
@@ -2084,10 +2084,10 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (obj == null)
       {
-	// "Object Not Found"
-	// "Error, object [{0}] does not appear to exist.  Couldn't edit it."
-	return Ganymede.createErrorDialog(ts.l("view_db_object.no_object_error"),
-					  ts.l("edit_db_object.no_object_error_text", String.valueOf(invid)));
+        // "Object Not Found"
+        // "Error, object [{0}] does not appear to exist.  Couldn't edit it."
+        return Ganymede.createErrorDialog(ts.l("view_db_object.no_object_error"),
+                                          ts.l("edit_db_object.no_object_error_text", String.valueOf(invid)));
       }
 
     // we always want to check permissions, even if the object has
@@ -2104,87 +2104,87 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (permManager.getPerm(obj).isEditable())
       {
-	if (!obj.isEmbedded())
-	  {
-	    setLastEvent("edit " + obj.getTypeName() + ":" + obj.getLabel());
-	  }
+        if (!obj.isEmbedded())
+          {
+            setLastEvent("edit " + obj.getTypeName() + ":" + obj.getLabel());
+          }
 
-	db_object objref = null;
+        db_object objref = null;
 
-	try
+        try
           {
             objref = dbSession.editDBObject(invid);
           }
         catch (GanymedeManagementException ex)
           {
-	    // "Error checking object out for editing"
-	    // "Error loading custom class for this object."
+            // "Error checking object out for editing"
+            // "Error loading custom class for this object."
             return Ganymede.createErrorDialog(ts.l("edit_db_object.checking_out_error"),
                                               ts.l("edit_db_object.custom_class_load_error_text"));
           }
 
-	if (objref != null)
-	  {
-	    ReturnVal result = new ReturnVal(true);
-	    result.setInvid(((DBObject) objref).getInvid());
+        if (objref != null)
+          {
+            ReturnVal result = new ReturnVal(true);
+            result.setInvid(((DBObject) objref).getInvid());
 
-	    if (this.exportObjects)
-	      {
-		exportObject((DBObject) objref);
-	      }
+            if (this.exportObjects)
+              {
+                exportObject((DBObject) objref);
+              }
 
-	    result.setObject(objref);
-	    return result;
-	  }
-	else
-	  {
-	    // someone else is editing it.. who?
+            result.setObject(objref);
+            return result;
+          }
+        else
+          {
+            // someone else is editing it.. who?
 
-	    String edit_username;
-	    String edit_hostname;
+            String edit_username;
+            String edit_hostname;
 
-	    DBEditObject editing = obj.shadowObject;
+            DBEditObject editing = obj.shadowObject;
 
-	    try
-	      {
-		edit_username = editing.gSession.getPermManager().getUserName();
-		edit_hostname = editing.gSession.getClientHostName();
+            try
+              {
+                edit_username = editing.gSession.getPermManager().getUserName();
+                edit_hostname = editing.gSession.getClientHostName();
 
-		// "Error, object already being edited"
-		// "{0} [{1} - {2}] is already being edited by user {3} on host {4}"
-		return Ganymede.createErrorDialog(ts.l("edit_db_object.already_editing"),
-						  ts.l("edit_db_object.already_editing_text",
-						       obj.getTypeName(),
-						       viewObjectLabel(invid),
-						       String.valueOf(invid),
-						       edit_username,
-						       edit_hostname));
-	      }
-	    catch (NullPointerException ex)
-	      {
-		// We might hit a NullPointerException if the object
-		// was being edited by a transaction that has since
-		// committed.
+                // "Error, object already being edited"
+                // "{0} [{1} - {2}] is already being edited by user {3} on host {4}"
+                return Ganymede.createErrorDialog(ts.l("edit_db_object.already_editing"),
+                                                  ts.l("edit_db_object.already_editing_text",
+                                                       obj.getTypeName(),
+                                                       viewObjectLabel(invid),
+                                                       String.valueOf(invid),
+                                                       edit_username,
+                                                       edit_hostname));
+              }
+            catch (NullPointerException ex)
+              {
+                // We might hit a NullPointerException if the object
+                // was being edited by a transaction that has since
+                // committed.
 
-		// "Error checking object out for editing"
-		// "Error checking out {0} [{1} - {2}] for editing.\nPerhaps someone else was editing it?"
-		return Ganymede.createErrorDialog(ts.l("edit_db_object.checking_out_error"),
-						  ts.l("edit_db_object.checking_out_error_text",
-						       obj.getTypeName(),
-						       viewObjectLabel(invid),
-						       String.valueOf(invid)));
-	      }
-	  }
+                // "Error checking object out for editing"
+                // "Error checking out {0} [{1} - {2}] for editing.\nPerhaps someone else was editing it?"
+                return Ganymede.createErrorDialog(ts.l("edit_db_object.checking_out_error"),
+                                                  ts.l("edit_db_object.checking_out_error_text",
+                                                       obj.getTypeName(),
+                                                       viewObjectLabel(invid),
+                                                       String.valueOf(invid)));
+              }
+          }
       }
     else
       {
-	// "Permissions Error"
-	// "Permission to edit {0} [{1} - {2}] denied."
-	return Ganymede.createErrorDialog(ts.l("global.permissions_error"),
-					  ts.l("edit_db_object.permissions_error_text",
-					       obj.getTypeName(),
-					       viewObjectLabel(invid),
-					       String.valueOf(invid)));
+        // "Permissions Error"
+        // "Permission to edit {0} [{1} - {2}] denied."
+        return Ganymede.createErrorDialog(ts.l("global.permissions_error"),
+                                          ts.l("edit_db_object.permissions_error_text",
+                                               obj.getTypeName(),
+                                               viewObjectLabel(invid),
+                                               String.valueOf(invid)));
       }
   }
 
@@ -2243,8 +2243,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (base == null)
       {
-	// "Error, "{0}" is not a valid object type in this Ganymede server."
-	return Ganymede.createErrorDialog(ts.l("global.no_such_object_type", objectType));
+        // "Error, "{0}" is not a valid object type in this Ganymede server."
+        return Ganymede.createErrorDialog(ts.l("global.no_such_object_type", objectType));
       }
 
     return this.create_db_object(base.getTypeID());
@@ -2276,17 +2276,17 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (invid == null)
       {
-	// "Client error"
-	// "Error, the client attempted to clone a null invid."
-	return Ganymede.createErrorDialog(ts.l("clone_db_object.clone_error"),
-					  ts.l("clone_db_object.clone_error_text"));
+        // "Client error"
+        // "Error, the client attempted to clone a null invid."
+        return Ganymede.createErrorDialog(ts.l("clone_db_object.clone_error"),
+                                          ts.l("clone_db_object.clone_error_text"));
       }
 
     ReturnVal retVal = view_db_object(invid); // get a copy customized for per-field visibility
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     DBObject vObj = (DBObject) retVal.getObject();
@@ -2295,10 +2295,10 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (!objectHook.canClone(dbSession, vObj))
       {
-	// "Cloning DENIED"
-	// "Cloning operation refused for {0} object {1}."
-	return Ganymede.createErrorDialog(ts.l("clone_db_object.denied"),
-					  ts.l("clone_db_object.denied_msg", vObj.getTypeName(), vObj.getLabel()));
+        // "Cloning DENIED"
+        // "Cloning operation refused for {0} object {1}."
+        return Ganymede.createErrorDialog(ts.l("clone_db_object.denied"),
+                                          ts.l("clone_db_object.denied_msg", vObj.getTypeName(), vObj.getLabel()));
       }
 
     String ckp = RandomUtils.getSaltedString("clone_db_object[" + invid.toString() + "]");
@@ -2368,35 +2368,35 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (vObj == null)
       {
-	setLastError(ts.l("inactivate_db_object.error_text"));
+        setLastError(ts.l("inactivate_db_object.error_text"));
 
-	// "Server: Error in inactivate_db_object()"
-	// "Can''t inactivate a non-existent object"
-	return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
-					  ts.l("inactivate_db_object.error_text"));
+        // "Server: Error in inactivate_db_object()"
+        // "Can''t inactivate a non-existent object"
+        return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
+                                          ts.l("inactivate_db_object.error_text"));
       }
 
     if (vObj.isInactivated())
       {
-	// "Server: Can''t inactivate an inactive object"
-	// "Error.. can''t inactivate {0} {1}, object is already inactivated"
-	return Ganymede.createErrorDialog(ts.l("inactivate_db_object.already_inactivated"),
-					  ts.l("inactivate_db_object.already_inactivated_text",
-					       vObj.getTypeName(),
-					       vObj.getLabel()));
+        // "Server: Can''t inactivate an inactive object"
+        // "Error.. can''t inactivate {0} {1}, object is already inactivated"
+        return Ganymede.createErrorDialog(ts.l("inactivate_db_object.already_inactivated"),
+                                          ts.l("inactivate_db_object.already_inactivated_text",
+                                               vObj.getTypeName(),
+                                               vObj.getLabel()));
       }
 
     if (!permManager.getPerm(vObj).isDeletable())
       {
-	setLastError(ts.l("inactivate_db_object.permission_text",
-			  vObj.getTypeName(),
-			  vObj.getLabel()));
+        setLastError(ts.l("inactivate_db_object.permission_text",
+                          vObj.getTypeName(),
+                          vObj.getLabel()));
 
-	// "Server: Error in inactivate_db_object()"
-	// "Don''t have permission to inactivate {0} {1}"
-	return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
-					  ts.l("inactivate_db_object.permission_text",
-					       vObj.getTypeName(), vObj.getLabel()));
+        // "Server: Error in inactivate_db_object()"
+        // "Don''t have permission to inactivate {0} {1}"
+        return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
+                                          ts.l("inactivate_db_object.permission_text",
+                                               vObj.getTypeName(), vObj.getLabel()));
       }
 
     ReturnVal result = edit_db_object(invid); // *sync* DBSession DBObject
@@ -2405,19 +2405,19 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (eObj == null)
       {
-	// "Server: Error in inactivate_db_object()"
-	// "Couldn''t check out {0} {1} for inactivation"
-	return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
-					  ts.l("inactivate_db_object.no_checkout",
-					       vObj.getTypeName(), vObj.getLabel()));
+        // "Server: Error in inactivate_db_object()"
+        // "Couldn''t check out {0} {1} for inactivation"
+        return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
+                                          ts.l("inactivate_db_object.no_checkout",
+                                               vObj.getTypeName(), vObj.getLabel()));
       }
 
     if (!eObj.canBeInactivated() || !eObj.canInactivate(dbSession, eObj))
       {
-	// "Server: Error in inactivate_db_object()"
-	// "Object {0} is not of a type that may be inactivated"
-	return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
-					  ts.l("inactivate_db_object.not_inactivatable", eObj.getLabel()));
+        // "Server: Error in inactivate_db_object()"
+        // "Object {0} is not of a type that may be inactivated"
+        return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
+                                          ts.l("inactivate_db_object.not_inactivatable", eObj.getLabel()));
       }
 
     setLastEvent("inactivate " + eObj.getTypeName() + ":" + eObj.getLabel());
@@ -2455,32 +2455,32 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (vObj == null)
       {
-	// "Server: Error in reactivate_db_object()"
-	// "Can''t reactivate a non-existent object"
-	return Ganymede.createErrorDialog(ts.l("reactivate_db_object.error"),
-					  ts.l("reactivate_db_object.no_such"));
+        // "Server: Error in reactivate_db_object()"
+        // "Can''t reactivate a non-existent object"
+        return Ganymede.createErrorDialog(ts.l("reactivate_db_object.error"),
+                                          ts.l("reactivate_db_object.no_such"));
       }
 
     if (!vObj.isInactivated())
       {
-	// "Server: Error in reactivate_db_object()"
-	// "Error, can''t reactivate {0} {1}, object is not inactivated"
-	return Ganymede.createErrorDialog(ts.l("reactivate_db_object.error"),
-					  ts.l("reactivate_db_object.not_inactivated",
-					       vObj.getTypeName(),
-					       vObj.getLabel()));
+        // "Server: Error in reactivate_db_object()"
+        // "Error, can''t reactivate {0} {1}, object is not inactivated"
+        return Ganymede.createErrorDialog(ts.l("reactivate_db_object.error"),
+                                          ts.l("reactivate_db_object.not_inactivated",
+                                               vObj.getTypeName(),
+                                               vObj.getLabel()));
       }
 
     // we'll treat the object's deletion bit as the power-over-life-and-death bit
 
     if (!permManager.getPerm(vObj).isDeletable())
       {
-	// "Server: Error in reactivate_db_object()"
-	// "You do not have permission to reactivate {0} {1}"
-	return Ganymede.createErrorDialog(ts.l("reactivate_db_object.error"),
-					  ts.l("reactivate_db_object.permission_text",
-					       vObj.getTypeName(),
-					       vObj.getLabel()));
+        // "Server: Error in reactivate_db_object()"
+        // "You do not have permission to reactivate {0} {1}"
+        return Ganymede.createErrorDialog(ts.l("reactivate_db_object.error"),
+                                          ts.l("reactivate_db_object.permission_text",
+                                               vObj.getTypeName(),
+                                               vObj.getLabel()));
       }
 
     ReturnVal result = edit_db_object(invid); // *sync* DBSession DBObject
@@ -2489,12 +2489,12 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (eObj == null)
       {
-	// "Server: Error in reactivate_db_object()"
-	// "Couldn''t check out {0} {1} for reactivation"
-	return Ganymede.createErrorDialog(ts.l("reactivate_db_object.error"),
-					  ts.l("reactivate_db_object.no_checkout",
-					       vObj.getTypeName(),
-					       vObj.getLabel()));
+        // "Server: Error in reactivate_db_object()"
+        // "Couldn''t check out {0} {1} for reactivation"
+        return Ganymede.createErrorDialog(ts.l("reactivate_db_object.error"),
+                                          ts.l("reactivate_db_object.no_checkout",
+                                               vObj.getTypeName(),
+                                               vObj.getLabel()));
       }
 
     setLastEvent("reactivate " + eObj.getTypeName() + ":" + eObj.getLabel());
@@ -2532,34 +2532,34 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (debug)
       {
-	Ganymede.debug("Attempting to delete object: " + invid);
+        Ganymede.debug("Attempting to delete object: " + invid);
       }
 
     if ((invid.getType() == SchemaConstants.RoleBase) &&
-	(invid.getNum() == SchemaConstants.RoleDefaultObj))
+        (invid.getNum() == SchemaConstants.RoleDefaultObj))
       {
-	// "Server: Error in remove_db_object()"
-	// "Error.. can''t delete the default permissions definitions.  This object is critical to the proper functioning of the Ganymede server."
-	return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
-					  ts.l("remove_db_object.badobj1"));
+        // "Server: Error in remove_db_object()"
+        // "Error.. can''t delete the default permissions definitions.  This object is critical to the proper functioning of the Ganymede server."
+        return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+                                          ts.l("remove_db_object.badobj1"));
       }
 
     if ((invid.getType() == SchemaConstants.PersonaBase) &&
-	(invid.getNum() == SchemaConstants.PersonaSupergashObj))
+        (invid.getNum() == SchemaConstants.PersonaSupergashObj))
       {
-	// "Server: Error in remove_db_object()"
-	// "Error.. can''t delete the {0} persona.  This object is critical to the proper functioning of the Ganymede server."
-	return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
-					  ts.l("remove_db_object.badobj2", Ganymede.rootname));
+        // "Server: Error in remove_db_object()"
+        // "Error.. can''t delete the {0} persona.  This object is critical to the proper functioning of the Ganymede server."
+        return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+                                          ts.l("remove_db_object.badobj2", Ganymede.rootname));
       }
 
     if ((invid.getType() == SchemaConstants.OwnerBase) &&
-	(invid.getNum() == SchemaConstants.OwnerSupergash))
+        (invid.getNum() == SchemaConstants.OwnerSupergash))
       {
-	// "Server: Error in remove_db_object()"
-	// "Error.. can''t delete the supergash owner group.  This object is critical to the proper functioning of the Ganymede server."
-	return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
-					  ts.l("remove_db_object.badobj3"));
+        // "Server: Error in remove_db_object()"
+        // "Error.. can''t delete the supergash owner group.  This object is critical to the proper functioning of the Ganymede server."
+        return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+                                          ts.l("remove_db_object.badobj3"));
       }
 
     DBObjectBase objBase = Ganymede.db.getObjectBase(invid.getType());
@@ -2567,10 +2567,10 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (vObj == null)
       {
-	// "Server: Error in remove_db_object()"
-	// "Can''t delete a non-existent object"
-	return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
-					  ts.l("remove_db_object.no_such"));
+        // "Server: Error in remove_db_object()"
+        // "Can''t delete a non-existent object"
+        return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+                                          ts.l("remove_db_object.no_such"));
       }
 
     // if the object is newly created or is already marked for
@@ -2578,51 +2578,51 @@ final public class GanymedeSession implements Session, Unreferenced {
     // it.
 
     boolean okToRemove = ((vObj instanceof DBEditObject) &&
-			  ((DBEditObject) vObj).getStatus() != ObjectStatus.EDITING);
+                          ((DBEditObject) vObj).getStatus() != ObjectStatus.EDITING);
 
     if (!okToRemove)
       {
-	if (!permManager.getPerm(vObj).isDeletable())
-	  {
-	    // "Server: Error in remove_db_object()"
-	    // "You do not have permission to delete {0} {1}"
-	    return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
-					      ts.l("remove_db_object.permission_text",
-						   vObj.getTypeName(),
-						   vObj.getLabel()));
-	  }
+        if (!permManager.getPerm(vObj).isDeletable())
+          {
+            // "Server: Error in remove_db_object()"
+            // "You do not have permission to delete {0} {1}"
+            return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+                                              ts.l("remove_db_object.permission_text",
+                                                   vObj.getTypeName(),
+                                                   vObj.getLabel()));
+          }
 
-	ReturnVal retVal = objBase.getObjectHook().canRemove(dbSession, vObj);
+        ReturnVal retVal = objBase.getObjectHook().canRemove(dbSession, vObj);
 
-	if (retVal != null && !retVal.didSucceed())
-	  {
-	    if (retVal.getDialog() != null)
-	      {
-		return retVal;
-	      }
+        if (retVal != null && !retVal.didSucceed())
+          {
+            if (retVal.getDialog() != null)
+              {
+                return retVal;
+              }
 
-	    // if an object type can be inactivated, then it *must* be
-	    // inactivated, unless the user is supergash
+            // if an object type can be inactivated, then it *must* be
+            // inactivated, unless the user is supergash
 
-	    if (!permManager.isSuperGash() && objBase.getObjectHook().canBeInactivated())
-	      {
-		// "Server: Error in remove_db_object()"
-		// "You do not have permission to delete {0} {1}.\n\nOnly supergash-level admins can remove objects of this type, other admins must use inactivate."
-		return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
-						  ts.l("remove_db_object.must_inactivate",
-						       vObj.getTypeName(),
-						       vObj.getLabel()));
-	      }
+            if (!permManager.isSuperGash() && objBase.getObjectHook().canBeInactivated())
+              {
+                // "Server: Error in remove_db_object()"
+                // "You do not have permission to delete {0} {1}.\n\nOnly supergash-level admins can remove objects of this type, other admins must use inactivate."
+                return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+                                                  ts.l("remove_db_object.must_inactivate",
+                                                       vObj.getTypeName(),
+                                                       vObj.getLabel()));
+              }
 
-	    // otherwise, generic refusal
+            // otherwise, generic refusal
 
-	    // "Server: Error in remove_db_object()"
-	    // "Permission to delete {0} {1} has been refused by custom code"
-	    return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
-					      ts.l("remove_db_object.deletion_refused",
-						   vObj.getTypeName(),
-						   vObj.getLabel()));
-	  }
+            // "Server: Error in remove_db_object()"
+            // "Permission to delete {0} {1} has been refused by custom code"
+            return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+                                              ts.l("remove_db_object.deletion_refused",
+                                                   vObj.getTypeName(),
+                                                   vObj.getLabel()));
+          }
       }
 
     setLastEvent("delete " + vObj.getTypeName() + ":" + vObj.getLabel());
@@ -2661,14 +2661,14 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     try
       {
-	transmitter = new XMLTransmitter(this, query, rows);
+        transmitter = new XMLTransmitter(this, query, rows);
       }
     catch (IOException ex)
       {
-	// "Error transmitting XML Query"
-	// "Exception caught trying to initialize XML query transmitter\n\n{0}"
-	return Ganymede.createErrorDialog(ts.l("runXMLQuery.transmitter_error"),
-					  ts.l("runXMLQuery.transmitter_error_msg", ex.getMessage()));
+        // "Error transmitting XML Query"
+        // "Exception caught trying to initialize XML query transmitter\n\n{0}"
+        return Ganymede.createErrorDialog(ts.l("runXMLQuery.transmitter_error"),
+                                          ts.l("runXMLQuery.transmitter_error_msg", ex.getMessage()));
       }
 
     ReturnVal retVal = new ReturnVal(true);
@@ -2701,14 +2701,14 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     try
       {
-	transmitter = new XMLTransmitter(this, query, rows);
+        transmitter = new XMLTransmitter(this, query, rows);
       }
     catch (IOException ex)
       {
-	// "Error transmitting XML Query"
-	// "Exception caught trying to initialize XML query transmitter\n\n{0}"
-	return Ganymede.createErrorDialog(ts.l("runXMLQuery.transmitter_error"),
-					  ts.l("runXMLQuery.transmitter_error_msg", ex.getMessage()));
+        // "Error transmitting XML Query"
+        // "Exception caught trying to initialize XML query transmitter\n\n{0}"
+        return Ganymede.createErrorDialog(ts.l("runXMLQuery.transmitter_error"),
+                                          ts.l("runXMLQuery.transmitter_error_msg", ex.getMessage()));
       }
 
     ReturnVal retVal = new ReturnVal(true);
@@ -2830,7 +2830,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     if (!isLoggedIn())
       {
-	throw new NotLoggedInException();
+        throw new NotLoggedInException();
       }
 
     synchronized (lastActionTime)
@@ -3014,7 +3014,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (!loggedInSemaphore.set(false))
       {
-	return;
+        return;
       }
 
     // we do want to synchronize on our session for this part, so that
@@ -3023,84 +3023,84 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     synchronized (this)
       {
-	// we'll do all of our active cleanup in a try clause, so we
-	// can wipe out references to aid GC in a finally clause
+        // we'll do all of our active cleanup in a try clause, so we
+        // can wipe out references to aid GC in a finally clause
 
-	try
-	  {
-	    // Abort any DBSession going and tell it to flush its
-	    // state
+        try
+          {
+            // Abort any DBSession going and tell it to flush its
+            // state
 
-	    dbSession.logout();	// *sync* DBSession
+            dbSession.logout(); // *sync* DBSession
 
-	    if (exportObjects)
-	      {
-		this.asyncPort.shutdown();
-		this.asyncPort = null;
+            if (exportObjects)
+              {
+                this.asyncPort.shutdown();
+                this.asyncPort = null;
 
-		// If we have DBObjects left exported through RMI, make
-		// them forcibly inaccesible
+                // If we have DBObjects left exported through RMI, make
+                // them forcibly inaccesible
 
-		unexportObjects(true);
+                unexportObjects(true);
 
-		// if we ourselves were exported, unexport
+                // if we ourselves were exported, unexport
 
-		Ganymede.rmi.unpublishObject(this, true);
+                Ganymede.rmi.unpublishObject(this, true);
 
-		// from this point on, RMI remote calls to this
-		// GanymedeSession should fail, but we still have
-		// everything guarded by checklogin() in case there
-		// are incoming RMI calls blocking on the
-		// GanymedeSession object monitor.
-	      }
+                // from this point on, RMI remote calls to this
+                // GanymedeSession should fail, but we still have
+                // everything guarded by checklogin() in case there
+                // are incoming RMI calls blocking on the
+                // GanymedeSession object monitor.
+              }
 
-	    // if we're a userSession and weren't forced off, do
-	    // normal logout logging
+            // if we're a userSession and weren't forced off, do
+            // normal logout logging
 
-	    if (userSession && !forced_off)
-	      {
-		if (Ganymede.log != null)
-		  {
-		    // "OK logout for username: {0}"
-		    Ganymede.log.logSystemEvent(new DBLogEvent("normallogout",
-							       ts.l("logout.normal_event", permManager.getUserName()),
-							       permManager.getUserInvid(),
-							       permManager.getUserName(),
-							       permManager.getIdentityInvids(),
-							       null));
-		  }
-	      }
+            if (userSession && !forced_off)
+              {
+                if (Ganymede.log != null)
+                  {
+                    // "OK logout for username: {0}"
+                    Ganymede.log.logSystemEvent(new DBLogEvent("normallogout",
+                                                               ts.l("logout.normal_event", permManager.getUserName()),
+                                                               permManager.getUserInvid(),
+                                                               permManager.getUserName(),
+                                                               permManager.getIdentityInvids(),
+                                                               null));
+                  }
+              }
 
-	    // if we are forced off, and we're running under a
-	    // GanymedeXMLSession, tell the GanymedeXMLSession to
-	    // kick off.
-	    //
-	    // if we're not forced off, then the GanymedeXMLSession
-	    // must be the one who triggered the logout and it should
-	    // be cleaning things up on its own.
+            // if we are forced off, and we're running under a
+            // GanymedeXMLSession, tell the GanymedeXMLSession to
+            // kick off.
+            //
+            // if we're not forced off, then the GanymedeXMLSession
+            // must be the one who triggered the logout and it should
+            // be cleaning things up on its own.
 
-	    if (forced_off && xSession != null)
-	      {
-		xSession.abort();
-	      }
-	  }
-	finally
-	  {
-	    // let go of our session name and let the server know that
-	    // it can shut the server down if it is deferred shutdown
-	    // mode and we were a user session.
+            if (forced_off && xSession != null)
+              {
+                xSession.abort();
+              }
+          }
+        finally
+          {
+            // let go of our session name and let the server know that
+            // it can shut the server down if it is deferred shutdown
+            // mode and we were a user session.
 
-	    GanymedeServer.clearSession(this);
-	  }
+            GanymedeServer.clearSession(this);
+          }
 
-	if (userSession)
-	  {
-	    // "{0} logged off"
-	    Ganymede.debug(ts.l("logout.logged_off", permManager.getUserName()));
-	  }
+        if (userSession)
+          {
+            // "{0} logged off"
+            Ganymede.debug(ts.l("logout.logged_off", permManager.getUserName()));
+          }
 
-	permManager = null;
-	queryEngine = null;
+        permManager = null;
+        queryEngine = null;
       }
   }
 
@@ -3236,23 +3236,23 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (!permManager.getPerm(type, true).isCreatable())
       {
-	DBObjectBase base = Ganymede.db.getObjectBase(type);
+        DBObjectBase base = Ganymede.db.getObjectBase(type);
 
-	String error;
+        String error;
 
-	if (base == null)
-	  {
-	    // "Permission to create object of *invalid* type {0} denied."
-	    error = ts.l("create_db_object.invalid_type", Integer.valueOf(type));
-	  }
-	else
-	  {
-	    // "Permission to create object of type {0} denied."
-	    error = ts.l("create_db_object.type_no_perm", base.getName());
-	  }
+        if (base == null)
+          {
+            // "Permission to create object of *invalid* type {0} denied."
+            error = ts.l("create_db_object.invalid_type", Integer.valueOf(type));
+          }
+        else
+          {
+            // "Permission to create object of type {0} denied."
+            error = ts.l("create_db_object.type_no_perm", base.getName());
+          }
 
-	// "Can''t Create Object"
-	return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"), error);
+        // "Can''t Create Object"
+        return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"), error);
       }
 
     // if embedded is true, this code was called from
@@ -3261,15 +3261,15 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (!embedded)
       {
-	ownerInvids = permManager.getNewOwnerInvids();
+        ownerInvids = permManager.getNewOwnerInvids();
 
-	if (!permManager.isSuperGash() && ownerInvids.size() == 0)
-	  {
-	    // "Can''t Create Object"
-	    // "Can''t create new object, no owner group to put it in."
-	    return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
-					      ts.l("create_db_object.no_owner_group"));
-	  }
+        if (!permManager.isSuperGash() && ownerInvids.size() == 0)
+          {
+            // "Can''t Create Object"
+            // "Can''t create new object, no owner group to put it in."
+            return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
+                                              ts.l("create_db_object.no_owner_group"));
+          }
       }
 
     // now create and process
@@ -3324,24 +3324,24 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (!permManager.isSuperGash())
       {
-	// "Permissions Error"
-	// "You do not have permissions to dump the server''s data with the xml client"
-	return Ganymede.createErrorDialog(ts.l("global.permissions_error"),
-					  ts.l("getXML.data_refused"));
+        // "Permissions Error"
+        // "You do not have permissions to dump the server''s data with the xml client"
+        return Ganymede.createErrorDialog(ts.l("global.permissions_error"),
+                                          ts.l("getXML.data_refused"));
       }
 
     XMLTransmitter transmitter = null;
 
     try
       {
-	transmitter = new XMLTransmitter(sendData, sendSchema, syncChannel, includeHistory, includeOid);
+        transmitter = new XMLTransmitter(sendData, sendSchema, syncChannel, includeHistory, includeOid);
       }
     catch (IOException ex)
       {
-	// "Error transmitting XML"
-	// "Exception caught trying to initialize server transmitter\n\n{0}"
-	return Ganymede.createErrorDialog(ts.l("getXML.transmitter_error"),
-					  ts.l("getXML.transmitter_error_msg", ex.getMessage()));
+        // "Error transmitting XML"
+        // "Exception caught trying to initialize server transmitter\n\n{0}"
+        return Ganymede.createErrorDialog(ts.l("getXML.transmitter_error"),
+                                          ts.l("getXML.transmitter_error_msg", ex.getMessage()));
       }
 
     ReturnVal retVal = new ReturnVal(true);
@@ -3404,12 +3404,12 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     if (wizard != null && wizard.isActive())
       {
-	return false;
+        return false;
       }
     else
       {
-	this.wizard = wizard;
-	return true;
+        this.wizard = wizard;
+        return true;
       }
   }
 
@@ -3427,11 +3427,11 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     if (this.wizard == wizard)
       {
-	this.wizard = null;
+        this.wizard = null;
       }
     else
       {
-	throw new IllegalArgumentException(ts.l("unregisterWizard.exception"));
+        throw new IllegalArgumentException(ts.l("unregisterWizard.exception"));
       }
   }
 
@@ -3459,18 +3459,18 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     synchronized (exported)
       {
-	for (DBObject exportedObject: exported)
-	  {
-	    if (exportedObject == object)
-	      {
-		return;
-	      }
-	  }
+        for (DBObject exportedObject: exported)
+          {
+            if (exportedObject == object)
+              {
+                return;
+              }
+          }
 
-	Ganymede.rmi.publishObject(object);
+        Ganymede.rmi.publishObject(object);
 
-	exported.add(object);
-	object.exportFields();
+        exported.add(object);
+        object.exportFields();
       }
   }
 
@@ -3494,20 +3494,20 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     synchronized (exported)
       {
-	// count down from the top so we can remove things as we go
+        // count down from the top so we can remove things as we go
 
-	for (int i = exported.size()-1; i >= 0; i--)
-	  {
-	    DBObject x = exported.get(i);
+        for (int i = exported.size()-1; i >= 0; i--)
+          {
+            DBObject x = exported.get(i);
 
-	    if (all || x instanceof DBEditObject)
-	      {
-		Ganymede.rmi.unpublishObject(x, true); // go ahead and force
-		x.unexportFields();
+            if (all || x instanceof DBEditObject)
+              {
+                Ganymede.rmi.unpublishObject(x, true); // go ahead and force
+                x.unexportFields();
 
-		exported.remove(i);
-	      }
-	  }
+                exported.remove(i);
+              }
+          }
       }
   }
 
@@ -3526,7 +3526,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   public synchronized void checkOut()
   {
     objectsCheckedOut++;
-    resetAdminEntry();		// clear admin console info cache
+    resetAdminEntry();          // clear admin console info cache
 
     GanymedeAdmin.refreshUsers();
   }
@@ -3543,18 +3543,18 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (objectsCheckedOut < 0)
       {
-	try
-	  {
-	    // "Ganymede session for {0} has a checkIn() cause objectsCheckedOut to go negative"
-	    throw new RuntimeException(ts.l("checkIn.exception", getSessionName()));
-	  }
-	catch (RuntimeException ex)
-	  {
-	    Ganymede.debug(Ganymede.stackTrace(ex));
-	  }
+        try
+          {
+            // "Ganymede session for {0} has a checkIn() cause objectsCheckedOut to go negative"
+            throw new RuntimeException(ts.l("checkIn.exception", getSessionName()));
+          }
+        catch (RuntimeException ex)
+          {
+            Ganymede.debug(Ganymede.stackTrace(ex));
+          }
       }
 
-    resetAdminEntry();	// clear admin console info cache
+    resetAdminEntry();  // clear admin console info cache
 
     GanymedeAdmin.refreshUsers();
   }
@@ -3575,14 +3575,14 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (info == null)
       {
-	info = new AdminEntry(getSessionName(),
-			      permManager.getIdentity(),
-			      getClientHostName(),
-			      (status == null) ? "" : status,
-			      connecttime.toString(),
-			      (lastEvent == null) ? "" : lastEvent,
-			      objectsCheckedOut);
-	userInfo = info;
+        info = new AdminEntry(getSessionName(),
+                              permManager.getIdentity(),
+                              getClientHostName(),
+                              (status == null) ? "" : status,
+                              connecttime.toString(),
+                              (lastEvent == null) ? "" : lastEvent,
+                              objectsCheckedOut);
+        userInfo = info;
       }
 
     // userInfo might have been set null again by another
@@ -3629,7 +3629,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (!exportObjects)
       {
-	return;
+        return;
       }
 
     this.lastEvent = text;
@@ -3651,12 +3651,12 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     if (!userSession)
       {
-	return;			// server-local session, we won't time it out
+        return;                 // server-local session, we won't time it out
       }
 
     if (!loggedInSemaphore.isSet())
       {
-	return;
+        return;
       }
 
     long millisIdle = 0;
@@ -3670,79 +3670,79 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (Ganymede.softtimeout)
       {
-	// we don't time out users logged in without admin privileges in softtimeout
+        // we don't time out users logged in without admin privileges in softtimeout
 
-	if (!permManager.isPrivileged())
-	  {
-	    return;
-	  }
+        if (!permManager.isPrivileged())
+          {
+            return;
+          }
 
-	// if the time has come to kick the user off, we'll send him a
-	// signal telling him to drop down to non-privileged.  If the
-	// sendMessage() call throws an exception for some reason,
-	// we'll log that.
+        // if the time has come to kick the user off, we'll send him a
+        // signal telling him to drop down to non-privileged.  If the
+        // sendMessage() call throws an exception for some reason,
+        // we'll log that.
 
-	try
-	  {
-	    if ((minutesIdle > Ganymede.timeoutIdleNoObjs && objectsCheckedOut == 0) ||
-		minutesIdle > Ganymede.timeoutIdleWithObjs)
-	      {
-		// if we've got a non-user based admin (i.e.,
-		// supergash) logged in, we can't force them
-		// non-privileged, so we'll skip sending the timeout
-		// message and just wait another couple of minutes for
-		// the forceoff.
+        try
+          {
+            if ((minutesIdle > Ganymede.timeoutIdleNoObjs && objectsCheckedOut == 0) ||
+                minutesIdle > Ganymede.timeoutIdleWithObjs)
+              {
+                // if we've got a non-user based admin (i.e.,
+                // supergash) logged in, we can't force them
+                // non-privileged, so we'll skip sending the timeout
+                // message and just wait another couple of minutes for
+                // the forceoff.
 
-		if (permManager.isElevated())
-		  {
-		    // "Sending a timeout message to {0}"
-		    System.err.println(ts.l("timeCheck.sending", this.toString()));
+                if (permManager.isElevated())
+                  {
+                    // "Sending a timeout message to {0}"
+                    System.err.println(ts.l("timeCheck.sending", this.toString()));
 
-		    timedout = true;
+                    timedout = true;
 
-		    // sending this message to the client should cause it
-		    // to set persona back to the unprivileged state,
-		    // coincidentally resetting the lastActionTime in the
-		    // process.
+                    // sending this message to the client should cause it
+                    // to set persona back to the unprivileged state,
+                    // coincidentally resetting the lastActionTime in the
+                    // process.
 
-		    sendMessage(ClientMessage.SOFTTIMEOUT, null);
-		  }
-	      }
-	  }
-	catch (Throwable ex)
-	  {
-	    // "Throwable condition caught while trying to send a timeout message to {0}:\n\n{1}"
-	    Ganymede.debug(ts.l("timeCheck.caught_throwable", this.toString(), Ganymede.stackTrace(ex)));
-	  }
-	finally
-	  {
-	    // we give the client two minutes to respond to the
-	    // SOFTTIMEOUT message, then we get mean.
+                    sendMessage(ClientMessage.SOFTTIMEOUT, null);
+                  }
+              }
+          }
+        catch (Throwable ex)
+          {
+            // "Throwable condition caught while trying to send a timeout message to {0}:\n\n{1}"
+            Ganymede.debug(ts.l("timeCheck.caught_throwable", this.toString(), Ganymede.stackTrace(ex)));
+          }
+        finally
+          {
+            // we give the client two minutes to respond to the
+            // SOFTTIMEOUT message, then we get mean.
 
-	    if (minutesIdle > (Ganymede.timeoutIdleNoObjs + 2) && objectsCheckedOut == 0)
-	      {
-		// "You have been idle for over {0,number,#} minutes with no transactions in progress.  You are being disconnected as a security precaution."
-		forceOff(ts.l("timeCheck.forceOffNoObjs", Integer.valueOf(Ganymede.timeoutIdleNoObjs)));
-	      }
-	    else if (minutesIdle > (Ganymede.timeoutIdleWithObjs + 2))
-	      {
-		// "You have been idle for over {0,number,#} minutes.  You are being disconnected as a security precaution."
-		forceOff(ts.l("timeCheck.forceOffWithObjs", Integer.valueOf(Ganymede.timeoutIdleWithObjs)));
-	      }
-	  }
+            if (minutesIdle > (Ganymede.timeoutIdleNoObjs + 2) && objectsCheckedOut == 0)
+              {
+                // "You have been idle for over {0,number,#} minutes with no transactions in progress.  You are being disconnected as a security precaution."
+                forceOff(ts.l("timeCheck.forceOffNoObjs", Integer.valueOf(Ganymede.timeoutIdleNoObjs)));
+              }
+            else if (minutesIdle > (Ganymede.timeoutIdleWithObjs + 2))
+              {
+                // "You have been idle for over {0,number,#} minutes.  You are being disconnected as a security precaution."
+                forceOff(ts.l("timeCheck.forceOffWithObjs", Integer.valueOf(Ganymede.timeoutIdleWithObjs)));
+              }
+          }
 
-	return;
+        return;
       }
 
     if (minutesIdle > Ganymede.timeoutIdleNoObjs && objectsCheckedOut == 0)
       {
-	// "You have been idle for over {0,number,#} minutes with no transactions in progress.  You are being disconnected as a security precaution."
-	forceOff(ts.l("timeCheck.forceOffNoObjs", Integer.valueOf(Ganymede.timeoutIdleNoObjs)));
+        // "You have been idle for over {0,number,#} minutes with no transactions in progress.  You are being disconnected as a security precaution."
+        forceOff(ts.l("timeCheck.forceOffNoObjs", Integer.valueOf(Ganymede.timeoutIdleNoObjs)));
       }
     else if (minutesIdle > Ganymede.timeoutIdleWithObjs)
       {
-	// "You have been idle for over {0,number,#} minutes.  You are being disconnected as a security precaution."
-	forceOff(ts.l("timeCheck.forceOffWithObjs", Integer.valueOf(Ganymede.timeoutIdleWithObjs)));
+        // "You have been idle for over {0,number,#} minutes.  You are being disconnected as a security precaution."
+        forceOff(ts.l("timeCheck.forceOffWithObjs", Integer.valueOf(Ganymede.timeoutIdleWithObjs)));
       }
   }
 
@@ -3760,32 +3760,32 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     if (loggedInSemaphore.isSet())
       {
-	if (Ganymede.log != null)
-	  {
-	    // "Abnormal termination for username: {0}\n\n{1}"
-	    Ganymede.log.logSystemEvent(new DBLogEvent("abnormallogout",
-						       ts.l("forceOff.log_event", permManager.getUserName(), reason),
-						       permManager.getUserInvid(),
-						       permManager.getUserName(),
-						       permManager.getIdentityInvids(),
-						       null));
-	  }
+        if (Ganymede.log != null)
+          {
+            // "Abnormal termination for username: {0}\n\n{1}"
+            Ganymede.log.logSystemEvent(new DBLogEvent("abnormallogout",
+                                                       ts.l("forceOff.log_event", permManager.getUserName(), reason),
+                                                       permManager.getUserInvid(),
+                                                       permManager.getUserName(),
+                                                       permManager.getIdentityInvids(),
+                                                       null));
+          }
 
-	// "Forcing {0} off for {1}."
-	Ganymede.debug(ts.l("forceOff.forcing", permManager.getUserName(), reason));
+        // "Forcing {0} off for {1}."
+        Ganymede.debug(ts.l("forceOff.forcing", permManager.getUserName(), reason));
 
-	if (asyncPort != null)
-	  {
-	    try
-	      {
-		asyncPort.shutdown(reason);
-	      }
-	    catch (RemoteException ex)
-	      {
-	      }
-	  }
+        if (asyncPort != null)
+          {
+            try
+              {
+                asyncPort.shutdown(reason);
+              }
+            catch (RemoteException ex)
+              {
+              }
+          }
 
-	logout(true);		// keep logout from logging a normal logout
+        logout(true);           // keep logout from logging a normal logout
       }
   }
 
@@ -3802,19 +3802,19 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     if (type < ClientMessage.FIRST || type > ClientMessage.LAST)
       {
-	// "type out of range"
-	throw new IllegalArgumentException(ts.l("sendMessage.exception"));
+        // "type out of range"
+        throw new IllegalArgumentException(ts.l("sendMessage.exception"));
       }
 
     if (asyncPort != null)
       {
-	try
-	  {
-	    asyncPort.sendMessage(type, message);	// async proxy
-	  }
-	catch (RemoteException ex)
-	  {
-	  }
+        try
+          {
+            asyncPort.sendMessage(type, message);       // async proxy
+          }
+        catch (RemoteException ex)
+          {
+          }
       }
   }
 
@@ -3843,13 +3843,13 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (xSession != null)
       {
-	return;
+        return;
       }
 
     if (loggedInSemaphore.isSet())
       {
-	// "Network connection to the Ganymede client process has been lost."
-	forceOff(ts.l("unreferenced.reason"));
+        // "Network connection to the Ganymede client process has been lost."
+        forceOff(ts.l("unreferenced.reason"));
       }
   }
 

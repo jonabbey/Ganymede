@@ -173,8 +173,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.client.containerPanel");
 
-  static final String edit_action = ts.l("global.edit_action");	// "Edit Object"
-  static final String view_action = ts.l("global.view_action");	// "View Object"
+  static final String edit_action = ts.l("global.edit_action"); // "Edit Object"
+  static final String view_action = ts.l("global.view_action"); // "View Object"
 
   // ---
 
@@ -360,12 +360,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    */
 
   public containerPanel(db_object    object,
-			Invid        invid,
-			boolean      editable,
-			gclient      gc,
-			windowPanel  window,
-			framePanel   frame,
-			Object context)
+                        Invid        invid,
+                        boolean      editable,
+                        gclient      gc,
+                        windowPanel  window,
+                        framePanel   frame,
+                        Object context)
   {
     this(object, invid, editable, gc, window, frame, null, true, context);
   }
@@ -391,13 +391,13 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    */
 
   public containerPanel(db_object object,
-			Invid invid,
-			boolean editable,
-			gclient gc,
-			windowPanel window,
-			framePanel frame,
-			JProgressBar progressBar,
-			Object context)
+                        Invid invid,
+                        boolean editable,
+                        gclient gc,
+                        windowPanel window,
+                        framePanel frame,
+                        JProgressBar progressBar,
+                        Object context)
   {
     this(object, invid, editable, gc, window, frame, progressBar, true, context);
   }
@@ -422,14 +422,14 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    */
 
   public containerPanel(db_object object,
-			Invid invid,
-			boolean editable,
-			gclient gc,
-			windowPanel window,
-			framePanel frame,
-			JProgressBar progressBar,
-			boolean loadNow,
-			Object context)
+                        Invid invid,
+                        boolean editable,
+                        gclient gc,
+                        windowPanel window,
+                        framePanel frame,
+                        JProgressBar progressBar,
+                        boolean loadNow,
+                        Object context)
   {
     this(object, invid, editable, gc, window, frame, progressBar, loadNow, false, context);
   }
@@ -455,15 +455,15 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    */
 
   public containerPanel(db_object object,
-			Invid invid,
-			boolean editable,
-			gclient gc,
-			windowPanel window,
-			framePanel frame,
-			JProgressBar progressBar,
-			boolean loadNow,
-			boolean isCreating,
-			Object context)
+                        Invid invid,
+                        boolean editable,
+                        gclient gc,
+                        windowPanel window,
+                        framePanel frame,
+                        JProgressBar progressBar,
+                        boolean loadNow,
+                        boolean isCreating,
+                        Object context)
   {
     super(false);
 
@@ -473,7 +473,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (object == null)
       {
-	throw new NullPointerException("null object passed to containerPanel constructor");
+        throw new NullPointerException("null object passed to containerPanel constructor");
       }
 
     this.winP = window;
@@ -486,7 +486,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (context != null && (context instanceof personaContainer))
       {
-	this.isPersonaPanel = true;
+        this.isPersonaPanel = true;
       }
 
     frame.addContainerPanel(this);
@@ -502,7 +502,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (loadNow)
       {
-	load();
+        load();
       }
   }
 
@@ -561,237 +561,237 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (loaded)
       {
-	printErr("Container panel is already loaded!");
-	return;
+        printErr("Container panel is already loaded!");
+        return;
       }
 
     if (debug)
       {
-	println("Loading container panel");
+        println("Loading container panel");
       }
 
     try
       {
-	// if we are a top-level container panel in a general pane
-	// or persona pane, we'll have a progress bar.. we'll want
-	// to update it as we go along loading field information.
+        // if we are a top-level container panel in a general pane
+        // or persona pane, we'll have a progress bar.. we'll want
+        // to update it as we go along loading field information.
 
-	if (progressBar != null)
-	  {
-	    progressBar.setMinimum(0);
-	    progressBar.setMaximum(20);
-	    progressBar.setValue(0);
-	  }
+        if (progressBar != null)
+          {
+            progressBar.setMinimum(0);
+            progressBar.setMaximum(20);
+            progressBar.setValue(0);
+          }
 
-	// Get the list of fields
+        // Get the list of fields
 
-	if (debug)
-	  {
-	    println("Getting list of fields");
-	  }
+        if (debug)
+          {
+            println("Getting list of fields");
+          }
 
-	type = invid.getType();
+        type = invid.getType();
 
-	setProgressBar(1);
+        setProgressBar(1);
 
-	// pull static field type information from the client's caches
+        // pull static field type information from the client's caches
 
-	templates = gc.getTemplateVector(type);
+        templates = gc.getTemplateVector(type);
 
-	if (templates == null || templates.size() == 0)
-	  {
-	    printErr("No fields defined for this object type.. ??");
+        if (templates == null || templates.size() == 0)
+          {
+            printErr("No fields defined for this object type.. ??");
 
-	    if (templates == null)
-	      {
-		printErr("templates is *null*");
-	      }
-	    else
-	      {
-		printErr("templates is empty");
-	      }
+            if (templates == null)
+              {
+                printErr("templates is *null*");
+              }
+            else
+              {
+                printErr("templates is empty");
+              }
 
-	    return;
-	  }
+            return;
+          }
 
-	setProgressBar(2);
+        setProgressBar(2);
 
-	//
-	// ok, got the list of field definitions.  Now we need to get
-	// the current values and visibility information for the fields
-	// in this object.
         //
-	// Note that if we have previously been pre-loaded with a
-	// FieldInfo Vector, we won't bother calling the server to get
-	// one.
-	//
+        // ok, got the list of field definitions.  Now we need to get
+        // the current values and visibility information for the fields
+        // in this object.
+        //
+        // Note that if we have previously been pre-loaded with a
+        // FieldInfo Vector, we won't bother calling the server to get
+        // one.
+        //
 
-	if (infoVector == null)
-	  {
-	    try
-	      {
-		infoVector = object.getFieldInfoVector();
-	      }
-	    catch (Exception rx)
-	      {
-		gc.processExceptionRethrow(rx);
-	      }
-	  }
+        if (infoVector == null)
+          {
+            try
+              {
+                infoVector = object.getFieldInfoVector();
+              }
+            catch (Exception rx)
+              {
+                gc.processExceptionRethrow(rx);
+              }
+          }
 
-	if (infoVector.size() == 0)
-	  {
-	    printErr("No field info in getFieldInfoVector()");
-	  }
+        if (infoVector.size() == 0)
+          {
+            printErr("No field info in getFieldInfoVector()");
+          }
 
-	// keep a copy of the infoVector size so we don't have to
-	// continously call the synchronized infoVector.size()
-	// method during our loops
+        // keep a copy of the infoVector size so we don't have to
+        // continously call the synchronized infoVector.size()
+        // method during our loops
 
-	infoSize = infoVector.size();
+        infoSize = infoVector.size();
 
-	// now we know how many fields are actually present in this
-	// object, we can set the max size of the progress bar (plus
-	// how many elements in each vector panel.)
+        // now we know how many fields are actually present in this
+        // object, we can set the max size of the progress bar (plus
+        // how many elements in each vector panel.)
 
-	if (progressBar != null)
-	  {
-	    int totalSize = 0;
+        if (progressBar != null)
+          {
+            int totalSize = 0;
 
-	    for (int i = 0; i < infoSize; i++)
-	      {
-		FieldInfo info = (FieldInfo)infoVector.elementAt(i);
-		FieldTemplate template = findtemplate(info.getID());
+            for (int i = 0; i < infoSize; i++)
+              {
+                FieldInfo info = (FieldInfo)infoVector.elementAt(i);
+                FieldTemplate template = findtemplate(info.getID());
 
-		if (this.tabName == null)
-		  {
-		    totalSize++;
-		  }
-		else if (this.tabName.equals(template.getTabName()))
-		  {
-		    totalSize++;
-		  }
+                if (this.tabName == null)
+                  {
+                    totalSize++;
+                  }
+                else if (this.tabName.equals(template.getTabName()))
+                  {
+                    totalSize++;
+                  }
 
-		if (template.isArray())
-		  {
-		    if ((template.getType() == FieldType.INVID) && template.isEditInPlace())
-		      {
-			totalSize += ((Vector)info.getValue()).size();
-		      }
-		  }
-	      }
+                if (template.isArray())
+                  {
+                    if ((template.getType() == FieldType.INVID) && template.isEditInPlace())
+                      {
+                        totalSize += ((Vector)info.getValue()).size();
+                      }
+                  }
+              }
 
-	    progressBar.setMaximum(totalSize);
-	    progressBar.setValue(3);
-	  }
+            progressBar.setMaximum(totalSize);
+            progressBar.setValue(3);
+          }
 
-	if (debug)
-	  {
-	    println("Entering big loop");
-	  }
+        if (debug)
+          {
+            println("Entering big loop");
+          }
 
-	for (int i = 0; i < infoSize; i++)
-	  {
-	    // let the gclient interrupt us
+        for (int i = 0; i < infoSize; i++)
+          {
+            // let the gclient interrupt us
 
-	    if (!keepLoading())
-	      {
-		break;
-	      }
+            if (!keepLoading())
+              {
+                break;
+              }
 
-	    setProgressBar(i + 3 + vectorElementsAdded);
+            setProgressBar(i + 3 + vectorElementsAdded);
 
-	    try
-	      {
-		fieldInfo = (FieldInfo) infoVector.elementAt(i);
-		ID = fieldInfo.getID();
-		fieldTemplate = findtemplate(ID);
+            try
+              {
+                fieldInfo = (FieldInfo) infoVector.elementAt(i);
+                ID = fieldInfo.getID();
+                fieldTemplate = findtemplate(ID);
 
-		if (fieldTemplate == null)
-		  {
-		    throw new RuntimeException("Could not find the template for this field: " +
-					       fieldInfo.getField());
-		  }
+                if (fieldTemplate == null)
+                  {
+                    throw new RuntimeException("Could not find the template for this field: " +
+                                               fieldInfo.getField());
+                  }
 
-		// Skip some fields.  custom panels hold the built ins, and a few others.
+                // Skip some fields.  custom panels hold the built ins, and a few others.
 
-		// If we are a persona panel, hide the associated user field.
+                // If we are a persona panel, hide the associated user field.
 
-		if ((ID == SchemaConstants.BackLinksField)
-		    || ((type == SchemaConstants.UserBase) &&
-			(ID == SchemaConstants.UserAdminPersonae))
-		    || ((ID == SchemaConstants.ContainerField) &&
-			object.isEmbedded())
-		    || (isPersonaPanel &&
-			(type == SchemaConstants.PersonaBase) &&
-			(ID == SchemaConstants.PersonaAssocUser)))
-		  {
-		    if (debug)
-		      {
-			println("Skipping a special field: " + fieldTemplate.getName());
-		      }
+                if ((ID == SchemaConstants.BackLinksField)
+                    || ((type == SchemaConstants.UserBase) &&
+                        (ID == SchemaConstants.UserAdminPersonae))
+                    || ((ID == SchemaConstants.ContainerField) &&
+                        object.isEmbedded())
+                    || (isPersonaPanel &&
+                        (type == SchemaConstants.PersonaBase) &&
+                        (ID == SchemaConstants.PersonaAssocUser)))
+                  {
+                    if (debug)
+                      {
+                        println("Skipping a special field: " + fieldTemplate.getName());
+                      }
 
-		    continue;
-		  }
+                    continue;
+                  }
 
-		// skip fields for other tabs
+                // skip fields for other tabs
 
-		if (this.tabName != null && !this.tabName.equals(fieldTemplate.getTabName()))
-		  {
-		    continue;
-		  }
+                if (this.tabName != null && !this.tabName.equals(fieldTemplate.getTabName()))
+                  {
+                    continue;
+                  }
 
-		// and do the work.  If we're read only, we don't want
-		// to bother showing fields that are undefined.  In
-		// fact, we should only see undefined fields if we are
-		// viewing an object that has been checked out for
-		// editing by the current transaction.  Normally, when
-		// we view an object from the server and a read-only
-		// copy is created for us, fields without values
-		// simply aren't part of the object.
+                // and do the work.  If we're read only, we don't want
+                // to bother showing fields that are undefined.  In
+                // fact, we should only see undefined fields if we are
+                // viewing an object that has been checked out for
+                // editing by the current transaction.  Normally, when
+                // we view an object from the server and a read-only
+                // copy is created for us, fields without values
+                // simply aren't part of the object.
 
-		if (editable || fieldInfo.isDefined())
-		  {
-		    addFieldComponent(fieldInfo.getField(), fieldInfo, fieldTemplate);
-		  }
-	      }
-	    catch (Exception ex)
-	      {
-		gc.processExceptionRethrow(ex);
-	      }
-	  }
+                if (editable || fieldInfo.isDefined())
+                  {
+                    addFieldComponent(fieldInfo.getField(), fieldInfo, fieldTemplate);
+                  }
+              }
+            catch (Exception ex)
+              {
+                gc.processExceptionRethrow(ex);
+              }
+          }
 
-	if (debug)
-	  {
-	    println("Done with loop");
-	  }
+        if (debug)
+          {
+            println("Done with loop");
+          }
       }
     finally
       {
-	loaded = true;
-	loading = false;
+        loaded = true;
+        loading = false;
 
-	if (!keepLoading())
-	  {
-	    return;
-	  }
+        if (!keepLoading())
+          {
+            return;
+          }
 
-	// If update(Vector) was called during the load, then any
-	// fields to be updated were added to the updatesWhileLoading
-	// vector.  So call update with that vector now, if it has any
-	// size.
+        // If update(Vector) was called during the load, then any
+        // fields to be updated were added to the updatesWhileLoading
+        // vector.  So call update with that vector now, if it has any
+        // size.
 
-	synchronized (updatesWhileLoading)
-	  {
-	    if (updatesWhileLoading.size() > 0)
-	      {
-		if (debug)
-		  {
-		    println("Calling update with the updatesWhileLoading vector.");
-		  }
+        synchronized (updatesWhileLoading)
+          {
+            if (updatesWhileLoading.size() > 0)
+              {
+                if (debug)
+                  {
+                    println("Calling update with the updatesWhileLoading vector.");
+                  }
 
-		update(updatesWhileLoading);
-	      }
-	  }
+                update(updatesWhileLoading);
+              }
+          }
       }
   }
 
@@ -803,7 +803,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   {
     if (progressBar != null)
       {
-	progressBar.setValue(count);
+        progressBar.setValue(count);
       }
   }
 
@@ -822,12 +822,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     for (int i = 0; i < tsize; i++)
       {
-	result = (FieldTemplate) templates.elementAt(i);
+        result = (FieldTemplate) templates.elementAt(i);
 
-	if (result.getID() == type)
-	  {
-	    return result;
-	  }
+        if (result.getID() == type)
+          {
+            return result;
+          }
       }
 
     return null;
@@ -874,14 +874,14 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   {
     if (invid == null)
       {
-	try
-	  {
-	    invid = object.getInvid().intern();
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx);
-	  }
+        try
+          {
+            invid = object.getInvid().intern();
+          }
+        catch (Exception rx)
+          {
+            gc.processExceptionRethrow(rx);
+          }
       }
 
     return invid;
@@ -921,7 +921,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (!editable)
       {
-	return;
+        return;
       }
 
     Enumeration en;
@@ -930,32 +930,32 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (debug)
       {
-	println("Updating container panel");
+        println("Updating container panel");
       }
 
     gc.setWaitCursor();
 
     try
       {
-	en = objectHash.keys();
+        en = objectHash.keys();
 
-	while (en.hasMoreElements())
-	  {
-	    updateComponent((Component)en.nextElement());
-	  }
+        while (en.hasMoreElements())
+          {
+            updateComponent((Component)en.nextElement());
+          }
 
-	invalidate();
-	frame.validate();
+        invalidate();
+        frame.validate();
 
       }
     finally
       {
-	if (debug)
-	  {
-	    println("Done updating container panel");
-	  }
+        if (debug)
+          {
+            println("Done updating container panel");
+          }
 
-	gc.setNormalCursor();
+        gc.setNormalCursor();
       }
   }
 
@@ -974,35 +974,35 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (debug)
       {
-	println("Updating container panel");
+        println("Updating container panel");
       }
 
     gc.setWaitCursor();
 
     try
       {
-	en = objectHash.keys();
+        en = objectHash.keys();
 
-	while (en.hasMoreElements())
-	  {
-	    Component element = (Component) en.nextElement();
+        while (en.hasMoreElements())
+          {
+            Component element = (Component) en.nextElement();
 
-	    db_field field = (db_field) objectHash.get(element);
+            db_field field = (db_field) objectHash.get(element);
 
-	    if (field instanceof invid_field)
-	      {
-		relabelInvidComponent((invid_field)field, element, invid, newLabel);
-	      }
-	  }
+            if (field instanceof invid_field)
+              {
+                relabelInvidComponent((invid_field)field, element, invid, newLabel);
+              }
+          }
       }
     finally
       {
-	if (debug)
-	  {
-	    println("Done updating container panel");
-	  }
+        if (debug)
+          {
+            println("Done updating container panel");
+          }
 
-	gc.setNormalCursor();
+        gc.setNormalCursor();
       }
   }
 
@@ -1010,11 +1010,11 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   {
     if (element instanceof StringSelector)
       {
-	((StringSelector) element).relabelObject(invid, newLabel);
+        ((StringSelector) element).relabelObject(invid, newLabel);
       }
     else if (element instanceof JInvidChooser)
       {
-	((JInvidChooser) element).relabelObject(invid, newLabel);
+        ((JInvidChooser) element).relabelObject(invid, newLabel);
       }
     else if (element instanceof JButton)
       {
@@ -1042,12 +1042,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   {
     if (!editable)
       {
-	return;
+        return;
       }
 
     if (fields == null)
       {
-	return;
+        return;
       }
 
     Component c;
@@ -1056,7 +1056,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (debug)
       {
-	println("Updating a few fields...");
+        println("Updating a few fields...");
       }
 
     // If the containerPanel is not loaded, then we need to keep track
@@ -1065,81 +1065,81 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     synchronized(updatesWhileLoading)
       {
-	if (!loaded)
-	  {
-	    // If we are not loading yet, then we don't need to worry
-	    // about keeping track of the fields.  They will current when
-	    // they are first loaded.
+        if (!loaded)
+          {
+            // If we are not loading yet, then we don't need to worry
+            // about keeping track of the fields.  They will current when
+            // they are first loaded.
 
-	    if (loading)
-	      {
-		for (int i = 0; i < fields.size(); i++)
-		  {
-		    updatesWhileLoading.addElement(fields.elementAt(i));
-		  }
-	      }
+            if (loading)
+              {
+                for (int i = 0; i < fields.size(); i++)
+                  {
+                    updatesWhileLoading.addElement(fields.elementAt(i));
+                  }
+              }
 
-	    return;
-	  }
+            return;
+          }
       }
 
     gc.setWaitCursor();
 
     try
       {
-	for (int i = 0; i < fields.size(); i++)
-	  {
-	    if (!keepLoading())
-	      {
-		return;
-	      }
+        for (int i = 0; i < fields.size(); i++)
+          {
+            if (!keepLoading())
+              {
+                return;
+              }
 
-	    Short fieldID = (Short) fields.elementAt(i);
+            Short fieldID = (Short) fields.elementAt(i);
 
-	    // if we're not an embedded container panel, check to see if
-	    // we should update either the expiration field or the removal
-	    // field.
+            // if we're not an embedded container panel, check to see if
+            // we should update either the expiration field or the removal
+            // field.
 
-	    if (frame != null)
-	      {
-		if (fieldID.shortValue() == SchemaConstants.ExpirationField)
-		  {
-		    frame.refresh_expiration_date_panel();
-		    continue;
-		  }
-		else if (fieldID.shortValue() == SchemaConstants.RemovalField)
-		  {
-		    frame.refresh_removal_date_panel();
-		    continue;
-		  }
-	      }
+            if (frame != null)
+              {
+                if (fieldID.shortValue() == SchemaConstants.ExpirationField)
+                  {
+                    frame.refresh_expiration_date_panel();
+                    continue;
+                  }
+                else if (fieldID.shortValue() == SchemaConstants.RemovalField)
+                  {
+                    frame.refresh_removal_date_panel();
+                    continue;
+                  }
+              }
 
-	    c = (Component) idHash.get(fieldID);
+            c = (Component) idHash.get(fieldID);
 
-	    if (c == null)
-	      {
-		if (debug)
-		  {
-		    println("Could not find this component: ID = " + fieldID);
-		  }
-	      }
-	    else
-	      {
-		updateComponent(c);
-	      }
-	  }
+            if (c == null)
+              {
+                if (debug)
+                  {
+                    println("Could not find this component: ID = " + fieldID);
+                  }
+              }
+            else
+              {
+                updateComponent(c);
+              }
+          }
 
-	invalidate();
-	frame.validate();
+        invalidate();
+        frame.validate();
 
-	if (debug)
-	  {
-	    println("Done updating container panel");
-	  }
+        if (debug)
+          {
+            println("Done updating container panel");
+          }
       }
     finally
       {
-	gc.setNormalCursor();
+        gc.setNormalCursor();
       }
   }
 
@@ -1154,499 +1154,499 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   {
     if (debug)
       {
-	printErr("containerPanel.updateComponent(" + comp + ")");
+        printErr("containerPanel.updateComponent(" + comp + ")");
       }
 
     try
       {
-	db_field field = (db_field) objectHash.get(comp);
+        db_field field = (db_field) objectHash.get(comp);
 
-	// by getting a FieldInfo, we'll save a call to the server by
-	// not having to repeatedly probe the field for elements of
-	// its state
+        // by getting a FieldInfo, we'll save a call to the server by
+        // not having to repeatedly probe the field for elements of
+        // its state
 
-	FieldInfo currentInfo = field.getFieldInfo();
+        FieldInfo currentInfo = field.getFieldInfo();
 
-	if (debug)
-	  {
-	    println("Updating " + field.getName() + " " + comp);
-	  }
+        if (debug)
+          {
+            println("Updating " + field.getName() + " " + comp);
+          }
 
-	// if the field is not visible, just hide it and
-	// return.. otherwise, set it visible and update
-	// the value and choices for the field
+        // if the field is not visible, just hide it and
+        // return.. otherwise, set it visible and update
+        // the value and choices for the field
 
-	if (!currentInfo.isVisible())
-	  {
-	    contentsPanel.setRowVisible(comp, false);
-	    return;
-	  }
+        if (!currentInfo.isVisible())
+          {
+            contentsPanel.setRowVisible(comp, false);
+            return;
+          }
 
-	contentsPanel.setRowVisible(comp, true);
+        contentsPanel.setRowVisible(comp, true);
 
-	if (comp instanceof JstringField)
-	  {
-	    if (comp.equals(currentlyChangingComponent))
-	      {
-		// the server apparently triggered a refresh of the
-		// field that we are processing a callback from.  the
-		// JstringField has specific support for this, to
-		// allow the server to canonicalize strings entered by
-		// the user.  We'll call the appropriate method on the
-		// JstringField so that it will redraw itself with the
-		// canonicalized value when our callstack unwinds to
-		// the callback origination in this JstringField.
+        if (comp instanceof JstringField)
+          {
+            if (comp.equals(currentlyChangingComponent))
+              {
+                // the server apparently triggered a refresh of the
+                // field that we are processing a callback from.  the
+                // JstringField has specific support for this, to
+                // allow the server to canonicalize strings entered by
+                // the user.  We'll call the appropriate method on the
+                // JstringField so that it will redraw itself with the
+                // canonicalized value when our callstack unwinds to
+                // the callback origination in this JstringField.
 
-		((JstringField)comp).substituteValueByCallBack(this, (String)currentInfo.getValue());
-	      }
-	    else
-	      {
-		((JstringField)comp).setText((String)currentInfo.getValue());
-	      }
-	  }
-	else if (comp instanceof JstringArea)
-	  {
-	    // JstringArea handles re-entrant refresh okay, no need to
-	    // worry about self-refresh
+                ((JstringField)comp).substituteValueByCallBack(this, (String)currentInfo.getValue());
+              }
+            else
+              {
+                ((JstringField)comp).setText((String)currentInfo.getValue());
+              }
+          }
+        else if (comp instanceof JstringArea)
+          {
+            // JstringArea handles re-entrant refresh okay, no need to
+            // worry about self-refresh
 
-	    ((JstringArea)comp).setText((String)currentInfo.getValue());
-	  }
-	else if (comp instanceof JdateField)
-	  {
-	    // JdateField handles re-entrant refresh okay as well
+            ((JstringArea)comp).setText((String)currentInfo.getValue());
+          }
+        else if (comp instanceof JdateField)
+          {
+            // JdateField handles re-entrant refresh okay as well
 
-	    date_field datef = (date_field) field;
+            date_field datef = (date_field) field;
 
-	    ((JdateField)comp).setDate((Date)currentInfo.getValue());
+            ((JdateField)comp).setDate((Date)currentInfo.getValue());
 
-	    if (currentInfo.isEditable())
-	      {
-		if (datef.limited())
-		  {
-		    ((JdateField)comp).setLimits(datef.minDate(), datef.maxDate());
-		  }
-		else
-		  {
-		    ((JdateField)comp).setLimits(null, null);
-		  }
-	      }
-	  }
-	else if (comp instanceof JnumberField)
-	  {
-	    Integer value = (Integer)currentInfo.getValue();
+            if (currentInfo.isEditable())
+              {
+                if (datef.limited())
+                  {
+                    ((JdateField)comp).setLimits(datef.minDate(), datef.maxDate());
+                  }
+                else
+                  {
+                    ((JdateField)comp).setLimits(null, null);
+                  }
+              }
+          }
+        else if (comp instanceof JnumberField)
+          {
+            Integer value = (Integer)currentInfo.getValue();
 
-	    if (comp.equals(currentlyChangingComponent))
-	      {
-		// the server apparently triggered a refresh of the field
-		// that we are processing a callback from.  the
-		// JnumberField has specific support for this, etc.
+            if (comp.equals(currentlyChangingComponent))
+              {
+                // the server apparently triggered a refresh of the field
+                // that we are processing a callback from.  the
+                // JnumberField has specific support for this, etc.
 
-		((JnumberField)comp).substituteValueByCallBack(this, value);
-	      }
-	    else
-	      {
-		((JnumberField)comp).setValue(value);
-	      }
-	  }
- 	else if (comp instanceof JfloatField)
- 	  {
- 	    Double value = (Double)currentInfo.getValue();
+                ((JnumberField)comp).substituteValueByCallBack(this, value);
+              }
+            else
+              {
+                ((JnumberField)comp).setValue(value);
+              }
+          }
+        else if (comp instanceof JfloatField)
+          {
+            Double value = (Double)currentInfo.getValue();
 
-	    if (comp.equals(currentlyChangingComponent))
-	      {
-		// the server apparently triggered a refresh of the field
-		// that we are processing a callback from.  the
-		// JfloatField has specific support for this, etc.
+            if (comp.equals(currentlyChangingComponent))
+              {
+                // the server apparently triggered a refresh of the field
+                // that we are processing a callback from.  the
+                // JfloatField has specific support for this, etc.
 
-		((JfloatField)comp).substituteValueByCallBack(this, value);
-	      }
-	    else
-	      {
-		((JfloatField)comp).setValue(value);
-	      }
- 	  }
-	else if (comp instanceof JCheckBox)
-	  {
-	    Boolean value = (Boolean)currentInfo.getValue();
-	    JCheckBox cb = (JCheckBox) comp;
+                ((JfloatField)comp).substituteValueByCallBack(this, value);
+              }
+            else
+              {
+                ((JfloatField)comp).setValue(value);
+              }
+          }
+        else if (comp instanceof JCheckBox)
+          {
+            Boolean value = (Boolean)currentInfo.getValue();
+            JCheckBox cb = (JCheckBox) comp;
 
-	    // make sure we don't trigger a callback here
+            // make sure we don't trigger a callback here
 
-	    cb.removeActionListener(this);
-	    cb.setSelected((value == null) ? false : value.booleanValue());
-	    cb.addActionListener(this);
-	  }
-	else if (comp instanceof JComboBox)
-	  {
-	    JComboBox cb = (JComboBox) comp;
-	    string_field sf = (string_field) field;
+            cb.removeActionListener(this);
+            cb.setSelected((value == null) ? false : value.booleanValue());
+            cb.addActionListener(this);
+          }
+        else if (comp instanceof JComboBox)
+          {
+            JComboBox cb = (JComboBox) comp;
+            string_field sf = (string_field) field;
 
-	    /* -- */
+            /* -- */
 
-	    // remove this as an item listener so we don't get tricked
-	    // into thinking this update came from the user
+            // remove this as an item listener so we don't get tricked
+            // into thinking this update came from the user
 
-	    cb.removeItemListener(this);
+            cb.removeItemListener(this);
 
-	    if (debug)
-	      {
-		println("Updating the combo box.");
-	      }
+            if (debug)
+              {
+                println("Updating the combo box.");
+              }
 
-	    // First we need to rebuild the list of choices
+            // First we need to rebuild the list of choices
 
-	    Vector labels = null;
-	    Object key = sf.choicesKey();
+            Vector labels = null;
+            Object key = sf.choicesKey();
 
-	    // if our choices key is null, we're not going to use a cached copy..
-	    // pull down a new list of choices for this field.
+            // if our choices key is null, we're not going to use a cached copy..
+            // pull down a new list of choices for this field.
 
-	    if (key == null)
-	      {
-		QueryResult qr = sf.choices();
+            if (key == null)
+              {
+                QueryResult qr = sf.choices();
 
-		if (qr != null)
-		  {
-		    labels = qr.getLabels();
-		  }
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    println("key = " + key);
-		  }
+                if (qr != null)
+                  {
+                    labels = qr.getLabels();
+                  }
+              }
+            else
+              {
+                if (debug)
+                  {
+                    println("key = " + key);
+                  }
 
-		if (gc.cachedLists.containsList(key))
-		  {
-		    if (debug)
-		      {
-			println("key in there, using cached list");
-		      }
+                if (gc.cachedLists.containsList(key))
+                  {
+                    if (debug)
+                      {
+                        println("key in there, using cached list");
+                      }
 
-		    labels = gc.cachedLists.getLabels(key, false);
-		  }
-		else
-		  {
-		    if (debug)
-		      {
-			println("JComboBox contents not cached, downloading stringfield choices.");
-		      }
+                    labels = gc.cachedLists.getLabels(key, false);
+                  }
+                else
+                  {
+                    if (debug)
+                      {
+                        println("JComboBox contents not cached, downloading stringfield choices.");
+                      }
 
-		    QueryResult choicesV = sf.choices();
+                    QueryResult choicesV = sf.choices();
 
-		    // if we got a null result, assume we have no choices,
-		    // otherwise we're going to cache this result
+                    // if we got a null result, assume we have no choices,
+                    // otherwise we're going to cache this result
 
-		    if (choicesV == null)
-		      {
-			labels = new Vector();
-		      }
-		    else
-		      {
-			gc.cachedLists.putList(key, choicesV);
-			labels = choicesV.getLabels();
-		      }
-		  }
-	      }
+                    if (choicesV == null)
+                      {
+                        labels = new Vector();
+                      }
+                    else
+                      {
+                        gc.cachedLists.putList(key, choicesV);
+                        labels = choicesV.getLabels();
+                      }
+                  }
+              }
 
-	    // reset the combo box.
+            // reset the combo box.
 
-	    boolean mustChoose = sf.mustChoose();
+            boolean mustChoose = sf.mustChoose();
 
-	    String currentValue = (String) sf.getValue();
+            String currentValue = (String) sf.getValue();
 
-	    if (!mustChoose || currentValue == null)
-	      {
-		// "<none>"
-		labels.addElement(ts.l("global.none"));
-	      }
+            if (!mustChoose || currentValue == null)
+              {
+                // "<none>"
+                labels.addElement(ts.l("global.none"));
+              }
 
-	    if (currentValue == null)
-	      {
-		// "<none>"
-		currentValue = ts.l("global.none");
-	      }
+            if (currentValue == null)
+              {
+                // "<none>"
+                currentValue = ts.l("global.none");
+              }
 
-	    // create a new model to avoid O(n^2) order time hassles when
-	    // we add items one-by-one to an extant JComboBox
+            // create a new model to avoid O(n^2) order time hassles when
+            // we add items one-by-one to an extant JComboBox
 
-	    cb.setModel(new DefaultComboBoxModel(labels));
-	    cb.setSelectedItem(currentValue);
+            cb.setModel(new DefaultComboBoxModel(labels));
+            cb.setSelectedItem(currentValue);
 
-	    if (debug)
-	      {
-		printErr("setting currentvalue in JComboBox to " + currentValue);
-	      }
+            if (debug)
+              {
+                printErr("setting currentvalue in JComboBox to " + currentValue);
+              }
 
-	    // put us back on as an item listener so we are live for updates
-	    // from the user again
+            // put us back on as an item listener so we are live for updates
+            // from the user again
 
-	    cb.repaint();
-	    cb.addItemListener(this);
-	  }
-	else if (comp instanceof JInvidChooser)
-	  {
-	    JInvidChooser chooser = (JInvidChooser) comp;
-	    invid_field invf = (invid_field) field;
+            cb.repaint();
+            cb.addItemListener(this);
+          }
+        else if (comp instanceof JInvidChooser)
+          {
+            JInvidChooser chooser = (JInvidChooser) comp;
+            invid_field invf = (invid_field) field;
 
-	    // "<none">
-	    listHandle noneHandle = new listHandle(ts.l("global.none"), null);
-	    boolean mustChoose;
+            // "<none">
+            listHandle noneHandle = new listHandle(ts.l("global.none"), null);
+            boolean mustChoose;
 
-	    /* -- */
+            /* -- */
 
-	    // remove this as an item listener so we don't get tricked
-	    // into thinking this update came from the user
+            // remove this as an item listener so we don't get tricked
+            // into thinking this update came from the user
 
-	    chooser.removeItemListener(this);
+            chooser.removeItemListener(this);
 
-	    if (debug)
-	      {
-		println("Updating the InvidChooser.");
-	      }
+            if (debug)
+              {
+                println("Updating the InvidChooser.");
+              }
 
-	    // First we need to rebuild the list of choices
+            // First we need to rebuild the list of choices
 
-	    Vector choiceHandles = null;
-	    Object key = invf.choicesKey();
+            Vector choiceHandles = null;
+            Object key = invf.choicesKey();
 
-	    // if our choices key is null, we're not going to use a cached copy..
-	    // pull down a new list of choices for this field.
+            // if our choices key is null, we're not going to use a cached copy..
+            // pull down a new list of choices for this field.
 
-	    if (key == null)
-	      {
-		if (debug)
-		  {
-		    println("key is null, getting new copy, not caching.");
-		  }
+            if (key == null)
+              {
+                if (debug)
+                  {
+                    println("key is null, getting new copy, not caching.");
+                  }
 
-		QueryResult qr = invf.choices();
+                QueryResult qr = invf.choices();
 
-		if (qr == null)
+                if (qr == null)
                   {
                     choiceHandles = new Vector();  // empty
                   }
                 else
-		  {
-		    choiceHandles = qr.getListHandles(); // pre-sorted
-		  }
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    println("key = " + key);
-		  }
+                  {
+                    choiceHandles = qr.getListHandles(); // pre-sorted
+                  }
+              }
+            else
+              {
+                if (debug)
+                  {
+                    println("key = " + key);
+                  }
 
-		if (gc.cachedLists.containsList(key))
-		  {
-		    if (debug)
-		      {
-			println("key in there, using cached list");
-		      }
+                if (gc.cachedLists.containsList(key))
+                  {
+                    if (debug)
+                      {
+                        println("key in there, using cached list");
+                      }
 
-		    choiceHandles = gc.cachedLists.getListHandles(key, false); // pre-sorted
-		  }
-		else
-		  {
-		    if (debug)
-		      {
-			println("JInvidChooser contents not cached, downloading invid field choices.");
-		      }
+                    choiceHandles = gc.cachedLists.getListHandles(key, false); // pre-sorted
+                  }
+                else
+                  {
+                    if (debug)
+                      {
+                        println("JInvidChooser contents not cached, downloading invid field choices.");
+                      }
 
-		    QueryResult choicesV = invf.choices();
+                    QueryResult choicesV = invf.choices();
 
-		    // if we got a null result, assume we have no choices
-		    // otherwise, we're going to cache this result
+                    // if we got a null result, assume we have no choices
+                    // otherwise, we're going to cache this result
 
-		    if (choicesV == null)
-		      {
-			choiceHandles = new Vector();
-		      }
-		    else
-		      {
-			gc.cachedLists.putList(key, choicesV);
-			choiceHandles = choicesV.getListHandles(); // sorted
-		      }
-		  }
-	      }
+                    if (choicesV == null)
+                      {
+                        choiceHandles = new Vector();
+                      }
+                    else
+                      {
+                        gc.cachedLists.putList(key, choicesV);
+                        choiceHandles = choicesV.getListHandles(); // sorted
+                      }
+                  }
+              }
 
-	    // reset the combo box.
+            // reset the combo box.
 
-	    Invid currentValue = (Invid) invf.getValue();
-	    String currentLabel = gc.getSession().viewObjectLabel(currentValue);
-	    listHandle currentValueHandle = new listHandle(currentLabel, currentValue);
-	    listHandle currentHandle = null;
+            Invid currentValue = (Invid) invf.getValue();
+            String currentLabel = gc.getSession().viewObjectLabel(currentValue);
+            listHandle currentValueHandle = new listHandle(currentLabel, currentValue);
+            listHandle currentHandle = null;
 
-	    if (debug)
-	      {
-		printErr("containerPanel.updateComponent(): updating invid chooser combo box");
-		printErr("containerPanel.updateComponent(): searching for value " + currentValue);
-	      }
+            if (debug)
+              {
+                printErr("containerPanel.updateComponent(): updating invid chooser combo box");
+                printErr("containerPanel.updateComponent(): searching for value " + currentValue);
+              }
 
-	    for (int i = 0; i < choiceHandles.size(); i++)
-	      {
-		currentHandle = (listHandle) choiceHandles.elementAt(i);
+            for (int i = 0; i < choiceHandles.size(); i++)
+              {
+                currentHandle = (listHandle) choiceHandles.elementAt(i);
 
-		if (currentHandle.getObject().equals(currentValue))
-		  {
-		    break;
-		  }
-		else
-		  {
-		    currentHandle = null;
-		  }
-	      }
+                if (currentHandle.getObject().equals(currentValue))
+                  {
+                    break;
+                  }
+                else
+                  {
+                    currentHandle = null;
+                  }
+              }
 
-	    // in many cases, the list of choices may not include the
-	    // current value held in an invid field.  In this case,
-	    // we need to synthesize a handle for the current value
+            // in many cases, the list of choices may not include the
+            // current value held in an invid field.  In this case,
+            // we need to synthesize a handle for the current value
 
-	    if (currentHandle == null && currentValue != null)
-	      {
-		VecSortInsert inserter = new VecSortInsert(new Comparator()
-							   {
-							     public int compare(Object o_a, Object o_b)
-							       {
-								 listHandle a, b;
+            if (currentHandle == null && currentValue != null)
+              {
+                VecSortInsert inserter = new VecSortInsert(new Comparator()
+                                                           {
+                                                             public int compare(Object o_a, Object o_b)
+                                                               {
+                                                                 listHandle a, b;
 
-								 a = (listHandle) o_a;
-								 b = (listHandle) o_b;
-								 int compResult = 0;
+                                                                 a = (listHandle) o_a;
+                                                                 b = (listHandle) o_b;
+                                                                 int compResult = 0;
 
-								 compResult = a.toString().compareToIgnoreCase(b.toString());
+                                                                 compResult = a.toString().compareToIgnoreCase(b.toString());
 
-								 if (compResult < 0)
-								   {
-								     return -1;
-								   }
-								 else if (compResult > 0)
-								   {
-								     return 1;
-								   }
-								 else
-								   {
-								     return 0;
-								   }
-							       }
-							   });
+                                                                 if (compResult < 0)
+                                                                   {
+                                                                     return -1;
+                                                                   }
+                                                                 else if (compResult > 0)
+                                                                   {
+                                                                     return 1;
+                                                                   }
+                                                                 else
+                                                                   {
+                                                                     return 0;
+                                                                   }
+                                                               }
+                                                           });
 
-		inserter.insert(choiceHandles, currentValueHandle);
-		currentHandle = currentValueHandle;
-	      }
+                inserter.insert(choiceHandles, currentValueHandle);
+                currentHandle = currentValueHandle;
+              }
 
-	    // now we need to decide whether we should allow the user
-	    // to set this field back to the <none> selection.
+            // now we need to decide whether we should allow the user
+            // to set this field back to the <none> selection.
 
-	    mustChoose = invf.mustChoose();
+            mustChoose = invf.mustChoose();
 
-	    if (!mustChoose || (currentHandle == null))
-	      {
-		choiceHandles.insertElementAt(noneHandle, 0);
-	      }
+            if (!mustChoose || (currentHandle == null))
+              {
+                choiceHandles.insertElementAt(noneHandle, 0);
+              }
 
-	    if (debug)
-	      {
-		printErr("containerPanel.updateComponent(): got handles, setting model");
-	      }
+            if (debug)
+              {
+                printErr("containerPanel.updateComponent(): got handles, setting model");
+              }
 
-	    // aaaand resort
+            // aaaand resort
 
-	    //	    choiceHandles = gc.sortListHandleVector(choiceHandles);
+            //      choiceHandles = gc.sortListHandleVector(choiceHandles);
 
-	    if (currentHandle == null)
-	      {
-		chooser.setVectorContents(choiceHandles, noneHandle);
-	      }
-	    else
-	      {
-		chooser.setVectorContents(choiceHandles, currentHandle);
-	      }
+            if (currentHandle == null)
+              {
+                chooser.setVectorContents(choiceHandles, noneHandle);
+              }
+            else
+              {
+                chooser.setVectorContents(choiceHandles, currentHandle);
+              }
 
-	    if (debug)
-	      {
-		printErr("setting currentvalue in JInvidChooser to " + currentHandle);
-	      }
+            if (debug)
+              {
+                printErr("setting currentvalue in JInvidChooser to " + currentHandle);
+              }
 
-	    // put us back on as an item listener so we are live for updates
-	    // from the user again
+            // put us back on as an item listener so we are live for updates
+            // from the user again
 
-	    chooser.repaint();
-	    chooser.addItemListener(this);
-	  }
-	else if (comp instanceof JLabel)
-	  {
-	    ((JLabel)comp).setText((String)currentInfo.getValue());
-	  }
-	else if (comp instanceof JButton)
-	  {
-	    // This is an invid field, non-editable.
-	    Invid inv = (Invid)currentInfo.getValue();
-	    ((JButton)comp).setText(gc.getSession().viewObjectLabel(inv));
-	  }
-	else if (comp instanceof JpassField)
-	  {
-	    if (debug)
-	      {
-		println("Passfield, ingnoring");
-	      }
-	  }
-	else if (comp instanceof StringSelector)
-	  {
-	    if (field instanceof invid_field)
-	      {
-		updateInvidStringSelector((StringSelector)comp, (invid_field)field);
-	      }
-	    else // must be a string_field
-	      {
-		updateStringStringSelector((StringSelector)comp, (string_field)field,
-					   currentInfo);
-	      }
+            chooser.repaint();
+            chooser.addItemListener(this);
+          }
+        else if (comp instanceof JLabel)
+          {
+            ((JLabel)comp).setText((String)currentInfo.getValue());
+          }
+        else if (comp instanceof JButton)
+          {
+            // This is an invid field, non-editable.
+            Invid inv = (Invid)currentInfo.getValue();
+            ((JButton)comp).setText(gc.getSession().viewObjectLabel(inv));
+          }
+        else if (comp instanceof JpassField)
+          {
+            if (debug)
+              {
+                println("Passfield, ingnoring");
+              }
+          }
+        else if (comp instanceof StringSelector)
+          {
+            if (field instanceof invid_field)
+              {
+                updateInvidStringSelector((StringSelector)comp, (invid_field)field);
+              }
+            else // must be a string_field
+              {
+                updateStringStringSelector((StringSelector)comp, (string_field)field,
+                                           currentInfo);
+              }
 
-	    // In the case of self-refresh on server command, prevent
-	    // the StringSelector from trying to finish up its
-	    // graphical state changing with the old data.
+            // In the case of self-refresh on server command, prevent
+            // the StringSelector from trying to finish up its
+            // graphical state changing with the old data.
 
-	    if (comp.equals(currentlyChangingComponent))
-	      {
-		((StringSelector) comp).substituteValueByCallBack(this);
-	      }
-	  }
-	else if (comp instanceof vectorPanel)
-	  {
-	    ((vectorPanel)comp).refresh();
-	  }
-	else if (comp instanceof JIPField)
-	  {
-	    if (debug)
-	      {
-		println("Updating JIPField.");
-	      }
+            if (comp.equals(currentlyChangingComponent))
+              {
+                ((StringSelector) comp).substituteValueByCallBack(this);
+              }
+          }
+        else if (comp instanceof vectorPanel)
+          {
+            ((vectorPanel)comp).refresh();
+          }
+        else if (comp instanceof JIPField)
+          {
+            if (debug)
+              {
+                println("Updating JIPField.");
+              }
 
-	    Byte[] bytes = (Byte[]) currentInfo.getValue();
+            Byte[] bytes = (Byte[]) currentInfo.getValue();
 
-	    if (comp.equals(currentlyChangingComponent))
-	      {
-		// the server apparently triggered a refresh of the field
-		// that we are processing a callback from.  the
-		// JIPField has specific support for this, etc.
+            if (comp.equals(currentlyChangingComponent))
+              {
+                // the server apparently triggered a refresh of the field
+                // that we are processing a callback from.  the
+                // JIPField has specific support for this, etc.
 
-		((JIPField)comp).substituteValueByCallBack(this, bytes);
-	      }
-	    else
-	      {
-		((JIPField)comp).setValue(bytes);
-	      }
-	  }
-	else
-	  {
-	    printErr("field of unknown type: " + comp);
-	  }
+                ((JIPField)comp).substituteValueByCallBack(this, bytes);
+              }
+            else
+              {
+                ((JIPField)comp).setValue(bytes);
+              }
+          }
+        else
+          {
+            printErr("field of unknown type: " + comp);
+          }
       }
     catch (Exception rx)
       {
-	gc.processExceptionRethrow(rx);
+        gc.processExceptionRethrow(rx);
       }
   }
 
@@ -1660,7 +1660,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    */
 
   public void updateStringStringSelector(StringSelector ss, string_field field,
-					 FieldInfo currentInfo) throws RemoteException
+                                         FieldInfo currentInfo) throws RemoteException
   {
     Vector available = null;
     Vector chosen = null;
@@ -1672,51 +1672,51 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (ss.isEditable())
       {
-	key = field.choicesKey();
+        key = field.choicesKey();
 
-	if (key == null)
-	  {
-	    QueryResult qr = field.choices();
+        if (key == null)
+          {
+            QueryResult qr = field.choices();
 
-	    if (qr != null)
-	      {
-		available = qr.getListHandles();
-	      }
-	  }
-	else
-	  {
-	    if (gc.cachedLists.containsList(key))
-	      {
-		if (debug)
-		  {
-		    println("key in there, using cached list");
-		  }
+            if (qr != null)
+              {
+                available = qr.getListHandles();
+              }
+          }
+        else
+          {
+            if (gc.cachedLists.containsList(key))
+              {
+                if (debug)
+                  {
+                    println("key in there, using cached list");
+                  }
 
-		available = gc.cachedLists.getListHandles(key, false);
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    println("list for updateStringStringSelector() not loaded, downloading a new one.");
-		  }
+                available = gc.cachedLists.getListHandles(key, false);
+              }
+            else
+              {
+                if (debug)
+                  {
+                    println("list for updateStringStringSelector() not loaded, downloading a new one.");
+                  }
 
-		QueryResult choicesV = field.choices();
+                QueryResult choicesV = field.choices();
 
-		// if we got a null result, assume we have no choices
-		// otherwise, we're going to cache this result
+                // if we got a null result, assume we have no choices
+                // otherwise, we're going to cache this result
 
-		if (choicesV == null)
-		  {
-		    available = new Vector();
-		  }
-		else
-		  {
-		    gc.cachedLists.putList(key, choicesV);
-		    available = choicesV.getListHandles();
-		  }
-	      }
-	  }
+                if (choicesV == null)
+                  {
+                    available = new Vector();
+                  }
+                else
+                  {
+                    gc.cachedLists.putList(key, choicesV);
+                    available = choicesV.getListHandles();
+                  }
+              }
+          }
       }
 
     // now find the chosen vector
@@ -1746,67 +1746,67 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (ss.isEditable())
       {
-	key = field.choicesKey();
+        key = field.choicesKey();
 
-	if (key == null)
-	  {
-	    QueryResult qr = field.choices();
+        if (key == null)
+          {
+            QueryResult qr = field.choices();
 
-	    if (qr != null)
-	      {
-		available = qr.getListHandles();
-	      }
-	  }
-	else
-	  {
-	    if (gc.cachedLists.containsList(key))
-	      {
-		if (debug)
-		  {
-		    println("key in there, using cached list");
-		  }
+            if (qr != null)
+              {
+                available = qr.getListHandles();
+              }
+          }
+        else
+          {
+            if (gc.cachedLists.containsList(key))
+              {
+                if (debug)
+                  {
+                    println("key in there, using cached list");
+                  }
 
-		available = gc.cachedLists.getListHandles(key, false);
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    println("list for updateInvidStringSelector() not loaded, downloading a new one.");
-		  }
+                available = gc.cachedLists.getListHandles(key, false);
+              }
+            else
+              {
+                if (debug)
+                  {
+                    println("list for updateInvidStringSelector() not loaded, downloading a new one.");
+                  }
 
-		QueryResult choicesV = field.choices();
+                QueryResult choicesV = field.choices();
 
-		// if we got a null result, assume we have no choices
-		// otherwise, we're going to cache this result
+                // if we got a null result, assume we have no choices
+                // otherwise, we're going to cache this result
 
-		if (choicesV == null)
-		  {
-		    available = new Vector();
-		  }
-		else
-		  {
-		    gc.cachedLists.putList(key, choicesV);
-		    available = choicesV.getListHandles();
-		  }
-	      }
-	  }
+                if (choicesV == null)
+                  {
+                    available = new Vector();
+                  }
+                else
+                  {
+                    gc.cachedLists.putList(key, choicesV);
+                    available = choicesV.getListHandles();
+                  }
+              }
+          }
       }
 
     QueryResult res = field.encodedValues();
 
     if (res != null)
       {
-	chosen = res.getListHandles();
+        chosen = res.getListHandles();
       }
 
     try
       {
-	ss.update(available, true, null, chosen, false, null);
+        ss.update(available, true, null, chosen, false, null);
       }
     catch (Exception e)
       {
-	println("Caught exception updating StringSelector: " + e);
+        println("Caught exception updating StringSelector: " + e);
       }
   }
 
@@ -1835,287 +1835,287 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (v instanceof JErrorValueObject)
       {
-	gc.showErrorMessage((String)v.getValue());
-	return true;
+        gc.showErrorMessage((String)v.getValue());
+        return true;
       }
 
     currentlyChangingComponent = (JComponent)v.getSource();
 
     try
       {
-	// ok, now we have to connect the field change report coming
-	// from the JDataComponent to the appropriate field object
-	// on the Ganymede server.  First we'll try the simplest,
-	// generic case.
+        // ok, now we have to connect the field change report coming
+        // from the JDataComponent to the appropriate field object
+        // on the Ganymede server.  First we'll try the simplest,
+        // generic case.
 
-	if ((v.getSource() instanceof JstringField) ||
-	    (v.getSource() instanceof JnumberField) ||
- 	    (v.getSource() instanceof JfloatField) ||
-	    (v.getSource() instanceof JIPField) ||
-	    (v.getSource() instanceof JdateField) ||
-	    (v.getSource() instanceof JstringArea))
-	  {
-	    db_field field = (db_field) objectHash.get(v.getSource());
+        if ((v.getSource() instanceof JstringField) ||
+            (v.getSource() instanceof JnumberField) ||
+            (v.getSource() instanceof JfloatField) ||
+            (v.getSource() instanceof JIPField) ||
+            (v.getSource() instanceof JdateField) ||
+            (v.getSource() instanceof JstringArea))
+          {
+            db_field field = (db_field) objectHash.get(v.getSource());
 
-	    /* -- */
+            /* -- */
 
-	    try
-	      {
-		if (debug)
-		  {
-		    println(field.getTypeDesc() + " trying to set to " + v.getValue());
-		  }
+            try
+              {
+                if (debug)
+                  {
+                    println(field.getTypeDesc() + " trying to set to " + v.getValue());
+                  }
 
-		returnValue = field.setValue(v.getValue());
-	      }
-	    catch (Exception rx)
-	      {
-		gc.processException(rx);
+                returnValue = field.setValue(v.getValue());
+              }
+            catch (Exception rx)
+              {
+                gc.processException(rx);
 
-		return false;
-	      }
-	  }
-	else if (v.getSource() instanceof JpassField)
-	  {
-	    pass_field field = (pass_field) objectHash.get(v.getSource());
+                return false;
+              }
+          }
+        else if (v.getSource() instanceof JpassField)
+          {
+            pass_field field = (pass_field) objectHash.get(v.getSource());
 
-	    /* -- */
+            /* -- */
 
-	    try
-	      {
-		if (debug)
-		  {
-		    println(field.getTypeDesc() + " trying to set to " + v.getValue());
-		  }
+            try
+              {
+                if (debug)
+                  {
+                    println(field.getTypeDesc() + " trying to set to " + v.getValue());
+                  }
 
-		returnValue = field.setPlainTextPass((String)v.getValue());
-	      }
-	    catch (Exception rx)
-	      {
-		gc.processException(rx);
+                returnValue = field.setPlainTextPass((String)v.getValue());
+              }
+            catch (Exception rx)
+              {
+                gc.processException(rx);
 
-		return false;
-	      }
- 	  }
-	else if (v.getSource() instanceof vectorPanel)
-	  {
-	    // no vectorPanel should really ever call this
-	    // method, so wtf?
+                return false;
+              }
+          }
+        else if (v.getSource() instanceof vectorPanel)
+          {
+            // no vectorPanel should really ever call this
+            // method, so wtf?
 
-	    if (debug)
-	      {
-		println("Something happened in the vector panel");
-	      }
-	  }
-	else if (v.getSource() instanceof StringSelector)
-	  {
-	    StringSelector sourceComponent = (StringSelector) v.getSource();
+            if (debug)
+              {
+                println("Something happened in the vector panel");
+              }
+          }
+        else if (v.getSource() instanceof StringSelector)
+          {
+            StringSelector sourceComponent = (StringSelector) v.getSource();
 
-	    /* -- */
+            /* -- */
 
-	    if (debug)
-	      {
-		println("value performed from StringSelector");
-	      }
+            if (debug)
+              {
+                println("value performed from StringSelector");
+              }
 
-	    // a StringSelector data component could be feeding us any of a
-	    // number of conditions, that we need to check.
+            // a StringSelector data component could be feeding us any of a
+            // number of conditions, that we need to check.
 
-	    // First, are we being given a menu operation from StringSelector?
+            // First, are we being given a menu operation from StringSelector?
 
-	    if (v instanceof JParameterValueObject)
-	      {
-		if (debug)
-		  {
-		    println("MenuItem selected in a StringSelector");
-		  }
+            if (v instanceof JParameterValueObject)
+              {
+                if (debug)
+                  {
+                    println("MenuItem selected in a StringSelector");
+                  }
 
-		String command = (String) v.getParameter();
+                String command = (String) v.getParameter();
 
-		if (command.equals(edit_action))
-		  {
-		    if (debug)
-		      {
-			println("Edit object: " + v.getValue());
-		      }
+                if (command.equals(edit_action))
+                  {
+                    if (debug)
+                      {
+                        println("Edit object: " + v.getValue());
+                      }
 
-		    Invid invid = (Invid) v.getValue();
+                    Invid invid = (Invid) v.getValue();
 
-		    gc.editObject(invid);
+                    gc.editObject(invid);
 
-		    return true;
-		  }
-		else if (command.equals(view_action))
-		  {
-		    if (debug)
-		      {
-			println("View object: " + v.getValue());
-		      }
+                    return true;
+                  }
+                else if (command.equals(view_action))
+                  {
+                    if (debug)
+                      {
+                        println("View object: " + v.getValue());
+                      }
 
-		    Invid invid = (Invid) v.getValue();
+                    Invid invid = (Invid) v.getValue();
 
-		    gc.viewObject(invid);
+                    gc.viewObject(invid);
 
-		    return true;
-		  }
-		else
-		  {
-		    println("Unknown action command from popup: " + command);
-		  }
-	      }
-	    else if (objectHash.get(sourceComponent) instanceof invid_field)
-	      {
-		invid_field field = (invid_field) objectHash.get(sourceComponent);
+                    return true;
+                  }
+                else
+                  {
+                    println("Unknown action command from popup: " + command);
+                  }
+              }
+            else if (objectHash.get(sourceComponent) instanceof invid_field)
+              {
+                invid_field field = (invid_field) objectHash.get(sourceComponent);
 
-		/* -- */
+                /* -- */
 
-		if (field == null)
-		  {
-		    throw new RuntimeException("Could not find field in objectHash");
-		  }
+                if (field == null)
+                  {
+                    throw new RuntimeException("Could not find field in objectHash");
+                  }
 
-		try
-		  {
-		    if (v instanceof JAddValueObject)
-		      {
-			if (debug)
-			  {
-			    println("Adding new value to string selector");
-			  }
+                try
+                  {
+                    if (v instanceof JAddValueObject)
+                      {
+                        if (debug)
+                          {
+                            println("Adding new value to string selector");
+                          }
 
-			returnValue = field.addElement(v.getValue());
-		      }
-		    else if (v instanceof JAddVectorValueObject)
-		      {
-			if (debug)
-			  {
-			    println("Adding new value vector to string selector");
-			  }
+                        returnValue = field.addElement(v.getValue());
+                      }
+                    else if (v instanceof JAddVectorValueObject)
+                      {
+                        if (debug)
+                          {
+                            println("Adding new value vector to string selector");
+                          }
 
-			returnValue = field.addElements((Vector) v.getValue());
-		      }
-		    else if (v instanceof JDeleteValueObject)
-		      {
-			if (debug)
-			  {
-			    println("Removing value from field(string selector)");
-			  }
+                        returnValue = field.addElements((Vector) v.getValue());
+                      }
+                    else if (v instanceof JDeleteValueObject)
+                      {
+                        if (debug)
+                          {
+                            println("Removing value from field(string selector)");
+                          }
 
-			returnValue = field.deleteElement(v.getValue());
-		      }
-		    else if (v instanceof JDeleteVectorValueObject)
-		      {
-			if (debug)
-			  {
-			    println("Removing value vector from field(string selector)");
-			  }
+                        returnValue = field.deleteElement(v.getValue());
+                      }
+                    else if (v instanceof JDeleteVectorValueObject)
+                      {
+                        if (debug)
+                          {
+                            println("Removing value vector from field(string selector)");
+                          }
 
-			returnValue = field.deleteElements((Vector) v.getValue());
-		      }
-		  }
-		catch (Exception rx)
-		  {
-		    gc.processExceptionRethrow(rx, "Could not change add/delete invid from field");
-		  }
-	      }
-	    else if (objectHash.get(v.getSource()) instanceof string_field)
-	      {
-		string_field field = (string_field) objectHash.get(v.getSource());
+                        returnValue = field.deleteElements((Vector) v.getValue());
+                      }
+                  }
+                catch (Exception rx)
+                  {
+                    gc.processExceptionRethrow(rx, "Could not change add/delete invid from field");
+                  }
+              }
+            else if (objectHash.get(v.getSource()) instanceof string_field)
+              {
+                string_field field = (string_field) objectHash.get(v.getSource());
 
-		/* -- */
+                /* -- */
 
-		if (field == null)
-		  {
-		    throw new RuntimeException("Could not find field in objectHash");
-		  }
+                if (field == null)
+                  {
+                    throw new RuntimeException("Could not find field in objectHash");
+                  }
 
-		try
-		  {
-		    if (v instanceof JAddValueObject)
-		      {
-			returnValue = field.addElement(v.getValue());
-		      }
-		    else if (v instanceof JAddVectorValueObject)
-		      {
-			returnValue = field.addElements((Vector) v.getValue());
-		      }
-		    else if (v instanceof JDeleteValueObject)
-		      {
-			returnValue = field.deleteElement(v.getValue());
-		      }
-		    else if (v instanceof JDeleteVectorValueObject)
-		      {
-			returnValue = field.deleteElements((Vector) v.getValue());
-		      }
-		  }
-		catch (Exception rx)
-		  {
-		    gc.processExceptionRethrow(rx, "Could not add/remove string from string_field: ");
-		  }
-	      }
-	    else
-	      {
-		println("Not an Invid in string selector.");
-	      }
-	  }
-	else
-	  {
-	    println("Value performed from unknown source");
-	  }
+                try
+                  {
+                    if (v instanceof JAddValueObject)
+                      {
+                        returnValue = field.addElement(v.getValue());
+                      }
+                    else if (v instanceof JAddVectorValueObject)
+                      {
+                        returnValue = field.addElements((Vector) v.getValue());
+                      }
+                    else if (v instanceof JDeleteValueObject)
+                      {
+                        returnValue = field.deleteElement(v.getValue());
+                      }
+                    else if (v instanceof JDeleteVectorValueObject)
+                      {
+                        returnValue = field.deleteElements((Vector) v.getValue());
+                      }
+                  }
+                catch (Exception rx)
+                  {
+                    gc.processExceptionRethrow(rx, "Could not add/remove string from string_field: ");
+                  }
+              }
+            else
+              {
+                println("Not an Invid in string selector.");
+              }
+          }
+        else
+          {
+            println("Value performed from unknown source");
+          }
 
-	// Handle any wizards, error dialogs, or rescan commands
+        // Handle any wizards, error dialogs, or rescan commands
 
-	returnValue = gc.handleReturnVal(returnValue);
+        returnValue = gc.handleReturnVal(returnValue);
 
-	if (returnValue == null)  // Success, no need to do anything else
-	  {
-	    if (debug)
-	      {
-		println("retVal is null: returning true");
-	      }
+        if (returnValue == null)  // Success, no need to do anything else
+          {
+            if (debug)
+              {
+                println("retVal is null: returning true");
+              }
 
-	    gc.somethingChanged();
-	    return true;
-	  }
+            gc.somethingChanged();
+            return true;
+          }
 
-	if (returnValue.didSucceed())
-	  {
-	    if (debug)
-	      {
-		println("didSucceed: Returning true.");
-	      }
+        if (returnValue.didSucceed())
+          {
+            if (debug)
+              {
+                println("didSucceed: Returning true.");
+              }
 
-	    gc.somethingChanged();
-	    return true;
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		println("didSucceed: Returning false.");
-	      }
+            gc.somethingChanged();
+            return true;
+          }
+        else
+          {
+            if (debug)
+              {
+                println("didSucceed: Returning false.");
+              }
 
-	    return false;
-	  }
+            return false;
+          }
       }
     catch (NullPointerException ne)
       {
-	ne.printStackTrace();
-	return false;
+        ne.printStackTrace();
+        return false;
       }
     catch (IllegalArgumentException e)
       {
-	e.printStackTrace();
-	return false;
+        e.printStackTrace();
+        return false;
       }
     catch (RuntimeException e)
       {
-	e.printStackTrace();
-	return false;
+        e.printStackTrace();
+        return false;
       }
     finally
       {
-	currentlyChangingComponent = null;
+        currentlyChangingComponent = null;
       }
   }
 
@@ -2146,69 +2146,69 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (field == null)
       {
-	throw new RuntimeException("Whoa, null field for a JCheckBox: " + e);
+        throw new RuntimeException("Whoa, null field for a JCheckBox: " + e);
       }
 
     try
       {
-	newValue = cb.isSelected();
+        newValue = cb.isSelected();
 
-	try
-	  {
-	    returnValue = field.setValue(Boolean.valueOf(newValue));
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx, "Could not set field value: ");
-	  }
+        try
+          {
+            returnValue = field.setValue(Boolean.valueOf(newValue));
+          }
+        catch (Exception rx)
+          {
+            gc.processExceptionRethrow(rx, "Could not set field value: ");
+          }
 
-	// Handle any wizards or error dialogs resulting from the
-	// field.setValue()
+        // Handle any wizards or error dialogs resulting from the
+        // field.setValue()
 
-	returnValue = gc.handleReturnVal(returnValue);
+        returnValue = gc.handleReturnVal(returnValue);
 
-	if (returnValue == null)
-	  {
-	    gc.somethingChanged();
-	  }
-	else if (returnValue.didSucceed())
-	  {
-	    gc.somethingChanged();
-	  }
-	else
-	  {
-	    // we need to undo things
+        if (returnValue == null)
+          {
+            gc.somethingChanged();
+          }
+        else if (returnValue.didSucceed())
+          {
+            gc.somethingChanged();
+          }
+        else
+          {
+            // we need to undo things
 
-	    // We need to turn off ourselves as an action listener
-	    // while we flip this back, so we don't go through this
-	    // method again.
+            // We need to turn off ourselves as an action listener
+            // while we flip this back, so we don't go through this
+            // method again.
 
-	    cb.removeActionListener(this);
+            cb.removeActionListener(this);
 
-	    cb.setSelected(!newValue);
+            cb.setSelected(!newValue);
 
-	    // and we re-enable event notification
+            // and we re-enable event notification
 
-	    cb.addActionListener(this);
-	  }
+            cb.addActionListener(this);
+          }
       }
     catch (Exception ex)
       {
-	// An exception was thrown, most likely from the server.  We need to revert the check box.
+        // An exception was thrown, most likely from the server.  We need to revert the check box.
 
-	printErr("Exception occured in containerPanel.actionPerformed: " + ex);
+        printErr("Exception occured in containerPanel.actionPerformed: " + ex);
 
-	try
-	  {
-	    Boolean b = (Boolean)field.getValue();
-	    cb.setSelected((b == null) ? false : b.booleanValue());
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processExceptionRethrow(rx);
-	  }
+        try
+          {
+            Boolean b = (Boolean)field.getValue();
+            cb.setSelected((b == null) ? false : b.booleanValue());
+          }
+        catch (Exception rx)
+          {
+            gc.processExceptionRethrow(rx);
+          }
 
-	gc.processExceptionRethrow(ex);
+        gc.processExceptionRethrow(ex);
       }
   }
 
@@ -2236,12 +2236,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (e.getStateChange() != ItemEvent.SELECTED)
       {
-	return;
+        return;
       }
 
     if (debug)
       {
-	println("containerPanel.itemStateChanged(): Item selected: " + e.getItem());
+        println("containerPanel.itemStateChanged(): Item selected: " + e.getItem());
       }
 
     // Find the field that is associated with this combo box.  Some
@@ -2253,99 +2253,99 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (field == null)
       {
-	field = (db_field) invidChooserHash.get(cb);
+        field = (db_field) invidChooserHash.get(cb);
 
-	if (field == null)
-	  {
-	    throw new RuntimeException("Whoa, null field for a JComboBox: " + e);
-	  }
+        if (field == null)
+          {
+            throw new RuntimeException("Whoa, null field for a JComboBox: " + e);
+          }
       }
 
     try
       {
-	Object newValue = e.getItem();
-	Object oldValue = field.getValue();
+        Object newValue = e.getItem();
+        Object oldValue = field.getValue();
 
-	if (newValue.equals(oldValue))
-	  {
-	    return;		// what else is new?
-	  }
+        if (newValue.equals(oldValue))
+          {
+            return;             // what else is new?
+          }
 
-	if (newValue instanceof String)
-	  {
-	    returnValue = field.setValue(newValue);
-	  }
-	else if (newValue instanceof listHandle)
-	  {
-	    listHandle lh = (listHandle) newValue;
+        if (newValue instanceof String)
+          {
+            returnValue = field.setValue(newValue);
+          }
+        else if (newValue instanceof listHandle)
+          {
+            listHandle lh = (listHandle) newValue;
 
-	    if (debug)
-	      {
-		if (field == null)
-		  {
-		    println("Field is null.");
-		  }
-	      }
+            if (debug)
+              {
+                if (field == null)
+                  {
+                    println("Field is null.");
+                  }
+              }
 
-	    returnValue = field.setValue(lh.getObject());
-	  }
-	else
-	  {
-	    throw new RuntimeException("Unknown type from JComboBox: " + newValue);
-	  }
+            returnValue = field.setValue(lh.getObject());
+          }
+        else
+          {
+            throw new RuntimeException("Unknown type from JComboBox: " + newValue);
+          }
 
-	// handle any wizards and/or error dialogs
+        // handle any wizards and/or error dialogs
 
-	returnValue = gc.handleReturnVal(returnValue);
+        returnValue = gc.handleReturnVal(returnValue);
 
-	if (returnValue == null)
-	  {
-	    gc.somethingChanged();
+        if (returnValue == null)
+          {
+            gc.somethingChanged();
 
-	    if (debug)
-	      {
-		println("field setValue returned true");
-	      }
-	  }
-	else if (returnValue.didSucceed())
-	  {
-	    if (debug)
-	      {
-		println("field setValue returned true!!");
-	      }
+            if (debug)
+              {
+                println("field setValue returned true");
+              }
+          }
+        else if (returnValue.didSucceed())
+          {
+            if (debug)
+              {
+                println("field setValue returned true!!");
+              }
 
-	    gc.somethingChanged();
-	  }
-	else
-	  {
-	    // Failure.. need to revert the combobox
+            gc.somethingChanged();
+          }
+        else
+          {
+            // Failure.. need to revert the combobox
 
-	    // turn off callbacks
+            // turn off callbacks
 
-	    cb.removeItemListener(this);
+            cb.removeItemListener(this);
 
-	    if (oldValue == null)
-	      {
-		cb.setSelectedItem(null);
-	      }
-	    else if (newValue instanceof String)
-	      {
-		cb.setSelectedItem(oldValue);
-	      }
-	    else if (newValue instanceof listHandle)
-	      {
-		listHandle lh = new listHandle(gc.getSession().viewObjectLabel((Invid) oldValue), oldValue);
-		cb.setSelectedItem(lh);
-	      }
+            if (oldValue == null)
+              {
+                cb.setSelectedItem(null);
+              }
+            else if (newValue instanceof String)
+              {
+                cb.setSelectedItem(oldValue);
+              }
+            else if (newValue instanceof listHandle)
+              {
+                listHandle lh = new listHandle(gc.getSession().viewObjectLabel((Invid) oldValue), oldValue);
+                cb.setSelectedItem(lh);
+              }
 
-	    // turn callbacks back on
+            // turn callbacks back on
 
-	    cb.addItemListener(this);
-	  }
+            cb.addItemListener(this);
+          }
       }
     catch (Exception rx)
       {
-	gc.processExceptionRethrow(rx);
+        gc.processExceptionRethrow(rx);
       }
   }
 
@@ -2355,8 +2355,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    */
 
   private void addFieldComponent(db_field field,
-				 FieldInfo fieldInfo,
-				 FieldTemplate fieldTemplate) throws RemoteException
+                                 FieldInfo fieldInfo,
+                                 FieldTemplate fieldTemplate) throws RemoteException
   {
     short fieldType;
     boolean isVector;
@@ -2365,12 +2365,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (!keepLoading())
       {
-	return;
+        return;
       }
 
     if (field == null)
       {
-	throw new IllegalArgumentException("null field");
+        throw new IllegalArgumentException("null field");
       }
 
     fieldType = fieldTemplate.getType();
@@ -2378,78 +2378,78 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (debug)
       {
-	println(" Name: " + fieldTemplate.getName() + " Field type desc: " + fieldType);
+        println(" Name: " + fieldTemplate.getName() + " Field type desc: " + fieldType);
       }
 
     if (isVector)
       {
-	if (fieldType == FieldType.STRING)
-	  {
-	    addStringVector((string_field) field, fieldInfo, fieldTemplate);
-	  }
-	else if (fieldType == FieldType.INVID && !fieldTemplate.isEditInPlace())
-	  {
-	    addInvidVector((invid_field) field, fieldInfo, fieldTemplate);
-	  }
-	else			// generic vector
-	  {
-	    addVectorPanel(field, fieldInfo, fieldTemplate);
-	  }
+        if (fieldType == FieldType.STRING)
+          {
+            addStringVector((string_field) field, fieldInfo, fieldTemplate);
+          }
+        else if (fieldType == FieldType.INVID && !fieldTemplate.isEditInPlace())
+          {
+            addInvidVector((invid_field) field, fieldInfo, fieldTemplate);
+          }
+        else                    // generic vector
+          {
+            addVectorPanel(field, fieldInfo, fieldTemplate);
+          }
       }
     else
       {
-	// plain old component
+        // plain old component
 
-	switch (fieldType)
-	  {
-	  case -1:
-	    printErr("**** Could not get field information");
-	    break;
+        switch (fieldType)
+          {
+          case -1:
+            printErr("**** Could not get field information");
+            break;
 
-	  case FieldType.STRING:
-	    addStringField((string_field) field, fieldInfo, fieldTemplate);
-	    break;
+          case FieldType.STRING:
+            addStringField((string_field) field, fieldInfo, fieldTemplate);
+            break;
 
-	  case FieldType.PASSWORD:
-	    addPasswordField((pass_field) field, fieldInfo, fieldTemplate);
-	    break;
+          case FieldType.PASSWORD:
+            addPasswordField((pass_field) field, fieldInfo, fieldTemplate);
+            break;
 
-	  case FieldType.NUMERIC:
-	    addNumericField(field, fieldInfo, fieldTemplate);
-	    break;
+          case FieldType.NUMERIC:
+            addNumericField(field, fieldInfo, fieldTemplate);
+            break;
 
- 	  case FieldType.FLOAT:
- 	    addFloatField(field, fieldInfo, fieldTemplate);
- 	    break;
+          case FieldType.FLOAT:
+            addFloatField(field, fieldInfo, fieldTemplate);
+            break;
 
-	  case FieldType.DATE:
-	    addDateField(field, fieldInfo, fieldTemplate);
-	    break;
+          case FieldType.DATE:
+            addDateField(field, fieldInfo, fieldTemplate);
+            break;
 
-	  case FieldType.BOOLEAN:
-	    addBooleanField(field, fieldInfo, fieldTemplate);
-	    break;
+          case FieldType.BOOLEAN:
+            addBooleanField(field, fieldInfo, fieldTemplate);
+            break;
 
-	  case FieldType.PERMISSIONMATRIX:
-	    addPermissionField(field, fieldInfo, fieldTemplate);
-	    break;
+          case FieldType.PERMISSIONMATRIX:
+            addPermissionField(field, fieldInfo, fieldTemplate);
+            break;
 
           case FieldType.FIELDOPTIONS:
             addFieldOptionsField(field, fieldInfo, fieldTemplate);
             break;
 
-	  case FieldType.INVID:
-	    addInvidField((invid_field)field, fieldInfo, fieldTemplate);
-	    break;
+          case FieldType.INVID:
+            addInvidField((invid_field)field, fieldInfo, fieldTemplate);
+            break;
 
-	  case FieldType.IP:
-	    addIPField((ip_field) field, fieldInfo, fieldTemplate);
-	    break;
+          case FieldType.IP:
+            addIPField((ip_field) field, fieldInfo, fieldTemplate);
+            break;
 
-	  default:
-	    JLabel label = new JLabel("(Unknown)Field type ID = " + fieldType);
-	    contentsPanel.addRow(fieldTemplate.getName(), label);
-	  }
+          default:
+            JLabel label = new JLabel("(Unknown)Field type ID = " + fieldType);
+            contentsPanel.addRow(fieldTemplate.getName(), label);
+          }
       }
   }
 
@@ -2459,8 +2459,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    */
 
   private void addStringVector(string_field field,
-			       FieldInfo fieldInfo,
-			       FieldTemplate fieldTemplate) throws RemoteException
+                               FieldInfo fieldInfo,
+                               FieldTemplate fieldTemplate) throws RemoteException
   {
     objectList list = null;
 
@@ -2468,155 +2468,155 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (debug)
       {
-	println("Adding StringSelector, its a vector of strings!");
+        println("Adding StringSelector, its a vector of strings!");
       }
 
     if (field == null)
       {
-	throw new NullPointerException();
+        throw new NullPointerException();
       }
 
     if (editable && fieldInfo.isEditable())
       {
-	QueryResult qr = null;
+        QueryResult qr = null;
 
-	if (debug)
-	  {
-	    println("Getting choicesKey()");
-	  }
+        if (debug)
+          {
+            println("Getting choicesKey()");
+          }
 
-	Object id = field.choicesKey();
+        Object id = field.choicesKey();
 
-	if (id == null)
-	  {
-	    if (debug)
-	      {
-		println("Key is null, Getting choices");
-	      }
+        if (id == null)
+          {
+            if (debug)
+              {
+                println("Key is null, Getting choices");
+              }
 
-	    qr = field.choices();
+            qr = field.choices();
 
-	    if (qr != null)
-	      {
-		list = new objectList(qr);
-	      }
-	  }
-	else
-	  {
-	    if (gc.cachedLists.containsList(id))
-	      {
-		list = gc.cachedLists.getList(id);
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    println("Getting QueryResult now");
-		  }
+            if (qr != null)
+              {
+                list = new objectList(qr);
+              }
+          }
+        else
+          {
+            if (gc.cachedLists.containsList(id))
+              {
+                list = gc.cachedLists.getList(id);
+              }
+            else
+              {
+                if (debug)
+                  {
+                    println("Getting QueryResult now");
+                  }
 
-		qr = field.choices();
+                qr = field.choices();
 
-		if (qr != null)
-		  {
-		    gc.cachedLists.putList(id, qr);
-		    list = gc.cachedLists.getList(id);
-		  }
-	      }
-	  }
+                if (qr != null)
+                  {
+                    gc.cachedLists.putList(id, qr);
+                    list = gc.cachedLists.getList(id);
+                  }
+              }
+          }
 
-	if (!keepLoading())
-	  {
-	    if (debug)
-	      {
-		println("Stopping containerPanel in the midst of loading a StringSelector");
-	      }
+        if (!keepLoading())
+          {
+            if (debug)
+              {
+                println("Stopping containerPanel in the midst of loading a StringSelector");
+              }
 
-	    return;
-	  }
+            return;
+          }
 
-	if (list == null)
-	  {
-	    StringSelector ss = new StringSelector(this,
-						   true, // editable
-						   false, // canChoose
-						   false); // mustChoose
+        if (list == null)
+          {
+            StringSelector ss = new StringSelector(this,
+                                                   true, // editable
+                                                   false, // canChoose
+                                                   false); // mustChoose
 
-	    ss.setCellWidth(300);
+            ss.setCellWidth(300);
             ss.setMinimumRowCount(3);
             ss.setMaximumRowCount(8);
 
-	    ss.update(null, true, null, (Vector) fieldInfo.getValue(), true, null);
+            ss.update(null, true, null, (Vector) fieldInfo.getValue(), true, null);
 
             registerComponent(ss, field, fieldTemplate);
 
-	    ss.setCallback(this);
+            ss.setCallback(this);
 
-	    String comment = fieldTemplate.getComment();
+            String comment = fieldTemplate.getComment();
 
-	    if (comment != null && !comment.equals(""))
-	      {
-		ss.setToolTipText(comment);
-	      }
+            if (comment != null && !comment.equals(""))
+              {
+                ss.setToolTipText(comment);
+              }
 
-	    associateFieldId(fieldInfo, ss);
+            associateFieldId(fieldInfo, ss);
 
-	    contentsPanel.addFillRow(fieldTemplate.getName(), ss);
-	    contentsPanel.setRowVisible(ss, fieldInfo.isVisible());
-	  }
-	else
-	  {
-	    Vector available = list.getLabels(false);
-	    StringSelector ss = new StringSelector(this,
-						   true, // editable
-						   true,   // canChoose
-						   false);  // mustChoose
-	    ss.setCellWidth(150);
+            contentsPanel.addFillRow(fieldTemplate.getName(), ss);
+            contentsPanel.setRowVisible(ss, fieldInfo.isVisible());
+          }
+        else
+          {
+            Vector available = list.getLabels(false);
+            StringSelector ss = new StringSelector(this,
+                                                   true, // editable
+                                                   true,   // canChoose
+                                                   false);  // mustChoose
+            ss.setCellWidth(150);
             ss.setMinimumRowCount(3);
             ss.setMaximumRowCount(8);
-	    ss.update(available, true, null, (Vector) fieldInfo.getValue(), true, null);
+            ss.update(available, true, null, (Vector) fieldInfo.getValue(), true, null);
 
             registerComponent(ss, field, fieldTemplate);
 
-	    ss.setCallback(this);
+            ss.setCallback(this);
 
-	    String comment = fieldTemplate.getComment();
+            String comment = fieldTemplate.getComment();
 
-	    if (comment != null && !comment.equals(""))
-	      {
-		ss.setToolTipText(comment);
-	      }
+            if (comment != null && !comment.equals(""))
+              {
+                ss.setToolTipText(comment);
+              }
 
-	    associateFieldId(fieldInfo, ss);
+            associateFieldId(fieldInfo, ss);
 
-	    contentsPanel.addFillRow(fieldTemplate.getName(), ss, 2);
-	    contentsPanel.setRowVisible(ss, fieldInfo.isVisible());
-	  }
+            contentsPanel.addFillRow(fieldTemplate.getName(), ss, 2);
+            contentsPanel.setRowVisible(ss, fieldInfo.isVisible());
+          }
       }
     else  //not editable, don't need whole list of things
       {
-	StringSelector ss = new StringSelector(this,
-					       false, // not editable
-					       false,   // canChoose
-					       false);  // mustChoose
-	ss.setCellWidth(300);
+        StringSelector ss = new StringSelector(this,
+                                               false, // not editable
+                                               false,   // canChoose
+                                               false);  // mustChoose
+        ss.setCellWidth(300);
         ss.setMinimumRowCount(3);
         ss.setMaximumRowCount(8);
 
-	ss.update(null, false, null, (Vector) fieldInfo.getValue(), true, null);
+        ss.update(null, false, null, (Vector) fieldInfo.getValue(), true, null);
 
         registerComponent(ss, field, fieldTemplate);
 
-	String comment = fieldTemplate.getComment();
+        String comment = fieldTemplate.getComment();
 
-	if (comment != null && !comment.equals(""))
-	  {
-	    ss.setToolTipText(comment);
-	  }
+        if (comment != null && !comment.equals(""))
+          {
+            ss.setToolTipText(comment);
+          }
 
-	associateFieldId(fieldInfo, ss);
+        associateFieldId(fieldInfo, ss);
 
-	contentsPanel.addFillRow(fieldTemplate.getName(), ss, 1);
-	contentsPanel.setRowVisible(ss, fieldInfo.isVisible());
+        contentsPanel.addFillRow(fieldTemplate.getName(), ss, 1);
+        contentsPanel.setRowVisible(ss, fieldInfo.isVisible());
       }
   }
 
@@ -2626,8 +2626,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    */
 
   private void addInvidVector(invid_field field,
-			      FieldInfo fieldInfo,
-			      FieldTemplate fieldTemplate) throws RemoteException
+                              FieldInfo fieldInfo,
+                              FieldTemplate fieldTemplate) throws RemoteException
   {
     Vector
       valueHandles = null,
@@ -2640,132 +2640,132 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (debug)
       {
-	println("Adding StringSelector, it's a vector of invids!");
+        println("Adding StringSelector, it's a vector of invids!");
       }
 
     QueryResult qres = field.encodedValues();
 
     if (qres != null)
       {
-	valueHandles = qres.getListHandles();
+        valueHandles = qres.getListHandles();
       }
 
     if (!keepLoading())
       {
-	if (debug)
-	  {
-	    println("Stopping containerPanel in the midst of loading a StringSelector");
-	  }
+        if (debug)
+          {
+            println("Stopping containerPanel in the midst of loading a StringSelector");
+          }
 
-	return;
+        return;
       }
 
     if (editable && fieldInfo.isEditable())
       {
-	Object key = field.choicesKey();
+        Object key = field.choicesKey();
 
-	if (key == null)
-	  {
-	    if (debug)
-	      {
-		println("key is null, downloading new copy");
-	      }
+        if (key == null)
+          {
+            if (debug)
+              {
+                println("key is null, downloading new copy");
+              }
 
-	    QueryResult choices = field.choices();
+            QueryResult choices = field.choices();
 
-	    if (choices != null)
-	      {
-		// the server may not automatically restrict inactive
-		// objects from the list, so we want to exclude inactive
-		// objects.  We don't want to exclude non-editable objects,
-		// however, because the server may include nominally
-		// non-editable objects that we are granted permission
-		// to link to by the DBEditObject.anonymousLinkOK()
-		// method.
+            if (choices != null)
+              {
+                // the server may not automatically restrict inactive
+                // objects from the list, so we want to exclude inactive
+                // objects.  We don't want to exclude non-editable objects,
+                // however, because the server may include nominally
+                // non-editable objects that we are granted permission
+                // to link to by the DBEditObject.anonymousLinkOK()
+                // method.
 
-		choiceHandles = choices.getListHandles(false, true);
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    println("choices is null");
-		  }
+                choiceHandles = choices.getListHandles(false, true);
+              }
+            else
+              {
+                if (debug)
+                  {
+                    println("choices is null");
+                  }
 
-		choiceHandles = null;
-	      }
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		println("key= " + key);
-	      }
+                choiceHandles = null;
+              }
+          }
+        else
+          {
+            if (debug)
+              {
+                println("key= " + key);
+              }
 
-	    if (gc.cachedLists.containsList(key))
-	      {
-		if (debug)
-		  {
-		    println("It's in there, using cached list");
-		  }
+            if (gc.cachedLists.containsList(key))
+              {
+                if (debug)
+                  {
+                    println("It's in there, using cached list");
+                  }
 
-		// when we are drawing a list of choices from the cache,
-		// we know that the server didn't filter that list for
-		// us so that the 'non-editables' are actually valid
-		// choices in this context, so we don't want either
-		// inactive nor non-editable choices.
+                // when we are drawing a list of choices from the cache,
+                // we know that the server didn't filter that list for
+                // us so that the 'non-editables' are actually valid
+                // choices in this context, so we don't want either
+                // inactive nor non-editable choices.
 
-		choiceHandles = gc.cachedLists.getListHandles(key, false, false);
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    println("Choice list for addInvidVector not cached, downloading choices.");
-		  }
+                choiceHandles = gc.cachedLists.getListHandles(key, false, false);
+              }
+            else
+              {
+                if (debug)
+                  {
+                    println("Choice list for addInvidVector not cached, downloading choices.");
+                  }
 
-		QueryResult qr = field.choices();
+                QueryResult qr = field.choices();
 
-		if (qr == null)
-		  {
-		    choiceHandles = null;
-		  }
-		else
-		  {
-		    gc.cachedLists.putList(key, qr);
-		    list = gc.cachedLists.getList(key);
+                if (qr == null)
+                  {
+                    choiceHandles = null;
+                  }
+                else
+                  {
+                    gc.cachedLists.putList(key, qr);
+                    list = gc.cachedLists.getList(key);
 
-		    // when the server gives us a choice key, we know
-		    // that the server didn't filter that list for us
-		    // so that the 'non-editables' are actually valid
-		    // choices in this context, so we don't want
-		    // either inactive nor non-editable choices.
+                    // when the server gives us a choice key, we know
+                    // that the server didn't filter that list for us
+                    // so that the 'non-editables' are actually valid
+                    // choices in this context, so we don't want
+                    // either inactive nor non-editable choices.
 
-		    choiceHandles = list.getListHandles(false, false);
-		  }
+                    choiceHandles = list.getListHandles(false, false);
+                  }
 
-		// debuging stuff
+                // debuging stuff
 
-		if (debug_persona)
-		  {
-		    System.out.println();
+                if (debug_persona)
+                  {
+                    System.out.println();
 
-		    for (int i = 0; i < choiceHandles.size(); i++)
-		      {
-			println(" choices: " + (listHandle)choiceHandles.elementAt(i));
-		      }
+                    for (int i = 0; i < choiceHandles.size(); i++)
+                      {
+                        println(" choices: " + (listHandle)choiceHandles.elementAt(i));
+                      }
 
-		    System.out.println();
-		  }
-	      }
-	  }
+                    System.out.println();
+                  }
+              }
+          }
       }
     else
       {
-	if (debug)
-	  {
-	    println("Not editable, not downloading choices");
-	  }
+        if (debug)
+          {
+            println("Not editable, not downloading choices");
+          }
       }
 
     // ss is canChoose, mustChoose
@@ -2783,12 +2783,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (debug)
       {
-	println("Creating StringSelector");
+        println("Creating StringSelector");
       }
 
     StringSelector ss = new StringSelector(this,
-					   editable && fieldInfo.isEditable(),
-					   true, true);
+                                           editable && fieldInfo.isEditable(),
+                                           true, true);
 
     ss.setMinimumRowCount(3);
     ss.setMaximumRowCount(8);
@@ -2805,7 +2805,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (comment != null && !comment.equals(""))
       {
-	ss.setToolTipText(comment);
+        ss.setToolTipText(comment);
       }
 
     associateFieldId(fieldInfo, ss);
@@ -2820,8 +2820,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    */
 
   private void addVectorPanel(db_field field,
-			      FieldInfo fieldInfo,
-			      FieldTemplate fieldTemplate) throws RemoteException
+                              FieldInfo fieldInfo,
+                              FieldTemplate fieldTemplate) throws RemoteException
   {
     boolean isEditInPlace = fieldTemplate.isEditInPlace();
 
@@ -2829,18 +2829,18 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (debug)
       {
-	if (isEditInPlace)
-	  {
-	    println("Adding editInPlace vector panel");
-	  }
-	else
-	  {
-	    println("Adding normal vector panel");
-	  }
+        if (isEditInPlace)
+          {
+            println("Adding editInPlace vector panel");
+          }
+        else
+          {
+            println("Adding normal vector panel");
+          }
       }
 
     vectorPanel vp = new vectorPanel(field, fieldTemplate, winP, editable && fieldInfo.isEditable(),
-				     isEditInPlace, this, isCreating);
+                                     isEditInPlace, this, isCreating);
     vectorPanelList.addElement(vp);
 
     registerComponent(vp, field, fieldTemplate);
@@ -2849,7 +2849,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (comment != null && !comment.equals(""))
       {
-	vp.setToolTipText(comment);
+        vp.setToolTipText(comment);
       }
 
     associateFieldId(fieldInfo, vp);
@@ -2869,7 +2869,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   {
     if (progressBar != null)
       {
-	progressBar.setValue(progressBar.getValue() + 1);
+        progressBar.setValue(progressBar.getValue() + 1);
       }
 
     ++vectorElementsAdded;
@@ -2885,7 +2885,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    */
 
   private void addStringField(string_field field, FieldInfo fieldInfo,
-			      FieldTemplate fieldTemplate) throws RemoteException
+                              FieldTemplate fieldTemplate) throws RemoteException
   {
     objectList
       list;
@@ -2900,193 +2900,193 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (this.editable && fieldInfo.isEditable() && field.canChoose())
       {
-	if (debug)
-	  {
-	    println("You can choose");
-	  }
+        if (debug)
+          {
+            println("You can choose");
+          }
 
-	Vector choices = null;
+        Vector choices = null;
 
-	Object key = field.choicesKey();
+        Object key = field.choicesKey();
 
-	if (key == null)
-	  {
-	    if (debug)
-	      {
-		println("key is null, getting new copy.");
-	      }
+        if (key == null)
+          {
+            if (debug)
+              {
+                println("key is null, getting new copy.");
+              }
 
-	    choices = field.choices().getLabels();
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		println("key = " + key);
-	      }
+            choices = field.choices().getLabels();
+          }
+        else
+          {
+            if (debug)
+              {
+                println("key = " + key);
+              }
 
-	    if (gc.cachedLists.containsList(key))
-	      {
-		if (debug)
-		  {
-		    println("key in there, using cached list");
-		  }
+            if (gc.cachedLists.containsList(key))
+              {
+                if (debug)
+                  {
+                    println("key in there, using cached list");
+                  }
 
-		list = gc.cachedLists.getList(key);
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    println("Choice list for addStringField not cached, downloading a new one.");
-		  }
+                list = gc.cachedLists.getList(key);
+              }
+            else
+              {
+                if (debug)
+                  {
+                    println("Choice list for addStringField not cached, downloading a new one.");
+                  }
 
-		gc.cachedLists.putList(key, field.choices());
-		list = gc.cachedLists.getList(key);
-	      }
+                gc.cachedLists.putList(key, field.choices());
+                list = gc.cachedLists.getList(key);
+              }
 
-	    choices = list.getLabels(false);
-	  }
+            choices = list.getLabels(false);
+          }
 
-	String currentChoice = (String) fieldInfo.getValue();
+        String currentChoice = (String) fieldInfo.getValue();
 
-	JComboBox combo = new JComboBox(choices);
-	combo.setKeySelectionManager(new TimedKeySelectionManager());
+        JComboBox combo = new JComboBox(choices);
+        combo.setKeySelectionManager(new TimedKeySelectionManager());
 
-	combo.setMaximumRowCount(8);
-	combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
+        combo.setMaximumRowCount(8);
+        combo.setMaximumSize(new Dimension(Integer.MAX_VALUE,20));
 
-	try
-	  {
-	    mustChoose = field.mustChoose();
-	  }
-	catch (Exception rx)
-	  {
-	    gc.processException(rx);
-	    throw new RuntimeException(rx);
-	  }
+        try
+          {
+            mustChoose = field.mustChoose();
+          }
+        catch (Exception rx)
+          {
+            gc.processException(rx);
+            throw new RuntimeException(rx);
+          }
 
-	combo.setEditable(!mustChoose);
+        combo.setEditable(!mustChoose);
 
-	if (currentChoice == null)
-	  {
-	    if (debug)
-	      {
-		println("Setting current value to <none>, because the current choice is null. " + currentChoice);
-	      }
+        if (currentChoice == null)
+          {
+            if (debug)
+              {
+                println("Setting current value to <none>, because the current choice is null. " + currentChoice);
+              }
 
-	    combo.addItem("<none>");
-	    combo.setSelectedItem("<none>");
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		println("Setting current value: " + currentChoice);
-	      }
+            combo.addItem("<none>");
+            combo.setSelectedItem("<none>");
+          }
+        else
+          {
+            if (debug)
+              {
+                println("Setting current value: " + currentChoice);
+              }
 
-	    try
-	      {
-		combo.setSelectedItem(currentChoice);
-	      }
-	    catch (IllegalArgumentException e)
-	      {
-		println("IllegalArgumentException: current choice is not in the string selection combobox.  Adding it now.");
-		combo.addItem(currentChoice);
-		combo.setSelectedItem(currentChoice);
-	      }
-	  }
+            try
+              {
+                combo.setSelectedItem(currentChoice);
+              }
+            catch (IllegalArgumentException e)
+              {
+                println("IllegalArgumentException: current choice is not in the string selection combobox.  Adding it now.");
+                combo.addItem(currentChoice);
+                combo.setSelectedItem(currentChoice);
+              }
+          }
 
-	if (editable && fieldInfo.isEditable())
-	  {
-	    combo.addItemListener(this); // register callback
-	  }
+        if (editable && fieldInfo.isEditable())
+          {
+            combo.addItemListener(this); // register callback
+          }
 
         registerComponent(combo, field, fieldTemplate);
 
-	String comment = fieldTemplate.getComment();
+        String comment = fieldTemplate.getComment();
 
-	if (comment != null && !comment.equals(""))
-	  {
-	    combo.setToolTipText(comment);
-	  }
+        if (comment != null && !comment.equals(""))
+          {
+            combo.setToolTipText(comment);
+          }
 
-	associateFieldId(fieldInfo, combo);
+        associateFieldId(fieldInfo, combo);
 
-	contentsPanel.addFillRow(fieldTemplate.getName(), combo, 1);
-	contentsPanel.setRowVisible(combo, fieldInfo.isVisible());
+        contentsPanel.addFillRow(fieldTemplate.getName(), combo, 1);
+        contentsPanel.setRowVisible(combo, fieldInfo.isVisible());
       }
     else if (fieldTemplate.isMultiLine())
       {
-	JstringArea sa = new JstringArea(6, FIELDWIDTH);
+        JstringArea sa = new JstringArea(6, FIELDWIDTH);
 
         registerComponent(sa, field, fieldTemplate);
 
-	sa.setAllowedChars(fieldTemplate.getOKChars());
-	sa.setDisallowedChars(fieldTemplate.getBadChars());
-	sa.setText((String)fieldInfo.getValue());
+        sa.setAllowedChars(fieldTemplate.getOKChars());
+        sa.setDisallowedChars(fieldTemplate.getBadChars());
+        sa.setText((String)fieldInfo.getValue());
 
-	if (editable && fieldInfo.isEditable())
-	  {
-	    sa.setCallback(this);
-	  }
-	else
-	  {
-	    // make sure we show the start of the non-editable string
+        if (editable && fieldInfo.isEditable())
+          {
+            sa.setCallback(this);
+          }
+        else
+          {
+            // make sure we show the start of the non-editable string
 
-	    sa.setCaretPosition(0);
-	  }
+            sa.setCaretPosition(0);
+          }
 
-	sa.setEditable(editable && fieldInfo.isEditable());
+        sa.setEditable(editable && fieldInfo.isEditable());
 
-	String comment = fieldTemplate.getComment();
+        String comment = fieldTemplate.getComment();
 
-	if (comment != null && !comment.equals(""))
-	  {
-	    sa.setToolTipText(comment);
-	  }
+        if (comment != null && !comment.equals(""))
+          {
+            sa.setToolTipText(comment);
+          }
 
-	associateFieldId(fieldInfo, sa);
+        associateFieldId(fieldInfo, sa);
 
-	contentsPanel.addFillRow(fieldTemplate.getName(), sa, 1);
-	contentsPanel.setRowVisible(sa, fieldInfo.isVisible());
+        contentsPanel.addFillRow(fieldTemplate.getName(), sa, 1);
+        contentsPanel.setRowVisible(sa, fieldInfo.isVisible());
       }
     else
       {
-	// It's not a choice
+        // It's not a choice
 
-	int maxLength = fieldTemplate.getMaxLength();
+        int maxLength = fieldTemplate.getMaxLength();
 
-	sf = new JstringField(FIELDWIDTH > maxLength ? maxLength + 1 : FIELDWIDTH,
-			      maxLength,
-			      editable && fieldInfo.isEditable(),
-			      false,
-			      fieldTemplate.getOKChars(),
-			      fieldTemplate.getBadChars(),
-			      this);
+        sf = new JstringField(FIELDWIDTH > maxLength ? maxLength + 1 : FIELDWIDTH,
+                              maxLength,
+                              editable && fieldInfo.isEditable(),
+                              false,
+                              fieldTemplate.getOKChars(),
+                              fieldTemplate.getBadChars(),
+                              this);
 
         registerComponent(sf, field, fieldTemplate);
 
-	sf.setText((String)fieldInfo.getValue());
+        sf.setText((String)fieldInfo.getValue());
 
-	if (editable && fieldInfo.isEditable())
-	  {
-	    sf.setCallback(this);
-	  }
+        if (editable && fieldInfo.isEditable())
+          {
+            sf.setCallback(this);
+          }
 
-	sf.setEditable(editable && fieldInfo.isEditable());
+        sf.setEditable(editable && fieldInfo.isEditable());
 
-	String comment = fieldTemplate.getComment();
+        String comment = fieldTemplate.getComment();
 
-	if (comment != null && !comment.equals(""))
-	  {
-	    sf.setToolTipText(comment);
-	  }
+        if (comment != null && !comment.equals(""))
+          {
+            sf.setToolTipText(comment);
+          }
 
-	associateFieldId(fieldInfo, sf);
+        associateFieldId(fieldInfo, sf);
 
-	contentsPanel.addFillRow(fieldTemplate.getName(), sf, 1);
-	contentsPanel.setRowVisible(sf, fieldInfo.isVisible());
+        contentsPanel.addFillRow(fieldTemplate.getName(), sf, 1);
+        contentsPanel.setRowVisible(sf, fieldInfo.isVisible());
       }
   }
 
@@ -3100,8 +3100,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    */
 
   private void addPasswordField(pass_field field,
-				FieldInfo fieldInfo,
-				FieldTemplate fieldTemplate) throws RemoteException
+                                FieldInfo fieldInfo,
+                                FieldTemplate fieldTemplate) throws RemoteException
   {
     JstringField sf;
 
@@ -3109,56 +3109,56 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (editable && fieldInfo.isEditable())
       {
-	JpassField pf = new JpassField(gc, 10, 8, editable && fieldInfo.isEditable());
+        JpassField pf = new JpassField(gc, 10, 8, editable && fieldInfo.isEditable());
 
         registerComponent(pf, field, fieldTemplate);
 
-	if (editable && fieldInfo.isEditable())
-	  {
-	    pf.setCallback(this);
-	  }
+        if (editable && fieldInfo.isEditable())
+          {
+            pf.setCallback(this);
+          }
 
-	String comment = fieldTemplate.getComment();
+        String comment = fieldTemplate.getComment();
 
-	if (comment != null && !comment.equals(""))
-	  {
-	    pf.setToolTipText(comment);
-	  }
+        if (comment != null && !comment.equals(""))
+          {
+            pf.setToolTipText(comment);
+          }
 
-	associateFieldId(fieldInfo, pf);
+        associateFieldId(fieldInfo, pf);
 
-	contentsPanel.addRow(fieldTemplate.getName(), pf);
-	contentsPanel.setRowVisible(pf, fieldInfo.isVisible());
+        contentsPanel.addRow(fieldTemplate.getName(), pf);
+        contentsPanel.setRowVisible(pf, fieldInfo.isVisible());
       }
     else
       {
-	int maxLength = fieldTemplate.getMaxLength();
-	sf = new JstringField(FIELDWIDTH > maxLength ? maxLength + 1 : FIELDWIDTH,
-			      maxLength,
-			      true,
-			      false,
-			      null,
-			      null);
+        int maxLength = fieldTemplate.getMaxLength();
+        sf = new JstringField(FIELDWIDTH > maxLength ? maxLength + 1 : FIELDWIDTH,
+                              maxLength,
+                              true,
+                              false,
+                              null,
+                              null);
 
         registerComponent(sf, field, fieldTemplate);
 
-	// the server won't give us an unencrypted password, we're clear here
+        // the server won't give us an unencrypted password, we're clear here
 
-	sf.setText((String)fieldInfo.getValue());
+        sf.setText((String)fieldInfo.getValue());
 
-	sf.setEditable(false);
+        sf.setEditable(false);
 
-	String comment = fieldTemplate.getComment();
+        String comment = fieldTemplate.getComment();
 
-	if (comment != null && !comment.equals(""))
-	  {
-	    sf.setToolTipText(comment);
-	  }
+        if (comment != null && !comment.equals(""))
+          {
+            sf.setToolTipText(comment);
+          }
 
-	associateFieldId(fieldInfo, sf);
+        associateFieldId(fieldInfo, sf);
 
-	contentsPanel.addFillRow(fieldTemplate.getName(), sf, 1);
-	contentsPanel.setRowVisible(sf, fieldInfo.isVisible());
+        contentsPanel.addFillRow(fieldTemplate.getName(), sf, 1);
+        contentsPanel.setRowVisible(sf, fieldInfo.isVisible());
       }
   }
 
@@ -3172,12 +3172,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    */
 
   private void addNumericField(db_field field,
-			       FieldInfo fieldInfo,
-			       FieldTemplate fieldTemplate) throws RemoteException
+                               FieldInfo fieldInfo,
+                               FieldTemplate fieldTemplate) throws RemoteException
   {
     if (debug)
       {
-	println("Adding numeric field");
+        println("Adding numeric field");
       }
 
     JnumberField nf = new JnumberField();
@@ -3188,12 +3188,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (value != null)
       {
-	nf.setValue(value.intValue());
+        nf.setValue(value.intValue());
       }
 
     if (editable && fieldInfo.isEditable())
       {
-	nf.setCallback(this);
+        nf.setCallback(this);
       }
 
     nf.setEditable(editable && fieldInfo.isEditable());
@@ -3203,7 +3203,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (comment != null && !comment.equals(""))
       {
-	nf.setToolTipText(comment);
+        nf.setToolTipText(comment);
       }
 
     associateFieldId(fieldInfo, nf);
@@ -3222,12 +3222,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     */
 
   private void addFloatField(db_field field,
- 			     FieldInfo fieldInfo,
- 			     FieldTemplate fieldTemplate) throws RemoteException
+                             FieldInfo fieldInfo,
+                             FieldTemplate fieldTemplate) throws RemoteException
   {
     if (debug)
       {
- 	println("Adding float field");
+        println("Adding float field");
       }
 
     JfloatField nf = new JfloatField();
@@ -3238,12 +3238,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (value != null)
       {
- 	nf.setValue(value.doubleValue());
+        nf.setValue(value.doubleValue());
       }
 
     if (editable && fieldInfo.isEditable())
       {
- 	nf.setCallback(this);
+        nf.setCallback(this);
       }
 
     nf.setEditable(editable && fieldInfo.isEditable());
@@ -3253,7 +3253,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (comment != null && !comment.equals(""))
       {
- 	nf.setToolTipText(comment);
+        nf.setToolTipText(comment);
       }
 
     associateFieldId(fieldInfo, nf);
@@ -3272,8 +3272,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    */
 
   private void addDateField(db_field field,
-			    FieldInfo fieldInfo,
-			    FieldTemplate fieldTemplate) throws RemoteException
+                            FieldInfo fieldInfo,
+                            FieldTemplate fieldTemplate) throws RemoteException
   {
     boolean enabled = editable && fieldInfo.isEditable();
     Date date = (Date) fieldInfo.getValue();
@@ -3281,7 +3281,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (enabled)
       {
-	callback = this;
+        callback = this;
       }
 
     date_field datef = (date_field) field;
@@ -3290,18 +3290,18 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (fieldInfo.isEditable())
       {
-	df = new JdateField(date, enabled, datef.limited(), true, datef.minDate(), datef.maxDate(), callback);
+        df = new JdateField(date, enabled, datef.limited(), true, datef.minDate(), datef.maxDate(), callback);
       }
     else
       {
-	df = new JdateField(date, enabled, false, true, null, null, callback);
+        df = new JdateField(date, enabled, false, true, null, null, callback);
       }
 
     registerComponent(df, field, fieldTemplate);
 
     if (debug)
       {
-	println("Editable: " + editable  + " isEditable: " + fieldInfo.isEditable());
+        println("Editable: " + editable  + " isEditable: " + fieldInfo.isEditable());
       }
 
     associateFieldId(fieldInfo, df);
@@ -3320,7 +3320,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    */
 
   private void addBooleanField(db_field field, FieldInfo fieldInfo,
-			       FieldTemplate fieldTemplate) throws RemoteException
+                               FieldTemplate fieldTemplate) throws RemoteException
   {
     JCheckBox cb = new JCheckBox();
 
@@ -3332,26 +3332,26 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (editable && fieldInfo.isEditable())
       {
-	cb.addActionListener(this);	// register callback
+        cb.addActionListener(this);     // register callback
       }
 
     try
       {
-	cb.setSelected(((Boolean)fieldInfo.getValue()).booleanValue());
+        cb.setSelected(((Boolean)fieldInfo.getValue()).booleanValue());
       }
     catch (NullPointerException ex)
       {
-	if (debug)
-	  {
-	    println("Null pointer setting selected choice: " + ex);
-	  }
+        if (debug)
+          {
+            println("Null pointer setting selected choice: " + ex);
+          }
       }
 
     String comment = fieldTemplate.getComment();
 
     if (comment != null && !comment.equals(""))
       {
-	cb.setToolTipText(comment);
+        cb.setToolTipText(comment);
       }
 
     associateFieldId(fieldInfo, cb);
@@ -3370,27 +3370,27 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    */
 
   private void addFieldOptionsField(db_field field, FieldInfo fieldInfo,
-				    FieldTemplate fieldTemplate) throws RemoteException
+                                    FieldTemplate fieldTemplate) throws RemoteException
   {
     if (debug)
       {
-	println("Adding field options matrix");
+        println("Adding field options matrix");
       }
 
     // note that the field options editor does its own callbacks to
     // the server, albeit using our transaction / session.
 
     fieldoption_button fob = new fieldoption_button((field_option_field) field,
-						    this.object,
-						    editable && fieldInfo.isEditable(),
-						    gc,
-						    fieldTemplate.getName());
+                                                    this.object,
+                                                    editable && fieldInfo.isEditable(),
+                                                    gc,
+                                                    fieldTemplate.getName());
 
     String comment = fieldTemplate.getComment();
 
     if (comment != null && !comment.equals(""))
       {
-	fob.setToolTipText(comment);
+        fob.setToolTipText(comment);
       }
 
     associateFieldId(fieldInfo, fob);
@@ -3410,27 +3410,27 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    */
 
   private void addPermissionField(db_field field, FieldInfo fieldInfo,
-				  FieldTemplate fieldTemplate) throws RemoteException
+                                  FieldTemplate fieldTemplate) throws RemoteException
   {
     if (debug)
       {
-	println("Adding perm matrix");
+        println("Adding perm matrix");
       }
 
     // note that the permissions editor does its own callbacks to
     // the server, albeit using our transaction / session.
 
     perm_button pb = new perm_button((perm_field) field,
-				     editable && fieldInfo.isEditable(),
-				     gc,
-				     false,
-				     fieldTemplate.getName());
+                                     editable && fieldInfo.isEditable(),
+                                     gc,
+                                     false,
+                                     fieldTemplate.getName());
 
     String comment = fieldTemplate.getComment();
 
     if (comment != null && !comment.equals(""))
       {
-	pb.setToolTipText(comment);
+        pb.setToolTipText(comment);
       }
 
     associateFieldId(fieldInfo, pb);
@@ -3449,8 +3449,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    */
 
   private void addInvidField(invid_field field,
-			     FieldInfo fieldInfo,
-			     FieldTemplate fieldTemplate) throws RemoteException
+                             FieldInfo fieldInfo,
+                             FieldTemplate fieldTemplate) throws RemoteException
   {
     objectList list;
 
@@ -3458,36 +3458,36 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (debug)
       {
-	println("addInvidField(" + fieldTemplate.getName() + ")");
+        println("addInvidField(" + fieldTemplate.getName() + ")");
       }
 
     if (fieldTemplate.isEditInPlace())
       {
-	// this should never happen
+        // this should never happen
 
-	if (debug)
-	  {
-	    println("Hey, " + fieldTemplate.getName() +
-		    " is edit in place but not a vector, what gives?");
-	  }
+        if (debug)
+          {
+            println("Hey, " + fieldTemplate.getName() +
+                    " is edit in place but not a vector, what gives?");
+          }
 
-	JLabel errorLabel = new JLabel("edit in place non-vector");
+        JLabel errorLabel = new JLabel("edit in place non-vector");
 
-	contentsPanel.addFillRow(fieldTemplate.getName(), errorLabel);
-	contentsPanel.setRowVisible(errorLabel, fieldInfo.isVisible());
+        contentsPanel.addFillRow(fieldTemplate.getName(), errorLabel);
+        contentsPanel.setRowVisible(errorLabel, fieldInfo.isVisible());
 
-	return;
+        return;
       }
 
     if (!editable || !fieldInfo.isEditable())
       {
-	if (fieldInfo.getValue() == null)
-	  {
-	    // "Null Pointer"
-	    JLabel errorLabel = new JLabel(ts.l("addInvidField.null_invid"));
+        if (fieldInfo.getValue() == null)
+          {
+            // "Null Pointer"
+            JLabel errorLabel = new JLabel(ts.l("addInvidField.null_invid"));
 
-	    contentsPanel.addFillRow(fieldTemplate.getName(), errorLabel);
-	    contentsPanel.setRowVisible(errorLabel, fieldInfo.isVisible());
+            contentsPanel.addFillRow(fieldTemplate.getName(), errorLabel);
+            contentsPanel.setRowVisible(errorLabel, fieldInfo.isVisible());
 
             return;
           }
@@ -3532,12 +3532,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
         contentsPanel.addRow(fieldTemplate.getName(), b);
         contentsPanel.setRowVisible(b, fieldInfo.isVisible());
 
-	return;
+        return;
       }
 
     if (!keepLoading())
       {
-        return;		// we were told to cancel
+        return;         // we were told to cancel
       }
 
     // okay, we've got an editable field, we need to construct and install
@@ -3549,16 +3549,16 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (key != null)
       {
-	if (!gc.cachedLists.containsList(key))
-	  {
-	    gc.cachedLists.putList(key, field.choices());
-	  }
+        if (!gc.cachedLists.containsList(key))
+          {
+            gc.cachedLists.putList(key, field.choices());
+          }
 
         list = gc.cachedLists.getList(key);
       }
     else
       {
-	list = new objectList(field.choices());
+        list = new objectList(field.choices());
       }
 
     // we have to include non-editables, because the server will
@@ -3574,7 +3574,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     if (debug)
       {
         currentChoiceLabel = gc.getSession().viewObjectLabel(currentChoice);
-	println("Current choice is : " + currentChoice + ", " + currentChoiceLabel);
+        println("Current choice is : " + currentChoice + ", " + currentChoiceLabel);
       }
 
     listHandle currentListHandle = null;
@@ -3585,11 +3585,11 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     try
       {
-	mustChoose = field.mustChoose();
+        mustChoose = field.mustChoose();
       }
     catch (Exception rx)
       {
-	gc.processExceptionRethrow(rx);
+        gc.processExceptionRethrow(rx);
       }
 
     // Find currentListHandle
@@ -3599,48 +3599,48 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (currentChoice != null)
       {
-	for (int j = 0; j < choices.size(); j++)
-	  {
-	    listHandle thisChoice = (listHandle) choices.elementAt(j);
+        for (int j = 0; j < choices.size(); j++)
+          {
+            listHandle thisChoice = (listHandle) choices.elementAt(j);
 
-	    if (thisChoice.getObject() == null)
-	      {
-		println("Current object " + thisChoice + " is null.");
-	      }
+            if (thisChoice.getObject() == null)
+              {
+                println("Current object " + thisChoice + " is null.");
+              }
 
-	    if (currentChoice.equals(thisChoice.getObject()))
-	      {
-		if (debug)
-		  {
-		    println("Found the current object in the list!");
-		  }
+            if (currentChoice.equals(thisChoice.getObject()))
+              {
+                if (debug)
+                  {
+                    println("Found the current object in the list!");
+                  }
 
-		currentListHandle = thisChoice;
-		found = true;
-		break;
-	      }
-	  }
+                currentListHandle = thisChoice;
+                found = true;
+                break;
+              }
+          }
 
-	if (!found)
-	  {
-	    currentListHandle = new listHandle(gc.getSession().viewObjectLabel(currentChoice), currentChoice);
-	    choices.addElement(currentListHandle);
-	  }
+        if (!found)
+          {
+            currentListHandle = new listHandle(gc.getSession().viewObjectLabel(currentChoice), currentChoice);
+            choices.addElement(currentListHandle);
+          }
       }
 
     if (!mustChoose || (currentChoice == null))
       {
-	if (debug)
-	  {
-	    println("inserting null handle");
-	  }
+        if (debug)
+          {
+            println("inserting null handle");
+          }
 
-	choices.insertElementAt(noneHandle, 0);
+        choices.insertElementAt(noneHandle, 0);
       }
 
     if (debug)
       {
-	println("creating JInvidChooser");
+        println("creating JInvidChooser");
       }
 
     combo = new JInvidChooser(choices, this, fieldTemplate.getTargetBase());
@@ -3651,35 +3651,35 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (currentChoice != null)
       {
-	if (debug)
-	  {
-	    println("setting current choice: " + currentChoiceLabel);
-	  }
+        if (debug)
+          {
+            println("setting current choice: " + currentChoiceLabel);
+          }
 
-	try
-	  {
-	    combo.setSelectedItem(currentListHandle);
-	  }
-	catch (IllegalArgumentException e)
-	  {
-	    println("IllegalArgumentException: current handle not in the list, adding it now.");
-	    combo.addItem(currentListHandle);
-	    combo.setSelectedItem(currentListHandle);
-	  }
+        try
+          {
+            combo.setSelectedItem(currentListHandle);
+          }
+        catch (IllegalArgumentException e)
+          {
+            println("IllegalArgumentException: current handle not in the list, adding it now.");
+            combo.addItem(currentListHandle);
+            combo.setSelectedItem(currentListHandle);
+          }
       }
     else
       {
-	if (debug)
-	  {
-	    println("currentChoice is null");
-	  }
+        if (debug)
+          {
+            println("currentChoice is null");
+          }
 
-	combo.setSelectedItem(noneHandle);
+        combo.setSelectedItem(noneHandle);
       }
 
     if (editable && fieldInfo.isEditable())
       {
-	combo.addItemListener(this); // register callback
+        combo.addItemListener(this); // register callback
       }
 
     combo.setAllowNone(!mustChoose);
@@ -3697,14 +3697,14 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (debug)
       {
-	println("Adding to panel");
+        println("Adding to panel");
       }
 
     String comment = fieldTemplate.getComment();
 
     if (comment != null && !comment.equals(""))
       {
-	combo.setToolTipText(comment);
+        combo.setToolTipText(comment);
       }
 
     associateFieldId(fieldInfo, combo);
@@ -3723,8 +3723,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    */
 
   private void addIPField(ip_field field,
-			  FieldInfo fieldInfo,
-			  FieldTemplate fieldTemplate) throws RemoteException
+                          FieldInfo fieldInfo,
+                          FieldTemplate fieldTemplate) throws RemoteException
   {
     JIPField
       ipf;
@@ -3735,28 +3735,28 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (debug)
       {
-	println("Adding IP field");
+        println("Adding IP field");
       }
 
     try
       {
-	ipf = new JIPField(editable && fieldInfo.isEditable(),
-			   (editable && fieldInfo.isEditable()) ? field.v6Allowed() : field.isIPV6());
+        ipf = new JIPField(editable && fieldInfo.isEditable(),
+                           (editable && fieldInfo.isEditable()) ? field.v6Allowed() : field.isIPV6());
       }
     catch (Exception rx)
       {
-	gc.processException(rx, "Could not determine if v6 Allowed for ip field: ");
-	throw new RuntimeException(rx);
+        gc.processException(rx, "Could not determine if v6 Allowed for ip field: ");
+        throw new RuntimeException(rx);
       }
 
     registerComponent(ipf, field, fieldTemplate);
 
     bytes = (Byte[]) fieldInfo.getValue();
 
-	if (bytes != null)
-	  {
-	    ipf.setValue(bytes);
-	  }
+        if (bytes != null)
+          {
+            ipf.setValue(bytes);
+          }
 
     ipf.setCallback(this);
 
@@ -3764,7 +3764,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (comment != null && !comment.equals(""))
       {
-	ipf.setToolTipText(comment);
+        ipf.setToolTipText(comment);
       }
 
     associateFieldId(fieldInfo, ipf);
@@ -3795,7 +3795,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (debug)
       {
-	printErr("containerPanel cleanUp()");
+        printErr("containerPanel cleanUp()");
       }
 
     contentsPanel.cleanup();
@@ -3807,14 +3807,14 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (updatesWhileLoading != null)
       {
-	updatesWhileLoading.setSize(0);
-	updatesWhileLoading = null;
+        updatesWhileLoading.setSize(0);
+        updatesWhileLoading = null;
       }
 
     if (vectorPanelList != null)
       {
-	vectorPanelList.setSize(0);
-	vectorPanelList = null;
+        vectorPanelList.setSize(0);
+        vectorPanelList = null;
       }
 
     currentlyChangingComponent = null;
@@ -3828,8 +3828,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (objectHash != null)
       {
-	objectHash.clear();
-	objectHash = null;
+        objectHash.clear();
+        objectHash = null;
       }
 
     if (objectTemplateHash != null)
@@ -3840,23 +3840,23 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (invidChooserHash != null)
       {
-	invidChooserHash.clear();
-	invidChooserHash = null;
+        invidChooserHash.clear();
+        invidChooserHash = null;
       }
 
     if (infoVector != null)
       {
-	infoVector.setSize(0);
-	infoVector = null;
+        infoVector.setSize(0);
+        infoVector = null;
       }
 
     if (templates != null)
       {
-	// it is critical that we don't setSize(0) on templates,
-	// as it is belongs to Loader.  we can drop our reference
-	// to it, though.
+        // it is critical that we don't setSize(0) on templates,
+        // as it is belongs to Loader.  we can drop our reference
+        // to it, though.
 
-	templates = null;
+        templates = null;
       }
 
     progressBar = null;

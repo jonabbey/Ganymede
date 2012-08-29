@@ -207,15 +207,15 @@ public class GanymedeServer implements Server {
   {
     synchronized (GanymedeServer.class)
       {
-	if (server == null)
-	  {
-	    server = this;
-	  }
-	else
-	  {
-	    Ganymede.debug(ts.l("init.multiserver"));
-	    throw new RemoteException(ts.l("init.multiserver"));
-	  }
+        if (server == null)
+          {
+            server = this;
+          }
+        else
+          {
+            Ganymede.debug(ts.l("init.multiserver"));
+            throw new RemoteException(ts.l("init.multiserver"));
+          }
       }
 
     loginSession = new GanymedeSession(); // supergash
@@ -285,14 +285,14 @@ public class GanymedeServer implements Server {
 
     if (!retVal.didSucceed())   // XXX processLogin never returns null
       {
-	return retVal;
+        return retVal;
       }
 
     GanymedeSession mySession = (GanymedeSession) retVal.getSession();
 
     if (mySession == null)
       {
-	return null;		// nope, no soup for you.
+        return null;            // nope, no soup for you.
       }
 
     GanymedeXMLSession xSession = new GanymedeXMLSession(mySession);
@@ -356,244 +356,244 @@ public class GanymedeServer implements Server {
 
     try
       {
-	synchronized (this)
-	  {
-	    // force logins to lowercase so we can keep track of
-	    // things cleanly..  we do a case insensitive match
-	    // against user/persona name later on, but we want to have
-	    // a canonical name to track multiple logins with.
+        synchronized (this)
+          {
+            // force logins to lowercase so we can keep track of
+            // things cleanly..  we do a case insensitive match
+            // against user/persona name later on, but we want to have
+            // a canonical name to track multiple logins with.
 
-	    clientName = clientName.toLowerCase();
+            clientName = clientName.toLowerCase();
 
-	    root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.NOCASEEQ, clientName);
-	    userQuery = new Query(SchemaConstants.UserBase, root, false);
+            root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.NOCASEEQ, clientName);
+            userQuery = new Query(SchemaConstants.UserBase, root, false);
 
-	    Vector<Result> results = loginSession.internalQuery(userQuery);
+            Vector<Result> results = loginSession.internalQuery(userQuery);
 
-	    // results.size() really shouldn't be any larger than 1,
-	    // since we are doing a match on username and username is
-	    // managed by a namespace in the schema.
+            // results.size() really shouldn't be any larger than 1,
+            // since we are doing a match on username and username is
+            // managed by a namespace in the schema.
 
-	    for (Result result: results)
-	      {
-		user = loginSession.getDBSession().viewDBObject(result.getInvid());
+            for (Result result: results)
+              {
+                user = loginSession.getDBSession().viewDBObject(result.getInvid());
 
-		pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
+                pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
 
-		if (pdbf != null && pdbf.matchPlainText(clientPass))
-		  {
-		    found = true;
+                if (pdbf != null && pdbf.matchPlainText(clientPass))
+                  {
+                    found = true;
 
-		    // and re-canonicalize the name so that later on
-		    // we can match when we do case sensitive searches
+                    // and re-canonicalize the name so that later on
+                    // we can match when we do case sensitive searches
 
-		    clientName = user.getLabel();
-		  }
-	      }
+                    clientName = user.getLabel();
+                  }
+              }
 
-	    // if we didn't find a user, perhaps they tried logging in
-	    // by entering their persona name directly?  For the time
-	    // being we are allowing this, so we'll go ahead and look
-	    // for a matching persona.
+            // if we didn't find a user, perhaps they tried logging in
+            // by entering their persona name directly?  For the time
+            // being we are allowing this, so we'll go ahead and look
+            // for a matching persona.
 
-	    if (!found)
-	      {
-		// we want to match against either the persona name
-		// field or the new persona label field.  This lets us
-		// work with old versions of the database or new.
-		// Going forward we'll want to match here against the
-		// PersonaLabelField.
+            if (!found)
+              {
+                // we want to match against either the persona name
+                // field or the new persona label field.  This lets us
+                // work with old versions of the database or new.
+                // Going forward we'll want to match here against the
+                // PersonaLabelField.
 
-		// note.. this is a hack for compatibility.. the
-		// personalabelfield will always be good, but if it
-		// does not exist, we'll go ahead and match against
-		// the persona name field as long as we don't have an
-		// associated user in that persona.. this is to avoid
-		// confusing 'broccol:supergash' with 'supergash'
+                // note.. this is a hack for compatibility.. the
+                // personalabelfield will always be good, but if it
+                // does not exist, we'll go ahead and match against
+                // the persona name field as long as we don't have an
+                // associated user in that persona.. this is to avoid
+                // confusing 'broccol:supergash' with 'supergash'
 
-		// the persona label field would be like
-		// 'broccol:supergash', whereas the persona name would
-		// be 'supergash', which could be confused with the
-		// supergash account.
+                // the persona label field would be like
+                // 'broccol:supergash', whereas the persona name would
+                // be 'supergash', which could be confused with the
+                // supergash account.
 
-		root = new QueryOrNode(new QueryDataNode(SchemaConstants.PersonaLabelField,
-							 QueryDataNode.NOCASEEQ, clientName),
-				       new QueryAndNode(new QueryDataNode(SchemaConstants.PersonaNameField,
-									  QueryDataNode.NOCASEEQ, clientName),
-							new QueryNotNode(new QueryDataNode(SchemaConstants.PersonaAssocUser,
-											   QueryDataNode.DEFINED, null))));
+                root = new QueryOrNode(new QueryDataNode(SchemaConstants.PersonaLabelField,
+                                                         QueryDataNode.NOCASEEQ, clientName),
+                                       new QueryAndNode(new QueryDataNode(SchemaConstants.PersonaNameField,
+                                                                          QueryDataNode.NOCASEEQ, clientName),
+                                                        new QueryNotNode(new QueryDataNode(SchemaConstants.PersonaAssocUser,
+                                                                                           QueryDataNode.DEFINED, null))));
 
-		userQuery = new Query(SchemaConstants.PersonaBase, root, false);
+                userQuery = new Query(SchemaConstants.PersonaBase, root, false);
 
-		results = loginSession.internalQuery(userQuery);
+                results = loginSession.internalQuery(userQuery);
 
-		// find the entry with the matching name and the
-		// matching password.  We no longer expect the
-		// PersonaNameField to be managed by a namespace, so
-		// we could conceivably get multiple matches back from
-		// our query.  This is particularly true if the user
-		// tries to log in as 'GASH Admin', which might be the
-		// "name" of many persona accounts.  In this case
-		// we'll depend on the password telling us which to
-		// match against.
+                // find the entry with the matching name and the
+                // matching password.  We no longer expect the
+                // PersonaNameField to be managed by a namespace, so
+                // we could conceivably get multiple matches back from
+                // our query.  This is particularly true if the user
+                // tries to log in as 'GASH Admin', which might be the
+                // "name" of many persona accounts.  In this case
+                // we'll depend on the password telling us which to
+                // match against.
 
-		// once we get all the ganymede.db files transitioned
-		// over to the new persona format, we'll probably want
-		// to just match against PersonaLabelField to avoid
-		// the possibility of ambiguous admin selection here.
+                // once we get all the ganymede.db files transitioned
+                // over to the new persona format, we'll probably want
+                // to just match against PersonaLabelField to avoid
+                // the possibility of ambiguous admin selection here.
 
-		for (Result result: results)
-		  {
-		    persona = loginSession.getDBSession().viewDBObject(result.getInvid());
+                for (Result result: results)
+                  {
+                    persona = loginSession.getDBSession().viewDBObject(result.getInvid());
 
-		    pdbf = (PasswordDBField) persona.getField(SchemaConstants.PersonaPasswordField);
+                    pdbf = (PasswordDBField) persona.getField(SchemaConstants.PersonaPasswordField);
 
-		    if (pdbf == null)
-		      {
-			System.err.println(ts.l("processLogin.nopersonapass", persona.getLabel()));
-		      }
-		    else
-		      {
-			if (clientPass == null)
-			  {
-			    System.err.println(ts.l("processLogin.nopass"));
-			  }
-			else
-			  {
-			    if (pdbf.matchPlainText(clientPass))
-			      {
-				found = true;
-			      }
-			  }
-		      }
-		  }
+                    if (pdbf == null)
+                      {
+                        System.err.println(ts.l("processLogin.nopersonapass", persona.getLabel()));
+                      }
+                    else
+                      {
+                        if (clientPass == null)
+                          {
+                            System.err.println(ts.l("processLogin.nopass"));
+                          }
+                        else
+                          {
+                            if (pdbf.matchPlainText(clientPass))
+                              {
+                                found = true;
+                              }
+                          }
+                      }
+                  }
 
-		// okay, if the user logged in directly to his persona
-		// (broccol:GASH Admin, etc.), try to find his base user
-		// account.
+                // okay, if the user logged in directly to his persona
+                // (broccol:GASH Admin, etc.), try to find his base user
+                // account.
 
-		if (found && clientName.indexOf(':') != -1)
-		  {
-		    String userName = clientName.substring(0, clientName.indexOf(':'));
+                if (found && clientName.indexOf(':') != -1)
+                  {
+                    String userName = clientName.substring(0, clientName.indexOf(':'));
 
-		    root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.EQUALS, userName);
-		    userQuery = new Query(SchemaConstants.UserBase, root, false);
+                    root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.EQUALS, userName);
+                    userQuery = new Query(SchemaConstants.UserBase, root, false);
 
-		    results = loginSession.internalQuery(userQuery);
+                    results = loginSession.internalQuery(userQuery);
 
-		    if (results.size() == 1)
-		      {
-			user = loginSession.getDBSession().viewDBObject(results.get(0).getInvid());
+                    if (results.size() == 1)
+                      {
+                        user = loginSession.getDBSession().viewDBObject(results.get(0).getInvid());
 
-			// recanonicalize
+                        // recanonicalize
 
-			clientName = user.getLabel();
+                        clientName = user.getLabel();
 
-			if (user.isInactivated())
-			  {
-			    found = false;
-			    user = null;
-			  }
-		      }
-		  }
-	      }
+                        if (user.isInactivated())
+                          {
+                            found = false;
+                            user = null;
+                          }
+                      }
+                  }
+              }
 
-	    if (found)
-	      {
-		// the GanymedeSession constructor calls one of the
-		// register session name methods on us
+            if (found)
+              {
+                // the GanymedeSession constructor calls one of the
+                // register session name methods on us
 
-		GanymedeSession session = new GanymedeSession(clientName,
-							      user, persona,
-							      directSession);
+                GanymedeSession session = new GanymedeSession(clientName,
+                                                              user, persona,
+                                                              directSession);
 
-		monitorUserSession(session);
+                monitorUserSession(session);
 
-		// "{0} logged in from {1}"
-		Ganymede.debug(ts.l("processLogin.loggedin", session.getUserName(), session.getClientHostName()));
+                // "{0} logged in from {1}"
+                Ganymede.debug(ts.l("processLogin.loggedin", session.getUserName(), session.getClientHostName()));
 
-		Vector objects = new Vector();
+                Vector objects = new Vector();
 
-		if (user != null)
-		  {
-		    objects.add(user.getInvid());
-		  }
-		else
-		  {
-		    objects.add(persona.getInvid());
-		  }
+                if (user != null)
+                  {
+                    objects.add(user.getInvid());
+                  }
+                else
+                  {
+                    objects.add(persona.getInvid());
+                  }
 
-		if (Ganymede.log != null)
-		  {
-		    Ganymede.log.logSystemEvent(new DBLogEvent("normallogin",
-							       ts.l("processLogin.logevent", clientName, session.getClientHostName()),
-							       null,
-							       clientName,
-							       objects,
-							       null));
-		  }
+                if (Ganymede.log != null)
+                  {
+                    Ganymede.log.logSystemEvent(new DBLogEvent("normallogin",
+                                                               ts.l("processLogin.logevent", clientName, session.getClientHostName()),
+                                                               null,
+                                                               clientName,
+                                                               objects,
+                                                               null));
+                  }
 
-		success = true;
+                success = true;
 
-		ReturnVal retVal = ReturnVal.success();
-		retVal.setSession(session);
+                ReturnVal retVal = ReturnVal.success();
+                retVal.setSession(session);
 
-		return retVal;
-	      }
-	    else
-	      {
-		try
-		  {
-		    String ipAddress = UnicastRemoteObject.getClientHost();
+                return retVal;
+              }
+            else
+              {
+                try
+                  {
+                    String ipAddress = UnicastRemoteObject.getClientHost();
 
-		    try
-		      {
-			java.net.InetAddress addr = java.net.InetAddress.getByName(ipAddress);
-			clienthost = addr.getHostName();
-		      }
-		    catch (java.net.UnknownHostException ex)
-		      {
-			clienthost = ipAddress;
-		      }
-		  }
-		catch (ServerNotActiveException ex)
-		  {
-		    clienthost = "unknown";
-		  }
+                    try
+                      {
+                        java.net.InetAddress addr = java.net.InetAddress.getByName(ipAddress);
+                        clienthost = addr.getHostName();
+                      }
+                    catch (java.net.UnknownHostException ex)
+                      {
+                        clienthost = ipAddress;
+                      }
+                  }
+                catch (ServerNotActiveException ex)
+                  {
+                    clienthost = "unknown";
+                  }
 
-		if (Ganymede.log != null)
-		  {
-		    Vector recipients = new Vector();
+                if (Ganymede.log != null)
+                  {
+                    Vector recipients = new Vector();
 
-		    //	    recipients.add(clientName); // this might well bounce.  C'est la vie.
+                    //      recipients.add(clientName); // this might well bounce.  C'est la vie.
 
-		    Ganymede.log.logSystemEvent(new DBLogEvent("badpass",
-							       ts.l("processLogin.badlogevent", clientName, clienthost),
-							       null,
-							       clientName,
-							       null,
-							       recipients));
-		  }
+                    Ganymede.log.logSystemEvent(new DBLogEvent("badpass",
+                                                               ts.l("processLogin.badlogevent", clientName, clienthost),
+                                                               null,
+                                                               clientName,
+                                                               null,
+                                                               recipients));
+                  }
 
                 // "Bad login attempt"
                 // "Bad username or password, login rejected."
-		return Ganymede.createErrorDialog(ts.l("processLogin.badlogin"),
-						  ts.l("processLogin.badlogintext"));
-	      }
-	  }
+                return Ganymede.createErrorDialog(ts.l("processLogin.badlogin"),
+                                                  ts.l("processLogin.badlogintext"));
+              }
+          }
       }
     finally
       {
-	if (!success)
-	  {
-	    GanymedeServer.lSemaphore.decrement();
+        if (!success)
+          {
+            GanymedeServer.lSemaphore.decrement();
 
-	    // notify the consoles after decrementing the login
-	    // semaphore so the notify won't show the semaphore
-	    // increment
+            // notify the consoles after decrementing the login
+            // semaphore so the notify won't show the semaphore
+            // increment
 
-	    Ganymede.debug(ts.l("processLogin.badlogevent", clientName, clienthost));
-	  }
+            Ganymede.debug(ts.l("processLogin.badlogevent", clientName, clienthost));
+          }
       }
   }
 
@@ -663,15 +663,15 @@ public class GanymedeServer implements Server {
   {
     synchronized (sessions)
       {
-	if (sessions.remove(session))
-	  {
-	    // we just removed the session of the user who logged out, so
-	    // they won't receive the log out message that we'll send to
-	    // the other clients
+        if (sessions.remove(session))
+          {
+            // we just removed the session of the user who logged out, so
+            // they won't receive the log out message that we'll send to
+            // the other clients
 
-	    sendMessageToRemoteSessions(ClientMessage.LOGOUT, ts.l("removeRemoteUser.logged_out", session.getUserName()));
-	    sendMessageToRemoteSessions(ClientMessage.LOGINCOUNT, Integer.toString(sessions.size()));
-	  }
+            sendMessageToRemoteSessions(ClientMessage.LOGOUT, ts.l("removeRemoteUser.logged_out", session.getUserName()));
+            sendMessageToRemoteSessions(ClientMessage.LOGINCOUNT, Integer.toString(sessions.size()));
+          }
       }
 
     // update the admin consoles
@@ -692,15 +692,15 @@ public class GanymedeServer implements Server {
 
     synchronized (sessions)
       {
-	entries = new Vector<AdminEntry>(sessions.size());
+        entries = new Vector<AdminEntry>(sessions.size());
 
-	for (GanymedeSession session: sessions)
-	  {
-	    if (session.isLoggedIn())
-	      {
-		entries.add(session.getAdminEntry());
-	      }
-	  }
+        for (GanymedeSession session: sessions)
+          {
+            if (session.isLoggedIn())
+              {
+                entries.add(session.getAdminEntry());
+              }
+          }
       }
 
     return entries;
@@ -759,7 +759,7 @@ public class GanymedeServer implements Server {
 
     for (GanymedeSession session: sessionsCopy)
       {
-	session.timeCheck();
+        session.timeCheck();
       }
   }
 
@@ -778,7 +778,7 @@ public class GanymedeServer implements Server {
 
     for (GanymedeSession session: sessionsCopy)
       {
-	session.forceOff(reason);
+        session.forceOff(reason);
       }
   }
 
@@ -796,14 +796,14 @@ public class GanymedeServer implements Server {
 
     synchronized (sessions)
       {
-	for (GanymedeSession session: sessions)
-	  {
-	    if (session.getSessionName().equals(username))
-	      {
-		session.forceOff(reason);
-		return true;
-	      }
-	  }
+        for (GanymedeSession session: sessions)
+          {
+            if (session.getSessionName().equals(username))
+              {
+                session.forceOff(reason);
+                return true;
+              }
+          }
       }
 
     return false;
@@ -819,7 +819,7 @@ public class GanymedeServer implements Server {
   {
     if (sessionName == null)
       {
-	throw new IllegalArgumentException("invalid null sessionName");
+        throw new IllegalArgumentException("invalid null sessionName");
       }
 
     String temp = sessionName;
@@ -827,13 +827,13 @@ public class GanymedeServer implements Server {
 
     synchronized (activeSessionNames)
       {
-	while (activeSessionNames.containsKey(sessionName))
-	  {
-	    sessionName = temp + "[" + i + "]";
-	    i++;
-	  }
+        while (activeSessionNames.containsKey(sessionName))
+          {
+            sessionName = temp + "[" + i + "]";
+            i++;
+          }
 
-	activeSessionNames.put(sessionName, sessionName);
+        activeSessionNames.put(sessionName, sessionName);
       }
 
     return sessionName;
@@ -849,7 +849,7 @@ public class GanymedeServer implements Server {
   {
     if (sessionName == null)
       {
-	throw new IllegalArgumentException("invalid null sessionName");
+        throw new IllegalArgumentException("invalid null sessionName");
       }
 
     String temp = sessionName;
@@ -857,14 +857,14 @@ public class GanymedeServer implements Server {
 
     synchronized (activeSessionNames)
       {
-	while (activeSessionNames.contains(sessionName))
-	  {
-	    sessionName = temp + "[" + i + "]";
-	    i++;
-	  }
+        while (activeSessionNames.contains(sessionName))
+          {
+            sessionName = temp + "[" + i + "]";
+            i++;
+          }
 
-	activeSessionNames.put(sessionName, sessionName);
-	activeUserSessionNames.put(sessionName, sessionName);
+        activeSessionNames.put(sessionName, sessionName);
+        activeUserSessionNames.put(sessionName, sessionName);
       }
 
     return sessionName;
@@ -891,59 +891,59 @@ public class GanymedeServer implements Server {
 
     if (userInvid != null)
       {
-	userLogOuts.put(userInvid, new Date());
+        userLogOuts.put(userInvid, new Date());
       }
 
     synchronized (activeSessionNames)
       {
-	activeSessionNames.remove(sessionName);
+        activeSessionNames.remove(sessionName);
 
-	if (activeUserSessionNames.remove(sessionName) != null)
-	  {
-	    userSession = true;
+        if (activeUserSessionNames.remove(sessionName) != null)
+          {
+            userSession = true;
 
-	    // if we are in deferred shutdown mode and this was the last
-	    // remote user logged in, spin off a thread to shut the server
-	    // down
+            // if we are in deferred shutdown mode and this was the last
+            // remote user logged in, spin off a thread to shut the server
+            // down
 
-	    if (shutdown && activeUserSessionNames.size() == 0)
-	      {
-		Thread deathThread = new Thread(new Runnable() {
-		    public void run() {
-		      // sleep for 5 seconds to let our last client disconnect
+            if (shutdown && activeUserSessionNames.size() == 0)
+              {
+                Thread deathThread = new Thread(new Runnable() {
+                    public void run() {
+                      // sleep for 5 seconds to let our last client disconnect
 
-		      try
-			{
-			  java.lang.Thread.currentThread().sleep(5000);
-			}
-		      catch (InterruptedException ex)
-			{
-			}
+                      try
+                        {
+                          java.lang.Thread.currentThread().sleep(5000);
+                        }
+                      catch (InterruptedException ex)
+                        {
+                        }
 
-		      GanymedeServer.shutdown();
-		    }
-		  }, ts.l("clearActiveUser.deathThread"));
+                      GanymedeServer.shutdown();
+                    }
+                  }, ts.l("clearActiveUser.deathThread"));
 
-		deathThread.start();
-	      }
-	  }
+                deathThread.start();
+              }
+          }
       }
 
     if (session.isUserSession())
       {
-	try
-	  {
-	    GanymedeServer.lSemaphore.decrement();
-	  }
-	catch (IllegalArgumentException ex)
-	  {
-	    Ganymede.logError(ex);
-	  }
+        try
+          {
+            GanymedeServer.lSemaphore.decrement();
+          }
+        catch (IllegalArgumentException ex)
+          {
+            Ganymede.logError(ex);
+          }
       }
 
     if (userSession)
       {
-	unmonitorUserSession(session);
+        unmonitorUserSession(session);
       }
   }
 
@@ -963,26 +963,26 @@ public class GanymedeServer implements Server {
    */
 
   public static StringBuffer getTextMessage(String key, Invid userToDateCompare,
-					    boolean html)
+                                            boolean html)
   {
     if ((key.indexOf('/') != -1) || (key.indexOf('\\') != -1))
       {
-	throw new IllegalArgumentException(ts.l("getTextMessage.badargs"));
+        throw new IllegalArgumentException(ts.l("getTextMessage.badargs"));
       }
 
     if (html)
       {
-	key = key + ".html";
+        key = key + ".html";
       }
     else
       {
-	key = key + ".txt";
+        key = key + ".txt";
       }
 
     if (Ganymede.messageDirectoryProperty == null)
       {
-	Ganymede.debug(ts.l("getTextMessage.nodir", key));
-	return null;
+        Ganymede.debug(ts.l("getTextMessage.nodir", key));
+        return null;
       }
 
     /* - */
@@ -996,22 +996,22 @@ public class GanymedeServer implements Server {
 
     if (!messageFile.exists() || ! messageFile.isFile())
       {
-	return null;
+        return null;
       }
 
     if (userToDateCompare != null)
       {
-	Date lastlogout = (Date) userLogOuts.get(userToDateCompare);
+        Date lastlogout = (Date) userLogOuts.get(userToDateCompare);
 
-	if (lastlogout != null)
-	  {
-	    Date timestamp = new Date(messageFile.lastModified());
+        if (lastlogout != null)
+          {
+            Date timestamp = new Date(messageFile.lastModified());
 
-	    if (lastlogout.after(timestamp))
-	      {
-		return null;
-	      }
-	  }
+            if (lastlogout.after(timestamp))
+              {
+                return null;
+              }
+          }
       }
 
     // okay, read and copy!
@@ -1021,44 +1021,44 @@ public class GanymedeServer implements Server {
 
     try
       {
-	in = new BufferedReader(new FileReader(messageFile));
+        in = new BufferedReader(new FileReader(messageFile));
 
-	result = new StringBuffer();
+        result = new StringBuffer();
 
-	try
-	  {
-	    String line = in.readLine();
+        try
+          {
+            String line = in.readLine();
 
-	    while (line != null)
-	      {
-		result.append(line);
-		result.append("\n");
-		line = in.readLine();
-	      }
-	  }
-	catch (IOException ex)
-	  {
-	    Ganymede.debug(ts.l("getTextMessage.IOExceptionReport", filename, ex.getMessage()));
-	    Ganymede.debug(result.toString());
-	  }
+            while (line != null)
+              {
+                result.append(line);
+                result.append("\n");
+                line = in.readLine();
+              }
+          }
+        catch (IOException ex)
+          {
+            Ganymede.debug(ts.l("getTextMessage.IOExceptionReport", filename, ex.getMessage()));
+            Ganymede.debug(result.toString());
+          }
       }
     catch (FileNotFoundException ex)
       {
-	Ganymede.debug("getTextMessage(" + key + "): FileNotFoundException");
-	return null;
+        Ganymede.debug("getTextMessage(" + key + "): FileNotFoundException");
+        return null;
       }
     finally
       {
-	if (in != null)
-	  {
-	    try
-	      {
-		in.close();
-	      }
-	    catch (IOException ex)
-	      {
-	      }
-	  }
+        if (in != null)
+          {
+            try
+              {
+                in.close();
+              }
+            catch (IOException ex)
+              {
+              }
+          }
       }
 
     return result;
@@ -1091,54 +1091,54 @@ public class GanymedeServer implements Server {
 
     if (error != null)
       {
-	return Ganymede.createErrorDialog(ts.l("admin.connect_failure"),
-					  ts.l("admin.semaphore_failure", error));
+        return Ganymede.createErrorDialog(ts.l("admin.connect_failure"),
+                                          ts.l("admin.semaphore_failure", error));
       }
 
     try
       {
-	String ipAddress = UnicastRemoteObject.getClientHost();
+        String ipAddress = UnicastRemoteObject.getClientHost();
 
-	try
-	  {
-	    java.net.InetAddress addr = java.net.InetAddress.getByName(ipAddress);
-	    clienthost = addr.getHostName();
-	  }
-	catch (java.net.UnknownHostException ex)
-	  {
-	    clienthost = ipAddress;
-	  }
+        try
+          {
+            java.net.InetAddress addr = java.net.InetAddress.getByName(ipAddress);
+            clienthost = addr.getHostName();
+          }
+        catch (java.net.UnknownHostException ex)
+          {
+            clienthost = ipAddress;
+          }
       }
     catch (ServerNotActiveException ex)
       {
-	clienthost = "unknown";
+        clienthost = "unknown";
       }
 
     validationResult = validateAdminUser(clientName, clientPass);
 
     if (validationResult == 0)
       {
-	if (Ganymede.log != null)
-	  {
-	    Ganymede.log.logSystemEvent(new DBLogEvent("badpass",
-						       ts.l("admin.badlogevent", clientName, clienthost),
-						       null,
-						       clientName,
-						       null,
-						       null));
-	  }
+        if (Ganymede.log != null)
+          {
+            Ganymede.log.logSystemEvent(new DBLogEvent("badpass",
+                                                       ts.l("admin.badlogevent", clientName, clienthost),
+                                                       null,
+                                                       clientName,
+                                                       null,
+                                                       null));
+          }
 
-	return Ganymede.createErrorDialog(ts.l("admin.badlogin"),
-					  ts.l("admin.baduserpass"));
+        return Ganymede.createErrorDialog(ts.l("admin.badlogin"),
+                                          ts.l("admin.baduserpass"));
       }
 
     if (validationResult == 1)
       {
-      	fullprivs = false;
+        fullprivs = false;
       }
     else if (validationResult >= 2)
       {
-      	fullprivs = true;
+        fullprivs = true;
       }
 
     // creating a new GanymedeAdmin can block if we are currently
@@ -1156,12 +1156,12 @@ public class GanymedeServer implements Server {
 
     if (Ganymede.log != null)
       {
-	Ganymede.log.logSystemEvent(new DBLogEvent("adminconnect",
-						   eventStr,
-						   null,
-						   clientName,
-						   null,
-						   null));
+        Ganymede.log.logSystemEvent(new DBLogEvent("adminconnect",
+                                                   eventStr,
+                                                   null,
+                                                   clientName,
+                                                   null,
+                                                   null));
       }
 
     ReturnVal retVal = new ReturnVal(true);
@@ -1197,7 +1197,7 @@ public class GanymedeServer implements Server {
     // If there is no admin persona with the given name, then bail
     if (results.size() == 0)
       {
-      	return 0;
+        return 0;
       }
 
     obj = loginSession.getDBSession().viewDBObject(results.get(0).getInvid());
@@ -1209,7 +1209,7 @@ public class GanymedeServer implements Server {
         // gets full privileges by default.
 
         if (obj.getInvid().equals(Invid.createInvid(SchemaConstants.PersonaBase,
-						    SchemaConstants.PersonaSupergashObj)))
+                                                    SchemaConstants.PersonaSupergashObj)))
           {
             return 3;
           }
@@ -1218,34 +1218,34 @@ public class GanymedeServer implements Server {
             // Is this user prohibited from accessing the admin
             // console?
 
-	    if (!obj.isSet(SchemaConstants.PersonaAdminConsole))
-	      {
-		return 0;
-	      }
+            if (!obj.isSet(SchemaConstants.PersonaAdminConsole))
+              {
+                return 0;
+              }
 
             // Ok, they can access the admin console...but do they
             // have full privileges?
 
-	    if (!obj.isSet(SchemaConstants.PersonaAdminPower))
-	      {
-		return 1;
-	      }
+            if (!obj.isSet(SchemaConstants.PersonaAdminPower))
+              {
+                return 1;
+              }
 
             // Ok, they have full privileges...but can they access the
             // admin interpreter?
 
-	    if (!obj.isSet(SchemaConstants.PersonaInterpreterPower))
-	      {
-		return 2;
-	      }
+            if (!obj.isSet(SchemaConstants.PersonaInterpreterPower))
+              {
+                return 2;
+              }
 
-	    return 3;
+            return 3;
           }
       }
     else
       // The password didn't match
       {
-      	return 0;
+        return 0;
       }
   }
 
@@ -1262,23 +1262,23 @@ public class GanymedeServer implements Server {
 
     try
       {
-	GanymedeServer.lSemaphore.disable("shutdown", false, 0);
+        GanymedeServer.lSemaphore.disable("shutdown", false, 0);
       }
     catch (InterruptedException ex)
       {
         Ganymede.logError(ex);
-	throw new RuntimeException(ex.getMessage());
+        throw new RuntimeException(ex.getMessage());
       }
 
     // if no one is logged in, right now, shut er down.
 
     if (GanymedeServer.lSemaphore.getCount() == 0)
       {
-	GanymedeAdmin.setState(ts.l("setShutDown.nousers_state"));
+        GanymedeAdmin.setState(ts.l("setShutDown.nousers_state"));
 
-	GanymedeServer.shutdown();
+        GanymedeServer.shutdown();
 
-	return;
+        return;
       }
 
     // otherwise by setting the shutdown variable to true, we signal
@@ -1300,24 +1300,24 @@ public class GanymedeServer implements Server {
 
     if (!"shutdown".equals(semaphoreState))
       {
-	// turn off the login semaphore.  this will block any new clients or admin consoles
-	// from connecting while we shut down
+        // turn off the login semaphore.  this will block any new clients or admin consoles
+        // from connecting while we shut down
 
-	try
-	  {
-	    semaphoreState = GanymedeServer.lSemaphore.disable("shutdown", false, 0); // no blocking
-	  }
-	catch (InterruptedException ex)
-	  {
+        try
+          {
+            semaphoreState = GanymedeServer.lSemaphore.disable("shutdown", false, 0); // no blocking
+          }
+        catch (InterruptedException ex)
+          {
             Ganymede.logError(ex);
-	    throw new RuntimeException(ex.getMessage());
-	  }
+            throw new RuntimeException(ex.getMessage());
+          }
 
-	if (semaphoreState != null)
-	  {
-	    return Ganymede.createErrorDialog(ts.l("shutdown.failure"),
-					      ts.l("shutdown.failure_text", semaphoreState));
-	  }
+        if (semaphoreState != null)
+          {
+            return Ganymede.createErrorDialog(ts.l("shutdown.failure"),
+                                              ts.l("shutdown.failure_text", semaphoreState));
+          }
       }
 
     // "Server going down.. waiting for any builder tasks to finish phase 2"
@@ -1325,11 +1325,11 @@ public class GanymedeServer implements Server {
 
     try
       {
-	shutdownSemaphore.disable("shutdown", true, -1);
+        shutdownSemaphore.disable("shutdown", true, -1);
       }
     catch (InterruptedException ex)
       {
-	// not much that we can do at this point
+        // not much that we can do at this point
       }
 
     // at this point, no new builder tasks can be scheduled
@@ -1339,98 +1339,98 @@ public class GanymedeServer implements Server {
 
     try
       {
-	// from this point on, we will go down, no matter what
-	// exceptions might percolate up to this point
+        // from this point on, we will go down, no matter what
+        // exceptions might percolate up to this point
 
-	// dump, then shut down.  This dump call will cause us to
-	// block until all write locks queued up are processed and
-	// released.  Our second dump parameter is false, so that we
-	// are guaranteed that no internal client can get a writelock
-	// and maybe get a transaction off that would cause us
-	// confusion.
+        // dump, then shut down.  This dump call will cause us to
+        // block until all write locks queued up are processed and
+        // released.  Our second dump parameter is false, so that we
+        // are guaranteed that no internal client can get a writelock
+        // and maybe get a transaction off that would cause us
+        // confusion.
 
-	try
-	  {
-	    Ganymede.db.dump(Ganymede.dbFilename, false, false); // don't release lock, don't archive last
-	  }
-	catch (IOException ex)
-	  {
+        try
+          {
+            Ganymede.db.dump(Ganymede.dbFilename, false, false); // don't release lock, don't archive last
+          }
+        catch (IOException ex)
+          {
             // "shutdown error: couldn''t successfully consolidate db."
-	    Ganymede.debug(ts.l("shutdown.dumperror"));
-	    throw ex;		// maybe didn't lock, so go down hard
-	  }
+            Ganymede.debug(ts.l("shutdown.dumperror"));
+            throw ex;           // maybe didn't lock, so go down hard
+          }
 
-	// ok, we now are left holding a dump lock.  it should be safe to kick
-	// everybody off and shut down the server
+        // ok, we now are left holding a dump lock.  it should be safe to kick
+        // everybody off and shut down the server
 
         // "Server going down.. database locked"
-	Ganymede.debug(ts.l("shutdown.locked"));
+        Ganymede.debug(ts.l("shutdown.locked"));
 
         // "Server going down.. disconnecting clients"
-	Ganymede.debug(ts.l("shutdown.clients"));
+        Ganymede.debug(ts.l("shutdown.clients"));
 
-	// forceOff modifies GanymedeServer.sessions, so we need to
-	// copy our list before we iterate over it.
+        // forceOff modifies GanymedeServer.sessions, so we need to
+        // copy our list before we iterate over it.
 
-	Vector<GanymedeSession> tempList = new Vector<GanymedeSession>();
+        Vector<GanymedeSession> tempList = new Vector<GanymedeSession>();
 
-	synchronized (sessions)
-	  {
-	    for (GanymedeSession session: sessions)
-	      {
-		tempList.add(session);
-	      }
-	  }
+        synchronized (sessions)
+          {
+            for (GanymedeSession session: sessions)
+              {
+                tempList.add(session);
+              }
+          }
 
-	for (GanymedeSession temp: tempList)
-	  {
+        for (GanymedeSession temp: tempList)
+          {
             // "Server going down"
-	    temp.forceOff(ts.l("shutdown.clientNotification"));
-	  }
+            temp.forceOff(ts.l("shutdown.clientNotification"));
+          }
 
         // "Server going down.. interrupting scheduler"
-	Ganymede.debug(ts.l("shutdown.scheduler"));
+        Ganymede.debug(ts.l("shutdown.scheduler"));
 
-	Ganymede.scheduler.interrupt();
+        Ganymede.scheduler.interrupt();
 
         // "Server going down.. disconnecting consoles"
-	Ganymede.debug(ts.l("shutdown.consoles"));
+        Ganymede.debug(ts.l("shutdown.consoles"));
 
-	GanymedeAdmin.closeAllConsoles(ts.l("shutdown.byeconsoles"));
+        GanymedeAdmin.closeAllConsoles(ts.l("shutdown.byeconsoles"));
 
-	// disconnect the Jython server
+        // disconnect the Jython server
 
-	/*
-	Ganymede.debug(ts.l("shutdown.jython"));
+        /*
+        Ganymede.debug(ts.l("shutdown.jython"));
 
-	Ganymede.jythonServer.shutdown();
-	*/
+        Ganymede.jythonServer.shutdown();
+        */
 
-	// log our shutdown and close the log
+        // log our shutdown and close the log
 
-	if (Ganymede.log != null)
-	  {
-	    Ganymede.log.logSystemEvent(new DBLogEvent("shutdown",
-						       ts.l("shutdown.logevent"),
-						       null,
-						       null,
-						       null,
-						       null));
+        if (Ganymede.log != null)
+          {
+            Ganymede.log.logSystemEvent(new DBLogEvent("shutdown",
+                                                       ts.l("shutdown.logevent"),
+                                                       null,
+                                                       null,
+                                                       null,
+                                                       null));
 
-	    System.err.println();
+            System.err.println();
 
-	    // "Server completing shutdown.. waiting for log thread to complete."
-	    System.err.println(ts.l("shutdown.closinglog"));
+            // "Server completing shutdown.. waiting for log thread to complete."
+            System.err.println(ts.l("shutdown.closinglog"));
 
-	    try
-	      {
-		Ganymede.log.close(); // this will block until the mail queue drains
-	      }
-	    catch (IOException ex)
-	      {
-		System.err.println(ts.l("shutdown.logIOException", ex.toString()));
-	      }
-	  }
+            try
+              {
+                Ganymede.log.close(); // this will block until the mail queue drains
+              }
+            catch (IOException ex)
+              {
+                System.err.println(ts.l("shutdown.logIOException", ex.toString()));
+              }
+          }
       }
     catch (Exception ex)
       {
@@ -1444,18 +1444,18 @@ public class GanymedeServer implements Server {
       }
     finally
       {
-	System.err.println();
+        System.err.println();
 
         // "Server shutdown complete."
-	System.err.println(ts.l("shutdown.finally"));
+        System.err.println(ts.l("shutdown.finally"));
 
-	arlut.csd.ganymede.common.Invid.printCount();
+        arlut.csd.ganymede.common.Invid.printCount();
 
         java.lang.Runtime.getRuntime().removeShutdownHook(Ganymede.signalHandlingThread);
 
         System.exit(0);
 
-	return null;
+        return null;
       }
   }
 
@@ -1496,111 +1496,111 @@ public class GanymedeServer implements Server {
 
     try
       {
-	lock.establish("sweepInvids"); // wait until we get our lock
+        lock.establish("sweepInvids"); // wait until we get our lock
       }
     catch (InterruptedException ex)
       {
-	Ganymede.debug(ts.l("sweepInvids.noproceed"));
+        Ganymede.debug(ts.l("sweepInvids.noproceed"));
 
-	return false;		// actually we just failed, but same difference
+        return false;           // actually we just failed, but same difference
       }
 
     try
       {
-	for (DBObjectBase base: Ganymede.db.objectBases.values())
-	  {
-	    Ganymede.debug(ts.l("sweepInvids.sweeping", base.toString()));
+        for (DBObjectBase base: Ganymede.db.objectBases.values())
+          {
+            Ganymede.debug(ts.l("sweepInvids.sweeping", base.toString()));
 
-	    for (DBObject object: base.getObjects())
-	      {
-		removeVector = new Vector<Short>();
+            for (DBObject object: base.getObjects())
+              {
+                removeVector = new Vector<Short>();
 
-		// loop 3: iterate over the fields present in this object
+                // loop 3: iterate over the fields present in this object
 
-		synchronized (object.fieldAry)
-		  {
-		    for (DBField field: object.fieldAry)
-		      {
-			if (field == null || !(field instanceof InvidDBField))
-			  {
-			    continue;	// only check invid fields
-			  }
+                synchronized (object.fieldAry)
+                  {
+                    for (DBField field: object.fieldAry)
+                      {
+                        if (field == null || !(field instanceof InvidDBField))
+                          {
+                            continue;   // only check invid fields
+                          }
 
-			InvidDBField iField = (InvidDBField) field;
+                        InvidDBField iField = (InvidDBField) field;
 
-			if (iField.isVector())
-			  {
-			    Vector<Invid> tempVector = (Vector<Invid>) iField.getVectVal();
-			    vectorEmpty = true;
+                        if (iField.isVector())
+                          {
+                            Vector<Invid> tempVector = (Vector<Invid>) iField.getVectVal();
+                            vectorEmpty = true;
 
-			    // clear out the invid's held in this field pending
-			    // successful lookup
+                            // clear out the invid's held in this field pending
+                            // successful lookup
 
-			    iField.value = new Vector();
+                            iField.value = new Vector();
 
-			    for (Invid invid: tempVector)
-			      {
-				if (session.viewDBObject(invid) != null)
-				  {
-				    iField.getVectVal().add(invid); // keep this invid
-				    vectorEmpty = false;
-				  }
-				else
-				  {
-				    Ganymede.debug(ts.l("sweepInvids.removing_vector",
-							invid.toString(),
-							iField.getName(),
-							base.getName(),
-							object.getLabel()));
+                            for (Invid invid: tempVector)
+                              {
+                                if (session.viewDBObject(invid) != null)
+                                  {
+                                    iField.getVectVal().add(invid); // keep this invid
+                                    vectorEmpty = false;
+                                  }
+                                else
+                                  {
+                                    Ganymede.debug(ts.l("sweepInvids.removing_vector",
+                                                        invid.toString(),
+                                                        iField.getName(),
+                                                        base.getName(),
+                                                        object.getLabel()));
 
-				    swept = true;
-				  }
-			      }
+                                    swept = true;
+                                  }
+                              }
 
-			    // now, if the vector is totally empty, we'll be removing
-			    // this field from definition
+                            // now, if the vector is totally empty, we'll be removing
+                            // this field from definition
 
-			    if (vectorEmpty)
-			      {
-				removeVector.add(Short.valueOf(iField.getID()));
-			      }
-			  }
-			else
-			  {
-			    Invid invid = (Invid) iField.value;
+                            if (vectorEmpty)
+                              {
+                                removeVector.add(Short.valueOf(iField.getID()));
+                              }
+                          }
+                        else
+                          {
+                            Invid invid = (Invid) iField.value;
 
-			    if (session.viewDBObject(invid) == null)
-			      {
-				swept = true;
-				removeVector.add(Short.valueOf(iField.getID()));
+                            if (session.viewDBObject(invid) == null)
+                              {
+                                swept = true;
+                                removeVector.add(Short.valueOf(iField.getID()));
 
-				Ganymede.debug(ts.l("sweepInvids.removing_scalar",
-						    invid.toString(),
-						    iField.getName(),
-						    base.getName(),
-						    object.getLabel()));
-			      }
-			  }
-		      }
-		  }
+                                Ganymede.debug(ts.l("sweepInvids.removing_scalar",
+                                                    invid.toString(),
+                                                    iField.getName(),
+                                                    base.getName(),
+                                                    object.getLabel()));
+                              }
+                          }
+                      }
+                  }
 
-		// need to remove undefined fields now
+                // need to remove undefined fields now
 
-		for (Short fieldID: removeVector)
-		  {
-		    object.clearField(fieldID.shortValue());
+                for (Short fieldID: removeVector)
+                  {
+                    object.clearField(fieldID.shortValue());
 
-		    Ganymede.debug(ts.l("sweepInvids.undefining",
-					fieldID.toString(),
-					base.getName(),
-					object.getLabel()));
-		  }
-	      }
-	  }
+                    Ganymede.debug(ts.l("sweepInvids.undefining",
+                                        fieldID.toString(),
+                                        base.getName(),
+                                        object.getLabel()));
+                  }
+              }
+          }
       }
     finally
       {
-	lock.release();
+        lock.release();
       }
 
     Ganymede.debug(ts.l("sweepInvids.done"));
@@ -1640,63 +1640,63 @@ public class GanymedeServer implements Server {
 
     try
       {
-	lock.establish("checkInvids"); // wait until we get our lock
+        lock.establish("checkInvids"); // wait until we get our lock
       }
     catch (InterruptedException ex)
       {
-	Ganymede.debug(ts.l("checkInvids.noproceed"));
+        Ganymede.debug(ts.l("checkInvids.noproceed"));
 
-	return false;		// actually we just failed, but same difference
+        return false;           // actually we just failed, but same difference
       }
 
     try
       {
-	// first we're going to do our forward test, making sure that
-	// all pointers registered in the objects in our data store
-	// point to valid objects and that they have valid symmetric
-	// back pointers or virtual back pointer registrations in the
-	// DBLinkTracker class.
+        // first we're going to do our forward test, making sure that
+        // all pointers registered in the objects in our data store
+        // point to valid objects and that they have valid symmetric
+        // back pointers or virtual back pointer registrations in the
+        // DBLinkTracker class.
 
-	for (DBObjectBase base: Ganymede.db.objectBases.values())
-	  {
-	    Ganymede.debug(ts.l("checkInvids.checking", base.getName()));
+        for (DBObjectBase base: Ganymede.db.objectBases.values())
+          {
+            Ganymede.debug(ts.l("checkInvids.checking", base.getName()));
 
-	    for (DBObject object: base.getObjects())
-	      {
-		synchronized (object.fieldAry)
-		  {
-		    for (DBField field: object.fieldAry)
-		      {
-			// we only care about invid fields
+            for (DBObject object: base.getObjects())
+              {
+                synchronized (object.fieldAry)
+                  {
+                    for (DBField field: object.fieldAry)
+                      {
+                        // we only care about invid fields
 
-			if (field == null || !(field instanceof InvidDBField))
-			  {
-			    continue;
-			  }
+                        if (field == null || !(field instanceof InvidDBField))
+                          {
+                            continue;
+                          }
 
-			InvidDBField iField = (InvidDBField) field;
+                        InvidDBField iField = (InvidDBField) field;
 
-			if (!iField.test(session, (base.getName() + ":" + object.getLabel())))
-			  {
-			    ok = false;
-			  }
-		      }
-		  }
-	      }
-	  }
+                        if (!iField.test(session, (base.getName() + ":" + object.getLabel())))
+                          {
+                            ok = false;
+                          }
+                      }
+                  }
+              }
+          }
 
         // validate the backPointers structure that we use to quickly
         // find objects pointing to other objects with non-symmetric
         // links
 
-	if (!Ganymede.db.aSymLinkTracker.checkInvids(session))
-	  {
-	    ok = false;
-	  }
+        if (!Ganymede.db.aSymLinkTracker.checkInvids(session))
+          {
+            ok = false;
+          }
       }
     finally
       {
-	lock.release();
+        lock.release();
       }
 
     Ganymede.debug(ts.l("checkInvids.done"));
@@ -1735,47 +1735,47 @@ public class GanymedeServer implements Server {
 
     try
       {
-	lock.establish("checkEmbeddedObjects"); // wait until we get our lock
+        lock.establish("checkEmbeddedObjects"); // wait until we get our lock
       }
     catch (InterruptedException ex)
       {
-	Ganymede.debug(ts.l("checkEmbeddedObjects.noproceed"));
+        Ganymede.debug(ts.l("checkEmbeddedObjects.noproceed"));
 
-	return false;		// actually we just failed, but same difference
+        return false;           // actually we just failed, but same difference
       }
 
     try
       {
-	// loop over the object bases
+        // loop over the object bases
 
-	for (DBObjectBase base: Ganymede.db.objectBases.values())
-	  {
-	    if (!base.isEmbedded())
-	      {
-		continue;
-	      }
+        for (DBObjectBase base: Ganymede.db.objectBases.values())
+          {
+            if (!base.isEmbedded())
+              {
+                continue;
+              }
 
-	    // loop over the objects in this base
+            // loop over the objects in this base
 
-	    Ganymede.debug(ts.l("checkEmbeddedObjects.checking", base.getName()));
+            Ganymede.debug(ts.l("checkEmbeddedObjects.checking", base.getName()));
 
-	    for (DBObject object: base.getObjects())
-	      {
-		try
-		  {
-		    gSession.getContainingObj(object);
-		  }
-		catch (IntegrityConstraintException ex)
-		  {
-		    Ganymede.debug(ts.l("checkEmbeddedObjects.aha", object.getTypeName(), object.getLabel()));
-		    ok = false;
-		  }
-	      }
-	  }
+            for (DBObject object: base.getObjects())
+              {
+                try
+                  {
+                    gSession.getContainingObj(object);
+                  }
+                catch (IntegrityConstraintException ex)
+                  {
+                    Ganymede.debug(ts.l("checkEmbeddedObjects.aha", object.getTypeName(), object.getLabel()));
+                    ok = false;
+                  }
+              }
+          }
       }
     finally
       {
-	lock.release();
+        lock.release();
       }
 
     Ganymede.debug(ts.l("checkEmbeddedObjects.done"));
@@ -1811,102 +1811,102 @@ public class GanymedeServer implements Server {
 
     try
       {
-	lock.establish("checkEmbeddedObjects"); // wait until we get our lock
+        lock.establish("checkEmbeddedObjects"); // wait until we get our lock
       }
     catch (InterruptedException ex)
       {
-	return Ganymede.createErrorDialog(ts.l("sweepEmbeddedObjects.failure"),
-					  ts.l("sweepEmbeddedObjects.failure_text"));
+        return Ganymede.createErrorDialog(ts.l("sweepEmbeddedObjects.failure"),
+                                          ts.l("sweepEmbeddedObjects.failure_text"));
       }
 
     try
       {
-	for (DBObjectBase base: Ganymede.db.objectBases.values())
-	  {
-	    if (!base.isEmbedded())
-	      {
-		continue;
-	      }
+        for (DBObjectBase base: Ganymede.db.objectBases.values())
+          {
+            if (!base.isEmbedded())
+              {
+                continue;
+              }
 
-	    // loop over the objects in this base
+            // loop over the objects in this base
 
-	    Ganymede.debug(ts.l("sweepEmbeddedObjects.checking", base.getName()));
+            Ganymede.debug(ts.l("sweepEmbeddedObjects.checking", base.getName()));
 
-	    for (DBObject object: base.getObjects())
-	      {
-		try
-		  {
-		    gSession.getContainingObj(object);
-		  }
-		catch (IntegrityConstraintException ex)
-		  {
-		    invidsToDelete.add(object.getInvid());
-		  }
-	      }
-	  }
+            for (DBObject object: base.getObjects())
+              {
+                try
+                  {
+                    gSession.getContainingObj(object);
+                  }
+                catch (IntegrityConstraintException ex)
+                  {
+                    invidsToDelete.add(object.getInvid());
+                  }
+              }
+          }
       }
     finally
       {
-	lock.release();
+        lock.release();
       }
 
     if (invidsToDelete.size() == 0)
       {
-	Ganymede.debug(ts.l("sweepEmbeddedObjects.complete"));
+        Ganymede.debug(ts.l("sweepEmbeddedObjects.complete"));
 
-	return null;
+        return null;
       }
 
     // we want a private,  supergash-privileged GanymedeSession
 
     try
       {
-	gSession = new GanymedeSession(":embeddedSweep");
+        gSession = new GanymedeSession(":embeddedSweep");
       }
     catch (RemoteException ex)
       {
         Ganymede.logError(ex);
-	throw new RuntimeException(ex.getMessage());
+        throw new RuntimeException(ex.getMessage());
       }
 
     try
       {
-	// we're going to delete the objects by skipping the GanymedeSession
-	// permission layer, which will break on non-contained embedded objects
+        // we're going to delete the objects by skipping the GanymedeSession
+        // permission layer, which will break on non-contained embedded objects
 
-	DBSession session = gSession.getDBSession();
+        DBSession session = gSession.getDBSession();
 
-	// we want a non-interactive transaction.. if an object removal fails, the
-	// whole transaction will fail, no rollbacks.
+        // we want a non-interactive transaction.. if an object removal fails, the
+        // whole transaction will fail, no rollbacks.
 
-	gSession.openTransaction("embedded object sweep", false); // non-interactive
+        gSession.openTransaction("embedded object sweep", false); // non-interactive
 
-	for (Invid objInvid: invidsToDelete)
-	  {
-	    ReturnVal retVal = session.deleteDBObject(objInvid);
+        for (Invid objInvid: invidsToDelete)
+          {
+            ReturnVal retVal = session.deleteDBObject(objInvid);
 
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		// "Couldn''t delete object {0}"
-		Ganymede.debug(ts.l("sweepEmbeddedObjects.delete_failure", gSession.getDBSession().getObjectLabel(objInvid)));
-	      }
-	    else
-	      {
-		// "Deleted object {0}"
-		Ganymede.debug(ts.l("sweepEmbeddedObjects.delete_ok", gSession.getDBSession().getObjectLabel(objInvid)));
-	      }
-	  }
+            if (!ReturnVal.didSucceed(retVal))
+              {
+                // "Couldn''t delete object {0}"
+                Ganymede.debug(ts.l("sweepEmbeddedObjects.delete_failure", gSession.getDBSession().getObjectLabel(objInvid)));
+              }
+            else
+              {
+                // "Deleted object {0}"
+                Ganymede.debug(ts.l("sweepEmbeddedObjects.delete_ok", gSession.getDBSession().getObjectLabel(objInvid)));
+              }
+          }
 
-	return gSession.commitTransaction();
+        return gSession.commitTransaction();
       }
     catch (NotLoggedInException ex)
       {
-	return Ganymede.createErrorDialog(ts.l("sweepEmbeddedObjects.error"),
-					  ts.l("sweepEmbeddedObjects.error_text", ex.getMessage()));
+        return Ganymede.createErrorDialog(ts.l("sweepEmbeddedObjects.error"),
+                                          ts.l("sweepEmbeddedObjects.error_text", ex.getMessage()));
       }
     finally
       {
-	gSession.logout();
+        gSession.logout();
       }
   }
 }

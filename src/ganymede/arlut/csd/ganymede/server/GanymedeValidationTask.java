@@ -117,151 +117,151 @@ public class GanymedeValidationTask implements Runnable {
 
     if (error != null)
       {
-	// "Deferring validation task = semaphore disabled: {0}"
-	Ganymede.debug(ts.l("run.disabled", error));
-	return;
+        // "Deferring validation task = semaphore disabled: {0}"
+        Ganymede.debug(ts.l("run.disabled", error));
+        return;
       }
 
     try
       {
-	try
-	  {
-	    mySession = new GanymedeSession("validation");
-	  }
-	catch (RemoteException ex)
-	  {
-	    // "Validation Task: Couldn''t establish session:\n{0}"
-	    Ganymede.debug(ts.l("run.nosession", Ganymede.stackTrace(ex)));
-	    return;
-	  }
+        try
+          {
+            mySession = new GanymedeSession("validation");
+          }
+        catch (RemoteException ex)
+          {
+            // "Validation Task: Couldn''t establish session:\n{0}"
+            Ganymede.debug(ts.l("run.nosession", Ganymede.stackTrace(ex)));
+            return;
+          }
 
-	// we do each query on one object type.. we have to iterate
-	// over all the object types defined in the server and scan
-	// each for objects to be inactivated and/or removed.
+        // we do each query on one object type.. we have to iterate
+        // over all the object types defined in the server and scan
+        // each for objects to be inactivated and/or removed.
 
-	baseEnum = Ganymede.db.objectBases.elements();
+        baseEnum = Ganymede.db.objectBases.elements();
 
-	while (baseEnum.hasMoreElements())
-	  {
-	    if (currentThread.isInterrupted())
-	      {
-		// "task interrupted."
-		throw new InterruptedException(ts.l("run.interrupted"));
-	      }
+        while (baseEnum.hasMoreElements())
+          {
+            if (currentThread.isInterrupted())
+              {
+                // "task interrupted."
+                throw new InterruptedException(ts.l("run.interrupted"));
+              }
 
-	    base = (DBObjectBase) baseEnum.nextElement();
+            base = (DBObjectBase) baseEnum.nextElement();
 
-	    objects = mySession.getDBSession().getTransactionalObjects(base.getTypeID());
+            objects = mySession.getDBSession().getTransactionalObjects(base.getTypeID());
 
-	    if (debug)
-	      {
-		// "Scanning base {0} for invalid objects"
-		Ganymede.debug(ts.l("run.scanning", base.getName()));
-	      }
+            if (debug)
+              {
+                // "Scanning base {0} for invalid objects"
+                Ganymede.debug(ts.l("run.scanning", base.getName()));
+              }
 
-	    for (DBObject object: objects)
-	      {
-		if (currentThread.isInterrupted())
-		  {
-		    throw new InterruptedException(ts.l("run.interrupted"));
-		  }
+            for (DBObject object: objects)
+              {
+                if (currentThread.isInterrupted())
+                  {
+                    throw new InterruptedException(ts.l("run.interrupted"));
+                  }
 
-		missingFields = object.checkRequiredFields();
+                missingFields = object.checkRequiredFields();
 
-		if (missingFields != null)
-		  {
-		    // "{0}:{1} is missing fields {2}"
-		    Ganymede.debug(ts.l("run.missing", base.getName(), object.getLabel(), VectorUtils.vectorString(missingFields)));
+                if (missingFields != null)
+                  {
+                    // "{0}:{1} is missing fields {2}"
+                    Ganymede.debug(ts.l("run.missing", base.getName(), object.getLabel(), VectorUtils.vectorString(missingFields)));
 
-		    everythingsfine = false;
-		  }
+                    everythingsfine = false;
+                  }
 
-		ReturnVal retVal;
+                ReturnVal retVal;
 
-		try
-		  {
-		    retVal = object.getBase().getObjectHook().consistencyCheck(object);
+                try
+                  {
+                    retVal = object.getBase().getObjectHook().consistencyCheck(object);
 
-		    if (!ReturnVal.didSucceed(retVal))
-		      {
-			String dialogText = retVal.getDialogText();
+                    if (!ReturnVal.didSucceed(retVal))
+                      {
+                        String dialogText = retVal.getDialogText();
 
-			if (dialogText != null)
-			  {
-			    // {0}:{1} failed consistency check: {2}
-			    Ganymede.debug(ts.l("run.inconsistent", base.getName(), object.getLabel(), dialogText));
-			  }
-			else
-			  {
-			    // {0}:{1} failed consistency check
-			    Ganymede.debug(ts.l("run.inconsistent_notext", base.getName(), object.getLabel()));
-			  }
+                        if (dialogText != null)
+                          {
+                            // {0}:{1} failed consistency check: {2}
+                            Ganymede.debug(ts.l("run.inconsistent", base.getName(), object.getLabel(), dialogText));
+                          }
+                        else
+                          {
+                            // {0}:{1} failed consistency check
+                            Ganymede.debug(ts.l("run.inconsistent_notext", base.getName(), object.getLabel()));
+                          }
 
-			everythingsfine = false;
-		      }
-		  }
-		catch (Throwable ex)
-		  {
-		    // "{0}:{1} threw exception in consistencyCheck():\n{2}"
-		    Ganymede.debug(ts.l("run.exceptioned", base.getName(), object.getLabel(), Ganymede.stackTrace(ex)));
+                        everythingsfine = false;
+                      }
+                  }
+                catch (Throwable ex)
+                  {
+                    // "{0}:{1} threw exception in consistencyCheck():\n{2}"
+                    Ganymede.debug(ts.l("run.exceptioned", base.getName(), object.getLabel(), Ganymede.stackTrace(ex)));
 
-		    everythingsfine = false;
-		  }
+                    everythingsfine = false;
+                  }
 
-		try
-		  {
-		    retVal = object.validateFieldIntegrity();  // no merge since we don't return the retVal
+                try
+                  {
+                    retVal = object.validateFieldIntegrity();  // no merge since we don't return the retVal
 
-		    if (!ReturnVal.didSucceed(retVal))
-		      {
-			String dialogText = retVal.getDialogText();
+                    if (!ReturnVal.didSucceed(retVal))
+                      {
+                        String dialogText = retVal.getDialogText();
 
-			if (dialogText != null)
-			  {
-			    // {0}:{1} failed field-level consistency check: {2}
-			    Ganymede.debug(ts.l("run.field_inconsistent", base.getName(), object.getLabel(), dialogText));
-			  }
-			else
-			  {
-			    // {0}:{1} failed field-level consistency check
-			    Ganymede.debug(ts.l("run.field_inconsistent_notext", base.getName(), object.getLabel()));
-			  }
+                        if (dialogText != null)
+                          {
+                            // {0}:{1} failed field-level consistency check: {2}
+                            Ganymede.debug(ts.l("run.field_inconsistent", base.getName(), object.getLabel(), dialogText));
+                          }
+                        else
+                          {
+                            // {0}:{1} failed field-level consistency check
+                            Ganymede.debug(ts.l("run.field_inconsistent_notext", base.getName(), object.getLabel()));
+                          }
 
-			everythingsfine = false;
-		      }
-		  }
-		catch (Throwable ex)
-		  {
-		    // "{0}:{1} threw exception in validateFieldIntegrity():\n{2}"
-		    Ganymede.debug(ts.l("run.field_exceptioned", base.getName(), object.getLabel(), Ganymede.stackTrace(ex)));
+                        everythingsfine = false;
+                      }
+                  }
+                catch (Throwable ex)
+                  {
+                    // "{0}:{1} threw exception in validateFieldIntegrity():\n{2}"
+                    Ganymede.debug(ts.l("run.field_exceptioned", base.getName(), object.getLabel(), Ganymede.stackTrace(ex)));
 
-		    everythingsfine = false;
-		  }
-	      }
-	  }
+                    everythingsfine = false;
+                  }
+              }
+          }
 
-	if (everythingsfine)
-	  {
-	    // "Validation Task: All objects in database checked out fine."
-	    Ganymede.debug(ts.l("run.ok"));
-	  }
-	else
-	  {
-	    // "Validation Task: Some objects had missing fields or were otherwise inconsistent."
-	    Ganymede.debug(ts.l("run.bad"));
-	  }
+        if (everythingsfine)
+          {
+            // "Validation Task: All objects in database checked out fine."
+            Ganymede.debug(ts.l("run.ok"));
+          }
+        else
+          {
+            // "Validation Task: Some objects had missing fields or were otherwise inconsistent."
+            Ganymede.debug(ts.l("run.bad"));
+          }
       }
     catch (InterruptedException ex)
       {
-	// "GanymedeValidationTask interrupted by GanymedeScheduler, validation incomplete."
-	Ganymede.debug(ts.l("run.interrupted_explanation"));
+        // "GanymedeValidationTask interrupted by GanymedeScheduler, validation incomplete."
+        Ganymede.debug(ts.l("run.interrupted_explanation"));
       }
     finally
       {
-	if (mySession != null)
-	  {
-	    mySession.logout();
-	  }
+        if (mySession != null)
+          {
+            mySession.logout();
+          }
       }
   }
 }

@@ -197,22 +197,22 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
 
     if (selectedNode != null)
       {
-	selectedBaseName = selectedNode.getTypeText();
+        selectedBaseName = selectedNode.getTypeText();
 
-	// if we get the handle and query it for its label, we
-	// avoid getting the "(inactive") tacked on for inactive
-	// objects.
+        // if we get the handle and query it for its label, we
+        // avoid getting the "(inactive") tacked on for inactive
+        // objects.
 
-	selectedObjectName = selectedNode.getHandle().getLabel();
+        selectedObjectName = selectedNode.getHandle().getLabel();
 
         selectedFound = true;
       }
     else
       {
-	if (gclient.prefs != null)
-	  {
-	    selectedBaseName = gclient.prefs.get(DEFAULT_OPEN, null);
-	  }
+        if (gclient.prefs != null)
+          {
+            selectedBaseName = gclient.prefs.get(DEFAULT_OPEN, null);
+          }
       }
 
     gbl = new GridBagLayout();
@@ -279,35 +279,35 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
 
     for (int i = 0; i < bases.size(); i++)
       {
-	thisBase = (BaseDump) bases.elementAt(i);
-	String name = (String) baseNames.get(thisBase);
+        thisBase = (BaseDump) bases.elementAt(i);
+        String name = (String) baseNames.get(thisBase);
 
-	if (!thisBase.isEmbedded())
-	  {
-	    listHandle lh = new listHandle(name, (Short) baseToShort.get(thisBase));
-	    listHandles.addElement(lh);
-	  }
+        if (!thisBase.isEmbedded())
+          {
+            listHandle lh = new listHandle(name, (Short) baseToShort.get(thisBase));
+            listHandles.addElement(lh);
+          }
       }
 
     listHandles = client.sortListHandleVector(listHandles);
 
     for (int i = 0; i < listHandles.size(); i++)
       {
-	type.addItem(listHandles.elementAt(i));
+        type.addItem(listHandles.elementAt(i));
       }
 
     if (selectedBaseName != null)
       {
-	for (int i = 0; i < listHandles.size(); i++)
-	  {
-	    listHandle lh = (listHandle) listHandles.elementAt(i);
+        for (int i = 0; i < listHandles.size(); i++)
+          {
+            listHandle lh = (listHandle) listHandles.elementAt(i);
 
-	    if (lh.getLabel().equals(selectedBaseName))
-	      {
-		type.setSelectedItem(lh);
-		break;
-	      }
-	  }
+            if (lh.getLabel().equals(selectedBaseName))
+              {
+                type.setSelectedItem(lh);
+                break;
+              }
+          }
       }
 
     gbc.gridx = 0;
@@ -341,7 +341,7 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
 
     if (selectedFound && selectedObjectName != null)
       {
-	text.setText(selectedObjectName);
+        text.setText(selectedObjectName);
       }
 
     text.addActionListener(this);
@@ -362,25 +362,25 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
 
     if (isRunningOnMac())
       {
-	JPanel macPanel = new JPanel();
-	macPanel.setLayout(new BorderLayout());
+        JPanel macPanel = new JPanel();
+        macPanel.setLayout(new BorderLayout());
 
-	JPanel buttonP = new JPanel();
+        JPanel buttonP = new JPanel();
 
-	buttonP.add(neverMind);
-	buttonP.add(ok);
+        buttonP.add(neverMind);
+        buttonP.add(ok);
 
-	macPanel.add(buttonP, BorderLayout.EAST);
-	getContentPane().add(macPanel, BorderLayout.SOUTH);
+        macPanel.add(buttonP, BorderLayout.EAST);
+        getContentPane().add(macPanel, BorderLayout.SOUTH);
       }
     else
       {
-	JPanel buttonP = new JPanel();
+        JPanel buttonP = new JPanel();
 
-	buttonP.add(ok);
-	buttonP.add(neverMind);
+        buttonP.add(ok);
+        buttonP.add(neverMind);
 
-	getContentPane().add(buttonP, BorderLayout.SOUTH);
+        getContentPane().add(buttonP, BorderLayout.SOUTH);
       }
 
     setBounds(150,100, 200,100);
@@ -426,12 +426,12 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
 
     if (!foundOne)
       {
-	invid = null;
+        invid = null;
       }
 
     if (gclient.prefs != null)
       {
-	gclient.prefs.put(DEFAULT_OPEN, getTypeString());
+        gclient.prefs.put(DEFAULT_OPEN, getTypeString());
       }
 
     setVisible(false);
@@ -440,25 +440,25 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
 
     if (list != null)
       {
-	if (debug)
-	  {
-	    System.out.println("Removing the list");
-	  }
-	pane.remove(list);
+        if (debug)
+          {
+            System.out.println("Removing the list");
+          }
+        pane.remove(list);
       }
 
     if (pane != null)
       {
-	if (debug)
-	  {
-	    System.out.println("Removing pane");
-	  }
-	middle.remove(pane);
+        if (debug)
+          {
+            System.out.println("Removing pane");
+          }
+        middle.remove(pane);
       }
 
     if (debug)
       {
-	System.out.println("Nulling the pane and list");
+        System.out.println("Nulling the pane and list");
       }
 
     pane = null;
@@ -469,194 +469,194 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
   {
     if (debug)
       {
-	System.out.println("Action performed: " + e.getActionCommand());
+        System.out.println("Action performed: " + e.getActionCommand());
       }
 
     if (e.getSource() == text)
       {
-	ok.doClick();
+        ok.doClick();
       }
     else if (e.getActionCommand().equals(OPEN_OBJ))
       {
-	String string = text.getText();
+        String string = text.getText();
 
-	if ((string == null) || (string.equals("")))
-	  {
-	    // "Error, no object label provided to object open dialog."
-	    client.setStatus(ts.l("actionPerformed.name_missing_status"));
-	    return;
-	  }
+        if ((string == null) || (string.equals("")))
+          {
+            // "Error, no object label provided to object open dialog."
+            client.setStatus(ts.l("actionPerformed.name_missing_status"));
+            return;
+          }
 
-	if ((currentObject != null) && (string.equals(currentObject.getLabel())))
-	  {
-	    // This was set from the listbox, and hasn't been changed.
+        if ((currentObject != null) && (string.equals(currentObject.getLabel())))
+          {
+            // This was set from the listbox, and hasn't been changed.
 
-	    invid = (Invid)currentObject.getObject();
-	    close(true);
+            invid = (Invid)currentObject.getObject();
+            close(true);
 
-	    return;
-	  }
+            return;
+          }
 
-	// We're looking up a new one.  Deselect the selected node in
-	// the tree, since we're going to be working with a different
-	// object.
+        // We're looking up a new one.  Deselect the selected node in
+        // the tree, since we're going to be working with a different
+        // object.
 
-	client.tree.unselectAllNodes(true);
-	client.tree.refresh();
-	currentObject = null;
+        client.tree.unselectAllNodes(true);
+        client.tree.refresh();
+        currentObject = null;
 
-	if (list == null)
-	  {
-	    list = new JList();
-	    list.setBorder(client.lineBorder);
-	    list.setModel(new DefaultListModel());
-	    list.addMouseListener(this);
-	  }
-	else
-	  {
-	    ((DefaultListModel)list.getModel()).clear();
-	  }
+        if (list == null)
+          {
+            list = new JList();
+            list.setBorder(client.lineBorder);
+            list.setModel(new DefaultListModel());
+            list.addMouseListener(this);
+          }
+        else
+          {
+            ((DefaultListModel)list.getModel()).clear();
+          }
 
-	if (pane == null)
-	  {
-	    pane = new JScrollPane(list);
+        if (pane == null)
+          {
+            pane = new JScrollPane(list);
 
-	    // "Matching Objects"
-	    pane.setBorder(new TitledBorder(ts.l("actionPerformed.matching_border")));
-	  }
+            // "Matching Objects"
+            pane.setBorder(new TitledBorder(ts.l("actionPerformed.matching_border")));
+          }
 
-	listHandle lh = (listHandle) type.getSelectedItem();
-	Short baseID = (Short) lh.getObject();
+        listHandle lh = (listHandle) type.getSelectedItem();
+        Short baseID = (Short) lh.getObject();
 
-	if (debug)
-	  {
-	    System.out.println("BaseID = " + baseID + ", string = " + string);
-	  }
+        if (debug)
+          {
+            System.out.println("BaseID = " + baseID + ", string = " + string);
+          }
 
-	// "Searching for object named {0}."
-	client.setStatus(ts.l("actionPerformed.searching_status", string));
+        // "Searching for object named {0}."
+        client.setStatus(ts.l("actionPerformed.searching_status", string));
 
-	// First see if this exactly matches something, then do the STARTSWITH stuff
+        // First see if this exactly matches something, then do the STARTSWITH stuff
 
-	try
-	  {
-	    invid = client.session.findLabeledObject(string, baseID, false);
+        try
+          {
+            invid = client.session.findLabeledObject(string, baseID, false);
 
-	    if (invid != null)
-	      {
-		// "Found object named {0}."
+            if (invid != null)
+              {
+                // "Found object named {0}."
 
-		client.setStatus(ts.l("actionPerformed.found_status", string));
-		close(true);
+                client.setStatus(ts.l("actionPerformed.found_status", string));
+                close(true);
 
-		return;
-	      }
-	  }
-	catch (java.rmi.RemoteException ex)
-	  {
-	    close(false);
-	    client.processExceptionRethrow(ex, "Remote Exception calling findLabeledObject()");
-	  }
+                return;
+              }
+          }
+        catch (java.rmi.RemoteException ex)
+          {
+            close(false);
+            client.processExceptionRethrow(ex, "Remote Exception calling findLabeledObject()");
+          }
 
-	// no direct match, let's look for a prefix match
+        // no direct match, let's look for a prefix match
 
-	try
-	  {
-	    if (debug)
-	      {
-		System.out.println("Looking for Startswith...");
-	      }
+        try
+          {
+            if (debug)
+              {
+                System.out.println("Looking for Startswith...");
+              }
 
-	    // "Searching for objects whose names begin with {0}."
-	    client.setStatus(ts.l("actionPerformed.searching_prefix_status", string));
+            // "Searching for objects whose names begin with {0}."
+            client.setStatus(ts.l("actionPerformed.searching_prefix_status", string));
 
-	    QueryDataNode node = new QueryDataNode(QueryDataNode.NOCASEMATCHES, "^" + string);
-	    QueryResult edit_query = client.session.query(new Query(baseID.shortValue(), node, editableOnly));
+            QueryDataNode node = new QueryDataNode(QueryDataNode.NOCASEMATCHES, "^" + string);
+            QueryResult edit_query = client.session.query(new Query(baseID.shortValue(), node, editableOnly));
 
-	    Vector edit_invids = edit_query.getListHandles();
+            Vector edit_invids = edit_query.getListHandles();
 
-	    // and add a direct match of a different type, if it exists
+            // and add a direct match of a different type, if it exists
 
-	    invid = client.session.findLabeledObject(string, baseID, true);
+            invid = client.session.findLabeledObject(string, baseID, true);
 
-	    if (invid != null)
-	      {
-		String matchLabel = client.session.viewObjectLabel(invid);
+            if (invid != null)
+              {
+                String matchLabel = client.session.viewObjectLabel(invid);
 
-		edit_invids.add(0, new listHandle("(" + client.getObjectType(invid) + ") " + string, invid));
-	      }
+                edit_invids.add(0, new listHandle("(" + client.getObjectType(invid) + ") " + string, invid));
+              }
 
-	    if (edit_invids.size() == 1)
-	      {
-		invid = (Invid)((listHandle)edit_invids.elementAt(0)).getObject();
-		close(true);
-	      }
-	    else if (edit_invids.size() == 0)
-	      {
-		// "Error Finding Object"
-		// "No editable object starts with that string."
-		// "No viewable object starts with that string."
-		client.showErrorMessage(ts.l("actionPerformed.error_title"),
-					editableOnly ?
-					ts.l("actionPerformed.no_editable_text") :
-					ts.l("actionPerformed.no_viewable_text"));
-		return;
-	      }
-	    else
-	      {
-		(new VecQuickSort(edit_invids,
-				  new Comparator() {
-				    public int compare(Object a, Object b)
-				    {
-				      listHandle aF, bF;
-				      
-				      aF = (listHandle) a;
-				      bF = (listHandle) b;
-				      int comp = 0;
+            if (edit_invids.size() == 1)
+              {
+                invid = (Invid)((listHandle)edit_invids.elementAt(0)).getObject();
+                close(true);
+              }
+            else if (edit_invids.size() == 0)
+              {
+                // "Error Finding Object"
+                // "No editable object starts with that string."
+                // "No viewable object starts with that string."
+                client.showErrorMessage(ts.l("actionPerformed.error_title"),
+                                        editableOnly ?
+                                        ts.l("actionPerformed.no_editable_text") :
+                                        ts.l("actionPerformed.no_viewable_text"));
+                return;
+              }
+            else
+              {
+                (new VecQuickSort(edit_invids,
+                                  new Comparator() {
+                                    public int compare(Object a, Object b)
+                                    {
+                                      listHandle aF, bF;
+                                      
+                                      aF = (listHandle) a;
+                                      bF = (listHandle) b;
+                                      int comp = 0;
 
-				      comp =  aF.toString().compareToIgnoreCase(bF.toString());
+                                      comp =  aF.toString().compareToIgnoreCase(bF.toString());
 
-				      if (comp < 0)
-					{
-					  return -1;
-					}
-				      else if (comp > 0)
-					{
-					  return 1;
-					}
-				      else
-					{
-					  return 0;
-					}
-				    }
-				  })).sort();
+                                      if (comp < 0)
+                                        {
+                                          return -1;
+                                        }
+                                      else if (comp > 0)
+                                        {
+                                          return 1;
+                                        }
+                                      else
+                                        {
+                                          return 0;
+                                        }
+                                    }
+                                  })).sort();
 
-		DefaultListModel model = (DefaultListModel)list.getModel();
+                DefaultListModel model = (DefaultListModel)list.getModel();
 
-		for (int i = 0; i < edit_invids.size(); i++)
-		  {
-		    model.addElement(edit_invids.elementAt(i));
-		  }
+                for (int i = 0; i < edit_invids.size(); i++)
+                  {
+                    model.addElement(edit_invids.elementAt(i));
+                  }
 
-		gbc.gridx = 0;
-		gbc.gridy = 3;
-		gbc.gridwidth = GridBagConstraints.REMAINDER;
-		gbc.fill = GridBagConstraints.HORIZONTAL;
-		gbl.setConstraints(pane, gbc);
+                gbc.gridx = 0;
+                gbc.gridy = 3;
+                gbc.gridwidth = GridBagConstraints.REMAINDER;
+                gbc.fill = GridBagConstraints.HORIZONTAL;
+                gbl.setConstraints(pane, gbc);
 
-		middle.add(pane);
-		pack();
-	      }
-	  }
-	catch (java.rmi.RemoteException rx)
-	  {
-	    close(false);
-	    client.processExceptionRethrow(rx, "Remote Exception opening object");
-	  }
+                middle.add(pane);
+                pack();
+              }
+          }
+        catch (java.rmi.RemoteException rx)
+          {
+            close(false);
+            client.processExceptionRethrow(rx, "Remote Exception opening object");
+          }
       }
     else if (e.getActionCommand().equals(CANCEL))
       {
-	close(false);
+        close(false);
       }
   }
 
@@ -666,12 +666,12 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
 
     if ((e.getWhen() - lastClick < 500)  && (currentObject == lastObject))
       {
-	invid = (Invid)((listHandle)currentObject).getObject();
-	close(true);
+        invid = (Invid)((listHandle)currentObject).getObject();
+        close(true);
       }
     else
       {
-	text.setText(currentObject.toString());
+        text.setText(currentObject.toString());
       }
 
     lastClick = e.getWhen();

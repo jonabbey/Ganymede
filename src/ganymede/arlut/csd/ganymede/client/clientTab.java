@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2005
@@ -92,7 +92,7 @@ public abstract class clientTab {
 
     if (index != -1)
       {
-	pane.setIconAt(index, icon);
+        pane.setIconAt(index, icon);
       }
   }
 
@@ -105,8 +105,8 @@ public abstract class clientTab {
   {
     synchronized (tabList)
       {
-	pane.addTab(getTabName(), icon, getComponent());
-	tabList.addElement(this);
+        pane.addTab(getTabName(), icon, getComponent());
+        tabList.addElement(this);
       }
   }
 
@@ -126,8 +126,8 @@ public abstract class clientTab {
   {
     if (!this.isCreated())
       {
-	this.initialize();
-	this.created = true;
+        this.initialize();
+        this.created = true;
       }
 
     pane.setSelectedIndex(this.getIndex());

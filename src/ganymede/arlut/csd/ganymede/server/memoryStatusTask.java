@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -106,7 +106,7 @@ class memoryStatusTask implements Runnable, silentTask {
   {
     if (ts == null)
       {
-	ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.memoryStatusTask");
+        ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.memoryStatusTask");
       }
   }
 
@@ -118,27 +118,27 @@ class memoryStatusTask implements Runnable, silentTask {
 
     if (debug)
       {
-	if (count == period)
-	  {
-	    count = 0;
-	  }
-	
-	if (count == 0)
-	  {
-	    // ">> [ {0} ] memory status dump: in use = {1}, free = {2}, total = {3}"
-	    Ganymede.debug(ts.l("status_dump",
-				new Date(),
-				Long.valueOf(rt.totalMemory() - rt.freeMemory()),
-				Long.valueOf(rt.freeMemory()),
-				Long.valueOf(rt.totalMemory())));
-	  }
+        if (count == period)
+          {
+            count = 0;
+          }
+        
+        if (count == 0)
+          {
+            // ">> [ {0} ] memory status dump: in use = {1}, free = {2}, total = {3}"
+            Ganymede.debug(ts.l("status_dump",
+                                new Date(),
+                                Long.valueOf(rt.totalMemory() - rt.freeMemory()),
+                                Long.valueOf(rt.freeMemory()),
+                                Long.valueOf(rt.totalMemory())));
+          }
       }
 
     GanymedeAdmin.updateMemState(rt.freeMemory(), rt.totalMemory());
 
     if (debug)
       {
-	count++;
+        count++;
       }
   }
 }

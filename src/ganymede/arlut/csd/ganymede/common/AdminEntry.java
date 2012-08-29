@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -72,9 +72,9 @@ public class AdminEntry implements java.io.Serializable {
   /* -- */
 
   public AdminEntry(String sessionName, String personaName,
-		    String hostname, String status,
-		    String connecttime, String event,
-		    int objectsCheckedOut)
+                    String hostname, String status,
+                    String connecttime, String event,
+                    int objectsCheckedOut)
   {
     this.sessionName = sessionName;
     this.personaName = personaName;

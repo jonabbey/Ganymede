@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -84,7 +84,7 @@ import arlut.csd.Util.TranslationService;
 public class DateDBField extends DBField implements date_field {
 
   static DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss",
-						     java.util.Locale.US);
+                                                     java.util.Locale.US);
 
   /**
    * TranslationService object for handling string localization in
@@ -241,8 +241,8 @@ public class DateDBField extends DBField implements date_field {
 
     if (value == null)
       {
-	// "null"
-	return ts.l("getValueString.null");
+        // "null"
+        return ts.l("getValueString.null");
       }
     
     // pass the date through the localized default formatter rather
@@ -262,7 +262,7 @@ public class DateDBField extends DBField implements date_field {
   {
     if (value == null)
       {
-	return "null";
+        return "null";
       }
 
     return Long.toString(((Date) this.value).getTime());
@@ -287,24 +287,24 @@ public class DateDBField extends DBField implements date_field {
 
     if (!(orig instanceof DateDBField))
       {
-	throw new IllegalArgumentException("bad field comparison");
+        throw new IllegalArgumentException("bad field comparison");
       }
 
     origD = (DateDBField) orig;
 
     if (!origD.value().equals(this.value()))
       {
-	// "\tOld: {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz}\n"
-	result.append(ts.l("getDiffString.old", origD.value));
+        // "\tOld: {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz}\n"
+        result.append(ts.l("getDiffString.old", origD.value));
 
-	// "\tNew: {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz}\n"
-	result.append(ts.l("getDiffString.new", this.value));
-	
-	return result.toString();
+        // "\tNew: {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz}\n"
+        result.append(ts.l("getDiffString.new", this.value));
+        
+        return result.toString();
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -334,7 +334,7 @@ public class DateDBField extends DBField implements date_field {
 
     if (!isEditable(true))
       {
-	throw new IllegalArgumentException("not applicable to a non-editable field/object");
+        throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
     eObj = (DBEditObject) owner;
@@ -360,7 +360,7 @@ public class DateDBField extends DBField implements date_field {
 
     if (!isEditable(true))
       {
-	throw new IllegalArgumentException("not applicable to a non-editable field/object");
+        throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
     eObj = (DBEditObject) owner;
@@ -386,7 +386,7 @@ public class DateDBField extends DBField implements date_field {
 
     if (!isEditable(true))
       {
-	throw new IllegalArgumentException("not applicable to a non-editable field/object");
+        throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
     eObj = (DBEditObject) owner;
@@ -414,57 +414,57 @@ public class DateDBField extends DBField implements date_field {
 
     if (!isEditable(true))
       {
-	// "Date Field Error"
-	// "Don''t have permission to edit field {0} in object {1}."
-	return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
-					  ts.l("verifyNewValue.bad_perm", getName(), owner.getLabel()));
+        // "Date Field Error"
+        // "Don''t have permission to edit field {0} in object {1}."
+        return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
+                                          ts.l("verifyNewValue.bad_perm", getName(), owner.getLabel()));
       }
 
     eObj = (DBEditObject) owner;
 
     if (!verifyTypeMatch(o))
       {
-	// "Date Field Error"
-	// "Type error.  Submitted value {0} is not a Date!  Major client error while trying to edit field {1} in object {2}."
-	return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
-					  ts.l("verifyNewValue.bad_type", o, getName(), owner.getLabel()));
+        // "Date Field Error"
+        // "Type error.  Submitted value {0} is not a Date!  Major client error while trying to edit field {1} in object {2}."
+        return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
+                                          ts.l("verifyNewValue.bad_type", o, getName(), owner.getLabel()));
       }
 
     if (o == null)
       {
-	return eObj.verifyNewValue(this, null);  // FindBugs explicit
+        return eObj.verifyNewValue(this, null);  // FindBugs explicit
       }
 
     d = (Date) o;
 
     if (limited())
       {
-	d2 = minDate();
+        d2 = minDate();
 
-	if (d2 != null)
-	  {
-	    if (d.before(d2))
-	      {
-		// "Date Field Error"
-		// "Submitted Date {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz} is out of range for field {1} in object {2}.\n
-		// This field will not accept dates before {3,date,EEE, MMM d yyyy hh:mm:ss aaa zz}."
-		return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
-						  ts.l("verifyNewValue.under_range", d, getName(), owner.getLabel(), d2));
-	      }
-	  }
+        if (d2 != null)
+          {
+            if (d.before(d2))
+              {
+                // "Date Field Error"
+                // "Submitted Date {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz} is out of range for field {1} in object {2}.\n
+                // This field will not accept dates before {3,date,EEE, MMM d yyyy hh:mm:ss aaa zz}."
+                return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
+                                                  ts.l("verifyNewValue.under_range", d, getName(), owner.getLabel(), d2));
+              }
+          }
 
-	d2 = maxDate();
-	if (d2 != null)
-	  {
-	    if (d.after(d2))
-	      {
-		// "Date Field Error"
-		// "Submitted Date {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz} is out of range for field {1} in object {2}.\n
-		// This field will not accept dates after {3,date,EEE, MMM d yyyy hh:mm:ss aaa zz}."
-		return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
-						  ts.l("verifyNewValue.over_range", d, getName(), owner.getLabel(), d2));
-	      }
-	  }
+        d2 = maxDate();
+        if (d2 != null)
+          {
+            if (d.after(d2))
+              {
+                // "Date Field Error"
+                // "Submitted Date {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz} is out of range for field {1} in object {2}.\n
+                // This field will not accept dates after {3,date,EEE, MMM d yyyy hh:mm:ss aaa zz}."
+                return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
+                                                  ts.l("verifyNewValue.over_range", d, getName(), owner.getLabel(), d2));
+              }
+          }
       }
 
     // have our parent make the final ok on the value

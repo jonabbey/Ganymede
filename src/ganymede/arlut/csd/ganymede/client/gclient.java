@@ -216,11 +216,11 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     try
       {
-	_prefs = Preferences.userNodeForPackage(gclient.class);
+        _prefs = Preferences.userNodeForPackage(gclient.class);
       }
     catch (Throwable ex)
       {
-	ex.printStackTrace();
+        ex.printStackTrace();
       }
 
     prefs = _prefs;
@@ -453,7 +453,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     somethingChanged = false;  // This will be set to true if the user changes anything
 
   private int
-    buildPhase = -1;		// unknown
+    buildPhase = -1;            // unknown
 
   /**
    * A custom KeyEventDispatcher we use to toggle the commit button's
@@ -729,31 +729,31 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (!Invid.hasAllocator())
       {
-	Invid.setAllocator(new InvidPool(3257)); // modest sized prime, should be adequate for the client
+        Invid.setAllocator(new InvidPool(3257)); // modest sized prime, should be adequate for the client
       }
 
     if (!debug)
       {
-	debug = g.debug;
+        debug = g.debug;
       }
 
     if (debug)
       {
-	System.err.println("Starting client");
+        System.err.println("Starting client");
       }
 
     enableEvents(AWTEvent.WINDOW_EVENT_MASK);
 
     if (s == null)
       {
-	throw new IllegalArgumentException("Ganymede Error: Parameter for Session s is null");
+        throw new IllegalArgumentException("Ganymede Error: Parameter for Session s is null");
       }
 
     // If we're running on the Mac, let's try to fit in a bit better.
 
     if (glogin.isRunningOnMac())
       {
-	System.setProperty("apple.laf.useScreenMenuBar", "true");
+        System.setProperty("apple.laf.useScreenMenuBar", "true");
       }
 
     session = s;
@@ -762,23 +762,23 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     try
       {
-	currentPersonaString = session.getActivePersonaName();
+        currentPersonaString = session.getActivePersonaName();
 
-	// In gclient, currentPersonaString must not be null.. if we
-	// didn't get a privileged persona, assume unprivileged
-	// end-user account name.
+        // In gclient, currentPersonaString must not be null.. if we
+        // didn't get a privileged persona, assume unprivileged
+        // end-user account name.
 
-	if (currentPersonaString == null)
-	  {
-	    currentPersonaString = my_username;
-	  }
+        if (currentPersonaString == null)
+          {
+            currentPersonaString = my_username;
+          }
 
-	// "Ganymede Client: {0} logged in"
-	setTitle(ts.l("global.logged_in_title", currentPersonaString));
+        // "Ganymede Client: {0} logged in"
+        setTitle(ts.l("global.logged_in_title", currentPersonaString));
       }
     catch (RemoteException rx)
       {
-	processExceptionRethrow(rx);
+        processExceptionRethrow(rx);
       }
 
     if (reportVersionToServer)
@@ -803,7 +803,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (debug)
       {
-	System.err.println("Creating menu bar");
+        System.err.println("Creating menu bar");
       }
 
     // Make the menu bar
@@ -815,7 +815,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (debug)
       {
-	System.err.println("Adding left and right panels");
+        System.err.println("Adding left and right panels");
       }
 
     leftP = new JPanel(false);
@@ -824,11 +824,11 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     try
       {
-	buildTree();
+        buildTree();
       }
     catch (Exception ex)
       {
-	processExceptionRethrow(ex, "caught remote exception in buildTree");
+        processExceptionRethrow(ex, "caught remote exception in buildTree");
       }
 
     // The right panel which will contain the windowPanel
@@ -845,17 +845,17 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (!glogin.isRunningOnMac())
       {
-	toolBar = createToolbar();
+        toolBar = createToolbar();
 
-	getContentPane().add("North", toolBar);
+        getContentPane().add("North", toolBar);
       }
     else
       {
-	UnifiedToolBar macToolBar = createMacToolBar();
+        UnifiedToolBar macToolBar = createMacToolBar();
 
-	macToolBar.installWindowDraggerOnWindow(this);
+        macToolBar.installWindowDraggerOnWindow(this);
 
-	getContentPane().add("North", macToolBar.getComponent());
+        getContentPane().add("North", macToolBar.getComponent());
       }
 
     commit = new JButton("");
@@ -869,7 +869,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     cancel = new JButton(ts.l("init.cancel_button"));
     cancel.setEnabled(false);
     cancel.setOpaque(true);
-    cancel.setToolTipText(ts.l("init.cancel_tooltip"));	// "Click this to cancel your transaction"
+    cancel.setToolTipText(ts.l("init.cancel_tooltip")); // "Click this to cancel your transaction"
     cancel.addActionListener(this);
 
     // Button bar at bottom, includes commit/cancel panel and taskbar
@@ -878,15 +878,15 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (glogin.isRunningOnMac())
       {
-	// cancel is to the left of commit on the mac
+        // cancel is to the left of commit on the mac
 
-	bottomButtonP.add(cancel);
-	bottomButtonP.add(commit);
+        bottomButtonP.add(cancel);
+        bottomButtonP.add(commit);
       }
     else
       {
-	bottomButtonP.add(commit);
-	bottomButtonP.add(cancel);
+        bottomButtonP.add(commit);
+        bottomButtonP.add(cancel);
       }
 
     bottomButtonP.setBorder(loweredBorder);
@@ -943,50 +943,50 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     try
       {
-	ownerGroups = session.getOwnerGroups().getListHandles();
+        ownerGroups = session.getOwnerGroups().getListHandles();
 
-	if (ownerGroups.size() == 0)
-	  {
-	    defaultOwnerMI.setEnabled(false);
-	  }
-	else if (ownerGroups.size() == 1)
-	  {
-	    chooseDefaultOwner(false); // tells the session our default owner
-	    defaultOwnerMI.setEnabled(false);
-	  }
+        if (ownerGroups.size() == 0)
+          {
+            defaultOwnerMI.setEnabled(false);
+          }
+        else if (ownerGroups.size() == 1)
+          {
+            chooseDefaultOwner(false); // tells the session our default owner
+            defaultOwnerMI.setEnabled(false);
+          }
       }
     catch (RemoteException ex)
       {
-	processExceptionRethrow(ex);
+        processExceptionRethrow(ex);
       }
 
     pack();
 
     if (!sizer.restoreSize(this))
       {
-	setSize(800, 600);
-	this.setLocationRelativeTo(null); // center gclient frame
-	sizer.saveSize(this);
+        setSize(800, 600);
+        this.setLocationRelativeTo(null); // center gclient frame
+        sizer.saveSize(this);
       }
 
     tree.requestFocus();
 
     if (glogin.isRunningOnMac())
       {
-	MacOSXController controller = new MacOSXController(this);
+        MacOSXController controller = new MacOSXController(this);
 
-	try
-	  {
-	    OSXAdapter.setQuitHandler(controller, MacOSXController.class.getMethod("handleQuit", (Class[]) null));
-	    OSXAdapter.setAboutHandler(controller, MacOSXController.class.getMethod("handleAbout", (Class[]) null));
-	  }
-	catch (NoSuchMethodException ex)
-	  {
-	    // we shouldn't get an exception here at runtime unless
-	    // we've made a mistake in the MacOSXController class.
+        try
+          {
+            OSXAdapter.setQuitHandler(controller, MacOSXController.class.getMethod("handleQuit", (Class[]) null));
+            OSXAdapter.setAboutHandler(controller, MacOSXController.class.getMethod("handleAbout", (Class[]) null));
+          }
+        catch (NoSuchMethodException ex)
+          {
+            // we shouldn't get an exception here at runtime unless
+            // we've made a mistake in the MacOSXController class.
 
-	    processExceptionRethrow(ex);
-	  }
+            processExceptionRethrow(ex);
+          }
       }
 
     altKeyListener = new AltKeyListener();
@@ -1023,15 +1023,15 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (glogin.isRunningOnMac())
       {
-	// "New Object"
-	createObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_3_mac")));
-	setAccelerator(createObjectMI, ts.l("createMenuBar.action_menu_3_mac_accelerator_optional"));
+        // "New Object"
+        createObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_3_mac")));
+        setAccelerator(createObjectMI, ts.l("createMenuBar.action_menu_3_mac_accelerator_optional"));
       }
     else
       {
-	// "Create Object"
-	createObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_3")));
-	setMenuMnemonic(createObjectMI, ts.l("createMenuBar.action_menu_3_key_optional"));
+        // "Create Object"
+        createObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_3")));
+        setMenuMnemonic(createObjectMI, ts.l("createMenuBar.action_menu_3_key_optional"));
       }
 
     createObjectMI.setActionCommand(create_action);
@@ -1041,15 +1041,15 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (glogin.isRunningOnMac())
       {
-	// "Open Object"
-	viewObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_2_mac")));
-	setAccelerator(viewObjectMI, ts.l("createMenuBar.action_menu_2_mac_accelerator_optional"));
+        // "Open Object"
+        viewObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_2_mac")));
+        setAccelerator(viewObjectMI, ts.l("createMenuBar.action_menu_2_mac_accelerator_optional"));
       }
     else
       {
-	// "View Object"
-	viewObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_2")));
-	setMenuMnemonic(viewObjectMI, ts.l("createMenuBar.action_menu_2_key_optional"));
+        // "View Object"
+        viewObjectMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_2")));
+        setMenuMnemonic(viewObjectMI, ts.l("createMenuBar.action_menu_2_key_optional"));
       }
 
     viewObjectMI.setActionCommand(view_action);
@@ -1096,9 +1096,9 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (glogin.isRunningOnMac())
       {
-	fileMenu.add(createObjectMI);
-	fileMenu.add(viewObjectMI);
-	fileMenu.addSeparator();
+        fileMenu.add(createObjectMI);
+        fileMenu.add(viewObjectMI);
+        fileMenu.addSeparator();
       }
 
     fileMenu.add(clearTreeMI);
@@ -1111,8 +1111,8 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (!glogin.isRunningOnMac())
       {
-	fileMenu.addSeparator();
-	fileMenu.add(logoutMI);
+        fileMenu.addSeparator();
+        fileMenu.add(logoutMI);
       }
 
     // Edit menu.. don't enable until i figure out whether we actually
@@ -1121,22 +1121,22 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (false && glogin.isRunningOnMac())
       {
-	editMenu = new JMenu(ts.l("createMenuBar.edit_menu")); // "Edit"
+        editMenu = new JMenu(ts.l("createMenuBar.edit_menu")); // "Edit"
 
-	cutMI = new JMenuItem(ts.l("createMenuBar.edit_menu_0")); // "Cut"
-	setAccelerator(cutMI, ts.l("createMenuBar.edit_menu_0_mac_accelerator_optional")); // "X"
-	cutMI.addActionListener(this);
-	editMenu.add(cutMI);
+        cutMI = new JMenuItem(ts.l("createMenuBar.edit_menu_0")); // "Cut"
+        setAccelerator(cutMI, ts.l("createMenuBar.edit_menu_0_mac_accelerator_optional")); // "X"
+        cutMI.addActionListener(this);
+        editMenu.add(cutMI);
 
-	copyMI = new JMenuItem(ts.l("createMenuBar.edit_menu_1")); // "Copy"
-	setAccelerator(copyMI, ts.l("createMenuBar.edit_menu_1_mac_accelerator_optional")); // "C"
-	copyMI.addActionListener(this);
-	editMenu.add(copyMI);
+        copyMI = new JMenuItem(ts.l("createMenuBar.edit_menu_1")); // "Copy"
+        setAccelerator(copyMI, ts.l("createMenuBar.edit_menu_1_mac_accelerator_optional")); // "C"
+        copyMI.addActionListener(this);
+        editMenu.add(copyMI);
 
-	pasteMI = new JMenuItem(ts.l("createMenuBar.edit_menu_2")); // "Paste"
-	setAccelerator(pasteMI, ts.l("createMenuBar.edit_menu_2_mac_accelerator_optional")); // "V"
-	pasteMI.addActionListener(this);
-	editMenu.add(pasteMI);
+        pasteMI = new JMenuItem(ts.l("createMenuBar.edit_menu_2")); // "Paste"
+        setAccelerator(pasteMI, ts.l("createMenuBar.edit_menu_2_mac_accelerator_optional")); // "V"
+        pasteMI.addActionListener(this);
+        editMenu.add(pasteMI);
       }
 
     // Action menu
@@ -1149,22 +1149,22 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     try
       {
-	personae = session.getPersonae();
+        personae = session.getPersonae();
       }
     catch (Exception rx)
       {
-	processExceptionRethrow(rx);
+        processExceptionRethrow(rx);
       }
 
     personaListener = new PersonaListener(session, this);
 
     if ((personae != null) && personae.size() > 1)
       {
-	// "Change Persona"
-	changePersonaMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_0")));
-	setMenuMnemonic(changePersonaMI, ts.l("createMenuBar.action_menu_0_key_optional"));
-	changePersonaMI.setActionCommand(persona_action);
-	changePersonaMI.addActionListener(this);
+        // "Change Persona"
+        changePersonaMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_0")));
+        setMenuMnemonic(changePersonaMI, ts.l("createMenuBar.action_menu_0_key_optional"));
+        changePersonaMI.setActionCommand(persona_action);
+        changePersonaMI.addActionListener(this);
       }
 
     // "Query"
@@ -1196,7 +1196,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (changePersonaMI != null)
       {
-	actionMenu.add(changePersonaMI);
+        actionMenu.add(changePersonaMI);
       }
 
     actionMenu.add(menubarQueryMI);
@@ -1204,8 +1204,8 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (!glogin.isRunningOnMac())
       {
-	actionMenu.add(viewObjectMI);
-	actionMenu.add(createObjectMI);
+        actionMenu.add(viewObjectMI);
+        actionMenu.add(createObjectMI);
       }
 
     actionMenu.add(editObjectMI);
@@ -1214,13 +1214,13 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (debug)
       {
-	// "Access Invid"
-	JMenuItem viewAnInvid = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_7")));
-	setMenuMnemonic(viewAnInvid, ts.l("createMenuBar.action_menu_7_key_optional"));
-	viewAnInvid.setActionCommand(access_invid_action);
-	viewAnInvid.addActionListener(this);
-	actionMenu.addSeparator();
-	actionMenu.add(viewAnInvid);
+        // "Access Invid"
+        JMenuItem viewAnInvid = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_7")));
+        setMenuMnemonic(viewAnInvid, ts.l("createMenuBar.action_menu_7_key_optional"));
+        viewAnInvid.setActionCommand(access_invid_action);
+        viewAnInvid.addActionListener(this);
+        actionMenu.addSeparator();
+        actionMenu.add(viewAnInvid);
       }
 
     // windowMenu
@@ -1239,7 +1239,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     // Look and Feel menu
 
     LandFMenu = new arlut.csd.JDataComponent.LAFMenu(this);
-    LandFMenu.setMnemonic('l');	// XXX need to localize.. probably should be done in LAFMenu itself
+    LandFMenu.setMnemonic('l'); // XXX need to localize.. probably should be done in LAFMenu itself
     LandFMenu.setCallback(this);
 
     // Help menu
@@ -1253,12 +1253,12 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (!glogin.isRunningOnMac())
       {
-	// "About Ganymede"
-	JMenuItem showAboutMI = new JMenuItem(ts.l("createMenuBar.help_menu_0"));
-	setMenuMnemonic(showAboutMI, ts.l("createMenuBar.help_menu_0_key_optional"));
-	showAboutMI.setActionCommand(about_action);
-	showAboutMI.addActionListener(this);
-	helpMenu.add(showAboutMI);
+        // "About Ganymede"
+        JMenuItem showAboutMI = new JMenuItem(ts.l("createMenuBar.help_menu_0"));
+        setMenuMnemonic(showAboutMI, ts.l("createMenuBar.help_menu_0_key_optional"));
+        showAboutMI.setActionCommand(about_action);
+        showAboutMI.addActionListener(this);
+        helpMenu.add(showAboutMI);
       }
 
     // "Message of the day"
@@ -1270,7 +1270,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (!glogin.isRunningOnMac())
       {
-	helpMenu.addSeparator();
+        helpMenu.addSeparator();
       }
 
     // "Java Version"
@@ -1284,7 +1284,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (false && glogin.isRunningOnMac())
       {
-	menubar.add(editMenu);
+        menubar.add(editMenu);
       }
 
     menubar.add(LandFMenu);
@@ -1309,11 +1309,11 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (glogin.isRunningOnMac())
       {
-	return text + "...";
+        return text + "...";
       }
     else
       {
-	return text;
+        return text;
       }
   }
 
@@ -1329,7 +1329,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (!glogin.isRunningOnMac() && pattern != null)
       {
-	item.setMnemonic((int) pattern.charAt(0));
+        item.setMnemonic((int) pattern.charAt(0));
       }
   }
 
@@ -1341,7 +1341,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (key == null)
       {
-	return;
+        return;
       }
 
     this.setAccelerator(item, key.toCharArray()[0]);
@@ -1360,7 +1360,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (debug)
       {
-	System.err.println("Creating tree");
+        System.err.println("Creating tree");
       }
 
     /* pick up the pop-up menu strings from our localization
@@ -1369,7 +1369,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     String
       hide = ts.l("createTree.hide_non_editable"), // "Hide Non-Editables"
       show = ts.l("createTree.show_non_editable"), // "Show Non-Editables"
-      query = ts.l("createTree.query"),	// "Query"
+      query = ts.l("createTree.query"), // "Query"
       report_editable = ts.l("createTree.report_editable"), // "Report Editable"
       report = ts.l("createTree.report"), // "Report All"
       create = ts.l("createTree.create"), // "Create"
@@ -1430,7 +1430,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (debug)
       {
-	System.err.println("Loading images for tree");
+        System.err.println("Loading images for tree");
       }
 
     ganymede_logo = _myglogin.ganymede_logo;
@@ -1492,8 +1492,8 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     images[OBJECTNOWRITE] = listnowrite;
 
     tree = new treeControl(new Font("SansSerif", Font.PLAIN, 12),
-			   Color.black, Color.white, this, images,
-			   null);
+                           Color.black, Color.white, this, images,
+                           null);
 
     tree.setMinimumWidth(200);
   }
@@ -1519,18 +1519,18 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     try
       {
-	ReturnVal rv = session.openTransaction("Ganymede GUI Client");
-	rv = handleReturnVal(rv);
+        ReturnVal rv = session.openTransaction("Ganymede GUI Client");
+        rv = handleReturnVal(rv);
 
-	if ((rv != null) && (!rv.didSucceed()))
-	  {
-	    return;
-	  }
+        if ((rv != null) && (!rv.didSucceed()))
+          {
+            return;
+          }
       }
     catch (Exception rx)
       {
-	// "Could not open transaction."
-	processExceptionRethrow(rx, ts.l("start.transaction_open_failure"));
+        // "Could not open transaction."
+        processExceptionRethrow(rx, ts.l("start.transaction_open_failure"));
       }
 
     // If user has multiple personae and he has logged in without
@@ -1538,62 +1538,62 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if ((personae != null)  && personae.size() > 1 && currentPersonaString.indexOf(':') == -1)
       {
-	// changePersona will block until the user does something
-	// with the persona selection dialog
+        // changePersona will block until the user does something
+        // with the persona selection dialog
 
-	changePersona(false);
-	personaDialog.updatePassField(currentPersonaString);
+        changePersona(false);
+        personaDialog.updatePassField(currentPersonaString);
       }
 
     // Check for MOTD on another thread
 
     Thread motdThread = new Thread(new Runnable() {
       public void run() {
-	try
-	  {
-	    // "Checking MOTD"
-	    setStatus(ts.l("start.motd_msg"), 1);
+        try
+          {
+            // "Checking MOTD"
+            setStatus(ts.l("start.motd_msg"), 1);
 
-	    StringBuffer m;
-	    boolean html = true;
+            StringBuffer m;
+            boolean html = true;
 
-	    m = session.getMessageHTML("motd", true);
+            m = session.getMessageHTML("motd", true);
 
-	    // if there wasn't an html motd message, maybe there's a
-	    // txt message?
+            // if there wasn't an html motd message, maybe there's a
+            // txt message?
 
-	    if (m == null)
-	      {
-		m = session.getMessage("motd", true);
-		html = false;
-	      }
+            if (m == null)
+              {
+                m = session.getMessage("motd", true);
+                html = false;
+              }
 
-	    // if we didn't get any message, fold it up, we're done
+            // if we didn't get any message, fold it up, we're done
 
-	    if (m == null)
-	      {
-		return;
-	      }
+            if (m == null)
+              {
+                return;
+              }
 
-	    // and pop up the motd box back on the main GUI thread
+            // and pop up the motd box back on the main GUI thread
 
-	    // create final locals to bridge the gap into another
-	    // method in the runnable to go on the GUI thread
+            // create final locals to bridge the gap into another
+            // method in the runnable to go on the GUI thread
 
-	    final String textString = m.toString();
-	    final boolean doHTML = html;
+            final String textString = m.toString();
+            final boolean doHTML = html;
 
-	    EventQueue.invokeLater(new Runnable() {
-	      public void run() {
-		showMOTD(textString, doHTML);
-	      }
-	    });
-	  }
-	catch (Exception rx)
-	  {
-	    // "Could not get MOTD"
-	    processExceptionRethrow(rx, ts.l("start.motd_failure"));
-	  }
+            EventQueue.invokeLater(new Runnable() {
+              public void run() {
+                showMOTD(textString, doHTML);
+              }
+            });
+          }
+        catch (Exception rx)
+          {
+            // "Could not get MOTD"
+            processExceptionRethrow(rx, ts.l("start.motd_failure"));
+          }
       }
     });
 
@@ -1625,12 +1625,12 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     for (int i = 0; i < vect.size(); i++)
       {
-	FieldTemplate template = (FieldTemplate) vect.elementAt(i);
+        FieldTemplate template = (FieldTemplate) vect.elementAt(i);
 
-	if (template.getID() == fieldId)
-	  {
-	    return template;
-	  }
+        if (template.getID() == fieldId)
+          {
+            return template;
+          }
       }
 
     return null;
@@ -1689,81 +1689,81 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (cachedLists.containsList(id))
       {
-	if (debug)
-	  {
-	    System.err.println("gclient.getObjectList(" + id + ", " + showAll +
-			       ") getting objectlist from the cachedLists.");
-	  }
+        if (debug)
+          {
+            System.err.println("gclient.getObjectList(" + id + ", " + showAll +
+                               ") getting objectlist from the cachedLists.");
+          }
 
-	objectlist = cachedLists.getList(id);
+        objectlist = cachedLists.getList(id);
 
-	// If we are being asked for a *complete* list of objects of
-	// the given type and we only have editable objects of this
-	// type cached, we may need to go back to the server to
-	// get the full list.
+        // If we are being asked for a *complete* list of objects of
+        // the given type and we only have editable objects of this
+        // type cached, we may need to go back to the server to
+        // get the full list.
 
-	if (showAll && !objectlist.containsNonEditable())
-	  {
-	    if (debug)
-	      {
-		System.err.println("gclient.getObjectList(" + id + ", " + showAll +
-				   ") objectList incomplete, downloading non-editables.");
-	      }
+        if (showAll && !objectlist.containsNonEditable())
+          {
+            if (debug)
+              {
+                System.err.println("gclient.getObjectList(" + id + ", " + showAll +
+                                   ") objectList incomplete, downloading non-editables.");
+              }
 
-	    try
-	      {
-		Query objQuery = new Query(id.shortValue(), null, false);
-		objQuery.setFiltered(true);
+            try
+              {
+                Query objQuery = new Query(id.shortValue(), null, false);
+                objQuery.setFiltered(true);
 
-		QueryResult qr = session.query(objQuery);
+                QueryResult qr = session.query(objQuery);
 
-		if (qr != null)
-		  {
-		    if (debug)
-		      {
-			System.err.println("gclient.getObjectList(): augmenting");
-		      }
+                if (qr != null)
+                  {
+                    if (debug)
+                      {
+                        System.err.println("gclient.getObjectList(): augmenting");
+                      }
 
-		    objectlist.augmentListWithNonEditables(qr);
-		  }
-	      }
-	    catch (Exception rx)
-	      {
-		// "Could not do the query"
-		processExceptionRethrow(rx, ts.l("getObjectList.query_exception"));
-	      }
+                    objectlist.augmentListWithNonEditables(qr);
+                  }
+              }
+            catch (Exception rx)
+              {
+                // "Could not do the query"
+                processExceptionRethrow(rx, ts.l("getObjectList.query_exception"));
+              }
 
-	    cachedLists.putList(id, objectlist);
-	  }
+            cachedLists.putList(id, objectlist);
+          }
       }
     else
       {
-	if (debug)
-	  {
-	    System.err.println("gclient.getObjectList(" + id + ", " + showAll +
-			       ") downloading objectlist from the server.");
-	  }
+        if (debug)
+          {
+            System.err.println("gclient.getObjectList(" + id + ", " + showAll +
+                               ") downloading objectlist from the server.");
+          }
 
-	try
-	  {
-	    Query objQuery = new Query(id.shortValue(), null, !showAll);
-	    objQuery.setFiltered(true);
+        try
+          {
+            Query objQuery = new Query(id.shortValue(), null, !showAll);
+            objQuery.setFiltered(true);
 
-	    QueryResult qr = session.query(objQuery);
+            QueryResult qr = session.query(objQuery);
 
-	    if (debug)
-	      {
-		System.err.println("gclient.getObjectList(): caching copy");
-	      }
+            if (debug)
+              {
+                System.err.println("gclient.getObjectList(): caching copy");
+              }
 
-	    objectlist = new objectList(qr);
-	    cachedLists.putList(id, objectlist);
-	  }
-	catch (Exception rx)
-	  {
-	    // "Could not get dump"
-	    processExceptionRethrow(rx, ts.l("getObjectList.dump_exception"));
-	  }
+            objectlist = new objectList(qr);
+            cachedLists.putList(id, objectlist);
+          }
+        catch (Exception rx)
+          {
+            // "Could not get dump"
+            processExceptionRethrow(rx, ts.l("getObjectList.dump_exception"));
+          }
       }
 
     return objectlist;
@@ -1808,7 +1808,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (errorImage == null)
       {
-	errorImage = PackageResources.getImageResource(this, "error.gif", getClass());
+        errorImage = PackageResources.getImageResource(this, "error.gif", getClass());
       }
 
     return errorImage;
@@ -1825,7 +1825,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (questionImage == null)
       {
-	questionImage = PackageResources.getImageResource(this, "question.gif", getClass());
+        questionImage = PackageResources.getImageResource(this, "question.gif", getClass());
       }
 
     return questionImage;
@@ -1842,7 +1842,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (infoImage == null)
       {
-	infoImage = PackageResources.getImageResource(this, "ok.gif", getClass());
+        infoImage = PackageResources.getImageResource(this, "ok.gif", getClass());
       }
 
     return infoImage;
@@ -1970,17 +1970,17 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (type == null)
       {
-	type = Short.valueOf(invid.getType());
+        type = Short.valueOf(invid.getType());
       }
 
     if (cachedLists.containsList(type))
       {
-	handle = cachedLists.getInvidHandle(type, invid);
+        handle = cachedLists.getInvidHandle(type, invid);
 
-	if (handle != null)
-	  {
-	    return handle;
-	  }
+        if (handle != null)
+          {
+            return handle;
+          }
       }
 
     // okay, we haven't found it.  try to pull this invid down from the
@@ -1992,18 +1992,18 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     try
       {
-	QueryResult result = session.queryInvids(paramVec);
+        QueryResult result = session.queryInvids(paramVec);
 
-	Vector handleList = result.getHandles();
+        Vector handleList = result.getHandles();
 
-	if (handleList.size() > 0)
-	  {
-	    handle = (ObjectHandle) handleList.elementAt(0);
-	  }
+        if (handleList.size() > 0)
+          {
+            handle = (ObjectHandle) handleList.elementAt(0);
+          }
       }
     catch (Exception ex)
       {
-	processExceptionRethrow(ex);
+        processExceptionRethrow(ex);
       }
 
     return handle;
@@ -2067,7 +2067,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (debug)
       {
-	System.err.println("Setting status: " + status);
+        System.err.println("Setting status: " + status);
       }
 
     final String fStatus = status;
@@ -2077,8 +2077,8 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     EventQueue.invokeLater(new Runnable() {
       public void run() {
-	statusLabel.setText(fStatus);
-	statusLabel.paintImmediately(statusLabel.getVisibleRect());
+        statusLabel.setText(fStatus);
+        statusLabel.paintImmediately(statusLabel.getVisibleRect());
       }
     });
 
@@ -2101,7 +2101,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     EventQueue.invokeLater(new Runnable() {
       public void run() {
-	personaListener.softTimeOutHandler();
+        personaListener.softTimeOutHandler();
       }
     });
   }
@@ -2125,29 +2125,29 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (debug)
       {
-	System.err.println("Setting build status: " + status);
+        System.err.println("Setting build status: " + status);
       }
 
     if (status.equals("idle"))
       {
-	buildPhase = 0;
+        buildPhase = 0;
       }
     else if (status.equals("building"))
       {
-	buildPhase = 1;
+        buildPhase = 1;
       }
     else if (status.equals("building2"))
       {
-	buildPhase = 2;
+        buildPhase = 2;
       }
     else
       {
-	buildPhase = -1;
+        buildPhase = -1;
       }
 
     try
       {
-	securityThread.setBuildStatus(buildPhase);
+        securityThread.setBuildStatus(buildPhase);
       }
     catch (NullPointerException ex)
       {
@@ -2168,13 +2168,13 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     treeNode myNode = selectedNode;
 
     if ((myNode == null) ||
-	!(myNode instanceof InvidNode))
+        !(myNode instanceof InvidNode))
       {
-	return null;
+        return null;
       }
     else
       {
-	return (InvidNode) myNode;
+        return (InvidNode) myNode;
       }
   }
 
@@ -2198,11 +2198,11 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (help == null)
       {
-	help = new helpPanel(this);
+        help = new helpPanel(this);
       }
     else
       {
-	help.setVisible(true);
+        help.setVisible(true);
       }
   }
 
@@ -2214,8 +2214,8 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (java_ver_dialog == null)
       {
-	// "Java Version"
-	java_ver_dialog = new aboutJavaDialog(this, ts.l("showJavaVersion.dialog_title"));
+        // "Java Version"
+        java_ver_dialog = new aboutJavaDialog(this, ts.l("showJavaVersion.dialog_title"));
       }
 
     java_ver_dialog.setVisible(true);
@@ -2229,13 +2229,13 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (about == null)
       {
-	// "About Ganymede"
-	about = new aboutGanyDialog(this, ts.l("showAboutMessage.dialog_title"));
+        // "About Ganymede"
+        about = new aboutGanyDialog(this, ts.l("showAboutMessage.dialog_title"));
       }
     else
       {
-	// "About Ganymede"
-	about.setTitle(ts.l("showAboutMessage.dialog_title"));
+        // "About Ganymede"
+        about.setTitle(ts.l("showAboutMessage.dialog_title"));
       }
 
     about.setVisible(true);
@@ -2253,25 +2253,25 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     try
       {
-	m = session.getMessageHTML("motd", false);
+        m = session.getMessageHTML("motd", false);
 
-	if (m == null)
-	  {
-	    m = session.getMessage("motd", false);
+        if (m == null)
+          {
+            m = session.getMessage("motd", false);
 
-	    if (m != null)
-	      {
-		showMOTD(m.toString(), false);
-	      }
-	  }
-	else
-	  {
-	    showMOTD(m.toString(), true);
-	  }
+            if (m != null)
+              {
+                showMOTD(m.toString(), false);
+              }
+          }
+        else
+          {
+            showMOTD(m.toString(), true);
+          }
       }
     catch (Exception rx)
       {
-	processExceptionRethrow(rx, "Could not get motd");
+        processExceptionRethrow(rx, "Could not get motd");
       }
   }
 
@@ -2287,17 +2287,17 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (motd == null)
       {
-	// "MOTD"
-	motd = new messageDialog(client, ts.l("showMOTD.dialog_title"), null);
+        // "MOTD"
+        motd = new messageDialog(client, ts.l("showMOTD.dialog_title"), null);
       }
 
     if (html)
       {
-	motd.setHtmlText(message);
+        motd.setHtmlText(message);
       }
     else
       {
-	motd.setPlainText(message);
+        motd.setPlainText(message);
       }
 
     motd.setVisible(true);
@@ -2359,47 +2359,47 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     for (int i = 0; !foundRethrow && i < frames.length; i++)
       {
-	StackTraceElement frame = frames[i];
+        StackTraceElement frame = frames[i];
 
-	if (frame.getMethodName().equals("processExceptionRethrow") &&
-	    frame.getClassName().endsWith("gclient"))
-	  {
-	    foundRethrow = true;
-	  }
+        if (frame.getMethodName().equals("processExceptionRethrow") &&
+            frame.getClassName().endsWith("gclient"))
+          {
+            foundRethrow = true;
+          }
       }
 
     if (foundRethrow)
       {
-	return;
+        return;
       }
 
     if (ex instanceof NotLoggedInException)
       {
-	showNotLoggedIn();
+        showNotLoggedIn();
       }
     else
       {
-	if (ex instanceof RegexpException)
-	  {
-	    // don't bother showing them the stack trace (or offering
-	    // to transmit the error to the server) if they entered a
-	    // bad regexp into a dialog
+        if (ex instanceof RegexpException)
+          {
+            // don't bother showing them the stack trace (or offering
+            // to transmit the error to the server) if they entered a
+            // bad regexp into a dialog
 
-	    showErrorMessage(ex.getMessage());
-	  }
-	else
-	  {
-	    String exceptionString = gclient.stackTrace(ex);
+            showErrorMessage(ex.getMessage());
+          }
+        else
+          {
+            String exceptionString = gclient.stackTrace(ex);
 
-	    if (message != null)
-	      {
-		exceptionString = message + "\n" + exceptionString;
-	      }
+            if (message != null)
+              {
+                exceptionString = message + "\n" + exceptionString;
+              }
 
-	    // "Exception"
-	    showExceptionMessage(ts.l("processException.exception"),
-				 exceptionString);
-	  }
+            // "Exception"
+            showExceptionMessage(ts.l("processException.exception"),
+                                 exceptionString);
+          }
       }
 
     setNormalCursor();
@@ -2432,7 +2432,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (debug)
       {
-	System.err.println("Error message: " + message);
+        System.err.println("Error message: " + message);
       }
 
     final gclient gc = this;
@@ -2441,57 +2441,57 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     final Image fIcon = icon;
 
     EventQueue.invokeLater(new Runnable()
-			       {
-				 public void run()
-				   {
-				     ExceptionDialog x = new ExceptionDialog(gc, Title, Message, fIcon); // implicit show
+                               {
+                                 public void run()
+                                   {
+                                     ExceptionDialog x = new ExceptionDialog(gc, Title, Message, fIcon); // implicit show
 
-				     if (x.didRequestReport())
-				       {
-					 boolean success = false;
+                                     if (x.didRequestReport())
+                                       {
+                                         boolean success = false;
 
-					 try
-					   {
-					     session.reportClientBug(aboutJavaDialog.getVersionInfoString(), Message);
-					     success = true;
-					   }
-					 catch (Throwable ex)
-					   {
-					     // ignore
-					   }
+                                         try
+                                           {
+                                             session.reportClientBug(aboutJavaDialog.getVersionInfoString(), Message);
+                                             success = true;
+                                           }
+                                         catch (Throwable ex)
+                                           {
+                                             // ignore
+                                           }
 
-					 if (success)
-					   {
-					     // "Exception Reported"
-					     // "This possible error
-					     // condition has been
-					     // reported to the
-					     // Ganymede
-					     // server.\n\nThank you!"
+                                         if (success)
+                                           {
+                                             // "Exception Reported"
+                                             // "This possible error
+                                             // condition has been
+                                             // reported to the
+                                             // Ganymede
+                                             // server.\n\nThank you!"
 
-					     new JErrorDialog(gc,
-							      ts.l("showExceptionMessage.exception_reported"),
-							      ts.l("showExceptionMessage.thank_you"),
-							      getInfoImage(), StandardDialog.ModalityType.DOCUMENT_MODAL); // implicit show
-					   }
-					 else
-					   {
-					     // "Failure Reporting Exception"
-					     // "This error condition
-					     // could not be reported
-					     // successfully to the
-					     // server.  Perhaps the
-					     // server or your network
-					     // has gone down?"
+                                             new JErrorDialog(gc,
+                                                              ts.l("showExceptionMessage.exception_reported"),
+                                                              ts.l("showExceptionMessage.thank_you"),
+                                                              getInfoImage(), StandardDialog.ModalityType.DOCUMENT_MODAL); // implicit show
+                                           }
+                                         else
+                                           {
+                                             // "Failure Reporting Exception"
+                                             // "This error condition
+                                             // could not be reported
+                                             // successfully to the
+                                             // server.  Perhaps the
+                                             // server or your network
+                                             // has gone down?"
 
-					     new JErrorDialog(gc,
-							      ts.l("showExceptionMessage.failure_reporting"),
-							      ts.l("showExceptionMessage.failure_explanation"),
-							      getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL); // implicit show
-					   }
-				       }
-				   }
-			       });
+                                             new JErrorDialog(gc,
+                                                              ts.l("showExceptionMessage.failure_reporting"),
+                                                              ts.l("showExceptionMessage.failure_explanation"),
+                                                              getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL); // implicit show
+                                           }
+                                       }
+                                   }
+                               });
 
     setStatus(title + ": " + message, 10);
   }
@@ -2505,7 +2505,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     // "Error"
     // "Not logged in to the server"
     showErrorMessage(ts.l("global.error"),
-		     ts.l("showNotLoggedIn.not_logged_in"));
+                     ts.l("showNotLoggedIn.not_logged_in"));
   }
 
   /**
@@ -2540,7 +2540,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (debug)
       {
-	System.err.println("Error message: " + message);
+        System.err.println("Error message: " + message);
       }
 
     final gclient gc = this;
@@ -2549,12 +2549,12 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     final Image fIcon = icon;
 
     EventQueue.invokeLater(new Runnable()
-			       {
-				 public void run()
-				   {
-				     new JErrorDialog(gc, Title, Message, fIcon, StandardDialog.ModalityType.DOCUMENT_MODAL); // implicit show
-				   }
-			       });
+                               {
+                                 public void run()
+                                   {
+                                     new JErrorDialog(gc, Title, Message, fIcon, StandardDialog.ModalityType.DOCUMENT_MODAL); // implicit show
+                                   }
+                               });
 
     setStatus(title + ": " + message, 10);
   }
@@ -2606,7 +2606,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (debug)
       {
-	System.err.println("Setting somethingChanged to " + state);
+        System.err.println("Setting somethingChanged to " + state);
       }
 
     somethingChanged = state;
@@ -2658,142 +2658,142 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (debug)
       {
-	System.err.println("gclient.handleReturnVal(): Entering");
+        System.err.println("gclient.handleReturnVal(): Entering");
       }
 
     wizardActive++;
 
     try
       {
-	while ((retVal != null) && (retVal.getDialog() != null))
-	  {
-	    if (retVal.getErrorType() == ErrorTypeEnum.SHOWOBJECT)
-	      {
-		Invid objInvid = retVal.getInvid();
-		wp.showWindow(objInvid);
-	      }
+        while ((retVal != null) && (retVal.getDialog() != null))
+          {
+            if (retVal.getErrorType() == ErrorTypeEnum.SHOWOBJECT)
+              {
+                Invid objInvid = retVal.getInvid();
+                wp.showWindow(objInvid);
+              }
 
-	    if (debug)
-	      {
-		System.err.println("gclient.handleReturnVal(): retrieving dialog");
-	      }
+            if (debug)
+              {
+                System.err.println("gclient.handleReturnVal(): retrieving dialog");
+              }
 
-	    JDialogBuff jdialog = retVal.getDialog();
+            JDialogBuff jdialog = retVal.getDialog();
 
-	    if (debug)
-	      {
-		System.err.println("gclient.handleReturnVal(): extracting dialog");
-	      }
+            if (debug)
+              {
+                System.err.println("gclient.handleReturnVal(): extracting dialog");
+              }
 
-	    DialogRsrc resource = jdialog.extractDialogRsrc(this, null);
+            DialogRsrc resource = jdialog.extractDialogRsrc(this, null);
 
-	    if (debug)
-	      {
-		System.err.println("gclient.handleReturnVal(): constructing dialog");
-	      }
+            if (debug)
+              {
+                System.err.println("gclient.handleReturnVal(): constructing dialog");
+              }
 
-	    StringDialog dialog = new StringDialog(resource, StandardDialog.ModalityType.DOCUMENT_MODAL);
+            StringDialog dialog = new StringDialog(resource, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
-	    if (debug)
-	      {
-		System.err.println("gclient.handleReturnVal(): displaying dialog");
-	      }
+            if (debug)
+              {
+                System.err.println("gclient.handleReturnVal(): displaying dialog");
+              }
 
-	    setWaitCursor();
+            setWaitCursor();
 
-	    try
-	      {
-		// display the Dialog sent to us by the server, get the
-		// result of the user's interaction with it.
+            try
+              {
+                // display the Dialog sent to us by the server, get the
+                // result of the user's interaction with it.
 
-		dialogResults = dialog.showDialog();
-	      }
-	    finally
-	      {
-		setNormalCursor();
-	      }
+                dialogResults = dialog.showDialog();
+              }
+            finally
+              {
+                setNormalCursor();
+              }
 
-	    if (debug)
-	      {
-		System.err.println("gclient.handleReturnVal(): dialog done");
-	      }
+            if (debug)
+              {
+                System.err.println("gclient.handleReturnVal(): dialog done");
+              }
 
-	    if (retVal.getCallback() != null)
-	      {
-		try
-		  {
-		    if (debug)
-		      {
-			System.err.println("gclient.handleReturnVal(): Sending result to callback: " + dialogResults);
-		      }
+            if (retVal.getCallback() != null)
+              {
+                try
+                  {
+                    if (debug)
+                      {
+                        System.err.println("gclient.handleReturnVal(): Sending result to callback: " + dialogResults);
+                      }
 
-		    // send the dialog results to the server
+                    // send the dialog results to the server
 
-		    retVal = retVal.getCallback().respond(dialogResults);
+                    retVal = retVal.getCallback().respond(dialogResults);
 
-		    if (debug)
-		      {
-			System.err.println("gclient.handleReturnVal(): Received result from callback.");
-		      }
-		  }
-		catch (Exception ex)
-		  {
-		    processExceptionRethrow(ex);
-		  }
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    System.err.println("gclient.handleReturnVal(): No callback, breaking");
-		  }
+                    if (debug)
+                      {
+                        System.err.println("gclient.handleReturnVal(): Received result from callback.");
+                      }
+                  }
+                catch (Exception ex)
+                  {
+                    processExceptionRethrow(ex);
+                  }
+              }
+            else
+              {
+                if (debug)
+                  {
+                    System.err.println("gclient.handleReturnVal(): No callback, breaking");
+                  }
 
-		break;		// we're done
-	      }
-	  }
+                break;          // we're done
+              }
+          }
       }
     finally
       {
-	wizardActive--;
+        wizardActive--;
       }
 
     if (debug)
       {
-	System.err.println("gclient.handleReturnVal(): Done with wizards, checking retVal for rescan.");
+        System.err.println("gclient.handleReturnVal(): Done with wizards, checking retVal for rescan.");
       }
 
     // Check for objects that need to be rescanned
 
     if (retVal != null && retVal.objectLabelChanged())
       {
-	wp.relabelObject(retVal.getInvid(), retVal.getNewLabel());
+        wp.relabelObject(retVal.getInvid(), retVal.getNewLabel());
       }
 
     if (retVal == null || !retVal.doRescan())
       {
-	return retVal;
+        return retVal;
       }
 
     if (debug)
       {
-	System.err.println("gclient.handleReturnVal(): rescan dump: " + retVal.dumpRescanInfo());
+        System.err.println("gclient.handleReturnVal(): rescan dump: " + retVal.dumpRescanInfo());
       }
 
     Vector objects = retVal.getRescanObjectsList();
 
     if (objects == null)
       {
-	if (debug)
-	  {
-	    System.err.println("gclient.handleReturnVal(): Odd, was told to rescan, but there's nothing there!");
-	  }
+        if (debug)
+          {
+            System.err.println("gclient.handleReturnVal(): Odd, was told to rescan, but there's nothing there!");
+          }
 
-	return retVal;
+        return retVal;
       }
 
     if (debug)
       {
-	System.err.println("gclient.handleReturnVal(): Rescanning " + objects.size() + " objects.");
+        System.err.println("gclient.handleReturnVal(): Rescanning " + objects.size() + " objects.");
       }
 
     Enumeration invids = objects.elements();
@@ -2803,19 +2803,19 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     while (invids.hasMoreElements())
       {
-	Invid invid = (Invid) invids.nextElement();
+        Invid invid = (Invid) invids.nextElement();
 
-	if (debug)
-	  {
-	    System.err.println("gclient.handleReturnVal(): updating invid: " + invid);
-	  }
+        if (debug)
+          {
+            System.err.println("gclient.handleReturnVal(): updating invid: " + invid);
+          }
 
-	wp.refreshObjectWindows(invid, retVal);
+        wp.refreshObjectWindows(invid, retVal);
       }
 
     if (debug)
       {
-	System.err.println("gclient.handleReturnVal(): Exiting handleReturnVal");
+        System.err.println("gclient.handleReturnVal(): Exiting handleReturnVal");
       }
 
     return retVal;
@@ -2915,16 +2915,16 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if ((personae != null)  && personae.size() > 1)
       {
-	// "Persona"
-	b = new JButton(ts.l("createToolbar.persona_button"), new ImageIcon(personaIcon));
-	b.setMargin(insets);
-	b.setActionCommand(persona_action);
-	b.setVerticalTextPosition(b.BOTTOM);
-	b.setHorizontalTextPosition(b.CENTER);
-	// "Change Persona"
-	b.setToolTipText(ts.l("createToolbar.persona_tooltip"));
-	b.addActionListener(this);
-	toolBarTemp.add(b);
+        // "Persona"
+        b = new JButton(ts.l("createToolbar.persona_button"), new ImageIcon(personaIcon));
+        b.setMargin(insets);
+        b.setActionCommand(persona_action);
+        b.setVerticalTextPosition(b.BOTTOM);
+        b.setHorizontalTextPosition(b.CENTER);
+        // "Change Persona"
+        b.setToolTipText(ts.l("createToolbar.persona_tooltip"));
+        b.addActionListener(this);
+        toolBarTemp.add(b);
       }
 
     return toolBarTemp;
@@ -2990,14 +2990,14 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if ((personae != null)  && personae.size() > 1)
       {
-	// "Persona"
-	b = new JButton(ts.l("createToolbar.persona_button"), new ImageIcon(personaIcon));
-	b.setBorderPainted(false);
-	b.setVerticalTextPosition(b.BOTTOM);
-	b.setHorizontalTextPosition(b.CENTER);
-	b.setActionCommand(persona_action);
-	b.addActionListener(this);
-	macToolBar.addComponentToRight(b);
+        // "Persona"
+        b = new JButton(ts.l("createToolbar.persona_button"), new ImageIcon(personaIcon));
+        b.setBorderPainted(false);
+        b.setVerticalTextPosition(b.BOTTOM);
+        b.setHorizontalTextPosition(b.CENTER);
+        b.setActionCommand(persona_action);
+        b.addActionListener(this);
+        macToolBar.addComponentToRight(b);
       }
 
     return macToolBar;
@@ -3023,12 +3023,12 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     try
       {
-	buildTree();
+        buildTree();
       }
     catch (Exception rx)
       {
-	// "Could not rebuild tree"
-	processExceptionRethrow(rx, ts.l("clearTree.exception"));
+        // "Could not rebuild tree"
+        processExceptionRethrow(rx, ts.l("clearTree.exception"));
       }
   }
 
@@ -3043,7 +3043,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (debug)
       {
-	System.err.println("gclient.buildTree(): Building tree");
+        System.err.println("gclient.buildTree(): Building tree");
       }
 
     // clear the invidNodeHash
@@ -3058,21 +3058,21 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (debug)
       {
-	System.err.println("gclient.buildTree(): got root category: " + dump.getName());
+        System.err.println("gclient.buildTree(): got root category: " + dump.getName());
       }
 
     recurseDownCategories(null, dump);
 
     if (debug)
       {
-	System.err.println("gclient.buildTree(): Refreshing tree");
+        System.err.println("gclient.buildTree(): Refreshing tree");
       }
 
     tree.refresh();
 
     if (debug)
       {
-	System.err.println("gclient.buildTree(): Done building tree,");
+        System.err.println("gclient.buildTree(): Done building tree,");
       }
   }
 
@@ -3099,37 +3099,37 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     for (int i = 0; i < children.size(); i++)
       {
-	// find the CategoryNode at this point in the server's category tree
+        // find the CategoryNode at this point in the server's category tree
 
-	cNode = (CategoryNode) children.elementAt(i);
+        cNode = (CategoryNode) children.elementAt(i);
 
-	if (cNode instanceof Base)
-	  {
-	    Base base = (Base) cNode;
+        if (cNode instanceof Base)
+          {
+            Base base = (Base) cNode;
 
-	    if (base.isEmbedded())
-	      {
-		continue;	// we don't want to present embedded objects
-	      }
-	  }
+            if (base.isEmbedded())
+              {
+                continue;       // we don't want to present embedded objects
+              }
+          }
 
-	// if we have a single category at this level, we don't want
-	// to bodily insert it into the tree.. we'll just continue to
-	// recurse down with it.
+        // if we have a single category at this level, we don't want
+        // to bodily insert it into the tree.. we'll just continue to
+        // recurse down with it.
 
-	if ((cNode instanceof Category) && (children.size() == 1))
-	  {
-	    recurseDownCategories(node, (Category) cNode);
-	  }
-	else
-	  {
-	    prevNode = insertCategoryNode(cNode, prevNode, node);
+        if ((cNode instanceof Category) && (children.size() == 1))
+          {
+            recurseDownCategories(node, (Category) cNode);
+          }
+        else
+          {
+            prevNode = insertCategoryNode(cNode, prevNode, node);
 
-	    if (prevNode instanceof CatTreeNode)
-	      {
-		recurseDownCategories((CatTreeNode)prevNode, (Category) cNode);
-	      }
-	  }
+            if (prevNode instanceof CatTreeNode)
+              {
+                recurseDownCategories((CatTreeNode)prevNode, (Category) cNode);
+              }
+          }
       }
   }
 
@@ -3143,42 +3143,42 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (node instanceof Base)
       {
-	Base base = (Base)node;
-	boolean canCreate = base.canCreate(getSession());
+        Base base = (Base)node;
+        boolean canCreate = base.canCreate(getSession());
 
-	newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
-			       true,
-			       OPEN_BASE,
-			       CLOSED_BASE,
-			       canCreate ? pMenuEditableCreatable : pMenuEditable,
-			       canCreate);
+        newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
+                               true,
+                               OPEN_BASE,
+                               CLOSED_BASE,
+                               canCreate ? pMenuEditableCreatable : pMenuEditable,
+                               canCreate);
 
-	((BaseNode) newNode).showAll(!hideNonEditables);
+        ((BaseNode) newNode).showAll(!hideNonEditables);
 
-	shortToBaseNodeHash.put(((BaseNode)newNode).getTypeID(), newNode);
+        shortToBaseNodeHash.put(((BaseNode)newNode).getTypeID(), newNode);
       }
     else if (node instanceof Category)
       {
-	Category category = (Category)node;
-	newNode = new CatTreeNode(parentNode, category.getName(), category,
-				  prevNode, true,
-				  OPEN_CAT,
-				  CLOSED_CAT,
-				  null);
+        Category category = (Category)node;
+        newNode = new CatTreeNode(parentNode, category.getName(), category,
+                                  prevNode, true,
+                                  OPEN_CAT,
+                                  CLOSED_CAT,
+                                  null);
       }
     else
       {
         // for FindBugs.  Shouldn't happen due to tree structure
-	throw new RuntimeException("gclient.insertCategoryNode(): Unknown instance: " + node);
+        throw new RuntimeException("gclient.insertCategoryNode(): Unknown instance: " + node);
       }
 
     if ((newNode.getParent() == null) && (newNode.getPrevSibling() == null))
       {
-	tree.setRoot(newNode);
+        tree.setRoot(newNode);
       }
     else
       {
-	tree.insertNode(newNode, false);
+        tree.insertNode(newNode, false);
       }
 
     return newNode;
@@ -3236,122 +3236,122 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     while ((i < objectHandles.size()) || (fNode != null))
       {
-	if (i < objectHandles.size())
-	  {
-	    handle = (ObjectHandle) objectHandles.elementAt(i);
+        if (i < objectHandles.size())
+          {
+            handle = (ObjectHandle) objectHandles.elementAt(i);
 
-	    if (!node.isShowAll() && !handle.isEditable())
-	      {
-		i++;		// skip this one, we're not showing non-editables
-		continue;
-	      }
+            if (!node.isShowAll() && !handle.isEditable())
+              {
+                i++;            // skip this one, we're not showing non-editables
+                continue;
+              }
 
-	    invid = handle.getInvid();
-	    label = handle.getLabel();
-	  }
-	else
-	  {
-	    // We've gone past the end of the list of objects in this
-	    // object list.. from here on out, we're going to wind up
-	    // removing anything we find in this subtree
+            invid = handle.getInvid();
+            label = handle.getLabel();
+          }
+        else
+          {
+            // We've gone past the end of the list of objects in this
+            // object list.. from here on out, we're going to wind up
+            // removing anything we find in this subtree
 
-	    handle = null;
-	    label = null;
-	    invid = null;
-	  }
+            handle = null;
+            label = null;
+            invid = null;
+          }
 
-	// insert a new node in the tree, change the label, or remove
-	// a node
+        // insert a new node in the tree, change the label, or remove
+        // a node
 
-	if ((fNode == null) ||
-	    ((invid != null) &&
-	     ((label.compareToIgnoreCase(fNode.getText())) < 0)))
-	  {
-	    // If we have an invid/label in the object list that's not
-	    // in the tree, we need to insert it
+        if ((fNode == null) ||
+            ((invid != null) &&
+             ((label.compareToIgnoreCase(fNode.getText())) < 0)))
+          {
+            // If we have an invid/label in the object list that's not
+            // in the tree, we need to insert it
 
-	    // "{0} (inactive)"
+            // "{0} (inactive)"
 
-	    InvidNode objNode = new InvidNode(node,
-					      handle.isInactive() ? ts.l("global.inactive_pattern", label):label,
-					      invid,
-					      oldNode, false,
-					      handle.isEditable() ? OPEN_FIELD : OBJECTNOWRITE,
-					      handle.isEditable() ? CLOSED_FIELD : OBJECTNOWRITE,
-					      handle.isEditable() ? (node.canInactivate()
-								     ? objectInactivatePM : objectRemovePM) : objectViewPM,
+            InvidNode objNode = new InvidNode(node,
+                                              handle.isInactive() ? ts.l("global.inactive_pattern", label):label,
+                                              invid,
+                                              oldNode, false,
+                                              handle.isEditable() ? OPEN_FIELD : OBJECTNOWRITE,
+                                              handle.isEditable() ? CLOSED_FIELD : OBJECTNOWRITE,
+                                              handle.isEditable() ? (node.canInactivate()
+                                                                     ? objectInactivatePM : objectRemovePM) : objectViewPM,
 
-					      handle);
+                                              handle);
 
-	    if (invid != null)
-	      {
-		invidNodeHash.put(invid, objNode);
+            if (invid != null)
+              {
+                invidNodeHash.put(invid, objNode);
 
-		if (createdObjectsWithoutNodes.containsKey(invid))
-		  {
-		    if (false)
-		      {
-			System.err.println("Found this object in the creating objectsWithoutNodes hash: " +
-					   handle.getLabel());
-		      }
+                if (createdObjectsWithoutNodes.containsKey(invid))
+                  {
+                    if (false)
+                      {
+                        System.err.println("Found this object in the creating objectsWithoutNodes hash: " +
+                                           handle.getLabel());
+                      }
 
-		    // "New Object"
-		    createHash.put(invid, new CacheInfo(node.getTypeID(),
-							(handle.getLabel() == null) ? ts.l("global.new_object") : handle.getLabel(),
-							null, handle));
-		    createdObjectsWithoutNodes.remove(invid);
-		  }
+                    // "New Object"
+                    createHash.put(invid, new CacheInfo(node.getTypeID(),
+                                                        (handle.getLabel() == null) ? ts.l("global.new_object") : handle.getLabel(),
+                                                        null, handle));
+                    createdObjectsWithoutNodes.remove(invid);
+                  }
 
-		setIconForNode(invid);
-	      }
+                setIconForNode(invid);
+              }
 
-	    tree.insertNode(objNode, false);
+            tree.insertNode(objNode, false);
 
-	    oldNode = objNode;
-	    fNode = (InvidNode) oldNode.getNextSibling();
+            oldNode = objNode;
+            fNode = (InvidNode) oldNode.getNextSibling();
 
-	    i++;
-	  }
-	else if ((invid == null) ||
-		 ((label.compareToIgnoreCase(fNode.getText())) > 0))
-	  {
-	    // We've found a node in the tree without a matching
-	    // node in the object list.  Delete it!
+            i++;
+          }
+        else if ((invid == null) ||
+                 ((label.compareToIgnoreCase(fNode.getText())) > 0))
+          {
+            // We've found a node in the tree without a matching
+            // node in the object list.  Delete it!
 
-	    newNode = (InvidNode) fNode.getNextSibling();
-	    tree.deleteNode(fNode, false);
+            newNode = (InvidNode) fNode.getNextSibling();
+            tree.deleteNode(fNode, false);
 
-	    fNode = newNode;
-	  }
-	else if (fNode.getInvid().equals(invid))
-	  {
-	    // we've got a node in the tree that matches the
-	    // invid of the current object in the object list,
-	    // but the label may possibly have changed, so we'll
-	    // go ahead and re-set the label, just to be sure
+            fNode = newNode;
+          }
+        else if (fNode.getInvid().equals(invid))
+          {
+            // we've got a node in the tree that matches the
+            // invid of the current object in the object list,
+            // but the label may possibly have changed, so we'll
+            // go ahead and re-set the label, just to be sure
 
-	    if (handle.isInactive())
-	      {
-		// {0} (inactive)
-		fNode.setText(ts.l("global.inactive_pattern", label));
-	      }
-	    else
-	      {
-		fNode.setText(label);
-	      }
+            if (handle.isInactive())
+              {
+                // {0} (inactive)
+                fNode.setText(ts.l("global.inactive_pattern", label));
+              }
+            else
+              {
+                fNode.setText(label);
+              }
 
-	    oldNode = fNode;
-	    fNode = (InvidNode) oldNode.getNextSibling();
+            oldNode = fNode;
+            fNode = (InvidNode) oldNode.getNextSibling();
 
-	    setIconForNode(invid);
+            setIconForNode(invid);
 
-	    i++;
-	  }
+            i++;
+          }
       }
 
     if (doRefresh)
       {
-	tree.refresh();
+        tree.refresh();
       }
   }
 
@@ -3383,31 +3383,31 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     synchronized (deleteHash)
       {
-	Enumeration deleted = deleteHash.keys();
+        Enumeration deleted = deleteHash.keys();
 
-	while (deleted.hasMoreElements())
-	  {
-	    invid = (Invid)deleted.nextElement();
-	    node = (InvidNode)invidNodeHash.get(invid);
+        while (deleted.hasMoreElements())
+          {
+            invid = (Invid)deleted.nextElement();
+            node = (InvidNode)invidNodeHash.get(invid);
 
-	    if (node != null)
-	      {
-		if (debug)
-		  {
-		    System.err.println("gclient.refreshTreeAfterCommit(): Deleting node: " + node.getText());
-		  }
+            if (node != null)
+              {
+                if (debug)
+                  {
+                    System.err.println("gclient.refreshTreeAfterCommit(): Deleting node: " + node.getText());
+                  }
 
-		tree.deleteNode(node, false);
-		invidNodeHash.remove(invid);
-	      }
+                tree.deleteNode(node, false);
+                invidNodeHash.remove(invid);
+              }
 
             // and be sure we close any view windows held open that
             // show the deleted object
 
             wp.closeInvidWindows(invid);
-	  }
+          }
 
-	deleteHash.clear();
+        deleteHash.clear();
       }
 
     //
@@ -3421,9 +3421,9 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     while (created.hasMoreElements())
       {
-	invid = (Invid) created.nextElement();
+        invid = (Invid) created.nextElement();
 
-	changedInvids.addElement(invid);
+        changedInvids.addElement(invid);
       }
 
     createHash.clear();
@@ -3434,26 +3434,26 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     while (changed.hasMoreElements())
       {
-	invid = (Invid) changed.nextElement();
+        invid = (Invid) changed.nextElement();
 
-	changedInvids.addElement(invid);
+        changedInvids.addElement(invid);
       }
 
     changedHash.clear();
 
     if (changedInvids.size() > 0)
       {
-	if (debug)
-	  {
-	    System.err.println("gclient.refreshTreeAfterCommit(): refreshing created objects");
-	  }
+        if (debug)
+          {
+            System.err.println("gclient.refreshTreeAfterCommit(): refreshing created objects");
+          }
 
-	refreshChangedObjectHandles(changedInvids, true);
+        refreshChangedObjectHandles(changedInvids, true);
 
-	if (debug)
-	  {
-	    System.err.println("gclient.refreshTreeAfterCommit(): done refreshing created objects");
-	  }
+        if (debug)
+          {
+            System.err.println("gclient.refreshTreeAfterCommit(): done refreshing created objects");
+          }
       }
 
     tree.refresh();
@@ -3485,61 +3485,61 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     try
       {
-	QueryResult result = session.queryInvids(paramVect);
+        QueryResult result = session.queryInvids(paramVect);
 
-	// now get the results
+        // now get the results
 
-	Vector handleList = result.getHandles();
+        Vector handleList = result.getHandles();
 
-	// and update anything we've got in the tree
+        // and update anything we've got in the tree
 
-	for (int i = 0; i < handleList.size(); i++)
-	  {
-	    ObjectHandle newHandle = (ObjectHandle) handleList.elementAt(i);
-	    invid = newHandle.getInvid();
+        for (int i = 0; i < handleList.size(); i++)
+          {
+            ObjectHandle newHandle = (ObjectHandle) handleList.elementAt(i);
+            invid = newHandle.getInvid();
 
-	    objectTypeKey = Short.valueOf(invid.getType());
+            objectTypeKey = Short.valueOf(invid.getType());
 
-	    InvidNode nodeToUpdate = (InvidNode) invidNodeHash.get(invid);
+            InvidNode nodeToUpdate = (InvidNode) invidNodeHash.get(invid);
 
-	    if (nodeToUpdate != null)
-	      {
-		if (debug)
-		  {
-		    System.err.println("gclient.refreshChangedObjectHandles(): got object handle refresh for " +
-				       newHandle.debugDump());
-		  }
+            if (nodeToUpdate != null)
+              {
+                if (debug)
+                  {
+                    System.err.println("gclient.refreshChangedObjectHandles(): got object handle refresh for " +
+                                       newHandle.debugDump());
+                  }
 
-		nodeToUpdate.setHandle(newHandle);
+                nodeToUpdate.setHandle(newHandle);
 
-		if (paramVect == null)
-		  {
-		    changedHash.remove(newHandle.getInvid());
-		  }
+                if (paramVect == null)
+                  {
+                    changedHash.remove(newHandle.getInvid());
+                  }
 
-		setIconForNode(newHandle.getInvid());
-	      }
-	    else if (debug)
-	      {
-		System.err.println("gclient.refreshChangedObjectHandles(): null node for " +
-				   newHandle.debugDump());
-	      }
+                setIconForNode(newHandle.getInvid());
+              }
+            else if (debug)
+              {
+                System.err.println("gclient.refreshChangedObjectHandles(): null node for " +
+                                   newHandle.debugDump());
+              }
 
-	    // and update our tree cache for this item
+            // and update our tree cache for this item
 
-	    objectList list = cachedLists.getList(objectTypeKey);
+            objectList list = cachedLists.getList(objectTypeKey);
 
-	    if (list != null)
-	      {
-		list.removeInvid(newHandle.getInvid());
-		list.addObjectHandle(newHandle);
-	      }
-	  }
+            if (list != null)
+              {
+                list.removeInvid(newHandle.getInvid());
+                list.addObjectHandle(newHandle);
+              }
+          }
       }
     catch (Exception ex)
       {
         // "Couldn''t refresh object tree"
-	processExceptionRethrow(ex, ts.l("refreshChangedObjectHandles.exception"));
+        processExceptionRethrow(ex, ts.l("refreshChangedObjectHandles.exception"));
       }
   }
 
@@ -3575,7 +3575,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (node == null)
       {
-	return;
+        return;
       }
 
     ObjectHandle handle = node.getHandle();
@@ -3695,19 +3695,19 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (this.prefs != null)
       {
-	String defaultPath = this.prefs.get("file_load_default_dir", null);
+        String defaultPath = this.prefs.get("file_load_default_dir", null);
 
-	if (defaultPath != null)
-	  {
-	    chooser.setCurrentDirectory(new File(defaultPath));
-	  }
+        if (defaultPath != null)
+          {
+            chooser.setCurrentDirectory(new File(defaultPath));
+          }
       }
 
     int returnValue = chooser.showDialog(this, null);
 
     if (!(returnValue == JFileChooser.APPROVE_OPTION))
       {
-	return;
+        return;
       }
 
     file = chooser.getSelectedFile();
@@ -3718,18 +3718,18 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     try
       {
-	if (this.prefs != null)
-	  {
-	    try
-	      {
-		this.prefs.put("file_load_default_dir", directory.getCanonicalPath());
-	      }
-	    catch (java.io.IOException ex)
-	      {
-		// we don't really care if we can't save the directory
-		// path in our preferences all that much.
-	      }
-	  }
+        if (this.prefs != null)
+          {
+            try
+              {
+                this.prefs.put("file_load_default_dir", directory.getCanonicalPath());
+              }
+            catch (java.io.IOException ex)
+              {
+                // we don't really care if we can't save the directory
+                // path in our preferences all that much.
+              }
+          }
 
         String result = xmlclient.submitXML(this, file);
 
@@ -3789,81 +3789,81 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (deleteHash.containsKey(invid))
       {
-	// "{0} has already been deleted.\n\nCancel this transaction if you do not wish to delete this object, after all."
-	showErrorMessage(ts.l("editObject.already_deleted", getObjectDesignation(invid)));
-	return;
+        // "{0} has already been deleted.\n\nCancel this transaction if you do not wish to delete this object, after all."
+        showErrorMessage(ts.l("editObject.already_deleted", getObjectDesignation(invid)));
+        return;
       }
 
     if (wp.isOpenForEdit(invid))
       {
-	// "Object Already Being Edited"
-	// "You already have a window open to edit {0}."
-	showErrorMessage(ts.l("editObject.already_editing_subj"),
-			 ts.l("editObject.already_editing_txt", getObjectDesignation(invid)));
-	return;
+        // "Object Already Being Edited"
+        // "You already have a window open to edit {0}."
+        showErrorMessage(ts.l("editObject.already_editing_subj"),
+                         ts.l("editObject.already_editing_txt", getObjectDesignation(invid)));
+        return;
       }
 
     ObjectHandle handle = getObjectHandle(invid);
 
     if (handle != null && handle.isInactive())
       {
-	Hashtable dialogResults = null;
+        Hashtable dialogResults = null;
 
-	// "Edit or Reactivate?"
-	// "Warning, {0} is currently inactivated.  If you are seeking
-	// to reactivate this object, it is recommended that you use
-	// the server's reactivation wizard rather than manually editing it.
-	//
-	// Can I go ahead and shift you over to the server's
-	// reactivation wizard?"
-	// "Yes, Reactivate"
-	// "No, I want to edit it!"
+        // "Edit or Reactivate?"
+        // "Warning, {0} is currently inactivated.  If you are seeking
+        // to reactivate this object, it is recommended that you use
+        // the server's reactivation wizard rather than manually editing it.
+        //
+        // Can I go ahead and shift you over to the server's
+        // reactivation wizard?"
+        // "Yes, Reactivate"
+        // "No, I want to edit it!"
 
-	DialogRsrc rsrc = new DialogRsrc(this,
-					 ts.l("editObject.reactivate_subj"),
-					 ts.l("editObject.reactivate_txt", getObjectDesignation(invid)),
-					 ts.l("editObject.reactivate_yes"),
-					 ts.l("editObject.reactivate_no"),
-					 "question.gif", null);
+        DialogRsrc rsrc = new DialogRsrc(this,
+                                         ts.l("editObject.reactivate_subj"),
+                                         ts.l("editObject.reactivate_txt", getObjectDesignation(invid)),
+                                         ts.l("editObject.reactivate_yes"),
+                                         ts.l("editObject.reactivate_no"),
+                                         "question.gif", null);
 
-	StringDialog verifyDialog = new StringDialog(rsrc, StandardDialog.ModalityType.DOCUMENT_MODAL);
+        StringDialog verifyDialog = new StringDialog(rsrc, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
-	dialogResults = verifyDialog.showDialog();
+        dialogResults = verifyDialog.showDialog();
 
-	if (dialogResults != null)
-	  {
-	    reactivateObject(invid);
-	    return;
-	  }
+        if (dialogResults != null)
+          {
+            reactivateObject(invid);
+            return;
+          }
       }
 
     try
       {
-	ReturnVal rv = handleReturnVal(session.edit_db_object(invid));
+        ReturnVal rv = handleReturnVal(session.edit_db_object(invid));
 
-	db_object o = (db_object) rv.getObject();
+        db_object o = (db_object) rv.getObject();
 
-	if (o == null)
-	  {
-	    // handleReturnVal threw up a dialog for us if needed
+        if (o == null)
+          {
+            // handleReturnVal threw up a dialog for us if needed
 
-	    return;
-	  }
+            return;
+          }
 
-	wp.addWindow(invid, o, true, originalWindow);
+        wp.addWindow(invid, o, true, originalWindow);
 
-	changedHash.put(invid, invid);
+        changedHash.put(invid, invid);
 
-	// we don't need to do a full refresh of it, since we've just
-	// checked it out..
+        // we don't need to do a full refresh of it, since we've just
+        // checked it out..
 
-	setIconForNode(invid);
-	tree.refresh();
+        setIconForNode(invid);
+        tree.refresh();
       }
     catch(Exception rx)
       {
-	// "Could not edit object"
-	processExceptionRethrow(rx, ts.l("editObject.exception_txt"));
+        // "Could not edit object"
+        processExceptionRethrow(rx, ts.l("editObject.exception_txt"));
       }
   }
 
@@ -3884,11 +3884,11 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (deleteHash.containsKey(origInvid))
       {
-	// "Can't Clone a Deleted Object"
-	// "{0} has already been deleted.\n\nCancel this transaction if you do not wish to delete this object after all."
-	showErrorMessage(ts.l("cloneObject.deleted_subj"),
-			 ts.l("cloneObject.deleted_txt", getObjectDesignation(origInvid)));
-	return;
+        // "Can't Clone a Deleted Object"
+        // "{0} has already been deleted.\n\nCancel this transaction if you do not wish to delete this object after all."
+        showErrorMessage(ts.l("cloneObject.deleted_subj"),
+                         ts.l("cloneObject.deleted_txt", getObjectDesignation(origInvid)));
+        return;
       }
 
     // if the admin is a member of more than one owner group, ask what
@@ -3896,106 +3896,106 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (!defaultOwnerChosen)
       {
-	if (!chooseDefaultOwner(false))
-	  {
-	    // They manually closed the default object dialog chooser, so
-	    // we won't proceed with the object cloning.
+        if (!chooseDefaultOwner(false))
+          {
+            // They manually closed the default object dialog chooser, so
+            // we won't proceed with the object cloning.
 
-	    return;
-	  }
+            return;
+          }
       }
 
     setWaitCursor();
 
     try
       {
-	final Invid local_origInvid = origInvid;
-	obj = null;
+        final Invid local_origInvid = origInvid;
+        obj = null;
 
-	ReturnVal rv =  (ReturnVal) FoxtrotAdapter.post(new foxtrot.Task()
-	  {
-	    public Object run() throws Exception
-	    {
-	      return session.clone_db_object(local_origInvid);
-	    }
-	  });
+        ReturnVal rv =  (ReturnVal) FoxtrotAdapter.post(new foxtrot.Task()
+          {
+            public Object run() throws Exception
+            {
+              return session.clone_db_object(local_origInvid);
+            }
+          });
 
-	rv = handleReturnVal(rv);
+        rv = handleReturnVal(rv);
 
-	obj = (db_object) rv.getObject();
+        obj = (db_object) rv.getObject();
 
-	// we'll depend on handleReturnVal() above showing the user a rejection
-	// dialog if the object create was rejected
+        // we'll depend on handleReturnVal() above showing the user a rejection
+        // dialog if the object create was rejected
 
-	if (obj == null)
-	  {
-	    return;
-	  }
+        if (obj == null)
+          {
+            return;
+          }
 
-	try
-	  {
-	    invid = obj.getInvid();
-	  }
-	catch (Exception rx)
-	  {
-	    processExceptionRethrow(rx);
-	  }
+        try
+          {
+            invid = obj.getInvid();
+          }
+        catch (Exception rx)
+          {
+            processExceptionRethrow(rx);
+          }
 
-	// "New Object"
-	ObjectHandle handle = new ObjectHandle(ts.l("global.new_object"), invid, false, false, false, true);
+        // "New Object"
+        ObjectHandle handle = new ObjectHandle(ts.l("global.new_object"), invid, false, false, false, true);
 
-	wp.addWindow(invid, obj, true, true, null);
+        wp.addWindow(invid, obj, true, true, null);
 
-	Short typeShort = Short.valueOf(invid.getType());
+        Short typeShort = Short.valueOf(invid.getType());
 
-	if (cachedLists.containsList(typeShort))
-	  {
-	    objectList list = cachedLists.getList(typeShort);
-	    list.addObjectHandle(handle);
-	  }
+        if (cachedLists.containsList(typeShort))
+          {
+            objectList list = cachedLists.getList(typeShort);
+            list.addObjectHandle(handle);
+          }
 
-	// If the base node is open, deal with the node.
+        // If the base node is open, deal with the node.
 
-	BaseNode baseN = null;
+        BaseNode baseN = null;
 
-	if (shortToBaseNodeHash.containsKey(typeShort))
-	  {
-	    baseN = (BaseNode)shortToBaseNodeHash.get(typeShort);
+        if (shortToBaseNodeHash.containsKey(typeShort))
+          {
+            baseN = (BaseNode)shortToBaseNodeHash.get(typeShort);
 
-	    if (baseN.isLoaded())
-	      {
-		InvidNode objNode = new InvidNode(baseN,
-						  handle.getLabel(),
-						  invid,
-						  null, false,
-						  OPEN_FIELD_CREATE,
-						  CLOSED_FIELD_CREATE,
-						  baseN.canInactivate() ? objectInactivatePM : objectRemovePM,
-						  handle);
+            if (baseN.isLoaded())
+              {
+                InvidNode objNode = new InvidNode(baseN,
+                                                  handle.getLabel(),
+                                                  invid,
+                                                  null, false,
+                                                  OPEN_FIELD_CREATE,
+                                                  CLOSED_FIELD_CREATE,
+                                                  baseN.canInactivate() ? objectInactivatePM : objectRemovePM,
+                                                  handle);
 
-		createHash.put(invid, new CacheInfo(typeShort, handle.getLabel(), null, handle));
+                createHash.put(invid, new CacheInfo(typeShort, handle.getLabel(), null, handle));
 
-		invidNodeHash.put(invid, objNode);
-		setIconForNode(invid);
+                invidNodeHash.put(invid, objNode);
+                setIconForNode(invid);
 
-		tree.insertNode(objNode, true);  // the true means the tree will refresh
-	      }
-	    else
-	      {
-		// this hash is used when creating the node for the object
-		// in the tree.  This way, if a new object is created
-		// before the base node is expanded, the new object will
-		// have the correct icon.
+                tree.insertNode(objNode, true);  // the true means the tree will refresh
+              }
+            else
+              {
+                // this hash is used when creating the node for the object
+                // in the tree.  This way, if a new object is created
+                // before the base node is expanded, the new object will
+                // have the correct icon.
 
-		createdObjectsWithoutNodes.put(invid, baseN);
-	      }
-	  }
+                createdObjectsWithoutNodes.put(invid, baseN);
+              }
+          }
 
-	somethingChanged();
+        somethingChanged();
       }
     finally
       {
-	setNormalCursor();
+        setNormalCursor();
       }
   }
 
@@ -4019,119 +4019,119 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (!defaultOwnerChosen)
       {
-	if (!chooseDefaultOwner(false))
-	  {
-	    // They manually closed the default object dialog chooser, so
-	    // we won't proceed with object creation.
+        if (!chooseDefaultOwner(false))
+          {
+            // They manually closed the default object dialog chooser, so
+            // we won't proceed with object creation.
 
-	    return null;
-	  }
+            return null;
+          }
       }
 
     setWaitCursor();
 
     try
       {
-	try
-	  {
-	    final short local_type = type;
+        try
+          {
+            final short local_type = type;
 
-	    ReturnVal rv;
+            ReturnVal rv;
 
-	    /*
-	      Use foxtrot to keep the GUI refreshing while we're
-	      waiting for the server to create the object for us.
-	    */
+            /*
+              Use foxtrot to keep the GUI refreshing while we're
+              waiting for the server to create the object for us.
+            */
 
-	    rv = (ReturnVal) FoxtrotAdapter.post(new foxtrot.Task()
-	      {
-		public Object run() throws Exception
-		{
-		  return session.create_db_object(local_type);
-		}
-	      });
+            rv = (ReturnVal) FoxtrotAdapter.post(new foxtrot.Task()
+              {
+                public Object run() throws Exception
+                {
+                  return session.create_db_object(local_type);
+                }
+              });
 
-	    rv = handleReturnVal(rv);
-	    obj = (db_object) rv.getObject();
-	  }
-	catch (Exception rx)
-	  {
-	    // "Exception encountered creating new object"
-	    processExceptionRethrow(rx, ts.l("createObject.exception_txt"));
-	  }
+            rv = handleReturnVal(rv);
+            obj = (db_object) rv.getObject();
+          }
+        catch (Exception rx)
+          {
+            // "Exception encountered creating new object"
+            processExceptionRethrow(rx, ts.l("createObject.exception_txt"));
+          }
 
-	// we'll depend on handleReturnVal() above showing the user a rejection
-	// dialog if the object create was rejected
+        // we'll depend on handleReturnVal() above showing the user a rejection
+        // dialog if the object create was rejected
 
-	if (obj == null)
-	  {
-	    return null;
-	  }
+        if (obj == null)
+          {
+            return null;
+          }
 
-	try
-	  {
-	    invid = obj.getInvid();
-	  }
-	catch (Exception rx)
-	  {
-	    processExceptionRethrow(rx);
-	  }
+        try
+          {
+            invid = obj.getInvid();
+          }
+        catch (Exception rx)
+          {
+            processExceptionRethrow(rx);
+          }
 
-	// "New Object"
-	ObjectHandle handle = new ObjectHandle(ts.l("global.new_object"), invid, false, false, false, true);
+        // "New Object"
+        ObjectHandle handle = new ObjectHandle(ts.l("global.new_object"), invid, false, false, false, true);
 
-	wp.addWindow(invid, obj, true, true, null);
+        wp.addWindow(invid, obj, true, true, null);
 
-	Short typeShort = Short.valueOf(type);
+        Short typeShort = Short.valueOf(type);
 
-	if (cachedLists.containsList(typeShort))
-	  {
-	    objectList list = cachedLists.getList(typeShort);
-	    list.addObjectHandle(handle);
-	  }
+        if (cachedLists.containsList(typeShort))
+          {
+            objectList list = cachedLists.getList(typeShort);
+            list.addObjectHandle(handle);
+          }
 
-	// If the base node is open, deal with the node.
+        // If the base node is open, deal with the node.
 
-	BaseNode baseN = null;
+        BaseNode baseN = null;
 
-	if (shortToBaseNodeHash.containsKey(typeShort))
-	  {
-	    baseN = (BaseNode)shortToBaseNodeHash.get(typeShort);
+        if (shortToBaseNodeHash.containsKey(typeShort))
+          {
+            baseN = (BaseNode)shortToBaseNodeHash.get(typeShort);
 
-	    if (baseN.isLoaded())
-	      {
-		InvidNode objNode = new InvidNode(baseN,
-						  handle.getLabel(),
-						  invid,
-						  null, false,
-						  OPEN_FIELD_CREATE,
-						  CLOSED_FIELD_CREATE,
-						  baseN.canInactivate() ? objectInactivatePM : objectRemovePM,
-						  handle);
+            if (baseN.isLoaded())
+              {
+                InvidNode objNode = new InvidNode(baseN,
+                                                  handle.getLabel(),
+                                                  invid,
+                                                  null, false,
+                                                  OPEN_FIELD_CREATE,
+                                                  CLOSED_FIELD_CREATE,
+                                                  baseN.canInactivate() ? objectInactivatePM : objectRemovePM,
+                                                  handle);
 
-		createHash.put(invid, new CacheInfo(typeShort, handle.getLabel(), null, handle));
+                createHash.put(invid, new CacheInfo(typeShort, handle.getLabel(), null, handle));
 
-		invidNodeHash.put(invid, objNode);
-		setIconForNode(invid);
+                invidNodeHash.put(invid, objNode);
+                setIconForNode(invid);
 
-		tree.insertNode(objNode, true);  // the true means the tree will refresh
-	      }
-	    else
-	      {
-		// this hash is used when creating the node for the object
-		// in the tree.  This way, if a new object is created
-		// before the base node is expanded, the new object will
-		// have the correct icon.
+                tree.insertNode(objNode, true);  // the true means the tree will refresh
+              }
+            else
+              {
+                // this hash is used when creating the node for the object
+                // in the tree.  This way, if a new object is created
+                // before the base node is expanded, the new object will
+                // have the correct icon.
 
-		createdObjectsWithoutNodes.put(invid, baseN);
-	      }
-	  }
+                createdObjectsWithoutNodes.put(invid, baseN);
+              }
+          }
 
-	somethingChanged();
+        somethingChanged();
       }
     finally
       {
-	setNormalCursor();
+        setNormalCursor();
       }
 
     return obj;
@@ -4146,30 +4146,30 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (deleteHash.containsKey(invid))
       {
-	// "{0} has already been deleted.\n\nCancel this transaction if you do not wish to delete this object after all."
-	showErrorMessage(ts.l("viewObject.deleted_txt", getObjectDesignation(invid)));
-	return;
+        // "{0} has already been deleted.\n\nCancel this transaction if you do not wish to delete this object after all."
+        showErrorMessage(ts.l("viewObject.deleted_txt", getObjectDesignation(invid)));
+        return;
       }
 
     try
       {
-	ReturnVal rv = handleReturnVal(session.view_db_object(invid));
-	db_object object = (db_object) rv.getObject();
+        ReturnVal rv = handleReturnVal(session.view_db_object(invid));
+        db_object object = (db_object) rv.getObject();
 
-	// we'll assume handleReturnVal() will display any rejection
-	// dialogs from the server
+        // we'll assume handleReturnVal() will display any rejection
+        // dialogs from the server
 
-	if (object == null)
-	  {
-	    return;
-	  }
+        if (object == null)
+          {
+            return;
+          }
 
-	wp.addWindow(invid, object, false);
+        wp.addWindow(invid, object, false);
       }
     catch (Exception rx)
       {
-	// "Could not view object"
-	processExceptionRethrow(rx, ts.l("viewObject.exception_txt"));
+        // "Could not view object"
+        processExceptionRethrow(rx, ts.l("viewObject.exception_txt"));
       }
   }
 
@@ -4196,14 +4196,14 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (deleteHash.containsKey(invid))
       {
-	// "Object Already Deleted"
-	// "{0} has already been marked as deleted.\n\nYou can hit the
-	// commit button to permanently get rid of this object, or you
-	// can hit the cancel button to undo everything."
+        // "Object Already Deleted"
+        // "{0} has already been marked as deleted.\n\nYou can hit the
+        // commit button to permanently get rid of this object, or you
+        // can hit the cancel button to undo everything."
 
-	showErrorMessage(ts.l("deleteObject.deleted_subj"),
-			 ts.l("deleteObject.deleted_txt", getObjectDesignation(invid)));
-	return;
+        showErrorMessage(ts.l("deleteObject.deleted_subj"),
+                         ts.l("deleteObject.deleted_txt", getObjectDesignation(invid)));
+        return;
       }
 
 
@@ -4217,122 +4217,122 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (wp.isOpenForEdit(invid) && !wp.isApprovedForClosing(invid))
       {
-	// "Object being edited"
-	// "You are currently editing {0}.  I can''t delete this
-	// object while you are actively editing it.\n\nYou must
-	// commit or cancel this transaction before this object can be
-	// deleted."
+        // "Object being edited"
+        // "You are currently editing {0}.  I can''t delete this
+        // object while you are actively editing it.\n\nYou must
+        // commit or cancel this transaction before this object can be
+        // deleted."
 
-	showErrorMessage(ts.l("deleteObject.edited_subj"),
-			 ts.l("deleteObject.edited_txt", getObjectDesignation(invid)));
-	return;
+        showErrorMessage(ts.l("deleteObject.edited_subj"),
+                         ts.l("deleteObject.edited_txt", getObjectDesignation(invid)));
+        return;
       }
 
     if (showDialog)
       {
-	// "Verify Object Deletion"
-	// "Are you sure you want to delete {0}?"
-	StringDialog d = new StringDialog(this,
-					  ts.l("deleteObject.verify_subj"),
-					  ts.l("deleteObject.verify_txt", getObjectDesignation(invid)),
-					  StringDialog.getDefaultOk(),
-					  StringDialog.getDefaultCancel(),
-					  getQuestionImage(), StandardDialog.ModalityType.DOCUMENT_MODAL);
-	Hashtable result = d.showDialog();
+        // "Verify Object Deletion"
+        // "Are you sure you want to delete {0}?"
+        StringDialog d = new StringDialog(this,
+                                          ts.l("deleteObject.verify_subj"),
+                                          ts.l("deleteObject.verify_txt", getObjectDesignation(invid)),
+                                          StringDialog.getDefaultOk(),
+                                          StringDialog.getDefaultCancel(),
+                                          getQuestionImage(), StandardDialog.ModalityType.DOCUMENT_MODAL);
+        Hashtable result = d.showDialog();
 
-	if (result == null)
-	  {
-	    // "Canceled!"
-	    setStatus(ts.l("deleteObject.canceled"));
+        if (result == null)
+          {
+            // "Canceled!"
+            setStatus(ts.l("deleteObject.canceled"));
 
-	    return;
-	  }
+            return;
+          }
       }
 
     setWaitCursor();
 
     try
       {
-	Short id = Short.valueOf(invid.getType());
+        Short id = Short.valueOf(invid.getType());
 
-	if (debug)
-	  {
-	    System.err.println("Deleting invid= " + invid);
-	  }
+        if (debug)
+          {
+            System.err.println("Deleting invid= " + invid);
+          }
 
-	// Delete the object
+        // Delete the object
 
-	retVal = handleReturnVal(session.remove_db_object(invid));
+        retVal = handleReturnVal(session.remove_db_object(invid));
 
-	if (ReturnVal.didSucceed(retVal))
-	  {
-	    // InvidNode node = (InvidNode)invidNodeHash.get(invid);
+        if (ReturnVal.didSucceed(retVal))
+          {
+            // InvidNode node = (InvidNode)invidNodeHash.get(invid);
 
-	    // Check out the deleteHash.  If this one is already on there,
-	    // then I don't know what to do.  If it isn't, then add a new
-	    // cache info.  I guess maybe update the name or something,
-	    // if it is on there.
+            // Check out the deleteHash.  If this one is already on there,
+            // then I don't know what to do.  If it isn't, then add a new
+            // cache info.  I guess maybe update the name or something,
+            // if it is on there.
 
-	    CacheInfo info = null;
-	    label = session.viewObjectLabel(invid);
+            CacheInfo info = null;
+            label = session.viewObjectLabel(invid);
 
-	    // Take this object out of the cachedLists, if it is in there
+            // Take this object out of the cachedLists, if it is in there
 
-	    if (cachedLists.containsList(id))
-	      {
-		if (debug)
-		  {
-		    System.err.println("This base has been hashed.  Removing: " + label);
-		  }
+            if (cachedLists.containsList(id))
+              {
+                if (debug)
+                  {
+                    System.err.println("This base has been hashed.  Removing: " + label);
+                  }
 
-		objectList list = cachedLists.getList(id);
+                objectList list = cachedLists.getList(id);
 
-		ObjectHandle h = list.getObjectHandle(invid);
-		list.removeInvid(invid);
+                ObjectHandle h = list.getObjectHandle(invid);
+                list.removeInvid(invid);
 
-		info = new CacheInfo(id, label, null, h);
-	      }
-	    else
-	      {
-		info = new CacheInfo(id, label, null);
-	      }
+                info = new CacheInfo(id, label, null, h);
+              }
+            else
+              {
+                info = new CacheInfo(id, label, null);
+              }
 
-	    if (deleteHash.containsKey(invid))
-	      {
-		if (debug)
-		  {
-		    System.err.println("already deleted, nothing to change, right?");
-		  }
-	      }
-	    else
-	      {
-		deleteHash.put(invid, info);
-	      }
+            if (deleteHash.containsKey(invid))
+              {
+                if (debug)
+                  {
+                    System.err.println("already deleted, nothing to change, right?");
+                  }
+              }
+            else
+              {
+                deleteHash.put(invid, info);
+              }
 
-	    if (invidNodeHash.containsKey(invid))
-	      {
-		setIconForNode(invid);
-		tree.refresh();
-	      }
+            if (invidNodeHash.containsKey(invid))
+              {
+                setIconForNode(invid);
+                tree.refresh();
+              }
 
-	    // "{0} will be deleted when commit is clicked."
-	    setStatus(ts.l("deleteObject.ready_to_delete", getObjectDesignation(invid)));
-	    somethingChanged();
-	  }
-	else
-	  {
-	    // "Delete Failed"
-	    setStatus(ts.l("deleteObject.failed"));
-	  }
+            // "{0} will be deleted when commit is clicked."
+            setStatus(ts.l("deleteObject.ready_to_delete", getObjectDesignation(invid)));
+            somethingChanged();
+          }
+        else
+          {
+            // "Delete Failed"
+            setStatus(ts.l("deleteObject.failed"));
+          }
       }
     catch (Exception rx)
       {
-	// "Error attempting to delete {0}.  Object not deleted."
-	processExceptionRethrow(rx, ts.l("deleteObject.exception_txt", getObjectDesignation(invid)));
+        // "Error attempting to delete {0}.  Object not deleted."
+        processExceptionRethrow(rx, ts.l("deleteObject.exception_txt", getObjectDesignation(invid)));
       }
     finally
       {
-	setNormalCursor();
+        setNormalCursor();
       }
 
     return;
@@ -4359,20 +4359,20 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (deleteHash.containsKey(invid))
       {
-	// "Object Already Deleted"
-	// "{0} has already been deleted.\n\nCancel this transaction if you do not wish to delete this object after all."
-	showErrorMessage(ts.l("inactivateObject.deleted_subj"),
-			 ts.l("inactivateObject.deleted_txt", getObjectDesignation(invid)));
-	return;
+        // "Object Already Deleted"
+        // "{0} has already been deleted.\n\nCancel this transaction if you do not wish to delete this object after all."
+        showErrorMessage(ts.l("inactivateObject.deleted_subj"),
+                         ts.l("inactivateObject.deleted_txt", getObjectDesignation(invid)));
+        return;
       }
 
     if (wp.isOpenForEdit(invid))
       {
-	// "Object Being Edited"
-	// "I can''t inactivate this object while you have a window open to edit {0}."
-	showErrorMessage(ts.l("inactivateObject.edited_subj"),
-			 ts.l("inactivateObject.edited_txt", getObjectDesignation(invid)));
-	return;
+        // "Object Being Edited"
+        // "I can''t inactivate this object while you have a window open to edit {0}."
+        showErrorMessage(ts.l("inactivateObject.edited_subj"),
+                         ts.l("inactivateObject.edited_txt", getObjectDesignation(invid)));
+        return;
       }
 
     String designation = getObjectDesignation(invid);
@@ -4383,57 +4383,57 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     try
       {
-	retVal = session.inactivate_db_object(invid);
+        retVal = session.inactivate_db_object(invid);
 
-	if (retVal != null)
-	  {
-	    retVal = handleReturnVal(retVal);
+        if (retVal != null)
+          {
+            retVal = handleReturnVal(retVal);
 
-	    if (retVal == null)
-	      {
-		ok = true;
-	      }
-	    else
-	      {
-		ok = retVal.didSucceed();
-	      }
-	  }
-	else
-	  {
-	    ok = true;
-	  }
+            if (retVal == null)
+              {
+                ok = true;
+              }
+            else
+              {
+                ok = retVal.didSucceed();
+              }
+          }
+        else
+          {
+            ok = true;
+          }
 
-	if (ok)
-	  {
-	    // remember that we changed this object for the refreshChangedObjectHandles
+        if (ok)
+          {
+            // remember that we changed this object for the refreshChangedObjectHandles
 
-	    changedHash.put(invid, invid);
+            changedHash.put(invid, invid);
 
-	    // refresh it now
+            // refresh it now
 
-	    refreshChangedObject(invid);
+            refreshChangedObject(invid);
 
-	    // and update the tree
+            // and update the tree
 
-	    tree.refresh();
-	    // "{0} inactivated."
-	    setStatus(ts.l("inactivateObject.success", designation), 2);
-	    somethingChanged();
-	  }
-	else
-	  {
-	    // "Could not inactivate {0}."
-	    setStatus(ts.l("inactivateObject.failure", designation));
-	  }
+            tree.refresh();
+            // "{0} inactivated."
+            setStatus(ts.l("inactivateObject.success", designation), 2);
+            somethingChanged();
+          }
+        else
+          {
+            // "Could not inactivate {0}."
+            setStatus(ts.l("inactivateObject.failure", designation));
+          }
       }
     catch (Exception rx)
       {
-	// "Could not inactivate {0}."
-	processExceptionRethrow(rx, ts.l("inactivateObject.failure", designation));
+        // "Could not inactivate {0}."
+        processExceptionRethrow(rx, ts.l("inactivateObject.failure", designation));
       }
     finally
       {
-	setNormalCursor();
+        setNormalCursor();
       }
   }
 
@@ -4458,50 +4458,50 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     try
       {
-	setWaitCursor();
-	retVal = session.reactivate_db_object(invid);
+        setWaitCursor();
+        retVal = session.reactivate_db_object(invid);
 
-	if (retVal == null)
-	  {
-	    // It worked
-	    ok = true;
-	  }
-	else
-	  {
-	    retVal = handleReturnVal(retVal);
+        if (retVal == null)
+          {
+            // It worked
+            ok = true;
+          }
+        else
+          {
+            retVal = handleReturnVal(retVal);
 
-	    if (retVal == null)
-	      {
-		ok = true;
-	      }
-	    else
-	      {
-		ok = retVal.didSucceed();
-	      }
-	  }
+            if (retVal == null)
+              {
+                ok = true;
+              }
+            else
+              {
+                ok = retVal.didSucceed();
+              }
+          }
       }
     catch (Exception rx)
       {
-	// "Could not reactivate {0}."
-	processExceptionRethrow(rx, ts.l("reactivateObject.failure", getObjectDesignation(invid)));
+        // "Could not reactivate {0}."
+        processExceptionRethrow(rx, ts.l("reactivateObject.failure", getObjectDesignation(invid)));
       }
 
     if (ok)
       {
-	somethingChanged();
+        somethingChanged();
 
-	// "{0} reactivated."
-	setStatus(ts.l("reactivateObject.success", getObjectDesignation(invid)), 2);
+        // "{0} reactivated."
+        setStatus(ts.l("reactivateObject.success", getObjectDesignation(invid)), 2);
 
-	// remember that this invid has been edited, and will need
-	// to be refreshed on commit
+        // remember that this invid has been edited, and will need
+        // to be refreshed on commit
 
-	changedHash.put(invid, invid);
+        changedHash.put(invid, invid);
 
-	refreshChangedObject(invid);
+        refreshChangedObject(invid);
 
-	tree.refresh();
-	setNormalCursor();
+        tree.refresh();
+        setNormalCursor();
       }
 
     return ok;
@@ -4520,12 +4520,12 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (createDialog == null)
       {
-	createDialog = new createObjectDialog(this);
+        createDialog = new createObjectDialog(this);
       }
     else
       {
-	createDialog.pack();	// force it to re-center itself.
-	createDialog.setVisible(true);
+        createDialog.pack();    // force it to re-center itself.
+        createDialog.setVisible(true);
       }
   }
 
@@ -4550,14 +4550,14 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (invid == null)
       {
-	if (debug)
-	  {
-	    System.err.println("Canceled");
-	  }
+        if (debug)
+          {
+            System.err.println("Canceled");
+          }
       }
     else
       {
-	editObject(invid, null);
+        editObject(invid, null);
       }
   }
 
@@ -4584,14 +4584,14 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (invid == null)
       {
-	if (debug)
-	  {
-	    System.err.println("Canceled");
-	  }
+        if (debug)
+          {
+            System.err.println("Canceled");
+          }
       }
     else
       {
-	viewObject(invid);
+        viewObject(invid);
       }
   }
 
@@ -4641,14 +4641,14 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (invid == null)
       {
-	if (debug)
-	  {
-	    System.err.println("Canceled");
-	  }
+        if (debug)
+          {
+            System.err.println("Canceled");
+          }
       }
     else
       {
-	deleteObject(invid, true);
+        deleteObject(invid, true);
       }
   }
 
@@ -4674,14 +4674,14 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (invid == null)
       {
-	if (debug)
-	  {
-	    System.err.println("Canceled");
-	  }
+        if (debug)
+          {
+            System.err.println("Canceled");
+          }
       }
     else
       {
-	cloneObject(invid);
+        cloneObject(invid);
       }
   }
 
@@ -4701,7 +4701,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   void changePersona(boolean requirePassword)
   {
     personaDialog = new PersonaDialog(client, requirePassword);
-    personaDialog.pack();	// force it to re-center itself.
+    personaDialog.pack();       // force it to re-center itself.
     personaDialog.setVisible(true); // block
   }
 
@@ -4754,11 +4754,11 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (filterDialog == null)
       {
-	filterDialog = new JFilterDialog(this);
+        filterDialog = new JFilterDialog(this);
       }
     else
       {
-	filterDialog.setVisible(true);
+        filterDialog.setVisible(true);
       }
   }
 
@@ -4793,44 +4793,44 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (node == null)
       {
-	return;
+        return;
       }
 
     if (debug)
       {
-	System.err.println("updateAfterFilterChange examining: " + node);
+        System.err.println("updateAfterFilterChange examining: " + node);
       }
 
     if (node instanceof BaseNode)
       {
-	while (node instanceof BaseNode)
-	  {
-	    if (node.getChild() != null)
-	      {
-		if (debug)
-		  {
-		    System.err.println("Updating " + node);
-		  }
+        while (node instanceof BaseNode)
+          {
+            if (node.getChild() != null)
+              {
+                if (debug)
+                  {
+                    System.err.println("Updating " + node);
+                  }
 
-		try
-		  {
-		    refreshObjects((BaseNode) node, false);
-		  }
-		catch (Exception ex)
-		  {
-		    // "Could not refresh object base {0}"
-		    processExceptionRethrow(ex, ts.l("updateTreeAfterFilterChange.exception_txt", node.getText()));
-		  }
-	      }
+                try
+                  {
+                    refreshObjects((BaseNode) node, false);
+                  }
+                catch (Exception ex)
+                  {
+                    // "Could not refresh object base {0}"
+                    processExceptionRethrow(ex, ts.l("updateTreeAfterFilterChange.exception_txt", node.getText()));
+                  }
+              }
 
-	    node = node.getNextSibling();
-	  }
+            node = node.getNextSibling();
+          }
       }
 
     if (node instanceof CatTreeNode)
       {
-	updateTreeAfterFilterChange(node.getChild());
-	updateTreeAfterFilterChange(node.getNextSibling());
+        updateTreeAfterFilterChange(node.getChild());
+        updateTreeAfterFilterChange(node.getNextSibling());
       }
   }
 
@@ -4848,20 +4848,20 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (ownerGroups == null)
       {
-	try
-	  {
-	    ownerGroups = session.getOwnerGroups().getListHandles();
+        try
+          {
+            ownerGroups = session.getOwnerGroups().getListHandles();
 
-	    if (ownerGroups == null)
-	      {
-		throw new NullPointerException();
-	      }
-	  }
-	catch (Exception rx)
-	  {
-	    // "Exception encountered attempting to load owner groups from the server"
-	    processExceptionRethrow(rx, ts.l("chooseDefaultOwner.exception_txt"));
-	  }
+            if (ownerGroups == null)
+              {
+                throw new NullPointerException();
+              }
+          }
+        catch (Exception rx)
+          {
+            // "Exception encountered attempting to load owner groups from the server"
+            processExceptionRethrow(rx, ts.l("chooseDefaultOwner.exception_txt"));
+          }
       }
 
     // we know that the supergash owner group, at least, should exist
@@ -4870,38 +4870,38 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (ownerGroups.size() == 0)
       {
-	// "Permissions Error"
-	// "Your account doesn''t have permission to access any owner groups on the server.\n\nYou cannot create new objects with this account."
-	showErrorMessage(ts.l("chooseDefaultOwner.permissions_subj"),
-			 ts.l("chooseDefaultOwner.permissions_txt"));
-	return false;
+        // "Permissions Error"
+        // "Your account doesn''t have permission to access any owner groups on the server.\n\nYou cannot create new objects with this account."
+        showErrorMessage(ts.l("chooseDefaultOwner.permissions_subj"),
+                         ts.l("chooseDefaultOwner.permissions_txt"));
+        return false;
       }
     else if (!forcePopup && (ownerGroups.size() == 1))
       {
-	// if forcePopup is false and there's only one group
-	// available, we'll go ahead and pick the default owner for
-	// objects created by this user ourselves.
+        // if forcePopup is false and there's only one group
+        // available, we'll go ahead and pick the default owner for
+        // objects created by this user ourselves.
 
-	defaultOwnerChosen = true;
+        defaultOwnerChosen = true;
 
-	Vector owners = new Vector();
+        Vector owners = new Vector();
 
-	for (int i = 0; i < ownerGroups.size(); i++)
-	  {
-	    owners.addElement(((listHandle)ownerGroups.elementAt(i)).getObject());
-	  }
+        for (int i = 0; i < ownerGroups.size(); i++)
+          {
+            owners.addElement(((listHandle)ownerGroups.elementAt(i)).getObject());
+          }
 
-	try
-	  {
-	    handleReturnVal(session.setDefaultOwner(owners));
-	  }
-	catch (Exception rx)
-	  {
-	    // "Exception encountered attempting to set the default owner group for newly created objects."
-	    processExceptionRethrow(rx, ts.l("chooseDefaultOwner.exception2_txt"));
-	  }
+        try
+          {
+            handleReturnVal(session.setDefaultOwner(owners));
+          }
+        catch (Exception rx)
+          {
+            // "Exception encountered attempting to set the default owner group for newly created objects."
+            processExceptionRethrow(rx, ts.l("chooseDefaultOwner.exception2_txt"));
+          }
 
-	return true;
+        return true;
       }
 
     defaultOwnerDialog = new JDefaultOwnerDialog(this, ownerGroups);
@@ -4912,22 +4912,22 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if ((retVal == null) || (retVal.didSucceed()))
       {
-	defaultOwnerChosen = true;
+        defaultOwnerChosen = true;
       }
     else
       {
-	// if the user voluntarily popped up the choose default owner
-	// dialog (i.e., by using the menu) and then forcibly closed
-	// the dialog window rather than clicking 'Ok', we'll get a
-	// negative return value from the chooseOwner() method, but we
-	// shouldn't take that as meaning that the defaultOwnerChosen
-	// flag should be set false, as it might previously have been
-	// appropriately set.
+        // if the user voluntarily popped up the choose default owner
+        // dialog (i.e., by using the menu) and then forcibly closed
+        // the dialog window rather than clicking 'Ok', we'll get a
+        // negative return value from the chooseOwner() method, but we
+        // shouldn't take that as meaning that the defaultOwnerChosen
+        // flag should be set false, as it might previously have been
+        // appropriately set.
 
-	if (!forcePopup)
-	  {
-	    defaultOwnerChosen = false;
-	  }
+        if (!forcePopup)
+          {
+            defaultOwnerChosen = false;
+          }
       }
 
     return defaultOwnerChosen;
@@ -4961,41 +4961,41 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (!logoutMI.isEnabled())
       {
-	return false;
+        return false;
       }
 
     if (wizardActive > 0)
       {
-	if (debug)
-	  {
-	    System.err.println("gclient: wizard is active, not ok to logout.");
-	  }
+        if (debug)
+          {
+            System.err.println("gclient: wizard is active, not ok to logout.");
+          }
 
-	return false;
+        return false;
       }
 
     if (getSomethingChanged())
       {
-	// "Warning: Changes have been made."
-	// "You have made changes in objects on the server that have
-	// not been committed.  If you log out now, those changes will
-	// be lost.\n\nAre you sure you want to log out and lose these
-	// changes?"
-	// "Yes, Discard Changes"
-	StringDialog dialog = new StringDialog(this,
-					       ts.l("OKToProceed.changes_warning_subj"),
-					       ts.l("OKToProceed.changes_warning_txt"),
-					       ts.l("OKToProceed.yes"),
-					       StringDialog.getDefaultCancel(), StandardDialog.ModalityType.DOCUMENT_MODAL);
+        // "Warning: Changes have been made."
+        // "You have made changes in objects on the server that have
+        // not been committed.  If you log out now, those changes will
+        // be lost.\n\nAre you sure you want to log out and lose these
+        // changes?"
+        // "Yes, Discard Changes"
+        StringDialog dialog = new StringDialog(this,
+                                               ts.l("OKToProceed.changes_warning_subj"),
+                                               ts.l("OKToProceed.changes_warning_txt"),
+                                               ts.l("OKToProceed.yes"),
+                                               StringDialog.getDefaultCancel(), StandardDialog.ModalityType.DOCUMENT_MODAL);
 
-	// if showDialog is null, cancel was clicked So return will be
-	// false if cancel was clicked
+        // if showDialog is null, cancel was clicked So return will be
+        // false if cancel was clicked
 
-	return (dialog.showDialog() != null);
+        return (dialog.showDialog() != null);
       }
     else
       {
-	return true;
+        return true;
       }
   }
 
@@ -5018,41 +5018,41 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     for (int i = 0; i < windows.size(); i++)
       {
-	if (debug)
-	  {
-	    System.err.println("Updating window number " + i);
-	  }
+        if (debug)
+          {
+            System.err.println("Updating window number " + i);
+          }
 
-	framePanel fp = (framePanel)windows.elementAt(i);
+        framePanel fp = (framePanel)windows.elementAt(i);
 
-	if (fp == null)
-	  {
-	    if (debug)
-	      {
-		System.err.println("null frame panel in updateNotesPanels");
-	      }
-	  }
-	else
-	  {
-	    notesPanel np = fp.getNotesPanel();
+        if (fp == null)
+          {
+            if (debug)
+              {
+                System.err.println("null frame panel in updateNotesPanels");
+              }
+          }
+        else
+          {
+            notesPanel np = fp.getNotesPanel();
 
-	    if (np == null)
-	      {
-		if (debug)
-		  {
-		    System.err.println("null notes panel in frame panel");
-		  }
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    System.err.println("Calling update notes.");
-		  }
+            if (np == null)
+              {
+                if (debug)
+                  {
+                    System.err.println("null notes panel in frame panel");
+                  }
+              }
+            else
+              {
+                if (debug)
+                  {
+                    System.err.println("Calling update notes.");
+                  }
 
-		np.updateNotes();
-	      }
-	  }
+                np.updateNotes();
+              }
+          }
       }
   }
 
@@ -5084,117 +5084,117 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (promptForComment || this.comment != null)
       {
-	// "Comment:"
-	String fieldName = ts.l("commitTransaction.comment_dialog_comment_label");
+        // "Comment:"
+        String fieldName = ts.l("commitTransaction.comment_dialog_comment_label");
 
-	// "Transaction Commit"
-	// "Commit"
+        // "Transaction Commit"
+        // "Commit"
 
-	DialogRsrc r = new DialogRsrc(this, ts.l("commitTransaction.comment_dialog_title"), "",
-				      ts.l("init.commit_button"),
-				      StringDialog.getDefaultCancel());
-	r.addMultiString(fieldName, this.comment);
+        DialogRsrc r = new DialogRsrc(this, ts.l("commitTransaction.comment_dialog_title"), "",
+                                      ts.l("init.commit_button"),
+                                      StringDialog.getDefaultCancel());
+        r.addMultiString(fieldName, this.comment);
 
-	StringDialog d = new StringDialog(r, StandardDialog.ModalityType.DOCUMENT_MODAL);
+        StringDialog d = new StringDialog(r, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
-	Hashtable result = d.showDialog();
+        Hashtable result = d.showDialog();
 
-	if (result == null)
-	  {
-	    // the user hit cancel
+        if (result == null)
+          {
+            // the user hit cancel
 
-	    return;
-	  }
-	else
-	  {
-	    this.comment = (String) result.get(fieldName);
+            return;
+          }
+        else
+          {
+            this.comment = (String) result.get(fieldName);
 
-	    if (this.comment != null && this.comment.trim().equals(""))
-	      {
-		this.comment = null;
-	      }
-	  }
+            if (this.comment != null && this.comment.trim().equals(""))
+              {
+                this.comment = null;
+              }
+          }
       }
 
     setWaitCursor();
 
     try
       {
-	// We need to check to see if any notes panels need to
-	// have their text flushed to the server..
+        // We need to check to see if any notes panels need to
+        // have their text flushed to the server..
 
-	updateNotePanels();
+        updateNotePanels();
 
-	retVal = session.commitTransaction(false, this.comment);
+        retVal = session.commitTransaction(false, this.comment);
 
-	if (retVal != null)
-	  {
-	    retVal = handleReturnVal(retVal);
-	  }
+        if (retVal != null)
+          {
+            retVal = handleReturnVal(retVal);
+          }
 
-	succeeded = ReturnVal.didSucceed(retVal);
+        succeeded = ReturnVal.didSucceed(retVal);
 
-	// if we succeed, we clean up.  If we don't,
-	// retVal.doNormalProcessing can be false, in which case the
-	// serve aborted our transaction utterly.  If
-	// retVal.doNormalProcessing is true, the user can do
-	// something to make the transaction able to complete
-	// successfully.  In this case, handleReturnVal() will have
-	// displayed a dialog telling the user what needs to be done.
+        // if we succeed, we clean up.  If we don't,
+        // retVal.doNormalProcessing can be false, in which case the
+        // serve aborted our transaction utterly.  If
+        // retVal.doNormalProcessing is true, the user can do
+        // something to make the transaction able to complete
+        // successfully.  In this case, handleReturnVal() will have
+        // displayed a dialog telling the user what needs to be done.
 
-	if (succeeded)
-	  {
-	    // "Transaction successfully commited."
-	    setStatus(ts.l("commitTransaction.success"));
-	    wp.closeEditables();
+        if (succeeded)
+          {
+            // "Transaction successfully commited."
+            setStatus(ts.l("commitTransaction.success"));
+            wp.closeEditables();
 
-	    wp.refreshTableWindows();
+            wp.refreshTableWindows();
 
-	    openNewTransaction();
+            openNewTransaction();
 
-	    //
-	    // This fixes all the icons in the tree, and closes any
-	    // view windows on objects that we have deleted
-	    //
+            //
+            // This fixes all the icons in the tree, and closes any
+            // view windows on objects that we have deleted
+            //
 
-	    refreshTreeAfterCommit();
+            refreshTreeAfterCommit();
 
-	    if (debug)
-	      {
-		System.err.println("Done committing");
-	      }
-	  }
-	else if (!retVal.doNormalProcessing)
-	  {
-	    // "Transaction aborted on the server."
-	    setStatus(ts.l("commitTransaction.failure"));
+            if (debug)
+              {
+                System.err.println("Done committing");
+              }
+          }
+        else if (!retVal.doNormalProcessing)
+          {
+            // "Transaction aborted on the server."
+            setStatus(ts.l("commitTransaction.failure"));
 
-	    // This is just like a cancel.  Something went wrong, and
-	    // the server canceled our transaction.  We don't need to
-	    // call cancelTransaction ourselves.
+            // This is just like a cancel.  Something went wrong, and
+            // the server canceled our transaction.  We don't need to
+            // call cancelTransaction ourselves.
 
-	    // "Commit Failure"
-	    // "The server experienced a failure committing this transaction, and was forced to abort the transaction entirely."
+            // "Commit Failure"
+            // "The server experienced a failure committing this transaction, and was forced to abort the transaction entirely."
 
-	    showErrorMessage(ts.l("commitTransaction.error_subj"),
-			     ts.l("commitTransaction.error_txt"));
-	  }
+            showErrorMessage(ts.l("commitTransaction.error_subj"),
+                             ts.l("commitTransaction.error_txt"));
+          }
       }
     catch (Exception ex)
       {
-	// "An exception was caught while attempting to commit a transaction."
-	processExceptionRethrow(ex, ts.l("commitTransaction.exception_txt"));
+        // "An exception was caught while attempting to commit a transaction."
+        processExceptionRethrow(ex, ts.l("commitTransaction.exception_txt"));
       }
     finally
       {
-	setNormalCursor();
+        setNormalCursor();
 
-	if (!succeeded && (retVal == null || !retVal.doNormalProcessing))
-	  {
-	    wp.closeEditables();
-	    cleanUpAfterCancel();
-	    openNewTransaction();
-	  }
+        if (!succeeded && (retVal == null || !retVal.doNormalProcessing))
+          {
+            wp.closeEditables();
+            cleanUpAfterCancel();
+            openNewTransaction();
+          }
       }
   }
 
@@ -5219,41 +5219,41 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     try
       {
-	retVal = session.abortTransaction();
+        retVal = session.abortTransaction();
 
-	if (retVal != null)
-	  {
-	    retVal = handleReturnVal(retVal);
-	  }
+        if (retVal != null)
+          {
+            retVal = handleReturnVal(retVal);
+          }
 
-	if (retVal == null || retVal.didSucceed())
-	  {
-	    // "Transaction canceled."
-	    setStatus(ts.l("cancelTransaction.canceled"), 3);
+        if (retVal == null || retVal.didSucceed())
+          {
+            // "Transaction canceled."
+            setStatus(ts.l("cancelTransaction.canceled"), 3);
 
-	    if (debug)
-	      {
-		System.err.println("Cancel succeeded");
-	      }
-	  }
-	else
-	  {
-	    // "Error on server, transaction cancel failed."
-	    setStatus(ts.l("cancelTransaction.error_canceling"));
+            if (debug)
+              {
+                System.err.println("Cancel succeeded");
+              }
+          }
+        else
+          {
+            // "Error on server, transaction cancel failed."
+            setStatus(ts.l("cancelTransaction.error_canceling"));
 
-	    if (debug)
-	      {
-		System.err.println("Everytime I think I'm out, they pull me back in! " +
-				   "Something went wrong with the cancel.");
-	      }
+            if (debug)
+              {
+                System.err.println("Everytime I think I'm out, they pull me back in! " +
+                                   "Something went wrong with the cancel.");
+              }
 
-	    return;
-	  }
+            return;
+          }
       }
     catch (Exception rx)
       {
-	// "An exception was caught while attempting to cancel a transaction."
-	processExceptionRethrow(rx, ts.l("cancelTransaction.exception_txt"));
+        // "An exception was caught while attempting to cancel a transaction."
+        processExceptionRethrow(rx, ts.l("cancelTransaction.exception_txt"));
       }
 
     cleanUpAfterCancel();
@@ -5283,49 +5283,49 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     synchronized (deleteHash)
       {
-	Enumeration dels = deleteHash.keys();
+        Enumeration dels = deleteHash.keys();
 
-	while (dels.hasMoreElements())
-	  {
-	    invid = (Invid)dels.nextElement();
-	    info = (CacheInfo)deleteHash.get(invid);
+        while (dels.hasMoreElements())
+          {
+            invid = (Invid)dels.nextElement();
+            info = (CacheInfo)deleteHash.get(invid);
 
-	    list = cachedLists.getList(info.getBaseID());
+            list = cachedLists.getList(info.getBaseID());
 
-	    if (list != null)
-	      {
-		if (createHash.containsKey(invid))
-		  {
-		    if (debug)
-		      {
-			System.err.println("Can't fool me: you just created this object!");
-		      }
-		  }
-		else
-		  {
-		    if (debug)
-		      {
-			System.err.println("This one is hashed, sticking it back in.");
-		      }
+            if (list != null)
+              {
+                if (createHash.containsKey(invid))
+                  {
+                    if (debug)
+                      {
+                        System.err.println("Can't fool me: you just created this object!");
+                      }
+                  }
+                else
+                  {
+                    if (debug)
+                      {
+                        System.err.println("This one is hashed, sticking it back in.");
+                      }
 
-		    handle = info.getOriginalObjectHandle();
+                    handle = info.getOriginalObjectHandle();
 
-		    if (handle != null)
-		      {
-			list.addObjectHandle(handle);
-			node = (InvidNode)invidNodeHash.get(invid);
+                    if (handle != null)
+                      {
+                        list.addObjectHandle(handle);
+                        node = (InvidNode)invidNodeHash.get(invid);
 
-			if (node != null)
-			  {
-			    node.setHandle(handle);
-			  }
-		      }
-		  }
-	      }
+                        if (node != null)
+                          {
+                            node.setHandle(handle);
+                          }
+                      }
+                  }
+              }
 
-	    deleteHash.remove(invid);
-	    setIconForNode(invid);
-	  }
+            deleteHash.remove(invid);
+            setIconForNode(invid);
+          }
       }
 
     node = null;
@@ -5337,35 +5337,35 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     synchronized (createHash)
       {
-	Enumeration created = createHash.keys();
+        Enumeration created = createHash.keys();
 
-	while (created.hasMoreElements())
-	  {
-	    invid = (Invid) created.nextElement();
-	    info = (CacheInfo)createHash.get(invid);
+        while (created.hasMoreElements())
+          {
+            invid = (Invid) created.nextElement();
+            info = (CacheInfo)createHash.get(invid);
 
-	    list = cachedLists.getList(info.getBaseID());
+            list = cachedLists.getList(info.getBaseID());
 
-	    if (list != null)
-	      {
-		if (debug)
-		  {
-		    System.err.println("This one is hashed, taking a created object out.");
-		  }
+            if (list != null)
+              {
+                if (debug)
+                  {
+                    System.err.println("This one is hashed, taking a created object out.");
+                  }
 
-		list.removeInvid(invid);
-	      }
+                list.removeInvid(invid);
+              }
 
-	    createHash.remove(invid);
+            createHash.remove(invid);
 
-	    node = (InvidNode)invidNodeHash.get(invid);
+            node = (InvidNode)invidNodeHash.get(invid);
 
-	    if (node != null)
-	      {
-		tree.deleteNode(node, false);
-		invidNodeHash.remove(invid);
-	      }
-	  }
+            if (node != null)
+              {
+                tree.deleteNode(node, false);
+                invidNodeHash.remove(invid);
+              }
+          }
       }
 
     createdObjectsWithoutNodes.clear();
@@ -5376,21 +5376,21 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     synchronized (changedHash)
       {
-	Enumeration changed = changedHash.keys();
+        Enumeration changed = changedHash.keys();
 
-	while (changed.hasMoreElements())
-	  {
-	    changedInvids.addElement(changed.nextElement());
-	  }
+        while (changed.hasMoreElements())
+          {
+            changedInvids.addElement(changed.nextElement());
+          }
 
-	changedHash.clear();
+        changedHash.clear();
       }
 
     refreshChangedObjectHandles(changedInvids, true);
 
     if (debug && createHash.isEmpty() && deleteHash.isEmpty())
       {
-	System.err.println("Woo-woo the hashes are all empty");
+        System.err.println("Woo-woo the hashes are all empty");
       }
 
     tree.refresh(); // To catch all the icon changing.
@@ -5406,23 +5406,23 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     try
       {
-	// "Ganymede GUI Client"
-	ReturnVal rv = session.openTransaction(ts.l("openNewTransaction.client_name"));
+        // "Ganymede GUI Client"
+        ReturnVal rv = session.openTransaction(ts.l("openNewTransaction.client_name"));
 
-	handleReturnVal(rv);
+        handleReturnVal(rv);
 
-	if ((rv != null) && (!rv.didSucceed()))
-	  {
-	    // "Could not open a new transaction on the Ganymede server."
-	    showErrorMessage(ts.l("openNewTransaction.error_txt"));
-	  }
+        if ((rv != null) && (!rv.didSucceed()))
+          {
+            // "Could not open a new transaction on the Ganymede server."
+            showErrorMessage(ts.l("openNewTransaction.error_txt"));
+          }
 
-	tree.refresh();
+        tree.refresh();
       }
     catch (Exception rx)
       {
-	// "Could not open a new transaction on the Ganymede server."
-	processExceptionRethrow(rx, ts.l("openNewTransaction.error_txt"));
+        // "Could not open a new transaction on the Ganymede server."
+        processExceptionRethrow(rx, ts.l("openNewTransaction.error_txt"));
       }
 
     setSomethingChanged(false);
@@ -5442,18 +5442,18 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (toolToggle == true)
       {
-	if (((BasicToolBarUI)toolBar.getUI()).isFloating())
-	  {
-	    ((BasicToolBarUI)toolBar.getUI()).setFloating(false, new Point(0,0));
-	  }
+        if (((BasicToolBarUI)toolBar.getUI()).isFloating())
+          {
+            ((BasicToolBarUI)toolBar.getUI()).setFloating(false, new Point(0,0));
+          }
 
-	toolBar.setVisible(false);
-	toolToggle = false;
+        toolBar.setVisible(false);
+        toolToggle = false;
       }
     else if (toolToggle == false)
       {
-	toolBar.setVisible(true);
-	toolToggle = true;
+        toolBar.setVisible(true);
+        toolToggle = true;
       }
 
     getContentPane().validate();
@@ -5476,34 +5476,34 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (debug)
       {
-	System.err.println("Action: " + command);
+        System.err.println("Action: " + command);
       }
 
     if (source == cancel)
       {
-	if (debug)
-	  {
-	    System.err.println("cancel button clicked");
-	  }
+        if (debug)
+          {
+            System.err.println("cancel button clicked");
+          }
 
-	cancelTransaction();
+        cancelTransaction();
       }
     else if (source == commit)
       {
-	if (debug)
-	  {
-	    System.err.println("commit button clicked");
-	  }
+        if (debug)
+          {
+            System.err.println("commit button clicked");
+          }
 
-	commitTransaction(promptForComments ^ altKeyDown);
+        commitTransaction(promptForComments ^ altKeyDown);
       }
     else if ((source == menubarQueryMI) || (command.equals(query_action)))
       {
-	postQuery(null);
+        postQuery(null);
       }
     else if (source == clearTreeMI)
       {
-	clearTree();
+        clearTree();
       }
     else if (source == submitXMLMI)
       {
@@ -5511,116 +5511,116 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
       }
     else if (source == promptForCommentsMI)
       {
-	promptForComments = promptForCommentsMI.getState();
+        promptForComments = promptForCommentsMI.getState();
 
-	if (this.prefs != null)
-	  {
-	    prefs.putBoolean("prompt_for_comments", promptForComments);
-	  }
+        if (this.prefs != null)
+          {
+            prefs.putBoolean("prompt_for_comments", promptForComments);
+          }
 
-	refreshCommitLabel();
+        refreshCommitLabel();
       }
     else if (source == hideNonEditablesMI)
       {
-	hideNonEditables = hideNonEditablesMI.getState();
+        hideNonEditables = hideNonEditablesMI.getState();
 
-	if (this.prefs != null)
-	  {
-	    prefs.putBoolean("hide_non_editable_objects", hideNonEditables);
-	  }
+        if (this.prefs != null)
+          {
+            prefs.putBoolean("hide_non_editable_objects", hideNonEditables);
+          }
 
-	clearTree();
+        clearTree();
       }
     else if (source == logoutMI)
       {
-	if (OKToProceed())
-	  {
-	    logout();
-	  }
+        if (OKToProceed())
+          {
+            logout();
+          }
       }
     else if (source == toggleToolBarMI)
       {
-	toggleToolBar();
+        toggleToolBar();
       }
     else if (command.equals(persona_action))
       {
-	changePersona(false);
+        changePersona(false);
       }
     else if (command.equals(create_action))
       {
-	createObjectDialog();
+        createObjectDialog();
       }
     else if (command.equals(edit_action))
       {
-	editObjectDialog();
+        editObjectDialog();
       }
     else if (command.equals(view_action))
       {
-	viewObjectDialog();
+        viewObjectDialog();
       }
     else if (command.equals(delete_action))
       {
-	deleteObjectDialog();
+        deleteObjectDialog();
       }
     else if (command.equals(clone_action))
       {
-	cloneObjectDialog();
+        cloneObjectDialog();
       }
     else if (command.equals(inactivate_action))
       {
-	inactivateObjectDialog();
+        inactivateObjectDialog();
       }
     else if (command.equals(access_invid_action))
       {
-	openAnInvid();
+        openAnInvid();
       }
     else if (command.equals(owner_filter_action))
       {
-	chooseFilter();
+        chooseFilter();
       }
     else if (command.equals(default_owner_action))
       {
-	chooseDefaultOwner(true);
+        chooseDefaultOwner(true);
       }
     else if (command.equals(help_action))
       {
-	// XXX at the present time, nothing triggers this, and the
-	// window the user would get wouldn't be helpful if something
-	// did.
+        // XXX at the present time, nothing triggers this, and the
+        // window the user would get wouldn't be helpful if something
+        // did.
 
-	showHelpWindow();
+        showHelpWindow();
       }
     else if (command.equals(java_version_action))
       {
-	Thread thread = new Thread(new Runnable() {
-	  public void run() {
-	    showJavaVersion();
-	  }});
-	thread.setPriority(Thread.NORM_PRIORITY);
-	thread.start();
+        Thread thread = new Thread(new Runnable() {
+          public void run() {
+            showJavaVersion();
+          }});
+        thread.setPriority(Thread.NORM_PRIORITY);
+        thread.start();
       }
     else if (command.equals(about_action))
       {
-	Thread thread = new Thread(new Runnable() {
-	  public void run() {
-	    showAboutMessage();
-	  }});
-	thread.setPriority(Thread.NORM_PRIORITY);
-	thread.start();
+        Thread thread = new Thread(new Runnable() {
+          public void run() {
+            showAboutMessage();
+          }});
+        thread.setPriority(Thread.NORM_PRIORITY);
+        thread.start();
       }
     else if (command.equals(motd_action))
       {
-	Thread thread = new Thread(new Runnable() {
-	  public void run() {
-	    showMOTD();
-	  }});
-	thread.setPriority(Thread.NORM_PRIORITY);
-	thread.start();
+        Thread thread = new Thread(new Runnable() {
+          public void run() {
+            showMOTD();
+          }});
+        thread.setPriority(Thread.NORM_PRIORITY);
+        thread.start();
       }
     else
       {
-	// "Unknown action event generated in Ganymede client.. client error?"
-	setStatus(ts.l("actionPerformed.unknown"));
+        // "Unknown action event generated in Ganymede client.. client error?"
+        setStatus(ts.l("actionPerformed.unknown"));
       }
   }
 
@@ -5632,17 +5632,17 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (my_querybox == null)
       {
-	// "Query Panel"
-	my_querybox = new querybox(base, this, this, ts.l("postQuery.query_title"));
+        // "Query Panel"
+        my_querybox = new querybox(base, this, this, ts.l("postQuery.query_title"));
       }
     else if (my_querybox.isVisible())
       {
-	return;
+        return;
       }
 
     if (base != null)
       {
-	my_querybox.selectBase(base);
+        my_querybox.selectBase(base);
       }
 
     my_querybox.setVisible(true);
@@ -5659,10 +5659,10 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   void openAnInvid()
   {
     DialogRsrc r = new DialogRsrc(this,
-				  "Open an invid",
-				  "This will open an invid by number.  This is for " +
-				  "debugging purposes only.  Invid's have the format " +
-				  "number:number, like 21:423");
+                                  "Open an invid",
+                                  "This will open an invid by number.  This is for " +
+                                  "debugging purposes only.  Invid's have the format " +
+                                  "number:number, like 21:423");
     r.addString("Invid number:");
     StringDialog d = new StringDialog(r, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
@@ -5672,23 +5672,23 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (result == null)
       {
-	if (debug)
-	  {
-	    System.err.println("Ok, nevermind.");
-	  }
-	return;
+        if (debug)
+          {
+            System.err.println("Ok, nevermind.");
+          }
+        return;
       }
 
     String invidString = (String)result.get("Invid number:");
 
     if (invidString == null)
       {
-	if (debug)
-	  {
-	    System.err.println("Ok, nevermind.");
-	  }
+        if (debug)
+          {
+            System.err.println("Ok, nevermind.");
+          }
 
-	return;
+        return;
       }
 
     viewObject(Invid.createInvid(invidString));
@@ -5703,37 +5703,37 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (e.getID() == WindowEvent.WINDOW_CLOSING)
       {
-	if (debug)
-	  {
-	    System.err.println("Window closing");
-	  }
+        if (debug)
+          {
+            System.err.println("Window closing");
+          }
 
-	if (OKToProceed())
-	  {
-	    if (debug)
-	      {
-		System.err.println("It's ok to log out.");
-	      }
+        if (OKToProceed())
+          {
+            if (debug)
+              {
+                System.err.println("It's ok to log out.");
+              }
 
-	    logout();
+            logout();
 
-	    sizer.saveSize(this);
+            sizer.saveSize(this);
 
-	    super.processWindowEvent(e);
-	  }
-	else if (debug)
-	  {
-	    System.err.println("No log out!");
-	  }
+            super.processWindowEvent(e);
+          }
+        else if (debug)
+          {
+            System.err.println("No log out!");
+          }
 
-	return;
+        return;
       }
 
     if (e.getID() == WindowEvent.WINDOW_ACTIVATED ||
-	e.getID() == WindowEvent.WINDOW_DEACTIVATED)
+        e.getID() == WindowEvent.WINDOW_DEACTIVATED)
       {
-	altKeyDown = false;
-	refreshCommitLabel();
+        altKeyDown = false;
+        refreshCommitLabel();
       }
 
     super.processWindowEvent(e);
@@ -5753,61 +5753,61 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (o instanceof JErrorValueObject)
       {
-	showErrorMessage((String)o.getValue());
+        showErrorMessage((String)o.getValue());
       }
     else if (o instanceof JSetValueObject && o.getSource() == LandFMenu)
       {
         sizer.saveLookAndFeel();
-	SwingUtilities.updateComponentTreeUI(_myglogin);
+        SwingUtilities.updateComponentTreeUI(_myglogin);
 
-	if (about != null)
-	  {
-	    SwingUtilities.updateComponentTreeUI(about);
-	  }
+        if (about != null)
+          {
+            SwingUtilities.updateComponentTreeUI(about);
+          }
 
-	if (motd != null)
-	  {
-	    SwingUtilities.updateComponentTreeUI(motd);
-	  }
+        if (motd != null)
+          {
+            SwingUtilities.updateComponentTreeUI(motd);
+          }
 
-	if (java_ver_dialog != null)
-	  {
-	    SwingUtilities.updateComponentTreeUI(java_ver_dialog);
-	  }
+        if (java_ver_dialog != null)
+          {
+            SwingUtilities.updateComponentTreeUI(java_ver_dialog);
+          }
 
-	if (filterDialog != null)
-	  {
-	    SwingUtilities.updateComponentTreeUI(filterDialog);
-	  }
+        if (filterDialog != null)
+          {
+            SwingUtilities.updateComponentTreeUI(filterDialog);
+          }
 
-	if (createDialog != null)
-	  {
-	    SwingUtilities.updateComponentTreeUI(createDialog);
-	  }
+        if (createDialog != null)
+          {
+            SwingUtilities.updateComponentTreeUI(createDialog);
+          }
 
-	if (defaultOwnerDialog != null)
-	  {
-	    SwingUtilities.updateComponentTreeUI(defaultOwnerDialog);
-	  }
+        if (defaultOwnerDialog != null)
+          {
+            SwingUtilities.updateComponentTreeUI(defaultOwnerDialog);
+          }
 
-	if (my_querybox != null)
-	  {
-	    SwingUtilities.updateComponentTreeUI(my_querybox);
-	  }
+        if (my_querybox != null)
+          {
+            SwingUtilities.updateComponentTreeUI(my_querybox);
+          }
 
-	if (personaDialog != null)
-	  {
-	    SwingUtilities.updateComponentTreeUI(personaDialog);
-	  }
+        if (personaDialog != null)
+          {
+            SwingUtilities.updateComponentTreeUI(personaDialog);
+          }
       }
     else
       {
-	if (debug)
-	  {
-	    System.err.println("I don't know what to do with this setValuePerformed: " + o);
-	  }
+        if (debug)
+          {
+            System.err.println("I don't know what to do with this setValuePerformed: " + o);
+          }
 
-	return false;
+        return false;
       }
 
     return true;
@@ -5829,25 +5829,25 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (node instanceof BaseNode && !((BaseNode) node).isLoaded())
       {
-	// "Loading objects for base {0}."
-	setStatus(ts.l("treeNodeExpanded.loading", node.getText()), 1);
-	setWaitCursor();
+        // "Loading objects for base {0}."
+        setStatus(ts.l("treeNodeExpanded.loading", node.getText()), 1);
+        setWaitCursor();
 
-	try
-	  {
-	    refreshObjects((BaseNode)node, true);
-	  }
-	catch (Exception ex)
-	  {
-	    // "Exception encountered loading objects for base {0}."
-	    processExceptionRethrow(ex, ts.l("treeNodeExpanded.exception_txt", node.getText()));
-	  }
+        try
+          {
+            refreshObjects((BaseNode)node, true);
+          }
+        catch (Exception ex)
+          {
+            // "Exception encountered loading objects for base {0}."
+            processExceptionRethrow(ex, ts.l("treeNodeExpanded.exception_txt", node.getText()));
+          }
 
-	// "Done loading objects for base {0}."
-	setStatus(ts.l("treeNodeExpanded.loaded", node.getText()), 1);
+        // "Done loading objects for base {0}."
+        setStatus(ts.l("treeNodeExpanded.loaded", node.getText()), 1);
 
-	((BaseNode) node).markLoaded();
-	setNormalCursor();
+        ((BaseNode) node).markLoaded();
+        setNormalCursor();
       }
   }
 
@@ -5879,7 +5879,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (node instanceof InvidNode)
       {
-	viewObject(((InvidNode)node).getInvid());
+        viewObject(((InvidNode)node).getInvid());
       }
   }
 
@@ -5907,253 +5907,253 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    */
 
   public void treeNodeMenuPerformed(treeNode node,
-				    java.awt.event.ActionEvent event)
+                                    java.awt.event.ActionEvent event)
   {
     boolean treeMenuDebug = false;
 
     if (event.getActionCommand().equals(create_pop_action))
       {
-	if (treeMenuDebug)
-	  {
-	    System.err.println("createMI");
-	  }
+        if (treeMenuDebug)
+          {
+            System.err.println("createMI");
+          }
 
-	if (node instanceof BaseNode)
-	  {
-	    BaseNode baseN = (BaseNode)node;
+        if (node instanceof BaseNode)
+          {
+            BaseNode baseN = (BaseNode)node;
 
-	    short id = baseN.getTypeID().shortValue();
+            short id = baseN.getTypeID().shortValue();
 
-	    createObject(id);
-	  }
-	else
-	  {
-	    System.err.println("not a base node, can't create");
-	  }
+            createObject(id);
+          }
+        else
+          {
+            System.err.println("not a base node, can't create");
+          }
       }
     else if ((event.getActionCommand().equals(report_edit_pop_action)) ||
-	     (event.getActionCommand().equals(report_pop_action)))
+             (event.getActionCommand().equals(report_pop_action)))
       {
-	if (treeMenuDebug)
-	  {
-	    System.err.println("viewMI/viewAllMI");
-	  }
+        if (treeMenuDebug)
+          {
+            System.err.println("viewMI/viewAllMI");
+          }
 
-	if (node instanceof BaseNode)
-	  {
-	    BaseNode baseN = (BaseNode)node;
+        if (node instanceof BaseNode)
+          {
+            BaseNode baseN = (BaseNode)node;
 
-	    Query listQuery = null;
+            Query listQuery = null;
 
-	    if (event.getActionCommand().equals(report_edit_pop_action))
-	      {
-		listQuery = baseN.getEditableQuery();
-	      }
-	    else
-	      {
-		listQuery = baseN.getAllQuery();
-	      }
+            if (event.getActionCommand().equals(report_edit_pop_action))
+              {
+                listQuery = baseN.getEditableQuery();
+              }
+            else
+              {
+                listQuery = baseN.getAllQuery();
+              }
 
-	    // we still want to filter
+            // we still want to filter
 
-	    listQuery.setFiltered(true);
+            listQuery.setFiltered(true);
 
-	    // inner classes can only refer to final method variables,
-	    // so we'll make some final references to keep our inner
-	    // class happy.
+            // inner classes can only refer to final method variables,
+            // so we'll make some final references to keep our inner
+            // class happy.
 
-	    final Query q = listQuery;
-	    final gclient thisGclient = this;
-	    final String tempText = node.getText();
+            final Query q = listQuery;
+            final gclient thisGclient = this;
+            final String tempText = node.getText();
 
-	    Thread t = new Thread(new Runnable() {
-	      public void run() {
+            Thread t = new Thread(new Runnable() {
+              public void run() {
 
-		thisGclient.wp.addWaitWindow(this);
-		DumpResult buffer = null;
+                thisGclient.wp.addWaitWindow(this);
+                DumpResult buffer = null;
 
-		try
-		  {
-		    try
-		      {
-			buffer = thisGclient.getSession().dump(q);
-		      }
-		    catch (Exception ex)
-		      {
-			processExceptionRethrow(ex);
-		      }
-		    catch (Error ex)
-		      {
-			// "Could not complete query.  We may have run out of memory in the client.\n\n{0}"
-			new JErrorDialog(thisGclient,
-					 ts.l("treeNodeMenuPerformed.error", ex.getMessage()), StandardDialog.ModalityType.DOCUMENT_MODAL);
-			throw ex;
-		      }
+                try
+                  {
+                    try
+                      {
+                        buffer = thisGclient.getSession().dump(q);
+                      }
+                    catch (Exception ex)
+                      {
+                        processExceptionRethrow(ex);
+                      }
+                    catch (Error ex)
+                      {
+                        // "Could not complete query.  We may have run out of memory in the client.\n\n{0}"
+                        new JErrorDialog(thisGclient,
+                                         ts.l("treeNodeMenuPerformed.error", ex.getMessage()), StandardDialog.ModalityType.DOCUMENT_MODAL);
+                        throw ex;
+                      }
 
-		    if (buffer == null)
-		      {
-			// "No results found from query operation on base {0}."
-			setStatus(ts.l("treeNodeMenuPerformed.empty_results", tempText),2);
-		      }
-		    else
-		      {
-			// "Results returned from server query on base {0} - building table widget."
-			setStatus(ts.l("treeNodeMenuPerformed.results", tempText), 1);
+                    if (buffer == null)
+                      {
+                        // "No results found from query operation on base {0}."
+                        setStatus(ts.l("treeNodeMenuPerformed.empty_results", tempText),2);
+                      }
+                    else
+                      {
+                        // "Results returned from server query on base {0} - building table widget."
+                        setStatus(ts.l("treeNodeMenuPerformed.results", tempText), 1);
 
-			thisGclient.wp.addTableWindow(thisGclient.getSession(), q, buffer);
-		      }
-		  }
-		finally
-		  {
-		    thisGclient.wp.removeWaitWindow(this);
-		  }
-	      }});
+                        thisGclient.wp.addTableWindow(thisGclient.getSession(), q, buffer);
+                      }
+                  }
+                finally
+                  {
+                    thisGclient.wp.removeWaitWindow(this);
+                  }
+              }});
 
-	    t.setPriority(Thread.NORM_PRIORITY);
-	    t.start();
+            t.setPriority(Thread.NORM_PRIORITY);
+            t.start();
 
-	    // "Sending query on base {0} to server."
-	    setStatus(ts.l("treeNodeMenuPerformed.sending", node.getText()), 0);
-	  }
-	else
-	  {
-	    System.err.println("viewMI from a node other than a BaseNode");
-	  }
+            // "Sending query on base {0} to server."
+            setStatus(ts.l("treeNodeMenuPerformed.sending", node.getText()), 0);
+          }
+        else
+          {
+            System.err.println("viewMI from a node other than a BaseNode");
+          }
       }
     else if (event.getActionCommand().equals(query_pop_action))
       {
-	if (treeMenuDebug)
-	  {
-	    System.err.println("queryMI");
-	  }
+        if (treeMenuDebug)
+          {
+            System.err.println("queryMI");
+          }
 
-	if (node instanceof BaseNode)
-	  {
-	    setWaitCursor();
-	    BaseDump base = (BaseDump)((BaseNode) node).getBase();
-	    setNormalCursor();
+        if (node instanceof BaseNode)
+          {
+            setWaitCursor();
+            BaseDump base = (BaseDump)((BaseNode) node).getBase();
+            setNormalCursor();
 
-	    postQuery(base);
-	  }
+            postQuery(base);
+          }
       }
     else if (event.getActionCommand().equals(show_pop_action) && (node instanceof BaseNode))
       {
-	BaseNode bn = (BaseNode) node;
+        BaseNode bn = (BaseNode) node;
 
-	/* -- */
+        /* -- */
 
-	if (treeMenuDebug)
-	  {
-	    System.err.println("show all objects");
-	  }
+        if (treeMenuDebug)
+          {
+            System.err.println("show all objects");
+          }
 
-	setWaitCursor();
+        setWaitCursor();
 
-	try
-	  {
-	    bn.showAll(true);
-	    node.setMenu(bn.canCreate() ? pMenuAllCreatable : pMenuAll);
+        try
+          {
+            bn.showAll(true);
+            node.setMenu(bn.canCreate() ? pMenuAllCreatable : pMenuAll);
 
-	    if (bn.isOpen())
-	      {
-		try
-		  {
-		    if (treeMenuDebug)
-		      {
-			System.err.println("Refreshing objects");
-		      }
+            if (bn.isOpen())
+              {
+                try
+                  {
+                    if (treeMenuDebug)
+                      {
+                        System.err.println("Refreshing objects");
+                      }
 
-		    refreshObjects(bn, true);
-		  }
-		catch (Exception ex)
-		  {
-		    processExceptionRethrow(ex);
-		  }
-	      }
-	  }
-	finally
-	  {
-	    setNormalCursor();
-	  }
+                    refreshObjects(bn, true);
+                  }
+                catch (Exception ex)
+                  {
+                    processExceptionRethrow(ex);
+                  }
+              }
+          }
+        finally
+          {
+            setNormalCursor();
+          }
       }
     else if (event.getActionCommand().equals(hide_pop_action) && (node instanceof BaseNode))
       {
-	BaseNode bn = (BaseNode) node;
+        BaseNode bn = (BaseNode) node;
 
-	/* -- */
+        /* -- */
 
-	bn.showAll(false);
-	bn.setMenu(bn.canCreate() ? pMenuEditableCreatable : pMenuEditable);
+        bn.showAll(false);
+        bn.setMenu(bn.canCreate() ? pMenuEditableCreatable : pMenuEditable);
 
-	if (bn.isOpen())
-	  {
-	    // this makes the ratchet operation in refreshObjects() faster
-	    // in the common case where there are many more editables than
-	    // non-editables.
+        if (bn.isOpen())
+          {
+            // this makes the ratchet operation in refreshObjects() faster
+            // in the common case where there are many more editables than
+            // non-editables.
 
-	    tree.removeChildren(bn, false);
-	    tree.expandNode(bn, false);
+            tree.removeChildren(bn, false);
+            tree.expandNode(bn, false);
 
-	    try
-	      {
-		refreshObjects(bn, true);
-	      }
-	    catch (Exception ex)
-	      {
-		processExceptionRethrow(ex);
-	      }
-	  }
+            try
+              {
+                refreshObjects(bn, true);
+              }
+            catch (Exception ex)
+              {
+                processExceptionRethrow(ex);
+              }
+          }
       }
     else if (event.getActionCommand().equals(view_pop_action))
       {
-	if (node instanceof InvidNode)
-	  {
-	    InvidNode invidN = (InvidNode)node;
+        if (node instanceof InvidNode)
+          {
+            InvidNode invidN = (InvidNode)node;
 
-	    viewObject(invidN.getInvid());
-	  }
+            viewObject(invidN.getInvid());
+          }
       }
     else if (event.getActionCommand().equals(edit_pop_action))
       {
-	if (treeMenuDebug)
-	  {
-	    System.err.println("objEditMI");
-	  }
+        if (treeMenuDebug)
+          {
+            System.err.println("objEditMI");
+          }
 
-	if (node instanceof InvidNode)
-	  {
-	    InvidNode invidN = (InvidNode)node;
+        if (node instanceof InvidNode)
+          {
+            InvidNode invidN = (InvidNode)node;
 
-	    editObject(invidN.getInvid(), null);
-	  }
+            editObject(invidN.getInvid(), null);
+          }
       }
     else if (event.getActionCommand().equals(clone_pop_action))
       {
-	if (treeMenuDebug)
-	  {
-	    System.err.println("objCloneMI");
-	  }
+        if (treeMenuDebug)
+          {
+            System.err.println("objCloneMI");
+          }
 
-	if (node instanceof InvidNode)
-	  {
-	    InvidNode invidN = (InvidNode)node;
+        if (node instanceof InvidNode)
+          {
+            InvidNode invidN = (InvidNode)node;
 
-	    cloneObject(invidN.getInvid());
-	  }
+            cloneObject(invidN.getInvid());
+          }
       }
     else if (event.getActionCommand().equals(delete_pop_action))
       {
-	// Need to change the icon on the tree to an X or something to show that it is deleted
+        // Need to change the icon on the tree to an X or something to show that it is deleted
 
-	if (treeMenuDebug)
-	  {
-	    System.err.println("Deleting object");
-	  }
+        if (treeMenuDebug)
+          {
+            System.err.println("Deleting object");
+          }
 
-	if (node instanceof InvidNode)
-	  {
-	    InvidNode invidN = (InvidNode)node;
-	    Invid invid = invidN.getInvid();
+        if (node instanceof InvidNode)
+          {
+            InvidNode invidN = (InvidNode)node;
+            Invid invid = invidN.getInvid();
 
             if ((event.getModifiers() & java.awt.event.ActionEvent.SHIFT_MASK) != 0)
               {
@@ -6163,35 +6163,35 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
               {
                 deleteObject(invid, true);
               }
-	  }
+          }
       }
     else if (event.getActionCommand().equals(inactivate_pop_action))
       {
-	if (treeMenuDebug)
-	  {
-	    System.err.println("objInactivateMI");
-	  }
+        if (treeMenuDebug)
+          {
+            System.err.println("objInactivateMI");
+          }
 
-	if (node instanceof InvidNode)
-	  {
-	    inactivateObject(((InvidNode)node).getInvid());
-	  }
+        if (node instanceof InvidNode)
+          {
+            inactivateObject(((InvidNode)node).getInvid());
+          }
       }
     else if (event.getActionCommand().equals(reactivate_pop_action))
       {
-	if (treeMenuDebug)
-	  {
-	    System.err.println("Reactivate item.");
-	  }
+        if (treeMenuDebug)
+          {
+            System.err.println("Reactivate item.");
+          }
 
-	if (node instanceof InvidNode)
-	  {
-	    reactivateObject(((InvidNode)node).getInvid());
-	  }
+        if (node instanceof InvidNode)
+          {
+            reactivateObject(((InvidNode)node).getInvid());
+          }
       }
     else
       {
-	System.err.println("Unknown MI chosen");
+        System.err.println("Unknown MI chosen");
       }
   }
 
@@ -6207,30 +6207,30 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   public Vector sortListHandleVector(Vector v)
   {
     (new VecQuickSort(v,
-		      new Comparator() {
+                      new Comparator() {
       public int compare(Object a, Object b)
-	{
-	  listHandle aF, bF;
+        {
+          listHandle aF, bF;
 
-	  aF = (listHandle) a;
-	  bF = (listHandle) b;
-	  int comp = 0;
+          aF = (listHandle) a;
+          bF = (listHandle) b;
+          int comp = 0;
 
-	  comp =  aF.toString().compareToIgnoreCase(bF.toString());
+          comp =  aF.toString().compareToIgnoreCase(bF.toString());
 
-	  if (comp < 0)
-	    {
-	      return -1;
-	    }
-	  else if (comp > 0)
-	    {
-	      return 1;
-	    }
-	  else
-	    {
-	      return 0;
-	    }
-	}
+          if (comp < 0)
+            {
+              return -1;
+            }
+          else if (comp > 0)
+            {
+              return 1;
+            }
+          else
+            {
+              return 0;
+            }
+        }
     })).sort();
 
     return v;
@@ -6260,7 +6260,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (commit != null)
       {
-	commit.setText(promptForComments ^ altKeyDown ? commitCommentButtonText : commitButtonText);
+        commit.setText(promptForComments ^ altKeyDown ? commitCommentButtonText : commitButtonText);
       }
   }
 
@@ -6275,7 +6275,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     if (debug)
       {
-	System.err.println("gclient.cleanUp()");
+        System.err.println("gclient.cleanUp()");
       }
 
     KeyboardFocusManager.getCurrentKeyboardFocusManager().removeKeyEventDispatcher(altKeyListener);
@@ -6299,50 +6299,50 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (changedHash != null)
       {
-	changedHash.clear();
-	changedHash = null;
+        changedHash.clear();
+        changedHash = null;
       }
 
     if (deleteHash != null)
       {
-	deleteHash.clear();
-	deleteHash = null;
+        deleteHash.clear();
+        deleteHash = null;
       }
 
     if (createHash != null)
       {
-	createHash.clear();
-	createHash = null;
+        createHash.clear();
+        createHash = null;
       }
 
     if (createdObjectsWithoutNodes != null)
       {
-	createdObjectsWithoutNodes.clear();
-	createdObjectsWithoutNodes = null;
+        createdObjectsWithoutNodes.clear();
+        createdObjectsWithoutNodes = null;
       }
 
     if (shortToBaseNodeHash != null)
       {
-	shortToBaseNodeHash.clear();
-	shortToBaseNodeHash = null;
+        shortToBaseNodeHash.clear();
+        shortToBaseNodeHash = null;
       }
 
     if (invidNodeHash != null)
       {
-	invidNodeHash.clear();
-	invidNodeHash = null;
+        invidNodeHash.clear();
+        invidNodeHash = null;
       }
 
     if (cachedLists != null)
       {
-	cachedLists.clearCaches();
-	cachedLists = null;
+        cachedLists.clearCaches();
+        cachedLists = null;
       }
 
     if (loader != null)
       {
-	loader.cleanUp();
-	loader = null;
+        loader.cleanUp();
+        loader = null;
       }
 
     help = null;
@@ -6351,40 +6351,40 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (personae != null)
       {
-	personae.setSize(0);
-	personae = null;
+        personae.setSize(0);
+        personae = null;
       }
 
     if (ownerGroups != null)
       {
-	ownerGroups.setSize(0);
-	ownerGroups = null;
+        ownerGroups.setSize(0);
+        ownerGroups = null;
       }
 
     toolBar = null;
 
     if (filterDialog != null)
       {
-	filterDialog.dispose();
-	filterDialog = null;
+        filterDialog.dispose();
+        filterDialog = null;
       }
 
     if (personaDialog != null)
       {
-	personaDialog.dispose();
-	personaDialog = null;
+        personaDialog.dispose();
+        personaDialog = null;
       }
 
     if (defaultOwnerDialog != null)
       {
-	defaultOwnerDialog.dispose();
-	defaultOwnerDialog = null;
+        defaultOwnerDialog.dispose();
+        defaultOwnerDialog = null;
       }
 
     if (createDialog != null)
       {
-	createDialog.dispose();
-	createDialog = null;
+        createDialog.dispose();
+        createDialog = null;
       }
 
     images = null;
@@ -6393,8 +6393,8 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (statusPanel != null)
       {
-	statusPanel.removeAll();
-	statusPanel = null;
+        statusPanel.removeAll();
+        statusPanel = null;
       }
 
     buildLabel = null;
@@ -6458,72 +6458,72 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     if (actionMenu != null)
       {
-	actionMenu.removeAll();
-	actionMenu = null;
+        actionMenu.removeAll();
+        actionMenu = null;
       }
 
     if (windowMenu != null)
       {
-	windowMenu.removeAll();
-	windowMenu = null;
+        windowMenu.removeAll();
+        windowMenu = null;
       }
 
     if (fileMenu != null)
       {
-	fileMenu.removeAll();
-	fileMenu = null;
+        fileMenu.removeAll();
+        fileMenu = null;
       }
 
     if (helpMenu != null)
       {
-	helpMenu.removeAll();
-	helpMenu = null;
+        helpMenu.removeAll();
+        helpMenu = null;
       }
 
     if (PersonaMenu != null)
       {
-	PersonaMenu.removeAll();
-	PersonaMenu = null;
+        PersonaMenu.removeAll();
+        PersonaMenu = null;
       }
 
     if (LandFMenu != null)
       {
-	LandFMenu.removeAll();
-	LandFMenu = null;
+        LandFMenu.removeAll();
+        LandFMenu = null;
       }
 
     personaListener = null;
 
     if (my_querybox != null)
       {
-	my_querybox.dispose();
-	my_querybox = null;
+        my_querybox.dispose();
+        my_querybox = null;
       }
 
     if (statusThread != null)
       {
-	try
-	  {
-	    statusThread.shutdown();
-	  }
-	catch (NullPointerException ex)
-	  {
-	  }
+        try
+          {
+            statusThread.shutdown();
+          }
+        catch (NullPointerException ex)
+          {
+          }
 
-	statusThread = null;
+        statusThread = null;
       }
 
     if (securityThread != null)
       {
-	try
-	  {
-	    securityThread.shutdown();
-	  }
-	catch (NullPointerException ex)
-	  {
-	  }
+        try
+          {
+            securityThread.shutdown();
+          }
+        catch (NullPointerException ex)
+          {
+          }
 
-	securityThread = null;
+        securityThread = null;
       }
   }
 }
@@ -6545,11 +6545,11 @@ class AltKeyListener implements KeyEventDispatcher {
   {
     if (e.getID() == KeyEvent.KEY_PRESSED && (e.getKeyCode() == KeyEvent.VK_ALT || e.getKeyCode() == KeyEvent.VK_META))
       {
-	gclient.client.altKeyDown = true;
+        gclient.client.altKeyDown = true;
       }
     else if (e.getID() == KeyEvent.KEY_RELEASED && (e.getKeyCode() == KeyEvent.VK_ALT || e.getKeyCode() == KeyEvent.VK_META))
       {
-	gclient.client.altKeyDown = false;
+        gclient.client.altKeyDown = false;
       }
 
     gclient.client.refreshCommitLabel();
@@ -6599,81 +6599,81 @@ class PersonaListener implements ActionListener {
 
     if (event.getSource() instanceof JRadioButton)
       {
-	newPersona = event.getActionCommand();
-	gc.getPersonaDialog().updatePassField(newPersona);
+        newPersona = event.getActionCommand();
+        gc.getPersonaDialog().updatePassField(newPersona);
       }
     else if (event.getSource() instanceof JButton)
       {
-	newPersona = gc.getPersonaDialog().getNewPersona();
+        newPersona = gc.getPersonaDialog().getNewPersona();
 
-	if (!gc.getPersonaDialog().requirePassword && newPersona.equals(gc.currentPersonaString))
-	  {
-	    return;
-	  }
+        if (!gc.getPersonaDialog().requirePassword && newPersona.equals(gc.currentPersonaString))
+          {
+            return;
+          }
 
-	// Deal with trying to change w/ uncommitted transactions
-	if (gc.getSomethingChanged() && !gc.getPersonaDialog().requirePassword)
-	  {
-	    // "Changing Personae"
-	    // "Changing personae requires that the current transaction be closed out.\n\nWould you like to commit this transaction now?"
-	    // "Yes, Commit My Changes"
-	    // "No, Never Mind"
-	    StringDialog d = new StringDialog(gc,
-					      ts.l("actionPerformed.commit_dialog_subj"),
-					      ts.l("actionPerformed.commit_dialog_txt"),
-					      ts.l("actionPerformed.commit_dialog_yes"),
-					      ts.l("actionPerformed.commit_dialog_no"), StandardDialog.ModalityType.DOCUMENT_MODAL);
-	    Hashtable result = d.showDialog();
+        // Deal with trying to change w/ uncommitted transactions
+        if (gc.getSomethingChanged() && !gc.getPersonaDialog().requirePassword)
+          {
+            // "Changing Personae"
+            // "Changing personae requires that the current transaction be closed out.\n\nWould you like to commit this transaction now?"
+            // "Yes, Commit My Changes"
+            // "No, Never Mind"
+            StringDialog d = new StringDialog(gc,
+                                              ts.l("actionPerformed.commit_dialog_subj"),
+                                              ts.l("actionPerformed.commit_dialog_txt"),
+                                              ts.l("actionPerformed.commit_dialog_yes"),
+                                              ts.l("actionPerformed.commit_dialog_no"), StandardDialog.ModalityType.DOCUMENT_MODAL);
+            Hashtable result = d.showDialog();
 
-	    if (result == null)
-	      {
-		// "Persona Change Canceled"
-		gc.setStatus(ts.l("actionPerformed.canceled"));
-		return;
-	      }
-	    else
-	      {
-		// "Committing Transaction"
-		gc.setStatus(ts.l("actionPerformed.committing"));
-		gc.commitTransaction(false);
-	      }
-	  }
+            if (result == null)
+              {
+                // "Persona Change Canceled"
+                gc.setStatus(ts.l("actionPerformed.canceled"));
+                return;
+              }
+            else
+              {
+                // "Committing Transaction"
+                gc.setStatus(ts.l("actionPerformed.committing"));
+                gc.commitTransaction(false);
+              }
+          }
 
-	// Now change the persona
+        // Now change the persona
 
-	String password = null;
+        String password = null;
 
-	// All admin level personae have a : in them.  Only admin level
-	// personae need passwords, unless we are forcing a password
+        // All admin level personae have a : in them.  Only admin level
+        // personae need passwords, unless we are forcing a password
 
-	if (gc.getPersonaDialog().requirePassword || newPersona.indexOf(":") > 0)
-	  {
-	    password = gc.getPersonaDialog().getPasswordField();
-	  }
+        if (gc.getPersonaDialog().requirePassword || newPersona.indexOf(":") > 0)
+          {
+            password = gc.getPersonaDialog().getPasswordField();
+          }
 
-	if (!setPersona(newPersona, password))
-	  {
-	    if (gc.getPersonaDialog().requirePassword)
-	      {
-		return;
-		//		gc.showErrorMessage("Wrong password");
-	      }
-	    else
-	      {
-		// "Persona Change Failed
-		// "Your attempt to change personae was
-		// unsuccessful.\n\nThis is probably due to your
-		// password being entered incorrectly."
+        if (!setPersona(newPersona, password))
+          {
+            if (gc.getPersonaDialog().requirePassword)
+              {
+                return;
+                //              gc.showErrorMessage("Wrong password");
+              }
+            else
+              {
+                // "Persona Change Failed
+                // "Your attempt to change personae was
+                // unsuccessful.\n\nThis is probably due to your
+                // password being entered incorrectly."
 
-		gc.showErrorMessage(ts.l("actionPerformed.error_subj"),
-				    ts.l("actionPerformed.error_txt"));
-	      }
-	  }
-	else
-	  {
-	    gc.getPersonaDialog().changedOK = true;
-	    gc.getPersonaDialog().setHidden(true);
-	  }
+                gc.showErrorMessage(ts.l("actionPerformed.error_subj"),
+                                    ts.l("actionPerformed.error_txt"));
+              }
+          }
+        else
+          {
+            gc.getPersonaDialog().changedOK = true;
+            gc.getPersonaDialog().setHidden(true);
+          }
       }
   }
 
@@ -6683,81 +6683,81 @@ class PersonaListener implements ActionListener {
 
     try
       {
-	personaChangeSuccessful = session.selectPersona(newPersona, password);
+        personaChangeSuccessful = session.selectPersona(newPersona, password);
 
-	// when we change personae, we lose our filter.  Clear the
-	// reference to our filterDialog so that we will recreate it
-	// from scratch if we need to.
+        // when we change personae, we lose our filter.  Clear the
+        // reference to our filterDialog so that we will recreate it
+        // from scratch if we need to.
 
-	gc.filterDialog = null;
+        gc.filterDialog = null;
 
-	if (personaChangeSuccessful)
-	  {
-	    gc.setWaitCursor();
+        if (personaChangeSuccessful)
+          {
+            gc.setWaitCursor();
 
             glogin.active_username = newPersona;
             glogin.active_passwd = password;
 
-	    gc.createDialog = null;
-	    JDefaultOwnerDialog.clear(); // forget our default owner groups selection
+            gc.createDialog = null;
+            JDefaultOwnerDialog.clear(); // forget our default owner groups selection
 
-	    // "Changing Persona"
-	    gc.setStatus(ts.l("setPersona.changing_status"));
+            // "Changing Persona"
+            gc.setStatus(ts.l("setPersona.changing_status"));
 
-	    // "Ganymede Client: {0} logged in"
+            // "Ganymede Client: {0} logged in"
 
-	    gc.setTitle(ts.l("setPersona.new_window_title", newPersona));
+            gc.setTitle(ts.l("setPersona.new_window_title", newPersona));
 
-	    // List of creatable object types might have changed.
+            // List of creatable object types might have changed.
 
-	    gc.ownerGroups = null;
-	    gc.clearCaches();
-	    gc.loader.clear();  // This reloads the hashes on a new background thread
-	    gc.cancelTransaction();
-	    gc.buildTree();
-	    gc.currentPersonaString = newPersona;
-	    gc.defaultOwnerChosen = false; // force a new default owner to be chosen
+            gc.ownerGroups = null;
+            gc.clearCaches();
+            gc.loader.clear();  // This reloads the hashes on a new background thread
+            gc.cancelTransaction();
+            gc.buildTree();
+            gc.currentPersonaString = newPersona;
+            gc.defaultOwnerChosen = false; // force a new default owner to be chosen
 
-	    try
-	      {
-		gc.ownerGroups = session.getOwnerGroups().getListHandles();
+            try
+              {
+                gc.ownerGroups = session.getOwnerGroups().getListHandles();
 
-		if (gc.ownerGroups.size() == 1)
-		  {
-		    gc.chooseDefaultOwner(false);
-		    gc.defaultOwnerMI.setEnabled(false);
-		  }
-		else if (gc.ownerGroups.size() > 1)
-		  {
-		    gc.defaultOwnerMI.setEnabled(true);
-		  }
-		else if (gc.ownerGroups.size() == 0)
-		  {
-		    gc.defaultOwnerMI.setEnabled(false);
-		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-		gc.processExceptionRethrow(ex);
-	      }
+                if (gc.ownerGroups.size() == 1)
+                  {
+                    gc.chooseDefaultOwner(false);
+                    gc.defaultOwnerMI.setEnabled(false);
+                  }
+                else if (gc.ownerGroups.size() > 1)
+                  {
+                    gc.defaultOwnerMI.setEnabled(true);
+                  }
+                else if (gc.ownerGroups.size() == 0)
+                  {
+                    gc.defaultOwnerMI.setEnabled(false);
+                  }
+              }
+            catch (RemoteException ex)
+              {
+                gc.processExceptionRethrow(ex);
+              }
 
-	    gc.setNormalCursor();
+            gc.setNormalCursor();
 
-	    // "Successfully changed persona to {0}."
-	    gc.setStatus(ts.l("setPersona.changed_status", newPersona));
+            // "Successfully changed persona to {0}."
+            gc.setStatus(ts.l("setPersona.changed_status", newPersona));
 
-	    return true;
-	  }
-	else
-	  {
-	    return false;
-	  }
+            return true;
+          }
+        else
+          {
+            return false;
+          }
       }
     catch (Exception rx)
       {
-	// "Exception encountered trying to change persona to {0}:\n"
-	gc.processException(rx, ts.l("setPersona.exception_txt", newPersona));
-	return false;
+        // "Exception encountered trying to change persona to {0}:\n"
+        gc.processException(rx, ts.l("setPersona.exception_txt", newPersona));
+        return false;
       }
   }
 
@@ -6808,38 +6808,38 @@ class CacheInfo {
 
     if (handle != null)
       {
-	try
-	  {
-	    originalHandle = (ObjectHandle) handle.clone();
+        try
+          {
+            originalHandle = (ObjectHandle) handle.clone();
 
-	    if (debug)
-	      {
-		System.err.println("a cloned handle.");
-	      }
-	  }
-	catch (Exception x)
-	  {
-	    originalHandle = null;
+            if (debug)
+              {
+                System.err.println("a cloned handle.");
+              }
+          }
+        catch (Exception x)
+          {
+            originalHandle = null;
 
-	    if (debug)
-	      {
-		System.err.println("Clone is not supported: " + x);
-	      }
-	  }
+            if (debug)
+              {
+                System.err.println("Clone is not supported: " + x);
+              }
+          }
       }
     else
       {
-	originalHandle = null;
+        originalHandle = null;
 
-	if (debug)
-	  {
-	    System.err.println("a null handle.");
-	  }
+        if (debug)
+          {
+            System.err.println("a null handle.");
+          }
       }
   }
 
   public CacheInfo(Short baseID, String originalLabel,
-		   String currentLabel, ObjectHandle handle, ObjectHandle originalHandle)
+                   String currentLabel, ObjectHandle handle, ObjectHandle originalHandle)
   {
     this.baseID = baseID;
     this.originalLabel = originalLabel;
@@ -6920,57 +6920,57 @@ class StatusClearThread extends Thread {
   {
     while (!done)
       {
-	if (debug)
-	  {
-	    System.err.println("StatusClearThread.run(): entering loop");
-	  }
+        if (debug)
+          {
+            System.err.println("StatusClearThread.run(): entering loop");
+          }
 
-	resetClock = false;
+        resetClock = false;
 
-	try
-	  {
-	    if (sleepSecs > 0)
-	      {
-		if (debug)
-		  {
-		    System.err.println("StatusClearThread.run(): waiting " + sleepSecs + " seconds");
-		  }
+        try
+          {
+            if (sleepSecs > 0)
+              {
+                if (debug)
+                  {
+                    System.err.println("StatusClearThread.run(): waiting " + sleepSecs + " seconds");
+                  }
 
-		wait(sleepSecs * 1000);
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    System.err.println("StatusClearThread.run(): waiting indefinitely");
-		  }
+                wait(sleepSecs * 1000);
+              }
+            else
+              {
+                if (debug)
+                  {
+                    System.err.println("StatusClearThread.run(): waiting indefinitely");
+                  }
 
-		wait();
-	      }
-	  }
-	catch (InterruptedException ex)
-	  {
-	  }
+                wait();
+              }
+          }
+        catch (InterruptedException ex)
+          {
+          }
 
-	if (!resetClock && !done)
-	  {
-	    // this has to be invokeLater or else we'll risk getting
-	    // deadlocked.
+        if (!resetClock && !done)
+          {
+            // this has to be invokeLater or else we'll risk getting
+            // deadlocked.
 
-	    if (debug)
-	      {
-		System.err.println("StatusClearThread.run(): invoking label clear");
-	      }
+            if (debug)
+              {
+                System.err.println("StatusClearThread.run(): invoking label clear");
+              }
 
-	    EventQueue.invokeLater(new Runnable() {
-	      public void run() {
-		statusLabel.setText(defaultMessage);
-		statusLabel.paintImmediately(statusLabel.getVisibleRect());
-	      }
-	    });
+            EventQueue.invokeLater(new Runnable() {
+              public void run() {
+                statusLabel.setText(defaultMessage);
+                statusLabel.paintImmediately(statusLabel.getVisibleRect());
+              }
+            });
 
-	    sleepSecs = 0;
-	  }
+            sleepSecs = 0;
+          }
       }
   }
 
@@ -7004,7 +7004,7 @@ class StatusClearThread extends Thread {
   {
     if (debug)
       {
-	System.err.println("StatusClearThread.setClock(" + countDown + ")");
+        System.err.println("StatusClearThread.setClock(" + countDown + ")");
       }
 
     resetClock = true;
@@ -7013,7 +7013,7 @@ class StatusClearThread extends Thread {
 
     if (debug)
       {
-	System.err.println("StatusClearThread.setClock(" + countDown + ") - done");
+        System.err.println("StatusClearThread.setClock(" + countDown + ") - done");
       }
   }
 
@@ -7050,7 +7050,7 @@ class SecurityLaunderThread extends Thread {
   gclient client;
   boolean done = false;
   boolean messageSet = false;
-  int buildPhase = -1;		// unknown
+  int buildPhase = -1;          // unknown
 
   /* -- */
 
@@ -7064,19 +7064,19 @@ class SecurityLaunderThread extends Thread {
     switch (client.getBuildPhase())
       {
       case 0:
-	client.buildLabel.setIcon(client.idleIcon);
-	break;
+        client.buildLabel.setIcon(client.idleIcon);
+        break;
 
       case 1:
-	client.buildLabel.setIcon(client.buildIcon);
-	break;
+        client.buildLabel.setIcon(client.buildIcon);
+        break;
 
       case 2:
-	client.buildLabel.setIcon(client.buildIcon2);
-	break;
+        client.buildLabel.setIcon(client.buildIcon2);
+        break;
 
       default:
-	client.buildLabel.setIcon(client.buildUnknownIcon);
+        client.buildLabel.setIcon(client.buildUnknownIcon);
       }
 
     client.buildLabel.validate();
@@ -7086,43 +7086,43 @@ class SecurityLaunderThread extends Thread {
   {
     while (!done)
       {
-	try
-	  {
-	    wait();
-	  }
-	catch (InterruptedException ex)
-	  {
-	  }
+        try
+          {
+            wait();
+          }
+        catch (InterruptedException ex)
+          {
+          }
 
-	if (messageSet)
-	  {
-	    EventQueue.invokeLater(new Runnable() {
-	      public void run() {
+        if (messageSet)
+          {
+            EventQueue.invokeLater(new Runnable() {
+              public void run() {
 
-		switch (buildPhase)
-		  {
-		  case 0:
-		    client.buildLabel.setIcon(client.idleIcon);
-		    break;
+                switch (buildPhase)
+                  {
+                  case 0:
+                    client.buildLabel.setIcon(client.idleIcon);
+                    break;
 
-		  case 1:
-		    client.buildLabel.setIcon(client.buildIcon);
-		    break;
+                  case 1:
+                    client.buildLabel.setIcon(client.buildIcon);
+                    break;
 
-		  case 2:
-		    client.buildLabel.setIcon(client.buildIcon2);
-		    break;
+                  case 2:
+                    client.buildLabel.setIcon(client.buildIcon2);
+                    break;
 
-		  default:
-		    client.buildLabel.setIcon(client.buildUnknownIcon);
-		  }
+                  default:
+                    client.buildLabel.setIcon(client.buildUnknownIcon);
+                  }
 
-		client.buildLabel.validate();
-	      }
-	    });
+                client.buildLabel.validate();
+              }
+            });
 
-	    messageSet = false;
-	  }
+            messageSet = false;
+          }
       }
 
     // done!
@@ -7140,7 +7140,7 @@ class SecurityLaunderThread extends Thread {
     this.messageSet = true;
     this.buildPhase = phase;
 
-    this.notifyAll();		// wakey-wakey!
+    this.notifyAll();           // wakey-wakey!
   }
 
   /**
@@ -7182,31 +7182,31 @@ class ClientExceptionHandler implements Thread.UncaughtExceptionHandler {
 
     if (ex instanceof NullPointerException)
       {
-	for (StackTraceElement el: ex.getStackTrace())
-	  {
-	    if (el.getClassName().equals("com.apple.laf.AquaInternalFramePaneUI") &&
-		el.getMethodName().equals("mousePressed"))
-	      {
-		return;		// silently eat the exception
-	      }
-	  }
+        for (StackTraceElement el: ex.getStackTrace())
+          {
+            if (el.getClassName().equals("com.apple.laf.AquaInternalFramePaneUI") &&
+                el.getMethodName().equals("mousePressed"))
+              {
+                return;         // silently eat the exception
+              }
+          }
       }
 
     if (gclient.client != null)
       {
-	try
-	  {
-	    gclient.client.processException(ex);
-	  }
-	catch (Throwable ex2)
-	  {
-	    ex.printStackTrace();
-	    ex2.printStackTrace();
-	  }
+        try
+          {
+            gclient.client.processException(ex);
+          }
+        catch (Throwable ex2)
+          {
+            ex.printStackTrace();
+            ex2.printStackTrace();
+          }
       }
     else
       {
-	ex.printStackTrace();
+        ex.printStackTrace();
       }
   }
 }

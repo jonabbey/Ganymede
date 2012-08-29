@@ -180,7 +180,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   static int registryPortProperty = 1099;
   static String server_url = null;
 
-  static Server server = null;	// remote reference
+  static Server server = null;  // remote reference
 
   /**
    * If true, we're running on a mac, and we might tweak our interface
@@ -227,14 +227,14 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
     if (argv.length >= 1)
       {
-	properties_file = argv[0];
+        properties_file = argv[0];
       }
 
     String debugFilename = null;
 
     if (argv.length > 1)
       {
-	debugFilename = argv[1];
+        debugFilename = argv[1];
       }
 
     GASHAdmin applet = new GASHAdmin(debugFilename);
@@ -245,9 +245,9 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
     my_frame.getContentPane().setLayout(new BorderLayout());
     my_frame.getContentPane().add("Center", applet);
 
-    applet.init();		// init before visible for smoothness
+    applet.init();              // init before visible for smoothness
 
-    my_frame.pack();		// pack so we size everything properly
+    my_frame.pack();            // pack so we size everything properly
     my_frame.setLocationRelativeTo(null); // center on screen
 
     my_frame.setVisible(true);
@@ -272,67 +272,67 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   {
     if (WeAreApplet)
       {
-	return my_GASHAdmin.getParameter(configKey);
+        return my_GASHAdmin.getParameter(configKey);
       }
     else
       {
-	if (properties_file != null)
-	  {
-	    if (ganymedeProperties == null)
-	      {
-		// declare a local Properties object while we're
-		// initializing it so that the static
-		// ganymedeProperties field is not visible externally
-		// in mid-configuration.  FindBugs.
+        if (properties_file != null)
+          {
+            if (ganymedeProperties == null)
+              {
+                // declare a local Properties object while we're
+                // initializing it so that the static
+                // ganymedeProperties field is not visible externally
+                // in mid-configuration.  FindBugs.
 
-		Properties myGanymedeProperties = new Properties();
+                Properties myGanymedeProperties = new Properties();
 
-		if (debug)
-		  {
-		    System.out.println("Loading properties from: " + properties_file);
-		  }
+                if (debug)
+                  {
+                    System.out.println("Loading properties from: " + properties_file);
+                  }
 
-		if (properties_file != null)
-		  {
-		    BufferedInputStream bis = null;
+                if (properties_file != null)
+                  {
+                    BufferedInputStream bis = null;
 
-		    try
-		      {
-			bis = new BufferedInputStream(new FileInputStream(properties_file));
-			myGanymedeProperties.load(bis);
-		      }
-		    catch (java.io.FileNotFoundException e)
-		      {
-			throw new RuntimeException("File not found: " + e);
-		      }
-		    catch (java.io.IOException e)
-		      {
-			throw new RuntimeException("Whoa, io exception: " + e);
-		      }
-		    finally
-		      {
-			if (bis != null)
-			  {
-			    try
-			      {
-				bis.close();
-			      }
-			    catch (IOException ex)
-			      {
-			      }
-			  }
-		      }
-		  }
+                    try
+                      {
+                        bis = new BufferedInputStream(new FileInputStream(properties_file));
+                        myGanymedeProperties.load(bis);
+                      }
+                    catch (java.io.FileNotFoundException e)
+                      {
+                        throw new RuntimeException("File not found: " + e);
+                      }
+                    catch (java.io.IOException e)
+                      {
+                        throw new RuntimeException("Whoa, io exception: " + e);
+                      }
+                    finally
+                      {
+                        if (bis != null)
+                          {
+                            try
+                              {
+                                bis.close();
+                              }
+                            catch (IOException ex)
+                              {
+                              }
+                          }
+                      }
+                  }
 
-		ganymedeProperties = myGanymedeProperties;
-	      }
+                ganymedeProperties = myGanymedeProperties;
+              }
 
-	    return ganymedeProperties.getProperty(configKey);
-	  }
-	else
-	  {
-	    return java.lang.System.getProperty(configKey);
-	  }
+            return ganymedeProperties.getProperty(configKey);
+          }
+        else
+          {
+            return java.lang.System.getProperty(configKey);
+          }
       }
   }
 
@@ -384,18 +384,18 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
     if (val == null)
       {
-	return defaultValue;
+        return defaultValue;
       }
     else
       {
-	if (val.equals("true"))
-	  {
-	    return true;
-	  }
-	else
-	  {
-	    return false;
-	  }
+        if (val.equals("true"))
+          {
+            return true;
+          }
+        else
+          {
+            return false;
+          }
       }
   }
 
@@ -403,7 +403,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   {
     if (runningOnMac == null)
       {
-	runningOnMac = "Mac OS X".equals(System.getProperty("os.name"));
+        runningOnMac = "Mac OS X".equals(System.getProperty("os.name"));
       }
 
     return runningOnMac;
@@ -431,11 +431,11 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
     try
       {
-	registryPort = getConfigInteger("ganymede.registryPort");
+        registryPort = getConfigInteger("ganymede.registryPort");
       }
     catch (NumberFormatException ex)
       {
-	registryPort = registryPortProperty; // default
+        registryPort = registryPortProperty; // default
       }
 
     server_url = "rmi://" + serverhost + ":" + registryPort + "/ganymede.server";
@@ -461,18 +461,18 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   {
     if (debug)
       {
-	System.err.println("applet stop()");
+        System.err.println("applet stop()");
       }
 
     if (adminDispatch != null)
       {
-	try
-	  {
-	    adminDispatch.disconnect();
-	  }
-	catch (RemoteException ex)
-	  {
-	  }
+        try
+          {
+            adminDispatch.disconnect();
+          }
+        catch (RemoteException ex)
+          {
+          }
       }
   }
 
@@ -480,18 +480,18 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   {
     if (debug)
       {
-	System.err.println("applet destroy()");
+        System.err.println("applet destroy()");
       }
 
     if (adminDispatch != null)
       {
-	try
-	  {
-	    adminDispatch.disconnect();
-	  }
-	catch (RemoteException ex)
-	  {
-	  }
+        try
+          {
+            adminDispatch.disconnect();
+          }
+        catch (RemoteException ex)
+          {
+          }
       }
   }
 
@@ -510,18 +510,18 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
     if (admin_logo != null)
       {
-	image = new JLabel(new ImageIcon(admin_logo));
-	image.setOpaque(true);
-	image.setBackground(Color.black);
+        image = new JLabel(new ImageIcon(admin_logo));
+        image.setOpaque(true);
+        image.setBackground(Color.black);
 
-	gbc.fill = GridBagConstraints.BOTH;
-	gbc.gridx = 0;
-	gbc.gridy = 0;
-	gbc.gridwidth = GridBagConstraints.REMAINDER;
-	gbc.weighty = 1.0;
-	gbc.weightx = 1.0;
-	gbl.setConstraints(image, gbc);
-	panel.add(image);
+        gbc.fill = GridBagConstraints.BOTH;
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.weighty = 1.0;
+        gbc.weightx = 1.0;
+        gbl.setConstraints(image, gbc);
+        panel.add(image);
       }
 
     JPanel labelPanel = new JPanel();
@@ -592,8 +592,8 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
     if (pre_username != null)
       {
-	username.setText(pre_username);
-	password.requestFocus();
+        username.setText(pre_username);
+        password.requestFocus();
       }
 
     gbc.gridx = 0;
@@ -613,15 +613,15 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
     if (!WeAreApplet)
       {
-	quitButton = new JButton(ts.l("createLoginPanel.quitButton"));
+        quitButton = new JButton(ts.l("createLoginPanel.quitButton"));
 
-	quitButton.addActionListener(new ActionListener() {
-	  public void actionPerformed(ActionEvent e)
-	    {
-	      System.exit(0);
-	    }});
+        quitButton.addActionListener(new ActionListener() {
+          public void actionPerformed(ActionEvent e)
+            {
+              System.exit(0);
+            }});
 
-	buttonPanel.add(quitButton, "East");
+        buttonPanel.add(quitButton, "East");
       }
 
     return panel;
@@ -641,140 +641,140 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
     if (connecting.set(true))
       {
-	return;			// we already have a thread running
+        return;                 // we already have a thread running
       }
 
     try
       {
-	while (!connected.isSet())
-	  {
-	    if (try_number++ > 20)
-	      {
-		break;
-	      }
+        while (!connected.isSet())
+          {
+            if (try_number++ > 20)
+              {
+                break;
+              }
 
-	    try
-	      {
-		Remote obj = Naming.lookup(GASHAdmin.server_url);
+            try
+              {
+                Remote obj = Naming.lookup(GASHAdmin.server_url);
 
-		if (obj instanceof Server)
-		  {
-		    server = (Server) obj;
-		    server.up();	// RMI call to verify our connection
-		  }
+                if (obj instanceof Server)
+                  {
+                    server = (Server) obj;
+                    server.up();        // RMI call to verify our connection
+                  }
 
-		connected.set(true);
-		break;
-	      }
-	    catch (Throwable ex)
-	      {
-		connectError = ex.getMessage();
-	      }
+                connected.set(true);
+                break;
+              }
+            catch (Throwable ex)
+              {
+                connectError = ex.getMessage();
+              }
 
-	    try
-	      {
-		spindex++;
+            try
+              {
+                spindex++;
 
-		if (spindex >= spinAry.length)
-		  {
-		    spindex = 0;
-		  }
+                if (spindex >= spinAry.length)
+                  {
+                    spindex = 0;
+                  }
 
-		try
-		  {
-		    final GASHAdmin localLoginBox = this;
+                try
+                  {
+                    final GASHAdmin localLoginBox = this;
 
-		    SwingUtilities.invokeAndWait(new Runnable()
-		      {
-			public void run()
-			{
-			  localLoginBox.loginButton.setText(ts.l("global.connectingButtonMsg", Character.valueOf(spinAry[spindex])));
-			}
-		      });
-		  }
-		catch (Exception ex)
-		  {
-		    ex.printStackTrace();
-		  }
+                    SwingUtilities.invokeAndWait(new Runnable()
+                      {
+                        public void run()
+                        {
+                          localLoginBox.loginButton.setText(ts.l("global.connectingButtonMsg", Character.valueOf(spinAry[spindex])));
+                        }
+                      });
+                  }
+                catch (Exception ex)
+                  {
+                    ex.printStackTrace();
+                  }
 
-		// Wait for 1/4 sec before retrying to connect to server
+                // Wait for 1/4 sec before retrying to connect to server
 
-		Thread.sleep(250);
-	      }
-	    catch (InterruptedException e)
-	      {
-	      }
-	  }
+                Thread.sleep(250);
+              }
+            catch (InterruptedException e)
+              {
+              }
+          }
 
-	if (connected.isSet())
-	  {
-	    if (isSSL() && !ssl_logo)
-	      {
-		image.setIcon(new ImageIcon(admin_ssl_logo));
-		this.ssl_logo = true;
-	      }
+        if (connected.isSet())
+          {
+            if (isSSL() && !ssl_logo)
+              {
+                image.setIcon(new ImageIcon(admin_ssl_logo));
+                this.ssl_logo = true;
+              }
 
-	    SwingUtilities.invokeLater(new Runnable()
-	      {
-		public void run()
-		{
-		  if (!ssl_logo)
-		    {
-		      // "Administrate Server (NO SSL)"
-		      loginButton.setText(ts.l("run.adminButtonNoSSL"));
-		    }
-		  else
-		    {
-		      // "Administrate Server"
-		      loginButton.setText(ts.l("run.adminButtonSSL"));
-		    }
+            SwingUtilities.invokeLater(new Runnable()
+              {
+                public void run()
+                {
+                  if (!ssl_logo)
+                    {
+                      // "Administrate Server (NO SSL)"
+                      loginButton.setText(ts.l("run.adminButtonNoSSL"));
+                    }
+                  else
+                    {
+                      // "Administrate Server"
+                      loginButton.setText(ts.l("run.adminButtonSSL"));
+                    }
 
-		  username.setEnabled(true);
-		  password.setEnabled(true);
+                  username.setEnabled(true);
+                  password.setEnabled(true);
 
-		  String pre_username = username.getText();
+                  String pre_username = username.getText();
 
-		  if (pre_username != null && !pre_username.equals(""))
-		    {
-		      password.requestFocus();
-		    }
-		  else
-		    {
-		      username.requestFocus();
-		    }
+                  if (pre_username != null && !pre_username.equals(""))
+                    {
+                      password.requestFocus();
+                    }
+                  else
+                    {
+                      username.requestFocus();
+                    }
 
-		  invalidate();
-		  validate();
-		}
-	      });
-	  }
-	else
-	  {
-	    new StringDialog(new JFrame(),
-			     ts.l("global.loginErrorTitle"), // "Login error"
-			     ts.l("global.loginErrorMsg", connectError), // "Couldn''t locate Ganymede server... perhaps it is down?\n\n{0}"
-			     ts.l("global.loginErrorOKButton"), // "Ok"
-			     null,
-			     getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
+                  invalidate();
+                  validate();
+                }
+              });
+          }
+        else
+          {
+            new StringDialog(new JFrame(),
+                             ts.l("global.loginErrorTitle"), // "Login error"
+                             ts.l("global.loginErrorMsg", connectError), // "Couldn''t locate Ganymede server... perhaps it is down?\n\n{0}"
+                             ts.l("global.loginErrorOKButton"), // "Ok"
+                             null,
+                             getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
 
-	    SwingUtilities.invokeLater(new Runnable()
-	      {
-		public void run()
-		{
-		  loginButton.setText(ts.l("run.connectButton")); // "Connect"
-		  username.setEnabled(false);
-		  password.setEnabled(false);
+            SwingUtilities.invokeLater(new Runnable()
+              {
+                public void run()
+                {
+                  loginButton.setText(ts.l("run.connectButton")); // "Connect"
+                  username.setEnabled(false);
+                  password.setEnabled(false);
 
-		  username.requestFocus();
-		  invalidate();
-		  validate();
-		}
-	      });
-	  }
+                  username.requestFocus();
+                  invalidate();
+                  validate();
+                }
+              });
+          }
       }
     finally
       {
-	connecting.set(false);
+        connecting.set(false);
       }
   }
 
@@ -782,106 +782,106 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   {
     if (e.getSource() == username)
       {
-	password.requestFocus();
+        password.requestFocus();
       }
     else if (e.getSource() == password)
       {
-	loginButton.doClick();
+        loginButton.doClick();
       }
     else if (e.getSource() == loginButton)
       {
-	// if we haven't got a good RMI connection, try to spawn
-	// another thread.  Note that the run() method starts off by
-	// testing the connecting booleanSemaphore, so we won't allow
-	// multiple connection threads to be running concurrently, no
-	// matter how many times the user presses the login button
-	// while waiting for a connection
+        // if we haven't got a good RMI connection, try to spawn
+        // another thread.  Note that the run() method starts off by
+        // testing the connecting booleanSemaphore, so we won't allow
+        // multiple connection threads to be running concurrently, no
+        // matter how many times the user presses the login button
+        // while waiting for a connection
 
-	if (!connected.isSet())
-	  {
-	    new Thread(this).start();
-	    return;
-	  }
+        if (!connected.isSet())
+          {
+            new Thread(this).start();
+            return;
+          }
 
-	try
-	  {
-	    adminDispatch = new GASHAdminDispatch(server);
+        try
+          {
+            adminDispatch = new GASHAdminDispatch(server);
 
-	    if (!adminDispatch.connect(username.getText(),
-				       new String(password.getPassword())))
-	      {
-		return;
-	      }
-	  }
-	catch (RemoteException rx)
-	  {
-	    new StringDialog(new JFrame(),
-			     ts.l("global.loginErrorTitle"), // "Login error"
-			     ts.l("global.loginErrorMsg", rx.getMessage()), // "Couldn''t locate Ganymede server... perhaps it is down?\n\n{0}"
-			     ts.l("global.loginErrorOKButton"), // "Ok"
-			     null,
-			     getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
+            if (!adminDispatch.connect(username.getText(),
+                                       new String(password.getPassword())))
+              {
+                return;
+              }
+          }
+        catch (RemoteException rx)
+          {
+            new StringDialog(new JFrame(),
+                             ts.l("global.loginErrorTitle"), // "Login error"
+                             ts.l("global.loginErrorMsg", rx.getMessage()), // "Couldn''t locate Ganymede server... perhaps it is down?\n\n{0}"
+                             ts.l("global.loginErrorOKButton"), // "Ok"
+                             null,
+                             getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
 
-	    connected.set(false);
+            connected.set(false);
 
-	    loginButton.setText(ts.l("global.connectingButtonMsg", Character.valueOf(spinAry[spindex])));
-	    new Thread(this).start();
-	    return;
-	  }
-	catch (Exception ex)
-	  {
-	    // "Couldn''t log in to the Ganymede Server"
-	    // "Exception caught during login attempt.\n\nThis condition may be due to a software error.\n\nException: {0}"
-	    new StringDialog(new JFrame(),
-			     ts.l("actionPerformed.loginErrorTitle"),
-			     ts.l("actionPerformed.loginErrorMsg", ex.getMessage()),
-			     ts.l("actionPerformed.loginErrorOKButton"),
-			     null,
-			     getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
+            loginButton.setText(ts.l("global.connectingButtonMsg", Character.valueOf(spinAry[spindex])));
+            new Thread(this).start();
+            return;
+          }
+        catch (Exception ex)
+          {
+            // "Couldn''t log in to the Ganymede Server"
+            // "Exception caught during login attempt.\n\nThis condition may be due to a software error.\n\nException: {0}"
+            new StringDialog(new JFrame(),
+                             ts.l("actionPerformed.loginErrorTitle"),
+                             ts.l("actionPerformed.loginErrorMsg", ex.getMessage()),
+                             ts.l("actionPerformed.loginErrorOKButton"),
+                             null,
+                             getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
 
-	    password.setText("");
-	    return;
-	  }
+            password.setText("");
+            return;
+          }
 
-	// remember last login name.
+        // remember last login name.
 
-	GASHAdminFrame.prefs.put("login_user", username.getText());
+        GASHAdminFrame.prefs.put("login_user", username.getText());
 
-	password.setText("");
+        password.setText("");
 
-	if (quitButton != null)
-	  {
-	    quitButton.setEnabled(false);
-	  }
+        if (quitButton != null)
+          {
+            quitButton.setEnabled(false);
+          }
 
-	loginButton.setEnabled(false);
+        loginButton.setEnabled(false);
 
-	// when we create the frame, it shows itself.
+        // when we create the frame, it shows itself.
 
-	frame = new GASHAdminFrame(ts.l("global.consoleTitle"), this, debugFilename, adminDispatch); // "Ganymede Admin Console"
+        frame = new GASHAdminFrame(ts.l("global.consoleTitle"), this, debugFilename, adminDispatch); // "Ganymede Admin Console"
 
-	hideLoginBox();
+        hideLoginBox();
 
-	// Now that the frame is completely initialized, tell the
-	// GASHAdminDispatch to start polling the server for updates
+        // Now that the frame is completely initialized, tell the
+        // GASHAdminDispatch to start polling the server for updates
 
-	try
-	  {
-	    adminDispatch.startAsyncPoller();
-	  }
-	catch (RemoteException rx)
-	  {
-	    System.err.println("Problem trying to start poll thread: " + rx);
-	  }
+        try
+          {
+            adminDispatch.startAsyncPoller();
+          }
+        catch (RemoteException rx)
+          {
+            System.err.println("Problem trying to start poll thread: " + rx);
+          }
 
-	try
-	  {
-	    adminDispatch.refreshMe();
-	  }
-	catch (RemoteException rx)
-	  {
-	    System.err.println("Problem trying to refresh: " + rx);
-	  }
+        try
+          {
+            adminDispatch.refreshMe();
+          }
+        catch (RemoteException rx)
+          {
+            System.err.println("Problem trying to refresh: " + rx);
+          }
       }
   }
 
@@ -919,7 +919,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   {
     if (errorImage == null)
       {
-	errorImage = PackageResources.getImageResource(this, "error.gif", getClass());
+        errorImage = PackageResources.getImageResource(this, "error.gif", getClass());
       }
 
     return errorImage;
@@ -929,10 +929,10 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   {
     if (hideLoginWhenApplication)
       {
-	if (!WeAreApplet && my_frame != null)
-	  {
-	    my_frame.setVisible(false);
-	  }
+        if (!WeAreApplet && my_frame != null)
+          {
+            my_frame.setVisible(false);
+          }
       }
   }
 
@@ -940,17 +940,17 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
   {
     if (hideLoginWhenApplication)
       {
-	if (!WeAreApplet && my_frame != null)
-	  {
-	    my_frame.setVisible(true);
-	  }
+        if (!WeAreApplet && my_frame != null)
+          {
+            my_frame.setVisible(true);
+          }
       }
   }
 }
 
 /*------------------------------------------------------------------------------
                                                                            class
-					                     GASHAdminLoginFrame
+                                                             GASHAdminLoginFrame
 
 ------------------------------------------------------------------------------*/
 
@@ -997,33 +997,33 @@ class GASHAdminLoginFrame extends JFrame {
 
     if (e.getID() == WindowEvent.WINDOW_CLOSING)
       {
-	if (debug)
-	  {
-	    System.out.println("Window closing");
-	  }
+        if (debug)
+          {
+            System.out.println("Window closing");
+          }
 
-	// it's safe to assume that adminLogin.quitButton is not null,
-	// because we would not have created a GASHAdminLoginFrame if
-	// we weren't running as an application.
+        // it's safe to assume that adminLogin.quitButton is not null,
+        // because we would not have created a GASHAdminLoginFrame if
+        // we weren't running as an application.
 
-	if (adminLogin.quitButton.isEnabled())
-	  {
-	    if (debug)
-	      {
-		System.out.println("It's ok to log out.");
-	      }
+        if (adminLogin.quitButton.isEnabled())
+          {
+            if (debug)
+              {
+                System.out.println("It's ok to log out.");
+              }
 
-	    System.exit(0);
-	    super.processWindowEvent(e);
-	  }
-	else if (debug)
-	  {
-	    System.out.println("No log out!");
-	  }
+            System.exit(0);
+            super.processWindowEvent(e);
+          }
+        else if (debug)
+          {
+            System.out.println("No log out!");
+          }
       }
     else
       {
-	super.processWindowEvent(e);
+        super.processWindowEvent(e);
       }
   }
 }

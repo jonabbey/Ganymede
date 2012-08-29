@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2008
@@ -99,7 +99,7 @@ public class imageTab extends clientTab {
   {
     if (contentPane == null)
       {
-	contentPane = new JPanel(false);
+        contentPane = new JPanel(false);
         contentPane.setLayout(new FlowLayout());
       }
 
@@ -152,8 +152,8 @@ public class imageTab extends clientTab {
   {
     if (contentPane != null)
       {
-	contentPane.removeAll();
-	contentPane = null;
+        contentPane.removeAll();
+        contentPane = null;
       }
 
     if (icon != null)

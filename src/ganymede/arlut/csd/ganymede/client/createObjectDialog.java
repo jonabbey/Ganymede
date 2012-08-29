@@ -10,7 +10,7 @@
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996 - 2009
@@ -166,34 +166,34 @@ public class createObjectDialog extends StandardDialog implements ActionListener
 
     try
       {
-	for (int i = 0; i < bases.size(); i++)
-	  {
-	    thisBase = (Base)bases.elementAt(i);
-	    
-	    String name = (String)baseNames.get(thisBase);
-		
-	    // For some reason, baseNames.get is returning null sometimes.
+        for (int i = 0; i < bases.size(); i++)
+          {
+            thisBase = (Base)bases.elementAt(i);
+            
+            String name = (String)baseNames.get(thisBase);
+                
+            // For some reason, baseNames.get is returning null sometimes.
 
-	    if (name == null)
-	      {
-		name = thisBase.getName();
-	      }
-		
-	    if (thisBase.isEmbedded())
-	      {
-		continue;
-	      }
+            if (name == null)
+              {
+                name = thisBase.getName();
+              }
+                
+            if (thisBase.isEmbedded())
+              {
+                continue;
+              }
 
-	    if (thisBase.canCreate(null))
-	      {
-		listHandle lh = new listHandle(name, (Short)baseToShort.get(thisBase));
-		listHandles.addElement(lh);
-	      }
-	  }
+            if (thisBase.canCreate(null))
+              {
+                listHandle lh = new listHandle(name, (Short)baseToShort.get(thisBase));
+                listHandles.addElement(lh);
+              }
+          }
       }
     catch (java.rmi.RemoteException rx)
       {
-	throw new RuntimeException("Could not check to see if the base was creatable: " + rx);
+        throw new RuntimeException("Could not check to see if the base was creatable: " + rx);
       }
 
     listHandles = gc.sortListHandleVector(listHandles);
@@ -203,19 +203,19 @@ public class createObjectDialog extends StandardDialog implements ActionListener
 
     if (gclient.prefs != null)
       {
-	String defaultType = gclient.prefs.get(DEFAULT_CREATE, null);
+        String defaultType = gclient.prefs.get(DEFAULT_CREATE, null);
 
-	if (defaultType != null)
-	  {
-	    for (int i = 0; i < listHandles.size(); i++)
-	      {
-		if (defaultType.equals(((listHandle) listHandles.elementAt(i)).getLabel()))
-		  {
-		    types.setSelectedItem(listHandles.elementAt(i));
-		    break;
-		  }
-	      }
-	  }
+        if (defaultType != null)
+          {
+            for (int i = 0; i < listHandles.size(); i++)
+              {
+                if (defaultType.equals(((listHandle) listHandles.elementAt(i)).getLabel()))
+                  {
+                    types.setSelectedItem(listHandles.elementAt(i));
+                    break;
+                  }
+              }
+          }
       }
 
     types.setKeySelectionManager(new TimedKeySelectionManager());
@@ -251,13 +251,13 @@ public class createObjectDialog extends StandardDialog implements ActionListener
 
     if (glogin.isRunningOnMac())
       {
-	buttonP.add(cancel);
-	buttonP.add(ok);
+        buttonP.add(cancel);
+        buttonP.add(ok);
       }
     else
       {
-	buttonP.add(ok);
-	buttonP.add(cancel);
+        buttonP.add(ok);
+        buttonP.add(cancel);
       }
 
     gbc.insets = new Insets(4,4,4,4);
@@ -275,9 +275,9 @@ public class createObjectDialog extends StandardDialog implements ActionListener
 
     if (glogin.isRunningOnMac())
       {
-	gbc.gridx = 2;
-	gbc.gridwidth = GridBagConstraints.REMAINDER;
-	gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 2;
+        gbc.gridwidth = GridBagConstraints.REMAINDER;
+        gbc.anchor = GridBagConstraints.EAST;
       }
 
     gbl.setConstraints(buttonP, gbc);
@@ -294,25 +294,25 @@ public class createObjectDialog extends StandardDialog implements ActionListener
   {
     if (e.getSource() == ok) 
       {
-	listHandle choice = (listHandle)types.getSelectedItem();
+        listHandle choice = (listHandle)types.getSelectedItem();
 
-	if (gclient.prefs != null)
-	  {
-	    gclient.prefs.put(DEFAULT_CREATE, choice.getLabel());
-	  }
+        if (gclient.prefs != null)
+          {
+            gclient.prefs.put(DEFAULT_CREATE, choice.getLabel());
+          }
 
-	Short type = (Short)choice.getObject();
+        Short type = (Short)choice.getObject();
 
-	setVisible(false);
+        setVisible(false);
 
-	if (type.shortValue() >= 0)
-	  {
-	    gc.createObject(type.shortValue());
-	  }
+        if (type.shortValue() >= 0)
+          {
+            gc.createObject(type.shortValue());
+          }
       }
     else if (e.getSource() == cancel) 
       {
-	setVisible(false);
+        setVisible(false);
       }
   }
 }

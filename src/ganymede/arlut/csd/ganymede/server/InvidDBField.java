@@ -140,7 +140,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
   InvidDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
-    super();			// may throw RemoteException
+    super();                    // may throw RemoteException
 
     value = null;
     this.owner = owner;
@@ -167,11 +167,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (isVector())
       {
-	value = new Vector();
+        value = new Vector();
       }
     else
       {
-	value = null;
+        value = null;
       }
   }
 
@@ -186,11 +186,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (isVector())
       {
-	value = (Vector) field.getVectVal().clone();
+        value = (Vector) field.getVectVal().clone();
       }
     else
       {
-	value = field.value;
+        value = field.value;
       }
   }
 
@@ -205,8 +205,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (definition.isArray())
       {
-	// "scalar value constructor called on vector field {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("init.type_mismatch", getName(), owner.getLabel()));
+        // "scalar value constructor called on vector field {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("init.type_mismatch", getName(), owner.getLabel()));
       }
 
     this.value = value;
@@ -223,17 +223,17 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!definition.isArray())
       {
-	// "vector value constructor called on scalar field {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("init.type_mismatch2", getName(), owner.getLabel()));
+        // "vector value constructor called on scalar field {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("init.type_mismatch2", getName(), owner.getLabel()));
       }
 
     if (values == null)
       {
-	value = new Vector();
+        value = new Vector();
       }
     else
       {
-	value = values.clone();
+        value = values.clone();
       }
   }
 
@@ -255,37 +255,37 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (isVector())
       {
-	Vector values = getVectVal();
+        Vector values = getVectVal();
 
-	out.writeInt(values.size());
+        out.writeInt(values.size());
 
-	for (int i = 0; i < values.size(); i++)
-	  {
-	    temp = (Invid) values.elementAt(i);
-	    out.writeShort(temp.getType());
-	    out.writeInt(temp.getNum());
-	  }
+        for (int i = 0; i < values.size(); i++)
+          {
+            temp = (Invid) values.elementAt(i);
+            out.writeShort(temp.getType());
+            out.writeInt(temp.getNum());
+          }
       }
     else
       {
-	temp = (Invid) value;
+        temp = (Invid) value;
 
-	try
-	  {
-	    out.writeShort(temp.getType());
-	    out.writeInt(temp.getNum());
-	  }
-	catch (NullPointerException ex)
-	  {
-	    System.err.println(owner.getLabel() + ":" + getName() + ": void value in emit");
+        try
+          {
+            out.writeShort(temp.getType());
+            out.writeInt(temp.getNum());
+          }
+        catch (NullPointerException ex)
+          {
+            System.err.println(owner.getLabel() + ":" + getName() + ": void value in emit");
 
-	    if (temp == null)
-	      {
-		System.err.println(owner.getLabel() + ":" + getName() + ": field value itself is null");
-	      }
+            if (temp == null)
+              {
+                System.err.println(owner.getLabel() + ":" + getName() + ": field value itself is null");
+              }
 
-	    throw ex;
-	  }
+            throw ex;
+          }
       }
   }
 
@@ -303,37 +303,37 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (definition.isArray())
       {
-	if (Ganymede.db.isLessThan(2,3))
-	  {
-	    count = in.readShort();
-	  }
-	else
-	  {
-	    count = in.readInt();
-	  }
+        if (Ganymede.db.isLessThan(2,3))
+          {
+            count = in.readShort();
+          }
+        else
+          {
+            count = in.readInt();
+          }
 
-	if (count > 0)
-	  {
-	    value = new Vector(count);
+        if (count > 0)
+          {
+            value = new Vector(count);
 
-	    // a cast of convenience..
+            // a cast of convenience..
 
-	    Vector v = (Vector) value;
+            Vector v = (Vector) value;
 
-	    for (int i = 0; i < count; i++)
-	      {
-		temp = Invid.createInvid(in.readShort(), in.readInt());
-		v.addElement(temp);
-	      }
-	  }
-	else
-	  {
-	    value = new Vector();
-	  }
+            for (int i = 0; i < count; i++)
+              {
+                temp = Invid.createInvid(in.readShort(), in.readInt());
+                v.addElement(temp);
+              }
+          }
+        else
+          {
+            value = new Vector();
+          }
       }
     else
       {
-	value = Invid.createInvid(in.readShort(), in.readInt());
+        value = Invid.createInvid(in.readShort(), in.readInt());
       }
   }
 
@@ -351,32 +351,32 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (getOwner().isEmbedded() && getID() == 0 && !xmlOut.isDeltaSyncing())
       {
-	return;
+        return;
       }
 
     xmlOut.startElementIndent(this.getXMLName());
 
     if (!isVector())
       {
-	emitInvidXML(xmlOut, value(), isEditInPlace());
+        emitInvidXML(xmlOut, value(), isEditInPlace());
       }
     else
       {
-	Vector values = getVectVal();
+        Vector values = getVectVal();
 
-	for (int i = 0; i < values.size(); i++)
-	  {
-	    if (!isEditInPlace())
-	      {
-		xmlOut.indentOut();
-		xmlOut.indent();
-		xmlOut.indentIn();
-	      }
+        for (int i = 0; i < values.size(); i++)
+          {
+            if (!isEditInPlace())
+              {
+                xmlOut.indentOut();
+                xmlOut.indent();
+                xmlOut.indentIn();
+              }
 
-	    emitInvidXML(xmlOut, (Invid) values.elementAt(i), isEditInPlace());
-	  }
+            emitInvidXML(xmlOut, (Invid) values.elementAt(i), isEditInPlace());
+          }
 
-	xmlOut.indent();
+        xmlOut.indent();
       }
 
     xmlOut.endElement(this.getXMLName());
@@ -404,7 +404,7 @@ public final class InvidDBField extends DBField implements invid_field {
    */
 
   public void emitInvidXML(XMLDumpContext xmlOut, Invid invid,
-			   boolean asEmbedded) throws IOException
+                           boolean asEmbedded) throws IOException
   {
     DBObject target = null;
     DBField targetField;
@@ -420,95 +420,95 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (target == null)
       {
-	throw new IllegalArgumentException(ts.l("emitInvidXML.bad_invid", this.toString(), invid));
+        throw new IllegalArgumentException(ts.l("emitInvidXML.bad_invid", this.toString(), invid));
       }
 
     if (asEmbedded)
       {
-	xmlOut.indentOut();
+        xmlOut.indentOut();
 
-	target.emitXML(xmlOut);
+        target.emitXML(xmlOut);
 
-	xmlOut.indentIn();
+        xmlOut.indentIn();
       }
     else
       {
-	xmlOut.startElement("invid");
-	xmlOut.attribute("type", XMLUtils.XMLEncode(target.getTypeName()));
-	xmlOut.attribute("id", target.getLabel()); // getLabel() gives us the XML-friendly label
+        xmlOut.startElement("invid");
+        xmlOut.attribute("type", XMLUtils.XMLEncode(target.getTypeName()));
+        xmlOut.attribute("id", target.getLabel()); // getLabel() gives us the XML-friendly label
 
-	if (xmlOut.isSyncing())
-	  {
-	    xmlOut.attribute("oid", invid.toString());
+        if (xmlOut.isSyncing())
+          {
+            xmlOut.attribute("oid", invid.toString());
 
-	    //
-	    // first get any extra Invid element attributes from the
-	    // object that we are writing out
-	    //
+            //
+            // first get any extra Invid element attributes from the
+            // object that we are writing out
+            //
 
-	    DBEditObject hook = getOwner().getBase().getObjectHook();
-	    String extras[] = hook.getForeignSyncKeys(invid, getOwner(),
-						      target, xmlOut.getSyncChannelName(),
-						      xmlOut.isBeforeStateDumping());
+            DBEditObject hook = getOwner().getBase().getObjectHook();
+            String extras[] = hook.getForeignSyncKeys(invid, getOwner(),
+                                                      target, xmlOut.getSyncChannelName(),
+                                                      xmlOut.isBeforeStateDumping());
 
-	    if (extras != null && extras.length > 0)
-	      {
-		if (extras.length % 2 != 0)
-		  {
-		    // "InvidDBField.emitInvidXML(): mismatched attribute/value pairs returned from getForeignSyncKeys() call on {0}"
-		    throw new RuntimeException(ts.l("emitInvidXML.bad_foreign_keys", getOwner().toString()));
-		  }
+            if (extras != null && extras.length > 0)
+              {
+                if (extras.length % 2 != 0)
+                  {
+                    // "InvidDBField.emitInvidXML(): mismatched attribute/value pairs returned from getForeignSyncKeys() call on {0}"
+                    throw new RuntimeException(ts.l("emitInvidXML.bad_foreign_keys", getOwner().toString()));
+                  }
 
-		for (int i = 0; i < extras.length; i = i + 2)
-		  {
-		    String name = extras[i];
-		    String value = extras[i+1];
+                for (int i = 0; i < extras.length; i = i + 2)
+                  {
+                    String name = extras[i];
+                    String value = extras[i+1];
 
-		    if (name.equals("id") || name.equals("num") || name.equals("type") || name.equals("oid"))
-		      {
-			// "InvidDBField.emitInvidXML(): improper use of a reserved attribute name in attribute/value pairs returned from getForeignSyncKeys call on {0}"
-			throw new RuntimeException(ts.l("emitInvidXML.bad_attribute_name", getOwner().toString()));
-		      }
+                    if (name.equals("id") || name.equals("num") || name.equals("type") || name.equals("oid"))
+                      {
+                        // "InvidDBField.emitInvidXML(): improper use of a reserved attribute name in attribute/value pairs returned from getForeignSyncKeys call on {0}"
+                        throw new RuntimeException(ts.l("emitInvidXML.bad_attribute_name", getOwner().toString()));
+                      }
 
-		    xmlOut.attribute(name, value);
-		  }
-	      }
+                    xmlOut.attribute(name, value);
+                  }
+              }
 
-	    //
-	    // now get any extra Invid element attributes from the
-	    // object that we are targeting
-	    //
+            //
+            // now get any extra Invid element attributes from the
+            // object that we are targeting
+            //
 
-	    hook = target.getBase().getObjectHook();
-	    extras = hook.getMyExtraInvidAttributes(target,
-						    xmlOut.getSyncChannelName(),
-						    xmlOut.isBeforeStateDumping());
+            hook = target.getBase().getObjectHook();
+            extras = hook.getMyExtraInvidAttributes(target,
+                                                    xmlOut.getSyncChannelName(),
+                                                    xmlOut.isBeforeStateDumping());
 
-	    if (extras != null && extras.length > 0)
-	      {
-		if (extras.length % 2 != 0)
-		  {
-		    // "InvidDBField.emitInvidXML(): mismatched attribute/value pairs returned from getForeignSyncKeys() call on {0}"
-		    throw new RuntimeException(ts.l("emitInvidXML.bad_foreign_keys", getOwner().toString()));
-		  }
+            if (extras != null && extras.length > 0)
+              {
+                if (extras.length % 2 != 0)
+                  {
+                    // "InvidDBField.emitInvidXML(): mismatched attribute/value pairs returned from getForeignSyncKeys() call on {0}"
+                    throw new RuntimeException(ts.l("emitInvidXML.bad_foreign_keys", getOwner().toString()));
+                  }
 
-		for (int i = 0; i < extras.length; i = i + 2)
-		  {
-		    String name = extras[i];
-		    String value = extras[i+1];
+                for (int i = 0; i < extras.length; i = i + 2)
+                  {
+                    String name = extras[i];
+                    String value = extras[i+1];
 
-		    if (name.equals("id") || name.equals("num") || name.equals("type") || name.equals("oid"))
-		      {
-			// "InvidDBField.emitInvidXML(): improper use of a reserved attribute name in attribute/value pairs returned from getForeignSyncKeys call on {0}"
-			throw new RuntimeException(ts.l("emitInvidXML.bad_attribute_name", getOwner().toString()));
-		      }
+                    if (name.equals("id") || name.equals("num") || name.equals("type") || name.equals("oid"))
+                      {
+                        // "InvidDBField.emitInvidXML(): improper use of a reserved attribute name in attribute/value pairs returned from getForeignSyncKeys call on {0}"
+                        throw new RuntimeException(ts.l("emitInvidXML.bad_attribute_name", getOwner().toString()));
+                      }
 
-		    xmlOut.attribute(name, value);
-		  }
-	      }
-	  }
+                    xmlOut.attribute(name, value);
+                  }
+              }
+          }
 
-	xmlOut.endElement("invid");
+        xmlOut.endElement("invid");
       }
   }
 
@@ -535,8 +535,8 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     if (isVector())
       {
-	// "scalar accessor called on vector field {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("value.type_mismatch", getName(), owner.getLabel()));
+        // "scalar accessor called on vector field {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("value.type_mismatch", getName(), owner.getLabel()));
       }
 
     return (Invid) value;
@@ -546,8 +546,8 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     if (!isVector())
       {
-	// "vector accessor called on scalar field {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("value.type_mismatch2", getName(), owner.getLabel()));
+        // "vector accessor called on scalar field {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("value.type_mismatch2", getName(), owner.getLabel()));
       }
 
     return (Invid) getVectVal().elementAt(index);
@@ -583,59 +583,59 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (gsession == null)
       {
-	gsession = Ganymede.internalSession;
+        gsession = Ganymede.internalSession;
       }
 
     // now do the work
 
     if (!isVector())
       {
-	if (value == null)
-	  {
-	    return "null";
-	  }
+        if (value == null)
+          {
+            return "null";
+          }
 
-	Invid localInvid = (Invid) this.value();
+        Invid localInvid = (Invid) this.value();
 
-	// XXX note: we don't use our owner's lookupLabel() method
-	// for scalar invid values..
+        // XXX note: we don't use our owner's lookupLabel() method
+        // for scalar invid values..
 
-	return getRemoteLabel(gsession, localInvid, false);
+        return getRemoteLabel(gsession, localInvid, false);
       }
     else
       {
-	int size = size();
+        int size = size();
 
-	if (size == 0)
-	  {
-	    return "";
-	  }
+        if (size == 0)
+          {
+            return "";
+          }
 
-	String entries[] = new String[size];
-	Invid tmp;
+        String entries[] = new String[size];
+        Invid tmp;
 
-	for (int i = 0; i < size; i++)
-	  {
-	    tmp = this.value(i);
+        for (int i = 0; i < size; i++)
+          {
+            tmp = this.value(i);
 
-	    entries[i] = getRemoteLabel(gsession, tmp, false);
-	  }
+            entries[i] = getRemoteLabel(gsession, tmp, false);
+          }
 
-	java.util.Arrays.sort(entries, null);
+        java.util.Arrays.sort(entries, null);
 
-	StringBuilder result = new StringBuilder();
+        StringBuilder result = new StringBuilder();
 
-	for (int i = 0; i < entries.length; i++)
-	  {
-	    if (i > 0)
-	      {
-		result.append(",");
-	      }
+        for (int i = 0; i < entries.length; i++)
+          {
+            if (i > 0)
+              {
+                result.append(",");
+              }
 
-	    result.append(entries[i]);
-	  }
+            result.append(entries[i]);
+          }
 
-	return result.toString();
+        return result.toString();
       }
   }
 
@@ -658,56 +658,56 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     if (gsession != null)
       {
-	/*
-	 * okay.. if we are finding the name of the referenced field in
-	 * the DBEditSet logging context, our reference might have already
-	 * had its fields cleared out.. we want to be able to get access
-	 * to the label it had for the purpose of logging this transaction..
-	 *
-	 * the DBEditSet commit() logic uses DBEditObject.diff(), which
-	 * will call us to get the original value of a invid field (perhaps
-	 * before the current version of this field was cleared.. we need
-	 * to also be able to present the name of the remote object before
-	 * it was cleared..
-	 */
+        /*
+         * okay.. if we are finding the name of the referenced field in
+         * the DBEditSet logging context, our reference might have already
+         * had its fields cleared out.. we want to be able to get access
+         * to the label it had for the purpose of logging this transaction..
+         *
+         * the DBEditSet commit() logic uses DBEditObject.diff(), which
+         * will call us to get the original value of a invid field (perhaps
+         * before the current version of this field was cleared.. we need
+         * to also be able to present the name of the remote object before
+         * it was cleared..
+         */
 
-	DBObject objectRef = gsession.getDBSession().viewDBObject(invid);
+        DBObject objectRef = gsession.getDBSession().viewDBObject(invid);
 
-	if (objectRef != null && (objectRef instanceof DBEditObject))
-	  {
-	    DBEditObject eObjectRef = (DBEditObject) objectRef;
+        if (objectRef != null && (objectRef instanceof DBEditObject))
+          {
+            DBEditObject eObjectRef = (DBEditObject) objectRef;
 
-	    if (forceOriginal || eObjectRef.getStatus() == ObjectStatus.DELETING)
-	      {
-		objectRef = eObjectRef.getOriginal();
-	      }
-	  }
+            if (forceOriginal || eObjectRef.getStatus() == ObjectStatus.DELETING)
+              {
+                objectRef = eObjectRef.getOriginal();
+              }
+          }
 
-	if (objectRef == null)
-	  {
-	    // "*** no target for invid {0} ***"
-	    return ts.l("getRemoteLabel.nonesuch", invid.toString());
-	  }
+        if (objectRef == null)
+          {
+            // "*** no target for invid {0} ***"
+            return ts.l("getRemoteLabel.nonesuch", invid.toString());
+          }
 
-	if (objectRef.isEmbedded())
-	  {
-	    return objectRef.getEmbeddedObjectDisplayLabel();
-	  }
-	else
-	  {
-	    return objectRef.getLabel();
-	  }
+        if (objectRef.isEmbedded())
+          {
+            return objectRef.getEmbeddedObjectDisplayLabel();
+          }
+        else
+          {
+            return objectRef.getLabel();
+          }
       }
     else
       {
-	if (!isVector())
-	  {
-	    return this.value().toString();
-	  }
-	else
-	  {
-	    return VectorUtils.vectorString(this.getVectVal());
-	  }
+        if (!isVector())
+          {
+            return this.value().toString();
+          }
+        else
+          {
+            return VectorUtils.vectorString(this.getVectVal());
+          }
       }
   }
 
@@ -745,13 +745,13 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!(orig instanceof InvidDBField))
       {
-	// "Bad field comparison {0}"
-	throw new IllegalArgumentException(ts.l("getDiffString.badtype", getName()));
+        // "Bad field comparison {0}"
+        throw new IllegalArgumentException(ts.l("getDiffString.badtype", getName()));
       }
 
     if (orig == this)
       {
-	return "";
+        return "";
       }
 
     origI = (InvidDBField) orig;
@@ -760,147 +760,147 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (gsession == null)
       {
-	gsession = Ganymede.internalSession;
+        gsession = Ganymede.internalSession;
       }
 
     if (isVector())
       {
-	Vector
-	  added = new Vector(),
-	  deleted = new Vector();
+        Vector
+          added = new Vector(),
+          deleted = new Vector();
 
-	Enumeration en;
+        Enumeration en;
 
-	Object
-	  element = null;
+        Object
+          element = null;
 
-	Invid
-	  elementA = null;
+        Invid
+          elementA = null;
 
-	boolean found = false;
+        boolean found = false;
 
-	Vector values = getVectVal();
-	Vector origValues = origI.getVectVal();
+        Vector values = getVectVal();
+        Vector origValues = origI.getVectVal();
 
-	/* -- */
+        /* -- */
 
-	// find elements in the orig field that aren't in our present field
+        // find elements in the orig field that aren't in our present field
 
-	Hashtable currentElements = new Hashtable();
+        Hashtable currentElements = new Hashtable();
 
-	for (int i = 0; !found && i < values.size(); i++)
-	  {
-	    if (debug)
-	      {
-		System.err.print(",");
-	      }
+        for (int i = 0; !found && i < values.size(); i++)
+          {
+            if (debug)
+              {
+                System.err.print(",");
+              }
 
-	    element = values.elementAt(i);
+            element = values.elementAt(i);
 
-	    currentElements.put(element, element);
-	  }
+            currentElements.put(element, element);
+          }
 
-	en = origValues.elements();
+        en = origValues.elements();
 
-	while (en.hasMoreElements())
-	  {
-	    element = en.nextElement();
+        while (en.hasMoreElements())
+          {
+            element = en.nextElement();
 
-	    if (currentElements.get(element) == null)
-	      {
-		deleted.addElement(element);
-	      }
-	  }
+            if (currentElements.get(element) == null)
+              {
+                deleted.addElement(element);
+              }
+          }
 
-	// find elements in our present field that aren't in the orig field
+        // find elements in our present field that aren't in the orig field
 
-	Hashtable origElements = new Hashtable();
+        Hashtable origElements = new Hashtable();
 
-	for (int i = 0; !found && i < origValues.size(); i++)
-	  {
-	    element = origValues.elementAt(i);
+        for (int i = 0; !found && i < origValues.size(); i++)
+          {
+            element = origValues.elementAt(i);
 
-	    origElements.put(element, element);
-	  }
+            origElements.put(element, element);
+          }
 
-	en = values.elements();
+        en = values.elements();
 
-	while (en.hasMoreElements())
-	  {
-	    element = en.nextElement();
+        while (en.hasMoreElements())
+          {
+            element = en.nextElement();
 
-	    if (origElements.get(element) == null)
-	      {
-		added.addElement(element);
-	      }
-	  }
+            if (origElements.get(element) == null)
+              {
+                added.addElement(element);
+              }
+          }
 
-	// were there any changes at all?
+        // were there any changes at all?
 
-	if (deleted.size() == 0 && added.size() == 0)
-	  {
-	    return null;
-	  }
-	else
-	  {
-	    if (deleted.size() != 0)
-	      {
-		StringBuilder deleteString = new StringBuilder();
+        if (deleted.size() == 0 && added.size() == 0)
+          {
+            return null;
+          }
+        else
+          {
+            if (deleted.size() != 0)
+              {
+                StringBuilder deleteString = new StringBuilder();
 
-		for (int i = 0; i < deleted.size(); i++)
-		  {
-		    elementA = (Invid) deleted.elementAt(i);
+                for (int i = 0; i < deleted.size(); i++)
+                  {
+                    elementA = (Invid) deleted.elementAt(i);
 
-		    if (i > 0)
-		      {
-			deleteString.append(", ");
-		      }
+                    if (i > 0)
+                      {
+                        deleteString.append(", ");
+                      }
 
-		    deleteString.append(getRemoteLabel(gsession, elementA, true)); // get original if edited
-		  }
+                    deleteString.append(getRemoteLabel(gsession, elementA, true)); // get original if edited
+                  }
 
-		// "\tDeleted: {0}\n"
-		result.append(ts.l("getDiffString.deleted_items", deleteString.toString()));
-	      }
+                // "\tDeleted: {0}\n"
+                result.append(ts.l("getDiffString.deleted_items", deleteString.toString()));
+              }
 
-	    if (added.size() != 0)
-	      {
-		StringBuilder addString = new StringBuilder();
+            if (added.size() != 0)
+              {
+                StringBuilder addString = new StringBuilder();
 
-		for (int i = 0; i < added.size(); i++)
-		  {
-		    elementA = (Invid) added.elementAt(i);
+                for (int i = 0; i < added.size(); i++)
+                  {
+                    elementA = (Invid) added.elementAt(i);
 
-		    if (i > 0)
-		      {
-			addString.append(", ");
-		      }
+                    if (i > 0)
+                      {
+                        addString.append(", ");
+                      }
 
-		    addString.append(getRemoteLabel(gsession, elementA, false));
-		  }
+                    addString.append(getRemoteLabel(gsession, elementA, false));
+                  }
 
-		// "\tAdded: {0}\n"
-		result.append(ts.l("getDiffString.added_items", addString.toString()));
-	      }
+                // "\tAdded: {0}\n"
+                result.append(ts.l("getDiffString.added_items", addString.toString()));
+              }
 
-	    return result.toString();
-	  }
+            return result.toString();
+          }
       }
     else
       {
-	if (origI.value().equals(this.value()))
-	  {
-	    return null;
-	  }
-	else
-	  {
-	    // "\tOld: {0}\n\tNew:{1}\n"
-	    result.append(ts.l("getDiffString.scalar",
-			       getRemoteLabel(gsession, origI.value(), true),
-			       getRemoteLabel(gsession, this.value(), false)));
+        if (origI.value().equals(this.value()))
+          {
+            return null;
+          }
+        else
+          {
+            // "\tOld: {0}\n\tNew:{1}\n"
+            result.append(ts.l("getDiffString.scalar",
+                               getRemoteLabel(gsession, origI.value(), true),
+                               getRemoteLabel(gsession, this.value(), false)));
 
-	    return result.toString();
-	  }
+            return result.toString();
+          }
       }
   }
 
@@ -938,7 +938,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!getFieldDef().isSymmetric())
       {
-	return null;
+        return null;
       }
 
     myParent = (DBEditObject) this.owner;
@@ -950,47 +950,47 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (remobj == null)
       {
-	return null;		// failure that bind will catch
+        return null;            // failure that bind will catch
       }
 
     try
       {
-	remoteField = (InvidDBField) remobj.getField(targetField);
+        remoteField = (InvidDBField) remobj.getField(targetField);
       }
     catch (ClassCastException ex)
       {
-	return null;
+        return null;
       }
 
     if (remoteField == null)
       {
-	// the target is either non-edited and doesn't contain the
-	// field in question, or it's been checked out for editing and
-	// the field in question just isn't defined.  it's either not
-	// a problem because there's no conflicting bind, or the
-	// schema is screwed up.  Not for us to worry about either way.
+        // the target is either non-edited and doesn't contain the
+        // field in question, or it's been checked out for editing and
+        // the field in question just isn't defined.  it's either not
+        // a problem because there's no conflicting bind, or the
+        // schema is screwed up.  Not for us to worry about either way.
 
-	return null;
+        return null;
       }
 
     if (!remoteField.isVector() && remoteField.isDefined())
       {
-	Invid myInvid = (Invid) remoteField.getValueLocal();
+        Invid myInvid = (Invid) remoteField.getValueLocal();
 
-	if (myInvid.equals(myParent.getInvid()))
-	  {
-	    return null;	// rebinding self.. bind() will catch this
-	  }
+        if (myInvid.equals(myParent.getInvid()))
+          {
+            return null;        // rebinding self.. bind() will catch this
+          }
 
-	// this is the case we care about
+        // this is the case we care about
 
-	// "Link Error"
-	// "Your operation could not be performed.  The target object {0} can only be linked to one {1} at a time."
+        // "Link Error"
+        // "Your operation could not be performed.  The target object {0} can only be linked to one {1} at a time."
 
-	return Ganymede.createErrorDialog(ts.l("checkBindConflict.subj"),
-					  ts.l("checkBindConflict.overlink",
-					       remobj.getLabel(),
-					       this.getOwner().getTypeName()));
+        return Ganymede.createErrorDialog(ts.l("checkBindConflict.subj"),
+                                          ts.l("checkBindConflict.overlink",
+                                               remobj.getLabel(),
+                                               this.getOwner().getTypeName()));
       }
 
     return null;
@@ -1062,19 +1062,19 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (newRemote == null)
       {
-	// "Null newRemote {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("bind.noremote", getName(), owner.getLabel()));
+        // "Null newRemote {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("bind.noremote", getName(), owner.getLabel()));
       }
 
     if (!isEditable(local))
       {
-	// "Not an editable invid field: {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("bind.noteditable", getName(), owner.getLabel()));
+        // "Not an editable invid field: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("bind.noteditable", getName(), owner.getLabel()));
       }
 
     if (debug)
       {
-	System.err.println("InvidDBField.bind(" + oldRemote + ", " + newRemote + ", " + local + ")");
+        System.err.println("InvidDBField.bind(" + oldRemote + ", " + newRemote + ", " + local + ")");
       }
 
     eObj = (DBEditObject) this.owner;
@@ -1082,17 +1082,17 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (newRemote.equals(oldRemote))
       {
-	return null;		// success
+        return null;            // success
       }
 
     if (!getFieldDef().isSymmetric())
       {
-	if (oldRemote != null)
-	  {
-	    unlinkTarget(oldRemote);
-	  }
+        if (oldRemote != null)
+          {
+            unlinkTarget(oldRemote);
+          }
 
-	Ganymede.db.aSymLinkTracker.linkObject(getDBSession(), newRemote, getOwner().getInvid());
+        Ganymede.db.aSymLinkTracker.linkObject(getDBSession(), newRemote, getOwner().getInvid());
       }
 
     // If we're the container field in an embedded object, we're
@@ -1107,29 +1107,29 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!getFieldDef().isSymmetric())
       {
-	// We need to make sure that we're not trying to link to an
-	// object that is in the middle of being deleted, so we check
-	// that here.  If deleteLockObject() returns true, the system
-	// will prevent the target object from being deleted until our
-	// transaction has cleared.
+        // We need to make sure that we're not trying to link to an
+        // object that is in the middle of being deleted, so we check
+        // that here.  If deleteLockObject() returns true, the system
+        // will prevent the target object from being deleted until our
+        // transaction has cleared.
 
-	// We don't have to worry about oldRemote (if it is indeed not
-	// null), as the DBEditSet marked it as non-deletable when we
-	// added the owner of this field to the transaction.  This is
-	// done in DBEditSet.addObject().  We don't want to clear the
-	// delete lock our transaction has on it, because we have to
-	// be able to revert the link to oldRemote if the transaction
-	// is cancelled.
+        // We don't have to worry about oldRemote (if it is indeed not
+        // null), as the DBEditSet marked it as non-deletable when we
+        // added the owner of this field to the transaction.  This is
+        // done in DBEditSet.addObject().  We don't want to clear the
+        // delete lock our transaction has on it, because we have to
+        // be able to revert the link to oldRemote if the transaction
+        // is cancelled.
 
-	if (!DBDeletionManager.deleteLockObject(session.viewDBObject(newRemote), session))
-	  {
-	    // "Bind link error"
-	    // "Can't forge an asymmetric link between {0} and invid {1}, the target object is being deleted."
-	    return Ganymede.createErrorDialog(ts.l("bind.deletedremote_sub"),
-					      ts.l("bind.deletedremote_text", this.getName(), newRemote.toString()));
-	  }
+        if (!DBDeletionManager.deleteLockObject(session.viewDBObject(newRemote), session))
+          {
+            // "Bind link error"
+            // "Can't forge an asymmetric link between {0} and invid {1}, the target object is being deleted."
+            return Ganymede.createErrorDialog(ts.l("bind.deletedremote_sub"),
+                                              ts.l("bind.deletedremote_text", this.getName(), newRemote.toString()));
+          }
 
-	return null;
+        return null;
       }
 
     // we're symmetric, so find out what field in remote we need to
@@ -1494,25 +1494,25 @@ public final class InvidDBField extends DBField implements invid_field {
       {
         retVal = oldRefField.dissolve(owner.getInvid(), (anonymous||local));
 
- 	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    return retVal;
-	  }
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            return retVal;
+          }
       }
 
     retVal = ReturnVal.merge(retVal, newRefField.establish(owner, (anonymous2||local)));
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	// oops!  try to undo what we did.. this probably isn't critical
-	// because something above us will do a rollback, but it's polite.
+        // oops!  try to undo what we did.. this probably isn't critical
+        // because something above us will do a rollback, but it's polite.
 
-	if (oldRefField != null)
-	  {
-	    oldRefField.establish(owner, (anonymous||local)); // hope this works
-	  }
+        if (oldRefField != null)
+          {
+            oldRefField.establish(owner, (anonymous||local)); // hope this works
+          }
 
-	return retVal;
+        return retVal;
       }
 
     // tell the client that it needs to rescan both the old and new
@@ -1522,12 +1522,12 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (oldRemote != null)
       {
-	retVal.addRescanField(oldRemote, targetField);
+        retVal.addRescanField(oldRemote, targetField);
       }
 
     retVal.addRescanField(newRemote, targetField);
 
-    return retVal;		// success
+    return retVal;              // success
   }
 
   /**
@@ -1575,20 +1575,20 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (remote == null)
       {
-	return null;
+        return null;
 
-	// throw new IllegalArgumentException("null remote: " + getName() + " in object " + owner.getLabel());
+        // throw new IllegalArgumentException("null remote: " + getName() + " in object " + owner.getLabel());
       }
 
     if (!isEditable(local))
       {
-	// "Not an editable invid field: {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("unbind.noteditable", getName(), owner.getLabel()));
+        // "Not an editable invid field: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("unbind.noteditable", getName(), owner.getLabel()));
       }
 
     if (debug)
       {
-	System.err.println("InvidDBField[" + toString() + "].unbind(" + remote + ", " + local + ")");
+        System.err.println("InvidDBField[" + toString() + "].unbind(" + remote + ", " + local + ")");
       }
 
     eObj = (DBEditObject) this.owner;
@@ -1596,9 +1596,9 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!getFieldDef().isSymmetric())
       {
-	unlinkTarget(remote);
+        unlinkTarget(remote);
 
-	return null;
+        return null;
       }
 
     // find out what field in remote we might need to update
@@ -1619,166 +1619,166 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (remobj == null)
       {
-	// "InvidDBField.unbind(): Couldn't find old reference"
-	// "Your operation could not succeed because field {0} was linked to a remote reference {1} that could not be found
-	// for unlinking.\n\nThis is a serious logic error in the server."
-	return Ganymede.createErrorDialog(ts.l("unbind.no_oldref"),
-					  ts.l("bind.no_oldref_text",  getName(), remote.toString()));
+        // "InvidDBField.unbind(): Couldn't find old reference"
+        // "Your operation could not succeed because field {0} was linked to a remote reference {1} that could not be found
+        // for unlinking.\n\nThis is a serious logic error in the server."
+        return Ganymede.createErrorDialog(ts.l("unbind.no_oldref"),
+                                          ts.l("bind.no_oldref_text",  getName(), remote.toString()));
       }
 
     // see if we are allowed to unlink the remote object without
     // having permission to edit it generally.
 
     anonymous = session.getObjectHook(remote).anonymousUnlinkOK(remobj,
-								targetField,
-								this.getOwner(),
-								this.getID(),
-								getGSession());
+                                                                targetField,
+                                                                this.getOwner(),
+                                                                this.getID(),
+                                                                getGSession());
 
     // if we're already editing it, just go with that.
 
     if (remobj instanceof DBEditObject)
       {
-	oldRef = (DBEditObject) remobj;
+        oldRef = (DBEditObject) remobj;
       }
     else
       {
-	if (anonymous || getGSession().getPermManager().getPerm(remobj).isEditable())
-	  {
-	    oldRef = (DBEditObject) session.editDBObject(remote);
+        if (anonymous || getGSession().getPermManager().getPerm(remobj).isEditable())
+          {
+            oldRef = (DBEditObject) session.editDBObject(remote);
 
-	    // if we couldn't checkout the old object for editing, despite
-	    // having permissions, we need to see why.
+            // if we couldn't checkout the old object for editing, despite
+            // having permissions, we need to see why.
 
-	    if (oldRef == null)
-	      {
-		// this check is not truly thread safe, as the
-		// shadowObject might be cleared by another thread while
-		// we're working..  this isn't a grave risk, but we'll
-		// wrap all of this in a NullPointerException catch just
-		// in case.  this check is just for informative purposes,
-		// so we don't mind throwing a null pointer exception in
-		// here, it's not worth doing all of the careful sync work
-		// to lock down this stuff without risk of deadlock
+            if (oldRef == null)
+              {
+                // this check is not truly thread safe, as the
+                // shadowObject might be cleared by another thread while
+                // we're working..  this isn't a grave risk, but we'll
+                // wrap all of this in a NullPointerException catch just
+                // in case.  this check is just for informative purposes,
+                // so we don't mind throwing a null pointer exception in
+                // here, it's not worth doing all of the careful sync work
+                // to lock down this stuff without risk of deadlock
 
-		try
-		  {
-		    String edit_username, edit_hostname;
-		    DBEditObject editing = remobj.shadowObject;
+                try
+                  {
+                    String edit_username, edit_hostname;
+                    DBEditObject editing = remobj.shadowObject;
 
-		    edit_username = editing.gSession.getPermManager().getBaseIdentity();
-		    edit_hostname = editing.gSession.getClientHostName();
+                    edit_username = editing.gSession.getPermManager().getBaseIdentity();
+                    edit_hostname = editing.gSession.getClientHostName();
 
-		    // "InvidDBField.unbind(): Couldn''t unlink from old reference"
-		    // "Field {0} could not be unlinked from the {1} {2} object, which is busy being edited by {3} on system {4}."
-		    return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
-						      ts.l("bind.busy_old",
-							   this.getName(),
-							   remobj.getLabel(),
-							   remobj.getTypeName(),
-							   edit_username,
-							   edit_hostname));
-		  }
-		catch (NullPointerException ex)
-		  {
-		    // "InvidDBField.unbind(): Couldn''t unlink from old reference"
-		    // "Field {0} could not be unlinked from the {1} {2} object.
-		    // This is probably a temporary condition due to other user activity on the Ganymede server."
-		    return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
-						      ts.l("bind.busy_old_temp",
-							   this.getName(),
-							   remobj.getLabel(),
-							   remobj.getTypeName()));
-		  }
-	      }
-	  }
-	else
-	  {
-	    // it's there, but we don't have permission to unlink it
+                    // "InvidDBField.unbind(): Couldn''t unlink from old reference"
+                    // "Field {0} could not be unlinked from the {1} {2} object, which is busy being edited by {3} on system {4}."
+                    return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
+                                                      ts.l("bind.busy_old",
+                                                           this.getName(),
+                                                           remobj.getLabel(),
+                                                           remobj.getTypeName(),
+                                                           edit_username,
+                                                           edit_hostname));
+                  }
+                catch (NullPointerException ex)
+                  {
+                    // "InvidDBField.unbind(): Couldn''t unlink from old reference"
+                    // "Field {0} could not be unlinked from the {1} {2} object.
+                    // This is probably a temporary condition due to other user activity on the Ganymede server."
+                    return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
+                                                      ts.l("bind.busy_old_temp",
+                                                           this.getName(),
+                                                           remobj.getLabel(),
+                                                           remobj.getTypeName()));
+                  }
+              }
+          }
+        else
+          {
+            // it's there, but we don't have permission to unlink it
 
-	    // "InvidDBField.unbind(): Couldn''t unlink from old reference"
-	    // "We couldn''t unlink field {0} in object {1} from field {2} in object {3} due to a permissions problem."
-	    return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
-					      ts.l("unbind.perm_fail",
-						   getName(),
-						   getOwner().getLabel(),
-						   remobj.getFieldName(targetField),
-						   getRemoteLabel(getGSession(), remote, false)));
-	  }
+            // "InvidDBField.unbind(): Couldn''t unlink from old reference"
+            // "We couldn''t unlink field {0} in object {1} from field {2} in object {3} due to a permissions problem."
+            return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
+                                              ts.l("unbind.perm_fail",
+                                                   getName(),
+                                                   getOwner().getLabel(),
+                                                   remobj.getFieldName(targetField),
+                                                   getRemoteLabel(getGSession(), remote, false)));
+          }
       }
 
     try
       {
-	oldRefField = (InvidDBField) oldRef.getField(targetField);
+        oldRefField = (InvidDBField) oldRef.getField(targetField);
       }
     catch (ClassCastException ex)
       {
-	// "InvidDBField.unbind(): Couldn''t unlink from old reference"
-	// "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
-	return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
-					  ts.l("bind.schema_error",
-					       oldRef.getFieldName(targetField),
-					       oldRef.getLabel()));
+        // "InvidDBField.unbind(): Couldn''t unlink from old reference"
+        // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
+        return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
+                                          ts.l("bind.schema_error",
+                                               oldRef.getFieldName(targetField),
+                                               oldRef.getLabel()));
       }
 
     if (oldRefField == null)
       {
-	// editDBObject() will create undefined fields for all
-	// fields defined in the DBObjectBase as long as the user
-	// had permission to create those fields, so if we got a
-	// null result we either have a schema corruption problem
-	// or a permission to create field problem
+        // editDBObject() will create undefined fields for all
+        // fields defined in the DBObjectBase as long as the user
+        // had permission to create those fields, so if we got a
+        // null result we either have a schema corruption problem
+        // or a permission to create field problem
 
-	DBObjectBaseField fieldDef = oldRef.getFieldDef(targetField);
+        DBObjectBaseField fieldDef = oldRef.getFieldDef(targetField);
 
-	if (fieldDef == null)
-	  {
-	    // "InvidDBField.unbind(): Couldn''t unlink from old reference"
-	    // "Your operation could not succeed due to a possible inconsistency in the server database.  Target field number {0} in object {1} does not exist."
-	    return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
-					      ts.l("bind.inconsistency",
-						   Integer.toString(targetField),
-						   oldRef.getLabel()));
-	  }
-	else
-	  {
-	    // "InvidDBField.unbind(): Couldn''t unlink from old reference"
-	    // "Your operation could not succeed due to a possible inconsistency in the server database.  Target field {0} is undefined in object {1}."
-	    return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
-					      ts.l("bind.inconsistency",
-						   fieldDef.getName(),
-						   oldRef.getLabel()));
-	  }
+        if (fieldDef == null)
+          {
+            // "InvidDBField.unbind(): Couldn''t unlink from old reference"
+            // "Your operation could not succeed due to a possible inconsistency in the server database.  Target field number {0} in object {1} does not exist."
+            return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
+                                              ts.l("bind.inconsistency",
+                                                   Integer.toString(targetField),
+                                                   oldRef.getLabel()));
+          }
+        else
+          {
+            // "InvidDBField.unbind(): Couldn''t unlink from old reference"
+            // "Your operation could not succeed due to a possible inconsistency in the server database.  Target field {0} is undefined in object {1}."
+            return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
+                                              ts.l("bind.inconsistency",
+                                                   fieldDef.getName(),
+                                                   oldRef.getLabel()));
+          }
       }
 
     try
       {
-	// note that we only want to remove one instance of the invid
-	// pointing back to us.. we may have multiple fields on
-	// this object pointing to the remote, and we want to only
-	// clear one back pointer at a time.
+        // note that we only want to remove one instance of the invid
+        // pointing back to us.. we may have multiple fields on
+        // this object pointing to the remote, and we want to only
+        // clear one back pointer at a time.
 
-	retVal = oldRefField.dissolve(owner.getInvid(), anonymous||local);
+        retVal = oldRefField.dissolve(owner.getInvid(), anonymous||local);
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    return retVal;
-	  }
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            return retVal;
+          }
       }
     catch (IllegalArgumentException ex)
       {
-	System.err.println("hm, couldn't dissolve a reference in " + getName());
+        System.err.println("hm, couldn't dissolve a reference in " + getName());
 
-	if (anonymous)
-	  {
-	    System.err.println("Did do an anonymous edit on target");
-	  }
-	else
-	  {
-	    System.err.println("Didn't do an anonymous edit on target");
-	  }
+        if (anonymous)
+          {
+            System.err.println("Did do an anonymous edit on target");
+          }
+        else
+          {
+            System.err.println("Didn't do an anonymous edit on target");
+          }
 
-	throw (IllegalArgumentException) ex;
+        throw (IllegalArgumentException) ex;
       }
 
 
@@ -1789,7 +1789,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     newRetVal.unionRescan(retVal);
 
-    return newRetVal;		// success
+    return newRetVal;           // success
   }
 
   /**
@@ -1831,99 +1831,99 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (isVector())
       {
-	Vector values = getVectVal();
+        Vector values = getVectVal();
 
-	for (int i = 0; i < values.size(); i++)
-	  {
-	    tmp = (Invid) values.elementAt(i);
+        for (int i = 0; i < values.size(); i++)
+          {
+            tmp = (Invid) values.elementAt(i);
 
-	    if (!tmp.equals(oldInvid))
-	      {
-		continue;
-	      }
+            if (!tmp.equals(oldInvid))
+              {
+                continue;
+              }
 
-	    ReturnVal retVal = eObj.finalizeDeleteElement(this, i);
+            ReturnVal retVal = eObj.finalizeDeleteElement(this, i);
 
-	    if (ReturnVal.didSucceed(retVal))
-	      {
-		// we got the okay, so we are going to take out this
-		// element and return.  note that if we didn't return
-		// here, we might get confused on our values loop.
+            if (ReturnVal.didSucceed(retVal))
+              {
+                // we got the okay, so we are going to take out this
+                // element and return.  note that if we didn't return
+                // here, we might get confused on our values loop.
 
-		values.removeElementAt(i);
-		qr = null;
+                values.removeElementAt(i);
+                qr = null;
 
-		return retVal;
-	      }
-	    else
-	      {
-		if (retVal.getDialog() != null)
-		  {
-		    // "InvidDBField.dissolve(): couldn''t finalizeDeleteElement"
-		    // "The custom plug-in class for object {0} refused to allow us to clear out all the references in field {1}:\n\n{2}"
-		    return Ganymede.createErrorDialog(ts.l("dissolve.no_finalize_vect"),
-						      ts.l("dissolve.refused_vect",
-							   eObj.getLabel(),
-							   getName(),
-							   retVal.getDialog().getText()));
-		  }
-		else
-		  {
-		    // "InvidDBField.dissolve(): couldn''t finalizeDeleteElement"
-		    // "The custom plug-in class for object {0} refused to allow us to clear out all the references in field {1}"
-		    return Ganymede.createErrorDialog(ts.l("dissolve.no_finalize_vect"),
-						      ts.l("dissolve.refused_vect_notext",
-							   eObj.getLabel(),
-							   getName()));
-		  }
-	      }
-	  }
+                return retVal;
+              }
+            else
+              {
+                if (retVal.getDialog() != null)
+                  {
+                    // "InvidDBField.dissolve(): couldn''t finalizeDeleteElement"
+                    // "The custom plug-in class for object {0} refused to allow us to clear out all the references in field {1}:\n\n{2}"
+                    return Ganymede.createErrorDialog(ts.l("dissolve.no_finalize_vect"),
+                                                      ts.l("dissolve.refused_vect",
+                                                           eObj.getLabel(),
+                                                           getName(),
+                                                           retVal.getDialog().getText()));
+                  }
+                else
+                  {
+                    // "InvidDBField.dissolve(): couldn''t finalizeDeleteElement"
+                    // "The custom plug-in class for object {0} refused to allow us to clear out all the references in field {1}"
+                    return Ganymede.createErrorDialog(ts.l("dissolve.no_finalize_vect"),
+                                                      ts.l("dissolve.refused_vect_notext",
+                                                           eObj.getLabel(),
+                                                           getName()));
+                  }
+              }
+          }
 
-	// "Warning: dissolve for {0}:{1} called with an unbound invid {2}"
-	Ganymede.debug(ts.l("dissolve.unbound_vector",
-			    owner.getLabel(),
-			    getName(),
-			    oldInvid.toString()));
+        // "Warning: dissolve for {0}:{1} called with an unbound invid {2}"
+        Ganymede.debug(ts.l("dissolve.unbound_vector",
+                            owner.getLabel(),
+                            getName(),
+                            oldInvid.toString()));
 
-	return null;	// we're already dissolved, effectively
+        return null;    // we're already dissolved, effectively
       }
     else
       {
-	tmp = (Invid) value;
+        tmp = (Invid) value;
 
-	if (!tmp.equals(oldInvid))
-	  {
-	    // Warning: dissolve for {0}:{1} called with an unbound invid {2}, current value = {3}
-	    throw new RuntimeException(ts.l("dissolve.unbound_scalar",
-					    owner.getLabel(), getName(), oldInvid, tmp));
-	  }
+        if (!tmp.equals(oldInvid))
+          {
+            // Warning: dissolve for {0}:{1} called with an unbound invid {2}, current value = {3}
+            throw new RuntimeException(ts.l("dissolve.unbound_scalar",
+                                            owner.getLabel(), getName(), oldInvid, tmp));
+          }
 
-	ReturnVal retVal = eObj.finalizeSetValue(this, null);
+        ReturnVal retVal = eObj.finalizeSetValue(this, null);
 
-	if (ReturnVal.didSucceed(retVal))
-	  {
-	    value = null;
-	    qr = null;
+        if (ReturnVal.didSucceed(retVal))
+          {
+            value = null;
+            qr = null;
 
-	    return retVal;
-	  }
-	else
-	  {
-	    if (retVal.getDialog() != null)
-	      {
-		// "InvidDBField.dissolve(): couldn''t finalizeSetValue"
-		// "The custom plug-in class for object {0} refused to allow us to clear out the reference in field {1}:\n\n{2}"
-		return Ganymede.createErrorDialog(ts.l("dissolve.no_finalize_scalar"),
-						  ts.l("dissolve.refused_scalar", eObj.getLabel(), getName(), retVal.getDialog().getText()));
-	      }
-	    else
-	      {
-		// "InvidDBField.dissolve(): couldn''t finalizeSetValue"
-		// "The custom plug-in class for object {0} refused to allow us to clear out the reference in field {1}"
-		return Ganymede.createErrorDialog(ts.l("dissolve.no_finalize_scalar"),
-						  ts.l("dissolve.refused_scalar_notext", eObj.getLabel(), getName()));
-	      }
-	  }
+            return retVal;
+          }
+        else
+          {
+            if (retVal.getDialog() != null)
+              {
+                // "InvidDBField.dissolve(): couldn''t finalizeSetValue"
+                // "The custom plug-in class for object {0} refused to allow us to clear out the reference in field {1}:\n\n{2}"
+                return Ganymede.createErrorDialog(ts.l("dissolve.no_finalize_scalar"),
+                                                  ts.l("dissolve.refused_scalar", eObj.getLabel(), getName(), retVal.getDialog().getText()));
+              }
+            else
+              {
+                // "InvidDBField.dissolve(): couldn''t finalizeSetValue"
+                // "The custom plug-in class for object {0} refused to allow us to clear out the reference in field {1}"
+                return Ganymede.createErrorDialog(ts.l("dissolve.no_finalize_scalar"),
+                                                  ts.l("dissolve.refused_scalar_notext", eObj.getLabel(), getName()));
+              }
+          }
       }
   }
 
@@ -1971,140 +1971,140 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (eObj.getStatus() == ObjectStatus.DELETING || eObj.getStatus() == ObjectStatus.DROPPING)
       {
-	// "InvidDBField.establish(): can''t link to deleted object"
-	// "Couldn''t establish a new linkage in field {0} because object {1} has been deleted."
-	return Ganymede.createErrorDialog(ts.l("establish.deletion_sub"),
-					  ts.l("establish.deletion_text", this.getName(), getOwner().getLabel()));
+        // "InvidDBField.establish(): can''t link to deleted object"
+        // "Couldn''t establish a new linkage in field {0} because object {1} has been deleted."
+        return Ganymede.createErrorDialog(ts.l("establish.deletion_sub"),
+                                          ts.l("establish.deletion_text", this.getName(), getOwner().getLabel()));
       }
 
     if (isVector())
       {
-	if (size() >= getMaxArraySize())
-	  {
-	    // "InvidDBField.establish(): Can''t link to full field"
-	    // "Couldn''t establish a new linkage in vector field {0} in object {1} because the vector field is already at maximum capacity."
-	    return Ganymede.createErrorDialog(ts.l("establish.overrun_sub"),
-					      ts.l("establish.overrun_text", getName(), getOwner().getLabel()));
-	  }
+        if (size() >= getMaxArraySize())
+          {
+            // "InvidDBField.establish(): Can''t link to full field"
+            // "Couldn''t establish a new linkage in vector field {0} in object {1} because the vector field is already at maximum capacity."
+            return Ganymede.createErrorDialog(ts.l("establish.overrun_sub"),
+                                              ts.l("establish.overrun_text", getName(), getOwner().getLabel()));
+          }
 
-	Vector values = getVectVal();
+        Vector values = getVectVal();
 
-	// For everybody else, though, this is a no-no.
+        // For everybody else, though, this is a no-no.
 
-	if (values.contains(newInvid))
-	  {
-	    // "InvidDBField.establish(): Schema logic error"
-	    // "The reverse link field field {0} in object {1} refused the pointer binding
-	    // because it already points back to the object requesting binding.  This sugests that multiple fields in the originating
-	    // object {2} {3} are trying to link to one vector field in we, the target, which can''t work.  If one of the fields in {3}
-	    // were ever cleared or changed, we''d be cleared and the symmetric relationship would be broken.\n\n
-	    // Have your adopter check the schema."
-	    return Ganymede.createErrorDialog(ts.l("establish.schema_sub"),
-					      ts.l("establish.schema_text",
-						   getName(),
-						   getOwner().getLabel(),
-						   newObject.getTypeName(),
-						   newObject.getLabel()));
-	  }
+        if (values.contains(newInvid))
+          {
+            // "InvidDBField.establish(): Schema logic error"
+            // "The reverse link field field {0} in object {1} refused the pointer binding
+            // because it already points back to the object requesting binding.  This sugests that multiple fields in the originating
+            // object {2} {3} are trying to link to one vector field in we, the target, which can''t work.  If one of the fields in {3}
+            // were ever cleared or changed, we''d be cleared and the symmetric relationship would be broken.\n\n
+            // Have your adopter check the schema."
+            return Ganymede.createErrorDialog(ts.l("establish.schema_sub"),
+                                              ts.l("establish.schema_text",
+                                                   getName(),
+                                                   getOwner().getLabel(),
+                                                   newObject.getTypeName(),
+                                                   newObject.getLabel()));
+          }
 
-	retVal = eObj.finalizeAddElement(this, newInvid);
+        retVal = eObj.finalizeAddElement(this, newInvid);
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    if (retVal.getDialog() != null)
-	      {
-		// "InvidDBField.establish(): finalizeAddElement refused"
-		// "Couldn''t establish a new linkage in vector field {0} in object {1} because the custom plug in code
-		// for this object refused to approve the operation:\n\n{2}"
-		return Ganymede.createErrorDialog(ts.l("establish.no_add_sub"),
-						  ts.l("establish.no_add_text",
-						       getName(), getOwner().getLabel(), retVal.getDialog().getText()));
-	      }
-	    else
-	      {
-		// "InvidDBField.establish(): finalizeAddElement refused"
-		// "Couldn''t establish a new linkage in vector field {0} in object {1} because the custom plug in code
-		// for this object refused to approve the operation."
-		return Ganymede.createErrorDialog(ts.l("establish.no_add_sub"),
-						  ts.l("establish.no_add_text2", getName(), getOwner().getLabel()));
-	      }
-	  }
-	else
-	  {
-	    values.addElement(newInvid);
-	    qr = null;
-	    return retVal;
-	  }
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            if (retVal.getDialog() != null)
+              {
+                // "InvidDBField.establish(): finalizeAddElement refused"
+                // "Couldn''t establish a new linkage in vector field {0} in object {1} because the custom plug in code
+                // for this object refused to approve the operation:\n\n{2}"
+                return Ganymede.createErrorDialog(ts.l("establish.no_add_sub"),
+                                                  ts.l("establish.no_add_text",
+                                                       getName(), getOwner().getLabel(), retVal.getDialog().getText()));
+              }
+            else
+              {
+                // "InvidDBField.establish(): finalizeAddElement refused"
+                // "Couldn''t establish a new linkage in vector field {0} in object {1} because the custom plug in code
+                // for this object refused to approve the operation."
+                return Ganymede.createErrorDialog(ts.l("establish.no_add_sub"),
+                                                  ts.l("establish.no_add_text2", getName(), getOwner().getLabel()));
+              }
+          }
+        else
+          {
+            values.addElement(newInvid);
+            qr = null;
+            return retVal;
+          }
       }
     else
       {
-	// ok, since we're scalar, *we* need to be unbound from *our*
-	// existing target in order to be free to point back to our
-	// friend who is trying to establish a link to us
+        // ok, since we're scalar, *we* need to be unbound from *our*
+        // existing target in order to be free to point back to our
+        // friend who is trying to establish a link to us
 
-	if (value != null)
-	  {
-	    tmp = (Invid) value;
+        if (value != null)
+          {
+            tmp = (Invid) value;
 
-	    if (tmp.equals(newInvid))
-	      {
-		// "InvidDBField.establish(): schema logic error"
-		// "The reverse link field field {0} in object {1} refused the pointer binding
-		// because it already points back to the object requesting binding.  This sugests that multiple fields in the originating
-		// object {2} {3} are trying to link to one scalar field in we, the target, which can''t work.  If one of the fields in {3}
-		// were ever cleared or changed, we''d be cleared and the symmetric relationship would be broken.\n\n
-		// Have your adopter check the schema."
-		return Ganymede.createErrorDialog(ts.l("establish.schema_sub"),
-						  ts.l("establish.schema_scalar_text",
-						       getName(),
-						       getOwner().getLabel(),
-						       newObject.getTypeName(),
-						       newObject.getLabel()));
-	      }
+            if (tmp.equals(newInvid))
+              {
+                // "InvidDBField.establish(): schema logic error"
+                // "The reverse link field field {0} in object {1} refused the pointer binding
+                // because it already points back to the object requesting binding.  This sugests that multiple fields in the originating
+                // object {2} {3} are trying to link to one scalar field in we, the target, which can''t work.  If one of the fields in {3}
+                // were ever cleared or changed, we''d be cleared and the symmetric relationship would be broken.\n\n
+                // Have your adopter check the schema."
+                return Ganymede.createErrorDialog(ts.l("establish.schema_sub"),
+                                                  ts.l("establish.schema_scalar_text",
+                                                       getName(),
+                                                       getOwner().getLabel(),
+                                                       newObject.getTypeName(),
+                                                       newObject.getLabel()));
+              }
 
-	    retVal = unbind(tmp, local);
+            retVal = unbind(tmp, local);
 
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		return retVal;
-	      }
-	  }
+            if (!ReturnVal.didSucceed(retVal))
+              {
+                return retVal;
+              }
+          }
 
-	retVal = ReturnVal.merge(retVal, eObj.finalizeSetValue(this, newInvid));
+        retVal = ReturnVal.merge(retVal, eObj.finalizeSetValue(this, newInvid));
 
-	if (ReturnVal.didSucceed(retVal))
-	  {
-	    value = newInvid;
-	    qr = null;
+        if (ReturnVal.didSucceed(retVal))
+          {
+            value = newInvid;
+            qr = null;
 
             return retVal;
-	  }
-	else
-	  {
-	    if (!ReturnVal.didSucceed(bind(null, tmp, local))) // bind back to the original target, should always work
-	      {
-		throw new RuntimeException("couldn't rebind a value " + tmp + " we just unbound.. sync error");
-	      }
+          }
+        else
+          {
+            if (!ReturnVal.didSucceed(bind(null, tmp, local))) // bind back to the original target, should always work
+              {
+                throw new RuntimeException("couldn't rebind a value " + tmp + " we just unbound.. sync error");
+              }
 
-	    if (retVal.getDialog() != null)
-	      {
-		// "InvidDBField.establish(): finalizeSetValue refused"
-		// "Couldn''t establish a new linkage in field {0} in object {1} because the custom plug in code
-		// for this object refused to approve the operation:\n\n{2}"
-		return Ganymede.createErrorDialog(ts.l("establish.no_set_sub"),
-						  ts.l("establish.no_set_text",
-						       getName(), getOwner().getLabel(), retVal.getDialog().getText()));
-	      }
-	    else
-	      {
-		// "InvidDBField.establish(): finalizeSetValue refused"
-		// "Couldn''t establish a new linkage in field {0} in object {1} because the custom plug in code
-		// for this object refused to approve the operation."
-		return Ganymede.createErrorDialog(ts.l("establish.no_set_sub"),
-						  ts.l("establish.no_set_text2",
-						       getName(), getOwner().getLabel()));
-	      }
-	  }
+            if (retVal.getDialog() != null)
+              {
+                // "InvidDBField.establish(): finalizeSetValue refused"
+                // "Couldn''t establish a new linkage in field {0} in object {1} because the custom plug in code
+                // for this object refused to approve the operation:\n\n{2}"
+                return Ganymede.createErrorDialog(ts.l("establish.no_set_sub"),
+                                                  ts.l("establish.no_set_text",
+                                                       getName(), getOwner().getLabel(), retVal.getDialog().getText()));
+              }
+            else
+              {
+                // "InvidDBField.establish(): finalizeSetValue refused"
+                // "Couldn''t establish a new linkage in field {0} in object {1} because the custom plug in code
+                // for this object refused to approve the operation."
+                return Ganymede.createErrorDialog(ts.l("establish.no_set_sub"),
+                                                  ts.l("establish.no_set_text2",
+                                                       getName(), getOwner().getLabel()));
+              }
+          }
       }
   }
 
@@ -2131,246 +2131,246 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (getFieldDef().isSymmetric())
       {
-	targetField = getFieldDef().getTargetField();
-	asymBackPointer = false;
+        targetField = getFieldDef().getTargetField();
+        asymBackPointer = false;
       }
     else
       {
-	asymBackPointer = true;	// we'll test Ganymede.db.aSymLinkTracker
-	targetField = -1;
+        asymBackPointer = true; // we'll test Ganymede.db.aSymLinkTracker
+        targetField = -1;
       }
 
     if (isVector())
       {
-	Vector values = getVectVal();
+        Vector values = getVectVal();
 
-	// test for all values in our vector
+        // test for all values in our vector
 
-	for (int i = 0; i < values.size(); i++)
-	  {
-	    temp = (Invid) values.elementAt(i);
+        for (int i = 0; i < values.size(); i++)
+          {
+            temp = (Invid) values.elementAt(i);
 
-	    if (asymBackPointer)
-	      {
-		target = session.viewDBObject(temp);
+            if (asymBackPointer)
+              {
+                target = session.viewDBObject(temp);
 
-		if (target == null)
-		  {
-		    // "*** InvidDBField.test(): Invid pointer to null object {0} located: {1} in field {2}"
-		    Ganymede.debug(ts.l("test.pointer_to_null_object", temp, objectName, getName()));
-		    result = false;
+                if (target == null)
+                  {
+                    // "*** InvidDBField.test(): Invid pointer to null object {0} located: {1} in field {2}"
+                    Ganymede.debug(ts.l("test.pointer_to_null_object", temp, objectName, getName()));
+                    result = false;
 
-		    continue;
-		  }
+                    continue;
+                  }
 
-		if (!Ganymede.db.aSymLinkTracker.linkExists(getDBSession(), myInvid, temp))
-		  {
-		    // "*** InvidDBField.test(): aSymLinkTracker doesn''t contain {0} for Invid {1} pointed to from {2} in field {3}"
-		    Ganymede.debug(ts.l("test.no_contains", myInvid, temp, objectName, getName()));
-		    result = false;
+                if (!Ganymede.db.aSymLinkTracker.linkExists(getDBSession(), myInvid, temp))
+                  {
+                    // "*** InvidDBField.test(): aSymLinkTracker doesn''t contain {0} for Invid {1} pointed to from {2} in field {3}"
+                    Ganymede.debug(ts.l("test.no_contains", myInvid, temp, objectName, getName()));
+                    result = false;
 
-		    continue;
-		  }
-	      }
-	    else
-	      {
-		// find the object that this invid points to
+                    continue;
+                  }
+              }
+            else
+              {
+                // find the object that this invid points to
 
-		target = session.viewDBObject(temp);
+                target = session.viewDBObject(temp);
 
-		if (target == null)
-		  {
-		    // "*** InvidDBField.test(): Invid pointer to null object {0} located: {1} in field {2}"
-		    Ganymede.debug(ts.l("test.pointer_to_null_object", temp, objectName, getName()));
-		    result = false;
+                if (target == null)
+                  {
+                    // "*** InvidDBField.test(): Invid pointer to null object {0} located: {1} in field {2}"
+                    Ganymede.debug(ts.l("test.pointer_to_null_object", temp, objectName, getName()));
+                    result = false;
 
-		    continue;
-		  }
+                    continue;
+                  }
 
-		// find the field that should contain the back-pointer
+                // find the field that should contain the back-pointer
 
-		try
-		  {
-		    backField = (InvidDBField) target.getField(targetField);
-		  }
-		catch (ClassCastException ex)
-		  {
-		    String fieldName = ((DBField) target.getField(targetField)).getName();
+                try
+                  {
+                    backField = (InvidDBField) target.getField(targetField);
+                  }
+                catch (ClassCastException ex)
+                  {
+                    String fieldName = ((DBField) target.getField(targetField)).getName();
 
-		    // "*** InvidDBField.test(): schema error!  back-reference field not an invid field!!\n\t>{0}:{1}, referenced from {2}:{3}"
-		    Ganymede.debug(ts.l("test.bad_symmetry", owner.lookupLabel(target), fieldName, objectName, getName()));
-		    result = false;
+                    // "*** InvidDBField.test(): schema error!  back-reference field not an invid field!!\n\t>{0}:{1}, referenced from {2}:{3}"
+                    Ganymede.debug(ts.l("test.bad_symmetry", owner.lookupLabel(target), fieldName, objectName, getName()));
+                    result = false;
 
-		    continue;
-		  }
+                    continue;
+                  }
 
-		if (backField == null)
-		  {
-		    // "InvidDBField.test(): Object {0}, field {1} is targeting a field, {2} in object {3} which does not exist!"
-		    Ganymede.debug(ts.l("test.pointer_to_null_field", objectName, getName(), Integer.toString(targetField), target));
-		    result = false;
+                if (backField == null)
+                  {
+                    // "InvidDBField.test(): Object {0}, field {1} is targeting a field, {2} in object {3} which does not exist!"
+                    Ganymede.debug(ts.l("test.pointer_to_null_field", objectName, getName(), Integer.toString(targetField), target));
+                    result = false;
 
-		    continue;
-		  }
-		else if (!backField.isDefined())
-		  {
-		    // "InvidDBField.test(): Object {0}, field {1} is targeting a field, {2} in object {3} which is not defined!"
-		    Ganymede.debug(ts.l("test.pointer_to_undefined_field", objectName, getName(), backField.getName(), target));
-		    result = false;
+                    continue;
+                  }
+                else if (!backField.isDefined())
+                  {
+                    // "InvidDBField.test(): Object {0}, field {1} is targeting a field, {2} in object {3} which is not defined!"
+                    Ganymede.debug(ts.l("test.pointer_to_undefined_field", objectName, getName(), backField.getName(), target));
+                    result = false;
 
-		    continue;
-		  }
+                    continue;
+                  }
 
-		if (backField.isVector())
-		  {
-		    if (backField.getVectVal() == null)
-		      {
-			// "*** InvidDBField.test(): Null back-link invid found for invid {0} in object {1} in field {2}"
-			Ganymede.debug(ts.l("test.empty_backlink", temp, objectName, getName()));
-			result = false;
+                if (backField.isVector())
+                  {
+                    if (backField.getVectVal() == null)
+                      {
+                        // "*** InvidDBField.test(): Null back-link invid found for invid {0} in object {1} in field {2}"
+                        Ganymede.debug(ts.l("test.empty_backlink", temp, objectName, getName()));
+                        result = false;
 
-			continue;
-		      }
-		    else
-		      {
-			boolean found = false;
-			Invid testInv;
-			Vector backValues = backField.getVectVal();
+                        continue;
+                      }
+                    else
+                      {
+                        boolean found = false;
+                        Invid testInv;
+                        Vector backValues = backField.getVectVal();
 
-			/* -- */
+                        /* -- */
 
-			for (int j = 0; !found && (j < backValues.size()); j++)
-			  {
-			    testInv = (Invid) backValues.elementAt(j);
+                        for (int j = 0; !found && (j < backValues.size()); j++)
+                          {
+                            testInv = (Invid) backValues.elementAt(j);
 
-			    if (myInvid.equals(testInv))
-			      {
-				found = true;
-			      }
-			  }
+                            if (myInvid.equals(testInv))
+                              {
+                                found = true;
+                              }
+                          }
 
-			if (!found)
-			  {
-			    // "*** InvidDBField.test(): No back-link invid found for invid {0} in object {1}:{2} in {3}"
-			    Ganymede.debug(ts.l("test.no_symmetry", temp, objectName, getName(), backField.getName()));
-			    result = false;
+                        if (!found)
+                          {
+                            // "*** InvidDBField.test(): No back-link invid found for invid {0} in object {1}:{2} in {3}"
+                            Ganymede.debug(ts.l("test.no_symmetry", temp, objectName, getName(), backField.getName()));
+                            result = false;
 
-			    continue;
-			  }
-		      }
-		  }
-		else
-		  {
-		    if ((backField.value == null) || !(backField.value.equals(myInvid)))
-		      {
-			// "*** InvidDBField.test(): No back-link invid found for invid {0} in object {1}:{2} in {3}"
-			Ganymede.debug(ts.l("test.no_symmetry", temp, objectName, getName(), backField.getName()));
-			result = false;
+                            continue;
+                          }
+                      }
+                  }
+                else
+                  {
+                    if ((backField.value == null) || !(backField.value.equals(myInvid)))
+                      {
+                        // "*** InvidDBField.test(): No back-link invid found for invid {0} in object {1}:{2} in {3}"
+                        Ganymede.debug(ts.l("test.no_symmetry", temp, objectName, getName(), backField.getName()));
+                        result = false;
 
-			continue;
-		      }
-		  }
-	      }
-	  }
+                        continue;
+                      }
+                  }
+              }
+          }
       }
-    else			// scalar invid field case
+    else                        // scalar invid field case
       {
-	temp = (Invid) value;
+        temp = (Invid) value;
 
-	if (asymBackPointer)
-	  {
-	    target = session.viewDBObject(temp);
+        if (asymBackPointer)
+          {
+            target = session.viewDBObject(temp);
 
-	    if (target == null)
-	      {
-		// "*** InvidDBField.test(): Invid pointer to null object {0} located: {1} in field {2}"
-		Ganymede.debug(ts.l("test.pointer_to_null_object", temp, objectName, getName()));
-		result = false;
-	      }
+            if (target == null)
+              {
+                // "*** InvidDBField.test(): Invid pointer to null object {0} located: {1} in field {2}"
+                Ganymede.debug(ts.l("test.pointer_to_null_object", temp, objectName, getName()));
+                result = false;
+              }
 
-	    if (!Ganymede.db.aSymLinkTracker.linkExists(getDBSession(), myInvid, temp))
-	      {
-		// "*** InvidDBField.test(): backpointer hash doesn''t contain {0} for Invid {1} pointed to from {2} in field {3}"
-		Ganymede.debug(ts.l("test.no_contains", myInvid, temp, objectName, getName()));
-		result = false;
-	      }
-	  }
-	else
-	  {
-	    if (temp != null)
-	      {
-		target = session.viewDBObject(temp);
+            if (!Ganymede.db.aSymLinkTracker.linkExists(getDBSession(), myInvid, temp))
+              {
+                // "*** InvidDBField.test(): backpointer hash doesn''t contain {0} for Invid {1} pointed to from {2} in field {3}"
+                Ganymede.debug(ts.l("test.no_contains", myInvid, temp, objectName, getName()));
+                result = false;
+              }
+          }
+        else
+          {
+            if (temp != null)
+              {
+                target = session.viewDBObject(temp);
 
-		if (target == null)
-		  {
-		    Ganymede.debug(ts.l("test.pointer_to_null_object", temp, objectName, getName()));
-		    return false;
-		  }
+                if (target == null)
+                  {
+                    Ganymede.debug(ts.l("test.pointer_to_null_object", temp, objectName, getName()));
+                    return false;
+                  }
 
-		try
-		  {
-		    backField = (InvidDBField) target.getField(targetField);
-		  }
-		catch (ClassCastException ex)
-		  {
-		    String fieldName = ((DBField) target.getField(targetField)).getName();
+                try
+                  {
+                    backField = (InvidDBField) target.getField(targetField);
+                  }
+                catch (ClassCastException ex)
+                  {
+                    String fieldName = ((DBField) target.getField(targetField)).getName();
 
-		    Ganymede.debug(ts.l("test.bad_symmetry",  owner.lookupLabel(target), fieldName, objectName, getName()));
-		    return false;
-		  }
+                    Ganymede.debug(ts.l("test.bad_symmetry",  owner.lookupLabel(target), fieldName, objectName, getName()));
+                    return false;
+                  }
 
-		if (backField == null)
-		  {
-		    Ganymede.debug(ts.l("test.pointer_to_null_field", objectName, getName(), Integer.toString(targetField), target));
-		    return false;
-		  }
-		else if (!backField.isDefined())
-		  {
-		    Ganymede.debug(ts.l("test.pointer_to_undefined_field", objectName, getName(), backField.getName(), target));
-		    return false;
-		  }
+                if (backField == null)
+                  {
+                    Ganymede.debug(ts.l("test.pointer_to_null_field", objectName, getName(), Integer.toString(targetField), target));
+                    return false;
+                  }
+                else if (!backField.isDefined())
+                  {
+                    Ganymede.debug(ts.l("test.pointer_to_undefined_field", objectName, getName(), backField.getName(), target));
+                    return false;
+                  }
 
-		if (backField.isVector())
-		  {
-		    Vector backValues = backField.getVectVal();
+                if (backField.isVector())
+                  {
+                    Vector backValues = backField.getVectVal();
 
-		    if (backValues == null)
-		      {
-			Ganymede.debug(ts.l("test.empty_backlink", temp, objectName, getName()));
-			return false;
-		      }
-		    else
-		      {
-			boolean found = false;
-			Invid testInv;
+                    if (backValues == null)
+                      {
+                        Ganymede.debug(ts.l("test.empty_backlink", temp, objectName, getName()));
+                        return false;
+                      }
+                    else
+                      {
+                        boolean found = false;
+                        Invid testInv;
 
-			for (int j = 0; !found && (j < backValues.size()); j++)
-			  {
-			    testInv = (Invid) backValues.elementAt(j);
+                        for (int j = 0; !found && (j < backValues.size()); j++)
+                          {
+                            testInv = (Invid) backValues.elementAt(j);
 
-			    if (myInvid.equals(testInv))
-			      {
-				found = true;
-			      }
-			  }
+                            if (myInvid.equals(testInv))
+                              {
+                                found = true;
+                              }
+                          }
 
-			if (!found)
-			  {
-			    Ganymede.debug(ts.l("test.no_symmetry", temp, objectName, getName(), backField.getName()));
-			    return false;
-			  }
-		      }
-		  }
-		else
-		  {
-		    if ((backField.value == null) || !(backField.value.equals(myInvid)))
-		      {
-			Ganymede.debug(ts.l("test.no_symmetry", temp, objectName, getName(), backField.getName()));
-			return false;
-		      }
-		  }
-	      }
-	  }
+                        if (!found)
+                          {
+                            Ganymede.debug(ts.l("test.no_symmetry", temp, objectName, getName(), backField.getName()));
+                            return false;
+                          }
+                      }
+                  }
+                else
+                  {
+                    if ((backField.value == null) || !(backField.value.equals(myInvid)))
+                      {
+                        Ganymede.debug(ts.l("test.no_symmetry", temp, objectName, getName(), backField.getName()));
+                        return false;
+                      }
+                  }
+              }
+          }
       }
 
     return result;
@@ -2420,33 +2420,33 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(local))
       {
-	// "Don''t have permission to change field {0} in object {1}"
-	return Ganymede.createErrorDialog("InvidDBField.setValue()",
-					  ts.l("global.no_perms", getName(), owner.getLabel()));
+        // "Don''t have permission to change field {0} in object {1}"
+        return Ganymede.createErrorDialog("InvidDBField.setValue()",
+                                          ts.l("global.no_perms", getName(), owner.getLabel()));
       }
 
     if (isVector())
       {
-	// "Scalar method called on a vector field: {0} in object {1}"
- 	throw new IllegalArgumentException(ts.l("global.oops_vector", getName(), owner.getLabel()));
+        // "Scalar method called on a vector field: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("global.oops_vector", getName(), owner.getLabel()));
       }
 
     if ((this.value == null && value == null) ||
-	(this.value != null && this.value.equals(value)))
+        (this.value != null && this.value.equals(value)))
       {
-	if (debug)
-	  {
-	    Ganymede.debug("InvidDBField.setValue(): no change");
-	  }
+        if (debug)
+          {
+            Ganymede.debug("InvidDBField.setValue(): no change");
+          }
 
-	return null;		// no change
+        return null;            // no change
       }
 
     retVal = verifyNewValue(value, local);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     // we now know that value is an invid
@@ -2458,16 +2458,16 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!noWizards && !local && getGSession().enableOversight)
       {
-	// Wizard check
+        // Wizard check
 
-	retVal = ReturnVal.merge(retVal, eObj.wizardHook(this, DBEditObject.SETVAL, value, null));
+        retVal = ReturnVal.merge(retVal, eObj.wizardHook(this, DBEditObject.SETVAL, value, null));
 
-	// if a wizard intercedes, we are going to let it take the ball.
+        // if a wizard intercedes, we are going to let it take the ball.
 
-	if (ReturnVal.wizardHandled(retVal))
-	  {
-	    return retVal;
-	  }
+        if (ReturnVal.wizardHandled(retVal))
+          {
+            return retVal;
+          }
       }
 
     checkkey = RandomUtils.getSaltedString("setValue[" + getName() + ":" + owner.getLabel() + "]");
@@ -2478,14 +2478,14 @@ public final class InvidDBField extends DBField implements invid_field {
 
     try
       {
-	// try to do the binding
+        // try to do the binding
 
-	if (newRemote != null)
-	  {
-	    retVal = ReturnVal.merge(retVal, bind(oldRemote, newRemote, local));
-	  }
-	else if (oldRemote != null)
-	  {
+        if (newRemote != null)
+          {
+            retVal = ReturnVal.merge(retVal, bind(oldRemote, newRemote, local));
+          }
+        else if (oldRemote != null)
+          {
             retVal = ReturnVal.merge(retVal, unbind(oldRemote, local));
           }
 
@@ -2494,31 +2494,31 @@ public final class InvidDBField extends DBField implements invid_field {
             return retVal;
           }
 
-	// check our owner, do it.  Checking our owner should
-	// be the last thing we do.. if it returns true, nothing
-	// should stop us from running the change to completion
+        // check our owner, do it.  Checking our owner should
+        // be the last thing we do.. if it returns true, nothing
+        // should stop us from running the change to completion
 
-	retVal = ReturnVal.merge(retVal, eObj.finalizeSetValue(this, value));
+        retVal = ReturnVal.merge(retVal, eObj.finalizeSetValue(this, value));
 
-	if (ReturnVal.didSucceed(retVal))
-	  {
-	    this.value = value;
-	    qr = null;
+        if (ReturnVal.didSucceed(retVal))
+          {
+            this.value = value;
+            qr = null;
 
-	    // success!
+            // success!
 
-	    eObj.getDBSession().popCheckpoint(checkkey);
-	    checkpointed = false;
+            eObj.getDBSession().popCheckpoint(checkkey);
+            checkpointed = false;
           }
 
         return retVal;
       }
     finally
       {
-	if (checkpointed)
-	  {
-	    eObj.getDBSession().rollback(checkkey);
-	  }
+        if (checkpointed)
+          {
+            eObj.getDBSession().rollback(checkkey);
+          }
       }
   }
 
@@ -2566,19 +2566,19 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isVector())
       {
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (isEditInPlace())
       {
-	// "Can''t manually set element in edit-in-place vector: {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("setElement.edit_in_place", getName(), owner.getLabel()));
+        // "Can''t manually set element in edit-in-place vector: {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("setElement.edit_in_place", getName(), owner.getLabel()));
       }
 
     if (!isEditable(local))
       {
-	return Ganymede.createErrorDialog("InvidDBField.setElement()",
-					  ts.l("global.no_perms", getName(), owner.getLabel()));
+        return Ganymede.createErrorDialog("InvidDBField.setElement()",
+                                          ts.l("global.no_perms", getName(), owner.getLabel()));
       }
 
     Vector values = getVectVal();
@@ -2587,47 +2587,47 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (oldIndex == index)
       {
-	return null;		// no-op
+        return null;            // no-op
       }
     else if (oldIndex != -1)
       {
-	return getDuplicateValueDialog("setElement", submittedValue); // duplicate
+        return getDuplicateValueDialog("setElement", submittedValue); // duplicate
       }
 
     if (this.value.equals(values.elementAt(index)))
       {
-	if (debug)
-	  {
-	    Ganymede.debug("InvidDBField.setElement(): no change");
-	  }
+        if (debug)
+          {
+            Ganymede.debug("InvidDBField.setElement(): no change");
+          }
 
-	return null;		// no change
+        return null;            // no change
       }
 
     retVal = verifyNewValue(submittedValue, local);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     eObj = (DBEditObject) owner;
 
     if (!local && getGSession().enableOversight)
       {
-	// Wizard check
+        // Wizard check
 
-	retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+        retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
                                                          DBEditObject.SETELEMENT,
                                                          Integer.valueOf(index),
                                                          submittedValue));
 
-	// if a wizard intercedes, we are going to let it take the ball.
+        // if a wizard intercedes, we are going to let it take the ball.
 
-	if (ReturnVal.wizardHandled(retVal))
-	  {
-	    return retVal;
-	  }
+        if (ReturnVal.wizardHandled(retVal))
+          {
+            return retVal;
+          }
       }
 
     oldRemote = (Invid) values.elementAt(index);
@@ -2641,40 +2641,40 @@ public final class InvidDBField extends DBField implements invid_field {
 
     try
       {
-	// try to do the binding
+        // try to do the binding
 
-	retVal = ReturnVal.merge(retVal, bind(oldRemote, newRemote, local));
+        retVal = ReturnVal.merge(retVal, bind(oldRemote, newRemote, local));
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    return retVal;
-	  }
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            return retVal;
+          }
 
-	// check our owner, do it.  Checking our owner should
-	// be the last thing we do.. if it returns true, nothing
-	// should stop us from running the change to completion
+        // check our owner, do it.  Checking our owner should
+        // be the last thing we do.. if it returns true, nothing
+        // should stop us from running the change to completion
 
-	retVal = ReturnVal.merge(retVal, eObj.finalizeSetElement(this, index, submittedValue));
+        retVal = ReturnVal.merge(retVal, eObj.finalizeSetElement(this, index, submittedValue));
 
-	if (ReturnVal.didSucceed(retVal))
-	  {
-	    values.setElementAt(submittedValue, index);
-	    qr = null;
+        if (ReturnVal.didSucceed(retVal))
+          {
+            values.setElementAt(submittedValue, index);
+            qr = null;
 
-	    // success!
+            // success!
 
-	    eObj.getDBSession().popCheckpoint(checkkey);
-	    checkpointed = false;
-	  }
+            eObj.getDBSession().popCheckpoint(checkkey);
+            checkpointed = false;
+          }
 
         return retVal;
       }
     finally
       {
-	if (checkpointed)
-	  {
-	    eObj.getDBSession().rollback(checkkey);
-	  }
+        if (checkpointed)
+          {
+            eObj.getDBSession().rollback(checkkey);
+          }
       }
   }
 
@@ -2713,21 +2713,21 @@ public final class InvidDBField extends DBField implements invid_field {
 
     /* -- */
 
-    if (!isEditable(local))	// *sync* on GanymedeSession possible
+    if (!isEditable(local))     // *sync* on GanymedeSession possible
       {
-	return Ganymede.createErrorDialog("InvidDBField.addElement()",
-					  ts.l("global.no_perms", getName(), owner.getLabel()));
+        return Ganymede.createErrorDialog("InvidDBField.addElement()",
+                                          ts.l("global.no_perms", getName(), owner.getLabel()));
       }
 
     if (isEditInPlace())
       {
-	return Ganymede.createErrorDialog("InvidDBField.addElement()",
-					  ts.l("addElement.edit_in_place", getName(), owner.getLabel()));
+        return Ganymede.createErrorDialog("InvidDBField.addElement()",
+                                          ts.l("addElement.edit_in_place", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     Vector values = getVectVal();
@@ -2736,22 +2736,22 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (values.contains(submittedValue))
       {
-	return getDuplicateValueDialog("addElement", submittedValue); // duplicate
+        return getDuplicateValueDialog("addElement", submittedValue); // duplicate
       }
 
     retVal = verifyNewValue(submittedValue, local);
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     if (size() >= getMaxArraySize())
       {
-	// "InvidDBField.addElement() - vector overflow"
-	// "Field {0} already at or beyond array size limit."
-	return Ganymede.createErrorDialog(ts.l("addElement.overflow_sub"),
-					  ts.l("addElement.overflow_text", getName()));
+        // "InvidDBField.addElement() - vector overflow"
+        // "Field {0} already at or beyond array size limit."
+        return Ganymede.createErrorDialog(ts.l("addElement.overflow_sub"),
+                                          ts.l("addElement.overflow_text", getName()));
       }
 
     remote = (Invid) submittedValue;
@@ -2760,19 +2760,19 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!noWizards && !local && getGSession().enableOversight)
       {
-	// Wizard check
+        // Wizard check
 
-	retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
+        retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
                                                          DBEditObject.ADDELEMENT,
                                                          submittedValue,
                                                          null));
 
-	// if a wizard intercedes, we are going to let it take the ball.
+        // if a wizard intercedes, we are going to let it take the ball.
 
-	if (ReturnVal.wizardHandled(retVal))
-	  {
-	    return retVal;
-	  }
+        if (ReturnVal.wizardHandled(retVal))
+          {
+            return retVal;
+          }
       }
 
     // check to make sure that we're not trying to add a remote
@@ -2783,7 +2783,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     checkkey = RandomUtils.getSaltedString("addElement[" + getName() + ":" + owner.getLabel() + "]");
@@ -2794,34 +2794,34 @@ public final class InvidDBField extends DBField implements invid_field {
 
     try
       {
-	retVal = ReturnVal.merge(retVal, bind(null, remote, local));
+        retVal = ReturnVal.merge(retVal, bind(null, remote, local));
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    return retVal;
-	  }
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            return retVal;
+          }
 
-	retVal = ReturnVal.merge(retVal, eObj.finalizeAddElement(this, submittedValue));
+        retVal = ReturnVal.merge(retVal, eObj.finalizeAddElement(this, submittedValue));
 
-	if (ReturnVal.didSucceed(retVal))
-	  {
-	    values.addElement(submittedValue);
-	    qr = null;
+        if (ReturnVal.didSucceed(retVal))
+          {
+            values.addElement(submittedValue);
+            qr = null;
 
-	    // success!
+            // success!
 
-	    eObj.getDBSession().popCheckpoint(checkkey);
-	    checkpointed = false;
-	  }
+            eObj.getDBSession().popCheckpoint(checkkey);
+            checkpointed = false;
+          }
 
         return retVal;
       }
     finally
       {
-	if (checkpointed)
-	  {
-	    eObj.getDBSession().rollback(checkkey);
-	  }
+        if (checkpointed)
+          {
+            eObj.getDBSession().rollback(checkkey);
+          }
       }
   }
 
@@ -2861,8 +2861,8 @@ public final class InvidDBField extends DBField implements invid_field {
    */
 
   public synchronized ReturnVal addElements(Vector submittedValues, boolean local,
-					    boolean noWizards,
-					    boolean partialSuccessOk)
+                                            boolean noWizards,
+                                            boolean partialSuccessOk)
   {
     boolean success = false;
     String checkkey = null;
@@ -2876,42 +2876,42 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (debug)
       {
-	System.err.println("InvidDBField.addElements(" + VectorUtils.vectorString(submittedValues) + ")");
+        System.err.println("InvidDBField.addElements(" + VectorUtils.vectorString(submittedValues) + ")");
       }
 
     if (isEditInPlace())
       {
-	// "Can''t manually add elements to edit-in-place vector: {0} in object {1}"
-	return Ganymede.createErrorDialog("InvidDBField.addElements()",
-					  ts.l("addElements.edit_in_place", getName(), owner.getLabel()));
+        // "Can''t manually add elements to edit-in-place vector: {0} in object {1}"
+        return Ganymede.createErrorDialog("InvidDBField.addElements()",
+                                          ts.l("addElements.edit_in_place", getName(), owner.getLabel()));
       }
 
-    if (!isEditable(local))	// *sync* on GanymedeSession possible
+    if (!isEditable(local))     // *sync* on GanymedeSession possible
       {
-	return Ganymede.createErrorDialog("InvidDBField.addElements()",
-					  ts.l("global.no_perms", getName(), owner.getLabel()));
+        return Ganymede.createErrorDialog("InvidDBField.addElements()",
+                                          ts.l("global.no_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     values = getVectVal(); // cast once
 
     if (submittedValues == null || submittedValues.size() == 0)
       {
-	return Ganymede.createErrorDialog(ts.l("addElements.error_sub"),
-					  ts.l("addElements.null_empty_param", getName()));
+        return Ganymede.createErrorDialog(ts.l("addElements.error_sub"),
+                                          ts.l("addElements.null_empty_param", getName()));
       }
 
     // can we add this many values?
 
     if (size() + submittedValues.size() > getMaxArraySize())
       {
-	return Ganymede.createErrorDialog(ts.l("addElements.error_sub"),
-					  ts.l("addElements.overflow_text", getName(), Integer.toString(submittedValues.size()),
-					       Integer.toString(size()), Integer.toString(getMaxArraySize())));
+        return Ganymede.createErrorDialog(ts.l("addElements.error_sub"),
+                                          ts.l("addElements.overflow_text", getName(), Integer.toString(submittedValues.size()),
+                                               Integer.toString(size()), Integer.toString(getMaxArraySize())));
       }
 
     // Don't allow adding values we've already got
@@ -2920,17 +2920,17 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (duplicateValues.size() > 0)
       {
-	if (!partialSuccessOk)
-	  {
-	    return getDuplicateValuesDialog("addElements", VectorUtils.vectorString(duplicateValues));
-	  }
-	else
-	  {
-	    // we use difference because we know that Ganymede vector
-	    // fields are not allowed to contain duplications
+        if (!partialSuccessOk)
+          {
+            return getDuplicateValuesDialog("addElements", VectorUtils.vectorString(duplicateValues));
+          }
+        else
+          {
+            // we use difference because we know that Ganymede vector
+            // fields are not allowed to contain duplications
 
-	    submittedValues = VectorUtils.difference(submittedValues, getVectVal());
-	  }
+            submittedValues = VectorUtils.difference(submittedValues, getVectVal());
+          }
       }
 
     // check to see if all of the submitted values are acceptable in
@@ -2941,40 +2941,40 @@ public final class InvidDBField extends DBField implements invid_field {
 
     for (int i = 0; i < submittedValues.size(); i++)
       {
-	retVal = verifyNewValue(submittedValues.elementAt(i), local);
+        retVal = verifyNewValue(submittedValues.elementAt(i), local);
 
-	if (!ReturnVal.didSucceed(retVal))
-	  {
-	    if (!partialSuccessOk)
-	      {
-		return retVal;
-	      }
-	    else
-	      {
-		if (retVal.getDialog() != null)
-		  {
-		    if (errorBuf.length() != 0)
-		      {
-			errorBuf.append("\n\n");
-		      }
+        if (!ReturnVal.didSucceed(retVal))
+          {
+            if (!partialSuccessOk)
+              {
+                return retVal;
+              }
+            else
+              {
+                if (retVal.getDialog() != null)
+                  {
+                    if (errorBuf.length() != 0)
+                      {
+                        errorBuf.append("\n\n");
+                      }
 
-		    errorBuf.append(retVal.getDialog().getText());
-		  }
-	      }
-	  }
-	else
-	  {
-	    approvedValues.addElement(submittedValues.elementAt(i));
-	  }
+                    errorBuf.append(retVal.getDialog().getText());
+                  }
+              }
+          }
+        else
+          {
+            approvedValues.addElement(submittedValues.elementAt(i));
+          }
       }
 
     // if we weren't able to get any copied, report
 
     if (approvedValues.size() == 0)
       {
-	// "AddElements Error"
-	return Ganymede.createErrorDialog(ts.l("addElements.subject"),
-					  errorBuf.toString());
+        // "AddElements Error"
+        return Ganymede.createErrorDialog(ts.l("addElements.subject"),
+                                          errorBuf.toString());
       }
 
     // see if our container wants to preemptively intercede in the
@@ -2984,16 +2984,16 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!noWizards && !local && getGSession().enableOversight)
       {
-	// Wizard check
+        // Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENTS, approvedValues, null);
+        retVal = eObj.wizardHook(this, DBEditObject.ADDELEMENTS, approvedValues, null);
 
-	// if a wizard intercedes, we are going to let it take the ball.
+        // if a wizard intercedes, we are going to let it take the ball.
 
-	if (ReturnVal.wizardHandled(retVal))
-	  {
-	    return retVal;
-	  }
+        if (ReturnVal.wizardHandled(retVal))
+          {
+            return retVal;
+          }
       }
 
     // check to make sure that we're not trying to add a remote
@@ -3004,231 +3004,231 @@ public final class InvidDBField extends DBField implements invid_field {
 
     for (int i = 0; i < approvedValues.size(); i++)
       {
-	Invid remote = (Invid) approvedValues.elementAt(i);
+        Invid remote = (Invid) approvedValues.elementAt(i);
 
-	ReturnVal newRetVal = checkBindConflict(remote);
+        ReturnVal newRetVal = checkBindConflict(remote);
 
-	if (!ReturnVal.didSucceed(newRetVal))
-	  {
-	    if (!partialSuccessOk)
-	      {
-		return newRetVal;
-	      }
-	    else
-	      {
-		if (newRetVal.getDialog() != null)
-		  {
-		    if (errorBuf.length() != 0)
-		      {
-			errorBuf.append("\n\n");
-		      }
+        if (!ReturnVal.didSucceed(newRetVal))
+          {
+            if (!partialSuccessOk)
+              {
+                return newRetVal;
+              }
+            else
+              {
+                if (newRetVal.getDialog() != null)
+                  {
+                    if (errorBuf.length() != 0)
+                      {
+                        errorBuf.append("\n\n");
+                      }
 
-		    errorBuf.append(newRetVal.getDialog().getText());
-		  }
+                    errorBuf.append(newRetVal.getDialog().getText());
+                  }
 
-		if (failed_bindings == null)
-		  {
-		    failed_bindings = new Vector();
-		  }
+                if (failed_bindings == null)
+                  {
+                    failed_bindings = new Vector();
+                  }
 
-		failed_bindings.addElement(remote);
-	      }
-	  }
+                failed_bindings.addElement(remote);
+              }
+          }
       }
 
     if (failed_bindings != null)
       {
-	// we use difference because we know that Ganymede vector
-	// fields are not allowed to contain duplications
+        // we use difference because we know that Ganymede vector
+        // fields are not allowed to contain duplications
 
-	approvedValues = VectorUtils.difference(approvedValues, failed_bindings);
+        approvedValues = VectorUtils.difference(approvedValues, failed_bindings);
       }
 
     checkkey = RandomUtils.getSaltedString("addElements[" + getName() + ":" + owner.getLabel() + "]");
 
     if (debug)
       {
-	System.err.println("InvidDBField.addElements(): checkpointing " + checkkey);
+        System.err.println("InvidDBField.addElements(): checkpointing " + checkkey);
       }
 
     eObj.getDBSession().checkpoint(checkkey); // may block if another thread has checkpointed this transaction
 
     if (debug)
       {
-	System.err.println("InvidDBField.addElements(): completed checkpointing " + checkkey);
+        System.err.println("InvidDBField.addElements(): completed checkpointing " + checkkey);
       }
 
     try
       {
-	if (debug)
-	  {
-	    System.err.println("InvidDBField.addElements(): binding");
-	  }
+        if (debug)
+          {
+            System.err.println("InvidDBField.addElements(): binding");
+          }
 
-	boolean any_success = false;
-	failed_bindings = null;
+        boolean any_success = false;
+        failed_bindings = null;
 
-	for (int i = 0; i < approvedValues.size(); i++)
-	  {
-	    Invid remote = (Invid) approvedValues.elementAt(i);
+        for (int i = 0; i < approvedValues.size(); i++)
+          {
+            Invid remote = (Invid) approvedValues.elementAt(i);
 
-	    ReturnVal newRetVal = bind(null, remote, local); // bind us to the target field
+            ReturnVal newRetVal = bind(null, remote, local); // bind us to the target field
 
-	    if (!ReturnVal.didSucceed(newRetVal))
-	      {
-		if (!partialSuccessOk)
-		  {
-		    return newRetVal;
-		  }
-		else
-		  {
-		    if (newRetVal.getDialog() != null)
-		      {
-			if (errorBuf.length() != 0)
-			  {
-			    errorBuf.append("\n\n");
-			  }
+            if (!ReturnVal.didSucceed(newRetVal))
+              {
+                if (!partialSuccessOk)
+                  {
+                    return newRetVal;
+                  }
+                else
+                  {
+                    if (newRetVal.getDialog() != null)
+                      {
+                        if (errorBuf.length() != 0)
+                          {
+                            errorBuf.append("\n\n");
+                          }
 
-			errorBuf.append(newRetVal.getDialog().getText());
-		      }
+                        errorBuf.append(newRetVal.getDialog().getText());
+                      }
 
-		    if (failed_bindings == null)
-		      {
-			failed_bindings = new Vector();
-		      }
+                    if (failed_bindings == null)
+                      {
+                        failed_bindings = new Vector();
+                      }
 
-		    failed_bindings.addElement(remote);
-		  }
-	      }
-	    else
-	      {
-		any_success = true;
-	      }
-	  }
+                    failed_bindings.addElement(remote);
+                  }
+              }
+            else
+              {
+                any_success = true;
+              }
+          }
 
-	if (!any_success)
-	  {
-	    // "AddElements Error"
-	    return Ganymede.createErrorDialog(ts.l("addElements.subject"),
-					      errorBuf.toString());
-	  }
+        if (!any_success)
+          {
+            // "AddElements Error"
+            return Ganymede.createErrorDialog(ts.l("addElements.subject"),
+                                              errorBuf.toString());
+          }
 
-	if (failed_bindings != null)
-	  {
-	    // we use difference because we know that Ganymede vector
-	    // fields are not allowed to contain duplications
+        if (failed_bindings != null)
+          {
+            // we use difference because we know that Ganymede vector
+            // fields are not allowed to contain duplications
 
-	    approvedValues = VectorUtils.difference(approvedValues, failed_bindings);
-	  }
+            approvedValues = VectorUtils.difference(approvedValues, failed_bindings);
+          }
 
-	if (debug)
-	  {
-	    System.err.println("InvidDBField.addElements(): all new elements bound");
-	  }
+        if (debug)
+          {
+            System.err.println("InvidDBField.addElements(): all new elements bound");
+          }
 
-	// Okay, see if the DBEditObject is willing to allow all of
-	// these elements to be added.  If we're allowing
-	// partialSuccessOk (for cloning), we'll want to query the
-	// DBEditObject about each item to be added, one at a time
+        // Okay, see if the DBEditObject is willing to allow all of
+        // these elements to be added.  If we're allowing
+        // partialSuccessOk (for cloning), we'll want to query the
+        // DBEditObject about each item to be added, one at a time
 
-	if (partialSuccessOk)
-	  {
-	    any_success = false;
+        if (partialSuccessOk)
+          {
+            any_success = false;
 
-	    for (int i = 0; i < approvedValues.size(); i++)
-	      {
-		ReturnVal newRetVal = eObj.finalizeAddElement(this, approvedValues.elementAt(i));
+            for (int i = 0; i < approvedValues.size(); i++)
+              {
+                ReturnVal newRetVal = eObj.finalizeAddElement(this, approvedValues.elementAt(i));
 
-		if (ReturnVal.didSucceed(newRetVal))
-		  {
-		    values.addElement(approvedValues.elementAt(i));
-		    any_success = true;
-		  }
-		else
-		  {
-		    if (newRetVal.getDialog() != null)
-		      {
-			if (errorBuf.length() != 0)
-			  {
-			    errorBuf.append("\n\n");
-			  }
+                if (ReturnVal.didSucceed(newRetVal))
+                  {
+                    values.addElement(approvedValues.elementAt(i));
+                    any_success = true;
+                  }
+                else
+                  {
+                    if (newRetVal.getDialog() != null)
+                      {
+                        if (errorBuf.length() != 0)
+                          {
+                            errorBuf.append("\n\n");
+                          }
 
-			errorBuf.append(newRetVal.getDialog().getText());
-		      }
-		  }
-	      }
+                        errorBuf.append(newRetVal.getDialog().getText());
+                      }
+                  }
+              }
 
-	    if (!any_success)
-	      {
-		// "AddElements Error"
-		return Ganymede.createErrorDialog(ts.l("addElements.subject"),
-						  errorBuf.toString());
-	      }
-	  }
-	else
-	  {
-	    retVal = ReturnVal.merge(retVal, eObj.finalizeAddElements(this, approvedValues));
+            if (!any_success)
+              {
+                // "AddElements Error"
+                return Ganymede.createErrorDialog(ts.l("addElements.subject"),
+                                                  errorBuf.toString());
+              }
+          }
+        else
+          {
+            retVal = ReturnVal.merge(retVal, eObj.finalizeAddElements(this, approvedValues));
 
-	    if (ReturnVal.didSucceed(retVal))
-	      {
-		if (debug)
-		  {
-		    System.err.println("InvidDBField.addElements(): finalize approved");
-		  }
+            if (ReturnVal.didSucceed(retVal))
+              {
+                if (debug)
+                  {
+                    System.err.println("InvidDBField.addElements(): finalize approved");
+                  }
 
-		for (int i = 0; i < approvedValues.size(); i++)
-		  {
-		    values.addElement(approvedValues.elementAt(i));
-		  }
-	      }
-	    else
-	      {
-		return retVal;
-	      }
-	  }
+                for (int i = 0; i < approvedValues.size(); i++)
+                  {
+                    values.addElement(approvedValues.elementAt(i));
+                  }
+              }
+            else
+              {
+                return retVal;
+              }
+          }
 
-	qr = null;
-	success = true;
+        qr = null;
+        success = true;
 
-	// if we were not able to copy some of the values (and we
-	// therefore have partialSuccessOk set), encode a description
-	// of what happened to go along with the success code.
+        // if we were not able to copy some of the values (and we
+        // therefore have partialSuccessOk set), encode a description
+        // of what happened to go along with the success code.
 
-	if (errorBuf.length() != 0)
-	  {
+        if (errorBuf.length() != 0)
+          {
             retVal = ReturnVal.merge(retVal, ReturnVal.success()); // force non-null retVal
 
-	    retVal.setDialog(new JDialogBuff("Warning",
+            retVal.setDialog(new JDialogBuff("Warning",
                                              errorBuf.toString(),
                                              Ganymede.OK, // localized ok
                                              null,
                                              "ok.gif"));
-	  }
+          }
 
-	return retVal;
+        return retVal;
       }
     finally
       {
-	if (success)
-	  {
-	    if (debug)
-	      {
-		System.err.println("InvidDBField.addElements(): popping checkpoint " + checkkey);
-	      }
+        if (success)
+          {
+            if (debug)
+              {
+                System.err.println("InvidDBField.addElements(): popping checkpoint " + checkkey);
+              }
 
-	    eObj.getDBSession().popCheckpoint(checkkey);
-	  }
-	else
-	  {
-	    // undo the bindings
+            eObj.getDBSession().popCheckpoint(checkkey);
+          }
+        else
+          {
+            // undo the bindings
 
-	    if (debug)
-	      {
-		System.err.println("InvidDBField.addElements(): rolling back checkpoint " + checkkey);
-	      }
+            if (debug)
+              {
+                System.err.println("InvidDBField.addElements(): rolling back checkpoint " + checkkey);
+              }
 
-	    eObj.getDBSession().rollback(checkkey);
-	  }
+            eObj.getDBSession().rollback(checkkey);
+          }
       }
   }
 
@@ -3283,26 +3283,26 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     if (!isEditable(local))
       {
-	return Ganymede.createErrorDialog("InvidDBField.createNewEmbedded()",
-					  ts.l("global.no_perms", getName(), owner.getLabel()));
+        return Ganymede.createErrorDialog("InvidDBField.createNewEmbedded()",
+                                          ts.l("global.no_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (!isEditInPlace())
       {
-	// "Edit-in-place method called on a referential invid field {0} in object {1}"
-	throw new IllegalArgumentException(ts.l("createNewEmbedded.non_embedded", getName(), owner.getLabel()));
+        // "Edit-in-place method called on a referential invid field {0} in object {1}"
+        throw new IllegalArgumentException(ts.l("createNewEmbedded.non_embedded", getName(), owner.getLabel()));
       }
 
     if (size() >= getMaxArraySize())
       {
         // "Field {0} is already at or beyond the specified array size limit."
-	return Ganymede.createErrorDialog("InvidDBField.createNewEmbedded()",
-					  ts.l("addElement.overflow_text", getName()));
+        return Ganymede.createErrorDialog("InvidDBField.createNewEmbedded()",
+                                          ts.l("addElement.overflow_text", getName()));
       }
 
     Vector values = getVectVal();
@@ -3405,9 +3405,9 @@ public final class InvidDBField extends DBField implements invid_field {
         values.addElement(embeddedObj.getInvid());  // do a live modification of this field's invid vector
         qr = null;
 
-	// record that we created this forward asymmetric link
+        // record that we created this forward asymmetric link
 
-	Ganymede.db.aSymLinkTracker.linkObject(getDBSession(), embeddedObj.getInvid(), owner.getInvid());
+        Ganymede.db.aSymLinkTracker.linkObject(getDBSession(), embeddedObj.getInvid(), owner.getInvid());
 
         // now we need to initialize the new embedded object, since we
         // defer that activity for embedded objects until after we
@@ -3471,7 +3471,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (targetBaseType < 0)
       {
-	return null;
+        return null;
       }
 
     return getFieldDef().base().getStore().getObjectBase(targetBaseType);
@@ -3502,7 +3502,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!getFieldDef().isSymmetric())
       {
-	return null;
+        return null;
       }
 
     // if we're not pointing to a specific field, also return null.
@@ -3512,7 +3512,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (getTargetBase() < 0)
       {
-	return null;
+        return null;
       }
 
     // we've got a specific field type in a specific object type, find
@@ -3548,18 +3548,18 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(local))
       {
-	return Ganymede.createErrorDialog("InvidDBField.deleteElement()",
-					  ts.l("global.no_perms", getName(), owner.getLabel()));
+        return Ganymede.createErrorDialog("InvidDBField.deleteElement()",
+                                          ts.l("global.no_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     if (debug)
       {
-	System.err.println("InvidDBField[" + toString() + ".deleteElement(" + index + ", " + local + ", " + noWizards + ")");
+        System.err.println("InvidDBField[" + toString() + ".deleteElement(" + index + ", " + local + ", " + noWizards + ")");
       }
 
     Vector values = getVectVal();
@@ -3572,16 +3572,16 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!noWizards && !local && getGSession().enableOversight)
       {
-	// Wizard check
+        // Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.DELELEMENT, Integer.valueOf(index), null);
+        retVal = eObj.wizardHook(this, DBEditObject.DELELEMENT, Integer.valueOf(index), null);
 
-	// if a wizard intercedes, we are going to let it take the ball.
+        // if a wizard intercedes, we are going to let it take the ball.
 
-	if (ReturnVal.wizardHandled(retVal))
-	  {
-	    return retVal;
-	  }
+        if (ReturnVal.wizardHandled(retVal))
+          {
+            return retVal;
+          }
       }
 
     // ok, we're going to handle it.  Checkpoint
@@ -3594,84 +3594,84 @@ public final class InvidDBField extends DBField implements invid_field {
 
     try
       {
-	// if we are an edit in place object, we don't want to do an
-	// unbinding.. we'll do a deleteDBObject() below, instead.  The
-	// reason for this is that the deleteDBObject() code requires that
-	// the SchemaConstants.ContainerField field be intact to properly
-	// check permissions for embedded objects.
+        // if we are an edit in place object, we don't want to do an
+        // unbinding.. we'll do a deleteDBObject() below, instead.  The
+        // reason for this is that the deleteDBObject() code requires that
+        // the SchemaConstants.ContainerField field be intact to properly
+        // check permissions for embedded objects.
 
-	if (!getFieldDef().isEditInPlace())
-	  {
-	    retVal = ReturnVal.merge(retVal, unbind(remote, local));
+        if (!getFieldDef().isEditInPlace())
+          {
+            retVal = ReturnVal.merge(retVal, unbind(remote, local));
 
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		return retVal;
-	      }
-	  }
+            if (!ReturnVal.didSucceed(retVal))
+              {
+                return retVal;
+              }
+          }
 
-	// finalizeDeleteElement() just gives the DBEditObject a chance to
-	// approve or disapprove deleting an element from this field
+        // finalizeDeleteElement() just gives the DBEditObject a chance to
+        // approve or disapprove deleting an element from this field
 
-	retVal = ReturnVal.merge(retVal, eObj.finalizeDeleteElement(this, index));
+        retVal = ReturnVal.merge(retVal, eObj.finalizeDeleteElement(this, index));
 
-	if (ReturnVal.didSucceed(retVal))
-	  {
-	    if (getFieldDef().isEditInPlace())
-	      {
-		// We're edit in place.  We unlink an embedded object
-		// by deleting it, and letting the asymmetric link
-		// breaking logic in the server remove the deleted
-		// invids out of values for us by way of
-		// DBEditObject.finalizeRemove() and
-		// attemptAsymBackLinkClear().
+        if (ReturnVal.didSucceed(retVal))
+          {
+            if (getFieldDef().isEditInPlace())
+              {
+                // We're edit in place.  We unlink an embedded object
+                // by deleting it, and letting the asymmetric link
+                // breaking logic in the server remove the deleted
+                // invids out of values for us by way of
+                // DBEditObject.finalizeRemove() and
+                // attemptAsymBackLinkClear().
 
-		retVal = ReturnVal.merge(retVal, eObj.getDBSession().deleteDBObject(remote));
+                retVal = ReturnVal.merge(retVal, eObj.getDBSession().deleteDBObject(remote));
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    return retVal;	// go ahead and return our error code
-		  }
-	      }
-	    else
-	      {
-		values.removeElementAt(index);
-	      }
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    return retVal;      // go ahead and return our error code
+                  }
+              }
+            else
+              {
+                values.removeElementAt(index);
+              }
 
-	    // success
+            // success
 
-	    qr = null;	// Clear the cache to force the choices to be read again
-	    eObj.getDBSession().popCheckpoint(checkkey);
-	    checkpointed = false;
+            qr = null;  // Clear the cache to force the choices to be read again
+            eObj.getDBSession().popCheckpoint(checkkey);
+            checkpointed = false;
 
-	    return retVal;
-	  }
-	else
-	  {
-	    if (retVal.getDialog() != null)
-	      {
-		// "InvidDBField.deleteElement() - custom code rejected element deletion"
-		// "Custom code refused deletion of element {0} from field {1} in object {2}.\n\n{3}"
-		return Ganymede.createErrorDialog(ts.l("deleteElement.rejected"),
-						  ts.l("deleteElement.no_finalize", Integer.toString(index),
-						       getName(), owner.getLabel(), retVal.getDialog().getText()));
-	      }
-	    else
-	      {
-		// "InvidDBField.deleteElement() - custom code rejected element deletion"
-		// "Custom code refused deletion of element {0} from field {1} in object {2}."
-		return Ganymede.createErrorDialog(ts.l("deleteElement.rejected"),
-						  ts.l("deleteElement.no_finalize_no_text",
-						       Integer.toString(index), getName(), owner.getLabel()));
-	      }
-	  }
+            return retVal;
+          }
+        else
+          {
+            if (retVal.getDialog() != null)
+              {
+                // "InvidDBField.deleteElement() - custom code rejected element deletion"
+                // "Custom code refused deletion of element {0} from field {1} in object {2}.\n\n{3}"
+                return Ganymede.createErrorDialog(ts.l("deleteElement.rejected"),
+                                                  ts.l("deleteElement.no_finalize", Integer.toString(index),
+                                                       getName(), owner.getLabel(), retVal.getDialog().getText()));
+              }
+            else
+              {
+                // "InvidDBField.deleteElement() - custom code rejected element deletion"
+                // "Custom code refused deletion of element {0} from field {1} in object {2}."
+                return Ganymede.createErrorDialog(ts.l("deleteElement.rejected"),
+                                                  ts.l("deleteElement.no_finalize_no_text",
+                                                       Integer.toString(index), getName(), owner.getLabel()));
+              }
+          }
       }
     finally
       {
-	if (checkpointed)
-	  {
-	    eObj.getDBSession().rollback(checkkey);
-	  }
+        if (checkpointed)
+          {
+            eObj.getDBSession().rollback(checkkey);
+          }
       }
   }
 
@@ -3704,13 +3704,13 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(local))
       {
-	return Ganymede.createErrorDialog("InvidDBField.deleteElements()",
-					  ts.l("global.no_perms", getName(), owner.getLabel()));
+        return Ganymede.createErrorDialog("InvidDBField.deleteElements()",
+                                          ts.l("global.no_perms", getName(), owner.getLabel()));
       }
 
     if (!isVector())
       {
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     currentValues = getVectVal();
@@ -3722,8 +3722,8 @@ public final class InvidDBField extends DBField implements invid_field {
     if (notPresent.size() != 0)
       {
         // "Field {0} can''t remove non-present items: {1}."
-	return Ganymede.createErrorDialog("InvidDBField.deleteElements()",
-					  ts.l("deleteElements.not_found",
+        return Ganymede.createErrorDialog("InvidDBField.deleteElements()",
+                                          ts.l("deleteElements.not_found",
                                                getName(),
                                                VectorUtils.vectorString(notPresent)));
       }
@@ -3734,16 +3734,16 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!noWizards && !local && getGSession().enableOversight)
       {
-	// Wizard check
+        // Wizard check
 
-	retVal = eObj.wizardHook(this, DBEditObject.DELELEMENTS, valuesToDelete, null);
+        retVal = eObj.wizardHook(this, DBEditObject.DELELEMENTS, valuesToDelete, null);
 
-	// if a wizard intercedes, we are going to let it take the ball.
+        // if a wizard intercedes, we are going to let it take the ball.
 
-	if (ReturnVal.wizardHandled(retVal))
-	  {
-	    return retVal;
-	  }
+        if (ReturnVal.wizardHandled(retVal))
+          {
+            return retVal;
+          }
       }
 
     // ok, we're going to handle it.  Checkpoint
@@ -3756,83 +3756,83 @@ public final class InvidDBField extends DBField implements invid_field {
 
     try
       {
-	if (!getFieldDef().isEditInPlace())
-	  {
-	    for (int i = 0; i < valuesToDelete.size(); i++)
-	      {
-		Invid remote = (Invid) valuesToDelete.elementAt(i);
+        if (!getFieldDef().isEditInPlace())
+          {
+            for (int i = 0; i < valuesToDelete.size(); i++)
+              {
+                Invid remote = (Invid) valuesToDelete.elementAt(i);
 
-		retVal = ReturnVal.merge(retVal, unbind(remote, local));
+                retVal = ReturnVal.merge(retVal, unbind(remote, local));
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    return retVal;
-		  }
-	      }
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    return retVal;
+                  }
+              }
 
-	    // We call finalizeDeleteElements() as our last optional
-	    // step, as we are meant to guarantee performance if
-	    // finalizeDeleteElements() returns a positive result.
+            // We call finalizeDeleteElements() as our last optional
+            // step, as we are meant to guarantee performance if
+            // finalizeDeleteElements() returns a positive result.
 
-	    retVal = ReturnVal.merge(retVal, eObj.finalizeDeleteElements(this, valuesToDelete));
+            retVal = ReturnVal.merge(retVal, eObj.finalizeDeleteElements(this, valuesToDelete));
 
-	    if (ReturnVal.didSucceed(retVal))
-	      {
-		for (int i = 0; i < valuesToDelete.size(); i++)
-		  {
-		    currentValues.removeElement(valuesToDelete.elementAt(i));
-		  }
+            if (ReturnVal.didSucceed(retVal))
+              {
+                for (int i = 0; i < valuesToDelete.size(); i++)
+                  {
+                    currentValues.removeElement(valuesToDelete.elementAt(i));
+                  }
 
-		qr = null;
-		success = true;
-	      }
+                qr = null;
+                success = true;
+              }
 
             return retVal;
-	  }
-	else
-	  {
-	    // We're edit in place.  We unlink an embedded object
-	    // by deleting it, and letting the asymmetric link
-	    // breaking logic in the server remove the deleted
-	    // invids out of values for us by way of
-	    // DBEditObject.finalizeRemove() and
-	    // attemptAsymBackLinkClear().
+          }
+        else
+          {
+            // We're edit in place.  We unlink an embedded object
+            // by deleting it, and letting the asymmetric link
+            // breaking logic in the server remove the deleted
+            // invids out of values for us by way of
+            // DBEditObject.finalizeRemove() and
+            // attemptAsymBackLinkClear().
 
-	    for (int i = 0; i < valuesToDelete.size(); i++)
-	      {
-		Invid remote = (Invid) valuesToDelete.elementAt(i);
+            for (int i = 0; i < valuesToDelete.size(); i++)
+              {
+                Invid remote = (Invid) valuesToDelete.elementAt(i);
 
-		retVal = ReturnVal.merge(retVal, eObj.getDBSession().deleteDBObject(remote));
+                retVal = ReturnVal.merge(retVal, eObj.getDBSession().deleteDBObject(remote));
 
-		if (!ReturnVal.didSucceed(retVal))
-		  {
-		    return retVal;
-		  }
-	      }
+                if (!ReturnVal.didSucceed(retVal))
+                  {
+                    return retVal;
+                  }
+              }
 
-	    retVal = ReturnVal.merge(retVal, eObj.finalizeDeleteElements(this, valuesToDelete));
+            retVal = ReturnVal.merge(retVal, eObj.finalizeDeleteElements(this, valuesToDelete));
 
-	    if (!ReturnVal.didSucceed(retVal))
-	      {
-		return retVal;
-	      }
+            if (!ReturnVal.didSucceed(retVal))
+              {
+                return retVal;
+              }
 
-	    qr = null;
-	    success = true;
+            qr = null;
+            success = true;
 
-	    return retVal;
-	  }
+            return retVal;
+          }
       }
     finally
       {
-	if (success)
-	  {
-	    eObj.getDBSession().popCheckpoint(checkkey);
-	  }
-	else
-	  {
-	    eObj.getDBSession().rollback(checkkey);
-	  }
+        if (success)
+          {
+            eObj.getDBSession().popCheckpoint(checkkey);
+          }
+        else
+          {
+            eObj.getDBSession().rollback(checkkey);
+          }
       }
   }
 
@@ -3873,7 +3873,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isVector())
       {
-	throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
+        throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
     Vector values = getVectVal();
@@ -3882,48 +3882,48 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (gsession == null)
       {
-	gsession = Ganymede.internalSession;
+        gsession = Ganymede.internalSession;
       }
 
     for (int i = 0; i < values.size(); i++)
       {
-	invid = (Invid) values.elementAt(i);
+        invid = (Invid) values.elementAt(i);
 
-	if (gsession != null)
-	  {
-	    object = gsession.getDBSession().viewDBObject(invid);
+        if (gsession != null)
+          {
+            object = gsession.getDBSession().viewDBObject(invid);
 
-	    if (object == null)
-	      {
-		Ganymede.debug(ts.l("encodedValues.bad_invid", owner.getLabel(), getName(), invid));
+            if (object == null)
+              {
+                Ganymede.debug(ts.l("encodedValues.bad_invid", owner.getLabel(), getName(), invid));
 
-		label = invid.toString();
-	      }
-	    else
-	      {
-		// use lookupLabel because our owner may wish to construct a custom
-		// label for the object.. different objects may display the name
-		// of a referenced object differently.
+                label = invid.toString();
+              }
+            else
+              {
+                // use lookupLabel because our owner may wish to construct a custom
+                // label for the object.. different objects may display the name
+                // of a referenced object differently.
 
-		if (owner instanceof DBEditObject)
-		  {
-		    label = owner.lookupLabel(object);
-		  }
-		else
-		  {
-		    label = owner.getBase().getObjectHook().lookupLabel(object);
-		  }
-	      }
-	  }
-	else
-	  {
-	    label = invid.toString();
-	  }
+                if (owner instanceof DBEditObject)
+                  {
+                    label = owner.lookupLabel(object);
+                  }
+                else
+                  {
+                    label = owner.getBase().getObjectHook().lookupLabel(object);
+                  }
+              }
+          }
+        else
+          {
+            label = invid.toString();
+          }
 
-	if (label != null)
-	  {
-	    results.addRow(invid, label, false); // we're not going to report the values as editable here
-	  }
+        if (label != null)
+          {
+            results.addRow(invid, label, false); // we're not going to report the values as editable here
+          }
       }
 
     return results;
@@ -3953,11 +3953,11 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     if (owner instanceof DBEditObject)
       {
-	return ((DBEditObject) owner).mustChoose(this);
+        return ((DBEditObject) owner).mustChoose(this);
       }
     else
       {
-	throw new IllegalArgumentException(ts.l("global.non_editable"));
+        throw new IllegalArgumentException(ts.l("global.non_editable"));
       }
   }
 
@@ -3970,7 +3970,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
   public QueryResult choices() throws NotLoggedInException
   {
-    return choices(true);	// by default, the filters are on
+    return choices(true);       // by default, the filters are on
   }
 
   /**
@@ -3988,7 +3988,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(true))
       {
-	throw new IllegalArgumentException(ts.l("global.non_editable"));
+        throw new IllegalArgumentException(ts.l("global.non_editable"));
       }
 
     // if choices is called, the client has asked to get
@@ -4003,7 +4003,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (applyFilter)
       {
-	qr = getGSession().filterQueryResult(qr);
+        qr = getGSession().filterQueryResult(qr);
       }
 
     return qr;
@@ -4025,25 +4025,25 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     if (owner instanceof DBEditObject)
       {
-	Object key = ((DBEditObject) owner).obtainChoicesKey(this);
+        Object key = ((DBEditObject) owner).obtainChoicesKey(this);
 
-	// we have to be careful not to let the client try to use
-	// its cache if our choices() method will return items that
-	// they would normally not be able to access
+        // we have to be careful not to let the client try to use
+        // its cache if our choices() method will return items that
+        // they would normally not be able to access
 
-	if (key != null)
-	  {
-	    if (((DBEditObject) owner).choiceListHasExceptions(this))
-	      {
-		return null;
-	      }
-	  }
+        if (key != null)
+          {
+            if (((DBEditObject) owner).choiceListHasExceptions(this))
+              {
+                return null;
+              }
+          }
 
-	return key;
+        return key;
       }
     else
       {
-	return null;
+        return null;
       }
   }
 
@@ -4100,89 +4100,89 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (debug)
       {
-	System.err.print("InvidDBField.verifyNewValue(");
+        System.err.print("InvidDBField.verifyNewValue(");
 
-	if (o instanceof Invid)
-	  {
-	    System.err.print(Ganymede.internalSession.getDBSession().getObjectLabel((Invid) o));
-	  }
-	else
-	  {
-	    System.err.print(o);
-	  }
+        if (o instanceof Invid)
+          {
+            System.err.print(Ganymede.internalSession.getDBSession().getObjectLabel((Invid) o));
+          }
+        else
+          {
+            System.err.print(o);
+          }
 
-	System.err.println(")");
+        System.err.println(")");
       }
 
     if (!isEditable(true))
       {
-	return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
-					  ts.l("global.no_perms", getName(), owner.getLabel()));
+        return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
+                                          ts.l("global.no_perms", getName(), owner.getLabel()));
       }
 
     eObj = (DBEditObject) owner;
 
     if (!verifyTypeMatch(o))
       {
-	return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
-					  ts.l("verifyNewValue.bad_type", o, getName(), owner.getLabel()));
+        return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
+                                          ts.l("verifyNewValue.bad_type", o, getName(), owner.getLabel()));
       }
 
     inv = (Invid) o;
 
     if (inv != null)
       {
-	if (limited() && (getTargetBase() != -2) &&
-	    (inv.getType() != getTargetBase()))
-	  {
-	    // the invid points to an object of the wrong type
+        if (limited() && (getTargetBase() != -2) &&
+            (inv.getType() != getTargetBase()))
+          {
+            // the invid points to an object of the wrong type
 
-	    return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
-					      ts.l("verifyNewValue.bad_object_type", inv, getName(), owner.getLabel(), Integer.toString(getTargetBase())));
-	  }
+            return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
+                                              ts.l("verifyNewValue.bad_object_type", inv, getName(), owner.getLabel(), Integer.toString(getTargetBase())));
+          }
 
-	if (!local && mustChoose())
-	  {
-	    if (qr == null && eObj.getDBSession().isInteractive())
-	      {
-		try
-		  {
-		    qr = eObj.obtainChoiceList(this); // allow any value, even if filtered
-		  }
-		catch (NotLoggedInException ex)
-		  {
-		    return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
-						      ts.l("global.not_logged_in"));
-		  }
-	      }
+        if (!local && mustChoose())
+          {
+            if (qr == null && eObj.getDBSession().isInteractive())
+              {
+                try
+                  {
+                    qr = eObj.obtainChoiceList(this); // allow any value, even if filtered
+                  }
+                catch (NotLoggedInException ex)
+                  {
+                    return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
+                                                      ts.l("global.not_logged_in"));
+                  }
+              }
 
-	    if (qr != null)
-	      {
-		if (debug)
-		  {
-		    Ganymede.debug("InvidDBField.verifyNewValue(): searching for matching choice");
-		  }
+            if (qr != null)
+              {
+                if (debug)
+                  {
+                    Ganymede.debug("InvidDBField.verifyNewValue(): searching for matching choice");
+                  }
 
-		if (!qr.containsInvid(inv))
-		  {
-		    String invLabel = Ganymede.internalSession.getDBSession().getObjectLabel(inv);
+                if (!qr.containsInvid(inv))
+                  {
+                    String invLabel = Ganymede.internalSession.getDBSession().getObjectLabel(inv);
 
-		    if (invLabel == null)
-		      {
-			invLabel = inv.toString();
-		      }
+                    if (invLabel == null)
+                      {
+                        invLabel = inv.toString();
+                      }
 
-		    if (debug)
-		      {
-			System.err.println("InvidDBField.verifyNewValue(" + invLabel + "): didn't match against");
-			System.err.println(qr);
-		      }
+                    if (debug)
+                      {
+                        System.err.println("InvidDBField.verifyNewValue(" + invLabel + "): didn't match against");
+                        System.err.println(qr);
+                      }
 
-		    return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
-						      ts.l("verifyNewValue.bad_choice", invLabel, getName(), owner.getLabel()));
-		  }
-	      }
-	  }
+                    return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
+                                                      ts.l("verifyNewValue.bad_choice", invLabel, getName(), owner.getLabel()));
+                  }
+              }
+          }
       }
 
     // have our parent make the final ok on the value
@@ -4202,37 +4202,37 @@ public final class InvidDBField extends DBField implements invid_field {
 
     for (DBField siblingField: ownerFields)
       {
-	if (siblingField == this)
-	  {
-	    continue;
-	  }
+        if (siblingField == this)
+          {
+            continue;
+          }
 
-	if (!siblingField.getFieldDef().isInvid() || siblingField.getFieldDef().isSymmetric())
-	  {
-	    continue;
-	  }
+        if (!siblingField.getFieldDef().isInvid() || siblingField.getFieldDef().isSymmetric())
+          {
+            continue;
+          }
 
-	if (siblingField.isVector())
-	  {
-	    if (siblingField.containsElementLocal(target))
-	      {
-		lastLink = false;
-		break;
-	      }
-	  }
-	else
-	  {
-	    if (target.equals(siblingField.value))
-	      {
-		lastLink = false;
-		break;
-	      }
-	  }
+        if (siblingField.isVector())
+          {
+            if (siblingField.containsElementLocal(target))
+              {
+                lastLink = false;
+                break;
+              }
+          }
+        else
+          {
+            if (target.equals(siblingField.value))
+              {
+                lastLink = false;
+                break;
+              }
+          }
       }
 
     if (lastLink)
       {
-	Ganymede.db.aSymLinkTracker.unlinkObject(getDBSession(), target, owner.getInvid());
+        Ganymede.db.aSymLinkTracker.unlinkObject(getDBSession(), target, owner.getInvid());
       }
   }
 }

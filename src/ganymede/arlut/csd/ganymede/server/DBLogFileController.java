@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -117,7 +117,7 @@ public class DBLogFileController implements DBLogController {
     logStream = new FileOutputStream(logFileName, true); // append
     logWriter = new PrintWriter(logStream, true); // auto-flush on newline
 
-    logWriter.println();	// emit newline to terminate any incomplete entry
+    logWriter.println();        // emit newline to terminate any incomplete entry
   }
 
   /**
@@ -155,43 +155,43 @@ public class DBLogFileController implements DBLogController {
 
     if (event.admin != null)
       {
-	writeStr(logWriter, event.admin.toString());
+        writeStr(logWriter, event.admin.toString());
       }
 
     writeSep(logWriter);
 
     if (event.adminName != null)
       {
-	writeStr(logWriter, event.adminName);
+        writeStr(logWriter, event.adminName);
       }
 
     writeSep(logWriter);
 
     if (event.transactionID != null)
       {
-	writeStr(logWriter, event.transactionID);
+        writeStr(logWriter, event.transactionID);
       }
 
     writeSep(logWriter);
 
     if (event.getInvids() != null)
       {
-	for (int i = 0; i < event.getInvids().size(); i++)
-	  {
-	    if (i > 0)
-	      {
-		logWriter.print(',');
-	      }
+        for (int i = 0; i < event.getInvids().size(); i++)
+          {
+            if (i > 0)
+              {
+                logWriter.print(',');
+              }
 
-	    writeStr(logWriter, event.getInvids().get(i).toString());
-	  }
+            writeStr(logWriter, event.getInvids().get(i).toString());
+          }
       }
 
     writeSep(logWriter);
 
     if (event.description != null)
       {
-	writeStr(logWriter, event.description);
+        writeStr(logWriter, event.description);
       }
 
     writeSep(logWriter);
@@ -234,13 +234,13 @@ public class DBLogFileController implements DBLogController {
    */
 
   public synchronized StringBuffer retrieveHistory(Invid invid, Date sinceTime, Date beforeTime,
-						   boolean keyOnAdmin,
+                                                   boolean keyOnAdmin,
                                                    boolean fullTransactions,
                                                    boolean getLoginEvents)
   {
     if (logFileName == null)
       {
-	throw new IllegalArgumentException("DBLogFileController: no filename specified");
+        throw new IllegalArgumentException("DBLogFileController: no filename specified");
       }
 
     StringBuffer buffer = new StringBuffer();
@@ -259,7 +259,7 @@ public class DBLogFileController implements DBLogController {
 
     if (sinceTime != null)
       {
-	sinceLong = sinceTime.getTime();
+        sinceLong = sinceTime.getTime();
       }
 
     if (beforeTime != null)
@@ -336,70 +336,70 @@ public class DBLogFileController implements DBLogController {
                                                           loginArg,
                                                           invidArgs);  // invid must be last for back compat
         
-	java.lang.Runtime runtime = java.lang.Runtime.getRuntime();
+        java.lang.Runtime runtime = java.lang.Runtime.getRuntime();
 
-	try
-	  {
-	    java.lang.Process helperProcess;
+        try
+          {
+            java.lang.Process helperProcess;
 
             helperProcess = runtime.exec(paramArgs);
 
-	    in = new BufferedReader(new InputStreamReader(helperProcess.getInputStream()));
-	  }
-	catch (IOException ex)
-	  {
-	    System.err.println("DBLog.retrieveHistory(): Couldn't use helperProcess " + 
-			       Ganymede.logHelperProperty);
-	    in = null;
-	  }
+            in = new BufferedReader(new InputStreamReader(helperProcess.getInputStream()));
+          }
+        catch (IOException ex)
+          {
+            System.err.println("DBLog.retrieveHistory(): Couldn't use helperProcess " + 
+                               Ganymede.logHelperProperty);
+            in = null;
+          }
       }
     
     if (in == null)
       {
-	try
-	  {
-	    reader = new FileReader(logFileName);
-	  }
-	catch (FileNotFoundException ex)
-	  {
-	    return null;
-	  }
+        try
+          {
+            reader = new FileReader(logFileName);
+          }
+        catch (FileNotFoundException ex)
+          {
+            return null;
+          }
 
-	in = new BufferedReader(reader);
+        in = new BufferedReader(reader);
       }
 
     /* -- */
 
     try
       {
-	while (true)
-	  {
-	    line = in.readLine();
+        while (true)
+          {
+            line = in.readLine();
 
-	    if (line == null)
-	      {
-		break;
-	      }
+            if (line == null)
+              {
+                break;
+              }
 
-	    if (line.trim().equals(""))
-	      {
-		continue;
-	      }
+            if (line.trim().equals(""))
+              {
+                continue;
+              }
 
-	    // check to see if we've gotten to the requested start point
+            // check to see if we've gotten to the requested start point
 
             if ((sinceTime != null && !afterSinceTime) || beforeTime != null)
               {
-		dateString = line.substring(0, line.indexOf('|'));
+                dateString = line.substring(0, line.indexOf('|'));
     
-		try
-		  {
-		    timeCode = new Long(dateString).longValue();
-		  }
-		catch (NumberFormatException ex)
-		  {
-		    throw new IOException("couldn't parse time code");
-		  }
+                try
+                  {
+                    timeCode = new Long(dateString).longValue();
+                  }
+                catch (NumberFormatException ex)
+                  {
+                    throw new IOException("couldn't parse time code");
+                  }
 
                 if (sinceTime != null && timeCode < sinceLong)
                   {
@@ -413,7 +413,7 @@ public class DBLogFileController implements DBLogController {
                   }
               }
 
-	    event = parseEvent(line);
+            event = parseEvent(line);
 
             if (invid.getType() == SchemaConstants.UserBase)
               {
@@ -432,100 +432,100 @@ public class DBLogFileController implements DBLogController {
                   }
               }
 
-	    boolean found = false;
+            boolean found = false;
 
-	    if (keyOnAdmin)
-	      {
-		if (event.admin != null)
-		  {
-		    found = invid.equals(event.admin);
-		  }
-	      }
-	    else
-	      {
-		for (int i = 0; !found && i < event.getInvids().size(); i++)
-		  {
-		    if (invid.equals(event.getInvids().get(i)))
-		      {
-			found = true;
-		      }
-		  }
-		
-		if (transactionID != null)
-		  {
-		    if (transactionID.equals(event.transactionID))
-		      {
-			if (fullTransactions || event.eventClassToken.equals("finishtransaction"))
-			  {
-			    found = true;
-			  }
-		      }
-		  }
-	      }
+            if (keyOnAdmin)
+              {
+                if (event.admin != null)
+                  {
+                    found = invid.equals(event.admin);
+                  }
+              }
+            else
+              {
+                for (int i = 0; !found && i < event.getInvids().size(); i++)
+                  {
+                    if (invid.equals(event.getInvids().get(i)))
+                      {
+                        found = true;
+                      }
+                  }
+                
+                if (transactionID != null)
+                  {
+                    if (transactionID.equals(event.transactionID))
+                      {
+                        if (fullTransactions || event.eventClassToken.equals("finishtransaction"))
+                          {
+                            found = true;
+                          }
+                      }
+                  }
+              }
 
-	    if (found)
-	      {
-		if (event.eventClassToken.equals("starttransaction"))
-		  {
-		    transactionID = event.transactionID;
+            if (found)
+              {
+                if (event.eventClassToken.equals("starttransaction"))
+                  {
+                    transactionID = event.transactionID;
 
-		    // "---------- Transaction {0}: {1} ----------\n\n"
-		    buffer.append(ts.l("retrieveHistory.start_trans", event.time, event.adminName));
-		  }
-		else if (event.eventClassToken.equals("finishtransaction"))
-		  {
-		    transactionID = null;
+                    // "---------- Transaction {0}: {1} ----------\n\n"
+                    buffer.append(ts.l("retrieveHistory.start_trans", event.time, event.adminName));
+                  }
+                else if (event.eventClassToken.equals("finishtransaction"))
+                  {
+                    transactionID = null;
 
-		    // "---------- End Transaction {0}: {1} ----------\n\n"
-		    buffer.append(ts.l("retrieveHistory.end_trans", event.time, event.adminName));
-		  }
-		else if (event.eventClassToken.equals("comment"))
-		  {
-		    // "\n{0}\n\n"
-		    buffer.append(ts.l("retrieveHistory.comment",
-				       WordWrap.wrap(event.description, 78)));
-		  }
-		else if (transactionID != null)
-		  {
-		    // "{0}\n{1}\n"
-		    buffer.append(ts.l("retrieveHistory.entry",
-				       event.eventClassToken, WordWrap.wrap(event.description, 78, "\t")));
-		  }
-		else
-		  {
-		    // "{0,date}: {1} {2}{3}\n"
-		    buffer.append(ts.l("retrieveHistory.standalone_entry",
-				       event.time, event.adminName, event.eventClassToken, WordWrap.wrap(event.description,78, "\t")));
-		  }
-	      }
-	  }
+                    // "---------- End Transaction {0}: {1} ----------\n\n"
+                    buffer.append(ts.l("retrieveHistory.end_trans", event.time, event.adminName));
+                  }
+                else if (event.eventClassToken.equals("comment"))
+                  {
+                    // "\n{0}\n\n"
+                    buffer.append(ts.l("retrieveHistory.comment",
+                                       WordWrap.wrap(event.description, 78)));
+                  }
+                else if (transactionID != null)
+                  {
+                    // "{0}\n{1}\n"
+                    buffer.append(ts.l("retrieveHistory.entry",
+                                       event.eventClassToken, WordWrap.wrap(event.description, 78, "\t")));
+                  }
+                else
+                  {
+                    // "{0,date}: {1} {2}{3}\n"
+                    buffer.append(ts.l("retrieveHistory.standalone_entry",
+                                       event.time, event.adminName, event.eventClassToken, WordWrap.wrap(event.description,78, "\t")));
+                  }
+              }
+          }
       }
     catch (IOException ex)
       {
-	// eof
+        // eof
       }
     finally
       {
-	try
-	  {
-	    in.close();
-	  }
-	catch (IOException ex)
-	  {
-	    // shrug
-	  }
+        try
+          {
+            in.close();
+          }
+        catch (IOException ex)
+          {
+            // shrug
+          }
 
-	try
-	  {
-	    if (reader != null)
-	      {
-		reader.close();
-	      }
-	  }
-	catch (IOException ex)
-	  {
-	    // shrug
-	  }
+        try
+          {
+            if (reader != null)
+              {
+                reader.close();
+              }
+          }
+        catch (IOException ex)
+          {
+            // shrug
+          }
       }
 
     return buffer;
@@ -550,7 +550,7 @@ public class DBLogFileController implements DBLogController {
 
     if (line == null || (line.trim().equals("")))
       {
-	throw new IOException("empty log line");
+        throw new IOException("empty log line");
       }
 
     //    System.out.println("Trying to create DBLogEvent: " + line);
@@ -561,24 +561,24 @@ public class DBLogFileController implements DBLogController {
 
     if (i == -1)
       {
-	throw new IOException("malformed log line: " + line);
+        throw new IOException("malformed log line: " + line);
       }
 
     dateString = line.substring(0, i);
     
     try
       {
-	timeCode = new Long(dateString).longValue();
+        timeCode = new Long(dateString).longValue();
       }
     catch (NumberFormatException ex)
       {
-	throw new IOException("couldn't parse time code");
+        throw new IOException("couldn't parse time code");
       }
     
     event.time = new Date(timeCode);
     
     j = i+1;
-    i = scanSep(cary, j);	// find next |, skip human readable date
+    i = scanSep(cary, j);       // find next |, skip human readable date
     
     j = i+1;
     i = scanSep(cary, j);
@@ -592,13 +592,13 @@ public class DBLogFileController implements DBLogController {
     
     if (!tmp.equals(""))
       {
-	event.admin = Invid.createInvid(tmp);	// get admin invid
+        event.admin = Invid.createInvid(tmp);   // get admin invid
       }
     else
       {
-	// we have to be sure to do this.
+        // we have to be sure to do this.
 
-	event.admin = null;
+        event.admin = null;
       }
 
     j = i+1;
@@ -676,18 +676,18 @@ public class DBLogFileController implements DBLogController {
 
     for (int i = 0; i < ary.length; i++)
       {
-	if (ary[i] == '\n')
-	  {
-	    buf.append("\\n");
-	  }
-	else if (ary[i] == '\\')
-	  {
-	    buf.append("\\\\");
-	  }
-	else
-	  {
-	    buf.append(ary[i]);
-	  }
+        if (ary[i] == '\n')
+          {
+            buf.append("\\n");
+          }
+        else if (ary[i] == '\\')
+          {
+            buf.append("\\\\");
+          }
+        else
+          {
+            buf.append(ary[i]);
+          }
       }
 
     return buf.toString();
@@ -708,10 +708,10 @@ public class DBLogFileController implements DBLogController {
 
     for (i = startIndex; (i < line.length) && (line[i] != '|'); i++)
       {
-	if (line[i] == '\\')	// skip backslashing
-	  {
-	    i++;
-	  }
+        if (line[i] == '\\')    // skip backslashing
+          {
+            i++;
+          }
       }
 
     return i;
@@ -730,18 +730,18 @@ public class DBLogFileController implements DBLogController {
 
     for (int i = startIndex; (i < line.length) && (line[i] != '|'); i++)
       {
-	if (line[i] == '\\')	// skip backslashing
-	  {
-	    i++;
+        if (line[i] == '\\')    // skip backslashing
+          {
+            i++;
 
-	    if (line[i] == 'n')
-	      {
-		buf.append('\n');
-		continue;
-	      }
-	  }
+            if (line[i] == 'n')
+              {
+                buf.append('\n');
+                continue;
+              }
+          }
 
-	buf.append(line[i]);
+        buf.append(line[i]);
       }
 
     return buf.toString();
@@ -770,38 +770,38 @@ public class DBLogFileController implements DBLogController {
 
     for (i = startIndex; (i < line.length) && (line[i] != '|'); i++)
       {
-	if (line[i] == '\\')	// skip backslashing
-	  {
-	    i++;		// assume no newlines in object list
-	  }
+        if (line[i] == '\\')    // skip backslashing
+          {
+            i++;                // assume no newlines in object list
+          }
 
-	if (line[i] == ',')
-	  {
-	    if (buf.length() != 0)
-	      {
-		result.addElement(Invid.createInvid(buf.toString()));
-		buf = new StringBuilder();
-	      }
-	  }
-	else
-	  {
-	    buf.append(line[i]);
-	  }
+        if (line[i] == ',')
+          {
+            if (buf.length() != 0)
+              {
+                result.addElement(Invid.createInvid(buf.toString()));
+                buf = new StringBuilder();
+              }
+          }
+        else
+          {
+            buf.append(line[i]);
+          }
       }
 
     try
       {
-	if (line[i] == '|')
-	  {
-	    if (buf.length() != 0)
-	      {
-		result.addElement(Invid.createInvid(buf.toString()));
-	      }
-	  }
+        if (line[i] == '|')
+          {
+            if (buf.length() != 0)
+              {
+                result.addElement(Invid.createInvid(buf.toString()));
+              }
+          }
       }
     catch (IndexOutOfBoundsException ex)
       {
-	System.err.println("bad parse on line " + new String(line));
+        System.err.println("bad parse on line " + new String(line));
       }
 
     return result;
@@ -830,23 +830,23 @@ public class DBLogFileController implements DBLogController {
 
     for (i = startIndex; (i < line.length) && (line[i] != '|'); i++)
       {
-	if (line[i] == '\\')	// skip backslashing
-	  {
-	    i++;
-	  }
+        if (line[i] == '\\')    // skip backslashing
+          {
+            i++;
+          }
 
-	if (line[i] == ',' || line[i] == '|')
-	  {
-	    if (buf.length() != 0)
-	      {
-		result.addElement(buf.toString());
-		buf = new StringBuilder();
-	      }
-	  }
-	else
-	  {
-	    buf.append(line[i]);
-	  }
+        if (line[i] == ',' || line[i] == '|')
+          {
+            if (buf.length() != 0)
+              {
+                result.addElement(buf.toString());
+                buf = new StringBuilder();
+              }
+          }
+        else
+          {
+            buf.append(line[i]);
+          }
       }
 
     return result;
@@ -863,11 +863,11 @@ public class DBLogFileController implements DBLogController {
 
     try
       {
-	logStream.getFD().sync();
+        logStream.getFD().sync();
       }
     catch (IOException ex)
       {
-	ex.printStackTrace();
+        ex.printStackTrace();
       }
   }
 
@@ -880,7 +880,7 @@ public class DBLogFileController implements DBLogController {
   {
     if (logWriter != null)
       {
-	logWriter.close();
+        logWriter.close();
       }
 
     logWriter = null;

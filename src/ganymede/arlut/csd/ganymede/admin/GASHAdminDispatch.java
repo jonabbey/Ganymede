@@ -9,7 +9,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -103,12 +103,12 @@ class GASHAdminDispatch implements Runnable {
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.admin.GASHAdminDispatch");
 
   private GASHAdminFrame frame = null;
-  private Server server = null;	// remote reference
-  private adminSession aSession = null;	// remote reference
+  private Server server = null; // remote reference
+  private adminSession aSession = null; // remote reference
 
   private boolean tasksLoaded = false;
 
-  private AdminAsyncResponder asyncPort = null;	// remote reference
+  private AdminAsyncResponder asyncPort = null; // remote reference
 
   private Thread asyncPollThread = null;
   private volatile boolean okayToPoll = false;
@@ -141,7 +141,7 @@ class GASHAdminDispatch implements Runnable {
 
     if (retVal == null || !retVal.didSucceed())
       {
-	return false;
+        return false;
       }
 
     aSession = retVal.getAdminSession();
@@ -151,15 +151,15 @@ class GASHAdminDispatch implements Runnable {
     // server *should* pass back a proper error report in the
     // ReturnVal, and this NullPointerException should
     // never be thrown.
-	
+        
     if (aSession == null)
       {
-	throw new NullPointerException("Bad null valued admin session received from server");
+        throw new NullPointerException("Bad null valued admin session received from server");
       }
 
     if (debug)
       {
-	System.err.println("Got Admin");
+        System.err.println("Got Admin");
       }
 
     return true;
@@ -169,11 +169,11 @@ class GASHAdminDispatch implements Runnable {
   {
     if (frame == null)
       {
-	frame = f;
+        frame = f;
       }
     else
       {
-	System.err.println("I already have a frame, thank you very much.");
+        System.err.println("I already have a frame, thank you very much.");
       }
   }
 
@@ -183,7 +183,7 @@ class GASHAdminDispatch implements Runnable {
 
     if (asyncPort == null)
       {
-	throw new RemoteException("Couldn't find admin console asyncPort");
+        throw new RemoteException("Couldn't find admin console asyncPort");
       }
 
     okayToPoll = true;
@@ -214,86 +214,86 @@ class GASHAdminDispatch implements Runnable {
 
     if (asyncPort == null)
       {
-	return;
+        return;
       }
 
     try
       {
-	while (okayToPoll)
-	  {
-	    events = asyncPort.getNextMsgs(); // will block on server
+        while (okayToPoll)
+          {
+            events = asyncPort.getNextMsgs(); // will block on server
 
-	    if (events == null || events.length == 0)
-	      {
-		return;
-	      }
+            if (events == null || events.length == 0)
+              {
+                return;
+              }
 
-	    for (int i = 0; i < events.length; i++)
-	      {
-		event = events[i];
+            for (int i = 0; i < events.length; i++)
+              {
+                event = events[i];
 
-		switch (event.getMethod())
-		  {
-		  case adminAsyncMessage.SETSERVERSTART:
-		    setServerStart((Date) event.getParam(0));
-		    break;
+                switch (event.getMethod())
+                  {
+                  case adminAsyncMessage.SETSERVERSTART:
+                    setServerStart((Date) event.getParam(0));
+                    break;
 
-		  case adminAsyncMessage.SETLASTDUMPTIME:
-		    setLastDumpTime((Date) event.getParam(0));
-		    break;
+                  case adminAsyncMessage.SETLASTDUMPTIME:
+                    setLastDumpTime((Date) event.getParam(0));
+                    break;
 
-		  case adminAsyncMessage.SETTRANSACTIONS:
-		    setTransactionsInJournal(event.getInt(0));
-		    break;
+                  case adminAsyncMessage.SETTRANSACTIONS:
+                    setTransactionsInJournal(event.getInt(0));
+                    break;
 
-		  case adminAsyncMessage.SETOBJSCHECKOUT:
-		    setObjectsCheckedOut(event.getInt(0));
-		    break;
+                  case adminAsyncMessage.SETOBJSCHECKOUT:
+                    setObjectsCheckedOut(event.getInt(0));
+                    break;
 
-		  case adminAsyncMessage.SETLOCKSHELD:
-		    setLocksHeld(event.getInt(0));
-		    break;
+                  case adminAsyncMessage.SETLOCKSHELD:
+                    setLocksHeld(event.getInt(0));
+                    break;
 
-		  case adminAsyncMessage.CHANGESTATE:
-		    changeState(event.getString(0));
-		    break;
+                  case adminAsyncMessage.CHANGESTATE:
+                    changeState(event.getString(0));
+                    break;
 
-		  case adminAsyncMessage.LOGAPPEND:
-		    logAppend(((StringBuffer) event.getParam(0)).toString());
-		    break;
+                  case adminAsyncMessage.LOGAPPEND:
+                    logAppend(((StringBuffer) event.getParam(0)).toString());
+                    break;
 
-		  case adminAsyncMessage.CHANGEADMINS:
-		    changeAdmins(event.getString(0));
-		    break;
+                  case adminAsyncMessage.CHANGEADMINS:
+                    changeAdmins(event.getString(0));
+                    break;
 
-		  case adminAsyncMessage.CHANGEUSERS:
-		    changeUsers(event.getParams());
-		    break;
+                  case adminAsyncMessage.CHANGEUSERS:
+                    changeUsers(event.getParams());
+                    break;
 
-		  case adminAsyncMessage.CHANGETASKS:
-		    changeTasks(event.getParams());
-		    break;
+                  case adminAsyncMessage.CHANGETASKS:
+                    changeTasks(event.getParams());
+                    break;
 
-		  case adminAsyncMessage.SETMEMORYSTATE:
-		    setMemoryState(event.getLong(0), event.getLong(1));
-		    break;
+                  case adminAsyncMessage.SETMEMORYSTATE:
+                    setMemoryState(event.getLong(0), event.getLong(1));
+                    break;
 
-		  case adminAsyncMessage.FORCEDISCONNECT:
-		    forceDisconnect(event.getString(0));
-		    break;
+                  case adminAsyncMessage.FORCEDISCONNECT:
+                    forceDisconnect(event.getString(0));
+                    break;
 
-		  default:
-		    System.err.println("Unrecognized adminAsyncMessage: " + event);
-		  }
-	      }
-	  }
+                  default:
+                    System.err.println("Unrecognized adminAsyncMessage: " + event);
+                  }
+              }
+          }
       }
     catch (RemoteException ex)
       {
       }
     finally
       {
-	asyncPort = null;
+        asyncPort = null;
       }
   }
 
@@ -306,19 +306,19 @@ class GASHAdminDispatch implements Runnable {
   {
     if (debug)
       {
-	System.err.println("GASHAdminDispatch.setServerStart()");
+        System.err.println("GASHAdminDispatch.setServerStart()");
       }
 
     if (frame == null)
       {
-	return;
+        return;
       }
 
     final Date lDate = date;
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-	frame.startField.setText(lDate.toString());
+        frame.startField.setText(lDate.toString());
       }
     });
   }
@@ -332,26 +332,26 @@ class GASHAdminDispatch implements Runnable {
   {
     if (debug)
       {
-	System.err.println("GASHAdminDispatch.setLastDumpTime()");
+        System.err.println("GASHAdminDispatch.setLastDumpTime()");
       }
 
     if (frame == null)
       {
-	return;
+        return;
       }
 
     final Date lDate = date;
     
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-	if (lDate == null)
-	  {
-	    frame.dumpField.setText("no dump since server start");
-	  }
-	else
-	  {
-	    frame.dumpField.setText(lDate.toString());
-	  }
+        if (lDate == null)
+          {
+            frame.dumpField.setText("no dump since server start");
+          }
+        else
+          {
+            frame.dumpField.setText(lDate.toString());
+          }
       }
     });
   }
@@ -366,19 +366,19 @@ class GASHAdminDispatch implements Runnable {
   {
     if (debug)
       {
-	System.err.println("GASHAdminDispatch.setTransactionsInJournal()");
+        System.err.println("GASHAdminDispatch.setTransactionsInJournal()");
       }
 
     if (frame == null)
       {
-	return;
+        return;
       }
 
     final int lTrans = trans;
     
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-	frame.journalField.setText("" + lTrans);
+        frame.journalField.setText("" + lTrans);
       }
     });
   }
@@ -392,19 +392,19 @@ class GASHAdminDispatch implements Runnable {
   {
     if (debug)
       {
-	System.err.println("GASHAdminDispatch.setObjectsCheckedOut()");
+        System.err.println("GASHAdminDispatch.setObjectsCheckedOut()");
       }
 
     if (frame == null)
       {
-	return;
+        return;
       }
 
     final int lObjs = objs;
     
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-	frame.checkedOutField.setText("" + lObjs);
+        frame.checkedOutField.setText("" + lObjs);
       }
     });
   }
@@ -418,19 +418,19 @@ class GASHAdminDispatch implements Runnable {
   {
     if (debug)
       {
-	System.err.println("GASHAdminDispatch.setLocksHeld()");
+        System.err.println("GASHAdminDispatch.setLocksHeld()");
       }
 
     if (frame == null)
       {
-	return;
+        return;
       }
 
     final int lLocks = locks;
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-	frame.locksField.setText("" + lLocks);
+        frame.locksField.setText("" + lLocks);
       }
     });
   }
@@ -444,12 +444,12 @@ class GASHAdminDispatch implements Runnable {
   {
     if (debug)
       {
-	System.err.println("GASHAdminDispatch.setMemoryState()");
+        System.err.println("GASHAdminDispatch.setMemoryState()");
       }
 
     if (frame == null)
       {
-	return;
+        return;
       }
 
     final long lFreeMemory = freeMemory;
@@ -457,13 +457,13 @@ class GASHAdminDispatch implements Runnable {
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-	String inuse = numberFormatter.format(lTotalMemory - lFreeMemory);
-	String free = numberFormatter.format(lFreeMemory);
-	String total = numberFormatter.format(lTotalMemory);
+        String inuse = numberFormatter.format(lTotalMemory - lFreeMemory);
+        String free = numberFormatter.format(lFreeMemory);
+        String total = numberFormatter.format(lTotalMemory);
 
-	frame.usedMemField.setText(inuse);
-	frame.freeMemField.setText(free);
-	frame.totalMemField.setText(total);
+        frame.usedMemField.setText(inuse);
+        frame.freeMemField.setText(free);
+        frame.totalMemField.setText(total);
       }
     });
   }
@@ -480,19 +480,19 @@ class GASHAdminDispatch implements Runnable {
   {
     if (debug)
       {
-	System.err.println("GASHAdminDispatch.logAppend()");
+        System.err.println("GASHAdminDispatch.logAppend()");
       }
 
     if (frame == null)
       {
-	return;
+        return;
       }
 
     final String lStatus = status;
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-	frame.appendStyledLogText(lStatus);
+        frame.appendStyledLogText(lStatus);
       }
     });
   }
@@ -506,19 +506,19 @@ class GASHAdminDispatch implements Runnable {
   {
     if (debug)
       {
-	System.err.println("GASHAdminDispatch.changeAdmins()");
+        System.err.println("GASHAdminDispatch.changeAdmins()");
       }
 
     if (frame == null)
       {
-	return;
+        return;
       }
 
     final String lAdminStatus = adminStatus;
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-	frame.adminField.setText(lAdminStatus);
+        frame.adminField.setText(lAdminStatus);
       }
     });
   }
@@ -532,19 +532,19 @@ class GASHAdminDispatch implements Runnable {
   {
     if (debug)
       {
-	System.err.println("GASHAdminDispatch.changeState()");
+        System.err.println("GASHAdminDispatch.changeState()");
       }
 
     if (frame == null)
       {
-	return;
+        return;
       }
 
     final String lState = state;
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-	frame.stateField.setText(lState);
+        frame.stateField.setText(lState);
       }
     });
   }
@@ -561,12 +561,12 @@ class GASHAdminDispatch implements Runnable {
   {
     if (debug)
       {
-	System.err.println("GASHAdminDispatch.changeUsers()");
+        System.err.println("GASHAdminDispatch.changeUsers()");
       }
 
     if (frame == null)
       {
-	return;
+        return;
       }
 
     /* -- */
@@ -579,60 +579,60 @@ class GASHAdminDispatch implements Runnable {
 
     try
       {
-	SwingUtilities.invokeAndWait(new Runnable() {
-	  public void run() {
+        SwingUtilities.invokeAndWait(new Runnable() {
+          public void run() {
 
-	    AdminEntry e;
-	    frame.table.clearCells();
+            AdminEntry e;
+            frame.table.clearCells();
     
-	    // Process entries from the server
+            // Process entries from the server
 
-	    for (int i = 0; i < localEntries.length; i++)
-	      {
-		e = (AdminEntry) localEntries[i];
+            for (int i = 0; i < localEntries.length; i++)
+              {
+                e = (AdminEntry) localEntries[i];
 
-		frame.table.newRow(e.sessionName);
+                frame.table.newRow(e.sessionName);
 
-		// the sessionName from the AdminEntry is constant,
-		// and gives us a unique session name for the session.
-		//
-		// if we don't have a persona name, we'll display that
-		// unique session name, otherwise we'll show the
-		// user's persona name, so as to show the user's
-		// active privilege level.
-		//
-		// either way, the table tracks the unique session
-		// name for us, so that when the user right-clicks on
-		// the entry to kick a user off, the proper session is
-		// targeted.
+                // the sessionName from the AdminEntry is constant,
+                // and gives us a unique session name for the session.
+                //
+                // if we don't have a persona name, we'll display that
+                // unique session name, otherwise we'll show the
+                // user's persona name, so as to show the user's
+                // active privilege level.
+                //
+                // either way, the table tracks the unique session
+                // name for us, so that when the user right-clicks on
+                // the entry to kick a user off, the proper session is
+                // targeted.
 
-		if (e.personaName == null || e.personaName.equals(""))
-		  {
-		    frame.table.setCellText(e.sessionName, 0, e.sessionName, false);
-		  }
-		else
-		  {
-		    frame.table.setCellText(e.sessionName, 0, e.personaName, false);
-		  }
+                if (e.personaName == null || e.personaName.equals(""))
+                  {
+                    frame.table.setCellText(e.sessionName, 0, e.sessionName, false);
+                  }
+                else
+                  {
+                    frame.table.setCellText(e.sessionName, 0, e.personaName, false);
+                  }
 
-		frame.table.setCellText(e.sessionName, 1, e.hostname, false);
-		frame.table.setCellText(e.sessionName, 2, e.status, false);
-		frame.table.setCellText(e.sessionName, 3, e.connecttime, false);
-		frame.table.setCellText(e.sessionName, 4, e.event, false);
-		frame.table.setCellText(e.sessionName, 5, Integer.toString(e.objectsCheckedOut), false);
-	      }
+                frame.table.setCellText(e.sessionName, 1, e.hostname, false);
+                frame.table.setCellText(e.sessionName, 2, e.status, false);
+                frame.table.setCellText(e.sessionName, 3, e.connecttime, false);
+                frame.table.setCellText(e.sessionName, 4, e.event, false);
+                frame.table.setCellText(e.sessionName, 5, Integer.toString(e.objectsCheckedOut), false);
+              }
 
-	    frame.table.refreshTable();
-	  }
-	});
+            frame.table.refreshTable();
+          }
+        });
       }
     catch (InvocationTargetException ite)
       {
-	ite.printStackTrace();
+        ite.printStackTrace();
       }
     catch (InterruptedException ie)
       {
-	ie.printStackTrace();
+        ie.printStackTrace();
       }
   }
 
@@ -649,12 +649,12 @@ class GASHAdminDispatch implements Runnable {
   {
     if (debug)
       {
-	System.err.println("GASHAdminDispatch.changeTasks()");
+        System.err.println("GASHAdminDispatch.changeTasks()");
       }
 
     if (frame == null)
       {
-	return;
+        return;
       }
 
     scheduleHandle handle;
@@ -663,38 +663,38 @@ class GASHAdminDispatch implements Runnable {
 
     if (!tasksLoaded)
       {
-	// System.err.println("changeTasks: tasks size = " + tasks.size());
+        // System.err.println("changeTasks: tasks size = " + tasks.size());
     
-	// Sort entries according to their incep date,
-	// to prevent confusion if new tasks are put into
-	// the server-side hashes, and as they are shuffled
-	// from hash to hash
-	
-	java.util.Arrays.sort(tasks,
-			      new Comparator() 
-			      {
-				public int compare(Object a, Object b) 
-				{
-				  scheduleHandle aH, bH;
-				  
-				  aH = (scheduleHandle) a;
-				  bH = (scheduleHandle) b;
-				  
-				  if (aH.incepDate.before(bH.incepDate))
-				    {
-				      return -1;
-				    }
-				  else if (aH.incepDate.after(bH.incepDate))
-				    {
-				      return 1;
-				    }
-				  else
-				    {
-				      return 0;
-				    }
-				}
-			      }
-			      );
+        // Sort entries according to their incep date,
+        // to prevent confusion if new tasks are put into
+        // the server-side hashes, and as they are shuffled
+        // from hash to hash
+        
+        java.util.Arrays.sort(tasks,
+                              new Comparator() 
+                              {
+                                public int compare(Object a, Object b) 
+                                {
+                                  scheduleHandle aH, bH;
+                                  
+                                  aH = (scheduleHandle) a;
+                                  bH = (scheduleHandle) b;
+                                  
+                                  if (aH.incepDate.before(bH.incepDate))
+                                    {
+                                      return -1;
+                                    }
+                                  else if (aH.incepDate.after(bH.incepDate))
+                                    {
+                                      return 1;
+                                    }
+                                  else
+                                    {
+                                      return 0;
+                                    }
+                                }
+                              }
+                              );
       }
 
     Vector<scheduleHandle> syncTasks = new Vector<scheduleHandle>();
@@ -703,25 +703,25 @@ class GASHAdminDispatch implements Runnable {
 
     for (int i = 0; i < tasks.length; i++)
       {
-	handle = (scheduleHandle) tasks[i];
+        handle = (scheduleHandle) tasks[i];
 
-	switch (handle.getTaskType())
-	  {
-	  case SCHEDULED:
-	    scheduledTasks.addElement(handle);
-	    break;
+        switch (handle.getTaskType())
+          {
+          case SCHEDULED:
+            scheduledTasks.addElement(handle);
+            break;
 
-	  case MANUAL:
-	    manualTasks.addElement(handle);
-	    break;
+          case MANUAL:
+            manualTasks.addElement(handle);
+            break;
 
-	  case BUILDER:
-	  case UNSCHEDULEDBUILDER:
-	  case SYNCINCREMENTAL:
-	  case SYNCFULLSTATE:
-	  case SYNCMANUAL:
-	    syncTasks.addElement(handle);
-	  }
+          case BUILDER:
+          case UNSCHEDULEDBUILDER:
+          case SYNCINCREMENTAL:
+          case SYNCFULLSTATE:
+          case SYNCMANUAL:
+            syncTasks.addElement(handle);
+          }
       }
 
     updateSyncTaskTable(frame.syncTaskTable, syncTasks);
@@ -739,70 +739,70 @@ class GASHAdminDispatch implements Runnable {
 
     for (scheduleHandle handle: tasks)
       {
-	taskNames.addElement(handle.name);
+        taskNames.addElement(handle.name);
 
-	if (!table.containsKey(handle.name))
-	  {
-	    table.newRow(handle.name);
-	  }
+        if (!table.containsKey(handle.name))
+          {
+            table.newRow(handle.name);
+          }
 
-	table.setCellText(handle.name, 0, handle.name, false); // task name
+        table.setCellText(handle.name, 0, handle.name, false); // task name
 
-	if (handle.isRunning() && handle.isSuspended())
-	  {
-	    // "Suspended upon completion"
-	    table.setCellText(handle.name, 1, ts.l("changeTasks.runningSuspendedState"), false);
-	    table.setCellColor(handle.name, 1, Color.red, false);
-	    table.setCellBackColor(handle.name, 1, Color.white, false);
-	  }
-	else if (handle.isRunning())
-	  {
-	    // "Running"
-	    table.setCellText(handle.name, 1, ts.l("changeTasks.runningState"), false);
-	    table.setCellColor(handle.name, 1, Color.blue, false);
-	    table.setCellBackColor(handle.name, 1, Color.white, false);
-	  }
-	else if (handle.isSuspended())
-	  {
-	    // "Suspended"
-	    table.setCellText(handle.name, 1, ts.l("changeTasks.suspendedState"), false);
-	    table.setCellColor(handle.name, 1, Color.red, false);
-	    table.setCellBackColor(handle.name, 1, Color.white, false);
-	  }
-	else if (handle.startTime != null)
-	  {
-	    // "Scheduled"
-	    table.setCellText(handle.name, 1, ts.l("changeTasks.scheduledState"), false);
-	    table.setCellColor(handle.name, 1, Color.black, false);
-	    table.setCellBackColor(handle.name, 1, Color.white, false);
-	  }
-	else
-	  {
-	    // "Waiting"
-	    table.setCellText(handle.name, 1, ts.l("changeTasks.waitingState"), false);
-	    table.setCellColor(handle.name, 1, Color.black, false);
-	    table.setCellBackColor(handle.name, 1, Color.white, false);
-	  }
+        if (handle.isRunning() && handle.isSuspended())
+          {
+            // "Suspended upon completion"
+            table.setCellText(handle.name, 1, ts.l("changeTasks.runningSuspendedState"), false);
+            table.setCellColor(handle.name, 1, Color.red, false);
+            table.setCellBackColor(handle.name, 1, Color.white, false);
+          }
+        else if (handle.isRunning())
+          {
+            // "Running"
+            table.setCellText(handle.name, 1, ts.l("changeTasks.runningState"), false);
+            table.setCellColor(handle.name, 1, Color.blue, false);
+            table.setCellBackColor(handle.name, 1, Color.white, false);
+          }
+        else if (handle.isSuspended())
+          {
+            // "Suspended"
+            table.setCellText(handle.name, 1, ts.l("changeTasks.suspendedState"), false);
+            table.setCellColor(handle.name, 1, Color.red, false);
+            table.setCellBackColor(handle.name, 1, Color.white, false);
+          }
+        else if (handle.startTime != null)
+          {
+            // "Scheduled"
+            table.setCellText(handle.name, 1, ts.l("changeTasks.scheduledState"), false);
+            table.setCellColor(handle.name, 1, Color.black, false);
+            table.setCellBackColor(handle.name, 1, Color.white, false);
+          }
+        else
+          {
+            // "Waiting"
+            table.setCellText(handle.name, 1, ts.l("changeTasks.waitingState"), false);
+            table.setCellColor(handle.name, 1, Color.black, false);
+            table.setCellBackColor(handle.name, 1, Color.white, false);
+          }
 
-	if (handle.lastTime != null)
-	  {
-	    table.setCellText(handle.name, 2, handle.lastTime.toString(), false);
-	  }
+        if (handle.lastTime != null)
+          {
+            table.setCellText(handle.name, 2, handle.lastTime.toString(), false);
+          }
 
-	if (table.getColCount() > 3)
-	  {
-	    if (handle.startTime != null)
-	      {
-		table.setCellText(handle.name, 3, handle.startTime.toString(), false);
-	      }
-	    else
-	      {
-		// "On Demand"
-		table.setCellText(handle.name, 3, ts.l("changeTasks.onDemandState"), false);
-	      }
+        if (table.getColCount() > 3)
+          {
+            if (handle.startTime != null)
+              {
+                table.setCellText(handle.name, 3, handle.startTime.toString(), false);
+              }
+            else
+              {
+                // "On Demand"
+                table.setCellText(handle.name, 3, ts.l("changeTasks.onDemandState"), false);
+              }
 
-	    table.setCellText(handle.name, 4, handle.intervalString, false);
-	  }
+            table.setCellText(handle.name, 4, handle.intervalString, false);
+          }
       }
 
     // and take any rows out that are gone
@@ -812,14 +812,14 @@ class GASHAdminDispatch implements Runnable {
 
     while (en.hasMoreElements())
       {
-	tasksKnown.addElement(en.nextElement());
+        tasksKnown.addElement(en.nextElement());
       }
 
     Vector removedTasks = VectorUtils.difference(tasksKnown, taskNames);
     
     for (int i = 0; i < removedTasks.size(); i++)
       {
-	table.deleteRow(removedTasks.elementAt(i), false);
+        table.deleteRow(removedTasks.elementAt(i), false);
       }
 
     // And refresh our table.. we'll wait until this succeeds so we
@@ -830,19 +830,19 @@ class GASHAdminDispatch implements Runnable {
 
     try
       {
-	SwingUtilities.invokeAndWait(new Runnable() {
-	  public void run() {
-	    localTableRef.refreshTable();
-	  }
-	});
+        SwingUtilities.invokeAndWait(new Runnable() {
+          public void run() {
+            localTableRef.refreshTable();
+          }
+        });
       }
     catch (InvocationTargetException ite)
       {
-	ite.printStackTrace();
+        ite.printStackTrace();
       }
     catch (InterruptedException ie)
       {
-	ie.printStackTrace();
+        ie.printStackTrace();
       }
   }
 
@@ -859,89 +859,89 @@ class GASHAdminDispatch implements Runnable {
 
     for (scheduleHandle handle: tasks)
       {
-	taskNames.addElement(handle.name);
+        taskNames.addElement(handle.name);
 
-	if (!table.containsKey(handle.name))
-	  {
-	    table.newRow(handle.name);
-	  }
+        if (!table.containsKey(handle.name))
+          {
+            table.newRow(handle.name);
+          }
 
-	table.setCellText(handle.name, 0, handle.name, false); // task name
+        table.setCellText(handle.name, 0, handle.name, false); // task name
 
-	table.setCellText(handle.name, 1, handle.getTaskType().toString(), false);
+        table.setCellText(handle.name, 1, handle.getTaskType().toString(), false);
 
-	if (handle.isRunning() && handle.isSuspended())
-	  {
-	    // "Suspended upon completion"
-	    table.setCellText(handle.name, 3, ts.l("changeTasks.runningSuspendedState"), false);
-	    table.setCellColor(handle.name, 3, Color.red, false);
-	    table.setCellBackColor(handle.name, 3, Color.white, false);
-	  }
-	else if (handle.isRunning())
-	  {
-	    // "Running"
-	    table.setCellText(handle.name, 3, ts.l("changeTasks.runningState"), false);
-	    table.setCellColor(handle.name, 3, Color.blue, false);
-	    table.setCellBackColor(handle.name, 3, Color.white, false);
+        if (handle.isRunning() && handle.isSuspended())
+          {
+            // "Suspended upon completion"
+            table.setCellText(handle.name, 3, ts.l("changeTasks.runningSuspendedState"), false);
+            table.setCellColor(handle.name, 3, Color.red, false);
+            table.setCellBackColor(handle.name, 3, Color.white, false);
+          }
+        else if (handle.isRunning())
+          {
+            // "Running"
+            table.setCellText(handle.name, 3, ts.l("changeTasks.runningState"), false);
+            table.setCellColor(handle.name, 3, Color.blue, false);
+            table.setCellBackColor(handle.name, 3, Color.white, false);
 
-	    running = true;
-	  }
-	else if (handle.isSuspended())
-	  {
-	    // "Suspended"
-	    table.setCellText(handle.name, 3, ts.l("changeTasks.suspendedState"), false);
-	    table.setCellColor(handle.name, 3, Color.red, false);
-	    table.setCellBackColor(handle.name, 3, Color.white, false);
-	  }
-	else if (handle.startTime != null)
-	  {
-	    // "Scheduled"
-	    table.setCellText(handle.name, 3, ts.l("changeTasks.scheduledState"), false);
-	    table.setCellColor(handle.name, 3, Color.black, false);
-	    table.setCellBackColor(handle.name, 3, Color.white, false);
-	  }
-	else
-	  {
-	    // "Waiting"
-	    table.setCellText(handle.name, 3, ts.l("changeTasks.waitingState"), false);
-	    table.setCellColor(handle.name, 3, Color.black, false);
-	    table.setCellBackColor(handle.name, 3, Color.white, false);
-	  }
+            running = true;
+          }
+        else if (handle.isSuspended())
+          {
+            // "Suspended"
+            table.setCellText(handle.name, 3, ts.l("changeTasks.suspendedState"), false);
+            table.setCellColor(handle.name, 3, Color.red, false);
+            table.setCellBackColor(handle.name, 3, Color.white, false);
+          }
+        else if (handle.startTime != null)
+          {
+            // "Scheduled"
+            table.setCellText(handle.name, 3, ts.l("changeTasks.scheduledState"), false);
+            table.setCellColor(handle.name, 3, Color.black, false);
+            table.setCellBackColor(handle.name, 3, Color.white, false);
+          }
+        else
+          {
+            // "Waiting"
+            table.setCellText(handle.name, 3, ts.l("changeTasks.waitingState"), false);
+            table.setCellColor(handle.name, 3, Color.black, false);
+            table.setCellBackColor(handle.name, 3, Color.white, false);
+          }
 
-	table.setCellText(handle.name, 2, handle.getTaskStatus().getMessage(handle.queueSize, handle.condition), false);
+        table.setCellText(handle.name, 2, handle.getTaskStatus().getMessage(handle.queueSize, handle.condition), false);
 
-	switch (handle.getTaskStatus())
-	  {
-	  case OK:
-	  case EMPTYQUEUE:
-	  case NONEMPTYQUEUE:
-	    table.setCellColor(handle.name, 2, Color.black, false);
-	    table.setCellBackColor(handle.name, 2, Color.white, false);
-	    break;
-	    
-	  default:
-	    table.setCellColor(handle.name, 2, Color.white, false);
-	    table.setCellBackColor(handle.name, 2, Color.red, false);
-	    error_seen = true;
-	  }
+        switch (handle.getTaskStatus())
+          {
+          case OK:
+          case EMPTYQUEUE:
+          case NONEMPTYQUEUE:
+            table.setCellColor(handle.name, 2, Color.black, false);
+            table.setCellBackColor(handle.name, 2, Color.white, false);
+            break;
+            
+          default:
+            table.setCellColor(handle.name, 2, Color.white, false);
+            table.setCellBackColor(handle.name, 2, Color.red, false);
+            error_seen = true;
+          }
 
-	if (handle.lastTime != null)
-	  {
-	    table.setCellText(handle.name, 4, handle.lastTime.toString(), false);
-	  }
+        if (handle.lastTime != null)
+          {
+            table.setCellText(handle.name, 4, handle.lastTime.toString(), false);
+          }
       }
 
     if (running)
       {
-	frame.tabPane.setIconAt(1, getPlayIcon());
+        frame.tabPane.setIconAt(1, getPlayIcon());
       }
     else if (error_seen)
       {
-	frame.tabPane.setIconAt(1, getErrorBall());
+        frame.tabPane.setIconAt(1, getErrorBall());
       }
     else
       {
-	frame.tabPane.setIconAt(1, getOkIcon());
+        frame.tabPane.setIconAt(1, getOkIcon());
       }
 
     // and take any rows out that are gone
@@ -951,14 +951,14 @@ class GASHAdminDispatch implements Runnable {
 
     while (en.hasMoreElements())
       {
-	tasksKnown.addElement(en.nextElement());
+        tasksKnown.addElement(en.nextElement());
       }
 
     Vector removedTasks = VectorUtils.difference(tasksKnown, taskNames);
     
     for (int i = 0; i < removedTasks.size(); i++)
       {
-	table.deleteRow(removedTasks.elementAt(i), false);
+        table.deleteRow(removedTasks.elementAt(i), false);
       }
 
     // And refresh our table.. we'll wait until this succeeds so we
@@ -969,19 +969,19 @@ class GASHAdminDispatch implements Runnable {
 
     try
       {
-	SwingUtilities.invokeAndWait(new Runnable() {
-	  public void run() {
-	    localTableRef.refreshTable();
-	  }
-	});
+        SwingUtilities.invokeAndWait(new Runnable() {
+          public void run() {
+            localTableRef.refreshTable();
+          }
+        });
       }
     catch (InvocationTargetException ite)
       {
-	ite.printStackTrace();
+        ite.printStackTrace();
       }
     catch (InterruptedException ie)
       {
-	ie.printStackTrace();
+        ie.printStackTrace();
       }
   }
 
@@ -1093,35 +1093,35 @@ class GASHAdminDispatch implements Runnable {
 
     if (debug)
       {
-	System.err.println("Trying to get SchemaEdit handle");
+        System.err.println("Trying to get SchemaEdit handle");
       }
 
     try
       {
-	editor = aSession.editSchema();
+        editor = aSession.editSchema();
       }
     catch (RemoteException ex)
       {
-	System.err.println("editSchema() exception: " + ex);
+        System.err.println("editSchema() exception: " + ex);
       }
 
     if (editor == null)
       {
-	System.err.println("null editor handle");
-	return null;
+        System.err.println("null editor handle");
+        return null;
       }
     else
       {
-	if (debug)
-	  {
-	    System.err.println("Got SchemaEdit handle");
-	  }
+        if (debug)
+          {
+            System.err.println("Got SchemaEdit handle");
+          }
 
-	// the GASHSchema constructor pops itself up at the end of
-	// initialization
+        // the GASHSchema constructor pops itself up at the end of
+        // initialization
 
-	// "Schema Editor"	
-	return new GASHSchema(ts.l("pullSchema.schemaEditingTitle"), editor, this);
+        // "Schema Editor"      
+        return new GASHSchema(ts.l("pullSchema.schemaEditingTitle"), editor, this);
       }
   }
 
@@ -1164,124 +1164,124 @@ class GASHAdminDispatch implements Runnable {
 
     if (debug)
       {
-	System.err.println("GASHAdminDispatch.handleReturnVal(): Entering");
+        System.err.println("GASHAdminDispatch.handleReturnVal(): Entering");
 
-	try
-	  {
-	    throw new RuntimeException("TRACE");
-	  }
-	catch (RuntimeException ex)
-	  {
-	    ex.printStackTrace();
-	  }
+        try
+          {
+            throw new RuntimeException("TRACE");
+          }
+        catch (RuntimeException ex)
+          {
+            ex.printStackTrace();
+          }
       }
 
     while ((retVal != null) && (retVal.getDialog() != null))
       {
-	if (debug)
-	  {
-	    System.err.println("GASHAdminDispatch.handleReturnVal(): retrieving dialog");
-	  }
+        if (debug)
+          {
+            System.err.println("GASHAdminDispatch.handleReturnVal(): retrieving dialog");
+          }
 
-	JDialogBuff jdialog = retVal.getDialog();
+        JDialogBuff jdialog = retVal.getDialog();
 
-	if (debug)
-	  {
-	    System.err.println("GASHAdminDispatch.handleReturnVal(): extracting dialog");
-	  }
+        if (debug)
+          {
+            System.err.println("GASHAdminDispatch.handleReturnVal(): extracting dialog");
+          }
 
-	if (frame == null)
-	  {
-	    if (debug)
-	      {
-		System.err.println("GASHAdminDispatch.handleReturnVal(): null frame");
-	      }
+        if (frame == null)
+          {
+            if (debug)
+              {
+                System.err.println("GASHAdminDispatch.handleReturnVal(): null frame");
+              }
 
-	    resource = jdialog.extractDialogRsrc(new JFrame(), this.getClass());
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.err.println("GASHAdminDispatch.handleReturnVal(): good frame");
-	      }
+            resource = jdialog.extractDialogRsrc(new JFrame(), this.getClass());
+          }
+        else
+          {
+            if (debug)
+              {
+                System.err.println("GASHAdminDispatch.handleReturnVal(): good frame");
+              }
 
-	    resource = jdialog.extractDialogRsrc(frame, null);
-	  }
+            resource = jdialog.extractDialogRsrc(frame, null);
+          }
 
-	if (debug)
-	  {
-	    System.err.println("GASHAdminDispatch.handleReturnVal(): constructing dialog");
-	  }
+        if (debug)
+          {
+            System.err.println("GASHAdminDispatch.handleReturnVal(): constructing dialog");
+          }
 
-	StringDialog dialog = new StringDialog(resource, StandardDialog.ModalityType.DOCUMENT_MODAL);
+        StringDialog dialog = new StringDialog(resource, StandardDialog.ModalityType.DOCUMENT_MODAL);
 
-	if (debug)
-	  {
-	    System.err.println("GASHAdminDispatch.handleReturnVal(): displaying dialog");
-	  }
+        if (debug)
+          {
+            System.err.println("GASHAdminDispatch.handleReturnVal(): displaying dialog");
+          }
 
-	// display the Dialog sent to us by the server, get the
-	// result of the user's interaction with it.
-	    
-	dialogResults = dialog.showDialog();
+        // display the Dialog sent to us by the server, get the
+        // result of the user's interaction with it.
+            
+        dialogResults = dialog.showDialog();
 
-	if (debug)
-	  {
-	    System.err.println("GASHAdminDispatch.handleReturnVal(): dialog done");
-	  }
+        if (debug)
+          {
+            System.err.println("GASHAdminDispatch.handleReturnVal(): dialog done");
+          }
 
-	if (retVal.getCallback() != null)
-	  {
-	    try
-	      {
-		if (debug)
-		  {
-		    System.err.println("GASHAdminDispatch.handleReturnVal(): Sending result to callback: " + dialogResults);
-		  }
+        if (retVal.getCallback() != null)
+          {
+            try
+              {
+                if (debug)
+                  {
+                    System.err.println("GASHAdminDispatch.handleReturnVal(): Sending result to callback: " + dialogResults);
+                  }
 
-		// send the dialog results to the server
+                // send the dialog results to the server
 
-		retVal = retVal.getCallback().respond(dialogResults);
+                retVal = retVal.getCallback().respond(dialogResults);
 
-		if (debug)
-		  {
-		    System.err.println("GASHAdminDispatch.handleReturnVal(): Received result from callback.");
-		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-		throw new RuntimeException("Caught remote exception: " + ex.getMessage());
-	      }
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.err.println("GASHAdminDispatch.handleReturnVal(): No callback, breaking");
-	      }
+                if (debug)
+                  {
+                    System.err.println("GASHAdminDispatch.handleReturnVal(): Received result from callback.");
+                  }
+              }
+            catch (RemoteException ex)
+              {
+                throw new RuntimeException("Caught remote exception: " + ex.getMessage());
+              }
+          }
+        else
+          {
+            if (debug)
+              {
+                System.err.println("GASHAdminDispatch.handleReturnVal(): No callback, breaking");
+              }
 
-	    break;		// we're done
-	  }
+            break;              // we're done
+          }
       }
 
     if (debug)
       {
-	if (retVal != null)
-	  {
-	    if (retVal.didSucceed())
-	      {
-		System.err.println("GASHAdminDispatch.handleReturnVal(): returning success code");
-	      }
-	    else
-	      {
-		System.err.println("GASHAdminDispatch.handleReturnVal(): returning failure code");
-	      }
-	  }
-	else
-	  {
-	    System.err.println("GASHAdminDispatch.handleReturnVal(): returning null retVal (success)");
-	  }
+        if (retVal != null)
+          {
+            if (retVal.didSucceed())
+              {
+                System.err.println("GASHAdminDispatch.handleReturnVal(): returning success code");
+              }
+            else
+              {
+                System.err.println("GASHAdminDispatch.handleReturnVal(): returning failure code");
+              }
+          }
+        else
+          {
+            System.err.println("GASHAdminDispatch.handleReturnVal(): returning null retVal (success)");
+          }
       }
 
     return retVal;
@@ -1291,7 +1291,7 @@ class GASHAdminDispatch implements Runnable {
   {
     if (errorBallIcon == null)
       {
-	errorBallIcon = new ImageIcon(PackageResources.getImageResource(frame, "error-ball.png", getClass()));
+        errorBallIcon = new ImageIcon(PackageResources.getImageResource(frame, "error-ball.png", getClass()));
       }
 
     return errorBallIcon;
@@ -1301,7 +1301,7 @@ class GASHAdminDispatch implements Runnable {
   {
     if (playIcon == null)
       {
-	playIcon = new ImageIcon(PackageResources.getImageResource(frame, "playing-icon.png", getClass()));
+        playIcon = new ImageIcon(PackageResources.getImageResource(frame, "playing-icon.png", getClass()));
       }
 
     return playIcon;
@@ -1311,7 +1311,7 @@ class GASHAdminDispatch implements Runnable {
   {
     if (okayIcon == null)
       {
-	okayIcon = new ImageIcon(PackageResources.getImageResource(frame, "okay-status.png", getClass()));
+        okayIcon = new ImageIcon(PackageResources.getImageResource(frame, "okay-status.png", getClass()));
       }
 
     return okayIcon;

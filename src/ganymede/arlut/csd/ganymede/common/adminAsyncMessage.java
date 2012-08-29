@@ -7,7 +7,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -102,7 +102,7 @@ public class adminAsyncMessage implements java.io.Serializable {
   {
     if (method < FIRST || method > LAST)
       {
-	throw new IllegalArgumentException("bad method code: " + method);
+        throw new IllegalArgumentException("bad method code: " + method);
       }
 
     this.method = method;
@@ -114,7 +114,7 @@ public class adminAsyncMessage implements java.io.Serializable {
   {
     if (method < FIRST || method > LAST)
       {
-	throw new IllegalArgumentException("bad method code: " + method);
+        throw new IllegalArgumentException("bad method code: " + method);
       }
 
     this.method = method;
@@ -126,7 +126,7 @@ public class adminAsyncMessage implements java.io.Serializable {
   {
     if (method < FIRST || method > LAST)
       {
-	throw new IllegalArgumentException("bad method code: " + method);
+        throw new IllegalArgumentException("bad method code: " + method);
       }
 
     this.method = method;
@@ -140,63 +140,63 @@ public class adminAsyncMessage implements java.io.Serializable {
     switch (method)
       {
       case SETSERVERSTART: 
-	result.append("setServerStart");
-	break;
-	
+        result.append("setServerStart");
+        break;
+        
       case SETLASTDUMPTIME:
-	result.append("setLastDumpTime");
-	break;
+        result.append("setLastDumpTime");
+        break;
 
       case SETTRANSACTIONS:
-	result.append("setTransactionsInJournal");
-	break;
+        result.append("setTransactionsInJournal");
+        break;
 
       case SETOBJSCHECKOUT:
-	result.append("setObjectsCheckedOut");
-	break;
+        result.append("setObjectsCheckedOut");
+        break;
 
       case SETLOCKSHELD:
-	result.append("setLocksHeld");
-	break;
+        result.append("setLocksHeld");
+        break;
 
       case CHANGESTATE:
-	result.append("changeState");
-	break;
+        result.append("changeState");
+        break;
 
       case LOGAPPEND:
-	result.append("logAppend");
-	break;
+        result.append("logAppend");
+        break;
 
       case CHANGEADMINS:
-	result.append("changeAdmins");
-	break;
+        result.append("changeAdmins");
+        break;
 
       case CHANGEUSERS:
-	result.append("changeUsers");
-	break;
+        result.append("changeUsers");
+        break;
 
       case CHANGETASKS:
-	result.append("changeTasks");
-	break;
+        result.append("changeTasks");
+        break;
 
       case SETMEMORYSTATE:
-	result.append("setMemoryState");
-	break;
-	
+        result.append("setMemoryState");
+        break;
+        
       default:
-	result.append("<" + method + ">??");
+        result.append("<" + method + ">??");
       }
 
     result.append("(");
 
     for (int i = 0; i < params.length; i++)
       {
-	if (i > 0)
-	  {
-	    result.append(", ");
-	  }
-	
-	result.append(params[i]);
+        if (i > 0)
+          {
+            result.append(", ");
+          }
+        
+        result.append(params[i]);
       }
 
     result.append(")");
