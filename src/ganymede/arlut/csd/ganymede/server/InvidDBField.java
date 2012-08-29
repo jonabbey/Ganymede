@@ -387,9 +387,16 @@ public final class InvidDBField extends DBField implements invid_field {
    * XML data dump stream.</p>
    *
    * <p>Whenever Ganymede writes out an Invid to an XML data dump, it
-   * uses an &lt;invid&gt; element with two attributes, type and id.
-   * type is the name of the object type that the invid points to, and
-   * id is the uniquely identifying label for the target object.</p>
+   * uses an &lt;invid&gt; element with a minimum two attributes, type
+   * and id.  type is the name of the object type that the invid
+   * points to, and id is the uniquely identifying label for the
+   * target object.</p>
+   *
+   * <p>The XMLDumpContext passed into emitInvidXML() can also cause
+   * emitInvidXML() to write out an oid attribute containing the
+   * target object's raw Invid in "typenum:objnum" format, along with
+   * any extra attributes provided by our owner type's
+   * getForeignSyncKeys() method.</p>
    *
    * <p>All this is a bit different if this InvidDBField is an
    * edit-in-place field.  In that case, emitInvidXML will simply
