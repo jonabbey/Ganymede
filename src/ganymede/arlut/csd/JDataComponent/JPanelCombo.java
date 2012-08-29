@@ -14,7 +14,7 @@
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -85,24 +85,24 @@ public class JPanelCombo extends JPanel {
 
     if (items == null)
       {
-	combo = new JComboBox();
-	combo.setKeySelectionManager(new TimedKeySelectionManager());
+        combo = new JComboBox();
+        combo.setKeySelectionManager(new TimedKeySelectionManager());
       }
     else
       {
-	combo = new JComboBox(items);
-	combo.setKeySelectionManager(new TimedKeySelectionManager());
+        combo = new JComboBox(items);
+        combo.setKeySelectionManager(new TimedKeySelectionManager());
 
-	// the following try/catch is to workaround
-	// a bug in Swing 1.0.2.
+        // the following try/catch is to workaround
+        // a bug in Swing 1.0.2.
 
-	try
-	  {
-	    combo.setSelectedIndex(0);
-	  }
-	catch (IllegalArgumentException ex)
-	  {
-	  }
+        try
+          {
+            combo.setSelectedIndex(0);
+          }
+        catch (IllegalArgumentException ex)
+          {
+          }
       }
 
     add("West", combo);
@@ -112,8 +112,8 @@ public class JPanelCombo extends JPanel {
   {
     if (combo == null)
       {
-	combo = new JComboBox();
-	combo.setKeySelectionManager(new TimedKeySelectionManager());
+        combo = new JComboBox();
+        combo.setKeySelectionManager(new TimedKeySelectionManager());
       }
 
     return combo;

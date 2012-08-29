@@ -7,7 +7,7 @@
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -153,7 +153,7 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
   {
     if (callback == null)
       {
-	throw new IllegalArgumentException("Invalid Parameter: callback cannot be null");
+        throw new IllegalArgumentException("Invalid Parameter: callback cannot be null");
       }
     
     this.callback = callback;
@@ -228,7 +228,7 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
   {
     if (value != state)
       {
-	changed = true;
+        changed = true;
       }
 
     this.value = state;
@@ -240,28 +240,28 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
   {
     if (!notifyOnFocus)
       {
-	return;
+        return;
       }
     
     switch (e.getID()) 
       {
       
       case FocusEvent.FOCUS_LOST:
-	{
-	  if (!changed) 
-	    {
-	      break;
-	    }
+        {
+          if (!changed) 
+            {
+              break;
+            }
 
- 	  value = isSelected();
-	  notify(value);
+          value = isSelected();
+          notify(value);
 
-	  break;
-	}
+          break;
+        }
 
       case FocusEvent.FOCUS_GAINED:
-	{
-	}
+        {
+        }
     }
 
     super.processFocusEvent(e);
@@ -278,27 +278,27 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
 
     if (allowCallback) 
       {
-	// do a callback to talk to the server
+        // do a callback to talk to the server
 
-	boolean b = false;
+        boolean b = false;
 
-	try 
-	  {
-	    b = callback.setValuePerformed(new JSetValueObject(this,bval));
-	  }
-	catch (java.rmi.RemoteException ex) 
-	  {
-	    throw new RuntimeException("notify caught remote exception: " + ex);
-	  }
-	
-	if (b==false)
-	  {
-	    resetValue();
-	  }
-	else
-	  {
-	    oldvalue = value;
-	  }
+        try 
+          {
+            b = callback.setValuePerformed(new JSetValueObject(this,bval));
+          }
+        catch (java.rmi.RemoteException ex) 
+          {
+            throw new RuntimeException("notify caught remote exception: " + ex);
+          }
+        
+        if (b==false)
+          {
+            resetValue();
+          }
+        else
+          {
+            oldvalue = value;
+          }
       }
   }
 }

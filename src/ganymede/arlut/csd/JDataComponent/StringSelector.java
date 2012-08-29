@@ -147,7 +147,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
   String
     org_in = ts.l("global.items_in"), // "Members"
-    org_out = ts.l("global.items_out");	// "Available"
+    org_out = ts.l("global.items_out"); // "Available"
 
   JButton
     addCustom;
@@ -181,11 +181,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
    */
 
   public StringSelector(Container parent, boolean editable, boolean canChoose,
-			boolean mustChoose)
+                        boolean mustChoose)
   {
     if (debug)
       {
-	System.err.println("-Adding new StringSelector-");
+        System.err.println("-Adding new StringSelector-");
       }
 
     setBorder(new javax.swing.border.EtchedBorder());
@@ -234,22 +234,22 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (editable)
       {
-	if (canChoose)
-	  {
-	    // "Remove >>"
-	    remove = new JButton(ts.l("global.remove_and_remember_button"));
-	  }
-	else
-	  {
-	    // "Remove"
-	    remove = new JButton(ts.l("global.remove_and_forget_button"));
-	  }
+        if (canChoose)
+          {
+            // "Remove >>"
+            remove = new JButton(ts.l("global.remove_and_remember_button"));
+          }
+        else
+          {
+            // "Remove"
+            remove = new JButton(ts.l("global.remove_and_forget_button"));
+          }
 
-	remove.setEnabled(false);
-	remove.setOpaque(true);
-	remove.setActionCommand("Remove");
-	remove.addActionListener(this);
-	inPanel.add("South", remove);
+        remove.setEnabled(false);
+        remove.setOpaque(true);
+        remove.setActionCommand("Remove");
+        remove.addActionListener(this);
+        inPanel.add("South", remove);
       }
 
     gbc.fill = gbc.BOTH;
@@ -266,195 +266,195 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (editable && canChoose)
       {
-	// Set up the outPanel.
-	// If we need an out box, build it now.
+        // Set up the outPanel.
+        // If we need an out box, build it now.
 
-	outTitle.setText(org_out.concat(": 0"));
-	//	outTitle.setHorizontalAlignment( SwingConstants.LEFT );
-	//	outTitle.setMargin( new Insets(0,0,0,0) );
-	outTitle.addActionListener(this);
+        outTitle.setText(org_out.concat(": 0"));
+        //      outTitle.setHorizontalAlignment( SwingConstants.LEFT );
+        //      outTitle.setMargin( new Insets(0,0,0,0) );
+        outTitle.addActionListener(this);
 
-	out = new JstringListBox();
-	out.setCallback(this);
+        out = new JstringListBox();
+        out.setCallback(this);
 
-	// "<< Add"
-	add = new JButton(ts.l("global.add_choice_button"));
-	add.setEnabled(false);
-	add.setOpaque(true);
-	add.setActionCommand("Add");
-	add.addActionListener(this);
+        // "<< Add"
+        add = new JButton(ts.l("global.add_choice_button"));
+        add.setEnabled(false);
+        add.setOpaque(true);
+        add.setActionCommand("Add");
+        add.addActionListener(this);
 
-	outPanel.setBorder(bborder);
-	outPanel.setLayout(new BorderLayout());
-	outPanel.add("Center", new JScrollPane(out));
-	outPanel.add("North", outTitle);
-	outPanel.add("South", add);
+        outPanel.setBorder(bborder);
+        outPanel.setLayout(new BorderLayout());
+        outPanel.add("Center", new JScrollPane(out));
+        outPanel.add("North", outTitle);
+        outPanel.add("South", add);
 
-	gbc.fill = gbc.BOTH;
-	gbc.gridwidth = 1;
-	gbc.weightx = 1.0;
-	gbc.weighty = 1.0;
-	gbc.gridx = 1;
-	gbc.gridy = 0;
-	gbl.setConstraints(outPanel, gbc);
+        gbc.fill = gbc.BOTH;
+        gbc.gridwidth = 1;
+        gbc.weightx = 1.0;
+        gbc.weighty = 1.0;
+        gbc.gridx = 1;
+        gbc.gridy = 0;
+        gbl.setConstraints(outPanel, gbc);
 
-	lists.add(outPanel);
+        lists.add(outPanel);
       }
 
     add("Center", lists);
 
     if (editable)
       {
-	custom = new JstringField();
-	custom.setBorder(new EmptyBorder(new Insets(0,0,0,4)));
-	custom.addActionListener(new ActionListener()
-				 {
-				   public void actionPerformed(ActionEvent e)
-				     {
-				       addCustom.doClick();
-				     }
-				 });
+        custom = new JstringField();
+        custom.setBorder(new EmptyBorder(new Insets(0,0,0,4)));
+        custom.addActionListener(new ActionListener()
+                                 {
+                                   public void actionPerformed(ActionEvent e)
+                                     {
+                                       addCustom.doClick();
+                                     }
+                                 });
 
-	JPanel customP = new JPanel();
-	customP.setLayout(new BorderLayout());
-	customP.add("Center", custom);
+        JPanel customP = new JPanel();
+        customP.setLayout(new BorderLayout());
+        customP.add("Center", custom);
 
-	if (!(mustChoose && out == null))
-	  {
-	    // "Add"
-	    addCustom = new JButton(ts.l("global.add_button"));
-	    addCustom.setEnabled(false);
-	    addCustom.setActionCommand("AddNewString");
-	    addCustom.addActionListener(this);
-	    customP.add("West", addCustom);
+        if (!(mustChoose && out == null))
+          {
+            // "Add"
+            addCustom = new JButton(ts.l("global.add_button"));
+            addCustom.setEnabled(false);
+            addCustom.setActionCommand("AddNewString");
+            addCustom.addActionListener(this);
+            customP.add("West", addCustom);
 
-	    // we only want this add button to be active when the user
-	    // has entered something in the text field.  Some users
-	    // have been confused by the add button just sitting there
-	    // active.
+            // we only want this add button to be active when the user
+            // has entered something in the text field.  Some users
+            // have been confused by the add button just sitting there
+            // active.
 
-	    custom.getDocument().addDocumentListener(new DocumentListener()
-						     {
-						       public void changedUpdate(DocumentEvent x) {}
-						       public void insertUpdate(DocumentEvent x)
-							 {
-							   if (x.getDocument().getLength() > 0)
-							     {
-							       addCustom.setEnabled(true);
-							     }
-							 }
+            custom.getDocument().addDocumentListener(new DocumentListener()
+                                                     {
+                                                       public void changedUpdate(DocumentEvent x) {}
+                                                       public void insertUpdate(DocumentEvent x)
+                                                         {
+                                                           if (x.getDocument().getLength() > 0)
+                                                             {
+                                                               addCustom.setEnabled(true);
+                                                             }
+                                                         }
 
-						       public void removeUpdate(DocumentEvent x)
-							 {
-							   if (x.getDocument().getLength() == 0)
-							     {
-							       addCustom.setEnabled(false);
-							     }
-							 }
-						     });
-	  }
+                                                       public void removeUpdate(DocumentEvent x)
+                                                         {
+                                                           if (x.getDocument().getLength() == 0)
+                                                             {
+                                                               addCustom.setEnabled(false);
+                                                             }
+                                                         }
+                                                     });
+          }
 
-	// if we know they can only type things from the list,
-	// implement choice completion
+        // if we know they can only type things from the list,
+        // implement choice completion
 
-	if (mustChoose)
-	  {
-	    // XXX
-	    //
-	    // Need to radically rework this keyadapter so it
-	    // behaves better with autocomplete.. we'll need it to
-	    // function in such a way that it doesn't stop being
-	    // involved as soon as the autocomplete is performed.  If
-	    // the user continues typing characters that match the
-	    // autocomplete, nothing should happen other than
-	    // advancing the cursor so that it remains after the last
-	    // character they typed.
-	    //
-	    // if the user uses the cursor keys to move the cursor
-	    // manually, we will 'freeze' the autocomplete entry and
-	    // let them do normal processing.  We'll also want to do
-	    // this if the mouse is used to set the cursor position.
-	    //
-	    // If the user hits a non-cursor key that doesn't match
-	    // the autocomplete (AND we're not in mustChoose mode?),
-	    // we should erase the remainder of the autocomplete match
-	    // and let the user type whatever they want at that
-	    // point... ?
-	    //
-	    // XXX
+        if (mustChoose)
+          {
+            // XXX
+            //
+            // Need to radically rework this keyadapter so it
+            // behaves better with autocomplete.. we'll need it to
+            // function in such a way that it doesn't stop being
+            // involved as soon as the autocomplete is performed.  If
+            // the user continues typing characters that match the
+            // autocomplete, nothing should happen other than
+            // advancing the cursor so that it remains after the last
+            // character they typed.
+            //
+            // if the user uses the cursor keys to move the cursor
+            // manually, we will 'freeze' the autocomplete entry and
+            // let them do normal processing.  We'll also want to do
+            // this if the mouse is used to set the cursor position.
+            //
+            // If the user hits a non-cursor key that doesn't match
+            // the autocomplete (AND we're not in mustChoose mode?),
+            // we should erase the remainder of the autocomplete match
+            // and let the user type whatever they want at that
+            // point... ?
+            //
+            // XXX
 
-	    custom.addKeyListener(new KeyAdapter()
-				  {
-				    public void keyReleased(KeyEvent ke)
-				      {
-					int curLen;
-					String curVal;
+            custom.addKeyListener(new KeyAdapter()
+                                  {
+                                    public void keyReleased(KeyEvent ke)
+                                      {
+                                        int curLen;
+                                        String curVal;
 
-					curVal = custom.getText().substring(0, custom.getCaretPosition());
+                                        curVal = custom.getText().substring(0, custom.getCaretPosition());
 
-					if (curVal != null)
-					  {
-					    curLen = curVal.length();
-					  }
-					else
-					  {
-					    curLen = 0;
-					  }
+                                        if (curVal != null)
+                                          {
+                                            curLen = curVal.length();
+                                          }
+                                        else
+                                          {
+                                            curLen = 0;
+                                          }
 
-					int keyCode = ke.getKeyCode();
+                                        int keyCode = ke.getKeyCode();
 
-					if (keyCode == KeyEvent.VK_DELETE || keyCode == KeyEvent.VK_BACK_SPACE)
-					  {
-					    custom.select(custom.getCaretPosition(), custom.getCaretPosition());
-					    return;
-					  }
+                                        if (keyCode == KeyEvent.VK_DELETE || keyCode == KeyEvent.VK_BACK_SPACE)
+                                          {
+                                            custom.select(custom.getCaretPosition(), custom.getCaretPosition());
+                                            return;
+                                          }
 
-					if (ke.isActionKey() || ke.getKeyChar() == KeyEvent.CHAR_UNDEFINED)
-					  {
-					    return;
-					  }
+                                        if (ke.isActionKey() || ke.getKeyChar() == KeyEvent.CHAR_UNDEFINED)
+                                          {
+                                            return;
+                                          }
 
-					if (curLen > 0)
-					  {
-					    listHandle item;
+                                        if (curLen > 0)
+                                          {
+                                            listHandle item;
 
-					    int matching = 0;
-					    String matchingItem = null;
+                                            int matching = 0;
+                                            String matchingItem = null;
 
-					    Enumeration en = out.model.elements();
+                                            Enumeration en = out.model.elements();
 
-					    while (en.hasMoreElements())
-					      {
-						item = (listHandle) en.nextElement();
+                                            while (en.hasMoreElements())
+                                              {
+                                                item = (listHandle) en.nextElement();
 
-						if (item.toString().equals(curVal))
-						  {
-						    // they've typed the full thing here, stop.
+                                                if (item.toString().equals(curVal))
+                                                  {
+                                                    // they've typed the full thing here, stop.
 
-						    out.setSelectedLabel(matchingItem, true);
-						    custom.setText(curVal);
-						    return;
-						  }
-						else if (item.toString().startsWith(curVal))
-						  {
-						    matching++;
-						    matchingItem = item.toString();
-						  }
-					      }
+                                                    out.setSelectedLabel(matchingItem, true);
+                                                    custom.setText(curVal);
+                                                    return;
+                                                  }
+                                                else if (item.toString().startsWith(curVal))
+                                                  {
+                                                    matching++;
+                                                    matchingItem = item.toString();
+                                                  }
+                                              }
 
-					    if (matching == 1)
-					      {
-						out.setSelectedLabel(matchingItem, true);
-						custom.setText(matchingItem);
-						custom.moveCaretPosition(curLen); // move the caret to select the text
-						return;
-					      }
-					  }
-				      }
-				    });
-	  }
+                                            if (matching == 1)
+                                              {
+                                                out.setSelectedLabel(matchingItem, true);
+                                                custom.setText(matchingItem);
+                                                custom.moveCaretPosition(curLen); // move the caret to select the text
+                                                return;
+                                              }
+                                          }
+                                      }
+                                    });
+          }
 
-	add("South", customP);
+        add("South", customP);
       }
 
     // provide a small default width
@@ -466,7 +466,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (debug)
       {
-	System.err.println("Done creating ss");
+        System.err.println("Done creating ss");
       }
   }
 
@@ -485,7 +485,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (out != null)
       {
-	out.setCellWidth(width);
+        out.setCellWidth(width);
       }
 
     invalidate();
@@ -505,7 +505,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (out != null)
       {
-	out.setCellWidth(template);
+        out.setCellWidth(template);
       }
 
     invalidate();
@@ -538,14 +538,14 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   {
     if (inPopup != null && inPopup == outPopup)
       {
-	throw new IllegalArgumentException("Need two different JPopupMenus");
+        throw new IllegalArgumentException("Need two different JPopupMenus");
       }
 
     in.registerPopupMenu(inPopup);
 
     if (out != null)
       {
-	out.registerPopupMenu(outPopup);
+        out.registerPopupMenu(outPopup);
       }
   }
 
@@ -581,39 +581,39 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
    */
 
   public synchronized void update(Vector available, boolean sortAvailable, Comparator availComparator,
-				  Vector chosen, boolean sortChosen, Comparator chosenComparator)
+                                  Vector chosen, boolean sortChosen, Comparator chosenComparator)
   {
     if (available == null)
       {
-	if (out != null)
-	  {
-	    out.model.removeAllElements();
-	  }
+        if (out != null)
+          {
+            out.model.removeAllElements();
+          }
       }
 
     // If there is no out box, then we don't need to worry about available stuff
 
     if (out != null)
       {
-	try
-	  {
-	    out.load(VectorUtils.difference(available,chosen), -1, sortAvailable, availComparator);
-	  }
-	catch (Exception e)
-	  {
-	    e.printStackTrace();
-	    throw new RuntimeException(e);
-	  }
+        try
+          {
+            out.load(VectorUtils.difference(available,chosen), -1, sortAvailable, availComparator);
+          }
+        catch (Exception e)
+          {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+          }
       }
 
     try
       {
-	in.load(chosen, -1, sortChosen, chosenComparator);
+        in.load(chosen, -1, sortChosen, chosenComparator);
       }
     catch (Exception e)
       {
-	e.printStackTrace();
-	throw new RuntimeException(e);
+        e.printStackTrace();
+        throw new RuntimeException(e);
       }
 
     updateTitles();
@@ -631,7 +631,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (out != null)
       {
-	out.relabelObject(object, newLabel);
+        out.relabelObject(object, newLabel);
       }
   }
 
@@ -643,7 +643,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   {
     if (addCustom == null)
       {
-	return;
+        return;
       }
 
     addCustom.setText(text);
@@ -770,14 +770,14 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (inVector == null)
       {
-	return result;
+        return result;
       }
 
     for (int i = 0; i < inVector.size(); i++)
       {
-	listHandle handle = (listHandle) inVector.elementAt(i);
+        listHandle handle = (listHandle) inVector.elementAt(i);
 
-	result.addElement(handle.toString());
+        result.addElement(handle.toString());
       }
 
     return result;
@@ -795,51 +795,51 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   {
     if (!editable)
       {
-	return;
+        return;
       }
 
     if (e.getSource() == inTitle)
       {
-	in.setSelectionInterval( 0, in.getModel().getSize()-1 );
+        in.setSelectionInterval( 0, in.getModel().getSize()-1 );
 
-	if (out != null)
-	  {
-	    out.clearSelection();
-	  }
+        if (out != null)
+          {
+            out.clearSelection();
+          }
       }
 
     if (e.getSource() == outTitle)
       {
-	out.setSelectionInterval( 0, out.getModel().getSize()-1 );
-	in.clearSelection();
+        out.setSelectionInterval( 0, out.getModel().getSize()-1 );
+        in.clearSelection();
       }
 
     if (e.getActionCommand().equals("Add"))
       {
-	if (debug)
-	  {
-	    System.err.println("StringSelector: add Action");
-	  }
+        if (debug)
+          {
+            System.err.println("StringSelector: add Action");
+          }
 
-	addItems();
+        addItems();
       }
     else if (e.getActionCommand().equals("Remove"))
       {
-	if (debug)
-	  {
-	    System.err.println("StringSelector: remove Action");
-	  }
+        if (debug)
+          {
+            System.err.println("StringSelector: remove Action");
+          }
 
-	removeItems();
+        removeItems();
       }
     else if (e.getActionCommand().equals("AddNewString"))
       {
-	if (debug)
-	  {
-	    System.err.println("StringSelector: addNewString Action");
-	  }
+        if (debug)
+          {
+            System.err.println("StringSelector: addNewString Action");
+          }
 
-	addNewString();
+        addNewString();
       }
   }
 
@@ -849,97 +849,97 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   {
     if (o.getSource() == custom)
       {
-	if (!editable)
-	  {
-	    return false;
-	  }
+        if (!editable)
+          {
+            return false;
+          }
 
-	addCustom.doClick();
-	return true;
+        addCustom.doClick();
+        return true;
       }
     else if (o instanceof JParameterValueObject)  // from the popup menu
       {
-	if (my_callback != null)
-	  {
-	    try
-	      {
-		my_callback.setValuePerformed(new JParameterValueObject(this,
-									o.getIndex(),
-									o.getValue(),
-									o.getParameter()));
-	      }
-	    catch (java.rmi.RemoteException rx)
-	      {
-		System.err.println("could not setValuePerformed from StringSelector: " + rx);
-	      }
+        if (my_callback != null)
+          {
+            try
+              {
+                my_callback.setValuePerformed(new JParameterValueObject(this,
+                                                                        o.getIndex(),
+                                                                        o.getValue(),
+                                                                        o.getParameter()));
+              }
+            catch (java.rmi.RemoteException rx)
+              {
+                System.err.println("could not setValuePerformed from StringSelector: " + rx);
+              }
 
-	    return true;
-	  }
+            return true;
+          }
       }
     else if (o.getSource() == in)
       {
-	if (!editable)
-	  {
-	    return false;
-	  }
+        if (!editable)
+          {
+            return false;
+          }
 
-	if (o instanceof JInsertValueObject)
-	  {
-	    remove.doClick();
-	    return true;
-	  }
-	else if (o instanceof JAddValueObject)		// selection
-	  {
-	    if (add != null)
-	      {
-		add.setEnabled(false);
-	      }
+        if (o instanceof JInsertValueObject)
+          {
+            remove.doClick();
+            return true;
+          }
+        else if (o instanceof JAddValueObject)          // selection
+          {
+            if (add != null)
+              {
+                add.setEnabled(false);
+              }
 
-	    if (remove != null)
-	      {
-		remove.setEnabled(true);
-	      }
+            if (remove != null)
+              {
+                remove.setEnabled(true);
+              }
 
-	    if (out != null)
-	      {
-		out.clearSelection();
-	      }
+            if (out != null)
+              {
+                out.clearSelection();
+              }
 
-	    return true;
-	  }
+            return true;
+          }
       }
     else if (o.getSource() == out)
       {
-	if (o instanceof JInsertValueObject)
-	  {
-	    add.doClick();
-	    return true;
-	  }
-	else if (o instanceof JAddValueObject)
-	  {
-	    add.setEnabled(true);
-	    remove.setEnabled(false);
-	    in.clearSelection();
-	    custom.setText("");
+        if (o instanceof JInsertValueObject)
+          {
+            add.doClick();
+            return true;
+          }
+        else if (o instanceof JAddValueObject)
+          {
+            add.setEnabled(true);
+            remove.setEnabled(false);
+            in.clearSelection();
+            custom.setText("");
 
-	    return true;
-	  }
+            return true;
+          }
       }
     else
       {
-	if (!editable)
-	  {
-	    return false;
-	  }
+        if (!editable)
+          {
+            return false;
+          }
 
-	if (debug)
-	  {
-	    System.err.println("set value in stringSelector");
-	  }
+        if (debug)
+          {
+            System.err.println("set value in stringSelector");
+          }
 
-	System.err.println("Unknown object generated setValuePerformed in stringSelector.");
+        System.err.println("Unknown object generated setValuePerformed in stringSelector.");
 
-	return false;
+        return false;
       }
 
     return false;  // should never really get here.
@@ -960,113 +960,113 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (out == null)
       {
-	System.err.println("Can't figure out the handle.  No out box to get it from.");
-	return;
+        System.err.println("Can't figure out the handle.  No out box to get it from.");
+        return;
       }
 
     handles = out.getSelectedHandles();
 
     if (handles == null)
       {
-	System.err.println("Error.. got addItem with outSelected == null");
-	return;
+        System.err.println("Error.. got addItem with outSelected == null");
+        return;
       }
 
     if (handles.size() > 1)
       {
-	if (my_callback != null)
-	  {
-	    Vector objVector = new Vector(handles.size());
+        if (my_callback != null)
+          {
+            Vector objVector = new Vector(handles.size());
 
-	    for (int i = 0; i < handles.size(); i++)
-	      {
-		objVector.addElement(((listHandle) handles.elementAt(i)).getObject());
-	      }
+            for (int i = 0; i < handles.size(); i++)
+              {
+                objVector.addElement(((listHandle) handles.elementAt(i)).getObject());
+              }
 
-	    ok = false;		// if we get an exception, that's not okay
+            ok = false;         // if we get an exception, that's not okay
 
-	    try
-	      {
-		ok = my_callback.setValuePerformed(new JAddVectorValueObject(this, objVector));
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not setValuePerformed: " + rx);
-	      }
-	  }
-	else
-	  {
-	    ok = true;
-	  }
+            try
+              {
+                ok = my_callback.setValuePerformed(new JAddVectorValueObject(this, objVector));
+              }
+            catch (RemoteException rx)
+              {
+                throw new RuntimeException("Could not setValuePerformed: " + rx);
+              }
+          }
+        else
+          {
+            ok = true;
+          }
 
-	if (ok)
-	  {
-	    // if replacingValue was set, we'll have been refreshed by
-	    // a callback from the setValuePerformed() call, above,
-	    // before we get to here, so don't do anything to further
-	    // mess with our state.
+        if (ok)
+          {
+            // if replacingValue was set, we'll have been refreshed by
+            // a callback from the setValuePerformed() call, above,
+            // before we get to here, so don't do anything to further
+            // mess with our state.
 
-	    if (replacingValue)
-	      {
-		replacingValue = false;
-		return;
-	      }
+            if (replacingValue)
+              {
+                replacingValue = false;
+                return;
+              }
 
-	    in.clearSelection();
+            in.clearSelection();
 
-	    for (int i = 0; i < handles.size(); i++)
-	      {
-		putItemIn((listHandle)handles.elementAt(i));
-	      }
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.err.println("setValuePerformed returned false");
-	      }
-	  }
+            for (int i = 0; i < handles.size(); i++)
+              {
+                putItemIn((listHandle)handles.elementAt(i));
+              }
+          }
+        else
+          {
+            if (debug)
+              {
+                System.err.println("setValuePerformed returned false");
+              }
+          }
       }
     else
       {
-	if (my_callback != null)
-	  {
-	    ok = false;
+        if (my_callback != null)
+          {
+            ok = false;
 
-	    try
-	      {
-		ok = my_callback.setValuePerformed(new JAddValueObject(this,
-								       ((listHandle)handles.elementAt(0)).getObject()));
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not setValuePerformed: " + rx);
-	      }
-	  }
-	else
-	  {
-	    ok = true;
-	  }
+            try
+              {
+                ok = my_callback.setValuePerformed(new JAddValueObject(this,
+                                                                       ((listHandle)handles.elementAt(0)).getObject()));
+              }
+            catch (RemoteException rx)
+              {
+                throw new RuntimeException("Could not setValuePerformed: " + rx);
+              }
+          }
+        else
+          {
+            ok = true;
+          }
 
-	if (ok)
-	  {
-	    if (replacingValue)
-	      {
-		replacingValue = false;
-		return;
-	      }
+        if (ok)
+          {
+            if (replacingValue)
+              {
+                replacingValue = false;
+                return;
+              }
 
-	    in.clearSelection();
+            in.clearSelection();
 
-	    putItemIn((listHandle)handles.elementAt(0));
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.err.println("setValuePerformed returned false");
-	      }
-	  }
+            putItemIn((listHandle)handles.elementAt(0));
+          }
+        else
+          {
+            if (debug)
+              {
+                System.err.println("setValuePerformed returned false");
+              }
+          }
       }
 
     updateTitles();
@@ -1091,96 +1091,96 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (handles == null)
       {
-	System.err.println("Error.. got removeItem with inSelected == null");
-	return;
+        System.err.println("Error.. got removeItem with inSelected == null");
+        return;
       }
 
     if (handles.size() > 1)
       {
-	if (my_callback != null)
-	  {
-	    Vector objVector = new Vector(handles.size());
+        if (my_callback != null)
+          {
+            Vector objVector = new Vector(handles.size());
 
-	    for (int i = 0; i < handles.size(); i++)
-	      {
-		objVector.addElement(((listHandle) handles.elementAt(i)).getObject());
-	      }
+            for (int i = 0; i < handles.size(); i++)
+              {
+                objVector.addElement(((listHandle) handles.elementAt(i)).getObject());
+              }
 
-	    ok = false;
+            ok = false;
 
-	    try
-	      {
-		ok = my_callback.setValuePerformed(new JDeleteVectorValueObject(this, objVector));
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not setValuePerformed: " + rx);
-	      }
-	  }
-	else
-	  {
-	    ok = true;
-	  }
+            try
+              {
+                ok = my_callback.setValuePerformed(new JDeleteVectorValueObject(this, objVector));
+              }
+            catch (RemoteException rx)
+              {
+                throw new RuntimeException("Could not setValuePerformed: " + rx);
+              }
+          }
+        else
+          {
+            ok = true;
+          }
 
-	if (ok)
-	  {
-	    if (replacingValue)
-	      {
-		replacingValue = false;
-		return;
-	      }
+        if (ok)
+          {
+            if (replacingValue)
+              {
+                replacingValue = false;
+                return;
+              }
 
-	    for (int i = 0; i < handles.size(); i++)
-	      {
-		takeItemOut((listHandle)handles.elementAt(i));
-	      }
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.err.println("setValuePerformed returned false");
-	      }
-	  }
+            for (int i = 0; i < handles.size(); i++)
+              {
+                takeItemOut((listHandle)handles.elementAt(i));
+              }
+          }
+        else
+          {
+            if (debug)
+              {
+                System.err.println("setValuePerformed returned false");
+              }
+          }
       }
     else
       {
-	if (my_callback != null)
-	  {
-	    ok = false;
+        if (my_callback != null)
+          {
+            ok = false;
 
-	    try
-	      {
-		ok = my_callback.setValuePerformed(new JDeleteValueObject(this,
-									  ((listHandle)handles.elementAt(0)).getObject()));
-	      }
-	    catch (RemoteException rx)
-	      {
-		throw new RuntimeException("Could not setValuePerformed: " + rx);
-	      }
-	  }
-	else
-	  {
-	    ok = true;
-	  }
+            try
+              {
+                ok = my_callback.setValuePerformed(new JDeleteValueObject(this,
+                                                                          ((listHandle)handles.elementAt(0)).getObject()));
+              }
+            catch (RemoteException rx)
+              {
+                throw new RuntimeException("Could not setValuePerformed: " + rx);
+              }
+          }
+        else
+          {
+            ok = true;
+          }
 
-	if (ok)
-	  {
-	    if (replacingValue)
-	      {
-		replacingValue = false;
-		return;
-	      }
+        if (ok)
+          {
+            if (replacingValue)
+              {
+                replacingValue = false;
+                return;
+              }
 
-	    takeItemOut((listHandle)handles.elementAt(0));
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.err.println("setValuePerformed returned false");
-	      }
-	  }
+            takeItemOut((listHandle)handles.elementAt(0));
+          }
+        else
+          {
+            if (debug)
+              {
+                System.err.println("setValuePerformed returned false");
+              }
+          }
       }
 
     updateTitles();
@@ -1201,47 +1201,47 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   {
     if (debug)
       {
-	System.err.println("Add: " + item);
+        System.err.println("Add: " + item);
       }
 
     if (!editable)
       {
-	return;
+        return;
       }
 
     if (canChoose)
       {
-	if (out != null)
-	  {
-	    out.removeItem(item);
-	  }
+        if (out != null)
+          {
+            out.removeItem(item);
+          }
 
-	if (debug)
-	  {
-	    System.err.println("Adding handle");
-	  }
+        if (debug)
+          {
+            System.err.println("Adding handle");
+          }
 
-	// We only want to put it in if it's not already there.
-	// Sometimes this happens in Ganymede if we update a field
-	// before we are changing.  It happens like this: the "add"
-	// button is clicked.  Then the return value decides to update
-	// this field, which loads the value in the in box.  Then it
-	// returns true, and then the value is already in there.  So
-	// if we add it again, we get two of them.  Got it?
+        // We only want to put it in if it's not already there.
+        // Sometimes this happens in Ganymede if we update a field
+        // before we are changing.  It happens like this: the "add"
+        // button is clicked.  Then the return value decides to update
+        // this field, which loads the value in the in box.  Then it
+        // returns true, and then the value is already in there.  So
+        // if we add it again, we get two of them.  Got it?
 
-	if (!in.containsItem(item))
-	  {
-	    in.addItem(item);
-	  }
+        if (!in.containsItem(item))
+          {
+            in.addItem(item);
+          }
 
-	if (debug)
-	  {
-	    System.err.println("Done Adding handle");
-	  }
+        if (debug)
+          {
+            System.err.println("Done Adding handle");
+          }
       }
     else
       {
-	throw new RuntimeException("Can't add something from the out box to a non-canChoose StringSelector!");
+        throw new RuntimeException("Can't add something from the out box to a non-canChoose StringSelector!");
       }
   }
 
@@ -1256,12 +1256,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   {
     if (debug)
       {
-	System.err.println("Remove." + item);
+        System.err.println("Remove." + item);
       }
 
     if (!editable)
       {
-	return;
+        return;
       }
 
     in.removeItem(item);
@@ -1270,7 +1270,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if ((out != null)  &&  (! out.containsItem(item)))
       {
-	out.addItem(item);
+        out.addItem(item);
       }
 
     remove.setEnabled(false);
@@ -1281,18 +1281,18 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (out != null)
       {
-	out.invalidate();
+        out.invalidate();
       }
 
     invalidate();
 
     if (parent.getParent() != null)
       {
-	parent.getParent().validate();
+        parent.getParent().validate();
       }
     else
       {
-	parent.validate();
+        parent.validate();
       }
   }
 
@@ -1307,12 +1307,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (inputText.equals("") || in.containsLabel(inputText))
       {
-	if (debug)
-	  {
-	    System.err.println("That one's already in there.  No soup for you!");
-	  }
+        if (debug)
+          {
+            System.err.println("That one's already in there.  No soup for you!");
+          }
 
-	return;
+        return;
       }
 
     if (debug)
@@ -1322,182 +1322,182 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (out != null && mustChoose)
       {
-	// Check to see if it is in there
+        // Check to see if it is in there
 
-	if (debug)
-	  {
-	    System.err.println("Checking to see if this is a viable option");
-	  }
+        if (debug)
+          {
+            System.err.println("Checking to see if this is a viable option");
+          }
 
-	if (out.containsLabel(inputText))
-	  {
-	    out.setSelectedLabel(inputText);
-	    listHandle handle = out.getSelectedHandle();
+        if (out.containsLabel(inputText))
+          {
+            out.setSelectedLabel(inputText);
+            listHandle handle = out.getSelectedHandle();
 
-	    boolean ok;
+            boolean ok;
 
-	    if (my_callback != null)
-	      {
-		ok = false;
+            if (my_callback != null)
+              {
+                ok = false;
 
-		try
-		  {
-		    ok = my_callback.setValuePerformed(new JAddValueObject(this, handle.getObject()));
-		  }
-		catch (RemoteException rx)
-		  {
-		    throw new RuntimeException("Could not setValuePerformed: " + rx);
-		  }
-	      }
-	    else
-	      {
-		ok = true;
-	      }
+                try
+                  {
+                    ok = my_callback.setValuePerformed(new JAddValueObject(this, handle.getObject()));
+                  }
+                catch (RemoteException rx)
+                  {
+                    throw new RuntimeException("Could not setValuePerformed: " + rx);
+                  }
+              }
+            else
+              {
+                ok = true;
+              }
 
-	    if (ok)
-	      {
-		if (replacingValue)
-		  {
-		    custom.setText("");
-		    replacingValue = false;
-		    return;
-		  }
+            if (ok)
+              {
+                if (replacingValue)
+                  {
+                    custom.setText("");
+                    replacingValue = false;
+                    return;
+                  }
 
-		in.clearSelection();
+                in.clearSelection();
 
-		putItemIn(handle);
-		custom.setText("");
-	      }
-	  }
-	else  //It's not in the outbox.
-	  {
-	    if (my_callback != null)
-	      {
-		try
-		  {
-		    // "Sorry, you must enter strings from the list of
-		    // available choices.  Please choose from the
-		    // available list."
+                putItemIn(handle);
+                custom.setText("");
+              }
+          }
+        else  //It's not in the outbox.
+          {
+            if (my_callback != null)
+              {
+                try
+                  {
+                    // "Sorry, you must enter strings from the list of
+                    // available choices.  Please choose from the
+                    // available list."
 
-		    my_callback.setValuePerformed(new JErrorValueObject(this,
-									ts.l("addNewString.bad_choice")));
-		  }
-		catch (RemoteException rx)
-		  {
-		    throw new RuntimeException("Could not tell parent what is wrong: " + rx);
-		  }
-	      }
-	  }
+                    my_callback.setValuePerformed(new JErrorValueObject(this,
+                                                                        ts.l("addNewString.bad_choice")));
+                  }
+                catch (RemoteException rx)
+                  {
+                    throw new RuntimeException("Could not tell parent what is wrong: " + rx);
+                  }
+              }
+          }
       }
     else
       {
-	// not mustChoose, so you can stick it in there.  But see,
-	// I need to see if it's in there first, because if it is,
-	// IF IT IS, then you have to move the String over.  HA!
+        // not mustChoose, so you can stick it in there.  But see,
+        // I need to see if it's in there first, because if it is,
+        // IF IT IS, then you have to move the String over.  HA!
 
-	if ((out != null) && out.containsLabel(inputText))
-	  {
-	    out.setSelectedLabel(inputText);
-	    listHandle handle = out.getSelectedHandle();
+        if ((out != null) && out.containsLabel(inputText))
+          {
+            out.setSelectedLabel(inputText);
+            listHandle handle = out.getSelectedHandle();
 
-	    boolean ok;
+            boolean ok;
 
-	    if (my_callback != null)
-	      {
-		ok = false;
+            if (my_callback != null)
+              {
+                ok = false;
 
-		try
-		  {
-		    ok = my_callback.setValuePerformed(new JAddValueObject(this, handle.getObject()));
-		  }
-		catch (RemoteException rx)
-		  {
-		    throw new RuntimeException("Could not setValuePerformed: " + rx);
-		  }
-	      }
-	    else
-	      {
-		ok = true;
-	      }
+                try
+                  {
+                    ok = my_callback.setValuePerformed(new JAddValueObject(this, handle.getObject()));
+                  }
+                catch (RemoteException rx)
+                  {
+                    throw new RuntimeException("Could not setValuePerformed: " + rx);
+                  }
+              }
+            else
+              {
+                ok = true;
+              }
 
-	    if (ok)
-	      {
-		if (replacingValue)
-		  {
-		    custom.setText("");
-		    replacingValue = false;
-		    return;
-		  }
+            if (ok)
+              {
+                if (replacingValue)
+                  {
+                    custom.setText("");
+                    replacingValue = false;
+                    return;
+                  }
 
-		in.clearSelection();
+                in.clearSelection();
 
-		putItemIn(handle);
-		custom.setText("");
-	      }
-	  }
-	else
-	  {
-	    // Not in the out box, send up the String as-is, with no attached data
+                putItemIn(handle);
+                custom.setText("");
+              }
+          }
+        else
+          {
+            // Not in the out box, send up the String as-is, with no attached data
 
             if (debug)
               {
                 System.err.println("addNewString() -- stand alone");
               }
 
-	    boolean ok;
+            boolean ok;
 
-	    if (my_callback != null)
-	      {
-		ok = false;
+            if (my_callback != null)
+              {
+                ok = false;
 
-		try
-		  {
-		    ok = my_callback.setValuePerformed(new JAddValueObject(this, inputText));
-		  }
-		catch (RemoteException rx)
-		  {
-		    throw new RuntimeException("Could not setValuePerformed: " + rx);
-		  }
-	      }
-	    else
-	      {
-		ok = true;
-	      }
+                try
+                  {
+                    ok = my_callback.setValuePerformed(new JAddValueObject(this, inputText));
+                  }
+                catch (RemoteException rx)
+                  {
+                    throw new RuntimeException("Could not setValuePerformed: " + rx);
+                  }
+              }
+            else
+              {
+                ok = true;
+              }
 
-	    if (ok)
-	      {
-		if (replacingValue)
-		  {
-		    custom.setText("");
-		    replacingValue = false;
+            if (ok)
+              {
+                if (replacingValue)
+                  {
+                    custom.setText("");
+                    replacingValue = false;
 
                     if (debug)
                       {
                         System.err.println("addNewString() -- replacing");
                       }
 
-		    return;
-		  }
+                    return;
+                  }
 
                 if (debug)
                   {
                     System.err.println("addNewString() -- adding");
                   }
 
-		in.clearSelection();
-		in.addItem(new listHandle(inputText, inputText));
-		custom.setText("");
-	      }
-	    else
-	      {
-		if (debug)
-		  {
-		    System.err.println("setValuePerformed returned false.");
-		  }
-	      }
-	  }
+                in.clearSelection();
+                in.addItem(new listHandle(inputText, inputText));
+                custom.setText("");
+              }
+            else
+              {
+                if (debug)
+                  {
+                    System.err.println("setValuePerformed returned false.");
+                  }
+              }
+          }
 
-	validate();
+        validate();
       }
 
     updateTitles();
@@ -1517,7 +1517,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (out != null)
       {
-	outTitle.setText(org_out.concat(" : " + out.getSizeOfList()));
+        outTitle.setText(org_out.concat(" : " + out.getSizeOfList()));
       }
   }
 
@@ -1529,7 +1529,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   {
     if (debug)
       {
-	System.err.println("recalcSize()");
+        System.err.println("recalcSize()");
       }
 
     if (minRows == -1 || maxRows == -1)
@@ -1546,7 +1546,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (out != null)
       {
-	int halfOptions = out.getSizeOfList() / 2;
+        int halfOptions = out.getSizeOfList() / 2;
 
         if (halfOptions > lowerBound)
           {
@@ -1561,8 +1561,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     if (debug)
       {
-	System.err.println("StringSelector.recalcSize(): currentRows == " + currentRows);
-	System.err.println("StringSelector.recalcSize(): lowerBound == " + lowerBound);
+        System.err.println("StringSelector.recalcSize(): currentRows == " + currentRows);
+        System.err.println("StringSelector.recalcSize(): lowerBound == " + lowerBound);
       }
 
     if (currentRows != lowerBound)
@@ -1587,7 +1587,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   {
     if (callback != this.my_callback)
       {
-	throw new IllegalStateException();
+        throw new IllegalStateException();
       }
 
     this.replacingValue = true;
@@ -1609,14 +1609,14 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     Vector v2 = new Vector();
     for ( int i=0; i < 10; i++ )
       {
-	v1.addElement( Integer.toString( i ) );
-	v2.addElement( Integer.toString( 20-i ) );
+        v1.addElement( Integer.toString( i ) );
+        v2.addElement( Integer.toString( 20-i ) );
       }
 
     StringSelector ss = new StringSelector( frame,
-					    true,
-					    true,
-					    true);
+                                            true,
+                                            true,
+                                            true);
 
     ss.update(v1, true, null, v2, true, null);
 

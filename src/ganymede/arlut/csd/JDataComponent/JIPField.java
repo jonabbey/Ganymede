@@ -97,7 +97,7 @@ public class JIPField extends JentryField {
    */
 
   public JIPField(boolean is_editable,
-		  boolean allowV6)
+                  boolean allowV6)
   {
     super(DEFAULT_COLS);
 
@@ -117,7 +117,7 @@ public class JIPField extends JentryField {
   public JIPField(boolean allowV6)
   {
     this(true,
-	 allowV6);
+         allowV6);
   }
 
   /**
@@ -131,8 +131,8 @@ public class JIPField extends JentryField {
     */
 
   public JIPField(boolean is_editable,
-		  JsetValueCallback callback,
-		  boolean allowV6)
+                  JsetValueCallback callback,
+                  boolean allowV6)
   {
     this(is_editable, allowV6);
 
@@ -164,19 +164,19 @@ public class JIPField extends JentryField {
   {
     if (bytes == null)
       {
-	setText("");
+        setText("");
 
-	storedValue = null;
-	return;
+        storedValue = null;
+        return;
       }
     
     if (bytes.length == 4)
       {
-	setText(genIPV4string(bytes));
+        setText(genIPV4string(bytes));
       }
     else
       {
-	setText(genIPV6string(bytes));
+        setText(genIPV6string(bytes));
       }
 
     storedValue = getText();
@@ -198,23 +198,23 @@ public class JIPField extends JentryField {
 
     if (str == null || str.equals(""))
       {
-	return null;
+        return null;
       }
 
     if (str.indexOf(':') != -1)
       {
-	if (allowV6)
-	  {
-	    return genIPV6bytes(str);
-	  }
-	else
-	  {
-	    throw new IllegalArgumentException("IPv6 Addresses not allowed in this field");
-	  }
+        if (allowV6)
+          {
+            return genIPV6bytes(str);
+          }
+        else
+          {
+            throw new IllegalArgumentException("IPv6 Addresses not allowed in this field");
+          }
       }
     else
       {
-	return genIPV4bytes(str);
+        return genIPV4bytes(str);
       }
   }
 
@@ -238,115 +238,115 @@ public class JIPField extends JentryField {
 
     synchronized (this)
       {
-	if (processingCallback)
-	  {
-	    return -1;
-	  }
-	
-	processingCallback = true;
+        if (processingCallback)
+          {
+            return -1;
+          }
+        
+        processingCallback = true;
       }
 
     try
       {
-	// if nothing in the JIPField has changed,
-	// we don't need to worry about this event.
+        // if nothing in the JIPField has changed,
+        // we don't need to worry about this event.
     
-	str = getText();
+        str = getText();
     
-	if ((storedValue != null && storedValue.equals(str)) || 
-	    (storedValue == null && (str == null || str.equals(""))))
-	  {
-	    return 0;
-	  }
+        if ((storedValue != null && storedValue.equals(str)) || 
+            (storedValue == null && (str == null || str.equals(""))))
+          {
+            return 0;
+          }
 
-	try
-	  {
-	    if (str.indexOf(':') != -1)
-	      {
-		if (allowV6)
-		  {
-		    bytes = genIPV6bytes(str);
-		  }
-		else
-		  {
-		    throw new IllegalArgumentException("IPv6 Addresses not allowed in this field");
-		  }
-	      }
-	    else
-	      {
-		bytes = genIPV4bytes(str);
-	      }
-	  }
-	catch (IllegalArgumentException ex)
-	  {
-	    reportError(ex.getMessage());
-	    return -1;
-	  }
+        try
+          {
+            if (str.indexOf(':') != -1)
+              {
+                if (allowV6)
+                  {
+                    bytes = genIPV6bytes(str);
+                  }
+                else
+                  {
+                    throw new IllegalArgumentException("IPv6 Addresses not allowed in this field");
+                  }
+              }
+            else
+              {
+                bytes = genIPV4bytes(str);
+              }
+          }
+        catch (IllegalArgumentException ex)
+          {
+            reportError(ex.getMessage());
+            return -1;
+          }
 
-	try 
-	  {
-	    if (debug)
-	      {
-		System.err.println("JIPField.processFocusEvent: making callback");
-	      }
-	    
-	    if (!allowCallback || my_parent.setValuePerformed(new JSetValueObject(this, bytes)))
-	      {
-		// handle modifications that were applied to us if
-		// setValuePerformed() canonicalized otherwise
-		// approved-but-modified the bytes that we suggested
+        try 
+          {
+            if (debug)
+              {
+                System.err.println("JIPField.processFocusEvent: making callback");
+              }
+            
+            if (!allowCallback || my_parent.setValuePerformed(new JSetValueObject(this, bytes)))
+              {
+                // handle modifications that were applied to us if
+                // setValuePerformed() canonicalized otherwise
+                // approved-but-modified the bytes that we suggested
 
-		if (replacingValue)
-		  {
-		    bytes = replacementValue;
-		  }
+                if (replacingValue)
+                  {
+                    bytes = replacementValue;
+                  }
 
-		if (bytes == null)
-		  {
-		    storedValue = "";
-		    setText(storedValue);
-		  }
-		else if (bytes.length == 4)
-		  {
-		    storedValue = genIPV4string(bytes);
-		    setText(storedValue);
-		  }
-		else if (bytes.length == 16)
-		  {
-		    storedValue = genIPV6string(bytes);
-		    setText(storedValue);
-		  }
-		else
-		  {
-		    throw new RuntimeException("JIPField: bad bytes calculated");
-		  }
-		
-		return 1;
-	      }
-	    else
-	      {
-		if (storedValue == null)
-		  {
-		    setText("");
-		  }
-		else
-		  {
-		    setText(storedValue);
-		  }
-		
-		return -1;
-	      }
-	  }
-	catch (RemoteException re)
-	  {
-	    throw new RuntimeException("failure in callback dispatch: " + re); 
-	  }
+                if (bytes == null)
+                  {
+                    storedValue = "";
+                    setText(storedValue);
+                  }
+                else if (bytes.length == 4)
+                  {
+                    storedValue = genIPV4string(bytes);
+                    setText(storedValue);
+                  }
+                else if (bytes.length == 16)
+                  {
+                    storedValue = genIPV6string(bytes);
+                    setText(storedValue);
+                  }
+                else
+                  {
+                    throw new RuntimeException("JIPField: bad bytes calculated");
+                  }
+                
+                return 1;
+              }
+            else
+              {
+                if (storedValue == null)
+                  {
+                    setText("");
+                  }
+                else
+                  {
+                    setText(storedValue);
+                  }
+                
+                return -1;
+              }
+          }
+        catch (RemoteException re)
+          {
+            throw new RuntimeException("failure in callback dispatch: " + re); 
+          }
       }
     finally
       {
-	processingCallback = false;
-	replacingValue = false;
-	replacementValue = null;
+        processingCallback = false;
+        replacingValue = false;
+        replacementValue = null;
       }
   }
 
@@ -360,19 +360,19 @@ public class JIPField extends JentryField {
   {
     if (allowCallback) 
       {
-	try 
-	  {
-	    if (debug)
-	      {
-		System.err.println("JIPField.processFocusEvent: making callback");
-	      }
+        try 
+          {
+            if (debug)
+              {
+                System.err.println("JIPField.processFocusEvent: making callback");
+              }
 
-	    my_parent.setValuePerformed(new JErrorValueObject(this, error));	    
-	  }
-	catch (RemoteException ex)
-	  {
-	    throw new RuntimeException("failure in error report: " + ex); 
-	  }
+            my_parent.setValuePerformed(new JErrorValueObject(this, error));        
+          }
+        catch (RemoteException ex)
+          {
+            throw new RuntimeException("failure in error report: " + ex); 
+          }
       }
   }
 
@@ -392,7 +392,7 @@ public class JIPField extends JentryField {
   {
     if ((x < 0) || (x > 255))
       {
-	throw new IllegalArgumentException("Out of range: " + x);
+        throw new IllegalArgumentException("Out of range: " + x);
       }
 
     return (byte) (x - 128);
@@ -453,7 +453,7 @@ public class JIPField extends JentryField {
 
     if (input == null)
       {
-	throw new IllegalArgumentException("null input");
+        throw new IllegalArgumentException("null input");
       }
 
     /*
@@ -468,59 +468,59 @@ public class JIPField extends JentryField {
 
     for (int i = 0; i < 4; i++)
       {
-	result[i] = Byte.valueOf(u2s(0));
+        result[i] = Byte.valueOf(u2s(0));
       }
 
     input = input.trim();
 
     if (input.equals(""))
       {
-	return result;
+        return result;
       }
 
     cAry = input.toCharArray();
 
     for (int i = 0; i < cAry.length; i++)
       {
-	if (!isAllowedV4(cAry[i]))
-	  {
-	    throw new IllegalArgumentException("bad char for IPv4 address in input: " + input);
-	  }
+        if (!isAllowedV4(cAry[i]))
+          {
+            throw new IllegalArgumentException("bad char for IPv4 address in input: " + input);
+          }
 
-	if (cAry[i] == '.')
-	  {
-	    dotCount++;
-	  }
+        if (cAry[i] == '.')
+          {
+            dotCount++;
+          }
       }
 
     if (dotCount > 3)
       {
-	throw new IllegalArgumentException("too many dots for an IPv4 address: " + input);
+        throw new IllegalArgumentException("too many dots for an IPv4 address: " + input);
       }
 
     while (length < cAry.length)
       {
-	temp.setLength(0);
+        temp.setLength(0);
 
-	while ((length < cAry.length) && (cAry[length] != '.'))
-	  {
-	    temp.append(cAry[length++]);
-	  }
+        while ((length < cAry.length) && (cAry[length] != '.'))
+          {
+            temp.append(cAry[length++]);
+          }
 
-	length++;		// skip the .
+        length++;               // skip the .
 
-	octets.addElement(temp.toString());
+        octets.addElement(temp.toString());
       }
 
     for (int i = 0; i < octets.size(); i++)
       {
-	if (debug)
-	  {
-	    System.err.println("JIPField.genIPV4bytes(): byte " + i + " = " + 
-			       (String) octets.elementAt(i));
-	  }
+        if (debug)
+          {
+            System.err.println("JIPField.genIPV4bytes(): byte " + i + " = " + 
+                               (String) octets.elementAt(i));
+          }
 
-	result[i] = Byte.valueOf(u2s(Integer.parseInt((String) octets.elementAt(i))));
+        result[i] = Byte.valueOf(u2s(Integer.parseInt((String) octets.elementAt(i))));
       }
 
     return result;
@@ -543,21 +543,21 @@ public class JIPField extends JentryField {
 
     if (octets.length != 4)
       {
-	throw new IllegalArgumentException("bad number of octets.");
+        throw new IllegalArgumentException("bad number of octets.");
       }
 
     absoctets = new Short[octets.length];
 
     for (int i = 0; i < octets.length; i++)
       {
-	absoctets[i] = Short.valueOf((short) (octets[i].shortValue() + 128)); // don't want negative values
+        absoctets[i] = Short.valueOf((short) (octets[i].shortValue() + 128)); // don't want negative values
 
-	if (i > 0)
-	  {
-	    result.append(".");
-	  }
+        if (i > 0)
+          {
+            result.append(".");
+          }
 
-	result.append(absoctets[i].toString());
+        result.append(absoctets[i].toString());
       }
     
     return result.toString();
@@ -579,12 +579,12 @@ public class JIPField extends JentryField {
     char[] cAry;
 
     int
-      length = 0,		// how far into the input have we processed?
-      dotCount = 0,		// how many dots for the IPv4 portion?
-      colonCount = 0,		// how many colons for the IPv6 portion?
-      doublecolon = 0,		// how many double colons?
-      tailBytes = 0,		// how many trailing bytes do we have?
-      v4v6boundary = 0;		// what is the index of the last char of the v6 portion?
+      length = 0,               // how far into the input have we processed?
+      dotCount = 0,             // how many dots for the IPv4 portion?
+      colonCount = 0,           // how many colons for the IPv6 portion?
+      doublecolon = 0,          // how many double colons?
+      tailBytes = 0,            // how many trailing bytes do we have?
+      v4v6boundary = 0;         // what is the index of the last char of the v6 portion?
 
     StringBuffer temp = new StringBuffer();
 
@@ -592,7 +592,7 @@ public class JIPField extends JentryField {
 
     if (input == null)
       {
-	throw new IllegalArgumentException("null input");
+        throw new IllegalArgumentException("null input");
       }
 
     /*
@@ -620,7 +620,7 @@ public class JIPField extends JentryField {
 
     for (int i = 0; i < 16; i++)
       {
-	result[i] = Byte.valueOf(u2s(0));
+        result[i] = Byte.valueOf(u2s(0));
       }
 
     // trim the input
@@ -631,92 +631,92 @@ public class JIPField extends JentryField {
 
     if (input.equals("") || input.equals("::"))
       {
-	return result;
+        return result;
       }
 
     cAry = input.toCharArray();
 
     for (int i = 0; i < cAry.length; i++)
       {
-	if (!isAllowedV6(cAry[i]))
-	  {
-	    throw new IllegalArgumentException("bad char for IPv6 address in input: " + input);
-	  }
+        if (!isAllowedV6(cAry[i]))
+          {
+            throw new IllegalArgumentException("bad char for IPv6 address in input: " + input);
+          }
 
-	if (cAry[i] == '.')
-	  {
-	    dotCount++;
-	  }
+        if (cAry[i] == '.')
+          {
+            dotCount++;
+          }
 
-	if (cAry[i] == ':')
-	  {
-	    colonCount++;
+        if (cAry[i] == ':')
+          {
+            colonCount++;
 
-	    if (i > 0 && (cAry[i-1] == ':'))
-	      {
-		doublecolon++;
-	      }
-	  }
+            if (i > 0 && (cAry[i-1] == ':'))
+              {
+                doublecolon++;
+              }
+          }
       }
 
     if (dotCount > 3)
       {
-	throw new IllegalArgumentException("too many dots for a mixed IPv4/IPv6 address: " + input);
+        throw new IllegalArgumentException("too many dots for a mixed IPv4/IPv6 address: " + input);
       }
 
     if (colonCount > 7)
       {
-	throw new IllegalArgumentException("too many colons for an IPv6 address: " + input);
+        throw new IllegalArgumentException("too many colons for an IPv6 address: " + input);
       }
 
     if (doublecolon > 1)
       {
-	throw new IllegalArgumentException("error: more than one double-colon.  Invalid IPv6 address: " + input);
+        throw new IllegalArgumentException("error: more than one double-colon.  Invalid IPv6 address: " + input);
       }
 
     if (dotCount > 0 && colonCount > 6)
       {
-	throw new IllegalArgumentException("invalid mixed IPv4/IPv6 address: " + input);
+        throw new IllegalArgumentException("invalid mixed IPv4/IPv6 address: " + input);
       }
 
     if ((colonCount == 0) && (dotCount != 0))
       {
-	// we've got an IPv4 address where we would like an IPv6 address.  Convert it.
+        // we've got an IPv4 address where we would like an IPv6 address.  Convert it.
 
-	ipv4bytes = genIPV4bytes(input);
+        ipv4bytes = genIPV4bytes(input);
 
-	result[10] = Byte.valueOf(u2s(255));
-	result[11] = Byte.valueOf(u2s(255));
+        result[10] = Byte.valueOf(u2s(255));
+        result[11] = Byte.valueOf(u2s(255));
 
-	result[12] = ipv4bytes[0];
-	result[13] = ipv4bytes[1];
-	result[14] = ipv4bytes[2];
-	result[15] = ipv4bytes[3];
+        result[12] = ipv4bytes[0];
+        result[13] = ipv4bytes[1];
+        result[14] = ipv4bytes[2];
+        result[15] = ipv4bytes[3];
 
-	return result;
+        return result;
       }
 
     if (dotCount > 0)
       {
-	// we've got a mixed address.. get the v4 bytes from the end.
+        // we've got a mixed address.. get the v4 bytes from the end.
 
-	v4v6boundary = input.lastIndexOf(':');
+        v4v6boundary = input.lastIndexOf(':');
 
-	try
-	  {
-	    ipv4bytes = genIPV4bytes(input.substring(v4v6boundary + 1));
-	  }
-	catch (Exception ex)
-	  {
-	    throw new IllegalArgumentException("couldn't do mixed IPv4 parsing: " + ex);
-	  }
+        try
+          {
+            ipv4bytes = genIPV4bytes(input.substring(v4v6boundary + 1));
+          }
+        catch (Exception ex)
+          {
+            throw new IllegalArgumentException("couldn't do mixed IPv4 parsing: " + ex);
+          }
 
-	result[12] = ipv4bytes[0];
-	result[13] = ipv4bytes[1];
-	result[14] = ipv4bytes[2];
-	result[15] = ipv4bytes[3];
+        result[12] = ipv4bytes[0];
+        result[13] = ipv4bytes[1];
+        result[14] = ipv4bytes[2];
+        result[15] = ipv4bytes[3];
 
-	tailBytes = 4;
+        tailBytes = 4;
       }
 
     // note that the v4v6boundary will be the length of the input
@@ -724,16 +724,16 @@ public class JIPField extends JentryField {
 
     while (length < v4v6boundary)
       {
-	temp.setLength(0);
+        temp.setLength(0);
 
-	while ((length < v4v6boundary) && (cAry[length] != ':'))
-	  {
-	    temp.append(cAry[length++]);
-	  }
+        while ((length < v4v6boundary) && (cAry[length] != ':'))
+          {
+            temp.append(cAry[length++]);
+          }
 
-	length++;		// skip the :
+        length++;               // skip the :
 
-	segments.addElement(temp.toString());
+        segments.addElement(temp.toString());
       }
 
     // okay, we now have a vector of segment strings, with (possibly)
@@ -747,18 +747,18 @@ public class JIPField extends JentryField {
 
     for (int i = 0; i < segments.size(); i++)
       {
-	tmp = (String) segments.elementAt(i);
-	
-	if (tmp.equals(""))
-	  {
-	    beforeRegion = false;
+        tmp = (String) segments.elementAt(i);
+        
+        if (tmp.equals(""))
+          {
+            beforeRegion = false;
 
-	    compressBoundary = i;
-	  }
-	else if (!beforeRegion)
-	  {
-	    tailBytes += 2;
-	  }
+            compressBoundary = i;
+          }
+        else if (!beforeRegion)
+          {
+            tailBytes += 2;
+          }
       }
 
     // compressBoundary won't be 0 if we had a leading ::,
@@ -766,91 +766,91 @@ public class JIPField extends JentryField {
 
     if (compressBoundary == 0)
       {
-	compressBoundary = segments.size();
+        compressBoundary = segments.size();
       }
     else if (compressBoundary == 1)
       {
-	// if the :: is leading the string, we want to get rid
-	// of the extra empty string
+        // if the :: is leading the string, we want to get rid
+        // of the extra empty string
 
-	tmp = (String) segments.elementAt(0);
+        tmp = (String) segments.elementAt(0);
 
-	if (tmp.equals(""))
-	  {
-	    segments.removeElementAt(0);
-	    compressBoundary--;
-	  }
+        if (tmp.equals(""))
+          {
+            segments.removeElementAt(0);
+            compressBoundary--;
+          }
       }
 
     int tailOffset = 16 - tailBytes;
 
     if (debug)
       {
-	System.err.println("tailBytes = " + tailBytes);
-	System.err.println("tailOffset = " + tailOffset);
+        System.err.println("tailBytes = " + tailBytes);
+        System.err.println("tailOffset = " + tailOffset);
       }
 
     // 
 
     for (int i = 0; i < compressBoundary; i++)
       {
-	tmp = (String) segments.elementAt(i);
+        tmp = (String) segments.elementAt(i);
 
-	if (tmp.length() < 4)
-	  {
-	    int l = tmp.length();
+        if (tmp.length() < 4)
+          {
+            int l = tmp.length();
 
-	    for (int j = 4; j > l; j--)
-	      {
-		tmp = "0" + tmp;
-	      }
-	  }
+            for (int j = 4; j > l; j--)
+              {
+                tmp = "0" + tmp;
+              }
+          }
 
-	if (tmp.equals(""))
-	  {
-	    throw new Error("logic error");
-	  }
+        if (tmp.equals(""))
+          {
+            throw new Error("logic error");
+          }
 
-	result[i * 2] = Byte.valueOf(u2s(Integer.parseInt(tmp.substring(0, 2), 16)));
-	result[(i * 2) + 1] = Byte.valueOf(u2s(Integer.parseInt(tmp.substring(2, 4), 16)));
+        result[i * 2] = Byte.valueOf(u2s(Integer.parseInt(tmp.substring(0, 2), 16)));
+        result[(i * 2) + 1] = Byte.valueOf(u2s(Integer.parseInt(tmp.substring(2, 4), 16)));
 
-	if (debug)
-	  {
-	    System.err.println("Byte " + (i*2) + " = " + s2u(result[i*2].byteValue()));
-	    System.err.println("Byte " + ((i*2)+1) + " = " + s2u(result[(i*2)+1].byteValue()));
-	  }
+        if (debug)
+          {
+            System.err.println("Byte " + (i*2) + " = " + s2u(result[i*2].byteValue()));
+            System.err.println("Byte " + ((i*2)+1) + " = " + s2u(result[(i*2)+1].byteValue()));
+          }
       }
 
     int x;
 
     for (int i = compressBoundary+1; i < segments.size(); i++)
       {
-	x = i - compressBoundary - 1;
-	tmp = (String) segments.elementAt(i);
+        x = i - compressBoundary - 1;
+        tmp = (String) segments.elementAt(i);
 
-	if (tmp.length() < 4)
-	  {
-	    int l = tmp.length();
+        if (tmp.length() < 4)
+          {
+            int l = tmp.length();
 
-	    for (int j = 4; j > l; j--)
-	      {
-		tmp = "0" + tmp;
-	      }
-	  }
+            for (int j = 4; j > l; j--)
+              {
+                tmp = "0" + tmp;
+              }
+          }
 
-	if (tmp.equals(""))
-	  {
-	    throw new Error("logic error");
-	  }
+        if (tmp.equals(""))
+          {
+            throw new Error("logic error");
+          }
 
-	result[tailOffset + (x * 2)] = Byte.valueOf(u2s(Integer.parseInt(tmp.substring(0, 2), 16)));
-	result[tailOffset + (x * 2) + 1] = Byte.valueOf(u2s(Integer.parseInt(tmp.substring(2, 4), 16)));
+        result[tailOffset + (x * 2)] = Byte.valueOf(u2s(Integer.parseInt(tmp.substring(0, 2), 16)));
+        result[tailOffset + (x * 2) + 1] = Byte.valueOf(u2s(Integer.parseInt(tmp.substring(2, 4), 16)));
 
-	if (debug)
-	  {
-	    System.err.println("Byte " + (tailOffset + (x*2)) + " = " + s2u(result[(tailOffset + (x*2))].byteValue()));
-	    System.err.println("Byte " + (tailOffset + ((x*2)+1)) + " = " + s2u(result[tailOffset + (x*2) + 1].byteValue()));
-	  }
+        if (debug)
+          {
+            System.err.println("Byte " + (tailOffset + (x*2)) + " = " + s2u(result[(tailOffset + (x*2))].byteValue()));
+            System.err.println("Byte " + (tailOffset + ((x*2)+1)) + " = " + s2u(result[tailOffset + (x*2) + 1].byteValue()));
+          }
 
       }
 
@@ -879,31 +879,31 @@ public class JIPField extends JentryField {
 
     for (i = 0; i < octets.length; i++)
       {
-	absoctets[i] = Short.valueOf((short) (octets[i].shortValue() + 128)); // don't want negative values
+        absoctets[i] = Short.valueOf((short) (octets[i].shortValue() + 128)); // don't want negative values
 
-	//	System.err.println("Converting byte " + octets[i].intValue() + " to abs " + absoctets[i].intValue());
+        //      System.err.println("Converting byte " + octets[i].intValue() + " to abs " + absoctets[i].intValue());
       }
 
     if (absoctets.length == 4)
       {
-	// okay, here's the easy one..
+        // okay, here's the easy one..
 
-	result.append("::ffff:"); // this is IPV6's compatibility mode
+        result.append("::ffff:"); // this is IPV6's compatibility mode
 
-	result.append(absoctets[0].toString());
-	result.append(".");
-	result.append(absoctets[1].toString());
-	result.append(".");
-	result.append(absoctets[2].toString());
-	result.append(".");
-	result.append(absoctets[3].toString());
+        result.append(absoctets[0].toString());
+        result.append(".");
+        result.append(absoctets[1].toString());
+        result.append(".");
+        result.append(absoctets[2].toString());
+        result.append(".");
+        result.append(absoctets[3].toString());
 
-	return result.toString();
+        return result.toString();
       }
 
     if (absoctets.length != 16)
       {
-	throw new IllegalArgumentException("bad number of octets.");
+        throw new IllegalArgumentException("bad number of octets.");
       }
 
     // now for the challenge..
@@ -912,7 +912,7 @@ public class JIPField extends JentryField {
 
     for (i = 0; i < 8; i++)
       {
-	stanzas[i] = (absoctets[i*2].intValue()*256) + absoctets[(i*2) + 1].intValue();
+        stanzas[i] = (absoctets[i*2].intValue()*256) + absoctets[(i*2) + 1].intValue();
       }
 
     stanzaStrings = new String[8];
@@ -921,9 +921,9 @@ public class JIPField extends JentryField {
 
     for (i = 0; i < 8; i++)
       {
-	stanzaStrings[i] = Integer.toString(stanzas[i], 16); // generate the 4 hex digits
+        stanzaStrings[i] = Integer.toString(stanzas[i], 16); // generate the 4 hex digits
 
-	//	System.err.println("Hex for " + stanzas[i] + " is " + stanzaStrings[i]);
+        //      System.err.println("Hex for " + stanzas[i] + " is " + stanzaStrings[i]);
       }
     
     // okay, we've got 8 stanzas.. now we have to determine
@@ -935,29 +935,29 @@ public class JIPField extends JentryField {
 
     while (i < 8)
       {
-	if (i < 7 && (stanzas[i] == 0) && (stanzas[i+1] == 0))
-	  {
-	    int localLo, localHi;
+        if (i < 7 && (stanzas[i] == 0) && (stanzas[i+1] == 0))
+          {
+            int localLo, localHi;
 
-	    localLo = i;
+            localLo = i;
 
-	    for (j = i; (j<8) && (stanzas[j] == 0); j++)
-	      {
-		// just counting up
-	      }
-	    
-	    localHi = j-1;
+            for (j = i; (j<8) && (stanzas[j] == 0); j++)
+              {
+                // just counting up
+              }
+            
+            localHi = j-1;
 
-	    if ((localHi - localLo) > (hiCompress - loCompress))
-	      {
-		hiCompress = localHi;
-		loCompress = localLo;
-		
-		i = localHi;	// continue our outer loop after this block
-	      }
-	  }
+            if ((localHi - localLo) > (hiCompress - loCompress))
+              {
+                hiCompress = localHi;
+                loCompress = localLo;
+                
+                i = localHi;    // continue our outer loop after this block
+              }
+          }
 
-	i++;
+        i++;
       }
 
     // System.err.println("loCompress = " + loCompress);
@@ -969,61 +969,61 @@ public class JIPField extends JentryField {
 
     if ((loCompress == 0) && (hiCompress == 5))
       {
-	return "::" + absoctets[12].toString() + "." + absoctets[13].toString() + "." +
-	  absoctets[14].toString() + "." + absoctets[15].toString();
+        return "::" + absoctets[12].toString() + "." + absoctets[13].toString() + "." +
+          absoctets[14].toString() + "." + absoctets[15].toString();
       }
     else if ((loCompress == 0) && (hiCompress == 4) && 
-	     (absoctets[10].shortValue() == 255) && (absoctets[11].shortValue() == 255))
+             (absoctets[10].shortValue() == 255) && (absoctets[11].shortValue() == 255))
       {
-	return "::ffff:" + absoctets[12].toString() + "." + absoctets[13].toString() + "." +
-	  absoctets[14].toString() + "." + absoctets[15].toString();
+        return "::ffff:" + absoctets[12].toString() + "." + absoctets[13].toString() + "." +
+          absoctets[14].toString() + "." + absoctets[15].toString();
       }
 
     // nope, we're gonna go all the way in IPv6 form..
 
     if (loCompress != hiCompress)
       {
-	// we've got a compressed area
+        // we've got a compressed area
 
-	i = 0;
+        i = 0;
 
-	while (i < loCompress)
-	  {
-	    if (i > 0)
-	      {
-		result.append(":");
-	      }
-	    
-	    result.append(stanzaStrings[i++]);
-	  }
+        while (i < loCompress)
+          {
+            if (i > 0)
+              {
+                result.append(":");
+              }
+            
+            result.append(stanzaStrings[i++]);
+          }
 
-	result.append("::");
-	
-	j = hiCompress + 1;
+        result.append("::");
+        
+        j = hiCompress + 1;
 
-	while (j < 8)
-	  {
-	    if (j > (hiCompress+1))
-	      {
-		result.append(":");
-	      }
-	    
-	    result.append(stanzaStrings[j++]);
-	  }
+        while (j < 8)
+          {
+            if (j > (hiCompress+1))
+              {
+                result.append(":");
+              }
+            
+            result.append(stanzaStrings[j++]);
+          }
       }
     else
       {
-	// no compressed area
+        // no compressed area
 
-	for (i = 0; i < 8; i++)
-	  {
-	    if (i > 0)
-	      {
-		result.append(":");
-	      }
-	    
-	    result.append(stanzaStrings[i]);
-	  }
+        for (i = 0; i < 8; i++)
+          {
+            if (i > 0)
+              {
+                result.append(":");
+              }
+            
+            result.append(stanzaStrings[i]);
+          }
       }
     
     return result.toString().toUpperCase();
@@ -1043,7 +1043,7 @@ public class JIPField extends JentryField {
   {
     if (callback != this.my_parent)
       {
-	throw new IllegalStateException();
+        throw new IllegalStateException();
       }
 
     this.replacingValue = true;
@@ -1058,8 +1058,8 @@ public class JIPField extends JentryField {
   {
     if (argv.length != 1)
       {
-	System.out.println("No input.\nUsage: java arlut.csd.JDataComponent.JIPField");
-	System.exit(0);
+        System.out.println("No input.\nUsage: java arlut.csd.JDataComponent.JIPField");
+        System.exit(0);
       }
 
     Byte[] results = genIPV6bytes(argv[0]);
@@ -1067,19 +1067,19 @@ public class JIPField extends JentryField {
 
     if (debug)
       {
-	for (int i = 0; i < results.length; i++)
-	  {
-	    s = s2u(results[i].byteValue());
-	    
-	    if (i > 0 && i%2 == 0)
-	      {
-		System.out.print(":");
-	      }
-	    
-	    System.out.print(Integer.toHexString(s));
-	  }
-	
-	System.out.println();
+        for (int i = 0; i < results.length; i++)
+          {
+            s = s2u(results[i].byteValue());
+            
+            if (i > 0 && i%2 == 0)
+              {
+                System.out.print(":");
+              }
+            
+            System.out.print(Integer.toHexString(s));
+          }
+        
+        System.out.println();
       }
 
     System.out.println(genIPV6string(results));

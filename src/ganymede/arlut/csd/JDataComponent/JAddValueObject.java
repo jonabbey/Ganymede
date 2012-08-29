@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -148,11 +148,11 @@ public class JAddValueObject extends JValueObject {
   {
     if (index != -1)
       {
-	return source.toString() +  " add(" + String.valueOf(value) + ")";
+        return source.toString() +  " add(" + String.valueOf(value) + ")";
       }
     else
       {
-	return source.toString() +  " add(" + index + ", " + String.valueOf(value) + ")";
+        return source.toString() +  " add(" + index + ", " + String.valueOf(value) + ")";
       }
   }
 }

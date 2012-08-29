@@ -100,17 +100,17 @@ public class JstringField extends JentryField {
    */
 
   public JstringField(int columns,
-		      int maxstrlen,
-		      boolean is_editable,
-		      boolean invisible,
-		      String allowed,
-		      String disallowed)
+                      int maxstrlen,
+                      boolean is_editable,
+                      boolean invisible,
+                      String allowed,
+                      String disallowed)
   {
     super(columns);
 
     if (maxstrlen <= 0)
       {
-	throw new IllegalArgumentException("Invalid Parameter: maximum string size is negative or zero");
+        throw new IllegalArgumentException("Invalid Parameter: maximum string size is negative or zero");
       }
 
     size = maxstrlen;
@@ -119,12 +119,12 @@ public class JstringField extends JentryField {
 
     if (allowed != null)
       {
-	setAllowedChars(allowed);
+        setAllowedChars(allowed);
       }
 
     if (disallowed != null)
       {
-	setDisallowedChars(disallowed);
+        setDisallowedChars(disallowed);
       }
   }
 
@@ -137,10 +137,10 @@ public class JstringField extends JentryField {
   public JstringField()
   {
     this(JstringField.DEFAULT_COLS,JstringField.DEFAULT_SIZE,
-	 true,
-	 false,
-	 null,
-	 null);
+         true,
+         false,
+         null,
+         null);
   }
 
   /**
@@ -150,10 +150,10 @@ public class JstringField extends JentryField {
   public JstringField(int cols, boolean is_editable)
   {
     this(cols,JstringField.DEFAULT_SIZE,
-	 is_editable,
-	 false,
-	 null,
-	 null);
+         is_editable,
+         false,
+         null,
+         null);
   }
 
   /**
@@ -167,12 +167,12 @@ public class JstringField extends JentryField {
    */
 
   public JstringField(int cols,
-		      int maxstrlen,
-		      boolean is_editable,
-		      boolean invisible,
-		      String allowed,
-		      String disallowed,
-		      JsetValueCallback callback)
+                      int maxstrlen,
+                      boolean is_editable,
+                      boolean invisible,
+                      String allowed,
+                      String disallowed,
+                      JsetValueCallback callback)
   {
     this(cols,maxstrlen,is_editable,invisible,allowed,disallowed);
 
@@ -193,7 +193,7 @@ public class JstringField extends JentryField {
   {
     if (debug)
       {
-	System.out.println("JstringField: setText() in JstringField");
+        System.out.println("JstringField: setText() in JstringField");
       }
 
     boolean editable = isEditable();
@@ -201,41 +201,41 @@ public class JstringField extends JentryField {
 
     if (str == null)
       {
-	if (debug)
-	  {
-	    System.out.println("JstringField: String is null.");
-	  }
+        if (debug)
+          {
+            System.out.println("JstringField: String is null.");
+          }
 
-	value = "";
+        value = "";
 
-	super.setText("");
+        super.setText("");
       }
     else
       {
-	// XXX  verifyValue(str);
+        // XXX  verifyValue(str);
 
-	if (debug)
-	  {
-	    System.out.println("JstringField: Calling super.setText(" + str + ")");
-	  }
+        if (debug)
+          {
+            System.out.println("JstringField: Calling super.setText(" + str + ")");
+          }
 
-	try
-	  {
-	    super.loadingText = true;
+        try
+          {
+            super.loadingText = true;
 
-	    super.setText(str);
-	  }
-	finally
-	  {
-	    super.loadingText = false;
-	  }
+            super.setText(str);
+          }
+        finally
+          {
+            super.loadingText = false;
+          }
 
-	value = str;
+        value = str;
       }
 
     if (!editable)
       {
-	setCaretPosition(0);	// scroll the view to show the start of the string, not the end of the string
+        setCaretPosition(0);    // scroll the view to show the start of the string, not the end of the string
       }
 
     setEditable(editable);
@@ -253,16 +253,16 @@ public class JstringField extends JentryField {
   {
     if (str.length() > size)
       {
-	throw new IllegalArgumentException("string too long");
+        throw new IllegalArgumentException("string too long");
       }
 
     for (int i = 0; i < str.length(); i++)
       {
-	if (!isAllowed(str.charAt(i)))
-	  {
-	    throw new IllegalArgumentException("invalid char in string (\"" + str + "\") : '" +
-					       str.charAt(i) + "'");
-	  }
+        if (!isAllowed(str.charAt(i)))
+          {
+            throw new IllegalArgumentException("invalid char in string (\"" + str + "\") : '" +
+                                               str.charAt(i) + "'");
+          }
       }
   }
 
@@ -301,11 +301,11 @@ public class JstringField extends JentryField {
   {
     if (s != null)
       {
-	this.allowedChars = s;
+        this.allowedChars = s;
       }
     else
       {
-	this.allowedChars = null;
+        this.allowedChars = null;
       }
   }
 
@@ -321,11 +321,11 @@ public class JstringField extends JentryField {
   {
     if (s!= null)
       {
- 	this.disallowedChars = s;
+        this.disallowedChars = s;
       }
     else
       {
- 	this.disallowedChars = null;
+        this.disallowedChars = null;
       }
   }
 
@@ -367,11 +367,11 @@ public class JstringField extends JentryField {
 
     if (text == null)
       {
-	return 0;
+        return 0;
       }
     else
       {
-	return text.length();
+        return text.length();
       }
   }
 
@@ -389,28 +389,28 @@ public class JstringField extends JentryField {
   {
     if (debug)
       {
-	System.out.println("JstringField.isAllowed()");
+        System.out.println("JstringField.isAllowed()");
       }
 
     if (disallowedChars != null)
       {
-	if (disallowedChars.indexOf(ch) != -1)
-	  {
-	    if (debug)
-	      {
-		System.out.println("Disallowing char: " + ch + " because it is in string: " + disallowedChars);
-	      }
+        if (disallowedChars.indexOf(ch) != -1)
+          {
+            if (debug)
+              {
+                System.out.println("Disallowing char: " + ch + " because it is in string: " + disallowedChars);
+              }
 
-	    return false;
-	  }
+            return false;
+          }
       }
 
     if (allowedChars != null)
       {
-	if (allowedChars.indexOf(ch) == -1)
-	  {
-	    return false;
-	  }
+        if (allowedChars.indexOf(ch) == -1)
+          {
+            return false;
+          }
       }
 
     return true;
@@ -430,99 +430,99 @@ public class JstringField extends JentryField {
   {
     synchronized (this)
       {
-	if (processingCallback)
-	  {
-	    return -1;
-	  }
+        if (processingCallback)
+          {
+            return -1;
+          }
 
-	processingCallback = true;
+        processingCallback = true;
       }
 
     try
       {
-	String str;
+        String str;
 
-	/* -- */
+        /* -- */
 
-	// if nothing in the JstringField has changed,
-	// we don't need to worry about this event.
+        // if nothing in the JstringField has changed,
+        // we don't need to worry about this event.
 
-	str = getText();
+        str = getText();
 
-	if ((value != null && value.equals(str)) || (value == null && (str == null || str.equals(""))))
-	  {
-	    return 0;
-	  }
+        if ((value != null && value.equals(str)) || (value == null && (str == null || str.equals(""))))
+          {
+            return 0;
+          }
 
-	/* we don't need to check the string for validity, since it was checked
-	   on a character by character basis on entry by our superclass. */
+        /* we don't need to check the string for validity, since it was checked
+           on a character by character basis on entry by our superclass. */
 
-	try
-	  {
-	    if (!allowCallback || my_parent.setValuePerformed(new JSetValueObject(this, str)))
-	      {
-		// check to see whether the setValuePerformed()
-		// callback asked us to do a canonicalization of the
-		// str we submitted during its processing.
-		//
-		// If so, we need to be sure that we don't overwrite
-		// the persistent value with the string that we
-		// originally started with, but that we instead accept
-		// and refresh with the replacement value that was set
-		// by a call to substituteValueByCallBack() during the
-		// execution of setValuePerformed().
+        try
+          {
+            if (!allowCallback || my_parent.setValuePerformed(new JSetValueObject(this, str)))
+              {
+                // check to see whether the setValuePerformed()
+                // callback asked us to do a canonicalization of the
+                // str we submitted during its processing.
+                //
+                // If so, we need to be sure that we don't overwrite
+                // the persistent value with the string that we
+                // originally started with, but that we instead accept
+                // and refresh with the replacement value that was set
+                // by a call to substituteValueByCallBack() during the
+                // execution of setValuePerformed().
 
-		if (replacingValue)
-		  {
-		    value = replacementValue;
+                if (replacingValue)
+                  {
+                    value = replacementValue;
 
-		    try
-		      {
-			super.loadingText = true;
+                    try
+                      {
+                        super.loadingText = true;
 
-			super.setText(value == null ? "":value);
-		      }
-		    finally
-		      {
-			super.loadingText = false;
-		      }
-		  }
-		else
-		  {
-		    value = str;
-		  }
+                        super.setText(value == null ? "":value);
+                      }
+                    finally
+                      {
+                        super.loadingText = false;
+                      }
+                  }
+                else
+                  {
+                    value = str;
+                  }
 
-		return 1;
-	      }
-	    else
-	      {
-		// revert
+                return 1;
+              }
+            else
+              {
+                // revert
 
-		try
-		  {
-		    // inhibit character filtering
-		    super.loadingText = true;
+                try
+                  {
+                    // inhibit character filtering
+                    super.loadingText = true;
 
-		    super.setText(value == null ? "":value);
-		  }
-		finally
-		  {
-		    super.loadingText = false;
-		  }
+                    super.setText(value == null ? "":value);
+                  }
+                finally
+                  {
+                    super.loadingText = false;
+                  }
 
-		return -1;
-	      }
-	  }
-	catch (RemoteException re)
-	  {
-	    return -1;
-	  }
+                return -1;
+              }
+          }
+        catch (RemoteException re)
+          {
+            return -1;
+          }
       }
     finally
       {
-	processingCallback = false;
-	replacementValue = null;
-	replacingValue = false;
+        processingCallback = false;
+        replacementValue = null;
+        replacingValue = false;
       }
   }
 
@@ -540,7 +540,7 @@ public class JstringField extends JentryField {
   {
     if (callback != this.my_parent)
       {
-	throw new IllegalStateException();
+        throw new IllegalStateException();
       }
 
     this.replacingValue = true;

@@ -10,7 +10,7 @@
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -125,7 +125,7 @@ public class listHandle {
   {
     if (object == null)
       {
-	return label;
+        return label;
       }
 
     return object;
@@ -135,11 +135,11 @@ public class listHandle {
   {
     if (object != null)
       {
-	return object.hashCode();
+        return object.hashCode();
       }
     else if (label != null)
       {
-	return label.hashCode();
+        return label.hashCode();
       }
 
     return super.hashCode();
@@ -149,23 +149,23 @@ public class listHandle {
   {
     if (!(val instanceof listHandle))
       {
-	return false;
+        return false;
       }
 
     listHandle handle = (listHandle) val;
 
     if (object != null)
       {
-	return object.equals(handle.object) &&
-	  label.equals(handle.label);
+        return object.equals(handle.object) &&
+          label.equals(handle.label);
       }
     else if (label != null)
       {
-	return label.equals(handle.label);
+        return label.equals(handle.label);
       }
     else
       {
-	return false;
+        return false;
       }
   }
 }

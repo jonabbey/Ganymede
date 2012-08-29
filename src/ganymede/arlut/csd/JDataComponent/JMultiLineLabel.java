@@ -9,7 +9,7 @@
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -147,11 +147,11 @@ public class JMultiLineLabel extends JTextArea {
 
     if (bgColor != null)
       {
-	super.setBackground(bgColor);
+        super.setBackground(bgColor);
       }
     else
       {
-	this.setOpaque(false);
+        this.setOpaque(false);
       }
 
     repaint();
@@ -164,14 +164,14 @@ public class JMultiLineLabel extends JTextArea {
 
     while (c != null && c.getBackground() == null)
       {
-	c = c.getParent();
+        c = c.getParent();
       }
 
     if (c == null)
       {
-	result = (Color)UIManager.get("Label.background");
+        result = (Color)UIManager.get("Label.background");
 
-	return result;
+        return result;
       }
 
     result = c.getBackground();
@@ -193,7 +193,7 @@ public class JMultiLineLabel extends JTextArea {
 
     if (bgColor == null)
       {
-	this.setOpaque(false);
+        this.setOpaque(false);
       }
 
     super.update(g);
@@ -249,7 +249,7 @@ public class JMultiLineLabel extends JTextArea {
   {
     if (text == null)
       {
-	return null;
+        return null;
       }
     
     return (WordWrap.wrap(text, columns, null));
@@ -290,14 +290,14 @@ public class JMultiLineLabel extends JTextArea {
 
     while (tk.hasMoreElements())
       {
-	String nextToken = WordWrap.deTabify((String) tk.nextElement());
+        String nextToken = WordWrap.deTabify((String) tk.nextElement());
 
-	length = myFontMetrics.getStringBounds(nextToken, getGraphics()).getBounds().width;
+        length = myFontMetrics.getStringBounds(nextToken, getGraphics()).getBounds().width;
 
-	if (length > maxLength)
-	  {
-	    maxLength = length;
-	  }
+        if (length > maxLength)
+          {
+            maxLength = length;
+          }
       }
 
     return maxLength;

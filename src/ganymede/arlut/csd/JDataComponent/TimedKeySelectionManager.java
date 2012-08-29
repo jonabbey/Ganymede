@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey 
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -87,8 +87,8 @@ public class TimedKeySelectionManager implements JComboBox.KeySelectionManager {
 
     if (debug)
       {
-	System.err.println("TimedKeySelectionManager: searchString = " + searchString);
-	System.err.println("TimedKeySelectionManager: start = " + start);
+        System.err.println("TimedKeySelectionManager: searchString = " + searchString);
+        System.err.println("TimedKeySelectionManager: start = " + start);
       }
 
     int selection = search(model, start);
@@ -97,14 +97,14 @@ public class TimedKeySelectionManager implements JComboBox.KeySelectionManager {
 
     if (selection == -1 && start != 0)
       {
-	selection = search(model, 0);
+        selection = search(model, 0);
       }
 
     start = selection + 1;
 
     if (debug)
       {
-	System.err.println("TimedKeySelectionManager: selection index = " + selection);
+        System.err.println("TimedKeySelectionManager: selection index = " + selection);
       }
 
     return selection;
@@ -121,22 +121,22 @@ public class TimedKeySelectionManager implements JComboBox.KeySelectionManager {
 
     for (int i = start; i < size; i++)
       {
-	String s = getString(model, i).toLowerCase();
+        String s = getString(model, i).toLowerCase();
 
-	if (s.startsWith(searchString))
-	  {
-	    if (debug)
-	      {
-		System.err.println("TimedKeySelectionManager.search(): searched through " + (i - start));
-	      }
+        if (s.startsWith(searchString))
+          {
+            if (debug)
+              {
+                System.err.println("TimedKeySelectionManager.search(): searched through " + (i - start));
+              }
 
-	    return i;
-	  }
+            return i;
+          }
       }
 
     if (debug)
       {
-	System.err.println("TimedKeySelectionManager.search(): searched through " + (size - start) + ", XX");
+        System.err.println("TimedKeySelectionManager.search(): searched through " + (size - start) + ", XX");
       }
 
     return -1;
@@ -158,11 +158,11 @@ public class TimedKeySelectionManager implements JComboBox.KeySelectionManager {
 
     if (time - lastTime < 500)
       {
-	searchString += key;
+        searchString += key;
       }
     else
       {
-	searchString = "" + key;
+        searchString = "" + key;
       }
 
     searchString = searchString.toLowerCase();

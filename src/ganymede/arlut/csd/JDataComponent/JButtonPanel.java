@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -117,7 +117,7 @@ public class JButtonPanel extends JPanel {
   {
     if (just < LEFT || just > RIGHT)
       {
-	throw new IllegalArgumentException();
+        throw new IllegalArgumentException();
       }
 
     this.justification = just;
@@ -138,16 +138,16 @@ public class JButtonPanel extends JPanel {
     switch (justification)
       {
       case LEFT:
-	add("West", gPanel);
-	break;
+        add("West", gPanel);
+        break;
 
       case CENTER:
-	add("Center", gPanel);
-	break;
+        add("Center", gPanel);
+        break;
 
       case RIGHT:
-	add("East", gPanel);
-	break;
+        add("East", gPanel);
+        break;
       }
 
     list = new ArrayList();
@@ -157,7 +157,7 @@ public class JButtonPanel extends JPanel {
   {
     if (gPanel == null)
       {
-	this.setup();
+        this.setup();
       }
 
     gbc.gridwidth = 1;
@@ -165,16 +165,16 @@ public class JButtonPanel extends JPanel {
     switch (justification)
       {
       case LEFT:
-	gbc.anchor = GridBagConstraints.WEST;
-	break;
+        gbc.anchor = GridBagConstraints.WEST;
+        break;
 
       case CENTER:
-	gbc.anchor = GridBagConstraints.CENTER;
-	break;
+        gbc.anchor = GridBagConstraints.CENTER;
+        break;
 
       case RIGHT:
-	gbc.anchor = GridBagConstraints.EAST;
-	break;
+        gbc.anchor = GridBagConstraints.EAST;
+        break;
       }
 
     gbc.fill = GridBagConstraints.NONE;
@@ -202,15 +202,15 @@ public class JButtonPanel extends JPanel {
   {
     if (list == null)
       {
-	return;
+        return;
       }
 
     Iterator it = list.iterator();
 
     while (it.hasNext())
       {
-	JButton b = (JButton) it.next();
-	b.addActionListener(listener);
+        JButton b = (JButton) it.next();
+        b.addActionListener(listener);
       }
   }
 

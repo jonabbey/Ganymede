@@ -10,7 +10,7 @@
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -101,8 +101,8 @@ import arlut.csd.Util.VecQuickSort;
  */
 
 public class JstringListBox extends JList implements ActionListener, ListSelectionListener,
-						     MouseListener, MouseMotionListener, 
-						     Comparator {
+                                                     MouseListener, MouseMotionListener, 
+                                                     Comparator {
 
   static final boolean debug = false;
 
@@ -189,22 +189,22 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
     if (popup == null)
       {
-	return;
+        return;
       }
 
     Component[] c = popup.getComponents();
 
     for (int i = 0; i < c.length; i++)
       {
-	if (c[i] instanceof JMenuItem)
-	  {
-	    JMenuItem pm = (JMenuItem)c[i];
-	    pm.addActionListener(this);
-	  }
-	else
-	  {
-	    throw new IllegalArgumentException("Hey, you are supposed to use JMenuItems in JPopupMenus, buddy.");
-	  }
+        if (c[i] instanceof JMenuItem)
+          {
+            JMenuItem pm = (JMenuItem)c[i];
+            pm.addActionListener(this);
+          }
+        else
+          {
+            throw new IllegalArgumentException("Hey, you are supposed to use JMenuItems in JPopupMenus, buddy.");
+          }
       }
   }
 
@@ -240,74 +240,74 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
     try
       {
-	doSort = sort;
+        doSort = sort;
 
-	if (comparator == null)
-	  {
-	    this.comparator = this;
-	  }
-	else
-	  {
-	    this.comparator = comparator;
-	  }
+        if (comparator == null)
+          {
+            this.comparator = this;
+          }
+        else
+          {
+            this.comparator = comparator;
+          }
 
-	if (items == null || items.size() == 0)
-	  {
-	    return;
-	  }
-	
-	if (items.elementAt(0) instanceof listHandle)
-	  {
-	    if (doSort)
-	      {
-		new VecQuickSort(items, comparator).sort();
-	      }
+        if (items == null || items.size() == 0)
+          {
+            return;
+          }
+        
+        if (items.elementAt(0) instanceof listHandle)
+          {
+            if (doSort)
+              {
+                new VecQuickSort(items, comparator).sort();
+              }
 
-	    for (int i = 0; i < items.size(); i++)
-	      {
-		listHandle handle = (listHandle) items.elementAt(i);
-		
-		insertHandleAt(handle, i);
-		
-		if (handle.toString().length() > maxWidthString.length())
-		  {
-		    maxWidthString = handle.toString();
-		  }
-	      }
-	  }
-	else  //It must be a string, or it will throw a ClassCastException
-	  {
-	    Vector convertedVect = new Vector(items.size());
+            for (int i = 0; i < items.size(); i++)
+              {
+                listHandle handle = (listHandle) items.elementAt(i);
+                
+                insertHandleAt(handle, i);
+                
+                if (handle.toString().length() > maxWidthString.length())
+                  {
+                    maxWidthString = handle.toString();
+                  }
+              }
+          }
+        else  //It must be a string, or it will throw a ClassCastException
+          {
+            Vector convertedVect = new Vector(items.size());
 
-	    for (int i = 0; i < items.size(); i++)
-	      {
-		String s = (String)items.elementAt(i);
-		
-		if (s.length() > maxWidthString.length())
-		  {
-		    maxWidthString = s;
-		  }
+            for (int i = 0; i < items.size(); i++)
+              {
+                String s = (String)items.elementAt(i);
+                
+                if (s.length() > maxWidthString.length())
+                  {
+                    maxWidthString = s;
+                  }
 
-		convertedVect.addElement(new listHandle(s,s));
-	      }
+                convertedVect.addElement(new listHandle(s,s));
+              }
 
-	    if (doSort)
-	      {
-		new VecQuickSort(convertedVect, comparator).sort();
-	      }
-	    
-	    for (int i = 0; i < convertedVect.size(); i++)
-	      {
-		listHandle handle = (listHandle) convertedVect.elementAt(i);
-		
-		insertHandleAt(handle, i);
-	      }
-	  }
+            if (doSort)
+              {
+                new VecQuickSort(convertedVect, comparator).sort();
+              }
+            
+            for (int i = 0; i < convertedVect.size(); i++)
+              {
+                listHandle handle = (listHandle) convertedVect.elementAt(i);
+                
+                insertHandleAt(handle, i);
+              }
+          }
       }
     finally
       {
-	setModel(model);
-	repaint();
+        setModel(model);
+        repaint();
       }
   }
 
@@ -324,23 +324,23 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
     if ((model.getSize() == 0) || !(model.getElementAt(0) instanceof listHandle))
       {
-	return;
+        return;
       }
 
     for (int i = 0; i < model.getSize(); i++)
       {
-	listHandle handle = (listHandle) model.getElementAt(i);
-	
-	if (handle.getObject() != null && handle.getObject().equals(object))
-	  {
-	    handle.setLabel(newLabel);
-	    break;
-	  }
+        listHandle handle = (listHandle) model.getElementAt(i);
+        
+        if (handle.getObject() != null && handle.getObject().equals(object))
+          {
+            handle.setLabel(newLabel);
+            break;
+          }
       }
 
     if (doSort)
       {
-	resort();
+        resort();
       }
 
     repaint();
@@ -356,19 +356,19 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
     if (model.getSize() < 2)
       {
-	return;
+        return;
       }
 
     Vector sortedList = new Vector();
 
     for (int i = 0; i < model.getSize(); i++)
       {
-	sortedList.addElement(model.getElementAt(i));
+        sortedList.addElement(model.getElementAt(i));
       }
 
     if (this.comparator == null)
       {
-	this.comparator = this;
+        this.comparator = this;
       }
 
     new VecQuickSort(sortedList, this.comparator).sort();
@@ -386,16 +386,16 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
     if (width > 0)
       {
-	if (debug)
-	  {
-	    System.err.println("JstringListBox: setting fixed cell width to " + width);
-	  }
+        if (debug)
+          {
+            System.err.println("JstringListBox: setting fixed cell width to " + width);
+          }
 
-	setFixedCellWidth(width);
+        setFixedCellWidth(width);
       }
     else if (width == 0)
       {
-	setPrototypeCellValue(maxWidthString);
+        setPrototypeCellValue(maxWidthString);
       }
   }
 
@@ -418,8 +418,8 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
     if (!dragOk)
       {
-	dragNode = -1;
-	startDragIndex = -1;
+        dragNode = -1;
+        startDragIndex = -1;
       }
   }
 
@@ -467,7 +467,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   {
     if (debug)
       {
-	System.out.println("Setting callback in JstringListBox");
+        System.out.println("Setting callback in JstringListBox");
       }
 
     this.callback = callback;
@@ -490,28 +490,28 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
     if (o instanceof String)
       {
-	lh = new listHandle((String)o, (String)o);
+        lh = new listHandle((String)o, (String)o);
       }
-    else			// we'll throw a ClassCastException if we need to
+    else                        // we'll throw a ClassCastException if we need to
       {
-	lh = (listHandle)o;
+        lh = (listHandle)o;
       }
 
     if (doSort)
       {
-	int i = 0;
-	int total = model.getSize();
+        int i = 0;
+        int total = model.getSize();
 
-	// find the insertion point
+        // find the insertion point
 
-	while ((i < total) && (comparator.compare(lh, model.getElementAt(i))>0))
-	  {
-	    i++;
-	  }
-	    
-	insertHandleAt(lh, i);
+        while ((i < total) && (comparator.compare(lh, model.getElementAt(i))>0))
+          {
+            i++;
+          }
+            
+        insertHandleAt(lh, i);
 
-	addSelectionInterval(i, i);
+        addSelectionInterval(i, i);
 
         if (debug)
           {
@@ -522,10 +522,10 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       }
     else
       {
-	int topIndex = model.getSize();
+        int topIndex = model.getSize();
 
-	model.addElement(lh);
-	addSelectionInterval(topIndex, topIndex);
+        model.addElement(lh);
+        addSelectionInterval(topIndex, topIndex);
 
         if (debug)
           {
@@ -547,14 +547,14 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   {
     if (sourceRow == targetRow)
       {
-	return;
+        return;
       }
 
     listHandle h = (listHandle) model.remove(sourceRow);
 
     if (h == null)
       {
-	return;
+        return;
       }
 
     model.insertElementAt(h, targetRow);
@@ -586,32 +586,32 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   {
     if (o instanceof listHandle)
       {
-	model.removeElement((listHandle)o);
+        model.removeElement((listHandle)o);
       }
     else if (o instanceof String)
       {
-	if (debug)
-	  {
-	    System.out.println("I am guessing you want me to remove a label...");
-	  }
+        if (debug)
+          {
+            System.out.println("I am guessing you want me to remove a label...");
+          }
 
-	removeLabel((String) o);
+        removeLabel((String) o);
       }
     else
       {
-	if (debug)
-	  {
-	    System.out.println("Ok, i will look for this object in the listHnaldes.");
-	  }
+        if (debug)
+          {
+            System.out.println("Ok, i will look for this object in the listHnaldes.");
+          }
 
-	for (int i = 0; i < model.getSize(); i++)
-	  {
-	    if ((((listHandle)model.elementAt(i)).getObject()).equals(o))
-	      {
-		model.removeElementAt(i);
-		break;
-	      }
-	  }
+        for (int i = 0; i < model.getSize(); i++)
+          {
+            if ((((listHandle)model.elementAt(i)).getObject()).equals(o))
+              {
+                model.removeElementAt(i);
+                break;
+              }
+          }
       }
 
     repaint();
@@ -627,11 +627,11 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   {
     for (int i = 0; i < model.getSize(); i++)
       {
-	if ((((listHandle)model.elementAt(i)).getLabel()).equals(s))
-	  {
-	    model.removeElementAt(i);
-	    break; //Assume there is only one?
-	  }
+        if ((((listHandle)model.elementAt(i)).getLabel()).equals(s))
+          {
+            model.removeElementAt(i);
+            break; //Assume there is only one?
+          }
       }
   }
 
@@ -662,10 +662,10 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   {
     for (int i = 0; i < model.getSize(); i++)
       {
-	if ((((listHandle)model.elementAt(i)).getLabel()).equals(string))
-	  {
-	    return true;
-	  }
+        if ((((listHandle)model.elementAt(i)).getLabel()).equals(string))
+          {
+            return true;
+          }
       }
 
     return false;
@@ -681,21 +681,21 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   {
     if (o instanceof String)
       {
-	return containsLabel((String)o);
+        return containsLabel((String)o);
       }
     else if (o instanceof listHandle)
       {
-	return model.contains(o);
+        return model.contains(o);
       }
     else
       {
-	for (int i = 0; i < model.getSize(); i++)
-	  {
-	    if (((listHandle)model.elementAt(i)).getObject().equals(o))
-	      {
-		return true;
-	      }
-	  }
+        for (int i = 0; i < model.getSize(); i++)
+          {
+            if (((listHandle)model.elementAt(i)).getObject().equals(o))
+              {
+                return true;
+              }
+          }
       }
 
     return false;
@@ -725,19 +725,19 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
     for (int i = 0; i < size; i++)
       {
-	lh = (listHandle)model.getElementAt(i);
+        lh = (listHandle)model.getElementAt(i);
 
-	if (lh.getLabel().equals(s))
-	  {
-	    setSelected(lh);
+        if (lh.getLabel().equals(s))
+          {
+            setSelected(lh);
 
-	    if (ensureVisible)
-	      {
-		ensureIndexIsVisible(i);
-	      }
+            if (ensureVisible)
+              {
+                ensureIndexIsVisible(i);
+              }
 
-	    break;
-	  }
+            break;
+          }
       }
   }
 
@@ -752,11 +752,11 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   {
     if (o instanceof listHandle)
       {
-	setSelectedValue(o, true); // use the JList.setSelectedValue(Object, boolean shouldScroll)
+        setSelectedValue(o, true); // use the JList.setSelectedValue(Object, boolean shouldScroll)
       }
-    else			// we'll throw ClassCastException if we need to
+    else                        // we'll throw ClassCastException if we need to
       {
-	setSelectedLabel((String)o);
+        setSelectedLabel((String)o);
       }
   }
 
@@ -797,7 +797,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
     
     for (int i =0; i < values.length; i++)
       {
-	v.addElement(values[i]);
+        v.addElement(values[i]);
       }
 
     return v;
@@ -813,7 +813,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
     
     for (int i =0; i < getModel().getSize(); i++)
       {
-	v.addElement(getModel().getElementAt(i));
+        v.addElement(getModel().getElementAt(i));
       }
 
     return v;
@@ -829,12 +829,12 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   {
     try
       {
-	listHandle lh = (listHandle) model.elementAt(getSelectedIndex());
-	return lh.getObject();
+        listHandle lh = (listHandle) model.elementAt(getSelectedIndex());
+        return lh.getObject();
       }
     catch (Exception e)
       {
-	return null;
+        return null;
       }
   }
 
@@ -850,30 +850,30 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
 
     if (selectedIndex == -1 || dragNode != -1)
       {
-	return;			// don't notify our container on deselect
+        return;                 // don't notify our container on deselect
       }
 
     if (callback != null)
       {
-	boolean ok = false;
+        boolean ok = false;
 
-	try 
-	  {
-	    ok = callback.setValuePerformed(new JAddValueObject(this, selectedIndex));
-	  }
-	catch (java.rmi.RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not setValuePerformed: " + rx);
-	  }
+        try 
+          {
+            ok = callback.setValuePerformed(new JAddValueObject(this, selectedIndex));
+          }
+        catch (java.rmi.RemoteException rx)
+          {
+            throw new RuntimeException("Could not setValuePerformed: " + rx);
+          }
 
-	if (ok)
-	  {
-	    //do something
-	  }
-	else
-	  {
-	    //put it back
-	  }
+        if (ok)
+          {
+            //do something
+          }
+        else
+          {
+            //put it back
+          }
       }
   }
 
@@ -887,72 +887,72 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   {
     if (callback != null)
       {
-	if (SwingUtilities.isLeftMouseButton(e))
-	  {
-	    // we only want to respond to a double-click.  mouseDown with no modifier
-	    // will be treated as a drag initiation
+        if (SwingUtilities.isLeftMouseButton(e))
+          {
+            // we only want to respond to a double-click.  mouseDown with no modifier
+            // will be treated as a drag initiation
 
-	    if (e.getClickCount() == 2)
-	      {
-		boolean ok = false;
-	    
-		int index = locationToIndex(e.getPoint());
+            if (e.getClickCount() == 2)
+              {
+                boolean ok = false;
+            
+                int index = locationToIndex(e.getPoint());
 
-		if (debug)
-		  {
-		    System.out.println("Double clicked on Item " + index);
-		  }
+                if (debug)
+                  {
+                    System.out.println("Double clicked on Item " + index);
+                  }
 
-		try
-		  {
-		    ok = callback.setValuePerformed(new JInsertValueObject(this, index));
-		  }
-		catch (java.rmi.RemoteException rx)
-		  {
-		    throw new RuntimeException("Double click produced: " + rx);
-		  }
-	    
-		if (debug)
-		  {
-		    System.out.println("setValue from JstringListBox=" + ok);
-		  }
-	      }
-	  }
-	else if (SwingUtilities.isRightMouseButton(e))
-	  {
-	    if (debug)
-	      {
-		System.out.println("Its a popup trigger!");
-	      }
+                try
+                  {
+                    ok = callback.setValuePerformed(new JInsertValueObject(this, index));
+                  }
+                catch (java.rmi.RemoteException rx)
+                  {
+                    throw new RuntimeException("Double click produced: " + rx);
+                  }
+            
+                if (debug)
+                  {
+                    System.out.println("setValue from JstringListBox=" + ok);
+                  }
+              }
+          }
+        else if (SwingUtilities.isRightMouseButton(e))
+          {
+            if (debug)
+              {
+                System.out.println("Its a popup trigger!");
+              }
 
-	    popUpIndex = locationToIndex(e.getPoint());
+            popUpIndex = locationToIndex(e.getPoint());
 
-	    boolean found = false;
+            boolean found = false;
 
-	    try
-	      {
-		if (model.elementAt(popUpIndex) != null)
-		  {
-		    found = true;
-		  }
-	      }
-	    catch (ArrayIndexOutOfBoundsException ex)
-	      {
-	      }
+            try
+              {
+                if (model.elementAt(popUpIndex) != null)
+                  {
+                    found = true;
+                  }
+              }
+            catch (ArrayIndexOutOfBoundsException ex)
+              {
+              }
 
-	    if (found)
-	      {
-		clearSelection();
-		setSelectedIndex(popUpIndex);
+            if (found)
+              {
+                clearSelection();
+                setSelectedIndex(popUpIndex);
 
-		if (popup != null)
-		  {
-		    popup.setVisible(false);
+                if (popup != null)
+                  {
+                    popup.setVisible(false);
 
-		    popup.show(e.getComponent(), e.getX(), e.getY());
-		  }
-	      }
-	  }
+                    popup.show(e.getComponent(), e.getX(), e.getY());
+                  }
+              }
+          }
       }
   }
 
@@ -986,9 +986,9 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   {
     if (e.isShiftDown() || e.isControlDown() || !dragOk)
       {
-	dragNode = -1;
-	startDragIndex = -1;
-	return;
+        dragNode = -1;
+        startDragIndex = -1;
+        return;
       }
 
     this.setCursor(Cursor.getPredefinedCursor(Cursor.MOVE_CURSOR));
@@ -1006,26 +1006,26 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   {
     if (startDragIndex != -1)
       {
-	if (callback != null)
-	  {
-	    boolean ok = false;
+        if (callback != null)
+          {
+            boolean ok = false;
 
-	    try 
-	      {
-		ok = callback.setValuePerformed(new JMoveValueObject(this, 
-								     startDragIndex,
-								     dragNode));
-	      }
-	    catch (java.rmi.RemoteException rx)
-	      {
-		throw new RuntimeException("Could not setValuePerformed: " + rx);
-	      }
+            try 
+              {
+                ok = callback.setValuePerformed(new JMoveValueObject(this, 
+                                                                     startDragIndex,
+                                                                     dragNode));
+              }
+            catch (java.rmi.RemoteException rx)
+              {
+                throw new RuntimeException("Could not setValuePerformed: " + rx);
+              }
 
-	    if (!ok)
-	      {
-		moveItem(dragNode, startDragIndex);
-	      }
-	  }
+            if (!ok)
+              {
+                moveItem(dragNode, startDragIndex);
+              }
+          }
       }
 
     this.setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -1043,22 +1043,22 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   {
     if (dragNode == -1)
       {
-	return;
+        return;
       }
 
     int overIndex = locationToIndex(e.getPoint());
 
     if (overIndex >= (model.getSize() - 1))
       {
-	overIndex = model.getSize() - 1;
+        overIndex = model.getSize() - 1;
       }
     
     if (overIndex != -1 && overIndex != dragNode)
       {
-	moveItem(dragNode, overIndex);
-	
-	dragNode = overIndex;
-	setSelectedIndex(overIndex);
+        moveItem(dragNode, overIndex);
+        
+        dragNode = overIndex;
+        setSelectedIndex(overIndex);
       }
   }
 
@@ -1083,38 +1083,38 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   {
     if (callback != null)
       {
-	if (e.getSource() instanceof JMenuItem)
-	  {
-	    String string = ((JMenuItem)e.getSource()).getActionCommand();
-	    Object popSelectedItem = null;
+        if (e.getSource() instanceof JMenuItem)
+          {
+            String string = ((JMenuItem)e.getSource()).getActionCommand();
+            Object popSelectedItem = null;
 
-	    try
-	      {
-		popSelectedItem = ((listHandle) model.elementAt(popUpIndex)).getObject();
-	      }
-	    catch (ArrayIndexOutOfBoundsException ex)
-	      {
-		popSelectedItem = null;
-	      }
+            try
+              {
+                popSelectedItem = ((listHandle) model.elementAt(popUpIndex)).getObject();
+              }
+            catch (ArrayIndexOutOfBoundsException ex)
+              {
+                popSelectedItem = null;
+              }
 
-	    if (debug)
-	      {
-		System.err.println("Forwarding selected item.. (" + popUpIndex + ": " +
-				   popSelectedItem + ")");
-	      }
+            if (debug)
+              {
+                System.err.println("Forwarding selected item.. (" + popUpIndex + ": " +
+                                   popSelectedItem + ")");
+              }
 
-	    try
-	      {
-		callback.setValuePerformed(new JParameterValueObject(this,
-								     popUpIndex,
-								     popSelectedItem,
-								     string));
-	      }
-	    catch (java.rmi.RemoteException rx)
-	      {
-		throw new RuntimeException("Could not set value from JstringListBox: " + rx);
-	      }
-	  }
+            try
+              {
+                callback.setValuePerformed(new JParameterValueObject(this,
+                                                                     popUpIndex,
+                                                                     popSelectedItem,
+                                                                     string));
+              }
+            catch (java.rmi.RemoteException rx)
+              {
+                throw new RuntimeException("Could not set value from JstringListBox: " + rx);
+              }
+          }
       }
   }
 

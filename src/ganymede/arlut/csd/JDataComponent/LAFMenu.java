@@ -10,7 +10,7 @@
    Module By: Mike Mulvaney, mulvaney@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -103,7 +103,7 @@ public class LAFMenu extends JMenu implements ActionListener
 
     if (debug)
       {
-	System.out.println("Current look and feel: " + UIManager.getLookAndFeel().getName());
+        System.out.println("Current look and feel: " + UIManager.getLookAndFeel().getName());
       }
 
     this.root = root;
@@ -114,18 +114,18 @@ public class LAFMenu extends JMenu implements ActionListener
 
     for (int i = 0; i < info.length; i++)
       {
-	JCheckBoxMenuItem mi = new JCheckBoxMenuItem(info[i].getName());
-	mi.setActionCommand(info[i].getClassName());
+        JCheckBoxMenuItem mi = new JCheckBoxMenuItem(info[i].getName());
+        mi.setActionCommand(info[i].getClassName());
 
-	if (debug)
-	  {
-	    System.out.println(info[i].getClassName());
-	  }
+        if (debug)
+          {
+            System.out.println(info[i].getClassName());
+          }
 
-	group.add(mi);
-	//mi.setEnabled(info[i].isSupportedLookAndFeel());
-	mi.addActionListener(this);
-	add(mi);
+        group.add(mi);
+        //mi.setEnabled(info[i].isSupportedLookAndFeel());
+        mi.addActionListener(this);
+        add(mi);
       }
 
     updateMenu();
@@ -142,7 +142,7 @@ public class LAFMenu extends JMenu implements ActionListener
   {
     if (parent == null)
       {
-	throw new IllegalArgumentException("Invalid Parameter: parent cannot be null");
+        throw new IllegalArgumentException("Invalid Parameter: parent cannot be null");
       }
     
     my_parent = parent;
@@ -154,42 +154,42 @@ public class LAFMenu extends JMenu implements ActionListener
   {
     try 
       {
-	UIManager.setLookAndFeel(look);
+        UIManager.setLookAndFeel(look);
 
-	if (root != null)
-	  {
-	    root.invalidate();
-	    SwingUtilities.updateComponentTreeUI(root);
+        if (root != null)
+          {
+            root.invalidate();
+            SwingUtilities.updateComponentTreeUI(root);
             
             if (allowCallback)
               {
                 my_parent.setValuePerformed(new JSetValueObject(this, look));
               }
 
-	    root.validate();
-	  }
+            root.validate();
+          }
       } 
     catch (javax.swing.UnsupportedLookAndFeelException e)
       {
-	if (allowCallback)
-	  {
-	    try
-	      {
-		// "Sorry, that look and feel is unsupported on this platform."
-		my_parent.setValuePerformed(new JErrorValueObject(this,
-								  ts.l("setLAF.unsupported")));
-	      }
-	    catch (java.rmi.RemoteException rx)
-	      {
-	      }
-	  }
+        if (allowCallback)
+          {
+            try
+              {
+                // "Sorry, that look and feel is unsupported on this platform."
+                my_parent.setValuePerformed(new JErrorValueObject(this,
+                                                                  ts.l("setLAF.unsupported")));
+              }
+            catch (java.rmi.RemoteException rx)
+              {
+              }
+          }
       }
     catch (Exception e)
       {
       }
     finally
       {
-	updateMenu();
+        updateMenu();
       }
   }
   
@@ -199,26 +199,26 @@ public class LAFMenu extends JMenu implements ActionListener
 
     if (StringUtils.stringEquals(current, e.getActionCommand()))
       {
-	if (debug)
-	  {
-	    System.out.println("Attempt to change to current LAF, I see your trick!");
-	  }
+        if (debug)
+          {
+            System.out.println("Attempt to change to current LAF, I see your trick!");
+          }
 
-	return;
+        return;
       }
     
     try
       {
-	setLAF(e.getActionCommand());
+        setLAF(e.getActionCommand());
       }
     catch (Exception ex)
       {
-	if (debug)
-	  {
-	    System.out.println("Something went wrong switching look and feels: " + ex);
-	  }
-	
-	updateMenu();
+        if (debug)
+          {
+            System.out.println("Something went wrong switching look and feels: " + ex);
+          }
+        
+        updateMenu();
       }
   }
 
@@ -230,18 +230,18 @@ public class LAFMenu extends JMenu implements ActionListener
 
     for (int i = 0; i < items.length; i++)
       {
-	JCheckBoxMenuItem mi = (JCheckBoxMenuItem)items[i];
-	String text = mi.getActionCommand().toLowerCase();
+        JCheckBoxMenuItem mi = (JCheckBoxMenuItem)items[i];
+        String text = mi.getActionCommand().toLowerCase();
 
-	if (current.indexOf(text) > -1)
-	  {
-	    mi.setSelected(true);
-	    break;
-	  }
-	else
-	  {
-	    mi.setSelected(false);
-	  }
+        if (current.indexOf(text) > -1)
+          {
+            mi.setSelected(true);
+            break;
+          }
+        else
+          {
+            mi.setSelected(false);
+          }
       }
   }
 }

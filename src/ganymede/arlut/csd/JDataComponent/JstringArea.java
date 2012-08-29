@@ -6,7 +6,7 @@
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -96,7 +96,7 @@ public class JstringArea extends JScrollPane implements FocusListener {
   private myTextArea textArea = null;
 
   String
-    value = null,		// last known value, used in comparisons to see if we need to do full callback
+    value = null,               // last known value, used in comparisons to see if we need to do full callback
     allowedChars = null,
     disallowedChars = null;
 
@@ -116,7 +116,7 @@ public class JstringArea extends JScrollPane implements FocusListener {
 
     if (debug)
       {
-	System.out.println("Constructing pane with textarea, adding to JScrollPane: ");
+        System.out.println("Constructing pane with textarea, adding to JScrollPane: ");
       }
 
     // Add textArea to scrollPane viewport
@@ -168,7 +168,7 @@ public class JstringArea extends JScrollPane implements FocusListener {
   {
     if (my_parent != null)
       {
-	allowCallback = val;
+        allowCallback = val;
       }
 
     textArea.setEditable(val);
@@ -183,7 +183,7 @@ public class JstringArea extends JScrollPane implements FocusListener {
   {
     if (parent == null)
       {
-	throw new IllegalArgumentException("Invalid Parameter: parent cannot be null");
+        throw new IllegalArgumentException("Invalid Parameter: parent cannot be null");
       }
     
     my_parent = parent;
@@ -203,145 +203,145 @@ public class JstringArea extends JScrollPane implements FocusListener {
 
     synchronized (this)
       {
-	if (processingCallback)
-	  {
-	    return;
-	  }
-	
-	processingCallback = true;
+        if (processingCallback)
+          {
+            return;
+          }
+        
+        processingCallback = true;
       }
 
     try
       {
-	// if nothing in the JstringArea has changed,
-	// we don't need to worry about this event.
+        // if nothing in the JstringArea has changed,
+        // we don't need to worry about this event.
     
-	str = getText();
+        str = getText();
     
-	if (value != null)
-	  {
-	    if (debug)
-	      {
-		System.err.println("JstringArea.sendCallback: old value != null");
-	      }
-	
-	    changed = !value.equals(str);
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.err.println("JstringArea.sendCallback: old value == null");
-	      }
+        if (value != null)
+          {
+            if (debug)
+              {
+                System.err.println("JstringArea.sendCallback: old value != null");
+              }
+        
+            changed = !value.equals(str);
+          }
+        else
+          {
+            if (debug)
+              {
+                System.err.println("JstringArea.sendCallback: old value == null");
+              }
 
-	    if (str == null || str.equals(""))
-	      {
-		changed = false;
-	      }
-	    else
-	      {
-		changed = true;
-	      }
-	  }
+            if (str == null || str.equals(""))
+              {
+                changed = false;
+              }
+            else
+              {
+                changed = true;
+              }
+          }
 
-	if (debug)
-	  {
-	    System.err.println("JstringArea.sendCallback(): str == '" + str + "', value == '" + value + "'");
-	  }
+        if (debug)
+          {
+            System.err.println("JstringArea.sendCallback(): str == '" + str + "', value == '" + value + "'");
+          }
     
-	if (!changed)
-	  {
-	    if (debug)
-	      {
-		System.err.println("JstringArea.sendCallback: no change, ignoring");
-	      }
-	
-	    return;
-	  }
+        if (!changed)
+          {
+            if (debug)
+              {
+                System.err.println("JstringArea.sendCallback: no change, ignoring");
+              }
+        
+            return;
+          }
 
-	// if we don't need to handle callbacks, just accept the new
-	// string value from the user and return
+        // if we don't need to handle callbacks, just accept the new
+        // string value from the user and return
     
-	if (!allowCallback) 
-	  {
-	    value = str;
-	    return;
-	  }
+        if (!allowCallback) 
+          {
+            value = str;
+            return;
+          }
 
-	boolean b = false;
-	  
-	try 
-	  {
-	    if (debug)
-	      {
-		System.err.println("JstringArea.sendCallback: making callback");
-	      }
+        boolean b = false;
+          
+        try 
+          {
+            if (debug)
+              {
+                System.err.println("JstringArea.sendCallback: making callback");
+              }
 
-	    if (str.equals(""))
-	      {
-		b = my_parent.setValuePerformed(new JSetValueObject(this, null));
-	      }
-	    else
-	      {
-		b = my_parent.setValuePerformed(new JSetValueObject(this, str));
-	      }
-	  }
-	catch (RemoteException re)
-	  {
-	  }
+            if (str.equals(""))
+              {
+                b = my_parent.setValuePerformed(new JSetValueObject(this, null));
+              }
+            else
+              {
+                b = my_parent.setValuePerformed(new JSetValueObject(this, str));
+              }
+          }
+        catch (RemoteException re)
+          {
+          }
 
-	// If the setValuePerformed callback failed, we'll revert the value to our last
-	// approved value
+        // If the setValuePerformed callback failed, we'll revert the value to our last
+        // approved value
     
-	if (!b) 
-	  {
-	    if (debug)
-	      {
-		System.err.println("JstringArea.sendCallback: setValue rejected");
-		
-		if (value == null)
-		  {
-		    System.err.println("JstringArea.sendCallback: resetting to empty string");
-		  }
-		else
-		  {
-		    System.err.println("JstringArea.sendCallback: resetting to " + value);
-		  }
-	      }
-	    
-	    if (value == null)
-	      {
-		textArea.setText("");
-	      }
-	    else
-	      {
-		textArea.setText(value);
-	      }
-	    
-	    changed = false;
-	  }
-	else 
-	  {
-	    if (debug)
-	      {
-		System.err.println("JstringArea.sendCallback: setValue('" + str + "') accepted");
-	      }
+        if (!b) 
+          {
+            if (debug)
+              {
+                System.err.println("JstringArea.sendCallback: setValue rejected");
+                
+                if (value == null)
+                  {
+                    System.err.println("JstringArea.sendCallback: resetting to empty string");
+                  }
+                else
+                  {
+                    System.err.println("JstringArea.sendCallback: resetting to " + value);
+                  }
+              }
+            
+            if (value == null)
+              {
+                textArea.setText("");
+              }
+            else
+              {
+                textArea.setText(value);
+              }
+            
+            changed = false;
+          }
+        else 
+          {
+            if (debug)
+              {
+                System.err.println("JstringArea.sendCallback: setValue('" + str + "') accepted");
+              }
 
-	    if (str.equals(""))
-	      {
-		value = null;
-	      }
-	    else
-	      {
-		value = str;
-	      }
-		
-	    changed = false;
-	  }
+            if (str.equals(""))
+              {
+                value = null;
+              }
+            else
+              {
+                value = str;
+              }
+                
+            changed = false;
+          }
       }
     finally
       {
-	processingCallback = false;
+        processingCallback = false;
       }
   }
 
@@ -354,28 +354,28 @@ public class JstringArea extends JScrollPane implements FocusListener {
   {
     if (disallowedChars != null)
       {
-	if (disallowedChars.indexOf(ch) != -1)
-	  {
-	    if (debug)
-	      {
-		System.err.println("JstringArea.isAllowed() rejecting char " + ch + " as disallowed");
-	      }
+        if (disallowedChars.indexOf(ch) != -1)
+          {
+            if (debug)
+              {
+                System.err.println("JstringArea.isAllowed() rejecting char " + ch + " as disallowed");
+              }
 
-	    return false;
-	  }
+            return false;
+          }
       }
     
     if (allowedChars != null)
       {
-	if (allowedChars.indexOf(ch) == -1)
-	  {
-	    if (debug)
-	      {
-		System.err.println("JstringArea.isAllowed() rejecting char " + ch + " as not allowed");
-	      }
+        if (allowedChars.indexOf(ch) == -1)
+          {
+            if (debug)
+              {
+                System.err.println("JstringArea.isAllowed() rejecting char " + ch + " as not allowed");
+              }
 
-	    return false;
-	  }
+            return false;
+          }
       }
     
     return true;
@@ -385,7 +385,7 @@ public class JstringArea extends JScrollPane implements FocusListener {
   {
     if (debug)
       {
-	System.out.println("JstringArea: focusLost");
+        System.out.println("JstringArea: focusLost");
       }
 
     sendCallback();
@@ -395,7 +395,7 @@ public class JstringArea extends JScrollPane implements FocusListener {
   {
     if (debug)
       {
-	System.out.println("focusGained");
+        System.out.println("focusGained");
       }
   }
 
@@ -417,8 +417,8 @@ public class JstringArea extends JScrollPane implements FocusListener {
 
     area.setCallback(new JsetValueCallback() {
       public boolean setValuePerformed(JValueObject o) {
-	System.out.println("I got an o: " + o.getValue());
-	return true;
+        System.out.println("I got an o: " + o.getValue());
+        return true;
       }
     });
 
@@ -479,8 +479,8 @@ class myTextArea extends JTextArea
       case KeyEvent.VK_DELETE:
       case KeyEvent.VK_END:
       case KeyEvent.VK_HOME:
-	super.processKeyEvent(e);
-	return;	
+        super.processKeyEvent(e);
+        return; 
       }
 
     // We check against KeyEvent.CHAR_UNDEFINED so that we pass
@@ -489,8 +489,8 @@ class myTextArea extends JTextArea
 
     if (e.getKeyChar() == KeyEvent.CHAR_UNDEFINED)
       {
-	super.processKeyEvent(e);
-	return;
+        super.processKeyEvent(e);
+        return;
       }
 
     // now check with the JstringArea to adjudicate this character
@@ -498,15 +498,15 @@ class myTextArea extends JTextArea
 
     if (my_parent.isAllowed(e.getKeyChar()))
       {
-	super.processKeyEvent(e);
-	return;
+        super.processKeyEvent(e);
+        return;
       }
 
     // otherwise, we ignore it
 
     if (JstringArea.debug)
       {
-	System.err.println("JstringArea: skipping key event " + e);
+        System.err.println("JstringArea: skipping key event " + e);
       }
   } // processKeyEvent
 

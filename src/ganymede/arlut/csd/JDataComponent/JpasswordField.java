@@ -96,17 +96,17 @@ public class JpasswordField extends JPasswordField implements FocusListener {
    */
 
   public JpasswordField(int columns,
-			int maxstrlen,
-			boolean is_editable,
-			boolean invisible,
-			String allowed,
-			String disallowed)
+                        int maxstrlen,
+                        boolean is_editable,
+                        boolean invisible,
+                        String allowed,
+                        String disallowed)
   {
     super(columns);
 
     if (maxstrlen <= 0)
       {
-	throw new IllegalArgumentException("Invalid Parameter: maximum string size is negative or zero");
+        throw new IllegalArgumentException("Invalid Parameter: maximum string size is negative or zero");
       }
 
     size = maxstrlen;
@@ -117,12 +117,12 @@ public class JpasswordField extends JPasswordField implements FocusListener {
 
     if (allowed != null)
       {
-	setAllowedChars(allowed);
+        setAllowedChars(allowed);
       }
 
     if (disallowed != null)
       {
-	setDisallowedChars(disallowed);
+        setDisallowedChars(disallowed);
       }
 
     addFocusListener(this);
@@ -142,11 +142,11 @@ public class JpasswordField extends JPasswordField implements FocusListener {
   public JpasswordField()
   {
     this(JpasswordField.DEFAULT_COLS,
-	 JpasswordField.DEFAULT_SIZE,
-	 true,
-	 false,
-	 null,
-	 null);
+         JpasswordField.DEFAULT_SIZE,
+         true,
+         false,
+         null,
+         null);
   }
 
   /**
@@ -156,11 +156,11 @@ public class JpasswordField extends JPasswordField implements FocusListener {
   public JpasswordField(int cols, boolean is_editable)
   {
     this(cols,
-	 JpasswordField.DEFAULT_SIZE,
-	 is_editable,
-	 false,
-	 null,
-	 null);
+         JpasswordField.DEFAULT_SIZE,
+         is_editable,
+         false,
+         null,
+         null);
   }
 
   /**
@@ -174,12 +174,12 @@ public class JpasswordField extends JPasswordField implements FocusListener {
    */
 
   public JpasswordField(int cols,
-			int maxstrlen,
-			boolean is_editable,
-			boolean invisible,
-			String allowed,
-			String disallowed,
-			JsetValueCallback callback)
+                        int maxstrlen,
+                        boolean is_editable,
+                        boolean invisible,
+                        String allowed,
+                        String disallowed,
+                        JsetValueCallback callback)
   {
     this(cols, maxstrlen, is_editable, invisible, allowed, disallowed);
 
@@ -194,7 +194,7 @@ public class JpasswordField extends JPasswordField implements FocusListener {
   {
     if (parent == null)
       {
-	throw new IllegalArgumentException("Invalid Parameter: parent cannot be null");
+        throw new IllegalArgumentException("Invalid Parameter: parent cannot be null");
       }
 
     my_parent = parent;
@@ -212,33 +212,33 @@ public class JpasswordField extends JPasswordField implements FocusListener {
   {
     if (str == null)
       {
-	value = "";
+        value = "";
 
-	super.setText("");
+        super.setText("");
 
-	changed = true;
+        changed = true;
       }
     else
       {
-	if (str.length() > size)
-	  {
-	    throw new IllegalArgumentException("string too long");
-	  }
+        if (str.length() > size)
+          {
+            throw new IllegalArgumentException("string too long");
+          }
 
-	for (int i = 0; i < str.length(); i++)
-	  {
-	    if (!isAllowed(str.charAt(i)))
-	      {
-		throw new IllegalArgumentException("invalid char in string: " +
-						   str.charAt(i));
-	      }
-	  }
+        for (int i = 0; i < str.length(); i++)
+          {
+            if (!isAllowed(str.charAt(i)))
+              {
+                throw new IllegalArgumentException("invalid char in string: " +
+                                                   str.charAt(i));
+              }
+          }
 
-	super.setText(str);
+        super.setText(str);
 
-	value = str;
+        value = str;
 
-	changed = true;
+        changed = true;
       }
   }
 
@@ -323,18 +323,18 @@ public class JpasswordField extends JPasswordField implements FocusListener {
   {
     if (disallowedChars != null)
       {
-	if (disallowedChars.indexOf(ch) != -1)
-	  {
-	    return false;
-	  }
+        if (disallowedChars.indexOf(ch) != -1)
+          {
+            return false;
+          }
       }
 
     if (allowedChars != null)
       {
-	if (allowedChars.indexOf(ch) == -1)
-	  {
-	    return false;
-	  }
+        if (allowedChars.indexOf(ch) == -1)
+          {
+            return false;
+          }
       }
 
     return true;
@@ -351,88 +351,88 @@ public class JpasswordField extends JPasswordField implements FocusListener {
 
     if (value != null)
       {
-	if (debug)
-	  {
-	    System.err.println("JpasswordField.sendCallback(): old value != null");
-	  }
+        if (debug)
+          {
+            System.err.println("JpasswordField.sendCallback(): old value != null");
+          }
 
-	changed = !value.equals(str);
+        changed = !value.equals(str);
       }
     else
       {
-	if (debug)
-	  {
-	    System.err.println("JpasswordField.sendCallback(): old value == null");
-	  }
+        if (debug)
+          {
+            System.err.println("JpasswordField.sendCallback(): old value == null");
+          }
 
-	changed = true;
+        changed = true;
       }
 
     if (!changed)
       {
-	if (debug)
-	  {
-	    System.err.println("JpasswordField.sendCallback(): no change, ignoring");
-	  }
+        if (debug)
+          {
+            System.err.println("JpasswordField.sendCallback(): no change, ignoring");
+          }
 
-	return;
+        return;
       }
 
     if (allowCallback)
       {
-	boolean b = false;
+        boolean b = false;
 
-	try
-	  {
-	    if (debug)
-	      {
-		System.err.println("JpasswordField.sendCallback(): making callback");
-	      }
+        try
+          {
+            if (debug)
+              {
+                System.err.println("JpasswordField.sendCallback(): making callback");
+              }
 
-	    b = my_parent.setValuePerformed(new JSetValueObject(this, str));
-	  }
-	catch (RemoteException re)
-	  {
-	  }
+            b = my_parent.setValuePerformed(new JSetValueObject(this, str));
+          }
+        catch (RemoteException re)
+          {
+          }
 
-	if (!b)
-	  {
-	    if (debug)
-	      {
-		System.err.println("JpasswordField.sendCallback(): setValue rejected");
+        if (!b)
+          {
+            if (debug)
+              {
+                System.err.println("JpasswordField.sendCallback(): setValue rejected");
 
-		if (value == null)
-		  {
-		    System.err.println("JpasswordField.sendCallback(): resetting to empty string");
-		  }
-		else
-		  {
-		    System.err.println("JpasswordField.sendCallback(): resetting to " + value);
-		  }
-	      }
+                if (value == null)
+                  {
+                    System.err.println("JpasswordField.sendCallback(): resetting to empty string");
+                  }
+                else
+                  {
+                    System.err.println("JpasswordField.sendCallback(): resetting to " + value);
+                  }
+              }
 
-	    if (value == null)
-	      {
-		super.setText("");
-	      }
-	    else
-	      {
-		super.setText(value);
-	      }
+            if (value == null)
+              {
+                super.setText("");
+              }
+            else
+              {
+                super.setText(value);
+              }
 
-	    changed = false;
-	  }
-	else
-	  {
-	    if (debug)
-	      {
-		System.err.println("JpasswordField.sendCallback(): setValue accepted");
-	      }
+            changed = false;
+          }
+        else
+          {
+            if (debug)
+              {
+                System.err.println("JpasswordField.sendCallback(): setValue accepted");
+              }
 
-	    value = str;
+            value = str;
 
-	    changed = true;
-	  }
+            changed = true;
+          }
       }
   }
 

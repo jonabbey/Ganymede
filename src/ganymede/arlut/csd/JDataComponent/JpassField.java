@@ -6,7 +6,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2011
@@ -102,14 +102,14 @@ public class JpassField extends JPanel implements JsetValueCallback {
    */
 
   public JpassField(Frame frame,
-		    int columns,
-		    int maxstrlen,
-		    boolean is_editable)
+                    int columns,
+                    int maxstrlen,
+                    boolean is_editable)
   {
     this(frame, columns, maxstrlen,
-	 is_editable,
-	 null,
-	 null);
+         is_editable,
+         null,
+         null);
   }
 
   /**
@@ -119,22 +119,22 @@ public class JpassField extends JPanel implements JsetValueCallback {
    */
 
   public JpassField(Frame frame,
-		    int columns, 
-		    int maxstrlen, 
-		    boolean is_editable,
-		    String allowed, 
-		    String disallowed) 
+                    int columns, 
+                    int maxstrlen, 
+                    boolean is_editable,
+                    String allowed, 
+                    String disallowed) 
   {
     this.frame = frame;
 
     field1 = new JpasswordField(columns, maxstrlen, 
-				is_editable, true, allowed, disallowed);
+                                is_editable, true, allowed, disallowed);
     
     field1.setCallback(this);
     field1.setEditable(is_editable);
     
     field2 = new JpasswordField(columns, maxstrlen,
-				is_editable, true, allowed, disallowed);
+                                is_editable, true, allowed, disallowed);
     
     field2.setCallback(this);
     field2.setEditable(is_editable);
@@ -175,100 +175,100 @@ public class JpassField extends JPanel implements JsetValueCallback {
 
     if (s == field1)
       {
-	if (debug)
-	  {
-	    System.err.println("setting value 1");
-	  }
+        if (debug)
+          {
+            System.err.println("setting value 1");
+          }
 
-	value1 = (String) v.getValue();
+        value1 = (String) v.getValue();
 
-	if (debug)
-	  {
-	    System.err.println("value 1 = " + value1);
-	  }
+        if (debug)
+          {
+            System.err.println("value 1 = " + value1);
+          }
 
-	field2.setText(null);
-	value2 = null;
+        field2.setText(null);
+        value2 = null;
       }
     else if (s == field2)
       {
-	if (debug)
-	  {
-	    System.err.println("setting value 2");
-	  }
+        if (debug)
+          {
+            System.err.println("setting value 2");
+          }
 
-	value2 = (String) v.getValue();
+        value2 = (String) v.getValue();
 
-	if (debug)
-	  {
-	    System.err.println("value 2 = " + value2);
-	  }
+        if (debug)
+          {
+            System.err.println("value 2 = " + value2);
+          }
 
-	if (!changingPass && (value1 != null) && (value2 != null) && (value1.equals(value2)))
-	  {
-	    validatedPass = value2;
+        if (!changingPass && (value1 != null) && (value2 != null) && (value1.equals(value2)))
+          {
+            validatedPass = value2;
 
-	    try
-	      {
-		changingPass = true;
+            try
+              {
+                changingPass = true;
 
-		try
-		  {
-		    // if our callback rejects the password, it will
-		    // handle informing the user of what and why
+                try
+                  {
+                    // if our callback rejects the password, it will
+                    // handle informing the user of what and why
 
-		    if (my_parent != null && !my_parent.setValuePerformed(new JSetValueObject(this, value1)))
-		      {
-			value1 = null;
-			value2 = null;
-			field1.setText(null);
-			field2.setText(null);
+                    if (my_parent != null && !my_parent.setValuePerformed(new JSetValueObject(this, value1)))
+                      {
+                        value1 = null;
+                        value2 = null;
+                        field1.setText(null);
+                        field2.setText(null);
 
-			// try again!
+                        // try again!
 
-			field1.requestFocus();
-			
-			return false;
-		      }
-		  }
-		finally
-		  {
-		    changingPass = false;
-		  }
-	      }
-	    catch (RemoteException ex)
-	      {
-		reportError("Error communicating with server.. network or server problem?");
+                        field1.requestFocus();
+                        
+                        return false;
+                      }
+                  }
+                finally
+                  {
+                    changingPass = false;
+                  }
+              }
+            catch (RemoteException ex)
+              {
+                reportError("Error communicating with server.. network or server problem?");
 
-		field1.setText(null);
-		field2.setText(null);
-		value1 = null;
-		value2 = null;
+                field1.setText(null);
+                field2.setText(null);
+                value1 = null;
+                value2 = null;
 
-		field1.requestFocus();
+                field1.requestFocus();
 
-		return false;
-	      }
-	  }
-	else if ((value1 != null) && (value2 != null) && (!value1.equals(value2)))
-	  {
-	    reportError("Passwords do not match, please try again.");
+                return false;
+              }
+          }
+        else if ((value1 != null) && (value2 != null) && (!value1.equals(value2)))
+          {
+            reportError("Passwords do not match, please try again.");
 
-	    field1.setText(null);
-	    field2.setText(null);
-	    value1 = null;
-	    value2 = null;
-	    validatedPass = null;
+            field1.setText(null);
+            field2.setText(null);
+            value1 = null;
+            value2 = null;
+            validatedPass = null;
 
-	    field1.requestFocus();
+            field1.requestFocus();
 
-	    return false;
-	  }
+            return false;
+          }
       }
     else
       {
-	System.err.println("whatthe?");
-	return false;		// ??
+        System.err.println("whatthe?");
+        return false;           // ??
       }
 
     return true;
@@ -301,7 +301,7 @@ public class JpassField extends JPanel implements JsetValueCallback {
   {
     if (parent == null)
       {
-	throw new IllegalArgumentException("Invalid Parameter: parent cannot be null");
+        throw new IllegalArgumentException("Invalid Parameter: parent cannot be null");
       }
     
     my_parent = parent;
@@ -318,14 +318,14 @@ public class JpassField extends JPanel implements JsetValueCallback {
   {
     if (allowCallback)
       {
-	try
-	  {
-	    my_parent.setValuePerformed(new JErrorValueObject(this, errorString));
-	  }
-	catch (java.rmi.RemoteException rx)
-	  {
-	    System.out.println("Could not send an error callback.");
-	  }
+        try
+          {
+            my_parent.setValuePerformed(new JErrorValueObject(this, errorString));
+          }
+        catch (java.rmi.RemoteException rx)
+          {
+            System.out.println("Could not send an error callback.");
+          }
       }
   }
 }

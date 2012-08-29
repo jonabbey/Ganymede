@@ -6,7 +6,7 @@
    Module By: Navin Manohar, Jonathan Abbey, Michael Mulvaney
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -97,19 +97,19 @@ public class JnumberField extends JentryField {
    * @param maxsize the maximum limit on the range of values
    */ 
   public JnumberField(int columns,
-		      boolean iseditable,
-		      boolean islimited,
-		      int minsize,
-		      int maxsize)
+                      boolean iseditable,
+                      boolean islimited,
+                      int minsize,
+                      int maxsize)
   {
     super(columns);
     
     if (islimited)
       {
-	limited = true;
-	
-	maxSize = maxsize;
-	minSize = minsize;
+        limited = true;
+        
+        maxSize = maxsize;
+        minSize = minsize;
       }
     
     setEditable(iseditable);  // will this JnumberField be editable or not?
@@ -123,9 +123,9 @@ public class JnumberField extends JentryField {
   public JnumberField(int width)
   {
     this(width,
-	 true,
-	 false,
-	 0,Integer.MAX_VALUE);
+         true,
+         false,
+         0,Integer.MAX_VALUE);
   }
 
   /**
@@ -152,11 +152,11 @@ public class JnumberField extends JentryField {
   *
   */ 
   public JnumberField(int columns,
-		     boolean iseditable,
-		     boolean islimited,
-		     int minsize,
-		     int maxsize,
-		     JsetValueCallback parent)
+                     boolean iseditable,
+                     boolean islimited,
+                     int minsize,
+                     int maxsize,
+                     JsetValueCallback parent)
   {
     this(columns,iseditable,islimited,minsize,maxsize);
     
@@ -179,12 +179,12 @@ public class JnumberField extends JentryField {
   {
     if (allowedChars.indexOf(c) == -1)
       {
-	if (debug)
-	  {
-	    System.err.println("JnumberField.isAllowed(): ruling NO WAY on char '" + c + "'");
-	  }
+        if (debug)
+          {
+            System.err.println("JnumberField.isAllowed(): ruling NO WAY on char '" + c + "'");
+          }
 
-	return false;
+        return false;
       }
 
     return true;
@@ -205,7 +205,7 @@ public class JnumberField extends JentryField {
 
     if (str == null || str.equals(""))
       {
-	return null;
+        return null;
       }
 
     return Integer.valueOf(str);
@@ -240,18 +240,18 @@ public class JnumberField extends JentryField {
   {
     if (limited)
       {
-	if (num != null)
-	  {
-	    if (num.intValue() > maxSize || num.intValue() < minSize)
-	      {
-		if (debug)
-		  {
-		    System.err.println("Invalid Parameter: number out of range");
-		  }
+        if (num != null)
+          {
+            if (num.intValue() > maxSize || num.intValue() < minSize)
+              {
+                if (debug)
+                  {
+                    System.err.println("Invalid Parameter: number out of range");
+                  }
 
-		return;
-	      }
-	  }
+                return;
+              }
+          }
       }
 
     // remember the value that is being set.
@@ -262,11 +262,11 @@ public class JnumberField extends JentryField {
 
     if (num != null)
       {
-	setText(num.toString());
+        setText(num.toString());
       }
     else
       {
-	setText("");
+        setText("");
       }
   }
 
@@ -354,125 +354,125 @@ public class JnumberField extends JentryField {
 
     synchronized (this)
       {
-	if (processingCallback)
-	  {
-	    return -1;
-	  }
-	
-	processingCallback = true;
+        if (processingCallback)
+          {
+            return -1;
+          }
+        
+        processingCallback = true;
       }
 
     try
       {
-	Integer currentValue;
+        Integer currentValue;
 
-	try
-	  {
-	    currentValue = getValue();
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    // ""{0}" is not a valid number."
-	    reportError(ts.l("sendCallback.not_valid", getText()));
+        try
+          {
+            currentValue = getValue();
+          }
+        catch (NumberFormatException ex)
+          {
+            // ""{0}" is not a valid number."
+            reportError(ts.l("sendCallback.not_valid", getText()));
 
-	    // revert the text field
+            // revert the text field
 
-	    setValue(oldvalue);
-	    return -1;
-	  }
+            setValue(oldvalue);
+            return -1;
+          }
 
-	if ((currentValue == null && oldvalue == null) ||
-	    (oldvalue != null && oldvalue.equals(currentValue)))
-	  {
-	    if (debug)
-	      {
-		System.err.println("The field was not changed.");
-	      }
+        if ((currentValue == null && oldvalue == null) ||
+            (oldvalue != null && oldvalue.equals(currentValue)))
+          {
+            if (debug)
+              {
+                System.err.println("The field was not changed.");
+              }
 
-	    return 0;
-	  }
+            return 0;
+          }
 
-	// check to see if it's in bounds, if we have bounds set.
+        // check to see if it's in bounds, if we have bounds set.
 
-	if (limited)
-	  {
-	    int value = currentValue.intValue();
+        if (limited)
+          {
+            int value = currentValue.intValue();
 
-	    if ((value > maxSize) || (value < minSize))
-	      {
-		// nope, revert.
+            if ((value > maxSize) || (value < minSize))
+              {
+                // nope, revert.
 
-		// "{0}" must be between {1,num,#} and {2,num,#}.
-		reportError(ts.l("sendCallback.out_of_range", getText(), Integer.valueOf(minSize), Integer.valueOf(maxSize)));
+                // "{0}" must be between {1,num,#} and {2,num,#}.
+                reportError(ts.l("sendCallback.out_of_range", getText(), Integer.valueOf(minSize), Integer.valueOf(maxSize)));
 
-		// revert
+                // revert
 
-		setValue(oldvalue);
-		return -1;
-	      }
-	  }
+                setValue(oldvalue);
+                return -1;
+              }
+          }
 
-	// now, tell somebody, if we need to.
+        // now, tell somebody, if we need to.
 
-	if (allowCallback)
-	  {
-	    // Do a callback
+        if (allowCallback)
+          {
+            // Do a callback
 
-	    if (debug)
-	      {
-		System.err.println("Sending callback");
-	      }
+            if (debug)
+              {
+                System.err.println("Sending callback");
+              }
 
-	    success = false;
+            success = false;
 
-	    try
-	      {
-		success = my_parent.setValuePerformed(new JSetValueObject(this,currentValue));
-	      }
-	    catch (java.rmi.RemoteException re)
-	      {
-		// success will still be false, that's good enough for us.
-	      }
+            try
+              {
+                success = my_parent.setValuePerformed(new JSetValueObject(this,currentValue));
+              }
+            catch (java.rmi.RemoteException re)
+              {
+                // success will still be false, that's good enough for us.
+              }
 
-	    if (!success)
-	      {
-		// revert
+            if (!success)
+              {
+                // revert
 
-		setValue(oldvalue);
-		return -1;
-	      }
-	    else
-	      {
-		// good to go.  We've already got the text set in the text
-		// field, the user did that for us.  Remember the value of
-		// it, so we can revert if we need to later.
+                setValue(oldvalue);
+                return -1;
+              }
+            else
+              {
+                // good to go.  We've already got the text set in the text
+                // field, the user did that for us.  Remember the value of
+                // it, so we can revert if we need to later.
 
-		if (replacingValue)
-		  {
-		    setValue(replacementValue);
-		  }
-		else
-		  {
-		    oldvalue = currentValue;
-		  }
+                if (replacingValue)
+                  {
+                    setValue(replacementValue);
+                  }
+                else
+                  {
+                    oldvalue = currentValue;
+                  }
 
-		return 1;
-	      }
-	  }
-	else
-	  {
-	    // no one to say no.  Odd, guess nobody cares.. remember our
-	    // value anyway.
+                return 1;
+              }
+          }
+        else
+          {
+            // no one to say no.  Odd, guess nobody cares.. remember our
+            // value anyway.
 
-	    oldvalue = currentValue;
-	    return 1;
-	  }
+            oldvalue = currentValue;
+            return 1;
+          }
       }
     finally
       {
-	processingCallback = false;
-	replacingValue = false;
-	replacementValue = null;
+        processingCallback = false;
+        replacingValue = false;
+        replacementValue = null;
       }
   }
 
@@ -485,17 +485,17 @@ public class JnumberField extends JentryField {
   {
     if (allowCallback)
       {
-	try
-	  {
-	    my_parent.setValuePerformed(new JErrorValueObject(this, errorString));
-	  }
-	catch (java.rmi.RemoteException rx)
-	  {
-	    if (debug)
-	      {
-		System.err.println("Could not send an error callback.");
-	      }
-	  }
+        try
+          {
+            my_parent.setValuePerformed(new JErrorValueObject(this, errorString));
+          }
+        catch (java.rmi.RemoteException rx)
+          {
+            if (debug)
+              {
+                System.err.println("Could not send an error callback.");
+              }
+          }
       }
   }
 
@@ -513,7 +513,7 @@ public class JnumberField extends JentryField {
   {
     if (callback != this.my_parent)
       {
-	throw new IllegalStateException();
+        throw new IllegalStateException();
       }
 
     this.replacingValue = true;

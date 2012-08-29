@@ -6,7 +6,7 @@
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -79,7 +79,7 @@ public class JFieldWrapper extends JPanel {
   {
     if (fieldname==null)
       {
-	throw new IllegalArgumentException("Error: handle to the name of the field is null");
+        throw new IllegalArgumentException("Error: handle to the name of the field is null");
       }
 
     setLayout(new BorderLayout());

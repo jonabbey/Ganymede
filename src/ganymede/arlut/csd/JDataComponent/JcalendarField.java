@@ -12,7 +12,7 @@
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -150,11 +150,11 @@ public class JcalendarField extends JPanel implements JsetValueCallback {
    */
 
   public JcalendarField(Date date,
-			boolean iseditable,
-			boolean islimited,
-			Date minDate,
-			Date maxDate,
-			JsetValueCallback parent)
+                        boolean iseditable,
+                        boolean islimited,
+                        Date minDate,
+                        Date maxDate,
+                        JsetValueCallback parent)
   {
     this(date,iseditable,islimited,minDate,maxDate);
 
@@ -173,25 +173,25 @@ public class JcalendarField extends JPanel implements JsetValueCallback {
    */
 
   public JcalendarField(Date date,
-			boolean iseditable,
-			boolean islimited,
-			Date minDate,
-			Date maxDate)
+                        boolean iseditable,
+                        boolean islimited,
+                        Date minDate,
+                        Date maxDate)
   { 
     if (debug)
       {
-	System.err.println("JcalendarField(): date = " + date);
+        System.err.println("JcalendarField(): date = " + date);
       }
 
     this.iseditable = iseditable;
 
     if (date == null)
       {
-	my_date = new Date();
+        my_date = new Date();
       }
     else
       {
-	my_date = new Date(date.getTime());
+        my_date = new Date(date.getTime());
       }
 
     _myCalendar = new GregorianCalendar(_myTimeZone,Locale.getDefault());
@@ -199,20 +199,20 @@ public class JcalendarField extends JPanel implements JsetValueCallback {
     
     if (islimited)
       {
-	if (minDate == null)
-	  {
-	    throw new IllegalArgumentException("Invalid Parameter: minDate cannot be null");
-	  }
+        if (minDate == null)
+          {
+            throw new IllegalArgumentException("Invalid Parameter: minDate cannot be null");
+          }
 
-	if (maxDate == null)
-	  {
-	    throw new IllegalArgumentException("Invalid Parameter: maxDate canot be null");
-	  }
+        if (maxDate == null)
+          {
+            throw new IllegalArgumentException("Invalid Parameter: maxDate canot be null");
+          }
 
-	limited = true;
+        limited = true;
 
-	this.minDate = minDate;
-	this.maxDate = maxDate;
+        this.minDate = minDate;
+        this.maxDate = maxDate;
       }       
    
     setLayout(new BorderLayout());
@@ -239,7 +239,7 @@ public class JcalendarField extends JPanel implements JsetValueCallback {
   {
     if (unset)
       {
-	return null;
+        return null;
       }
 
     return my_date;
@@ -266,30 +266,30 @@ public class JcalendarField extends JPanel implements JsetValueCallback {
   {
     if (d == null)
       {
-	unset = true;
-	my_date = null;
-	changed = true;
-	return;
+        unset = true;
+        my_date = null;
+        changed = true;
+        return;
       }
 
     if (debug)
       {
-	System.err.println("setDate() called: " + d);
+        System.err.println("setDate() called: " + d);
       }
         
     if (checkLimits && limited)
       {
-	if (d.after(maxDate) || d.before(minDate))
-	  {
-	    throw new IllegalArgumentException("Invalid Parameter: date out of range");
-	  }
+        if (d.after(maxDate) || d.before(minDate))
+          {
+            throw new IllegalArgumentException("Invalid Parameter: date out of range");
+          }
       }
 
     my_date = d;
 
     if (my_date != null)
       {
-	_myCalendar.setTime(my_date);
+        _myCalendar.setTime(my_date);
       }
 
     unset = false;
@@ -318,7 +318,7 @@ public class JcalendarField extends JPanel implements JsetValueCallback {
   {
     if (callback == null)
       {
-	throw new IllegalArgumentException("Invalid Parameter: callback is null");
+        throw new IllegalArgumentException("Invalid Parameter: callback is null");
       }
     
     this.callback = callback;
@@ -343,78 +343,78 @@ public class JcalendarField extends JPanel implements JsetValueCallback {
 
     if (comp == pCal) 
       {
-	if (debug)
-	  {
-	    System.out.println("setValuePerformed called by Calendar");
-	  }
+        if (debug)
+          {
+            System.out.println("setValuePerformed called by Calendar");
+          }
 
-	if (!(obj instanceof Date))
-	  {
-	    throw new RuntimeException("Error: Invalid value embedded in JValueObject");
-	  }
+        if (!(obj instanceof Date))
+          {
+            throw new RuntimeException("Error: Invalid value embedded in JValueObject");
+          }
 
-	old_date = getDate();
-	
-	try
-	  {
-	    setDate((Date) obj);
-	  }
-	catch (IllegalArgumentException ex)
-	  {
-	    return false;	// out of range
-	  }
+        old_date = getDate();
+        
+        try
+          {
+            setDate((Date) obj);
+          }
+        catch (IllegalArgumentException ex)
+          {
+            return false;       // out of range
+          }
 
-	// The user has triggered an update of the date value
-	// in the _date field by choosing a date from the 
-	// JpopUpCalendar
+        // The user has triggered an update of the date value
+        // in the _date field by choosing a date from the 
+        // JpopUpCalendar
 
-	if (allowCallback)
-	  {
-	    // Do a callback to talk to the server
+        if (allowCallback)
+          {
+            // Do a callback to talk to the server
 
-	    try 
-	      {
-		if (debug)
-		  {
-		    System.out.println("setValuePerformed called by Calendar --- passing up to container");
-		  }
+            try 
+              {
+                if (debug)
+                  {
+                    System.out.println("setValuePerformed called by Calendar --- passing up to container");
+                  }
 
-		retval=callback.setValuePerformed(new JSetValueObject(this,my_date));
-		changed = false;
-	      }
-	    catch (java.rmi.RemoteException re) 
-	      {
-		// throw up an information dialog here
+                retval=callback.setValuePerformed(new JSetValueObject(this,my_date));
+                changed = false;
+              }
+            catch (java.rmi.RemoteException re) 
+              {
+                // throw up an information dialog here
 
-		// "Calendar Field Error"
-		// "There was an error communicating with the server!\n{0}"
-		new JErrorDialog(new JFrame(),
-				 ts.l("global.error_subj"),
-				 ts.l("global.error_text", re.getMessage()),
-				 StandardDialog.ModalityType.DOCUMENT_MODAL);
-	      }
+                // "Calendar Field Error"
+                // "There was an error communicating with the server!\n{0}"
+                new JErrorDialog(new JFrame(),
+                                 ts.l("global.error_subj"),
+                                 ts.l("global.error_text", re.getMessage()),
+                                 StandardDialog.ModalityType.DOCUMENT_MODAL);
+              }
 
-	    if (!retval)
-	      {
-		if (debug)
-		  {
-		    System.err.println("Resetting date to " + old_date);
-		  }
-		
-		setDate(old_date, false);
+            if (!retval)
+              {
+                if (debug)
+                  {
+                    System.err.println("Resetting date to " + old_date);
+                  }
+                
+                setDate(old_date, false);
 
-		return false;
-	      }
-	  }
-	else
-	  {
-	    setDate((Date) obj);
-	    _myCalendar.setTime((Date) obj);
+                return false;
+              }
+          }
+        else
+          {
+            setDate((Date) obj);
+            _myCalendar.setTime((Date) obj);
 
-	    // no callback, so we ok the date
+            // no callback, so we ok the date
 
-	    return true;
-	  }
+            return true;
+          }
       }
     
     return retval;

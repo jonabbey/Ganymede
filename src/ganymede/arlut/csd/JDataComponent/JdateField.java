@@ -171,12 +171,12 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
    */
 
   public JdateField(Date date,
-		    boolean iseditable,
-		    boolean islimited,
-		    boolean usetime,
-		    Date minDate,
-		    Date maxDate,
-		    JsetValueCallback parent)
+                    boolean iseditable,
+                    boolean islimited,
+                    boolean usetime,
+                    Date minDate,
+                    Date maxDate,
+                    JsetValueCallback parent)
   {
     this(date,iseditable,islimited,usetime,minDate,maxDate);
 
@@ -196,37 +196,37 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
    */
 
   public JdateField(Date date,
-		    boolean iseditable,
-		    boolean islimited,
-		    boolean usetime,
-		    Date minDate,
-		    Date maxDate)
+                    boolean iseditable,
+                    boolean islimited,
+                    boolean usetime,
+                    Date minDate,
+                    Date maxDate)
   {
     if (debug)
       {
-	System.err.println("JdateField(): date = " + date);
+        System.err.println("JdateField(): date = " + date);
       }
 
     if (date == null)
       {
-	curr_date = original_date = null;
+        curr_date = original_date = null;
       }
     else
       {
-	curr_date = original_date = new Date(date.getTime());
+        curr_date = original_date = new Date(date.getTime());
       }
 
     if (islimited)
       {
-	if (minDate == null)
-	  {
-	    throw new IllegalArgumentException("Invalid Parameter: minDate cannot be null");
-	  }
+        if (minDate == null)
+          {
+            throw new IllegalArgumentException("Invalid Parameter: minDate cannot be null");
+          }
 
-	if (maxDate == null)
-	  {
-	    throw new IllegalArgumentException("Invalid Parameter: maxDate canot be null");
-	  }
+        if (maxDate == null)
+          {
+            throw new IllegalArgumentException("Invalid Parameter: maxDate canot be null");
+          }
       }
 
     setLayout(new BorderLayout());
@@ -236,7 +236,7 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
     // Adds a year spinner to the MonthView object.
     UIManager.put(CalendarHeaderHandler.uiControllerID,
-		  "org.jdesktop.swingx.plaf.basic.SpinningCalendarHeaderHandler");
+                  "org.jdesktop.swingx.plaf.basic.SpinningCalendarHeaderHandler");
 
     // Moves the year spinner after month arrows.
     UIManager.put(SpinningCalendarHeaderHandler.ARROWS_SURROUND_MONTH, Boolean.TRUE);
@@ -250,15 +250,15 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
     if (islimited)
       {
-	if (minDate != null)
-	  {
-	    monthView.setLowerBound(minDate);
-	  }
+        if (minDate != null)
+          {
+            monthView.setLowerBound(minDate);
+          }
 
-	if (maxDate != null)
-	  {
-	    monthView.setUpperBound(maxDate);
-	  }
+        if (maxDate != null)
+          {
+            monthView.setUpperBound(maxDate);
+          }
       }
 
     monthView.setZoomable(true);
@@ -267,7 +267,7 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
     if (iseditable)
       {
-	datef.addFocusListener(this);
+        datef.addFocusListener(this);
       }
 
     buttonPanel.add(datePicker, "West");
@@ -281,12 +281,12 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
     if (usetime)
       {
-	if (iseditable)
-	  {
-	    timef.addFocusListener(this);
-	  }
+        if (iseditable)
+          {
+            timef.addFocusListener(this);
+          }
 
-	add(timef);
+        add(timef);
       }
 
     add(buttonPanel, "East");
@@ -308,23 +308,23 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
     if (c == timef)
       {
-	setTimeOnly(timef.getText());
+        setTimeOnly(timef.getText());
 
-	updateServer();
+        updateServer();
       }
     else if (c == datef)
       {
-	try
-	  {
-	    datePicker.getEditor().commitEdit();
+        try
+          {
+            datePicker.getEditor().commitEdit();
 
-	    setDateOnly(datePicker.getDate());
+            setDateOnly(datePicker.getDate());
 
-	    updateServer();
-	  }
-	catch (ParseException pe)
-	  {
-	  }
+            updateServer();
+          }
+        catch (ParseException pe)
+          {
+          }
       }
   }
 
@@ -346,8 +346,8 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
     if (c == datePicker)
       {
-	setDateOnly(datePicker.getDate());
-	updateServer();
+        setDateOnly(datePicker.getDate());
+        updateServer();
       }
   }
 
@@ -385,32 +385,32 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
   {
     if (date != null)
       {
-	if (debug)
-	  {
-	    System.err.println("setDateOnly() called: " + date);
-	  }
+        if (debug)
+          {
+            System.err.println("setDateOnly() called: " + date);
+          }
 
-	if (curr_date == null)
-	  {
-	    setDate(date);
-	    return;
-	  }
+        if (curr_date == null)
+          {
+            setDate(date);
+            return;
+          }
 
-	Calendar cal = Calendar.getInstance();
-	cal.setTime(curr_date);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(curr_date);
 
-	int hour = cal.get(Calendar.HOUR_OF_DAY);
-	int minute = cal.get(Calendar.MINUTE);
+        int hour = cal.get(Calendar.HOUR_OF_DAY);
+        int minute = cal.get(Calendar.MINUTE);
 
-	cal.setTime(date);
-	cal.set(Calendar.HOUR_OF_DAY, hour);
-	cal.set(Calendar.MINUTE, minute);
+        cal.setTime(date);
+        cal.set(Calendar.HOUR_OF_DAY, hour);
+        cal.set(Calendar.MINUTE, minute);
 
-	setDate(cal.getTime());
+        setDate(cal.getTime());
       }
     else
       {
-	setDate(null);
+        setDate(null);
       }
   }
 
@@ -427,28 +427,28 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
   {
     if (timeStr == null)
       {
-	return;
+        return;
       }
 
     String[] splt = timeStr.split(":");
 
     if (splt.length < 2)
       {
-	return;
+        return;
       }
 
     Calendar cal = Calendar.getInstance();
 
     if (curr_date == null)
       {
-	// oops, we can't set the time without some underlying
-	// date.. pick the current date then set the time on it.
+        // oops, we can't set the time without some underlying
+        // date.. pick the current date then set the time on it.
 
-	cal.setTime(new Date());
+        cal.setTime(new Date());
       }
     else
       {
-	cal.setTime(curr_date);
+        cal.setTime(curr_date);
       }
 
     cal.set(Calendar.HOUR_OF_DAY, Integer.parseInt(splt[0]));
@@ -470,24 +470,24 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
   {
     if (debug)
       {
-	System.err.println("setDate() called: " + date);
+        System.err.println("setDate() called: " + date);
       }
 
     datePicker.setDate(date);
 
     if (date != null)
       {
-	Calendar cal = Calendar.getInstance();
-	cal.setTime(date);
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
 
-	String hour = prefixZero(Integer.toString(cal.get(Calendar.HOUR_OF_DAY)));
-	String minute = prefixZero(Integer.toString(cal.get(Calendar.MINUTE)));
+        String hour = prefixZero(Integer.toString(cal.get(Calendar.HOUR_OF_DAY)));
+        String minute = prefixZero(Integer.toString(cal.get(Calendar.MINUTE)));
 
-	timef.setText(hour + ":" + minute);
+        timef.setText(hour + ":" + minute);
       }
     else
       {
-	timef.setText("00:00");
+        timef.setText("00:00");
       }
 
     curr_date = date;
@@ -511,7 +511,7 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
   {
     if (callback == null)
       {
-	return;
+        return;
       }
 
     // Right now, we don't support using the JdateField GUI component
@@ -521,32 +521,32 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
     if (curr_date == null || (original_date != null && curr_date.compareTo(original_date) == 0))
       {
-	return;
+        return;
       }
 
     boolean retval = false;
 
     try
       {
-	retval = callback.setValuePerformed(new JSetValueObject(this, curr_date));
+        retval = callback.setValuePerformed(new JSetValueObject(this, curr_date));
       }
     catch (RemoteException ex)
       {
-	// throw up an information dialog here
-	// "Date Field Error"
-	// "There was an error communicating with the server!\n{0}"
-	new JErrorDialog(new JFrame(),
-			 ts.l("global.error_subj"),
-			 ts.l("global.error_text", ex.getMessage()),
-			 StandardDialog.ModalityType.DOCUMENT_MODAL);
+        // throw up an information dialog here
+        // "Date Field Error"
+        // "There was an error communicating with the server!\n{0}"
+        new JErrorDialog(new JFrame(),
+                         ts.l("global.error_subj"),
+                         ts.l("global.error_text", ex.getMessage()),
+                         StandardDialog.ModalityType.DOCUMENT_MODAL);
       }
 
     // if setValuePerformed() didn't work, revert the date,
 
     if (!retval)
       {
-	setDate(original_date);
-	return;
+        setDate(original_date);
+        return;
       }
 
     // Now, the new value has propagated to the server, so reset
@@ -561,7 +561,7 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
   {
     if (str.length() < 2)
       {
-	str = "0" + str;
+        str = "0" + str;
       }
 
     return str;

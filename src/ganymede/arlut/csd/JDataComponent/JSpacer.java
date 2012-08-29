@@ -11,7 +11,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -105,14 +105,14 @@ public class JSpacer extends JComponent {
   {
     if (x == null)
       {
-	return size;
+        return size;
       }
     else
       {
-	x.width = this.width;
-	x.height = this.height;
+        x.width = this.width;
+        x.height = this.height;
 
-	return x;
+        return x;
       }
   }
 

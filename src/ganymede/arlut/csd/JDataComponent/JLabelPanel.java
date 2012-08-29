@@ -157,28 +157,28 @@ public class JLabelPanel extends JPanel {
   {
     if (gbl == null)
       {
-	setup();
+        setup();
       }
 
     if (tf && !enforceFixedSize)
       {
-	gbc.gridwidth = 1;
-	gbc.gridy = row;
-	gbc.weightx = 0.0;
-	gbc.gridx = 0;
-	spacer = new JSpacer(maximumLabelWidth, 0);
-	gbl.setConstraints(spacer,gbc);
-	gPanel.add(spacer);
+        gbc.gridwidth = 1;
+        gbc.gridy = row;
+        gbc.weightx = 0.0;
+        gbc.gridx = 0;
+        spacer = new JSpacer(maximumLabelWidth, 0);
+        gbl.setConstraints(spacer,gbc);
+        gPanel.add(spacer);
 
-	row = row + 1;
+        row = row + 1;
       }
 
     enforceFixedSize = tf;
 
     if (!enforceFixedSize)
       {
-	gPanel.remove(spacer);
-	spacer = null;
+        gPanel.remove(spacer);
+        spacer = null;
       }
   }
 
@@ -203,11 +203,11 @@ public class JLabelPanel extends JPanel {
   {
     if (insets == null)
       {
-	this.leftInsets = new java.awt.Insets(0,0,0,0);
+        this.leftInsets = new java.awt.Insets(0,0,0,0);
       }
     else
       {
-	this.leftInsets = insets;
+        this.leftInsets = insets;
       }
 
     this.rightInsets = this.leftInsets;
@@ -233,11 +233,11 @@ public class JLabelPanel extends JPanel {
   {
     if (insets == null)
       {
-	this.leftInsets = new java.awt.Insets(0,0,0,0);
+        this.leftInsets = new java.awt.Insets(0,0,0,0);
       }
     else
       {
-	this.leftInsets = insets;
+        this.leftInsets = insets;
       }
   }
 
@@ -260,11 +260,11 @@ public class JLabelPanel extends JPanel {
   {
     if (insets == null)
       {
-	this.rightInsets = new java.awt.Insets(0,0,0,0);
+        this.rightInsets = new java.awt.Insets(0,0,0,0);
       }
     else
       {
-	this.rightInsets = insets;
+        this.rightInsets = insets;
       }
   }
 
@@ -312,11 +312,11 @@ public class JLabelPanel extends JPanel {
 
     if (size == 0.0F)
       {
-	this.font = labelFont;
+        this.font = labelFont;
       }
     else
       {
-	this.font = labelFont.deriveFont(size);
+        this.font = labelFont.deriveFont(size);
       }
 
     this.font = this.font.deriveFont(style);
@@ -332,7 +332,7 @@ public class JLabelPanel extends JPanel {
   {
     if (this.size != 0.0F)
       {
-	return this.size;
+        return this.size;
       }
 
     JLabel newLabel = new JLabel();
@@ -351,20 +351,20 @@ public class JLabelPanel extends JPanel {
 
     if (rowHash == null)
       {
-	return;
+        return;
       }
 
     int maxSize = 0;
 
     for (JLabel label: rowHash.values())
       {
-	label.setFont(font);
-	label.invalidate();
+        label.setFont(font);
+        label.invalidate();
 
-	if (label.getPreferredSize().width > maxSize)
-	  {
-	    maxSize = label.getPreferredSize().width;
-	  }
+        if (label.getPreferredSize().width > maxSize)
+          {
+            maxSize = label.getPreferredSize().width;
+          }
       }
 
     gPanel.invalidate();
@@ -373,7 +373,7 @@ public class JLabelPanel extends JPanel {
 
     if (spacer != null)
       {
-	spacer.setSpacerSize(this.maximumLabelWidth, 0);
+        spacer.setSpacerSize(this.maximumLabelWidth, 0);
       }
 
     validate();
@@ -491,7 +491,7 @@ public class JLabelPanel extends JPanel {
   {
     if (rowHash == null || gPanel == null)
       {
-	this.setup();
+        this.setup();
       }
 
     gbc.gridy = row;
@@ -499,52 +499,52 @@ public class JLabelPanel extends JPanel {
 
     if (label != null)
       {
-	JLabel l = new JLabel(label);
+        JLabel l = new JLabel(label);
 
-	if (this.font != null)
-	  {
-	    l.setFont(font);
-	  }
+        if (this.font != null)
+          {
+            l.setFont(font);
+          }
 
-	rowHash.put(comp, l);
+        rowHash.put(comp, l);
 
-	gbc.anchor = GridBagConstraints.NORTHWEST;
-	gbc.fill = GridBagConstraints.NONE;
-	gbc.weightx = 0.0;
-	gbc.gridx = 0;
-	gbc.gridwidth = 1;
-	gbl.setConstraints(l, gbc);
-	gPanel.add(l);
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.weightx = 0.0;
+        gbc.gridx = 0;
+        gbc.gridwidth = 1;
+        gbl.setConstraints(l, gbc);
+        gPanel.add(l);
 
-	if (l.getPreferredSize().width > this.maximumLabelWidth)
-	  {
-	    this.maximumLabelWidth = l.getPreferredSize().width;
+        if (l.getPreferredSize().width > this.maximumLabelWidth)
+          {
+            this.maximumLabelWidth = l.getPreferredSize().width;
 
-	    if (spacer != null)
-	      {
-		spacer.setSpacerSize(this.maximumLabelWidth, 0);
-	      }
-	  }
+            if (spacer != null)
+              {
+                spacer.setSpacerSize(this.maximumLabelWidth, 0);
+              }
+          }
       }
 
     gbc.anchor = GridBagConstraints.WEST;
 
     if (fill)
       {
-	gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
       }
     else
       {
-	gbc.fill = GridBagConstraints.NONE;
+        gbc.fill = GridBagConstraints.NONE;
       }
 
     if (label == null && wideComponent)
       {
-	gbc.gridx = 0;
+        gbc.gridx = 0;
       }
     else
       {
-	gbc.gridx = 1;
+        gbc.gridx = 1;
       }
 
     gbc.insets = this.rightInsets;
@@ -587,7 +587,7 @@ public class JLabelPanel extends JPanel {
   {
     if (rowHash == null)
       {
-	this.setup();
+        this.setup();
       }
 
     JLabel label = rowHash.get(comp);
@@ -596,7 +596,7 @@ public class JLabelPanel extends JPanel {
 
     if (label != null)
       {
-	label.setVisible(b);
+        label.setVisible(b);
       }
   }
 
@@ -609,7 +609,7 @@ public class JLabelPanel extends JPanel {
   {
     if (rowHash == null)
       {
-	return;			// nothing added
+        return;                 // nothing added
       }
 
     gPanel.remove(comp);
@@ -618,7 +618,7 @@ public class JLabelPanel extends JPanel {
 
     if (label != null)
       {
-	gPanel.remove(label);
+        gPanel.remove(label);
       }
   }
 
@@ -631,22 +631,22 @@ public class JLabelPanel extends JPanel {
   {
     if (rowHash != null)
       {
-	rowHash.clear();
-	rowHash = null;
+        rowHash.clear();
+        rowHash = null;
       }
 
     removeAll();
 
     if (gPanel != null)
       {
-	gPanel.removeAll();
-	gPanel = null;
+        gPanel.removeAll();
+        gPanel = null;
       }
 
     if (bPanel != null)
       {
-	bPanel.removeAll();
-	bPanel = null;
+        bPanel.removeAll();
+        bPanel = null;
       }
 
     gbl = null;

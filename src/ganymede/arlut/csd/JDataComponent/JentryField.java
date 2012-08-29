@@ -138,7 +138,7 @@ abstract public class JentryField extends JTextField implements FocusListener, A
   {
     if (parent == null)
       {
-	throw new IllegalArgumentException("Invalid Parameter: parent cannot be null");
+        throw new IllegalArgumentException("Invalid Parameter: parent cannot be null");
       }
 
     my_parent = parent;
@@ -188,7 +188,7 @@ abstract public class JentryField extends JTextField implements FocusListener, A
   {
     if (debug)
       {
-	System.err.println("isAllowed in JentryField");
+        System.err.println("isAllowed in JentryField");
       }
 
     return true;
@@ -218,7 +218,7 @@ abstract public class JentryField extends JTextField implements FocusListener, A
   {
     if (debug)
       {
-	System.err.println("JentryField: focusLost");
+        System.err.println("JentryField: focusLost");
       }
 
     sendCallback();
@@ -228,7 +228,7 @@ abstract public class JentryField extends JTextField implements FocusListener, A
   {
     if (debug)
       {
-	System.err.println("focusGained");
+        System.err.println("focusGained");
       }
   }
 
@@ -241,17 +241,17 @@ abstract public class JentryField extends JTextField implements FocusListener, A
   {
     if (debug)
       {
-	System.err.println("enter hit");
+        System.err.println("enter hit");
       }
 
     if (notifier != null && sendCallback() >= 0)
       {
-	if (debug)
-	  {
-	    System.err.println("enter approved");
-	  }
+        if (debug)
+          {
+            System.err.println("enter approved");
+          }
 
-	notifier.actionPerformed(e);
+        notifier.actionPerformed(e);
       }
   }
 }
@@ -292,45 +292,45 @@ class JentryDocument extends PlainDocument {
 
     if (debug)
       {
-	System.err.println("JentryDocument.insertString(" + str +")");
+        System.err.println("JentryDocument.insertString(" + str +")");
       }
 
     if (field.isLoading())
       {
-	buffer.append(str);
+        buffer.append(str);
       }
     else
       {
-	for (int i = 0; i < str.length(); i++)
-	  {
-	    char c = str.charAt(i);
+        for (int i = 0; i < str.length(); i++)
+          {
+            char c = str.charAt(i);
 
-	    if (!field.isAllowed(c) ||
-		(field.getMaxStringSize() != -1 &&
-		 field.getMaxStringSize() - field.getLength() <= 0))
-	      {
-		if (debug)
-		  {
-		    System.err.println("Trying to reject character " + c);
-		  }
+            if (!field.isAllowed(c) ||
+                (field.getMaxStringSize() != -1 &&
+                 field.getMaxStringSize() - field.getLength() <= 0))
+              {
+                if (debug)
+                  {
+                    System.err.println("Trying to reject character " + c);
+                  }
 
-		Toolkit.getDefaultToolkit().beep();
-	      }
-	    else
-	      {
-		buffer.append(c);
-	      }
-	  }
+                Toolkit.getDefaultToolkit().beep();
+              }
+            else
+              {
+                buffer.append(c);
+              }
+          }
       }
 
     if (buffer.length() != 0)
       {
-	if (debug)
-	  {
-	    System.err.println("Inserting string " + buffer.toString());
-	  }
+        if (debug)
+          {
+            System.err.println("Inserting string " + buffer.toString());
+          }
 
-	super.insertString(offset, buffer.toString(), a);
+        super.insertString(offset, buffer.toString(), a);
       }
   }
 }

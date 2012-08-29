@@ -6,7 +6,7 @@
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -121,27 +121,27 @@ public class JchoiceList extends Panel {
     clear();
 
     for (int i=0;i<choices.length;i++)
-	l.add(choices[i]);
+        l.add(choices[i]);
   }
 
   public void actionPerformed(ActionEvent evt)
     {
       if (my_cint == null)
-	return;
+        return;
 
       if (evt.getSource() == restore)
-	{
-	  my_cint.restoreValue();
-	  my_cint.notifyComponent();
-	  changed = true;
-	  return;
-	}
+        {
+          my_cint.restoreValue();
+          my_cint.notifyComponent();
+          changed = true;
+          return;
+        }
       if (evt.getSource() == l)
-	{
-	  my_cint.setVal(evt.paramString());
-	  my_cint.notifyComponent();
-	  changed = true;
-	}
+        {
+          my_cint.setVal(evt.paramString());
+          my_cint.notifyComponent();
+          changed = true;
+        }
     }
 }
 

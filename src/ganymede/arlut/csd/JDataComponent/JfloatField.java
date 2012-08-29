@@ -8,7 +8,7 @@
    Module By: Navin Manohar, Jonathan Abbey, Michael Mulvaney, John Knutson
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -92,19 +92,19 @@ public class JfloatField extends JentryField {
    * @param maxsize the maximum limit on the range of values
    */ 
   public JfloatField(int columns,
-		     boolean iseditable,
-		     boolean islimited,
-		     double minsize,
-		     double maxsize)
+                     boolean iseditable,
+                     boolean islimited,
+                     double minsize,
+                     double maxsize)
   {
     super(columns);
     
     if (islimited)
       {
-	limited = true;
-	
-	maxSize = maxsize;
-	minSize = minsize;
+        limited = true;
+        
+        maxSize = maxsize;
+        minSize = minsize;
       }
     
     setEditable(iseditable);  // will this JfloatField be editable or not?
@@ -118,9 +118,9 @@ public class JfloatField extends JentryField {
   public JfloatField(int width)
   {
     this(width,
-	 true,
-	 false,
-	 Double.MIN_VALUE,Double.MAX_VALUE);
+         true,
+         false,
+         Double.MIN_VALUE,Double.MAX_VALUE);
   }
 
   /**
@@ -147,11 +147,11 @@ public class JfloatField extends JentryField {
    *
    */ 
   public JfloatField(int columns,
-		     boolean iseditable,
-		     boolean islimited,
-		     double minsize,
-		     double maxsize,
-		     JsetValueCallback parent)
+                     boolean iseditable,
+                     boolean islimited,
+                     double minsize,
+                     double maxsize,
+                     JsetValueCallback parent)
   {
     this(columns,iseditable,islimited,minsize,maxsize);
     
@@ -174,12 +174,12 @@ public class JfloatField extends JentryField {
   {
     if (allowedChars.indexOf(c) == -1)
       {
-	if (debug)
-	  {
-	    System.err.println("JfloatField.isAllowed(): ruling NO WAY on char '" + c + "'");
-	  }
+        if (debug)
+          {
+            System.err.println("JfloatField.isAllowed(): ruling NO WAY on char '" + c + "'");
+          }
 
-	return false;
+        return false;
       }
 
     return true;
@@ -200,7 +200,7 @@ public class JfloatField extends JentryField {
 
     if (str == null || str.equals(""))
       {
-	return null;
+        return null;
       }
 
     return new Double(str);
@@ -235,14 +235,14 @@ public class JfloatField extends JentryField {
   {
     if (limited)
       {
-	if (num != null)
-	  {
-	    if (num.doubleValue() > maxSize || num.doubleValue() < minSize)
-	      {
-		System.out.println("Invalid Parameter: float out of range");
-		return;
-	      }
-	  }
+        if (num != null)
+          {
+            if (num.doubleValue() > maxSize || num.doubleValue() < minSize)
+              {
+                System.out.println("Invalid Parameter: float out of range");
+                return;
+              }
+          }
       }
 
     // remember the value that is being set.
@@ -253,11 +253,11 @@ public class JfloatField extends JentryField {
     
     if (num != null)
       {
-	setText(num.toString());
+        setText(num.toString());
       }
     else
       {
-	setText("");
+        setText("");
       }
   }
 
@@ -341,97 +341,97 @@ public class JfloatField extends JentryField {
   {
     synchronized (this)
       {
-	if (processingCallback)
-	  {
-	    return -1;
-	  }
-	
-	processingCallback = true;
+        if (processingCallback)
+          {
+            return -1;
+          }
+        
+        processingCallback = true;
       }
 
     try
       {
-	Double currentValue;
+        Double currentValue;
 
-	try
-	  {
-	    currentValue = getValue();
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    reportError(getText() + " is not a properly formatted floating point number.");
+        try
+          {
+            currentValue = getValue();
+          }
+        catch (NumberFormatException ex)
+          {
+            reportError(getText() + " is not a properly formatted floating point number.");
 
-	    // revert the text field
+            // revert the text field
 
-	    setValue(storedValue);
-	    return -1;
-	  }
+            setValue(storedValue);
+            return -1;
+          }
 
-	if ((currentValue == null && storedValue == null) ||
-	    (storedValue != null && storedValue.equals(currentValue)))
-	  {
-	    if (debug)
-	      {
-		System.out.println("The field was not changed.");
-	      }
+        if ((currentValue == null && storedValue == null) ||
+            (storedValue != null && storedValue.equals(currentValue)))
+          {
+            if (debug)
+              {
+                System.out.println("The field was not changed.");
+              }
 
-	    return 0;
-	  }
+            return 0;
+          }
 
-	// check to see if it's in bounds, if we have bounds set.
+        // check to see if it's in bounds, if we have bounds set.
 
-	if (limited)
-	  {
-	    double value = currentValue.doubleValue();
+        if (limited)
+          {
+            double value = currentValue.doubleValue();
 
-	    if ((value > maxSize) || (value < minSize))
-	      {
-		// nope, revert.
+            if ((value > maxSize) || (value < minSize))
+              {
+                // nope, revert.
 
-		reportError(getText() + " must be between " + minSize + " and  " + maxSize + ".");
+                reportError(getText() + " must be between " + minSize + " and  " + maxSize + ".");
 
-		setValue(storedValue);
-		return -1;
-	      }
-	  }
+                setValue(storedValue);
+                return -1;
+              }
+          }
 
-	// now, tell somebody, if we need to.
+        // now, tell somebody, if we need to.
 
-	try
-	  {
-	    if (!allowCallback || my_parent.setValuePerformed(new JSetValueObject(this,currentValue)))
-	      {
-		// good to go.  We've already got the text set in the text
-		// field, the user did that for us.  Remember the value of
-		// it, so we can revert if we need to later.
+        try
+          {
+            if (!allowCallback || my_parent.setValuePerformed(new JSetValueObject(this,currentValue)))
+              {
+                // good to go.  We've already got the text set in the text
+                // field, the user did that for us.  Remember the value of
+                // it, so we can revert if we need to later.
 
-		if (replacingValue)
-		  {
-		    setValue(replacementValue);
-		  }
-		else
-		  {
-		    storedValue = currentValue;
-		  }
+                if (replacingValue)
+                  {
+                    setValue(replacementValue);
+                  }
+                else
+                  {
+                    storedValue = currentValue;
+                  }
 
-		return 1;
-	      }
-	    else
-	      {
-		setValue(storedValue);
-		return -1;
-	      }
-	  }
-	catch (java.rmi.RemoteException re)
-	  {
-	    return -1;
-	  }
+                return 1;
+              }
+            else
+              {
+                setValue(storedValue);
+                return -1;
+              }
+          }
+        catch (java.rmi.RemoteException re)
+          {
+            return -1;
+          }
       }
     finally
       {
-	processingCallback = false;
-	replacingValue = false;
-	replacementValue = null;
+        processingCallback = false;
+        replacingValue = false;
+        replacementValue = null;
       }
   }
 
@@ -444,14 +444,14 @@ public class JfloatField extends JentryField {
   {
     if (allowCallback)
       {
-	try
-	  {
-	    my_parent.setValuePerformed(new JErrorValueObject(this, errorString));
-	  }
-	catch (java.rmi.RemoteException rx)
-	  {
-	    System.out.println("Could not send an error callback.");
-	  }
+        try
+          {
+            my_parent.setValuePerformed(new JErrorValueObject(this, errorString));
+          }
+        catch (java.rmi.RemoteException rx)
+          {
+            System.out.println("Could not send an error callback.");
+          }
       }
   }
 
@@ -469,7 +469,7 @@ public class JfloatField extends JentryField {
   {
     if (callback != this.my_parent)
       {
-	throw new IllegalStateException();
+        throw new IllegalStateException();
       }
 
     this.replacingValue = true;
