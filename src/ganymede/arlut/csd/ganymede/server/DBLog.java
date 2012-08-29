@@ -76,6 +76,7 @@ import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.Result;
 import arlut.csd.ganymede.common.SchemaConstants;
 
+import arlut.csd.Util.StringUtils;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 
@@ -332,11 +333,11 @@ public class DBLog {
 
     if (!suppressEmail)
       {
-      	mailer = new Qsmtp(Ganymede.mailHostProperty);
+        mailer = new Qsmtp(Ganymede.mailHostProperty);
 
-      	// run the Qsmtp mailer in non-blocking mode
+        // run the Qsmtp mailer in non-blocking mode
 
-      	mailer.goThreaded();
+        mailer.goThreaded();
       }
   }
 
@@ -348,31 +349,31 @@ public class DBLog {
   {
     try
       {
-	try
-	  {
-	    logController.close();
-	  }
-	finally
-	  {
-	    if (mailController != null)
-	      {
-		try
-		  {
-		    mailController.close();
-		  }
-		finally
-		  {
-		    if (mailer != null)
-		      {
-			mailer.close(); // we'll block here while the mailer's email thread drains
-		      }
-		  }
-	      }
-	  }
+        try
+          {
+            logController.close();
+          }
+        finally
+          {
+            if (mailController != null)
+              {
+                try
+                  {
+                    mailController.close();
+                  }
+                finally
+                  {
+                    if (mailer != null)
+                      {
+                        mailer.close(); // we'll block here while the mailer's email thread drains
+                      }
+                  }
+              }
+          }
       }
     finally
       {
-	closed = true;
+        closed = true;
       }
   }
 
@@ -412,8 +413,8 @@ public class DBLog {
    */
 
   public void sendMail(List<String> recipients,
-		       String title, String description,
-		       MailMode mode, List<Invid> invids)
+                       String title, String description,
+                       MailMode mode, List<Invid> invids)
   {
     DBLogEvent event;
 
@@ -450,8 +451,8 @@ public class DBLog {
    */
 
   public synchronized void mailNotify(String title, String description,
-				      DBLogEvent event, MailMode mode,
-				      DBSession session)
+                                      DBLogEvent event, MailMode mode,
+                                      DBSession session)
   {
     systemEventType type = null;
 
@@ -459,13 +460,13 @@ public class DBLog {
 
     if (closed)
       {
-	// "log already closed."
-	throw new RuntimeException(ts.l("global.log_closed"));
+        // "log already closed."
+        throw new RuntimeException(ts.l("global.log_closed"));
       }
 
     if (debug)
       {
-	System.err.println("DBLog.mailNotify(): Writing log event " + event.eventClassToken);
+        System.err.println("DBLog.mailNotify(): Writing log event " + event.eventClassToken);
       }
 
     updateSysEventCodeHash();
@@ -485,44 +486,44 @@ public class DBLog {
 
     if (event.eventClassToken.equals("mailout"))
       {
-	if (mailController != null)
-	  {
-	    mailController.writeEvent(event);
-	  }
-	else
-	  {
-	    // "DBLog.mailNotify(): Skipping logging mailout event ({0}) to disk due to mail logging being disabled at startup."
-	    Ganymede.debug(ts.l("mailNotify.no_mail", title));
-	  }
+        if (mailController != null)
+          {
+            mailController.writeEvent(event);
+          }
+        else
+          {
+            // "DBLog.mailNotify(): Skipping logging mailout event ({0}) to disk due to mail logging being disabled at startup."
+            Ganymede.debug(ts.l("mailNotify.no_mail", title));
+          }
       }
     else
       {
-	logController.writeEvent(event);
+        logController.writeEvent(event);
 
-	type = (systemEventType) sysEventCodes.get(event.eventClassToken);
+        type = (systemEventType) sysEventCodes.get(event.eventClassToken);
 
-	if (type == null)
-	  {
-	    // "Error in DBLog.mailNotify(): unrecognized eventClassToken: {0}."
-	    Ganymede.debug(ts.l("mailNotify.unrecognized_token", event.eventClassToken));
+        if (type == null)
+          {
+            // "Error in DBLog.mailNotify(): unrecognized eventClassToken: {0}."
+            Ganymede.debug(ts.l("mailNotify.unrecognized_token", event.eventClassToken));
 
-	    return;
-	  }
+            return;
+          }
 
-	if (!type.mail)
-	  {
-	    // "Logic error in DBLog.mailNotify(): eventClassToken not configured for mail delivery: {0}."
-	    Ganymede.debug(ts.l("mailNotify.whaaa", event.eventClassToken));
+        if (!type.mail)
+          {
+            // "Logic error in DBLog.mailNotify(): eventClassToken not configured for mail delivery: {0}."
+            Ganymede.debug(ts.l("mailNotify.whaaa", event.eventClassToken));
 
-	    return;
-	  }
+            return;
+          }
       }
 
     if (mailer != null)
       {
         if (debug)
           {
-    	    System.err.println("Attempting to email log event " + event.eventClassToken);
+            System.err.println("Attempting to email log event " + event.eventClassToken);
           }
 
         // prepare our message, word wrap it
@@ -556,14 +557,14 @@ public class DBLog {
 
         if (type == null)
           {
-    	    emailList = event.getMailTargets();
+            emailList = event.getMailTargets();
           }
         else
           {
-    	    Set<String> addressSet = new HashSet<String>(event.getMailTargets());
-	    addressSet.addAll(type.addressList);
+            Set<String> addressSet = new HashSet<String>(event.getMailTargets());
+            addressSet.addAll(type.addressList);
 
-	    emailList = new ArrayList<String>(addressSet);
+            emailList = new ArrayList<String>(addressSet);
           }
 
         String titleString;
@@ -597,16 +598,16 @@ public class DBLog {
           }
         catch (IOException ex)
           {
-	    // "DBLog.mailNotify(): mailer error:\n{0}\n\nwhile processing: {1}"
-	    Ganymede.debug(ts.l("mailNotify.mailer_error",
-				Ganymede.stackTrace(ex),
-				event));
+            // "DBLog.mailNotify(): mailer error:\n{0}\n\nwhile processing: {1}"
+            Ganymede.debug(ts.l("mailNotify.mailer_error",
+                                Ganymede.stackTrace(ex),
+                                event));
           }
       }
 
     if (debug)
       {
-	System.err.println("Completed emailing log event " + event.eventClassToken);
+        System.err.println("Completed emailing log event " + event.eventClassToken);
       }
   }
 
@@ -622,12 +623,12 @@ public class DBLog {
   {
     if (closed)
      {
-	throw new RuntimeException(ts.l("global.log_closed"));
+        throw new RuntimeException(ts.l("global.log_closed"));
       }
 
     if (debug)
       {
-	System.err.println("DBLog.logSystemEvent(): Writing log event " + event.eventClassToken);
+        System.err.println("DBLog.logSystemEvent(): Writing log event " + event.eventClassToken);
       }
 
     event.setLogTime(System.currentTimeMillis());
@@ -662,12 +663,12 @@ public class DBLog {
   {
     if (closed)
       {
-	throw new RuntimeException(ts.l("global.log_closed"));
+        throw new RuntimeException(ts.l("global.log_closed"));
       }
 
     if (debug)
       {
-	System.err.println("DBLog.startTransactionLog(): Logging transaction for  " + adminName);
+        System.err.println("DBLog.startTransactionLog(): Logging transaction for  " + adminName);
       }
 
     updateSysEventCodeHash();
@@ -678,22 +679,22 @@ public class DBLog {
 
     if (comment != null && !"".equals(comment.trim()))
       {
-	this.transactionComment = comment;
+        this.transactionComment = comment;
       }
     else
       {
-	this.transactionComment = null;
+        this.transactionComment = null;
       }
 
     // write out a start-of-transaction line to the log
 
     // "Start Transaction: {0}"
     DBLogEvent start = new DBLogEvent("starttransaction",
-				      ts.l("startTransactionLog.start_template", transaction.description),
-				      admin,
-				      adminName,
-				      invids,
-				      null);
+                                      ts.l("startTransactionLog.start_template", transaction.description),
+                                      admin,
+                                      adminName,
+                                      invids,
+                                      null);
 
     start.setTransactionID(this.transactionID);
     start.setLogTime(this.transactionTimeStamp);
@@ -704,17 +705,17 @@ public class DBLog {
 
     if (this.transactionComment != null)
       {
-	DBLogEvent commentEvent = new DBLogEvent("comment",
-						 this.transactionComment,
-						 admin,
-						 adminName,
-						 invids,
-						 null);
+        DBLogEvent commentEvent = new DBLogEvent("comment",
+                                                 this.transactionComment,
+                                                 admin,
+                                                 adminName,
+                                                 invids,
+                                                 null);
 
-	commentEvent.setTransactionID(this.transactionID);
-	commentEvent.setLogTime(this.transactionTimeStamp);
+        commentEvent.setTransactionID(this.transactionID);
+        commentEvent.setLogTime(this.transactionTimeStamp);
 
-	logController.writeEvent(commentEvent);
+        logController.writeEvent(commentEvent);
       }
 
     this.transactionMailOuts = new HashMap<String, MailOut>();
@@ -742,13 +743,13 @@ public class DBLog {
   {
     if (closed)
       {
-	throw new RuntimeException(ts.l("global.log_closed"));
+        throw new RuntimeException(ts.l("global.log_closed"));
       }
 
     if (transactionID == null)
       {
-	// "Not in a transaction."
-	throw new RuntimeException(ts.l("streamEvent.no_transaction"));
+        // "Not in a transaction."
+        throw new RuntimeException(ts.l("streamEvent.no_transaction"));
       }
 
     event.setTransactionID(this.transactionID);
@@ -756,122 +757,122 @@ public class DBLog {
 
     if (debug)
       {
-	System.err.println("DBLog.streamEvent(): logging event: \n** " +
-			   event.eventClassToken + " **\n" + event.description);
+        System.err.println("DBLog.streamEvent(): logging event: \n** " +
+                           event.eventClassToken + " **\n" + event.description);
       }
 
     if (mailer != null)
       {
-	// if the event doesn't have its own subject set, we'll assume
-	// that it is not a pre-generated mail message, and that we
-	// need to calculate the list of email targets from the
-	// Ganymede server's system and object event control objects.
+        // if the event doesn't have its own subject set, we'll assume
+        // that it is not a pre-generated mail message, and that we
+        // need to calculate the list of email targets from the
+        // Ganymede server's system and object event control objects.
 
-	if (event.subject == null)
-	  {
-	    // we track all email addresses that we send mail to in
-	    // response to this particular event so that we can record
-	    // in the log who got told about this
+        if (event.subject == null)
+          {
+            // we track all email addresses that we send mail to in
+            // response to this particular event so that we can record
+            // in the log who got told about this
 
-	    // first, if we have a recognizable object-specific event
-	    // happening, queue up notification for it to any interested
-	    // parties, for later transmission with sendObjectMail().
+            // first, if we have a recognizable object-specific event
+            // happening, queue up notification for it to any interested
+            // parties, for later transmission with sendObjectMail().
 
-	    Set<String> sentTo = new HashSet<String>(appendObjectMail(event, this.objectOuts,
-								      transaction.description,
-								      transaction.session));
+            Set<String> sentTo = new HashSet<String>(appendObjectMail(event, this.objectOuts,
+                                                                      transaction.description,
+                                                                      transaction.session));
 
-	    // we may have a system event instead, in which case we handle
-	    // mailing it here
+            // we may have a system event instead, in which case we handle
+            // mailing it here
 
-	    sentTo.addAll(sendSysEventMail(event, transaction.description));
+            sentTo.addAll(sendSysEventMail(event, transaction.description));
 
-	    // now, go ahead and add to the mail buffers we are prepping
-	    // to describe this whole transaction
+            // now, go ahead and add to the mail buffers we are prepping
+            // to describe this whole transaction
 
-	    // we are keeping a bunch of buffers, one for each
-	    // combination of email addresses that we've
-	    // encountered.. different addresses or groups of
-	    // addresses may get a different subset of the mail for
-	    // this transaction, the appendMailOut() logic handles
-	    // that.
+            // we are keeping a bunch of buffers, one for each
+            // combination of email addresses that we've
+            // encountered.. different addresses or groups of
+            // addresses may get a different subset of the mail for
+            // this transaction, the appendMailOut() logic handles
+            // that.
 
-	    // appendMailOut() takes care of calling
-	    // calculateMailTargets() on event, which handles
-	    // calculating who needs to receive owner-group related
-	    // generic email about this event.
+            // appendMailOut() takes care of calling
+            // calculateMailTargets() on event, which handles
+            // calculating who needs to receive owner-group related
+            // generic email about this event.
 
-	    sentTo.addAll(appendMailOut(event,
-					this.transactionMailOuts,
-					transaction.session,
-					this.transactionControl));
+            sentTo.addAll(appendMailOut(event,
+                                        this.transactionMailOuts,
+                                        transaction.session,
+                                        this.transactionControl));
 
-	    // and we want to make sure and send this event to any
-	    // addresses listed in the starttransaction system event
-	    // object.
+            // and we want to make sure and send this event to any
+            // addresses listed in the starttransaction system event
+            // object.
 
-	    sentTo.addAll(this.transactionControl.addressList);
+            sentTo.addAll(this.transactionControl.addressList);
 
-	    sentTo = cleanupAddresses(sentTo);
+            sentTo = cleanupAddresses(sentTo);
 
-	    // now we record in the event who we actually sent the
-	    // mail to, so it is logged properly
+            // now we record in the event who we actually sent the
+            // mail to, so it is logged properly
 
-	    event.setMailTargets(sentTo);
-	  }
-	else
-	  {
-	    // we've got a generic transactional mail event and we're
-	    // allowed to send out emails, so we can process
-	    // it.. note that we don't lump it with the transaction
-	    // summary.
+            event.setMailTargets(sentTo);
+          }
+        else
+          {
+            // we've got a generic transactional mail event and we're
+            // allowed to send out emails, so we can process
+            // it.. note that we don't lump it with the transaction
+            // summary.
 
-	    String returnAddr = null;
+            String returnAddr = null;
 
-	    // who should we say the mail is from?
+            // who should we say the mail is from?
 
-	    if (event.admin != null)
-	      {
-		returnAddr = adminPersonaCustom.convertAdminInvidToString(event.admin,
-									  transaction.session);
-	      }
-	    else
-	      {
-		returnAddr = Ganymede.returnaddrProperty;
-	      }
+            if (event.admin != null)
+              {
+                returnAddr = adminPersonaCustom.convertAdminInvidToString(event.admin,
+                                                                          transaction.session);
+              }
+            else
+              {
+                returnAddr = Ganymede.returnaddrProperty;
+              }
 
-	    try
-	      {
-		String message = event.description;
+            try
+              {
+                String message = event.description;
 
-		message = arlut.csd.Util.WordWrap.wrap(message, 78);
+                message = arlut.csd.Util.WordWrap.wrap(message, 78);
 
-		if (this.transactionComment != null)
-		  {
-		    // "{0}\n----\n\n{1}\n\n{2}"
-		    message = ts.l("streamEvent.comment_template", message, this.transactionComment, signature);
-		  }
-		else
-		  {
-		    // "{0}\n{1}"
-		    message = ts.l("streamEvent.no_comment_template", message, signature);
-		  }
+                if (this.transactionComment != null)
+                  {
+                    // "{0}\n----\n\n{1}\n\n{2}"
+                    message = ts.l("streamEvent.comment_template", message, this.transactionComment, signature);
+                  }
+                else
+                  {
+                    // "{0}\n{1}"
+                    message = ts.l("streamEvent.no_comment_template", message, signature);
+                  }
 
-		// bombs away!
+                // bombs away!
 
-		mailer.sendmsg(returnAddr,
-			       event.getMailTargets(),
-			       Ganymede.subjectPrefixProperty + event.subject,
-			       message);
-	      }
-	    catch (IOException ex)
-	      {
-		// "DBLog.streamEvent(): mailer error:\n{0}\n\nwhile processing: {1}"
-		Ganymede.debug(ts.l("streamEvent.mailer_error",
-				    Ganymede.stackTrace(ex),
-				    event));
-	      }
-	  }
+                mailer.sendmsg(returnAddr,
+                               event.getMailTargets(),
+                               Ganymede.subjectPrefixProperty + event.subject,
+                               message);
+              }
+            catch (IOException ex)
+              {
+                // "DBLog.streamEvent(): mailer error:\n{0}\n\nwhile processing: {1}"
+                Ganymede.debug(ts.l("streamEvent.mailer_error",
+                                    Ganymede.stackTrace(ex),
+                                    event));
+              }
+          }
       }
 
     // and write it to our log.  NB this has to happen last so that we
@@ -908,11 +909,11 @@ public class DBLog {
 
     // "Finish Transaction: {0}"
     DBLogEvent finish = new DBLogEvent("finishtransaction",
-				       ts.l("endTransactionLog.finish_template", transaction.description),
-				       admin,
-				       adminName,
-				       null,
-				       null);
+                                       ts.l("endTransactionLog.finish_template", transaction.description),
+                                       admin,
+                                       adminName,
+                                       null,
+                                       null);
     finish.setTransactionID(transactionID);
     finish.setLogTime(this.transactionTimeStamp);
 
@@ -926,8 +927,8 @@ public class DBLog {
 
     if (admin != null)
       {
-	returnAddr = adminPersonaCustom.convertAdminInvidToString(admin,
-								  gSession.getDBSession());
+        returnAddr = adminPersonaCustom.convertAdminInvidToString(admin,
+                                                                  gSession.getDBSession());
       }
 
     // if there was no email address registered for the admin persona,
@@ -935,14 +936,14 @@ public class DBLog {
 
     if (returnAddr == null)
       {
-	returnAddr = Ganymede.returnaddrProperty;
+        returnAddr = Ganymede.returnaddrProperty;
       }
 
     // send out object event reporting mail to anyone who has signed up for it
 
     if (mailer != null)
       {
-      	sendObjectMail(returnAddr, adminName, this.objectOuts, this.transactionTimeStamp, transaction);
+        sendObjectMail(returnAddr, adminName, this.objectOuts, this.transactionTimeStamp, transaction);
       }
 
     this.objectOuts.clear();
@@ -953,52 +954,52 @@ public class DBLog {
 
     if (mailer != null && this.transactionControl.mail)
       {
-	for (MailOut mailout: transactionMailOuts.values())
-	  {
-	    String description = null;
+        for (MailOut mailout: transactionMailOuts.values())
+          {
+            String description = null;
 
-	    if (this.transactionComment != null)
-	      {
-		// "Transaction summary: User {0} {1,date,EEE MMM dd HH:mm:ss zzz yyyy}\n\n----\n\n{2}\n\n{3}{4}"
-		description = ts.l("endTransactionLog.summary_comment_template",
-				   adminName, this.transactionTimeStamp,
-				   this.transactionComment,
-				   arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78),
-				   signature);
-	      }
-	    else
-	      {
-		// "Transaction summary: User {0} {1,date,EEE MMM dd HH:mm:ss zzz yyyy}\n\n{2}{3}"
-		description = ts.l("endTransactionLog.summary_template",
-				   adminName, this.transactionTimeStamp,
-				   arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78),
-				   signature);
-	      }
+            if (this.transactionComment != null)
+              {
+                // "Transaction summary: User {0} {1,date,EEE MMM dd HH:mm:ss zzz yyyy}\n\n----\n\n{2}\n\n{3}{4}"
+                description = ts.l("endTransactionLog.summary_comment_template",
+                                   adminName, this.transactionTimeStamp,
+                                   this.transactionComment,
+                                   arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78),
+                                   signature);
+              }
+            else
+              {
+                // "Transaction summary: User {0} {1,date,EEE MMM dd HH:mm:ss zzz yyyy}\n\n{2}{3}"
+                description = ts.l("endTransactionLog.summary_template",
+                                   adminName, this.transactionTimeStamp,
+                                   arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78),
+                                   signature);
+              }
 
-	    // we don't want any \n's between wordwrap and signature above,
-	    // since appendMailOut() adds "\n\n" at the end of each transaction
-	    // summary segment
+            // we don't want any \n's between wordwrap and signature above,
+            // since appendMailOut() adds "\n\n" at the end of each transaction
+            // summary segment
 
-	    if (debug)
-	      {
-		System.err.println("Sending mail to " + mailout.addresses.get(0));
-	      }
+            if (debug)
+              {
+                System.err.println("Sending mail to " + mailout.addresses.get(0));
+              }
 
-	    try
-	      {
-		mailer.sendmsg(returnAddr,
-			       mailout.addresses,
-			       Ganymede.subjectPrefixProperty + describeTransaction(mailout, transaction),
-			       description);
-	      }
-	    catch (IOException ex)
-	      {
-		// "DBLog.endTransactionLog(): mailer error:\n{0}\n\nwhile processing: {1}"
-		Ganymede.debug(ts.l("endTransactionLog.mailer_error",
-				    Ganymede.stackTrace(ex),
-				    finish));
-	      }
-	  }
+            try
+              {
+                mailer.sendmsg(returnAddr,
+                               mailout.addresses,
+                               Ganymede.subjectPrefixProperty + describeTransaction(mailout, transaction),
+                               description);
+              }
+            catch (IOException ex)
+              {
+                // "DBLog.endTransactionLog(): mailer error:\n{0}\n\nwhile processing: {1}"
+                Ganymede.debug(ts.l("endTransactionLog.mailer_error",
+                                    Ganymede.stackTrace(ex),
+                                    finish));
+              }
+          }
       }
 
     logController.flushAndSync();
@@ -1054,7 +1055,7 @@ public class DBLog {
 
   public synchronized StringBuffer retrieveHistory(Invid invid, Date sinceTime, Date beforeTime,
                                                    boolean keyOnAdmin,
-						   boolean fullTransactions,
+                                                   boolean fullTransactions,
                                                    boolean getLoginEvents)
   {
     return logController.retrieveHistory(invid, sinceTime, beforeTime, keyOnAdmin, fullTransactions, getLoginEvents);
@@ -1084,7 +1085,7 @@ public class DBLog {
 
     if (mailer == null)
       {
-      	return emailList;
+        return emailList;
       }
 
     updateSysEventCodeHash();
@@ -1093,14 +1094,14 @@ public class DBLog {
 
     if (type == null || !type.mail)
       {
-	return emailList;
+        return emailList;
       }
 
     Set<String> addressSet = new HashSet<String>();
 
     if (debug)
       {
-	System.err.println("Attempting to email log event " + event.eventClassToken);
+        System.err.println("Attempting to email log event " + event.eventClassToken);
       }
 
     // prepare our message, word wrap it
@@ -1128,56 +1129,56 @@ public class DBLog {
 
     if (event.getInvids() != null)
       {
-	addressSet.addAll(event.getMailTargets());
+        addressSet.addAll(event.getMailTargets());
       }
 
     if (type.addressList != null)
       {
-	addressSet.addAll(type.addressList);
+        addressSet.addAll(type.addressList);
       }
 
     if (type.ccToSelf)
       {
-	String name = null;
+        String name = null;
 
-	if (event.admin != null)
-	  {
-	    name = adminPersonaCustom.convertAdminInvidToString(event.admin, gSession.getDBSession());
-	  }
-	else
-	  {
-	    name = event.adminName;	// hopefully this will be a valid email target.. used for bad login attempts
+        if (event.admin != null)
+          {
+            name = adminPersonaCustom.convertAdminInvidToString(event.admin, gSession.getDBSession());
+          }
+        else
+          {
+            name = event.adminName;     // hopefully this will be a valid email target.. used for bad login attempts
 
-	    // skip any persona info after a colon in case the
-	    // user tried logging in with admin privileges
+            // skip any persona info after a colon in case the
+            // user tried logging in with admin privileges
 
-	    if (name != null && name.indexOf(':') != -1)
-	      {
-		name = name.substring(0, name.indexOf(':'));
-	      }
-	  }
+            if (name != null && name.indexOf(':') != -1)
+              {
+                name = name.substring(0, name.indexOf(':'));
+              }
+          }
 
-	if (name != null)
-	  {
-	    addressSet.add(name);
-	  }
+        if (name != null)
+          {
+            addressSet.add(name);
+          }
       }
 
     if (type.ccToOwners)
       {
-	addressSet.addAll(calculateOwnerAddresses(event.getInvids(), MailMode.BOTH));
+        addressSet.addAll(calculateOwnerAddresses(event.getInvids(), MailMode.BOTH));
       }
 
     // who should we say the mail is from?
 
     if (event.admin != null)
       {
-	returnAddr = adminPersonaCustom.convertAdminInvidToString(event.admin,
-								  gSession.getDBSession());
+        returnAddr = adminPersonaCustom.convertAdminInvidToString(event.admin,
+                                                                  gSession.getDBSession());
       }
     else
       {
-	returnAddr = Ganymede.returnaddrProperty;
+        returnAddr = Ganymede.returnaddrProperty;
       }
 
     // and now..
@@ -1186,24 +1187,24 @@ public class DBLog {
 
     try
       {
-	// bombs away!
+        // bombs away!
 
-	mailer.sendmsg(returnAddr,
-		       emailList,
-		       Ganymede.subjectPrefixProperty + type.name,
-		       message);
+        mailer.sendmsg(returnAddr,
+                       emailList,
+                       Ganymede.subjectPrefixProperty + type.name,
+                       message);
       }
     catch (IOException ex)
       {
-	// "DBLog.sendSysEventMail(): mailer error:\n{0}\n\nwhile processing: {1}"
-	Ganymede.debug(ts.l("sendSysEventMail.mailer_error",
-			    Ganymede.stackTrace(ex),
-			    event));
+        // "DBLog.sendSysEventMail(): mailer error:\n{0}\n\nwhile processing: {1}"
+        Ganymede.debug(ts.l("sendSysEventMail.mailer_error",
+                            Ganymede.stackTrace(ex),
+                            event));
       }
 
     if (debug)
       {
-	System.err.println("Completed emailing log event " + event.eventClassToken);
+        System.err.println("Completed emailing log event " + event.eventClassToken);
       }
 
     return emailList;
@@ -1221,13 +1222,13 @@ public class DBLog {
    */
 
   private List<String> appendObjectMail(DBLogEvent event,
-					HashMap<String, HashMap<String, MailOut>> objectOuts,
-					String transdescrip,
-					DBSession transSession)
+                                        HashMap<String, HashMap<String, MailOut>> objectOuts,
+                                        String transdescrip,
+                                        DBSession transSession)
   {
     if (event == null || event.getInvids() == null || event.getInvids().size() != 1)
       {
-	return Collections.emptyList();
+        return Collections.emptyList();
       }
 
     // --
@@ -1241,17 +1242,17 @@ public class DBLog {
 
     if (debug)
       {
-	System.err.println("DBLog.appendObjectMail(): processing object Event " + key);
+        System.err.println("DBLog.appendObjectMail(): processing object Event " + key);
       }
 
     if (type == null)
       {
-	if (debug)
-	  {
-	    System.err.println("DBLog.appendObjectMail(): couldn't find objectEventType " + key);
-	  }
+        if (debug)
+          {
+            System.err.println("DBLog.appendObjectMail(): couldn't find objectEventType " + key);
+          }
 
-	return Collections.emptyList();
+        return Collections.emptyList();
       }
 
     // ok.  now we've got an objectEventType, so check to see who we
@@ -1259,27 +1260,27 @@ public class DBLog {
 
     if (type.ccToSelf)
       {
-	if (event.admin != null)
-	  {
-	    String name = adminPersonaCustom.convertAdminInvidToString(event.admin, transSession);
+        if (event.admin != null)
+          {
+            String name = adminPersonaCustom.convertAdminInvidToString(event.admin, transSession);
 
-	    if (name != null)
-	      {
-		mailSet.add(name);
-	      }
-	  }
+            if (name != null)
+              {
+                mailSet.add(name);
+              }
+          }
       }
 
     if (type.ccToOwners)
       {
-	mailSet.addAll(calculateOwnerAddresses(event.getInvids(), MailMode.BOTH, transSession));
+        mailSet.addAll(calculateOwnerAddresses(event.getInvids(), MailMode.BOTH, transSession));
       }
 
     mailSet.addAll(type.addressList);
 
     if (mailSet.size() == 0)
       {
-	return Collections.emptyList();
+        return Collections.emptyList();
       }
 
     mailSet = cleanupAddresses(mailSet);
@@ -1301,22 +1302,22 @@ public class DBLog {
 
     if (addresses == null)
       {
-	addresses = new HashMap<String, MailOut>();
+        addresses = new HashMap<String, MailOut>();
 
-	objectOuts.put(key, addresses);
+        objectOuts.put(key, addresses);
       }
 
     for (String address: mailSet)
       {
-	MailOut mailout = addresses.get(address);
+        MailOut mailout = addresses.get(address);
 
-	if (mailout == null)
-	  {
-	    mailout = new MailOut(address);
-	    addresses.put(address, mailout);
-	  }
+        if (mailout == null)
+          {
+            mailout = new MailOut(address);
+            addresses.put(address, mailout);
+          }
 
-	mailout.append(event);
+        mailout.append(event);
       }
 
     return new ArrayList<String>(mailSet);
@@ -1331,101 +1332,101 @@ public class DBLog {
   {
     for (Map.Entry<String, HashMap<String, MailOut>> item: objectOuts.entrySet())
       {
-	String key = item.getKey();
+        String key = item.getKey();
 
-	for (Map.Entry<String, MailOut> item2: item.getValue().entrySet())
-	  {
-	    String address = item2.getKey();
-	    MailOut mailout = item2.getValue();
+        for (Map.Entry<String, MailOut> item2: item.getValue().entrySet())
+          {
+            String address = item2.getKey();
+            MailOut mailout = item2.getValue();
 
-	    objectEventType type = objEventCodes.get(key);
+            objectEventType type = objEventCodes.get(key);
 
-	    String description = null;
+            String description = null;
 
-	    if (this.transactionComment == null)
-	      {
-		// "{0} summary: User {1} {2,date,EEE MMM dd HH:mm:ss zzz yyyy}\n\n{3}{4}"
-		description = ts.l("sendObjectMail.template",
-				   type.name,
-				   adminName,
-				   currentTime,
-				   arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78),
-				   signature);
-	      }
-	    else
-	      {
-		// "{0} summary: User {1} {2,date,EEE MMM dd HH:mm:ss zzz yyyy}\n\n----\n\n{3}\n\n{4}{5}"
-		description = ts.l("sendObjectMail.comment_template",
-				   type.name,
-				   adminName,
-				   currentTime,
-				   this.transactionComment,
-				   arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78),
-				   signature);
-	      }
+            if (this.transactionComment == null)
+              {
+                // "{0} summary: User {1} {2,date,EEE MMM dd HH:mm:ss zzz yyyy}\n\n{3}{4}"
+                description = ts.l("sendObjectMail.template",
+                                   type.name,
+                                   adminName,
+                                   currentTime,
+                                   arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78),
+                                   signature);
+              }
+            else
+              {
+                // "{0} summary: User {1} {2,date,EEE MMM dd HH:mm:ss zzz yyyy}\n\n----\n\n{3}\n\n{4}{5}"
+                description = ts.l("sendObjectMail.comment_template",
+                                   type.name,
+                                   adminName,
+                                   currentTime,
+                                   this.transactionComment,
+                                   arlut.csd.Util.WordWrap.wrap(mailout.toString(), 78),
+                                   signature);
+              }
 
-	    String title;
+            String title;
 
-	    if (mailout.entryCount < 5)
-	      {
-		if (type.name != null)
-		  {
-		    title = Ganymede.subjectPrefixProperty + type.name;
-		  }
-		else
-		  {
-		    title = Ganymede.subjectPrefixProperty + type.token;
-		  }
+            if (mailout.entryCount < 5)
+              {
+                if (type.name != null)
+                  {
+                    title = Ganymede.subjectPrefixProperty + type.name;
+                  }
+                else
+                  {
+                    title = Ganymede.subjectPrefixProperty + type.token;
+                  }
 
-		List<String> name_list = new ArrayList<String>();
+                List<String> name_list = new ArrayList<String>();
 
-		for (Invid invid: mailout.getInvids())
-		  {
-		    DBEditObject object = transaction.findObject(invid);
+                for (Invid invid: mailout.getInvids())
+                  {
+                    DBEditObject object = transaction.findObject(invid);
 
-		    name_list.add(object.getLabel());
-		  }
+                    name_list.add(object.getLabel());
+                  }
 
-		if (name_list.size() > 0)
-		  {
-		    title = title + " (\"" + VectorUtils.vectorString(name_list, ", ") + "\")";
-		  }
-	      }
-	    else
-	      {
-		if (type.name != null)
-		  {
-		    // "{0}{1} (x{2,number,#})"
-		    title = ts.l("sendObjectMail.multi_object_subject",
-				 Ganymede.subjectPrefixProperty,
-				 type.name,
-				 Integer.valueOf(mailout.entryCount));
-		  }
-		else
-		  {
-		    // "{0}{1} (x{2,number,#})"
-		    title = ts.l("sendObjectMail.multi_object_subject",
-				 Ganymede.subjectPrefixProperty,
-				 type.token,
-				 Integer.valueOf(mailout.entryCount));
-		  }
-	      }
+                if (name_list.size() > 0)
+                  {
+                    title = title + " (\"" + VectorUtils.vectorString(name_list, ", ") + "\")";
+                  }
+              }
+            else
+              {
+                if (type.name != null)
+                  {
+                    // "{0}{1} (x{2,number,#})"
+                    title = ts.l("sendObjectMail.multi_object_subject",
+                                 Ganymede.subjectPrefixProperty,
+                                 type.name,
+                                 Integer.valueOf(mailout.entryCount));
+                  }
+                else
+                  {
+                    // "{0}{1} (x{2,number,#})"
+                    title = ts.l("sendObjectMail.multi_object_subject",
+                                 Ganymede.subjectPrefixProperty,
+                                 type.token,
+                                 Integer.valueOf(mailout.entryCount));
+                  }
+              }
 
-	    try
-	      {
-		mailer.sendmsg(returnAddr,
-			       mailout.addresses,
-			       title,
-			       description);
-	      }
-	    catch (IOException ex)
-	      {
-		// "DBLog.sendObjectMail(): mailer error:\n{0}\n\nwhile processing: {1}"
-		Ganymede.debug(ts.l("sendObjectMail.mailer_error",
-				    Ganymede.stackTrace(ex),
-				    title));
-	      }
-	  }
+            try
+              {
+                mailer.sendmsg(returnAddr,
+                               mailout.addresses,
+                               title,
+                               description);
+              }
+            catch (IOException ex)
+              {
+                // "DBLog.sendObjectMail(): mailer error:\n{0}\n\nwhile processing: {1}"
+                Ganymede.debug(ts.l("sendObjectMail.mailer_error",
+                                    Ganymede.stackTrace(ex),
+                                    title));
+              }
+          }
       }
   }
 
@@ -1445,41 +1446,41 @@ public class DBLog {
 
     if (debug)
       {
-	System.err.println("updateSysEventCodeHash(): entering..");
+        System.err.println("updateSysEventCodeHash(): entering..");
       }
 
     if (sysEventCodesTimeStamp != null)
       {
-	DBObjectBase eventBase = Ganymede.db.getObjectBase(SchemaConstants.EventBase);
+        DBObjectBase eventBase = Ganymede.db.getObjectBase(SchemaConstants.EventBase);
 
-	if (!eventBase.getTimeStamp().after(sysEventCodesTimeStamp))
-	  {
-	    if (debug)
-	      {
-		System.err.println("updateSysEventCodeHash(): exiting, no work needed..");
-	      }
+        if (!eventBase.getTimeStamp().after(sysEventCodesTimeStamp))
+          {
+            if (debug)
+              {
+                System.err.println("updateSysEventCodeHash(): exiting, no work needed..");
+              }
 
-	    return;
-	  }
+            return;
+          }
 
-	// this method can be called during a transaction commit
-	// sequence, in which this thread may have already locked the
-	// object base we would otherwise need to query..
+        // this method can be called during a transaction commit
+        // sequence, in which this thread may have already locked the
+        // object base we would otherwise need to query..
 
-	if (eventBase.isLocked())
-	  {
-	    if (debug)
-	      {
-		System.err.println("updateSysEventCodeHash(): exiting, sysEvent Base locked..");
-	      }
+        if (eventBase.isLocked())
+          {
+            if (debug)
+              {
+                System.err.println("updateSysEventCodeHash(): exiting, sysEvent Base locked..");
+              }
 
-	    return;
-	  }
+            return;
+          }
       }
 
     if (debug)
       {
-	System.err.println("updateSysEventCodeHash(): updating..");
+        System.err.println("updateSysEventCodeHash(): updating..");
       }
 
     sysEventCodes.clear();
@@ -1490,30 +1491,30 @@ public class DBLog {
 
     if (eventCodeList == null)
       {
-	Ganymede.debug("DBLog.updateSysEventCodeHash(): no event records found in database");
-	return;
+        Ganymede.debug("DBLog.updateSysEventCodeHash(): no event records found in database");
+        return;
       }
 
     for (Result entry: eventCodeList)
       {
-	sysEventCodes.put(entry.toString(),
-			  new systemEventType(gSession.getDBSession().viewDBObject(entry.getInvid())));
+        sysEventCodes.put(entry.toString(),
+                          new systemEventType(gSession.getDBSession().viewDBObject(entry.getInvid())));
       }
 
     // remember when we updated our local cache
 
     if (sysEventCodesTimeStamp == null)
       {
-	sysEventCodesTimeStamp = new Date();
+        sysEventCodesTimeStamp = new Date();
       }
     else
       {
-	sysEventCodesTimeStamp.setTime(System.currentTimeMillis());
+        sysEventCodesTimeStamp.setTime(System.currentTimeMillis());
       }
 
     if (debug)
       {
-	System.err.println("updateSysEventCodeHash(): exiting, sysEventCodeHash updated.");
+        System.err.println("updateSysEventCodeHash(): exiting, sysEventCodeHash updated.");
       }
   }
 
@@ -1532,7 +1533,7 @@ public class DBLog {
 
     if (debug)
       {
-	System.err.println("updateObjEventCodeHash(): entering..");
+        System.err.println("updateObjEventCodeHash(): entering..");
       }
 
     // check our time stamp, make sure we aren't unnecessarily
@@ -1540,36 +1541,36 @@ public class DBLog {
 
     if (objEventCodesTimeStamp != null)
       {
-	DBObjectBase eventBase = Ganymede.db.getObjectBase(SchemaConstants.ObjectEventBase);
+        DBObjectBase eventBase = Ganymede.db.getObjectBase(SchemaConstants.ObjectEventBase);
 
-	if (!eventBase.getTimeStamp().after(objEventCodesTimeStamp))
-	  {
-	    if (debug)
-	      {
-		System.err.println("updateObjEventCodeHash(): exiting, no work done..");
-	      }
+        if (!eventBase.getTimeStamp().after(objEventCodesTimeStamp))
+          {
+            if (debug)
+              {
+                System.err.println("updateObjEventCodeHash(): exiting, no work done..");
+              }
 
-	    return;
-	  }
+            return;
+          }
 
-	// this method can be called during a transaction commit
-	// sequence, in which this thread may have already locked the
-	// object base we would otherwise need to query..
+        // this method can be called during a transaction commit
+        // sequence, in which this thread may have already locked the
+        // object base we would otherwise need to query..
 
-	if (eventBase.isLocked())
-	  {
-	    if (debug)
-	      {
-		System.err.println("updateObjEventCodeHash(): exiting, objEvent Base locked..");
-	      }
+        if (eventBase.isLocked())
+          {
+            if (debug)
+              {
+                System.err.println("updateObjEventCodeHash(): exiting, objEvent Base locked..");
+              }
 
-	    return;
-	  }
+            return;
+          }
       }
 
     if (debug)
       {
-	System.err.println("updateObjEventCodeHash(): updating..");
+        System.err.println("updateObjEventCodeHash(): updating..");
       }
 
     objEventCodes.clear();
@@ -1580,31 +1581,31 @@ public class DBLog {
 
     if (eventCodeList == null)
       {
-	Ganymede.debug("DBLog.updateObjEventCodeHash(): no event records found in database");
-	return;
+        Ganymede.debug("DBLog.updateObjEventCodeHash(): no event records found in database");
+        return;
       }
 
     for (Result entry: eventCodeList)
       {
-	objEventobj = (DBObject) gSession.getDBSession().viewDBObject(entry.getInvid());
-	objEventItem = new objectEventType(objEventobj);
-	objEventCodes.put(objEventItem.hashKey, objEventItem);
+        objEventobj = (DBObject) gSession.getDBSession().viewDBObject(entry.getInvid());
+        objEventItem = new objectEventType(objEventobj);
+        objEventCodes.put(objEventItem.hashKey, objEventItem);
       }
 
     // remember when we updated our local cache
 
     if (objEventCodesTimeStamp == null)
       {
-	objEventCodesTimeStamp = new Date();
+        objEventCodesTimeStamp = new Date();
       }
     else
       {
-	objEventCodesTimeStamp.setTime(System.currentTimeMillis());
+        objEventCodesTimeStamp.setTime(System.currentTimeMillis());
       }
 
     if (debug)
       {
-	System.err.println("updateObjEventCodeHash(): exiting..");
+        System.err.println("updateObjEventCodeHash(): exiting..");
       }
   }
 
@@ -1620,7 +1621,7 @@ public class DBLog {
    */
 
   private void calculateMailTargets(DBLogEvent event, DBSession session,
-				    systemEventType eventType, MailMode mode)
+                                    systemEventType eventType, MailMode mode)
   {
     Set<String> mailSet = new HashSet<String>();
 
@@ -1636,36 +1637,36 @@ public class DBLog {
 
     if (event.augmented)
       {
-	return;
+        return;
       }
 
     if (debug)
       {
-	System.err.println("DBLog.java: calculateMailTargets: entering");
-	System.err.println(event.toString());
+        System.err.println("DBLog.java: calculateMailTargets: entering");
+        System.err.println(event.toString());
       }
 
     if (eventType == null)
       {
-	mailSet.addAll(event.getMailTargets());
-	mailSet.addAll(calculateOwnerAddresses(event.getInvids(), mode, session));
+        mailSet.addAll(event.getMailTargets());
+        mailSet.addAll(calculateOwnerAddresses(event.getInvids(), mode, session));
       }
     else if (eventType.ccToOwners)
       {
-	mailSet.addAll(event.getMailTargets());
-	mailSet.addAll(calculateOwnerAddresses(event.getInvids(), MailMode.BOTH, session));
+        mailSet.addAll(event.getMailTargets());
+        mailSet.addAll(calculateOwnerAddresses(event.getInvids(), MailMode.BOTH, session));
       }
 
     if (eventType == null || eventType.ccToSelf)
       {
-	// always include the email address for the admin who
-	// initiated the action.
+        // always include the email address for the admin who
+        // initiated the action.
 
-	if (event.admin != null)
-	  {
-	    mailSet.add(adminPersonaCustom.convertAdminInvidToString(event.admin,
-								     session));
-	  }
+        if (event.admin != null)
+          {
+            mailSet.add(adminPersonaCustom.convertAdminInvidToString(event.admin,
+                                                                     session));
+          }
       }
 
     mailSet = cleanupAddresses(mailSet);
@@ -1679,8 +1680,8 @@ public class DBLog {
 
     if (debug)
       {
-	System.err.println("DBLog.java: calculateMailTargets: exiting");
-	System.err.println(event.toString());
+        System.err.println("DBLog.java: calculateMailTargets: exiting");
+        System.err.println(event.toString());
       }
   }
 
@@ -1701,7 +1702,7 @@ public class DBLog {
    */
 
   private List<String> appendMailOut(DBLogEvent event, HashMap<String, MailOut> map,
-				     DBSession session, systemEventType transactionType)
+                                     DBSession session, systemEventType transactionType)
   {
     Iterator iter;
     MailOut mailout;
@@ -1710,37 +1711,37 @@ public class DBLog {
 
     if (transactionType == null || transactionType.ccToOwners)
       {
-	calculateMailTargets(event, session, transactionType, MailMode.BOTH);
+        calculateMailTargets(event, session, transactionType, MailMode.BOTH);
       }
     else
       {
-	calculateMailTargets(event, session, transactionType, MailMode.NONE);
+        calculateMailTargets(event, session, transactionType, MailMode.NONE);
       }
 
     for (String str: event.getMailTargets())
       {
-	if (debug)
-	  {
-	    System.err.println("Going to be mailing to " + str);
-	  }
+        if (debug)
+          {
+            System.err.println("Going to be mailing to " + str);
+          }
 
-	if (str == null)
-	  {
-	    // if a custom DBEditObject subclass includes a null value
-	    // in a List<String>, we don't want to choke on it.
+        if (str == null)
+          {
+            // if a custom DBEditObject subclass includes a null value
+            // in a List<String>, we don't want to choke on it.
 
-	    continue;
-	  }
+            continue;
+          }
 
-	mailout = (MailOut) map.get(str);
+        mailout = (MailOut) map.get(str);
 
-	if (mailout == null)
-	  {
-	    mailout = new MailOut(str);
-	    map.put(str, mailout);
-	  }
+        if (mailout == null)
+          {
+            mailout = new MailOut(str);
+            map.put(str, mailout);
+          }
 
-	mailout.append(event);
+        mailout.append(event);
       }
 
     return event.getMailTargets();
@@ -1763,8 +1764,8 @@ public class DBLog {
 
     while (c != -1)
       {
-	buffer.append((char) c);
-	c = inBuf.read();
+        buffer.append((char) c);
+        c = inBuf.read();
       }
 
     inBuf.close();
@@ -1774,9 +1775,9 @@ public class DBLog {
 
     if (debug)
       {
-	System.err.println("Loaded signature string:");
-	System.err.println(signature);
-	System.err.println("----");
+        System.err.println("Loaded signature string:");
+        System.err.println(signature);
+        System.err.println("----");
       }
   }
 
@@ -1831,161 +1832,161 @@ public class DBLog {
 
     if (debug)
       {
-	System.err.println("DBLog.java: calculateOwnerAddresses");
+        System.err.println("DBLog.java: calculateOwnerAddresses");
       }
 
     if (objects == null)
       {
-	return addresses;
+        return addresses;
       }
 
     for (Invid invid: objects)
       {
-	DBObject object = session.viewDBObject(invid);
+        DBObject object = session.viewDBObject(invid);
 
-	if (object == null)
-	  {
-	    if (debug)
-	      {
-		System.err.println("calculateOwnerAddresses(): Couldn't find invid " +
-				   invid.toString());
-	      }
+        if (object == null)
+          {
+            if (debug)
+              {
+                System.err.println("calculateOwnerAddresses(): Couldn't find invid " +
+                                   invid.toString());
+              }
 
-	    continue;
-	  }
+            continue;
+          }
 
-	if (debug)
-	  {
-	    System.err.println("DBLog.calculateOwnerAddresses(): processing " + object.getLabel());
-	  }
+        if (debug)
+          {
+            System.err.println("DBLog.calculateOwnerAddresses(): processing " + object.getLabel());
+          }
 
-	// first off, does the object itself have anyone it wants to notify?
+        // first off, does the object itself have anyone it wants to notify?
 
-	if (mode == MailMode.USERS || mode == MailMode.BOTH)
-	  {
-	    if (object.hasEmailTarget())
-	      {
-		List<String> targets = (List<String>) object.getEmailTargets();
+        if (mode == MailMode.USERS || mode == MailMode.BOTH)
+          {
+            if (object.hasEmailTarget())
+              {
+                List<String> targets = (List<String>) object.getEmailTargets();
 
-		if (targets != null)
-		  {
-		    addresses.addAll(targets);
-		  }
-	      }
+                if (targets != null)
+                  {
+                    addresses.addAll(targets);
+                  }
+              }
 
-	    // get the email targets from the original version of the
-	    // object, if present, in case our transaction changed the
-	    // object's list of addressees along the way
+            // get the email targets from the original version of the
+            // object, if present, in case our transaction changed the
+            // object's list of addressees along the way
 
-	    if (object instanceof DBEditObject)
-	      {
-		DBEditObject eObject = (DBEditObject) object;
+            if (object instanceof DBEditObject)
+              {
+                DBEditObject eObject = (DBEditObject) object;
 
-		switch (eObject.getStatus())
-		  {
-		  case ObjectStatus.DELETING:
-		  case ObjectStatus.EDITING:
-		    DBObject originalObject = eObject.getOriginal();
+                switch (eObject.getStatus())
+                  {
+                  case ObjectStatus.DELETING:
+                  case ObjectStatus.EDITING:
+                    DBObject originalObject = eObject.getOriginal();
 
-		    if (originalObject.hasEmailTarget())
-		      {
-			List<String> targets = (List<String>) originalObject.getEmailTargets();
+                    if (originalObject.hasEmailTarget())
+                      {
+                        List<String> targets = (List<String>) originalObject.getEmailTargets();
 
-			if (targets != null)
-			  {
-			    addresses.addAll(targets);
-			  }
-		      }
-		  }
-	      }
-	  }
+                        if (targets != null)
+                          {
+                            addresses.addAll(targets);
+                          }
+                      }
+                  }
+              }
+          }
 
-	// Do we need to notify the owners?
+        // Do we need to notify the owners?
 
-	if (mode != MailMode.OWNERS && mode != MailMode.BOTH)
-	  {
-	    continue;		// Nope
-	  }
+        if (mode != MailMode.OWNERS && mode != MailMode.BOTH)
+          {
+            continue;           // Nope
+          }
 
-	// yep, we need to notify the owners
+        // yep, we need to notify the owners
 
-	Set<DBObject> objectVersions = new HashSet<DBObject>();
+        Set<DBObject> objectVersions = new HashSet<DBObject>();
 
-	// if we're working with a DBEditObject, we may need to
-	// consider the original version of the object, the modified
-	// version of the object, both, or neither.
+        // if we're working with a DBEditObject, we may need to
+        // consider the original version of the object, the modified
+        // version of the object, both, or neither.
 
-	if (object instanceof DBEditObject)
-	  {
-	    DBEditObject eObject = (DBEditObject) object;
+        if (object instanceof DBEditObject)
+          {
+            DBEditObject eObject = (DBEditObject) object;
 
-	    switch (eObject.getStatus())
-	      {
-	      case ObjectStatus.CREATING:
-		objectVersions.add(eObject);
-		break;
+            switch (eObject.getStatus())
+              {
+              case ObjectStatus.CREATING:
+                objectVersions.add(eObject);
+                break;
 
-	      case ObjectStatus.DELETING:
-		objectVersions.add(eObject.getOriginal());
-		break;
+              case ObjectStatus.DELETING:
+                objectVersions.add(eObject.getOriginal());
+                break;
 
-	      case ObjectStatus.EDITING:
-		objectVersions.add(eObject);
-		objectVersions.add(eObject.getOriginal());
-		break;
+              case ObjectStatus.EDITING:
+                objectVersions.add(eObject);
+                objectVersions.add(eObject.getOriginal());
+                break;
 
-	      case ObjectStatus.DROPPING:
-		// no point in logging a transient object
-		break;
-	      }
-	  }
-	else
-	  {
-	    objectVersions.add(object);
-	  }
+              case ObjectStatus.DROPPING:
+                // no point in logging a transient object
+                break;
+              }
+          }
+        else
+          {
+            objectVersions.add(object);
+          }
 
-	DBObject[] versionArray = objectVersions.toArray(new DBObject[0]);
+        DBObject[] versionArray = objectVersions.toArray(new DBObject[0]);
 
-	for (int i = 0; i < versionArray.length; i++)
-	  {
-	    if (versionArray[i].isEmbedded())
-	      {
-		objectVersions.remove(versionArray[i]);
+        for (int i = 0; i < versionArray.length; i++)
+          {
+            if (versionArray[i].isEmbedded())
+              {
+                objectVersions.remove(versionArray[i]);
 
-		try
-		  {
-		    objectVersions.add(session.getGSession().getContainingObj(versionArray[i]));
-		  }
-		catch (IntegrityConstraintException ex)
-		  {
-		    Ganymede.debug("Couldn't find container for " + versionArray[i].getLabel());
+                try
+                  {
+                    objectVersions.add(session.getGSession().getContainingObj(versionArray[i]));
+                  }
+                catch (IntegrityConstraintException ex)
+                  {
+                    Ganymede.debug("Couldn't find container for " + versionArray[i].getLabel());
 
-		    continue;
-		  }
-	      }
-	  }
+                    continue;
+                  }
+              }
+          }
 
-	for (DBObject versionOfObject: objectVersions)
-	  {
-	    // get a list of owner invids for this object
+        for (DBObject versionOfObject: objectVersions)
+          {
+            // get a list of owner invids for this object
 
-	    InvidDBField ownersField = (InvidDBField) versionOfObject.getField(SchemaConstants.OwnerListField);
+            InvidDBField ownersField = (InvidDBField) versionOfObject.getField(SchemaConstants.OwnerListField);
 
-	    if (ownersField == null)
-	      {
-		if (debug)
-		  {
-		    System.err.println("calculateOwnerAddresses(): disregarding supergash-owned invid " +
-				       invid.toString());
-		  }
+            if (ownersField == null)
+              {
+                if (debug)
+                  {
+                    System.err.println("calculateOwnerAddresses(): disregarding supergash-owned invid " +
+                                       invid.toString());
+                  }
 
-		continue;
-	      }
+                continue;
+              }
 
-	    // *** Caution!  getValuesLocal() does not clone the field's contents..
+            // *** Caution!  getValuesLocal() does not clone the field's contents..
 
-	    ownerGroupInvids.addAll((List<Invid>) ownersField.getValuesLocal());
-	  }
+            ownerGroupInvids.addAll((List<Invid>) ownersField.getValuesLocal());
+          }
       }
 
     // okay, we have a set of owner invids for all of the objects.
@@ -1994,13 +1995,13 @@ public class DBLog {
 
     for (Invid ownerInvid: ownerGroupInvids)
       {
-	if (debug)
-	  {
-	    System.err.println("DBLog.calculateOwnerAddresses(): processing owner group " +
-			       session.getGSession().getDBSession().getObjectLabel(ownerInvid));
-	  }
+        if (debug)
+          {
+            System.err.println("DBLog.calculateOwnerAddresses(): processing owner group " +
+                               session.getGSession().getDBSession().getObjectLabel(ownerInvid));
+          }
 
-	addresses.addAll(ownerCustom.getAddresses(ownerInvid, session));
+        addresses.addAll(ownerCustom.getAddresses(ownerInvid, session));
       }
 
     return addresses;
@@ -2025,21 +2026,21 @@ public class DBLog {
   {
     if (Ganymede.defaultDomainProperty == null)
       {
-	return addresses;
+        return addresses;
       }
 
     Set<String> results = new HashSet<String>();
 
     for (String address: addresses)
       {
-	if (address.indexOf('@') != -1)
-	  {
-	    results.add(address);
-	  }
-	else
-	  {
-	    results.add(address + "@" + Ganymede.defaultDomainProperty);
-	  }
+        if (address.indexOf('@') != -1)
+          {
+            results.add(address);
+          }
+        else
+          {
+            results.add(address + "@" + Ganymede.defaultDomainProperty);
+          }
       }
 
     return results;
@@ -2055,23 +2056,23 @@ public class DBLog {
 
     for (Invid invid: mailOut.getInvids())
       {
-	DBObjectBase base = Ganymede.db.getObjectBase(invid.getType());
+        DBObjectBase base = Ganymede.db.getObjectBase(invid.getType());
 
-	if (base.isEmbedded())
-	  {
-	    continue;
-	  }
+        if (base.isEmbedded())
+          {
+            continue;
+          }
 
-	count++;
+        count++;
       }
 
     if (count < 5)
       {
-	return describeSmallTransaction(mailOut, transaction);
+        return describeSmallTransaction(mailOut, transaction);
       }
     else
       {
-	return describeLargeTransaction(mailOut, transaction);
+        return describeLargeTransaction(mailOut, transaction);
       }
   }
 
@@ -2093,14 +2094,14 @@ public class DBLog {
 
     for (Invid invid: mailOut.getInvids())
       {
-	DBObjectBase base = Ganymede.db.getObjectBase(invid.getType());
+        DBObjectBase base = Ganymede.db.getObjectBase(invid.getType());
 
-	if (base.isEmbedded())
-	  {
-	    continue;
-	  }
+        if (base.isEmbedded())
+          {
+            continue;
+          }
 
-	types.add(base.getName());
+        types.add(base.getName());
       }
 
     // in describeSmallTransaction we have three loops, over the
@@ -2114,150 +2115,150 @@ public class DBLog {
 
     for (int mode = 0; mode < 3; mode++)
       {
-	boolean declared_action = false;
+        boolean declared_action = false;
 
-	// group by type
+        // group by type
 
-	for (String type: types)
-	  {
-	    DBObjectBase base = Ganymede.db.getObjectBase(type);
-	    boolean declared_type = false;
+        for (String type: types)
+          {
+            DBObjectBase base = Ganymede.db.getObjectBase(type);
+            boolean declared_type = false;
 
-	    // finally loop over the actual invids, which we'll
-	    // include or disinclude based on the outer loops
+            // finally loop over the actual invids, which we'll
+            // include or disinclude based on the outer loops
 
-	    for (Invid invid: mailOut.getInvids())
-	      {
-		if (invid.getType() == base.getTypeID())
-		  {
-		    DBEditObject object = transaction.findObject(invid);
+            for (Invid invid: mailOut.getInvids())
+              {
+                if (invid.getType() == base.getTypeID())
+                  {
+                    DBEditObject object = transaction.findObject(invid);
 
-		    switch (object.getStatus())
-		      {
-		      case ObjectStatus.CREATING:
-			if (mode == 0)
-			  {
-			    if (!declared_action)
-			      {
-				if (subject.length() > 0)
-				  {
-				    // ". "
-				    subject.append(ts.l("describeSmallTransaction.append"));
-				  }
+                    switch (object.getStatus())
+                      {
+                      case ObjectStatus.CREATING:
+                        if (mode == 0)
+                          {
+                            if (!declared_action)
+                              {
+                                if (subject.length() > 0)
+                                  {
+                                    // ". "
+                                    subject.append(ts.l("describeSmallTransaction.append"));
+                                  }
 
-				// "Created {0} "{1}"
-				subject.append(ts.l("describeSmallTransaction.creation_first",
-						    base.getName(),
-						    object.getLabel()));
-				declared_action = true;
-				declared_type = true;
-			      }
-			    else
-			      {
-				if (!declared_type)
-				  {
-				    // ", {0} "{1}"
-				    subject.append(ts.l("describeSmallTransaction.creation_later",
-							base.getName(),
-							object.getLabel()));
-				    declared_type = true;
-				  }
-				else
-				  {
-				    // ", "{0}"
-				    subject.append(ts.l("describeSmallTransaction.creation_later_sametype",
-							object.getLabel()));
-				  }
-			      }
-			  }
-			break;
+                                // "Created {0} "{1}"
+                                subject.append(ts.l("describeSmallTransaction.creation_first",
+                                                    base.getName(),
+                                                    object.getLabel()));
+                                declared_action = true;
+                                declared_type = true;
+                              }
+                            else
+                              {
+                                if (!declared_type)
+                                  {
+                                    // ", {0} "{1}"
+                                    subject.append(ts.l("describeSmallTransaction.creation_later",
+                                                        base.getName(),
+                                                        object.getLabel()));
+                                    declared_type = true;
+                                  }
+                                else
+                                  {
+                                    // ", "{0}"
+                                    subject.append(ts.l("describeSmallTransaction.creation_later_sametype",
+                                                        object.getLabel()));
+                                  }
+                              }
+                          }
+                        break;
 
-		      case ObjectStatus.DELETING:
-			if (mode == 1)
-			  {
-			    if (!declared_action)
-			      {
-				if (subject.length() > 0)
-				  {
-				    // ". "
-				    subject.append(ts.l("describeSmallTransaction.append"));
-				  }
+                      case ObjectStatus.DELETING:
+                        if (mode == 1)
+                          {
+                            if (!declared_action)
+                              {
+                                if (subject.length() > 0)
+                                  {
+                                    // ". "
+                                    subject.append(ts.l("describeSmallTransaction.append"));
+                                  }
 
-				// "Deleted {0} "{1}"
-				subject.append(ts.l("describeSmallTransaction.deletion_first",
-						    base.getName(),
-						    object.getLabel()));
-				declared_action = true;
-				declared_type = true;
-			      }
-			    else
-			      {
-				if (!declared_type)
-				  {
-				    // ", {0} "{1}"
-				    subject.append(ts.l("describeSmallTransaction.deletion_later",
-							base.getName(),
-							object.getLabel()));
-				    declared_type = true;
-				  }
-				else
-				  {
-				    // ", "{0}"
-				    subject.append(ts.l("describeSmallTransaction.deletion_later_sametype",
-							object.getLabel()));
-				  }
-			      }
-			  }
-			break;
+                                // "Deleted {0} "{1}"
+                                subject.append(ts.l("describeSmallTransaction.deletion_first",
+                                                    base.getName(),
+                                                    object.getLabel()));
+                                declared_action = true;
+                                declared_type = true;
+                              }
+                            else
+                              {
+                                if (!declared_type)
+                                  {
+                                    // ", {0} "{1}"
+                                    subject.append(ts.l("describeSmallTransaction.deletion_later",
+                                                        base.getName(),
+                                                        object.getLabel()));
+                                    declared_type = true;
+                                  }
+                                else
+                                  {
+                                    // ", "{0}"
+                                    subject.append(ts.l("describeSmallTransaction.deletion_later_sametype",
+                                                        object.getLabel()));
+                                  }
+                              }
+                          }
+                        break;
 
-		      case ObjectStatus.EDITING:
-			if (mode == 2)
-			  {
-			    if (!declared_action)
-			      {
-				if (subject.length() > 0)
-				  {
-				    // ". "
-				    subject.append(ts.l("describeSmallTransaction.append"));
-				  }
+                      case ObjectStatus.EDITING:
+                        if (mode == 2)
+                          {
+                            if (!declared_action)
+                              {
+                                if (subject.length() > 0)
+                                  {
+                                    // ". "
+                                    subject.append(ts.l("describeSmallTransaction.append"));
+                                  }
 
-				// "Edited {0} "{1}"
-				subject.append(ts.l("describeSmallTransaction.editing_first",
-						    base.getName(),
-						    object.getLabel()));
-				declared_action = true;
-				declared_type = true;
-			      }
-			    else
-			      {
-				if (!declared_type)
-				  {
-				    // ", {0} "{1}"
-				    subject.append(ts.l("describeSmallTransaction.editing_later",
-							base.getName(),
-							object.getLabel()));
-				    declared_type = true;
-				  }
-				else
-				  {
-				    // ", "{0}"
-				    subject.append(ts.l("describeSmallTransaction.editing_later_sametype",
-							object.getLabel()));
-				  }
-			      }
-			  }
-			break;
+                                // "Edited {0} "{1}"
+                                subject.append(ts.l("describeSmallTransaction.editing_first",
+                                                    base.getName(),
+                                                    object.getLabel()));
+                                declared_action = true;
+                                declared_type = true;
+                              }
+                            else
+                              {
+                                if (!declared_type)
+                                  {
+                                    // ", {0} "{1}"
+                                    subject.append(ts.l("describeSmallTransaction.editing_later",
+                                                        base.getName(),
+                                                        object.getLabel()));
+                                    declared_type = true;
+                                  }
+                                else
+                                  {
+                                    // ", "{0}"
+                                    subject.append(ts.l("describeSmallTransaction.editing_later_sametype",
+                                                        object.getLabel()));
+                                  }
+                              }
+                          }
+                        break;
 
-		      }
-		  }
-	      }
-	  }
+                      }
+                  }
+              }
+          }
       }
 
     if (subject.length() != 0)
       {
-	// "."
-	subject.append(ts.l("describeSmallTransaction.end_subject"));
+        // "."
+        subject.append(ts.l("describeSmallTransaction.end_subject"));
       }
 
     return subject.toString();
@@ -2277,257 +2278,257 @@ public class DBLog {
 
     for (Invid invid: mailOut.getInvids())
       {
-	DBObjectBase base = Ganymede.db.getObjectBase(invid.getType());
+        DBObjectBase base = Ganymede.db.getObjectBase(invid.getType());
 
-	if (base.isEmbedded())
-	  {
-	    continue;
-	  }
+        if (base.isEmbedded())
+          {
+            continue;
+          }
 
-	types.add(base.getName());
+        types.add(base.getName());
       }
 
     if (types.size() <= 3)
       {
-	// prepare a count of create, edit, delete for each type
+        // prepare a count of create, edit, delete for each type
 
-	for (String type: types)
-	  {
-	    DBObjectBase base = Ganymede.db.getObjectBase(type);
-	    int create = 0;
-	    int edit = 0;
-	    int delete = 0;
+        for (String type: types)
+          {
+            DBObjectBase base = Ganymede.db.getObjectBase(type);
+            int create = 0;
+            int edit = 0;
+            int delete = 0;
 
-	    for (Invid invid: mailOut.getInvids())
-	      {
-		if (invid.getType() == base.getTypeID())
-		  {
-		    DBEditObject object = transaction.findObject(invid);
+            for (Invid invid: mailOut.getInvids())
+              {
+                if (invid.getType() == base.getTypeID())
+                  {
+                    DBEditObject object = transaction.findObject(invid);
 
-		    switch (object.getStatus())
-		      {
-		      case ObjectStatus.CREATING:
-			create++;
-			break;
+                    switch (object.getStatus())
+                      {
+                      case ObjectStatus.CREATING:
+                        create++;
+                        break;
 
-		      case ObjectStatus.EDITING:
-			edit++;
-			break;
+                      case ObjectStatus.EDITING:
+                        edit++;
+                        break;
 
-		      case ObjectStatus.DELETING:
-			delete++;
-			break;
-		      }
-		  }
-	      }
+                      case ObjectStatus.DELETING:
+                        delete++;
+                        break;
+                      }
+                  }
+              }
 
-	    String createString = null;
-	    String editString = null;
-	    String deleteString = null;
+            String createString = null;
+            String editString = null;
+            String deleteString = null;
 
-	    if (create > 0)
-	      {
-		// "Created {0,number}"
-		createString = ts.l("describeLargeTransaction.typed_create", create);
-	      }
+            if (create > 0)
+              {
+                // "Created {0,number}"
+                createString = ts.l("describeLargeTransaction.typed_create", create);
+              }
 
-	    if (edit > 0)
-	      {
-		// "Edited {0, number}"
-		editString = ts.l("describeLargeTransaction.typed_edit", edit);
-	      }
+            if (edit > 0)
+              {
+                // "Edited {0, number}"
+                editString = ts.l("describeLargeTransaction.typed_edit", edit);
+              }
 
-	    if (delete > 0)
-	      {
-		// "Deleted {0, number}"
-		deleteString = ts.l("describeLargeTransaction.typed_delete", delete);
-	      }
+            if (delete > 0)
+              {
+                // "Deleted {0, number}"
+                deleteString = ts.l("describeLargeTransaction.typed_delete", delete);
+              }
 
-	    int paramCount = (createString != null ? 1 : 0) +
-	      (editString != null ? 1 : 0) +
-	      (deleteString != null ? 1 : 0);
+            int paramCount = (createString != null ? 1 : 0) +
+              (editString != null ? 1 : 0) +
+              (deleteString != null ? 1 : 0);
 
-	    String objectSummary = null;
+            String objectSummary = null;
 
-	    switch (paramCount)
-	      {
-	      case 1:
-		if (createString != null)
-		  {
-		    // "{0} {1} objects."
-		    objectSummary = ts.l("describeLargeTransaction.typed_subject_template", createString, type.toLowerCase());
-		  }
-		else if (editString != null)
-		  {
-		    // "{0} {1} objects."
-		    objectSummary = ts.l("describeLargeTransaction.typed_subject_template", editString, type.toLowerCase());
-		  }
-		else if (deleteString != null)
-		  {
-		    // "{0} {1} objects."
-		    objectSummary = ts.l("describeLargeTransaction.typed_subject_template", deleteString, type.toLowerCase());
-		  }
+            switch (paramCount)
+              {
+              case 1:
+                if (createString != null)
+                  {
+                    // "{0} {1} objects."
+                    objectSummary = ts.l("describeLargeTransaction.typed_subject_template", createString, type.toLowerCase());
+                  }
+                else if (editString != null)
+                  {
+                    // "{0} {1} objects."
+                    objectSummary = ts.l("describeLargeTransaction.typed_subject_template", editString, type.toLowerCase());
+                  }
+                else if (deleteString != null)
+                  {
+                    // "{0} {1} objects."
+                    objectSummary = ts.l("describeLargeTransaction.typed_subject_template", deleteString, type.toLowerCase());
+                  }
 
-		break;
+                break;
 
-	      case 2:
-		if (createString == null)
-		  {
-		    // "{0} {1} objects."
-		    // "{0}, {1}"
-		    objectSummary = ts.l("describeLargeTransaction.typed_subject_template",
-					 ts.l("describeLargeTransaction.typed_subject_duplex_pattern", deleteString, editString),
-					 type.toLowerCase());
-		  }
-		else if (editString == null)
-		  {
-		    // "{0} {1} objects."
-		    // "{0}, {1}"
-		    objectSummary = ts.l("describeLargeTransaction.typed_subject_template",
-					 ts.l("describeLargeTransaction.typed_subject_duplex_pattern", createString, deleteString),
-					 type.toLowerCase());
-		  }
-		else if (deleteString == null)
-		  {
-		    // "{0} {1} objects."
-		    // "{0}, {1}"
-		    objectSummary = ts.l("describeLargeTransaction.typed_subject_template",
-					 ts.l("describeLargeTransaction.typed_subject_duplex_pattern", createString, editString),
-					 type.toLowerCase());
-		  }
+              case 2:
+                if (createString == null)
+                  {
+                    // "{0} {1} objects."
+                    // "{0}, {1}"
+                    objectSummary = ts.l("describeLargeTransaction.typed_subject_template",
+                                         ts.l("describeLargeTransaction.typed_subject_duplex_pattern", deleteString, editString),
+                                         type.toLowerCase());
+                  }
+                else if (editString == null)
+                  {
+                    // "{0} {1} objects."
+                    // "{0}, {1}"
+                    objectSummary = ts.l("describeLargeTransaction.typed_subject_template",
+                                         ts.l("describeLargeTransaction.typed_subject_duplex_pattern", createString, deleteString),
+                                         type.toLowerCase());
+                  }
+                else if (deleteString == null)
+                  {
+                    // "{0} {1} objects."
+                    // "{0}, {1}"
+                    objectSummary = ts.l("describeLargeTransaction.typed_subject_template",
+                                         ts.l("describeLargeTransaction.typed_subject_duplex_pattern", createString, editString),
+                                         type.toLowerCase());
+                  }
 
-		break;
+                break;
 
-	      case 3:
-		// "{0} {1} objects."
-		// "{0}, {1}, {2}"
-		objectSummary = ts.l("describeLargeTransaction.typed_subject_template",
-				     ts.l("describeLargeTransaction.typed_subject_triplex_pattern", createString, deleteString, editString),
-				     type.toLowerCase());
-	      }
+              case 3:
+                // "{0} {1} objects."
+                // "{0}, {1}, {2}"
+                objectSummary = ts.l("describeLargeTransaction.typed_subject_template",
+                                     ts.l("describeLargeTransaction.typed_subject_triplex_pattern", createString, deleteString, editString),
+                                     type.toLowerCase());
+              }
 
-	    if (subject == null)
-	      {
-		subject = objectSummary;
-	      }
-	    else
-	      {
-		// concatenation between object types
+            if (subject == null)
+              {
+                subject = objectSummary;
+              }
+            else
+              {
+                // concatenation between object types
 
-		subject = ts.l("describeLargeTransaction.concatenation", subject, objectSummary);
-	      }
-	  }
+                subject = ts.l("describeLargeTransaction.concatenation", subject, objectSummary);
+              }
+          }
       }
     else
       {
-	// prepare a count of create, edit, delete
+        // prepare a count of create, edit, delete
 
-	int create = 0;
-	int edit = 0;
-	int delete = 0;
+        int create = 0;
+        int edit = 0;
+        int delete = 0;
 
-	for (Invid invid: mailOut.getInvids())
-	  {
-	    DBEditObject object = transaction.findObject(invid);
+        for (Invid invid: mailOut.getInvids())
+          {
+            DBEditObject object = transaction.findObject(invid);
 
-	    switch (object.getStatus())
-	      {
-	      case ObjectStatus.CREATING:
-		create++;
-		break;
+            switch (object.getStatus())
+              {
+              case ObjectStatus.CREATING:
+                create++;
+                break;
 
-	      case ObjectStatus.EDITING:
-		edit++;
-		break;
+              case ObjectStatus.EDITING:
+                edit++;
+                break;
 
-	      case ObjectStatus.DELETING:
-		delete++;
-		break;
-	      }
-	  }
+              case ObjectStatus.DELETING:
+                delete++;
+                break;
+              }
+          }
 
-	String createString = null;
-	String editString = null;
-	String deleteString = null;
+        String createString = null;
+        String editString = null;
+        String deleteString = null;
 
-	if (create > 0)
-	  {
-	    // "Created {0,number}"
-	    createString = ts.l("describeLargeTransaction.create", create);
-	  }
+        if (create > 0)
+          {
+            // "Created {0,number}"
+            createString = ts.l("describeLargeTransaction.create", create);
+          }
 
-	if (edit > 0)
-	  {
-	    // "Edited {0, number}"
-	    editString = ts.l("describeLargeTransaction.edit", edit);
-	  }
+        if (edit > 0)
+          {
+            // "Edited {0, number}"
+            editString = ts.l("describeLargeTransaction.edit", edit);
+          }
 
-	if (delete > 0)
-	  {
-	    // "Deleted {0, number}"
-	    deleteString = ts.l("describeLargeTransaction.delete", delete);
-	  }
+        if (delete > 0)
+          {
+            // "Deleted {0, number}"
+            deleteString = ts.l("describeLargeTransaction.delete", delete);
+          }
 
-	int paramCount = (createString != null ? 1 : 0) +
-	  (editString != null ? 1 : 0) +
-	  (deleteString != null ? 1 : 0);
+        int paramCount = (createString != null ? 1 : 0) +
+          (editString != null ? 1 : 0) +
+          (deleteString != null ? 1 : 0);
 
-	String objectSummary = null;
+        String objectSummary = null;
 
-	switch (paramCount)
-	  {
-	  case 1:
-	    if (createString != null)
-	      {
-		// "{0} {1} objects."
-		objectSummary = ts.l("describeLargeTransaction.subject_template", createString);
-	      }
-	    else if (editString != null)
-	      {
-		// "{0} {1} objects."
-		objectSummary = ts.l("describeLargeTransaction.subject_template", editString);
-	      }
-	    else if (deleteString != null)
-	      {
-		// "{0} {1} objects."
-		objectSummary = ts.l("describeLargeTransaction.subject_template", deleteString);
-	      }
+        switch (paramCount)
+          {
+          case 1:
+            if (createString != null)
+              {
+                // "{0} {1} objects."
+                objectSummary = ts.l("describeLargeTransaction.subject_template", createString);
+              }
+            else if (editString != null)
+              {
+                // "{0} {1} objects."
+                objectSummary = ts.l("describeLargeTransaction.subject_template", editString);
+              }
+            else if (deleteString != null)
+              {
+                // "{0} {1} objects."
+                objectSummary = ts.l("describeLargeTransaction.subject_template", deleteString);
+              }
 
-	    break;
+            break;
 
-	  case 2:
-	    if (createString == null)
-	      {
-		// "{0} objects."
-		// "{0}, {1}"
-		objectSummary = ts.l("describeLargeTransaction.subject_template",
-				     ts.l("describeLargeTransaction.subject_duplex_pattern", deleteString, editString));
-	      }
-	    else if (editString == null)
-	      {
-		// "{0} objects."
-		// "{0}, {1}"
-		objectSummary = ts.l("describeLargeTransaction.subject_template",
-				     ts.l("describeLargeTransaction.subject_duplex_pattern", createString, deleteString));
-	      }
-	    else if (deleteString == null)
-	      {
-		// "{0} objects."
-		// "{0}, {1}"
-		objectSummary = ts.l("describeLargeTransaction.subject_template",
-				     ts.l("describeLargeTransaction.subject_duplex_pattern", createString, editString));
-	      }
+          case 2:
+            if (createString == null)
+              {
+                // "{0} objects."
+                // "{0}, {1}"
+                objectSummary = ts.l("describeLargeTransaction.subject_template",
+                                     ts.l("describeLargeTransaction.subject_duplex_pattern", deleteString, editString));
+              }
+            else if (editString == null)
+              {
+                // "{0} objects."
+                // "{0}, {1}"
+                objectSummary = ts.l("describeLargeTransaction.subject_template",
+                                     ts.l("describeLargeTransaction.subject_duplex_pattern", createString, deleteString));
+              }
+            else if (deleteString == null)
+              {
+                // "{0} objects."
+                // "{0}, {1}"
+                objectSummary = ts.l("describeLargeTransaction.subject_template",
+                                     ts.l("describeLargeTransaction.subject_duplex_pattern", createString, editString));
+              }
 
-	    break;
+            break;
 
-	  case 3:
-	    // "{0} objects."
-	    // "{0}, {1}, {2}"
-	    objectSummary = ts.l("describeLargeTransaction.subject_template",
-				 ts.l("describeLargeTransaction.subject_triplex_pattern", createString, deleteString, editString));
-	  }
+          case 3:
+            // "{0} objects."
+            // "{0}, {1}, {2}"
+            objectSummary = ts.l("describeLargeTransaction.subject_template",
+                                 ts.l("describeLargeTransaction.subject_triplex_pattern", createString, deleteString, editString));
+          }
 
-	subject = objectSummary;
+        subject = objectSummary;
       }
 
     return subject;
@@ -2580,7 +2581,7 @@ class systemEventType {
 
     if (f == null)
       {
-	return "";
+        return "";
       }
 
     return (String) f.getValueLocal();
@@ -2592,7 +2593,7 @@ class systemEventType {
 
     if (f == null)
       {
-	return false;
+        return false;
       }
 
     return ((Boolean) f.getValueLocal()).booleanValue();
@@ -2619,7 +2620,7 @@ class systemEventType {
 
     if (strF != null)
       {
-	set.addAll((List<String>)strF.getValuesLocal());
+        set.addAll((List<String>)strF.getValuesLocal());
       }
 
     set = DBLog.cleanupAddresses(set);
@@ -2674,7 +2675,7 @@ class objectEventType {
 
     if (f == null)
       {
-	return "";
+        return "";
       }
 
     return (String) f.getValueLocal();
@@ -2686,7 +2687,7 @@ class objectEventType {
 
     if (f == null)
       {
-	return false;
+        return false;
       }
 
     return ((Boolean) f.getValueLocal()).booleanValue();
@@ -2722,7 +2723,7 @@ class objectEventType {
 
     if (strF != null)
       {
-	set.addAll((List<String>)strF.getValuesLocal());
+        set.addAll((List<String>)strF.getValuesLocal());
       }
 
     set = DBLog.cleanupAddresses(set);
@@ -2733,7 +2734,7 @@ class objectEventType {
 
 /*------------------------------------------------------------------------------
                                                                            class
-								         MailOut
+                                                                         MailOut
 
 ------------------------------------------------------------------------------*/
 
@@ -2756,7 +2757,7 @@ class MailOut {
   {
     if (address == null)
       {
-	throw new NullPointerException("bad address");
+        throw new NullPointerException("bad address");
       }
 
     addresses = new ArrayList<String>();
@@ -2771,13 +2772,14 @@ class MailOut {
   synchronized void append(DBLogEvent event)
   {
     entryCount++;
+
     description.append("------------------------------------------------------------\n\n");
     description.append(event.eventClassToken);
     description.append("\n");
 
     for (int i = 0; i < event.eventClassToken.length(); i++)
       {
-	description.append("-");
+        description.append("-");
       }
 
     description.append("\n\n");
