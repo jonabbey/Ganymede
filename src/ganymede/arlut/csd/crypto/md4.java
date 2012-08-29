@@ -43,16 +43,16 @@ public class md4 {
   {
     /* Test cases, mostly taken from rfc 1320 */
     String str[] = { "" , "a", "abc", "message digest", 
-		     "abcdefghijklmnopqrstuvwxyz", 
-		     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 
-		     "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
-		     "01234567890123456789012345678901234567890123456789012345"};
+                     "abcdefghijklmnopqrstuvwxyz", 
+                     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789", 
+                     "12345678901234567890123456789012345678901234567890123456789012345678901234567890",
+                     "01234567890123456789012345678901234567890123456789012345"};
 
     for (int i = 0; i < str.length; i++)
       {
-	md4 mdc = new md4(str[i]);
-	mdc.calc();
-	System.out.println("md4(\"" + str[i] + "\") = " + mdc);
+        md4 mdc = new md4(str[i]);
+        mdc.calc();
+        System.out.println("md4(\"" + str[i] + "\") = " + mdc);
       }
   }
 
@@ -82,10 +82,10 @@ public class md4 {
 
     for (int b = 0; b < 4; b++)
       {
-	buf.append(Integer.toString((i >> 4) & 0xf, 16));
-	buf.append(Integer.toString(i & 0xf, 16));
+        buf.append(Integer.toString((i >> 4) & 0xf, 16));
+        buf.append(Integer.toString(i & 0xf, 16));
 
-	i >>= 8;
+        i >>= 8;
       }
 
     return buf.toString().toUpperCase();
@@ -104,7 +104,7 @@ public class md4 {
 
     for (i=0; i < s.length(); i++)
       {
-	in[i] = (byte) (s.charAt(i) & 0xff);
+        in[i] = (byte) (s.charAt(i) & 0xff);
       }
 
     mdinit(in);
@@ -132,11 +132,11 @@ public class md4 {
 
     for (i=0; i < numwords/16; i++)
       {
-	AA = A; BB = B; CC = C; DD = D;
-	round1(i);
-	round2(i);
-	round3(i);
-	A += AA; B+= BB; C+= CC; D+= DD;
+        AA = A; BB = B; CC = C; DD = D;
+        round1(i);
+        round2(i);
+        round3(i);
+        A += AA; B+= BB; C+= CC; D+= DD;
       }
   }
 
@@ -157,11 +157,11 @@ public class md4 {
 
     if (endblklen < 56)
       {
-	pad = 64 - endblklen;
+        pad = 64 - endblklen;
       }
     else
       {
-	pad = (64 - endblklen) + 64;
+        pad = (64 - endblklen) + 64;
       }
 
     newlen = in.length + pad;
@@ -169,20 +169,20 @@ public class md4 {
 
     for (i=0; i < in.length; i++)
       {
-	b[i] = in[i];
+        b[i] = in[i];
       }
 
     b[in.length] = (byte) 0x80;
 
     for (i = b.length + 1; i < (newlen - 8); i++)
       {
-	b[i] = 0;
+        b[i] = 0;
       }
 
     for (i = 0; i < 8; i++)
       {
-	b[newlen - 8 + i] = (byte) (datalenbits & 0xff);
-	datalenbits >>= 8;
+        b[newlen - 8 + i] = (byte) (datalenbits & 0xff);
+        datalenbits >>= 8;
       }
 
     /* init registers */
@@ -196,8 +196,8 @@ public class md4 {
 
     for (i = 0; i < newlen; i += 4)
       {
-	this.d[i/4] = (b[i] & 0xff) + ((b[i+1] & 0xff) << 8) + 
-	  ((b[i+2] & 0xff) << 16) + ((b[i+3] & 0xff) << 24);
+        this.d[i/4] = (b[i] & 0xff) + ((b[i+1] & 0xff) << 8) + 
+          ((b[i+2] & 0xff) << 16) + ((b[i+3] & 0xff) << 24);
       }
    }
 

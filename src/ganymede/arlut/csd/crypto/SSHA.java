@@ -17,7 +17,7 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -86,11 +86,11 @@ public final class SSHA {
   {
     try
       {
-	return MessageDigest.getInstance("SHA-1");
+        return MessageDigest.getInstance("SHA-1");
       }
     catch (java.security.NoSuchAlgorithmException ex)
       {
-	throw new RuntimeException(ex);
+        throw new RuntimeException(ex);
       }
   }
 
@@ -113,11 +113,11 @@ public final class SSHA {
 
     if (salt == null)
       {
-	saltBytes = genRandomSalt();
+        saltBytes = genRandomSalt();
       }
     else
       {
-	saltBytes = salt.getBytes();
+        saltBytes = salt.getBytes();
       }
 
     hasher.reset();
@@ -167,65 +167,65 @@ public final class SSHA {
 
     if (hashText.indexOf("{SSHA}") != -1)
       {
-	hashText = hashText.substring(6);
+        hashText = hashText.substring(6);
       }
     else if (hashText.indexOf("{SHA}") != -1)
       {
-	hashText = hashText.substring(5);
+        hashText = hashText.substring(5);
       }
 
     if (debug)
       {
-	System.err.println("Wha!  " + hashText);
+        System.err.println("Wha!  " + hashText);
       }
 
     try
       {
-	hashBytes = Base64.decode(hashText);
+        hashBytes = Base64.decode(hashText);
       }
     catch (IOException ex)
       {
-	return false;
+        return false;
       }
 
     if (hashBytes.length > 20)
       {
-	saltBytes = new byte[hashBytes.length - 20];
+        saltBytes = new byte[hashBytes.length - 20];
 
-	for (int i = 20; i < hashBytes.length; i++)
-	  {
-	    saltBytes[i-20] = hashBytes[i];
-	  }
+        for (int i = 20; i < hashBytes.length; i++)
+          {
+            saltBytes[i-20] = hashBytes[i];
+          }
 
-	if (debug)
-	  {
-	    System.err.println("Salt is " + new String(saltBytes));
-	  }
+        if (debug)
+          {
+            System.err.println("Salt is " + new String(saltBytes));
+          }
       }
     
     if (saltBytes != null)
       {
-	byte[] inBytes = plaintext.getBytes();
-	plainBytes = new byte[inBytes.length + saltBytes.length];
+        byte[] inBytes = plaintext.getBytes();
+        plainBytes = new byte[inBytes.length + saltBytes.length];
 
-	for (int i = 0; i < inBytes.length; i++)
-	  {
-	    plainBytes[i] = inBytes[i];
-	  }
+        for (int i = 0; i < inBytes.length; i++)
+          {
+            plainBytes[i] = inBytes[i];
+          }
 
-	for (int i = 0; i < saltBytes.length; i++)
-	  {
-	    plainBytes[i+inBytes.length] = saltBytes[i];
-	  }
+        for (int i = 0; i < saltBytes.length; i++)
+          {
+            plainBytes[i+inBytes.length] = saltBytes[i];
+          }
       }
     else
       {
-	plainBytes = plaintext.getBytes();
+        plainBytes = plaintext.getBytes();
       }
 
     if (debug)
       {
-	System.err.println("Match text is " + new String(plainBytes));
+        System.err.println("Match text is " + new String(plainBytes));
       }
 
     // okay, now we should have in plainBytes the input to the SHA
@@ -240,15 +240,15 @@ public final class SSHA {
 
     for (int i = 0; i < matchBytes.length; i++)
       {
-	if (matchBytes[i] != hashBytes[i])
-	  {
-	    if (debug)
-	      {
-		System.err.println("Char mismatch [" + i + "]");
-	      }
+        if (matchBytes[i] != hashBytes[i])
+          {
+            if (debug)
+              {
+                System.err.println("Char mismatch [" + i + "]");
+              }
 
-	    return false;
-	  }
+            return false;
+          }
       }
 
     return true;
@@ -290,11 +290,11 @@ public final class SSHA {
     
     if (SSHA.matchSHAHash(hashText, "secret"))
       {
-	System.out.println("Good match on " + hashText);
+        System.out.println("Good match on " + hashText);
       }
     else
       {
-	System.out.println("Bad match on " + hashText);
+        System.out.println("Bad match on " + hashText);
       }
 
     /*
@@ -307,11 +307,11 @@ public final class SSHA {
 
     if (SSHA.matchSHAHash(hashText, "abc"))
       {
-	System.out.println("Good match on " + hashText);
+        System.out.println("Good match on " + hashText);
       }
     else
       {
-	System.out.println("Bad match on " + hashText);
+        System.out.println("Bad match on " + hashText);
       }
 
     /*
@@ -324,13 +324,13 @@ public final class SSHA {
     hashText = "{SHA}hJg+RBw70m66rkqh+VEp5eVGcPE=";
 
     if (SSHA.matchSHAHash(hashText,
-			  "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"))
+                          "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq"))
       {
-	System.out.println("Good match on " + hashText);
+        System.out.println("Good match on " + hashText);
       }
     else
       {
-	System.out.println("Bad match on " + hashText);
+        System.out.println("Bad match on " + hashText);
       }
   }
 }

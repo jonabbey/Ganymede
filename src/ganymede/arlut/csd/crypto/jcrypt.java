@@ -574,23 +574,23 @@ public class jcrypt
    {
      if (debug)
        {
-	 System.err.println("crypting..");
+         System.err.println("crypting..");
        }
 
      while (salt.length() < 2)
        {
-	 int index = (int) (randgen.nextFloat() * SALTCHARS.length());
+         int index = (int) (randgen.nextFloat() * SALTCHARS.length());
          salt += SALTCHARS.substring(index, index+1);
 
-	 if (debug)
-	   {
-	     System.err.println("looping..");
-	   }
+         if (debug)
+           {
+             System.err.println("looping..");
+           }
        }
 
      if (debug)
        {
-	 System.err.println("salt = " + salt + ", plaintext = " + original);
+         System.err.println("salt = " + salt + ", plaintext = " + original);
        }
 
       StringBuilder buffer = new StringBuilder("             ");

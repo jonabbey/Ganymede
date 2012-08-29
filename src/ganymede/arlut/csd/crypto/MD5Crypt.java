@@ -59,21 +59,21 @@ public final class MD5Crypt {
   {
     if ((argv.length < 1) || (argv.length > 3))
       {
-	System.err.println("Usage: MD5Crypt [-apache] password salt");
-	System.exit(1);
+        System.err.println("Usage: MD5Crypt [-apache] password salt");
+        System.exit(1);
       }
 
     if (argv.length == 3)
       {
-	System.err.println(MD5Crypt.apacheCrypt(argv[1], argv[2]));
+        System.err.println(MD5Crypt.apacheCrypt(argv[1], argv[2]));
       }
     else if (argv.length == 2)
       {
-	System.err.println(MD5Crypt.crypt(argv[0], argv[1]));
+        System.err.println(MD5Crypt.crypt(argv[0], argv[1]));
       }
     else
       {
-	System.err.println(MD5Crypt.crypt(argv[0]));
+        System.err.println(MD5Crypt.crypt(argv[0]));
       }
     
     System.exit(0);
@@ -88,8 +88,8 @@ public final class MD5Crypt {
 
     while (--size >= 0)
       {
-	result.append(itoa64.charAt((int) (v & 0x3f)));
-	v >>>= 6;
+        result.append(itoa64.charAt((int) (v & 0x3f)));
+        v >>>= 6;
       }
 
     return result.toString();
@@ -99,7 +99,7 @@ public final class MD5Crypt {
   {
     for (int i = 0; i < bits.length; i++)
       {
-	bits[i] = 0;
+        bits[i] = 0;
       }
   }
 
@@ -117,11 +117,11 @@ public final class MD5Crypt {
   {
     try
       {
-	return MessageDigest.getInstance("MD5");
+        return MessageDigest.getInstance("MD5");
       }
     catch (java.security.NoSuchAlgorithmException ex)
       {
-	throw new RuntimeException(ex);
+        throw new RuntimeException(ex);
       }
   }
 
@@ -146,7 +146,7 @@ public final class MD5Crypt {
 
      while (salt.length() < 8)
        {
-	 int index = (int) (randgen.nextFloat() * SALTCHARS.length());
+         int index = (int) (randgen.nextFloat() * SALTCHARS.length());
          salt.append(SALTCHARS.substring(index, index+1));
        }
 
@@ -195,7 +195,7 @@ public final class MD5Crypt {
 
      while (salt.length() < 8)
        {
-	 int index = (int) (randgen.nextFloat() * SALTCHARS.length());
+         int index = (int) (randgen.nextFloat() * SALTCHARS.length());
          salt.append(SALTCHARS.substring(index, index+1));
        }
 
@@ -261,19 +261,19 @@ public final class MD5Crypt {
     
     if (salt.startsWith(magic))
       {
-	salt = salt.substring(magic.length());
+        salt = salt.substring(magic.length());
       }
 
     /* It stops at the first '$', max 8 chars */
 
     if (salt.indexOf('$') != -1)
       {
-	salt = salt.substring(0, salt.indexOf('$'));
+        salt = salt.substring(0, salt.indexOf('$'));
       }
 
     if (salt.length() > 8)
       {
-	salt = salt.substring(0, 8);
+        salt = salt.substring(0, 8);
       }
 
     ctx = getMD5();
@@ -292,7 +292,7 @@ public final class MD5Crypt {
 
     for (int pl = password.length(); pl > 0; pl -= 16)
       {
-	ctx.update(finalState, 0, pl > 16 ? 16 : pl);
+        ctx.update(finalState, 0, pl > 16 ? 16 : pl);
       }
 
     /* the original code claimed that finalState was being cleared
@@ -305,14 +305,14 @@ public final class MD5Crypt {
 
     for (int i = password.length(); i != 0; i >>>=1)
       {
-	if ((i & 1) != 0)
-	  {
-	    ctx.update(finalState, 0, 1);
-	  }
-	else
-	  {
-	    ctx.update(password.getBytes(), 0, 1);
-	  }
+        if ((i & 1) != 0)
+          {
+            ctx.update(finalState, 0, 1);
+          }
+        else
+          {
+            ctx.update(password.getBytes(), 0, 1);
+          }
       }
 
     finalState = ctx.digest();
@@ -327,37 +327,37 @@ public final class MD5Crypt {
 
     for (int i = 0; i < 1000; i++)
       {
-	ctx1.reset();
+        ctx1.reset();
 
-	if ((i & 1) != 0)
-	  {
-	    ctx1.update(password.getBytes());
-	  }
-	else
-	  {
-	    ctx1.update(finalState, 0, 16);
-	  }
+        if ((i & 1) != 0)
+          {
+            ctx1.update(password.getBytes());
+          }
+        else
+          {
+            ctx1.update(finalState, 0, 16);
+          }
 
-	if ((i % 3) != 0)
-	  {
-	    ctx1.update(salt.getBytes());
-	  }
+        if ((i % 3) != 0)
+          {
+            ctx1.update(salt.getBytes());
+          }
 
-	if ((i % 7) != 0)
-	  {
-	    ctx1.update(password.getBytes());
-	  }
+        if ((i % 7) != 0)
+          {
+            ctx1.update(password.getBytes());
+          }
 
-	if ((i & 1) != 0)
-	  {
-	    ctx1.update(finalState, 0, 16);
-	  }
-	else
-	  {
-	    ctx1.update(password.getBytes());
-	  }
+        if ((i & 1) != 0)
+          {
+            ctx1.update(finalState, 0, 16);
+          }
+        else
+          {
+            ctx1.update(password.getBytes());
+          }
 
-	finalState = ctx1.digest();
+        finalState = ctx1.digest();
       }
 
     /* Now make the output string */

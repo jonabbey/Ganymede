@@ -91,11 +91,11 @@ public final class Sha256Crypt
   {
     try
       {
-	return MessageDigest.getInstance("SHA-256");
+        return MessageDigest.getInstance("SHA-256");
       }
     catch (java.security.NoSuchAlgorithmException ex)
       {
-	throw new RuntimeException(ex);
+        throw new RuntimeException(ex);
       }
   }
 
@@ -133,50 +133,50 @@ public final class Sha256Crypt
 
     if (saltStr != null)
       {
-	if (saltStr.startsWith(sha256_salt_prefix))
-	  {
-	    saltStr = saltStr.substring(sha256_salt_prefix.length());
-	  }
+        if (saltStr.startsWith(sha256_salt_prefix))
+          {
+            saltStr = saltStr.substring(sha256_salt_prefix.length());
+          }
 
-	if (saltStr.startsWith(sha256_rounds_prefix))
-	  {
-	    String num = saltStr.substring(sha256_rounds_prefix.length(), saltStr.indexOf('$'));
-	    int srounds = Integer.valueOf(num).intValue();
-	    saltStr = saltStr.substring(saltStr.indexOf('$')+1);
-	    rounds = Math.max(ROUNDS_MIN, Math.min(srounds, ROUNDS_MAX));
-	    include_round_count = true;
-	  }
+        if (saltStr.startsWith(sha256_rounds_prefix))
+          {
+            String num = saltStr.substring(sha256_rounds_prefix.length(), saltStr.indexOf('$'));
+            int srounds = Integer.valueOf(num).intValue();
+            saltStr = saltStr.substring(saltStr.indexOf('$')+1);
+            rounds = Math.max(ROUNDS_MIN, Math.min(srounds, ROUNDS_MAX));
+            include_round_count = true;
+          }
 
-	// gnu libc's crypt(3) implementation allows the salt to end
-	// in $ which is then ignored.
+        // gnu libc's crypt(3) implementation allows the salt to end
+        // in $ which is then ignored.
 
-	if (saltStr.endsWith("$"))
-	  {
-	    saltStr = saltStr.substring(0, saltStr.length() - 1);
-	  }
+        if (saltStr.endsWith("$"))
+          {
+            saltStr = saltStr.substring(0, saltStr.length() - 1);
+          }
 
-	if (saltStr.length() > SALT_LEN_MAX)
-	  {
-	    saltStr = saltStr.substring(0, SALT_LEN_MAX);
-	  }
+        if (saltStr.length() > SALT_LEN_MAX)
+          {
+            saltStr = saltStr.substring(0, SALT_LEN_MAX);
+          }
       }
     else
       {
-	java.util.Random randgen = new java.util.Random();
-	StringBuilder saltBuf = new StringBuilder();
+        java.util.Random randgen = new java.util.Random();
+        StringBuilder saltBuf = new StringBuilder();
 
-	while (saltBuf.length() < 16)
-	  {
-	    int index = (int) (randgen.nextFloat() * SALTCHARS.length());
-	    saltBuf.append(SALTCHARS.substring(index, index+1));
-	  }
+        while (saltBuf.length() < 16)
+          {
+            int index = (int) (randgen.nextFloat() * SALTCHARS.length());
+            saltBuf.append(SALTCHARS.substring(index, index+1));
+          }
 
-	saltStr = saltBuf.toString();
+        saltStr = saltBuf.toString();
       }
 
     if (roundsCount != 0)
       {
-	rounds = Math.max(ROUNDS_MIN, Math.min(roundsCount, ROUNDS_MAX));
+        rounds = Math.max(ROUNDS_MIN, Math.min(roundsCount, ROUNDS_MAX));
       }
 
     byte[] key = keyStr.getBytes();
@@ -195,21 +195,21 @@ public final class Sha256Crypt
 
     for (cnt = key.length; cnt > 32; cnt -= 32)
       {
-	ctx.update(alt_result, 0, 32);
+        ctx.update(alt_result, 0, 32);
       }
 
     ctx.update(alt_result, 0, cnt);
 
     for (cnt = key.length; cnt > 0; cnt >>= 1)
       {
-	if ((cnt & 1) != 0)
-	  {
-	    ctx.update(alt_result, 0, 32);
-	  }
-	else
-	  {
-	    ctx.update(key, 0, key.length);
-	  }
+        if ((cnt & 1) != 0)
+          {
+            ctx.update(alt_result, 0, 32);
+          }
+        else
+          {
+            ctx.update(key, 0, key.length);
+          }
       }
 
     alt_result = ctx.digest();
@@ -218,7 +218,7 @@ public final class Sha256Crypt
 
     for (cnt = 0; cnt < key.length; ++cnt)
       {
-	alt_ctx.update(key, 0, key.length);
+        alt_ctx.update(key, 0, key.length);
       }
 
     temp_result = alt_ctx.digest();
@@ -227,8 +227,8 @@ public final class Sha256Crypt
 
     for (cnt2 = 0, cnt = p_bytes.length; cnt >= 32; cnt -= 32)
       {
-	System.arraycopy(temp_result, 0, p_bytes, cnt2, 32);
-	cnt2 += 32;
+        System.arraycopy(temp_result, 0, p_bytes, cnt2, 32);
+        cnt2 += 32;
       }
 
     System.arraycopy(temp_result, 0, p_bytes, cnt2, cnt);
@@ -237,7 +237,7 @@ public final class Sha256Crypt
 
     for (cnt = 0; cnt < 16 + (alt_result[0]&0xFF); ++cnt)
       {
-	alt_ctx.update(salt, 0, salt.length);
+        alt_ctx.update(salt, 0, salt.length);
       }
 
     temp_result = alt_ctx.digest();
@@ -246,8 +246,8 @@ public final class Sha256Crypt
 
     for (cnt2 = 0, cnt = s_bytes.length; cnt >= 32; cnt -= 32)
       {
-	System.arraycopy(temp_result, 0, s_bytes, cnt2, 32);
-	cnt2 += 32;
+        System.arraycopy(temp_result, 0, s_bytes, cnt2, 32);
+        cnt2 += 32;
       }
 
     System.arraycopy(temp_result, 0, s_bytes, cnt2, cnt);
@@ -257,46 +257,46 @@ public final class Sha256Crypt
 
     for (cnt = 0; cnt < rounds; ++cnt)
       {
-	ctx.reset();
+        ctx.reset();
 
-	if ((cnt & 1) != 0)
-	  {
-	    ctx.update(p_bytes, 0, key.length);
-	  }
-	else
-	  {
-	    ctx.update (alt_result, 0, 32);
-	  }
+        if ((cnt & 1) != 0)
+          {
+            ctx.update(p_bytes, 0, key.length);
+          }
+        else
+          {
+            ctx.update (alt_result, 0, 32);
+          }
 
-	if (cnt % 3 != 0)
-	  {
-	    ctx.update(s_bytes, 0, salt.length);
-	  }
+        if (cnt % 3 != 0)
+          {
+            ctx.update(s_bytes, 0, salt.length);
+          }
 
-	if (cnt % 7 != 0)
-	  {
-	    ctx.update(p_bytes, 0, key.length);
-	  }
+        if (cnt % 7 != 0)
+          {
+            ctx.update(p_bytes, 0, key.length);
+          }
 
-	if ((cnt & 1) != 0)
-	  {
-	    ctx.update(alt_result, 0, 32);
-	  }
-	else
-	  {
-	    ctx.update(p_bytes, 0, key.length);
-	  }
+        if ((cnt & 1) != 0)
+          {
+            ctx.update(alt_result, 0, 32);
+          }
+        else
+          {
+            ctx.update(p_bytes, 0, key.length);
+          }
 
-	alt_result = ctx.digest();
+        alt_result = ctx.digest();
       }
 
     buffer = new StringBuilder(sha256_salt_prefix);
 
     if (include_round_count || rounds != ROUNDS_DEFAULT)
       {
-	buffer.append(sha256_rounds_prefix);
-	buffer.append(rounds);
-	buffer.append("$");
+        buffer.append(sha256_rounds_prefix);
+        buffer.append(rounds);
+        buffer.append("$");
       }
 
     buffer.append(saltStr);
@@ -331,8 +331,8 @@ public final class Sha256Crypt
 
     while (--size >= 0)
       {
-	result.append(itoa64.charAt((int) (v & 0x3f)));
-	v >>>= 6;
+        result.append(itoa64.charAt((int) (v & 0x3f)));
+        v >>>= 6;
       }
 
     return result.toString();
@@ -368,40 +368,40 @@ public final class Sha256Crypt
   {
     if (!sha256CryptText.startsWith(sha256_salt_prefix))
       {
-	return false;
+        return false;
       }
 
     sha256CryptText = sha256CryptText.substring(sha256_salt_prefix.length());
 
     if (sha256CryptText.startsWith(sha256_rounds_prefix))
       {
-	String num = sha256CryptText.substring(sha256_rounds_prefix.length(), sha256CryptText.indexOf('$'));
+        String num = sha256CryptText.substring(sha256_rounds_prefix.length(), sha256CryptText.indexOf('$'));
 
-	try
-	  {
-	    int srounds = Integer.valueOf(num).intValue();
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    return false;
-	  }
+        try
+          {
+            int srounds = Integer.valueOf(num).intValue();
+          }
+        catch (NumberFormatException ex)
+          {
+            return false;
+          }
 
-	sha256CryptText = sha256CryptText.substring(sha256CryptText.indexOf('$')+1);
+        sha256CryptText = sha256CryptText.substring(sha256CryptText.indexOf('$')+1);
       }
 
     if (sha256CryptText.indexOf('$') > (SALT_LEN_MAX + 1))
       {
-	return false;
+        return false;
       }
 
     sha256CryptText = sha256CryptText.substring(sha256CryptText.indexOf('$') + 1);
 
     for (int i = 0; i < sha256CryptText.length(); i++)
       {
-	if (itoa64.indexOf(sha256CryptText.charAt(i)) == -1)
-	  {
-	    return false;
-	  }
+        if (itoa64.indexOf(sha256CryptText.charAt(i)) == -1)
+          {
+            return false;
+          }
       }
 
     return true;
@@ -416,13 +416,13 @@ public final class Sha256Crypt
   {
     String msgs[] =
       {
-	"$5$saltstring", "Hello world!", "$5$saltstring$5B8vYYiY.CVt1RlTTf8KbXBH3hsxY/GNooZaBBGWEc5",
-	"$5$rounds=10000$saltstringsaltstring", "Hello world!", "$5$rounds=10000$saltstringsaltst$3xv.VbSHBb41AL9AvLeujZkZRBAwqFMz2.opqey6IcA",
-	"$5$rounds=5000$toolongsaltstring", "This is just a test", "$5$rounds=5000$toolongsaltstrin$Un/5jzAHMgOGZ5.mWJpuVolil07guHPvOW8mGRcvxa5",
-	"$5$rounds=1400$anotherlongsaltstring", "a very much longer text to encrypt.  This one even stretches over morethan one line.", "$5$rounds=1400$anotherlongsalts$Rx.j8H.h8HjEDGomFU8bDkXm3XIUnzyxf12oP84Bnq1",
-	"$5$rounds=77777$short", "we have a short salt string but not a short password", "$5$rounds=77777$short$JiO1O3ZpDAxGJeaDIuqCoEFysAe1mZNJRs3pw0KQRd/",
-	"$5$rounds=123456$asaltof16chars..", "a short string", "$5$rounds=123456$asaltof16chars..$gP3VQ/6X7UUEW3HkBn2w1/Ptq2jxPyzV/cZKmF/wJvD",
-	"$5$rounds=10$roundstoolow", "the minimum number is still observed", "$5$rounds=1000$roundstoolow$yfvwcWrQ8l/K0DAWyuPMDNHpIVlTQebY9l/gL972bIC"
+        "$5$saltstring", "Hello world!", "$5$saltstring$5B8vYYiY.CVt1RlTTf8KbXBH3hsxY/GNooZaBBGWEc5",
+        "$5$rounds=10000$saltstringsaltstring", "Hello world!", "$5$rounds=10000$saltstringsaltst$3xv.VbSHBb41AL9AvLeujZkZRBAwqFMz2.opqey6IcA",
+        "$5$rounds=5000$toolongsaltstring", "This is just a test", "$5$rounds=5000$toolongsaltstrin$Un/5jzAHMgOGZ5.mWJpuVolil07guHPvOW8mGRcvxa5",
+        "$5$rounds=1400$anotherlongsaltstring", "a very much longer text to encrypt.  This one even stretches over morethan one line.", "$5$rounds=1400$anotherlongsalts$Rx.j8H.h8HjEDGomFU8bDkXm3XIUnzyxf12oP84Bnq1",
+        "$5$rounds=77777$short", "we have a short salt string but not a short password", "$5$rounds=77777$short$JiO1O3ZpDAxGJeaDIuqCoEFysAe1mZNJRs3pw0KQRd/",
+        "$5$rounds=123456$asaltof16chars..", "a short string", "$5$rounds=123456$asaltof16chars..$gP3VQ/6X7UUEW3HkBn2w1/Ptq2jxPyzV/cZKmF/wJvD",
+        "$5$rounds=10$roundstoolow", "the minimum number is still observed", "$5$rounds=1000$roundstoolow$yfvwcWrQ8l/K0DAWyuPMDNHpIVlTQebY9l/gL972bIC"
       };
 
     System.out.println("Starting Sha256Crypt tests now...");
@@ -439,28 +439,28 @@ public final class Sha256Crypt
 
     if (result.equals(res))
       {
-	System.out.println("Passed well");
+        System.out.println("Passed well");
       }
     else
       {
-	System.out.println("Failed Badly");
+        System.out.println("Failed Badly");
       }
 
     for (int t=0; t<7; t++)
       {
-	result = Sha256_crypt(msgs[t*3+1], msgs[t*3], 0);
+        result = Sha256_crypt(msgs[t*3+1], msgs[t*3], 0);
 
-	System.out.println("test " + t + " result is:" + result);
-	System.out.println("test " + t + " should be:" + msgs[t*3+2]);
+        System.out.println("test " + t + " result is:" + result);
+        System.out.println("test " + t + " should be:" + msgs[t*3+2]);
 
-	if (result.equals(msgs[t*3+2]))
-	  {
-	    System.out.println("Passed well");
-	  }
-	else
-	  {
-	    System.out.println("Failed Badly");
-	  }
+        if (result.equals(msgs[t*3+2]))
+          {
+            System.out.println("Passed well");
+          }
+        else
+          {
+            System.out.println("Failed Badly");
+          }
       }
   }
 
