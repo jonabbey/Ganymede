@@ -9,7 +9,7 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -133,7 +133,7 @@ public class aboutJavaDialog extends JDialog {
 
   public aboutJavaDialog(JFrame frame, String title)
   {
-    super(frame, title, false);	// not modal, thanks
+    super(frame, title, false); // not modal, thanks
 
     gbl = new GridBagLayout();
     gbc = new GridBagConstraints();
@@ -143,15 +143,15 @@ public class aboutJavaDialog extends JDialog {
     pane.setOpaque(true);
 
     ImageIcon logo = new ImageIcon(PackageResources.getImageResource(frame,
-								     "small_ganymede_title.png",
-								     getClass()));
+                                                                     "small_ganymede_title.png",
+                                                                     getClass()));
     JLabel pictureLabel = new JLabel(logo);
 
     textbox = new JMultiLineLabel(true);
 
     JScrollPane scrollPane = new JScrollPane(textbox,
-					     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-					     JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+                                             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                                             JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     scrollPane.setBorder(null);
     scrollPane.setViewportBorder(null);
     scrollPane.getViewport().setOpaque(true);

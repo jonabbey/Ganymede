@@ -103,11 +103,11 @@ public class messageDialog extends StandardDialog {
 
     if (image == null)
       {
-	picture = new JLabel();
+        picture = new JLabel();
       }
     else
       {
-	picture = new JLabel(new ImageIcon(image));
+        picture = new JLabel(new ImageIcon(image));
       }
 
     text = new JEditorPane();

@@ -208,29 +208,29 @@ public class DialogRsrc {
 
     if (refClass == null)
       {
-	myRefClass = frame.getClass();
+        myRefClass = frame.getClass();
       }
     else
       {
-	myRefClass = refClass;
+        myRefClass = refClass;
       }
 
     if (imageName != null)
       {
-	if (imageCache.containsKey(imageName))
-	  {
-	    image = (Image) imageCache.get(imageName);
-	  }
-	else
-	  {
-	    image = arlut.csd.Util.PackageResources.getImageResource(frame, imageName, myRefClass);
+        if (imageCache.containsKey(imageName))
+          {
+            image = (Image) imageCache.get(imageName);
+          }
+        else
+          {
+            image = arlut.csd.Util.PackageResources.getImageResource(frame, imageName, myRefClass);
 
-	    imageCache.put(imageName, image);
-	  }
+            imageCache.put(imageName, image);
+          }
       }
     else
       {
-	this.image = null;
+        this.image = null;
       }
 
     objects = new Vector();
@@ -388,7 +388,7 @@ public class DialogRsrc {
   {
     if (debug)
       {
-	System.out.println("Adding password field: "  + isNew);
+        System.out.println("Adding password field: "  + isNew);
       }
 
     objects.addElement(new passwordThing(label, isNew));

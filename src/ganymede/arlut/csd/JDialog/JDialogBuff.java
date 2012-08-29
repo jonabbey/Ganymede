@@ -10,7 +10,7 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -168,8 +168,8 @@ public class JDialogBuff implements java.io.Serializable {
 
     if (Text != null)
       {
-	this.text = new StringBuffer();
-	this.text.append(Text);
+        this.text = new StringBuffer();
+        this.text.append(Text);
       }
 
     this.okText = OK;
@@ -319,7 +319,7 @@ public class JDialogBuff implements java.io.Serializable {
   {
     if (text == null)
       {
-	return null;
+        return null;
       }
 
     return text.toString();

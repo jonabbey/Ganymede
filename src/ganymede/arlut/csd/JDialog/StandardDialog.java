@@ -118,33 +118,33 @@ public class StandardDialog extends JDialog {
 
     try
       {
-	if (modality != null)
-	  {
-	    Class enumClass = Class.forName("java.awt.Dialog$ModalityType");
+        if (modality != null)
+          {
+            Class enumClass = Class.forName("java.awt.Dialog$ModalityType");
 
-	    Class[] paramTypes = new Class[] {enumClass};
-	    Method modalityMethod = java.awt.Dialog.class.getDeclaredMethod("setModalityType", paramTypes);
+            Class[] paramTypes = new Class[] {enumClass};
+            Method modalityMethod = java.awt.Dialog.class.getDeclaredMethod("setModalityType", paramTypes);
 
-	    modalityMethod.invoke(this, Enum.valueOf(enumClass, modality.name()));
-	    
-	    success = true;
-	  }
+            modalityMethod.invoke(this, Enum.valueOf(enumClass, modality.name()));
+            
+            success = true;
+          }
       }
     catch (RuntimeException ex)
       {
-	// to make FindBugs happier
+        // to make FindBugs happier
       }
     catch (Exception ex)
       {
-	// expecting ClassNotFoundException if we are running on Java
-	// 1.5, but NoSuchMethodException, InvocationTargetException,
-	// IllegalAccessException, SecurityException are also checked
-	// exceptions that reflection operations can generate
+        // expecting ClassNotFoundException if we are running on Java
+        // 1.5, but NoSuchMethodException, InvocationTargetException,
+        // IllegalAccessException, SecurityException are also checked
+        // exceptions that reflection operations can generate
       }
 
     if (!success)
       {
-	setModal(modality != ModalityType.MODELESS);
+        setModal(modality != ModalityType.MODELESS);
       }
   }
 
@@ -157,12 +157,12 @@ public class StandardDialog extends JDialog {
   {
     try
       {
-	return ("Mac OS X".equals(System.getProperty("os.name")) &&
-		"Mac OS X".equals(UIManager.getLookAndFeel().getName()));
+        return ("Mac OS X".equals(System.getProperty("os.name")) &&
+                "Mac OS X".equals(UIManager.getLookAndFeel().getName()));
       }
     catch (NullPointerException ex)
       {
-	return false;
+        return false;
       }
   }
 
@@ -175,7 +175,7 @@ public class StandardDialog extends JDialog {
   {
     if (modality == ModalityType.DOCUMENT_MODAL && isRunningOnMac())
       {
-	return true;
+        return true;
       }
 
     return false;
@@ -185,26 +185,26 @@ public class StandardDialog extends JDialog {
   {
     if (state && !already_shown)
       {
-	if (isMacSheet())
-	  {
-	    // set it as a modal sheet on the Mac
-	    //
-	    // XXX nb: Any document modal StandardDialog on the Mac
-	    // will need to have a button or buttons to close the
-	    // sheet, as sheets on the Mac do not have close controls,
-	    // etc.
+        if (isMacSheet())
+          {
+            // set it as a modal sheet on the Mac
+            //
+            // XXX nb: Any document modal StandardDialog on the Mac
+            // will need to have a button or buttons to close the
+            // sheet, as sheets on the Mac do not have close controls,
+            // etc.
 
-	    this.setLocationRelativeTo(null);
-	    getRootPane().putClientProperty("apple.awt.documentModalSheet", Boolean.TRUE);
-	  }
-	else
-	  {
-	    // center to the frame
+            this.setLocationRelativeTo(null);
+            getRootPane().putClientProperty("apple.awt.documentModalSheet", Boolean.TRUE);
+          }
+        else
+          {
+            // center to the frame
 
-	    this.setLocationRelativeTo(frame);
-	  }
+            this.setLocationRelativeTo(frame);
+          }
 
-	already_shown = true;
+        already_shown = true;
       }
 
     super.setVisible(state);

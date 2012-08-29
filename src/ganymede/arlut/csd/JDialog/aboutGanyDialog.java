@@ -9,7 +9,7 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -108,7 +108,7 @@ public class aboutGanyDialog extends JDialog {
 
   public aboutGanyDialog(JFrame frame, String title)
   {
-    super(frame, title, false);	// not modal, thanks
+    super(frame, title, false); // not modal, thanks
 
     gbl = new GridBagLayout();
     gbc = new GridBagConstraints();
@@ -118,14 +118,14 @@ public class aboutGanyDialog extends JDialog {
     pane.setOpaque(true);
 
     ImageIcon logo = new ImageIcon(PackageResources.getImageResource(frame,
-								     "small_ganymede_title.png",
-								     getClass()));
+                                                                     "small_ganymede_title.png",
+                                                                     getClass()));
     JLabel pictureLabel = new JLabel(logo);
 
     tabPane = new JTabbedPane();
 
     addTab(ts.l("init.about_tab"), ts.l("init.aboutText",
-					arlut.csd.Util.SVNVersion.getReleaseString()));
+                                        arlut.csd.Util.SVNVersion.getReleaseString()));
 
     gbc.anchor = GridBagConstraints.NORTHWEST;
     gbc.fill = GridBagConstraints.NONE;
@@ -171,8 +171,8 @@ public class aboutGanyDialog extends JDialog {
     textbox.setCaretPosition(0);
 
     JScrollPane scrollpane = new JScrollPane(textbox,
-					     JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-					     JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+                                             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                                             JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
     scrollpane.setBorder(null);
     scrollpane.setViewportBorder(null);
     scrollpane.getViewport().setOpaque(true);
