@@ -544,7 +544,7 @@ public class DBLog {
             message = message + description;
           }
 
-	message = StringUtils.ensureEndsWith(message, "\n\n");
+        message = StringUtils.ensureEndsWith(message, "\n\n");
 
         message = arlut.csd.Util.WordWrap.wrap(message, 78);
 
