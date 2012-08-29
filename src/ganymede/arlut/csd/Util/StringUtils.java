@@ -4,15 +4,16 @@
 
    Created: 24 March 2000
 
-
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2011
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -53,8 +54,8 @@ package arlut.csd.Util;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class contains a variety of utility String manipulating static 
- * methods for use in Ganymede.</P>
+ * <p>This class contains a variety of utility String manipulating static
+ * methods for use in Ganymede.</p>
  */
 
 public class StringUtils {
@@ -84,10 +85,10 @@ public class StringUtils {
   }
 
   /**
-   * <P>This method strips out any characters from inputString that are
-   * not present in legalChars.</P>
+   * <p>This method strips out any characters from inputString that are
+   * not present in legalChars.</p>
    *
-   * <P>This method will always return a non-null String.</P>
+   * <p>This method will always return a non-null String.</p>
    */
 
   public static String strip(String inputString, String legalChars)
@@ -113,13 +114,13 @@ public class StringUtils {
   }
 
   /**
-   * <P>This method tests to see if inputString consists of only characters
+   * <p>This method tests to see if inputString consists of only characters
    * contained within the legalChars string.  If inputString contains
    * no characters not contained within legalChars, containsOnly() will
-   * return true, otherwise it will return false.</P>
+   * return true, otherwise it will return false.</p>
    *
-   * <P>Note that containsOnly will always return true if inputString is
-   * null.</P>
+   * <p>Note that containsOnly will always return true if inputString is
+   * null.</p>
    */
 
   public static boolean containsOnly(String inputString, String legalChars)
@@ -148,8 +149,8 @@ public class StringUtils {
   }
 
   /**
-   * <P>This method takes an inputString and counts the number of times
-   * that patternString occurs within it.</P>
+   * <p>This method takes an inputString and counts the number of times
+   * that patternString occurs within it.</p>
    */
 
   public static int count(String inputString, String patternString)
@@ -178,12 +179,12 @@ public class StringUtils {
   }
 
   /**
-   * This method takes an input string and inserts back-slash escapes
-   * to protect single quote, double quote, newlines, and back-slash
-   * characters.
+   * <p>This method takes an input string and inserts back-slash
+   * escapes to protect single quote, double quote, newlines, and
+   * back-slash characters.</p>
    *
-   * This breaks horribly if the input string is already escaped, of
-   * course.
+   * <p>This breaks horribly if the input string is already escaped,
+   * of course.</p>
    */
 
   public static String escape(String inputString)
@@ -224,8 +225,9 @@ public class StringUtils {
   }
 
   /**
-   * This method takes an input string and handles back-slash escaping of single quotes,
-   * double quotes, newline sequence (\n), and \ itself.
+   * <p>This method takes an input string and handles back-slash
+   * escaping of single quotes, double quotes, newline sequence (\n),
+   * and \ itself.</p>
    */
 
   public static String de_escape(String inputString)
@@ -248,7 +250,7 @@ public class StringUtils {
                 escaping = true;
                 continue;
               }
-            
+
             resultAry[index++] = c;
           }
         else
@@ -303,15 +305,15 @@ public class StringUtils {
   }
 
   /**
-   * <P>This method takes a (possibly multiline) inputString 
+   * <p>This method takes a (possibly multiline) inputString
    * containing subsequences matching splitString and returns
    * an array of Strings which contain the contents of the inputString
    * between instances of the splitString.  The splitString divider
-   * will not be returned in the split strings.</P>
+   * will not be returned in the split strings.</p>
    *
-   * <P>In particular, this can be used to split a multiline String
+   * <p>In particular, this can be used to split a multiline String
    * into an array of Strings by using a splitString of "\n".  The
-   * resulting strings will not include their terminating newlines.</P>
+   * resulting strings will not include their terminating newlines.</p>
    */
 
   public static String[] split(String inputString, String splitString)
@@ -349,8 +351,8 @@ public class StringUtils {
   }
 
   /**
-   * <p>This method behaves like String.replace(), but replaces substrings rather than
-   * chars.</p>
+   * <p>This method behaves like String.replace(), but replaces
+   * substrings rather than chars.</p>
    */
 
   public static String replaceStr(String inputString, String splitString, String joinString)
@@ -375,8 +377,8 @@ public class StringUtils {
   }
 
   /**
-   * This static method can be used to compare two string variables,
-   * whether they are null or not.
+   * <p>This static method can be used to compare two string
+   * variables, whether they are null or not.</p>
    */
 
   public static boolean stringEquals(String stringA, String stringB)
@@ -395,17 +397,263 @@ public class StringUtils {
   }
 
   /**
+   * <p>Returns inputString with whatever characters from
+   * desiredEnding are required to ensure that the resulting String
+   * ends with desiredEnding.</p>
+   *
+   * <p>I.e., if inputString is "Hi!" (or "Hi!\n") and desiredEnding
+   * is "\n\n", then ensureEndsWith() will return "Hi!\n\n".  If
+   * inputString is "Hi!\n\n", "Hi!\n\n\n", etc., then inputString
+   * will be returned as is, because it already ends with
+   * desiredEnding.</p>
+   */
+
+  public static String ensureEndsWith(String inputString, String desiredEnding)
+  {
+    if (inputString.endsWith(desiredEnding))
+      {
+	return inputString;
+      }
+
+    for (int i = 1; i < desiredEnding.length(); i++)
+      {
+	String suffix = desiredEnding.substring(i);
+
+	if (inputString.endsWith(suffix))
+	  {
+	    return inputString + desiredEnding.substring(desiredEnding.length() - i);
+	  }
+      }
+
+    return inputString + desiredEnding;
+  }
+
+  /**
+   * <p>Appends the minimum number of characters to 'in' necessary to
+   * ensure that 'in' ends with the contents of desiredEnding.</p>
+   */
+
+  public static void ensureEndsWith(StringBuffer in, String desiredEnding)
+  {
+    if (endsWith(in, desiredEnding))
+      {
+	return;
+      }
+
+    for (int i = 1; i < desiredEnding.length(); i++)
+      {
+	String suffix = desiredEnding.substring(i);
+
+	if (endsWith(in, suffix))
+	  {
+	    in.append(desiredEnding.substring(desiredEnding.length() - i));
+	    return;
+	  }
+      }
+
+    in.append(desiredEnding);
+  }
+
+  /**
+   * <p>Returns true if the StringBuffer parameter ends with the
+   * ending String.</p>
+   */
+
+  public static boolean endsWith(StringBuffer in, String ending)
+  {
+    return (in.length() >= ending.length() &&
+	    (in.substring(in.length() - ending.length()).equals(ending)));
+  }
+
+  /**
+   * <p>Appends the minimum number of characters to 'in' necessary to
+   * ensure that 'in' ends with the contents of desiredEnding.</p>
+   */
+
+  public static void ensureEndsWith(StringBuilder in, String desiredEnding)
+  {
+    if (endsWith(in, desiredEnding))
+      {
+	return;
+      }
+
+    for (int i = 1; i < desiredEnding.length(); i++)
+      {
+	String suffix = desiredEnding.substring(i);
+
+	if (endsWith(in, suffix))
+	  {
+	    in.append(desiredEnding.substring(desiredEnding.length() - i));
+	    return;
+	  }
+      }
+
+    in.append(desiredEnding);
+  }
+
+  /**
+   * <p>Returns true if the StringBuilder parameter ends with the
+   * ending String.</p>
+   */
+
+  public static boolean endsWith(StringBuilder in, String ending)
+  {
+    return (in.length() >= ending.length() &&
+	    (in.substring(in.length() - ending.length()).equals(ending)));
+  }
+
+  /**
    * <p>Test rig</p>
    */
 
-  /*
   public static void main(String argv[])
   {
-    String test = "10.8.[100-21].[1-253]\n10.3.[4-8].[1-253]\n129.116.[224-227].[1-253]";
-    //String test = "10.8.[100-21].[1-253]";
+    System.out.println("\n-------------------- String ensureEndsWith Tests --------------------\n");
 
-    System.out.println("split() test");
-    System.out.println("------------------------------------------------------------\n");
+    String test = "Hi!";
+    String test2 = "Hi!n";
+    String test3 = "Hi!nn";
+    String test4 = "Hi!nnn";
+
+    if (ensureEndsWith(test, "nn").equals(test3))
+      {
+	System.out.println("Pass 1");
+      }
+    else
+      {
+	System.out.println("Fail 1");
+      }
+
+    if (ensureEndsWith(test2, "nn").equals(test3))
+      {
+	System.out.println("Pass 2");
+      }
+    else
+      {
+	System.out.println("Fail 2");
+      }
+
+    if (ensureEndsWith(test3, "nn").equals(test3))
+      {
+	System.out.println("Pass 3");
+      }
+    else
+      {
+	System.out.println("Fail 3");
+      }
+
+    if (ensureEndsWith(test4, "nn").equals(test4))
+      {
+	System.out.println("Pass 4");
+      }
+    else
+      {
+	System.out.println("Fail 4");
+      }
+
+    System.out.println("\n-------------------- StringBuffer ensureEndsWith Tests --------------------\n");
+
+    StringBuffer testBuf = new StringBuffer(test);
+    ensureEndsWith(testBuf, "nn");
+
+    if (testBuf.toString().equals(test3))
+      {
+	System.out.println("Pass 1");
+      }
+    else
+      {
+	System.out.println("Fail 1");
+      }
+
+    testBuf = new StringBuffer(test2);
+    ensureEndsWith(testBuf, "nn");
+
+    if (testBuf.toString().equals(test3))
+      {
+	System.out.println("Pass 2");
+      }
+    else
+      {
+	System.out.println("Fail 2");
+      }
+
+    testBuf = new StringBuffer(test3);
+    ensureEndsWith(testBuf, "nn");
+
+    if (testBuf.toString().equals(test3))
+      {
+	System.out.println("Pass 3");
+      }
+    else
+      {
+	System.out.println("Fail 3");
+      }
+
+    testBuf = new StringBuffer(test4);
+    ensureEndsWith(testBuf, "nn");
+
+    if (testBuf.toString().equals(test4))
+      {
+	System.out.println("Pass 4");
+      }
+    else
+      {
+	System.out.println("Fail 4");
+      }
+
+    System.out.println("\n-------------------- StringBuilder ensureEndsWith Tests --------------------\n");
+
+    StringBuilder testBuild = new StringBuilder(test);
+    ensureEndsWith(testBuild, "nn");
+
+    if (testBuild.toString().equals(test3))
+      {
+	System.out.println("Pass 1");
+      }
+    else
+      {
+	System.out.println("Fail 1");
+      }
+
+    testBuild = new StringBuilder(test2);
+    ensureEndsWith(testBuild, "nn");
+
+    if (testBuild.toString().equals(test3))
+      {
+	System.out.println("Pass 2");
+      }
+    else
+      {
+	System.out.println("Fail 2");
+      }
+
+    testBuild = new StringBuilder(test3);
+    ensureEndsWith(testBuild, "nn");
+
+    if (testBuild.toString().equals(test3))
+      {
+	System.out.println("Pass 3");
+      }
+    else
+      {
+	System.out.println("Fail 3");
+      }
+
+    testBuild = new StringBuilder(test4);
+    ensureEndsWith(testBuild, "nn");
+
+    if (testBuild.toString().equals(test4))
+      {
+	System.out.println("Pass 4");
+      }
+    else
+      {
+	System.out.println("Fail 4");
+      }
+
+    System.out.println("\n-------------------- split() Tests --------------------\n");
+
+    test = "10.8.[100-21].[1-253]\n10.3.[4-8].[1-253]\n129.116.[224-227].[1-253]";
 
     String results[] = StringUtils.split(test, "\n");
 
@@ -420,8 +668,8 @@ public class StringUtils {
 	  }
       }
 
-    System.out.println("\ncontainsOnly() test");
-    System.out.println("------------------------------------------------------------\n");
+    System.out.println("\n-------------------- containsOnly() Tests --------------------\n");
+
 
     if (StringUtils.containsOnly(test, "0123456789.[-]\n"))
       {
@@ -459,5 +707,4 @@ public class StringUtils {
 	System.out.println("Fail test 4");
       }
   }
-  */
 }
