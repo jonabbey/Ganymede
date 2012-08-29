@@ -1,5 +1,3 @@
-stty -echo; /opt/bin/java arlut.csd.ganymede.client.xmlclient properties=/home/broccol/ganymede-client/etc/ganymede.properties '-dumpSchema' 'username=broccol:supergash';SAVE=$?;stty echo;exit $SAVE
-
 <ganyschema>
   <namespaces>
     <namespace name="ownerbase" case-sensitive="false"/>
