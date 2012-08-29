@@ -8,7 +8,7 @@
    Module By: Navin Manohar, Michael Mulvaney, and Jonathan Abbey
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -94,7 +94,7 @@ import arlut.csd.Util.TranslationService;
 /*------------------------------------------------------------------------------
                                                                            class
                                                                   JpanelCalendar
-	
+        
 ------------------------------------------------------------------------------*/
 
 /**
@@ -242,20 +242,20 @@ public class JpanelCalendar extends JPanel implements ActionListener {
    *
    */
   public JpanelCalendar(GregorianCalendar parentCalendar, JsetValueCallback callback, 
-			boolean showTime, boolean editable)
+                        boolean showTime, boolean editable)
   {
     this(parentCalendar, callback, showTime, false, editable);
   }
 
   public JpanelCalendar(JpopUpCalendar pC,GregorianCalendar parentCalendar, 
-			JsetValueCallback callback, boolean editable) 
+                        JsetValueCallback callback, boolean editable) 
   {
     this(pC, parentCalendar, callback, true, false, editable);
   }
 
   public JpanelCalendar(JpopUpCalendar pC,GregorianCalendar parentCalendar, 
-			JsetValueCallback callback, boolean showTime, 
-			boolean editable) 
+                        JsetValueCallback callback, boolean showTime, 
+                        boolean editable) 
   {
     this(pC, parentCalendar, callback, showTime, false, editable);
   }
@@ -267,16 +267,16 @@ public class JpanelCalendar extends JPanel implements ActionListener {
    */
 
   public JpanelCalendar(JpopUpCalendar pC,
-			GregorianCalendar parentCalendar, 
-			JsetValueCallback callback, 
-			boolean showTime, boolean compact,
-			boolean editable) 
+                        GregorianCalendar parentCalendar, 
+                        JsetValueCallback callback, 
+                        boolean showTime, boolean compact,
+                        boolean editable) 
   {
     this(parentCalendar,callback, showTime, compact, editable);
 
     if (pC == null)
       {
-	throw new IllegalArgumentException("popUpCalendar parameter is null");
+        throw new IllegalArgumentException("popUpCalendar parameter is null");
       }
 
     pCal = pC;
@@ -296,21 +296,21 @@ public class JpanelCalendar extends JPanel implements ActionListener {
    */
 
   public JpanelCalendar(GregorianCalendar parentCalendar, 
-			JsetValueCallback callback,  
-			boolean showTime, boolean compact,
-			boolean editable)
+                        JsetValueCallback callback,  
+                        boolean showTime, boolean compact,
+                        boolean editable)
   {
     if (parentCalendar == null)
       {
-	// if we weren't given a calendar object, create a default
-	// calendar, which will be initialized to current date/time.
+        // if we weren't given a calendar object, create a default
+        // calendar, which will be initialized to current date/time.
 
-	parentCalendar = new GregorianCalendar(); 
-	dateIsSet = false;
+        parentCalendar = new GregorianCalendar(); 
+        dateIsSet = false;
       }
     else
       {
-	dateIsSet = true;
+        dateIsSet = true;
       }
 
     this.showTime = showTime;
@@ -319,14 +319,14 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
     if (debug)
       {
-	if (editable)
-	  {
-	    System.err.println("JpanelCalendar.editable == true!");
-	  }
-	else
-	  {
-	    System.err.println("JpanelCalendar.editable == false!");
-	  }
+        if (editable)
+          {
+            System.err.println("JpanelCalendar.editable == true!");
+          }
+        else
+          {
+            System.err.println("JpanelCalendar.editable == false!");
+          }
       }
 
     this.callback = callback;
@@ -422,12 +422,12 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
     for (int i=0;i<37;i++) 
       {
-	gbc.gridx = i % 7;
-	gbc.gridy = (i / 7) + 1;
+        gbc.gridx = i % 7;
+        gbc.gridy = (i / 7) + 1;
 
-	_datebuttonArray[i] = new JdateButton(this, compact);
-	gbl.setConstraints(_datebuttonArray[i], gbc);
-	daysPanel.add(_datebuttonArray[i]);
+        _datebuttonArray[i] = new JdateButton(this, compact);
+        gbl.setConstraints(_datebuttonArray[i], gbc);
+        daysPanel.add(_datebuttonArray[i]);
       }
 
     /*    daysPanel.setBackground(new Color(200,200,255));  // light blue*/
@@ -454,20 +454,20 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
     if (showTime)
       {
-	timePanel = new JTimePanel(this);
+        timePanel = new JTimePanel(this);
 
-	if (editable)
-	  {
-	    // "Please choose a time of day:"
-	    timePanel.setBorder(new TitledBorder(ts.l("init.chooseTitle")));
-	  }
-	else
-	  {
-	    // "Time of day:"
-	    timePanel.setBorder(new TitledBorder(ts.l("init.displayTitle")));
-	  }
+        if (editable)
+          {
+            // "Please choose a time of day:"
+            timePanel.setBorder(new TitledBorder(ts.l("init.chooseTitle")));
+          }
+        else
+          {
+            // "Time of day:"
+            timePanel.setBorder(new TitledBorder(ts.l("init.displayTitle")));
+          }
 
-	southPanel.add(timePanel,"Center");
+        southPanel.add(timePanel,"Center");
       }
 
     mainPanel.add(southPanel,"South"); //# James new
@@ -495,62 +495,62 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   {
     if (date == null)
       {
-	if (debug)
-	  {
-	    System.err.println("JpanelCalendar.setDate(): null value");
-	  }
+        if (debug)
+          {
+            System.err.println("JpanelCalendar.setDate(): null value");
+          }
 
-	dateIsSet = false;
+        dateIsSet = false;
 
-	// and re-draw
+        // and re-draw
 
-	if (debug)
-	  {
-	    System.err.println("JpanelCalendar.setDate(): writeDates after cleared");
-	  }
+        if (debug)
+          {
+            System.err.println("JpanelCalendar.setDate(): writeDates after cleared");
+          }
 
-	writeDates();
+        writeDates();
       }
     else
       {
-	dateIsSet = true;
+        dateIsSet = true;
 
-	if (debug)
-	  {
-	    System.err.println("JpanelCalendar.setDate(): setting to " + date);
-	  }
+        if (debug)
+          {
+            System.err.println("JpanelCalendar.setDate(): setting to " + date);
+          }
 
-	// refresh the visible calendar page (month/year) to the newly set date
+        // refresh the visible calendar page (month/year) to the newly set date
 
-	visibleDate_calendar.setTime(date);
+        visibleDate_calendar.setTime(date);
 
-	// refresh the recorded time
+        // refresh the recorded time
 
-	selectedDate_calendar.setTime(date);
+        selectedDate_calendar.setTime(date);
 
-	if (debug)
-	  {
-	    System.err.println("JpanelCalendar.setDate(): calling writeDates()");
-	  }
+        if (debug)
+          {
+            System.err.println("JpanelCalendar.setDate(): calling writeDates()");
+          }
 
-	// do the calendar calculations to update the display
+        // do the calendar calculations to update the display
 
-	Calendar c = Calendar.getInstance();
-	c.setTime(date);
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
 
-	// refresh the month visible in the month combo box
+        // refresh the month visible in the month combo box
 
-	monthYearPanel.setMonth(c.get(Calendar.MONTH));
+        monthYearPanel.setMonth(c.get(Calendar.MONTH));
 
-	// set the year and re-draw.. note that setYear calls writeDates()
-	// for us so we don't have to do that here.
+        // set the year and re-draw.. note that setYear calls writeDates()
+        // for us so we don't have to do that here.
 
-	setYear(c.get(Calendar.YEAR));
+        setYear(c.get(Calendar.YEAR));
 
-	if (debug)
-	  {
-	    System.err.println("JpanelCalendar.setDate(): returned from writeDates()");
-	  }
+        if (debug)
+          {
+            System.err.println("JpanelCalendar.setDate(): returned from writeDates()");
+          }
       }
 
     this.previousDate = date;
@@ -704,12 +704,12 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   {
     if (e.getSource() == closeButton)
       {
-	if (debug)
-	  {
-	    System.err.println("Closing pCal");
-	  }
-	
-	pCal.setVisible(false);
+        if (debug)
+          {
+            System.err.println("Closing pCal");
+          }
+        
+        pCal.setVisible(false);
       }
     else if (e.getSource() == resetButton)
       {
@@ -751,7 +751,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
     if (timePanel != null)
       {
-	timePanel.update();
+        timePanel.update();
       }
   }
 
@@ -764,75 +764,75 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   {
     try
       {
-	inhibitPainting = true;
+        inhibitPainting = true;
 
-	updateDate();
+        updateDate();
 
-	// get a local copy of the calendar object indicating the month and year
-	// shown
+        // get a local copy of the calendar object indicating the month and year
+        // shown
 
-	GregorianCalendar temp  = (GregorianCalendar) visibleDate_calendar.clone();
+        GregorianCalendar temp  = (GregorianCalendar) visibleDate_calendar.clone();
 
-	// find the first day of the month
+        // find the first day of the month
 
-	temp.add(Calendar.DATE,-(temp.get(Calendar.DATE)-1));
+        temp.add(Calendar.DATE,-(temp.get(Calendar.DATE)-1));
 
-	// this is presumably here for a bug workaround
-	
-	temp.setTime(temp.getTime());
+        // this is presumably here for a bug workaround
+        
+        temp.setTime(temp.getTime());
    
-	int startDay = temp.get(Calendar.DAY_OF_WEEK);
+        int startDay = temp.get(Calendar.DAY_OF_WEEK);
 
-	for (int i = 0; i<startDay-1; i++)
-	  {
-	    _datebuttonArray[i].hideYourself();
-	  }
+        for (int i = 0; i<startDay-1; i++)
+          {
+            _datebuttonArray[i].hideYourself();
+          }
 
-	int numDays;
+        int numDays;
     
-	if (temp.isLeapYear(temp.get(Calendar.YEAR)))
-	  {
-	    numDays = leapDays[temp.get(Calendar.MONTH)];
-	  }
-	else
-	  {
-	    numDays = monthDays[temp.get(Calendar.MONTH)];
-	  }
+        if (temp.isLeapYear(temp.get(Calendar.YEAR)))
+          {
+            numDays = leapDays[temp.get(Calendar.MONTH)];
+          }
+        else
+          {
+            numDays = monthDays[temp.get(Calendar.MONTH)];
+          }
 
-	int day = 1;
+        int day = 1;
 
-	for (int i = startDay-1; i < (startDay+numDays-1); i++,day++)
-	  {
-	    if (dateIsSet &&
-		visibleDate_calendar.get(Calendar.YEAR) == selectedDate_calendar.get(Calendar.YEAR) &&
-		visibleDate_calendar.get(Calendar.MONTH) == selectedDate_calendar.get(Calendar.MONTH) &&
-		selectedDate_calendar.get(Calendar.DATE) == day)
-	      {
-		_datebuttonArray[i].setText(Integer.toString(day,10));
-		_datebuttonArray[i].setFont(todayFont);
-		_datebuttonArray[i].showYourself(Color.red);
-	      }
-	    else 
-	      {
-		_datebuttonArray[i].setText(Integer.toString(day,10));
-		_datebuttonArray[i].setFont(notTodayFont);
-		_datebuttonArray[i].showYourself(Color.black);
-	      }
-	  }
+        for (int i = startDay-1; i < (startDay+numDays-1); i++,day++)
+          {
+            if (dateIsSet &&
+                visibleDate_calendar.get(Calendar.YEAR) == selectedDate_calendar.get(Calendar.YEAR) &&
+                visibleDate_calendar.get(Calendar.MONTH) == selectedDate_calendar.get(Calendar.MONTH) &&
+                selectedDate_calendar.get(Calendar.DATE) == day)
+              {
+                _datebuttonArray[i].setText(Integer.toString(day,10));
+                _datebuttonArray[i].setFont(todayFont);
+                _datebuttonArray[i].showYourself(Color.red);
+              }
+            else 
+              {
+                _datebuttonArray[i].setText(Integer.toString(day,10));
+                _datebuttonArray[i].setFont(notTodayFont);
+                _datebuttonArray[i].showYourself(Color.black);
+              }
+          }
 
-	for (int i=startDay+numDays-1;i<37;i++)
-	  {
-	    _datebuttonArray[i].hideYourself();
-	  }
+        for (int i=startDay+numDays-1;i<37;i++)
+          {
+            _datebuttonArray[i].hideYourself();
+          }
 
-	if (showTime)
-	  {
-	    timePanel.update();
-	  }
+        if (showTime)
+          {
+            timePanel.update();
+          }
       }
     finally
       {
-	inhibitPainting = false;
+        inhibitPainting = false;
       }
 
     repaint();
@@ -842,7 +842,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   {
     if (!inhibitPainting)
       {
-	super.update(g);
+        super.update(g);
       }
   }
 
@@ -857,29 +857,29 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   {
     if (debug)
       {
-	System.err.println("buttonPressed");
+        System.err.println("buttonPressed");
       }
 
     if (!editable)
       {
-	return;
+        return;
       }
 
     if (_bttn == null) 
       {
-	throw new IllegalArgumentException("The dateButton parameter is null");
+        throw new IllegalArgumentException("The dateButton parameter is null");
       }
 
     if (_bttn.getText().equals(""))
       {
-	return;			// no-op
+        return;                 // no-op
       }
     
     int date = Integer.parseInt(_bttn.getText(),10);
 
     if (debug)
       {
-	System.err.println("setting date to day " + date);
+        System.err.println("setting date to day " + date);
       }
 
     visibleDate_calendar.set(Calendar.DATE,date);
@@ -890,7 +890,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
     if (debug)
       {
-	System.err.println("selectedDate_calendar = " + selectedDate_calendar.getTime());
+        System.err.println("selectedDate_calendar = " + selectedDate_calendar.getTime());
       }
 
     // clear the button that was pressed previously
@@ -899,27 +899,27 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
     try 
       {
-	if (callback != null)
-	  {
-	    // we're going to count on our parent doing an error dialog display if
-	    // needed.
+        if (callback != null)
+          {
+            // we're going to count on our parent doing an error dialog display if
+            // needed.
 
-	    if (!callback.setValuePerformed(new JSetValueObject(this, selectedDate_calendar.getTime())))
-	      {
-		if (debug)
-		  {
-		    System.err.println("JpanelCalendar.buttonPressed(): oops, unacceptable date.. reverting to " + 
-				       previousDate);
-		  }
+            if (!callback.setValuePerformed(new JSetValueObject(this, selectedDate_calendar.getTime())))
+              {
+                if (debug)
+                  {
+                    System.err.println("JpanelCalendar.buttonPressed(): oops, unacceptable date.. reverting to " + 
+                                       previousDate);
+                  }
 
-		setDate(previousDate);
+                setDate(previousDate);
 
-		if (debug)
-		  {
-		    System.err.println("JpanelCalendar.buttonPressed(): reverted date.");
-		  }
-	      }
-	  }
+                if (debug)
+                  {
+                    System.err.println("JpanelCalendar.buttonPressed(): reverted date.");
+                  }
+              }
+          }
       }
     catch (RemoteException re) 
       {
@@ -937,48 +937,48 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   {
     if (!editable)
       {
-	return;
+        return;
       }
 
     if (_field == null)
       {
-	throw new IllegalArgumentException("_field is null");
+        throw new IllegalArgumentException("_field is null");
       }
 
     if (_field.equals("hour"))
       {
-	visibleDate_calendar.set(Calendar.HOUR_OF_DAY,_value);
-	selectedDate_calendar.set(Calendar.HOUR_OF_DAY,_value);
+        visibleDate_calendar.set(Calendar.HOUR_OF_DAY,_value);
+        selectedDate_calendar.set(Calendar.HOUR_OF_DAY,_value);
       }
     else if (_field.equals("min")) 
       {
-	visibleDate_calendar.set(Calendar.MINUTE,_value);
-	selectedDate_calendar.set(Calendar.MINUTE,_value);
+        visibleDate_calendar.set(Calendar.MINUTE,_value);
+        selectedDate_calendar.set(Calendar.MINUTE,_value);
       }
     else if (_field.equals("sec")) 
       {
-	visibleDate_calendar.set(Calendar.SECOND,_value);
-	selectedDate_calendar.set(Calendar.SECOND,_value);
+        visibleDate_calendar.set(Calendar.SECOND,_value);
+        selectedDate_calendar.set(Calendar.SECOND,_value);
       }
     else
       {
-	return;
+        return;
       }
 
     try 
       {
-	if (!callback.setValuePerformed(new JSetValueObject(this, selectedDate_calendar.getTime())))
-	  {
-	    // constructing a JErrorDialog causes it to be shown.
+        if (!callback.setValuePerformed(new JSetValueObject(this, selectedDate_calendar.getTime())))
+          {
+            // constructing a JErrorDialog causes it to be shown.
 
-	    // "Date Out Of Range"	    
-	    // "The date you have chosen is out of the acceptable range."
-	    new JErrorDialog(new JFrame(),
-			     ts.l("timeChanged.dateRangeError"), 
-			     ts.l("timeChanged.dateRangeErrorText"), StandardDialog.ModalityType.DOCUMENT_MODAL);
-	    
-	    setDate(previousDate);
-	  }
+            // "Date Out Of Range"          
+            // "The date you have chosen is out of the acceptable range."
+            new JErrorDialog(new JFrame(),
+                             ts.l("timeChanged.dateRangeError"), 
+                             ts.l("timeChanged.dateRangeErrorText"), StandardDialog.ModalityType.DOCUMENT_MODAL);
+            
+            setDate(previousDate);
+          }
       }
     catch (RemoteException re) 
       {
@@ -1038,17 +1038,17 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
   {
     if (parent == null)
       {
-	throw new IllegalArgumentException("The parameter parent is null");
+        throw new IllegalArgumentException("The parameter parent is null");
       }
 
     if (compact)
       {
-	setMargin(new Insets(1,1,1,1));
-	setBorderPainted(false);
+        setMargin(new Insets(1,1,1,1));
+        setBorderPainted(false);
       }
     else
       {
-	setMargin(new Insets(3,5,3,5));
+        setMargin(new Insets(3,5,3,5));
       }
 
     my_parent = parent;
@@ -1063,25 +1063,25 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
   {
     if (active)
       {
-	if (!getForeground().equals(fg))
-	  {
-	    setForeground(fg);
-	  }
+        if (!getForeground().equals(fg))
+          {
+            setForeground(fg);
+          }
       }
     else
       {
-	setBorderPainted(true);
+        setBorderPainted(true);
 
-	setForeground(fg);
+        setForeground(fg);
 
-	if (!getBackground().equals(bg))
-	  {
-	    setBackground(bg); // reset background
-	  }
-	
-	setEnabled(true);
+        if (!getBackground().equals(bg))
+          {
+            setBackground(bg); // reset background
+          }
+        
+        setEnabled(true);
 
-	this.active = true;
+        this.active = true;
       }
   }
 
@@ -1089,24 +1089,24 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
   {
     if (active)
       {
-	setText("  ");
+        setText("  ");
 
-	if (isBorderPainted())
-	  {
-	    setBorderPainted(false);
-	  }
+        if (isBorderPainted())
+          {
+            setBorderPainted(false);
+          }
 
-	if (!getForeground().equals(getBackground()))
-	  {
-	    setForeground(getBackground());
-	  }
+        if (!getForeground().equals(getBackground()))
+          {
+            setForeground(getBackground());
+          }
 
-	if (isEnabled())
-	  {
-	    setEnabled(false);
-	  }
+        if (isEnabled())
+          {
+            setEnabled(false);
+          }
 
-	this.active = false;
+        this.active = false;
       }
   }
 
@@ -1114,12 +1114,12 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
   {
     if (my_parent == null)
       {
-	throw new NullPointerException("dateButton: null parent");
+        throw new NullPointerException("dateButton: null parent");
       }
 
     if (this.active)
       {
-	my_parent.buttonPressed(this);
+        my_parent.buttonPressed(this);
       }
   }
 
@@ -1128,7 +1128,7 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
   {
     if (isBorderPainted())
       {
-	super.setBackground(Color.lightGray.brighter());
+        super.setBackground(Color.lightGray.brighter());
       }
   }
 
@@ -1136,7 +1136,7 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
   {
     if (isBorderPainted())
       {
-	super.setBackground(bg);
+        super.setBackground(bg);
       }
   }
 
@@ -1148,7 +1148,7 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
 /*------------------------------------------------------------------------------
                                                                            class
                                                                       JTimePanel
-	
+        
 ------------------------------------------------------------------------------*/
 
 /**
@@ -1183,7 +1183,7 @@ class JTimePanel extends JPanel implements JsetValueCallback {
   {
     if (parent == null)
       {
-	throw new IllegalArgumentException("The parameter parent is null");
+        throw new IllegalArgumentException("The parameter parent is null");
       }
     
     container = parent;
@@ -1194,9 +1194,9 @@ class JTimePanel extends JPanel implements JsetValueCallback {
 
     if (!parent.isEditable())
       {
-	_hour.setEditable(false);
-	_min.setEditable(false);
-	_sec.setEditable(false);
+        _hour.setEditable(false);
+        _min.setEditable(false);
+        _sec.setEditable(false);
       }
 
   
@@ -1262,32 +1262,32 @@ class JTimePanel extends JPanel implements JsetValueCallback {
 
     if (comp == null)
       {
-	throw new RuntimeException("comp is null");
+        throw new RuntimeException("comp is null");
       }
 
     if (obj == null)
       {
-	throw new RuntimeException("obj is null");
+        throw new RuntimeException("obj is null");
       }
 
     if (comp != _hour && comp != _min && comp != _sec)
       {
-	throw new RuntimeException("processEvent called from invalid component");
+        throw new RuntimeException("processEvent called from invalid component");
       }
 
     int val = ((Integer)obj).intValue();
 
     if (comp == _hour)
       {
-	container.timeChanged("hour",val); // "hour"
+        container.timeChanged("hour",val); // "hour"
       }
     else if (comp == _min)
       {
-	container.timeChanged("min",val); // "min"
+        container.timeChanged("min",val); // "min"
       }
     else
       {
-	container.timeChanged("sec",val); // "sec"
+        container.timeChanged("sec",val); // "sec"
       }
 
     return true;
@@ -1297,7 +1297,7 @@ class JTimePanel extends JPanel implements JsetValueCallback {
 /*------------------------------------------------------------------------------
                                                                            class
                                                                     JYearChooser
-	
+        
 ------------------------------------------------------------------------------*/
 
 /**
@@ -1359,15 +1359,15 @@ class JYearChooser extends JPanel implements ActionListener {
   {
     if (e.getSource() == up)
       {
-	int year = year_field.getValue().intValue();
-	year_field.setValue(year+1);
-	callback.updateYear(year+1);
+        int year = year_field.getValue().intValue();
+        year_field.setValue(year+1);
+        callback.updateYear(year+1);
       }
     else if (e.getSource() == down)
       {
-	int year = year_field.getValue().intValue();
-	year_field.setValue(year-1);
-	callback.updateYear(year-1);
+        int year = year_field.getValue().intValue();
+        year_field.setValue(year-1);
+        callback.updateYear(year-1);
       }
   }
 
@@ -1380,7 +1380,7 @@ class JYearChooser extends JPanel implements ActionListener {
   {
     if (debug)
       {
-	System.out.println("Setting to year: " + year);
+        System.out.println("Setting to year: " + year);
       }
 
     year_field.setValue(year);
@@ -1396,7 +1396,7 @@ class JYearChooser extends JPanel implements ActionListener {
 /*------------------------------------------------------------------------------
                                                                            class
                                                                  JMonthYearPanel
-	
+        
 ------------------------------------------------------------------------------*/
 
 /**
@@ -1445,11 +1445,11 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
 
     if (editable)
       {
-	initializeEditable();
+        initializeEditable();
       }
     else
       {
-	initializeNonEditable();
+        initializeNonEditable();
       }
   }
 
@@ -1465,18 +1465,18 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
   {
     if (index < 0 || index > 11)
       {
-	throw new IllegalArgumentException("month out of range: " + index);
+        throw new IllegalArgumentException("month out of range: " + index);
       }
 
     currentMonth = index;
 
     if (editable)
       {
-	month.setSelectedIndex(currentMonth);
+        month.setSelectedIndex(currentMonth);
       }
     else
       {
-	mYLabel.setText(JpanelCalendar.month_names[currentMonth] + " " + currentYear);
+        mYLabel.setText(JpanelCalendar.month_names[currentMonth] + " " + currentYear);
       }
   }
 
@@ -1514,11 +1514,11 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
 
     if (editable)
       {
-	year.setYear(currentYear);
+        year.setYear(currentYear);
       }
     else
       {
-	mYLabel.setText(JpanelCalendar.month_names[currentMonth] + " " + currentYear);
+        mYLabel.setText(JpanelCalendar.month_names[currentMonth] + " " + currentYear);
       }
   }
 
@@ -1566,19 +1566,19 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
 
     for (int i = 0; i < JpanelCalendar.month_names.length; i++)
       {
-	if (JpanelCalendar.month_names[i] == null || JpanelCalendar.month_names[i].equals(""))
-	  {
-	    // The months array returned from
-	    // DateFormatSymbols.getMonths() returns thirteen entries
-	    // because some calendars have thirteen (lunar) months.
-	    // For conventional twelve month calendars, we'll have an
-	    // empty month string at the end of our array, which we'll
-	    // need to skip.
+        if (JpanelCalendar.month_names[i] == null || JpanelCalendar.month_names[i].equals(""))
+          {
+            // The months array returned from
+            // DateFormatSymbols.getMonths() returns thirteen entries
+            // because some calendars have thirteen (lunar) months.
+            // For conventional twelve month calendars, we'll have an
+            // empty month string at the end of our array, which we'll
+            // need to skip.
 
             // NOTICE: The month buttons actions do not support this 13th month, add that in
-	    continue;
-	  }
-	month.addItem(JpanelCalendar.month_names[i]);
+            continue;
+          }
+        month.addItem(JpanelCalendar.month_names[i]);
       }
 
     month.setSelectedIndex(currentMonth);
@@ -1624,18 +1624,18 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
   {
     if (this.editable == allow)
       {
-	return;
+        return;
       }
 
     this.editable = allow;
 
     if (editable)
       {
-	initializeEditable();
+        initializeEditable();
       }
     else
       {
-	initializeNonEditable();
+        initializeNonEditable();
       }
   }
 
@@ -1643,43 +1643,43 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
   {
     if (e.getSource() == _nextdate) 
       {
-	currentMonth++;
+        currentMonth++;
 
-	if (currentMonth > 11)
-	  {
-	    currentMonth = 0;
+        if (currentMonth > 11)
+          {
+            currentMonth = 0;
 
-	    if (debug)
-	      {
-		System.out.println("Going back to Jan");
-	      }
+            if (debug)
+              {
+                System.out.println("Going back to Jan");
+              }
 
-	    setYear(currentYear + 1);
-	  }
+            setYear(currentYear + 1);
+          }
 
-	month.setSelectedIndex(currentMonth);
+        month.setSelectedIndex(currentMonth);
 
-	performCallback();
+        performCallback();
       }
     else if (e.getSource() == _prevdate) 
       {
-	currentMonth--;
+        currentMonth--;
 
-	if (currentMonth < 0)
-	  {
-	    currentMonth = 11;
+        if (currentMonth < 0)
+          {
+            currentMonth = 11;
 
-	    if (debug)
-	      {
-		System.out.println("Going back to Dec");
-	      }
+            if (debug)
+              {
+                System.out.println("Going back to Dec");
+              }
 
-	    setYear(currentYear - 1);
-	  }
+            setYear(currentYear - 1);
+          }
 
-	month.setSelectedIndex(currentMonth);
+        month.setSelectedIndex(currentMonth);
 
-	performCallback();
+        performCallback();
       }
   }
 
@@ -1691,18 +1691,18 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
   {
     if (e.getStateChange() == ItemEvent.SELECTED)
       {
-	if (month.getSelectedIndex() != currentMonth)
-	  {
-	    int index = month.getSelectedIndex();
+        if (month.getSelectedIndex() != currentMonth)
+          {
+            int index = month.getSelectedIndex();
 
-	    if (index < 0 || index > 11)
-	      {
-		throw new IllegalArgumentException("month out of range: " + index);
-	      }
+            if (index < 0 || index > 11)
+              {
+                throw new IllegalArgumentException("month out of range: " + index);
+              }
 
-	    currentMonth = index;
-	    performCallback();
-	  }
+            currentMonth = index;
+            performCallback();
+          }
       }
   }
 

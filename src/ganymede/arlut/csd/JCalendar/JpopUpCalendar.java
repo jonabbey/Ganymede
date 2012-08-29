@@ -6,7 +6,7 @@
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
-	    
+            
    Ganymede Directory Management System
  
    Copyright (C) 1996-2010
@@ -93,7 +93,7 @@ public class JpopUpCalendar extends JDialog implements JsetValueCallback {
 
     if (callback == null)
       {
-	throw new IllegalArgumentException("callback parameter is null");
+        throw new IllegalArgumentException("callback parameter is null");
       }
 
     parent = callback;
@@ -112,7 +112,7 @@ public class JpopUpCalendar extends JDialog implements JsetValueCallback {
 
     if (debug)
       {
-	System.out.println("popUp setValueperformed called");
+        System.out.println("popUp setValueperformed called");
       }
 
     if (vObj instanceof JSetValueObject)
@@ -151,14 +151,14 @@ public class JpopUpCalendar extends JDialog implements JsetValueCallback {
   {
     if (visibility)
       {
-	if (!firstAppearance)
-	  {
-	    panelCal.displaySelectedPage();
-	  }
-	else
-	  {
-	    firstAppearance = false;
-	  }
+        if (!firstAppearance)
+          {
+            panelCal.displaySelectedPage();
+          }
+        else
+          {
+            firstAppearance = false;
+          }
       }
 
     super.setVisible(visibility);
