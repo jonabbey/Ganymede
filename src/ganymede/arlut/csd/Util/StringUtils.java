@@ -68,7 +68,7 @@ public class StringUtils {
   {
     if (inputString == null)
       {
-	return "";
+        return "";
       }
 
     return inputString;
@@ -95,19 +95,19 @@ public class StringUtils {
   {
     if (inputString == null || legalChars == null)
       {
-	return "";
+        return "";
       }
 
     StringBuilder buffer = new StringBuilder();
 
     for (int i = 0; i < inputString.length(); i++)
       {
-	char c = inputString.charAt(i);
+        char c = inputString.charAt(i);
 
-	if (legalChars.indexOf(c) != -1)
-	  {
-	    buffer.append(c);
-	  }
+        if (legalChars.indexOf(c) != -1)
+          {
+            buffer.append(c);
+          }
       }
 
     return buffer.toString();
@@ -127,22 +127,22 @@ public class StringUtils {
   {
     if (inputString == null || inputString.length() == 0)
       {
-	return true;
+        return true;
       }
 
     if (legalChars == null || legalChars.length() == 0)
       {
-	return false;
+        return false;
       }
 
     for (int i = 0; i < inputString.length(); i++)
       {
-	char c = inputString.charAt(i);
+        char c = inputString.charAt(i);
 
-	if (legalChars.indexOf(c) == -1)
-	  {
-	    return false;
-	  }
+        if (legalChars.indexOf(c) == -1)
+          {
+            return false;
+          }
       }
 
     return true;
@@ -162,17 +162,17 @@ public class StringUtils {
 
     while (true)
       {
-	index = inputString.indexOf(patternString, index);
+        index = inputString.indexOf(patternString, index);
 
-	if (index == -1)
-	  {
-	    break;
-	  }
-	else
-	  {
-	    index += patternString.length();
-	    count++;
-	  }
+        if (index == -1)
+          {
+            break;
+          }
+        else
+          {
+            index += patternString.length();
+            count++;
+          }
       }
 
     return count;
@@ -296,7 +296,7 @@ public class StringUtils {
     int last = inputString.length()-1;
 
     if ((inputString.charAt(0) == '"' && inputString.charAt(last) == '"') ||
-	(inputString.charAt(0) == '\'' && inputString.charAt(last) == '\''))
+        (inputString.charAt(0) == '\'' && inputString.charAt(last) == '\''))
       {
         return inputString.substring(1, last);
       }
@@ -330,19 +330,19 @@ public class StringUtils {
 
     while (index < upperBound)
       {
-	int nextIndex = inputString.indexOf(splitString, index);
+        int nextIndex = inputString.indexOf(splitString, index);
 
-	if (nextIndex == -1)
-	  {
-	    results[count++] = inputString.substring(index);
-	    return results;
-	  }
-	else
-	  {
-	    results[count++] = inputString.substring(index, nextIndex);
-	  }
+        if (nextIndex == -1)
+          {
+            results[count++] = inputString.substring(index);
+            return results;
+          }
+        else
+          {
+            results[count++] = inputString.substring(index, nextIndex);
+          }
 
-	index = nextIndex + splitString.length();
+        index = nextIndex + splitString.length();
       }
 
     // we should never get here
@@ -362,15 +362,15 @@ public class StringUtils {
 
     for (int i = 0; i < elems.length; i++)
       {
-	if (i != 0)
-	  {
-	    buffer.append(joinString);
-	  }
+        if (i != 0)
+          {
+            buffer.append(joinString);
+          }
 
-	if (elems[i] != null)
-	  {
-	    buffer.append(elems[i]);
-	  }
+        if (elems[i] != null)
+          {
+            buffer.append(elems[i]);
+          }
       }
 
     return buffer.toString();
@@ -385,12 +385,12 @@ public class StringUtils {
   {
     if (stringA == null)
       {
-	return stringB == null;
+        return stringB == null;
       }
 
     if (stringB == null)
       {
-	return false;
+        return false;
       }
 
     return stringA.equals(stringB);
@@ -412,17 +412,17 @@ public class StringUtils {
   {
     if (inputString.endsWith(desiredEnding))
       {
-	return inputString;
+        return inputString;
       }
 
     for (int i = 1; i < desiredEnding.length(); i++)
       {
-	String suffix = desiredEnding.substring(i);
+        String suffix = desiredEnding.substring(i);
 
-	if (inputString.endsWith(suffix))
-	  {
-	    return inputString + desiredEnding.substring(desiredEnding.length() - i);
-	  }
+        if (inputString.endsWith(suffix))
+          {
+            return inputString + desiredEnding.substring(desiredEnding.length() - i);
+          }
       }
 
     return inputString + desiredEnding;
@@ -437,18 +437,18 @@ public class StringUtils {
   {
     if (endsWith(in, desiredEnding))
       {
-	return;
+        return;
       }
 
     for (int i = 1; i < desiredEnding.length(); i++)
       {
-	String suffix = desiredEnding.substring(i);
+        String suffix = desiredEnding.substring(i);
 
-	if (endsWith(in, suffix))
-	  {
-	    in.append(desiredEnding.substring(desiredEnding.length() - i));
-	    return;
-	  }
+        if (endsWith(in, suffix))
+          {
+            in.append(desiredEnding.substring(desiredEnding.length() - i));
+            return;
+          }
       }
 
     in.append(desiredEnding);
@@ -462,7 +462,7 @@ public class StringUtils {
   public static boolean endsWith(StringBuffer in, String ending)
   {
     return (in.length() >= ending.length() &&
-	    (in.substring(in.length() - ending.length()).equals(ending)));
+            (in.substring(in.length() - ending.length()).equals(ending)));
   }
 
   /**
@@ -474,18 +474,18 @@ public class StringUtils {
   {
     if (endsWith(in, desiredEnding))
       {
-	return;
+        return;
       }
 
     for (int i = 1; i < desiredEnding.length(); i++)
       {
-	String suffix = desiredEnding.substring(i);
+        String suffix = desiredEnding.substring(i);
 
-	if (endsWith(in, suffix))
-	  {
-	    in.append(desiredEnding.substring(desiredEnding.length() - i));
-	    return;
-	  }
+        if (endsWith(in, suffix))
+          {
+            in.append(desiredEnding.substring(desiredEnding.length() - i));
+            return;
+          }
       }
 
     in.append(desiredEnding);
@@ -499,7 +499,7 @@ public class StringUtils {
   public static boolean endsWith(StringBuilder in, String ending)
   {
     return (in.length() >= ending.length() &&
-	    (in.substring(in.length() - ending.length()).equals(ending)));
+            (in.substring(in.length() - ending.length()).equals(ending)));
   }
 
   /**
@@ -517,38 +517,38 @@ public class StringUtils {
 
     if (ensureEndsWith(test, "nn").equals(test3))
       {
-	System.out.println("Pass 1");
+        System.out.println("Pass 1");
       }
     else
       {
-	System.out.println("Fail 1");
+        System.out.println("Fail 1");
       }
 
     if (ensureEndsWith(test2, "nn").equals(test3))
       {
-	System.out.println("Pass 2");
+        System.out.println("Pass 2");
       }
     else
       {
-	System.out.println("Fail 2");
+        System.out.println("Fail 2");
       }
 
     if (ensureEndsWith(test3, "nn").equals(test3))
       {
-	System.out.println("Pass 3");
+        System.out.println("Pass 3");
       }
     else
       {
-	System.out.println("Fail 3");
+        System.out.println("Fail 3");
       }
 
     if (ensureEndsWith(test4, "nn").equals(test4))
       {
-	System.out.println("Pass 4");
+        System.out.println("Pass 4");
       }
     else
       {
-	System.out.println("Fail 4");
+        System.out.println("Fail 4");
       }
 
     System.out.println("\n-------------------- StringBuffer ensureEndsWith Tests --------------------\n");
@@ -558,11 +558,11 @@ public class StringUtils {
 
     if (testBuf.toString().equals(test3))
       {
-	System.out.println("Pass 1");
+        System.out.println("Pass 1");
       }
     else
       {
-	System.out.println("Fail 1");
+        System.out.println("Fail 1");
       }
 
     testBuf = new StringBuffer(test2);
@@ -570,11 +570,11 @@ public class StringUtils {
 
     if (testBuf.toString().equals(test3))
       {
-	System.out.println("Pass 2");
+        System.out.println("Pass 2");
       }
     else
       {
-	System.out.println("Fail 2");
+        System.out.println("Fail 2");
       }
 
     testBuf = new StringBuffer(test3);
@@ -582,11 +582,11 @@ public class StringUtils {
 
     if (testBuf.toString().equals(test3))
       {
-	System.out.println("Pass 3");
+        System.out.println("Pass 3");
       }
     else
       {
-	System.out.println("Fail 3");
+        System.out.println("Fail 3");
       }
 
     testBuf = new StringBuffer(test4);
@@ -594,11 +594,11 @@ public class StringUtils {
 
     if (testBuf.toString().equals(test4))
       {
-	System.out.println("Pass 4");
+        System.out.println("Pass 4");
       }
     else
       {
-	System.out.println("Fail 4");
+        System.out.println("Fail 4");
       }
 
     System.out.println("\n-------------------- StringBuilder ensureEndsWith Tests --------------------\n");
@@ -608,11 +608,11 @@ public class StringUtils {
 
     if (testBuild.toString().equals(test3))
       {
-	System.out.println("Pass 1");
+        System.out.println("Pass 1");
       }
     else
       {
-	System.out.println("Fail 1");
+        System.out.println("Fail 1");
       }
 
     testBuild = new StringBuilder(test2);
@@ -620,11 +620,11 @@ public class StringUtils {
 
     if (testBuild.toString().equals(test3))
       {
-	System.out.println("Pass 2");
+        System.out.println("Pass 2");
       }
     else
       {
-	System.out.println("Fail 2");
+        System.out.println("Fail 2");
       }
 
     testBuild = new StringBuilder(test3);
@@ -632,11 +632,11 @@ public class StringUtils {
 
     if (testBuild.toString().equals(test3))
       {
-	System.out.println("Pass 3");
+        System.out.println("Pass 3");
       }
     else
       {
-	System.out.println("Fail 3");
+        System.out.println("Fail 3");
       }
 
     testBuild = new StringBuilder(test4);
@@ -644,11 +644,11 @@ public class StringUtils {
 
     if (testBuild.toString().equals(test4))
       {
-	System.out.println("Pass 4");
+        System.out.println("Pass 4");
       }
     else
       {
-	System.out.println("Fail 4");
+        System.out.println("Fail 4");
       }
 
     System.out.println("\n-------------------- split() Tests --------------------\n");
@@ -659,13 +659,13 @@ public class StringUtils {
 
     for (int i = 0; i < results.length; i++)
       {
-	System.out.println(results[i]);
-	String results2[] = StringUtils.split(results[i], ".");
+        System.out.println(results[i]);
+        String results2[] = StringUtils.split(results[i], ".");
 
-	for (int j = 0; j < results2.length; j++)
-	  {
-	    System.out.println("\t" + results2[j]);
-	  }
+        for (int j = 0; j < results2.length; j++)
+          {
+            System.out.println("\t" + results2[j]);
+          }
       }
 
     System.out.println("\n-------------------- containsOnly() Tests --------------------\n");
@@ -673,38 +673,38 @@ public class StringUtils {
 
     if (StringUtils.containsOnly(test, "0123456789.[-]\n"))
       {
-	System.out.println("Pass test 1");
+        System.out.println("Pass test 1");
       }
     else
       {
-	System.out.println("Fail test 1");
+        System.out.println("Fail test 1");
       }
 
     if (!StringUtils.containsOnly(test, "0123456789"))
       {
-	System.out.println("Pass test 2");
+        System.out.println("Pass test 2");
       }
     else
       {
-	System.out.println("Fail test 2");
+        System.out.println("Fail test 2");
       }
 
     if (StringUtils.containsOnly("", "abcdefg"))
       {
-	System.out.println("Pass test 3");
+        System.out.println("Pass test 3");
       }
     else
       {
-	System.out.println("Fail test 3");
+        System.out.println("Fail test 3");
       }
 
     if (!StringUtils.containsOnly("test", null))
       {
-	System.out.println("Pass test 4");
+        System.out.println("Pass test 4");
       }
     else
       {
-	System.out.println("Fail test 4");
+        System.out.println("Fail test 4");
       }
   }
 }
