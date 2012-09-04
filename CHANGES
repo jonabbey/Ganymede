@@ -1,12 +1,12 @@
 Ganymede Release 2.0
-28 August 2012
+4 September 2012
 CHANGES
 
 ---------------------------------------------
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: 28 August 2012
+RELEASE DATE: 4 September 2012
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -2040,6 +2040,11 @@ or Java Web Start application caused the login window to appear again.
 
 The Ganymede client will now simply terminate when the main window is
 closed.
+
+150. [SOURCE] Detabified Ganymede source
+
+Following JWZ's advice, I have now switched to using spaces for all
+indents in the Ganymede source code.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
