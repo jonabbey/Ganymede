@@ -3,17 +3,19 @@
    aboutJavaDialog.java
 
    A dialog class used to display information about the JDK being used.
-   
+
    Created: 7 July 2008
 
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -74,12 +76,7 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- *
  * A dialog class used to display information about the JDK being used.
- *   
- * @version $Id$
- * @author Jonathan Abbey
- *
  */
 
 public class aboutJavaDialog extends JDialog {
@@ -96,11 +93,11 @@ public class aboutJavaDialog extends JDialog {
   private static String versionString = null;
 
   /**
-   * This static method is used to generate the Java version string
-   * from System properties.
+   * <p>This static method is used to generate the Java version string
+   * from System properties.</p>
    *
-   * We expect other classes to call this method when they need to get
-   * a reportable Java version info string.
+   * <p>We expect other classes to call this method when they need to
+   * get a reportable Java version info string.</p>
    */
 
   public static synchronized String getVersionInfoString()

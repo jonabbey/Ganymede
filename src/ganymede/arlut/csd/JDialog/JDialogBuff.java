@@ -3,18 +3,19 @@
    JDialogBuff.java
 
    Serializable resource class for use with StringDialog.java
-   
-   Created: 27 January 1998
 
+   Created: 27 January 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -58,21 +59,21 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class is a serializable description of a dialog object that a server
- * is asking a client to present.</P>
+ * <p>This class is a serializable description of a dialog object that a server
+ * is asking a client to present.</p>
  *
- * <P>If you don't need to send a dialog definition object across an RMI
+ * <p>If you don't need to send a dialog definition object across an RMI
  * link, you can just construct a {@link arlut.csd.JDialog.DialogRsrc DialogRsrc}
  * directly.</p>
  */
 
-/*  (Note.. this is
- * semi-vestigal code, now, since we just use normal serialization to
- * have JDialogBuff transport its parameters, which could be done
- * directly with DialogRsrc just as well.  There are some things in
- * the DialogRsrc class, like the image cache, that we may not want
- * to mess with.  In any case, all of the Ganymede code expects JDialogBuff,
- * so it's going to stay for now.)
+/*
+ * (Note.. this is semi-vestigal code, now, since we just use normal
+ * serialization to have JDialogBuff transport its parameters, which
+ * could be done directly with DialogRsrc just as well.  There are
+ * some things in the DialogRsrc class, like the image cache, that we
+ * may not want to mess with.  In any case, all of the Ganymede code
+ * expects JDialogBuff, so it's going to stay for now.)
  */
 
 public class JDialogBuff implements java.io.Serializable {
@@ -80,7 +81,7 @@ public class JDialogBuff implements java.io.Serializable {
   static final boolean debug = false;
 
   // ---
-  
+
   String title;
   StringBuffer text;
   String okText;
@@ -111,7 +112,7 @@ public class JDialogBuff implements java.io.Serializable {
    */
 
   public DialogRsrc extractDialogRsrc(Frame frame, Class refClass)
-  { 
+  {
     DialogRsrc rsrc;
 
     /* -- */
@@ -138,12 +139,12 @@ public class JDialogBuff implements java.io.Serializable {
     this(Title, Text, "Ok", "Cancel", null);
   }
 
-  /** 
+  /**
    * Constructor with special "Ok" and "Cancel" strings
    *
    * @param Title String for title of Dialog box.
    * @param Text String for message at top of dialog box.
-   * @param OK String for Ok button 
+   * @param OK String for Ok button
    * @param Cancel String for Cancel button
    */
 
@@ -152,12 +153,12 @@ public class JDialogBuff implements java.io.Serializable {
     this(Title, Text, OK, Cancel, null);
   }
 
-  /** 
+  /**
    * Constructor with special "Ok" and "Cancel" strings
    *
    * @param Title String for title of Dialog box.
    * @param Text String for message at top of dialog box.
-   * @param OK String for Ok button 
+   * @param OK String for Ok button
    * @param Cancel String for Cancel button
    * @param image Filename of image to display next to text
    */
@@ -219,7 +220,7 @@ public class JDialogBuff implements java.io.Serializable {
    *
    * @param string String to use as the label
    */
-  
+
   public void addBoolean(String string)
   {
     addBoolean(string, false);
@@ -231,7 +232,7 @@ public class JDialogBuff implements java.io.Serializable {
    * @param string String to use as the label
    * @param value Initial value
    */
-  
+
   public void addBoolean(String string, boolean value)
   {
     resources.addElement(new booleanThing(string, value));
@@ -244,7 +245,7 @@ public class JDialogBuff implements java.io.Serializable {
    * @param currentDate Date to initialize the date field to
    * @param maxDate Latest date that the user may choose for this field.
    */
-  
+
   public void addDate(String label, Date currentDate, Date maxDate)
   {
     resources.addElement(new dateThing(label, currentDate, maxDate));
@@ -254,9 +255,9 @@ public class JDialogBuff implements java.io.Serializable {
    * <p>Adds a choice field to the dialog</p>
    *
    * @param label String to use as the label
-   * @param choices Vector of Strings to add to the choice 
+   * @param choices Vector of Strings to add to the choice
    */
-  
+
   public void addChoice(String label, Vector choices)
   {
     addChoice(label, choices, null);
@@ -266,9 +267,9 @@ public class JDialogBuff implements java.io.Serializable {
    * <p>Adds a choice field to the dialog</p>
    *
    * @param label String to use as the label
-   * @param choices Vector of Strings to add to the choice 
+   * @param choices Vector of Strings to add to the choice
    */
-  
+
   public void addChoice(String label, Vector choices, String selectedValue)
   {
     resources.addElement(new choiceThing(label, choices, selectedValue));

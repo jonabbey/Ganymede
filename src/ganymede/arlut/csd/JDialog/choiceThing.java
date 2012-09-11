@@ -3,17 +3,19 @@
    choiceThing.java
 
    Resource class for use with StringDialog.java
-   
+
    Created: 16 June 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -55,13 +57,13 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Serializable object to describe a string chooser field for passing to the
+ * <p>Serializable object to describe a string chooser field for passing to the
  * client as part of a {@link arlut.csd.JDialog.JDialogBuff JDialogBuff}
- * or {@link arlut.csd.JDialog.StringDialog StringDialog}.</P> 
+ * or {@link arlut.csd.JDialog.StringDialog StringDialog}.</p>
  */
 
 public class choiceThing implements java.io.Serializable {
-  
+
   String choiceLabel;
   Vector items;
   Object selected;

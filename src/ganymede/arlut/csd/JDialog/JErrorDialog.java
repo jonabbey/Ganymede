@@ -12,8 +12,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -51,6 +53,12 @@ import java.awt.Frame;
 import java.awt.Image;
 
 import arlut.csd.Util.TranslationService;
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                    JErrorDialog
+
+------------------------------------------------------------------------------*/
 
 /**
  * Simple way to throw up a StringDialog.
