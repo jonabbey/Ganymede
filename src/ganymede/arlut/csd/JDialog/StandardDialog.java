@@ -12,8 +12,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -64,8 +66,6 @@ import javax.swing.UIManager;
 /**
  * A dialog base class for centered, possibly modal dialogs.  On the
  * Mac, document-modal StandardDialogs will appear as sheets.
- *
- * @author Jonathan Abbey
  */
 
 public class StandardDialog extends JDialog {
@@ -126,7 +126,7 @@ public class StandardDialog extends JDialog {
             Method modalityMethod = java.awt.Dialog.class.getDeclaredMethod("setModalityType", paramTypes);
 
             modalityMethod.invoke(this, Enum.valueOf(enumClass, modality.name()));
-            
+
             success = true;
           }
       }

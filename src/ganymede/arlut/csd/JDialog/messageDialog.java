@@ -14,8 +14,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -67,14 +69,12 @@ import javax.swing.JScrollPane;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * A dialog class used to display text and HTML with an optional
- * image on the left side, used for the about.. and motd features
- * in the Ganymede client.
+ * <p>A dialog class used to display text and HTML with an optional
+ * image on the left side, used for the about.. and motd features in
+ * the Ganymede client.</p>
  *
  * @version $Id$
  * @author Mike Mulvaney
- *
  */
 
 public class messageDialog extends StandardDialog {
@@ -124,11 +124,9 @@ public class messageDialog extends StandardDialog {
   }
 
   /**
-   *
    * Load this message dialog with HTML content.
    *
    * @param s An HTML document held within a string.
-   *
    */
 
   public void setHtmlText(String s)
@@ -140,11 +138,9 @@ public class messageDialog extends StandardDialog {
   }
 
   /**
-   *
    * Load this message dialog with Unicode content.
    *
    * @param s The message content to be displayed.
-   *
    */
 
   public void setPlainText(String s)

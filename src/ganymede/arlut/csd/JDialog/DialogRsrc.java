@@ -12,8 +12,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -61,15 +63,15 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class is used to create a customized
- * {@link arlut.csd.JDialog.StringDialog StringDialog}.</P>
+ * <p>This class is used to create a customized
+ * {@link arlut.csd.JDialog.StringDialog StringDialog}.</p>
  *
  * <p>Use the various addXXX methods on this class to insert
  * the desired type of inputs, and then pass it to a StringDialog
  * constructor.  The order in which the addXXX methods are called
  * determines the layout order in the StringDialog.</p>
  *
- * <P>Example:</P>
+ * <p>Example:</p>
  *
  * <code><blockquote><pre>
  * DialogRsrc r = new DialogRsrc(frame, "Simple dialog", "Give us some information:");
@@ -130,8 +132,8 @@ public class DialogRsrc {
    * @param frame Parent frame.
    * @param Title String for title of Dialog box.
    * @param Text String for message at top of dialog box.
-   *
    */
+
   public DialogRsrc(Frame frame, String Title, String Text)
   {
     this(frame, Title, Text, ts.l("global.ok"), ts.l("global.cancel"), (Image) null);
@@ -162,7 +164,6 @@ public class DialogRsrc {
    * @param OK String for Ok button
    * @param Cancel String for Cancel button
    * @param image Image to display next to text
-
    */
 
   public DialogRsrc(Frame frame, String Title, String Text, String OK, String Cancel, Image image)
@@ -237,7 +238,6 @@ public class DialogRsrc {
   }
 
   /**
-   *
    * Adds a labeled text field
    *
    * @param label String to use as the label
@@ -250,7 +250,6 @@ public class DialogRsrc {
   }
 
   /**
-   *
    * Adds a labeled text field
    *
    * @param label String to use as the label
@@ -262,7 +261,6 @@ public class DialogRsrc {
   }
 
   /**
-   *
    * Adds a labeled multi-line text field
    *
    * @param label String to use as the label
@@ -275,7 +273,6 @@ public class DialogRsrc {
   }
 
   /**
-   *
    * Adds a labeled multi-line text field
    *
    * @param label String to use as the label
@@ -287,13 +284,11 @@ public class DialogRsrc {
   }
 
   /**
-   *
    * Adds a labeled date field
    *
    * @param label String to use as the label
    * @param currentDate What should the date be set to initially?
    * @param maxDate What is the latest the date can be set to?
-   *
    */
 
   public void addDate(String label, Date currentDate, Date maxDate)
@@ -303,7 +298,6 @@ public class DialogRsrc {
   }
 
   /**
-   *
    * Adds a labeled date field
    *
    * @param label String to use as the label
@@ -315,7 +309,6 @@ public class DialogRsrc {
   }
 
   /**
-   *
    * Adds a labeled check box field
    *
    * @param label String to use as the label
@@ -327,7 +320,6 @@ public class DialogRsrc {
   }
 
   /**
-   *
    * Adds a labeled check box field
    *
    * @param label String to use as the label
@@ -340,7 +332,6 @@ public class DialogRsrc {
   }
 
   /**
-   *
    * Adds a choice field to the dialog
    *
    * @param label String to use as the label
@@ -354,7 +345,6 @@ public class DialogRsrc {
   }
 
   /**
-   *
    * Adds a choice field to the dialog
    *
    * @param label String to use as the label
@@ -367,23 +357,23 @@ public class DialogRsrc {
   }
 
   /**
-   *
    * Adds a text-hidden password string field to the dialog
    *
    * @param label String to use as label
    */
+
   public void addPassword(String label)
   {
     addPassword(label, false);
   }
 
   /**
-   *
    * Adds a text-hidden password string field to the dialog
    *
    * @param label String to use as label
    * @param isNew If true, password will have two fields for verification
    */
+
   public void addPassword(String label, boolean isNew)
   {
     if (debug)
@@ -412,7 +402,7 @@ public class DialogRsrc {
   public String getCancelText()
   {
     return cancelText;
-  } 
+  }
 
   public Image getImage()
   {
@@ -420,7 +410,6 @@ public class DialogRsrc {
   }
 
   /**
-   *
    * Set the image to be displayed in upper left corner.
    *
    * @param newImage Image to display
