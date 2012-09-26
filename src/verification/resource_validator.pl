@@ -2,10 +2,6 @@
 #
 # resource_validator.pl
 #
-# Last Revision Changed: $Rev$
-# Last Changed By: $Author$
-# Last Mod Date: $Date$
-#
 # This perl script is designed to scan through the Ganymede
 # source files in search of localization string retrievals, and to
 # match them against the property file resources in the Ganymede
