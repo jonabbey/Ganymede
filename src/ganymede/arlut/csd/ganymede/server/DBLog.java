@@ -937,6 +937,7 @@ public class DBLog {
       {
         returnAddr = adminPersonaCustom.convertAdminInvidToString(admin,
                                                                   gSession.getDBSession());
+        returnAddrDesc = returnAddr;
       }
 
     // if there was no email address registered for the admin persona,
