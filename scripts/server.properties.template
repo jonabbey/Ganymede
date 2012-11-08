@@ -130,12 +130,22 @@ ganymede.mailhost=ns1.arlut.utexas.edu
 
 ganymede.defaultdomain=
 
+
 # ganymede.returnaddr
 #
 # What return email address will appear on system mail sent by the
 # Ganymede server?
 
 ganymede.returnaddr=jonabbey@arlut.utexas.edu
+
+
+# ganymede.returnaddrdesc
+#
+# The human readable, rfc822 compatible version of ganymede.returnaddr to appear
+# in the header of system mail from Ganymede.  May include descriptive text in angle
+# brackets ahead of the email address.
+
+ganymede.returnaddr=<Jonathan Abbey> jonabbey@arlut.utexas.edu
 
 
 # ganymede.serverhost
