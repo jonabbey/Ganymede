@@ -141,11 +141,12 @@ ganymede.returnaddr=jonabbey@arlut.utexas.edu
 
 # ganymede.returnaddrdesc
 #
-# The human readable, rfc822 compatible version of ganymede.returnaddr to appear
-# in the header of system mail from Ganymede.  May include descriptive text in angle
-# brackets ahead of the email address.
+# The human readable, rfc822 compatible version of ganymede.returnaddr
+# to appear in the header of system mail from Ganymede.  May include
+# descriptive text followed by the proper email address in angle
+# brackets.
 
-ganymede.returnaddrdesc=<Jonathan Abbey> jonabbey@arlut.utexas.edu
+ganymede.returnaddrdesc=Jonathan Abbey <jonabbey@arlut.utexas.edu>
 
 
 # ganymede.serverhost
