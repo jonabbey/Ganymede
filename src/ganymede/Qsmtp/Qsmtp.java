@@ -117,7 +117,7 @@ public class Qsmtp implements Runnable {
   static public String formatDate(Date date)
   {
     DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z",
-						java.util.Locale.US);
+                                                java.util.Locale.US);
     return formatter.format(date);
   }
 
@@ -174,18 +174,18 @@ public class Qsmtp implements Runnable {
   {
     if (this.threaded)
       {
-	return;
+        return;
       }
 
     while (backgroundThread != null)
       {
-	try
-	  {
-	    this.wait();
-	  }
-	catch (InterruptedException ex)
-	  {
-	  }
+        try
+          {
+            this.wait();
+          }
+        catch (InterruptedException ex)
+          {
+          }
       }
 
     backgroundThread = new Thread(this, "Ganymede Mail Thread");
@@ -202,62 +202,62 @@ public class Qsmtp implements Runnable {
   {
     if (debug)
       {
-	System.err.println("Qsmtp.stopThreaded()");
+        System.err.println("Qsmtp.stopThreaded()");
       }
 
     if (!this.threaded)
       {
-	return;
+        return;
       }
 
     if (backgroundThread != null)
       {
-	this.threaded = false;
+        this.threaded = false;
 
-	if (debug)
-	  {
-	    System.err.println("Qsmtp.stopThreaded() - waking background thread");
-	  }
+        if (debug)
+          {
+            System.err.println("Qsmtp.stopThreaded() - waking background thread");
+          }
 
-	synchronized (queuedMessages)
-	  {
-	    queuedMessages.notifyAll();
-	  }
+        synchronized (queuedMessages)
+          {
+            queuedMessages.notifyAll();
+          }
 
-	// the background thread will kill itself off cleanly
+        // the background thread will kill itself off cleanly
 
-	try
-	  {
-	    if (debug)
-	      {
-		System.err.println("Qsmtp.stopThreaded() - waiting for background thread to die");
-	      }
+        try
+          {
+            if (debug)
+              {
+                System.err.println("Qsmtp.stopThreaded() - waiting for background thread to die");
+              }
 
-	    // the backgroundThread variable is cleared when the
-	    // background thread terminates.  If that happens before
-	    // we wait for it, catch the NullPointerException and move
-	    // on.
+            // the backgroundThread variable is cleared when the
+            // background thread terminates.  If that happens before
+            // we wait for it, catch the NullPointerException and move
+            // on.
 
-	    try
-	      {
-		backgroundThread.join(); // wait for our email sending thread to drain
-	      }
-	    catch (NullPointerException ex)
-	      {
-		return;
-	      }
-	    finally
-	      {
-		if (debug)
-		  {
-		    System.err.println("Qsmtp.stopThreaded() - background thread completed");
-		  }
-	      }
-	  }
-	catch (InterruptedException ex)
-	  {
-	    return;		// oh, well.
-	  }
+            try
+              {
+                backgroundThread.join(); // wait for our email sending thread to drain
+              }
+            catch (NullPointerException ex)
+              {
+                return;
+              }
+            finally
+              {
+                if (debug)
+                  {
+                    System.err.println("Qsmtp.stopThreaded() - background thread completed");
+                  }
+              }
+          }
+        catch (InterruptedException ex)
+          {
+            return;             // oh, well.
+          }
       }
   }
 
@@ -330,34 +330,34 @@ public class Qsmtp implements Runnable {
 
     if (textBody != null)
       {
-	buffer.append("--");
-	buffer.append(separator);
-	buffer.append("\nContent-Type: text/plain; charset=us-ascii\n");
-	buffer.append("Content-Transfer-Encoding: 7bit\n\n");
-	buffer.append(textBody);
-	buffer.append("\n");
+        buffer.append("--");
+        buffer.append(separator);
+        buffer.append("\nContent-Type: text/plain; charset=us-ascii\n");
+        buffer.append("Content-Transfer-Encoding: 7bit\n\n");
+        buffer.append(textBody);
+        buffer.append("\n");
       }
 
     if (htmlBody != null)
       {
-	buffer.append("--");
-	buffer.append(separator);
-	buffer.append("\nContent-Type: text/html; charset=us-ascii\n");
-	buffer.append("Content-Transfer-Encoding: 7bit\n");
+        buffer.append("--");
+        buffer.append(separator);
+        buffer.append("\nContent-Type: text/html; charset=us-ascii\n");
+        buffer.append("Content-Transfer-Encoding: 7bit\n");
 
-	if (htmlFilename != null && !htmlFilename.equals(""))
-	  {
-	    buffer.append("Content-Disposition: inline; filename=\"");
-	    buffer.append(htmlFilename);
-	    buffer.append("\"\n\n");
-	  }
-	else
-	  {
-	    buffer.append("Content-Disposition: inline;\n\n");
-	  }
+        if (htmlFilename != null && !htmlFilename.equals(""))
+          {
+            buffer.append("Content-Disposition: inline; filename=\"");
+            buffer.append(htmlFilename);
+            buffer.append("\"\n\n");
+          }
+        else
+          {
+            buffer.append("Content-Disposition: inline;\n\n");
+          }
 
-	buffer.append(htmlBody);
-	buffer.append("\n");
+        buffer.append(htmlBody);
+        buffer.append("\n");
       }
 
     buffer.append("--");
@@ -393,7 +393,9 @@ public class Qsmtp implements Runnable {
    */
 
   public synchronized boolean sendmsg(String from_address,
-				      List<String> to_addresses,
+                                      List<String> to_addresses,
+                                      String subject, String message,
+                                      List<String> extraHeaders)
                                       String subject, String message,
                                       List<String> extraHeaders)
   {
@@ -402,17 +404,17 @@ public class Qsmtp implements Runnable {
 
     if (threaded)
       {
-	synchronized (queuedMessages)
-	  {
-	    queuedMessages.add(msgObj);
-	    queuedMessages.notify();
-	  }
+        synchronized (queuedMessages)
+          {
+            queuedMessages.add(msgObj);
+            queuedMessages.notify();
+          }
 
         return true;
       }
     else
       {
-	return dispatchMessage(msgObj);
+        return dispatchMessage(msgObj);
       }
   }
 
@@ -428,43 +430,43 @@ public class Qsmtp implements Runnable {
 
     if (debug)
       {
-	System.err.println("Qsmtp: background thread starting");
+        System.err.println("Qsmtp: background thread starting");
       }
 
     try
       {
-	while (threaded)
-	  {
-	    message = null;
+        while (threaded)
+          {
+            message = null;
 
-	    synchronized (queuedMessages)
-	      {
-		if (queuedMessages.size() > 0)
-		  {
-		    message = queuedMessages.remove(0);
-		  }
-		else
-		  {
-		    message = null;
+            synchronized (queuedMessages)
+              {
+                if (queuedMessages.size() > 0)
+                  {
+                    message = queuedMessages.remove(0);
+                  }
+                else
+                  {
+                    message = null;
 
-		    try
-		      {
-			queuedMessages.wait(); // wait until something is queued
-		      }
-		    catch (InterruptedException ex)
-		      {
-			// ??
-		      }
+                    try
+                      {
+                        queuedMessages.wait(); // wait until something is queued
+                      }
+                    catch (InterruptedException ex)
+                      {
+                        // ??
+                      }
 
-		    if (debug)
-		      {
-			System.err.println("Qsmtp: background thread woke up");
-		      }
-		  }
-	      }
+                    if (debug)
+                      {
+                        System.err.println("Qsmtp: background thread woke up");
+                      }
+                  }
+              }
 
-	    if (message != null)
-	      {
+            if (message != null)
+              {
                 int count = 0;
 
                 while (threaded && !dispatchMessage(message))
@@ -485,27 +487,27 @@ public class Qsmtp implements Runnable {
 
                     System.err.println("Retrying mail transmission.. internal mail queue has " + queuedMessages.size() + " elements.");
                   }
-	      }
-	  }
+              }
+          }
       }
     finally
       {
-	try
-	  {
-	    // clear out any remaining messages
+        try
+          {
+            // clear out any remaining messages
 
-	    if (!threaded)
-	      {
-		if (debug)
-		  {
-		    System.err.println("Qsmtp: background thread stopping.. clearing mail queue");
-		  }
+            if (!threaded)
+              {
+                if (debug)
+                  {
+                    System.err.println("Qsmtp: background thread stopping.. clearing mail queue");
+                  }
 
-		synchronized (queuedMessages)
-		  {
-		    while (queuedMessages.size() > 0)
-		      {
-			message = queuedMessages.remove(0);
+                synchronized (queuedMessages)
+                  {
+                    while (queuedMessages.size() > 0)
+                      {
+                        message = queuedMessages.remove(0);
 
                         if (debug)
                           {
@@ -513,15 +515,15 @@ public class Qsmtp implements Runnable {
                           }
 
                         dispatchMessage(message);  // if it fails, it fails.. we still need to shut down.
-		      }
-		  }
-	      }
-	  }
-	finally
-	  {
-	    this.backgroundThread = null;
-	    this.threaded = false;
-	  }
+                      }
+                  }
+              }
+          }
+        finally
+          {
+            this.backgroundThread = null;
+            this.threaded = false;
+          }
       }
 
     System.err.println("Qsmtp: background thread finishing");
@@ -639,7 +641,7 @@ public class Qsmtp implements Runnable {
 
             boolean successRcpt = false;
 
-	    for (String address: to_addresses)
+            for (String address: to_addresses)
               {
                 sstr = "RCPT TO: " + address;
                 send.print(sstr);
@@ -719,7 +721,7 @@ public class Qsmtp implements Runnable {
 
             if (extraHeaders != null)
               {
-		for (String header: extraHeaders)
+                for (String header: extraHeaders)
                   {
                     send.print(header);
                     send.print(EOL);
@@ -883,15 +885,15 @@ class messageObject {
 
     if (to_addresses != null)
       {
-	for (int i = 0; i < to_addresses.size(); i++)
-	  {
-	    if (i > 0)
-	      {
-		buffer.append(", ");
-	      }
+        for (int i = 0; i < to_addresses.size(); i++)
+          {
+            if (i > 0)
+              {
+                buffer.append(", ");
+              }
 
-	    buffer.append(to_addresses.get(i));
-	  }
+            buffer.append(to_addresses.get(i));
+          }
       }
 
     buffer.append("\nSubject: ");
@@ -900,11 +902,11 @@ class messageObject {
 
     if (extraHeaders != null)
       {
-	for (String header: extraHeaders)
-	  {
-	    buffer.append(header);
-	    buffer.append("\n");
-	  }
+        for (String header: extraHeaders)
+          {
+            buffer.append(header);
+            buffer.append("\n");
+          }
       }
 
     buffer.append("Message:\n");
