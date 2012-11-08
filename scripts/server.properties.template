@@ -145,7 +145,7 @@ ganymede.returnaddr=jonabbey@arlut.utexas.edu
 # in the header of system mail from Ganymede.  May include descriptive text in angle
 # brackets ahead of the email address.
 
-ganymede.returnaddr=<Jonathan Abbey> jonabbey@arlut.utexas.edu
+ganymede.returnaddrdesc=<Jonathan Abbey> jonabbey@arlut.utexas.edu
 
 
 # ganymede.serverhost
