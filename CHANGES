@@ -1,12 +1,12 @@
 Ganymede Release 2.0
-28 August 2012
+8 November August 2012
 CHANGES
 
 ---------------------------------------------
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: 28 August 2012
+RELEASE DATE: 8 November 2012
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -2040,6 +2040,22 @@ or Java Web Start application caused the login window to appear again.
 
 The Ganymede client will now simply terminate when the main window is
 closed.
+
+150. [SERVER] The server now supports a Ganymede.returnaddrdesc property.
+
+The Ganymede Server now supports a new system property,
+'Ganymede.returnaddrdesc'.  This property may contain the extended
+human readable rfc822 return address for inclusion in the 'From:'
+field of any mail sent out by the Ganymede server on behalf of itself
+rather than a logged-in user.
+
+I.e., you might have
+
+  Ganymede.returnaddr=ganymede-server@yourdomain.com
+  Ganymede.returnaddrdesc=Ganymede Server <ganymede-server@yourdomain.com>
+
+The returnaddr property is used in the SMTP handshake, and the
+returnaddrdesc is used in the headers.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
