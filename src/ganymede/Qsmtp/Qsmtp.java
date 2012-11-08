@@ -292,7 +292,27 @@ public class Qsmtp implements Runnable {
   public synchronized boolean sendmsg(String from_address, List<String> to_addresses,
                                       String subject, String message) throws IOException
   {
-    return sendmsg(from_address, to_addresses, subject, message, null);
+    return sendmsg(from_address, to_addresses, from_address, subject, message, null);
+  }
+
+  /**
+   * <p>Sends a plain ASCII mail message</p>
+   *
+   * @param from_address Who is sending this message?
+   * @param to_addresses List of string addresses to send this message to
+   * @param from_address_desc A more elaborate version of the from address, with optional leading <Description> section
+   * @param subject Subject for this message
+   * @param message The text for the mail message
+   *
+   * @return True if the message was successfully sent to the
+   * mailhost, false otherwise.
+   */
+
+  public synchronized boolean sendmsg(String from_address, List<String> to_addresses,
+                                      String from_address_desc,
+                                      String subject, String message) throws IOException
+  {
+    return sendmsg(from_address, to_addresses, from_address_desc, subject, message, null);
   }
 
   /**
@@ -314,6 +334,33 @@ public class Qsmtp implements Runnable {
    */
 
   public synchronized boolean sendHTMLmsg(String from_address, List<String> to_addresses,
+                                          String subject, String htmlBody, String htmlFilename,
+                                          String textBody) throws IOException
+  {
+    return this.sendHTMLmsg(from_address, to_addresses, from_address, subject, htmlBody, htmlFilename, textBody);
+  }
+
+  /**
+   * <p>Sends a message with a MIME-attached HTML message</p>
+   *
+   * <p>In a perfect world, we'd do a generic MIME-capable mail system here, but
+   * as it is, we only support HTML.</p>
+   *
+   * @param from_address Who is sending this message?
+   * @param to_addresses List of string addresses to send this message to
+   * @param from_address_desc A more elaborate version of the from address, with optional leading <Description> section
+   * @param subject Subject for this message
+   * @param htmlBody A string containing the HTML document to be sent
+   * @param htmlFilename The name to label the HTML document with, will
+   * show up in mail clients
+   * @param textBody The text for the non-HTML part of the mail message
+   *
+   * @return True if the message was successfully sent to the
+   * mailhost, false otherwise.
+   */
+
+  public synchronized boolean sendHTMLmsg(String from_address, List<String> to_addresses,
+                                          String from_address_desc,
                                           String subject, String htmlBody, String htmlFilename,
                                           String textBody) throws IOException
   {
@@ -364,7 +411,7 @@ public class Qsmtp implements Runnable {
     buffer.append(separator);
     buffer.append("--\n\n");
 
-    return sendmsg(from_address, to_addresses, subject, buffer.toString(), MIMEheaders);
+    return sendmsg(from_address, to_addresses, from_address_desc, subject, buffer.toString(), MIMEheaders);
   }
 
   /**
@@ -396,11 +443,34 @@ public class Qsmtp implements Runnable {
                                       List<String> to_addresses,
                                       String subject, String message,
                                       List<String> extraHeaders)
+  {
+    return this.sendmsg(from_address, to_addresses, from_address, subject, message, extraHeaders);
+  }
+
+  /**
+   * <p>Sends a mail message with some custom-specified envelope headers.  Used
+   * internally by the other Qsmtp sendmsg and sendHTMLmsg methods.</p>
+   *
+   * @param from_address Who is sending this message?
+   * @param to_addresses List of string addresses to send this message to
+   * @param from_address_desc A more elaborate version of the from address, with optional leading <Description> section
+   * @param subject Subject for this message
+   * @param message The text for the mail message
+   * @param extraHeaders List of string headers to include in the message's
+   * envelope
+   *
+   * @return True if the message was successfully sent to the
+   * mailhost, false otherwise.
+   */
+
+  public synchronized boolean sendmsg(String from_address,
+                                      List<String> to_addresses,
+                                      String from_address_desc,
                                       String subject, String message,
                                       List<String> extraHeaders)
   {
-    messageObject msgObj = new messageObject(from_address, to_addresses,
-					     subject, message, extraHeaders);
+    messageObject msgObj = new messageObject(from_address, to_addresses, from_address_desc,
+                                             subject, message, extraHeaders);
 
     if (threaded)
       {
@@ -546,6 +616,7 @@ public class Qsmtp implements Runnable {
 
     String from_address = msgObj.from_address;
     List<String> to_addresses = msgObj.to_addresses;
+    String from_address_desc = msgObj.from_address_desc;
     String subject = msgObj.subject;
     String message = msgObj.message;
     List<String> extraHeaders = msgObj.extraHeaders;
@@ -685,7 +756,7 @@ public class Qsmtp implements Runnable {
                 throw new ProtocolException(rstr);
               }
 
-            send.print("From: " + from_address);
+            send.print("From: " + from_address_desc);
             send.print(EOL);
 
             StringBuilder targetString = new StringBuilder();
@@ -856,6 +927,7 @@ class messageObject {
 
   String from_address;
   List<String> to_addresses;
+  String from_address_desc;
   String subject;
   String message;
   List<String> extraHeaders;
@@ -863,11 +935,13 @@ class messageObject {
   /* -- */
 
   messageObject(String from_address, List<String> to_addresses,
-		String subject, String message,
-		List<String> extraHeaders)
+                String from_address_desc,
+                String subject, String message,
+                List<String> extraHeaders)
   {
     this.from_address = from_address;
     this.to_addresses = to_addresses;
+    this.from_address_desc = from_address_desc;
     this.subject = subject;
     this.message = message;
     this.extraHeaders = extraHeaders;
