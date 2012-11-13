@@ -105,9 +105,13 @@ import java.util.Random;
  * are placed into an in-memory queue structure for transmission by a
  * background mail thread.</p>
  *
- * <p>In either case, because this class opens a socket to a
- * potentially remote TCP/IP server, this class may not function
- * properly when used within an applet.</p>
+ * <p>If running in threaded mode, it is essential to call {@link
+ * Qsmtp@close()} to let the background thread finish draining its
+ * queue and terminate cleanly.</p>
+ *
+ * <p>Because this class opens a socket to a potentially remote TCP/IP
+ * server, this class will not function properly when used within an
+ * applet unless you have a custom security policy in place.</p>
  *
  * <p>This code was originally written and released into the public
  * domain by James Driscoll.  It has since been enhanced at ARL:UT to
