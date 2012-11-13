@@ -224,7 +224,7 @@ public class Qsmtp implements Runnable {
   }
 
   /**
-   * Hostname and port number constructor.
+   * Address and port number constructor.
    *
    * @param address The IP address of an SMTP server.
    * @param port The TCP port number of an SMTP server.
