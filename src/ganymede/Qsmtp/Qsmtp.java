@@ -100,6 +100,13 @@ import java.util.Random;
  *
  * <p>Because this class opens a socket to a potentially remote TCP/IP server,
  * this class may not function properly when used within an applet.</p>
+ *
+ * <p>This code was originally written and released into the public
+ * domain by James Driscoll.  It has since been enhanced at ARL:UT to
+ * support HTML mail and threaded operation.</p>
+ *
+ * @author James Driscoll jgd@jamesdriscoll.com
+ * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  */
 
 public class Qsmtp implements Runnable {
