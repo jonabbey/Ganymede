@@ -81,25 +81,33 @@ import java.util.Random;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>SMTP mailer class, used to send email messages (with optional HTML MIME
- * attachments) through direct TCP/IP communication with Internet SMTP mail
- * servers.</p>
+ * <p>A simple unencrypted SMTP mailer class, used to send email
+ * messages (with optional HTML MIME attachments) through direct
+ * TCP/IP communication with Internet SMTP mail servers.</p>
  *
- * <p>The Qsmtp constructors take an address for a SMTP mail server, and all
- * messages subsequently sent out by the Qsmtp object are handled by
- * that SMTP server.</p>
+ * <p>To use, create a Qsmtp object with the address (and optionally
+ * port number) of a non-encrypting, non-authenticating SMTP server.</p>
  *
- * <p>Once created, a Qsmtp object can be used to send any number of messages
- * through that mail server.  Each call to
- * {@link Qsmtp#sendmsg(java.lang.String, java.util.List, java.lang.String,
- * java.lang.String) sendmsg} or
- * {@link Qsmtp#sendHTMLmsg(java.lang.String, java.util.List, java.lang.String,
- * java.lang.String, java.lang.String, java.lang.String) sendHTMLmsg} opens a
- * separate SMTP connection to the designated mail server and transmits a
- * single message.</p>
+ * <p>Once created, a Qsmtp object can used in one of two ways.</p>
  *
- * <p>Because this class opens a socket to a potentially remote TCP/IP server,
- * this class may not function properly when used within an applet.</p>
+ * <p>By default, a newly created Qsmtp object operates in a
+ * non-threaded mode.  Each call to {@link
+ * Qsmtp#sendmsg(java.lang.String, java.util.List, java.lang.String,
+ * java.lang.String) sendmsg} or {@link
+ * Qsmtp#sendHTMLmsg(java.lang.String, java.util.List,
+ * java.lang.String, java.lang.String, java.lang.String,
+ * java.lang.String) sendHTMLmsg} will synchronously open a separate
+ * SMTP connection to the SMTP mail server and transmit a single
+ * message, with no queueing.</p>
+ *
+ * <p>Alternately, the user can call {@link Qsmtp#goThreaded()} to put
+ * the Qsmtp object into a threaded mode, in which messages to be sent
+ * are placed into an in-memory queue structure for transmission by a
+ * background mail thread.</p>
+ *
+ * <p>In either case, because this class opens a socket to a
+ * potentially remote TCP/IP server, this class may not function
+ * properly when used within an applet.</p>
  *
  * <p>This code was originally written and released into the public
  * domain by James Driscoll.  It has since been enhanced at ARL:UT to
@@ -140,21 +148,47 @@ public class Qsmtp implements Runnable {
 
   /* -- */
 
+  /**
+   * Hostname-only constructor on port 25.
+   *
+   * @param hostid The DNS name or IP address of an SMTP server.
+   */
+
   public Qsmtp(String hostid)
   {
     this(hostid, DEFAULT_PORT);
   }
+
+  /**
+   * {@link java.net.InetAddress} constructor on port 25.
+   *
+   * @param address The IP address of an SMTP server.
+   */
 
   public Qsmtp(InetAddress address)
   {
     this(address, DEFAULT_PORT);
   }
 
+  /**
+   * Hostname and port number constructor.
+   *
+   * @param hostid The DNS name or IP address of an SMTP server.
+   * @param port The TCP port number of an SMTP server.
+   */
+
   public Qsmtp(String hostid, int port)
   {
     this.hostid = hostid;
     this.port = port;
   }
+
+  /**
+   * Hostname and port number constructor.
+   *
+   * @param address The IP address of an SMTP server.
+   * @param port The TCP port number of an SMTP server.
+   */
 
   public Qsmtp(InetAddress address, int port)
   {
@@ -203,6 +237,9 @@ public class Qsmtp implements Runnable {
   /**
    * <p>Calling this method turns off the background thread and
    * returns Qsmtp to normal blocking operation.</p>
+   *
+   * <p>May block if there are still messages to be processed by the
+   * background email thread.</p>
    */
 
   public synchronized void stopThreaded()
@@ -259,6 +296,8 @@ public class Qsmtp implements Runnable {
                   {
                     System.err.println("Qsmtp.stopThreaded() - background thread completed");
                   }
+
+                backgroundThread = null;
               }
           }
         catch (InterruptedException ex)
@@ -269,8 +308,11 @@ public class Qsmtp implements Runnable {
   }
 
   /**
-   * This method is called to shutdown this mailer object.  Once it is
-   * shut down, no more mail can be sent through it.
+   * <p>Mailer shutdown method.  Currently a no-op if we're not
+   * operating in threaded mode.</p>
+   *
+   * <p>If we are in threaded mode, close() will block until the
+   * background thread's mail queue is drained or times out.</p>
    */
 
   public synchronized void close()
@@ -292,8 +334,9 @@ public class Qsmtp implements Runnable {
    * @param subject Subject for this message
    * @param message The text for the mail message
    *
-   * @return True if the message was successfully sent to the
-   * mailhost, false otherwise.
+   * @return True if the message was successfully sent to the mailhost
+   * (or queued if the Qsmtp object is operating in threaded mode),
+   * false otherwise.
    */
 
   public synchronized boolean sendmsg(String from_address, List<String> to_addresses,
@@ -311,8 +354,9 @@ public class Qsmtp implements Runnable {
    * @param subject Subject for this message
    * @param message The text for the mail message
    *
-   * @return True if the message was successfully sent to the
-   * mailhost, false otherwise.
+   * @return True if the message was successfully sent to the mailhost
+   * (or queued if the Qsmtp object is operating in threaded mode),
+   * false otherwise.
    */
 
   public synchronized boolean sendmsg(String from_address, List<String> to_addresses,
@@ -336,8 +380,9 @@ public class Qsmtp implements Runnable {
    * show up in mail clients
    * @param textBody The text for the non-HTML part of the mail message
    *
-   * @return True if the message was successfully sent to the
-   * mailhost, false otherwise.
+   * @return True if the message was successfully sent to the mailhost
+   * (or queued if the Qsmtp object is operating in threaded mode),
+   * false otherwise.
    */
 
   public synchronized boolean sendHTMLmsg(String from_address, List<String> to_addresses,
@@ -362,8 +407,9 @@ public class Qsmtp implements Runnable {
    * show up in mail clients
    * @param textBody The text for the non-HTML part of the mail message
    *
-   * @return True if the message was successfully sent to the
-   * mailhost, false otherwise.
+   * @return True if the message was successfully sent to the mailhost
+   * (or queued if the Qsmtp object is operating in threaded mode),
+   * false otherwise.
    */
 
   public synchronized boolean sendHTMLmsg(String from_address, List<String> to_addresses,
@@ -442,8 +488,9 @@ public class Qsmtp implements Runnable {
    * @param extraHeaders List of string headers to include in the message's
    * envelope
    *
-   * @return True if the message was successfully sent to the
-   * mailhost, false otherwise.
+   * @return True if the message was successfully sent to the mailhost
+   * (or queued if the Qsmtp object is operating in threaded mode),
+   * false otherwise.
    */
 
   public synchronized boolean sendmsg(String from_address,
@@ -466,8 +513,9 @@ public class Qsmtp implements Runnable {
    * @param extraHeaders List of string headers to include in the message's
    * envelope
    *
-   * @return True if the message was successfully sent to the
-   * mailhost, false otherwise.
+   * @return True if the message was successfully sent to the mailhost
+   * (or queued if the Qsmtp object is operating in threaded mode),
+   * false otherwise.
    */
 
   public synchronized boolean sendmsg(String from_address,
