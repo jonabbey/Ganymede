@@ -106,7 +106,7 @@ import java.util.Random;
  * background mail thread.</p>
  *
  * <p>If running in threaded mode, it is essential to call {@link
- * Qsmtp@close()} to let the background thread finish draining its
+ * Qsmtp#close()} to let the background thread finish draining its
  * queue and terminate cleanly.</p>
  *
  * <p>Because this class opens a socket to a potentially remote TCP/IP
@@ -124,9 +124,30 @@ import java.util.Random;
 public class Qsmtp implements Runnable {
 
   static final boolean debug = false;
+
+  /**
+   * The default SMTP port, 25.
+   */
+
   static final int DEFAULT_PORT = 25;
-  static final String EOL = "\r\n"; // network end of line
-  static final public int messageTimeout = 15000;  // 15 seconds
+
+  /**
+   * SMTP end of line characters.
+   */
+
+  static final String EOL = "\r\n";
+
+  /**
+   * Our 15 second socket timeout in milliseconds.
+   */
+
+  static final public int messageTimeout = 15000;
+
+  /**
+   * A java.util.Random object, used to create random MIME separator
+   * strings.
+   */
+
   static final private Random randomizer = new Random();
 
   /**
@@ -146,8 +167,23 @@ public class Qsmtp implements Runnable {
   private InetAddress address = null;
   private int port = DEFAULT_PORT;
 
-  private List<messageObject> queuedMessages = new ArrayList<messageObject>();
+  /**
+   * Are we threaded?
+   */
+
   private volatile boolean threaded = false;
+
+  /**
+   * Queue of messages to be serviced by backgroundThread.
+   */
+
+  private List<messageObject> queuedMessages = new ArrayList<messageObject>();
+
+  /**
+   * The background thread executing our {@link Qsmtp#run()} method,
+   * if any.
+   */
+
   private volatile Thread backgroundThread;
 
   /* -- */
