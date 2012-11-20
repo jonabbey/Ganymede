@@ -1199,8 +1199,8 @@ class rowSorter {
       }
 
     node = result;
-    
-    while (p1 != null || p2 != null)
+
+    while (node != null && (p1 != null || p2 != null))
       {
         if (p1 == null || compare(p1,p2) > 0)
           {
