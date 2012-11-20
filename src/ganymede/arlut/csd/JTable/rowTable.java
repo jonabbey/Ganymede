@@ -93,7 +93,7 @@ public class rowTable extends baseTable implements ActionListener {
   static final public String delColStr = ts.l("global.del_col"); // "Delete This Column"
   static final public String optColWidStr = ts.l("global.opt_col_widths"); // "Optimize Column Widths"
 
-  Hashtable 
+  Hashtable
     index;
 
   Vector
@@ -140,10 +140,10 @@ public class rowTable extends baseTable implements ActionListener {
    *
    */
 
-  public rowTable(tableAttr headerAttrib, 
+  public rowTable(tableAttr headerAttrib,
                   tableAttr tableAttrib,
-                  tableAttr[] colAttribs, 
-                  int[] colWidths, 
+                  tableAttr[] colAttribs,
+                  int[] colWidths,
                   Color vHeadLineColor,
                   Color vRowLineColor,
                   Color hHeadLineColor,
@@ -157,11 +157,11 @@ public class rowTable extends baseTable implements ActionListener {
   {
     super(headerAttrib, tableAttrib, colAttribs, colWidths,
           vHeadLineColor, vRowLineColor, hHeadLineColor, hRowLineColor,
-          headers, horizLines, vertLines, vertFill, hVertFill, 
+          headers, horizLines, vertLines, vertFill, hVertFill,
           menu, null);
-    
+
     rowMenu = new JPopupMenu();
-    
+
     rowMenu.add(new JLabel(menuTitle));
     rowMenu.addSeparator();
 
@@ -213,7 +213,7 @@ public class rowTable extends baseTable implements ActionListener {
 
         OptimizeMI.addActionListener(this);
       }
-    
+
     canvas.add(rowMenu);
 
     this.headerMenu = rowMenu;
@@ -235,17 +235,17 @@ public class rowTable extends baseTable implements ActionListener {
    *
    */
 
-  public rowTable(int[] colWidths, String[] headers, 
-                  rowSelectCallback callback, 
+  public rowTable(int[] colWidths, String[] headers,
+                  rowSelectCallback callback,
                   boolean horizLines,
                   JPopupMenu menu, boolean allowDeleteColumn)
   {
-    this(new tableAttr(null, new Font("SansSerif", Font.BOLD, 14), 
+    this(new tableAttr(null, new Font("SansSerif", Font.BOLD, 14),
                        Color.white, Color.blue, tableAttr.JUST_CENTER),
          new tableAttr(null, new Font("SansSerif", Font.PLAIN, 12),
                        Color.black, Color.white, tableAttr.JUST_LEFT),
          (tableAttr[]) null,
-         colWidths, 
+         colWidths,
          Color.black,
          Color.black,
          Color.black,
@@ -275,16 +275,16 @@ public class rowTable extends baseTable implements ActionListener {
    *
    */
 
-  public rowTable(int[] colWidths, String[] headers, 
-                  rowSelectCallback callback, 
+  public rowTable(int[] colWidths, String[] headers,
+                  rowSelectCallback callback,
                   JPopupMenu menu, boolean allowDeleteColumn)
   {
-    this(new tableAttr(null, new Font("SansSerif", Font.BOLD, 14), 
+    this(new tableAttr(null, new Font("SansSerif", Font.BOLD, 14),
                        Color.white, Color.blue, tableAttr.JUST_CENTER),
          new tableAttr(null, new Font("SansSerif", Font.PLAIN, 12),
                        Color.black, Color.white, tableAttr.JUST_LEFT),
          (tableAttr[]) null,
-         colWidths, 
+         colWidths,
          Color.black,
          Color.black,
          Color.black,
@@ -313,7 +313,7 @@ public class rowTable extends baseTable implements ActionListener {
 
   public synchronized void clickInCell(int x, int y, boolean rightButton)
   {
-    rowHandle 
+    rowHandle
       element = null;
 
     /* -- */
@@ -371,23 +371,23 @@ public class rowTable extends baseTable implements ActionListener {
       {
         // go ahead and deselect the current row, if and only if this is a left-button
         // click.
-        
+
         if (!rightButton)
           {
             if (debug)
               {
                 System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in selected row.. unselecting");
               }
-            
+
             unSelectRow();
-            
+
             if (debug)
               {
                 System.err.println("rowTable.clickInCell(" + x + "," + y + "): clicked in selected row.. refreshing");
               }
-            
+
             refreshTable();
-            
+
             if (debug)
               {
                 System.err.println("rowTable.clickInCell(" + x + "," + y + "): table refreshed");
@@ -406,7 +406,7 @@ public class rowTable extends baseTable implements ActionListener {
   public synchronized void doubleClickInCell(int x, int y)
   {
     rowHandle element = null;
-    
+
     /* -- */
 
     element = findRow(y);
@@ -580,7 +580,7 @@ public class rowTable extends baseTable implements ActionListener {
 
     super.deleteRow(element.rownum, repaint);
 
-    // sync up the rowHandles 
+    // sync up the rowHandles
 
     crossref.removeElementAt(element.rownum);
 
@@ -693,7 +693,7 @@ public class rowTable extends baseTable implements ActionListener {
    * table or column's default font for this cell.
    *
    * @param key key to the row of the cell
-   * @param col column of the cell 
+   * @param col column of the cell
    * @param font the Font to assign to cell, may be null to use default
    * @param repaint true if the table should be redrawn after changing cell
    *
@@ -710,7 +710,7 @@ public class rowTable extends baseTable implements ActionListener {
    * Use tableAttr.JUST_INHERIT to have this cell use default justification
    *
    * @param key key to the row of the cell
-   * @param col column of the cell 
+   * @param col column of the cell
    * @param just the justification to assign to cell
    * @param repaint true if the table should be redrawn after changing cell
    *
@@ -730,7 +730,7 @@ public class rowTable extends baseTable implements ActionListener {
    * the table.
    *
    * @param key key to the row of the cell
-   * @param col column of the cell 
+   * @param col column of the cell
    * @param color the Color to assign to cell
    * @param repaint true if the table should be redrawn after changing cell
    *
@@ -749,7 +749,7 @@ public class rowTable extends baseTable implements ActionListener {
    * the table.
    *
    * @param key key to the row of the cell
-   * @param col column of the cell 
+   * @param col column of the cell
    * @param color the Color to assign to cell
    * @param repaint true if the table should be redrawn after changing cell
    *
@@ -782,9 +782,9 @@ public class rowTable extends baseTable implements ActionListener {
   }
 
   /**
-   * Method used to handle the popup menu 
+   * Method used to handle the popup menu
    */
-  
+
   public void actionPerformed(ActionEvent e)
   {
     rowHandle element = null;
@@ -831,7 +831,7 @@ public class rowTable extends baseTable implements ActionListener {
           }
 
         element = findRow(menuRow);
-    
+
         // perform our callback
 
         if (element != null)
@@ -890,7 +890,7 @@ public class rowTable extends baseTable implements ActionListener {
 
 }
 
-/* from Fundamentals of Data Structures in Pascal, 
+/* from Fundamentals of Data Structures in Pascal,
         Ellis Horowitz and Sartaj Sahni,
         Second Edition, p.347
         Computer Science Press, Inc.
@@ -899,7 +899,7 @@ public class rowTable extends baseTable implements ActionListener {
 
 class mergeRec {
 
-  
+
   tableRow element;
   rowHandle handle;
   mergeRec link;
@@ -1032,7 +1032,7 @@ class rowSorter {
           }
 
         // okay, neither null.
-        
+
         return one.compareToIgnoreCase(two);
       }
 
@@ -1235,7 +1235,7 @@ class rowSorter {
       }
 
     mergeRecs = new Vector();
-    
+
     // System.err.println("Creating mergeRecs");
 
     for (int i = 0; i < parent.rows.size(); i++)
@@ -1245,7 +1245,7 @@ class rowSorter {
       }
 
     // System.err.println("Sorting from element " + 0 + " to " + (mergeRecs.size()-1));
-    
+
     mergeRec result = rmsort(0, mergeRecs.size()-1);
 
     //  System.err.println("Toplevel sorted, fixing crossrefs");
@@ -1274,7 +1274,7 @@ This class is used to map a hash key to a position in the table.
 
 class rowHandle {
 
-  Object 
+  Object
     key;
 
   int
@@ -1291,7 +1291,7 @@ class rowHandle {
 
     parent.crossref.addElement(this);
 
-    // check to make sure 
+    // check to make sure
 
     if (parent.crossref.indexOf(this) != rownum)
       {
