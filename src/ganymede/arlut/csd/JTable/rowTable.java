@@ -70,12 +70,7 @@ import arlut.csd.Util.TranslationService;
 
 /**
  * <p>rowTable is a specialized baseTable, supporting a per-row
- * access model based on a hashtable.
- *
- *
- * @see arlut.csd.JTable.baseTable
- * @author Jonathan Abbey
- * @version $Id$
+ * access model based on a hashtable.</p>
  */
 
 public class rowTable extends baseTable implements ActionListener {
@@ -851,10 +846,8 @@ public class rowTable extends baseTable implements ActionListener {
   }
 
   /**
-   *
-   * Sort by column <column>, according to the direction
-   * of the last sort.
-   *
+   * <p>Sort by column &lt;column&gt;, according to the direction of the
+   * last sort.</p>
    */
 
   public void resort(int column, boolean repaint)
@@ -1202,7 +1195,7 @@ class rowSorter {
 
     node = result;
 
-    while (node != null && (p1 != null || p2 != null))
+    while (p1 != null || p2 != null)
       {
         if (p1 == null || compare(p1,p2) > 0)
           {
