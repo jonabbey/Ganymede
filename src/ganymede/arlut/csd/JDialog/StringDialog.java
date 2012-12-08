@@ -787,7 +787,10 @@ public class StringDialog extends StandardDialog implements ActionListener, Wind
 
   public void setFont(Font font)
   {
-    textLabel.setFont(font);
+    if (textLabel != null)
+      {
+        textLabel.setFont(font);
+      }
   }
 
   /**
