@@ -10,11 +10,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -67,8 +69,8 @@ import java.util.Vector;
  * DBWriteLock can be established until the dumping thread has
  * completed the dump and released the lock.</p>
  *
- * <p>{@link arlut.csd.ganymede.server.DBReadLock DBReadLock}'s can be established
- * while a DBDumpLock is active, though.</p>
+ * <p>{@link arlut.csd.ganymede.server.DBReadLock DBReadLock}'s can be
+ * established while a DBDumpLock is active, though.</p>
  *
  * <p>A DBDumpLock acts as a highest priority DBReadLock.</p>
  */
@@ -80,7 +82,7 @@ class DBDumpLock extends DBLock {
   /* -- */
 
   /**
-   * Constructor to get a dump lock on all the object bases.
+   * <p>Constructor to get a dump lock on all the object bases.</p>
    */
 
   public DBDumpLock(DBStore store)
@@ -92,8 +94,8 @@ class DBDumpLock extends DBLock {
   }
 
   /**
-   * Constructor to get a dump lock on a subset of the
-   * object bases.
+   * <p>Constructor to get a dump lock on a subset of the object
+   * bases.</p>
    */
 
   public DBDumpLock(DBStore store, Vector<DBObjectBase> baseSet)
@@ -105,10 +107,27 @@ class DBDumpLock extends DBLock {
   }
 
   /**
-   * <p>Establish a dump lock on bases specified in this DBDumpLock's
-   * constructor.  Can throw InterruptedException if another thread
-   * orders us to abort() while we're waiting for permission to
-   * proceed with reads on the specified baseset.</p>
+   * <p>A thread that calls establish() will be suspended (waiting on
+   * the server's {@link arlut.csd.ganymede.server.DBStore DBStore}
+   * until all DBObjectBases listed in this DBDumpLock's constructor
+   * are available to be locked.  At that point, the thread blocking
+   * on establish() will wake up possessing a dump lock on the
+   * requested DBObjectBases.</p>
+   *
+   * <p>It is possible for the establish() to fail completely.. the
+   * admin console may reject a client whose thread is blocking on
+   * establish(), for instance, or the server may be shut down.  In
+   * those cases, another thread may call this DBDumpLock's {@link
+   * arlut.csd.ganymede.server.DBLock#abort() abort()} method, in
+   * which case establish() will throw an InterruptedException, and
+   * the lock will not be established.</p>
+   *
+   * @param key An object used in the server to uniquely identify the
+   * entity internal to Ganymede that is attempting to obtain the
+   * lock, typically a {@link
+   * arlut.csd.ganymede.server.GanymedeSession GanymedeSession} or a
+   * {@link arlut.csd.ganymede.server.GanymedeBuilderTask
+   * GanymedeBuilderTask}.
    */
 
   public void establish(Object key) throws InterruptedException
@@ -205,7 +224,7 @@ class DBDumpLock extends DBLock {
                     catch (InterruptedException ex)
                       {
                         throw ex; // finally will clean up
-                      } 
+                      }
                   }
               }
 
@@ -241,7 +260,7 @@ class DBDumpLock extends DBLock {
   }
 
   /**
-   * Release this lock on all bases locked
+   * <p>Release this lock on all bases locked</p>
    */
 
   public void release()
@@ -257,15 +276,15 @@ class DBDumpLock extends DBLock {
             try
               {
                 lockSync.wait(2500); // or until notify'ed
-              } 
+              }
             catch (InterruptedException ex)
               {
               }
           }
-        
+
         // note that we have to check locked here or else we might accidentally
         // release somebody else's lock below
-        
+
         if (!locked)
           {
             return;
@@ -276,10 +295,10 @@ class DBDumpLock extends DBLock {
             base = (DBObjectBase) baseSet.elementAt(i);
             base.removeDumpLock(this);
           }
-        
+
         locked = false;
         lockSync.clearLockHeld(key);
-        
+
         key = null;             // gc
         
         lockSync.removeLock();  // notify consoles

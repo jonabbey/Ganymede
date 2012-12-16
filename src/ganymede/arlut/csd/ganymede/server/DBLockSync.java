@@ -10,11 +10,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -73,7 +75,7 @@ import java.util.Vector;
 
 public class DBLockSync {
 
-  /** 
+  /**
    * <p>Identifier keys for current {@link arlut.csd.ganymede.server.DBLock
    * DBLocks}.</p>
    *
@@ -123,9 +125,9 @@ public class DBLockSync {
     locksHeld = 0;
   }
 
-  /** 
+  /**
    * <p>This method returns true if there is a lock held in care of
-   * the given identifier in this DBLockSync object.</p> 
+   * the given identifier in this DBLockSync object.</p>
    */
 
   public boolean isLockHeld(Object key)
@@ -240,7 +242,7 @@ public class DBLockSync {
 
     if (obj != null && !(obj instanceof Vector))
       {
-        throw new IllegalStateException("Error, can't add a read lock while there is a " + obj + 
+        throw new IllegalStateException("Error, can't add a read lock while there is a " + obj +
                                         " associated with key " + key);
       }
 
@@ -269,9 +271,9 @@ public class DBLockSync {
 
     if (obj != null && !(obj instanceof Vector))
       {
-        throw new IllegalStateException("Error, can't remove a read lock while there is a " + 
-                                        obj + 
-                                        " associated with key " + key + 
+        throw new IllegalStateException("Error, can't remove a read lock while there is a " +
+                                        obj +
+                                        " associated with key " + key +
                                         ".. there are no readlocks here.");
       }
 
@@ -323,7 +325,7 @@ public class DBLockSync {
 
   /**
    * <p>This method returns a DBLock associated with the
-   * given key, if any.</p> 
+   * given key, if any.</p>
    *
    * <p>This method will only ever return a DBWriteLock or
    * a DBDumpLock.  If the key is associated with a Vector
@@ -372,7 +374,7 @@ public class DBLockSync {
 
     if (locksHeld < 0)
       {
-        throw new RuntimeException("Locks held has gone negative"); 
+        throw new RuntimeException("Locks held has gone negative");
       }
   }
 

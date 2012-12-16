@@ -10,11 +10,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -86,7 +88,7 @@ public class DBWriteLock extends DBLock {
   /* -- */
 
   /**
-   * Constructor to get a write lock on all the object bases
+   * <p>Constructor to get a write lock on all the object bases</p>
    */
 
   public DBWriteLock(DBStore store)
@@ -97,8 +99,8 @@ public class DBWriteLock extends DBLock {
   }
 
   /**
-   * Constructor to get a write lock on a subset of the
-   * object bases.
+   * <p>Constructor to get a write lock on a subset of the server's
+   * object bases.</p>
    */
 
   public DBWriteLock(DBStore store, Vector<DBObjectBase> baseSet)
@@ -109,10 +111,27 @@ public class DBWriteLock extends DBLock {
   }
 
   /**
-   * <p>Establish a dump lock on bases specified in this DBWriteLock's
-   * constructor.  Can throw InterruptedException if another thread
-   * orders us to abort() while we're waiting for permission to
-   * proceed with writes on the specified baseset.</p>
+   * <p>A thread that calls establish() will be suspended (waiting on
+   * the server's {@link arlut.csd.ganymede.server.DBStore DBStore}
+   * until all DBObjectBases listed in this DBWriteLock's constructor
+   * are available to be locked.  At that point, the thread blocking
+   * on establish() will wake up possessing a write lock on the
+   * requested DBObjectBases.</p>
+   *
+   * <p>It is possible for the establish() to fail completely.. the
+   * admin console may reject a client whose thread is blocking on
+   * establish(), for instance, or the server may be shut down.  In
+   * those cases, another thread may call this DBWriteLock's {@link
+   * arlut.csd.ganymede.server.DBLock#abort() abort()} method, in
+   * which case establish() will throw an InterruptedException, and
+   * the lock will not be established.</p>
+   *
+   * @param key An object used in the server to uniquely identify the
+   * entity internal to Ganymede that is attempting to obtain the
+   * lock, typically a {@link
+   * arlut.csd.ganymede.server.GanymedeSession GanymedeSession} or a
+   * {@link arlut.csd.ganymede.server.GanymedeBuilderTask
+   * GanymedeBuilderTask}.
    */
 
   public void establish(Object key) throws InterruptedException
@@ -227,7 +246,7 @@ public class DBWriteLock extends DBLock {
                   {
                     try
                       {
-                        lockSync.wait(2500); // or until notify'ed
+                        lockSync.wait(2500);
                       }
                     catch (InterruptedException ex)
                       {
@@ -237,7 +256,7 @@ public class DBWriteLock extends DBLock {
                       }
                   }
 
-              } while (!okay);  // waiting for dumpers / schema editing to clear out
+              } while (!okay);  // waiting for dumpers to clear out
 
             if (debug)
               {
@@ -314,7 +333,7 @@ public class DBWriteLock extends DBLock {
                             else if (base.isWriteInProgress())
                               {
                                 System.err.println(this.key +
-                                                   ": DBWriteLock.establish(): " + 
+                                                   ": DBWriteLock.establish(): " +
                                                    "waiting for writer to release.");
                               }
                           }
@@ -346,24 +365,25 @@ public class DBWriteLock extends DBLock {
                         base.setWriteInProgress(true);
                         base.setCurrentLock(this);
                       }
-                
+
                     done = true;
                   }
                 else
                   {
-                    // Okay, something's locked us out.  Wait a bit
-                    // and try again.
+                    // Okay, something's locked us out.  Sleep a bit
+                    // (2.5 seconds or until woken by notify) and try
+                    // again.
 
                     try
                       {
-                        lockSync.wait(2500); // or until notify'ed
+                        lockSync.wait(2500);
                       }
                     catch (InterruptedException ex)
                       {
                         throw ex; // finally will clean up
                       }
                   }
-              } // while (!done)
+              }
 
             locked = true;
             lockSync.addLock(); // notify consoles
@@ -379,17 +399,17 @@ public class DBWriteLock extends DBLock {
                     base = (DBObjectBase) baseSet.elementAt(i);
                     base.removeWriter(this);
                   }
-                
+
                 writersAdded = false;
               }
-            
+
             if (!locked)
               {
                 lockSync.clearLockHeld(this.key);
                 this.key = null;
               }
 
-            lockSync.notifyAll(); // wake up threads waiting to establish or release
+            lockSync.notifyAll();
           }
 
       } // synchronized(lockSync)
@@ -401,7 +421,7 @@ public class DBWriteLock extends DBLock {
   }
 
   /**
-   * Release this lock on all bases locked
+   * <p>Release this lock on all bases locked</p>
    */
 
   public void release()
@@ -415,22 +435,22 @@ public class DBWriteLock extends DBLock {
         // if we are forcing this lock to go away on behalf of a thread
         // distinct from the locking thread, we have to wait for that
         // thread's establish method to get clear
-        
+
         while (inEstablish)
           {
             try
               {
-                lockSync.wait(2500); // or until notify'ed
-              } 
+                lockSync.wait(2500);
+              }
             catch (InterruptedException ex)
               {
               }
           }
-        
+
         // note that we have to check locked here or else we might
         // accidentally release somebody else's lock below, if we
         // called release on a non-locked thread.
-        
+
         if (!locked)
           {
             return;
@@ -442,7 +462,7 @@ public class DBWriteLock extends DBLock {
             base.setWriteInProgress(false);
             base.setCurrentLock(null);
           }
-        
+
         locked = false;
         lockSync.clearLockHeld(key);
         
@@ -465,7 +485,7 @@ public class DBWriteLock extends DBLock {
    * Any subsequent calls to estabish() will always throw
    * InterruptedException.</p>
    */
-  
+
   public void abort()
   {
     synchronized (lockSync)
