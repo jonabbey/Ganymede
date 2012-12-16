@@ -97,9 +97,9 @@ public class DBReadLock extends DBLock {
 
   public DBReadLock(DBStore store)
   {
-    key = null;
+    this.key = null;
     this.lockSync = store.lockSync;
-    baseSet = store.getBases();
+    this.baseSet = store.getBases();
   }
 
   /**
@@ -109,7 +109,7 @@ public class DBReadLock extends DBLock {
 
   public DBReadLock(DBStore store, Vector baseSet)
   {
-    key = null;
+    this.key = null;
     this.lockSync = store.lockSync;
     this.baseSet = baseSet;
   }
@@ -140,8 +140,9 @@ public class DBReadLock extends DBLock {
 
   public void establish(Object key) throws InterruptedException
   {
-    boolean done = false, okay = false, added = false;
-    DBObjectBase base;
+    boolean done = false;
+    boolean okay = false;
+    boolean added = false;
 
     /* -- */
 
@@ -168,7 +169,7 @@ public class DBReadLock extends DBLock {
 
                 if (debug)
                   {
-                    System.err.println("DBReadLock (" + key + "):  dump or write lock blocking us");
+                    System.err.println("DBReadLock (" + key + "):  our own dump or write lock blocking us");
                   }
 
                 throw new RuntimeException("Error: read lock sought by owner of existing write or dump lockset.");
@@ -183,7 +184,7 @@ public class DBReadLock extends DBLock {
 
             // so, record who we are and that we are pending
 
-            inEstablish = true;     
+            this.inEstablish = true;
             this.key = key;
             lockSync.addReadLock(key, this);
 
@@ -203,16 +204,15 @@ public class DBReadLock extends DBLock {
                     System.err.println("DBReadLock (" + key + "):  looping to get establish permission");
                   }
 
-                if (abort)
+                if (this.abort)
                   {
                     throw new InterruptedException("DBReadLock (" + key + "):  establish aborting before permission granted");
                   }
 
                 okay = true;
 
-                for (int i = 0; okay && (i < baseSet.size()); i++)
+                for (DBObjectBase base: baseSet)
                   {
-                    base = (DBObjectBase) baseSet.elementAt(i);
                     // check for writers.  we don't care about
                     // dumpers, since we can read without problems
                     // while a dump lock is held
@@ -229,11 +229,12 @@ public class DBReadLock extends DBLock {
                       {
                         if (debug)
                           {
-                            System.err.println("DBReadLock (" + key + "):  base " + 
+                            System.err.println("DBReadLock (" + key + "):  base " +
                                                base.getName() + " has writers queued/locked");
                           }
 
                         okay = false;
+                        break;
                       }
                   }
 
@@ -243,8 +244,8 @@ public class DBReadLock extends DBLock {
                       {
                         System.err.println("DBReadLock (" + key + "):  waiting on lockSync");
                       }
-                    
-                    lockSync.wait(2500); // an InterruptedException here gets propagated up
+
+                    lockSync.wait(2500);
 
                     if (debug)
                       {
@@ -259,7 +260,7 @@ public class DBReadLock extends DBLock {
                       {
                         for (i = 0; i < baseSet.size(); i++)
                           {
-                            base = (DBObjectBase) baseSet.elementAt(i);
+                            DBObjectBase base = (DBObjectBase) baseSet.elementAt(i);
                             base.addReader(this);
                           }
 
@@ -273,7 +274,7 @@ public class DBReadLock extends DBLock {
 
                         for (int j = i-1; j >= 0; j--)
                           {
-                            base = (DBObjectBase) baseSet.elementAt(i);
+                            DBObjectBase base = (DBObjectBase) baseSet.elementAt(i);
                             base.removeReader(this);
                           }
 
@@ -294,14 +295,14 @@ public class DBReadLock extends DBLock {
           }
         finally
           {
-            inEstablish = false; // in case we threw an exception while establishing
+            inEstablish = false;
 
             if (added && !locked)
               {
                 lockSync.delReadLock(key, this);
               }
 
-            lockSync.notifyAll(); // let a thread trying to release this lock proceed
+            lockSync.notifyAll();
           }
       } // synchronized (lockSync)
   }
@@ -327,10 +328,6 @@ public class DBReadLock extends DBLock {
 
   public void release()
   {
-    DBObjectBase base;
-
-    /* -- */
-
     if (debug)
       {
         System.err.println("DBReadLock (" + key + "):  attempting release");
@@ -369,9 +366,8 @@ public class DBReadLock extends DBLock {
             return;
           }
 
-        for (int i = 0; i < baseSet.size(); i++)
+        for (DBObjectBase base: baseSet)
           {
-            base = (DBObjectBase) baseSet.elementAt(i);
             base.removeReader(this);
           }
 
@@ -411,7 +407,7 @@ public class DBReadLock extends DBLock {
   {
     synchronized (lockSync)
       {
-        abort = true;
+        this.abort = true;
         release();              // blocks until freed
       }
   }

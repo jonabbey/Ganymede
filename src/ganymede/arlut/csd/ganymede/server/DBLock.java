@@ -199,7 +199,7 @@ public abstract class DBLock {
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} locked.</p>
    */
 
-  boolean isLocked(DBObjectBase base)
+  boolean isLocked(DBObjectBase candidateBase)
   {
     synchronized (lockSync)
       {
@@ -208,9 +208,9 @@ public abstract class DBLock {
             return false;
           }
 
-        for (int i=0; i < baseSet.size(); i++)
+        for (DBObjectBase base: baseSet)
           {
-            if (baseSet.elementAt(i) == base)
+            if (base == candidateBase)
               {
                 return true;
               }

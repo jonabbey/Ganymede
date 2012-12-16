@@ -137,8 +137,8 @@ public class DBWriteLock extends DBLock {
   public void establish(Object key) throws InterruptedException
   {
     boolean writersAdded = false;
-    boolean done, okay;
-    DBObjectBase base;
+    boolean done = false;
+    boolean okay = false;
 
     /* -- */
 
@@ -178,8 +178,6 @@ public class DBWriteLock extends DBLock {
             this.key = key;
             inEstablish = true;
 
-            done = false;
-
             // wait until there are no dumpers queued for establish,
             // then queue up for own own turn at our bases
 
@@ -215,10 +213,8 @@ public class DBWriteLock extends DBLock {
                   }
                 else
                   {
-                    for (int i = 0; okay && (i < baseSet.size()); i++)
+                    for (DBObjectBase base: baseSet)
                       {
-                        base = (DBObjectBase) baseSet.elementAt(i);
-
                         // if this base has any dumpers queued on it
                         // (even if they don't yet hold an actual
                         // lock), we have to wait.  once a write lock
@@ -231,13 +227,14 @@ public class DBWriteLock extends DBLock {
                           {
                             if (debug)
                               {
-                                System.err.println(this.key + ": DBWriteLock.establish(): waiting for dumpers on base " + 
+                                System.err.println(this.key + ": DBWriteLock.establish(): waiting for dumpers on base " +
                                                    base.getName());
-                                System.err.println(this.key + ": DBWriteLock.establish(): dumperList size: " + 
+                                System.err.println(this.key + ": DBWriteLock.establish(): dumperList size: " +
                                                    base.getDumperSize());
                               }
 
                             okay = false;
+                            break;
                           }
                       }
                   }
@@ -271,9 +268,8 @@ public class DBWriteLock extends DBLock {
             // away while we block out any new readers until we're
             // through
 
-            for (int i = 0; i < baseSet.size(); i++)
+            for (DBObjectBase base: baseSet)
               {
-                base = (DBObjectBase) baseSet.elementAt(i);
                 base.addWriter(this);
               }
 
@@ -307,10 +303,8 @@ public class DBWriteLock extends DBLock {
 
                 okay = true;
 
-                for (int i = 0; okay && (i < baseSet.size()); i++)
+                for (DBObjectBase base: baseSet)
                   {
-                    base = (DBObjectBase) baseSet.elementAt(i);
-
                     // writers are exclusive.. if any lock of any kind
                     // is asserted, we can't play
 
@@ -337,7 +331,9 @@ public class DBWriteLock extends DBLock {
                                                    "waiting for writer to release.");
                               }
                           }
+
                         okay = false;
+                        break;
                       }
                   }
 
@@ -359,9 +355,8 @@ public class DBWriteLock extends DBLock {
                     // in establish() that is okay to proceed on all
                     // requested bases.
 
-                    for (int i = 0; i < baseSet.size(); i++)
+                    for (DBObjectBase base: baseSet)
                       {
-                        base = (DBObjectBase) baseSet.elementAt(i);
                         base.setWriteInProgress(true);
                         base.setCurrentLock(this);
                       }
@@ -394,9 +389,8 @@ public class DBWriteLock extends DBLock {
 
             if (writersAdded)
               {
-                for (int i = 0; i < baseSet.size(); i++)
+                for (DBObjectBase base: baseSet)
                   {
-                    base = (DBObjectBase) baseSet.elementAt(i);
                     base.removeWriter(this);
                   }
 
@@ -426,10 +420,6 @@ public class DBWriteLock extends DBLock {
 
   public void release()
   {
-    DBObjectBase base;
-
-    /* -- */
-
     synchronized (lockSync)
       {
         // if we are forcing this lock to go away on behalf of a thread
@@ -455,10 +445,9 @@ public class DBWriteLock extends DBLock {
           {
             return;
           }
-        
-        for (int i = 0; i < baseSet.size(); i++)
+
+        for (DBObjectBase base: baseSet)
           {
-            base = (DBObjectBase) baseSet.elementAt(i);
             base.setWriteInProgress(false);
             base.setCurrentLock(null);
           }

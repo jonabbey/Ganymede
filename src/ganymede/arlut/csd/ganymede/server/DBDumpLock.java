@@ -88,9 +88,9 @@ class DBDumpLock extends DBLock {
   public DBDumpLock(DBStore store)
   {
     this.lockSync = store.lockSync;
-    baseSet = store.getBases();
+    this.baseSet = store.getBases();
 
-    locked = false;
+    this.locked = false;
   }
 
   /**
@@ -102,8 +102,7 @@ class DBDumpLock extends DBLock {
   {
     this.lockSync = store.lockSync;
     this.baseSet = baseSet;
-
-    locked = false;
+    this.locked = false;
   }
 
   /**
@@ -133,8 +132,8 @@ class DBDumpLock extends DBLock {
   public void establish(Object key) throws InterruptedException
   {
     boolean added = false;
-    boolean done, okay;
-    DBObjectBase base;
+    boolean done = false;
+    boolean okay = false;
 
     /* -- */
 
@@ -142,8 +141,6 @@ class DBDumpLock extends DBLock {
       {
         try
           {
-            done = false;
-
             if (lockSync.isLockHeld(key))
               {
                 throw new RuntimeException("Error: dump lock sought by owner of existing lockset.");
@@ -158,9 +155,8 @@ class DBDumpLock extends DBLock {
             // writers to hold off on adding themselves to the
             // writerlists until the dumperlists are empty.
 
-            for (int i = 0; i < baseSet.size(); i++)
+            for (DBObjectBase base: baseSet)
               {
-                base = (DBObjectBase) baseSet.elementAt(i);
                 base.addDumper(this);
               }
 
@@ -179,10 +175,8 @@ class DBDumpLock extends DBLock {
                 // isWriterEmpty() is not true, that base needs to wait for
                 // its slate of writers to release and drain
 
-                for (int i = 0; okay && (i < baseSet.size()); i++)
+                for (DBObjectBase base: baseSet)
                   {
-                    base = (DBObjectBase) baseSet.elementAt(i);
-
                     // note that the writer locks are polite enough to
                     // wait for us if we are queued in the dump wait
                     // queue, which we are at this point.  so we just
@@ -193,6 +187,7 @@ class DBDumpLock extends DBLock {
                     if (!base.isWriterEmpty() || base.isWriteInProgress())
                       {
                         okay = false;
+                        break;
                       }
                   }
 
@@ -202,10 +197,8 @@ class DBDumpLock extends DBLock {
 
                 if (okay)
                   {
-                    for (int i = 0; i < baseSet.size(); i++)
+                    for (DBObjectBase base: baseSet)
                       {
-                        base = (DBObjectBase) baseSet.elementAt(i);
-
                         // base.addDumpLock() actually records this
                         // DBDumpLock as being established, and not
                         // just in the dumper wait queue
@@ -241,9 +234,8 @@ class DBDumpLock extends DBLock {
                 // in either case we don't need to be on the dumper
                 // wait queues any more
 
-                for (int i = 0; i < baseSet.size(); i++)
+                for (DBObjectBase base: baseSet)
                   {
-                    base = (DBObjectBase) baseSet.elementAt(i);
                     base.removeDumper(this);
                   }
               }
@@ -265,10 +257,6 @@ class DBDumpLock extends DBLock {
 
   public void release()
   {
-    DBObjectBase base;
-
-    /* -- */
-
     synchronized (lockSync)
       {
         while (inEstablish)
@@ -289,10 +277,9 @@ class DBDumpLock extends DBLock {
           {
             return;
           }
-        
-        for (int i = 0; i < baseSet.size(); i++)
+
+        for (DBObjectBase base: baseSet)
           {
-            base = (DBObjectBase) baseSet.elementAt(i);
             base.removeDumpLock(this);
           }
 
