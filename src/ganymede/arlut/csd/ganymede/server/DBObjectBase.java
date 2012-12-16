@@ -3567,20 +3567,32 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * show a reference to the DBWriteLock locking us down.</p>
    */
 
-  void setCurrentLock(DBWriteLock lock)
+  void setWriteLock(DBWriteLock lock)
   {
+    this.setWriteInProgress(true);
     this.currentLock = lock;
+  }
+
+  void clearWriteLock(DBWriteLock lock)
+  {
+    if (this.currentLock != lock)
+      {
+        throw new IllegalArgumentException("mismatched writelock");
+      }
+
+    this.setWriteInProgress(false);
+    this.currentLock = null;
   }
 
   /**
    * <p>Add a DBWriteLock to this base's writer wait set.</p>
    */
 
-  boolean addWriter(DBWriteLock writer)
+  boolean addWaitingWriter(DBWriteLock writer)
   {
     synchronized (store.lockSync)
       {
-        writerList.addElement(writer);
+        writerList.add(writer);
       }
 
     return true;
@@ -3590,7 +3602,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Remove a DBWriteLock from this base's writer wait set.</p>
    */
 
-  boolean removeWriter(DBWriteLock writer)
+  boolean removeWaitingWriter(DBWriteLock writer)
   {
     boolean result;
 
@@ -3604,10 +3616,20 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
+   * <p>Returns true if this base has a non-empty writer waiting list
+   * or actually has a write lock established.</p>
+   */
+
+  boolean hasWriter()
+  {
+    return !isWaitingWriterListEmpty() || isWriteInProgress();
+  }
+
+  /**
    * <p>Returns true if this base's writer wait set is empty.</p>
    */
 
-  boolean isWriterEmpty()
+  boolean isWaitingWriterListEmpty()
   {
     return writerList.isEmpty();
   }
@@ -3616,7 +3638,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Returns the size of the writer wait set</p>
    */
 
-  int getWriterSize()
+  int getWaitingWriterListSize()
   {
     return writerList.size();
   }
@@ -3675,7 +3697,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Add a DBDumpLock to this base's dumper waiting set.</p>
    */
 
-  boolean addDumper(DBDumpLock dumper)
+  boolean addWaitingDumper(DBDumpLock dumper)
   {
     synchronized (store.lockSync)
       {
@@ -3689,7 +3711,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Remove a DBDumpLock from this base's dumper waiting set.</p>
    */
 
-  boolean removeDumper(DBDumpLock dumper)
+  boolean removeWaitingDumper(DBDumpLock dumper)
   {
     boolean result;
 
@@ -3708,7 +3730,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Returns true if this base's dumper wait set is empty.</p>
    */
 
-  boolean isDumperEmpty()
+  boolean isWaitingDumperListEmpty()
   {
     return dumperList.isEmpty();
   }
@@ -3717,7 +3739,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Returns the size of the dumper wait set</p>
    */
 
-  int getDumperSize()
+  int getWaitingDumperListSize()
   {
     return dumperList.size();
   }

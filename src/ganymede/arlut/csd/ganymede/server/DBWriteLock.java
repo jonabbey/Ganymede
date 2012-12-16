@@ -95,7 +95,7 @@ public class DBWriteLock extends DBLock {
   {
     this.key = null;
     this.lockSync = store.lockSync;
-    baseSet = store.getBases();
+    this.baseSet = store.getBases();
   }
 
   /**
@@ -136,8 +136,7 @@ public class DBWriteLock extends DBLock {
 
   public void establish(Object key) throws InterruptedException
   {
-    boolean writersAdded = false;
-    boolean done = false;
+    boolean waiting = false;
     boolean okay = false;
 
     /* -- */
@@ -150,21 +149,13 @@ public class DBWriteLock extends DBLock {
 
     synchronized (lockSync)
       {
+        if (!lockSync.claimLockKey(key, this))
+          {
+            throw new InterruptedException("DBWriteLock.establish(): error, lock already held for key: " + key);
+          }
+
         try
           {
-            // okay, we're wanting to establish a write lock.. first
-            // we check to see if we already have a lock associated
-            // with the same lock key.. if so, we need to abort to
-            // avoid deadlock.  we don't support upgrading read locks
-            // to write locks.
-
-            if (lockSync.isLockHeld(key))
-              {
-                throw new InterruptedException("DBWriteLock.establish(): error, lock already held for key: " + key);
-              }
-
-            lockSync.setWriteLockHeld(key, this);
-
             if (debug)
               {
                 System.err.println(key + ": DBWriteLock.establish(): added myself to the DBLockSync lockHash.");
@@ -176,21 +167,17 @@ public class DBWriteLock extends DBLock {
             // another thread trying to release us.
 
             this.key = key;
-            inEstablish = true;
+            this.inEstablish = true;
 
             // wait until there are no dumpers queued for establish,
             // then queue up for own own turn at our bases
 
-            do
+            while (!okay)
               {
-                if (abort)
+                if (this.abort)
                   {
-                    // the finally clause at bottom will clean up
-
                     throw new InterruptedException("aborted on command");
                   }
-
-                okay = true;
 
                 // if the server is in shutdown or in schema edit, we
                 // can't proceed.  in theory, this check would be
@@ -201,59 +188,48 @@ public class DBWriteLock extends DBLock {
 
                 String disabledMessage = GanymedeServer.lSemaphore.checkEnabled();
 
-                // if the server is in soon-to-be-shutdown mode, we'll
-                // go ahead and allow the transaction to complete.  if
-                // the server is in schema edit mode, or for some
-                // other reason is refusing logins, we won't allow a
-                // write lock. Wouldn't be prudent at this juncture.
-
                 if (disabledMessage != null && !disabledMessage.equals("shutdown"))
                   {
-                    throw new InterruptedException(disabledMessage); // finally will clean up
+                    // if the server is in soon-to-be-shutdown mode,
+                    // we'll go ahead and allow the transaction to
+                    // complete.  if the server is in schema edit
+                    // mode, or for some other reason is refusing
+                    // logins, we won't allow a write lock. Wouldn't
+                    // be prudent at this juncture.
+
+                    throw new InterruptedException(disabledMessage);
                   }
-                else
+
+                okay = true;
+
+                for (DBObjectBase base: baseSet)
                   {
-                    for (DBObjectBase base: baseSet)
+                    // we won't queue up on the bases while there are
+                    // dumpers waiting.  once we get on the writer
+                    // wait lists, the dumpers will wait for us, but
+                    // we let dumpers proceed before us if they are
+                    // waiting
+
+                    if (!base.isWaitingDumperListEmpty())
                       {
-                        // if this base has any dumpers queued on it
-                        // (even if they don't yet hold an actual
-                        // lock), we have to wait.  once a write lock
-                        // is queued up, no new dumpers will queue up,
-                        // but all dumpers presently queued get in
-                        // before we do.  Dumping is the highest
-                        // priority.
-
-                        if (!base.isDumperEmpty())
+                        if (debug)
                           {
-                            if (debug)
-                              {
-                                System.err.println(this.key + ": DBWriteLock.establish(): waiting for dumpers on base " +
-                                                   base.getName());
-                                System.err.println(this.key + ": DBWriteLock.establish(): dumperList size: " +
-                                                   base.getDumperSize());
-                              }
-
-                            okay = false;
-                            break;
+                            System.err.println(this.key + ": DBWriteLock.establish(): waiting for dumpers on base " +
+                                               base.getName());
+                            System.err.println(this.key + ": DBWriteLock.establish(): dumperList size: " +
+                                               base.getWaitingDumperListSize());
                           }
+
+                        okay = false;
+                        break;
                       }
                   }
 
                 if (!okay)
                   {
-                    try
-                      {
-                        lockSync.wait(2500);
-                      }
-                    catch (InterruptedException ex)
-                      {
-                        lockSync.clearLockHeld(this.key);
-
-                        throw ex; // finally at bottom will clean up
-                      }
+                    lockSync.wait(2500);
                   }
-
-              } while (!okay);  // waiting for dumpers to clear out
+              }
 
             if (debug)
               {
@@ -270,10 +246,10 @@ public class DBWriteLock extends DBLock {
 
             for (DBObjectBase base: baseSet)
               {
-                base.addWriter(this);
+                base.addWaitingWriter(this);
               }
 
-            writersAdded = true;
+            waiting = true;
 
             if (debug)
               {
@@ -286,14 +262,16 @@ public class DBWriteLock extends DBLock {
             // wait until we finish.. at this point, we're just
             // waiting for existing read locks to drain
 
-            while (!done)
+            okay = false;
+
+            while (!okay)
               {
                 if (debug)
                   {
                     System.err.println(this.key + ": DBWriteLock.establish(): spinning.");
                   }
 
-                if (abort)
+                if (this.abort)
                   {
                     // we've been told to abort by another thread's
                     // abort() call.  get out of dodge.
@@ -337,76 +315,44 @@ public class DBWriteLock extends DBLock {
                       }
                   }
 
-                // at this point, okay == true only if we were able to
-                // verify that no bases we need have any locks on them.
-
-                if (okay)
+                if (!okay)
                   {
-                    // Okay, we've got permission to lock all of the bases,
-                    // let's do that.
-
-                    // Note that we don't ever try to insure that
-                    // writers are granted locks on bases in the order
-                    // they originally queued up in any base writer
-                    // list.  We can't do that, since different write
-                    // locks pending will specify different sets of
-                    // bases.  We just depend on the JVM's thread
-                    // scheduler eventually hitting upon a write lock
-                    // in establish() that is okay to proceed on all
-                    // requested bases.
-
-                    for (DBObjectBase base: baseSet)
-                      {
-                        base.setWriteInProgress(true);
-                        base.setCurrentLock(this);
-                      }
-
-                    done = true;
+                    lockSync.wait(2500);
+                    continue;
                   }
-                else
+
+                // nothing can stop us now
+
+                for (DBObjectBase base: baseSet)
                   {
-                    // Okay, something's locked us out.  Sleep a bit
-                    // (2.5 seconds or until woken by notify) and try
-                    // again.
-
-                    try
-                      {
-                        lockSync.wait(2500);
-                      }
-                    catch (InterruptedException ex)
-                      {
-                        throw ex; // finally will clean up
-                      }
+                    base.setWriteLock(this);
                   }
+
+                this.locked = true;
+                lockSync.incLockCount();
               }
-
-            locked = true;
-            lockSync.incLockCount();
           }
         finally
           {
-            inEstablish = false;
+            this.inEstablish = false;
 
-            if (writersAdded)
+            if (waiting)
               {
                 for (DBObjectBase base: baseSet)
                   {
-                    base.removeWriter(this);
+                    base.removeWaitingWriter(this);
                   }
-
-                writersAdded = false;
               }
 
-            if (!locked)
+            if (!this.locked)
               {
-                lockSync.clearLockHeld(this.key);
+                lockSync.unclaimLockKey(key, this);
                 this.key = null;
               }
 
             lockSync.notifyAll();
           }
-
-      } // synchronized(lockSync)
+      }
 
     if (debug)
       {
@@ -422,11 +368,11 @@ public class DBWriteLock extends DBLock {
   {
     synchronized (lockSync)
       {
-        // if we are forcing this lock to go away on behalf of a thread
-        // distinct from the locking thread, we have to wait for that
-        // thread's establish method to get clear
+        // if we are trying to force this lock to go away on behalf of
+        // a thread distinct from the locking thread, we have to wait
+        // for that thread's establish method to get clear
 
-        while (inEstablish)
+        while (this.inEstablish)
           {
             try
               {
@@ -448,12 +394,11 @@ public class DBWriteLock extends DBLock {
 
         for (DBObjectBase base: baseSet)
           {
-            base.setWriteInProgress(false);
-            base.setCurrentLock(null);
+            base.clearWriteLock(this);
           }
 
-        locked = false;
-        lockSync.clearLockHeld(key);
+        this.locked = false;
+        lockSync.unclaimLockKey(key, this);
 
         key = null;             // gc
 

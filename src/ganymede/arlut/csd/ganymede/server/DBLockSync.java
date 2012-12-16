@@ -127,179 +127,95 @@ public class DBLockSync {
   }
 
   /**
-   * <p>This method returns true if there is a lock held in care of
-   * the given identifier in this DBLockSync object.</p>
-   */
-
-  public synchronized boolean isLockHeld(Object key)
-  {
-    return lockHash.containsKey(key);
-  }
-
-  /**
-   * <p>This method returns true if the lock associated with
-   * key in the DBLockSync lockHash is a DBReadLock.</p>
+   * <p>This method associates a DBLock with the given key, making
+   * sure that there is no conflicting lock request for the key</p>
    *
-   * <p>If there is no lock associated with the key, or if
-   * the lock associated with the key is not a read lock,
-   * false will be returned.</p>
+   * @return True if the lock could be associated with key, False if
+   * there was a pre-existing conflicting association.
    */
 
-  public synchronized boolean isReadLock(Object key)
+  public synchronized boolean claimLockKey(Object key, DBLock lock)
   {
-    Object result = lockHash.get(key);
-
-    if (result == null || !(result instanceof Vector))
+    if (lock instanceof DBReadLock)
       {
-        return false;
+        Object obj = lockHash.get(key);
+
+        if (obj != null && !(obj instanceof Vector))
+          {
+            return false;
+          }
+
+        Vector lockList = (Vector) obj;
+
+        if (lockList == null)
+          {
+            lockList = new Vector();
+            lockHash.put(key, lockList);
+          }
+
+        lockList.addElement(lock);
+      }
+    else
+      {
+        if (lockHash.containsKey(key))
+          {
+            return false;
+          }
+
+        lockHash.put(key, lock);
       }
 
     return true;
   }
 
   /**
-   * <p>This method returns true if the lock associated with
-   * key in the DBLockSync lockHash is a DBDumpLock.</p>
+   * <p>This method disassociates a DBLock from the given key</p>
    *
-   * <p>If there is no lock associated with the key, or if
-   * the lock associated with the key is not a dump lock,
-   * false will be returned.</p>
+   * <p>If the key was not previously claimed for the given lock, an
+   * IllegalStateException will be thrown.</p>
    */
 
-  public synchronized boolean isDumpLock(Object key)
-  {
-    Object result = lockHash.get(key);
-
-    if (result == null || !(result instanceof DBDumpLock))
-      {
-        return false;
-      }
-
-    return true;
-  }
-
-  /**
-   * <p>This method returns true if the lock associated with
-   * key in the DBLockSync lockHash is a DBWriteLock.</p>
-   *
-   * <p>If there is no lock associated with the key, or if
-   * the lock associated with the key is not a write lock,
-   * false will be returned.</p>
-   */
-
-  public synchronized boolean isWriteLock(Object key)
-  {
-    Object result = lockHash.get(key);
-
-    if (result == null || !(result instanceof DBWriteLock))
-      {
-        return false;
-      }
-
-    return true;
-  }
-
-  /**
-   * <p>This method associates a write lock with the given key and
-   * returns true if there is no other lock already held on this key,
-   * else it returns false.</p>
-   */
-
-  public synchronized boolean setWriteLockHeld(Object key, DBWriteLock lock)
-  {
-    if (lockHash.containsKey(key))
-      {
-        return false;
-      }
-
-    lockHash.put(key, lock);
-
-    return true;
-  }
-
-  /**
-   * <p>This method associates a dump lock with the given key and
-   * returns true if there is no other lock already held on this
-   * key, else it returns false.</p>
-   */
-
-  public synchronized boolean setDumpLockHeld(Object key, DBDumpLock lock)
-  {
-    if (lockHash.containsKey(key))
-      {
-        return false;
-      }
-
-    lockHash.put(key, lock);
-
-    return true;
-  }
-
-  /**
-   * <p>This method associates a new DBReadLock with the given key, if
-   * possible, returning true.  Multiple read locks may be associated
-   * with a single key in DBLockSync, but not if there is a write lock
-   * or dump lock associated with the key.</p>
-   *
-   * <p>If there is already a dump or write lock associated with
-   * the key, will return false.</p>
-   */
-
-  public synchronized boolean claimReadLock(Object key, DBReadLock lock)
+  public synchronized void unclaimLockKey(Object key, DBLock lock)
   {
     Object obj = lockHash.get(key);
-
-    if (obj != null && !(obj instanceof Vector))
-      {
-        return false;
-      }
-
-    Vector lockList = (Vector) obj;
-
-    if (lockList == null)
-      {
-        lockList = new Vector();
-        lockHash.put(key, lockList);
-      }
-
-    lockList.addElement(lock);
-
-    return true;
-  }
-
-  /**
-   * <p>This method disassociates a DBReadLock from the given
-   * key, if possible.</p>
-   *
-   * <p>If there are no read locks associated with the given
-   * key, an IllegalStateException will be thrown.</p>
-   */
-
-  public synchronized void unclaimReadLock(Object key, DBReadLock lock)
-  {
-    Object obj = lockHash.get(key);
-
-    if (obj != null && !(obj instanceof Vector))
-      {
-        throw new IllegalStateException("Error, can't remove a read lock while there is a " +
-                                        obj +
-                                        " associated with key " + key +
-                                        ".. there are no readlocks here.");
-      }
 
     if (obj == null)
       {
-        throw new IllegalStateException("Error, can't remove a read lock for key " +
-                                        key + ".. there are no readlocks here.");
+        throw new IllegalStateException("No such key");
       }
 
-    Vector lockList = (Vector) obj;
-
-    lockList.removeElement(lock);
-
-    if (lockList.size() == 0)
+    if (lock instanceof DBReadLock)
       {
-        lockHash.remove(key);   // that was the last read lock on this key
+        if (!(obj instanceof Vector))
+          {
+            throw new IllegalStateException("Error, can't remove a read lock while there is a " +
+                                            obj +
+                                            " associated with key " + key +
+                                            ".. there are no readlocks here.");
+          }
+
+        Vector lockList = (Vector) obj;
+
+        if (!lockList.contains(lock))
+          {
+            throw new IllegalStateException("Mismatched lock claim");
+          }
+
+        lockList.removeElement(lock);
+
+        if (lockList.size() == 0)
+          {
+            lockHash.remove(key);   // that was the last read lock on this key
+          }
+      }
+    else
+      {
+        if (obj != lock)
+          {
+            throw new IllegalStateException("Mismatched lock claim");
+          }
+
+        lockHash.remove(key);
       }
   }
 
@@ -352,15 +268,6 @@ public class DBLockSync {
       }
 
     return null; // Can't return a single lock, this key has a readlock vector.
-  }
-
-  /**
-   * <p>This method clears out a lock associated with the given key.</p>
-   */
-
-  public void clearLockHeld(Object key)
-  {
-    lockHash.remove(key);
   }
 
   /**
