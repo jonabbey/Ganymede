@@ -91,9 +91,10 @@ public class DBLockSync {
   private Hashtable lockHash;
 
   /**
-   * A count of how many {@link arlut.csd.ganymede.server.DBLock DBLocks} are
-   * established on {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBases}
-   * in this DBStore.
+   * <p>A count of how many {@link arlut.csd.ganymede.server.DBLock
+   * DBLocks} are established on {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBases} in this
+   * DBStore.</p>
    */
 
   private int locksHeld = 0;
@@ -199,51 +200,58 @@ public class DBLockSync {
   }
 
   /**
-   * <p>This method associates a write lock with the given key.</p>
+   * <p>This method associates a write lock with the given key and
+   * returns true if there is no other lock already held on this key,
+   * else it returns false.</p>
    */
 
-  public synchronized void setWriteLockHeld(Object key, DBWriteLock lock)
+  public synchronized boolean setWriteLockHeld(Object key, DBWriteLock lock)
   {
     if (lockHash.containsKey(key))
       {
-        throw new IllegalStateException("There is already a lock associated with key " + key);
+        return false;
       }
 
     lockHash.put(key, lock);
+
+    return true;
   }
 
   /**
-   * <p>This method associates a dump lock with the given key.</p>
+   * <p>This method associates a dump lock with the given key and
+   * returns true if there is no other lock already held on this
+   * key, else it returns false.</p>
    */
 
-  public synchronized void setDumpLockHeld(Object key, DBDumpLock lock)
+  public synchronized boolean setDumpLockHeld(Object key, DBDumpLock lock)
   {
     if (lockHash.containsKey(key))
       {
-        throw new IllegalStateException("There is already a lock associated with key " + key);
+        return false;
       }
 
     lockHash.put(key, lock);
+
+    return true;
   }
 
   /**
-   * <p>This method associates a new DBReadLock with the given
-   * key, if possible.  Multiple read locks may be associated
-   * with a single key in DBLockSync, but not if there is a
-   * write lock or dump lock associated with the key.</p>
+   * <p>This method associates a new DBReadLock with the given key, if
+   * possible, returning true.  Multiple read locks may be associated
+   * with a single key in DBLockSync, but not if there is a write lock
+   * or dump lock associated with the key.</p>
    *
    * <p>If there is already a dump or write lock associated with
-   * the key, an IllegalStateException will be thrown.</p>
+   * the key, will return false.</p>
    */
 
-  public synchronized void addReadLock(Object key, DBReadLock lock)
+  public synchronized boolean claimReadLock(Object key, DBReadLock lock)
   {
     Object obj = lockHash.get(key);
 
     if (obj != null && !(obj instanceof Vector))
       {
-        throw new IllegalStateException("Error, can't add a read lock while there is a " + obj +
-                                        " associated with key " + key);
+        return false;
       }
 
     Vector lockList = (Vector) obj;
@@ -255,6 +263,8 @@ public class DBLockSync {
       }
 
     lockList.addElement(lock);
+
+    return true;
   }
 
   /**
@@ -265,7 +275,7 @@ public class DBLockSync {
    * key, an IllegalStateException will be thrown.</p>
    */
 
-  public synchronized void delReadLock(Object key, DBReadLock lock)
+  public synchronized void unclaimReadLock(Object key, DBReadLock lock)
   {
     Object obj = lockHash.get(key);
 
