@@ -229,7 +229,7 @@ class DBDumpLock extends DBLock {
               }
 
             locked = true;
-            lockSync.addLock(); // notify consoles
+            lockSync.incLockCount(); // notify consoles
           }
         finally
           {
@@ -300,8 +300,8 @@ class DBDumpLock extends DBLock {
         lockSync.clearLockHeld(key);
 
         key = null;             // gc
-        
-        lockSync.removeLock();  // notify consoles
+
+        lockSync.decLockCount();  // notify consoles
         lockSync.notifyAll();   // many threads might want to check to see what we freed
       }
   }

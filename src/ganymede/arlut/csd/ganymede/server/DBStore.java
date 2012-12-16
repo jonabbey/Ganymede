@@ -2939,24 +2939,6 @@ public final class DBStore implements JythonMap {
       }
   }
 
-  /**
-   * Increments the count of held locks for the admin consoles.
-   */
-
-  void addLock()
-  {
-    lockSync.addLock();
-  }
-
-  /**
-   * Decrements the count of held locks for the admin consoles.
-   */
-
-  void removeLock()
-  {
-    lockSync.removeLock();
-  }
-
   /* *************************************************************************
    *
    * The following methods are for Jython/Map support

@@ -285,7 +285,7 @@ public class DBReadLock extends DBLock {
             // okay!  if we got this far, we're locked
 
             locked = true;
-            lockSync.addLock(); // notify consoles
+            lockSync.incLockCount();
 
             if (debug)
               {
@@ -384,8 +384,8 @@ public class DBReadLock extends DBLock {
             System.err.println("DBReadLock (" + key + "):  release() released");
           }
 
-        lockSync.removeLock();  // notify consoles
-        lockSync.notifyAll(); // let other threads waiting to establish proceed
+        lockSync.decLockCount();
+        lockSync.notifyAll();
       }
   }
 

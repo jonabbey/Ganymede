@@ -386,7 +386,7 @@ public class DBWriteLock extends DBLock {
               }
 
             locked = true;
-            lockSync.addLock(); // notify consoles
+            lockSync.incLockCount();
           }
         finally
           {
@@ -465,10 +465,10 @@ public class DBWriteLock extends DBLock {
 
         locked = false;
         lockSync.clearLockHeld(key);
-        
-        this.key = null;                // gc
-        
-        lockSync.removeLock();  // notify consoles
+
+        key = null;             // gc
+
+        lockSync.decLockCount();
         lockSync.notifyAll();   // many readers may want in
       }
   }

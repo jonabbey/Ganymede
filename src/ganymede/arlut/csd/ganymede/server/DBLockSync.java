@@ -357,7 +357,7 @@ public class DBLockSync {
    * <p>Increments the count of held locks for the admin consoles.</p>
    */
 
-  public synchronized void addLock()
+  public synchronized void incLockCount()
   {
     locksHeld++;
     GanymedeAdmin.updateLocksHeld();
@@ -367,7 +367,7 @@ public class DBLockSync {
    * <p>Decrements the count of held locks for the admin consoles.</p>
    */
 
-  public synchronized void removeLock()
+  public synchronized void decLockCount()
   {
     locksHeld--;
     GanymedeAdmin.updateLocksHeld();
