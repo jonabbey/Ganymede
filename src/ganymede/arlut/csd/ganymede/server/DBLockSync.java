@@ -130,7 +130,7 @@ public class DBLockSync {
    * the given identifier in this DBLockSync object.</p>
    */
 
-  public boolean isLockHeld(Object key)
+  public synchronized boolean isLockHeld(Object key)
   {
     return lockHash.containsKey(key);
   }
@@ -202,7 +202,7 @@ public class DBLockSync {
    * <p>This method associates a write lock with the given key.</p>
    */
 
-  public void setWriteLockHeld(Object key, DBWriteLock lock)
+  public synchronized void setWriteLockHeld(Object key, DBWriteLock lock)
   {
     if (lockHash.containsKey(key))
       {
@@ -216,7 +216,7 @@ public class DBLockSync {
    * <p>This method associates a dump lock with the given key.</p>
    */
 
-  public void setDumpLockHeld(Object key, DBDumpLock lock)
+  public synchronized void setDumpLockHeld(Object key, DBDumpLock lock)
   {
     if (lockHash.containsKey(key))
       {
