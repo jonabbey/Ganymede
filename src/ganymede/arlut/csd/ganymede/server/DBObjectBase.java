@@ -424,7 +424,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * purposes.</p>
    */
 
-  private DBLock currentLock;
+  private DBWriteLock currentLock;
 
   /**
    * <p>Set of {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLock}s
@@ -451,7 +451,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * writer in any order, depending on the server's threading behavior.</p>
    */
 
-  private Vector writerList;
+  private Vector<DBWriteLock> writerList;
 
   /**
    * <p>Collection of {@link arlut.csd.ganymede.server.DBReadLock DBReadLock}s
@@ -700,7 +700,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     this.store = store;
     this.editor = editor;
 
-    writerList = new Vector();
+    writerList = new Vector<DBWriteLock>();
     readerList = new Vector();
     dumperList = new Vector();
     dumpLockList = new Vector();
@@ -3514,7 +3514,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   //
   // the following methods are used to manage locks on this base
   // All methods that modify writerList, readerList, or dumperList
-  // must be synchronized on store.
+  // must be synchronized on store.lockSync
   //
 
   /**
@@ -3548,8 +3548,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     if (writeInProgress.set(state) == state)
       {
-        // assert
-
         if (state)
           {
             // "double write lock in DBObjectBase"
@@ -3598,7 +3596,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     synchronized (store.lockSync)
       {
-        result = writerList.removeElement(writer);
+        result = writerList.remove(writer);
         store.lockSync.notifyAll();
 
         return result;
