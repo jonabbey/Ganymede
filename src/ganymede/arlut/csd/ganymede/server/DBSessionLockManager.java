@@ -147,18 +147,19 @@ public class DBSessionLockManager {
   }
 
   /**
-   * <P>openReadLock establishes a read lock for the entire
-   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
+   * <p>openReadLock establishes a read lock for the entire
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</p>
    *
-   * <P>The thread calling this method will block until the read lock
+   * <p>The thread calling this method will block until the read lock
    * can be established.  If transactions on the database are
-   * currently committing, the establishment of the read lock will be suspended
-   * until all such transactions are committed.</P>
+   * currently committing, the establishment of the read lock will be
+   * suspended until all such transactions are committed.</p>
    *
-   * <P>All viewDBObject calls done within the context of an open read lock
-   * will be transaction consistent.  Other sessions may pull objects out for
-   * editing during the course of the session's read lock, but no visible changes
-   * will be made to those ObjectBases until the read lock is released.</P>
+   * <p>All viewDBObject calls done within the context of an open read
+   * lock will be transaction consistent.  Other sessions may pull
+   * objects out for editing during the course of the session's read
+   * lock, but no visible changes will be made to those ObjectBases
+   * until the read lock is released.</p>
    */
 
   public synchronized DBReadLock openReadLock() throws InterruptedException
@@ -229,8 +230,8 @@ public class DBSessionLockManager {
   }
 
   /**
-   * <P>This method establishes a dump lock on all object bases in this Ganymede
-   * server.</P>
+   * <p>This method establishes a dump lock on all object bases in
+   * this Ganymede server.</p>
    */
 
   public synchronized DBDumpLock openDumpLock() throws InterruptedException
@@ -256,10 +257,10 @@ public class DBSessionLockManager {
   }
 
   /**
-   * <P>releaseLock releases a particular lock held by this session.
+   * <p>releaseLock releases a particular lock held by this session.
    * This method will not force a lock being held by another thread to
    * drop out of its establish method.. it is intended to be called by
-   * the same thread that established the lock.</P>
+   * the same thread that established the lock.</p>
    */
 
   public synchronized void releaseLock(DBLock lock)
@@ -274,8 +275,8 @@ public class DBSessionLockManager {
   }
 
   /**
-   * <P>releaseAllLocks() releases all locks held by this
-   * session.</P>
+   * <p>releaseAllLocks() releases all locks held by this
+   * session.</p>
    */
 
   public synchronized void releaseAllLocks()
