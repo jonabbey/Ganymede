@@ -10,11 +10,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -49,7 +51,7 @@
 package arlut.csd.ganymede.server;
 
 import java.util.Enumeration;
-import java.util.Hashtable;
+import java.util.HashSet;
 import java.util.Vector;
 
 /*------------------------------------------------------------------------------
@@ -59,19 +61,20 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class coordinates lock activity for a server-side
- * {@link arlut.csd.ganymede.server.DBSession DBSession} object.  This class handles
- * the logic to make sure that a session does not grant a new lock that would
- * conflict with a lock already held by the same session.</P>
+ * <p>This class coordinates lock activity for a server-side {@link
+ * arlut.csd.ganymede.server.DBSession DBSession} object.  This class
+ * handles the logic to make sure that a session does not grant a new
+ * lock that would conflict with a lock already held by the same
+ * session.</p>
  */
 
 public class DBSessionLockManager {
 
-  private Hashtable lockHash = new Hashtable(31);
+  private HashSet<DBLock> lockSet = new HashSet<DBLock>(31);
   private DBSession session;
 
   /* -- */
-  
+
   public DBSessionLockManager(DBSession session)
   {
     this.session = session;
@@ -89,7 +92,7 @@ public class DBSessionLockManager {
         throw new IllegalArgumentException("bad param to isLocked()");
       }
 
-    if (!lockHash.containsKey(lock))
+    if (!lockSet.contains(lock))
       {
         return false;
       }
@@ -100,54 +103,44 @@ public class DBSessionLockManager {
   }
 
   /**
-   * <p>Establishes a read lock for the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBases}
-   * in bases.</p>
+   * <p>Establishes a read lock for the {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBases} in
+   * bases.</p>
    *
-   * <p>The thread calling this method will block until the read lock 
-   * can be established.  If any of the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBases}
-   * in the bases vector have transactions
-   * currently committing, the establishment of the read lock will be suspended
-   * until all such transactions are committed.</p>
+   * <p>The thread calling this method will block until the read lock
+   * can be established.  If any of the {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBases} in the
+   * bases vector have transactions currently committing, the
+   * establishment of the read lock will be suspended until all such
+   * transactions are committed.</p>
    *
-   * <p>All viewDBObject calls done within the context of an open read lock
-   * will be transaction consistent.  Other sessions may pull objects out for
-   * editing during the course of the session's read lock, but no visible changes
-   * will be made to those ObjectBases until the read lock is released.</p>
+   * <p>All viewDBObject calls done within the context of an open read
+   * lock will be transaction consistent.  Other sessions may pull
+   * objects out for editing during the course of the session's read
+   * lock, but no visible changes will be made to those ObjectBases
+   * until the read lock is released.</p>
    */
 
   public synchronized DBReadLock openReadLock(Vector<DBObjectBase> bases) throws InterruptedException
   {
-    DBReadLock lock;
-
-    /* -- */
-
     // we'll never be able to establish a read lock if we have to
     // wait for this thread to release an existing write lock..
 
-    if (lockHash.size() != 0)
+    for (DBLock oldLock: lockSet)
       {
-        Enumeration en = lockHash.keys();
-
-        while (en.hasMoreElements())
+        if (oldLock instanceof DBWriteLock)
           {
-            DBLock oldLock = (DBLock) en.nextElement();
-
-            if (oldLock instanceof DBWriteLock)
+            if (oldLock.overlaps(bases))
               {
-                if (oldLock.overlaps(bases))
-                  {
-                    throw new InterruptedException("Can't establish read lock, session " + session.getID() +
-                                                   " already has overlapping write lock:\n" +
-                                                   oldLock.toString());
-                  }
+                throw new InterruptedException("Can't establish read lock, session " + session.getID() +
+                                               " already has overlapping write lock:\n" +
+                                               oldLock.toString());
               }
           }
       }
-    
-    lock = new DBReadLock(session.getStore(), bases);
-    
-    lockHash.put(lock, Boolean.TRUE);   // use like a set
-    
+
+    DBReadLock lock = new DBReadLock(session.getStore(), bases);
+    lockSet.add(lock);
     lock.establish(session.getKey()); // block
 
     return lock;
@@ -157,7 +150,7 @@ public class DBSessionLockManager {
    * <P>openReadLock establishes a read lock for the entire
    * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
    *
-   * <P>The thread calling this method will block until the read lock 
+   * <P>The thread calling this method will block until the read lock
    * can be established.  If transactions on the database are
    * currently committing, the establishment of the read lock will be suspended
    * until all such transactions are committed.</P>
@@ -170,42 +163,30 @@ public class DBSessionLockManager {
 
   public synchronized DBReadLock openReadLock() throws InterruptedException
   {
-    DBReadLock lock;
-
-    /* -- */
-
     // we'll never be able to establish a read lock if we have to
     // wait for this thread to release an existing write lock..
 
-    if (lockHash.size() != 0)
+    for (DBLock oldLock: lockSet)
       {
-        Enumeration en = lockHash.keys();
-
-        while (en.hasMoreElements())
+        if (oldLock instanceof DBWriteLock)
           {
-            DBLock oldLock = (DBLock) en.nextElement();
-
-            if (oldLock instanceof DBWriteLock)
-              {
-                throw new InterruptedException("Can't establish global read lock, session " + session.getID() +
-                                               " already has write lock:\n" +
-                                               oldLock.toString());
-              }
+            throw new InterruptedException("Can't establish global read lock, session " + session.getID() +
+                                           " already has write lock:\n" +
+                                           oldLock.toString());
           }
       }
 
-    lock = new DBReadLock(session.getStore());
-
-    lockHash.put(lock, Boolean.TRUE);
-
+    DBReadLock lock = new DBReadLock(session.getStore());
+    lockSet.add(lock);
     lock.establish(session.getKey());
 
     return lock;
   }
 
   /**
-   * <p>Establishes a write lock for the {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBases}
-   * in bases.</p>
+   * <p>Establishes a write lock for the {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBases} in
+   * bases.</p>
    *
    * <p>The thread calling this method will block until the write lock
    * can be established.  If this DBSession already possesses a write lock,
@@ -219,37 +200,29 @@ public class DBSessionLockManager {
 
   public synchronized DBWriteLock openWriteLock(Vector<DBObjectBase> bases) throws InterruptedException
   {
-    DBWriteLock lock;
-
-    /* -- */
-
     // we'll never be able to establish a write lock if we have to
     // wait for this thread to release read, write, or dump locks..
     // and we must not have pre-existing locks on bases not
     // overlapping with our bases parameter either, or else we risk
     // dead-lock later on..
 
-    if (lockHash.size() != 0)
+    if (lockSet.size() != 0)
       {
         StringBuilder resultBuffer = new StringBuilder();
 
-        Enumeration en = lockHash.keys();
-
-        while (en.hasMoreElements())
+        for (DBLock lock: lockSet)
           {
-            resultBuffer.append(en.nextElement().toString());
+            resultBuffer.append(lock.toString());
             resultBuffer.append("\n");
           }
 
-        throw new InterruptedException("Can't establish write lock, session " + session.getID() + 
+        throw new InterruptedException("Can't establish write lock, session " + session.getID() +
                                        " already has locks:\n" +
                                        resultBuffer.toString());
       }
 
-    lock = new DBWriteLock(session.getStore(), bases);
-
-    lockHash.put(lock, Boolean.TRUE);
-
+    DBWriteLock lock = new DBWriteLock(session.getStore(), bases);
+    lockSet.add(lock);
     lock.establish(session.getKey());
 
     return lock;
@@ -262,33 +235,21 @@ public class DBSessionLockManager {
 
   public synchronized DBDumpLock openDumpLock() throws InterruptedException
   {
-    DBDumpLock lock;
-
-    /* -- */
-
     // we'll never be able to establish a dump lock if we have to
     // wait for this thread to release an existing write lock..
 
-    if (lockHash.size() != 0)
+    for (DBLock oldLock: lockSet)
       {
-        Enumeration en = lockHash.keys();
-
-        while (en.hasMoreElements())
+        if (oldLock instanceof DBWriteLock)
           {
-            DBLock oldLock = (DBLock) en.nextElement();
-
-            if (oldLock instanceof DBWriteLock)
-              {
-                throw new InterruptedException("Can't establish global dump lock, session " + session.getID() +
-                                               " already has write lock:\n" +
-                                               oldLock.toString());
-              }
+            throw new InterruptedException("Can't establish global dump lock, session " + session.getID() +
+                                           " already has write lock:\n" +
+                                           oldLock.toString());
           }
       }
 
-    lock = new DBDumpLock(session.getStore());
-    lockHash.put(lock, Boolean.TRUE);
-
+    DBDumpLock lock = new DBDumpLock(session.getStore());
+    lockSet.add(lock);
     lock.establish(session.getKey());
 
     return lock;
@@ -303,13 +264,13 @@ public class DBSessionLockManager {
 
   public synchronized void releaseLock(DBLock lock)
   {
-    if (!lockHash.containsKey(lock))
+    if (!lockSet.contains(lock))
       {
         throw new IllegalArgumentException("lock " + lock.toString() + " not held by this session");
       }
 
     lock.release();
-    lockHash.remove(lock);
+    lockSet.remove(lock);
   }
 
   /**
@@ -319,14 +280,11 @@ public class DBSessionLockManager {
 
   public synchronized void releaseAllLocks()
   {
-    Enumeration en = lockHash.keys();
-
-    while (en.hasMoreElements())
+    for (DBLock lock: lockSet)
       {
-        DBLock lock = (DBLock) en.nextElement();
         lock.abort();           // blocks until the lock can be cleared
       }
 
-    lockHash.clear();
+    lockSet.clear();
   }
 }
