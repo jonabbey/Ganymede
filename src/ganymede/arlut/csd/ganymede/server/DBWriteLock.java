@@ -205,12 +205,12 @@ public class DBWriteLock extends DBLock {
                 for (DBObjectBase base: baseSet)
                   {
                     // we won't queue up on the bases while there are
-                    // dumpers waiting.  once we get on the writer
-                    // wait lists, the dumpers will wait for us, but
-                    // we let dumpers proceed before us if they are
-                    // waiting
+                    // dumpers waiting or in effect.  once we get on
+                    // the writer wait lists, the dumpers will wait
+                    // for us, but we let dumpers proceed before us if
+                    // they are waiting
 
-                    if (!base.isWaitingDumperListEmpty())
+                    if (!base.isWaitingDumperListEmpty() || !isDumpLockListEmpty())
                       {
                         if (debug)
                           {
