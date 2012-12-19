@@ -210,7 +210,7 @@ public class DBWriteLock extends DBLock {
                     // for us, but we let dumpers proceed before us if
                     // they are waiting
 
-                    if (!base.isWaitingDumperListEmpty() || !isDumpLockListEmpty())
+                    if (!base.isWaitingDumperListEmpty() || !base.isDumpLockListEmpty())
                       {
                         if (debug)
                           {
