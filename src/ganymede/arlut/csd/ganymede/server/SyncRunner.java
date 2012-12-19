@@ -1591,7 +1591,13 @@ public class SyncRunner implements Runnable {
 
     this.needBuild.set(false);
 
-    ReturnVal retVal = session.getDataXML(this.name, true, true); // include history fields and oid's
+    // session.getDataXML will obtain and manage another dump lock on
+    // another thread, but we have ensured that DBWriteLock will not
+    // allow any establishment of a DBWriteLock while the upper
+    // DBDumpLock in runFullState() remains in effect, thus preventing
+    // deadlock.
+
+    ReturnVal retVal = session.getDataXML(this.name, true, true);
     FileTransmitter transmitter = retVal.getFileTransmitter();
     BufferedOutputStream out = null;
 
