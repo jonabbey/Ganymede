@@ -99,6 +99,15 @@ public class DBLockSync {
 
   private int locksHeld = 0;
 
+  /**
+   * <p>A count of how many {@link arlut.csd.ganymede.server.DBLock
+   * DBLocks} are waiting to be established on {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBases} in this
+   * DBStore.</p>
+   */
+
+  private int locksWaiting = 0;
+
   /* -- */
 
   public DBLockSync()
@@ -124,6 +133,7 @@ public class DBLockSync {
       }
 
     locksHeld = 0;
+    locksWaiting = 0;
   }
 
   /**
@@ -271,6 +281,26 @@ public class DBLockSync {
   }
 
   /**
+   * <p>Increments the count of locks waiting to be established.</p>
+   */
+
+  public synchronized void incLocksWaitingCount()
+  {
+    locksWaiting++;
+    GanymedeAdmin.updateLocksHeld();
+  }
+
+  /**
+   * <p>Decrements the count of locks waiting to be established.</p>
+   */
+
+  public synchronized void decLocksWaitingCount()
+  {
+    locksWaiting--;
+    GanymedeAdmin.updateLocksHeld();
+  }
+
+  /**
    * <p>Increments the count of held locks for the admin consoles.</p>
    */
 
@@ -293,6 +323,15 @@ public class DBLockSync {
       {
         throw new RuntimeException("Locks held has gone negative");
       }
+  }
+
+  /**
+   * <p>Returns the number of locks currently waiting to be established.</p>
+   */
+
+  public int getLocksWaitingCount()
+  {
+    return locksWaiting;
   }
 
   /**

@@ -9,11 +9,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -136,7 +138,7 @@ class GASHAdminDispatch implements Runnable {
    */
 
   public boolean connect(String name, String pass) throws RemoteException
-  { 
+  {
     ReturnVal retVal = handleReturnVal(server.admin(name, pass));
 
     if (retVal == null || !retVal.didSucceed())
@@ -151,7 +153,7 @@ class GASHAdminDispatch implements Runnable {
     // server *should* pass back a proper error report in the
     // ReturnVal, and this NullPointerException should
     // never be thrown.
-        
+
     if (aSession == null)
       {
         throw new NullPointerException("Bad null valued admin session received from server");
@@ -251,7 +253,7 @@ class GASHAdminDispatch implements Runnable {
                     break;
 
                   case adminAsyncMessage.SETLOCKSHELD:
-                    setLocksHeld(event.getInt(0));
+                    setLocksHeld(event.getInt(0), event.getInt(1));
                     break;
 
                   case adminAsyncMessage.CHANGESTATE:
@@ -341,7 +343,7 @@ class GASHAdminDispatch implements Runnable {
       }
 
     final Date lDate = date;
-    
+
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         if (lDate == null)
@@ -375,7 +377,7 @@ class GASHAdminDispatch implements Runnable {
       }
 
     final int lTrans = trans;
-    
+
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         frame.journalField.setText("" + lTrans);
@@ -401,7 +403,7 @@ class GASHAdminDispatch implements Runnable {
       }
 
     final int lObjs = objs;
-    
+
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         frame.checkedOutField.setText("" + lObjs);
@@ -414,7 +416,7 @@ class GASHAdminDispatch implements Runnable {
    * number of locks held in the admin console.
    */
 
-  public void setLocksHeld(int locks)
+  public void setLocksHeld(int locks, int waiting)
   {
     if (debug)
       {
@@ -427,10 +429,11 @@ class GASHAdminDispatch implements Runnable {
       }
 
     final int lLocks = locks;
+    final int lWaiting = waiting;
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-        frame.locksField.setText("" + lLocks);
+        frame.locksField.setText(lWaiting + ":" + lLocks);
       }
     });
   }
@@ -584,7 +587,7 @@ class GASHAdminDispatch implements Runnable {
 
             AdminEntry e;
             frame.table.clearCells();
-    
+
             // Process entries from the server
 
             for (int i = 0; i < localEntries.length; i++)
@@ -664,22 +667,22 @@ class GASHAdminDispatch implements Runnable {
     if (!tasksLoaded)
       {
         // System.err.println("changeTasks: tasks size = " + tasks.size());
-    
+
         // Sort entries according to their incep date,
         // to prevent confusion if new tasks are put into
         // the server-side hashes, and as they are shuffled
         // from hash to hash
-        
+
         java.util.Arrays.sort(tasks,
-                              new Comparator() 
+                              new Comparator()
                               {
-                                public int compare(Object a, Object b) 
+                                public int compare(Object a, Object b)
                                 {
                                   scheduleHandle aH, bH;
-                                  
+
                                   aH = (scheduleHandle) a;
                                   bH = (scheduleHandle) b;
-                                  
+
                                   if (aH.incepDate.before(bH.incepDate))
                                     {
                                       return -1;
@@ -816,7 +819,7 @@ class GASHAdminDispatch implements Runnable {
       }
 
     Vector removedTasks = VectorUtils.difference(tasksKnown, taskNames);
-    
+
     for (int i = 0; i < removedTasks.size(); i++)
       {
         table.deleteRow(removedTasks.elementAt(i), false);
@@ -918,7 +921,7 @@ class GASHAdminDispatch implements Runnable {
             table.setCellColor(handle.name, 2, Color.black, false);
             table.setCellBackColor(handle.name, 2, Color.white, false);
             break;
-            
+
           default:
             table.setCellColor(handle.name, 2, Color.white, false);
             table.setCellBackColor(handle.name, 2, Color.red, false);
@@ -955,7 +958,7 @@ class GASHAdminDispatch implements Runnable {
       }
 
     Vector removedTasks = VectorUtils.difference(tasksKnown, taskNames);
-    
+
     for (int i = 0; i < removedTasks.size(); i++)
       {
         table.deleteRow(removedTasks.elementAt(i), false);
@@ -1003,7 +1006,7 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * Callback: The server can tell us to disconnect if the server is 
+   * Callback: The server can tell us to disconnect if the server is
    * going down.
    */
 
@@ -1120,7 +1123,7 @@ class GASHAdminDispatch implements Runnable {
         // the GASHSchema constructor pops itself up at the end of
         // initialization
 
-        // "Schema Editor"      
+        // "Schema Editor"
         return new GASHSchema(ts.l("pullSchema.schemaEditingTitle"), editor, this);
       }
   }
@@ -1223,7 +1226,7 @@ class GASHAdminDispatch implements Runnable {
 
         // display the Dialog sent to us by the server, get the
         // result of the user's interaction with it.
-            
+
         dialogResults = dialog.showDialog();
 
         if (debug)

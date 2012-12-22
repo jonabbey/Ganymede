@@ -700,7 +700,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   private void doUpdateLocksHeld() throws RemoteException
   {
-    asyncPort.setLocksHeld(Ganymede.db.lockSync.getLockCount());
+    asyncPort.setLocksHeld(Ganymede.db.lockSync.getLockCount(), Ganymede.db.lockSync.getLocksWaitingCount());
   }
 
   /**

@@ -145,6 +145,8 @@ class DBDumpLock extends DBLock {
 
         try
           {
+            lockSync.incLocksWaitingCount();
+
             this.key = key;
             this.inEstablish = true;
 
@@ -197,6 +199,7 @@ class DBDumpLock extends DBLock {
           }
         finally
           {
+            lockSync.decLocksWaitingCount();
             this.inEstablish = false;
 
             if (waiting)

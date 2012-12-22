@@ -153,6 +153,8 @@ public class DBReadLock extends DBLock {
 
         try
           {
+            lockSync.incLocksWaitingCount();
+
             this.inEstablish = true;
             this.key = key;
 
@@ -224,6 +226,7 @@ public class DBReadLock extends DBLock {
           }
         finally
           {
+            lockSync.decLocksWaitingCount();
             this.inEstablish = false;
 
             if (!this.locked)

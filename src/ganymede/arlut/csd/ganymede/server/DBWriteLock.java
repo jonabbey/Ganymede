@@ -156,6 +156,8 @@ public class DBWriteLock extends DBLock {
 
         try
           {
+            lockSync.incLocksWaitingCount();
+
             if (debug)
               {
                 System.err.println(key + ": DBWriteLock.establish(): added myself to the DBLockSync lockHash.");
@@ -334,6 +336,8 @@ public class DBWriteLock extends DBLock {
           }
         finally
           {
+            lockSync.decLocksWaitingCount();
+
             this.inEstablish = false;
 
             if (waiting)

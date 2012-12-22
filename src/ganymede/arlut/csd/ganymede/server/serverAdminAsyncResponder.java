@@ -14,17 +14,19 @@
    This makes it possible for the server to provide asynchronous
    notification to the admin consoles, even if the consoles are
    running behind a system-level firewall.
-   
+
    Created: 4 September 2003
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -238,7 +240,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
 
   /**
    *
-   * Callback: The server can tell us to disconnect if the server is 
+   * Callback: The server can tell us to disconnect if the server is
    * going down.
    *
    */
@@ -300,9 +302,14 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
    * locks held in the admin console.</p>
    */
 
-  public void setLocksHeld(int locks) throws RemoteException
+  public void setLocksHeld(int locks, int waiting) throws RemoteException
   {
-    adminAsyncMessage message = new adminAsyncMessage(adminAsyncMessage.SETLOCKSHELD, locks);
+    Object[] parmAry = new Object[2];
+
+    parmAry[0] = Integer.valueOf(locks);
+    parmAry[1] = Integer.valueOf(waiting);
+
+    adminAsyncMessage message = new adminAsyncMessage(adminAsyncMessage.SETLOCKSHELD, parmAry);
     replaceEvent(message);
   }
 
@@ -350,7 +357,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
         // we have to throw a remote exception, since that's what
         // the GanymedeAdmin code expects to receive as a signal
         // that an admin console needs to be dropped
-        
+
         throw new RemoteException("serverAdminProxy: console disconnected");
       }
 
@@ -448,9 +455,9 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
           {
             throwOverflow();
           }
-        
+
         result = enqueue(newEvent);
-        
+
         eventBuffer.notify();   // wake up getNextMsg()
       }
 
@@ -531,7 +538,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
               }
           }
       }
-    
+
     throw new RemoteException("serverAdminAsyncResponder buffer overflow:" + buffer.toString());
   }
 
@@ -551,12 +558,12 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
       {
         result = enqueuePtr;
         eventBuffer[enqueuePtr] = item;
-        
+
         if (++enqueuePtr >= maxBufferSize)
           {
             enqueuePtr = 0;
           }
-        
+
         ebSz++;
       }
 
@@ -588,12 +595,12 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
 
             lookUp[result.getMethod()] = -1;
           }
-        
+
         if (++dequeuePtr >= maxBufferSize)
           {
             dequeuePtr = 0;
           }
-        
+
         ebSz--;
         return result;
       }
