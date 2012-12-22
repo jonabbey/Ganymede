@@ -433,7 +433,7 @@ class GASHAdminDispatch implements Runnable {
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-        frame.locksField.setText(lWaiting + ":" + lLocks);
+        frame.locksField.setText(lWaiting + " / " + lLocks);
       }
     });
   }
