@@ -1,12 +1,12 @@
 Ganymede Release 2.0
-4 September 2012
+3 January 2013
 CHANGES
 
 ---------------------------------------------
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: 4 September 2012
+RELEASE DATE: 3 January 2013
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -2041,10 +2041,52 @@ or Java Web Start application caused the login window to appear again.
 The Ganymede client will now simply terminate when the main window is
 closed.
 
-150. [SOURCE] Detabified Ganymede source
+150. [SERVER] The server now supports a Ganymede.returnaddrdesc property.
 
-Following JWZ's advice, I have now switched to using spaces for all
-indents in the Ganymede source code.
+The Ganymede Server now supports a new system property,
+'Ganymede.returnaddrdesc'.  This property may contain the extended
+human readable rfc822 return address for inclusion in the 'From:'
+field of any mail sent out by the Ganymede server on behalf of itself
+rather than a logged-in user.
+
+I.e., you might have
+
+  Ganymede.returnaddr=ganymede-server@yourdomain.com
+  Ganymede.returnaddrdesc=Ganymede Server <ganymede-server@yourdomain.com>
+
+The returnaddr property is used in the SMTP handshake, and the
+returnaddrdesc is used in the headers.
+
+151. [SERVER] Fixed a rare deadlock vulnerability with XML sync channels
+
+The XML Sync Channel subsystem was doing a nested dumplock, but was
+not preventing other threads from getting into the writer list queue
+after the outer dump lock was established and before the inner dump
+luck could be.
+
+I have modified the DBWriteLock so that it will not permit writers to
+get on the write lock queue until there are both no dumpers waiting to
+be established or established on a competing DBObjectBase.
+
+152. [Admin Console] Display both locks waiting to be established and locks held
+
+The admin console now displays both the number of locks waiting in
+their establish routines and the number actually established and held.
+
+153. [Admin Console] Cleaned up monitor tables, date formatting
+
+The admin console now uses a much briefer and more readable date
+format, with configurable localization patterns in the
+GASHAdminDispatch.properties file.
+
+There are two separate date format strings available, one for
+timestamps that occur in the same day as current time, and one for
+times that are not.
+
+I also improved the task highlighting for running or disabled tasks in
+the Sync Monitor, and changed the column ordering in the Scheduled
+Task Monitor to have 'Last Run' be the last column as it is in the
+other admin console table views.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
