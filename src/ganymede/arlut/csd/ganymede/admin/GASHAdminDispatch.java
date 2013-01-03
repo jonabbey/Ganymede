@@ -1088,9 +1088,10 @@ class GASHAdminDispatch implements Runnable {
         if (handle.lastTime != null)
           {
             table.setCellText(handle.name, 4, formatDate(handle.lastTime), false);
-            table.setCellColor(handle.name, 4, foreground, false);
-            table.setCellBackColor(handle.name, 4, background, false);
           }
+
+        table.setCellColor(handle.name, 4, foreground, false);
+        table.setCellBackColor(handle.name, 4, background, false);
       }
 
     if (running)
