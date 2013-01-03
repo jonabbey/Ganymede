@@ -668,8 +668,8 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * This method is remotely called by the Ganymede server to update
-   * the admin console's task table.
+   * <p>This method is remotely called by the Ganymede server to
+   * update the admin console's task tables.</
    *
    * @param tasks an array of {@link
    * arlut.csd.ganymede.common.scheduleHandle scheduleHandle} objects
@@ -1055,8 +1055,16 @@ class GASHAdminDispatch implements Runnable {
           }
         else if (handle.isRunning())
           {
-            // "Running"
-            table.setCellText(handle.name, 3, ts.l("changeTasks.runningState"), false);
+            if (handle.runAgain())
+              {
+                // "Running, Pending"
+                table.setCellText(handle.name, 3, ts.l("changeTasks.runningAndPending"), false);
+              }
+            else
+              {
+                // "Running"
+                table.setCellText(handle.name, 3, ts.l("changeTasks.runningState"), false);
+              }
           }
         else if (handle.isSuspended())
           {
