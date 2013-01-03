@@ -648,7 +648,7 @@ class GASHAdminDispatch implements Runnable {
 
                 frame.table.setCellText(e.sessionName, 1, e.hostname, false);
                 frame.table.setCellText(e.sessionName, 2, e.status, false);
-                frame.table.setCellText(e.sessionName, 3, e.connecttime, false);
+                frame.table.setCellText(e.sessionName, 3, formatDate(e.connecttime), false);
                 frame.table.setCellText(e.sessionName, 4, e.event, false);
                 frame.table.setCellText(e.sessionName, 5, Integer.toString(e.objectsCheckedOut), false);
               }

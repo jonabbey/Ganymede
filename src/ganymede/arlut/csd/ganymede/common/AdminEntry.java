@@ -4,15 +4,15 @@
 
    A serializable object, holding the contents of a row in an
    admin console's table.
-   
+
    Created: 3 February 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2010
    The University of Texas at Austin
 
@@ -47,6 +47,8 @@
 
 package arlut.csd.ganymede.common;
 
+import java.util.Date;
+
 /**
  * <p>Serializable data carrier object used by the Ganymede
  * server to report a row of user status to the Ganymede admin console.</p>
@@ -63,9 +65,11 @@ public class AdminEntry implements java.io.Serializable {
     personaName,
     hostname,
     status,
-    connecttime,
     event;
-  
+
+  public Date
+    connecttime;
+
   public int
     objectsCheckedOut;
 
@@ -73,7 +77,7 @@ public class AdminEntry implements java.io.Serializable {
 
   public AdminEntry(String sessionName, String personaName,
                     String hostname, String status,
-                    String connecttime, String event,
+                    Date connecttime, String event,
                     int objectsCheckedOut)
   {
     this.sessionName = sessionName;
