@@ -500,6 +500,17 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     scheduleHandles = Ganymede.scheduler.reportTaskInfo();
 
+    boolean anyRunningSyncs = false;
+
+    for (scheduleHandle handle: scheduleHandles)
+      {
+        if (handle.isRunning())
+          {
+            anyRunningSyncs = true;
+            break;
+          }
+      }
+
     synchronized (GanymedeAdmin.consoles)
       {
         for (GanymedeAdmin temp: GanymedeAdmin.consoles)
@@ -516,6 +527,23 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
       }
 
     detachBadConsoles();
+
+    if (anyRunningSyncs)
+      {
+        new Thread(new Runnable() {
+            public void run() {
+              try
+                {
+                  wait(1000);
+                }
+              catch (InterruptedException ex)
+                {
+                }
+
+              refreshTasks();
+            }
+          }, "task reporter").start();
+      }
   }
 
   /**
