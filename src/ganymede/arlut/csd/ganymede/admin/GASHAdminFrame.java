@@ -330,9 +330,10 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   String taskHeaders[] = {ts.l("global.task_col_0"), // "Task"
                           ts.l("global.task_col_1"), // "Status"
-                          ts.l("global.task_col_2"), // "Last Run"
+                          ts.l("global.task_col_4"), // "Interval"
                           ts.l("global.task_col_3"), // "Next Run"
-                          ts.l("global.task_col_4")}; // "Interval"
+                          ts.l("global.task_col_2")}; // "Last Run"
+
   int taskColWidths[] = {100,100,100,100,100};
 
   // resources for the manual task monitor table
