@@ -998,68 +998,90 @@ class GASHAdminDispatch implements Runnable {
             table.newRow(handle.name);
           }
 
-        table.setCellText(handle.name, 0, handle.name, false); // task name
-
-        table.setCellText(handle.name, 1, handle.getTaskType().toString(), false);
+        Color background = null;
+        Color foreground = null;
 
         if (handle.isRunning() && handle.isSuspended())
           {
-            // "Suspended upon completion"
-            table.setCellText(handle.name, 3, ts.l("changeTasks.runningSuspendedState"), false);
-            table.setCellColor(handle.name, 3, Color.white, false);
-            table.setCellBackColor(handle.name, 3, Color.red, false);
+            foreground = Color.white;
+            background = Color.red;
           }
         else if (handle.isRunning())
           {
-            // "Running"
-            table.setCellText(handle.name, 3, ts.l("changeTasks.runningState"), false);
-            table.setCellColor(handle.name, 3, Color.white, false);
-            table.setCellBackColor(handle.name, 3, Color.blue, false);
+            foreground = Color.white;
+            background = Color.blue;
 
             running = true;
           }
         else if (handle.isSuspended())
           {
+            foreground = Color.white;
+            background = Color.red;
+          }
+        else
+          {
+            switch (handle.getTaskStatus())
+              {
+              case OK:
+              case EMPTYQUEUE:
+              case NONEMPTYQUEUE:
+                foreground = Color.black;
+                background = Color.white;
+                break;
+
+              default:
+                foreground = Color.white;
+                background = Color.red;
+                error_seen = true;
+              }
+          }
+
+        table.setCellText(handle.name, 0, handle.name, false); // task name
+        table.setCellColor(handle.name, 0, foreground, false);
+        table.setCellBackColor(handle.name, 0, background, false);
+
+        table.setCellText(handle.name, 1, handle.getTaskType().toString(), false);
+        table.setCellColor(handle.name, 1, foreground, false);
+        table.setCellBackColor(handle.name, 1, background, false);
+
+        table.setCellText(handle.name, 2, handle.getTaskStatus().getMessage(handle.queueSize, handle.condition), false);
+        table.setCellColor(handle.name, 2, foreground, false);
+        table.setCellBackColor(handle.name, 2, background, false);
+
+        if (handle.isRunning() && handle.isSuspended())
+          {
+            // "Suspended upon completion"
+            table.setCellText(handle.name, 3, ts.l("changeTasks.runningSuspendedState"), false);
+          }
+        else if (handle.isRunning())
+          {
+            // "Running"
+            table.setCellText(handle.name, 3, ts.l("changeTasks.runningState"), false);
+          }
+        else if (handle.isSuspended())
+          {
             // "Suspended"
             table.setCellText(handle.name, 3, ts.l("changeTasks.suspendedState"), false);
-            table.setCellColor(handle.name, 3, Color.white, false);
-            table.setCellBackColor(handle.name, 3, Color.red, false);
           }
         else if (handle.startTime != null)
           {
             // "Scheduled"
             table.setCellText(handle.name, 3, ts.l("changeTasks.scheduledState"), false);
-            table.setCellColor(handle.name, 3, Color.black, false);
-            table.setCellBackColor(handle.name, 3, Color.white, false);
           }
         else
           {
             // "Waiting"
             table.setCellText(handle.name, 3, ts.l("changeTasks.waitingState"), false);
-            table.setCellColor(handle.name, 3, Color.black, false);
-            table.setCellBackColor(handle.name, 3, Color.white, false);
           }
 
-        table.setCellText(handle.name, 2, handle.getTaskStatus().getMessage(handle.queueSize, handle.condition), false);
-
-        switch (handle.getTaskStatus())
-          {
-          case OK:
-          case EMPTYQUEUE:
-          case NONEMPTYQUEUE:
-            table.setCellColor(handle.name, 2, Color.black, false);
-            table.setCellBackColor(handle.name, 2, Color.white, false);
-            break;
-
-          default:
-            table.setCellColor(handle.name, 2, Color.white, false);
-            table.setCellBackColor(handle.name, 2, Color.red, false);
-            error_seen = true;
-          }
+        table.setCellColor(handle.name, 3, foreground, false);
+        table.setCellBackColor(handle.name, 3, background, false);
 
         if (handle.lastTime != null)
           {
             table.setCellText(handle.name, 4, formatDate(handle.lastTime), false);
+            table.setCellColor(handle.name, 4, foreground, false);
+            table.setCellBackColor(handle.name, 4, background, false);
           }
       }
 
