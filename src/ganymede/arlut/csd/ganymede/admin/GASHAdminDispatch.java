@@ -348,7 +348,7 @@ class GASHAdminDispatch implements Runnable {
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-        frame.startField.setText(lDate.toString());
+        frame.startField.setText(formatDate(lDate));
       }
     });
   }
@@ -380,7 +380,7 @@ class GASHAdminDispatch implements Runnable {
           }
         else
           {
-            frame.dumpField.setText(lDate.toString());
+            frame.dumpField.setText(formatDate(lDate));
           }
       }
     });
