@@ -790,8 +790,8 @@ class GASHAdminDispatch implements Runnable {
           }
         else if (handle.isRunning())
           {
-            // "Running"
-            table.setCellText(handle.name, 1, ts.l("changeTasks.runningState"), false);
+            // "Running ({0}s)"
+            table.setCellText(handle.name, 1, ts.l("changeTasks.runningState", handle.getAge()), false);
             table.setCellColor(handle.name, 1, Color.blue, false);
             table.setCellBackColor(handle.name, 1, Color.white, false);
           }
@@ -900,8 +900,8 @@ class GASHAdminDispatch implements Runnable {
           }
         else if (handle.isRunning())
           {
-            // "Running"
-            table.setCellText(handle.name, 1, ts.l("changeTasks.runningState"), false);
+            // "Running ({0}s)"
+            table.setCellText(handle.name, 1, ts.l("changeTasks.runningState", handle.getAge()), false);
             table.setCellColor(handle.name, 1, Color.blue, false);
             table.setCellBackColor(handle.name, 1, Color.white, false);
           }
@@ -1057,13 +1057,13 @@ class GASHAdminDispatch implements Runnable {
           {
             if (handle.runAgain())
               {
-                // "Running, Pending"
-                table.setCellText(handle.name, 3, ts.l("changeTasks.runningAndPending"), false);
+                // "Running ({0}s), Pending"
+                table.setCellText(handle.name, 3, ts.l("changeTasks.runningAndPending", handle.getAge()), false);
               }
             else
               {
-                // "Running"
-                table.setCellText(handle.name, 3, ts.l("changeTasks.runningState"), false);
+                // "Running ({0}s)"
+                table.setCellText(handle.name, 3, ts.l("changeTasks.runningState", handle.getAge()), false);
               }
           }
         else if (handle.isSuspended())
