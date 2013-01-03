@@ -1380,7 +1380,7 @@ public class GanymedeScheduler extends Thread {
    * suitable for reporting to the admin console.</p>
    */
 
-  synchronized Vector reportTaskInfo()
+  synchronized Vector<scheduleHandle> reportTaskInfo()
   {
     if (!taskListInitialized)
       {
@@ -1391,7 +1391,7 @@ public class GanymedeScheduler extends Thread {
     // communicating with the admin consoles asynchronously, using the
     // serverAdminProxy.
 
-    return (Vector) taskList.clone();
+    return (Vector<scheduleHandle>) taskList.clone();
   }
 }
 

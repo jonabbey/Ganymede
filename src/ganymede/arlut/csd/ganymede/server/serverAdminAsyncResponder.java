@@ -64,7 +64,9 @@ import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.Vector;
 
+import arlut.csd.ganymede.common.AdminEntry;
 import arlut.csd.ganymede.common.adminAsyncMessage;
+import arlut.csd.ganymede.common.scheduleHandle;
 import arlut.csd.ganymede.rmi.AdminAsyncResponder;
 
 /*------------------------------------------------------------------------------
@@ -407,7 +409,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
    * login description objects.
    */
 
-  public void changeUsers(Vector entries) throws RemoteException
+  public void changeUsers(Vector<AdminEntry> entries) throws RemoteException
   {
     Object params[] = new Object[entries.size()];
     entries.copyInto(params);
@@ -423,7 +425,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
    * objects describing the tasks registered in the Ganymede server.
    */
 
-  public void changeTasks(Vector tasks) throws RemoteException
+  public void changeTasks(Vector<scheduleHandle> tasks) throws RemoteException
   {
     Object params[] = new Object[tasks.size()];
     tasks.copyInto(params);

@@ -60,7 +60,9 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import arlut.csd.Util.VectorUtils;
+import arlut.csd.ganymede.common.AdminEntry;
 import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.scheduleHandle;
 import arlut.csd.ganymede.rmi.AdminAsyncResponder;
 import arlut.csd.ganymede.rmi.SchemaEdit;
 import arlut.csd.ganymede.rmi.adminSession;
@@ -271,8 +273,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * This static method is used to send the current transcount
-   * to the consoles.
+   * This static method is used to send the current transactions in
+   * journal count to the consoles.
    */
 
   public static void updateTransCount()
@@ -452,7 +454,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   public static void refreshUsers()
   {
-    Vector entries;
+    Vector<AdminEntry> entries;
 
     /* -- */
 
@@ -487,7 +489,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   public static void refreshTasks()
   {
-    Vector scheduleHandles;
+    Vector<scheduleHandle> scheduleHandles;
 
     /* -- */
 
@@ -718,7 +720,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * this admin console
    */
 
-  private void doRefreshUsers(Vector entries) throws RemoteException
+  private void doRefreshUsers(Vector<AdminEntry> entries) throws RemoteException
   {
     asyncPort.changeUsers(entries);
   }
@@ -728,7 +730,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * this admin console
    */
 
-  private void doRefreshTasks(Vector scheduleHandles) throws RemoteException
+  private void doRefreshTasks(Vector<scheduleHandle> scheduleHandles) throws RemoteException
   {
     asyncPort.changeTasks(scheduleHandles);
   }
