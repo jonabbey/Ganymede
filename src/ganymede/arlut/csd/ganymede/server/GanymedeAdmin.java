@@ -6,17 +6,19 @@
    interface;  GanymedeAdmin provides the means by which privileged users
    can carry out privileged operations on the Ganymede server, including
    status monitoring and administrative activities.
-   
+
    Created: 17 January 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -58,7 +60,9 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import arlut.csd.Util.VectorUtils;
+import arlut.csd.ganymede.common.AdminEntry;
 import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.scheduleHandle;
 import arlut.csd.ganymede.rmi.AdminAsyncResponder;
 import arlut.csd.ganymede.rmi.SchemaEdit;
 import arlut.csd.ganymede.rmi.adminSession;
@@ -101,10 +105,10 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   /**
    * Static vector of GanymedeAdmin instances, used to
-   * keep track of the attached admin consoles.  
+   * keep track of the attached admin consoles.
    */
 
-  private static Vector consoles = new Vector();
+  private static Vector<GanymedeAdmin> consoles = new Vector<GanymedeAdmin>();
 
   /**
    * Static vector of GanymedeAdmin instances for which
@@ -114,7 +118,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * to remove consoles that we were not able to communicate with.
    */
 
-  private static Vector badConsoles = new Vector();
+  private static Vector<GanymedeAdmin> badConsoles = new Vector<GanymedeAdmin>();
 
   /**
    * The overall server state.. 'normal operation', 'shutting down', etc.
@@ -155,10 +159,6 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   public static void closeAllConsoles(String reason)
   {
-    GanymedeAdmin temp;
-
-    /* -- */
-
     if (debug)
       {
         System.err.println("GanymedeAdmin.closeAllConsoles: waiting for sync");
@@ -171,10 +171,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
             System.err.println("GanymedeAdmin.closeAllConsoles: got sync");
           }
 
-        for (int i = 0; i < GanymedeAdmin.consoles.size(); i++)
+        for (GanymedeAdmin temp: GanymedeAdmin.consoles)
           {
-            temp = (GanymedeAdmin) GanymedeAdmin.consoles.elementAt(i);
-
             try
               {
                 temp.forceDisconnect(reason);
@@ -198,7 +196,6 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   public static void logAppend(String status)
   {
-    GanymedeAdmin temp;
     String stampedLine;
 
     synchronized (GanymedeServer.lSemaphore)
@@ -219,10 +216,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     synchronized (GanymedeAdmin.consoles)
       {
-        for (int i = 0; i < consoles.size(); i++)
+        for (GanymedeAdmin temp: GanymedeAdmin.consoles)
           {
-            temp = (GanymedeAdmin) consoles.elementAt(i);
-
             try
               {
                 temp.asyncPort.logAppend(stampedLine);
@@ -244,7 +239,6 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   public static void setConsoleCount()
   {
-    GanymedeAdmin temp;
     String message;
 
     /* -- */
@@ -262,10 +256,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
             message = ts.l("setConsoleCount.single_attached");
           }
 
-        for (int i = 0; i < consoles.size(); i++)
+        for (GanymedeAdmin temp: GanymedeAdmin.consoles)
           {
-            temp = (GanymedeAdmin) consoles.elementAt(i);
-
             try
               {
                 temp.asyncPort.changeAdmins(message);
@@ -281,22 +273,16 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   }
 
   /**
-   * This static method is used to send the current transcount
-   * to the consoles.
+   * This static method is used to send the current transactions in
+   * journal count to the consoles.
    */
 
   public static void updateTransCount()
   {
-    GanymedeAdmin temp;
-
-    /* -- */
-
     synchronized (GanymedeAdmin.consoles)
       {
-        for (int i = 0; i < consoles.size(); i++)
+        for (GanymedeAdmin temp: GanymedeAdmin.consoles)
           {
-            temp = (GanymedeAdmin) consoles.elementAt(i);
-
             try
               {
                 temp.doUpdateTransCount();
@@ -329,16 +315,10 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   public static void updateLastDump()
   {
-    GanymedeAdmin temp;
-
-    /* -- */
-
     synchronized (GanymedeAdmin.consoles)
       {
-        for (int i = 0; i < consoles.size(); i++)
+        for (GanymedeAdmin temp: GanymedeAdmin.consoles)
           {
-            temp = (GanymedeAdmin) consoles.elementAt(i);
-
             try
               {
                 temp.doUpdateLastDump();
@@ -372,16 +352,10 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   public static void updateMemState()
   {
-    GanymedeAdmin temp;
-
-    /* -- */
-
     synchronized (GanymedeAdmin.consoles)
       {
-        for (int i = 0; i < consoles.size(); i++)
+        for (GanymedeAdmin temp: GanymedeAdmin.consoles)
           {
-            temp = (GanymedeAdmin) consoles.elementAt(i);
-
             try
               {
                 temp.doUpdateMemState();
@@ -403,16 +377,10 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   public static void updateCheckedOut()
   {
-    GanymedeAdmin temp;
-
-    /* -- */
-
     synchronized (GanymedeAdmin.consoles)
       {
-        for (int i = 0; i < consoles.size(); i++)
+        for (GanymedeAdmin temp: GanymedeAdmin.consoles)
           {
-            temp = (GanymedeAdmin) consoles.elementAt(i);
-
             try
               {
                 temp.doUpdateCheckedOut();
@@ -433,16 +401,10 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   public static void updateLocksHeld()
   {
-    GanymedeAdmin temp;
-
-    /* -- */
-
     synchronized (GanymedeAdmin.consoles)
       {
-        for (int i = 0; i < consoles.size(); i++)
+        for (GanymedeAdmin temp: GanymedeAdmin.consoles)
           {
-            temp = (GanymedeAdmin) consoles.elementAt(i);
-
             try
               {
                 temp.doUpdateLocksHeld();
@@ -464,18 +426,12 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   public static void setState(String state)
   {
-    GanymedeAdmin temp;
-
-    /* -- */
-
     GanymedeAdmin.state = state;
 
     synchronized (GanymedeAdmin.consoles)
       {
-        for (int i = 0; i < consoles.size(); i++)
+        for (GanymedeAdmin temp: GanymedeAdmin.consoles)
           {
-            temp = (GanymedeAdmin) consoles.elementAt(i);
-
             try
               {
                 temp.doSetState();
@@ -498,8 +454,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   public static void refreshUsers()
   {
-    GanymedeAdmin temp;
-    Vector entries;
+    Vector<AdminEntry> entries;
 
     /* -- */
 
@@ -511,10 +466,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     synchronized (GanymedeAdmin.consoles)
       {
-        for (int i = 0; i < consoles.size(); i++)
+        for (GanymedeAdmin temp: GanymedeAdmin.consoles)
           {
-            temp = (GanymedeAdmin) consoles.elementAt(i);
-            
             try
               {
                 temp.doRefreshUsers(entries);
@@ -536,11 +489,10 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   public static void refreshTasks()
   {
-    GanymedeAdmin temp;
-    Vector scheduleHandles;
+    Vector<scheduleHandle> scheduleHandles;
 
     /* -- */
-    
+
     if (Ganymede.scheduler == null)
       {
         return;
@@ -550,10 +502,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     synchronized (GanymedeAdmin.consoles)
       {
-        for (int i = 0; i < consoles.size(); i++)
+        for (GanymedeAdmin temp: GanymedeAdmin.consoles)
           {
-            temp = (GanymedeAdmin) consoles.elementAt(i);
-
             try
               {
                 temp.doRefreshTasks(scheduleHandles);
@@ -595,19 +545,13 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * GanymedeAdmin.consoles vector.  This method should never be
    * called from within a loop over GanymedeAdmin.consoles.</p>
    */
-   
+
   private static void detachBadConsoles()
   {
-    GanymedeAdmin temp;
-
-    /* -- */
-
-    synchronized (GanymedeAdmin.consoles)
+    synchronized (GanymedeAdmin.badConsoles)
       {
-        for (int i=0; i < badConsoles.size(); i++)
+        for (GanymedeAdmin temp: GanymedeAdmin.badConsoles)
           {
-            temp = (GanymedeAdmin) badConsoles.elementAt(i);
-
             // the logout() method will cause the console to remove
             // itself from the static GanymedeAdmin.consoles vecotr,
             // which is why we are synchronized on
@@ -617,7 +561,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
             temp.logout(ts.l("detachBadConsoles.error"));
           }
 
-        badConsoles.setSize(0);
+        badConsoles.clear();
       }
   }
 
@@ -653,7 +597,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    */
 
   private serverAdminAsyncResponder asyncPort;
-  
+
   /* -- */
 
   /**
@@ -701,7 +645,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
         doUpdateLocksHeld();
         doUpdateMemState();
         doSetState();
-        
+
         doRefreshUsers(GanymedeServer.getUserTable());
         doRefreshTasks(Ganymede.scheduler.reportTaskInfo());
       }
@@ -743,7 +687,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   /**
    * This private method updates the objects checked out display on
-   * this admin console 
+   * this admin console
    */
 
   private void doUpdateCheckedOut() throws RemoteException
@@ -758,7 +702,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   private void doUpdateLocksHeld() throws RemoteException
   {
-    asyncPort.setLocksHeld(Ganymede.db.lockSync.getLockCount());
+    asyncPort.setLocksHeld(Ganymede.db.lockSync.getLockCount(), Ganymede.db.lockSync.getLocksWaitingCount());
   }
 
   /**
@@ -776,7 +720,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * this admin console
    */
 
-  private void doRefreshUsers(Vector entries) throws RemoteException
+  private void doRefreshUsers(Vector<AdminEntry> entries) throws RemoteException
   {
     asyncPort.changeUsers(entries);
   }
@@ -786,7 +730,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * this admin console
    */
 
-  private void doRefreshTasks(Vector scheduleHandles) throws RemoteException
+  private void doRefreshTasks(Vector<scheduleHandle> scheduleHandles) throws RemoteException
   {
     asyncPort.changeTasks(scheduleHandles);
   }
@@ -1177,7 +1121,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     // "Running Invid Test"
     GanymedeAdmin.setState(ts.l("runInvidTest.running_state"));
-         
+
     if (Ganymede.server.checkInvids())
       {
         // "Invid Test completed successfully, no problems boss."
@@ -1221,7 +1165,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
     // "Running Invid Sweep"
     GanymedeAdmin.setState(ts.l("runInvidSweep.running_state"));
     Ganymede.debug(ts.l("runInvidSweep.running_state"));
-         
+
     Ganymede.server.sweepInvids();
 
     // "Normal Operation"
@@ -1252,7 +1196,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     // "Running Embedded Test"
     GanymedeAdmin.setState(ts.l("runEmbeddedTest.running_state"));
-         
+
     if (Ganymede.server.checkEmbeddedObjects())
       {
         // "Embedded Objects Test completed successfully, no problems boss."
@@ -1411,7 +1355,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     if (Ganymede.scheduler.enableTask(name))
       {
-        return null; 
+        return null;
       }
 
     // "Couldn''t enable task {0}.  Perhaps the task isn't registered?"
@@ -1506,28 +1450,28 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
             while (en.hasMoreElements())
               {
                 base = (DBObjectBase) en.nextElement();
-                
+
                 if (base.isLocked())
                   {
                     // "Admin console {0} can''t edit Schema, lock held on {1}."
                     Ganymede.debug(ts.l("editSchema.locked_base", this.toString(), base.getName()));
-                    
+
                     // "schema edit"
                     GanymedeServer.lSemaphore.enable(ts.l("editSchema.semaphore_token"));
-                    
+
                     return null;
                   }
               }
           }
-        
+
         // should be okay
-        
+
         // "Ok to create DBSchemaEdit for admin console {0}."
         Ganymede.debug(ts.l("editSchema.okay_to_go", this.toString()));
-        
+
         // "Schema Edit In Progress"
         GanymedeAdmin.setState(ts.l("editSchema.edit_state"));
-        
+
         try
           {
             DBSchemaEdit result = new DBSchemaEdit();

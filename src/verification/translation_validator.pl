@@ -2,10 +2,6 @@
 #
 # translation_validator.pl
 #
-# Last Revision Changed: $Rev$
-# Last Changed By: $Author$
-# Last Mod Date: $Date$
-#
 # This script is a partner to resource_validator.pl.  Where
 # resource_validator.pl validates the Java sources in the Ganymede
 # tree against the default internationalization/localization

@@ -10,11 +10,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -58,25 +60,28 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>DBReadLock is a class used in the Ganymede server to represent a read lock on
- * one or more {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects.  A
- * DBReadLock is used in the
- * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession} class to guarantee
- * that all query operations go from start to finish without any changes being made
- * along the way.</p>
+ * <p>DBReadLock is a class used in the Ganymede server to represent a
+ * read lock on one or more {@link
+ * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects.  A
+ * DBReadLock is used in the {@link
+ * arlut.csd.ganymede.server.GanymedeSession GanymedeSession} class to
+ * guarantee that all query operations go from start to finish without
+ * any changes being made along the way.</p>
  *
- * <p>While a DBReadLock is established on a DBObjectBase, no changes may be made
- * to that base.  The {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLock}'s
- * {@link arlut.csd.ganymede.server.DBWriteLock#establish(java.lang.Object) establish()}
- * method will suspend until all read locks on a base are cleared.  As soon as
- * a thread attempts to establish a DBWriteLock on a base, no more DBReadLocks
- * will be established on that base until the DBWriteLock is cleared, but any
- * DBReadLocks already established will persist until released, whereupon the
- * DBWriteLock will establish.</p>
+ * <p>While a DBReadLock is established on a DBObjectBase, no changes
+ * may be made to that base.  The {@link
+ * arlut.csd.ganymede.server.DBWriteLock DBWriteLock}'s {@link
+ * arlut.csd.ganymede.server.DBWriteLock#establish(java.lang.Object)
+ * establish()} method will suspend until all read locks on a base are
+ * cleared.  As soon as a thread attempts to establish a DBWriteLock
+ * on a base, no more DBReadLocks will be established on that base
+ * until the DBWriteLock is cleared, but any DBReadLocks already
+ * established will persist until released, whereupon the DBWriteLock
+ * will establish.</p>
  *
- * <p>See {@link arlut.csd.ganymede.server.DBLock DBLock},
- * {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLock}, and
- * {@link arlut.csd.ganymede.server.DBDumpLock DBDumpLock} for details.</p>
+ * <p>See {@link arlut.csd.ganymede.server.DBLock DBLock}, {@link
+ * arlut.csd.ganymede.server.DBWriteLock DBWriteLock}, and {@link
+ * arlut.csd.ganymede.server.DBDumpLock DBDumpLock} for details.</p>
  */
 
 public class DBReadLock extends DBLock {
@@ -86,246 +91,175 @@ public class DBReadLock extends DBLock {
   /* -- */
 
   /**
-   *
-   * constructor to get a read lock on all the object bases
-   *
+   * <p>Constructor to get a read lock on all of the server's object
+   * bases</p>
    */
 
   public DBReadLock(DBStore store)
   {
-    key = null;
+    this.key = null;
     this.lockSync = store.lockSync;
-    baseSet = store.getBases();
+    this.baseSet = store.getBases();
   }
 
   /**
-   *
-   * constructor to get a read lock on a subset of the
-   * object bases.
-   *
+   * <p>Constructor to get a read lock on a subset of the object
+   * bases.</p>
    */
 
   public DBReadLock(DBStore store, Vector baseSet)
   {
-    key = null;
+    this.key = null;
     this.lockSync = store.lockSync;
     this.baseSet = baseSet;
   }
 
   /**
-   * <p>Establish a read lock on bases specified in this DBReadLock's
-   * constructor.  Can throw InterruptedException if another thread
-   * orders us to abort() while we're waiting for permission to
-   * proceed with reads on the specified baseset.</p>
+   * <p>A thread that calls establish() will be suspended (waiting on
+   * the server's {@link arlut.csd.ganymede.server.DBStore DBStore}
+   * until all DBObjectBases listed in this DBReadLock's constructor
+   * are available to be locked.  At that point, the thread blocking
+   * on establish() will wake up possessing a shared read lock on the
+   * requested DBObjectBases.</p>
+   *
+   * <p>It is possible for the establish() to fail completely.. the
+   * admin console may reject a client whose thread is blocking on
+   * establish(), for instance, or the server may be shut down.  In
+   * those cases, another thread may call this DBReadLock's {@link
+   * arlut.csd.ganymede.server.DBLock#abort() abort()} method, in
+   * which case establish() will throw an InterruptedException, and
+   * the lock will not be established.</p>
+   *
+   * @param key An object used in the server to uniquely identify the
+   * entity internal to Ganymede that is attempting to obtain the
+   * lock, typically a {@link
+   * arlut.csd.ganymede.server.GanymedeSession GanymedeSession} or a
+   * {@link arlut.csd.ganymede.server.GanymedeBuilderTask
+   * GanymedeBuilderTask}.
    */
 
   public void establish(Object key) throws InterruptedException
   {
-    boolean done = false, okay = false, added = false;
-    DBObjectBase base;
+    boolean okay = false;
 
     /* -- */
 
     synchronized (lockSync)
       {
+        if (!lockSync.claimLockKey(key, this))
+          {
+            throw new RuntimeException("Error: read lock sought by owner of existing write or dump lockset for key: " + key);
+          }
+
         try
           {
-            // okay, we're wanting to establish a read lock.. first we
-            // check to see if we already have a lock with the same
-            // lock key.. if so, and it's a reader, we'll add
-            // ourselves to the list of locks held by that key.  If
-            // not, we'll record that we are trying to establish/hold
-            // a read lock with this key
+            lockSync.incLocksWaitingCount();
 
-            if (lockSync.isLockHeld(key) && !lockSync.isReadLock(key))
-              {
-                // we've got a write lock or a dump lock already held
-                // on this key.  we can't proceed or else we might
-                // deadlock in a number of ways.. if this lock wants
-                // bases that we don't already have locked under this
-                // key, or if granting this lock to a subset or our
-                // locked set would confuse the lock scheduling,
-                // either way.  better not to risk it.
-
-                if (debug)
-                  {
-                    System.err.println("DBReadLock (" + key + "):  dump or write lock blocking us");
-                  }
-                
-                throw new RuntimeException("Error: read lock sought by owner of existing write or dump lockset.");
-              }
-
-            // we may already have a readlock registered with this
-            // key, but that's okay, since we only do read locks
-            // in the GanymedeSession query() and dump() methods.
-            // These methods have no possibility of deadlock, as
-            // they will proceed to completion without acquiring
-            // more locks.
-
-            // so, record who we are and that we are pending 
-
-            inEstablish = true;     
+            this.inEstablish = true;
             this.key = key;
-            lockSync.addReadLock(key, this);
-            added = true;
 
-            // okay, we've made sure that we're not going to chance a
-            // deadlock by grabbing incompatible locks after we've
-            // already gotten some.  now we need to actually acquire
-            // lock the bases down.
-
-            done = false;
-
-            while (!done)
+            while (!okay)
               {
                 if (debug)
                   {
                     System.err.println("DBReadLock (" + key + "):  looping to get establish permission");
                   }
 
-                // if we've received an abort notification, bail.
-
-                if (abort)
+                if (this.abort)
                   {
                     throw new InterruptedException("DBReadLock (" + key + "):  establish aborting before permission granted");
                   }
 
-                // assume we can proceed to get our lock until we find out
-                // otherwise
-
                 okay = true;
 
-                // if there are any writers queued on any of the bases
-                // we want to get a readlock for, we have to wait for
-                // them to finish before we can proceed
-
-                for (int i = 0; okay && (i < baseSet.size()); i++)
+                for (DBObjectBase base: baseSet)
                   {
-                    base = (DBObjectBase) baseSet.elementAt(i);
-                
-                    // check for writers.  we don't care about dumpers, since
-                    // we can read without problems while a dump lock is held
+                    // check for writers.  we don't care about
+                    // dumpers, since we can read without problems
+                    // while a dump lock is held
 
-                    // note that we check to see if the writer *wait
-                    // queue* is non-empty.  the writer will remain in
-                    // the writer wait queue as long as the lock is
-                    // held
-
-                    // we're being very polite, for we are a lowly
-                    // read lock
-                    
-                    if (!base.isWriterEmpty() || base.isWriteInProgress())
+                    if (base.hasWriter())
                       {
                         if (debug)
                           {
-                            System.err.println("DBReadLock (" + key + "):  base " + 
+                            System.err.println("DBReadLock (" + key + "):  base " +
                                                base.getName() + " has writers queued/locked");
                           }
 
                         okay = false;
+                        break;
                       }
                   }
 
                 if (!okay)
                   {
-                    // oops, things aren't clear for us to lock yet.
-                    // we need to wait for a few seconds, or until
-                    // something wakes us up by doing a notifyAll() on
-                    // our lockSync.p
-                    
                     if (debug)
                       {
                         System.err.println("DBReadLock (" + key + "):  waiting on lockSync");
                       }
-                    
-                    lockSync.wait(2500); // an InterruptedException here gets propagated up
+
+                    lockSync.wait(2500);
 
                     if (debug)
                       {
                         System.err.println("DBReadLock (" + key + "):  done waiting on lockSync");
                       }
+
+                    continue;
                   }
-                else
+
+                // nothing can stop us now
+
+                for (DBObjectBase base: baseSet)
                   {
-                    // we were given the okay to lock, do it
-
-                    int i = 0;
-                    
-                    try
-                      {
-                        for (i = 0; i < baseSet.size(); i++)
-                          {
-                            base = (DBObjectBase) baseSet.elementAt(i);
-                            base.addReader(this);
-                          }
-
-                        done = true;
-                      }
-                    catch (RuntimeException ex)
-                      {
-                        Ganymede.logError(ex);
-
-                        // clean up intelligently if we can
-
-                        for (int j = i-1; j >= 0; j--)
-                          {
-                            base = (DBObjectBase) baseSet.elementAt(i);
-                            base.removeReader(this);
-                          }
-
-                        throw ex; // the finally clause below will clean up
-                      }
+                    base.addReader(this);
                   }
-              } // while (!done)
 
-            // okay!  if we got this far, we're locked
+                this.locked = true;
+                lockSync.incLockCount();
 
-            locked = true;
-            lockSync.addLock(); // notify consoles
-
-            if (debug)
-              {
-                System.err.println("DBReadLock (" + key + "):  read lock established");
+                if (debug)
+                  {
+                    System.err.println("DBReadLock (" + key + "):  read lock established");
+                  }
               }
           }
         finally
           {
-            inEstablish = false; // in case we threw an exception while establishing
+            lockSync.decLocksWaitingCount();
+            this.inEstablish = false;
 
-            if (added && !locked)
+            if (!this.locked)
               {
-                lockSync.delReadLock(key, this);
+                lockSync.unclaimLockKey(key, this);
               }
 
-            lockSync.notifyAll(); // let a thread trying to release this lock proceed
+            lockSync.notifyAll();
           }
-      } // synchronized (lockSync)
+      }
   }
 
   /**
    * <p>Relinquish the lock on bases held by this lock object.</p>
    *
-   * <p>Should be called by {@link arlut.csd.ganymede.server.DBSession DBSession}'s
-   * {@link arlut.csd.ganymede.server.DBSession#releaseLock(arlut.csd.ganymede.server.DBLock) releaseLock()}
-   * method.</p>
+   * <p>Should be called by {@link arlut.csd.ganymede.server.DBSession
+   * DBSession}'s {@link
+   * arlut.csd.ganymede.server.DBSession#releaseLock(arlut.csd.ganymede.server.DBLock)
+   * releaseLock()} method.</p>
    *
    * <p>Note that this method is designed to be able to be called from
-   * one thread while another is trying to use and/or establish the lock.  If
-   * this.abort is not set to true before calling release(), release() will
-   * block until the establish is granted.  That's why abort() sets this.abort
-   * to true before calling release().</p>
+   * one thread while another is trying to use and/or establish the
+   * lock.  If this.abort is not set to true before calling release(),
+   * release() will block until the establish is granted.  That's why
+   * abort() sets this.abort to true before calling release().</p>
    *
-   * <p>The point of release() is to clear out this lock's connections to
-   * the locked object bases and to allow DBLock establish() methods in other
-   * threads to proceed.</p>
+   * <p>The point of release() is to clear out this lock's connections
+   * to the locked object bases and to allow DBLock establish()
+   * methods in other threads to proceed.</p>
    */
 
   public void release()
   {
-    DBObjectBase base;
-
-    /* -- */
-
     if (debug)
       {
         System.err.println("DBReadLock (" + key + "):  attempting release");
@@ -334,12 +268,11 @@ public class DBReadLock extends DBLock {
     synchronized (lockSync)
       {
         // if this lock is being established in another thread, we
-        // need to wait until that thread exits its establish
-        // section.  if we haven't set abort to true, this won't
-        // happen until it gets the lock established, or it
-        // catches an InterruptedException for some reason.
+        // need to wait until that thread exits its establish section.
+        // if we haven't set abort to true, this won't happen until it
+        // gets the lock established, or is interrupted
 
-        while (inEstablish)
+        while (this.inEstablish)
           {
             if (debug)
               {
@@ -348,8 +281,8 @@ public class DBReadLock extends DBLock {
 
             try
               {
-                lockSync.wait(2500); // or until notify'ed
-              } 
+                lockSync.wait(2500);
+              }
             catch (InterruptedException ex)
               {
               }
@@ -365,20 +298,13 @@ public class DBReadLock extends DBLock {
             return;
           }
 
-        for (int i = 0; i < baseSet.size(); i++)
+        for (DBObjectBase base: baseSet)
           {
-            base = (DBObjectBase) baseSet.elementAt(i);
             base.removeReader(this);
           }
 
         locked = false;
-
-        // dissociate this lock from the lockSync's lockHash.
-        // if this key has another readlock, that other lock will
-        // need to take care of its own dissociation
-
-        lockSync.delReadLock(key, this);
-
+        lockSync.unclaimLockKey(key, this);
         key = null;             // for gc
 
         if (debug)
@@ -386,38 +312,34 @@ public class DBReadLock extends DBLock {
             System.err.println("DBReadLock (" + key + "):  release() released");
           }
 
-        lockSync.removeLock();  // notify consoles
-        lockSync.notifyAll(); // let other threads waiting to establish proceed
+        lockSync.decLockCount();
+        lockSync.notifyAll();
       }
   }
 
   /**
    * <p>Withdraw this lock.  This method can be called by a thread to
-   * interrupt a lock establish that is blocked waiting to get
-   * access to the appropriate set of
-   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects.  If
-   * this method is called while another thread is blocked in
+   * interrupt a lock establish that is blocked waiting to get access
+   * to the appropriate set of {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects.  If
+   * this method is called while another thread is waiting in
    * establish(), establish() will throw an InterruptedException.</p>
    *
    * <p>Once abort() is processed, this lock may never be established.
    * Any subsequent calls to establish() will always throw
    * InterruptedException.</p>
    *
-   * <p>Note that calling abort() on a lock that has already established
-   * in another thread will remove the lock, but a thread that is using
-   * the lock to iterate over a list will explicitly need to check to
-   * see if its lock was pulled.  
-   *{@link arlut.csd.ganymede.server.GanymedeSession#queryDispatch(arlut.csd.ganymede.common.Query,boolean,boolean,arlut.csd.ganymede.server.DBLock,arlut.csd.ganymede.server.DBEditObject) queryDispatch()} 
-   * and {@link arlut.csd.ganymede.server.GanymedeSession#getObjects(short) getObjects()}
-   * both do this properly, so it is generally safe to abort read locks in the
-   * GanymedeServer as needed.</p>
+   * <p>Note that calling abort() on a lock that has already
+   * established in another thread will remove the lock, but a thread
+   * that is using the lock to iterate over a list will explicitly
+   * need to check to see if its lock was pulled.</p>
    */
 
   public void abort()
   {
     synchronized (lockSync)
       {
-        abort = true;
+        this.abort = true;
         release();              // blocks until freed
       }
   }

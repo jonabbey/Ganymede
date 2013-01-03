@@ -7,11 +7,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -53,12 +55,13 @@ package arlut.csd.ganymede.common;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>The adminAsyncMessage class is used by the Ganymede server to pass
- * asynchronous messages to the Ganymede admin console.  The Ganymede console repeatedly
- * calls {@link arlut.csd.ganymede.server.serverClientAsyncResponder#getNextMsg() arlut.csd.ganymede.server.serverClientAsyncResponder#getNextMsgs() } to
- * receive asynchonous notifications from the server.</p>
+ * <p>The adminAsyncMessage class is used by the Ganymede server to
+ * pass asynchronous messages to the Ganymede admin console.  The
+ * Ganymede console repeatedly calls {@link
+ * arlut.csd.ganymede.server.serverClientAsyncResponder#getNextMsg()
+ * arlut.csd.ganymede.server.serverClientAsyncResponder#getNextMsgs()
+ * } to receive asynchonous notifications from the server.</p>
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -139,10 +142,10 @@ public class adminAsyncMessage implements java.io.Serializable {
 
     switch (method)
       {
-      case SETSERVERSTART: 
+      case SETSERVERSTART:
         result.append("setServerStart");
         break;
-        
+
       case SETLASTDUMPTIME:
         result.append("setLastDumpTime");
         break;
@@ -182,7 +185,7 @@ public class adminAsyncMessage implements java.io.Serializable {
       case SETMEMORYSTATE:
         result.append("setMemoryState");
         break;
-        
+
       default:
         result.append("<" + method + ">??");
       }
@@ -195,7 +198,7 @@ public class adminAsyncMessage implements java.io.Serializable {
           {
             result.append(", ");
           }
-        
+
         result.append(params[i]);
       }
 

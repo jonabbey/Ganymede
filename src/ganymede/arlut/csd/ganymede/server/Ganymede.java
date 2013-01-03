@@ -322,6 +322,7 @@ public class Ganymede {
   static public String mailHostProperty = null;
   static public String defaultDomainProperty = null;
   static public String returnaddrProperty = null;
+  static public String returnaddrdescProperty = null;
   static public String subjectPrefixProperty = null;
   static public String signatureFileProperty = null;
   static public String helpbaseProperty = null;
@@ -670,6 +671,7 @@ public class Ganymede {
     defaultDomainProperty = System.getProperty("ganymede.defaultdomain");
     signatureFileProperty = System.getProperty("ganymede.signaturefile");
     returnaddrProperty = System.getProperty("ganymede.returnaddr");
+    returnaddrdescProperty = System.getProperty("ganymede.returnaddrdesc");
     subjectPrefixProperty = System.getProperty("ganymede.subjectprefix");
     helpbaseProperty = System.getProperty("ganymede.helpbase");
     monitornameProperty = System.getProperty("ganymede.monitorname");
@@ -798,6 +800,11 @@ public class Ganymede {
       {
         // "Couldn''t get the ganymede.returnaddr return email address property"
         throw new GanymedeStartupException(ts.l("loadProperties.no_email_addr"));
+      }
+
+    if (returnaddrdescProperty == null)
+      {
+        returnaddrdescProperty = returnaddrProperty;
       }
 
     // if the subjectPrefixProperty is not defined or if it does not begin and

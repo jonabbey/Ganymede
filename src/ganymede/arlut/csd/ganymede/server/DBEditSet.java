@@ -1155,7 +1155,7 @@ public class DBEditSet {
       }
     catch (InterruptedException ex)
       {
-        Ganymede.debug(ts.l("commit_lockBases.interrupted", String.valueOf(session.key)));
+        Ganymede.debug(ts.l("commit_lockBases.interrupted", String.valueOf(session.getKey())));
 
         releaseWriteLock();
 

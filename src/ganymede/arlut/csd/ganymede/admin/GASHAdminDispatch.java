@@ -9,11 +9,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -50,6 +52,8 @@ import java.awt.Color;
 import java.awt.Dialog;
 import java.lang.reflect.InvocationTargetException;
 import java.rmi.RemoteException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
@@ -136,7 +140,7 @@ class GASHAdminDispatch implements Runnable {
    */
 
   public boolean connect(String name, String pass) throws RemoteException
-  { 
+  {
     ReturnVal retVal = handleReturnVal(server.admin(name, pass));
 
     if (retVal == null || !retVal.didSucceed())
@@ -151,7 +155,7 @@ class GASHAdminDispatch implements Runnable {
     // server *should* pass back a proper error report in the
     // ReturnVal, and this NullPointerException should
     // never be thrown.
-        
+
     if (aSession == null)
       {
         throw new NullPointerException("Bad null valued admin session received from server");
@@ -194,6 +198,32 @@ class GASHAdminDispatch implements Runnable {
   public void stopAsyncPoller()
   {
     okayToPoll = false;
+  }
+
+  /**
+   * Generates the localized time formatting for the admin console
+   */
+
+  public String formatDate(Date time)
+  {
+    SimpleDateFormat formatter;
+    Calendar cal1 = Calendar.getInstance();
+    Calendar cal2 = Calendar.getInstance();
+
+    cal1.setTime(new Date());
+    cal2.setTime(time);
+
+    if ((cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)) &&
+        (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)))
+      {
+        formatter = new SimpleDateFormat(ts.l("global.todayTimeFormat"));
+      }
+    else
+      {
+        formatter = new SimpleDateFormat(ts.l("global.timeFormat"));
+      }
+
+    return formatter.format(time);
   }
 
   /**
@@ -251,7 +281,7 @@ class GASHAdminDispatch implements Runnable {
                     break;
 
                   case adminAsyncMessage.SETLOCKSHELD:
-                    setLocksHeld(event.getInt(0));
+                    setLocksHeld(event.getInt(0), event.getInt(1));
                     break;
 
                   case adminAsyncMessage.CHANGESTATE:
@@ -318,7 +348,7 @@ class GASHAdminDispatch implements Runnable {
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-        frame.startField.setText(lDate.toString());
+        frame.startField.setText(formatDate(lDate));
       }
     });
   }
@@ -341,7 +371,7 @@ class GASHAdminDispatch implements Runnable {
       }
 
     final Date lDate = date;
-    
+
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         if (lDate == null)
@@ -350,7 +380,7 @@ class GASHAdminDispatch implements Runnable {
           }
         else
           {
-            frame.dumpField.setText(lDate.toString());
+            frame.dumpField.setText(formatDate(lDate));
           }
       }
     });
@@ -375,7 +405,7 @@ class GASHAdminDispatch implements Runnable {
       }
 
     final int lTrans = trans;
-    
+
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         frame.journalField.setText("" + lTrans);
@@ -401,7 +431,7 @@ class GASHAdminDispatch implements Runnable {
       }
 
     final int lObjs = objs;
-    
+
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
         frame.checkedOutField.setText("" + lObjs);
@@ -414,7 +444,7 @@ class GASHAdminDispatch implements Runnable {
    * number of locks held in the admin console.
    */
 
-  public void setLocksHeld(int locks)
+  public void setLocksHeld(int locks, int waiting)
   {
     if (debug)
       {
@@ -427,10 +457,11 @@ class GASHAdminDispatch implements Runnable {
       }
 
     final int lLocks = locks;
+    final int lWaiting = waiting;
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-        frame.locksField.setText("" + lLocks);
+        frame.locksField.setText(lWaiting + " / " + lLocks);
       }
     });
   }
@@ -584,7 +615,7 @@ class GASHAdminDispatch implements Runnable {
 
             AdminEntry e;
             frame.table.clearCells();
-    
+
             // Process entries from the server
 
             for (int i = 0; i < localEntries.length; i++)
@@ -617,7 +648,7 @@ class GASHAdminDispatch implements Runnable {
 
                 frame.table.setCellText(e.sessionName, 1, e.hostname, false);
                 frame.table.setCellText(e.sessionName, 2, e.status, false);
-                frame.table.setCellText(e.sessionName, 3, e.connecttime, false);
+                frame.table.setCellText(e.sessionName, 3, formatDate(e.connecttime), false);
                 frame.table.setCellText(e.sessionName, 4, e.event, false);
                 frame.table.setCellText(e.sessionName, 5, Integer.toString(e.objectsCheckedOut), false);
               }
@@ -664,22 +695,22 @@ class GASHAdminDispatch implements Runnable {
     if (!tasksLoaded)
       {
         // System.err.println("changeTasks: tasks size = " + tasks.size());
-    
+
         // Sort entries according to their incep date,
         // to prevent confusion if new tasks are put into
         // the server-side hashes, and as they are shuffled
         // from hash to hash
-        
+
         java.util.Arrays.sort(tasks,
-                              new Comparator() 
+                              new Comparator()
                               {
-                                public int compare(Object a, Object b) 
+                                public int compare(Object a, Object b)
                                 {
                                   scheduleHandle aH, bH;
-                                  
+
                                   aH = (scheduleHandle) a;
                                   bH = (scheduleHandle) b;
-                                  
+
                                   if (aH.incepDate.before(bH.incepDate))
                                     {
                                       return -1;
@@ -725,21 +756,133 @@ class GASHAdminDispatch implements Runnable {
       }
 
     updateSyncTaskTable(frame.syncTaskTable, syncTasks);
-    updateTaskTable(frame.taskTable, scheduledTasks);
-    updateTaskTable(frame.manualTaskTable, manualTasks);
+    updateScheduledTaskTable(frame.taskTable, scheduledTasks);
+    updateManualTaskTable(frame.manualTaskTable, manualTasks);
   }
 
-  private void updateTaskTable(rowTable table, Vector<scheduleHandle> tasks)
+  /**
+   * <p>Updated the scheduled task table</p>
+   */
+
+  private void updateScheduledTaskTable(rowTable table, Vector<scheduleHandle> tasks)
   {
-    Vector taskNames = new Vector();
+    Vector<String> taskNames = new Vector<String>();
 
     /* -- */
 
-    // now reload the table with the current stats
+    for (scheduleHandle handle: tasks)
+      {
+        taskNames.add(handle.name);
+
+        if (!table.containsKey(handle.name))
+          {
+            table.newRow(handle.name);
+          }
+
+        table.setCellText(handle.name, 0, handle.name, false); // task name
+
+        if (handle.isRunning() && handle.isSuspended())
+          {
+            // "Suspended upon completion"
+            table.setCellText(handle.name, 1, ts.l("changeTasks.runningSuspendedState"), false);
+            table.setCellColor(handle.name, 1, Color.red, false);
+            table.setCellBackColor(handle.name, 1, Color.white, false);
+          }
+        else if (handle.isRunning())
+          {
+            // "Running"
+            table.setCellText(handle.name, 1, ts.l("changeTasks.runningState"), false);
+            table.setCellColor(handle.name, 1, Color.blue, false);
+            table.setCellBackColor(handle.name, 1, Color.white, false);
+          }
+        else if (handle.isSuspended())
+          {
+            // "Suspended"
+            table.setCellText(handle.name, 1, ts.l("changeTasks.suspendedState"), false);
+            table.setCellColor(handle.name, 1, Color.red, false);
+            table.setCellBackColor(handle.name, 1, Color.white, false);
+          }
+        else if (handle.startTime != null)
+          {
+            // "Scheduled"
+            table.setCellText(handle.name, 1, ts.l("changeTasks.scheduledState"), false);
+            table.setCellColor(handle.name, 1, Color.black, false);
+            table.setCellBackColor(handle.name, 1, Color.white, false);
+          }
+
+        table.setCellText(handle.name, 2, handle.intervalString, false);
+
+        if (handle.startTime != null)
+          {
+            table.setCellText(handle.name, 3, formatDate(handle.startTime), false);
+          }
+        else
+          {
+            // "On Demand"
+            table.setCellText(handle.name, 3, ts.l("changeTasks.onDemandState"), false);
+          }
+
+        if (handle.lastTime != null)
+          {
+            table.setCellText(handle.name, 4, formatDate(handle.lastTime), false);
+          }
+      }
+
+    // and take any rows out that are gone
+
+    Vector tasksKnown = new Vector();
+    Enumeration en = table.keys();
+
+    while (en.hasMoreElements())
+      {
+        tasksKnown.addElement(en.nextElement());
+      }
+
+    Vector removedTasks = VectorUtils.difference(tasksKnown, taskNames);
+
+    for (int i = 0; i < removedTasks.size(); i++)
+      {
+        table.deleteRow(removedTasks.elementAt(i), false);
+      }
+
+    // And refresh our table.. we'll wait until this succeeds so we
+    // don't get the server sending us more updates before the table
+    // finishes drawing
+
+    final rowTable localTableRef = table;
+
+    try
+      {
+        SwingUtilities.invokeAndWait(new Runnable() {
+          public void run() {
+            localTableRef.refreshTable();
+          }
+        });
+      }
+    catch (InvocationTargetException ite)
+      {
+        ite.printStackTrace();
+      }
+    catch (InterruptedException ie)
+      {
+        ie.printStackTrace();
+      }
+  }
+
+
+  /**
+   * <p>Updated the manual task table</p>
+   */
+
+  private void updateManualTaskTable(rowTable table, Vector<scheduleHandle> tasks)
+  {
+    Vector<String> taskNames = new Vector();
+
+    /* -- */
 
     for (scheduleHandle handle: tasks)
       {
-        taskNames.addElement(handle.name);
+        taskNames.add(handle.name);
 
         if (!table.containsKey(handle.name))
           {
@@ -786,22 +929,7 @@ class GASHAdminDispatch implements Runnable {
 
         if (handle.lastTime != null)
           {
-            table.setCellText(handle.name, 2, handle.lastTime.toString(), false);
-          }
-
-        if (table.getColCount() > 3)
-          {
-            if (handle.startTime != null)
-              {
-                table.setCellText(handle.name, 3, handle.startTime.toString(), false);
-              }
-            else
-              {
-                // "On Demand"
-                table.setCellText(handle.name, 3, ts.l("changeTasks.onDemandState"), false);
-              }
-
-            table.setCellText(handle.name, 4, handle.intervalString, false);
+            table.setCellText(handle.name, 2, formatDate(handle.lastTime), false);
           }
       }
 
@@ -816,7 +944,7 @@ class GASHAdminDispatch implements Runnable {
       }
 
     Vector removedTasks = VectorUtils.difference(tasksKnown, taskNames);
-    
+
     for (int i = 0; i < removedTasks.size(); i++)
       {
         table.deleteRow(removedTasks.elementAt(i), false);
@@ -846,9 +974,13 @@ class GASHAdminDispatch implements Runnable {
       }
   }
 
+  /**
+   * <p>Update the sync monitor tasks</p>
+   */
+
   private void updateSyncTaskTable(rowTable table, Vector<scheduleHandle> tasks)
   {
-    Vector taskNames = new Vector();
+    Vector<String> taskNames = new Vector();
 
     /* -- */
 
@@ -859,75 +991,97 @@ class GASHAdminDispatch implements Runnable {
 
     for (scheduleHandle handle: tasks)
       {
-        taskNames.addElement(handle.name);
+        taskNames.add(handle.name);
 
         if (!table.containsKey(handle.name))
           {
             table.newRow(handle.name);
           }
 
-        table.setCellText(handle.name, 0, handle.name, false); // task name
-
-        table.setCellText(handle.name, 1, handle.getTaskType().toString(), false);
+        Color background = null;
+        Color foreground = null;
 
         if (handle.isRunning() && handle.isSuspended())
           {
-            // "Suspended upon completion"
-            table.setCellText(handle.name, 3, ts.l("changeTasks.runningSuspendedState"), false);
-            table.setCellColor(handle.name, 3, Color.red, false);
-            table.setCellBackColor(handle.name, 3, Color.white, false);
+            foreground = Color.white;
+            background = Color.red;
           }
         else if (handle.isRunning())
           {
-            // "Running"
-            table.setCellText(handle.name, 3, ts.l("changeTasks.runningState"), false);
-            table.setCellColor(handle.name, 3, Color.blue, false);
-            table.setCellBackColor(handle.name, 3, Color.white, false);
+            foreground = Color.white;
+            background = Color.blue;
 
             running = true;
           }
         else if (handle.isSuspended())
           {
+            foreground = Color.white;
+            background = Color.red;
+          }
+        else
+          {
+            switch (handle.getTaskStatus())
+              {
+              case OK:
+              case EMPTYQUEUE:
+              case NONEMPTYQUEUE:
+                foreground = Color.black;
+                background = Color.white;
+                break;
+
+              default:
+                foreground = Color.white;
+                background = Color.red;
+                error_seen = true;
+              }
+          }
+
+        table.setCellText(handle.name, 0, handle.name, false); // task name
+        table.setCellColor(handle.name, 0, foreground, false);
+        table.setCellBackColor(handle.name, 0, background, false);
+
+        table.setCellText(handle.name, 1, handle.getTaskType().toString(), false);
+        table.setCellColor(handle.name, 1, foreground, false);
+        table.setCellBackColor(handle.name, 1, background, false);
+
+        table.setCellText(handle.name, 2, handle.getTaskStatus().getMessage(handle.queueSize, handle.condition), false);
+        table.setCellColor(handle.name, 2, foreground, false);
+        table.setCellBackColor(handle.name, 2, background, false);
+
+        if (handle.isRunning() && handle.isSuspended())
+          {
+            // "Suspended upon completion"
+            table.setCellText(handle.name, 3, ts.l("changeTasks.runningSuspendedState"), false);
+          }
+        else if (handle.isRunning())
+          {
+            // "Running"
+            table.setCellText(handle.name, 3, ts.l("changeTasks.runningState"), false);
+          }
+        else if (handle.isSuspended())
+          {
             // "Suspended"
             table.setCellText(handle.name, 3, ts.l("changeTasks.suspendedState"), false);
-            table.setCellColor(handle.name, 3, Color.red, false);
-            table.setCellBackColor(handle.name, 3, Color.white, false);
           }
         else if (handle.startTime != null)
           {
             // "Scheduled"
             table.setCellText(handle.name, 3, ts.l("changeTasks.scheduledState"), false);
-            table.setCellColor(handle.name, 3, Color.black, false);
-            table.setCellBackColor(handle.name, 3, Color.white, false);
           }
         else
           {
             // "Waiting"
             table.setCellText(handle.name, 3, ts.l("changeTasks.waitingState"), false);
-            table.setCellColor(handle.name, 3, Color.black, false);
-            table.setCellBackColor(handle.name, 3, Color.white, false);
           }
 
-        table.setCellText(handle.name, 2, handle.getTaskStatus().getMessage(handle.queueSize, handle.condition), false);
-
-        switch (handle.getTaskStatus())
-          {
-          case OK:
-          case EMPTYQUEUE:
-          case NONEMPTYQUEUE:
-            table.setCellColor(handle.name, 2, Color.black, false);
-            table.setCellBackColor(handle.name, 2, Color.white, false);
-            break;
-            
-          default:
-            table.setCellColor(handle.name, 2, Color.white, false);
-            table.setCellBackColor(handle.name, 2, Color.red, false);
-            error_seen = true;
-          }
+        table.setCellColor(handle.name, 3, foreground, false);
+        table.setCellBackColor(handle.name, 3, background, false);
 
         if (handle.lastTime != null)
           {
-            table.setCellText(handle.name, 4, handle.lastTime.toString(), false);
+            table.setCellText(handle.name, 4, formatDate(handle.lastTime), false);
+            table.setCellColor(handle.name, 4, foreground, false);
+            table.setCellBackColor(handle.name, 4, background, false);
           }
       }
 
@@ -955,7 +1109,7 @@ class GASHAdminDispatch implements Runnable {
       }
 
     Vector removedTasks = VectorUtils.difference(tasksKnown, taskNames);
-    
+
     for (int i = 0; i < removedTasks.size(); i++)
       {
         table.deleteRow(removedTasks.elementAt(i), false);
@@ -1003,7 +1157,7 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * Callback: The server can tell us to disconnect if the server is 
+   * Callback: The server can tell us to disconnect if the server is
    * going down.
    */
 
@@ -1120,7 +1274,7 @@ class GASHAdminDispatch implements Runnable {
         // the GASHSchema constructor pops itself up at the end of
         // initialization
 
-        // "Schema Editor"      
+        // "Schema Editor"
         return new GASHSchema(ts.l("pullSchema.schemaEditingTitle"), editor, this);
       }
   }
@@ -1223,7 +1377,7 @@ class GASHAdminDispatch implements Runnable {
 
         // display the Dialog sent to us by the server, get the
         // result of the user's interaction with it.
-            
+
         dialogResults = dialog.showDialog();
 
         if (debug)

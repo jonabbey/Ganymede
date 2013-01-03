@@ -153,7 +153,7 @@ final public class DBSession {
    * locks.</p>
    */
 
-  Object key;
+  private Object key;
 
   /* -- */
 

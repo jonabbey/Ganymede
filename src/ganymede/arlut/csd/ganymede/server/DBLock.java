@@ -10,11 +10,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2011
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -74,7 +76,7 @@ import java.util.Vector;
  * has a chance to get in and make its update and then signals
  * completion by calling release().  Writers are given priority in the
  * DBLock queue over readers.</p>
- * 
+ *
  * <p>Similarly, if there are a number of writer locks queued up for
  * update access to a DBObjectBase in the DBStore when a thread
  * attempts to establish a DBDumpLock, those writers are allowed to
@@ -98,7 +100,7 @@ import java.util.Vector;
  * synchronized on the Ganymede's DBStore object.  This
  * synchronization is critical for the proper functioning of the
  * DBLock system.</p>
- * 
+ *
  * <p>There is currently no intrinsic support for handling timeouts
  * within the DBLock class hierarchy, and locks can persist
  * indefinitely.</p>
@@ -121,66 +123,67 @@ import java.util.Vector;
 public abstract class DBLock {
 
   /**
-   * All DBLock's have an identifier key, which is used to identify
+   * <p>All DBLock's have an identifier key, which is used to identify
    * the lock in the {@link arlut.csd.ganymede.server.DBStore
    * DBStore}'s {@link arlut.csd.ganymede.server.DBLockSync
    * DBLockSync} object.  The establish() methods in the DBLock
    * subclasses consult the DBStore.lockSync to make sure that no
    * {@link arlut.csd.ganymede.server.DBSession DBSession} ever
    * possesses more than one write lock, to prevent deadlocks from
-   * occuring in the server.
+   * occuring in the server.</p>
    */
 
   Object key;
 
   /**
-   * All DBLock's establish() and release() methods synchronize their
-   * critical sections on a singleton DBLockSync object held in the
-   * Ganymede server's DBStore object in order to guarantee that all
-   * lock negotiations are thread-safe.
+   * <p>All DBLock's establish() and release() methods synchronize
+   * their critical sections on a singleton DBLockSync object held in
+   * the Ganymede server's DBStore object in order to guarantee that
+   * all lock negotiations are thread-safe.</p>
    */
 
   DBLockSync lockSync;
 
   /**
-   * In order to prevent deadlocks, each individual lock must be
+   * <p>In order to prevent deadlocks, each individual lock must be
    * established on all applicable {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBases} at the time
    * the lock is initially established.  baseSet is the Vector of
-   * DBObjectBases that this DBLock is/will be locked on.
+   * DBObjectBases that this DBLock is/will be locked on.</p>
    */
 
   Vector<DBObjectBase> baseSet;
 
   /**
-   * Will be true if a DBLock is successfully locked.
+   * <p>Will be true if a DBLock is successfully locked.</p>
    *
-   * Should not be directly accessed outside of the DBLock class
+   * <p>Should not be directly accessed outside of the DBLock class
    * hierarchy (unfortunately Java has no support for 'accessible to
-   * subclasses only').
+   * subclasses only').</p>
    */
 
   boolean locked = false;
 
   /**
-   * Will be true if a DBLock has had its abort() method called.  Once
-   * aborted, a lock may never be re-established; the locking code
-   * must create a new lock.
+   * <p>Will be true if a DBLock has had its abort() method called.
+   * Once aborted, a lock may never be re-established; the locking
+   * code must create a new lock.</p>
    */
 
   boolean abort = false;
 
   /**
-   * Will be true while a DBLock is in the process of being established.
+   * <p>Will be true while a DBLock is in the process of being
+   * established.</p>
    */
-  
+
   boolean inEstablish = false;
 
   /* -- */
 
   /**
-   * Returns true if the lock has been established and not
-   * yet aborted / released.
+   * <p>Returns true if the lock has been established and not yet
+   * aborted / released.</p>
    */
 
   boolean isLocked()
@@ -192,12 +195,11 @@ public abstract class DBLock {
   }
 
   /**
-   * Returns true if the lock has the given
-   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
-   * locked.
+   * <p>Returns true if the lock has the given {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} locked.</p>
    */
 
-  boolean isLocked(DBObjectBase base)
+  boolean isLocked(DBObjectBase candidateBase)
   {
     synchronized (lockSync)
       {
@@ -206,9 +208,9 @@ public abstract class DBLock {
             return false;
           }
 
-        for (int i=0; i < baseSet.size(); i++)
+        for (DBObjectBase base: baseSet)
           {
-            if (baseSet.elementAt(i) == base)
+            if (base == candidateBase)
               {
                 return true;
               }
@@ -219,9 +221,9 @@ public abstract class DBLock {
   }
 
   /**
-   * Returns true if the lock has all of the 
-   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
-   * objects in the provided Vector locked.
+   * <p>Returns true if the lock has all of the {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects in
+   * the provided Vector locked.</p>
    */
 
   boolean isLocked(Vector<DBObjectBase> bases)
@@ -233,9 +235,9 @@ public abstract class DBLock {
   }
 
   /**
-   * Returns true if the lock has any of the 
-   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
-   * objects in the provided Vector locked.
+   * <p>Returns true if the lock has any of the {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects in
+   * the provided Vector locked.</p>
    */
 
   boolean overlaps(Vector<DBObjectBase> bases)
@@ -255,7 +257,7 @@ public abstract class DBLock {
    * {@link arlut.csd.ganymede.server.DBDumpLock DBDumpLock}).</p>
    *
    * <p>A thread that calls establish() will be suspended (waiting
-   * on the server's {@link arlut.csd.ganymede.server.DBStore DBStore} until 
+   * on the server's {@link arlut.csd.ganymede.server.DBStore DBStore} until
    * all DBObjectBases listed in the DBLock's constructor are available
    * to be locked.  At that point, the thread blocking on establish()
    * will wake up possessing a lock on the requested DBObjectBases.</p>
@@ -268,27 +270,34 @@ public abstract class DBLock {
    * which case
    * establish() will throw an InterruptedException, and the lock will
    * not be established.</p>
+   *
+   * @param key An object used in the server to uniquely identify the
+   * entity internal to Ganymede that is attempting to obtain the
+   * lock, typically a {@link
+   * arlut.csd.ganymede.server.GanymedeSession GanymedeSession} or a
+   * {@link arlut.csd.ganymede.server.GanymedeBuilderTask
+   * GanymedeBuilderTask}.
    */
 
   abstract void establish(Object key) throws InterruptedException;
 
   /**
-   * Unlock the bases held by this lock.
-   */ 
+   * <p>Unlock the bases held by this lock.</p>
+   */
 
   abstract void release();
 
   /**
-   * Abort this lock;  if any thread is waiting in establish() on this
-   * lock when abort() is called, that thread's call to establish() will
-   * fail with an InterruptedException.
+   * <p>Abort this lock; if any thread is waiting in establish() on
+   * this lock when abort() is called, that thread's call to
+   * establish() will fail with an InterruptedException.</p>
    */
 
   abstract void abort();
 
   /**
-   * Returns the key that this lock is established with,
-   * or null if the lock has not been established.
+   * <p>Returns the key that this lock is established with, or null if
+   * the lock has not been established.</p>
    */
 
   Object getKey()
@@ -304,7 +313,8 @@ public abstract class DBLock {
   }
 
   /**
-   * <p>Returns a string describing this lock for use in debug messages</p>
+   * <p>Returns a string describing this lock for use in debug
+   * messages</p>
    */
 
   public String toString()

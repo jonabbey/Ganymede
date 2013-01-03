@@ -3579,7 +3579,7 @@ final public class GanymedeSession implements Session, Unreferenced {
                               permManager.getIdentity(),
                               getClientHostName(),
                               (status == null) ? "" : status,
-                              connecttime.toString(),
+                              connecttime,
                               (lastEvent == null) ? "" : lastEvent,
                               objectsCheckedOut);
         userInfo = info;

@@ -8,11 +8,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -299,7 +301,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   JTextPane statusArea = null;
 
   // resources for the users connected table
-  
+
   rowTable table = null;
 
   String headers[] = {ts.l("global.user_col_0"), // "User"
@@ -328,9 +330,10 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   String taskHeaders[] = {ts.l("global.task_col_0"), // "Task"
                           ts.l("global.task_col_1"), // "Status"
-                          ts.l("global.task_col_2"), // "Last Run"
+                          ts.l("global.task_col_4"), // "Interval"
                           ts.l("global.task_col_3"), // "Next Run"
-                          ts.l("global.task_col_4")}; // "Interval"
+                          ts.l("global.task_col_2")}; // "Last Run"
+
   int taskColWidths[] = {100,100,100,100,100};
 
   // resources for the manual task monitor table
@@ -343,7 +346,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   int manualTaskColWidths[] = {100,100,100};
 
   JSplitPane splitterPane = null;
-  
+
   GASHAdmin loginPanel;
 
   String
@@ -872,7 +875,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     /* Locks held */
 
-    // "Locks Held:"
+    // "Locks Waiting / Held:"
     locksLabel = new JLabel(ts.l("init.locks"));
 
     locksField = new JTextField("", 40);
@@ -1035,7 +1038,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     taskTable = new rowTable(taskColWidths, taskHeaders, this, false, taskPopMenu, false);
     taskTable.setHeadBackColor(Color.red, false);
-                          
+
     JPanel taskBox = new JPanel(new java.awt.BorderLayout());
     taskBox.add("Center", taskTable);
 
@@ -1056,7 +1059,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
     manualTaskTable = new rowTable(manualTaskColWidths, manualTaskHeaders, this, false, manualTaskPopMenu, false);
     manualTaskTable.setHeadBackColor(Color.gray, false);
-                          
+
     JPanel manualTaskBox = new JPanel(new java.awt.BorderLayout());
     manualTaskBox.add("Center", manualTaskTable);
 
@@ -1150,7 +1153,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
         statusBox.setPreferredSize(new Dimension(0, statusAreaHeight));
         tabPane.setPreferredSize(new Dimension(0, tabAreaHeight));
       }
-    
+
     if (!sizer.restoreSize(this))
       {
         statusBox.setPreferredSize(new Dimension(0, 200));
@@ -1229,7 +1232,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
         setVisible(false);
 
         // This shouldn't kill everything off, but it does for now.  Need to fix this later.
-            
+
         if (!GASHAdmin.WeAreApplet)
           {
             System.exit(0);
@@ -1533,7 +1536,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
             saveWindowPrefs();
             setVisible(false);
-                
+
             if (!GASHAdmin.WeAreApplet)
               {
                 System.exit(0);
@@ -1552,9 +1555,9 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
                                      ts.l("actionPerformed.killall_title"),
                                      ts.l("actionPerformed.killall_question"),
                                      ts.l("global.yes"), ts.l("global.no"), question);
-    
+
         killAllDLG = new StringDialog(killAllDLGR, StandardDialog.ModalityType.DOCUMENT_MODAL);
-        
+
         if (killAllDLG.showDialog() == null)
           {
             return;
@@ -1832,7 +1835,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
    * GASHAdminFrame constructor to activate this method.</p>
    */
 
-  protected void processWindowEvent(WindowEvent e) 
+  protected void processWindowEvent(WindowEvent e)
   {
     if (e.getID() == WindowEvent.WINDOW_CLOSING)
       {
@@ -1858,7 +1861,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
                             "********************\n");
     StringWriter stringTarget = new StringWriter();
     PrintWriter writer = new PrintWriter(stringTarget);
-    
+
     ex.printStackTrace(writer);
     writer.close();
 
@@ -1870,8 +1873,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   /**
    * <p>Loads and returns the error Image for use in client dialogs.</p>
-   * 
-   * <p>Once the image is loaded, it is cached for future calls to 
+   *
+   * <p>Once the image is loaded, it is cached for future calls to
    * getErrorImage().</p>
    */
 
@@ -1881,7 +1884,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
       {
         errorImage = PackageResources.getImageResource(this, "error.gif", getClass());
       }
-    
+
     return errorImage;
   }
 
@@ -1905,7 +1908,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     showErrorMessage(title, message, getErrorImage());
   }
 
-  /** 
+  /**
    * Show an error dialog.
    *
    * @param title title of dialog.
@@ -1925,7 +1928,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     final String Message = message;
     final Image fIcon = icon;
 
-    EventQueue.invokeLater(new Runnable() 
+    EventQueue.invokeLater(new Runnable()
                                {
                                  public void run()
                                    {
@@ -1958,7 +1961,7 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
 
   GridBagLayout
     gbl;
-  
+
   GridBagConstraints
     gbc;
 
@@ -1968,7 +1971,7 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
   JPanel
     mainPanel, imagePanel, buttonPanel;
 
-  JMultiLineLabel 
+  JMultiLineLabel
     textLabel;
 
   Image image;
@@ -2009,7 +2012,7 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
     // "Are you sure you want to shut down the Ganymede server\nrunning at {0}?"
 
     textLabel = new JMultiLineLabel(ts.l("global.question", GASHAdmin.server_url));
-    
+
     gbc.gridy = 0;
     gbc.gridx = 1;
     gbc.gridwidth = 1;
@@ -2019,7 +2022,7 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
 
     //
     // Separator goes all the way accross
-    // 
+    //
 
     JSeparator sep = new JSeparator();
 
@@ -2096,7 +2099,7 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
    * user closes the dialog box.</p>
    *
    * <p>Use this instead of Dialog.show().  If Hashtable returned is null,
-   * then the cancel button was clicked.  Otherwise, it will contain a 
+   * then the cancel button was clicked.  Otherwise, it will contain a
    * hash of labels(String) to results (Object).</p>
    *
    * @return HashTable of labels to values
@@ -2166,7 +2169,7 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
 
         // by setting valueHash to null, we're basically treating
         // this window close as a cancel.
-        
+
         result = 0;
       }
 

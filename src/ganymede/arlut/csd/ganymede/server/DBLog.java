@@ -595,6 +595,7 @@ public class DBLog {
 
             mailer.sendmsg(Ganymede.returnaddrProperty,
                            emailList,
+                           Ganymede.returnaddrdescProperty,
                            titleString,
                            message);
           }
@@ -830,6 +831,7 @@ public class DBLog {
             // summary.
 
             String returnAddr = null;
+            String returnAddrDesc = null;
 
             // who should we say the mail is from?
 
@@ -837,10 +839,12 @@ public class DBLog {
               {
                 returnAddr = adminPersonaCustom.convertAdminInvidToString(event.admin,
                                                                           transaction.session);
+                returnAddrDesc = returnAddrDesc;
               }
             else
               {
                 returnAddr = Ganymede.returnaddrProperty;
+                returnAddrDesc = Ganymede.returnaddrdescProperty;
               }
 
             try
@@ -864,6 +868,7 @@ public class DBLog {
 
                 mailer.sendmsg(returnAddr,
                                event.getMailTargets(),
+                               returnAddrDesc,
                                Ganymede.subjectPrefixProperty + event.subject,
                                message);
               }
@@ -924,6 +929,7 @@ public class DBLog {
     // now, for each distinct set of recipients, mail them their summary
 
     String returnAddr = null;
+    String returnAddrDesc = null;
 
     // who should we say the mail is from?
 
@@ -931,6 +937,7 @@ public class DBLog {
       {
         returnAddr = adminPersonaCustom.convertAdminInvidToString(admin,
                                                                   gSession.getDBSession());
+        returnAddrDesc = returnAddr;
       }
 
     // if there was no email address registered for the admin persona,
@@ -939,13 +946,14 @@ public class DBLog {
     if (returnAddr == null)
       {
         returnAddr = Ganymede.returnaddrProperty;
+        returnAddrDesc = Ganymede.returnaddrdescProperty;
       }
 
     // send out object event reporting mail to anyone who has signed up for it
 
     if (mailer != null)
       {
-        sendObjectMail(returnAddr, adminName, this.objectOuts, this.transactionTimeStamp, transaction);
+        sendObjectMail(returnAddr, adminName, returnAddrDesc, this.objectOuts, this.transactionTimeStamp, transaction);
       }
 
     this.objectOuts.clear();
@@ -991,6 +999,7 @@ public class DBLog {
               {
                 mailer.sendmsg(returnAddr,
                                mailout.addresses,
+                               returnAddrDesc,
                                Ganymede.subjectPrefixProperty + describeTransaction(mailout, transaction),
                                description);
               }
@@ -1078,7 +1087,8 @@ public class DBLog {
   private List<String> sendSysEventMail(DBLogEvent event, String transdescrip)
   {
     systemEventType type;
-    String returnAddr;
+    String returnAddr = null;
+    String returnAddrDesc = null;
     List<String> emailList = new ArrayList<String>();
 
     /* -- */
@@ -1179,10 +1189,12 @@ public class DBLog {
       {
         returnAddr = adminPersonaCustom.convertAdminInvidToString(event.admin,
                                                                   gSession.getDBSession());
+        returnAddrDesc = returnAddr;
       }
     else
       {
         returnAddr = Ganymede.returnaddrProperty;
+        returnAddrDesc = Ganymede.returnaddrdescProperty;
       }
 
     // and now..
@@ -1195,6 +1207,7 @@ public class DBLog {
 
         mailer.sendmsg(returnAddr,
                        emailList,
+                       returnAddrDesc,
                        Ganymede.subjectPrefixProperty + type.name,
                        message);
       }
@@ -1332,7 +1345,7 @@ public class DBLog {
    * that have signed up for per-object-type mail notifications.
    */
 
-  private void sendObjectMail(String returnAddr, String adminName, HashMap<String, HashMap<String, MailOut>> objectOuts, Date currentTime, DBEditSet transaction)
+  private void sendObjectMail(String returnAddr, String adminName, String returnAddrDesc, HashMap<String, HashMap<String, MailOut>> objectOuts, Date currentTime, DBEditSet transaction)
   {
     for (Map.Entry<String, HashMap<String, MailOut>> item: objectOuts.entrySet())
       {
@@ -1420,6 +1433,7 @@ public class DBLog {
               {
                 mailer.sendmsg(returnAddr,
                                mailout.addresses,
+                               returnAddrDesc,
                                title,
                                description);
               }

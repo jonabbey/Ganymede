@@ -14,17 +14,19 @@
    This makes it possible for the server to provide asynchronous
    notification to the admin consoles, even if the consoles are
    running behind a system-level firewall.
-   
+
    Created: 4 September 2003
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -62,7 +64,9 @@ import java.rmi.RemoteException;
 import java.util.Date;
 import java.util.Vector;
 
+import arlut.csd.ganymede.common.AdminEntry;
 import arlut.csd.ganymede.common.adminAsyncMessage;
+import arlut.csd.ganymede.common.scheduleHandle;
 import arlut.csd.ganymede.rmi.AdminAsyncResponder;
 
 /*------------------------------------------------------------------------------
@@ -238,7 +242,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
 
   /**
    *
-   * Callback: The server can tell us to disconnect if the server is 
+   * Callback: The server can tell us to disconnect if the server is
    * going down.
    *
    */
@@ -300,9 +304,14 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
    * locks held in the admin console.</p>
    */
 
-  public void setLocksHeld(int locks) throws RemoteException
+  public void setLocksHeld(int locks, int waiting) throws RemoteException
   {
-    adminAsyncMessage message = new adminAsyncMessage(adminAsyncMessage.SETLOCKSHELD, locks);
+    Object[] parmAry = new Object[2];
+
+    parmAry[0] = Integer.valueOf(locks);
+    parmAry[1] = Integer.valueOf(waiting);
+
+    adminAsyncMessage message = new adminAsyncMessage(adminAsyncMessage.SETLOCKSHELD, parmAry);
     replaceEvent(message);
   }
 
@@ -350,7 +359,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
         // we have to throw a remote exception, since that's what
         // the GanymedeAdmin code expects to receive as a signal
         // that an admin console needs to be dropped
-        
+
         throw new RemoteException("serverAdminProxy: console disconnected");
       }
 
@@ -400,7 +409,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
    * login description objects.
    */
 
-  public void changeUsers(Vector entries) throws RemoteException
+  public void changeUsers(Vector<AdminEntry> entries) throws RemoteException
   {
     Object params[] = new Object[entries.size()];
     entries.copyInto(params);
@@ -416,7 +425,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
    * objects describing the tasks registered in the Ganymede server.
    */
 
-  public void changeTasks(Vector tasks) throws RemoteException
+  public void changeTasks(Vector<scheduleHandle> tasks) throws RemoteException
   {
     Object params[] = new Object[tasks.size()];
     tasks.copyInto(params);
@@ -448,9 +457,9 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
           {
             throwOverflow();
           }
-        
+
         result = enqueue(newEvent);
-        
+
         eventBuffer.notify();   // wake up getNextMsg()
       }
 
@@ -531,7 +540,7 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
               }
           }
       }
-    
+
     throw new RemoteException("serverAdminAsyncResponder buffer overflow:" + buffer.toString());
   }
 
@@ -551,12 +560,12 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
       {
         result = enqueuePtr;
         eventBuffer[enqueuePtr] = item;
-        
+
         if (++enqueuePtr >= maxBufferSize)
           {
             enqueuePtr = 0;
           }
-        
+
         ebSz++;
       }
 
@@ -588,12 +597,12 @@ public class serverAdminAsyncResponder implements AdminAsyncResponder {
 
             lookUp[result.getMethod()] = -1;
           }
-        
+
         if (++dequeuePtr >= maxBufferSize)
           {
             dequeuePtr = 0;
           }
-        
+
         ebSz--;
         return result;
       }

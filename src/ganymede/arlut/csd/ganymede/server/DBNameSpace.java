@@ -1132,7 +1132,7 @@ public final class DBNameSpace implements NameSpace {
         if (handle.getShadowFieldB() != null)
           {
             throw new RuntimeException("ASSERT: lingering shadowFieldB at commit time for transaction " +
-                                       editSet.session.key);
+                                       editSet.session.getKey());
           }
 
         DBNameSpaceHandle newHandle = handle.getNewHandle();

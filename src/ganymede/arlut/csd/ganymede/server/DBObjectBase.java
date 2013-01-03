@@ -10,9 +10,9 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2010
    The University of Texas at Austin
 
@@ -128,11 +128,11 @@ import arlut.csd.ganymede.rmi.Session;
  * functioning.</p>
  *
  * <p>DBObjectBase also keeps track of {@link arlut.csd.ganymede.server.DBReadLock DBReadLocks},
- * {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLocks}, and 
- * {@link arlut.csd.ganymede.server.DBDumpLock DBDumpLocks}, to manage 
+ * {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLocks}, and
+ * {@link arlut.csd.ganymede.server.DBDumpLock DBDumpLocks}, to manage
  * changes to be made to objects contained in this DBObjectBase.</p>
  *
- * <p>DBObjectBase implements the {@link arlut.csd.ganymede.rmi.Base Base} RMI remote 
+ * <p>DBObjectBase implements the {@link arlut.csd.ganymede.rmi.Base Base} RMI remote
  * interface, which is used by the client to determine type information for objects
  * of this type, as well as by the schema editor when the schema is being edited.</p>
  */
@@ -172,7 +172,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   private static Comparator comparator =
     new Comparator() {
-    public int compare(Object a, Object b) 
+    public int compare(Object a, Object b)
       {
         DBObjectBaseField aF, bF;
 
@@ -184,11 +184,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
             return -1;
           }
         else if (bF.tmp_displayOrder > aF.tmp_displayOrder)
-          { 
+          {
             return 1;
-          } 
+          }
         else
-          { 
+          {
             return 0;
           }
       }
@@ -223,7 +223,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    */
 
   public enum EditingMode
-  { 
+  {
     /**
      * The object base is locked and may not have any of its object or
      * field definition parameters changed in any way.
@@ -286,7 +286,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   private short type_code;
 
   /**
-   * <p>Fully qualified package and class name for a custom 
+   * <p>Fully qualified package and class name for a custom
    * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} subclass
    * to be dynamically loaded to manage operations on this DBObjectBase.</p>
    *
@@ -400,8 +400,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   /**
    * <p>Timestamp for the last time this DBObjectBase was
-   * changed, used by 
-   * {@link arlut.csd.ganymede.server.GanymedeBuilderTask GanymedeBuilderTasks} 
+   * changed, used by
+   * {@link arlut.csd.ganymede.server.GanymedeBuilderTask GanymedeBuilderTasks}
    * to determine whether a particular build sequence is necessary.</p>
    *
    * <p>See also
@@ -424,7 +424,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * purposes.</p>
    */
 
-  private DBLock currentLock;
+  private DBWriteLock currentLock;
 
   /**
    * <p>Set of {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLock}s
@@ -438,7 +438,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * in the list.</p>
    *
    * <p>When a DBWriteLock is locked onto this base, it is taken out
-   * of writerList, writeInProgress is set to true, and currentLock 
+   * of writerList, writeInProgress is set to true, and currentLock
    * is set to point to the DBWriteLock that has exclusive access.</p>
    *
    * <p>Note that there is no guarantee that DBWriteLocks will be granted
@@ -451,7 +451,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * writer in any order, depending on the server's threading behavior.</p>
    */
 
-  private Vector writerList;
+  private Vector<DBWriteLock> writerList;
 
   /**
    * <p>Collection of {@link arlut.csd.ganymede.server.DBReadLock DBReadLock}s
@@ -527,7 +527,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} subclass
    * to respond to a number of 'pseudostatic' method calls which customize
    * the Ganymede server's behavior when dealing with objects of this DBObjectBase's
-   * type.  The DBObjectBase 
+   * type.  The DBObjectBase
    * {@link arlut.csd.ganymede.server.DBObjectBase#createHook() createHook()} method
    * is responsible for loading the custom DBEditObject subclass
    * ({@link arlut.csd.ganymede.server.DBObjectBase#classdef classdef}) from
@@ -543,7 +543,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * more details on the use of DBEditObjects as objectHooks.</p>
    */
 
-  private DBEditObject objectHook;      
+  private DBEditObject objectHook;
 
   /* -- */
 
@@ -638,10 +638,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
         label_id = original.label_id;
         category = original.category;
         embedded = original.embedded;
-    
+
         // make copies of all the custom field definitions for this
         // object type, and save them into our own field hash.
-    
+
         for (DBObjectBaseField fieldDef: original.customFields)
           {
             DBObjectBaseField bf = new DBObjectBaseField(fieldDef, this);
@@ -658,7 +658,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
         iterationList = original.iterationList; // this is safe to do only in the schema editing context
 
         maxid = original.maxid;
-    
+
         objectHook = original.objectHook;
 
         lastChange = new Date();
@@ -700,7 +700,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     this.store = store;
     this.editor = editor;
 
-    writerList = new Vector();
+    writerList = new Vector<DBWriteLock>();
     readerList = new Vector();
     dumperList = new Vector();
     dumpLockList = new Vector();
@@ -768,7 +768,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
       {
         fieldDef.emit(out);
       }
-    
+
     out.writeShort(label_id);   // added at file version 1.1
 
     out.writeBoolean(embedded); // added at file version 1.5
@@ -778,7 +778,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
         out.writeInt(maxid);    // added at file version 1.12
 
         out.writeInt(objectTable.size());
-   
+
         baseEnum = objectTable.elements();
 
         while (baseEnum.hasMoreElements())
@@ -813,7 +813,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     if (store.isLessThan(2,7))
       {
         prepClassMap();
-        
+
         if (upgradeClassMap.containsKey(classname))
           {
             String newclassname = (String) upgradeClassMap.get(classname);
@@ -970,7 +970,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
         objectTable.putNoSyncNoRemove(tempObject);
         tempObject.registerAsymmetricLinks(); // register anonymous invid fields
       }
-    
+
     // lock and load
 
     this.iterationList = Collections.unmodifiableList(tmpIterationList);
@@ -1235,7 +1235,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     // GanymedeXMLSession.processSchema does a handleBaseRenaming up
     // front, but if we are a newly created base we might not have had
     // our name set yet.. go ahead and try to do it here
-    
+
     _objectName = XMLUtils.XMLDecode(root.getAttrStr("name"));
 
     if (_objectName == null || _objectName.equals(""))
@@ -1474,7 +1474,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
                   }
 
                 retVal = newField.setXML(item, resolveInvidLinks, err);
-                
+
                 if (!ReturnVal.didSucceed(retVal))
                   {
                     return retVal;
@@ -1493,7 +1493,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
               {
                 // "\t\tEditing field {0}"
                 err.println(ts.l("setXML.editing", item.getAttrStr("name")));
-                
+
                 retVal = newField.setXML(item, resolveInvidLinks, err);
 
                 if (!ReturnVal.didSucceed(retVal))
@@ -1533,7 +1533,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
       {
         retVal = setLabelField(_labelInt.shortValue());
       }
-    
+
     if (!ReturnVal.didSucceed(retVal))
       {
         return retVal;
@@ -1544,9 +1544,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
         // "Setting class name"
         err.println(ts.l("setXML.debugclass"));
       }
-    
+
     retVal = setClassInfo(_classStr, _classOptionStr);
-    
+
     if (!ReturnVal.didSucceed(retVal))
       {
         return retVal;
@@ -1562,9 +1562,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
         // "Setting object name"
         err.println(ts.l("setXML.debugname"));
       }
-    
+
     retVal = setName(_objectName);
-    
+
     if (!ReturnVal.didSucceed(retVal))
       {
         return retVal;
@@ -1613,7 +1613,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
                                           // "Consistency error while resorting customFields."
                                           ts.l("setXML.consistencyerror"));
       }
-    
+
     customFields = _newCustom;
 
     // and we're done
@@ -1698,20 +1698,20 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   /**
    * <p>
    * This method will attempt to invoke an apppropriate <i>factory</i> method
-   * on this object base's specified custom class. This adds a layer of 
+   * on this object base's specified custom class. This adds a layer of
    * indirection to Ganymede's custom class loading behaviour. Instead of trying
    * to invoke a constructor directly on the custom class, we instead look for
    * a method called "factory" in the custom class that takes the same
    * parameters.
    * </p>
-   * 
+   *
    * <p>
    * This allows programmers to define a custom class that can do fancy tricks
    * before constructing a new {@link arlut.csd.ganymede.server DBEditObject
    * DBEditObject} like, say, loading the class from a Jython interpreter, or
    * doing code-generation from an external class descriptor file.
    * </p>
-   * 
+   *
    * @param classParams the list of parameter types
    * @param methodParams the parameters to pass to the factory method
    * @return a new {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}
@@ -1719,7 +1719,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * @throws InvocationTargetException
    * @throws IllegalAccessException
    */
-  
+
   protected DBEditObject invokeFactory(Class[] classParams,
                                        Object[] methodParams) throws SecurityException,
                                                                      InvocationTargetException,
@@ -1750,7 +1750,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     return null;
   }
 
-  /** 
+  /**
    * <p>This method is used to create a DBEditObject subclass handle
    * ({@link arlut.csd.ganymede.server.DBObjectBase#objectHook
    * objectHook}), to allow various classes to make calls to
@@ -1782,7 +1782,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
           }
 
         // if we don't have a custom object hook, use the default
-        
+
         if (classdef == null)
           {
             return new DBEditObject(this);
@@ -1851,7 +1851,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     return e_object;
   }
-  
+
   /**
    * <p>Factory method to create a new DBEditObject of this
    * type.  The created DBEditObject will be connected
@@ -1859,7 +1859,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * DBStore until the editset is committed.</p>
    *
    * <p><b>IMPORTANT NOTE</b>: This method *must not* be public!  All
-   * DBEditObject customization classes should go through 
+   * DBEditObject customization classes should go through
    * DBSession.createDBObject() to create new objects.</p>
    *
    * @param editset The transaction this object is to be created in
@@ -1877,18 +1877,18 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * DBStore until the editset is committed.</p>
    *
    * <p><b>IMPORTANT NOTE</b>: This method *must not* be public!  All
-   * DBEditObject customization classes should go through 
+   * DBEditObject customization classes should go through
    * DBSession.createDBObject() to create new objects.</p>
    *
    * @param editset The transaction this object is to be created in
-   * @param chosenSlot If this is non-null, the object will be assigned 
+   * @param chosenSlot If this is non-null, the object will be assigned
    * the given invid, if available
    *
    */
 
   synchronized DBEditObject createNewObject(DBEditSet editset, Invid chosenSlot)
   {
-    DBEditObject 
+    DBEditObject
       e_object = null;
 
     Invid invid;
@@ -1974,9 +1974,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
             if (e_object == null)
               {
-                c = classdef.getDeclaredConstructor(classArray); 
+                c = classdef.getDeclaredConstructor(classArray);
                 e_object = (DBEditObject) c.newInstance(parameterArray);
-              } 
+              }
           }
         catch (NoSuchMethodException ex)
           {
@@ -2000,8 +2000,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
           }
         catch (InvocationTargetException ex)
           {
-            error_code = "Invocation Target Exception: " + 
-              ex.getTargetException() + "\n" + 
+            error_code = "Invocation Target Exception: " +
+              ex.getTargetException() + "\n" +
               ex.getMessage() + "\n\n" +
               Ganymede.stackTrace(ex) + "\n";
           }
@@ -2026,7 +2026,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     return e_object;
   }
-  
+
   /**
   *
   * Check-out constructor, used by DBObject.createShadow()
@@ -2035,7 +2035,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   * @param original the object to create the shadow of
   * @param editset the transaction this object is to be created in
   */
-  
+
   public DBEditObject createNewObject(DBObject original, DBEditSet editset)
   {
     // if we are a customized object type, dynamically invoke
@@ -2133,7 +2133,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   /**
    *
-   * allocate a new object id 
+   * allocate a new object id
    *
    */
 
@@ -2277,19 +2277,19 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    *
    * @see arlut.csd.ganymede.rmi.Base
    */
-  
+
   public String getClassName()
   {
     return classname;
   }
 
   /**
-   * <p>Returns the option string for the class definition.. see 
+   * <p>Returns the option string for the class definition.. see
    * {@link arlut.csd.ganymede.server.DBObjectBase#classOptionString classOptionString} for more
    * details.</p>
    *
    */
-  
+
   public String getClassOptionString()
   {
     return classOptionString;
@@ -2362,7 +2362,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
       }
 
     classOptionString = newOptionString;
-        
+
     // Reset the classdef so that createHook can load the newly specified
     // class via class.forName()
 
@@ -2379,11 +2379,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     catch (RemoteException ex)
       {
         // Restore our state back to the way it was originally
-        
+
         classname = originalClassName;
         classdef = originalClassDef;
         objectHook = originalObjectHook;
-                
+
         return Ganymede.createErrorDialog("setClassInfo Failure",
                                           // "Internal RemoteException in setClassInfo: {0}"
                                           ts.l("setClassInfo.internalError", Ganymede.stackTrace(ex)));
@@ -2420,11 +2420,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
           }
 
         // Restore our state back to the way it was originally
-        
+
         classname = originalClassName;
         classdef = originalClassDef;
         objectHook = originalObjectHook;
-        
+
         return retVal;
       }
 
@@ -2453,7 +2453,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   public synchronized ReturnVal moveFieldAfter(String fieldName, String previousFieldName)
   {
     securityCheck();
-    
+
     DBObjectBaseField oldField = getFieldDef(fieldName);
 
     if (oldField == null)
@@ -2622,7 +2622,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
       {
         return null;
       }
-    
+
     return getFieldDef(label_id);
   }
 
@@ -2644,7 +2644,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
       {
         return null;
       }
-    
+
     fieldDef = getFieldDef(label_id);
 
     if (fieldDef == null)
@@ -2668,7 +2668,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   /**
    * Returns the number of objects in this object base.
    */
-  
+
   public int getObjectCount()
   {
     return objectTable.size();
@@ -2714,7 +2714,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * built-in fields will be appended to the Vector after the custom
    * types, in random order.</p>
    *
-   * @see arlut.csd.ganymede.rmi.Base 
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public synchronized Vector<DBObjectBaseField> getFields(boolean includeBuiltIns)
@@ -2923,7 +2923,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    *
    * @see arlut.csd.ganymede.rmi.Base
    */
-  
+
   public synchronized BaseField createNewField()
   {
     short id;
@@ -2977,7 +2977,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
-   * <p>This method is used to remove a field definition from 
+   * <p>This method is used to remove a field definition from
    * the current schema.</p>
    *
    * <p>Of course, this removal will only take effect if
@@ -3049,11 +3049,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     synchronized (objectTable)
       {
         en = objectTable.elements();
-            
+
         while (en.hasMoreElements())
           {
             DBObject obj = (DBObject) en.nextElement();
-            
+
             if (obj.getField(bF.getID()) != null)
               {
                 return true;
@@ -3089,11 +3089,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     synchronized (objectTable)
       {
         en = objectTable.elements();
-            
+
         while (en.hasMoreElements())
           {
             DBObject obj = (DBObject) en.nextElement();
-            
+
             if (obj.getField(id) != null)
               {
                 return true;
@@ -3361,7 +3361,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * This method also updates the FieldTemplate for each field in this
    * object base.</p>
    */
-  
+
   synchronized void clearEditor()
   {
     Enumeration en;
@@ -3379,7 +3379,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
       {
         throw new IllegalArgumentException(ts.l("global.notediting"));
       }
-    
+
     this.editor = null;
 
     setEditingMode(EditingMode.LOCKED);
@@ -3399,7 +3399,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     synchronized (fieldTable)
       {
         en = fieldTable.elements();
-        
+
         while (en.hasMoreElements())
           {
             fieldDef = (DBObjectBaseField) en.nextElement();
@@ -3417,7 +3417,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
           {
             for (int i = 0; i <customFields.size(); i++)
               {
-                System.err.println("DBObjectBase.clearEditor(): customFields[" + i + "(" + 
+                System.err.println("DBObjectBase.clearEditor(): customFields[" + i + "(" +
                                    this.toString() + ")] = " + customFields.get(i));
               }
           }
@@ -3503,7 +3503,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   /**
    * <p>Returns a Date object containing the time that any changes were
-   * committed to this DBObjectBase.</p> 
+   * committed to this DBObjectBase.</p>
    */
 
   public Date getTimeStamp()
@@ -3514,7 +3514,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   //
   // the following methods are used to manage locks on this base
   // All methods that modify writerList, readerList, or dumperList
-  // must be synchronized on store.
+  // must be synchronized on store.lockSync
   //
 
   /**
@@ -3540,15 +3540,14 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
-   * <p>Used by {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLock} to establish or clear a lock.</p>
+   * <p>Used by {@link arlut.csd.ganymede.server.DBWriteLock
+   * DBWriteLock} to establish or clear a lock.</p>
    */
 
   void setWriteInProgress(boolean state)
   {
     if (writeInProgress.set(state) == state)
       {
-        // assert
-
         if (state)
           {
             // "double write lock in DBObjectBase"
@@ -3568,20 +3567,32 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * show a reference to the DBWriteLock locking us down.</p>
    */
 
-  void setCurrentLock(DBWriteLock lock)
+  void setWriteLock(DBWriteLock lock)
   {
+    this.setWriteInProgress(true);
     this.currentLock = lock;
+  }
+
+  void clearWriteLock(DBWriteLock lock)
+  {
+    if (this.currentLock != lock)
+      {
+        throw new IllegalArgumentException("mismatched writelock");
+      }
+
+    this.setWriteInProgress(false);
+    this.currentLock = null;
   }
 
   /**
    * <p>Add a DBWriteLock to this base's writer wait set.</p>
    */
 
-  boolean addWriter(DBWriteLock writer)
+  boolean addWaitingWriter(DBWriteLock writer)
   {
     synchronized (store.lockSync)
       {
-        writerList.addElement(writer);
+        writerList.add(writer);
       }
 
     return true;
@@ -3591,13 +3602,13 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Remove a DBWriteLock from this base's writer wait set.</p>
    */
 
-  boolean removeWriter(DBWriteLock writer)
+  boolean removeWaitingWriter(DBWriteLock writer)
   {
     boolean result;
 
     synchronized (store.lockSync)
       {
-        result = writerList.removeElement(writer);
+        result = writerList.remove(writer);
         store.lockSync.notifyAll();
 
         return result;
@@ -3605,10 +3616,20 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
+   * <p>Returns true if this base has a non-empty writer waiting list
+   * or actually has a write lock established.</p>
+   */
+
+  boolean hasWriter()
+  {
+    return !isWaitingWriterListEmpty() || isWriteInProgress();
+  }
+
+  /**
    * <p>Returns true if this base's writer wait set is empty.</p>
    */
 
-  boolean isWriterEmpty()
+  boolean isWaitingWriterListEmpty()
   {
     return writerList.isEmpty();
   }
@@ -3617,7 +3638,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Returns the size of the writer wait set</p>
    */
 
-  int getWriterSize()
+  int getWaitingWriterListSize()
   {
     return writerList.size();
   }
@@ -3676,7 +3697,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Add a DBDumpLock to this base's dumper waiting set.</p>
    */
 
-  boolean addDumper(DBDumpLock dumper)
+  boolean addWaitingDumper(DBDumpLock dumper)
   {
     synchronized (store.lockSync)
       {
@@ -3690,7 +3711,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Remove a DBDumpLock from this base's dumper waiting set.</p>
    */
 
-  boolean removeDumper(DBDumpLock dumper)
+  boolean removeWaitingDumper(DBDumpLock dumper)
   {
     boolean result;
 
@@ -3699,7 +3720,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     synchronized (store.lockSync)
       {
         result = dumperList.removeElement(dumper);
-        
+
         store.lockSync.notifyAll();
         return result;
       }
@@ -3709,7 +3730,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Returns true if this base's dumper wait set is empty.</p>
    */
 
-  boolean isDumperEmpty()
+  boolean isWaitingDumperListEmpty()
   {
     return dumperList.isEmpty();
   }
@@ -3718,7 +3739,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Returns the size of the dumper wait set</p>
    */
 
-  int getDumperSize()
+  int getWaitingDumperListSize()
   {
     return dumperList.size();
   }
@@ -3940,7 +3961,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
         customFields.remove(field);
       }
   }
-  
+
   // general convenience methods
 
   /**
@@ -4001,7 +4022,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   /* *************************************************************************
    *
    * The following methods are for Jython/Map support
-   *    
+   *
    * For this object, the Map interface allows for indexing based on either
    * the name or the numeric ID of a DBObject. Indexing by numeric id, however,
    * is only supported for "direct" access to the Map; the numeric id numbers
@@ -4020,7 +4041,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   public List items()
   {
     List list = new ArrayList();
-    
+
     for (DBObject obj: getIterationSet())
       {
         Object[] tuple = new Object[2];
@@ -4028,19 +4049,19 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
         tuple[1] = obj;
         list.add(tuple);
       }
-    
-    return list;    
+
+    return list;
   }
 
   public Set keys()
   {
     Set keys = new HashSet(objectTable.size());
-    
+
     for (DBObject obj: getIterationSet())
       {
         keys.add(obj.getLabel());
       }
-    
+
     return keys;
   }
 
@@ -4065,12 +4086,12 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   public Set entrySet()
   {
     Set entrySet = new HashSet(objectTable.size());
-    
+
     for (DBObject obj: getIterationSet())
       {
         entrySet.add(new Entry(obj));
       }
-    
+
     return entrySet;
   }
 
@@ -4087,8 +4108,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
       }
     else if (key instanceof String)
       {
-        // 
-        // XXX I can't make heads or tails out of what Deepak was trying to do 
+        //
+        // XXX I can't make heads or tails out of what Deepak was trying to do
         // XXX in this section.. wtf?  - jon 19 aug 2005
         //
 
@@ -4099,7 +4120,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
           {
             return null;
           }
-        
+
         /* Now we'll check to see if there's a namespace on this field */
         DBNameSpace namespace = getFieldDef(labelFieldName).getNameSpace();
 
@@ -4107,7 +4128,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
           {
             return null;
           }
-        
+
         DBField field = namespace.lookupPersistent(key);
 
         if (field.getObjTypeID() == getTypeID())
@@ -4131,7 +4152,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     return keys();
   }
-  
+
   public int size()
   {
     return objectTable.size();
@@ -4141,22 +4162,22 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     return getIterationSet();
   }
-  
+
   public String toString()
   {
     return keys().toString();
   }
-  
+
   static class Entry implements Map.Entry
   {
     Object key, value;
-    
+
     public Entry( DBObject obj )
     {
       key = obj.getLabel();
       value = obj;
     }
-    
+
     public Object getKey()
     {
       return key;
@@ -4171,13 +4192,13 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     {
       return null;
     }
-  }  
-  
-  /* 
+  }
+
+  /*
    * These methods are are no-ops since we don't want this object
    * messed with via the Map interface.
    */
-      
+
   public void clear()
   {
     return;

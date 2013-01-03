@@ -4,17 +4,19 @@
 
    This class is used to keep track of background tasks running on the
    Ganymede Server.  It is also used to pass data to the admin console.
-   
+
    Created: 3 February 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2012
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -63,23 +65,23 @@ import arlut.csd.ganymede.server.taskMonitor;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Handle object used to help manage background tasks registered in the 
+ * <P>Handle object used to help manage background tasks registered in the
  * Ganymede Server's
  * {@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}.  In addition
  * to being used by the server's task scheduler to organize and track
  * registered tasks, vectors of serialized scheduleHandle objects are passed to the
- * Ganymede admin console's 
- * {@link arlut.csd.ganymede.admin#changeTasks(java.util.Vector) changeTasks} 
+ * Ganymede admin console's
+ * {@link arlut.csd.ganymede.admin#changeTasks(java.util.Vector) changeTasks}
  * method.</P>
- * 
- * <P>Within the Ganymede server, scheduleHandle objects are held within the 
- * GanymedeScheduler to track the status of each registered task.  When the 
+ *
+ * <P>Within the Ganymede server, scheduleHandle objects are held within the
+ * GanymedeScheduler to track the status of each registered task.  When the
  * GanymedeScheduler needs to run a background task, the scheduleHandle's
  * {@link arlut.csd.ganymede.common.scheduleHandle#runTask() runTask()} method
  * is called.  runTask() creates a pair of threads, one to run the task
  * and another {@link arlut.csd.ganymede.server.taskMonitor taskMonitor} thread
  * to wait for the task to be completed.  When the thread running
- * the task completes, the task's taskMonitor calls the scheduleHandle's 
+ * the task completes, the task's taskMonitor calls the scheduleHandle's
  * {@link arlut.csd.ganymede.common.scheduleHandle#notifyCompletion notifyCompletion()}
  * method, which in turn notifies the GanymedeScheduler that the task
  * has completed its execution.</P>
@@ -388,7 +390,7 @@ public class scheduleHandle implements java.io.Serializable {
    * point to the running thread, otherwise it will be null.
    */
 
-  transient public Thread thread; 
+  transient public Thread thread;
 
   /**
    * If this task is currently running, this field will
@@ -419,7 +421,7 @@ public class scheduleHandle implements java.io.Serializable {
    */
 
   public scheduleHandle(GanymedeScheduler scheduler,
-                        Date time, int interval, 
+                        Date time, int interval,
                         Runnable task, String name,
                         TaskType tasktype)
   {
@@ -534,18 +536,18 @@ public class scheduleHandle implements java.io.Serializable {
         // XXX must not be locally synchronized here, else possible
         // nested monitor deadlock
 
-        scheduler.notifyCompletion(this); 
+        scheduler.notifyCompletion(this);
 
         return;
       }
   }
 
-  /** 
+  /**
    * <P>This method is called by our {@link
    * arlut.csd.ganymede.server.taskMonitor taskMonitor} when our task
    * completes.  This method has no meaning outside of the context of
    * the taskMonitor spawned by this handle, and should not be called
-   * from any other code.</P> 
+   * from any other code.</P>
    */
 
   public void notifyCompletion()

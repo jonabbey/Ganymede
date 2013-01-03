@@ -81,33 +81,73 @@ import java.util.Random;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>SMTP mailer class, used to send email messages (with optional HTML MIME
- * attachments) through direct TCP/IP communication with Internet SMTP mail
- * servers.</p>
+ * <p>A simple unencrypted SMTP mailer class, used to send email
+ * messages (with optional HTML MIME attachments) through direct
+ * TCP/IP communication with Internet SMTP mail servers.</p>
  *
- * <p>The Qsmtp constructors take an address for a SMTP mail server, and all
- * messages subsequently sent out by the Qsmtp object are handled by
- * that SMTP server.</p>
+ * <p>To use, create a Qsmtp object with the address (and optionally
+ * port number) of a non-encrypting, non-authenticating SMTP server.</p>
  *
- * <p>Once created, a Qsmtp object can be used to send any number of messages
- * through that mail server.  Each call to
- * {@link Qsmtp#sendmsg(java.lang.String, java.util.List, java.lang.String,
- * java.lang.String) sendmsg} or
- * {@link Qsmtp#sendHTMLmsg(java.lang.String, java.util.List, java.lang.String,
- * java.lang.String, java.lang.String, java.lang.String) sendHTMLmsg} opens a
- * separate SMTP connection to the designated mail server and transmits a
- * single message.</p>
+ * <p>Once created, a Qsmtp object can used in one of two ways.</p>
  *
- * <p>Because this class opens a socket to a potentially remote TCP/IP server,
- * this class may not function properly when used within an applet.</p>
+ * <p>By default, a newly created Qsmtp object operates in a
+ * non-threaded mode.  Each call to {@link
+ * Qsmtp#sendmsg(java.lang.String, java.util.List, java.lang.String,
+ * java.lang.String) sendmsg} or {@link
+ * Qsmtp#sendHTMLmsg(java.lang.String, java.util.List,
+ * java.lang.String, java.lang.String, java.lang.String,
+ * java.lang.String) sendHTMLmsg} will synchronously open a separate
+ * SMTP connection to the SMTP mail server and transmit a single
+ * message, with no queueing.</p>
+ *
+ * <p>Alternately, the user can call {@link Qsmtp#goThreaded()} to put
+ * the Qsmtp object into a threaded mode, in which messages to be sent
+ * are placed into an in-memory queue structure for transmission by a
+ * background mail thread.</p>
+ *
+ * <p>If running in threaded mode, it is essential to call {@link
+ * Qsmtp#close()} to let the background thread finish draining its
+ * queue and terminate cleanly.</p>
+ *
+ * <p>Because this class opens a socket to a potentially remote TCP/IP
+ * server, this class will not function properly when used within an
+ * applet unless you have a custom security policy in place.</p>
+ *
+ * <p>This code was originally written and released into the public
+ * domain by James Driscoll.  It has since been enhanced at ARL:UT to
+ * support HTML mail and threaded operation.</p>
+ *
+ * @author James Driscoll jgd@jamesdriscoll.com
+ * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  */
 
 public class Qsmtp implements Runnable {
 
   static final boolean debug = false;
+
+  /**
+   * The default SMTP port, 25.
+   */
+
   static final int DEFAULT_PORT = 25;
-  static final String EOL = "\r\n"; // network end of line
-  static final public int messageTimeout = 15000;  // 15 seconds
+
+  /**
+   * SMTP end of line characters.
+   */
+
+  static final String EOL = "\r\n";
+
+  /**
+   * Our 15 second socket timeout in milliseconds.
+   */
+
+  static final public int messageTimeout = 15000;
+
+  /**
+   * A java.util.Random object, used to create random MIME separator
+   * strings.
+   */
+
   static final private Random randomizer = new Random();
 
   /**
@@ -117,7 +157,7 @@ public class Qsmtp implements Runnable {
   static public String formatDate(Date date)
   {
     DateFormat formatter = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z",
-						java.util.Locale.US);
+                                                java.util.Locale.US);
     return formatter.format(date);
   }
 
@@ -127,27 +167,68 @@ public class Qsmtp implements Runnable {
   private InetAddress address = null;
   private int port = DEFAULT_PORT;
 
-  private List<messageObject> queuedMessages = new ArrayList<messageObject>();
+  /**
+   * Are we threaded?
+   */
+
   private volatile boolean threaded = false;
+
+  /**
+   * Queue of messages to be serviced by backgroundThread.
+   */
+
+  private List<messageObject> queuedMessages = new ArrayList<messageObject>();
+
+  /**
+   * The background thread executing our {@link Qsmtp#run()} method,
+   * if any.
+   */
+
   private volatile Thread backgroundThread;
 
   /* -- */
+
+  /**
+   * Hostname-only constructor on port 25.
+   *
+   * @param hostid The DNS name or IP address of an SMTP server.
+   */
 
   public Qsmtp(String hostid)
   {
     this(hostid, DEFAULT_PORT);
   }
 
+  /**
+   * {@link java.net.InetAddress} constructor on port 25.
+   *
+   * @param address The IP address of an SMTP server.
+   */
+
   public Qsmtp(InetAddress address)
   {
     this(address, DEFAULT_PORT);
   }
+
+  /**
+   * Hostname and port number constructor.
+   *
+   * @param hostid The DNS name or IP address of an SMTP server.
+   * @param port The TCP port number of an SMTP server.
+   */
 
   public Qsmtp(String hostid, int port)
   {
     this.hostid = hostid;
     this.port = port;
   }
+
+  /**
+   * Address and port number constructor.
+   *
+   * @param address The IP address of an SMTP server.
+   * @param port The TCP port number of an SMTP server.
+   */
 
   public Qsmtp(InetAddress address, int port)
   {
@@ -174,18 +255,18 @@ public class Qsmtp implements Runnable {
   {
     if (this.threaded)
       {
-	return;
+        return;
       }
 
     while (backgroundThread != null)
       {
-	try
-	  {
-	    this.wait();
-	  }
-	catch (InterruptedException ex)
-	  {
-	  }
+        try
+          {
+            this.wait();
+          }
+        catch (InterruptedException ex)
+          {
+          }
       }
 
     backgroundThread = new Thread(this, "Ganymede Mail Thread");
@@ -196,74 +277,82 @@ public class Qsmtp implements Runnable {
   /**
    * <p>Calling this method turns off the background thread and
    * returns Qsmtp to normal blocking operation.</p>
+   *
+   * <p>May block if there are still messages to be processed by the
+   * background email thread.</p>
    */
 
   public synchronized void stopThreaded()
   {
     if (debug)
       {
-	System.err.println("Qsmtp.stopThreaded()");
+        System.err.println("Qsmtp.stopThreaded()");
       }
 
     if (!this.threaded)
       {
-	return;
+        return;
       }
 
     if (backgroundThread != null)
       {
-	this.threaded = false;
+        this.threaded = false;
 
-	if (debug)
-	  {
-	    System.err.println("Qsmtp.stopThreaded() - waking background thread");
-	  }
+        if (debug)
+          {
+            System.err.println("Qsmtp.stopThreaded() - waking background thread");
+          }
 
-	synchronized (queuedMessages)
-	  {
-	    queuedMessages.notifyAll();
-	  }
+        synchronized (queuedMessages)
+          {
+            queuedMessages.notifyAll();
+          }
 
-	// the background thread will kill itself off cleanly
+        // the background thread will kill itself off cleanly
 
-	try
-	  {
-	    if (debug)
-	      {
-		System.err.println("Qsmtp.stopThreaded() - waiting for background thread to die");
-	      }
+        try
+          {
+            if (debug)
+              {
+                System.err.println("Qsmtp.stopThreaded() - waiting for background thread to die");
+              }
 
-	    // the backgroundThread variable is cleared when the
-	    // background thread terminates.  If that happens before
-	    // we wait for it, catch the NullPointerException and move
-	    // on.
+            // the backgroundThread variable is cleared when the
+            // background thread terminates.  If that happens before
+            // we wait for it, catch the NullPointerException and move
+            // on.
 
-	    try
-	      {
-		backgroundThread.join(); // wait for our email sending thread to drain
-	      }
-	    catch (NullPointerException ex)
-	      {
-		return;
-	      }
-	    finally
-	      {
-		if (debug)
-		  {
-		    System.err.println("Qsmtp.stopThreaded() - background thread completed");
-		  }
-	      }
-	  }
-	catch (InterruptedException ex)
-	  {
-	    return;		// oh, well.
-	  }
+            try
+              {
+                backgroundThread.join(); // wait for our email sending thread to drain
+              }
+            catch (NullPointerException ex)
+              {
+                return;
+              }
+            finally
+              {
+                if (debug)
+                  {
+                    System.err.println("Qsmtp.stopThreaded() - background thread completed");
+                  }
+
+                backgroundThread = null;
+              }
+          }
+        catch (InterruptedException ex)
+          {
+            return;             // oh, well.
+          }
       }
   }
 
   /**
-   * This method is called to shutdown this mailer object.  Once it is
-   * shut down, no more mail can be sent through it.
+   * <p>Mailer shutdown method.  Currently a no-op if we're not
+   * operating in threaded mode.</p>
+   *
+   * <p>If we are in threaded mode, close() will block until the
+   * background thread's mail queue is drained or times out.</p>
    */
 
   public synchronized void close()
@@ -285,14 +374,36 @@ public class Qsmtp implements Runnable {
    * @param subject Subject for this message
    * @param message The text for the mail message
    *
-   * @return True if the message was successfully sent to the
-   * mailhost, false otherwise.
+   * @return True if the message was successfully sent to the mailhost
+   * (or queued if the Qsmtp object is operating in threaded mode),
+   * false otherwise.
    */
 
   public synchronized boolean sendmsg(String from_address, List<String> to_addresses,
                                       String subject, String message) throws IOException
   {
-    return sendmsg(from_address, to_addresses, subject, message, null);
+    return sendmsg(from_address, to_addresses, from_address, subject, message, null);
+  }
+
+  /**
+   * <p>Sends a plain ASCII mail message</p>
+   *
+   * @param from_address Who is sending this message?
+   * @param to_addresses List of string addresses to send this message to
+   * @param from_address_desc A more elaborate version of the from address, with optional leading <Description> section
+   * @param subject Subject for this message
+   * @param message The text for the mail message
+   *
+   * @return True if the message was successfully sent to the mailhost
+   * (or queued if the Qsmtp object is operating in threaded mode),
+   * false otherwise.
+   */
+
+  public synchronized boolean sendmsg(String from_address, List<String> to_addresses,
+                                      String from_address_desc,
+                                      String subject, String message) throws IOException
+  {
+    return sendmsg(from_address, to_addresses, from_address_desc, subject, message, null);
   }
 
   /**
@@ -309,11 +420,40 @@ public class Qsmtp implements Runnable {
    * show up in mail clients
    * @param textBody The text for the non-HTML part of the mail message
    *
-   * @return True if the message was successfully sent to the
-   * mailhost, false otherwise.
+   * @return True if the message was successfully sent to the mailhost
+   * (or queued if the Qsmtp object is operating in threaded mode),
+   * false otherwise.
    */
 
   public synchronized boolean sendHTMLmsg(String from_address, List<String> to_addresses,
+                                          String subject, String htmlBody, String htmlFilename,
+                                          String textBody) throws IOException
+  {
+    return this.sendHTMLmsg(from_address, to_addresses, from_address, subject, htmlBody, htmlFilename, textBody);
+  }
+
+  /**
+   * <p>Sends a message with a MIME-attached HTML message</p>
+   *
+   * <p>In a perfect world, we'd do a generic MIME-capable mail system here, but
+   * as it is, we only support HTML.</p>
+   *
+   * @param from_address Who is sending this message?
+   * @param to_addresses List of string addresses to send this message to
+   * @param from_address_desc A more elaborate version of the from address, with optional leading <Description> section
+   * @param subject Subject for this message
+   * @param htmlBody A string containing the HTML document to be sent
+   * @param htmlFilename The name to label the HTML document with, will
+   * show up in mail clients
+   * @param textBody The text for the non-HTML part of the mail message
+   *
+   * @return True if the message was successfully sent to the mailhost
+   * (or queued if the Qsmtp object is operating in threaded mode),
+   * false otherwise.
+   */
+
+  public synchronized boolean sendHTMLmsg(String from_address, List<String> to_addresses,
+                                          String from_address_desc,
                                           String subject, String htmlBody, String htmlFilename,
                                           String textBody) throws IOException
   {
@@ -330,41 +470,41 @@ public class Qsmtp implements Runnable {
 
     if (textBody != null)
       {
-	buffer.append("--");
-	buffer.append(separator);
-	buffer.append("\nContent-Type: text/plain; charset=us-ascii\n");
-	buffer.append("Content-Transfer-Encoding: 7bit\n\n");
-	buffer.append(textBody);
-	buffer.append("\n");
+        buffer.append("--");
+        buffer.append(separator);
+        buffer.append("\nContent-Type: text/plain; charset=us-ascii\n");
+        buffer.append("Content-Transfer-Encoding: 7bit\n\n");
+        buffer.append(textBody);
+        buffer.append("\n");
       }
 
     if (htmlBody != null)
       {
-	buffer.append("--");
-	buffer.append(separator);
-	buffer.append("\nContent-Type: text/html; charset=us-ascii\n");
-	buffer.append("Content-Transfer-Encoding: 7bit\n");
+        buffer.append("--");
+        buffer.append(separator);
+        buffer.append("\nContent-Type: text/html; charset=us-ascii\n");
+        buffer.append("Content-Transfer-Encoding: 7bit\n");
 
-	if (htmlFilename != null && !htmlFilename.equals(""))
-	  {
-	    buffer.append("Content-Disposition: inline; filename=\"");
-	    buffer.append(htmlFilename);
-	    buffer.append("\"\n\n");
-	  }
-	else
-	  {
-	    buffer.append("Content-Disposition: inline;\n\n");
-	  }
+        if (htmlFilename != null && !htmlFilename.equals(""))
+          {
+            buffer.append("Content-Disposition: inline; filename=\"");
+            buffer.append(htmlFilename);
+            buffer.append("\"\n\n");
+          }
+        else
+          {
+            buffer.append("Content-Disposition: inline;\n\n");
+          }
 
-	buffer.append(htmlBody);
-	buffer.append("\n");
+        buffer.append(htmlBody);
+        buffer.append("\n");
       }
 
     buffer.append("--");
     buffer.append(separator);
     buffer.append("--\n\n");
 
-    return sendmsg(from_address, to_addresses, subject, buffer.toString(), MIMEheaders);
+    return sendmsg(from_address, to_addresses, from_address_desc, subject, buffer.toString(), MIMEheaders);
   }
 
   /**
@@ -388,31 +528,58 @@ public class Qsmtp implements Runnable {
    * @param extraHeaders List of string headers to include in the message's
    * envelope
    *
-   * @return True if the message was successfully sent to the
-   * mailhost, false otherwise.
+   * @return True if the message was successfully sent to the mailhost
+   * (or queued if the Qsmtp object is operating in threaded mode),
+   * false otherwise.
    */
 
   public synchronized boolean sendmsg(String from_address,
-				      List<String> to_addresses,
+                                      List<String> to_addresses,
                                       String subject, String message,
                                       List<String> extraHeaders)
   {
-    messageObject msgObj = new messageObject(from_address, to_addresses,
-					     subject, message, extraHeaders);
+    return this.sendmsg(from_address, to_addresses, from_address, subject, message, extraHeaders);
+  }
+
+  /**
+   * <p>Sends a mail message with some custom-specified envelope headers.  Used
+   * internally by the other Qsmtp sendmsg and sendHTMLmsg methods.</p>
+   *
+   * @param from_address Who is sending this message?
+   * @param to_addresses List of string addresses to send this message to
+   * @param from_address_desc A more elaborate version of the from address, with optional leading <Description> section
+   * @param subject Subject for this message
+   * @param message The text for the mail message
+   * @param extraHeaders List of string headers to include in the message's
+   * envelope
+   *
+   * @return True if the message was successfully sent to the mailhost
+   * (or queued if the Qsmtp object is operating in threaded mode),
+   * false otherwise.
+   */
+
+  public synchronized boolean sendmsg(String from_address,
+                                      List<String> to_addresses,
+                                      String from_address_desc,
+                                      String subject, String message,
+                                      List<String> extraHeaders)
+  {
+    messageObject msgObj = new messageObject(from_address, to_addresses, from_address_desc,
+                                             subject, message, extraHeaders);
 
     if (threaded)
       {
-	synchronized (queuedMessages)
-	  {
-	    queuedMessages.add(msgObj);
-	    queuedMessages.notify();
-	  }
+        synchronized (queuedMessages)
+          {
+            queuedMessages.add(msgObj);
+            queuedMessages.notify();
+          }
 
         return true;
       }
     else
       {
-	return dispatchMessage(msgObj);
+        return dispatchMessage(msgObj);
       }
   }
 
@@ -428,43 +595,43 @@ public class Qsmtp implements Runnable {
 
     if (debug)
       {
-	System.err.println("Qsmtp: background thread starting");
+        System.err.println("Qsmtp: background thread starting");
       }
 
     try
       {
-	while (threaded)
-	  {
-	    message = null;
+        while (threaded)
+          {
+            message = null;
 
-	    synchronized (queuedMessages)
-	      {
-		if (queuedMessages.size() > 0)
-		  {
-		    message = queuedMessages.remove(0);
-		  }
-		else
-		  {
-		    message = null;
+            synchronized (queuedMessages)
+              {
+                if (queuedMessages.size() > 0)
+                  {
+                    message = queuedMessages.remove(0);
+                  }
+                else
+                  {
+                    message = null;
 
-		    try
-		      {
-			queuedMessages.wait(); // wait until something is queued
-		      }
-		    catch (InterruptedException ex)
-		      {
-			// ??
-		      }
+                    try
+                      {
+                        queuedMessages.wait(); // wait until something is queued
+                      }
+                    catch (InterruptedException ex)
+                      {
+                        // ??
+                      }
 
-		    if (debug)
-		      {
-			System.err.println("Qsmtp: background thread woke up");
-		      }
-		  }
-	      }
+                    if (debug)
+                      {
+                        System.err.println("Qsmtp: background thread woke up");
+                      }
+                  }
+              }
 
-	    if (message != null)
-	      {
+            if (message != null)
+              {
                 int count = 0;
 
                 while (threaded && !dispatchMessage(message))
@@ -485,27 +652,27 @@ public class Qsmtp implements Runnable {
 
                     System.err.println("Retrying mail transmission.. internal mail queue has " + queuedMessages.size() + " elements.");
                   }
-	      }
-	  }
+              }
+          }
       }
     finally
       {
-	try
-	  {
-	    // clear out any remaining messages
+        try
+          {
+            // clear out any remaining messages
 
-	    if (!threaded)
-	      {
-		if (debug)
-		  {
-		    System.err.println("Qsmtp: background thread stopping.. clearing mail queue");
-		  }
+            if (!threaded)
+              {
+                if (debug)
+                  {
+                    System.err.println("Qsmtp: background thread stopping.. clearing mail queue");
+                  }
 
-		synchronized (queuedMessages)
-		  {
-		    while (queuedMessages.size() > 0)
-		      {
-			message = queuedMessages.remove(0);
+                synchronized (queuedMessages)
+                  {
+                    while (queuedMessages.size() > 0)
+                      {
+                        message = queuedMessages.remove(0);
 
                         if (debug)
                           {
@@ -513,15 +680,15 @@ public class Qsmtp implements Runnable {
                           }
 
                         dispatchMessage(message);  // if it fails, it fails.. we still need to shut down.
-		      }
-		  }
-	      }
-	  }
-	finally
-	  {
-	    this.backgroundThread = null;
-	    this.threaded = false;
-	  }
+                      }
+                  }
+              }
+          }
+        finally
+          {
+            this.backgroundThread = null;
+            this.threaded = false;
+          }
       }
 
     System.err.println("Qsmtp: background thread finishing");
@@ -544,6 +711,7 @@ public class Qsmtp implements Runnable {
 
     String from_address = msgObj.from_address;
     List<String> to_addresses = msgObj.to_addresses;
+    String from_address_desc = msgObj.from_address_desc;
     String subject = msgObj.subject;
     String message = msgObj.message;
     List<String> extraHeaders = msgObj.extraHeaders;
@@ -639,7 +807,7 @@ public class Qsmtp implements Runnable {
 
             boolean successRcpt = false;
 
-	    for (String address: to_addresses)
+            for (String address: to_addresses)
               {
                 sstr = "RCPT TO: " + address;
                 send.print(sstr);
@@ -683,7 +851,7 @@ public class Qsmtp implements Runnable {
                 throw new ProtocolException(rstr);
               }
 
-            send.print("From: " + from_address);
+            send.print("From: " + from_address_desc);
             send.print(EOL);
 
             StringBuilder targetString = new StringBuilder();
@@ -719,7 +887,7 @@ public class Qsmtp implements Runnable {
 
             if (extraHeaders != null)
               {
-		for (String header: extraHeaders)
+                for (String header: extraHeaders)
                   {
                     send.print(header);
                     send.print(EOL);
@@ -854,6 +1022,7 @@ class messageObject {
 
   String from_address;
   List<String> to_addresses;
+  String from_address_desc;
   String subject;
   String message;
   List<String> extraHeaders;
@@ -861,11 +1030,13 @@ class messageObject {
   /* -- */
 
   messageObject(String from_address, List<String> to_addresses,
-		String subject, String message,
-		List<String> extraHeaders)
+                String from_address_desc,
+                String subject, String message,
+                List<String> extraHeaders)
   {
     this.from_address = from_address;
     this.to_addresses = to_addresses;
+    this.from_address_desc = from_address_desc;
     this.subject = subject;
     this.message = message;
     this.extraHeaders = extraHeaders;
@@ -883,15 +1054,15 @@ class messageObject {
 
     if (to_addresses != null)
       {
-	for (int i = 0; i < to_addresses.size(); i++)
-	  {
-	    if (i > 0)
-	      {
-		buffer.append(", ");
-	      }
+        for (int i = 0; i < to_addresses.size(); i++)
+          {
+            if (i > 0)
+              {
+                buffer.append(", ");
+              }
 
-	    buffer.append(to_addresses.get(i));
-	  }
+            buffer.append(to_addresses.get(i));
+          }
       }
 
     buffer.append("\nSubject: ");
@@ -900,11 +1071,11 @@ class messageObject {
 
     if (extraHeaders != null)
       {
-	for (String header: extraHeaders)
-	  {
-	    buffer.append(header);
-	    buffer.append("\n");
-	  }
+        for (String header: extraHeaders)
+          {
+            buffer.append(header);
+            buffer.append("\n");
+          }
       }
 
     buffer.append("Message:\n");
