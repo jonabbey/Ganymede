@@ -705,7 +705,10 @@ public class scheduleHandle implements java.io.Serializable {
         return -1;
       }
 
-    return (int) ((new Date()).getTime() - runStartTime.getTime() / 1000);
+    long currentTime = System.currentTimeMillis();
+    long myStartTime = runStartTime.getTime();
+
+    return (int) (currentTime - myStartTime) / 1000;
   }
 
   /**
