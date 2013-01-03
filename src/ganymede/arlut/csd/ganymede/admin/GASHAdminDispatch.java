@@ -1035,9 +1035,7 @@ class GASHAdminDispatch implements Runnable {
         else
           {
             // "Waiting"
-            // table.setCellText(handle.name, 3, ts.l("changeTasks.waitingState"), false);
-
-            table.setCellText(handle.name, 3, "", false);
+            table.setCellText(handle.name, 3, ts.l("changeTasks.waitingState"), false);
             table.setCellColor(handle.name, 3, Color.black, false);
             table.setCellBackColor(handle.name, 3, Color.white, false);
           }
