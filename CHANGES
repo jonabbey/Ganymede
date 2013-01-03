@@ -1,12 +1,12 @@
 Ganymede Release 2.0
-8 November 2012
+3 January 2013
 CHANGES
 
 ---------------------------------------------
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: 8 November 2012
+RELEASE DATE: 3 January 2013
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -2056,6 +2056,37 @@ I.e., you might have
 
 The returnaddr property is used in the SMTP handshake, and the
 returnaddrdesc is used in the headers.
+
+151. [SERVER] Fixed a rare deadlock vulnerability with XML sync channels
+
+The XML Sync Channel subsystem was doing a nested dumplock, but was
+not preventing other threads from getting into the writer list queue
+after the outer dump lock was established and before the inner dump
+luck could be.
+
+I have modified the DBWriteLock so that it will not permit writers to
+get on the write lock queue until there are both no dumpers waiting to
+be established or established on a competing DBObjectBase.
+
+152. [Admin Console] Display both locks waiting to be established and locks held
+
+The admin console now displays both the number of locks waiting in
+their establish routines and the number actually established and held.
+
+153. [Admin Console] Cleaned up monitor tables, date formatting
+
+The admin console now uses a much briefer and more readable date
+format, with configurable localization patterns in the
+GASHAdminDispatch.properties file.
+
+There are two separate date format strings available, one for
+timestamps that occur in the same day as current time, and one for
+times that are not.
+
+I also improved the task highlighting for running or disabled tasks in
+the Sync Monitor, and changed the column ordering in the Scheduled
+Task Monitor to have 'Last Run' be the last column as it is in the
+other admin console table views.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
