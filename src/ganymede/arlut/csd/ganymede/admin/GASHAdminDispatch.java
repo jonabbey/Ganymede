@@ -1006,15 +1006,15 @@ class GASHAdminDispatch implements Runnable {
           {
             // "Suspended upon completion"
             table.setCellText(handle.name, 3, ts.l("changeTasks.runningSuspendedState"), false);
-            table.setCellColor(handle.name, 3, Color.red, false);
-            table.setCellBackColor(handle.name, 3, Color.white, false);
+            table.setCellColor(handle.name, 3, Color.white, false);
+            table.setCellBackColor(handle.name, 3, Color.red, false);
           }
         else if (handle.isRunning())
           {
             // "Running"
             table.setCellText(handle.name, 3, ts.l("changeTasks.runningState"), false);
-            table.setCellColor(handle.name, 3, Color.blue, false);
-            table.setCellBackColor(handle.name, 3, Color.white, false);
+            table.setCellColor(handle.name, 3, Color.white, false);
+            table.setCellBackColor(handle.name, 3, Color.blue, false);
 
             running = true;
           }
@@ -1022,8 +1022,8 @@ class GASHAdminDispatch implements Runnable {
           {
             // "Suspended"
             table.setCellText(handle.name, 3, ts.l("changeTasks.suspendedState"), false);
-            table.setCellColor(handle.name, 3, Color.red, false);
-            table.setCellBackColor(handle.name, 3, Color.white, false);
+            table.setCellColor(handle.name, 3, Color.white, false);
+            table.setCellBackColor(handle.name, 3, Color.red, false);
           }
         else if (handle.startTime != null)
           {
