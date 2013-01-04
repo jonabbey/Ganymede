@@ -310,7 +310,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
                       ts.l("global.user_col_4"), // "Last Event"
                       ts.l("global.user_col_5")}; // "Objects Checked Out"
 
-  int colWidths[] = {100,100,100,600,100};
+  int colWidths[] = {50,50,50,300,50};
 
   // resources for the sync task monitor table
 
@@ -321,7 +321,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
                               ts.l("global.task_col_6"), // "Status"
                               ts.l("global.task_col_1"), // "Scheduling Status"
                               ts.l("global.task_col_2")}; // "Last Run"
-  int syncTaskColWidths[] = {100,100,200,100,100};
+  int syncTaskColWidths[] = {50,50,100,50,50};
 
   // resources for the scheduled task monitor table
 
@@ -333,7 +333,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
                           ts.l("global.task_col_3"), // "Next Run"
                           ts.l("global.task_col_2")}; // "Last Run"
 
-  int taskColWidths[] = {100,100,100,100,100};
+  int taskColWidths[] = {50,50,50,50,50};
 
   // resources for the manual task monitor table
 
@@ -342,7 +342,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
   String manualTaskHeaders[] = {ts.l("global.task_col_0"), // "Task"
                                 ts.l("global.task_col_1"), // "Status"
                                 ts.l("global.task_col_2")}; // "Last Run"
-  int manualTaskColWidths[] = {100,100,100};
+  int manualTaskColWidths[] = {50,50,50};
 
   JSplitPane splitterPane = null;
 
