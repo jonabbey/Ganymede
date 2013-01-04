@@ -311,7 +311,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
                       ts.l("global.user_col_4"), // "Last Event"
                       ts.l("global.user_col_5")}; // "Objects Checked Out"
 
-  int colWidths[] = {100,100,100,400,100};
+  int colWidths[] = {100,100,100,600,100};
 
   // resources for the sync task monitor table
 
