@@ -306,7 +306,6 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   String headers[] = {ts.l("global.user_col_0"), // "User"
                       ts.l("global.user_col_1"), // "System"
-                      // ts.l("global.user_col_2"), // "Status"
                       ts.l("global.user_col_3"), // "Connect Time"
                       ts.l("global.user_col_4"), // "Last Event"
                       ts.l("global.user_col_5")}; // "Objects Checked Out"
