@@ -710,7 +710,14 @@ public class scheduleHandle implements java.io.Serializable {
 
   public synchronized void updateServerTime()
   {
-    recentServerTime = new Date();
+    if (runStartTime != null)
+      {
+        recentServerTime = new Date();
+      }
+    else
+      {
+        recentServerTime = null;
+      }
   }
 
   /**
