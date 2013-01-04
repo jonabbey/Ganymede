@@ -10,8 +10,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -253,12 +255,15 @@ public class QueryDataNode extends QueryNode {
   }
 
   /**
-   *
    * Diagnostic aid.
-   *
    */
 
   public String toString()
+  {
+    return this.toString(null);
+  }
+
+  public String toString(Query query)
   {
     StringBuilder result = new StringBuilder();
 
@@ -270,9 +275,18 @@ public class QueryDataNode extends QueryNode {
       }
     else
       {
-        result.append("<");
-        result.append(Short.toString(fieldId));
-        result.append(">");
+        if (fieldId == INVIDVAL)
+          {
+            result.append("<invid>");
+          }
+        else if (fieldId == LABELVAL)
+          {
+            result.append("<label>");
+          }
+        else if (query != null)
+          {
+            result.append(query.describeField(fieldId));
+          }
       }
 
     result.append(" ");

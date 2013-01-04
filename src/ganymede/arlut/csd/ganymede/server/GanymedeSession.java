@@ -1583,6 +1583,8 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
+    query.setDescriber(dbSession);
+
     setLastEvent("dump:" + query.toString());
 
     return queryEngine.dump(query);
@@ -1758,6 +1760,8 @@ final public class GanymedeSession implements Session, Unreferenced {
   public synchronized QueryResult query(Query query) throws NotLoggedInException
   {
     checklogin();
+
+    query.setDescriber(dbSession);
 
     setLastEvent("query:" + query.toString());
 
@@ -2716,6 +2720,10 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     // get a simple list of matching invids without bothering to do
     // transport setup.
+
+    query.setDescriber(dbSession);
+
+    setLastEvent("xml query:" + query.toString());
 
     QueryResult rows = queryEngine.queryDispatch(query, false, false, null, null);
 

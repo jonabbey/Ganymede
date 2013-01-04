@@ -1,15 +1,12 @@
 /*
 
-   QueryNode.java
+   QueryDescriber.java
 
-   The QueryNode class is used to represent a node in a query tree.
-   Each node can be an and node, an or node, a not node, or a leaf
-   node.  Leaf nodes actually represent a comparator test.
+   An interface that can be used to provide for object and field name
+   look ups when producing toString() output from a Query chain on the
+   server
 
-   The QueryNode classes are serializable, for bodily transmission
-   over an RMI connection.
-
-   Created: 21 October 1996
+   Created: 4 January 2013
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -54,21 +51,35 @@
 package arlut.csd.ganymede.common;
 
 /*------------------------------------------------------------------------------
-                                                                           class
-                                                                       QueryNode
+                                                                       interface
+                                                                  QueryDescriber
 
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>A QueryNode is a node in a serialized {@link arlut.csd.ganymede.common.Query Query}
- * tree.  The QueryNodes form a tree of boolean operators and comparison nodes
- * that are submitted to the server by the client, and which are interpreted
- * by the {@link arlut.csd.ganymede.server.DBQueryHandler DBQueryHandler}.</P>
+ * <p>A simple interface that can be used on the Ganymede server to
+ * provide name lookups for the toString() method of a Query object
+ * chain.</p>
  */
 
-public abstract class QueryNode implements java.io.Serializable {
-  static final long serialVersionUID = -4396943100372813308L;
+public interface QueryDescriber {
 
-  public abstract String toString(Query query);
+  /**
+   * Returns a description of the type id.
+   */
+
+  public String describeType(short objType);
+
+  /**
+   * Returns a description of the field id.
+   */
+
+  public String describeField(short objType, short fieldType);
+
+  /**
+   * Returns a description of the field id.
+   */
+
+  public String describeField(String objTypeName, short fieldType);
 }
 
