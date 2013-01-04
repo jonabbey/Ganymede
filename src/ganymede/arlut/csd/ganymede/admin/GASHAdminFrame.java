@@ -11,7 +11,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -306,12 +306,12 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   String headers[] = {ts.l("global.user_col_0"), // "User"
                       ts.l("global.user_col_1"), // "System"
-                      ts.l("global.user_col_2"), // "Status"
+                      // ts.l("global.user_col_2"), // "Status"
                       ts.l("global.user_col_3"), // "Connect Time"
                       ts.l("global.user_col_4"), // "Last Event"
                       ts.l("global.user_col_5")}; // "Objects Checked Out"
 
-  int colWidths[] = {100,100,100,100,100,100};
+  int colWidths[] = {100,100,100,400,100};
 
   // resources for the sync task monitor table
 
