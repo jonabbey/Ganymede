@@ -145,6 +145,13 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   private static long totalMem;
 
+  /**
+   * <p>Background thread that will order a refresh of the admin
+   * consoles' task lists if we have any tasks currently running.</p>
+   */
+
+  private static Thread taskRefreshThread;
+
   /* -----====================--------------------====================-----
 
                                  static methods
@@ -529,9 +536,10 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     detachBadConsoles();
 
-    if (anyRunningSyncs)
+    if (anyRunningSyncs && GanymedeAdmin.taskRefreshThread == null)
       {
-        new Thread(new Runnable() {
+        GanymedeAdmin.taskRefreshThread =
+        new Thread(new Thread() {
             public void run() {
 
               try
@@ -542,9 +550,12 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
                 {
                 }
 
+              GanymedeAdmin.taskRefreshThread = null;
               GanymedeAdmin.refreshTasks();
             }
-          }, "task reporter").start();
+          }, "task reporter");
+
+        GanymedeAdmin.taskRefreshThread.start();
       }
   }
 

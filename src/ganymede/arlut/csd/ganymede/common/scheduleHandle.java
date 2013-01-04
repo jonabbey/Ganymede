@@ -727,7 +727,7 @@ public class scheduleHandle implements java.io.Serializable {
 
   public synchronized int getAge()
   {
-    if (runStartTime == null)
+    if (runStartTime == null || recentServerTime == null)
       {
         return -1;
       }
