@@ -507,8 +507,9 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
         if (handle.isRunning())
           {
             anyRunningSyncs = true;
-            break;
           }
+
+        handle.updateServerTime();
       }
 
     synchronized (GanymedeAdmin.consoles)

@@ -371,6 +371,16 @@ public class scheduleHandle implements java.io.Serializable {
 
   private Date runStartTime;
 
+  /**
+   * <p>The most recent time seen on the server before this
+   * scheduleHandle is transmitted to the admin console.  Used to
+   * calculate the age of this task's runtime without respect to time
+   * differences between the server and the machine running the admin
+   * console.</p>
+   */
+
+  private Date recentServerTime;
+
   //
   // non-serializable, for use on the server only
   //
@@ -694,6 +704,16 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
+   * <p>Update the server time held in this scheduleHandle prior to
+   * sending it down to an admin console.</p>
+   */
+
+  public synchronized void updateServerTime()
+  {
+    recentServerTime = new Date();
+  }
+
+  /**
    * <p>Returns the length of time this task has been running, in
    * seconds, or -1 if the task is not running.</p>
    */
@@ -705,7 +725,7 @@ public class scheduleHandle implements java.io.Serializable {
         return -1;
       }
 
-    long currentTime = System.currentTimeMillis();
+    long currentTime = recentServerTime.getTime();
     long myStartTime = runStartTime.getTime();
 
     return (int) (currentTime - myStartTime) / 1000;
