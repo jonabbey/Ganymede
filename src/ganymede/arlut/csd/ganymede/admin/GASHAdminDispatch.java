@@ -121,7 +121,7 @@ class GASHAdminDispatch implements Runnable {
   private ImageIcon playIcon = null;
   private ImageIcon okayIcon = null;
 
-  NumberFormat numberFormatter = NumberFormat.getInstance();
+  private NumberFormat numberFormatter = NumberFormat.getInstance();
 
   /* -- */
 
