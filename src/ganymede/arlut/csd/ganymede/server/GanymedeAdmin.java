@@ -534,15 +534,12 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
         new Thread(new Runnable() {
             public void run() {
 
-              synchronized(this)
+              try
                 {
-                  try
-                    {
-                      wait(1000);
-                    }
-                  catch (InterruptedException ex)
-                    {
-                    }
+                  Thread.sleep(1000);
+                }
+              catch (InterruptedException ex)
+                {
                 }
 
               GanymedeAdmin.refreshTasks();
