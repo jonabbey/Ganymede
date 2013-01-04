@@ -395,19 +395,18 @@ public class Query implements java.io.Serializable {
           {
             result.append(String.valueOf(objectType));
           }
-
-        result.append(",");
       }
-
-    if (objectName != null)
+    else
       {
         result.append("objectName = ");
         result.append(objectName);
-        result.append(",");
       }
 
-    result.append("editableOnly = ");
-    result.append(editableOnly ? "True" : "False");
+    if (editableOnly)
+      {
+        result.append(",");
+        result.append("editable");
+      }
 
     if (root != null)
       {
