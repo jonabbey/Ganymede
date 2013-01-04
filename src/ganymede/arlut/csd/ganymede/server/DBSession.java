@@ -1781,6 +1781,18 @@ final public class DBSession {
   }
 
   /**
+   * This method is intended as a lightweight way of returning a handy
+   * description of the specified type.
+   */
+
+  public String describeType(short type)
+  {
+    DBObjectBase base = Ganymede.db.getObjectBase(type);
+
+    return base.getName();
+  }
+
+  /**
    * <p>This method returns a handle to the objectHook for
    * a particular Invid.</p>
    */
