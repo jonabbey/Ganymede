@@ -513,15 +513,15 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     synchronized (GanymedeAdmin.consoles)
       {
-        for (GanymedeAdmin temp: GanymedeAdmin.consoles)
+        for (GanymedeAdmin console: GanymedeAdmin.consoles)
           {
             try
               {
-                temp.doRefreshTasks(scheduleHandles);
+                console.doRefreshTasks(scheduleHandles);
               }
             catch (RemoteException ex)
               {
-                handleConsoleRMIFailure(temp, ex);
+                handleConsoleRMIFailure(console, ex);
               }
           }
       }
@@ -544,7 +544,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
                     }
                 }
 
-              refreshTasks();
+              GanymedeAdmin.refreshTasks();
             }
           }, "task reporter").start();
       }

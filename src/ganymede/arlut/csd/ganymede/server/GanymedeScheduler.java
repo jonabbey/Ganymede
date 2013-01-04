@@ -179,8 +179,8 @@ public class GanymedeScheduler extends Thread {
   private boolean taskListInitialized = false;
 
   /**
-   * if true, the scheduler will attempt to notify the GanymedeAdmin class when
-   * tasks are scheduled and/or completed.
+   * If true, the scheduler will attempt to notify the GanymedeAdmin
+   * class when tasks are scheduled and/or completed.
    */
 
   private boolean reportTasks;
@@ -1366,7 +1366,6 @@ public class GanymedeScheduler extends Thread {
       {
         GanymedeAdmin.refreshTasks();
       }
-
 
     if (debug)
       {
