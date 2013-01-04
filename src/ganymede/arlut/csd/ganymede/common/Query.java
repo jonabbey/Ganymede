@@ -407,7 +407,7 @@ public class Query implements java.io.Serializable {
       }
 
     result.append("editableOnly = ");
-    result.append(editableOnly ? "True\n" : "False\n");
+    result.append(editableOnly ? "True," : "False,");
 
     if (root != null)
       {
