@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -704,8 +704,12 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   * <p>Update the server time held in this scheduleHandle prior to
-   * sending it down to an admin console.</p>
+   * <p>Load the current server time into this scheduleHandle.</p>
+   *
+   * <p>We do this so the admin console which is about to receive a
+   * serialized copy of this scheduleHandle has a reference with which
+   * to calculate the duration of this task on the server, without
+   * worrying about any clock skew between the server and console.</p>
    */
 
   public synchronized void updateServerTime()
