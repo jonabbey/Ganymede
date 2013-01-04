@@ -206,6 +206,18 @@ class GASHAdminDispatch implements Runnable {
 
   public String formatDate(Date time)
   {
+    return this.formatDate(time, true);
+  }
+
+  /**
+   * Generates the localized time formatting for the admin console
+   *
+   * @param todayIsSpecial If true, a shorter time format will be used
+   * for time if it occurred today.
+   */
+
+  public String formatDate(Date time, boolean todayIsSpecial)
+  {
     SimpleDateFormat formatter;
     Calendar cal1 = Calendar.getInstance();
     Calendar cal2 = Calendar.getInstance();
@@ -213,7 +225,8 @@ class GASHAdminDispatch implements Runnable {
     cal1.setTime(new Date());
     cal2.setTime(time);
 
-    if ((cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)) &&
+    if (todayIsSpecial &&
+        (cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)) &&
         (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)))
       {
         formatter = new SimpleDateFormat(ts.l("global.todayTimeFormat"));
@@ -348,7 +361,9 @@ class GASHAdminDispatch implements Runnable {
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-        frame.startField.setText(formatDate(lDate));
+        // always use long format date as the server start time will
+        // not be updated once set
+        frame.startField.setText(formatDate(lDate, false));
       }
     });
   }
