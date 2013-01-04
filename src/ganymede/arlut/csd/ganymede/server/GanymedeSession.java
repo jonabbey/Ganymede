@@ -1608,8 +1608,6 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
-    setLastEvent("queryInvids");
-
     return queryEngine.queryInvids(invidVector);
   }
 
