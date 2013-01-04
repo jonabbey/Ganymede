@@ -115,11 +115,11 @@ public class scheduleHandle implements java.io.Serializable {
   static public enum TaskType {
     SCHEDULED       (ts.l("taskType.scheduledTask")), // "Scheduled Task"
     MANUAL          (ts.l("taskType.manualTask")),    // "On Demand Task"
-    BUILDER         (ts.l("taskType.builderTask")),   // "Ganymede Builder Task"
+    BUILDER         (ts.l("taskType.builderTask")),   // "Builder Task"
     UNSCHEDULEDBUILDER (ts.l("taskType.unscheduledBuilderTask")), // "Unscheduled Ganymede Builder Task"
-    SYNCINCREMENTAL (ts.l("taskType.incrementalSync")), // "Incremental Sync Channel"
-    SYNCFULLSTATE   (ts.l("taskType.fullstateSync")),   // "Full State Sync Channel"
-    SYNCMANUAL      (ts.l("taskType.manualSync"));      // "Manual Sync Channel"
+    SYNCINCREMENTAL (ts.l("taskType.incrementalSync")), // "Incremental"
+    SYNCFULLSTATE   (ts.l("taskType.fullstateSync")),   // "Full State"
+    SYNCMANUAL      (ts.l("taskType.manualSync"));      // "Manual"
 
     private final String name;
 
