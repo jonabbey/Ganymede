@@ -2302,6 +2302,8 @@ final public class GanymedeSession implements Session, Unreferenced {
                                           ts.l("clone_db_object.clone_error_text"));
       }
 
+    setLastEvent("clone:" + dbSession.describe(invid));
+
     ReturnVal retVal = view_db_object(invid); // get a copy customized for per-field visibility
 
     if (!ReturnVal.didSucceed(retVal))
@@ -2349,8 +2351,6 @@ final public class GanymedeSession implements Session, Unreferenced {
             dbSession.popCheckpoint(ckp);
             checkpointed = false;
           }
-
-        setLastEvent("clone:" + dbSession.describe(invid));
 
         return retVal;
       }
