@@ -110,6 +110,7 @@ public class rowTable extends baseTable implements ActionListener {
   JMenuItem OptimizeMI;
 
   boolean sortForward = true;
+  int sortColumn = -1;
 
   Object rowSelectedKey;
 
@@ -813,12 +814,14 @@ public class rowTable extends baseTable implements ActionListener {
               {
                 callback.colMenuPerformed(menuCol, e);
                 sortForward = true;
+                sortColumn = menuCol;
                 resort(menuCol, true);
               }
             else if (e.getSource() == RevSortByMI)
               {
                 callback.colMenuPerformed(menuCol, e);
                 sortForward = false;
+                sortColumn = menuCol;
                 resort(menuCol, true);
               }
             else if (e.getSource() == OptimizeMI)
@@ -847,6 +850,20 @@ public class rowTable extends baseTable implements ActionListener {
         menuRow = -1;
         menuCol = -1;
       }
+  }
+
+  /**
+   * <p>Sort by the last used sort col and sort order, if set.</p>
+   */
+
+  public void resort(boolean repaint)
+  {
+    if (sortColumn == -1)
+      {
+        return;
+      }
+
+    resort(sortColumn, sortForward, repaint);
   }
 
   /**
