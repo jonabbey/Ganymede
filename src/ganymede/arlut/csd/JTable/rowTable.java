@@ -51,9 +51,13 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.JLabel;
@@ -885,56 +889,31 @@ public class rowTable extends baseTable implements ActionListener {
 
 }
 
-/* from Fundamentals of Data Structures in Pascal,
-        Ellis Horowitz and Sartaj Sahni,
-        Second Edition, p.347
-        Computer Science Press, Inc.
-        Rockville, Maryland
-        ISBN 0-88175-165-0 */
-
 class mergeRec {
-
-
   tableRow element;
   rowHandle handle;
-  mergeRec link;
-
-  mergeRec(tableRow element, rowHandle handle)
-  {
-    this.element = element;
-    this.handle = handle;
-    link = null;
-  }
-
-  void setNext(mergeRec link)
-  {
-    this.link = link;
-  }
-
-  mergeRec next()
-  {
-    return link;
-  }
-
-}
-
-class rowSorter {
-
-  Vector mergeRecs;
-  boolean forward;
-  rowTable parent;
-  int column;
 
   /* -- */
 
-  public rowSorter(boolean forward, rowTable parent, int column)
+  public mergeRec(tableRow element, rowHandle handle)
   {
-    this.forward = forward;
-    this.parent = parent;
+    this.element = element;
+    this.handle = handle;
+  }
+}
+
+class rowComparator implements Comparator<mergeRec> {
+
+  int column = 0;
+  boolean forward = true;
+
+  public rowComparator(int column, boolean forward)
+  {
     this.column = column;
+    this.forward = forward;
   }
 
-  int compare(mergeRec a, mergeRec b)
+  public int compare(mergeRec a, mergeRec b)
   {
     Object Adata, Bdata;
 
@@ -1149,77 +1128,22 @@ class rowSorter {
 
     return 0;
   }
+}
 
-  mergeRec rmsort(int l, int u)
+class rowSorter {
+
+  rowTable parent;
+  List<mergeRec> mergeRecs;
+  boolean forward;
+  int column;
+
+  /* -- */
+
+  public rowSorter(boolean forward, rowTable parent, int column)
   {
-    int mid;
-    mergeRec q, r;
-
-    //    System.err.println("rmsort: low " + l + ", high " + u);
-
-    if (l >= u)
-      {
-        return (mergeRec) mergeRecs.elementAt(l);
-      }
-    else
-      {
-        mid = (l + u) / 2;
-        q = rmsort(l, mid);
-        r = rmsort(mid+1, u);
-        return rmerge(q,r);
-      }
-  }
-
-  mergeRec rmerge(mergeRec u, mergeRec y)
-  {
-    mergeRec p1, p2, px, result, node;
-
-    /* -- */
-
-    p1 = u;
-    p2 = y;
-    result = null;
-
-    if (compare(p1, p2) <= 0)
-      {
-        result = p1;
-        p1 = p1.next();
-        result.setNext(null);
-      }
-    else
-      {
-        result = p2;
-        p2 = p2.next();
-        result.setNext(null);
-      }
-
-    node = result;
-
-    while (p1 != null || p2 != null)
-      {
-        if (p1 == null || compare(p1,p2) > 0)
-          {
-            node.setNext(p2);
-
-            if (p2 != null)
-              {
-                px = p2.next();
-                p2.setNext(null);
-                p2 = px;
-              }
-          }
-        else
-          {
-            px = p1.next();
-            node.setNext(p1);
-            p1.setNext(null);
-            p1 = px;
-          }
-
-        node = node.next();
-      }
-
-    return result;
+    this.forward = forward;
+    this.parent = parent;
+    this.column = column;
   }
 
   public void sort()
@@ -1229,29 +1153,31 @@ class rowSorter {
         return;
       }
 
-    mergeRecs = new Vector();
+    mergeRecs = new ArrayList<mergeRec>();
 
     // System.err.println("Creating mergeRecs");
 
     for (int i = 0; i < parent.rows.size(); i++)
       {
-        mergeRecs.addElement(new mergeRec((tableRow)parent.rows.elementAt(i),
-                                          (rowHandle)parent.crossref.elementAt(i)));
+        mergeRecs.add(new mergeRec((tableRow)parent.rows.elementAt(i),
+                                   (rowHandle)parent.crossref.elementAt(i)));
       }
 
     // System.err.println("Sorting from element " + 0 + " to " + (mergeRecs.size()-1));
 
-    mergeRec result = rmsort(0, mergeRecs.size()-1);
+    Collections.sort(mergeRecs, new rowComparator(column, forward));
 
     //  System.err.println("Toplevel sorted, fixing crossrefs");
 
-    for (int i = 0; i < parent.rows.size(); i++)
-      {
-        parent.rows.setElementAt(result.element, i);
-        parent.crossref.setElementAt(result.handle, i);
-        result.handle.rownum = i;
+    int i = 0;
 
-        result = result.next();
+    for (mergeRec rec: mergeRecs)
+      {
+        parent.rows.setElementAt(rec.element, i);
+        parent.crossref.setElementAt(rec.handle, i);
+        rec.handle.rownum = i;
+
+        i++;
       }
 
     parent.reCalcRowPos(0);             // recalc vertical positions
