@@ -668,7 +668,7 @@ class GASHAdminDispatch implements Runnable {
 
                 frame.table.setCellText(e.sessionName, 1, e.hostname, false);
                 //                frame.table.setCellText(e.sessionName, 2, e.status, false);
-                frame.table.setCellText(e.sessionName, 2, formatDate(e.connecttime), false);
+                frame.table.setCellText(e.sessionName, 2, formatDate(e.connecttime), e.connecttime, false);
                 frame.table.setCellText(e.sessionName, 3, e.event, false);
                 frame.table.setCellText(e.sessionName, 4, Integer.toString(e.objectsCheckedOut), false);
               }
@@ -834,7 +834,7 @@ class GASHAdminDispatch implements Runnable {
 
         if (handle.startTime != null)
           {
-            table.setCellText(handle.name, 3, formatDate(handle.startTime), false);
+            table.setCellText(handle.name, 3, formatDate(handle.startTime), handle.startTime, false);
           }
         else
           {
@@ -844,7 +844,7 @@ class GASHAdminDispatch implements Runnable {
 
         if (handle.lastTime != null)
           {
-            table.setCellText(handle.name, 4, formatDate(handle.lastTime), false);
+            table.setCellText(handle.name, 4, formatDate(handle.lastTime), handle.lastTime, false);
           }
       }
 
@@ -949,7 +949,7 @@ class GASHAdminDispatch implements Runnable {
 
         if (handle.lastTime != null)
           {
-            table.setCellText(handle.name, 2, formatDate(handle.lastTime), false);
+            table.setCellText(handle.name, 2, formatDate(handle.lastTime), handle.lastTime, false);
           }
       }
 
@@ -1107,7 +1107,7 @@ class GASHAdminDispatch implements Runnable {
 
         if (handle.lastTime != null)
           {
-            table.setCellText(handle.name, 4, formatDate(handle.lastTime), false);
+            table.setCellText(handle.name, 4, formatDate(handle.lastTime), handle.lastTime, false);
           }
 
         table.setCellColor(handle.name, 4, foreground, false);
