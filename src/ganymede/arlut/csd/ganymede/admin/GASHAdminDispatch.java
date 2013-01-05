@@ -673,6 +673,7 @@ class GASHAdminDispatch implements Runnable {
                 frame.table.setCellText(e.sessionName, 4, Integer.toString(e.objectsCheckedOut), false);
               }
 
+            frame.table.resort(false);
             frame.table.refreshTable();
           }
         });
@@ -875,6 +876,7 @@ class GASHAdminDispatch implements Runnable {
       {
         SwingUtilities.invokeAndWait(new Runnable() {
           public void run() {
+            localTableRef.resort(false);
             localTableRef.refreshTable();
           }
         });
@@ -980,6 +982,7 @@ class GASHAdminDispatch implements Runnable {
       {
         SwingUtilities.invokeAndWait(new Runnable() {
           public void run() {
+            localTableRef.resort(false);
             localTableRef.refreshTable();
           }
         });
@@ -1154,6 +1157,7 @@ class GASHAdminDispatch implements Runnable {
       {
         SwingUtilities.invokeAndWait(new Runnable() {
           public void run() {
+            localTableRef.resort(false);
             localTableRef.refreshTable();
           }
         });
