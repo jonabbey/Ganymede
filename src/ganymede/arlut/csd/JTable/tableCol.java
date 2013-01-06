@@ -11,8 +11,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -76,7 +78,7 @@ class tableCol {
 
   /* -- */
 
-  public tableCol(baseTable rt, String header, float origWidth, tableAttr attr, 
+  public tableCol(baseTable rt, String header, float origWidth, tableAttr attr,
                   JPopupMenu menu)
   {
     if (rt == null && menu != null)

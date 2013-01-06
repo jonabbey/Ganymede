@@ -11,8 +11,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -59,13 +61,13 @@ import java.util.Vector;
  * table, including current position of the row in the table, height
  * of row in elemental lines, and a vector of the current cells in
  * this row.
- * 
+ *
  */
 
 class tableRow {
 
   baseTable rt;
-  Vector cells = new Vector();
+  Vector<tableCell> cells = new Vector<tableCell>();
   int rowSpan = 1;
   int topEdge = 0, bottomEdge = 0;
 
@@ -84,9 +86,9 @@ class tableRow {
   {
     this.rt = rt;
 
-    for (int i = 0; i < cells.length; i++)
+    for (tableCell cell: cells)
       {
-        this.cells.addElement(cells[i]);
+        this.cells.add(cell);
       }
   }
 
@@ -102,11 +104,11 @@ class tableRow {
   tableRow(baseTable rt, int size)
   {
     this.rt = rt;
-    this.cells = new Vector(size);
+    this.cells = new Vector<tableCell>(size);
 
-    for (int i = 0; i < size; i++)
+    for (tableCol col: rt.cols)
       {
-        this.cells.addElement(new tableCell((tableCol) rt.cols.elementAt(i)));
+        this.cells.add(new tableCell(col));
       }
   }
 
@@ -118,9 +120,9 @@ class tableRow {
    *
    */
 
-  void removeElementAt(int index)
+  void remove(int index)
   {
-    cells.removeElementAt(index);
+    cells.remove(index);
   }
 
   /**
@@ -129,9 +131,9 @@ class tableRow {
    *
    */
 
-  tableCell elementAt(int index)
+  tableCell get(int index)
   {
-    return (tableCell) cells.elementAt(index);
+    return cells.get(index);
   }
 
   /**
@@ -141,9 +143,9 @@ class tableRow {
    *
    */
 
-  void setElementAt(tableCell cell, int index)
+  void set(int index, tableCell cell)
   {
-    cells.setElementAt(cell, index);
+    cells.set(index, cell);
 
     if (cell.getRowSpan() > rowSpan)
       {
@@ -161,12 +163,9 @@ class tableRow {
   int getRowSpan()
   {
     rowSpan = 0;
-    tableCell cell;
 
-    for (int i = 0; i < cells.size(); i++)
+    for (tableCell cell: cells)
       {
-        cell = (tableCell) cells.elementAt(i);
-
         if (cell.getRowSpan() > rowSpan)
           {
             rowSpan = cell.getRowSpan();
@@ -219,9 +218,9 @@ class tableRow {
    *
    * This method returns the current position of the bottom edge of
    * this row within the table.
-   * 
+   *
    */
-  
+
   int getBottomEdge()
   {
     return bottomEdge;
