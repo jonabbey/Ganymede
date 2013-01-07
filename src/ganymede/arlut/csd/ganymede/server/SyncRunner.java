@@ -16,7 +16,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -1732,8 +1732,11 @@ public class SyncRunner implements Runnable {
       {
         GanymedeBuilderTask.incPhase2(true); // so that the client sees the phase 2 icon rolling
 
-        // "SyncRunner {0} running"
-        Ganymede.debug(ts.l("runIncremental.running", myName));
+        if (debug)
+          {
+            // "SyncRunner {0} running"
+            Ganymede.debug(ts.l("runIncremental.running", myName));
+          }
 
         if (getServiceProgram() != null)
           {
@@ -1822,8 +1825,11 @@ public class SyncRunner implements Runnable {
         GanymedeBuilderTask.decPhase2(true);
       }
 
-    // "SyncRunner {0} finished"
-    Ganymede.debug(ts.l("runIncremental.done", myName));
+    if (debug)
+      {
+        // "SyncRunner {0} finished"
+        Ganymede.debug(ts.l("runIncremental.done", myName));
+      }
 
     updateAdminConsole(true);
   }
