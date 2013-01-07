@@ -1448,8 +1448,11 @@ public class SyncRunner implements Runnable {
           }
         else
           {
-            // "{0} has not seen any changes that need to be processed."
-            Ganymede.debug(ts.l("run.skipping_full", this.getName()));
+            if (debug)
+              {
+                // "{0} has not seen any changes that need to be processed."
+                Ganymede.debug(ts.l("run.skipping_full", this.getName()));
+              }
           }
       }
     else if (this.mode == SyncType.INCREMENTAL)
@@ -1460,8 +1463,11 @@ public class SyncRunner implements Runnable {
           }
         else
           {
-            // "{0} has no incremental transactions to process."
-            Ganymede.debug(ts.l("run.skipping_incremental", this.getName()));
+            if (debug)
+              {
+                // "{0} has no incremental transactions to process."
+                Ganymede.debug(ts.l("run.skipping_incremental", this.getName()));
+              }
           }
       }
   }
