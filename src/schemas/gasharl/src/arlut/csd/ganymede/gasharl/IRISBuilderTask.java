@@ -4,18 +4,20 @@
 
    This class is intended to dump the Ganymede datastore to the ARL:UT
    IRIS system.
-   
+
    Created: 27 September 2004
 
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -125,73 +127,80 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
   {
     PrintWriter out;
     boolean needBuild = false;
-    
+
     /* -- */
 
-    Ganymede.debug("IRISBuilderTask builderPhase1 running");
+    Ganymede.debug("IRISBuilderTask writing files");
 
     if (path == null)
       {
-	path = System.getProperty("ganymede.builder.output");
+        path = System.getProperty("ganymede.builder.output");
 
-	if (path == null)
-	  {
-	    throw new RuntimeException("IRISBuilder not able to determine output directory.");
-	  }
+        if (path == null)
+          {
+            throw new RuntimeException("IRISBuilder not able to determine output directory.");
+          }
 
-	path = PathComplete.completePath(path);
+        path = PathComplete.completePath(path);
       }
 
     now = null;
 
-    if (baseChanged(SchemaConstants.UserBase) || 
-	/* User netgroups */
-	baseChanged((short) 270))
+    if (baseChanged(SchemaConstants.UserBase) ||
+        /* User netgroups */
+        baseChanged((short) 270))
       {
-	Ganymede.debug("Need to build IRIS output");
-	needBuild = true;
+        if (debug)
+          {
+            Ganymede.debug("Need to build IRIS output");
+          }
 
-	out = null;
+        needBuild = true;
 
-	try
-	  {
-	    out = openOutFile(path + "iris_sync.txt", "iris");
-	  }
-	catch (IOException ex)
-	  {
-	    throw new RuntimeException("IRISBuilderTask.builderPhase1(): couldn't open iris_sync.txt file: " + ex);
-	  }
-	
-	if (out != null)
-	  {
-	    try
-	      {
-		DBObject user;
-		Enumeration users = enumerateObjects(SchemaConstants.UserBase);
-		
-		while (users.hasMoreElements())
-		  {
-		    user = (DBObject) users.nextElement();
+        out = null;
 
-		    if (user_in_netgroup(user, "IRIS-users"))
-		      {
-			if (debug)
-			  {
-			    System.err.println("Writing out IRIS user " + user.getLabel());
-			  }
+        try
+          {
+            out = openOutFile(path + "iris_sync.txt", "iris");
+          }
+        catch (IOException ex)
+          {
+            throw new RuntimeException("IRISBuilderTask.builderPhase1(): couldn't open iris_sync.txt file: " + ex);
+          }
 
-			write_iris(out, user);
-		      }
-		  }
-	      }
-	    finally
-	      {
-		out.close();
-	      }
-	  }
+        if (out != null)
+          {
+            try
+              {
+                DBObject user;
+                Enumeration users = enumerateObjects(SchemaConstants.UserBase);
+
+                while (users.hasMoreElements())
+                  {
+                    user = (DBObject) users.nextElement();
+
+                    if (user_in_netgroup(user, "IRIS-users"))
+                      {
+                        if (debug)
+                          {
+                            System.err.println("Writing out IRIS user " + user.getLabel());
+                          }
+
+                        write_iris(out, user);
+                      }
+                  }
+              }
+            finally
+              {
+                out.close();
+              }
+          }
       }
 
-    Ganymede.debug("IRISBuilderTask builderPhase1 completed");
+    if (debug)
+      {
+        Ganymede.debug("IRISBuilderTask builderPhase1 completed");
+      }
 
     return needBuild;
   }
@@ -214,13 +223,13 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
 
-    Ganymede.debug("IRISBuilderTask builderPhase2 running");
+    Ganymede.debug("IRISBuilderTask running build");
 
     if (buildScript == null)
       {
-	buildScript = System.getProperty("ganymede.builder.scriptlocation");
-	buildScript = PathComplete.completePath(buildScript);
-	buildScript = buildScript + "irisbuilder";
+        buildScript = System.getProperty("ganymede.builder.scriptlocation");
+        buildScript = PathComplete.completePath(buildScript);
+        buildScript = buildScript + "irisbuilder";
       }
 
     int resultCode = -999;      // a resultCode of 0 is success
@@ -231,33 +240,33 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 
     if (file.exists())
       {
-	if (runtime == null)
-	  {
-	    runtime = Runtime.getRuntime();
-	  }
+        if (runtime == null)
+          {
+            runtime = Runtime.getRuntime();
+          }
 
-	Process process = null;
+        Process process = null;
 
-	/* -- */
+        /* -- */
 
-	try
-	  {
-	    resultCode = FileOps.runProcess(buildScript);
-	    startedOk = true;
-	  }
-	catch (IOException ex)
-	  {
-	    Ganymede.debug("Couldn't exec buildScript (" + buildScript + 
-			   ") due to IOException: " + ex);
-	  }
-	catch (InterruptedException ex)
-	  {
-	    Ganymede.debug("Failure during exec of buildScript (" + buildScript + "): " + ex);
-	  }
+        try
+          {
+            resultCode = FileOps.runProcess(buildScript);
+            startedOk = true;
+          }
+        catch (IOException ex)
+          {
+            Ganymede.debug("Couldn't exec buildScript (" + buildScript +
+                           ") due to IOException: " + ex);
+          }
+        catch (InterruptedException ex)
+          {
+            Ganymede.debug("Failure during exec of buildScript (" + buildScript + "): " + ex);
+          }
       }
     else
       {
-	Ganymede.debug(buildScript + " doesn't exist, not running external IRIS build script");
+        Ganymede.debug(buildScript + " doesn't exist, not running external IRIS build script");
       }
 
     if (resultCode != 0)
@@ -280,24 +289,27 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 
         Ganymede.log.logSystemEvent(event);
 
-	if (startedOk)
-	  {
-	    throw new ServiceFailedException("gashbuilder returned a failure code: " + resultCode);
-	  }
-	else
-	  {
-	    if (!file.exists())
-	      {
-		throw new ServiceNotFoundException("Couldn't find " + path);
-	      }
-	    else
-	      {
-		throw new ServiceNotFoundException("Couldn't run " + path);
-	      }
-	  }
+        if (startedOk)
+          {
+            throw new ServiceFailedException("gashbuilder returned a failure code: " + resultCode);
+          }
+        else
+          {
+            if (!file.exists())
+              {
+                throw new ServiceNotFoundException("Couldn't find " + path);
+              }
+            else
+              {
+                throw new ServiceNotFoundException("Couldn't run " + path);
+              }
+          }
       }
 
-    Ganymede.debug("IRISBuilderTask builderPhase2 completed");
+    if (debug)
+      {
+        Ganymede.debug("IRISBuilderTask builderPhase2 completed");
+      }
 
     return true;
   }
@@ -316,17 +328,17 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 
     if (netgroups == null)
       {
-	return false;
+        return false;
       }
 
     for (int i = 0; i < netgroups.size(); i++)
       {
-	DBObject netgroup = getObject((Invid) netgroups.elementAt(i));
-	
-	if (netgroup_or_parent_equals(netgroup, netgroupName))
-	  {
-	    return true;
-	  }
+        DBObject netgroup = getObject((Invid) netgroups.elementAt(i));
+
+        if (netgroup_or_parent_equals(netgroup, netgroupName))
+          {
+            return true;
+          }
       }
 
     return false;
@@ -343,22 +355,22 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 
     if (name.equals(netgroupName))
       {
-	return true;
+        return true;
       }
-    
+
     Vector netgroups = netgroup.getFieldValuesLocal(userNetgroupSchema.OWNERNETGROUPS);
 
     if (netgroups == null)
       {
-	return false;
+        return false;
       }
 
     for (int i = 0; i < netgroups.size(); i++)
       {
-	if (netgroup_or_parent_equals(getObject((Invid) netgroups.elementAt(i)), netgroupName))
-	  {
-	    return true;
-	  }
+        if (netgroup_or_parent_equals(getObject((Invid) netgroups.elementAt(i)), netgroupName))
+          {
+            return true;
+          }
       }
 
     return false;
@@ -386,22 +398,22 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
       plaintext;
 
     /* -- */
-      
+
     username = (String) userObject.getFieldValueLocal(userSchema.USERNAME);
     invidString = userObject.getInvid().toString();
     badge = (String) userObject.getFieldValueLocal(userSchema.BADGE);
-    
+
     PasswordDBField passField = (PasswordDBField) userObject.getField(userSchema.PASSWORD);
 
     if (passField == null)
       {
-	md5Crypt = "*";
-	plaintext = "*";
+        md5Crypt = "*";
+        plaintext = "*";
       }
     else
       {
-	md5Crypt = passField.getMD5CryptText();
-	plaintext = passField.getPlainText();
+        md5Crypt = passField.getMD5CryptText();
+        plaintext = passField.getPlainText();
       }
 
     StringBuilder output = new StringBuilder();
@@ -419,7 +431,7 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
     out.println(output.toString());
   }
 
-  /** 
+  /**
    * We can't have any | characters in passwords in the iris_sync.txt
    * file we generate, since we use | chars as field separators in
    * this file.  Make sure that we backslash any such chars.
@@ -429,7 +441,7 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
   {
     if (in == null)
       {
-	return "";
+        return "";
       }
 
     StringBuilder buffer = new StringBuilder();
@@ -441,18 +453,18 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 
     for (int i = 0; i < ary.length; i++)
       {
-	if (ary[i] == '|')
-	  {
-	    buffer.append("\\|");
-	  }
-	else if (ary[i] == '\\')
-	  {
-	    buffer.append("\\\\");
-	  }
-	else
-	  {
-	    buffer.append(ary[i]);
-	  }
+        if (ary[i] == '|')
+          {
+            buffer.append("\\|");
+          }
+        else if (ary[i] == '\\')
+          {
+            buffer.append("\\\\");
+          }
+        else
+          {
+            buffer.append(ary[i]);
+          }
       }
 
     return buffer.toString();
