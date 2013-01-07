@@ -383,7 +383,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (baseChanged(MailmanListSchema.BASE)) // mailman lists
       {
-        Ganymede.debug("Need to call mailman ns8 sync script");
+        if (debug)
+          {
+            Ganymede.debug("Need to call mailman ns8 sync script");
+          }
 
         if (writeMailmanListsFile())
           {
