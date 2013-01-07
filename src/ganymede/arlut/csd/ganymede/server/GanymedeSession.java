@@ -2793,7 +2793,6 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
-    Ganymede.debug("GanymedeSession.getDataXML(" + syncChannel + ")");
     return this.getXML(true, false, syncChannel, includeHistory, includeOid);
   }
 
