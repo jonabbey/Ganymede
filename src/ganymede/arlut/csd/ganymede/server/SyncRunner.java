@@ -1627,8 +1627,11 @@ public class SyncRunner implements Runnable {
 
   private void runFullStateService()
   {
-    // "Full State Sync Channel {0} external build running."
-    Ganymede.debug(ts.l("runFullStateService.running", this.name));
+    if (debug)
+      {
+        // "Full State Sync Channel {0} external build running."
+        Ganymede.debug(ts.l("runFullStateService.running", this.name));
+      }
 
     int resultCode = -999;  // a resultCode of 0 is success
 
@@ -1653,8 +1656,11 @@ public class SyncRunner implements Runnable {
                                 this.name, Ganymede.stackTrace(ex)));
           }
 
-        // "Full State Sync Channel {0} external build completed."
-        Ganymede.debug(ts.l("runFullStateService.ran", this.name));
+        if (debug)
+          {
+            // "Full State Sync Channel {0} external build completed."
+            Ganymede.debug(ts.l("runFullStateService.ran", this.name));
+          }
       }
     else
       {
