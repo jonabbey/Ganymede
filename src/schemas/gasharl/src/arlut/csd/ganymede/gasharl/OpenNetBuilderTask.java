@@ -129,7 +129,7 @@ public class OpenNetBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
 
-    Ganymede.debug("OpenNetBuilderTask writing files");
+    Ganymede.debug("build: OpenNetBuilderTask writing files");
 
     if (path == null)
       {
@@ -251,7 +251,7 @@ public class OpenNetBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
 
-    Ganymede.debug("OpenNetBuilderTask running build");
+    Ganymede.debug("build: OpenNetBuilderTask running build");
 
     if (buildScript == null)
       {

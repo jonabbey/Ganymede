@@ -134,7 +134,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
 
-    Ganymede.debug("LDAPBuilderTask writing files");
+    Ganymede.debug("build: LDAPBuilderTask writing files");
 
     if (path == null)
       {
@@ -318,7 +318,7 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
 
-    Ganymede.debug("LDAPBuilderTask running build");
+    Ganymede.debug("build: LDAPBuilderTask running build");
 
     if (buildScript == null)
       {

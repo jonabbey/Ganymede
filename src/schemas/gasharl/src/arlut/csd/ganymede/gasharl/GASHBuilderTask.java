@@ -172,7 +172,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
 
-    Ganymede.debug("GASHBuilderTask writing files");
+    Ganymede.debug("build: GASHBuilderTask writing files");
 
     if (path == null)
       {
@@ -482,7 +482,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
 
-    Ganymede.debug("GASHBuilderTask running build");
+    Ganymede.debug("build: GASHBuilderTask running build");
 
     if (buildScript == null)
       {

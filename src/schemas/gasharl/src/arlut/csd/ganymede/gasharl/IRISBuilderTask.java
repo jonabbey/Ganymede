@@ -130,7 +130,7 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
 
-    Ganymede.debug("IRISBuilderTask writing files");
+    Ganymede.debug("build: IRISBuilderTask writing files");
 
     if (path == null)
       {
@@ -223,7 +223,7 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
 
-    Ganymede.debug("IRISBuilderTask running build");
+    Ganymede.debug("build: IRISBuilderTask running build");
 
     if (buildScript == null)
       {
