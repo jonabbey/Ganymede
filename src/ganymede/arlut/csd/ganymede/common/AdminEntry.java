@@ -13,8 +13,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -68,7 +70,8 @@ public class AdminEntry implements java.io.Serializable {
     event;
 
   public Date
-    connecttime;
+    connecttime,
+    eventtime;
 
   public int
     objectsCheckedOut;
@@ -77,7 +80,7 @@ public class AdminEntry implements java.io.Serializable {
 
   public AdminEntry(String sessionName, String personaName,
                     String hostname, String status,
-                    Date connecttime, String event,
+                    Date connecttime, String event, Date eventtime,
                     int objectsCheckedOut)
   {
     this.sessionName = sessionName;
@@ -86,6 +89,7 @@ public class AdminEntry implements java.io.Serializable {
     this.status = status;
     this.connecttime = connecttime;
     this.event = event;
+    this.eventtime = eventtime;
     this.objectsCheckedOut = objectsCheckedOut;
   }
 }

@@ -286,6 +286,12 @@ final public class GanymedeSession implements Session, Unreferenced {
   private String lastEvent = null;
 
   /**
+   * <p>Server-side timestamp for the event documented in lastEvent.</p>
+   */
+
+  private Date lastEventTime = null;
+
+  /**
    * <p>Our DBSession object.  DBSession is the generic DBStore access
    * layer.  A GanymedeSession is layered on top of a DBSession to
    * provide access control and remote access via RMI.  The DBSession
@@ -509,7 +515,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // set our initial status
 
     status = ts.l("init.loggedin");
-    lastEvent = ts.l("init.loggedin");
+    setLastEvent(ts.l("init.loggedin"));
   }
 
   //
@@ -1047,7 +1053,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     dbSession.openTransaction(describe, interactive); // *sync* DBSession
 
     this.status = "Transaction: " + describe;
-    setLastEvent("");
+    setLastEvent(null);
 
     return null;
   }
@@ -3608,6 +3614,7 @@ final public class GanymedeSession implements Session, Unreferenced {
                               (status == null) ? "" : status,
                               connecttime,
                               (lastEvent == null) ? "" : lastEvent,
+                              lastEventTime,
                               objectsCheckedOut);
         userInfo = info;
       }
@@ -3660,6 +3667,16 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
 
     this.lastEvent = text;
+
+    if (text == null)
+      {
+        lastEventTime = null;
+      }
+    else
+      {
+        lastEventTime = new Date();
+      }
+
     resetAdminEntry();
     GanymedeAdmin.refreshUsers();
   }

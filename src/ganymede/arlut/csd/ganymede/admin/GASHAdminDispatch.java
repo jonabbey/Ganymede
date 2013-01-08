@@ -228,6 +228,11 @@ class GASHAdminDispatch implements Runnable {
 
   public String formatDate(Date time, boolean todayIsSpecial)
   {
+    if (time == null)
+      {
+        return "";
+      }
+
     SimpleDateFormat formatter;
     Calendar cal1 = Calendar.getInstance();
     Calendar cal2 = Calendar.getInstance();
@@ -669,7 +674,16 @@ class GASHAdminDispatch implements Runnable {
                 frame.table.setCellText(e.sessionName, 1, e.hostname, false);
                 //                frame.table.setCellText(e.sessionName, 2, e.status, false);
                 frame.table.setCellText(e.sessionName, 2, formatDate(e.connecttime), e.connecttime, false);
-                frame.table.setCellText(e.sessionName, 3, e.event, false);
+
+                if (e.eventtime == null)
+                  {
+                    frame.table.setCellText(e.sessionName, 3, e.event, false);
+                  }
+                else
+                  {
+                    frame.table.setCellText(e.sessionName, 3, formatDate(e.eventtime) + " " + e.event, e.eventtime, false);
+                  }
+
                 frame.table.setCellText(e.sessionName, 4, Integer.toString(e.objectsCheckedOut), false);
               }
 
