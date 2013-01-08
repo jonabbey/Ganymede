@@ -306,11 +306,11 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   String headers[] = {ts.l("global.user_col_0"), // "User"
                       ts.l("global.user_col_1"), // "System"
-                      ts.l("global.user_col_3"), // "Connect Time"
-                      ts.l("global.user_col_4"), // "Last Event"
-                      ts.l("global.user_col_5")}; // "Objects Checked Out"
+                      ts.l("global.user_col_3"), // "Connect"
+                      ts.l("global.user_col_4"), // "Activity"
+                      ts.l("global.user_col_5")}; // "Locked Objects"
 
-  int colWidths[] = {50,50,50,300,50};
+  int colWidths[] = {50,50,25,325,50};
 
   // resources for the sync task monitor table
 
