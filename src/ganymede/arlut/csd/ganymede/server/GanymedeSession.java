@@ -1053,7 +1053,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     dbSession.openTransaction(describe, interactive); // *sync* DBSession
 
     this.status = "Transaction: " + describe;
-    setLastEvent(null);
+    setLastEvent("new transaction");
 
     return null;
   }
