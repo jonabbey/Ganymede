@@ -16,7 +16,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -181,6 +181,14 @@ public class GanymedeServer implements Server {
   static loginSemaphore shutdownSemaphore = new loginSemaphore();
 
   /**
+   * <p>Message string explaining reason for shut down.  Displayed to
+   * connected users and/or users blocked from logging in while we're
+   * waiting to shut down.</p>
+   */
+
+  static private String shutdownReason = null;
+
+  /**
    * <p>During the login process, we need to get exclusive access over
    * an extended time to synchronized methods in a privileged
    * GanymedeSession to do the query operations for login.  If we used
@@ -341,8 +349,20 @@ public class GanymedeServer implements Server {
       {
         if (error.equals("shutdown"))
           {
-            return Ganymede.createErrorDialog(ts.l("processLogin.nologins"),
-                                              ts.l("processLogin.nologins_shutdown"));
+            if (shutdownReason != null)
+              {
+                // "No logins allowed"
+                // "The server is currently waiting to shut down.  No logins will be accepted until the server has restarted.\n\nReason for shutdown: {0}"
+                return Ganymede.createErrorDialog(ts.l("processLogin.nologins"),
+                                                  ts.l("processLogin.nologins_shutdown_reason", shutdownReason));
+              }
+            else
+              {
+                // "No logins allowed"
+                // "The server is currently waiting to shut down.  No logins will be accepted until the server has restarted."
+                return Ganymede.createErrorDialog(ts.l("processLogin.nologins"),
+                                                  ts.l("processLogin.nologins_shutdown"));
+              }
           }
         else
           {
@@ -920,7 +940,7 @@ public class GanymedeServer implements Server {
                         {
                         }
 
-                      GanymedeServer.shutdown();
+                      GanymedeServer.shutdown(null);
                     }
                   }, ts.l("clearActiveUser.deathThread"));
 
@@ -1255,8 +1275,13 @@ public class GanymedeServer implements Server {
    * method to put the server into 'shutdown soon' mode.</p>
    */
 
-  public static void setShutdown()
+  public static void setShutdown(String reason)
   {
+    if (reason != null)
+      {
+        GanymedeServer.shutdownReason = reason;
+      }
+
     // turn off the login semaphore.  this will block any new clients
     // or admin consoles from connecting while we shut down
 
@@ -1276,7 +1301,7 @@ public class GanymedeServer implements Server {
       {
         GanymedeAdmin.setState(ts.l("setShutDown.nousers_state"));
 
-        GanymedeServer.shutdown();
+        GanymedeServer.shutdown(null);
 
         return;
       }
@@ -1294,8 +1319,13 @@ public class GanymedeServer implements Server {
    * <p>This method actually does the shutdown.</p>
    */
 
-  public static ReturnVal shutdown()
+  public static ReturnVal shutdown(String reason)
   {
+    if (reason != null)
+      {
+        GanymedeServer.shutdownReason = reason;
+      }
+
     String semaphoreState = GanymedeServer.lSemaphore.checkEnabled();
 
     if (!"shutdown".equals(semaphoreState))
@@ -1384,8 +1414,16 @@ public class GanymedeServer implements Server {
 
         for (GanymedeSession temp: tempList)
           {
-            // "Server going down"
-            temp.forceOff(ts.l("shutdown.clientNotification"));
+            if (shutdownReason != null)
+              {
+                // "Server going down"
+                temp.forceOff(ts.l("shutdown.clientNotification"));
+              }
+            else
+              {
+                // "Server going down\n\nReason:{0}"
+                temp.forceOff(ts.l("shutdown.clientNotification_reason", shutdownReason));
+              }
           }
 
         // "Server going down.. interrupting scheduler"

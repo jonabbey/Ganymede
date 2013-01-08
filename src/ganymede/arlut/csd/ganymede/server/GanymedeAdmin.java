@@ -1061,9 +1061,11 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    *
    * @param waitForUsers if true, shutdown will be deferred until all users are logged
    * out.  No new users will be allowed to login.
+   *
+   * @param reason Message to be logged and displayed to any users connected.
    */
 
-  public ReturnVal shutdown(boolean waitForUsers)
+  public ReturnVal shutdown(boolean waitForUsers, String reason)
   {
     if (!fullprivs)
       {
@@ -1075,7 +1077,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     if (waitForUsers)
       {
-        GanymedeServer.setShutdown();
+        GanymedeServer.setShutdown(reason);
 
         // "Server Set For Shutdown"
         // "The server is prepared for shut down.  Shutdown will commence as soon as all current users log out."
@@ -1084,8 +1086,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
       }
     else
       {
-        return GanymedeServer.shutdown(); // we may never return if the shutdown succeeds.. the client
-                                          // will catch an exception in that case.
+        return GanymedeServer.shutdown(reason); // we may never return if the shutdown succeeds.. the client
+                                                // will catch an exception in that case.
       }
   }
 

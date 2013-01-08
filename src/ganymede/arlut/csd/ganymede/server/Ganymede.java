@@ -18,7 +18,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -520,7 +520,7 @@ public class Ganymede {
       {
         if (Ganymede.server != null)
           {
-            GanymedeServer.shutdown();
+            GanymedeServer.shutdown(null);
           }
 
         ex.process();
@@ -1460,7 +1460,7 @@ public class Ganymede {
         public void run() {
           try
             {
-              GanymedeServer.shutdown();
+              GanymedeServer.shutdown(null);
             }
           finally
             {

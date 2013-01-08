@@ -1254,9 +1254,9 @@ class GASHAdminDispatch implements Runnable {
     handleReturnVal(aSession.killAll());
   }
 
-  boolean shutdown(boolean waitForUsers) throws RemoteException
+  boolean shutdown(boolean waitForUsers, String reason) throws RemoteException
   {
-    ReturnVal retVal = handleReturnVal(aSession.shutdown(waitForUsers));
+    ReturnVal retVal = handleReturnVal(aSession.shutdown(waitForUsers, reason));
 
     return (retVal == null || retVal.didSucceed());
   }

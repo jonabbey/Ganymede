@@ -1510,7 +1510,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
         try
           {
-            success = adminDispatch.shutdown(waitForUsers);
+            success = adminDispatch.shutdown(waitForUsers, null);
           }
         catch (RemoteException ex)
           {
