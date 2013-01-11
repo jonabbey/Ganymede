@@ -195,40 +195,43 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
               }
           }
 
-        try
-          {
-            out2 = openOutFile(path + "iris_sync_test.txt", "iris");
-          }
-        catch (IOException ex)
-          {
-            throw new RuntimeException("IRISBuilderTask.builderPhase1(): couldn't open iris_sync_test.txt file: " + ex);
-          }
-
-        if (out2 != null)
+        if (false)
           {
             try
               {
-                DBObject user;
-                Enumeration users = enumerateObjects(SchemaConstants.UserBase);
+                out2 = openOutFile(path + "iris_sync_test.txt", "iris");
+              }
+            catch (IOException ex)
+              {
+                throw new RuntimeException("IRISBuilderTask.builderPhase1(): couldn't open iris_sync_test.txt file: " + ex);
+              }
 
-                while (users.hasMoreElements())
+            if (out2 != null)
+              {
+                try
                   {
-                    user = (DBObject) users.nextElement();
+                    DBObject user;
+                    Enumeration users = enumerateObjects(SchemaConstants.UserBase);
 
-                    if (user_in_maillist(user, "IRIS-test-users"))
+                    while (users.hasMoreElements())
                       {
-                        if (debug)
-                          {
-                            System.err.println("Writing out IRIS test user " + user.getLabel());
-                          }
+                        user = (DBObject) users.nextElement();
 
-                        write_iris(out2, user);
+                        if (user_in_maillist(user, "IRIS-test-users"))
+                          {
+                            if (debug)
+                              {
+                                System.err.println("Writing out IRIS test user " + user.getLabel());
+                              }
+
+                            write_iris(out2, user);
+                          }
                       }
                   }
-              }
-            finally
-              {
-                out2.close();
+                finally
+                  {
+                    out2.close();
+                  }
               }
           }
       }
