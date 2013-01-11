@@ -394,6 +394,11 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
         return false;
       }
 
+    return user_in_maillist(user, mailListInvid);
+  }
+
+  public boolean user_in_maillist(DBObject user, Invid mailListInvid)
+  {
     DBObject mailListObject = getObject(mailListInvid);
 
     Vector<Invid> members = (Vector<Invid>) mailListObject.getFieldValuesLocal(emailListSchema.MEMBERS);
@@ -406,6 +411,10 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
     for (Invid inv: members)
       {
         if (inv.equals(user.getInvid()))
+          {
+            return true;
+          }
+        else if (inv.getType() == emailListSchema.BASE && user_in_maillist(user, inv))
           {
             return true;
           }
