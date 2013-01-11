@@ -7,7 +7,6 @@
 
    Created: 27 September 2004
 
-
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
@@ -125,7 +124,7 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 
   public boolean builderPhase1()
   {
-    PrintWriter out;
+    PrintWriter out, out2;
     boolean needBuild = false;
 
     /* -- */
@@ -193,6 +192,43 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
             finally
               {
                 out.close();
+              }
+          }
+
+        try
+          {
+            out2 = openOutFile(path + "iris_sync_test.txt", "iris");
+          }
+        catch (IOException ex)
+          {
+            throw new RuntimeException("IRISBuilderTask.builderPhase1(): couldn't open iris_sync_test.txt file: " + ex);
+          }
+
+        if (out2 != null)
+          {
+            try
+              {
+                DBObject user;
+                Enumeration users = enumerateObjects(SchemaConstants.UserBase);
+
+                while (users.hasMoreElements())
+                  {
+                    user = (DBObject) users.nextElement();
+
+                    if (user_in_maillist(user, "IRIS-test-users"))
+                      {
+                        if (debug)
+                          {
+                            System.err.println("Writing out IRIS test user " + user.getLabel());
+                          }
+
+                        write_iris(out2, user);
+                      }
+                  }
+              }
+            finally
+              {
+                out2.close();
               }
           }
       }
@@ -336,6 +372,40 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
         DBObject netgroup = getObject((Invid) netgroups.elementAt(i));
 
         if (netgroup_or_parent_equals(netgroup, netgroupName))
+          {
+            return true;
+          }
+      }
+
+    return false;
+  }
+
+  public boolean user_in_maillist(DBObject user, String mailListName)
+  {
+    if (user == null || mailListName == null)
+      {
+        return false;
+      }
+
+    Invid mailListInvid = findLabeledObject(mailListName, emailListSchema.BASE);
+
+    if (mailListInvid == null)
+      {
+        return false;
+      }
+
+    DBObject mailListObject = getObject(mailListInvid);
+
+    Vector<Invid> members = (Vector<Invid>) mailListObject.getFieldValuesLocal(emailListSchema.MEMBERS);
+
+    if (members == null)
+      {
+        return false;
+      }
+
+    for (Invid inv: members)
+      {
+        if (inv.equals(user.getInvid()))
           {
             return true;
           }
