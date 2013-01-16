@@ -59,6 +59,8 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -859,6 +861,88 @@ public class rowTable extends baseTable implements ActionListener {
         menuRow = -1;
         menuCol = -1;
       }
+  }
+
+  /**
+   * <p>Sets the sort preferences for this rowTable from a String
+   * encoding suitable for storage in a Java Prefrences object.</p>
+   */
+
+  public void setSortPref(String sortPref)
+  {
+    lastSortColumn = -1;
+    olderSortColumn = -1;
+
+    if (sortPref == null || sortPref.equals(""))
+      {
+        return;
+      }
+
+    String regex = "(\\d+)([fr])(?:(\\d+)([fr]))?";
+    Pattern pat = Pattern.compile(regex);
+    Matcher mat = pat.matcher(sortPref);
+
+    if (!mat.matches())
+      {
+        return;
+      }
+
+    String lastCol = mat.group(1);
+    String lastOrder = mat.group(2);
+    String olderCol = mat.group(3);
+    String olderOrder = mat.group(4);
+
+    lastSortColumn = Integer.parseInt(lastCol);
+    lastSortForward = lastOrder.equals("f");
+
+    if (olderCol != null)
+      {
+        olderSortColumn = Integer.parseInt(olderCol);
+        olderSortForward = olderOrder.equals("f");
+      }
+  }
+
+  /**
+   * <p>Gets the sort preferences for this rowTable as a String
+   * encoding suitable for storage in a Java Prefrences object.</p>
+   */
+
+  public String getSortPref()
+  {
+    StringBuilder builder = new StringBuilder();
+
+    if (lastSortColumn == -1)
+      {
+        return "";
+      }
+
+    builder.append(lastSortColumn);
+
+    if (lastSortForward)
+      {
+        builder.append("f");
+      }
+    else
+      {
+        builder.append("r");
+      }
+
+    if (olderSortColumn != -1)
+      {
+        builder.append(":");
+        builder.append(olderSortColumn);
+
+        if (olderSortForward)
+          {
+            builder.append("f");
+          }
+        else
+          {
+            builder.append("r");
+          }
+      }
+
+    return builder.toString();
   }
 
   /**
