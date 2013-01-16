@@ -878,7 +878,7 @@ public class rowTable extends baseTable implements ActionListener {
         return;
       }
 
-    String regex = "(\\d+)([fr])(?:(\\d+)([fr]))?";
+    String regex = "(\\d+)([fr])(:(\\d+)([fr]))?";
     Pattern pat = Pattern.compile(regex);
     Matcher mat = pat.matcher(sortPref);
 
@@ -889,8 +889,8 @@ public class rowTable extends baseTable implements ActionListener {
 
     String lastCol = mat.group(1);
     String lastOrder = mat.group(2);
-    String olderCol = mat.group(3);
-    String olderOrder = mat.group(4);
+    String olderCol = mat.group(4);
+    String olderOrder = mat.group(5);
 
     lastSortColumn = Integer.parseInt(lastCol);
     lastSortForward = lastOrder.equals("f");
