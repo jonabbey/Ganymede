@@ -180,9 +180,16 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   public static final windowSizer sizer = new windowSizer(prefs);
 
+  // keys used for our preferences
+
   static final String SPLITTER_POS = "admin_splitter_pos";
   static final String STATUS_AREA_HEIGHT = "status_area_pos";
   static final String TAB_AREA_HEIGHT = "tab_area_height";
+  static final String VISIBLE_TABLE = "visible_table";
+  static final String USERTABLE_SORT_PREF = "usertable_sort";
+  static final String SYNCTABLE_SORT_PREF = "synctable_sort";
+  static final String SCHEDTABLE_SORT_PREF = "schedtable_sort";
+  static final String MANUALTABLE_SORT_PREF = "manualtable_sort";
 
   static final boolean debug = false;
 
@@ -1084,18 +1091,33 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     int statusAreaHeight = -1;
     int tabAreaHeight = -1;
     int dividerLoc = -1;
+    int visibleTable = -1;
+    String userSort = null;
+    String syncSort = null;
+    String schedSort = null;
+    String manualSort = null;
 
     if (prefs != null)
       {
         statusAreaHeight = prefs.getInt(STATUS_AREA_HEIGHT, -1);
         tabAreaHeight = prefs.getInt(TAB_AREA_HEIGHT, -1);
         dividerLoc = prefs.getInt(SPLITTER_POS, -1);
+        visibleTable = prefs.getInt(VISIBLE_TABLE, -1);
+        userSort = prefs.get(USERTABLE_SORT_PREF, null);
+        syncSort = prefs.get(SYNCTABLE_SORT_PREF, null);
+        schedSort = prefs.get(SCHEDTABLE_SORT_PREF, null);
+        manualSort = prefs.get(MANUALTABLE_SORT_PREF, null);
 
         if (debug)
           {
             System.err.println("statusAreaHeight = " + statusAreaHeight);
             System.err.println("tabAreaHeight = " + tabAreaHeight);
             System.err.println("dividerLoc = " + dividerLoc);
+            System.err.println("visibleTable = " + visibleTable);
+            System.err.println("userSort = " + userSort);
+            System.err.println("syncSort = " + syncSort);
+            System.err.println("schedSort = " + schedSort);
+            System.err.println("manualSort = " + manualSort);
           }
       }
 
@@ -1191,6 +1213,16 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
         splitterPane.setDividerLocation(dividerLoc);
       }
+
+    if (visibleTable != -1)
+      {
+        tabPane.setSelectedIndex(visibleTable);
+      }
+
+    table.setSortPref(userSort);
+    syncTaskTable.setSortPref(syncSort);
+    taskTable.setSortPref(schedSort);
+    manualTaskTable.setSortPref(manualSort);
 
     // these break things on JDK 7
     //
@@ -1618,6 +1650,11 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
         prefs.putInt(STATUS_AREA_HEIGHT, statusBox.getHeight());
         prefs.putInt(TAB_AREA_HEIGHT, tabPane.getHeight());
         prefs.putInt(SPLITTER_POS, splitterPane.getDividerLocation());
+        prefs.putInt(VISIBLE_TABLE, tabPane.getSelectedIndex());
+        prefs.put(USERTABLE_SORT_PREF, table.getSortPref());
+        prefs.put(SYNCTABLE_SORT_PREF, syncTaskTable.getSortPref());
+        prefs.put(SCHEDTABLE_SORT_PREF, taskTable.getSortPref());
+        prefs.put(MANUALTABLE_SORT_PREF, manualTaskTable.getSortPref());
       }
   }
 
