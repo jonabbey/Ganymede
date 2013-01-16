@@ -11,11 +11,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -97,7 +99,6 @@ import java.util.ResourceBundle;
  * <p>So, for use within Ganymede, please be sure always to follow
  * these conventions.</p>
  *
- * @version $Id$
  * @author Jonathan Abbey
  */
 
@@ -284,7 +285,8 @@ public class TranslationService {
    * short name so that I can use it everywhere in Ganymede with
    * minimal source code disruption.</p>
    *
-   * This method obviously requires Java 5 due to its use of varargs.
+   * <p>This method obviously requires Java 5 due to its use of
+   * varargs.</p>
    */
 
   public String l(String key, Object... params)
