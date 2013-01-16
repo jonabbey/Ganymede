@@ -1179,15 +1179,16 @@ public class DBQueryHandler {
   }
 
   /**
-   * <P>This helper method extracts the leading octets from the supplied
-   * IP address that are not all zeros.  I.e., for the address
-   * 129.0.116.0, ipAddrNoPad() would return 129.0.116, where
+   * <p>This helper method extracts the leading octets from the
+   * supplied IP address that are not all zeros.  I.e., for the
+   * address 129.0.116.0, ipAddrNoPad() would return 129.0.116, where
    * for the address 129.116.0.0, ipAddrNoPad() would return
-   * 129.116.</P>
+   * 129.116.</p>
    *
-   * <P>Note that, like all Ganymede code dealing with IP addresses,
+   * <p>Note that, like all Ganymede code dealing with IP addresses,
    * Ganymede is using the u2s() and s2u() methods here to handle
-   * encoded unsigned values in the Java signed byte/Byte type/object.</P>
+   * encoded unsigned values in the Java signed byte/Byte
+   * type/object.</p>
    */
 
   private static Byte[] ipAddrNoPad(Byte[] ipaddr)
@@ -1208,8 +1209,8 @@ public class DBQueryHandler {
   }
 
   /**
-   * <P>This method maps an int value between 0 and 255 inclusive
-   * to a legal signed byte value.</P>
+   * <p>This method maps an int value between 0 and 255 inclusive to a
+   * legal signed byte value.</p>
    */
 
   private final static byte u2s(int x)
@@ -1223,8 +1224,8 @@ public class DBQueryHandler {
   }
 
   /**
-   * <P>This method maps a u2s-encoded signed byte value to an
-   * int value between 0 and 255 inclusive.</P>
+   * <p>This method maps a u2s-encoded signed byte value to an int
+   * value between 0 and 255 inclusive.</p>
    */
 
   private final static short s2u(byte b)
