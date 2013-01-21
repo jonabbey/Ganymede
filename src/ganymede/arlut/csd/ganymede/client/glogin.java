@@ -14,7 +14,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -654,7 +654,12 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
     // if we remember the last username that they logged in with,
     // pre-set that and focus the password field.
 
-    String pre_username = gclient.prefs.get("login_user", null);
+    String pre_username = gclient.prefs.get("login_user:" + serverhost, null);
+
+    if (pre_username == null)
+      {
+        gclient.prefs.get("login_user", null);
+      }
 
     if (pre_username != null)
       {
@@ -1061,7 +1066,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
                 // remember last login name.
 
-                gclient.prefs.put("login_user", active_username);
+                gclient.prefs.put("login_user:" + serverhost, active_username);
 
                 startSession(my_session);
               }

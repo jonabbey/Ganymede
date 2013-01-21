@@ -11,7 +11,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -588,7 +588,12 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
     gbl.setConstraints(password, gbc);
     panel.add(password);
 
-    String pre_username = GASHAdminFrame.prefs.get("login_user", null);
+    String pre_username = GASHAdminFrame.prefs.get("login_user:" + serverhost, null);
+
+    if (pre_username == null)
+      {
+        pre_username = GASHAdminFrame.prefs.get("login_user", null);
+      }
 
     if (pre_username != null)
       {
@@ -845,7 +850,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
         // remember last login name.
 
-        GASHAdminFrame.prefs.put("login_user", username.getText());
+        GASHAdminFrame.prefs.put("login_user:" + serverhost, username.getText());
 
         password.setText("");
 
