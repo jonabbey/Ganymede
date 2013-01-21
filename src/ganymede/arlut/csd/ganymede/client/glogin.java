@@ -1192,6 +1192,13 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
       {
         new JErrorDialog(my_frame, e.getMessage(), getErrorImage(), StandardDialog.ModalityType.DOCUMENT_MODAL);
       }
+    else if (e.getType() == ClientMessage.BADCREDS)
+      {
+        passwd.setText("");
+        passwd.requestFocus();
+
+        return;
+      }
     else if (e.getType() == ClientMessage.BUILDSTATUS)
       {
         if (g_client != null)

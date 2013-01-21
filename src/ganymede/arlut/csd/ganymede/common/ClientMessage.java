@@ -3,15 +3,15 @@
    ClientMessage.java
 
    Message types used for client messages.
-   
+
    Created: 1 March 2000
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2010
    The University of Texas at Austin
 
@@ -61,5 +61,6 @@ public interface ClientMessage {
   static final int LOGINCOUNT = 5;
   static final int COMMITNOTIFY = 6;
   static final int ABORTNOTIFY = 7;
-  static final int LAST = 7;
+  static final int BADCREDS = 8;
+  static final int LAST = 8;
 }

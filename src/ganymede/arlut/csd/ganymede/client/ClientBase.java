@@ -6,17 +6,19 @@
    a connection to the server and get logged in.  By using this class,
    the server will only need an RMI stub for this class, regardless of
    what client is written.
-   
+
    Created: 31 March 1998
 
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2011
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -57,6 +59,8 @@ import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.Vector;
 
+import arlut.csd.ganymede.common.ClientMessage;
+import arlut.csd.ganymede.common.ErrorTypeEnum;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.clientAsyncMessage;
 import arlut.csd.ganymede.common.RMISSLClientListener;
@@ -137,7 +141,7 @@ public class ClientBase implements Runnable, RMISSLClientListener {
    */
 
   private String cipherSuite = null;
- 
+
   private Vector listeners = new Vector();
   private String myServerURL = null;
 
@@ -160,7 +164,7 @@ public class ClientBase implements Runnable, RMISSLClientListener {
       {
         throw new IllegalArgumentException("bad argument");
       }
-    
+
     myServerURL = serverURL;
     listeners.addElement(listener);
 
@@ -174,11 +178,11 @@ public class ClientBase implements Runnable, RMISSLClientListener {
    * This method attempts to establish and verify an RMI connection to the
    * server.
    */
-    
+
   public boolean connect() throws RemoteException, NotBoundException, MalformedURLException
   {
     Remote obj = Naming.lookup(myServerURL);
-        
+
     if (obj instanceof Server)
       {
         server = (Server) obj;
@@ -193,7 +197,7 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   /**
    * This method is used by a client to actually get logged into the
    * server.  The {@link arlut.csd.ganymede.rmi.Session Session} handle
-   * returned is then used to do all server operations appropriate 
+   * returned is then used to do all server operations appropriate
    * for a normal client.  Calling the Session logout() method will
    * end the client's connection to the server.
    *
@@ -228,12 +232,27 @@ public class ClientBase implements Runnable, RMISSLClientListener {
 
             if (error != null && !error.equals(""))
               {
-                sendErrorMessage(error);
+                if (retVal.getErrorType() == ErrorTypeEnum.BADCREDS)
+                  {
+                    sendErrorMessage(ClientMessage.BADCREDS, error);
+                  }
+                else
+                  {
+                    sendErrorMessage(error);
+                  }
               }
             else
               {
-                // "Couldn''t log in to server.  Bad username/password?"
-                sendErrorMessage(ts.l("global.login_failure_msg"));
+                if (retVal.getErrorType() == ErrorTypeEnum.BADCREDS)
+                  {
+                    // "Couldn''t log in to server.  Bad username/password?"
+                    sendErrorMessage(ClientMessage.BADCREDS, ts.l("global.login_failure_msg"));
+                  }
+                else
+                  {
+                    // "Couldn''t log in to server.  Bad username/password?"
+                    sendErrorMessage(ts.l("global.login_failure_msg"));
+                  }
               }
 
             return null;
@@ -276,7 +295,7 @@ public class ClientBase implements Runnable, RMISSLClientListener {
         // "ClientBase login caught some other exception:\n{0}"
         sendErrorMessage(ts.l("global.other_exception_msg", ex));
       }
-  
+
     return session;
   }
 
@@ -343,7 +362,7 @@ public class ClientBase implements Runnable, RMISSLClientListener {
             asyncThread = new Thread(this, "Ganymede Async Reader");
             asyncThread.start();
           }
-        
+
         session = null; // avoid lingering reference we don't need for xmlclient
       }
     catch (NullPointerException ex)
@@ -370,7 +389,7 @@ public class ClientBase implements Runnable, RMISSLClientListener {
         // "ClientBase login caught some other exception:\n{0}"
         sendErrorMessage(ts.l("global.other_exception_msg", ex));
       }
-  
+
     return xSession;
   }
 
@@ -471,7 +490,7 @@ public class ClientBase implements Runnable, RMISSLClientListener {
 
   // **
   //
-  // The following three methods implement the 
+  // The following three methods implement the
   // arlut.csd.ganymede.Client interface that the server
   // needs in order to talk to us.
   //
@@ -500,7 +519,7 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   /**
    * Allows the server to send an asynchronous message to the
    * client..  Used by the server to tell the client when a build
-   * is/is not being performed on the server. 
+   * is/is not being performed on the server.
    */
 
   public void sendMessage(int messageType, String status)
@@ -530,7 +549,7 @@ public class ClientBase implements Runnable, RMISSLClientListener {
    * get notified about the SSL cipher suite used if we wind up using
    * SSL to connect to an RMI server.
    */
- 
+
   public void notifySSLClient(String host, int port, String cipherSuite)
   {
     this.cipherSuite = cipherSuite;
@@ -609,12 +628,27 @@ public class ClientBase implements Runnable, RMISSLClientListener {
    * from the server after construction..
    */
 
+  private void sendErrorMessage(int errType, String message)
+  {
+    ClientEvent e = new ClientEvent(errType, message);
+
+    for (int i = 0; i < listeners.size(); i++)
+      {
+        ((ClientListener)listeners.elementAt(i)).messageReceived(e);
+      }
+  }
+
+  /**
+   * Private method to inform clientListeners if we get an error
+   * from the server after construction..
+   */
+
   private void sendErrorMessage(String message)
   {
     ClientEvent e = new ClientEvent(message);
 
     for (int i = 0; i < listeners.size(); i++)
-      { 
+      {
         ((ClientListener)listeners.elementAt(i)).messageReceived(e);
       }
   }

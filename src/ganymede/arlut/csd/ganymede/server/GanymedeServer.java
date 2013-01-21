@@ -68,6 +68,7 @@ import java.util.Vector;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.AdminEntry;
 import arlut.csd.ganymede.common.ClientMessage;
+import arlut.csd.ganymede.common.ErrorTypeEnum;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.Query;
@@ -597,8 +598,12 @@ public class GanymedeServer implements Server {
 
                 // "Bad login attempt"
                 // "Bad username or password, login rejected."
-                return Ganymede.createErrorDialog(ts.l("processLogin.badlogin"),
-                                                  ts.l("processLogin.badlogintext"));
+                ReturnVal badCredsRetVal = Ganymede.createErrorDialog(ts.l("processLogin.badlogin"),
+                                                                      ts.l("processLogin.badlogintext"));
+
+                badCredsRetVal.setErrorType(ErrorTypeEnum.BADCREDS);
+
+                return badCredsRetVal;
               }
           }
       }
