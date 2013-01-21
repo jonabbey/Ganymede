@@ -590,7 +590,7 @@ public class GASHAdmin extends JApplet implements Runnable, ActionListener, RMIS
 
     String pre_username = GASHAdminFrame.prefs.get("login_user:" + serverhost, null);
 
-    if (pre_username == null)
+    if (pre_username == null || pre_username.equals(""))
       {
         pre_username = GASHAdminFrame.prefs.get("login_user", null);
       }

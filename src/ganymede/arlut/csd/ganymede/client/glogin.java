@@ -656,7 +656,7 @@ public class glogin extends JApplet implements Runnable, ActionListener, ClientL
 
     String pre_username = gclient.prefs.get("login_user:" + serverhost, null);
 
-    if (pre_username == null)
+    if (pre_username == null || pre_username.equals(""))
       {
         gclient.prefs.get("login_user", null);
       }
