@@ -21,7 +21,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -286,6 +286,12 @@ final public class GanymedeSession implements Session, Unreferenced {
   private String lastEvent = null;
 
   /**
+   * <p>Server-side timestamp for the event documented in lastEvent.</p>
+   */
+
+  private Date lastEventTime = null;
+
+  /**
    * <p>Our DBSession object.  DBSession is the generic DBStore access
    * layer.  A GanymedeSession is layered on top of a DBSession to
    * provide access control and remote access via RMI.  The DBSession
@@ -509,7 +515,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // set our initial status
 
     status = ts.l("init.loggedin");
-    lastEvent = ts.l("init.loggedin");
+    setLastEvent(ts.l("init.loggedin"));
   }
 
   //
@@ -999,9 +1005,16 @@ final public class GanymedeSession implements Session, Unreferenced {
    * stored in the modification history for objects modified by this
    * transaction.
    *
-   * @return A ReturnVal indicating success or failure.  May
-   * be simply 'null' to indicate success if no feedback need
-   * be provided.
+   * @param interactive If False, this transaction will operate in
+   * non-interactive mode.  Certain Invid operations will be optimized
+   * to avoid doing choice list queries and bind checkpoint
+   * operations.  When a transaction is operating in non-interactive mode,
+   * any failure that cannot be handled cleanly due to the optimizations will
+   * result in the transaction refusing to commit when commitTransaction()
+   * is attempted.  This mode is intended for batch operations.
+   *
+   * @return A ReturnVal indicating success or failure.  May be simply
+   * 'null' to indicate success if no feedback need be provided.
    *
    * @see arlut.csd.ganymede.rmi.Session
    */
@@ -1047,7 +1060,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     dbSession.openTransaction(describe, interactive); // *sync* DBSession
 
     this.status = "Transaction: " + describe;
-    setLastEvent("openTransaction");
+    setLastEvent("new transaction");
 
     return null;
   }
@@ -1559,6 +1572,8 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
+    setLastEvent("dump:" + queryString);
+
     return queryEngine.dump(queryString);
   }
 
@@ -1580,6 +1595,10 @@ final public class GanymedeSession implements Session, Unreferenced {
   public synchronized DumpResult dump(Query query) throws NotLoggedInException
   {
     checklogin();
+
+    query.setDescriber(dbSession);
+
+    setLastEvent("dump:" + query.toString());
 
     return queryEngine.dump(query);
   }
@@ -1733,6 +1752,8 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
+    setLastEvent("query:" + queryString);
+
     return queryEngine.query(queryString);
   }
 
@@ -1750,6 +1771,10 @@ final public class GanymedeSession implements Session, Unreferenced {
   public synchronized QueryResult query(Query query) throws NotLoggedInException
   {
     checklogin();
+
+    query.setDescriber(dbSession);
+
+    setLastEvent("query:" + query.toString());
 
     return queryEngine.query(query);
   }
@@ -1894,6 +1919,8 @@ final public class GanymedeSession implements Session, Unreferenced {
         before = new Date(lastModDate.getTime() + 10000);
       }
 
+    setLastEvent("viewObjectHistory:" + dbSession.describe(invid));
+
     return Ganymede.log.retrieveHistory(invid, since, before, false, fullTransactions, false); // *sync* DBLog
   }
 
@@ -1958,6 +1985,8 @@ final public class GanymedeSession implements Session, Unreferenced {
         since = creationDate;
       }
 
+    setLastEvent("viewAdminHistory:" + dbSession.describe(invid));
+
     return Ganymede.log.retrieveHistory(invid, since, null, true, true, false); // *sync* DBLog
   }
 
@@ -2018,7 +2047,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         if (!obj.isEmbedded())
           {
-            setLastEvent("view " + obj.getTypeName() + ":" + obj.getLabel());
+            setLastEvent("view:" + obj.getTypeName() + ":" + obj.getLabel());
           }
 
         // return a copy that knows what GanymedeSession is
@@ -2106,7 +2135,7 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         if (!obj.isEmbedded())
           {
-            setLastEvent("edit " + obj.getTypeName() + ":" + obj.getLabel());
+            setLastEvent("edit:" + obj.getTypeName() + ":" + obj.getLabel());
           }
 
         db_object objref = null;
@@ -2212,6 +2241,8 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
+    setLastEvent("create:" + dbSession.describeType(type));
+
     return this.create_db_object(type, false, null);
   }
 
@@ -2247,6 +2278,8 @@ final public class GanymedeSession implements Session, Unreferenced {
         return Ganymede.createErrorDialog(ts.l("global.no_such_object_type", objectType));
       }
 
+    setLastEvent("create:" + objectType);
+
     return this.create_db_object(base.getTypeID());
   }
 
@@ -2281,6 +2314,8 @@ final public class GanymedeSession implements Session, Unreferenced {
         return Ganymede.createErrorDialog(ts.l("clone_db_object.clone_error"),
                                           ts.l("clone_db_object.clone_error_text"));
       }
+
+    setLastEvent("clone:" + dbSession.describe(invid));
 
     ReturnVal retVal = view_db_object(invid); // get a copy customized for per-field visibility
 
@@ -2420,7 +2455,7 @@ final public class GanymedeSession implements Session, Unreferenced {
                                           ts.l("inactivate_db_object.not_inactivatable", eObj.getLabel()));
       }
 
-    setLastEvent("inactivate " + eObj.getTypeName() + ":" + eObj.getLabel());
+    setLastEvent("inactivate:" + eObj.getTypeName() + ":" + eObj.getLabel());
 
     // note!  DBEditObject's finalizeInactivate() method does the
     // event logging
@@ -2497,7 +2532,7 @@ final public class GanymedeSession implements Session, Unreferenced {
                                                vObj.getLabel()));
       }
 
-    setLastEvent("reactivate " + eObj.getTypeName() + ":" + eObj.getLabel());
+    setLastEvent("reactivate:" + eObj.getTypeName() + ":" + eObj.getLabel());
 
     // note!  DBEditObject's finalizeReactivate() method does the
     // event logging at transaction commit time
@@ -2625,7 +2660,7 @@ final public class GanymedeSession implements Session, Unreferenced {
           }
       }
 
-    setLastEvent("delete " + vObj.getTypeName() + ":" + vObj.getLabel());
+    setLastEvent("delete:" + vObj.getTypeName() + ":" + vObj.getLabel());
 
     // we do logging of the object deletion in DBEditSet.commit() when
     // the transaction commits
@@ -2671,6 +2706,8 @@ final public class GanymedeSession implements Session, Unreferenced {
                                           ts.l("runXMLQuery.transmitter_error_msg", ex.getMessage()));
       }
 
+    setLastEvent("xml query:" + queryString);
+
     ReturnVal retVal = new ReturnVal(true);
     retVal.setFileTransmitter(transmitter);
     return retVal;
@@ -2694,6 +2731,10 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     // get a simple list of matching invids without bothering to do
     // transport setup.
+
+    query.setDescriber(dbSession);
+
+    setLastEvent("xml query:" + query.toString());
 
     QueryResult rows = queryEngine.queryDispatch(query, false, false, null, null);
 
@@ -2765,7 +2806,6 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     checklogin();
 
-    Ganymede.debug("GanymedeSession.getDataXML(" + syncChannel + ")");
     return this.getXML(true, false, syncChannel, includeHistory, includeOid);
   }
 
@@ -3297,7 +3337,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     newObj = (DBObject) retVal.getObject();
 
-    setLastEvent("create " + newObj.getTypeName());
+    setLastEvent("create:" + newObj.getTypeName());
 
     retVal = ReturnVal.success();
 
@@ -3581,6 +3621,7 @@ final public class GanymedeSession implements Session, Unreferenced {
                               (status == null) ? "" : status,
                               connecttime,
                               (lastEvent == null) ? "" : lastEvent,
+                              lastEventTime,
                               objectsCheckedOut);
         userInfo = info;
       }
@@ -3633,6 +3674,16 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
 
     this.lastEvent = text;
+
+    if (text == null)
+      {
+        lastEventTime = null;
+      }
+    else
+      {
+        lastEventTime = new Date();
+      }
+
     resetAdminEntry();
     GanymedeAdmin.refreshUsers();
   }

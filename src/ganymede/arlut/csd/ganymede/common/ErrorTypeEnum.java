@@ -13,8 +13,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -51,7 +53,7 @@ import arlut.csd.Util.TranslationService;
 
 /*------------------------------------------------------------------------------
                                                                             enum
-                                                                    ErrorTypeEnum
+                                                                   ErrorTypeEnum
 
 ------------------------------------------------------------------------------*/
 
@@ -86,5 +88,11 @@ public enum ErrorTypeEnum {
    * even if the object is not complete enough to have a label.</p>
    */
 
-  SHOWOBJECT;
+  SHOWOBJECT,
+
+  /**
+   * <p>Returned if a login attempt failed due to bad credentials.</p>
+   */
+
+  BADCREDS;
 }

@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -59,6 +59,7 @@ import arlut.csd.Util.RandomUtils;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.ObjectStatus;
+import arlut.csd.ganymede.common.QueryDescriber;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.rmi.db_field;
@@ -103,7 +104,7 @@ import arlut.csd.ganymede.rmi.db_field;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-final public class DBSession {
+final public class DBSession implements QueryDescriber {
 
   static boolean debug = false;
 
@@ -1705,6 +1706,19 @@ final public class DBSession {
   }
 
   /**
+   * <p>This method returns a handle to the objectHook for
+   * a particular Invid.</p>
+   */
+
+  public DBEditObject getObjectHook(Invid invid)
+  {
+    DBObjectBase base;
+
+    base = Ganymede.db.getObjectBase(invid.getType());
+    return base.getObjectHook();
+  }
+
+  /**
    * <p>Gets our lock key</p>
    */
 
@@ -1780,19 +1794,6 @@ final public class DBSession {
       }
   }
 
-  /**
-   * <p>This method returns a handle to the objectHook for
-   * a particular Invid.</p>
-   */
-
-  public DBEditObject getObjectHook(Invid invid)
-  {
-    DBObjectBase base;
-
-    base = Ganymede.db.getObjectBase(invid.getType());
-    return base.getObjectHook();
-  }
-
   public String toString()
   {
     if (editSet != null)
@@ -1802,6 +1803,61 @@ final public class DBSession {
     else
       {
         return super.toString();
+      }
+  }
+
+  //******************************************************************
+  //
+  // To satisfy the arlut.csd.ganymede.common.QueryDescriber interface
+  //
+  //******************************************************************
+
+  /**
+   * This method is intended as a lightweight way of returning a handy
+   * description of the specified type.
+   */
+
+  public String describeType(short type)
+  {
+    try
+      {
+        DBObjectBase base = Ganymede.db.getObjectBase(type);
+
+        return base.getName();
+      }
+    catch (Exception ex)
+      {
+        return String.valueOf(type);
+      }
+  }
+
+  public String describeField(short objType, short fieldType)
+  {
+    try
+      {
+        DBObjectBase base = Ganymede.db.getObjectBase(objType);
+        DBObjectBaseField field = base.getFieldDef(fieldType);
+
+        return field.getName();
+      }
+    catch (Exception ex)
+      {
+        return String.valueOf(fieldType);
+      }
+  }
+
+  public String describeField(String objTypeName, short fieldType)
+  {
+    try
+      {
+        DBObjectBase base = Ganymede.db.getObjectBase(objTypeName);
+        DBObjectBaseField field = base.getFieldDef(fieldType);
+
+        return field.getName();
+      }
+    catch (Exception ex)
+      {
+        return String.valueOf(fieldType);
       }
   }
 }

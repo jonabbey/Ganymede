@@ -15,8 +15,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -133,9 +135,11 @@ public interface adminSession extends Remote {
    *
    * @param waitForUsers if true, shutdown will be deferred until all
    * users are logged out.  No new users will be allowed to login.
+   *
+   * @param reason Message to be logged and displayed to any users connected.
    */
 
-  ReturnVal     shutdown(boolean waitForUsers) throws RemoteException;
+  ReturnVal     shutdown(boolean waitForUsers, String reason) throws RemoteException;
 
   /**
    * <P>Dumps the current state of the db to disk.</p>
@@ -220,7 +224,7 @@ public interface adminSession extends Remote {
 
   /**
    * <p>Locks the server to prevent client logins and edits the server
-   * schema.</p> 
+   * schema.</p>
    *
    * <p>This method will return a {@link
    * arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} remote reference to

@@ -145,6 +145,13 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   private static long totalMem;
 
+  /**
+   * <p>Background thread that will order a refresh of the admin
+   * consoles' task lists if we have any tasks currently running.</p>
+   */
+
+  private static Thread taskRefreshThread;
+
   /* -----====================--------------------====================-----
 
                                  static methods
@@ -500,22 +507,56 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     scheduleHandles = Ganymede.scheduler.reportTaskInfo();
 
+    boolean anyRunningSyncs = false;
+
+    for (scheduleHandle handle: scheduleHandles)
+      {
+        if (handle.isRunning())
+          {
+            anyRunningSyncs = true;
+          }
+
+        handle.updateServerTime();
+      }
+
     synchronized (GanymedeAdmin.consoles)
       {
-        for (GanymedeAdmin temp: GanymedeAdmin.consoles)
+        for (GanymedeAdmin console: GanymedeAdmin.consoles)
           {
             try
               {
-                temp.doRefreshTasks(scheduleHandles);
+                console.doRefreshTasks(scheduleHandles);
               }
             catch (RemoteException ex)
               {
-                handleConsoleRMIFailure(temp, ex);
+                handleConsoleRMIFailure(console, ex);
               }
           }
       }
 
     detachBadConsoles();
+
+    if (anyRunningSyncs && GanymedeAdmin.taskRefreshThread == null)
+      {
+        GanymedeAdmin.taskRefreshThread =
+        new Thread(new Thread() {
+            public void run() {
+
+              try
+                {
+                  Thread.sleep(1000);
+                }
+              catch (InterruptedException ex)
+                {
+                }
+
+              GanymedeAdmin.taskRefreshThread = null;
+              GanymedeAdmin.refreshTasks();
+            }
+          }, "task reporter");
+
+        GanymedeAdmin.taskRefreshThread.start();
+      }
   }
 
   /**
@@ -1020,9 +1061,11 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    *
    * @param waitForUsers if true, shutdown will be deferred until all users are logged
    * out.  No new users will be allowed to login.
+   *
+   * @param reason Message to be logged and displayed to any users connected.
    */
 
-  public ReturnVal shutdown(boolean waitForUsers)
+  public ReturnVal shutdown(boolean waitForUsers, String reason)
   {
     if (!fullprivs)
       {
@@ -1034,7 +1077,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     if (waitForUsers)
       {
-        GanymedeServer.setShutdown();
+        GanymedeServer.setShutdown(reason);
 
         // "Server Set For Shutdown"
         // "The server is prepared for shut down.  Shutdown will commence as soon as all current users log out."
@@ -1043,8 +1086,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
       }
     else
       {
-        return GanymedeServer.shutdown(); // we may never return if the shutdown succeeds.. the client
-                                          // will catch an exception in that case.
+        return GanymedeServer.shutdown(reason); // we may never return if the shutdown succeeds.. the client
+                                                // will catch an exception in that case.
       }
   }
 

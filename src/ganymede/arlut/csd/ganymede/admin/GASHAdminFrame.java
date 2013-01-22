@@ -11,7 +11,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -180,9 +180,16 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   public static final windowSizer sizer = new windowSizer(prefs);
 
+  // keys used for our preferences
+
   static final String SPLITTER_POS = "admin_splitter_pos";
   static final String STATUS_AREA_HEIGHT = "status_area_pos";
   static final String TAB_AREA_HEIGHT = "tab_area_height";
+  static final String VISIBLE_TABLE = "visible_table";
+  static final String USERTABLE_SORT_PREF = "usertable_sort";
+  static final String SYNCTABLE_SORT_PREF = "synctable_sort";
+  static final String SCHEDTABLE_SORT_PREF = "schedtable_sort";
+  static final String MANUALTABLE_SORT_PREF = "manualtable_sort";
 
   static final boolean debug = false;
 
@@ -306,12 +313,11 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   String headers[] = {ts.l("global.user_col_0"), // "User"
                       ts.l("global.user_col_1"), // "System"
-                      ts.l("global.user_col_2"), // "Status"
-                      ts.l("global.user_col_3"), // "Connect Time"
-                      ts.l("global.user_col_4"), // "Last Event"
-                      ts.l("global.user_col_5")}; // "Objects Checked Out"
+                      ts.l("global.user_col_3"), // "Connect"
+                      ts.l("global.user_col_4"), // "Activity"
+                      ts.l("global.user_col_5")}; // "Locked Objects"
 
-  int colWidths[] = {100,100,100,100,100,100};
+  int colWidths[] = {50,50,25,325,50};
 
   // resources for the sync task monitor table
 
@@ -321,8 +327,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
                               ts.l("global.task_col_5"), // "Type"
                               ts.l("global.task_col_6"), // "Status"
                               ts.l("global.task_col_1"), // "Scheduling Status"
-                              ts.l("global.task_col_2")}; // "Last Run"
-  int syncTaskColWidths[] = {100,100,200,100,100};
+                              ts.l("global.task_col_2")}; // "Last Completed"
+  int syncTaskColWidths[] = {50,50,100,50,50};
 
   // resources for the scheduled task monitor table
 
@@ -332,9 +338,9 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
                           ts.l("global.task_col_1"), // "Status"
                           ts.l("global.task_col_4"), // "Interval"
                           ts.l("global.task_col_3"), // "Next Run"
-                          ts.l("global.task_col_2")}; // "Last Run"
+                          ts.l("global.task_col_2")}; // "Last Completed"
 
-  int taskColWidths[] = {100,100,100,100,100};
+  int taskColWidths[] = {50,50,50,50,50};
 
   // resources for the manual task monitor table
 
@@ -342,8 +348,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
   String manualTaskHeaders[] = {ts.l("global.task_col_0"), // "Task"
                                 ts.l("global.task_col_1"), // "Status"
-                                ts.l("global.task_col_2")}; // "Last Run"
-  int manualTaskColWidths[] = {100,100,100};
+                                ts.l("global.task_col_2")}; // "Last Completed"
+  int manualTaskColWidths[] = {50,50,50};
 
   JSplitPane splitterPane = null;
 
@@ -1085,18 +1091,33 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
     int statusAreaHeight = -1;
     int tabAreaHeight = -1;
     int dividerLoc = -1;
+    int visibleTable = -1;
+    String userSort = null;
+    String syncSort = null;
+    String schedSort = null;
+    String manualSort = null;
 
     if (prefs != null)
       {
         statusAreaHeight = prefs.getInt(STATUS_AREA_HEIGHT, -1);
         tabAreaHeight = prefs.getInt(TAB_AREA_HEIGHT, -1);
         dividerLoc = prefs.getInt(SPLITTER_POS, -1);
+        visibleTable = prefs.getInt(VISIBLE_TABLE, -1);
+        userSort = prefs.get(USERTABLE_SORT_PREF, null);
+        syncSort = prefs.get(SYNCTABLE_SORT_PREF, null);
+        schedSort = prefs.get(SCHEDTABLE_SORT_PREF, null);
+        manualSort = prefs.get(MANUALTABLE_SORT_PREF, null);
 
         if (debug)
           {
             System.err.println("statusAreaHeight = " + statusAreaHeight);
             System.err.println("tabAreaHeight = " + tabAreaHeight);
             System.err.println("dividerLoc = " + dividerLoc);
+            System.err.println("visibleTable = " + visibleTable);
+            System.err.println("userSort = " + userSort);
+            System.err.println("syncSort = " + syncSort);
+            System.err.println("schedSort = " + schedSort);
+            System.err.println("manualSort = " + manualSort);
           }
       }
 
@@ -1192,6 +1213,16 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
         splitterPane.setDividerLocation(dividerLoc);
       }
+
+    if (visibleTable != -1)
+      {
+        tabPane.setSelectedIndex(visibleTable);
+      }
+
+    table.setSortPref(userSort);
+    syncTaskTable.setSortPref(syncSort);
+    taskTable.setSortPref(schedSort);
+    manualTaskTable.setSortPref(manualSort);
 
     // these break things on JDK 7
     //
@@ -1511,7 +1542,7 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
         try
           {
-            success = adminDispatch.shutdown(waitForUsers);
+            success = adminDispatch.shutdown(waitForUsers, null);
           }
         catch (RemoteException ex)
           {
@@ -1619,6 +1650,11 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
         prefs.putInt(STATUS_AREA_HEIGHT, statusBox.getHeight());
         prefs.putInt(TAB_AREA_HEIGHT, tabPane.getHeight());
         prefs.putInt(SPLITTER_POS, splitterPane.getDividerLocation());
+        prefs.putInt(VISIBLE_TABLE, tabPane.getSelectedIndex());
+        prefs.put(USERTABLE_SORT_PREF, table.getSortPref());
+        prefs.put(SYNCTABLE_SORT_PREF, syncTaskTable.getSortPref());
+        prefs.put(SCHEDTABLE_SORT_PREF, taskTable.getSortPref());
+        prefs.put(MANUALTABLE_SORT_PREF, manualTaskTable.getSortPref());
       }
   }
 

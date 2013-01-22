@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -179,8 +179,8 @@ public class GanymedeScheduler extends Thread {
   private boolean taskListInitialized = false;
 
   /**
-   * if true, the scheduler will attempt to notify the GanymedeAdmin class when
-   * tasks are scheduled and/or completed.
+   * If true, the scheduler will attempt to notify the GanymedeAdmin
+   * class when tasks are scheduled and/or completed.
    */
 
   private boolean reportTasks;
@@ -513,7 +513,7 @@ public class GanymedeScheduler extends Thread {
 
     if (logStuff)
       {
-        Ganymede.debug("Ganymede Scheduler: Scheduled task " + name + " for execution at " + time);
+        Ganymede.debug("sched: Scheduled task " + name + " for execution at " + time);
       }
 
     updateTaskInfo(true);
@@ -585,7 +585,7 @@ public class GanymedeScheduler extends Thread {
 
     if (logStuff)
       {
-        Ganymede.debug("Ganymede Scheduler: Scheduled task " + name + " for daily execution at " + time);
+        Ganymede.debug("sched: Scheduled task " + name + " for daily execution at " + time);
       }
 
     updateTaskInfo(true);
@@ -644,8 +644,8 @@ public class GanymedeScheduler extends Thread {
 
     if (logStuff)
       {
-        Ganymede.debug("Ganymede Scheduler: Scheduled task " + name + " for periodic execution at " + firstTime);
-        Ganymede.debug("                    Task will repeat every " + intervalMinutes + " minutes");
+        Ganymede.debug("sched: Scheduled task " + name + " for periodic execution at " + firstTime);
+        Ganymede.debug("                       Task will repeat every " + intervalMinutes + " minutes");
       }
 
     updateTaskInfo(true);
@@ -1187,7 +1187,7 @@ public class GanymedeScheduler extends Thread {
       {
         if (logStuff && !(handle.task instanceof silentTask))
           {
-            Ganymede.debug("Ganymede Scheduler: running " + handle.name);
+            Ganymede.debug("sched: Running " + handle.name);
           }
 
         currentlyRunning.put(handle.name, handle);
@@ -1210,7 +1210,7 @@ public class GanymedeScheduler extends Thread {
       {
         if (logStuff && !(handle.task instanceof silentTask))
           {
-            Ganymede.debug("Ganymede Scheduler: " + handle.name + " completed");
+            Ganymede.debug("sched: " + handle.name + " completed");
           }
 
         // we need to check to see if the task was ordinarily scheduled to
@@ -1229,7 +1229,7 @@ public class GanymedeScheduler extends Thread {
               {
                 if (logStuff && !(handle.task instanceof silentTask))
                   {
-                    Ganymede.debug("Ganymede Scheduler: rescheduling task " +
+                    Ganymede.debug("sched: rescheduling task " +
                                    handle.name + " for " + handle.startTime);
                   }
 
@@ -1250,7 +1250,7 @@ public class GanymedeScheduler extends Thread {
       }
     else
       {
-        Ganymede.debug("Ganymede Scheduler: confusion! Couldn't find task " +
+        Ganymede.debug("sched: confusion! Couldn't find task " +
                        handle.name + " on the runnng list");
       }
   }
@@ -1366,7 +1366,6 @@ public class GanymedeScheduler extends Thread {
       {
         GanymedeAdmin.refreshTasks();
       }
-
 
     if (debug)
       {

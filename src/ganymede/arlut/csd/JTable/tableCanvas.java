@@ -11,8 +11,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -82,8 +84,8 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
   Rectangle backing_rect;
   Graphics bg;
 
-  int 
-    hbar_old = 0, 
+  int
+    hbar_old = 0,
     vbar_old = 0,
     colDrag = 0,
     dragRowSave = -1,
@@ -92,7 +94,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
     v_offset = 0,               // y value of the topmost displayed pixel
     h_offset = 0,               // x value of the leftmost displayed pixel
     oldClickCol = -1,
-    oldClickRow = -1; 
+    oldClickRow = -1;
 
   long
     lastClick = 0;
@@ -120,7 +122,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
    *
    */
 
-  public synchronized void paint(Graphics g) 
+  public synchronized void paint(Graphics g)
   {
     if (debug)
       {
@@ -137,7 +139,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
       }
 
     if (debug)
-      { 
+      {
         System.err.println("tableCanvas: copying image");
       }
 
@@ -177,7 +179,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
      The rendering algorithm uses a single large backing store image, with
      each cell drawn directly onto the backing store using the 1.1 setClip()
      routine.
-     
+
      For now we're just going to center our strings within each
      header.  Later on maybe we'll make this modifiable.
 
@@ -233,7 +235,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
       tr = null;
 
     /* -- */
-    
+
     /* ------------------------------------------------------------------------
 
        General algorithm: reallocate/initialize our backing store if our size
@@ -242,7 +244,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
        rendering algorithm to clear the table.
 
        ------------------------------------------------------------------------ */
-       
+
     if (debug)
       {
         System.err.println("render called");
@@ -258,7 +260,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
     // prep our backing image
 
-    if (backing == null) 
+    if (backing == null)
       {
         if (debug)
           {
@@ -356,27 +358,27 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
             System.err.println("maximum = " + rt.hbar.getMaximum());
             System.err.println("calculated right edge = " + (h_offset + width));
             System.err.println("canvas width = " + width);
-            System.err.println("position of right pole = " + rt.colPos.elementAt(rt.cols.size()));
+            System.err.println("position of right pole = " + rt.colPos.get(rt.cols.size()));
           }
 
         /* calculate first col visible */
 
-        first_col = 0;  
-        xpos =  rt.vLineThickness + ((tableCol) rt.cols.elementAt(first_col)).width;
+        first_col = 0;
+        xpos =  rt.vLineThickness + rt.cols.get(first_col).width;
 
         while (xpos < h_offset)
           {
-            xpos += rt.vLineThickness + ((tableCol) rt.cols.elementAt(++first_col)).width;
+            xpos += rt.vLineThickness + rt.cols.get(++first_col).width;
           }
 
         /* calculate last col visible */
 
         last_col = first_col;
         leftedge = width + h_offset;
-        
+
         while ((xpos < leftedge) && (last_col < rt.cols.size() - 1))
           {
-            xpos += rt.vLineThickness + ((tableCol) rt.cols.elementAt(++last_col)).width;
+            xpos += rt.vLineThickness + rt.cols.get(++last_col).width;
           }
       }
     else
@@ -414,11 +416,11 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
         first_row = 0;
         ypos = 0;
 
-        tr = (tableRow) rt.rows.elementAt(first_row);
+        tr = rt.rows.get(first_row);
 
         while (tr.getBottomEdge() < v_offset && ++first_row < rt.rows.size())
           {
-            tr = (tableRow) rt.rows.elementAt(first_row);
+            tr = rt.rows.get(first_row);
           }
 
         if (debug)
@@ -434,7 +436,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
         bottomedge = v_offset + height - 1 - rt.displayRegionFirstLine();
 
         while (last_row < (rt.rows.size() - 1) &&
-               ((tableRow) rt.rows.elementAt(last_row)).getTopEdge() < bottomedge)
+               rt.rows.get(last_row).getTopEdge() < bottomedge)
           {
             last_row++;
           }
@@ -462,9 +464,9 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
         else
           {
             // we'll have varying row sizes for the loaded rows,
-            // followed by a series of rows of single row_height 
+            // followed by a series of rows of single row_height
 
-            last_row = rt.rows.size() + 
+            last_row = rt.rows.size() +
               (height - rt.displayRegionFirstLine() - rt.calcVSize()) /
               (rt.row_height + rt.hRowLineThickness);
 
@@ -489,9 +491,9 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
     for (int j = first_col; j <= last_col; j++)
       {
-        column = (tableCol) rt.cols.elementAt(j);
+        column = rt.cols.get(j);
 
-        /* render the column 
+        /* render the column
 
            note that this loop can go past the last row in the
            rt.rows vector (if rt.vertFill is true).. we do this
@@ -503,17 +505,17 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
             System.err.println("Rendering rows: first_row = " + first_row + ", last_row = " + last_row);
           }
 
-        leftEdge = ((Integer) rt.colPos.elementAt(j)).intValue() - h_offset + rt.vLineThickness;
+        leftEdge = rt.colPos.get(j) - h_offset + rt.vLineThickness;
 
         int i;
-        
+
         if (!rt.vbar_visible)
           {
             // we have the table partially filled.. handle it
 
             for (i = first_row; i <= last_visible_row; i++)
               {
-                row = (tableRow) rt.rows.elementAt(i);
+                row = rt.rows.get(i);
 
                 topLine = row.getTopEdge() - v_offset;
 
@@ -557,15 +559,15 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
               {
                 bg.setColor(rt.tableAttrib.bg);
               }
-            
+
             // open up the clip region enough for us to blank the rest of
             // this column
-            
+
             bg.setClip(leftEdge, blankTop,
                        column.width, height - blankTop);
-            
+
             // and do it
-            
+
             bg.fillRect(leftEdge, blankTop,
                         column.width, height - blankTop);
           }
@@ -575,13 +577,13 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
             for (i = first_row; i <= last_row; i++)
               {
-                row = (tableRow) rt.rows.elementAt(i);
-                
+                row = rt.rows.get(i);
+
                 topLine = row.getTopEdge() - v_offset;
-                
+
                 cellRect.setBounds(leftEdge, topLine, column.width, row.getHeight() + 1);
                 bg.setClip(cellRect);
-                
+
                 renderBlitCell(cellRect, bg, j, i, column);
               }
           }
@@ -589,7 +591,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
         // and now render the header for this column.  We do this last so that
         // we will overwrite whatever portion of the first row extends above
         // the displayRegionFirstLine() demarc.
-        
+
         cellRect.setBounds(leftEdge, 0, column.width, rt.headerAttrib.height + 1);
         bg.setClip(cellRect);
 
@@ -601,13 +603,13 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
         if (column.header != null)
           {
             bg.setColor(rt.headerAttrib.fg);
-            
+
             strwidth = rt.headerAttrib.fontMetric.stringWidth(column.header);
-            bg.drawString(column.header, cellRect.x + cellRect.width / 2 - (strwidth/2), 
+            bg.drawString(column.header, cellRect.x + cellRect.width / 2 - (strwidth/2),
                           cellRect.y + rt.headerAttrib.baseline);
           }
       }
-        
+
     // Draw lines ------------------------------------------------------------
 
     // max out our clip so we can draw the lines
@@ -624,7 +626,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
     bg.drawLine(0,
                 rt.headerAttrib.height + rt.hHeadLineThickness,
-                width-1, 
+                width-1,
                 rt.headerAttrib.height + rt.hHeadLineThickness); // line between header and table
 
     // draw a line across the bottom of the table
@@ -648,7 +650,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
             drawHorizLine(ypos);
           }
       }
-    
+
     // if rt.horizLines is true, draw the horizontal lines
     // in the body of the table
 
@@ -677,7 +679,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
               }
             else
               {
-                row = (tableRow) rt.rows.elementAt(i);
+                row = rt.rows.get(i);
 
                 horizlinePos = row.getBottomEdge() - v_offset;
 
@@ -695,8 +697,8 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
       {
         for (int j = first_col; j <= last_col + 1; j++)
           {
-            xpos = ((Integer) rt.colPos.elementAt(j)).intValue() - h_offset;
-            
+            xpos = rt.colPos.get(j) - h_offset;
+
             bg.setColor(rt.vHeadLineColor);
             bg.drawLine(xpos, 0, xpos, rt.displayRegionFirstLine() - 1);
             bg.setColor(rt.vRowLineColor);
@@ -837,13 +839,13 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
    *
    */
 
-  private void renderBlitCell(Rectangle cellRect, Graphics g, 
+  private void renderBlitCell(Rectangle cellRect, Graphics g,
                               int col, int row,
                               tableCol element)
   {
     tableCell cell;
 
-    int 
+    int
       baseLine,
       strwidth,
       just;
@@ -866,11 +868,11 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
       {
         cell = null;    // if we are vertically filling
       }
-    
+
     // fill in our background
 
     setCellBackColor(g, cell, element); // note this is the canvas' setCBC, not the tables
-            
+
     g.fillRect(cellRect.x, cellRect.y, cellRect.width, cellRect.height);
 
     if (cell == null)
@@ -884,7 +886,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
     g.setFont(cell.getFont());
     strwidth = cell.getCurrentWidth();
-            
+
     // set our color
 
     setCellForeColor(g, cell, element);
@@ -899,17 +901,17 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
             // and draw
 
             just = cell.getJust();
-                    
+
             switch (just)
               {
               case tableAttr.JUST_LEFT:
                 g.drawString(renderString, cellRect.x + 2, baseLine);
                 break;
-                        
+
               case tableAttr.JUST_RIGHT:
                 g.drawString(renderString, cellRect.x + cellRect.width - strwidth - 2, baseLine);
                 break;
-                        
+
               case tableAttr.JUST_CENTER:
                 g.drawString(renderString, cellRect.x + cellRect.width / 2 - (strwidth/2), baseLine);
                 break;
@@ -941,10 +943,10 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
    * the index for the row containing that point.
    *
    */
-  
+
   int mapClickToRow(int vy)
   {
-    int 
+    int
       base,
       row,
       rowHeight;
@@ -953,14 +955,14 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
       tr;
 
     /* -- */
-    
+
     base = rt.displayRegionFirstLine();
-    
+
     row = 0;
 
     for (row = 0; row < rt.rows.size() && base < vy; row++)
       {
-        tr = (tableRow) rt.rows.elementAt(row);
+        tr = rt.rows.get(row);
         rowHeight = tr.getRowSpan() * (rt.row_height + rt.hRowLineThickness);
 
         base += rowHeight;
@@ -1032,12 +1034,12 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
         for (col = 1; col < rt.cols.size(); col++)
           {
-            int colLoc = ((Integer) rt.colPos.elementAt(col)).intValue();
+            int colLoc = rt.colPos.get(col);
 
             // nice wide grab range
-        
-            if ((vx > colLoc - colgrab) &&
-                (vx < colLoc + colgrab))
+
+            if (vx > colLoc - colgrab &&
+                vx < colLoc + colgrab)
               {
                 if (debug)
                   {
@@ -1052,7 +1054,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
                 if (dragRowSave != -1)
                   {
-                    dragRowSaveY = ((tableRow) rt.rows.elementAt(dragRowSave)).getTopEdge() - v_offset;
+                    dragRowSaveY = rt.rows.get(dragRowSave).getTopEdge() - v_offset;
 
                     if (debug)
                       {
@@ -1061,8 +1063,8 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
                       }
                   }
               }
-            else if ((vx >= (colLoc + colgrab)) &&
-                     (vx <= (((Integer) rt.colPos.elementAt(col+1)).intValue() - colgrab)))
+            else if (vx >= colLoc + colgrab &&
+                     vx <= rt.colPos.get(col+1) - colgrab)
               {
                 clickCol = col;
               }
@@ -1074,8 +1076,8 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
         if (clickCol == -1)
           {
-            if ((vx >= ((Integer) rt.colPos.elementAt(0)).intValue()) &&
-                (vx <= (((Integer) rt.colPos.elementAt(1)).intValue() - colgrab)))
+            if (vx >= rt.colPos.get(0) &&
+                vx <= rt.colPos.get(1) - colgrab)
               {
                 clickCol = 0;
               }
@@ -1099,7 +1101,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
                 return;
               }
 
-            if ((clickRow == oldClickRow) && (clickCol == oldClickCol))
+            if (clickRow == oldClickRow && clickCol == oldClickCol)
               {
                 if (e.getWhen() - lastClick < 500)
                   {
@@ -1139,7 +1141,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
     int
       x, y;
 
-    float 
+    float
       x1;
 
     /* -- */
@@ -1176,17 +1178,17 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
         if (debug)
           {
             System.err.println("placing column " + colDrag);
-            
+
             System.err.println("x = " + x);
-            System.err.println("colPos["+(colDrag-1)+"] = " + rt.colPos.elementAt(colDrag-1));
-            System.err.println("colPos["+(colDrag)+"] = " + rt.colPos.elementAt(colDrag));
+            System.err.println("colPos["+(colDrag-1)+"] = " + rt.colPos.get(colDrag-1));
+            System.err.println("colPos["+(colDrag)+"] = " + rt.colPos.get(colDrag));
           }
 
         // if we have gone past the edge of our valid column adjust region,
         // restrict it to a valid range
 
-        int prior = ((Integer) rt.colPos.elementAt(colDrag-1)).intValue();
-        int next = ((Integer) rt.colPos.elementAt(colDrag+1)).intValue();
+        int prior = rt.colPos.get(colDrag-1);
+        int next = rt.colPos.get(colDrag+1);
 
         if (x <= prior + mincolwidth)
           {
@@ -1203,7 +1205,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
             System.err.println("Adjusting column " + colDrag);
           }
 
-        rt.colPos.setElementAt(Integer.valueOf(x), colDrag);
+        rt.colPos.set(colDrag, x);
 
         if (rt.hbar_visible)
           {
@@ -1211,8 +1213,8 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
             tableCol priorCol, thisCol;
 
-            priorCol = (tableCol) rt.cols.elementAt(colDrag-1);
-            thisCol = (tableCol) rt.cols.elementAt(colDrag);
+            priorCol = rt.cols.get(colDrag-1);
+            thisCol = rt.cols.get(colDrag);
 
             if (debug)
               {
@@ -1237,8 +1239,8 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
             tableCol priorCol, thisCol;
 
-            priorCol = (tableCol) rt.cols.elementAt(colDrag-1);
-            thisCol = (tableCol) rt.cols.elementAt(colDrag);
+            priorCol = rt.cols.get(colDrag-1);
+            thisCol = rt.cols.get(colDrag);
 
             if (debug)
               {
@@ -1256,7 +1258,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
               {
                 System.err.println("Scaling and adjusting..NEW cols["+(colDrag-1)+"].origWidth = " +
                                    priorCol.origWidth + ", cols["+colDrag+"].origWidth = " +
-                                   thisCol.origWidth);          
+                                   thisCol.origWidth);
               }
           }
 
@@ -1266,16 +1268,16 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
         tableRow tr;
         tableCell cl;
-        tableCol 
-          priorCol = (tableCol) rt.cols.elementAt(colDrag-1),
-          thisCol = (tableCol) rt.cols.elementAt(colDrag);
+        tableCol
+          priorCol = rt.cols.get(colDrag-1),
+          thisCol = rt.cols.get(colDrag);
 
         for (int i = 0; i < rt.rows.size(); i++)
           {
-            tr = (tableRow) rt.rows.elementAt(i);
-            cl = (tableCell) tr.elementAt(colDrag - 1);
+            tr = rt.rows.get(i);
+            cl = tr.get(colDrag - 1);
             cl.wrap(priorCol.width);
-            cl = (tableCell) tr.elementAt(colDrag);
+            cl = tr.get(colDrag);
             cl.wrap(thisCol.width);
           }
 
@@ -1310,7 +1312,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
     colDrag = 0;
     colXOR = -1;
-    
+
     return;
   }
 
@@ -1369,8 +1371,8 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
       {
         // nice wide grab range
 
-        if ((vx >= (((Integer) rt.colPos.elementAt(i)).intValue())) &&
-            (vx <= (((Integer) rt.colPos.elementAt(i+1)).intValue())))
+        if (vx >= rt.colPos.get(i) &&
+            vx <= rt.colPos.get(i+1))
           {
             clickCol = i;
           }
@@ -1391,9 +1393,9 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
     if (y > rt.displayRegionFirstLine())
       {
         clickRow = mapClickToRow(vy);
-        
+
         // if the user clicked below the last defined row, ignore it
-        
+
         if (clickRow == -1)
           {
             return;
@@ -1424,7 +1426,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
       }
 
-    // remember what row and column we launched the popup from so 
+    // remember what row and column we launched the popup from so
     // rowTable, etc., can report the row/col in its callback
 
     rt.menuRow = clickRow;
@@ -1437,7 +1439,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
         System.err.println("Base table: menuRow = " + rt.menuRow + ", menuCol = " + rt.menuCol);
       }
 
-    col = (tableCol) rt.cols.elementAt(clickCol);
+    col = rt.cols.get(clickCol);
 
     if (col.menu != null)
       {
@@ -1462,10 +1464,10 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
         return;
       }
-    
+
   }
 
-  // 
+  //
   // MouseMotionListener methods
   //
 
@@ -1494,10 +1496,10 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
     for (int col = 1; column == -1 && col < rt.cols.size(); col++)
       {
-        int colLoc = ((Integer) rt.colPos.elementAt(col)).intValue();
+        int colLoc = rt.colPos.get(col);
 
         // nice wide grab range
-        
+
         if ((vx > colLoc - colgrab) &&
             (vx < colLoc + colgrab))
           {
@@ -1506,7 +1508,7 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
       }
 
     if (column == -1)
-      { 
+      {
         // we'll only reset the cursor if we're not dragging and the
         // cursor is not already reset.
 
@@ -1530,13 +1532,13 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
 
   public synchronized void mouseDragged(MouseEvent e)
   {
-    int 
+    int
       x;
 
     /* -- */
 
     x = e.getX();
-    
+
     if (rt.hbar_visible)
       {
         x = x + h_offset;               // adjust for horizontal scrolling
@@ -1548,15 +1550,15 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
           {
             System.err.println("colDragging column " + colDrag);
             System.err.println("x = " + x);
-            System.err.println("colPos["+(colDrag-1)+"] = " + 
-                               ((Integer) rt.colPos.elementAt(colDrag-1)).intValue());
+            System.err.println("colPos["+(colDrag-1)+"] = " +
+                               rt.colPos.get(colDrag-1));
 
-            System.err.println("colPos["+(colDrag)+"] = " + 
-                               ((Integer) rt.colPos.elementAt(colDrag)).intValue());
+            System.err.println("colPos["+(colDrag)+"] = " +
+                               rt.colPos.get(colDrag));
           }
 
-        if ((x > (((Integer)rt.colPos.elementAt(colDrag-1)).intValue() + mincolwidth + 1)) && 
-            (x < ((Integer)rt.colPos.elementAt(colDrag+1)).intValue() - mincolwidth - 1))
+        if (x > rt.colPos.get(colDrag-1) + mincolwidth + 1 &&
+            x < rt.colPos.get(colDrag+1) - mincolwidth - 1)
           {
             bg.setXORMode(Color.red); // needs to be settable
 

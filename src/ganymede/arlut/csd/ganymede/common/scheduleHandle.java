@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -65,34 +65,36 @@ import arlut.csd.ganymede.server.taskMonitor;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Handle object used to help manage background tasks registered in the
- * Ganymede Server's
- * {@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}.  In addition
- * to being used by the server's task scheduler to organize and track
- * registered tasks, vectors of serialized scheduleHandle objects are passed to the
- * Ganymede admin console's
- * {@link arlut.csd.ganymede.admin#changeTasks(java.util.Vector) changeTasks}
- * method.</P>
+ * <p>Handle object used to help manage background tasks registered in
+ * the Ganymede Server's {@link
+ * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}.  In
+ * addition to being used by the server's task scheduler to organize
+ * and track registered tasks, vectors of serialized scheduleHandle
+ * objects are passed to the Ganymede admin console's {@link
+ * arlut.csd.ganymede.admin#changeTasks(java.util.Vector) changeTasks}
+ * method.</p>
  *
- * <P>Within the Ganymede server, scheduleHandle objects are held within the
- * GanymedeScheduler to track the status of each registered task.  When the
- * GanymedeScheduler needs to run a background task, the scheduleHandle's
- * {@link arlut.csd.ganymede.common.scheduleHandle#runTask() runTask()} method
- * is called.  runTask() creates a pair of threads, one to run the task
- * and another {@link arlut.csd.ganymede.server.taskMonitor taskMonitor} thread
- * to wait for the task to be completed.  When the thread running
- * the task completes, the task's taskMonitor calls the scheduleHandle's
- * {@link arlut.csd.ganymede.common.scheduleHandle#notifyCompletion notifyCompletion()}
- * method, which in turn notifies the GanymedeScheduler that the task
- * has completed its execution.</P>
+ * <p>Within the Ganymede server, scheduleHandle objects are held
+ * within the GanymedeScheduler to track the status of each registered
+ * task.  When the GanymedeScheduler needs to run a background task,
+ * the scheduleHandle's {@link
+ * arlut.csd.ganymede.common.scheduleHandle#runTask() runTask()}
+ * method is called.  runTask() creates a pair of threads, one to run
+ * the task and another {@link arlut.csd.ganymede.server.taskMonitor
+ * taskMonitor} thread to wait for the task to be completed.  When the
+ * thread running the task completes, the task's taskMonitor calls the
+ * scheduleHandle's {@link
+ * arlut.csd.ganymede.common.scheduleHandle#notifyCompletion
+ * notifyCompletion()} method, which in turn notifies the
+ * GanymedeScheduler that the task has completed its execution.</p>
  *
- * <P>The various scheduling methods in scheduleHandle will throw an
+ * <p>The various scheduling methods in scheduleHandle will throw an
  * IllegalArgumentException if called post-serialization on the
- * Ganymede client.</P>
+ * Ganymede client.</p>
  *
- * <P>In order to avoid nested monitor deadlock, all calls from
+ * <p>In order to avoid nested monitor deadlock, all calls from
  * scheduleHandle to synchronized methods on the GanymedeScheduler
- * must be made from locally unsynchronized code blocks.</P>
+ * must be made from locally unsynchronized code blocks.</p>
  */
 
 public class scheduleHandle implements java.io.Serializable {
@@ -113,11 +115,11 @@ public class scheduleHandle implements java.io.Serializable {
   static public enum TaskType {
     SCHEDULED       (ts.l("taskType.scheduledTask")), // "Scheduled Task"
     MANUAL          (ts.l("taskType.manualTask")),    // "On Demand Task"
-    BUILDER         (ts.l("taskType.builderTask")),   // "Ganymede Builder Task"
+    BUILDER         (ts.l("taskType.builderTask")),   // "Builder Task"
     UNSCHEDULEDBUILDER (ts.l("taskType.unscheduledBuilderTask")), // "Unscheduled Ganymede Builder Task"
-    SYNCINCREMENTAL (ts.l("taskType.incrementalSync")), // "Incremental Sync Channel"
-    SYNCFULLSTATE   (ts.l("taskType.fullstateSync")),   // "Full State Sync Channel"
-    SYNCMANUAL      (ts.l("taskType.manualSync"));      // "Manual Sync Channel"
+    SYNCINCREMENTAL (ts.l("taskType.incrementalSync")), // "Incremental"
+    SYNCFULLSTATE   (ts.l("taskType.fullstateSync")),   // "Full State"
+    SYNCMANUAL      (ts.l("taskType.manualSync"));      // "Manual"
 
     private final String name;
 
@@ -135,26 +137,26 @@ public class scheduleHandle implements java.io.Serializable {
   static public enum TaskStatus {
 
     /**
-     * OK used for scheduled, manual, builder, unscheduled builder,
-     * syncfullstate, syncmanual TaskTypes.
+     * <p>OK used for scheduled, manual, builder, unscheduled builder,
+     * syncfullstate, syncmanual TaskTypes.</p>
      *
-     * Indicates an uneventful condition, with everything as it should
-     * be.
+     * <p>Indicates an uneventful condition, with everything as it
+     * should be.</p>
      */
 
     OK()
       {
         @Override public String getMessage(int queueSize, String condition)
           {
-            // "Good"
+            // " "
             return ts.l("taskStatus.ok");
           }
       },
 
     /**
-     * EMPTYQUEUE only used for SYNCINCREMENTAL.  Has the connotation
-     * of OK, but specifically indicates that the queue is empty for
-     * an incremental sync channel.
+     * <p>EMPTYQUEUE only used for SYNCINCREMENTAL.  Has the
+     * connotation of OK, but specifically indicates that the queue is
+     * empty for an incremental sync channel.</p>
      */
 
     EMPTYQUEUE()
@@ -167,9 +169,9 @@ public class scheduleHandle implements java.io.Serializable {
       },
 
     /**
-     * NONEMPTYQUEUE only used for SYNCINCREMENTAL.  Has the
+     * <p>NONEMPTYQUEUE only used for SYNCINCREMENTAL.  Has the
      * connotation of OK, but specifically indicates that the queue is
-     * not empty for an incremental sync channel.
+     * not empty for an incremental sync channel.</p>
      */
 
     NONEMPTYQUEUE()
@@ -182,11 +184,11 @@ public class scheduleHandle implements java.io.Serializable {
       },
 
     /**
-     * STUCKQUEUE only used for SYNCINCREMENTAL.  Has the connotation
-     * of SERVICEERROR, SERVICEFAIL, or FAIL, but specifically
-     * indicates that the queue is not being successfully serviced,
-     * meaning that the lowest numbered transaction in the queue
-     * remained in the queue after the service was last run.
+     * <p>STUCKQUEUE only used for SYNCINCREMENTAL.  Has the
+     * connotation of SERVICEERROR, SERVICEFAIL, or FAIL, but
+     * specifically indicates that the queue is not being successfully
+     * serviced, meaning that the lowest numbered transaction in the
+     * queue remained in the queue after the service was last run.</p>
      */
 
     STUCKQUEUE()
@@ -199,11 +201,11 @@ public class scheduleHandle implements java.io.Serializable {
       },
 
     /**
-     * SERVICEERROR is used for BUILDER, UNSCHEDULEDBUILDER,
+     * <p>SERVICEERROR is used for BUILDER, UNSCHEDULEDBUILDER,
      * SYNCFULLSTATE, SYNCMANUAL, and indicates that the service
      * program associated with this task could not be successfully
      * started, due to a missing service program or a permissions
-     * error.
+     * error.</p>
      */
 
     SERVICEERROR()
@@ -216,10 +218,10 @@ public class scheduleHandle implements java.io.Serializable {
       },
 
     /**
-     * SERVICEFAIL is used for BUILDER, UNSCHEDULEDBUILDER,
+     * <p>SERVICEFAIL is used for BUILDER, UNSCHEDULEDBUILDER,
      * SYNCFULLSTATE, SYNCMANUAL, and indicates that the service
      * program associated with this task was able to be started, but
-     * exited with a failure code.
+     * exited with a failure code.</p>
      */
 
     SERVICEFAIL()
@@ -232,8 +234,8 @@ public class scheduleHandle implements java.io.Serializable {
       },
 
     /**
-     * FAIL can be used for any task type, and indicates some kind of
-     * unexpected exception was thrown.
+     * <p>FAIL can be used for any task type, and indicates some kind
+     * of unexpected exception was thrown.</p>
      */
 
     FAIL()
@@ -329,39 +331,55 @@ public class scheduleHandle implements java.io.Serializable {
   public String condition;
 
   /**
-   * This booleanSemaphore will be set to true if the task associated
-   * with this scheduleHandle is currently running.
+   * <p>This booleanSemaphore will be set to true if the task
+   * associated with this scheduleHandle is currently running.</p>
    *
-   * It is a booleanSemaphore so that we can have an appropriate
+   * <p>It is a booleanSemaphore so that we can have an appropriate
    * memory barrier for multiprocessor access without having to
-   * synchronize on the scheduleHandle upon calls to isRunning().
+   * synchronize on the scheduleHandle upon calls to isRunning().</p>
    */
 
   private booleanSemaphore isRunning = new booleanSemaphore(false);
 
   /**
-   * This booleanSemaphore will be set to true if the task associated
-   * with this scheduleHandle is currently suspended.
+   * <p>This booleanSemaphore will be set to true if the task
+   * associated with this scheduleHandle is currently suspended.</p>
    *
-   * It is a booleanSemaphore so that we can have an appropriate
+   * <p>It is a booleanSemaphore so that we can have an appropriate
    * memory barrier for multiprocessor access without having to
-   * synchronize on the scheduleHandle upon calls to isSuspended().
+   * synchronize on the scheduleHandle upon calls to
+   * isSuspended().</p>
    */
 
   private booleanSemaphore suspend = new booleanSemaphore(false);
 
   /**
-   * This booleanSemaphore will be set to true if we are doing a
+   * <p>This booleanSemaphore will be set to true if we are doing a
    * on-demand and we get a request while running it, which signifies
-   * that we'll want to immediately re-run it on completion.
+   * that we'll want to immediately re-run it on completion.</p>
    *
-   * It is a booleanSemaphore so that we can have an appropriate
+   * <p>It is a booleanSemaphore so that we can have an appropriate
    * memory barrier for multiprocessor access without having to
-   * synchronize on the scheduleHandle upon calls to
-   * runAgain().
+   * synchronize on the scheduleHandle upon calls to runAgain().</p>
    */
 
   private booleanSemaphore rerun = new booleanSemaphore(false);
+
+  /**
+   * <p>The time on the server that this task was started running.</p>
+   */
+
+  private Date runStartTime;
+
+  /**
+   * <p>The most recent time seen on the server before this
+   * scheduleHandle is transmitted to the admin console.  Used to
+   * calculate the age of this task's runtime without respect to time
+   * differences between the server and the machine running the admin
+   * console.</p>
+   */
+
+  private Date recentServerTime;
 
   //
   // non-serializable, for use on the server only
@@ -437,6 +455,7 @@ public class scheduleHandle implements java.io.Serializable {
     this.name = name;
     this.tasktype = tasktype;
     this.status = TaskStatus.OK;
+    this.runStartTime = null;
 
     setInterval(interval);
 
@@ -447,13 +466,15 @@ public class scheduleHandle implements java.io.Serializable {
 
   /**
    * <p>This method is used to set an options array for the next run
-   * of the task associated with this handle, if that task is a GanymedeBuilderTask.</p>
+   * of the task associated with this handle, if that task is a
+   * GanymedeBuilderTask.</p>
    *
-   * <p>If the task associated with this handle is not a GanymedeBuilderTask,
-   * the options will be ignored.  Since setOptions() is synchronized, options
-   * may only be set at a time when runTask() is not busy issuing the
-   * task in the background.  runTask() clears the options set, so setOptions()
-   * only affects the next launching of the task.</p>
+   * <p>If the task associated with this handle is not a
+   * GanymedeBuilderTask, the options will be ignored.  Since
+   * setOptions() is synchronized, options may only be set at a time
+   * when runTask() is not busy issuing the task in the background.
+   * runTask() clears the options set, so setOptions() only affects
+   * the next launching of the task.</p>
    */
 
   public void setOptions(Object _options[])
@@ -462,11 +483,11 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   * <P>Runs this task in a background thread.  A second background thread
+   * <p>Runs this task in a background thread.  A second background thread
    * is created to handle a {@link arlut.csd.ganymede.server.taskMonitor taskMonitor}
-   * to wait and report when the task completes.</P>
+   * to wait and report when the task completes.</p>
    *
-   * <P>This method is invalid on the client.</P>
+   * <p>This method is invalid on the client.</p>
    */
 
   public void runTask()
@@ -495,6 +516,8 @@ public class scheduleHandle implements java.io.Serializable {
 
                 throw new suspendedTaskException(); // goto a-go-go
               }
+
+            this.runStartTime = new Date();
 
             // grab options for this run
 
@@ -543,11 +566,11 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   * <P>This method is called by our {@link
+   * <p>This method is called by our {@link
    * arlut.csd.ganymede.server.taskMonitor taskMonitor} when our task
    * completes.  This method has no meaning outside of the context of
    * the taskMonitor spawned by this handle, and should not be called
-   * from any other code.</P>
+   * from any other code.</p>
    */
 
   public void notifyCompletion()
@@ -561,6 +584,7 @@ public class scheduleHandle implements java.io.Serializable {
 
         monitor = null;
         thread = null;
+        runStartTime = null;
 
         isRunning.set(false);
         lastTime = new Date();
@@ -573,9 +597,9 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   * <P>Server-side method to determine whether this task should be rescheduled.
-   * Increments the startTime and returns true if this is a periodically
-   * executed task.</P>
+   * <p>Server-side method to determine whether this task should be
+   * rescheduled.  Increments the startTime and returns true if this
+   * is a periodically executed task.</p>
    */
 
   public synchronized boolean reschedule()
@@ -597,8 +621,8 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   * Returns an enum value indicating what type of Ganymede task this
-   * scheduleHandle is pertaining to.
+   * <p>Returns an enum value indicating what type of Ganymede task
+   * this scheduleHandle is pertaining to.</p>
    */
 
   public TaskType getTaskType()
@@ -607,8 +631,8 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   * Returns an expanded status for the task associated with this
-   * handle.
+   * <p>Returns an expanded status for the task associated with this
+   * handle.</p>
    */
 
   public TaskStatus getTaskStatus()
@@ -617,7 +641,7 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   * Updates the task status for this scheduleHandle.
+   * <p>Updates the task status for this scheduleHandle.</p>
    */
 
   public void setTaskStatus(TaskStatus newStatus, int queueSize, String condition)
@@ -628,7 +652,7 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   * Returns the name of this handle.
+   * <p>Returns the name of this handle.</p>
    */
 
   public String getName()
@@ -637,8 +661,8 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   * <P>This method lets the GanymedeScheduler check to see whether this task
-   * should be re-run when it terminates</P>
+   * <p>This method lets the GanymedeScheduler check to see whether
+   * this task should be re-run when it terminates</p>
    */
 
   public boolean runAgain()
@@ -647,7 +671,8 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   * <P>Returns true if this task is not scheduled for periodic execution</P>
+   * <p>Returns true if this task is not scheduled for periodic
+   * execution</p>
    */
 
   public boolean isOnDemand()
@@ -661,7 +686,7 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   * Returns true if the task is currently running.
+   * <p>Returns true if the task is currently running.</p>
    */
 
   public boolean isRunning()
@@ -670,7 +695,7 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   * Returns true if the task is suspended.
+   * <p>Returns true if the task is suspended.</p>
    */
 
   public boolean isSuspended()
@@ -679,10 +704,50 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   * <P>Server-side method to request that this task be re-run after
+   * <p>Load the current server time into this scheduleHandle.</p>
+   *
+   * <p>We do this so the admin console which is about to receive a
+   * serialized copy of this scheduleHandle has a reference with which
+   * to calculate the duration of this task on the server, without
+   * worrying about any clock skew between the server and console.</p>
+   */
+
+  public synchronized void updateServerTime()
+  {
+    if (runStartTime != null)
+      {
+        recentServerTime = new Date();
+      }
+    else
+      {
+        recentServerTime = null;
+      }
+  }
+
+  /**
+   * <p>Returns the length of time this task has been running, in
+   * seconds, or -1 if the task is not running.</p>
+   */
+
+  public synchronized int getAge()
+  {
+    if (runStartTime == null || recentServerTime == null)
+      {
+        return -1;
+      }
+
+    long currentTime = recentServerTime.getTime();
+    long myStartTime = runStartTime.getTime();
+
+    return (int) (currentTime - myStartTime) / 1000;
+  }
+
+  /**
+   * <p>Server-side method to request that this task be re-run after
    * its current completion.  Intended for on-demand tasks that are
-   * requested by the {@link arlut.csd.ganymede.server.GanymedeScheduler
-   * GanymedeScheduler} while they are already running.</P>
+   * requested by the {@link
+   * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}
+   * while they are already running.</p>
    */
 
   public void runOnCompletion()
@@ -691,10 +756,11 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   * <P>Server-side method to request that this task be re-run after
+   * <p>Server-side method to request that this task be re-run after
    * its current completion.  Intended for on-demand tasks that are
-   * requested by the {@link arlut.csd.ganymede.server.GanymedeScheduler
-   * GanymedeScheduler} while they are already running.</P>
+   * requested by the {@link
+   * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}
+   * while they are already running.</p>
    */
 
   public synchronized void runOnCompletion(Object _options[])
@@ -710,8 +776,9 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   * <P>Server-side method to request that this task not be kept after its
-   * current completion.  Used to remove a task from the Ganymede scheduler.</P>
+   * <p>Server-side method to request that this task not be kept after
+   * its current completion.  Used to remove a task from the Ganymede
+   * scheduler.</p>
    */
 
   public synchronized void unregister()
@@ -725,8 +792,8 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   * <P>Server-side method to interrupt this task.  Tasks must be specifically
-   * written to properly respond to an interruption.</P>
+   * <p>Server-side method to interrupt this task.  Tasks must be
+   * specifically written to properly respond to an interruption.</p>
    */
 
   public synchronized void stop()
@@ -744,7 +811,8 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   * <P>Server-side method to disable future invocations of this task</P>
+   * <p>Server-side method to disable future invocations of this
+   * task</p>
    */
 
   public synchronized void disable()
@@ -758,7 +826,8 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   * <P>Server-side method to enable future invocations of this task</P>
+   * <p>Server-side method to enable future invocations of this
+   * task</p>
    */
 
   public synchronized void enable()
@@ -772,7 +841,7 @@ public class scheduleHandle implements java.io.Serializable {
   }
 
   /**
-   * <P>Server-side method to change the interval for this task</P>
+   * <p>Server-side method to change the interval for this task</p>
    *
    * @param interval Number of seconds between runs of this task
    */

@@ -15,8 +15,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -137,6 +139,14 @@ public class Query implements java.io.Serializable {
 
   private Set<Short> permitSet = null;
 
+  /**
+   * <p>If we are on the server, we'll have a generic reference to a
+   * GanymedeSession so that we can look up the description of the
+   * object type.</p>
+   */
+
+  transient QueryDescriber describer = null;
+
   /* -- */
 
   /**
@@ -235,6 +245,16 @@ public class Query implements java.io.Serializable {
     objectType = -1;
     root = null;
     editableOnly = true;
+  }
+
+  /**
+   * <p>Sets a reference to a GanymedeSession on the server only, for
+   * use in providing more descriptive toString() results.</p>
+   */
+
+  public void setDescriber(QueryDescriber describer)
+  {
+    this.describer = describer;
   }
 
   /**
@@ -366,25 +386,51 @@ public class Query implements java.io.Serializable {
     if (objectType != -1)
       {
         result.append("objectType = ");
-        result.append(objectType);
-        result.append("\n");
-      }
 
-    if (objectName != null)
+        if (describer != null)
+          {
+            result.append(describer.describeType(objectType));
+          }
+        else
+          {
+            result.append(String.valueOf(objectType));
+          }
+      }
+    else
       {
         result.append("objectName = ");
         result.append(objectName);
-        result.append("\n");
       }
 
-    result.append("editableOnly = ");
-    result.append(editableOnly ? "True\n" : "False\n");
+    if (editableOnly)
+      {
+        result.append(",");
+        result.append("editable");
+      }
 
     if (root != null)
       {
+        result.append(",");
         result.append(root.toString());
       }
 
     return result.toString();
+  }
+
+  public String describeField(short fieldId)
+  {
+    if (describer == null)
+      {
+        return "<" + String.valueOf(fieldId) + ">";
+      }
+
+    if (objectType != -1)
+      {
+        return describer.describeField(objectType, fieldId);
+      }
+    else
+      {
+        return describer.describeField(objectName, fieldId);
+      }
   }
 }

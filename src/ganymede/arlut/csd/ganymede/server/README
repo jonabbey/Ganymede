@@ -1,8 +1,5 @@
 README -- server
 
-Version: $Id$
-Last Commit: $Format:%cd$
-
 --------------------------------------------------------------------------------
 
 This directory contains the Ganymede server code.
@@ -23,4 +20,4 @@ commit transactions, and so on.  GanymedeSession actually holds most
 of the logic in the Ganymede server.
 
 Jonathan Abbey
-7 May 2004
+22 January 2013

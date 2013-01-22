@@ -8,17 +8,19 @@
 
    The QueryNode classes are serializable, for bodily transmission
    over an RMI connection.
-   
+
    Created: 21 October 1996
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -66,5 +68,7 @@ package arlut.csd.ganymede.common;
 
 public abstract class QueryNode implements java.io.Serializable {
   static final long serialVersionUID = -4396943100372813308L;
+
+  public abstract String toString(Query query);
 }
 

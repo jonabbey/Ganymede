@@ -7,11 +7,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -88,12 +90,15 @@ public class QueryDeRefNode extends QueryNode {
   }
 
   /**
-   *
    * Diagnostic aid.
-   *
    */
 
   public String toString()
+  {
+    return this.toString(null);
+  }
+
+  public String toString(Query query)
   {
     StringBuilder result = new StringBuilder();
 
@@ -103,16 +108,23 @@ public class QueryDeRefNode extends QueryNode {
       }
     else
       {
-        result.append("<");
-        result.append(Short.toString(fieldId));
-        result.append(">");
+        if (query != null)
+          {
+            result.append(query.describeField(fieldId));
+          }
+        else
+          {
+            result.append("<");
+            result.append(String.valueOf(fieldId));
+            result.append(">");
+          }
       }
 
     result.append("->");
 
     if (queryTree != null)
       {
-        result.append(queryTree.toString());
+        result.append(queryTree.toString(null));
       }
 
     return result.toString();

@@ -16,7 +16,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -1448,8 +1448,11 @@ public class SyncRunner implements Runnable {
           }
         else
           {
-            // "{0} has not seen any changes that need to be processed."
-            Ganymede.debug(ts.l("run.skipping_full", this.getName()));
+            if (debug)
+              {
+                // "{0} has not seen any changes that need to be processed."
+                Ganymede.debug(ts.l("run.skipping_full", this.getName()));
+              }
           }
       }
     else if (this.mode == SyncType.INCREMENTAL)
@@ -1460,8 +1463,11 @@ public class SyncRunner implements Runnable {
           }
         else
           {
-            // "{0} has no incremental transactions to process."
-            Ganymede.debug(ts.l("run.skipping_incremental", this.getName()));
+            if (debug)
+              {
+                // "{0} has no incremental transactions to process."
+                Ganymede.debug(ts.l("run.skipping_incremental", this.getName()));
+              }
           }
       }
   }
@@ -1627,8 +1633,11 @@ public class SyncRunner implements Runnable {
 
   private void runFullStateService()
   {
-    // "Full State Sync Channel {0} external build running."
-    Ganymede.debug(ts.l("runFullStateService.running", this.name));
+    if (debug)
+      {
+        // "Full State Sync Channel {0} external build running."
+        Ganymede.debug(ts.l("runFullStateService.running", this.name));
+      }
 
     int resultCode = -999;  // a resultCode of 0 is success
 
@@ -1653,8 +1662,11 @@ public class SyncRunner implements Runnable {
                                 this.name, Ganymede.stackTrace(ex)));
           }
 
-        // "Full State Sync Channel {0} external build completed."
-        Ganymede.debug(ts.l("runFullStateService.ran", this.name));
+        if (debug)
+          {
+            // "Full State Sync Channel {0} external build completed."
+            Ganymede.debug(ts.l("runFullStateService.ran", this.name));
+          }
       }
     else
       {
@@ -1732,8 +1744,11 @@ public class SyncRunner implements Runnable {
       {
         GanymedeBuilderTask.incPhase2(true); // so that the client sees the phase 2 icon rolling
 
-        // "SyncRunner {0} running"
-        Ganymede.debug(ts.l("runIncremental.running", myName));
+        if (debug)
+          {
+            // "SyncRunner {0} running"
+            Ganymede.debug(ts.l("runIncremental.running", myName));
+          }
 
         if (getServiceProgram() != null)
           {
@@ -1822,8 +1837,11 @@ public class SyncRunner implements Runnable {
         GanymedeBuilderTask.decPhase2(true);
       }
 
-    // "SyncRunner {0} finished"
-    Ganymede.debug(ts.l("runIncremental.done", myName));
+    if (debug)
+      {
+        // "SyncRunner {0} finished"
+        Ganymede.debug(ts.l("runIncremental.done", myName));
+      }
 
     updateAdminConsole(true);
   }

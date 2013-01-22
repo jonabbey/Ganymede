@@ -1,11 +1,12 @@
 /*
 
-   AdminEntry.java
+   QueryDescriber.java
 
-   A serializable object, holding the contents of a row in an
-   admin console's table.
+   An interface that can be used to provide for object and field name
+   look ups when producing toString() output from a Query chain on the
+   server
 
-   Created: 3 February 1997
+   Created: 4 January 2013
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -49,47 +50,36 @@
 
 package arlut.csd.ganymede.common;
 
-import java.util.Date;
+/*------------------------------------------------------------------------------
+                                                                       interface
+                                                                  QueryDescriber
+
+------------------------------------------------------------------------------*/
 
 /**
- * <p>Serializable data carrier object used by the Ganymede
- * server to report a row of user status to the Ganymede admin console.</p>
+ * <p>A simple interface that can be used on the Ganymede server to
+ * provide name lookups for the toString() method of a Query object
+ * chain.</p>
  */
 
-public class AdminEntry implements java.io.Serializable {
+public interface QueryDescriber {
 
-  static final long serialVersionUID = -2534608083606361951L;
+  /**
+   * Returns a description of the type id.
+   */
 
-  // ---
+  public String describeType(short objType);
 
-  public String
-    sessionName,
-    personaName,
-    hostname,
-    status,
-    event;
+  /**
+   * Returns a description of the field id.
+   */
 
-  public Date
-    connecttime,
-    eventtime;
+  public String describeField(short objType, short fieldType);
 
-  public int
-    objectsCheckedOut;
+  /**
+   * Returns a description of the field id.
+   */
 
-  /* -- */
-
-  public AdminEntry(String sessionName, String personaName,
-                    String hostname, String status,
-                    Date connecttime, String event, Date eventtime,
-                    int objectsCheckedOut)
-  {
-    this.sessionName = sessionName;
-    this.personaName = personaName;
-    this.hostname = hostname;
-    this.status = status;
-    this.connecttime = connecttime;
-    this.event = event;
-    this.eventtime = eventtime;
-    this.objectsCheckedOut = objectsCheckedOut;
-  }
+  public String describeField(String objTypeName, short fieldType);
 }
+

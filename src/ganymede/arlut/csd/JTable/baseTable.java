@@ -14,8 +14,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -106,18 +108,18 @@ import javax.swing.JScrollBar;
  */
 
 public class baseTable extends JComponent implements AdjustmentListener, ActionListener, MouseWheelListener {
-  
+
   static final boolean debug = false;
 
   /* - */
-  
-  tableCanvas 
+
+  tableCanvas
     canvas;
 
   // the following variables are non-private. tableCanvas accesses them.
 
-  JScrollBar 
-    hbar, 
+  JScrollBar
+    hbar,
     vbar;
 
   int
@@ -148,7 +150,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
                                 // of component, otherwise don't draw horiz lines below
                                 // last non-empty row
 
-  Vector
+  Vector<Integer>
     colPos;                     // x position of vertical lines.. colPos[0] is 0,
                                 // colPos[cols.size()] is x pos of right most edge
 
@@ -162,21 +164,21 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
     hHeadLineColor,
     hRowLineColor;
 
-  Vector 
+  Vector<tableRow>
     rows;                       // vector of tableRows, which actually hold the table content
 
-  Vector
+  Vector<tableCol>
     cols;                       // header information, column attributes
 
   JPopupMenu
     headerMenu,                 // popup menu to appear in header row
     menu;                       // popup menu attached to table as a whole
 
-  int 
+  int
     menuRow = -1,
     menuCol = -1;               // holds the row, col of the last popup launch
 
-  int 
+  int
     selectedRow = -1;
 
   /* -- */
@@ -210,10 +212,10 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
    *
    */
 
-  public baseTable(tableAttr headerAttrib, 
+  public baseTable(tableAttr headerAttrib,
                    tableAttr tableAttrib,
-                   tableAttr[] colAttribs, 
-                   int[] colWidths, 
+                   tableAttr[] colAttribs,
+                   int[] colWidths,
                    Color vHeadLineColor,
                    Color vRowLineColor,
                    Color hHeadLineColor,
@@ -292,27 +294,27 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
         System.err.println("** calculating columns");
       }
 
-    cols = new Vector(colWidths.length);
-    colPos = new Vector(colWidths.length + 1);
+    cols = new Vector<tableCol>(colWidths.length);
+    colPos = new Vector<Integer>(colWidths.length + 1);
     origTotalWidth = 0;
 
     for (int i = 0; i < colWidths.length; i++)
       {
-        cols.addElement(new tableCol(this, headers[i], colWidths[i],
-                                     colAttribs != null?colAttribs[i]:null));
+        cols.add(new tableCol(this, headers[i], colWidths[i],
+                              colAttribs != null?colAttribs[i]:null));
         origTotalWidth += colWidths[i];
-        
-        colPos.addElement(Integer.valueOf(0));
+
+        colPos.add(0);
       }
 
     // and one to grow one for the last pole
 
-    colPos.addElement(Integer.valueOf(0));
+    colPos.add(0);
 
     // initialize our vector of tableRow's
     // we don't actually allocate cells until they are set
 
-    rows = new Vector();
+    rows = new Vector<tableRow>();
 
     // and actually build our component
 
@@ -366,12 +368,12 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
   public baseTable(int[] colWidths, String[] headers,
                    JPopupMenu menu, JPopupMenu headerMenu)
   {
-    this(new tableAttr(null, new Font("SansSerif", Font.BOLD, 14), 
+    this(new tableAttr(null, new Font("SansSerif", Font.BOLD, 14),
                              Color.white, Color.blue, tableAttr.JUST_CENTER),
          new tableAttr(null, new Font("SansSerif", Font.PLAIN, 12),
                              Color.black, Color.white, tableAttr.JUST_LEFT),
          (tableAttr[]) null,
-         colWidths, 
+         colWidths,
          Color.black,
          Color.black,
          Color.black,
@@ -423,24 +425,24 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
     /* -- */
 
-    row = (tableRow) rows.elementAt(y);
+    row = rows.get(y);
 
     // this shouldn't happen
 
     if (row == null)
       {
         row = new tableRow(this, cols.size());
-        rows.setElementAt(row, y);
+        rows.set(y, row);
       }
 
     // this often will
-    
-    if (row.elementAt(x) == null)
+
+    if (row.get(x) == null)
       {
-        row.setElementAt(new tableCell((tableCol)cols.elementAt(x)), x);
+        row.set(x, new tableCell(cols.get(x)));
       }
 
-    return row.elementAt(x);
+    return row.get(x);
   }
 
   /**
@@ -513,7 +515,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
   // -------------------- Attribute Methods --------------------
 
   // -------------------- cell attribute methods
-  
+
   /**
    * Sets the tableAttr of a cell in the table.
    *
@@ -528,7 +530,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
     cell.attr = attr;
 
     calcFonts();
-    
+
     cell.refresh();
 
     if (repaint)
@@ -567,13 +569,13 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
       {
         cell.attr = new tableAttr(this);
       }
-    
+
     cell.attr.setFont(font);
 
     calcFonts();
 
     cell.refresh();
-    
+
     if (repaint)
       {
         refreshTable();
@@ -598,7 +600,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
       {
         cell.attr = new tableAttr(this);
       }
-    
+
     if (just < tableAttr.JUST_LEFT || just > tableAttr.JUST_INHERIT)
       {
         throw new IllegalArgumentException();
@@ -683,23 +685,20 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
   public synchronized final void setColAttr(int x, tableAttr attr, boolean repaint)
   {
-    tableCol element;
-    tableRow row;
+    tableCol col;
 
     /* -- */
 
-    element = (tableCol) cols.elementAt(x);
-    element.attr = attr;
+    col = cols.get(x);
+    col.attr = attr;
 
     calcFonts();
 
     // recalc the cell's word wrapping, spacing
 
-    for (int i = 0; i < rows.size(); i++)
+    for (tableRow row: rows)
       {
-        row = (tableRow) rows.elementAt(i);
-
-        row.elementAt(x).refresh();
+        row.get(x).refresh();
       }
 
     if (repaint)
@@ -722,28 +721,22 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
   public synchronized final void setColFont(int x, Font font, boolean repaint)
   {
-    tableRow row;
+    tableCol col = cols.get(x);
 
-    /* -- */
-
-    tableCol element = (tableCol) cols.elementAt(x);
-
-    if (element.attr == null)
+    if (col.attr == null)
       {
-        element.attr = new tableAttr(this);
+        col.attr = new tableAttr(this);
       }
 
-    element.attr.setFont(font);
+    col.attr.setFont(font);
 
     calcFonts();
 
     // recalc the cell's word wrapping, spacing
 
-    for (int i = 0; i < rows.size(); i++)
+    for (tableRow row: rows)
       {
-        row = (tableRow) rows.elementAt(i);
-
-        row.elementAt(x).refresh();
+        row.get(x).refresh();
       }
 
     if (repaint)
@@ -766,19 +759,19 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
   public final void setColJust(int x, int just, boolean repaint)
   {
-    tableCol element = (tableCol) cols.elementAt(x);
+    tableCol col = cols.get(x);
 
-    if (element.attr == null)
+    if (col.attr == null)
       {
-        element.attr = new tableAttr(this);
+        col.attr = new tableAttr(this);
       }
-    
+
     if (just < tableAttr.JUST_LEFT || just > tableAttr.JUST_INHERIT)
       {
         throw new IllegalArgumentException();
       }
 
-    element.attr.align = just;
+    col.attr.align = just;
 
     if (repaint)
       {
@@ -800,14 +793,14 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
   public final void setColColor(int x, Color color, boolean repaint)
   {
-    tableCol element = (tableCol) cols.elementAt(x);
+    tableCol col = cols.get(x);
 
-    if (element.attr == null)
+    if (col.attr == null)
       {
-        element.attr = new tableAttr(this);
+        col.attr = new tableAttr(this);
       }
 
-    element.attr.fg = color;
+    col.attr.fg = color;
 
     if (repaint)
       {
@@ -829,14 +822,14 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
   public final void setColBackColor(int x, Color color, boolean repaint)
   {
-    tableCol element = (tableCol) cols.elementAt(x);
+    tableCol col = cols.get(x);
 
-    if (element.attr == null)
+    if (col.attr == null)
       {
-        element.attr = new tableAttr(this);
+        col.attr = new tableAttr(this);
       }
 
-    element.attr.bg = color;
+    col.attr.bg = color;
 
     if (repaint)
       {
@@ -868,10 +861,6 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
   public final void setTableAttr(tableAttr attr, boolean repaint)
   {
-    tableRow row;
-
-    /* -- */
-
     if (attr == null)
       {
         throw new IllegalArgumentException();
@@ -883,13 +872,11 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
     // need to refresh all cells
 
-    for (int i = 0; i < rows.size(); i++)
+    for (tableRow row: rows)
       {
-        row = (tableRow) rows.elementAt(i);
-
         for (int j = 0; j < cols.size(); j++)
           {
-            row.elementAt(j).refresh();
+            row.get(j).refresh();
           }
       }
 
@@ -906,13 +893,9 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
    * @param repaint true if the table should be redrawn after changing font
    *
    */
-  
+
   public final void setTableFont(Font font, boolean repaint)
   {
-    tableRow row;
-
-    /* -- */
-
     if (font == null)
       {
         throw new IllegalArgumentException();
@@ -924,13 +907,11 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
     // need to refresh all cells
 
-    for (int i = 0; i < rows.size(); i++)
+    for (tableRow row: rows)
       {
-        row = (tableRow) rows.elementAt(i);
-
         for (int j = 0; j < cols.size(); j++)
           {
-            row.elementAt(j).refresh();
+            row.get(j).refresh();
           }
       }
 
@@ -973,7 +954,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
    * @param repaint true if the table should be redrawn after changing color
    *
    */
-  
+
   public final void setTableColor(Color color, boolean repaint)
   {
     if (color == null)
@@ -996,7 +977,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
    * @param repaint true if the table should be redrawn after changing color
    *
    */
-  
+
   public final void setTableBackColor(Color color, boolean repaint)
   {
     if (color == null)
@@ -1118,33 +1099,26 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
   public synchronized void deleteColumn(int index, boolean reportion)
   {
-    tableRow row;
-    tableCol col;
-
-    /* -- */
-
     if (cols.size() == 1)
       {
         return;                 // can't delete only column
       }
 
-    for (int i = 0; i < rows.size(); i++)
+    for (tableRow row: rows)
       {
-        row = (tableRow) rows.elementAt(i);
-        row.removeElementAt(index);
+        row.remove(index);
       }
 
-    cols.removeElementAt(index);
-    colPos.removeElementAt(colPos.size()-1); // doesn't matter which, we're about to recalc it
+    cols.remove(index);
+    colPos.remove(colPos.size()-1); // doesn't matter which, we're about to recalc it
 
     if (reportion)
       {
         int newWidth = origTotalWidth / cols.size();
 
-        for (int i=0; i < cols.size(); i++)
+        for (tableCol col: cols)
           {
-            col = (tableCol) cols.elementAt(i);
-            col.origWidth = newWidth; 
+            col.origWidth = newWidth;
           }
       }
 
@@ -1323,7 +1297,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
   /**
    * Returns true if cell (x,y) is currently selected
    * @param x col of cell to test
-   * @param y row of cell to test   
+   * @param y row of cell to test
    */
 
   public final boolean testCellSelected(int x, int y)
@@ -1359,7 +1333,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
   public void addRow(boolean repaint)
   {
-    tableRow 
+    tableRow
       newRow,
       oldRow;
 
@@ -1378,7 +1352,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
       {
         int newVal;
 
-        oldRow = (tableRow) rows.lastElement();
+        oldRow = rows.lastElement();
         newVal = oldRow.getBottomEdge() + hRowLineThickness;
 
         if (debug)
@@ -1398,7 +1372,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
     newRow.setBottomEdge(bottom);
 
-    rows.addElement(newRow);
+    rows.add(newRow);
 
     if (repaint)
       {
@@ -1419,14 +1393,13 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
   public synchronized void optimizeCols()
   {
-    tableRow row;
     tableCell cell;
     tableCol col;
     int nominalWidth[];
     int localNW;
     float totalOver, spareSpace, scaledWidth;
 
-    float 
+    float
       percentSpace,
       shrinkFactor,
       percentOver,
@@ -1470,12 +1443,11 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
     for (int i = 0; i < cols.size(); i++)
       {
         nominalWidth[i] = canvas.mincolwidth;
-        col = (tableCol) cols.elementAt(i);
+        col = cols.get(i);
 
-        for (int j = 0; j < rows.size(); j++)
+        for (tableRow row: rows)
           {
-            row = (tableRow) rows.elementAt(j);
-            cell = row.elementAt(i);
+            cell = row.get(i);
 
             localNW = cell.getNominalWidth() + 5;
 
@@ -1519,7 +1491,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
     for (int i = 0; i < cols.size(); i++)
       {
-        col = (tableCol) cols.elementAt(i);
+        col = cols.get(i);
 
         // are we going to be actually doing some redistributing?
 
@@ -1549,7 +1521,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
               {
                 // what percentage of the overage goes to this col?
 
-                percentOver = (nominalWidth[i] - scaledWidth) / totalOver; 
+                percentOver = (nominalWidth[i] - scaledWidth) / totalOver;
                 growthFactor = (redistribute * percentOver) / scalefact;
 
                 col.origWidth += growthFactor;
@@ -1558,8 +1530,8 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
                 if (debug)
                   {
-                    System.err.println("Column " + i + ": percentOver = " + percentOver + 
-                                       " , growing by " + growthFactor + ", new width = " + 
+                    System.err.println("Column " + i + ": percentOver = " + percentOver +
+                                       " , growing by " + growthFactor + ", new width = " +
                                        col.origWidth * scalefact);
                   }
               }
@@ -1572,10 +1544,9 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
         // now we need to wrap the column
 
-        for (int j = 0; j < rows.size(); j++)
+        for (tableRow row: rows)
           {
-            row = (tableRow) rows.elementAt(j);
-            cell = row.elementAt(i);
+            cell = row.get(i);
             cell.wrap(Math.round(col.origWidth * scalefact));
           }
       }
@@ -1588,7 +1559,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
    *
    * This method returns the first line of the display area,
    * below the headers.
-   * 
+   *
    */
 
   final int displayRegionFirstLine()
@@ -1623,11 +1594,11 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
     if (startRow == 0)
       {
-        bottomEdge = headerAttrib.height + hHeadLineThickness; // 
+        bottomEdge = headerAttrib.height + hHeadLineThickness; //
       }
     else
       {
-        bottomEdge = ((tableRow) rows.elementAt(startRow - 1)).getBottomEdge();
+        bottomEdge = rows.get(startRow - 1).getBottomEdge();
       }
 
     // each time through the loop, bottom edge is the y position
@@ -1637,7 +1608,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
     for (int i = startRow; i < rows.size(); i++)
       {
-        row = (tableRow) rows.elementAt(i);
+        row = rows.get(i);
         row.setTopEdge(bottomEdge + hRowLineThickness);
 
         bottomEdge = row.getTopEdge() + row.getRowSpan() * (row_height + hRowLineThickness) - hRowLineThickness;
@@ -1657,7 +1628,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
   public void deleteRow(int num, boolean repaint)
   {
-    rows.removeElementAt(num);
+    rows.remove(num);
     reCalcRowPos(num);          // move everybody at and below the deleted row up
 
     if (repaint)
@@ -1670,7 +1641,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
   /**
    * Causes the table to be updated and redisplayed.
    */
-  
+
   public void refreshTable()
   {
     if (debug)
@@ -1695,7 +1666,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
   /**
    * Erases all the cells in the table and removes any per-cell
-   * attribute sets.  
+   * attribute sets.
    */
 
   public void clearCells()
@@ -1713,7 +1684,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
           }
       }
 
-    rows = new Vector();
+    rows = new Vector<tableRow>();
 
     reShape();
     refreshTable();
@@ -1738,24 +1709,24 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
   {
     clearCells();
 
-    cols = new Vector(colWidths.length); 
-    colPos = new Vector(colWidths.length + 1);
+    cols = new Vector<tableCol>(colWidths.length);
+    colPos = new Vector<Integer>(colWidths.length + 1);
     origTotalWidth = 0;
 
     for (int i = 0; i < colWidths.length; i++)
       {
-        cols.addElement(new tableCol(this, headers[i], colWidths[i],
-                                     colAttribs != null?colAttribs[i]:null));
+        cols.add(new tableCol(this, headers[i], colWidths[i],
+                              colAttribs != null?colAttribs[i]:null));
         origTotalWidth += colWidths[i];
 
-        colPos.addElement(Integer.valueOf(0));
+        colPos.add(0);
       }
 
     // and one to grow on for our last pole
 
-    colPos.addElement(Integer.valueOf(0));
+    colPos.add(0);
 
-    rows = new Vector();
+    rows = new Vector<tableRow>();
 
     reShape();
     refreshTable();
@@ -1768,18 +1739,15 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
    *
    */
 
-  public synchronized Vector getTableHeaders()
+  public synchronized Vector<String> getTableHeaders()
   {
-    Vector result = new Vector();
-    tableCol col;
+    Vector<String> result = new Vector<String>();
 
     /* -- */
 
-    for (int i = 0; i < cols.size(); i++)
+    for (tableCol col: cols)
       {
-        col = (tableCol) cols.elementAt(i);
-
-        result.addElement(col.header);
+        result.add(col.header);
       }
 
     return result;
@@ -1835,7 +1803,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
       {
         System.err.println("setBounds(" + x + "," + y + "," + width + "," + height + ")");
       }
-    
+
     super.setBounds(x,y,width,height);
 
     validate();         // we need to do this to get our canvas resized before we call
@@ -1883,7 +1851,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
       }
 
     // calculate whether we need scrollbars, add/remove them
-      
+
     adjustScrollbars();
     calcCols();
 
@@ -1907,7 +1875,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
   void adjustScrollbars()
   {
     int
-      hSize, 
+      hSize,
       vSize;
 
     /* -- */
@@ -1930,12 +1898,12 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
     // calculate how wide our table is total, not counting any scroll
     // bars.  That is, how narrow can we be before we need to have a
     // horizontal scrollbar?
-    
+
     hSize = vLineThickness;
 
-    for (int i = 0; i < cols.size(); i++)
+    for (tableCol col: cols)
       {
-        hSize += ((tableCol) cols.elementAt(i)).origWidth + vLineThickness;
+        hSize += col.origWidth + vLineThickness;
       }
 
     // calculate how tall or table is, not counting any scroll bars.
@@ -1949,7 +1917,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
     if (rows.size() != 0)
       {
-        vSize = ((tableRow) rows.lastElement()).getBottomEdge() + hRowLineThickness;
+        vSize = rows.lastElement().getBottomEdge() + hRowLineThickness;
       }
     else
       {
@@ -1959,7 +1927,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
     if (debug)
       {
         System.err.println("vertical size due to combined vertical height of rows = " + vSize);
-      } 
+      }
 
     // calculate whether we need scrollbars
 
@@ -2102,7 +2070,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
           }
 
         vbar.setUnitIncrement(row_height + hRowLineThickness);    // we want the up/down buttons to go a line at a time
-            
+
         vbar.setBlockIncrement((canvas.getBounds().height - displayRegionFirstLine())/2);
       }
 
@@ -2129,7 +2097,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
                            my_current_width);
           }
 
-        hbar.setBlockIncrement(canvas.getBounds().width / 2);    
+        hbar.setBlockIncrement(canvas.getBounds().width / 2);
       }
 
     if (debug)
@@ -2138,7 +2106,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
       }
   }
 
-  /** 
+  /**
    * Internal method
    *
    * calculate the total vertical size of the rows only
@@ -2152,7 +2120,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
         return 0;
       }
 
-    return ((tableRow) rows.lastElement()).getBottomEdge() - displayRegionFirstLine() +
+    return rows.lastElement().getBottomEdge() - displayRegionFirstLine() +
       hRowLineThickness;
   }
 
@@ -2167,10 +2135,10 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
   void calcCols()
   {
-    int 
+    int
       pos;
 
-    tableCol element;
+    tableCol col;
 
     /* -- */
 
@@ -2198,31 +2166,31 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
         scalefact = (float) 1.0;
 
         // Calculate vertical bar positions
-        
+
         pos = 0;
 
         for (int i = 0; i < cols.size(); i++)
           {
-            element = (tableCol) cols.elementAt(i);
-            element.width = (int) element.origWidth;
+            col = cols.get(i);
+            col.width = (int) col.origWidth;
 
-            colPos.setElementAt(Integer.valueOf(pos), i);
-            pos += element.width + vLineThickness;
+            colPos.set(i, pos);
+            pos += col.width + vLineThickness;
           }
 
         // set the last pole directly to avoid scaling artifacts
 
-        colPos.setElementAt(Integer.valueOf(origTotalWidth + (cols.size() + 1) * vLineThickness),
-                            cols.size());
+        colPos.set(cols.size(),
+                   origTotalWidth + (cols.size() + 1) * vLineThickness);
 
         // and set the last column's width directly to avoid the same
 
         if (cols.size() > 0)
           {
-            element = (tableCol) cols.elementAt(cols.size() - 1);
-            
-            element.width = ((Integer)colPos.elementAt(cols.size())).intValue() -
-              ((Integer)colPos.elementAt(cols.size()-1)).intValue();
+            col = cols.get(cols.size() - 1);
+
+            col.width = colPos.get(cols.size()) -
+              colPos.get(cols.size()-1);
           }
       }
     else
@@ -2240,17 +2208,17 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
             System.err.println("Canvas height: " + canvas.getBounds().height);
           }
 
-        // figure out how much we need to scale the column sizes to fill the 
+        // figure out how much we need to scale the column sizes to fill the
         // available horizontal space
 
         /*  note that when we do column resizing we'll need to update this
             algorithm, particularly the use of origTotalWidth as the source
             or our scrolling.. column adjustment should change relative width
             of columns relative to the scalefact, probably.
-            
+
             make scalefact an object global float? */
-        
-        scalefact = (canvas.getBounds().width - (cols.size() + 1) * vLineThickness) / 
+
+        scalefact = (canvas.getBounds().width - (cols.size() + 1) * vLineThickness) /
           (float) origTotalWidth;
 
         if (debug)
@@ -2264,24 +2232,24 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
 
         for (int i = 0; i < cols.size(); i++)
           {
-            element = (tableCol) cols.elementAt(i);
-            
-            colPos.setElementAt(Integer.valueOf(pos), i);
-            element.width = Math.round(element.origWidth * scalefact);
-            pos += element.width + vLineThickness;
+            col = cols.get(i);
+
+            colPos.set(i, pos);
+            col.width = Math.round(col.origWidth * scalefact);
+            pos += col.width + vLineThickness;
           }
 
         // we know where the last colPos should be if we are not doing
         // a scrollbar.  set it directly to avoid integer/float
         // precision problems.
 
-        colPos.setElementAt(Integer.valueOf(canvas.getBounds().width - 1), cols.size());
+        colPos.set(cols.size(), canvas.getBounds().width - 1);
 
         if (cols.size() > 0)
           {
-            element = (tableCol) cols.elementAt(cols.size()-1);
-            element.width = ((Integer)colPos.elementAt(cols.size())).intValue() -
-              ((Integer)colPos.elementAt(cols.size()-1)).intValue() - vLineThickness;
+            col = cols.get(cols.size()-1);
+            col.width = colPos.get(cols.size()) -
+              colPos.get(cols.size()-1) - vLineThickness;
           }
       }
 
@@ -2302,9 +2270,8 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
   void calcFonts()
   {
     tableCell cell;
-    tableCol element = null;
 
-    int 
+    int
       old_rheight = row_height,
       old_rbline = row_baseline;
 
@@ -2320,21 +2287,15 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
     row_height = 0;
     row_baseline = 0;
 
-    for (int i = 0; i < cols.size(); i++)
+    for (tableCol col: cols)
       {
-        try
+        if (col.attr != null)
           {
-            element = (tableCol) cols.elementAt(i);
-
-            if (element.attr.height > row_height)
+            if (col.attr.height > row_height)
               {
-                row_height = element.attr.height;
-                row_baseline = element.attr.baseline;
+                row_height = col.attr.height;
+                row_baseline = col.attr.baseline;
               }
-          }
-        catch (RuntimeException ex)
-          {
-            // null pointer or array violation.. continue with the loop
           }
       }
 
@@ -2358,7 +2319,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
     if (tableAttrib.height > row_height)
       {
         // this row will use the table default
-        
+
         row_height = tableAttrib.height;
         row_baseline = tableAttrib.baseline;
       }
@@ -2392,8 +2353,8 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
       {
         return;
       }
-    
-    row = (tableRow) rows.elementAt(rowIndex);
+
+    row = rows.get(rowIndex);
 
     currentVbar = vbar.getValue();
     currenty = row.getTopEdge() - currentVbar;
@@ -2402,7 +2363,7 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
       {
         System.err.println("scrollRowTo: row " + row + " is currently at " + currenty);
       }
-    
+
     // ok, currenty is where the row's top edge is now.
     // we want it to be at y, so we adjust the vbar's value.
 

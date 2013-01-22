@@ -11,7 +11,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -51,10 +51,16 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -90,10 +96,10 @@ public class rowTable extends baseTable implements ActionListener {
   static final public String delColStr = ts.l("global.del_col"); // "Delete This Column"
   static final public String optColWidStr = ts.l("global.opt_col_widths"); // "Optimize Column Widths"
 
-  Hashtable
+  Hashtable<Object, rowHandle>
     index;
 
-  Vector
+  Vector<rowHandle>
     crossref;
 
   rowSelectCallback
@@ -105,7 +111,21 @@ public class rowTable extends baseTable implements ActionListener {
   JMenuItem DeleteColMI;
   JMenuItem OptimizeMI;
 
-  boolean sortForward = true;
+  // we remember the last two sorts that have been performed so that
+  // we can be requested to automatically re-do the primary and
+  // secondary stable sorts after the data is changed by the user of
+  // rowTable.
+
+  private int lastSortColumn = -1;
+  private boolean lastSortForward = true;
+
+  private int olderSortColumn = -1;
+  private boolean olderSortForward = true;
+
+  /**
+   * <p>The hash key for the selected row, or null if no row is
+   * selected.</p>
+   */
 
   Object rowSelectedKey;
 
@@ -217,8 +237,8 @@ public class rowTable extends baseTable implements ActionListener {
 
     this.callback = callback;
 
-    index = new Hashtable();
-    crossref = new Vector();
+    index = new Hashtable<Object, rowHandle>();
+    crossref = new Vector<rowHandle>();
   }
 
   /**
@@ -456,7 +476,7 @@ public class rowTable extends baseTable implements ActionListener {
 
     if (key != null)
       {
-        rowHandle row = (rowHandle) index.get(key);
+        rowHandle row = index.get(key);
 
         if (row == null)
           {
@@ -489,7 +509,7 @@ public class rowTable extends baseTable implements ActionListener {
   {
     if (rowSelectedKey != null)
       {
-        rowHandle row = (rowHandle) index.get(rowSelectedKey);
+        rowHandle row = index.get(rowSelectedKey);
 
         if (row == null)
           {
@@ -516,8 +536,8 @@ public class rowTable extends baseTable implements ActionListener {
 
   public void clearCells()
   {
-    index = new Hashtable();
-    crossref = new Vector();
+    index = new Hashtable<Object, rowHandle>();
+    crossref = new Vector<rowHandle>();
     super.clearCells();
     rowSelectedKey = null;
   }
@@ -569,7 +589,7 @@ public class rowTable extends baseTable implements ActionListener {
         unSelectRow();
       }
 
-    element = (rowHandle) index.get(key);
+    element = index.get(key);
 
     index.remove(key);
 
@@ -579,13 +599,13 @@ public class rowTable extends baseTable implements ActionListener {
 
     // sync up the rowHandles
 
-    crossref.removeElementAt(element.rownum);
+    crossref.remove(element.rownum);
 
     // and make sure the rownums are correct.
 
     for (int i = element.rownum; i < crossref.size(); i++)
       {
-        ((rowHandle) crossref.elementAt(i)).rownum = i;
+        crossref.get(i).rownum = i;
       }
 
     reShape();
@@ -604,7 +624,7 @@ public class rowTable extends baseTable implements ActionListener {
 
   public tableCell getCell(Object key, int col)
   {
-    return super.getCell(col, ((rowHandle)index.get(key)).rownum);
+    return super.getCell(col, index.get(key).rownum);
   }
 
   // -------------------- convenience methods --------------------
@@ -808,14 +828,12 @@ public class rowTable extends baseTable implements ActionListener {
             else if (e.getSource() == SortByMI)
               {
                 callback.colMenuPerformed(menuCol, e);
-                sortForward = true;
-                resort(menuCol, true);
+                resort(menuCol, true, true);
               }
             else if (e.getSource() == RevSortByMI)
               {
                 callback.colMenuPerformed(menuCol, e);
-                sortForward = false;
-                resort(menuCol, true);
+                resort(menuCol, false, true);
               }
             else if (e.getSource() == OptimizeMI)
               {
@@ -846,13 +864,104 @@ public class rowTable extends baseTable implements ActionListener {
   }
 
   /**
-   * <p>Sort by column &lt;column&gt;, according to the direction of the
-   * last sort.</p>
+   * <p>Sets the sort preferences for this rowTable from a String
+   * encoding suitable for storage in a Java Prefrences object.</p>
    */
 
-  public void resort(int column, boolean repaint)
+  public void setSortPref(String sortPref)
   {
-    new rowSorter(sortForward, this, column).sort();
+    lastSortColumn = -1;
+    olderSortColumn = -1;
+
+    if (sortPref == null || sortPref.equals(""))
+      {
+        return;
+      }
+
+    String regex = "(\\d+)([fr])(:(\\d+)([fr]))?";
+    Pattern pat = Pattern.compile(regex);
+    Matcher mat = pat.matcher(sortPref);
+
+    if (!mat.matches())
+      {
+        return;
+      }
+
+    String lastCol = mat.group(1);
+    String lastOrder = mat.group(2);
+    String olderCol = mat.group(4);
+    String olderOrder = mat.group(5);
+
+    lastSortColumn = Integer.parseInt(lastCol);
+    lastSortForward = lastOrder.equals("f");
+
+    if (olderCol != null)
+      {
+        olderSortColumn = Integer.parseInt(olderCol);
+        olderSortForward = olderOrder.equals("f");
+      }
+  }
+
+  /**
+   * <p>Gets the sort preferences for this rowTable as a String
+   * encoding suitable for storage in a Java Prefrences object.</p>
+   */
+
+  public String getSortPref()
+  {
+    StringBuilder builder = new StringBuilder();
+
+    if (lastSortColumn == -1)
+      {
+        return "";
+      }
+
+    builder.append(lastSortColumn);
+
+    if (lastSortForward)
+      {
+        builder.append("f");
+      }
+    else
+      {
+        builder.append("r");
+      }
+
+    if (olderSortColumn != -1)
+      {
+        builder.append(":");
+        builder.append(olderSortColumn);
+
+        if (olderSortForward)
+          {
+            builder.append("f");
+          }
+        else
+          {
+            builder.append("r");
+          }
+      }
+
+    return builder.toString();
+  }
+
+  /**
+   * <p>Sort by the last two sort columns and sort orders, if set.</p>
+   */
+
+  public void resort(boolean repaint)
+  {
+    if (lastSortColumn == -1)
+      {
+        return;
+      }
+
+    if (olderSortColumn != -1)
+      {
+        new rowSorter(this, olderSortColumn, olderSortForward).sort();
+      }
+
+    new rowSorter(this, lastSortColumn, lastSortForward).sort();
 
     if (repaint)
       {
@@ -860,9 +969,26 @@ public class rowTable extends baseTable implements ActionListener {
       }
   }
 
+  /**
+   * <p>Do a sort by column and forward direction.</p>
+   */
+
   public void resort(int column, boolean forward, boolean repaint)
   {
-    new rowSorter(forward, this, column).sort();
+    if (column == this.lastSortColumn)
+      {
+        this.olderSortColumn = -1;
+      }
+    else
+      {
+        this.olderSortColumn = this.lastSortColumn;
+        this.olderSortForward = this.lastSortForward;
+      }
+
+    this.lastSortColumn = column;
+    this.lastSortForward = forward;
+
+    new rowSorter(this, column, forward).sort();
 
     if (repaint)
       {
@@ -872,75 +998,87 @@ public class rowTable extends baseTable implements ActionListener {
 
   private rowHandle findRow(int y)
   {
-    for (int i = 0; i < crossref.size(); i++)
+    for (rowHandle row: crossref)
       {
-        if (((rowHandle) crossref.elementAt(i)).rownum == y)
+        if (row.rownum == y)
           {
-            return (rowHandle) crossref.elementAt(i);
+            return row;
           }
       }
 
     throw new RuntimeException("Couldn't find row " + y);
   }
-
 }
 
-/* from Fundamentals of Data Structures in Pascal,
-        Ellis Horowitz and Sartaj Sahni,
-        Second Edition, p.347
-        Computer Science Press, Inc.
-        Rockville, Maryland
-        ISBN 0-88175-165-0 */
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                       rowHandle
 
-class mergeRec {
+------------------------------------------------------------------------------*/
 
+/**
+ * <p>This class is used to map a hash key to a row in the table.</p>
+ */
+
+class rowHandle {
+
+  Object
+    key;
+
+  int
+    rownum;
 
   tableRow element;
-  rowHandle handle;
-  mergeRec link;
 
-  mergeRec(tableRow element, rowHandle handle)
+  public rowHandle(rowTable parent, Object key)
   {
-    this.element = element;
-    this.handle = handle;
-    link = null;
-  }
+    parent.addRow(false);       // don't repaint table
+    rownum = parent.rows.size() - 1;
+    this.key = key;
 
-  void setNext(mergeRec link)
-  {
-    this.link = link;
-  }
+    // crossref's index for RowHash element should be same as
+    // rows's index for the corresponding ReportRow
 
-  mergeRec next()
-  {
-    return link;
-  }
+    parent.crossref.add(this);
 
+    // check to make sure
+
+    if (parent.crossref.indexOf(this) != rownum)
+      {
+        throw new RuntimeException("rowTable / baseTable mismatch");
+      }
+  }
 }
 
-class rowSorter {
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                                       rowSorter
 
-  Vector mergeRecs;
-  boolean forward;
+------------------------------------------------------------------------------*/
+
+class rowSorter implements Comparator<rowHandle> {
+
   rowTable parent;
+  List<rowHandle> rows;
+  boolean forward;
   int column;
 
   /* -- */
 
-  public rowSorter(boolean forward, rowTable parent, int column)
+  public rowSorter(rowTable parent, int column, boolean forward)
   {
-    this.forward = forward;
     this.parent = parent;
     this.column = column;
+    this.forward = forward;
   }
 
-  int compare(mergeRec a, mergeRec b)
+  public int compare(rowHandle a, rowHandle b)
   {
     Object Adata, Bdata;
 
     try
       {
-        Adata = a.element.elementAt(column).getData();
+        Adata = a.element.get(column).getData();
       }
     catch (NullPointerException ex)
       {
@@ -949,7 +1087,7 @@ class rowSorter {
 
     try
       {
-        Bdata = b.element.elementAt(column).getData();
+        Bdata = b.element.get(column).getData();
       }
     catch (NullPointerException ex)
       {
@@ -971,7 +1109,7 @@ class rowSorter {
           {
             try
               {
-                one = a.element.elementAt(column).text;
+                one = a.element.get(column).text;
               }
             catch (NullPointerException ex)
               {
@@ -980,7 +1118,7 @@ class rowSorter {
 
             try
               {
-                two = b.element.elementAt(column).text;
+                two = b.element.get(column).text;
               }
             catch (NullPointerException ex)
               {
@@ -991,7 +1129,7 @@ class rowSorter {
           {
             try
               {
-                one = b.element.elementAt(column).text;
+                one = b.element.get(column).text;
               }
             catch (NullPointerException ex)
               {
@@ -1000,7 +1138,7 @@ class rowSorter {
 
             try
               {
-                two = a.element.elementAt(column).text;
+                two = a.element.get(column).text;
               }
             catch (NullPointerException ex)
               {
@@ -1150,78 +1288,6 @@ class rowSorter {
     return 0;
   }
 
-  mergeRec rmsort(int l, int u)
-  {
-    int mid;
-    mergeRec q, r;
-
-    //    System.err.println("rmsort: low " + l + ", high " + u);
-
-    if (l >= u)
-      {
-        return (mergeRec) mergeRecs.elementAt(l);
-      }
-    else
-      {
-        mid = (l + u) / 2;
-        q = rmsort(l, mid);
-        r = rmsort(mid+1, u);
-        return rmerge(q,r);
-      }
-  }
-
-  mergeRec rmerge(mergeRec u, mergeRec y)
-  {
-    mergeRec p1, p2, px, result, node;
-
-    /* -- */
-
-    p1 = u;
-    p2 = y;
-    result = null;
-
-    if (compare(p1, p2) <= 0)
-      {
-        result = p1;
-        p1 = p1.next();
-        result.setNext(null);
-      }
-    else
-      {
-        result = p2;
-        p2 = p2.next();
-        result.setNext(null);
-      }
-
-    node = result;
-
-    while (p1 != null || p2 != null)
-      {
-        if (p1 == null || compare(p1,p2) > 0)
-          {
-            node.setNext(p2);
-
-            if (p2 != null)
-              {
-                px = p2.next();
-                p2.setNext(null);
-                p2 = px;
-              }
-          }
-        else
-          {
-            px = p1.next();
-            node.setNext(p1);
-            p1.setNext(null);
-            p1 = px;
-          }
-
-        node = node.next();
-      }
-
-    return result;
-  }
-
   public void sort()
   {
     if (parent.rows.size() < 2)
@@ -1229,68 +1295,37 @@ class rowSorter {
         return;
       }
 
-    mergeRecs = new Vector();
+    rows = new ArrayList<rowHandle>();
 
-    // System.err.println("Creating mergeRecs");
+    int i = 0;
 
-    for (int i = 0; i < parent.rows.size(); i++)
+    for (tableRow tRow: parent.rows)
       {
-        mergeRecs.addElement(new mergeRec((tableRow)parent.rows.elementAt(i),
-                                          (rowHandle)parent.crossref.elementAt(i)));
+        rowHandle row = parent.crossref.get(i);
+        row.element = tRow;
+        rows.add(row);
+
+        i++;
       }
 
-    // System.err.println("Sorting from element " + 0 + " to " + (mergeRecs.size()-1));
+    // NB: Collections.sort() is stable, so we won't affect the
+    // pre-existing ordering for rows with identical keys in the sort
+    // column
 
-    mergeRec result = rmsort(0, mergeRecs.size()-1);
+    Collections.sort(rows, this);
 
-    //  System.err.println("Toplevel sorted, fixing crossrefs");
+    i = 0;
 
-    for (int i = 0; i < parent.rows.size(); i++)
+    for (rowHandle row: rows)
       {
-        parent.rows.setElementAt(result.element, i);
-        parent.crossref.setElementAt(result.handle, i);
-        result.handle.rownum = i;
+        row.rownum = i;
+        parent.crossref.set(i, row);
+        parent.rows.set(i, row.element);
 
-        result = result.next();
+        i++;
       }
 
     parent.reCalcRowPos(0);             // recalc vertical positions
   }
-
 }
 
-/*------------------------------------------------------------------------------
-                                                                           class
-                                                                       rowHandle
-
-This class is used to map a hash key to a position in the table.
-
-------------------------------------------------------------------------------*/
-
-class rowHandle {
-
-  Object
-    key;
-
-  int
-    rownum;
-
-  public rowHandle(rowTable parent, Object key)
-  {
-    parent.addRow(false);       // don't repaint table
-    rownum = parent.rows.size() - 1;
-    this.key = key;
-
-    // crossref's index for RowHash element should be same as
-    // rows's index for the corresponding ReportRow
-
-    parent.crossref.addElement(this);
-
-    // check to make sure
-
-    if (parent.crossref.indexOf(this) != rownum)
-      {
-        throw new RuntimeException("rowTable / baseTable mismatch");
-      }
-  }
-}

@@ -12,8 +12,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -103,6 +105,8 @@ import arlut.csd.ganymede.server.ServiceFailedException;
 
 public class GASHBuilderTask extends GanymedeBuilderTask {
 
+  public final static boolean debug = false;
+
   private static String path = null;
   private static String dnsdomain = null;
   private static String buildScript = null;
@@ -168,7 +172,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
 
-    Ganymede.debug("GASHBuilderTask builderPhase1 running");
+    Ganymede.debug("build: GASHBuilderTask writing files");
 
     if (path == null)
       {
@@ -205,7 +209,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (baseChanged(SchemaConstants.UserBase))
       {
-        Ganymede.debug("Need to build user map");
+        if (debug)
+          {
+            Ganymede.debug("Need to build user map");
+          }
 
         out = null;
 
@@ -229,11 +236,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
               }
             finally
               {
-		out.close();
+                out.close();
               }
           }
 
-	out = null;
+        out = null;
 
         try
           {
@@ -255,7 +262,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
               }
             finally
               {
-		out.close();
+                out.close();
               }
           }
 
@@ -283,7 +290,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     if (baseChanged(groupSchema.BASE) ||
         baseChanged(SchemaConstants.UserBase)) // in case a user was renamed
       {
-        Ganymede.debug("Need to build group map");
+        if (debug)
+          {
+            Ganymede.debug("Need to build group map");
+          }
 
         out = null;
 
@@ -345,7 +355,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         baseChanged(emailRedirectSchema.BASE) || // external mail addresses
         baseChanged(MailmanListSchema.BASE)) // mailman lists
       {
-        Ganymede.debug("Need to build aliases map");
+        if (debug)
+          {
+            Ganymede.debug("Need to build aliases map");
+          }
 
         if (writeAliasesFile() && writeEmailLists())
           {
@@ -370,7 +383,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (baseChanged(MailmanListSchema.BASE)) // mailman lists
       {
-        Ganymede.debug("Need to call mailman ns8 sync script");
+        if (debug)
+          {
+            Ganymede.debug("Need to call mailman ns8 sync script");
+          }
 
         if (writeMailmanListsFile())
           {
@@ -383,7 +399,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         baseChanged(SchemaConstants.UserBase) || // in case users were renamed
         baseChanged(systemSchema.BASE)) // in case systems were renamed
       {
-        Ganymede.debug("Need to build netgroup map");
+        if (debug)
+          {
+            Ganymede.debug("Need to build netgroup map");
+          }
 
         if (writeNetgroupFile())
           {
@@ -402,7 +421,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         baseChanged(SchemaConstants.UserBase) || // in case users were renamed
         baseChanged(mapEntrySchema.BASE)) // automounter map entries
       {
-        Ganymede.debug("Need to build automounter maps");
+        if (debug)
+          {
+            Ganymede.debug("Need to build automounter maps");
+          }
 
         if (writeAutoMounterFiles())
           {
@@ -413,9 +435,13 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     if (baseChanged(systemSchema.BASE) || // system base
         baseChanged(networkSchema.BASE) || // I.P. Network base
         baseChanged(interfaceSchema.BASE) || // system interface base
-	baseChanged(roomSchema.BASE))
+        baseChanged(roomSchema.BASE))
       {
-        Ganymede.debug("Need to build DNS tables");
+        if (debug)
+          {
+            Ganymede.debug("Need to build DNS tables");
+          }
+
         writeSysFile();
         writeSysDataFile();
         success = true;
@@ -429,12 +455,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         baseChanged(dhcpEntrySchema.BASE) ||
         baseChanged(dhcpNetworkSchema.BASE))
       {
-        Ganymede.debug("Need to build DHCP configuration file");
+        if (debug)
+          {
+            Ganymede.debug("Need to build DHCP configuration file");
+          }
+
         writeDHCPFile();
         success = true;
       }
-
-    Ganymede.debug("GASHBuilderTask builderPhase1 completed");
 
     return success;
   }
@@ -457,7 +485,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
 
-    Ganymede.debug("GASHBuilderTask builderPhase2 running");
+    Ganymede.debug("build: GASHBuilderTask running build");
 
     if (buildScript == null)
       {
@@ -486,7 +514,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
           {
             resultCode = FileOps.runProcess(buildScript);
 
-	    startedOk = true;
+            startedOk = true;
           }
         catch (IOException ex)
           {
@@ -523,24 +551,27 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         Ganymede.log.logSystemEvent(event);
 
-	if (startedOk)
-	  {
-	    throw new ServiceFailedException("gashbuilder returned a failure code: " + resultCode);
-	  }
-	else
-	  {
-	    if (!file.exists())
-	      {
-		throw new ServiceNotFoundException("Couldn't find " + path);
-	      }
-	    else
-	      {
-		throw new ServiceNotFoundException("Couldn't run " + path);
-	      }
-	  }
+        if (startedOk)
+          {
+            throw new ServiceFailedException("gashbuilder returned a failure code: " + resultCode);
+          }
+        else
+          {
+            if (!file.exists())
+              {
+                throw new ServiceNotFoundException("Couldn't find " + path);
+              }
+            else
+              {
+                throw new ServiceNotFoundException("Couldn't run " + path);
+              }
+          }
       }
 
-    Ganymede.debug("GASHBuilderTask builderPhase2 completed");
+    if (debug)
+      {
+        Ganymede.debug("GASHBuilderTask builderPhase2 completed");
+      }
 
     return true;
   }
@@ -2031,19 +2062,19 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
             writeExternalAlias(external, aliases_info);
           }
 
-	// as well as the aliases for the mailman lists
+        // as well as the aliases for the mailman lists
 
         for (DBObject mailman: getObjects(MailmanListSchema.BASE))
           {
             writeMailmanListAlias(mailman, aliases_info);
           }
 
-	// and the IRIS-derived mail lists
+        // and the IRIS-derived mail lists
 
-	for (DBObject irisList: getObjects(IRISListSchema.BASE))
-	  {
-	    writeIRISListAlias(irisList, aliases_info);
-	  }
+        for (DBObject irisList: getObjects(IRISListSchema.BASE))
+          {
+            writeIRISListAlias(irisList, aliases_info);
+          }
 
       }
     finally
@@ -2320,7 +2351,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 result.append(":");
                 lengthlimit_remaining = 900 - subname.length() - 6;
 
-		subgroup++;
+                subgroup++;
               }
 
             result.append(target);
@@ -2364,7 +2395,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 result.append(":");
                 lengthlimit_remaining = 900 - subname.length() - 6;
 
-		subgroup++;
+                subgroup++;
               }
 
             result.append(target);
@@ -2476,7 +2507,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 result.append(":");
                 lengthlimit_remaining = 900 - subname.length() - 6;
 
-		subgroup++;
+                subgroup++;
               }
 
             result.append(target);
@@ -2609,7 +2640,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
             result.append(":");
             lengthlimit_remaining = 900 - subname.length() - 6;
 
-	    subgroup++;
+            subgroup++;
           }
 
         result.append(target);
@@ -2813,7 +2844,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 result.append(":");
                 lengthlimit_remaining = 900 - subname.length() - 6;
 
-		subgroup++;
+                subgroup++;
               }
 
             result.append(target);
@@ -2858,56 +2889,56 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
               {
                 PrintWriter pfknownu = openOutFile(path + "pfknown_users", "gasharl");
 
-		try
-		  {
-		    PrintWriter pfcanonical = openOutFile(path + "pfrecipient_canonical", "gasharl");
+                try
+                  {
+                    PrintWriter pfcanonical = openOutFile(path + "pfrecipient_canonical", "gasharl");
 
-		    try
-		      {
-			writeHashTransport(pftransport);
-			writeHashKnownuser(pfknownu, pfcanonical);
+                    try
+                      {
+                        writeHashTransport(pftransport);
+                        writeHashKnownuser(pfknownu, pfcanonical);
 
-			for (DBObject user: getObjects(SchemaConstants.UserBase))
-			  {
-			    writeHashGenerics(user, pfgenerics);
-			    writeHashUserAlias(user, pfmalias);
-			  }
+                        for (DBObject user: getObjects(SchemaConstants.UserBase))
+                          {
+                            writeHashGenerics(user, pfgenerics);
+                            writeHashUserAlias(user, pfmalias);
+                          }
 
-			// mail lists
+                        // mail lists
 
-			for (DBObject group: getObjects(emailListSchema.BASE))
-			  {
-			    writeHashGroupAlias(group, pfmalias);
-			  }
+                        for (DBObject group: getObjects(emailListSchema.BASE))
+                          {
+                            writeHashGroupAlias(group, pfmalias);
+                          }
 
-			// emailable account groups
+                        // emailable account groups
 
-			for (DBObject group: getObjects(groupSchema.BASE))
-			  {
-			    writeHashAccountGroupAlias(group, pfmalias);
-			  }
+                        for (DBObject group: getObjects(groupSchema.BASE))
+                          {
+                            writeHashAccountGroupAlias(group, pfmalias);
+                          }
 
-			// emailable user netgroups
+                        // emailable user netgroups
 
-			for (DBObject group: getObjects(userNetgroupSchema.BASE))
-			  {
-			    writeHashUserNetgroupAlias(group, pfmalias);
-			  }
+                        for (DBObject group: getObjects(userNetgroupSchema.BASE))
+                          {
+                            writeHashUserNetgroupAlias(group, pfmalias);
+                          }
 
-			// external mail addresses
+                        // external mail addresses
 
-			for (DBObject external: getObjects(emailRedirectSchema.BASE))
-			  {
-			    writeHashExternalAlias(external, pfmalias);
-			  }
+                        for (DBObject external: getObjects(emailRedirectSchema.BASE))
+                          {
+                            writeHashExternalAlias(external, pfmalias);
+                          }
 
-			success = true;
-		      }
-		    finally
-		      {
-			pfcanonical.close();
-		      }
-		  }
+                        success = true;
+                      }
+                    finally
+                      {
+                        pfcanonical.close();
+                      }
+                  }
                 finally
                   {
                     pfknownu.close();
@@ -3183,7 +3214,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                   }
 
                 result.append(getLabel(memberInvid));
-	        didSomething++;
+                didSomething++;
               }
           }
 
@@ -3197,14 +3228,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                   }
 
                 result.append(external_targets.get(i));
-	        didSomething++;
+                didSomething++;
               }
           }
 
         if( didSomething > 0 )
-	  {
+          {
             writer.println(result.toString().toLowerCase());
-	  }
+          }
       }
   }
 
@@ -3343,21 +3374,21 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (!empty(targets))
       {
-	result.setLength(0);
-	result.append(groupname);
-	result.append(": ");
+        result.setLength(0);
+        result.append(groupname);
+        result.append(": ");
 
-	for (int i = 0; i < targets.size(); i++)
-	  {
-	    if (i > 0)
-	      {
-		result.append(", ");
-	      }
+        for (int i = 0; i < targets.size(); i++)
+          {
+            if (i > 0)
+              {
+                result.append(", ");
+              }
 
-	    result.append(targets.get(i));
-	  }
+            result.append(targets.get(i));
+          }
 
-	writer.println(result.toString().toLowerCase());
+        writer.println(result.toString().toLowerCase());
       }
   }
 
@@ -3583,7 +3614,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         if (!empty(group_aliases) || !empty(group_targets) || !empty(external_targets))
           {
-	    set.add(groupname);
+            set.add(groupname);
           }
 
         if (!empty(group_aliases))
@@ -3665,16 +3696,16 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     for (String account: set)
       {
-	// needs to end in @arlut.utexas.edu on postfix side.
-	// jgs 17 nov 2010
+        // needs to end in @arlut.utexas.edu on postfix side.
+        // jgs 17 nov 2010
 
         writer.print(account);
         writer.println("@arlut.utexas.edu OK");
       }
 
     //
-    //	once more, w/ feeling:
-    //  /^user@.*\.arlut\.utexas\.edu$/	user@arlut.utexas.edu
+    //  once more, w/ feeling:
+    //  /^user@.*\.arlut\.utexas\.edu$/ user@arlut.utexas.edu
     //
 
     for (String account: set)
@@ -3737,7 +3768,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (address.indexOf('@') == -1)
       {
-	return address.toLowerCase();
+        return address.toLowerCase();
       }
 
     return address.substring(0, address.indexOf('@')).toLowerCase();
@@ -4691,29 +4722,29 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 primaryUser = getLabel(primaryUserInvid);
               }
 
-	    try
-	      {
-		IPstring = ((IPDBField) interfaceObj.getField(interfaceSchema.ADDRESS)).getValueString();
-		MACstring = ((StringDBField) interfaceObj.getField(interfaceSchema.ETHERNETINFO)).getValueString();
-		MACstring = MACstring.replace('-',':');
-	      }
-	    catch (NullPointerException ex)
-	      {
-	      }
+            try
+              {
+                IPstring = ((IPDBField) interfaceObj.getField(interfaceSchema.ADDRESS)).getValueString();
+                MACstring = ((StringDBField) interfaceObj.getField(interfaceSchema.ETHERNETINFO)).getValueString();
+                MACstring = MACstring.replace('-',':');
+              }
+            catch (NullPointerException ex)
+              {
+              }
 
             if (IPstring == null || MACstring == null)
               {
                 continue;
               }
 
-	    try
-	      {
-		ownerString = ((InvidDBField) object.getField(SchemaConstants.OwnerListField)).getValueString();
-	      }
-	    catch (Exception ex)
-	      {
-		ownerString = null;
-	      }
+            try
+              {
+                ownerString = ((InvidDBField) object.getField(SchemaConstants.OwnerListField)).getValueString();
+              }
+            catch (Exception ex)
+              {
+                ownerString = null;
+              }
 
             result.append(IPstring);
             result.append("|");

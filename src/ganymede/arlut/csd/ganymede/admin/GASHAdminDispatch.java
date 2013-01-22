@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -121,9 +121,15 @@ class GASHAdminDispatch implements Runnable {
   private ImageIcon playIcon = null;
   private ImageIcon okayIcon = null;
 
-  NumberFormat numberFormatter = NumberFormat.getInstance();
+  private NumberFormat numberFormatter = NumberFormat.getInstance();
 
   /* -- */
+
+  /**
+   * <p>Constructor.</p>
+   *
+   * @param server A remote RMI reference to the Ganymede server we're monitoring.
+   */
 
   public GASHAdminDispatch(Server server)
   {
@@ -131,12 +137,12 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * This method connects the admin console to the server RMI
+   * <p>This method connects the admin console to the server RMI
    * reference that was provided to the GASHAdminDispatch constructor.
    * If the server returns a failure message, connect() will pop up a
    * dialog providing the error text.  If the connection failed
    * through a RemoteException, it will be passed up for the calling
-   * code to handle.
+   * code to handle.</p>
    */
 
   public boolean connect(String name, String pass) throws RemoteException
@@ -201,11 +207,32 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * Generates the localized time formatting for the admin console
+   * <p>Generates the localized time formatting for the admin console,
+   * with special short formatting for times that occurred in the
+   * current calendar day.</p>
    */
 
   public String formatDate(Date time)
   {
+    return this.formatDate(time, true);
+  }
+
+  /**
+   * <p>Generates the localized time formatting for the admin console,
+   * with optional short formatting for times that occurred in this
+   * calendar day.</p>
+   *
+   * @param todayIsSpecial If true, a shorter time format will be used
+   * for time if it occurred today.
+   */
+
+  public String formatDate(Date time, boolean todayIsSpecial)
+  {
+    if (time == null)
+      {
+        return "";
+      }
+
     SimpleDateFormat formatter;
     Calendar cal1 = Calendar.getInstance();
     Calendar cal2 = Calendar.getInstance();
@@ -213,7 +240,8 @@ class GASHAdminDispatch implements Runnable {
     cal1.setTime(new Date());
     cal2.setTime(time);
 
-    if ((cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)) &&
+    if (todayIsSpecial &&
+        (cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR)) &&
         (cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR)))
       {
         formatter = new SimpleDateFormat(ts.l("global.todayTimeFormat"));
@@ -227,12 +255,12 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * This method spins continuously, polling the server for {@link
+   * <p>This method spins continuously, polling the server for {@link
    * arlut.csd.ganymede.common.adminAsyncMessage adminAsyncMessages}.
    * The server will block until something happens, then download a
    * set of adminAsyncMessages.  This run method will then dispatch
    * those messages to the appropriate GASHAdminDispatch methods for
-   * propagation into the admin console's GUI.
+   * propagation into the admin console's GUI.</p>
    */
 
   public void run()
@@ -328,8 +356,8 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * This method is remotely called by the Ganymede server to set the
-   * server start date in the admin console.
+   * <p>Updates the display of the server start date in the admin
+   * console.</p>
    */
 
   public void setServerStart(Date date)
@@ -348,14 +376,16 @@ class GASHAdminDispatch implements Runnable {
 
     SwingUtilities.invokeLater(new Runnable() {
       public void run() {
-        frame.startField.setText(formatDate(lDate));
+        // always use long format date as the server start time will
+        // not be updated once set
+        frame.startField.setText(formatDate(lDate, false));
       }
     });
   }
 
   /**
-   * This method is remotely called by the Ganymede server to set the
-   * last dump date in the admin console.
+   * <p>Updates the display of the server's last dump date in the admin
+   * console.</p>
    */
 
   public void setLastDumpTime(Date date)
@@ -387,9 +417,8 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * This method is remotely called by the Ganymede server to set the
-   * number of transactions in the server's journal in the admin
-   * console.
+   * <p>Updates the display of the number of transactions in the server's
+   * journal in the admin console.</p>
    */
 
   public void setTransactionsInJournal(int trans)
@@ -414,8 +443,8 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * This method is remotely called by the Ganymede server to set the
-   * number of objects checked out in the admin console.
+   * <p>Updates the display of the number of objects checked out on the
+   * server in the admin console.</p>
    */
 
   public void setObjectsCheckedOut(int objs)
@@ -440,8 +469,8 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * This method is remotely called by the Ganymede server to set the
-   * number of locks held in the admin console.
+   * <p>Updates the display of the number of server locks waiting to be
+   * established / established in the admin console.</p>
    */
 
   public void setLocksHeld(int locks, int waiting)
@@ -467,8 +496,7 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * This method is remotely called by the Ganymede server to update
-   * the memory statistics display in the admin console.
+   * <p>Updates the memory statistics display in the admin console.</p>
    */
 
   public void setMemoryState(long freeMemory, long totalMemory)
@@ -500,8 +528,7 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * This method is remotely called by the Ganymede server to add to
-   * the admin console's log display.
+   * <p>Appends to the server log display in the admin console.</p>
    *
    * @param status A string to add to the console's log display, with
    * the trailing newline included.
@@ -529,8 +556,8 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * This method is remotely called by the Ganymede server to update
-   * the number of admin consoles attached to the server.
+   * <p>Updates the display of the number of admin consoles attached to
+   * the server.</p>
    */
 
   public void changeAdmins(String adminStatus)
@@ -555,8 +582,7 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * This method is remotely called by the Ganymede server to update
-   * the admin console's server state display.
+   * <p>Updates the admin console's server state display.</p>
    */
 
   public void changeState(String state)
@@ -581,8 +607,7 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * This method is remotely called by the Ganymede server to update
-   * the admin console's connected user table.
+   * <p>Updates the admin console's connected user table.</p>
    *
    * @param entries a Vector of {@link arlut.csd.ganymede.common.AdminEntry AdminEntry}
    * login description objects.
@@ -647,12 +672,22 @@ class GASHAdminDispatch implements Runnable {
                   }
 
                 frame.table.setCellText(e.sessionName, 1, e.hostname, false);
-                frame.table.setCellText(e.sessionName, 2, e.status, false);
-                frame.table.setCellText(e.sessionName, 3, formatDate(e.connecttime), false);
-                frame.table.setCellText(e.sessionName, 4, e.event, false);
-                frame.table.setCellText(e.sessionName, 5, Integer.toString(e.objectsCheckedOut), false);
+                //                frame.table.setCellText(e.sessionName, 2, e.status, false);
+                frame.table.setCellText(e.sessionName, 2, formatDate(e.connecttime), e.connecttime, false);
+
+                if (e.eventtime == null)
+                  {
+                    frame.table.setCellText(e.sessionName, 3, e.event, false);
+                  }
+                else
+                  {
+                    frame.table.setCellText(e.sessionName, 3, formatDate(e.eventtime) + " " + e.event, e.eventtime, false);
+                  }
+
+                frame.table.setCellText(e.sessionName, 4, Integer.toString(e.objectsCheckedOut), false);
               }
 
+            frame.table.resort(false);
             frame.table.refreshTable();
           }
         });
@@ -668,8 +703,8 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * This method is remotely called by the Ganymede server to update
-   * the admin console's task table.
+   * <p>This method is remotely called by the Ganymede server to
+   * update the admin console's task tables.</p>
    *
    * @param tasks an array of {@link
    * arlut.csd.ganymede.common.scheduleHandle scheduleHandle} objects
@@ -790,8 +825,8 @@ class GASHAdminDispatch implements Runnable {
           }
         else if (handle.isRunning())
           {
-            // "Running"
-            table.setCellText(handle.name, 1, ts.l("changeTasks.runningState"), false);
+            // "Running ({0}s)"
+            table.setCellText(handle.name, 1, ts.l("changeTasks.runningState", handle.getAge()), false);
             table.setCellColor(handle.name, 1, Color.blue, false);
             table.setCellBackColor(handle.name, 1, Color.white, false);
           }
@@ -814,7 +849,7 @@ class GASHAdminDispatch implements Runnable {
 
         if (handle.startTime != null)
           {
-            table.setCellText(handle.name, 3, formatDate(handle.startTime), false);
+            table.setCellText(handle.name, 3, formatDate(handle.startTime), handle.startTime, false);
           }
         else
           {
@@ -824,7 +859,7 @@ class GASHAdminDispatch implements Runnable {
 
         if (handle.lastTime != null)
           {
-            table.setCellText(handle.name, 4, formatDate(handle.lastTime), false);
+            table.setCellText(handle.name, 4, formatDate(handle.lastTime), handle.lastTime, false);
           }
       }
 
@@ -855,6 +890,7 @@ class GASHAdminDispatch implements Runnable {
       {
         SwingUtilities.invokeAndWait(new Runnable() {
           public void run() {
+            localTableRef.resort(false);
             localTableRef.refreshTable();
           }
         });
@@ -900,8 +936,8 @@ class GASHAdminDispatch implements Runnable {
           }
         else if (handle.isRunning())
           {
-            // "Running"
-            table.setCellText(handle.name, 1, ts.l("changeTasks.runningState"), false);
+            // "Running ({0}s)"
+            table.setCellText(handle.name, 1, ts.l("changeTasks.runningState", handle.getAge()), false);
             table.setCellColor(handle.name, 1, Color.blue, false);
             table.setCellBackColor(handle.name, 1, Color.white, false);
           }
@@ -929,7 +965,7 @@ class GASHAdminDispatch implements Runnable {
 
         if (handle.lastTime != null)
           {
-            table.setCellText(handle.name, 2, formatDate(handle.lastTime), false);
+            table.setCellText(handle.name, 2, formatDate(handle.lastTime), handle.lastTime, false);
           }
       }
 
@@ -960,6 +996,7 @@ class GASHAdminDispatch implements Runnable {
       {
         SwingUtilities.invokeAndWait(new Runnable() {
           public void run() {
+            localTableRef.resort(false);
             localTableRef.refreshTable();
           }
         });
@@ -1055,8 +1092,16 @@ class GASHAdminDispatch implements Runnable {
           }
         else if (handle.isRunning())
           {
-            // "Running"
-            table.setCellText(handle.name, 3, ts.l("changeTasks.runningState"), false);
+            if (handle.runAgain())
+              {
+                // "Running ({0}s), Pending"
+                table.setCellText(handle.name, 3, ts.l("changeTasks.runningAndPending", handle.getAge()), false);
+              }
+            else
+              {
+                // "Running ({0}s)"
+                table.setCellText(handle.name, 3, ts.l("changeTasks.runningState", handle.getAge()), false);
+              }
           }
         else if (handle.isSuspended())
           {
@@ -1079,10 +1124,11 @@ class GASHAdminDispatch implements Runnable {
 
         if (handle.lastTime != null)
           {
-            table.setCellText(handle.name, 4, formatDate(handle.lastTime), false);
-            table.setCellColor(handle.name, 4, foreground, false);
-            table.setCellBackColor(handle.name, 4, background, false);
+            table.setCellText(handle.name, 4, formatDate(handle.lastTime), handle.lastTime, false);
           }
+
+        table.setCellColor(handle.name, 4, foreground, false);
+        table.setCellBackColor(handle.name, 4, background, false);
       }
 
     if (running)
@@ -1125,6 +1171,7 @@ class GASHAdminDispatch implements Runnable {
       {
         SwingUtilities.invokeAndWait(new Runnable() {
           public void run() {
+            localTableRef.resort(false);
             localTableRef.refreshTable();
           }
         });
@@ -1207,9 +1254,9 @@ class GASHAdminDispatch implements Runnable {
     handleReturnVal(aSession.killAll());
   }
 
-  boolean shutdown(boolean waitForUsers) throws RemoteException
+  boolean shutdown(boolean waitForUsers, String reason) throws RemoteException
   {
-    ReturnVal retVal = handleReturnVal(aSession.shutdown(waitForUsers));
+    ReturnVal retVal = handleReturnVal(aSession.shutdown(waitForUsers, reason));
 
     return (retVal == null || retVal.didSucceed());
   }
@@ -1291,22 +1338,15 @@ class GASHAdminDispatch implements Runnable {
   }
 
   /**
-   * This method takes a ReturnVal object from the server and, if
+   * <p>This method takes a ReturnVal object from the server and, if
    * necessary, runs through a wizard interaction sequence, possibly
    * displaying several dialogs before finally returning a final
-   * result code.
+   * result code.</p>
    *
-   * Use the ReturnVal returned from this function after this function
-   * is called to determine the ultimate success or failure of any
-   * operation which returns ReturnVal, because a wizard sequence may
-   * determine the ultimate result.
-   *
-   * This method should not be synchronized, since handleReturnVal may
-   * pop up modal (thread-blocking) dialogs, and if we we synchronize
-   * this, some Swing or AWT code seems to block on our
-   * synchronization when we do pop-up dialogs.  It's not any of my
-   * code, so I assume that AWT tries to synchronize on the frame when
-   * parenting a new dialog.
+   * <p>Use the ReturnVal returned from this function after this
+   * function is called to determine the ultimate success or failure
+   * of any operation which returns ReturnVal, because a wizard
+   * sequence may determine the ultimate result.</p>
    */
 
   public ReturnVal handleReturnVal(ReturnVal retVal)

@@ -12,11 +12,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -356,9 +358,9 @@ class stopServerAdmin {
           {
             // "Ganymede.stopServer: Error, couldn''t log into server with admin privileges."
             System.err.println(ts.l("init.login_failure"));
-            
+
             String error = retVal.getDialogText();
-            
+
             if (error != null && !error.equals(""))
               {
                 System.err.println(error);
@@ -384,7 +386,7 @@ class stopServerAdmin {
 
   void shutdown(boolean waitForUsers) throws RemoteException
   {
-    aSession.shutdown(waitForUsers);
+    aSession.shutdown(waitForUsers, null);
   }
 
   public void disconnect() throws RemoteException

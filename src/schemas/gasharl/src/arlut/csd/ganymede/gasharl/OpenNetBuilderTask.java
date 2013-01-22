@@ -13,8 +13,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -90,6 +92,8 @@ import arlut.csd.ganymede.server.ServiceFailedException;
 
 public class OpenNetBuilderTask extends GanymedeBuilderTask {
 
+  static final boolean debug = false;
+
   private static String path = null;
   private static String buildScript = null;
 
@@ -125,7 +129,7 @@ public class OpenNetBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
 
-    Ganymede.debug("OpenNetBuilderTask builderPhase1 running");
+    Ganymede.debug("build: OpenNetBuilderTask writing files");
 
     if (path == null)
       {
@@ -145,7 +149,10 @@ public class OpenNetBuilderTask extends GanymedeBuilderTask {
 
     if (baseChanged(SchemaConstants.UserBase))
       {
-        Ganymede.debug("Need to build user map");
+        if (debug)
+          {
+            Ganymede.debug("Need to build user map");
+          }
 
         out = null;
 
@@ -169,11 +176,11 @@ public class OpenNetBuilderTask extends GanymedeBuilderTask {
               }
             finally
               {
-		out.close();
+                out.close();
               }
           }
 
-	out = null;
+        out = null;
 
         success = true;
       }
@@ -183,7 +190,10 @@ public class OpenNetBuilderTask extends GanymedeBuilderTask {
     if (baseChanged(groupSchema.BASE) ||
         baseChanged(SchemaConstants.UserBase)) // in case a user was renamed
       {
-        Ganymede.debug("Need to build group map");
+        if (debug)
+          {
+            Ganymede.debug("Need to build group map");
+          }
 
         out = null;
 
@@ -217,7 +227,10 @@ public class OpenNetBuilderTask extends GanymedeBuilderTask {
         success = true;
       }
 
-    Ganymede.debug("OpenNetBuilderTask builderPhase1 completed");
+    if (debug)
+      {
+        Ganymede.debug("OpenNetBuilderTask builderPhase1 completed");
+      }
 
     return success;
   }
@@ -238,7 +251,7 @@ public class OpenNetBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
 
-    Ganymede.debug("OpenNetBuilderTask builderPhase2 running");
+    Ganymede.debug("build: OpenNetBuilderTask running build");
 
     if (buildScript == null)
       {
@@ -267,7 +280,7 @@ public class OpenNetBuilderTask extends GanymedeBuilderTask {
           {
             resultCode = FileOps.runProcess(buildScript);
 
-	    startedOk = true;
+            startedOk = true;
           }
         catch (IOException ex)
           {
@@ -304,24 +317,27 @@ public class OpenNetBuilderTask extends GanymedeBuilderTask {
 
         Ganymede.log.logSystemEvent(event);
 
-	if (startedOk)
-	  {
-	    throw new ServiceFailedException("open net builder returned a failure code: " + resultCode);
-	  }
-	else
-	  {
-	    if (!file.exists())
-	      {
-		throw new ServiceNotFoundException("Couldn't find " + path);
-	      }
-	    else
-	      {
-		throw new ServiceNotFoundException("Couldn't run " + path);
-	      }
-	  }
+        if (startedOk)
+          {
+            throw new ServiceFailedException("open net builder returned a failure code: " + resultCode);
+          }
+        else
+          {
+            if (!file.exists())
+              {
+                throw new ServiceNotFoundException("Couldn't find " + path);
+              }
+            else
+              {
+                throw new ServiceNotFoundException("Couldn't run " + path);
+              }
+          }
       }
 
-    Ganymede.debug("OpenNetBuilderTask builderPhase2 completed");
+    if (debug)
+      {
+        Ganymede.debug("OpenNetBuilderTask builderPhase2 completed");
+      }
 
     return true;
   }

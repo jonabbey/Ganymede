@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-22 November 2010
+22 January 2013
 README.localization
 
 ---------------------------------------------
@@ -66,8 +66,11 @@ sources.  'ant validate' will print out a report letting you know how
 complete your translation is, and whether it is properly constructed.
 
 If you do generate a new translation for Ganymede, we encourage you to
-send us patches at ganymede@arlut.utexas.edu for us to incorporate
-into the master Ganymede repository.
+send us patches at ganymede_author@arlut.utexas.edu for us to
+incorporate into the master Ganymede repository.
+
+You could also fork Ganymede on GitHub and submit pull requests to
+'jonabbey'.
 
 Thanks!
 

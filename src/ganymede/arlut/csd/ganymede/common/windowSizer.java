@@ -4,17 +4,19 @@
 
    Utility class to manage saving and restoring of window sizes in the
    Ganymede client.
-   
+
    Created: 21 January 2006
 
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2008
+
+   Copyright (C) 1996 - 2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -60,9 +62,9 @@ import javax.swing.UIManager;
 ------------------------------------------------------------------------------*/
 
 /**
- * This utility class handles saving and restoring window sizes for
+ * <p>This utility class handles saving and restoring window sizes for
  * the Ganymede client, using the Java Preferences API that was
- * introduced in Java 1.4.
+ * introduced in Java 1.4.</p>
  */
 
 public class windowSizer {
@@ -83,11 +85,11 @@ public class windowSizer {
   }
 
   /**
-   * This method saves the given window's size and position in the 
-   * system-dependent Java preferences store.
+   * <p>This method saves the given window's size and position in the
+   * system-dependent Java preferences store.</p>
    *
-   * This is not guaranteed to work, and may in fact be a no-op if no
-   * preferences store is available.
+   * <p>This is not guaranteed to work, and may in fact be a no-op if
+   * no preferences store is available.</p>
    */
 
   public void saveSize(JFrame window)
@@ -116,14 +118,14 @@ public class windowSizer {
   }
 
   /**
-   * This method retrieves the given window's size and position from
-   * the system-dependent Java preferences store.
+   * <p>This method retrieves the given window's size and position
+   * from the system-dependent Java preferences store.</p>
    *
-   * This is not guaranteed to work.  If no preferences are found for
-   * the window's position and size, restoreSize() will return false
-   * and no actions will be performed on the window.  If the
+   * <p>This is not guaranteed to work.  If no preferences are found
+   * for the window's position and size, restoreSize() will return
+   * false and no actions will be performed on the window.  If the
    * preferences are found, the given window will be sized to match
-   * that saved in the preferences.
+   * that saved in the preferences.</p>
    */
 
   public boolean restoreSize(JFrame window)
@@ -165,11 +167,11 @@ public class windowSizer {
   }
 
   /**
-   * This method saves the given dialog's size and position in the 
-   * system-dependent Java preferences store.
+   * <p>This method saves the given dialog's size and position in the
+   * system-dependent Java preferences store.</p>
    *
-   * This is not guaranteed to work, and may in fact be a no-op if no
-   * preferences store is available.
+   * <p>This is not guaranteed to work, and may in fact be a no-op if
+   * no preferences store is available.</p>
    */
 
   public void saveSize(JDialog dialog)
@@ -188,14 +190,14 @@ public class windowSizer {
   }
 
   /**
-   * This method retrieves the given dialog's size and position from
-   * the system-dependent Java preferences store.
+   * <p>This method retrieves the given dialog's size and position
+   * from the system-dependent Java preferences store.</p>
    *
-   * This is not guaranteed to work.  If no preferences are found for
-   * the dialog's position and size, restoreSize() will return false
-   * and no actions will be performed on the dialog.  If the
+   * <p>This is not guaranteed to work.  If no preferences are found
+   * for the dialog's position and size, restoreSize() will return
+   * false and no actions will be performed on the dialog.  If the
    * preferences are found, the given dialog will be sized to match
-   * that saved in the preferences.
+   * that saved in the preferences.</p>
    */
 
   public boolean restoreSize(JDialog dialog)
