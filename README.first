@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-22 November 2010
+22 January 2013
 README.first
 
 ---------------------------------------------
@@ -9,17 +9,25 @@ the Ganymede network directory management system.
 
 This archive contains the Ganymede server, clients, and documentation.
 
-This archive does not contain customization code to make Ganymede
-useful in any specific context.  You will want to download (or create)
-a schema kit that provides a database schema, custom plug-in Java
+The Ganymede clients are turnkey, but the Ganymede server is intended
+to be configured and programmed using the admin console's schema
+editor and pluggable Java classes.
+
+This archive contains the 'gasharl' schema kit that we use at the
+laboratory for our traditional-style NIS and DNS management, but you
+will want to download (or create) a schema kit suited for your purposes.
+
+Such a schema kit would include a database schema, custom plug-in Java
 classes to intelligently manage objects in your database, and both
 Java code and external scripts to take data from the Ganymede database
-and to propagate it into your network environment.  We have published
-a 'userKit' package which customizes Ganymede for user and group
-account management on UNIX, Windows NT, and Samba.
+and to propagate it into your network environment.
 
-You should read the following documents to get oriented with the
-Ganymede system, in roughly this order:
+Without such a kit, you can use Ganymede as a simple in-memory
+database with GUI clients, but you'll be missing out on the intended
+purpose of Ganymede.
+
+In any event, you should read the following documents to get oriented
+with the Ganymede system, in roughly this order:
 
 1. README
 2. FAQ
