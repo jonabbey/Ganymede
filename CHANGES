@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-3 January 2013
+22 January 2013
 CHANGES
 
 ---------------------------------------------
@@ -2087,6 +2087,13 @@ I also improved the task highlighting for running or disabled tasks in
 the Sync Monitor, and changed the column ordering in the Scheduled
 Task Monitor to have 'Last Run' be the last column as it is in the
 other admin console table views.
+
+154. [CLIENT] Better behavior on login failure
+
+The client now simply clears the password field and prompts for
+re-entry if the user provides invalid credentials.  All other causes
+for login failure (server going down, schema being edited, etc.) will
+still pop up a nuisance dialog to the user.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
