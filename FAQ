@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-22 November 2010
+22 January 2013
 FAQ
 ---------------------------------------------
 
@@ -292,8 +292,8 @@ Questions Answered:
    We've recently moved to GIT, and that has accelerated our work even
    further.
 
-   At this point, Ganymede proper has been under development for fifteen
-   years, and in 24/7 production use for eleven.
+   At this point, Ganymede proper has been under development for seventeen
+   years, and in 24/7 production use for thirteen.
 
   13. When I try to start the Ganymede server, I see a message complaining about
   the system hostname resolving to the 127.0.0.1 loopback address and the server
@@ -350,12 +350,14 @@ Questions Answered:
    Ganymede users (present or future) can benefit from the discussion.
 
    If you want to send mail to the developers, you can send mail to
-   ganymede@arlut.utexas.edu. For any long term discussion, though, we prefer
-   the forums, so that the discussion is public and can benefit others down
-   the line.
+   ganymede_author@arlut.utexas.edu. You could also participate in the
+   GitHub copy of the Ganymede repository, if you like, at
+   https://github.com/jonabbey/Ganymede
+
+   We also have forums on the our web site, little used though they are.
 
    Thanks!
 
    --------------------------------------------------------------------------
 
-   Authors: ganymede@arlut.utexas.edu                                     ARL
+   Authors: ganymede_author@arlut.utexas.edu                              ARL
