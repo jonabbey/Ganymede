@@ -4,5 +4,13 @@ README -- src/ganymede
 
 This directory tree contains the actual sources for the Ganymede system.
 
+The ARL-written packages are under arlut/csd, with the sources to the
+Ganymede server, client, admin console and common pieces under
+arlut/csd/ganymede.
+
+Everything else under this directory consists of compatibly-licensed
+code that is incorporated in the Ganymede system.  See the CREDITS
+file for more details.
+
 Jonathan Abbey
-14 April 2005
+22 January 2013
