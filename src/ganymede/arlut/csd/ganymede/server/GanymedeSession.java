@@ -1005,9 +1005,16 @@ final public class GanymedeSession implements Session, Unreferenced {
    * stored in the modification history for objects modified by this
    * transaction.
    *
-   * @return A ReturnVal indicating success or failure.  May
-   * be simply 'null' to indicate success if no feedback need
-   * be provided.
+   * @param interactive If False, this transaction will operate in
+   * non-interactive mode.  Certain Invid operations will be optimized
+   * to avoid doing choice list queries and bind checkpoint
+   * operations.  When a transaction is operating in non-interactive mode,
+   * any failure that cannot be handled cleanly due to the optimizations will
+   * result in the transaction refusing to commit when commitTransaction()
+   * is attempted.  This mode is intended for batch operations.
+   *
+   * @return A ReturnVal indicating success or failure.  May be simply
+   * 'null' to indicate success if no feedback need be provided.
    *
    * @see arlut.csd.ganymede.rmi.Session
    */
