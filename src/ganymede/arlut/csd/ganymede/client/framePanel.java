@@ -12,8 +12,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -390,7 +392,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
   public void load()
   {
-    Vector infoVector = null;
+    Vector<FieldInfo> infoVector = null;
 
     /* -- */
 
@@ -1817,12 +1819,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   }
 
   /**
-   * If this object window contains any editable containerPanels, this
-   * method will examine all Invid fields contained within and change
-   * the label of the Invid parameter to the newLabel.
+   * <p>If this object window contains any editable containerPanels,
+   * this method will examine all Invid fields contained within and
+   * change the label of the Invid parameter to the newLabel.</p>
    *
-   * This method will also relabel the object window to reflect the
-   * new title, if we're open for editing.
+   * <p>This method will also relabel the object window to reflect the
+   * new title, if we're open for editing.</p>
    */
 
   public synchronized void relabelObject(Invid invid, String newLabel)
@@ -1831,7 +1833,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       {
         if (editable)
           {
-            String newTitle = wp.getWindowTitle(editable, isCreating, gc.getObjectType(invid), newLabel);
+            String newTitle = wp.getWindowTitle(editable, isCreating, false, gc.getObjectType(invid), newLabel);
             wp.setWindowTitle(this, newTitle);
           }
 

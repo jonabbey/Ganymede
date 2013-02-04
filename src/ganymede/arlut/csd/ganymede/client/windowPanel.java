@@ -13,8 +13,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -418,11 +420,11 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
             if (isNewlyCreated)
               {
-                title = getWindowTitle(editable, isNewlyCreated, objectType, null);
+                title = getWindowTitle(editable, isNewlyCreated, false, objectType, null);
               }
             else
               {
-                title = getWindowTitle(editable, isNewlyCreated, objectType, object.getLabel());
+                title = getWindowTitle(editable, isNewlyCreated, object.isInactivated(), objectType, object.getLabel());
               }
           }
         catch (Exception rx)
@@ -549,7 +551,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
    * altered.</p>
    */
 
-  public String getWindowTitle(boolean editable, boolean newlyCreated, String objectType, String object_label)
+  public String getWindowTitle(boolean editable, boolean newlyCreated, boolean inactivated, String objectType, String object_label)
   {
     if (newlyCreated)
       {
@@ -572,8 +574,16 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
       }
     else
       {
-        // "View: {0} - {1}"
-        return ts.l("getWindowTitle.view_object_title", objectType, object_label);
+        if (inactivated)
+          {
+            // "View: {0} - {1} (inactive)"
+            return ts.l("getWindowTitle.view_inactivated_object_title", objectType, object_label);
+          }
+        else
+          {
+            // "View: {0} - {1}"
+            return ts.l("getWindowTitle.view_object_title", objectType, object_label);
+          }
       }
   }
 
