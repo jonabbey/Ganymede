@@ -62,15 +62,16 @@ import arlut.csd.ganymede.common.ReturnVal;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Client side interface definition for the Ganymede
- * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} class.  This
- * interface allows the client to query type information remotely, and allows
- * the schema editor in the admin console to remotely edit object type information.</P>
+ * <p>Client side interface definition for the Ganymede {@link
+ * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} class.  This
+ * interface allows the client to query type information remotely, and
+ * allows the schema editor in the admin console to remotely edit
+ * object type information.</p>
  *
- * <P>The {@link arlut.csd.ganymede.rmi.Category Category} interface is also vital to
- * the client and schema editor's work with object types.</P>
+ * <p>The {@link arlut.csd.ganymede.rmi.Category Category} interface
+ * is also vital to the client and schema editor's work with object
+ * types.</p>
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -196,7 +197,6 @@ public interface Base extends CategoryNode, Remote {
   public boolean canCreate(Session session) throws RemoteException;
 
   /**
-   *
    * Returns true if this object type can be inactivated.  Not all
    * object types will have inactivation protocols defined in the
    * server.  Those that do not can just be deleted.
