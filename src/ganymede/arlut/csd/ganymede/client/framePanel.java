@@ -444,7 +444,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
             for (int j = 0; !field_present && j < infoVector.size(); j++)
               {
-                FieldInfo field_info = (FieldInfo) infoVector.elementAt(j);
+                FieldInfo field_info = infoVector.get(j);
 
                 if (field_info.getID() == fieldID)
                   {

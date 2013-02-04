@@ -15,8 +15,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -131,7 +133,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
    * the actual GUI components added to this vector, not the elementWrappers.
    */
 
-  Vector
+  Vector<Component>
     compVector;
 
   /**
@@ -156,7 +158,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
    * components.
    */
 
-  Hashtable
+  Hashtable<Component, elementWrapper>
     ewHash;
 
   /**
@@ -309,8 +311,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     addMouseListener(this);
 
-    compVector = new Vector();
-    ewHash = new Hashtable();
+    compVector = new Vector<Component>();
+    ewHash = new Hashtable<Component, elementWrapper>();
 
     createVectorComponents();
   }
@@ -673,7 +675,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
         throw new IllegalArgumentException("vectorPanel.addElement(): Component parameter is null");
       }
 
-    compVector.addElement(c);
+    compVector.add(c);
 
     if (debug)
       {
@@ -879,7 +881,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
                       cp.updateAll();
                       */
 
-                    elementWrapper ew = (elementWrapper) ewHash.get(cp);
+                    elementWrapper ew = ewHash.get(cp);
 
                     ew.setIndex(localIndex);
                     ew.refreshTitle();
@@ -902,7 +904,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
                     // the server doesn't have this invid anymore, so
                     // we need to take it out of this vector panel
 
-                    elementWrapper ew = (elementWrapper) ewHash.get(cp);
+                    elementWrapper ew = ewHash.get(cp);
 
                     removeElement(ew);
 
@@ -974,7 +976,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
                     ipf.setValue((Byte[])my_field.getElement(i));
 
-                    elementWrapper ew = (elementWrapper) ewHash.get(ipf);
+                    elementWrapper ew = ewHash.get(ipf);
 
                     ew.setIndex(i);
                   }
@@ -1006,7 +1008,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
             for (int i = fieldCount; i >= size; i--)
               {
-                removeElement((elementWrapper) ewHash.get(compVector.elementAt(i)));
+                removeElement(ewHash.get(compVector.elementAt(i)));
               }
           }
         else
@@ -1041,13 +1043,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
   public void expandAllLevels()
   {
-    Enumeration wrappers = ewHash.keys();
-
-    /* -- */
-
-    while (wrappers.hasMoreElements())
+    for (elementWrapper ew: ewHash.values())
       {
-        elementWrapper ew = (elementWrapper)ewHash.get(wrappers.nextElement());
         ew.open();
 
         Component comp = ew.getComponent();
@@ -1061,9 +1058,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
             containerPanel cp = (containerPanel)comp;
 
-            for (int i = 0; i < cp.vectorPanelList.size(); i++)
+            for (vectorPanel vp: cp.vectorPanelList)
               {
-                ((vectorPanel)cp.vectorPanelList.elementAt(i)).expandLevels(true);
+                vp.expandLevels(true);
               }
           }
         else if (debug)
@@ -1102,13 +1099,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       {
         setWaitCursor();
 
-        Enumeration wrappers = ewHash.keys();
-
-        /* -- */
-
-        while (wrappers.hasMoreElements())
+        for (elementWrapper ew: ewHash.values())
           {
-            elementWrapper ew = (elementWrapper)ewHash.get(wrappers.nextElement());
             ew.open();
           }
 
@@ -1134,17 +1126,12 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
   public void closeLevels(boolean recursive)
   {
-    Enumeration wrappers = ewHash.keys();
-
-    /* -- */
-
     setWaitCursor();
 
     try
       {
-        while (wrappers.hasMoreElements())
+        for (elementWrapper ew: ewHash.values())
           {
-            elementWrapper ew = (elementWrapper)ewHash.get(wrappers.nextElement());
             ew.close();
 
             if (recursive)
@@ -1155,9 +1142,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
                   {
                     containerPanel cp = (containerPanel)comp;
 
-                    for (int i = 0; i < cp.vectorPanelList.size(); i++)
+                    for (vectorPanel vp: cp.vectorPanelList)
                       {
-                        ((vectorPanel)cp.vectorPanelList.elementAt(i)).closeLevels(true);
+                        vp.closeLevels(true);
                       }
                   }
               }

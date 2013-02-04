@@ -4,17 +4,19 @@
 
    This class handles the creation and management of custom
    server-defined tabs in the Ganymede client.
-   
+
    Created: 22 June 2005
 
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2005
+
+   Copyright (C) 1996 - 2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -47,6 +49,8 @@
 
 package arlut.csd.ganymede.client;
 
+import arlut.csd.ganymede.common.FieldInfo;
+
 import java.util.Vector;
 
 import javax.swing.JComponent;
@@ -68,7 +72,7 @@ public class serverTab extends clientTab {
 
   private JScrollPane contentPane;
   private containerPanel cp;
-  private Vector infoVector;
+  private Vector<FieldInfo> infoVector;
 
   public serverTab(framePanel parent, JTabbedPane pane, String tabName)
   {
@@ -85,7 +89,7 @@ public class serverTab extends clientTab {
     return contentPane;
   }
 
-  public void setInfoVector(Vector infoVector)
+  public void setInfoVector(Vector<FieldInfo> infoVector)
   {
     this.infoVector = infoVector;
   }
