@@ -11,17 +11,19 @@
    a consistent interface for the client, not for actual
    remote access.  Thus, we are not extending UnicastRemoteObject
    as we would if we were truly a remote object.
-   
+
    Created: 12 February 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -70,7 +72,6 @@ import arlut.csd.ganymede.rmi.Session;
 ------------------------------------------------------------------------------*/
 
 /**
- *
  * <p>This class is intended to serve as a stub to hold basic
  * information about server side categories for the client
  * to process locally.</p>
@@ -86,7 +87,6 @@ import arlut.csd.ganymede.rmi.Session;
  * remote access.  Thus, we are not extending UnicastRemoteObject
  * as we would if we were truly a remote object.</p>
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -225,42 +225,42 @@ public class BaseDump implements Base, CategoryNode {
   //
   // ***
 
-  public boolean isRemovable() 
+  public boolean isRemovable()
   {
     throw new RuntimeException("this method not supported in BaseDump");
   }
 
-  public boolean isEmbedded() 
+  public boolean isEmbedded()
   {
     return isEmbedded;
   }
 
-  public String getName() 
+  public String getName()
   {
     return name;
-  }  
+  }
 
   public String getPath()
   {
     return pathedName;
   }
 
-  public String getClassName() 
+  public String getClassName()
   {
     throw new RuntimeException("this method not supported in BaseDump");
-  }  
+  }
 
-  public String getClassOptionString() 
+  public String getClassOptionString()
   {
     throw new RuntimeException("this method not supported in BaseDump");
-  }  
+  }
 
-  public short getTypeID() 
+  public short getTypeID()
   {
     return type_code;
-  }  
+  }
 
-  public short getLabelField() 
+  public short getLabelField()
   {
     return label_id;
   }
@@ -270,27 +270,27 @@ public class BaseDump implements Base, CategoryNode {
     throw new RuntimeException("this method not supported in BaseDump");
   }
 
-  public String getLabelFieldName() 
+  public String getLabelFieldName()
   {
     return labelFieldName;
   }
 
-  public Vector getFields(boolean includeBuiltIns)
+  public Vector<BaseField> getFields(boolean includeBuiltIns)
   {
     throw new RuntimeException("this method not supported in BaseDump");
-  }  
+  }
 
-  public Vector getFields()
+  public Vector<BaseField> getFields()
   {
     throw new RuntimeException("this method not supported in BaseDump");
-  }  
+  }
 
-  public BaseField getField(short id) 
+  public BaseField getField(short id)
   {
     throw new RuntimeException("this method not supported in BaseDump");
-  }  
+  }
 
-  public BaseField getField(String name) 
+  public BaseField getField(String name)
   {
     throw new RuntimeException("this method not supported in BaseDump");
   }
@@ -299,15 +299,15 @@ public class BaseDump implements Base, CategoryNode {
    *
    * We ignore the Session param here, since we're a client side dump
    * associated with a known Session.
-   * 
+   *
    */
 
-  public boolean canCreate(Session session) 
+  public boolean canCreate(Session session)
   {
     return canCreate;
-  }  
+  }
 
-  public boolean canInactivate() 
+  public boolean canInactivate()
   {
     return canInactivate;
   }
@@ -315,12 +315,12 @@ public class BaseDump implements Base, CategoryNode {
   // the following methods are only valid when the Base reference
   // is obtained from a SchemaEdit reference.
 
-  public ReturnVal setName(String newName) 
+  public ReturnVal setName(String newName)
   {
     throw new RuntimeException("this method not supported in BaseDump");
-  }  
+  }
 
-  public ReturnVal setClassInfo(String newClassName, String newClassOptionString) 
+  public ReturnVal setClassInfo(String newClassName, String newClassOptionString)
   {
     throw new RuntimeException("this method not supported in BaseDump");
   }
@@ -335,27 +335,27 @@ public class BaseDump implements Base, CategoryNode {
     throw new RuntimeException("this method not supported in BaseDump");
   }
 
-  public ReturnVal setLabelField(String fieldName) 
+  public ReturnVal setLabelField(String fieldName)
   {
     throw new RuntimeException("this method not supported in BaseDump");
-  } 
+  }
 
-  public ReturnVal setLabelField(short fieldID) 
+  public ReturnVal setLabelField(short fieldID)
   {
     throw new RuntimeException("this method not supported in BaseDump");
-  } 
+  }
 
-  public Category getCategory() 
+  public Category getCategory()
   {
     return parent;
   }
 
-  public BaseField createNewField() 
+  public BaseField createNewField()
   {
     throw new RuntimeException("this method not supported in BaseDump");
-  }  
+  }
 
-  public ReturnVal deleteField(String baseName) 
+  public ReturnVal deleteField(String baseName)
   {
     throw new RuntimeException("this method not supported in BaseDump");
   }

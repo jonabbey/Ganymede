@@ -219,7 +219,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
    * is kept private.</p>
    */
 
-  private Vector containerPanels = new Vector();
+  private Vector<containerPanel> containerPanels = new Vector<containerPanel>();
 
   /**
    * Vector of {@link arlut.csd.ganymede.common.FieldTemplate
@@ -227,7 +227,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
    * enumerate this object's fields.
    */
 
-  Vector templates;
+  Vector<FieldTemplate> templates;
 
   /**
    * Vector of {@link arlut.csd.ganymede.client.clientTab} objects
@@ -235,7 +235,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
    * tab definitions.
    */
 
-  private Vector tabList = new Vector();
+  private Vector<clientTab> tabList = new Vector<clientTab>();
 
   private imageTab image_tab;
   private personaeTab personae_tab;
@@ -432,10 +432,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
         serverTab newTab = null;
         serverTab oldTab = null;
 
-        for (int i = 0; i < templates.size(); i++)
+        for (FieldTemplate template: templates)
           {
-            FieldTemplate template = (FieldTemplate) templates.elementAt(i);
-
             // make sure that we don't create a tab if the field isn't
             // actually present in this instance of the object
 
@@ -1731,7 +1729,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     if (containerPanels != null)
       {
-        containerPanels.addElement(cp);
+        containerPanels.add(cp);
       }
   }
 
@@ -1739,7 +1737,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     if (containerPanels != null)
       {
-        containerPanels.removeElement(cp);
+        containerPanels.remove(cp);
       }
   }
 
@@ -1789,7 +1787,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
             i = containerPanels.size() - 1;
           }
 
-        containerPanel cp = (containerPanel) containerPanels.elementAt(i);
+        containerPanel cp = containerPanels.get(i);
 
         if (debug)
           {
@@ -1865,7 +1863,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
             i = containerPanels.size() - 1;
           }
 
-        containerPanel cp = (containerPanel) containerPanels.elementAt(i);
+        containerPanel cp = containerPanels.get(i);
 
         cp.updateInvidLabels(invid, newLabel);
       }
@@ -2119,9 +2117,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     if (containerPanels != null)
       {
-        for (int i = 0; i < containerPanels.size(); i++)
+        for (containerPanel cp: containerPanels)
           {
-            containerPanel cp = (containerPanel)containerPanels.elementAt(i);
             cp.cleanup();
           }
 
