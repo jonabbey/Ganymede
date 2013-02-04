@@ -13,8 +13,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -366,7 +368,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Cached template vector</p>
    */
 
-  private Vector templateVector;
+  private Vector<FieldTemplate> templateVector;
 
   /**
    * field dictionary
@@ -458,7 +460,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * that are locked on this DBObjectBase.</p>
    */
 
-  private Vector readerList;
+  private Vector<DBReadLock> readerList;
 
   /**
    * <p>Set of {@link arlut.csd.ganymede.server.DBDumpLock DBDumpLock}s
@@ -479,14 +481,14 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * dumper in any order, depending on the server's threading behavior.</p>
    */
 
-  private Vector dumperList;
+  private Vector<DBDumpLock> dumperList;
 
   /**
    * <p>Collection of {@link arlut.csd.ganymede.server.DBDumpLock DBDumpLock}s
    * that are locked on this DBObjectBase.</p>
    */
 
-  private Vector dumpLockList;
+  private Vector<DBDumpLock> dumpLockList;
 
   /**
    * <p>Boolean semaphore monitoring whether or not this DBObjectBase
@@ -701,9 +703,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     this.editor = editor;
 
     writerList = new Vector<DBWriteLock>();
-    readerList = new Vector();
-    dumperList = new Vector();
-    dumpLockList = new Vector();
+    readerList = new Vector<DBReadLock>();
+    dumperList = new Vector<DBDumpLock>();
+    dumpLockList = new Vector<DBDumpLock>();
     iterationList = Collections.unmodifiableList(new ArrayList<DBObject>());
 
     object_name = "";
@@ -2028,13 +2030,12 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
-  *
-  * Check-out constructor, used by DBObject.createShadow()
-  * to pull out an object for editing.
-  *
-  * @param original the object to create the shadow of
-  * @param editset the transaction this object is to be created in
-  */
+   * <p>Check-out constructor, used by DBObject.createShadow() to pull
+   * out an object for editing.</p>
+   *
+   * @param original the object to create the shadow of
+   * @param editset the transaction this object is to be created in
+   */
 
   public DBEditObject createNewObject(DBObject original, DBEditSet editset)
   {
@@ -3651,7 +3652,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     synchronized (store.lockSync)
       {
-        readerList.addElement(reader);
+        readerList.add(reader);
       }
 
     return true;
@@ -3667,7 +3668,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     synchronized (store.lockSync)
       {
-        result = readerList.removeElement(reader);
+        result = readerList.remove(reader);
 
         store.lockSync.notifyAll();
         return result;
@@ -3701,7 +3702,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     synchronized (store.lockSync)
       {
-        dumperList.addElement(dumper);
+        dumperList.add(dumper);
       }
 
     return true;
@@ -3719,7 +3720,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     synchronized (store.lockSync)
       {
-        result = dumperList.removeElement(dumper);
+        result = dumperList.remove(dumper);
 
         store.lockSync.notifyAll();
         return result;
@@ -3752,7 +3753,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   {
     synchronized (store.lockSync)
       {
-        dumpLockList.addElement(dumper);
+        dumpLockList.add(dumper);
       }
 
     return true;
@@ -3768,7 +3769,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     synchronized (store.lockSync)
       {
-        result = dumpLockList.removeElement(dumper);
+        result = dumpLockList.remove(dumper);
 
         store.lockSync.notifyAll();
         return result;
@@ -3813,14 +3814,14 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
         for (DBObjectBaseField fieldDef: getCustomFields())
           {
-            templateVector.addElement(fieldDef.getTemplate());
+            templateVector.add(fieldDef.getTemplate());
           }
 
         // then load our system fields
 
         for (DBObjectBaseField fieldDef: getStandardFields())
           {
-            templateVector.addElement(fieldDef.getTemplate());
+            templateVector.add(fieldDef.getTemplate());
           }
       }
 
