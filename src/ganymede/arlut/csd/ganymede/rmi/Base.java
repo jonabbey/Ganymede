@@ -164,7 +164,7 @@ public interface Base extends CategoryNode, Remote {
    * types, in random order.</P>
    */
 
-  public Vector<BaseField> getFields(boolean includeBuiltIns) throws RemoteException;
+  public Vector<? extends BaseField> getFields(boolean includeBuiltIns) throws RemoteException;
 
   /**
    * <p>This method returns a list of all
@@ -172,7 +172,7 @@ public interface Base extends CategoryNode, Remote {
    * fields defined by this object type, in random order.</p>
    */
 
-  public Vector<BaseField> getFields() throws RemoteException;
+  public Vector<? extends BaseField> getFields() throws RemoteException;
 
   /**
    * Returns the field definition for the field matching id,
