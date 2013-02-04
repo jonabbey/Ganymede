@@ -11,11 +11,13 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -73,9 +75,10 @@ import arlut.csd.ganymede.rmi.db_object;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class is a data holding structure that is intended to hold
+ * <p>This class is a data holding structure that is intended to hold
  * object and field data for an XML object element for {@link
- * arlut.csd.ganymede.server.GanymedeXMLSession GanymedeXMLSession}.
+ * arlut.csd.ganymede.server.GanymedeXMLSession
+ * GanymedeXMLSession}.</p>
  *
  * @author Jonathan Abbey
  */
@@ -107,7 +110,7 @@ public class xmlobject {
 
   /**
    * Action mode for this object, should be null,
-   * "create", "edit", "delete", or "inactivate". 
+   * "create", "edit", "delete", or "inactivate".
    */
 
   String actionMode = null;
@@ -210,7 +213,7 @@ public class xmlobject {
    * XML stream up to and including the matching close element for
    * this object.</p>
    */
-  
+
   public xmlobject(XMLElement openElement, GanymedeXMLSession xSession, xmlfield ownerField) throws SAXException
   {
     this.xSession = xSession;
@@ -316,7 +319,7 @@ public class xmlobject {
 
             xmlfield field = new xmlfield(this, (XMLElement) nextItem);
 
-            //      xSession.err.println("Added new field: " + field.toString());       
+            //      xSession.err.println("Added new field: " + field.toString());
 
             fields.put(field.getName(), field);
           }
@@ -395,7 +398,7 @@ public class xmlobject {
     Invid localInvid;
 
     /* -- */
-    
+
     // just to check our logic.. we shouldn't be getting a create and
     // an edit directive on the same object from the XML file
 
@@ -436,21 +439,22 @@ public class xmlobject {
       }
     else
       {
-        throw new RuntimeException("Couldn't find object on server to edit it: " + 
+        throw new RuntimeException("Couldn't find object on server to edit it: " +
                                    this.toString());
       }
   }
 
   /**
-   * This method uploads field information contained in this object
+   * <p>This method uploads field information contained in this object
    * up to the Ganymede server.  Unfortunately, we can't necessarily
    * upload all the field information all at once, as we have to
    * create all the objects and set enough information into them that
    * they can properly be addressed, before we can set all the invid
    * fields.  The mode paramater controls this, allowing this method
-   * to be called in multiple passes.
+   * to be called in multiple passes.</p>
    *
-   * @param mode 0 to register all non-invids, 1 to register just invids, 2 to register both
+   * @param mode 0 to register all non-invids, 1 to register just
+   * invids, 2 to register both
    */
 
   public ReturnVal registerFields(int mode) throws NotLoggedInException

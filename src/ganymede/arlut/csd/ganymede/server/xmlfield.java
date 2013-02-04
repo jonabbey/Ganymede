@@ -11,11 +11,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -157,7 +159,7 @@ public class xmlfield implements FieldType {
   /**
    * <p>Definition record for this field type</p>
    */
-  
+
   FieldTemplate fieldDef;
 
   /**
@@ -300,7 +302,7 @@ public class xmlfield implements FieldType {
             // parseDate will always return a non-null value, or
             // a RuntimeException if the date element couldn't
             // be parsed
-            
+
             if (dValue != null)
               {
                 value = dValue;
@@ -355,7 +357,7 @@ public class xmlfield implements FieldType {
 
                 // getFollowingString automatically consumes the field
                 // close element after the string text
-                
+
                 return;
               }
           }
@@ -380,7 +382,7 @@ public class xmlfield implements FieldType {
               }
 
             nextItem = owner.xSession.getNextItem();
-           
+
             if (nextItem.matchesClose(elementName))
               {
                 value = null;
@@ -423,12 +425,12 @@ public class xmlfield implements FieldType {
 
             skipToEndField(elementName);
 
-            throw new NullPointerException("void field def");       
+            throw new NullPointerException("void field def");
           }
         else
           {
             setValues = new Vector();
-            
+
             nextItem = owner.xSession.getNextItem();
 
             while (!nextItem.matchesClose("permissions") && !(nextItem instanceof XMLEndDocument))
@@ -562,7 +564,7 @@ public class xmlfield implements FieldType {
         else
           {
             setValues = new Vector();
-            
+
             nextItem = owner.xSession.getNextItem();
 
             while (!nextItem.matchesClose("options") && !(nextItem instanceof XMLEndDocument))
@@ -616,7 +618,7 @@ public class xmlfield implements FieldType {
        "delete" -- Delete the listed elements
 
     */
-    
+
     Stack modeStack = new Stack();
 
     /* -- */
@@ -629,7 +631,7 @@ public class xmlfield implements FieldType {
 
     while (!nextItem.matchesClose(openElement.getName()) && !(nextItem instanceof XMLEndDocument))
       {
-        if (((nextItem.matches(ADDIFNOTPRESENT) || nextItem.matches(ADD) || 
+        if (((nextItem.matches(ADDIFNOTPRESENT) || nextItem.matches(ADD) ||
               nextItem.matches(DELETE)) && !nextItem.isEmpty()))
           {
             if (setMode)
@@ -640,7 +642,7 @@ public class xmlfield implements FieldType {
                 throw new RuntimeException("xmlclient: error, can't enter " + nextItem.getName() +
                                            " mode with a previous <set> directive in field " + openElement);
               }
-                    
+
             canDoSetMode = false;
             modeStack.push(nextItem.getName());
 
@@ -727,7 +729,7 @@ public class xmlfield implements FieldType {
               {
                 newValue = parseIP(nextItem);
               }
-                    
+
             if (newValue != null)
               {
                 if (setMode)
@@ -778,7 +780,7 @@ public class xmlfield implements FieldType {
                 owner.xSession.err.println("xmlfield WARNING: couldn't get vector value for " + nextItem +
                                    "in xml field object " + openElement);
               }
-                    
+
             nextItem = owner.xSession.getNextItem();
           }
       }
@@ -798,7 +800,7 @@ public class xmlfield implements FieldType {
   private void skipToEndField(String elementName) throws SAXException
   {
     XMLItem nextItem = owner.xSession.getNextItem();
-    
+
     while (!(nextItem.matchesClose(elementName) || (nextItem instanceof XMLEndDocument)))
       {
         nextItem = owner.xSession.getNextItem();
@@ -930,7 +932,7 @@ public class xmlfield implements FieldType {
           }
         catch (NumberFormatException ex)
           {
-            owner.xSession.err.println("\nError, could not parse date numeric timecode " + 
+            owner.xSession.err.println("\nError, could not parse date numeric timecode " +
                                timecodeStr + " in element " + item);
             owner.xSession.err.println(ex.getMessage());
           }
@@ -1133,21 +1135,21 @@ public class xmlfield implements FieldType {
                 if (addValues != null)
                   {
                     result = field.addElements(addValues);
-                    
+
                     if (!ReturnVal.didSucceed(result))
                       {
                         return result;
                       }
                   }
-                
+
                 if (addIfNotPresentValues != null)
                   {
                     Vector newValues = VectorUtils.difference(addIfNotPresentValues, field.getValuesLocal());
-                    
+
                     if (newValues.size() != 0)
                       {
                         result = field.addElements(newValues);
-                        
+
                         if (!ReturnVal.didSucceed(result))
                           {
                             return result;
@@ -1158,7 +1160,7 @@ public class xmlfield implements FieldType {
                 if (delValues != null)
                   {
                     result = field.deleteElements(delValues);
-                    
+
                     if (!ReturnVal.didSucceed(result))
                       {
                         return result;
@@ -1233,7 +1235,7 @@ public class xmlfield implements FieldType {
                     if (removeValues.size() > 0)
                       {
                         result = field.deleteElements(removeValues);
-                        
+
                         if (!ReturnVal.didSucceed(result))
                           {
                             return result;
@@ -1250,7 +1252,7 @@ public class xmlfield implements FieldType {
                         // <set></set> to clear the field, or if we have
                         // already synchronized the field by deleting
                         // elements
-                        
+
                         return ReturnVal.merge(result, null);
                       }
                   }
@@ -1260,32 +1262,32 @@ public class xmlfield implements FieldType {
                       {
                         Vector invidValues = getExtantInvids(addIfNotPresentValues);
                         Vector newValues = VectorUtils.difference(invidValues, field.getValuesLocal());
-                        
+
                         if (newValues.size() != 0)
                           {
                             result = ReturnVal.merge(result, field.addElements(newValues));
-                            
+
                             if (!ReturnVal.didSucceed(result))
                               {
                                 return result;
                               }
                           }
                       }
-                    
+
                     if (addValues != null)
                       {
                         result = ReturnVal.merge(result, field.addElements(getExtantInvids(addValues)));
-                        
+
                         if (!ReturnVal.didSucceed(result))
                           {
                             return result;
                           }
                       }
-                    
+
                     if (delValues != null)
                       {
                         result = ReturnVal.merge(result, field.deleteElements(getExtantInvids(delValues)));
-                        
+
                         if (!ReturnVal.didSucceed(result))
                           {
                             return result;
@@ -1298,7 +1300,7 @@ public class xmlfield implements FieldType {
                 InvidDBField field = (InvidDBField) owner.objref.getField(fieldDef.getID());
 
                 /* -- */
-                
+
                 Vector currentValues = field.getValuesLocal();
                 Vector needToBeEdited = null;
                 Vector needToBeCreated = null;
@@ -1339,7 +1341,7 @@ public class xmlfield implements FieldType {
 
                         if (x instanceof xInvid)
                           {
-                            throw new RuntimeException("Error, could not process <invid> " + 
+                            throw new RuntimeException("Error, could not process <invid> " +
                                                        "element in embedded invid field: " +
                                                        x.toString());
                           }
@@ -1356,7 +1358,7 @@ public class xmlfield implements FieldType {
                         if (!ReturnVal.didSucceed(result))
                           {
                             String msg = result.getDialogText();
-                                
+
                             if (msg != null)
                               {
                                 owner.xSession.err.println("Error creating new embedded " + object + ", reason: " + msg);
@@ -1427,14 +1429,14 @@ public class xmlfield implements FieldType {
                           }
 
                         result = ReturnVal.merge(result, object.editOnServer(owner.xSession.session));
-                        
+
                         if (!ReturnVal.didSucceed(result))
                           {
                             String msg = result.getDialogText();
-                            
+
                             if (msg != null)
                               {
-                                owner.xSession.err.println("Error editing previous embedded " + object + 
+                                owner.xSession.err.println("Error editing previous embedded " + object +
                                                    ", reason: " + msg);
                               }
                             else
@@ -1480,10 +1482,10 @@ public class xmlfield implements FieldType {
                         if (!ReturnVal.didSucceed(result))
                           {
                             String msg = result.getDialogText();
-                            
+
                             if (msg != null)
                               {
-                                owner.xSession.err.println("Error deleting embedded " + invid + 
+                                owner.xSession.err.println("Error deleting embedded " + invid +
                                                    ", reason: " + msg);
                               }
                             else
@@ -1511,7 +1513,7 @@ public class xmlfield implements FieldType {
                 field.resetOptions();
 
                 // now set the options
-                
+
                 for (int i = 0; i < setValues.size(); i++)
                   {
                     xOption option = (xOption) setValues.elementAt(i);
@@ -1524,7 +1526,7 @@ public class xmlfield implements FieldType {
                       {
                         return result;
                       }
-                    
+
                     if (option.fields != null)
                       {
                         Enumeration fieldOptions = option.fields.elements();
@@ -1537,7 +1539,7 @@ public class xmlfield implements FieldType {
 
                             if (fieldHash == null)
                               {
-                                owner.xSession.err.println("Error, can't process field options for object base " + 
+                                owner.xSession.err.println("Error, can't process field options for object base " +
                                                    XMLUtils.XMLDecode(option.getName()) + ", base not found.");
                                 return new ReturnVal(false);
                               }
@@ -1547,7 +1549,7 @@ public class xmlfield implements FieldType {
                             if (optionFieldDef == null)
                               {
                                 owner.xSession.err.println("Error, can't process field options for field " +
-                                                   XMLUtils.XMLDecode(fieldOption.getName()) + " in object base " + 
+                                                   XMLUtils.XMLDecode(fieldOption.getName()) + " in object base " +
                                                    XMLUtils.XMLDecode(option.getName()) + ", base not found.");
                                 return new ReturnVal(false);
                               }
@@ -1556,7 +1558,7 @@ public class xmlfield implements FieldType {
                                                      field.setOption(baseId,
                                                                      optionFieldDef.getID(),
                                                                      fieldOption.getOption()));
-                                                     
+
                             if (!ReturnVal.didSucceed(result))
                               {
                                 return result;
@@ -1579,7 +1581,7 @@ public class xmlfield implements FieldType {
                 field.resetPerms();
 
                 // now set the permissions
-                
+
                 for (int i = 0; i < setValues.size(); i++)
                   {
                     xPerm perm = (xPerm) setValues.elementAt(i);
@@ -1592,7 +1594,7 @@ public class xmlfield implements FieldType {
                       {
                         return result;
                       }
-                    
+
                     if (perm.fields != null)
                       {
                         Enumeration fieldPerms = perm.fields.elements();
@@ -1605,7 +1607,7 @@ public class xmlfield implements FieldType {
 
                             if (fieldHash == null)
                               {
-                                owner.xSession.err.println("Error, can't process field permissions for object base " + 
+                                owner.xSession.err.println("Error, can't process field permissions for object base " +
                                                    XMLUtils.XMLDecode(perm.getName()) + ", base not found.");
                                 return new ReturnVal(false);
                               }
@@ -1615,7 +1617,7 @@ public class xmlfield implements FieldType {
                             if (permFieldDef == null)
                               {
                                 owner.xSession.err.println("Error, can't process field permissions for field " +
-                                                   XMLUtils.XMLDecode(fieldPerm.getName()) + " in object base " + 
+                                                   XMLUtils.XMLDecode(fieldPerm.getName()) + " in object base " +
                                                    XMLUtils.XMLDecode(perm.getName()) + ", base not found.");
                                 return new ReturnVal(false);
                               }
@@ -1644,19 +1646,19 @@ public class xmlfield implements FieldType {
   }
 
   /**
-   * This method is used by the {@link
+   * <p>This method is used by the {@link
    * arlut.csd.ganymede.server.GanymedeXMLSession} to cause this field
    * to attempt to do lookups on all labeled xInvids in this field, in
    * an attempt to get the Invids for them.  If a lookup cannot be
    * resolved when this method is called, it will be left unresolved
    * for a later round, after we have created the objects we need to
-   * create.
+   * create.</p>
    *
-   * Note in the code for this method that we don't care about the
+   * <p>Note in the code for this method that we don't care about the
    * actual invids returned, we're just wanting to make sure that we
    * try to look them up on the server at this point in time, before
    * we apply any object renaming in the processing of our containing
-   * xml transaction.
+   * xml transaction.</p>
    */
 
   public void dereferenceInvids() throws NotLoggedInException
@@ -1709,7 +1711,7 @@ public class xmlfield implements FieldType {
                     xi.getInvid(false); // try to resolve
                   }
               }
-            
+
             if (addIfNotPresentValues != null)
               {
                 for (int i = 0; i < addIfNotPresentValues.size(); i++)
@@ -1728,14 +1730,14 @@ public class xmlfield implements FieldType {
   }
 
   /**
-   * <P>This private helper method takes a Vector of xInvid and
+   * <p>This private helper method takes a Vector of xInvid and
    * xmlobject objects (in the embedded object case) and returns
    * a Vector of Invid objects.  If any xmlobjects in the input
    * Vector did not map to pre-existing objects on the server,
    * then no invid will be returned for those elements, and as
    * a result, the returned vector may be smaller than the
-   * input.</P>
-   */ 
+   * input.</p>
+   */
 
   private Vector getExtantInvids(Vector values) throws NotLoggedInException
   {
@@ -1793,13 +1795,13 @@ public class xmlfield implements FieldType {
   }
 
   /**
-   * <P>This private helper method takes a Vector of xInvid and
+   * <p>This private helper method takes a Vector of xInvid and
    * xmlobject objects (in the embedded object case) and returns
    * a Vector of xmlobjects that exist on the server.  Any xInvid
    * objects in the input Vector, along with any xmlobject objects
    * which do not correspond to pre-existing objects on the server
-   * will be omitted from the returned vector.</P>
-   */ 
+   * will be omitted from the returned vector.</p>
+   */
 
   private Vector getExtantObjects(Vector values) throws NotLoggedInException
   {
@@ -1817,7 +1819,7 @@ public class xmlfield implements FieldType {
     for (int i=0; i < values.size(); i++)
       {
         Object x = values.elementAt(i);
-        
+
         if (x instanceof xInvid)
           {
             continue;
@@ -1844,9 +1846,9 @@ public class xmlfield implements FieldType {
   }
 
   /**
-   * <P>This private helper method takes a Vector of xInvid and
+   * <p>This private helper method takes a Vector of xInvid and
    * xmlobject objects and returns a Vector of xInvids and xmlobjects
-   * that could not be resolved on the server.</P>
+   * that could not be resolved on the server.</p>
    */
 
   private Vector getNonRegisteredObjects(Vector values) throws NotLoggedInException
@@ -1976,38 +1978,40 @@ class xInvid {
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.xInvid");
 
   /**
-   * The numeric type id for the object type this xInvid is meant to
-   * point to.
+   * <p>The numeric type id for the object type this xInvid is meant
+   * to point to.</p>
    *
-   * In the XML file, this field is derived from the type attribute,
-   * after doing an object type lookup in the server's data
-   * structures.
+   * <p>In the XML file, this field is derived from the type
+   * attribute, after doing an object type lookup in the server's data
+   * structures.</p>
    */
 
   short typeId;
 
   /**
-   * The id string for this xInvid from the XML file.  Will be used to
-   * resolve this xInvid to an actual {@link
-   * arlut.csd.ganymede.common.Invid Invid} on the server, if set.
+   * <p>The id string for this xInvid from the XML file.  Will be used
+   * to resolve this xInvid to an actual {@link
+   * arlut.csd.ganymede.common.Invid Invid} on the server, if set.</p>
    *
-   * In the XML file, this field is taken from the id attribute.
+   * <p>In the XML file, this field is taken from the id
+   * attribute.</p>
    */
 
   String objectId;
 
   /**
-   * This polymorphic object field is intended to contain the actual
-   * on-server Invid corresponding to this xInvid object.
+   * <p>This polymorphic object field is intended to contain the
+   * actual on-server Invid corresponding to this xInvid object.</p>
    *
-   * invidPtr will contain an actual {@link arlut.csd.ganymede.common.Invid}
-   * object if this <invid> element could be matched against a pre-existing
-   * Invid on the Ganymede server.
+   * <p>invidPtr will contain an actual {@link
+   * arlut.csd.ganymede.common.Invid} object if this <invid> element
+   * could be matched against a pre-existing Invid on the Ganymede
+   * server.</p>
    *
-   * If no server-side Invid can be found, invidPtr may instead point
-   * to the {@link arlut.csd.ganymede.server.xmlobject} object which
-   * will eventually be given the Invid we're interested in when it is
-   * integrated into the server's data store.
+   * <p>If no server-side Invid can be found, invidPtr may instead
+   * point to the {@link arlut.csd.ganymede.server.xmlobject} object
+   * which will eventually be given the Invid we're interested in when
+   * it is integrated into the server's data store.</p>
    */
 
   private Object invidPtr;
@@ -2086,7 +2090,7 @@ class xInvid {
       }
     catch (NullPointerException ex)
       {
-        getXSession().err.println("Unknown target type " + typeString + 
+        getXSession().err.println("Unknown target type " + typeString +
                            " in invid field element: " + item);
         throw new NullPointerException("Bad item!");
       }
@@ -2104,9 +2108,9 @@ class xInvid {
   }
 
   /**
-   * This method resolves and returns the Invid for this xInvid place
-   * holder, talking to the server if necessary to resolve an id
-   * string.
+   * <p>This method resolves and returns the Invid for this xInvid
+   * place holder, talking to the server if necessary to resolve an id
+   * string.</p>
    *
    * @param noReally If false, we're being called by the xmlfield
    * dereferenceInvids method, and we don't need to consider it a
@@ -2176,7 +2180,7 @@ class xInvid {
     else if (num != -1)
       {
         invidPtr = Invid.createInvid(typeId, num);
-        
+
         return (Invid) invidPtr;
       }
 
@@ -2192,7 +2196,7 @@ class xInvid {
     result.append("<invid type=\"");
     result.append(getXSession().getTypeName(typeId));
     result.append("\" ");
-    
+
     if (objectId != null)
       {
         result.append("id=\"");
@@ -2290,21 +2294,21 @@ class xPassword {
     /* -- */
 
     result.append("<password");
-    
+
     if (plaintext != null)
       {
         result.append(" plaintext=\"");
         result.append(plaintext);
         result.append("\"");
       }
-    
+
     if (crypttext != null)
       {
         result.append(" crypt=\"");
         result.append(crypttext);
         result.append("\"");
       }
-    
+
     if (md5text != null)
       {
         result.append(" md5crypt=\"");
@@ -2410,7 +2414,7 @@ class xPerm {
 
   /**
    * <p>xPerm constructor.  When the constructor is called, the
-   * xPerm reads the next item from the xmlclient's 
+   * xPerm reads the next item from the xmlclient's
    * {@link arlut.csd.ganymede.client.xmlclient#getNextItem() getNextItem()}
    * method and uses it to initialize the xPerm.</p>
    *
@@ -2531,7 +2535,7 @@ class xOption {
 
   /**
    * <p>xOption constructor.  When the constructor is called, the
-   * xOption reads the next item from the xmlclient's 
+   * xOption reads the next item from the xmlclient's
    * {@link arlut.csd.ganymede.client.xmlclient#getNextItem() getNextItem()}
    * method and uses it to initialize the xOption.</p>
    *
