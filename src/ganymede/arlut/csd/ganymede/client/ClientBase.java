@@ -142,7 +142,7 @@ public class ClientBase implements Runnable, RMISSLClientListener {
 
   private String cipherSuite = null;
 
-  private Vector listeners = new Vector();
+  private Vector<ClientListener> listeners = new Vector<ClientListener>();
   private String myServerURL = null;
 
   private booleanSemaphore connected = new booleanSemaphore(false);
@@ -166,7 +166,7 @@ public class ClientBase implements Runnable, RMISSLClientListener {
       }
 
     myServerURL = serverURL;
-    listeners.addElement(listener);
+    listeners.add(listener);
 
     // and make sure we are notified if the RMI system creates an SSL
     // connection for us
@@ -460,7 +460,7 @@ public class ClientBase implements Runnable, RMISSLClientListener {
 
   public synchronized void addClientListener(ClientListener l)
   {
-    listeners.addElement(l);
+    listeners.add(l);
   }
 
   /**
@@ -469,7 +469,7 @@ public class ClientBase implements Runnable, RMISSLClientListener {
 
   public synchronized void removeClientListener(ClientListener l)
   {
-    listeners.removeElement(l);
+    listeners.remove(l);
   }
 
   /**
@@ -508,11 +508,11 @@ public class ClientBase implements Runnable, RMISSLClientListener {
     // "Ganymede Server forced client to disconnect: {0}"
     ClientEvent e = new ClientEvent(ts.l("forceDisconnect.forced_off", reason));
 
-    Vector myVect = (Vector) listeners.clone();
+    Vector<ClientListener> myVect = (Vector<ClientListener>) listeners.clone();
 
-    for (int i = 0; i < myVect.size(); i++)
+    for (ClientListener listener: myVect)
       {
-        ((ClientListener)myVect.elementAt(i)).disconnected(e);
+        listener.disconnected(e);
       }
   }
 
@@ -526,11 +526,11 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   {
     ClientEvent e = new ClientEvent(messageType, status);
 
-    Vector myVect = (Vector) listeners.clone();
+    Vector<ClientListener> myVect = (Vector<ClientListener>) listeners.clone();
 
-    for (int i = 0; i < myVect.size(); i++)
+    for (ClientListener listener: myVect)
       {
-        ((ClientListener)myVect.elementAt(i)).messageReceived(e);
+        listener.messageReceived(e);
       }
   }
 
@@ -632,9 +632,9 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   {
     ClientEvent e = new ClientEvent(errType, message);
 
-    for (int i = 0; i < listeners.size(); i++)
+    for (ClientListener listener: listeners)
       {
-        ((ClientListener)listeners.elementAt(i)).messageReceived(e);
+        listener.messageReceived(e);
       }
   }
 
@@ -647,9 +647,9 @@ public class ClientBase implements Runnable, RMISSLClientListener {
   {
     ClientEvent e = new ClientEvent(message);
 
-    for (int i = 0; i < listeners.size(); i++)
+    for (ClientListener listener: listeners)
       {
-        ((ClientListener)listeners.elementAt(i)).messageReceived(e);
+        listener.messageReceived(e);
       }
   }
 }
