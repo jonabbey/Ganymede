@@ -947,8 +947,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   {
     Vector<framePanel> editables = new Vector<framePanel>();
 
-    /* -- */
-
     synchronized (windowList)
       {
         for (JInternalFrame window: windowList.values())
@@ -977,10 +975,10 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   public void closeEditables()
   {
-    Vector<JInternalFrame> closing = new Vector<JInternalFrame>();
-
     synchronized (windowList)
       {
+        Vector<JInternalFrame> closing = new Vector<JInternalFrame>();
+
         for (JInternalFrame window: windowList.values())
           {
             if (window instanceof framePanel)
@@ -999,20 +997,20 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
                   }
               }
           }
-      }
 
-    // we do this in a separate loop so that we don't implicitly cause
-    // a ConcurrentModificationException on the windowList
+        // we do this in a separate loop so that we don't implicitly cause
+        // a ConcurrentModificationException on the windowList
 
-    for (JInternalFrame window: closing)
-      {
-        try
+        for (JInternalFrame window: closing)
           {
-            window.setClosed(true);
-          }
-        catch (java.beans.PropertyVetoException ex)
-          {
-            // shouldn't happen here
+            try
+              {
+                window.setClosed(true);
+              }
+            catch (java.beans.PropertyVetoException ex)
+              {
+                // shouldn't happen here
+              }
           }
       }
   }
@@ -1026,10 +1024,10 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   public void closeInvidWindows(Invid invid)
   {
-    Vector<JInternalFrame> closing = new Vector<JInternalFrame>();
-
     synchronized (windowList)
       {
+        Vector<JInternalFrame> closing = new Vector<JInternalFrame>();
+
         for (JInternalFrame window: windowList.values())
           {
             if (window instanceof framePanel)
@@ -1043,20 +1041,20 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
                   }
               }
           }
-      }
 
-    // we do this in a separate loop so that we don't implicitly cause
-    // a ConcurrentModificationException on the windowList
+        // we do this in a separate loop so that we don't implicitly cause
+        // a ConcurrentModificationException on the windowList
 
-    for (JInternalFrame window: closing)
-      {
-        try
+        for (JInternalFrame window: closing)
           {
-            window.setClosed(true);
-          }
-        catch (java.beans.PropertyVetoException ex)
-          {
-            // shouldn't happen here
+            try
+              {
+                window.setClosed(true);
+              }
+            catch (java.beans.PropertyVetoException ex)
+              {
+                // shouldn't happen here
+              }
           }
       }
   }
@@ -1070,10 +1068,10 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   public void closeAll(boolean askNoQuestions)
   {
-    Vector<JInternalFrame> closing = new Vector<JInternalFrame>();
-
     synchronized (windowList)
       {
+        Vector<JInternalFrame> closing = new Vector<JInternalFrame>();
+
         for (JInternalFrame window: windowList.values())
           {
             if (window instanceof framePanel)
@@ -1099,20 +1097,20 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
             closing.add(window);
           }
-      }
 
-    // we do this in a separate loop so that we don't implicitly cause
-    // a ConcurrentModificationException on the windowList
+        // we do this in a separate loop so that we don't implicitly cause
+        // a ConcurrentModificationException on the windowList
 
-    for (JInternalFrame window: closing)
-      {
-        try
+        for (JInternalFrame window: closing)
           {
-            window.setClosed(true);
-          }
-        catch (java.beans.PropertyVetoException ex)
-          {
-            // something decided against this one.. oh well.
+            try
+              {
+                window.setClosed(true);
+              }
+            catch (java.beans.PropertyVetoException ex)
+              {
+                // something decided against this one.. oh well.
+              }
           }
       }
   }
