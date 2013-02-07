@@ -10,11 +10,13 @@
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -54,18 +56,15 @@ package arlut.csd.JDataComponent;
 ------------------------------------------------------------------------------*/
 
 /**
+ * <p>A wrapper to hold both a String and (optionally) a related
+ * object, such as an Invid.  The JstringListBox uses them to allow
+ * the client to manipulate labeled object pointers.</p>
  *
- * A wrapper to hold both a String and (optionally) a related object,
- * such as an Invid.  The JstringListBox uses them to allow the client
- * to manipulate labeled object pointers.<br><br>
+ * <p>listHandle's are also used extensively throughout the client
+ * code to handle client-side object label caching.</p>
  *
- * listHandle's are also used extensively throughout the client code to
- * handle client-side object label caching.
- * 
  * @see JstringListBox
- * @version $Id$
  * @author Mike Mulvaney
- *
  */
 
 public class listHandle {
@@ -115,10 +114,10 @@ public class listHandle {
   }
 
   /**
-   * Returns the value of this listHandle.
+   * <p>Returns the value of this listHandle.</p>
    *
-   * If the object has not been set, getValue() returns the label.  Otherwise,
-   * the object is returned.
+   * <p>If the object has not been set, getValue() returns the label.
+   * Otherwise, the object is returned.</p>
    */
 
   public Object getValue()
