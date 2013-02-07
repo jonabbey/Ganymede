@@ -5,17 +5,19 @@
    This class implements an information cache for the client.  Client
    code can store information about objects on the server here and
    can use it wherever.
-   
+
    Created: 7 February 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2008
+
+   Copyright (C) 1996 - 2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -51,6 +53,8 @@ package arlut.csd.ganymede.client;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import arlut.csd.JDataComponent.listHandle;
+
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.ObjectHandle;
 import arlut.csd.ganymede.common.QueryResult;
@@ -62,20 +66,20 @@ import arlut.csd.ganymede.common.QueryResult;
 ------------------------------------------------------------------------------*/
 
 /**
- * Implements an information cache for the client.  Client
- * code can store information about objects on the server here and
- * can use it wherever.
+ * <p>Implements an information cache for the client.  Client code can
+ * store information about objects on the server here and can use it
+ * wherever.</p>
  *
- * objectCache maintains a mapping between hash keys (typically
+ * <p>objectCache maintains a mapping between hash keys (typically
  * Short values corresponding to object type ids on the server) and
  * {@link arlut.csd.ganymede.client.objectList objectList} objects
- * which track status of objects for that hash key.
+ * which track status of objects for that hash key.</p>
  */
 
 public class objectCache {
 
   static final boolean debug = false;
-  Hashtable idMap = new Hashtable();
+  Hashtable<Object, objectList> idMap = new Hashtable();
 
   /* -- */
 
@@ -111,37 +115,37 @@ public class objectCache {
   }
 
   /**
-   * This method returns a sorted Vector of listHandles for the cache
-   * for &lt;key&gt;.  The vector is essentially a read-out of the current
-   * state of the objectList, and will not track any future changes to
-   * this objectList.
+   * <p>This method returns a sorted Vector of listHandles for the
+   * cache for &lt;key&gt;.  The vector is essentially a read-out of
+   * the current state of the objectList, and will not track any
+   * future changes to this objectList.</p>
    *
    * @param includeInactives if false, the list returned will not include entries
-   * for any inactive objects 
-   * 
+   * for any inactive objects
+   *
    */
 
-  public Vector getListHandles(Object key, boolean includeInactives)
+  public Vector<listHandle> getListHandles(Object key, boolean includeInactives)
   {
     return getListHandles(key, includeInactives, false);
   }
 
   /**
-   * This method returns a sorted Vector of listHandles for the cache
-   * for &lt;key&gt;.  The vector is essentially a read-out of the current
-   * state of the objectList, and will not track any future changes to
-   * this objectList.
+   * <p>This method returns a sorted Vector of listHandles for the
+   * cache for &lt;key&gt;.  The vector is essentially a read-out of
+   * the current state of the objectList, and will not track any
+   * future changes to this objectList.</p>
    *
    * @param includeInactives if false, the list returned will not include entries
-   * for any inactive objects 
+   * for any inactive objects
    *
    * @param includeNonEditables if false, the list returned will not
    * include entries for any non-editable objects
-   * 
+   *
    */
 
-  public Vector getListHandles(Object key, boolean includeInactives,
-                               boolean includeNonEditables)
+  public Vector<listHandle> getListHandles(Object key, boolean includeInactives,
+                                           boolean includeNonEditables)
   {
     objectList list = getList(key);
 
@@ -162,7 +166,7 @@ public class objectCache {
    * include entries for any inactive objects
    */
 
-  public Vector getLabels(Object key, boolean includeInactives)
+  public Vector<String> getLabels(Object key, boolean includeInactives)
   {
     return getLabels(key, includeInactives, false);
   }
@@ -174,13 +178,13 @@ public class objectCache {
    *
    * @param includeInactives if false, the list returned will not
    * include entries for any inactive objects
-   * 
+   *
    * @param includeNonEditables if false, the list returned will not
    * include entries for any non-editable objects
    */
 
-  public Vector getLabels(Object key, boolean includeInactives,
-                          boolean includeNonEditables)
+  public Vector<String> getLabels(Object key, boolean includeInactives,
+                                  boolean includeNonEditables)
   {
     objectList list = getList(key);
 
@@ -193,10 +197,11 @@ public class objectCache {
   }
 
   /**
-   * This method retrieves an object handle matching the given invid
-   * from the specified object list.
+   * <p>This method retrieves an object handle matching the given
+   * invid from the specified object list.</p>
    *
-   * This isn't the fastest operation, but hopefully won't be too bad.
+   * <p>This isn't the fastest operation, but hopefully won't be too
+   * bad.</p>
    *
    * @return The matching handle, or null if it wasn't found.
    */

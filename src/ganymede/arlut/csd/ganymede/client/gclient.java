@@ -1856,7 +1856,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    * Always use this instead of trying to access baseNames directly.</p>
    */
 
-  public final Hashtable getBaseNames()
+  public final Hashtable<Base, String> getBaseNames()
   {
     return loader.getBaseNames();
   }
@@ -6167,7 +6167,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    * @return Vector of sorted listHandles(sorted by label)
    */
 
-  public Vector sortListHandleVector(Vector v)
+  public Vector<listHandle> sortListHandleVector(Vector<listHandle> v)
   {
     (new VecQuickSort(v,
                       new Comparator() {
@@ -6205,11 +6205,11 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    * @return Vector of sorted Strings.
    */
 
-  public Vector sortStringVector(Vector v)
+  public Vector<String> sortStringVector(Vector<String> v)
   {
     new VecQuickSort(v, null).sort();
 
-    return v;
+    return (Vector<String>) v;
   }
 
   /**

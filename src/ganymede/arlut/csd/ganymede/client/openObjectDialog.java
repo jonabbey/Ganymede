@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -87,6 +87,7 @@ import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.QueryDataNode;
 import arlut.csd.ganymede.common.QueryResult;
+import arlut.csd.ganymede.rmi.Base;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -269,39 +270,34 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
 
     // **   type.setLightWeightPopupEnabled(false);
 
-    Vector bases = client.getBaseList();
-    Hashtable baseToShort = client.getBaseToShort();
-    Hashtable baseNames = client.getBaseNames();
+    Vector<Base> bases = client.getBaseList();
+    Hashtable<Base, Short> baseToShort = client.getBaseToShort();
+    Hashtable<Base, String> baseNames = client.getBaseNames();
 
-    BaseDump thisBase = null;
+    Vector<listHandle> listHandles = new Vector<listHandle>();
 
-    Vector listHandles = new Vector();
-
-    for (int i = 0; i < bases.size(); i++)
+    for (Base thisBase: bases)
       {
-        thisBase = (BaseDump) bases.elementAt(i);
-        String name = (String) baseNames.get(thisBase);
+        String name = baseNames.get(thisBase);
 
-        if (!thisBase.isEmbedded())
+        if (!((BaseDump) thisBase).isEmbedded())
           {
-            listHandle lh = new listHandle(name, (Short) baseToShort.get(thisBase));
-            listHandles.addElement(lh);
+            listHandle lh = new listHandle(name, baseToShort.get(thisBase));
+            listHandles.add(lh);
           }
       }
 
     listHandles = client.sortListHandleVector(listHandles);
 
-    for (int i = 0; i < listHandles.size(); i++)
+    for (listHandle handle: listHandles)
       {
-        type.addItem(listHandles.elementAt(i));
+        type.addItem(handle);
       }
 
     if (selectedBaseName != null)
       {
-        for (int i = 0; i < listHandles.size(); i++)
+        for (listHandle lh: listHandles)
           {
-            listHandle lh = (listHandle) listHandles.elementAt(i);
-
             if (lh.getLabel().equals(selectedBaseName))
               {
                 type.setSelectedItem(lh);
@@ -444,6 +440,7 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
           {
             System.out.println("Removing the list");
           }
+
         pane.remove(list);
       }
 
@@ -453,6 +450,7 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
           {
             System.out.println("Removing pane");
           }
+
         middle.remove(pane);
       }
 
@@ -573,7 +571,7 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
             QueryDataNode node = new QueryDataNode(QueryDataNode.NOCASEMATCHES, "^" + string);
             QueryResult edit_query = client.session.query(new Query(baseID.shortValue(), node, editableOnly));
 
-            Vector edit_invids = edit_query.getListHandles();
+            Vector<listHandle> edit_invids = edit_query.getListHandles();
 
             // and add a direct match of a different type, if it exists
 
@@ -588,7 +586,7 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
 
             if (edit_invids.size() == 1)
               {
-                invid = (Invid)((listHandle)edit_invids.elementAt(0)).getObject();
+                invid = (Invid) edit_invids.get(0).getObject();
                 close(true);
               }
             else if (edit_invids.size() == 0)
@@ -609,7 +607,7 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
                                     public int compare(Object a, Object b)
                                     {
                                       listHandle aF, bF;
-                                      
+
                                       aF = (listHandle) a;
                                       bF = (listHandle) b;
                                       int comp = 0;
@@ -633,9 +631,9 @@ public class openObjectDialog extends StandardDialog implements ActionListener, 
 
                 DefaultListModel model = (DefaultListModel)list.getModel();
 
-                for (int i = 0; i < edit_invids.size(); i++)
+                for (listHandle handle: edit_invids)
                   {
-                    model.addElement(edit_invids.elementAt(i));
+                    model.addElement(handle);
                   }
 
                 gbc.gridx = 0;

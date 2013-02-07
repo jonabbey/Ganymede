@@ -6,17 +6,19 @@
    the server, storing various pieces of information about the
    objects, including their expiration/removal/inactive status,
    their current state in the client, and more.
-   
+
    Created: 6 February 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2006
+
+   Copyright (C) 1996 - 2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -54,6 +56,8 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
+import arlut.csd.JDataComponent.listHandle;
+
 import arlut.csd.Util.VecQuickSort;
 import arlut.csd.Util.VecSortInsert;
 import arlut.csd.ganymede.common.Invid;
@@ -67,13 +71,12 @@ import arlut.csd.ganymede.common.QueryResult;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class is used to keep track of a list of {@link
+ * <p>This class is used to keep track of a list of {@link
  * arlut.csd.ganymede.common.ObjectHandle ObjectHandle} objects from
  * the server, storing various pieces of information about the
  * objects, including their expiration/removal/inactive status, their
- * current label, and more.
+ * current label, and more.</p>
  *
- * @version $Id$
  * @author Jonathan Abbey
  */
 
@@ -81,39 +84,39 @@ public class objectList {
 
   final static boolean debug = false;
 
-  static Comparator comparator = new Comparator() 
+  static Comparator comparator = new Comparator()
     {
-      public int compare(Object o_a, Object o_b) 
+      public int compare(Object o_a, Object o_b)
         {
           ObjectHandle a, b;
-          
+
           a = (ObjectHandle) o_a;
           b = (ObjectHandle) o_b;
           int comp = 0;
-          
+
           comp = a.getLabel().compareToIgnoreCase(b.getLabel());
-          
+
           if (comp < 0)
             {
               return -1;
             }
           else if (comp > 0)
-            { 
+            {
               return 1;
-            } 
+            }
           else
-            { 
+            {
               return 0;
             }
         }
     };
 
   VecSortInsert inserter;
-  private Vector handles;
+  private Vector<ObjectHandle> handles;
   boolean sorted = false;
 
-  private Vector activeHandles;
-  private Hashtable invids;
+  private Vector<ObjectHandle> activeHandles;
+  private Hashtable<Invid, ObjectHandle> invids;
   boolean activeSorted = false;
   boolean containsNonEditable = false;
 
@@ -125,11 +128,11 @@ public class objectList {
 
     /* -- */
 
-    invids = new Hashtable();
+    invids = new Hashtable<Invid, ObjectHandle>();
 
     if (result == null)
       {
-        handles = new Vector();
+        handles = new Vector<ObjectHandle>();
       }
     else
       {
@@ -138,7 +141,7 @@ public class objectList {
 
     sorted = true;
 
-    activeHandles = (Vector) handles.clone(); // quickly dup the vector of handles
+    activeHandles = (Vector<ObjectHandle>) handles.clone(); // quickly dup the vector of handles
 
     activeSorted = true;
 
@@ -147,7 +150,7 @@ public class objectList {
 
     for (int i = activeHandles.size() - 1; i >= 0; i--)
       {
-        handle = (ObjectHandle) activeHandles.elementAt(i);
+        handle = activeHandles.get(i);
         invids.put(handle.getInvid(), handle);
 
         if (!handle.isEditable())
@@ -157,7 +160,7 @@ public class objectList {
 
         if (handle.isInactive())
           {
-            activeHandles.removeElementAt(i);
+            activeHandles.remove(i);
 
             if (debug)
               {
@@ -176,10 +179,8 @@ public class objectList {
   }
 
   /**
-   *
    * This method returns true if this list contains any non-editable
    * handles.
-   *
    */
 
   public boolean containsNonEditable()
@@ -188,20 +189,11 @@ public class objectList {
   }
 
   /**
-   *
    * This method is used to augment an object list with non-editables.
-   *
-   *
    */
 
   public synchronized void augmentListWithNonEditables(QueryResult result)
   {
-    Enumeration en;
-    Vector localhandles;
-    ObjectHandle handle;
-
-    /* -- */
-
     if (containsNonEditable)
       {
         throw new IllegalArgumentException("already contains non-editables");
@@ -212,14 +204,8 @@ public class objectList {
         return;
       }
 
-    localhandles = result.getHandles();
-
-    en = localhandles.elements();
-
-    while (en.hasMoreElements())
+    for (ObjectHandle handle: result.getHandles())
       {
-        handle = (ObjectHandle) en.nextElement();
-
         // we only want to add a handle if we don't have the
         // invid in place already
 
@@ -236,67 +222,61 @@ public class objectList {
   }
 
   /**
-   * This method returns a sorted Vector of listHandles.  The vector
-   * is essentially a read-out of the current state of the objectList,
-   * and will not track any future changes to this objectList.
+   * <p>This method returns a sorted Vector of listHandles.  The
+   * vector is essentially a read-out of the current state of the
+   * objectList, and will not track any future changes to this
+   * objectList.</p>
    *
-   * @param includeInactives if false, the list returned will not include entries
-   * for any inactive objects 
+   * @param includeInactives if false, the list returned will not
+   * include entries for any inactive objects
    */
-  
-  public Vector getListHandles(boolean includeInactives)
+
+  public Vector<listHandle> getListHandles(boolean includeInactives)
   {
     return getListHandles(includeInactives, false);
   }
 
   /**
-   * This method returns a sorted Vector of listHandles.  The vector
-   * is essentially a read-out of the current state of the objectList,
-   * and will not track any future changes to this objectList.
+   * <p>This method returns a sorted Vector of listHandles.  The
+   * vector is essentially a read-out of the current state of the
+   * objectList, and will not track any future changes to this
+   * objectList.</p>
    *
-   * @param includeInactives if false, the list returned will not include entries
-   * for any inactive objects 
+   * @param includeInactives if false, the list returned will not
+   * include entries for any inactive objects
    *
    * @param includeNonEditables if false, the list returned will not
    * include entries for any non-editable objects
-   *
    */
-  
-  public synchronized Vector getListHandles(boolean includeInactives,
-                                            boolean includeNonEditables)
+
+  public synchronized Vector<listHandle> getListHandles(boolean includeInactives,
+                                                        boolean includeNonEditables)
   {
-    ObjectHandle handle;
-    Vector results;
+    Vector<listHandle> results = null;
 
     /* -- */
 
-    //    sortHandles();
-
     if (includeInactives)
       {
-        results = new Vector(handles.size());
+        results = new Vector<listHandle>(handles.size());
 
-        for (int i = 0; i < handles.size(); i++)
+        for (ObjectHandle handle: handles)
           {
-            handle = (ObjectHandle) handles.elementAt(i);
-
             if (includeNonEditables || handle.isEditable())
               {
-                results.addElement(handle.getListHandle());
+                results.add(handle.getListHandle());
               }
           }
       }
     else
       {
-        results = new Vector(activeHandles.size());
+        results = new Vector<listHandle>(activeHandles.size());
 
-        for (int i = 0; i < activeHandles.size(); i++)
+        for (ObjectHandle handle: activeHandles)
           {
-            handle = (ObjectHandle) activeHandles.elementAt(i);
-
             if (includeNonEditables || handle.isEditable())
               {
-                results.addElement(handle.getListHandle());
+                results.add(handle.getListHandle());
               }
           }
       }
@@ -305,70 +285,61 @@ public class objectList {
   }
 
   /**
-   *
-   * This method returns a sorted Vector of object labels.  The vector
-   * is essentially a read-out of the current state of the objectList,
-   * and will not track any future changes to this objectList.
+   * <p>This method returns a sorted Vector of object labels.  The
+   * vector is essentially a read-out of the current state of the
+   * objectList, and will not track any future changes to this
+   * objectList.</p>
    *
    * @param includeInactives if false, the list returned will not
    * include entries for any inactive objects
-   * 
    */
 
-  public Vector getLabels(boolean includeInactives)
+  public Vector<String> getLabels(boolean includeInactives)
   {
     return getLabels(includeInactives, false);
   }
 
   /**
-   *
-   * This method returns a sorted Vector of object labels.  The vector
-   * is essentially a read-out of the current state of the objectList,
-   * and will not track any future changes to this objectList.
+   * <p>This method returns a sorted Vector of object labels.  The
+   * vector is essentially a read-out of the current state of the
+   * objectList, and will not track any future changes to this
+   * objectList.</p>
    *
    * @param includeInactives if false, the list returned will not
    * include entries for any inactive objects
    *
    * @param includeNonEditables if false, the list returned will not
    * include entries for any non-editable objects
-   * 
    */
 
-  public synchronized Vector getLabels(boolean includeInactives,
-                                       boolean includeNonEditables)
+  public synchronized Vector<String> getLabels(boolean includeInactives,
+                                               boolean includeNonEditables)
   {
-    ObjectHandle handle;
-    Vector results;
+    Vector<String> results = null;
 
     /* -- */
 
-    //    sortHandles();
-
     if (includeInactives)
       {
-        results = new Vector(handles.size());
+        results = new Vector<String>(handles.size());
 
-        for (int i = 0; i < handles.size(); i++)
+        for (ObjectHandle handle: handles)
           {
-            handle = (ObjectHandle) handles.elementAt(i);
-
             if (includeNonEditables || handle.isEditable())
               {
-                results.addElement(handle.getLabel());
+                results.add(handle.getLabel());
               }
           }
       }
     else
       {
-        results = new Vector(activeHandles.size());
+        results = new Vector<String>(activeHandles.size());
 
-        for (int i = 0; i < handles.size(); i++)
+        for (ObjectHandle handle: activeHandles)
           {
-            handle = (ObjectHandle) activeHandles.elementAt(i);
-
             if (includeNonEditables || handle.isEditable())
               {
-                results.addElement(handle.getLabel());
+                results.add(handle.getLabel());
               }
           }
       }
@@ -377,74 +348,63 @@ public class objectList {
   }
 
   /**
+   * <p>This method returns a sorted copy of an object handles
+   * vector.</p>
    *
-   * This method returns a sorted copy of an object handles vector.
-   *
-   * No adds or deletes to the returned vector will be reflected
-   * in this objectList, but any changes to the status of the individual
-   * ObjectHandle's will be reflected in the objectList.
-   *
+   * <p>No adds or deletes to the returned vector will be reflected in
+   * this objectList, but any changes to the status of the individual
+   * ObjectHandle's will be reflected in the objectList.</p>
    */
 
-  public Vector getObjectHandles(boolean includeInactives)
+  public Vector<ObjectHandle> getObjectHandles(boolean includeInactives)
   {
     return getObjectHandles(includeInactives, false);
   }
 
   /**
+   * <p>This method returns a sorted copy of an object handles
+   * vector.</p>
    *
-   * This method returns a sorted copy of an object handles vector.
-   *
-   * No adds or deletes to the returned vector will be reflected
-   * in this objectList, but any changes to the status of the individual
-   * ObjectHandle's will be reflected in the objectList.
-   *
+   * <p>No adds or deletes to the returned vector will be reflected in
+   * this objectList, but any changes to the status of the individual
+   * ObjectHandle's will be reflected in the objectList.</p>
    */
 
-  public synchronized Vector getObjectHandles(boolean includeInactives,
-                                              boolean includeNonEditables)
+  public synchronized Vector<ObjectHandle> getObjectHandles(boolean includeInactives,
+                                                            boolean includeNonEditables)
   {
-    //    sortHandles();
-
     if (includeNonEditables || !containsNonEditable)
       {
         if (includeInactives)
           {
-            return (Vector) handles.clone();
+            return (Vector<ObjectHandle>) handles.clone();
           }
         else
           {
-            return (Vector) activeHandles.clone();
+            return (Vector<ObjectHandle>) activeHandles.clone();
           }
       }
     else
       {
-        ObjectHandle handle;
-        Vector result = new Vector();
-
-        /* -- */
+        Vector<ObjectHandle> result = new Vector<ObjectHandle>();
 
         if (includeInactives)
           {
-            for (int i = 0; i < handles.size(); i++)
+            for (ObjectHandle handle: handles)
               {
-                handle = (ObjectHandle) handles.elementAt(i);
-
                 if (handle.isEditable())
                   {
-                    result.addElement(handle);
+                    result.add(handle);
                   }
               }
           }
         else
           {
-            for (int i = 0; i < activeHandles.size(); i++)
+            for (ObjectHandle handle: activeHandles)
               {
-                handle = (ObjectHandle) activeHandles.elementAt(i);
-
                 if (handle.isEditable())
                   {
-                    result.addElement(handle);
+                    result.add(handle);
                   }
               }
           }
@@ -454,13 +414,11 @@ public class objectList {
   }
 
   /**
+   * <p>This method relabels an object handle in this list.</p>
    *
-   * This method relabels an object handle in this list.
-   *
-   * Use this method rather than changing an object
-   * handle reference got by getObjectHandle() in
-   * order to let objectList maintain sort order.
-   *
+   * <p>Use this method rather than changing an object handle
+   * reference got by getObjectHandle() in order to let objectList
+   * maintain sort order.</p>
    */
 
   public synchronized void relabelObject(Invid invid, String newLabel)
@@ -478,10 +436,8 @@ public class objectList {
   }
 
   /**
-   *
-   * This method adds an object handle to this list, quickly,
-   * in sorted order.
-   *
+   * <p>This method adds an object handle to this list, quickly, in
+   * sorted order.</p>
    */
 
   public synchronized void addObjectHandle(ObjectHandle handle)
@@ -495,45 +451,37 @@ public class objectList {
   }
 
   /**
-   *
-   * This method returns a live reference to the object handle
-   * corresponding to invid, or null if none such is in this
-   * object list.
-   *
+   * <p>This method returns a live reference to the object handle
+   * corresponding to invid, or null if none such is in this object
+   * list.</p>
    */
 
   public ObjectHandle getObjectHandle(Invid invid)
   {
-    return (ObjectHandle) invids.get(invid);
+    return invids.get(invid);
   }
 
   /**
+   * <p>This method removes object handles matching the given invid
+   * from the object list.</p>
    *
-   * This method removes object handles matching the given
-   * invid from the object list.
-   *
-   * This isn't the fastest operation, but hopefully won't
-   * be too bad.
+   * <p>This isn't the fastest operation, but hopefully won't be too
+   * bad.</p>
    *
    * @return The handle removed, or null if it wasn't found.
-   *
    */
 
   public synchronized ObjectHandle removeInvid(Invid invid)
   {
-    ObjectHandle handle;
-
-    /* -- */
-
-    handle = (ObjectHandle) invids.remove(invid);
+    ObjectHandle handle = invids.remove(invid);
 
     if (handle == null)
       {
         return null;
       }
 
-    handles.removeElement(handle);
-    activeHandles.removeElement(handle);
+    handles.remove(handle);
+    activeHandles.remove(handle);
 
     return handle;
   }
@@ -542,9 +490,9 @@ public class objectList {
   {
     StringBuilder tempBuf = new StringBuilder();
 
-    for (int i = 0; handles != null && i < handles.size(); i++)
+    for (ObjectHandle handle: handles)
       {
-        tempBuf.append(handles.elementAt(i));
+        tempBuf.append(handle);
         tempBuf.append("\n");
       }
 

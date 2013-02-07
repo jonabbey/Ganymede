@@ -530,7 +530,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * FieldInfo Vector that only needs to be downloaded once.
    */
 
-  public void setInfoVector(Vector infoVector)
+  public void setInfoVector(Vector<FieldInfo> infoVector)
   {
     this.infoVector = infoVector;
   }
@@ -657,9 +657,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
           {
             int totalSize = 0;
 
-            for (int i = 0; i < infoSize; i++)
+            for (FieldInfo info: infoVector)
               {
-                FieldInfo info = (FieldInfo)infoVector.elementAt(i);
                 FieldTemplate template = findtemplate(info.getID());
 
                 if (this.tabName == null)
@@ -702,7 +701,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
             try
               {
-                fieldInfo = (FieldInfo) infoVector.elementAt(i);
+                fieldInfo = infoVector.get(i);
                 ID = fieldInfo.getID();
                 fieldTemplate = findtemplate(ID);
 
@@ -813,20 +812,11 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
   private final FieldTemplate findtemplate(short type)
   {
-    FieldTemplate result;
-    int tsize;
-
-    /* -- */
-
-    tsize = templates.size();
-
-    for (int i = 0; i < tsize; i++)
+    for (FieldTemplate template: templates)
       {
-        result = (FieldTemplate) templates.elementAt(i);
-
-        if (result.getID() == type)
+        if (template.getID() == type)
           {
-            return result;
+            return template;
           }
       }
 
@@ -924,10 +914,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
         return;
       }
 
-    Enumeration en;
-
-    /* -- */
-
     if (debug)
       {
         println("Updating container panel");
@@ -944,7 +930,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
         invalidate();
         frame.validate();
-
       }
     finally
       {
@@ -966,10 +951,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
   public void updateInvidLabels(Invid invid, String newLabel)
   {
-    Enumeration en;
-
-    /* -- */
-
     if (debug)
       {
         println("Updating container panel");
@@ -1287,7 +1268,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
             // First we need to rebuild the list of choices
 
-            Vector labels = null;
+            Vector<String> labels = null;
             Object key = sf.choicesKey();
 
             // if our choices key is null, we're not going to use a cached copy..
@@ -1332,7 +1313,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
                     if (choicesV == null)
                       {
-                        labels = new Vector();
+                        labels = new Vector<String>();
                       }
                     else
                       {
@@ -1351,7 +1332,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
             if (!mustChoose || currentValue == null)
               {
                 // "<none>"
-                labels.addElement(ts.l("global.none"));
+                labels.add(ts.l("global.none"));
               }
 
             if (currentValue == null)
@@ -1400,7 +1381,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
             // First we need to rebuild the list of choices
 
-            Vector choiceHandles = null;
+            Vector<listHandle> choiceHandles = null;
             Object key = invf.choicesKey();
 
             // if our choices key is null, we're not going to use a cached copy..
@@ -1417,7 +1398,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
                 if (qr == null)
                   {
-                    choiceHandles = new Vector();  // empty
+                    choiceHandles = new Vector<listHandle>();  // empty
                   }
                 else
                   {
@@ -1454,7 +1435,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
                     if (choicesV == null)
                       {
-                        choiceHandles = new Vector();
+                        choiceHandles = new Vector<listHandle>();
                       }
                     else
                       {
@@ -3558,7 +3539,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     // DBEditObject.anonymousLinkOK() nonetheless give us rights
     // to link.
 
-    Vector choices = list.getListHandles(false, true);
+    Vector<listHandle> choices = list.getListHandles(false, true);
 
     Invid currentChoice = (Invid) fieldInfo.getValue();
     String currentChoiceLabel = null;
@@ -3591,10 +3572,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (currentChoice != null)
       {
-        for (int j = 0; j < choices.size(); j++)
+        for (listHandle thisChoice: choices)
           {
-            listHandle thisChoice = (listHandle) choices.elementAt(j);
-
             if (thisChoice.getObject() == null)
               {
                 println("Current object " + thisChoice + " is null.");
@@ -3616,7 +3595,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
         if (!found)
           {
             currentListHandle = new listHandle(gc.getSession().viewObjectLabel(currentChoice), currentChoice);
-            choices.addElement(currentListHandle);
+            choices.add(currentListHandle);
           }
       }
 
@@ -3745,10 +3724,10 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     bytes = (Byte[]) fieldInfo.getValue();
 
-        if (bytes != null)
-          {
-            ipf.setValue(bytes);
-          }
+    if (bytes != null)
+      {
+        ipf.setValue(bytes);
+      }
 
     ipf.setCallback(this);
 
@@ -3781,10 +3760,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
   public synchronized final void cleanup()
   {
-    Enumeration en;
-
-    /* -- */
-
     if (debug)
       {
         printErr("containerPanel cleanUp()");
