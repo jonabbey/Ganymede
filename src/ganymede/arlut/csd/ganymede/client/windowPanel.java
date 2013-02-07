@@ -1068,8 +1068,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     synchronized (windowList)
       {
-        Vector<JInternalFrame> closing = new Vector<JInternalFrame>();
-
         for (JInternalFrame window: windowList.values())
           {
             if (window instanceof framePanel)
@@ -1099,11 +1097,6 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
                 gResultTable w = (gResultTable) window;
                 closing.add(w);
               }
-          }
-
-        for (JInternalFrame window: closing)
-          {
-            window.setClosed(true);
           }
       }
 
