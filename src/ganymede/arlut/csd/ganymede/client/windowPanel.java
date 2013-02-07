@@ -1052,6 +1052,8 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   {
     synchronized (windowList)
       {
+        Vector<JInternalFrame> closing = new Vector<JInternalFrame>();
+
         for (JInternalFrame window: windowList.values())
           {
             if (window instanceof framePanel)
@@ -1076,7 +1078,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
                         w.closingApproved = true;
                       }
 
-                    w.setClosed(true);
+                    closing.add(w);
                   }
                 catch (java.beans.PropertyVetoException ex)
                   {
@@ -1089,13 +1091,18 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
                 try
                   {
-                    w.setClosed(true);
+                    closing.add(w);
                   }
                 catch (java.beans.PropertyVetoException ex)
                   {
                     // something decided against this one.. oh well.
                   }
               }
+          }
+
+        for (JInternalFrame window: closing)
+          {
+            window.setClosed(true);
           }
       }
   }
