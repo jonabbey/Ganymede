@@ -977,6 +977,8 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   public void closeEditables()
   {
+    Vector<JInternalFrame> closing = new Vector<JInternalFrame>();
+
     synchronized (windowList)
       {
         for (JInternalFrame window: windowList.values())
@@ -992,17 +994,22 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
                         System.err.println("closing editables.. " + w.getTitle());
                       }
 
-                    try
-                      {
-                        w.closingApproved = true;
-                        w.setClosed(true);
-                      }
-                    catch (java.beans.PropertyVetoException ex)
-                      {
-                        // shouldn't happen here
-                      }
+                    w.closingApproved = true;
+                    closing.add(w);
                   }
               }
+          }
+      }
+
+    for (JInternalFrame window: closing)
+      {
+        try
+          {
+            window.setClosed(true);
+          }
+        catch (java.beans.PropertyVetoException ex)
+          {
+            // shouldn't happen here
           }
       }
   }
@@ -1016,6 +1023,8 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   public void closeInvidWindows(Invid invid)
   {
+    Vector<JInternalFrame> closing = new Vector<JInternalFrame>();
+
     synchronized (windowList)
       {
         for (JInternalFrame window: windowList.values())
@@ -1026,17 +1035,22 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
                 if (w.getObjectInvid().equals(invid))
                   {
-                    try
-                      {
-                        w.closingApproved = true;
-                        w.setClosed(true);
-                      }
-                    catch (java.beans.PropertyVetoException ex)
-                      {
-                        // shouldn't happen here
-                      }
+                    w.closingApproved = true;
+                    closing.add(w);
                   }
               }
+          }
+      }
+
+    for (JInternalFrame window: closing)
+      {
+        try
+          {
+            window.setClosed(true);
+          }
+        catch (java.beans.PropertyVetoException ex)
+          {
+            // shouldn't happen here
           }
       }
   }
@@ -1050,6 +1064,8 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   public void closeAll(boolean askNoQuestions)
   {
+    Vector<JInternalFrame> closing = new Vector<JInternalFrame>();
+
     synchronized (windowList)
       {
         for (JInternalFrame window: windowList.values())
@@ -1068,34 +1084,31 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
                     System.err.println("windowPanel.closeAll() - closing window " + w.getTitle());
                   }
 
-                try
+                if (askNoQuestions)
                   {
-                    if (askNoQuestions)
-                      {
-                        w.stopNow();        // stop all container threads asap
-                        w.closingApproved = true;
-                      }
+                    w.stopNow();        // stop all container threads asap
+                    w.closingApproved = true;
+                  }
 
-                    w.setClosed(true);
-                  }
-                catch (java.beans.PropertyVetoException ex)
-                  {
-                    // user decided against this one..
-                  }
+                closing.add(w);
               }
             else if (window instanceof gResultTable)
               {
                 gResultTable w = (gResultTable) window;
-
-                try
-                  {
-                    w.setClosed(true);
-                  }
-                catch (java.beans.PropertyVetoException ex)
-                  {
-                    // something decided against this one.. oh well.
-                  }
+                closing.add(w);
               }
+          }
+      }
+
+    for (JInternalFrame window: closing)
+      {
+        try
+          {
+            window.setClosed(true);
+          }
+        catch (java.beans.PropertyVetoException ex)
+          {
+            // something decided against this one.. oh well.
           }
       }
   }
