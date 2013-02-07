@@ -6161,7 +6161,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   // Utilities
 
   /**
-   * Sorts a vector of listHandles.
+   * <p>Sorts a vector of listHandles in place.</p>
    *
    * @param v Vector to be sorted
    * @return Vector of sorted listHandles(sorted by label)
@@ -6200,7 +6200,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   }
 
   /**
-   * Sort a vector of Strings
+   * <p>Sort a vector of Strings in-place.</p>
    *
    * @return Vector of sorted Strings.
    */
@@ -6209,14 +6209,14 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   {
     new VecQuickSort(v, null).sort();
 
-    return (Vector<String>) v;
+    return v;
   }
 
   /**
-   * This method updates the commit button's label, with the text set
-   * according to whether the user has the 'Prompt for Comments on
+   * <p>This method updates the commit button's label, with the text
+   * set according to whether the user has the 'Prompt for Comments on
    * Commit' menu item checked and whether or not the Alt/Option key
-   * is held down.
+   * is held down.</p>
    */
 
   public void refreshCommitLabel()
