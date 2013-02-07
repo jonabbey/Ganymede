@@ -1001,6 +1001,9 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
           }
       }
 
+    // we do this in a separate loop so that we don't implicitly cause
+    // a ConcurrentModificationException on the windowList
+
     for (JInternalFrame window: closing)
       {
         try
@@ -1041,6 +1044,9 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
               }
           }
       }
+
+    // we do this in a separate loop so that we don't implicitly cause
+    // a ConcurrentModificationException on the windowList
 
     for (JInternalFrame window: closing)
       {
@@ -1089,16 +1095,14 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
                     w.stopNow();        // stop all container threads asap
                     w.closingApproved = true;
                   }
+              }
 
-                closing.add(w);
-              }
-            else if (window instanceof gResultTable)
-              {
-                gResultTable w = (gResultTable) window;
-                closing.add(w);
-              }
+            closing.add(window);
           }
       }
+
+    // we do this in a separate loop so that we don't implicitly cause
+    // a ConcurrentModificationException on the windowList
 
     for (JInternalFrame window: closing)
       {
