@@ -169,13 +169,13 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
   // the following hashes are accessed through a set of private accessor
   // methods to avoid confusion
 
-  private Hashtable baseIDHash = new Hashtable();
+  private Hashtable<String, Short> baseIDHash = new Hashtable<String, Short>();
 
   /**
    * Hashtable mapping field names to FieldTemplate objects.
    */
 
-  private Hashtable fieldHash = new Hashtable();
+  private Hashtable<String, FieldTemplate> fieldHash = new Hashtable<String, FieldTemplate>();
 
   /**
    * Hashtable mapping embedded field name path to the discrete name
@@ -183,14 +183,14 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
    * field.
    */
 
-  private Hashtable nameHash = new Hashtable();
+  private Hashtable<String, String> nameHash = new Hashtable<String, String>();
 
   /**
    * Hashtable mapping from the name of an object Base to a BaseDump
    * for that Base.
    */
 
-  private Hashtable myHash = new Hashtable();
+  private Hashtable<String, BaseDump> myHash = new Hashtable<String, BaseDump>();
 
   JButton
     OkButton = new JButton(ts.l("global.submit_button")), // "Submit"
@@ -222,10 +222,9 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
   CardLayout
     card_layout;
 
-  Vector
-    fieldChoices = new Vector(), // A vector of strings for the field choice menus in QueryRow
-    Rows = new Vector(),        // store the QueryRows
-    fields;                     // FieldTemplates for the selectedBase
+  Vector<String> fieldChoices = new Vector<String>(); // A vector of strings for the field choice menus in QueryRow
+  Vector<QueryRow> Rows = new Vector<QueryRow>(); // store the QueryRows
+  Vector<FieldTemplate> fields = new Vector<FieldTemplate>(); // FieldTemplates for the selectedBase
 
   BaseDump selectedBase = null;
 
@@ -511,7 +510,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
         for (int i=0; fields != null && (i < fields.size()); i++)
           {
-            template = (FieldTemplate) fields.elementAt(i);
+            template = fields.get(i);
 
             // ignore containing objects and the like...
 
@@ -558,7 +557,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
                         // and finally add to fieldChoices
 
-                        fieldChoices.addElement(embedName);
+                        fieldChoices.add(embedName);
                       }
 
                     // and we're done with Embedded.  Clear it out.
@@ -583,7 +582,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
                 mapNameToId(name, Short.valueOf(selectedBase.getTypeID()));
 
                 // and finally add to fieldChoices
-                fieldChoices.addElement(name);
+                fieldChoices.add(name);
               }
           }
 
@@ -628,7 +627,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
    * names of embedded fields during our recursion
    */
 
-  private void getEmbedded(Vector fields, String basePrefix,
+  private void getEmbedded(Vector<FieldTemplate> fields, String basePrefix,
                            Short lowestBase, Vector Embedded)
   {
     FieldTemplate tempField;
@@ -643,7 +642,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
     for (int j=0; fields != null && (j < fields.size()); j++)
       {
-        tempField = (FieldTemplate) fields.elementAt(j);
+        tempField = fields.get(j);
 
         // ignore containing objects and the like...
 
@@ -727,7 +726,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
     for (int i = 0; i < Rows.size(); i++)
       {
-        row = (QueryRow) Rows.elementAt(i);
+        row = Rows.get(i);
 
         qNodes.addElement(row.getQueryNode());
       }
@@ -914,15 +913,15 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
   private void removeRow()
   {
-    QueryRow row = (QueryRow) Rows.lastElement();
+    QueryRow row = Rows.lastElement();
     row.removeRow();
-    Rows.removeElementAt(Rows.size()-1);
+    Rows.remove(Rows.size()-1);
     inner_choice.revalidate();
   }
 
   private void addRow()
   {
-    Rows.addElement(new QueryRow(inner_choice, this));
+    Rows.add(new QueryRow(inner_choice, this));
   }
 
   /**
@@ -1065,7 +1064,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
   Short getIdFromName(String name)
   {
-    return (Short) baseIDHash.get(name);
+    return baseIDHash.get(name);
   }
 
   private void mapBaseNamesToTemplates(short id)
@@ -1082,7 +1081,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
         for (int i = 0; i < fields.size(); i++)
           {
-            template = (FieldTemplate) fields.elementAt(i);
+            template = fields.get(i);
             mapNameToTemplate(template.getName(), template);
           }
       }
@@ -1097,7 +1096,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
   FieldTemplate getTemplateFromName(String name)
   {
-    return (FieldTemplate) fieldHash.get(name);
+    return fieldHash.get(name);
   }
 
   /**
@@ -1120,7 +1119,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
   String getFieldFromEmbedded(String name)
   {
-    return (String) nameHash.get(name);
+    return nameHash.get(name);
   }
 
   // we have a map from base names to Base
@@ -1132,7 +1131,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
   BaseDump getBaseFromName(String name)
   {
-    return (BaseDump) myHash.get(name);
+    return myHash.get(name);
   }
 
   BaseDump getBaseFromShort(Short id)
@@ -1327,10 +1326,10 @@ class QueryRow implements ItemListener {
         if (debug)
           {
             System.err.println("QueryRow: adding field choice <" + i + ">:" +
-                               parent.fieldChoices.elementAt(i));
+                               parent.fieldChoices.get(i));
           }
 
-        fieldChoice.addItem(parent.fieldChoices.elementAt(i));
+        fieldChoice.addItem(parent.fieldChoices.get(i));
       }
 
     // We want to show the label field for the selected object base by
@@ -2199,7 +2198,7 @@ class queryFieldsPanel extends JPanel {
   public void resetBoxes()
   {
     FieldTemplate template;
-    Vector fields;
+    Vector<FieldTemplate> fields;
 
     Vector
       builtInItems_Vect = new Vector(),
@@ -2214,7 +2213,7 @@ class queryFieldsPanel extends JPanel {
 
     for (int i=0; fields != null && (i < fields.size()); i++)
       {
-        template = (FieldTemplate) fields.elementAt(i);
+        template = fields.get(i);
 
         if (template.isBuiltIn())
           {
@@ -2277,9 +2276,9 @@ class queryFieldsPanel extends JPanel {
    * settings.</p>
    */
 
-  public Vector getReturnFields()
+  public Vector<String> getReturnFields()
   {
-    Vector fieldsToReturn = new Vector();
+    Vector<String> fieldsToReturn = new Vector<String>();
 
     /* -- */
 
@@ -2287,17 +2286,17 @@ class queryFieldsPanel extends JPanel {
     // we are still supporting in the client, so we revert to manual
     // field addition here.
 
-    Vector vectA = builtInSelector.getChosenStrings();
-    Vector vectB = customSelector.getChosenStrings();
+    Vector<String> vectA = (Vector<String>) builtInSelector.getChosenStrings();
+    Vector<String> vectB = (Vector<String>) customSelector.getChosenStrings();
 
     for (int i = 0; i < vectA.size(); i++)
       {
-        fieldsToReturn.addElement(vectA.elementAt(i));
+        fieldsToReturn.add(vectA.get(i));
       }
 
     for (int i = 0; i < vectB.size(); i++)
       {
-        fieldsToReturn.addElement(vectB.elementAt(i));
+        fieldsToReturn.add(vectB.get(i));
       }
 
     // if we are returning all fields, we can use null to indicate that
