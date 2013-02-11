@@ -1,20 +1,22 @@
 /*
 
-   ownerPanel.java
+   ownershipPanel.java
 
    The ownershipPanel is used in the Ganymede client to display
    objects owned when the user opens a Ganymede Owner Group window.
-   
+
    Created: 9 September 1997
 
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -97,8 +99,6 @@ import arlut.csd.ganymede.rmi.Session;
 
 public class ownershipPanel extends JPanel implements ItemListener {
 
-  final static boolean debug = false;
-
   /**
    * TranslationService object for handling string localization in the
    * Ganymede client.
@@ -108,7 +108,7 @@ public class ownershipPanel extends JPanel implements ItemListener {
 
   boolean
     editable;
-  
+
   framePanel
     parent;
 
@@ -121,16 +121,12 @@ public class ownershipPanel extends JPanel implements ItemListener {
   JComboBox
     bases;
 
-  Hashtable
-    objects_owned,   // (Short)Base type -> (Vector)list of objects [all objects]
-    paneHash;        // (String) base name -> objectPane holding base objects
+  Hashtable<Short, Base> objects_owned = null; // (Short)Base type -> (Vector)list of objects [all objects]
+
+  Hashtable<String, objectPane> paneHash = null; // (String) base name -> objectPane holding base objects
 
   CardLayout
     cards;
-
-  Vector
-    owners = null,
-    result = null;
 
   JPanel
     holder;
@@ -168,24 +164,25 @@ public class ownershipPanel extends JPanel implements ItemListener {
     bp.add(new JLabel(ts.l("init.type_label")));
     bp.add(bases);
 
-    Vector baseList = gc.getBaseList();
-    Hashtable baseNames = gc.getBaseNames();
-    Hashtable baseToShort = gc.getBaseToShort();
-    paneHash = new Hashtable();
+    Vector<Base> baseList = gc.getBaseList();
+    Hashtable<Base, String> baseNames = gc.getBaseNames();
+    Hashtable<Base, Short> baseToShort = gc.getBaseToShort();
+
+    paneHash = new Hashtable<String, objectPane>();
 
     try
       {
-        for (int i = 0; i < baseList.size(); i++)
+        for (Base b: baseList)
           {
-            Base b = (Base)baseList.elementAt(i);
-
             if (!b.isEmbedded())
               {
-                String name = (String)baseNames.get(b);
-                bases.addItem (name);
-                objectPane p = new objectPane(editable, 
+                String name = baseNames.get(b);
+
+                bases.addItem(name);
+
+                objectPane p = new objectPane(editable,
                                               this,
-                                              ((Short)baseToShort.get(b)).shortValue());
+                                              baseToShort.get(b).shortValue());
                 paneHash.put(name, p);
                 center.add(name, p);
               }
@@ -216,23 +213,18 @@ public class ownershipPanel extends JPanel implements ItemListener {
     if (event.getStateChange() == ItemEvent.SELECTED)
       {
         String item = (String)event.getItem();
-        
-        objectPane op = (objectPane) paneHash.get(item);
-        
+
+        objectPane op = paneHash.get(item);
+
         if (!op.isStarted())
           {
             Thread thread = new Thread(op);
             thread.setPriority(Thread.NORM_PRIORITY);
             thread.start();
           }
-        
+
         cards.show(center, item);
       }
-  }
-
-  private void println(String s)
-  {
-    System.err.println("OwnershipPanel: " + s);
   }
 
   public void dispose()
@@ -263,18 +255,6 @@ public class ownershipPanel extends JPanel implements ItemListener {
 
     cards = null;
 
-    if (owners != null)
-      {
-        owners.clear();
-        owners = null;
-      }
-
-    if (result != null)
-      {
-        result.clear();
-        result = null;
-      }
-
     if (holder != null)
       {
         holder.removeAll();
@@ -298,8 +278,6 @@ public class ownershipPanel extends JPanel implements ItemListener {
  */
 
 class objectPane extends JPanel implements JsetValueCallback, Runnable {
-
-  final static boolean debug = false;
 
   /**
    * TranslationService object for handling string localization in the
@@ -331,10 +309,10 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
   private
     ownershipPanel parent;
 
-  private 
+  private
     JPanel filler;
 
-  private 
+  private
     boolean isStarted = false;
 
   private
@@ -385,8 +363,8 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
         // group
 
         QueryDataNode node = new QueryDataNode(SchemaConstants.OwnerListField,
-                                               QueryDataNode.EQUALS, 
-                                               QueryDataNode.CONTAINS, 
+                                               QueryDataNode.EQUALS,
+                                               QueryDataNode.CONTAINS,
                                                parent.parent.getObjectInvid());
 
         qResult = gc.getSession().query(new Query(type, node, false));  // no filtering, allow non-editables
@@ -418,7 +396,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 
             list = new objectList(result);
             possible = list.getListHandles(false);
-    
+
             gc.cachedLists.putList(key, list);
           }
       }
@@ -442,7 +420,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
     // having each listen to the other's events.  Also, each menu item
     // is limited to belonging to a single menu, so we have to create
     // redundant menuitems with identical action commands set.
-    
+
     JPopupMenu invidTablePopup = new JPopupMenu();
 
     // "View object"
@@ -473,7 +451,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
     ss.setCallback(this);
     remove(filler);
     add("Center", ss);
-    
+
     invalidate();
     parent.validate();
     stringSelector_loaded = true;
@@ -501,54 +479,30 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
     /* -- */
 
     // First, are we being given a menu operation from StringSelector?
-    
+
     if (e instanceof JParameterValueObject)
       {
-        if (debug)
-          {
-            println("MenuItem selected in a StringSelector");
-          }
-
         String command = (String) e.getParameter();
 
         if (command.equals("Edit object"))
           {
-            if (debug)
-              {
-                println("Edit object: " + e.getValue());
-              }
-
             Invid invid = (Invid) e.getValue();
-                    
+
             gc.editObject(invid);
 
             return true;
           }
         else if (command.equals("View object"))
           {
-            if (debug)
-              {
-                println("View object: " + e.getValue());
-              }
-
             Invid invid = (Invid) e.getValue();
-                    
+
             gc.viewObject(invid);
 
             return true;
           }
-        else
-          {
-            println("Unknown action command from popup: " + command);
-          }
       }
     else if (e instanceof JAddValueObject)
       {
-        if (debug)
-          {
-            println("Adding object to list");
-          }
-
         try
           {
             retVal = addToOwnerGroup((Invid) e.getValue());
@@ -567,14 +521,9 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
       }
     else if (e instanceof JAddVectorValueObject)
       {
-        if (debug)
-          {
-            println("Adding objects to list");
-          }
-
         try
           {
-            retVal = addToOwnerGroup((Vector)e.getValue());
+            retVal = addToOwnerGroup((Vector<Invid>) e.getValue());
 
             if (retVal != null)
               {
@@ -590,11 +539,6 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
       }
     else if (e instanceof JDeleteValueObject)
       {
-        if (debug)
-          {
-            println("Deleting object from list");
-          }
-
         try
           {
             retVal = removeFromOwnerGroup((Invid) e.getValue());
@@ -613,14 +557,9 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
       }
     else if (e instanceof JDeleteVectorValueObject)
       {
-        if (debug)
-          {
-            println("Adding objects to list");
-          }
-
         try
           {
-            retVal = removeFromOwnerGroup((Vector)e.getValue());
+            retVal = removeFromOwnerGroup((Vector<Invid>) e.getValue());
 
             if (retVal != null)
               {
@@ -635,16 +574,11 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
           }
       }
 
-    if (debug)
-      {
-        println("returnValue = " + succeeded);
-      }
-    
     if (succeeded)
       {
         gc.somethingChanged();
       }
-    
+
     return succeeded;
   }
 
@@ -675,26 +609,28 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
   }
 
   /**
-   * This private helper method attempts to edit the objects whose
+   * <p>This private helper method attempts to edit the objects whose
    * Invid are provided in the Vector parameter.  If successful, it
    * will add the Invid for the owner group we are attached to to the
-   * Owner List Field for these objects.
+   * Owner List Field for these objects.</p>
    *
-   * If a failure is encountered while we are looping over the
+   * <p>If a failure is encountered while we are looping over the
    * vector of objects to add, we will return an error message and
-   * revert the objects we've already added.
+   * revert the objects we've already added.</p>
    */
 
-  private ReturnVal addToOwnerGroup(Vector objectsToAdd) throws RemoteException
+  private ReturnVal addToOwnerGroup(Vector<Invid> objectsToAdd) throws RemoteException
   {
     ReturnVal retVal = null;
     Session session = gc.getSession();
-    int i;
     boolean success = true;
+    int i;
+
+    // XXX we need to do manual loops here
 
     for (i = 0; success && i < objectsToAdd.size(); i++)
       {
-        Invid objectToAdd = (Invid) objectsToAdd.elementAt(i);
+        Invid objectToAdd = objectsToAdd.get(i);
 
         retVal = session.edit_db_object(objectToAdd);
 
@@ -728,7 +664,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 
         for (int j = 0; j < i; j++)
           {
-            Invid objectToAdd = (Invid) objectsToAdd.elementAt(j);
+            Invid objectToAdd = objectsToAdd.get(j);
 
             ReturnVal retVal2 = session.edit_db_object(objectToAdd);
 
@@ -737,7 +673,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
                 // weird!  go ahead and try to undo the rest
                 continue;
               }
-            
+
             db_object my_object = retVal2.getObject();
             db_field my_field = my_object.getField(SchemaConstants.OwnerListField);
 
@@ -760,9 +696,9 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
   }
 
   /**
-   * This private helper method attempts to edit the object whose
-   * Invid is provided.  If successful, it will remove the Invid for the
-   * owner group we are attached to from the Owner List Field.
+   * <p>This private helper method attempts to edit the object whose
+   * Invid is provided.  If successful, it will remove the Invid for
+   * the owner group we are attached to from the Owner List Field.</p>
    */
 
   private ReturnVal removeFromOwnerGroup(Invid objectToRemove) throws RemoteException
@@ -786,26 +722,28 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
   }
 
   /**
-   * This private helper method attempts to edit the objects whose
+   * <p>This private helper method attempts to edit the objects whose
    * Invid are provided in the Vector parameter.  If successful, it
    * will remove the Invid for the owner group we are attached to from
-   * the Owner List Field for these objects.
+   * the Owner List Field for these objects.</p>
    *
-   * If a failure is encountered while we are looping over the
+   * <p>If a failure is encountered while we are looping over the
    * vector of objects to add, we will return an error message and
-   * revert the objects we've already removed.
+   * revert the objects we've already removed.</p>
    */
 
-  private ReturnVal removeFromOwnerGroup(Vector objectsToRemove) throws RemoteException
+  private ReturnVal removeFromOwnerGroup(Vector<Invid> objectsToRemove) throws RemoteException
   {
     ReturnVal retVal = null;
     Session session = gc.getSession();
     int i;
     boolean success = true;
 
+    // XXX we need to do manual loops here
+
     for (i = 0; success && i < objectsToRemove.size(); i++)
       {
-        Invid objectToRemove = (Invid) objectsToRemove.elementAt(i);
+        Invid objectToRemove = objectsToRemove.get(i);
 
         retVal = session.edit_db_object(objectToRemove);
 
@@ -840,7 +778,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
 
         for (int j = 0; j < i; j++)
           {
-            Invid objectToRemove = (Invid) objectsToRemove.elementAt(j);
+            Invid objectToRemove = objectsToRemove.get(j);
 
             ReturnVal retVal2 = session.edit_db_object(objectToRemove);
 
@@ -849,7 +787,7 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
                 // weird!  go ahead and try to undo the rest
                 continue;
               }
-            
+
             db_object my_object = retVal2.getObject();
             db_field my_field = my_object.getField(SchemaConstants.OwnerListField);
 
@@ -867,10 +805,5 @@ class objectPane extends JPanel implements JsetValueCallback, Runnable {
       }
 
     return null;                // success
-  }
-
-  private void println(String s)
-  {
-    System.err.println("OwnershipPanel.objectPane: " + s);
   }
 }
