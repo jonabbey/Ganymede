@@ -76,7 +76,6 @@ import java.awt.event.WindowListener;
 import java.rmi.RemoteException;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
@@ -332,14 +331,10 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
     // - Create the choice window containing the fields
 
-    Vector baseNames = new Vector();
+    Vector<String> baseNames = new Vector<String>();
 
-    Enumeration en = gc.getBaseMap().elements();
-
-    while (en.hasMoreElements())
+    for (BaseDump key: (Vector<BaseDump>) gc.getBaseMap().elements())
       {
-        BaseDump key = (BaseDump) en.nextElement();
-
         // we want to ignore embedded objects -- for now
 
         if (key.isEmbedded())
@@ -353,7 +348,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
           {
             String choiceToAdd = key.getName();
 
-            baseNames.addElement(choiceToAdd);
+            baseNames.add(choiceToAdd);
             mapNameToBase(choiceToAdd, key);
           }
       }
@@ -364,9 +359,9 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
     gc.sortStringVector(baseNames);
 
-    for (int i = 0; i < baseNames.size(); i++)
+    for (String item: baseNames)
       {
-        baseChoice.addItem((String) baseNames.elementAt(i));
+        baseChoice.addItem(item);
       }
 
     // set the selected base in the baseChoice before we add the item
@@ -380,9 +375,9 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
           {
             // we had a default object query choice, make sure it's still valid
 
-            for (int i = 0; i < baseNames.size(); i++)
+            for (String item: baseNames)
               {
-                if (defaultBaseName.equals(baseNames.elementAt(i)))
+                if (defaultBaseName.equals(item))
                   {
                     defaultBase = getBaseFromName(defaultBaseName);
                     break;
@@ -498,22 +493,17 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
   private void resetFieldChoices()
   {
-    FieldTemplate template;
-    Vector EIPfields = new Vector(); // edit-in-place
-    Vector Embedded = new Vector();
+    Vector<FieldTemplate> EIPfields = new Vector<FieldTemplate>(); // edit-in-place
+    Vector<String> Embedded = new Vector<String>();
 
     /* -- */
 
     synchronized (fieldChoices)
       {
-        fieldChoices.removeAllElements();
+        fieldChoices.clear();
 
-        for (int i=0; fields != null && (i < fields.size()); i++)
+        for (FieldTemplate template: fields)
           {
-            template = fields.get(i);
-
-            // ignore containing objects and the like...
-
             if ((selectedBase.isEmbedded() && template.getID() == SchemaConstants.OwnerListField) ||
                 template.getID() == SchemaConstants.BackLinksField)
               {
@@ -533,16 +523,14 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
                 // to and remove from EIPfields so that we can cheaply
                 // re-use the Vector.
 
-                EIPfields.addElement(template);
+                EIPfields.add(template);
                 getEmbedded(EIPfields, null, Short.valueOf(selectedBase.getTypeID()), Embedded);
                 EIPfields.removeElement(template);
 
                 if (!Embedded.isEmpty())
                   {
-                    for (int j = 0; (j < Embedded.size()); j++)
+                    for (String embedName: Embedded)
                       {
-                        String embedName = (String) Embedded.elementAt(j);
-
                         // Ok, let's do our string processing for our field name,
                         // once and for all by removing the slashes and saving
                         // the result. Erik again.
@@ -554,15 +542,10 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
                         // being the slash filled name
 
                         mapEmbeddedToField(embedName, noSlash);
-
-                        // and finally add to fieldChoices
-
                         fieldChoices.add(embedName);
                       }
 
-                    // and we're done with Embedded.  Clear it out.
-
-                    Embedded.removeAllElements();
+                    Embedded.clear();
                   }
               }
             else
@@ -585,19 +568,6 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
                 fieldChoices.add(name);
               }
           }
-
-        // If we wound up with any embedded (edit-in-place) fields from
-        // contained objects, add those fields to our embedded map.
-        //
-        // Note that we don't try to get fancy with where these extra
-        // field possibilities are added in the fieldChoices vector at
-        // this point.  We'll sort them, after.
-
-        // sort fieldChoices
-
-        //      gc.sortStringVector(fieldChoices);
-
-        // and reset the options panel checkboxes.
 
         if (fieldsPanel != null)
           {
@@ -630,7 +600,6 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
   private void getEmbedded(Vector<FieldTemplate> fields, String basePrefix,
                            Short lowestBase, Vector Embedded)
   {
-    FieldTemplate tempField;
     String myName;
     Short tempIDobj;
     short tempID;
@@ -640,12 +609,8 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
     // Examine each field and if it's not referring to an embedded,
     // then add its name + basePrefix to the string vector
 
-    for (int j=0; fields != null && (j < fields.size()); j++)
+    for (FieldTemplate tempField: fields)
       {
-        tempField = fields.get(j);
-
-        // ignore containing objects and the like...
-
         if (tempField.getID() == SchemaConstants.OwnerListField ||
             tempField.getID() == SchemaConstants.BackLinksField)
           {
@@ -708,39 +673,26 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
   private Query createQuery()
   {
-    QueryNode myNode;
-    QueryRow row;
-    Vector qNodes;
-    Query result = null;
-
-    /* -- */
-
-    // If showAllItems is true, then we need to show everything.
-
     if (showAllItems)
       {
         return new Query((String)baseChoice.getSelectedItem(), null, editOnly);
       }
 
-    qNodes = new Vector();
+    Vector<QueryNode> qNodes = new Vector<QueryNode>();
 
-    for (int i = 0; i < Rows.size(); i++)
+    for (QueryRow row: Rows)
       {
-        row = Rows.get(i);
-
-        qNodes.addElement(row.getQueryNode());
+        qNodes.add(row.getQueryNode());
       }
 
-    myNode = (QueryNode) qNodes.elementAt(0);
+    QueryNode myNode = qNodes.get(0);
 
     for (int i = 1; i < qNodes.size(); i++)
       {
-        myNode = new QueryAndNode(myNode, (QueryNode) qNodes.elementAt(i));
+        myNode = new QueryAndNode(myNode, qNodes.get(i));
       }
 
-    result = new Query(selectedBase.getName(), myNode, editOnly);
-
-    return result;
+    return new Query(selectedBase.getName(), myNode, editOnly);
   }
 
   /**
@@ -753,9 +705,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
   public Query setFields(Query someQuery)
   {
-    FieldTemplate tempField;
-    String tempString;
-    Vector fieldsToReturn = null;
+    Vector<String> fieldsToReturn = null;
 
     /* -- */
 
@@ -769,12 +719,9 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
         return someQuery;
       }
 
-    for (int i = 0; i < fieldsToReturn.size(); i++)
+    for (String item: fieldsToReturn)
       {
-        tempString = (String) fieldsToReturn.elementAt(i);
-        tempField = getTemplateFromName(tempString);
-
-        someQuery.addField(tempField.getID());
+        someQuery.addField(getTemplateFromName(item).getID());
       }
 
     return someQuery;
@@ -911,6 +858,10 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
     t.start();
   }
 
+  /**
+   * <p>Remove the last row from this querybox.</p>
+   */
+
   private void removeRow()
   {
     QueryRow row = Rows.lastElement();
@@ -975,6 +926,7 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
             card_layout.show(card_panel, "main");
             query_Buttons.setVisible(true);
           }
+
         getContentPane().invalidate();
         getContentPane().validate();
       }
@@ -1010,9 +962,19 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
     selectedBase = base;
 
-    mapBaseNamesToTemplates(selectedBase.getTypeID());
+    // update the field structures for the chosen base
 
-    // update the fieldChoices vector
+    fields = gc.getTemplateVector(selectedBase.getTypeID());
+
+    if (fields != null)
+      {
+        fieldHash.clear();
+
+        for (FieldTemplate template: fields)
+          {
+            mapNameToTemplate(template.getName(), template);
+          }
+      }
 
     resetFieldChoices();
 
@@ -1025,12 +987,8 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
     addRow();
 
-    // select the right item
-
     baseChoice.removeItemListener(this);
-
     baseChoice.setSelectedItem(selectedBase.getName());
-
     baseChoice.addItemListener(this);
   }
 
@@ -1065,26 +1023,6 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
   Short getIdFromName(String name)
   {
     return baseIDHash.get(name);
-  }
-
-  private void mapBaseNamesToTemplates(short id)
-  {
-    FieldTemplate template;
-
-    /* -- */
-
-    fields = gc.getTemplateVector(id);
-
-    if (fields != null)
-      {
-        fieldHash.clear();
-
-        for (int i = 0; i < fields.size(); i++)
-          {
-            template = fields.get(i);
-            mapNameToTemplate(template.getName(), template);
-          }
-      }
   }
 
   // we have a map from fieldname to field template
@@ -2141,8 +2079,7 @@ class queryFieldsPanel extends JPanel {
   StringSelector builtInSelector,
                  customSelector;
 
-  int numBuiltInChoices,
-      numCustomChoices;
+  int item_count = 0;
 
   /* -- */
 
@@ -2197,12 +2134,11 @@ class queryFieldsPanel extends JPanel {
 
   public void resetBoxes()
   {
-    FieldTemplate template;
     Vector<FieldTemplate> fields;
 
-    Vector
-      builtInItems_Vect = new Vector(),
-      customItems_Vect = new Vector();
+    Vector<String>
+      builtInItems_Vect = new Vector<String>(),
+      customItems_Vect = new Vector<String>();
 
     /* -- */
 
@@ -2211,35 +2147,29 @@ class queryFieldsPanel extends JPanel {
 
     fields = parent.gc.getTemplateVector(parent.selectedBase.getTypeID());
 
-    for (int i=0; fields != null && (i < fields.size()); i++)
+    for (FieldTemplate template: fields)
       {
-        template = fields.get(i);
-
         if (template.isBuiltIn())
           {
-            builtInItems_Vect.addElement( template.getName() );
+            builtInItems_Vect.add(template.getName());
           }
         else
           {
-            customItems_Vect.addElement( template.getName() );
+            customItems_Vect.add(template.getName());
           }
-
       }
 
-    numBuiltInChoices = builtInItems_Vect.size();
-    numCustomChoices = customItems_Vect.size();
+    this.item_count = fields.size();
 
     // create and load the StringSelector for the built in fields
 
     builtInSelector = new StringSelector(builtInPanel, true, true, true);
 
-    Vector builtInHandles = new Vector(builtInItems_Vect.size());
+    Vector<listHandle> builtInHandles = new Vector<listHandle>(builtInItems_Vect.size());
 
-    for (int i = 0; i < builtInItems_Vect.size(); i++)
+    for (String item: builtInItems_Vect)
       {
-        String x = (String) builtInItems_Vect.elementAt(i);
-
-        builtInHandles.addElement(new listHandle(x, x));
+        builtInHandles.add(new listHandle(item, item));
       }
 
     FixedListCompare builtInComparator = new FixedListCompare(builtInHandles, null);
@@ -2251,13 +2181,11 @@ class queryFieldsPanel extends JPanel {
 
     customSelector = new StringSelector(customPanel, true, true, true);
 
-    Vector customHandles = new Vector(customItems_Vect.size());
+    Vector<listHandle> customHandles = new Vector<listHandle>(customItems_Vect.size());
 
-    for (int i = 0; i < customItems_Vect.size(); i++)
+    for (String item: customItems_Vect)
       {
-        String x = (String) customItems_Vect.elementAt(i);
-
-        customHandles.addElement(new listHandle(x, x));
+        customHandles.add(new listHandle(item, item));
       }
 
     FixedListCompare customComparator = new FixedListCompare(customHandles, null);
@@ -2265,8 +2193,8 @@ class queryFieldsPanel extends JPanel {
     customSelector.update(new Vector(), true, customComparator,
                           customItems_Vect, true, customComparator);
 
-    builtInPanel.add( builtInSelector, BorderLayout.CENTER );
-    customPanel.add( customSelector, BorderLayout.CENTER );
+    builtInPanel.add(builtInSelector, BorderLayout.CENTER);
+    customPanel.add(customSelector, BorderLayout.CENTER);
   }
 
   /**
@@ -2289,20 +2217,22 @@ class queryFieldsPanel extends JPanel {
     Vector<String> vectA = (Vector<String>) builtInSelector.getChosenStrings();
     Vector<String> vectB = (Vector<String>) customSelector.getChosenStrings();
 
-    for (int i = 0; i < vectA.size(); i++)
+    for (String item: vectA)
       {
-        fieldsToReturn.add(vectA.get(i));
+        fieldsToReturn.add(item);
       }
 
-    for (int i = 0; i < vectB.size(); i++)
+    for (String item: vectB)
       {
-        fieldsToReturn.add(vectB.get(i));
+        fieldsToReturn.add(item);
       }
 
     // if we are returning all fields, we can use null to indicate that
 
-    if ( fieldsToReturn.size() == (numBuiltInChoices + numCustomChoices) )
+    if (fieldsToReturn.size() == this.item_count)
+      {
         fieldsToReturn = null;
+      }
 
     return fieldsToReturn;
   }
