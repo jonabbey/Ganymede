@@ -75,6 +75,7 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.rmi.RemoteException;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Vector;
@@ -333,8 +334,10 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
     Vector<String> baseNames = new Vector<String>();
 
-    for (BaseDump key: (Vector<BaseDump>) gc.getBaseMap().elements())
+    for (Base base: gc.getBaseMap().values())
       {
+        BaseDump key = (BaseDump) base;
+
         // we want to ignore embedded objects -- for now
 
         if (key.isEmbedded())
