@@ -336,11 +336,11 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
 
     for (Base base: gc.getBaseMap().values())
       {
-        BaseDump key = (BaseDump) base;
+        BaseDump bd = (BaseDump) base;
 
         // we want to ignore embedded objects -- for now
 
-        if (key.isEmbedded())
+        if (bd.isEmbedded())
           {
             // get a base that works...this embedded would cause
             // problems [null pointer exceptions, that kind of thing]
@@ -349,10 +349,10 @@ class querybox extends JDialog implements ActionListener, ItemListener, WindowLi
           }
         else
           {
-            String choiceToAdd = key.getName();
+            String choiceToAdd = bd.getName();
 
             baseNames.add(choiceToAdd);
-            mapNameToBase(choiceToAdd, key);
+            mapNameToBase(choiceToAdd, bd);
           }
       }
 
