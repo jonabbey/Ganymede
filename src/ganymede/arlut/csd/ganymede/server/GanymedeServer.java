@@ -328,8 +328,8 @@ public class GanymedeServer implements Server {
    *
    * @param clientName The user/persona name to be logged in
    * @param clientPass The password (in plaintext) to authenticate with
-   * @param directSession If true, the GanymedeSession returned will export objects
-   * created or referenced by the GanymedeSession for direct RMI access
+   * @param directSession If true, the GanymedeSession returned be
+   * published for remote RMI access.
    * @param exportObjects If true, the DBObjects viewed and edited by
    * the GanymedeSession will be exported for remote RMI access.
    */
