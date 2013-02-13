@@ -239,7 +239,7 @@ class JythonServerProtocol {
           }
 
         /* Now we have all we need to create the session */
-        session = new GanymedeSession(personaName, user, persona, false);
+        session = new GanymedeSession(personaName, user, persona, false, false);
       }
     catch (RemoteException ex)
       {

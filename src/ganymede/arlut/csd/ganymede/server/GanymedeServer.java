@@ -265,7 +265,7 @@ public class GanymedeServer implements Server {
 
   public ReturnVal login(String username, String password) throws RemoteException
   {
-    return processLogin(username, password, true);
+    return processLogin(username, password, true, true);
   }
 
   /**
@@ -290,7 +290,7 @@ public class GanymedeServer implements Server {
 
   public ReturnVal xmlLogin(String username, String password) throws RemoteException
   {
-    ReturnVal retVal = processLogin(username, password, false);
+    ReturnVal retVal = processLogin(username, password, true, false);
 
     if (!retVal.didSucceed())   // XXX processLogin never returns null
       {
@@ -330,9 +330,11 @@ public class GanymedeServer implements Server {
    * @param clientPass The password (in plaintext) to authenticate with
    * @param directSession If true, the GanymedeSession returned will export objects
    * created or referenced by the GanymedeSession for direct RMI access
+   * @param exportObjects If true, the DBObjects viewed and edited by
+   * the GanymedeSession will be exported for remote RMI access.
    */
 
-  private ReturnVal processLogin(String clientName, String clientPass, boolean directSession) throws RemoteException
+  private ReturnVal processLogin(String clientName, String clientPass, boolean directSession, boolean exportObjects) throws RemoteException
   {
     String clienthost = null;
     boolean found = false;
@@ -526,7 +528,8 @@ public class GanymedeServer implements Server {
 
                 GanymedeSession session = new GanymedeSession(clientName,
                                                               user, persona,
-                                                              directSession);
+                                                              directSession,
+                                                              exportObjects);
 
                 monitorUserSession(session);
 

@@ -334,8 +334,15 @@ final public class GanymedeSession implements Session, Unreferenced {
   private AdminEntry userInfo = null;
 
   /**
-   * If true, this GanymedeSession will export its objects and fields for
-   * direct access via RMI.
+   * If true, this GanymedeSession will export itself and its
+   * asyncPort for direct access via RMI.
+   */
+
+  private boolean exportSession = false;
+
+  /**
+   * If true, this GanymedeSession will export its DBObjects and
+   * DBFields for direct access via RMI.
    */
 
   private boolean exportObjects = false;
@@ -425,6 +432,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     loggedInSemaphore.set(true);
 
+    this.exportSession = false;
     this.exportObjects = false;
     clienthost = Ganymede.serverHostProperty;
 
@@ -451,24 +459,28 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @param loginName The name for the user logging in
    * @param userObject The user record for this login
    * @param personaObject The user's initial admin persona
+   * @param exportSession If true, we'll export this GanymedeSession
+   * and our asyncPort for access by the client.
    * @param exportObjects If true, we'll export any viewed or edited
    * objects for direct RMI access.  We don't need to do this is we're
    * being driven by a server-side {@link
    * arlut.csd.ganymede.server.GanymedeXMLSession}, for instance.
-   *
+
    * @see arlut.csd.ganymede.rmi.Server#login(java.lang.String, java.lang.String)
    */
 
   public GanymedeSession(String loginName, DBObject userObject,
-                         DBObject personaObject, boolean exportObjects) throws RemoteException
+                         DBObject personaObject,
+                         boolean exportSession, boolean exportObjects) throws RemoteException
   {
     this.userSession = true;
 
     // record whether we should export our objects
 
     this.exportObjects = exportObjects;
+    this.exportSession = exportSession;
 
-    if (this.exportObjects)
+    if (this.exportSession)
       {
         asyncPort = new serverClientAsyncResponder();
 
@@ -1347,7 +1359,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
         // create the signature
 
-        if (exportObjects)
+        if (this.exportSession)
           {
             // "This message was sent by {0}, who is running the Ganymede client on {1}."
             signature.append(ts.l("sendMail.signature", permManager.getUserName(), getClientHostName()));
@@ -1442,7 +1454,7 @@ final public class GanymedeSession implements Session, Unreferenced {
             asciiContent.append("\n\n");
           }
 
-        if (exportObjects)
+        if (this.exportSession)
           {
             // "This message was sent by {0}, who is running the Ganymede client on {1}."
             signature.append(ts.l("sendMail.signature", permManager.getUserName(), getClientHostName()));
@@ -3073,15 +3085,10 @@ final public class GanymedeSession implements Session, Unreferenced {
 
             dbSession.logout(); // *sync* DBSession
 
-            if (exportObjects)
+            if (this.exportSession)
               {
                 this.asyncPort.shutdown();
                 this.asyncPort = null;
-
-                // If we have DBObjects left exported through RMI, make
-                // them forcibly inaccesible
-
-                unexportObjects(true);
 
                 // if we ourselves were exported, unexport
 
@@ -3092,6 +3099,11 @@ final public class GanymedeSession implements Session, Unreferenced {
                 // everything guarded by checklogin() in case there
                 // are incoming RMI calls blocking on the
                 // GanymedeSession object monitor.
+              }
+
+            if (this.exportObjects)
+              {
+                unexportObjects(true);
               }
 
             // if we're a userSession and weren't forced off, do
@@ -3668,7 +3680,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // excessive communications with the admin console, but no point
     // in getting ourselves all worked up here.
 
-    if (!exportObjects)
+    if (!this.exportObjects)
       {
         return;
       }
