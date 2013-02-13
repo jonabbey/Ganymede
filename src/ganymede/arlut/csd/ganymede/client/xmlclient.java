@@ -821,8 +821,20 @@ public final class xmlclient implements ClientListener, Runnable {
         return false;
       }
 
-    // since we're transmitting changes, we'll need a
-    // GanymedeXMLSession on the server side.
+    // XXX
+    //
+    // I don't feel particularly good about having to pass the
+    // username and password to the server and creating an entirely
+    // separate session when we're already logged in with the GUI
+    // client, but the GanymedeXMLSession and the xmlclient were not
+    // originally designed with the idea that XML could be submitted
+    // to the server from within an active GUI client.
+    //
+    // This could be better integrated to re-use the existing
+    // authentication, somehow.  Some way that doesn't require the gui
+    // client to retain its username and password in memory on the off
+    // chance the user will want to submit an XML file without
+    // internal credentials. ;-/
 
     this.xSession = client.xmlLogin(username, password);
 
