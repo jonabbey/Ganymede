@@ -62,8 +62,8 @@ package arlut.csd.ganymede.common;
  * chain.</p>
  *
  * <p>This interface exists so that the Query object's class
- * definition doesn't require a reference to a specific server-side
- * object that we don't want to provide in the client jar file.</p>
+ * definition doesn't require a specific reference to a server-side
+ * class that we aren't going to provide in the client jar file.</p>
  */
 
 public interface QueryDescriber {
