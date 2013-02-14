@@ -1313,14 +1313,24 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   {
     synchronized (windowList)
       {
+        Vector<gResultTable> results = new Vector<gResultTable>();
+
         for (JInternalFrame window: windowList.values())
           {
             if (window instanceof gResultTable)
               {
                 gResultTable grt = (gResultTable) window;
 
-                grt.refreshQuery();
+                results.add(grt);
               }
+          }
+
+        for (gResultTable grt: results)
+          {
+            // indirectly calls wp.updateWindowMenu(), altering our
+            // windowList
+
+            grt.refreshQuery();
           }
       }
   }
