@@ -744,7 +744,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * @return An Enumeration of {@link arlut.csd.ganymede.server.DBObject DBObject} references
    */
 
-  protected final Enumeration enumerateObjects(short baseid)
+  protected final Enumeration<DBObject> enumerateObjects(short baseid)
   {
     // this works only because we've already got our lock
     // established..  otherwise, we'd have to use the query system.
