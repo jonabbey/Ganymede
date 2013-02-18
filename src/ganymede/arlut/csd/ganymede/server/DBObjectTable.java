@@ -4,17 +4,19 @@
 
    A customized variant of the java.util.Hashtable class that is
    tuned for use as Ganymede's object hashes.
-   
+
    Created: 9 June 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2009
+
+   Copyright (C) 1996 - 2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -49,6 +51,8 @@ package arlut.csd.ganymede.server;
 
 import java.lang.Iterable;
 
+import java.util.AbstractCollection;
+import java.util.Collection;;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -60,10 +64,11 @@ import java.util.NoSuchElementException;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>A customized variant of the java.util.Hashtable class that is
- * tuned for use in managing {@link arlut.csd.ganymede.server.DBObject DBObject}s
- * in a Ganymede {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}.</P>
- * 
+ * <p>A customized variant of the java.util.Hashtable class that is
+ * tuned for use in managing {@link arlut.csd.ganymede.server.DBObject
+ * DBObject}s in a Ganymede {@link
+ * arlut.csd.ganymede.server.DBObjectBase DBObjectBase}.</p>
+ *
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -94,8 +99,8 @@ public class DBObjectTable implements Iterable<DBObject> {
   private float loadFactor;
 
   /**
-   * Constructs a new, empty DBObjectTable with the specified initial 
-   * capacity and the specified load factor. 
+   * Constructs a new, empty DBObjectTable with the specified initial
+   * capacity and the specified load factor.
    *
    * @param      initialCapacity   the initial capacity of the hashtable.
    * @param      loadFactor        a number between 0.0 and 1.0.
@@ -104,9 +109,9 @@ public class DBObjectTable implements Iterable<DBObject> {
    *               or equal to zero.
    */
 
-  public DBObjectTable(int initialCapacity, float loadFactor) 
+  public DBObjectTable(int initialCapacity, float loadFactor)
   {
-    if ((initialCapacity <= 0) || (loadFactor <= 0.0) || (loadFactor > 1.0)) 
+    if ((initialCapacity <= 0) || (loadFactor <= 0.0) || (loadFactor > 1.0))
       {
         throw new IllegalArgumentException();
       }
@@ -123,18 +128,17 @@ public class DBObjectTable implements Iterable<DBObject> {
    * @param   initialCapacity   the initial capacity of the hashtable.
    */
 
-  public DBObjectTable(int initialCapacity) 
+  public DBObjectTable(int initialCapacity)
   {
     this(initialCapacity, 0.75f);
   }
 
   /**
    * Constructs a new, empty DBObjectTable with a default capacity and load
-   * factor. 
-   *
+   * factor.
    */
 
-  public DBObjectTable() 
+  public DBObjectTable()
   {
     this(101, 0.75f);
   }
@@ -143,10 +147,9 @@ public class DBObjectTable implements Iterable<DBObject> {
    * Returns the number of objects in this DBObjectTable.
    *
    * @return  the number of objects in this DBObjectTable.
-   *
    */
 
-  public int size() 
+  public int size()
   {
     return count;
   }
@@ -156,22 +159,21 @@ public class DBObjectTable implements Iterable<DBObject> {
    *
    * @return  <code>true</code> if this DBObjectTable contains no values;
    *          <code>false</code> otherwise.
-   *
    */
 
-  public boolean isEmpty() 
+  public boolean isEmpty()
   {
     return count == 0;
   }
 
   /**
-   * Returns an Iterator of the objects in this DBObjectTable.
+   * <p>Returns an Iterator of the objects in this DBObjectTable.</p>
    *
-   * Use the Iterator methods on the returned object to fetch the
-   * elements sequentially.
+   * <p>Use the Iterator methods on the returned object to fetch the
+   * elements sequentially.</p>
    *
-   * This method allows DBObjectTable to support the Java 5 foreach
-   * loop construct.
+   * <p>This method allows DBObjectTable to support the Java 5 foreach
+   * loop construct.</p>
    *
    * @return  an Iterator of the objects in this DBObjectTable.
    * @see     java.util.Iterator
@@ -183,13 +185,12 @@ public class DBObjectTable implements Iterable<DBObject> {
   }
 
   /**
-   * Returns an enumeration of the objects in this DBObjectTable.
-   * Use the Enumeration methods on the returned object to fetch the elements
-   * sequentially.
+   * <p>Returns an enumeration of the objects in this DBObjectTable.
+   * Use the Enumeration methods on the returned object to fetch the
+   * elements sequentially.</p>
    *
    * @return  an enumeration of the objects in this DBObjectTable.
    * @see     java.util.Enumeration
-   *
    */
 
   public synchronized Enumeration elements()
@@ -198,16 +199,16 @@ public class DBObjectTable implements Iterable<DBObject> {
   }
 
   /**
-   * Tests if the DBObject value is contained in this DBObjectTable.
+   * <p>Tests if the DBObject value is contained in this
+   * DBObjectTable.</p>
    *
    * @param      value   a DBObject to search for.
    * @exception  NullPointerException  if the value is <code>null</code>.
-   *
    */
 
-  public boolean contains(DBObject value) 
+  public boolean contains(DBObject value)
   {
-    if (value == null) 
+    if (value == null)
       {
         throw new NullPointerException();
       }
@@ -216,43 +217,42 @@ public class DBObjectTable implements Iterable<DBObject> {
   }
 
   /**
-   * Tests if a DBObject with the specified object id is in this DBObjectTable.
-   * 
-   * @param   key   possible object id.
+   * <p>Tests if a DBObject with the specified object id is in this
+   * DBObjectTable.</p>
    *
+   * @param   key   possible object id.
    */
 
-  public synchronized boolean containsKey(int key) 
+  public synchronized boolean containsKey(int key)
   {
     DBObject tab[] = table;
 
     int index = (key & 0x7FFFFFFF) % tab.length;
 
-    for (DBObject e = tab[index] ; e != null ; e = e.next) 
+    for (DBObject e = tab[index] ; e != null ; e = e.next)
       {
         if (e.hashCode() == key)
           {
             return true;
           }
       }
-    
+
     return false;
   }
 
   /**
-   *
-   * Returns the DBObject with the specified key from this DBObjectTable, or
-   * null if no object with that id is in this table.
-   *
+   * <p>Returns the DBObject with the specified key from this
+   * DBObjectTable, or null if no object with that id is in this
+   * table.</p>
    */
 
-  public DBObject getNoSync(int key) 
+  public DBObject getNoSync(int key)
   {
     DBObject tab[] = table;
 
     int index = (key & 0x7FFFFFFF) % tab.length;
 
-    for (DBObject e = tab[index] ; e != null ; e = e.next) 
+    for (DBObject e = tab[index] ; e != null ; e = e.next)
       {
         if (e.hashCode() == key)
           {
@@ -264,19 +264,18 @@ public class DBObjectTable implements Iterable<DBObject> {
   }
 
   /**
-   *
-   * Returns the DBObject with the specified key from this DBObjectTable, or
-   * null if no object with that id is in this table.
-   *
+   * <p>Returns the DBObject with the specified key from this
+   * DBObjectTable, or null if no object with that id is in this
+   * table.</p>
    */
 
-  public synchronized DBObject get(int key) 
+  public synchronized DBObject get(int key)
   {
     DBObject tab[] = table;
 
     int index = (key & 0x7FFFFFFF) % tab.length;
 
-    for (DBObject e = tab[index] ; e != null ; e = e.next) 
+    for (DBObject e = tab[index] ; e != null ; e = e.next)
       {
         if (e.hashCode() == key)
           {
@@ -288,15 +287,13 @@ public class DBObjectTable implements Iterable<DBObject> {
   }
 
   /**
-   *
-   * Rehashes the contents of the DBObjectTable into a DBObjectTable
-   * with a larger capacity. This method is called automatically when
-   * the number of keys in the hashtable exceeds this DBObjectTable's
-   * capacity and load factor.
-   * 
+   * <p>Rehashes the contents of the DBObjectTable into a
+   * DBObjectTable with a larger capacity. This method is called
+   * automatically when the number of keys in the hashtable exceeds
+   * this DBObjectTable's capacity and load factor.</p>
    */
 
-  protected void rehash() 
+  protected void rehash()
   {
     int oldCapacity = table.length;
     DBObject oldTable[] = table;
@@ -310,13 +307,13 @@ public class DBObjectTable implements Iterable<DBObject> {
     //System.out.println("rehash old=" + oldCapacity + ", new=" +
     //newCapacity + ", thresh=" + threshold + ", count=" + count);
 
-    for (int i = oldCapacity ; i-- > 0 ;) 
+    for (int i = oldCapacity ; i-- > 0 ;)
       {
-        for (DBObject old = oldTable[i] ; old != null ; ) 
+        for (DBObject old = oldTable[i] ; old != null ; )
           {
             DBObject e = old;
             old = old.next;
-            
+
             int index = (e.hashCode() & 0x7FFFFFFF) % newCapacity;
             e.next = newTable[index];
             newTable[index] = e;
@@ -325,38 +322,36 @@ public class DBObjectTable implements Iterable<DBObject> {
   }
 
   /**
+   * <p>Inserts a DBObject into this DBObjectTable.</p>
    *
-   * Inserts a DBObject into this DBObjectTable.
-   *
-   * This put is not sync'ed, and should only be used with
-   * higher level sync provisions.
-   *
+   * <p>This put is not sync'ed, and should only be used with higher
+   * level sync provisions.</p>
    */
 
-  public void putNoSync(DBObject value) 
+  public void putNoSync(DBObject value)
   {
     // Make sure the value is not null
 
-    if (value == null) 
+    if (value == null)
       {
         throw new NullPointerException();
       }
 
     // Makes sure the object is not already in the hashtable.
-    
+
     removeNoSync(value.hashCode());
-    
+
     DBObject tab[] = table;
     int hash = value.hashCode();
     int index = (hash & 0x7FFFFFFF) % tab.length;
 
-    if (count > threshold) 
+    if (count > threshold)
       {
         rehash();
         putNoSync(value);
 
         return;
-      } 
+      }
 
     // Insert the new entry.
 
@@ -367,16 +362,14 @@ public class DBObjectTable implements Iterable<DBObject> {
   }
 
   /**
-   *
-   * Inserts a DBObject into this DBObjectTable
-   *
+   * <p>Inserts a DBObject into this DBObjectTable</p>
    */
 
-  public synchronized void put(DBObject value) 
+  public synchronized void put(DBObject value)
   {
     // Make sure the value is not null
 
-    if (value == null) 
+    if (value == null)
       {
         throw new NullPointerException();
       }
@@ -384,10 +377,10 @@ public class DBObjectTable implements Iterable<DBObject> {
     // Makes sure the object is not already in the hashtable.
     // Note that we are sync'ed, so we can use the non-sync'ed
     // removeNoSync().
-    
+
     removeNoSync(value.hashCode());
 
-    if (count > threshold) 
+    if (count > threshold)
       {
         rehash();
       }
@@ -397,28 +390,26 @@ public class DBObjectTable implements Iterable<DBObject> {
     int index = (hash & 0x7FFFFFFF) % tab.length;
 
     // Insert the new entry.
-    
+
     value.next = tab[index];
     tab[index] = value;
     count++;
-    
+
     return;
   }
 
   /**
+   * <p>Inserts a DBObject into this DBObjectTable.</p>
    *
-   * Inserts a DBObject into this DBObjectTable.
-   *
-   * This put is not sync'ed, and should only be used with
-   * higher level sync provisions.
-   *
+   * <p>This put is not sync'ed, and should only be used with higher
+   * level sync provisions.</p>
    */
 
-  public void putNoSyncNoRemove(DBObject value) 
+  public void putNoSyncNoRemove(DBObject value)
   {
     // Make sure the value is not null
 
-    if (value == null) 
+    if (value == null)
       {
         throw new NullPointerException();
       }
@@ -427,13 +418,13 @@ public class DBObjectTable implements Iterable<DBObject> {
     int hash = value.hashCode();
     int index = (hash & 0x7FFFFFFF) % tab.length;
 
-    if (count > threshold) 
+    if (count > threshold)
       {
         rehash();
         putNoSync(value);
 
         return;
-      } 
+      }
 
     // Insert the new entry.
 
@@ -444,24 +435,23 @@ public class DBObjectTable implements Iterable<DBObject> {
   }
 
   /**
-   *
-   * Removes the DBObject with the given id from this DBObjectTable.
-   *
+   * <p>Removes the DBObject with the given id from this
+   * DBObjectTable.</p>
    */
 
-  public void removeNoSync(int key) 
+  public void removeNoSync(int key)
   {
     DBObject tab[] = table;
     int index = (key & 0x7FFFFFFF) % tab.length;
 
-    for (DBObject e = tab[index], prev = null ; e != null ; prev = e, e = e.next) 
+    for (DBObject e = tab[index], prev = null ; e != null ; prev = e, e = e.next)
       {
         if (e.hashCode() == key)
           {
-            if (prev != null) 
+            if (prev != null)
               {
                 prev.next = e.next;
-              } 
+              }
             else
               {
                 tab[index] = e.next;
@@ -477,24 +467,23 @@ public class DBObjectTable implements Iterable<DBObject> {
   }
 
   /**
-   *
-   * Removes the DBObject with the given id from this DBObjectTable.
-   *
+   * <p>Removes the DBObject with the given id from this
+   * DBObjectTable.</p>
    */
 
-  public synchronized void remove(int key) 
+  public synchronized void remove(int key)
   {
     DBObject tab[] = table;
     int index = (key & 0x7FFFFFFF) % tab.length;
 
-    for (DBObject e = tab[index], prev = null ; e != null ; prev = e, e = e.next) 
+    for (DBObject e = tab[index], prev = null ; e != null ; prev = e, e = e.next)
       {
         if (e.hashCode() == key)
           {
-            if (prev != null) 
+            if (prev != null)
               {
                 prev.next = e.next;
-              } 
+              }
             else
               {
                 tab[index] = e.next;
@@ -510,12 +499,10 @@ public class DBObjectTable implements Iterable<DBObject> {
   }
 
   /**
-   *
-   * Clears this DBObjectTable.
-   *
+   * <p>Clears this DBObjectTable.</p>
    */
 
-  public synchronized void clear() 
+  public synchronized void clear()
   {
     DBObject tab[] = table;
 
@@ -528,6 +515,15 @@ public class DBObjectTable implements Iterable<DBObject> {
 
     count = 0;
   }
+
+  /**
+   * <p>Returns a non-editable Collection view of this DBObjectTable.</p>
+   */
+
+  public Collection<DBObject> values()
+  {
+    return new DBObjectTableContainer(this);
+  }
 }
 
 /*------------------------------------------------------------------------------
@@ -537,9 +533,9 @@ public class DBObjectTable implements Iterable<DBObject> {
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>A {@link arlut.csd.ganymede.server.DBObjectTable DBObjectTable} enumerator class.
- * This class should remain opaque to the client, which will use the
- * Enumeration interface.</P>
+ * <p>A {@link arlut.csd.ganymede.server.DBObjectTable DBObjectTable}
+ * enumerator class.  This class should remain opaque to the client,
+ * which will use the Enumeration interface.</p>
  */
 
 class DBObjectTableEnumerator implements Enumeration {
@@ -550,22 +546,22 @@ class DBObjectTableEnumerator implements Enumeration {
 
   /* -- */
 
-  DBObjectTableEnumerator(DBObject table[]) 
+  DBObjectTableEnumerator(DBObject table[])
   {
     this.table = table;
     this.index = table.length;
   }
-        
-  public boolean hasMoreElements() 
+
+  public boolean hasMoreElements()
   {
-    if (entry != null) 
+    if (entry != null)
       {
         return true;
       }
 
-    while (index-- > 0) 
+    while (index-- > 0)
       {
-        if ((entry = table[index]) != null) 
+        if ((entry = table[index]) != null)
           {
             return true;
           }
@@ -574,14 +570,14 @@ class DBObjectTableEnumerator implements Enumeration {
     return false;
   }
 
-  public Object nextElement() 
+  public Object nextElement()
   {
-    if (entry == null) 
+    if (entry == null)
       {
         while ((index-- > 0) && ((entry = table[index]) == null));
       }
 
-    if (entry != null) 
+    if (entry != null)
       {
         DBObject e = entry;
         entry = e.next;
@@ -592,7 +588,6 @@ class DBObjectTableEnumerator implements Enumeration {
   }
 }
 
-
 /*------------------------------------------------------------------------------
                                                                            class
                                                            DBObjectTableIterator
@@ -600,9 +595,9 @@ class DBObjectTableEnumerator implements Enumeration {
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>A {@link arlut.csd.ganymede.server.DBObjectTable DBObjectTable}
+ * <p>A {@link arlut.csd.ganymede.server.DBObjectTable DBObjectTable}
  * Iterator class.  This class should remain opaque to the client,
- * which will use the Iterator interface.</P>
+ * which will use the Iterator interface.</p>
  */
 
 class DBObjectTableIterator implements Iterator<DBObject> {
@@ -613,22 +608,22 @@ class DBObjectTableIterator implements Iterator<DBObject> {
 
   /* -- */
 
-  DBObjectTableIterator(DBObject table[]) 
+  DBObjectTableIterator(DBObject table[])
   {
     this.table = table;
     this.index = table.length;
   }
-        
-  public boolean hasNext() 
+
+  public boolean hasNext()
   {
-    if (entry != null) 
+    if (entry != null)
       {
         return true;
       }
 
-    while (index-- > 0) 
+    while (index-- > 0)
       {
-        if ((entry = table[index]) != null) 
+        if ((entry = table[index]) != null)
           {
             return true;
           }
@@ -637,14 +632,14 @@ class DBObjectTableIterator implements Iterator<DBObject> {
     return false;
   }
 
-  public DBObject next() 
+  public DBObject next()
   {
-    if (entry == null) 
+    if (entry == null)
       {
         while ((index-- > 0) && ((entry = table[index]) == null));
       }
 
-    if (entry != null) 
+    if (entry != null)
       {
         DBObject e = entry;
         entry = e.next;
@@ -657,5 +652,33 @@ class DBObjectTableIterator implements Iterator<DBObject> {
   public void remove()
   {
     throw new UnsupportedOperationException();
+  }
+}
+
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                          DBObjectTableContainer
+
+------------------------------------------------------------------------------*/
+
+class DBObjectTableContainer extends AbstractCollection<DBObject>
+{
+  private DBObjectTable parent;
+
+  /* -- */
+
+  DBObjectTableContainer(DBObjectTable parent)
+  {
+    this.parent = parent;
+  }
+
+  public int size()
+  {
+    return parent.size();
+  }
+
+  public Iterator<DBObject> iterator()
+  {
+    return parent.iterator();
   }
 }
