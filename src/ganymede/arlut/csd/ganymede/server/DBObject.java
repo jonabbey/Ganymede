@@ -1331,8 +1331,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <p>This method provides a Vector of DBFields contained in this
-   * object in a fashion that does not contribute to fieldAry
+   * <p>This method provides a Vector copy of the DBFields contained
+   * in this object in a fashion that does not contribute to fieldAry
    * threadlock.</p>
    */
 
