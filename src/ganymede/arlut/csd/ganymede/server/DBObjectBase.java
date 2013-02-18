@@ -3399,14 +3399,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   void updateIterationSet()
   {
-    List<DBObject> newIterationList = new ArrayList<DBObject>(objectTable.size());
+    List<DBObject> newIterationList;
 
     synchronized (objectTable)
       {
-        for (DBObject object: objectTable)
-          {
-            newIterationList.add(object);
-          }
+        newIterationList = new ArrayList<DBObject>(objectTable.values());
       }
 
     this.iterationList = Collections.unmodifiableList(newIterationList);
