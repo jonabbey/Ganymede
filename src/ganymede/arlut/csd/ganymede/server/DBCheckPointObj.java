@@ -10,11 +10,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2008
+
+   Copyright (C) 1996 - 2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -59,9 +61,10 @@ import arlut.csd.ganymede.common.Invid;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>DBCheckPointObj holds a snapshot of an object's state at a moment
- * in time.  It is used by the {@link arlut.csd.ganymede.server.DBCheckPoint DBCheckPoint}
- * class to record the state of the fields in an object.</p>
+ * <p>DBCheckPointObj holds a snapshot of an object's state at a
+ * moment in time.  It is used by the {@link
+ * arlut.csd.ganymede.server.DBCheckPoint DBCheckPoint} class to
+ * record the state of the fields in an object.</p>
  */
 
 class DBCheckPointObj {
@@ -73,7 +76,7 @@ class DBCheckPointObj {
    * <p>This field actually holds the object value state.</p>
    */
 
-  Hashtable fields;
+  Hashtable<Short, Object> fields;
 
   /* -- */
 
