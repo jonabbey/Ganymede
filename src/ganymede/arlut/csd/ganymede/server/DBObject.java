@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -510,10 +510,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final void exportFields()
   {
-    DBField field;
-
-    /* -- */
-
     if (fieldAry == null)
       {
         throw new NullPointerException(ts.l("global.pseudostatic"));
@@ -521,10 +517,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     synchronized (fieldAry)
       {
-        for (int i = 0; i < fieldAry.length; i++)
+        for (DBField field: fieldAry)
           {
-            field = fieldAry[i];
-
             // export can fail if the object has already
             // been exported.. don't worry about it if
             // it happens.. the client will know about it
@@ -545,10 +539,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final void unexportFields()
   {
-    DBField field;
-
-    /* -- */
-
     if (fieldAry == null)
       {
         throw new NullPointerException(ts.l("global.pseudostatic"));
@@ -556,10 +546,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     synchronized (fieldAry)
       {
-        for (int i = 0; i < fieldAry.length; i++)
+        for (DBField field: fieldAry)
           {
-            field = fieldAry[i];
-
             // unexport can fail (return false) if the object has
             // already been unexported, or if it was never exported,
             // but we don't care as long as it's not exported after
@@ -910,10 +898,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   void emit(DataOutput out) throws IOException
   {
-    DBField field;
-
-    /* -- */
-
     //    System.err.println("Emitting " + objectBase.getName() + " <" + id + ">");
 
     if (fieldAry == null)
@@ -927,10 +911,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       {
         short count = 0;
 
-        for (int i = 0; i < fieldAry.length; i++)
+        for (DBField field: fieldAry)
           {
-            field = fieldAry[i];
-
             if (field != null && field.isDefined())
               {
                 count++;
@@ -946,10 +928,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
         out.writeShort(count);
 
-        for (int i = 0; i < fieldAry.length; i++)
+        for (DBField field: fieldAry)
           {
-            field = fieldAry[i];
-
             if (field != null && field.isDefined())
               {
                 out.writeShort(field.getID());
@@ -1187,12 +1167,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     // by using getFieldVector(), we get the fields in display
     // order
 
-    Vector fieldVec = getFieldVector(false);
+    Vector<DBField> fieldVec = getFieldVector(false);
 
-    for (int i = 0; i < fieldVec.size(); i++)
+    for (DBField field: fieldVec)
       {
-        DBField field = (DBField) fieldVec.elementAt(i);
-
         if (field.isDefined())
           {
             if (xmlOut.mayInclude(field))
@@ -1360,14 +1338,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Vector<DBField> getFieldVect()
   {
-    DBField field;
     Vector<DBField> fieldVect = new Vector<DBField>(fieldAry.length);
 
     synchronized (fieldAry)
       {
-        for (int i = 0; i < fieldAry.length; i++)
+        for (DBField field: fieldAry)
           {
-            fieldVect.addElement(fieldAry[i]);
+            fieldVect.add(field);
           }
       }
 
@@ -1600,11 +1577,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     synchronized (fieldAry)
       {
-        for (int i = 0; i < fieldAry.length; i++)
+        for (DBField field: fieldAry)
           {
-            if (fieldAry[i] != null && fieldAry[i].getName().equalsIgnoreCase(fieldName))
+            if (field != null && field.getName().equalsIgnoreCase(fieldName))
               {
-                return fieldAry[i];
+                return field;
               }
           }
       }
@@ -1761,9 +1738,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     synchronized (fieldAry)
       {
-        for (int i = 0; i < fieldAry.length; i++)
+        for (DBField field: fieldAry)
           {
-            if (fieldAry[i] != null)
+            if (field != null)
               {
                 count++;
               }
@@ -1773,11 +1750,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
         count = 0;
 
-        for (int i = 0; i < fieldAry.length; i++)
+        for (DBField field: fieldAry)
           {
-            if (fieldAry[i] != null)
+            if (field != null)
               {
-                result[count++] = fieldAry[i];
+                result[count++] = field;
               }
           }
       }
@@ -1824,7 +1801,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final ReturnVal validateFieldIntegrity()
   {
-    DBField field = null;
     StringBuilder resultBuffer = new StringBuilder();
 
     /* -- */
@@ -1843,13 +1819,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         // loop over the fields in display order (rather than the hash
         // order in the fieldAry)
 
-        Vector fieldTemplates = objectBase.getFieldTemplateVector();
+        Vector<FieldTemplate> fieldTemplates = objectBase.getFieldTemplateVector();
 
-        for (int i = 0; i < fieldTemplates.size(); i++)
+        for (FieldTemplate template: fieldTemplates)
           {
-            FieldTemplate template = (FieldTemplate) fieldTemplates.elementAt(i);
-
-            field = retrieveField(template.getID());
+            DBField field = retrieveField(template.getID());
 
             if (field != null && field.isDefined())
               {
@@ -2587,59 +2561,37 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * checked.</p>
    */
 
-  public Vector getFieldVector(boolean customOnly)
+  public Vector<DBField> getFieldVector(boolean customOnly)
   {
-    Vector results = new Vector();
-    DBField field;
-
-    /* -- */
-
-    // sync on fieldAry so we can loop over fields
-
     if (fieldAry == null)
       {
         throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
+    Vector<DBField> results = new Vector<DBField>();
+
     synchronized (fieldAry)
       {
-        if (customOnly)
+        // use objectBase.getCustomFields so that we're in display
+        // order
+
+        for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
           {
-            // return the custom fields only, in display order
+            DBField field = retrieveField(fieldDef.getID());
 
-            for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
+            if (field != null)
               {
-                field = retrieveField(fieldDef.getID());
-
-                if (field != null)
-                  {
-                    results.addElement(field);
-                  }
+                results.add(field);
               }
           }
-        else                    // all fields in this object
+
+        if (!customOnly)
           {
-            // first the display fields, in display order
-
-            for (DBObjectBaseField fieldDef: objectBase.getCustomFields())
+            for (DBField field: fieldAry)
               {
-                field = retrieveField(fieldDef.getID());
-
-                if (field != null)
-                  {
-                    results.addElement(field);
-                  }
-              }
-
-            // then tack on the built-in fields
-
-            for (int i = 0; i < fieldAry.length; i++)
-              {
-                field = fieldAry[i];
-
                 if (field != null && field.isBuiltIn())
                   {
-                    results.addElement(field);
+                    results.add(field);
                   }
               }
           }
@@ -2781,7 +2733,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     this.objectBase = newBase;
 
-    DBField field;
     short count = 0;
 
     // we need to be double-synchronized because we are looping
@@ -2796,10 +2747,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     synchronized (oldAry)
       {
-        for (int i = 0; i < fieldAry.length; i++)
+        for (DBField field: fieldAry)
           {
-            field = fieldAry[i];
-
             if (field == null)
               {
                 continue;
@@ -2823,10 +2772,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
             permCacheAry = null;        // okay in synchronized block
 
-            for (int i = 0; i < oldAry.length; i++)
+            for (DBField field: oldAry)
               {
-                field = oldAry[i];
-
                 if (field == null)
                   {
                     continue;
@@ -2884,10 +2831,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     synchronized (fieldAry)
       {
-        for (int i = 0; i < fieldAry.length; i++)
+        for (DBField field: fieldAry)
           {
-            DBField field = fieldAry[i];
-
             if (field == null)
               {
                 continue;
@@ -2918,11 +2863,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <p>This method returns a Vector of Invids that point to this object via
-   * forward asymmetric link fields.</p>
+   * <p>This method returns a Vector of Invids that point to this
+   * object via forward asymmetric link fields.</p>
    */
 
-  public Vector getBackLinks()
+  public Vector<Invid> getBackLinks()
   {
     return new Vector(Ganymede.db.aSymLinkTracker.getForwardLinkSources(getDBSession(), getInvid()));
   }
@@ -3153,10 +3098,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         // okay, got all the custom fields.. now we need to summarize all the
         // built-in fields that were not listed in customFields.
 
-        for (int i = 0; i < fieldAry.length; i++)
+        for (DBField field: fieldAry)
           {
-            DBField field = fieldAry[i];
-
             if (field == null || !field.isBuiltIn() || !field.isDefined())
               {
                 continue;
@@ -3207,13 +3150,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public List items()
   {
-    List list = new ArrayList();
-    DBField field;
+    List<Object[]> list = new ArrayList<Object[]>();
     Object[] tuple;
 
-    for (Iterator iter = getFieldVect().iterator(); iter.hasNext();)
+    for (DBField field: getFieldVect())
       {
-        field = (DBField) iter.next();
         tuple = new Object[2];
         tuple[0] = field.getName();
         tuple[1] = field;
@@ -3229,13 +3170,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public Set keys()
   {
-    Set keys = new HashSet();
-    DBField field;
-    for (Iterator iter = getFieldVect().iterator(); iter.hasNext();)
+    Set<String> keys = new HashSet<String>();
+
+    for (DBField field: getFieldVect())
       {
-        field = (DBField) iter.next();
         keys.add(field.getName());
       }
+
     return keys;
   }
 
@@ -3266,12 +3207,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public Set entrySet()
   {
-    Set entrySet = new HashSet();
-    DBField field;
+    Set<Entry> entrySet = new HashSet<Entry>();
 
-    for (Iterator iter = getFieldVect().iterator(); iter.hasNext();)
+    for (DBField field: getFieldVect())
       {
-        field = (DBField) iter.next();
         entrySet.add(new Entry(field));
       }
 
