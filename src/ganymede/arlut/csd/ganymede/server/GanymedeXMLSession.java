@@ -2658,13 +2658,13 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     return fieldHash.get(XMLUtils.XMLDecode(fieldName));
   }
 
-  public Vector getTemplateVector(Short type)
+  public Vector<FieldTemplate> getTemplateVector(Short type)
   {
     DBObjectBase base = Ganymede.db.getObjectBase(type);
     return base.getFieldTemplateVector();
   }
 
-  public Vector getTemplateVector(short type)
+  public Vector<FieldTemplate> getTemplateVector(short type)
   {
     DBObjectBase base = Ganymede.db.getObjectBase(type);
     return base.getFieldTemplateVector();
