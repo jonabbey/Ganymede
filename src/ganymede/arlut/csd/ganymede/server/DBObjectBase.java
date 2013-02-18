@@ -736,10 +736,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   synchronized void emit(DataOutput out, boolean dumpObjects) throws IOException
   {
-    Enumeration baseEnum;
-
-    /* -- */
-
     out.writeUTF(object_name);
 
     if (classname == null)
@@ -781,11 +777,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
         out.writeInt(objectTable.size());
 
-        baseEnum = objectTable.elements();
-
-        while (baseEnum.hasMoreElements())
+        for (DBObject object: objectTable)
           {
-            ((DBObject) baseEnum.nextElement()).emit(out);
+            object.emit(out);
           }
       }
     else
@@ -3043,18 +3037,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public boolean fieldInUse(DBObjectBaseField bF)
   {
-    Enumeration en;
-
-    /* -- */
-
     synchronized (objectTable)
       {
-        en = objectTable.elements();
-
-        while (en.hasMoreElements())
+        for (DBObject obj: objectTable)
           {
-            DBObject obj = (DBObject) en.nextElement();
-
             if (obj.getField(bF.getID()) != null)
               {
                 return true;
@@ -3074,9 +3060,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public boolean fieldInUse(String fieldName)
   {
-    Enumeration en;
-    short id;
-
     DBObjectBaseField fieldDef = getFieldDef(fieldName);
 
     if (fieldDef == null)
@@ -3085,16 +3068,12 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
         throw new RuntimeException(ts.l("fieldInUse.nofield", fieldName));
       }
 
-    id = fieldDef.getID();
+    short id = fieldDef.getID();
 
     synchronized (objectTable)
       {
-        en = objectTable.elements();
-
-        while (en.hasMoreElements())
+        for (DBObject obj: objectTable)
           {
-            DBObject obj = (DBObject) en.nextElement();
-
             if (obj.getField(id) != null)
               {
                 return true;
@@ -3134,17 +3113,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   synchronized short getNextFieldID()
   {
     short id = 256;             // below 256 reserved for future server-mandatory fields
-    Enumeration en;
-    DBObjectBaseField fieldDef;
 
-    /* -- */
-
-    en = fieldTable.elements();
-
-    while (en.hasMoreElements())
+    for (DBObjectBaseField fieldDef: fieldTable)
       {
-        fieldDef = (DBObjectBaseField) en.nextElement();
-
         if (fieldDef.getID() >= id)
           {
             id = (short) (fieldDef.getID() + 1);
@@ -3205,7 +3176,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * DBObjectBase.
    */
 
-  public final Enumeration getObjectsEnum()
+  public final Enumeration<DBObject> getObjectsEnum()
   {
     return objectTable.elements();
   }
@@ -3365,11 +3336,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   synchronized void clearEditor()
   {
-    Enumeration en;
-    DBObjectBaseField fieldDef;
-
-    /* -- */
-
     if (DBSchemaEdit.debug)
       {
         // "DBObjectBase.clearEditor(): clearing editor for {0}"
@@ -3399,11 +3365,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     synchronized (fieldTable)
       {
-        en = fieldTable.elements();
-
-        while (en.hasMoreElements())
+        for (DBObjectBaseField fieldDef: fieldTable)
           {
-            fieldDef = (DBObjectBaseField) en.nextElement();
             fieldDef.clearEditor();
           }
       }
@@ -3436,13 +3399,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   void updateIterationSet()
   {
-    List<DBObject> newIterationList = null;
+    List<DBObject> newIterationList = new ArrayList<DBObject>(objectTable.size());
 
     synchronized (objectTable)
       {
-        newIterationList = new ArrayList<DBObject>(objectTable.size());
-
-        for (DBObject object: getObjects())
+        for (DBObject object: objectTable)
           {
             newIterationList.add(object);
           }
