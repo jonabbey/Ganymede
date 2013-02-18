@@ -1529,12 +1529,8 @@ public class xmlfield implements FieldType {
 
                     if (option.fields != null)
                       {
-                        Enumeration fieldOptions = option.fields.elements();
-
-                        while (fieldOptions.hasMoreElements())
+                        for (xOption fieldOption: option.fields.values())
                           {
-                            xOption fieldOption = (xOption) fieldOptions.nextElement();
-
                             Hashtable<String, FieldTemplate> fieldHash = owner.xSession.getFieldHash(option.getName());
 
                             if (fieldHash == null)
@@ -1597,12 +1593,8 @@ public class xmlfield implements FieldType {
 
                     if (perm.fields != null)
                       {
-                        Enumeration fieldPerms = perm.fields.elements();
-
-                        while (fieldPerms.hasMoreElements())
+                        for (xPerm fieldPerm: perm.fields.values())
                           {
-                            xPerm fieldPerm = (xPerm) fieldPerms.nextElement();
-
                             Hashtable<String, FieldTemplate> fieldHash = owner.xSession.getFieldHash(perm.getName());
 
                             if (fieldHash == null)
@@ -2403,7 +2395,7 @@ class xPerm {
    * will be null.</p>
    */
 
-  Hashtable fields = null;
+  Hashtable<String, xPerm> fields = null;
 
   boolean view = false;
   boolean edit = false;
@@ -2456,7 +2448,7 @@ class xPerm {
 
     if (objectType && !item.isEmpty())
       {
-        fields = new Hashtable();
+        fields = new Hashtable<String, xPerm>();
         item = getXSession().getNextItem();
 
         while (!item.matchesClose(label) && !(item instanceof XMLEndDocument))
@@ -2523,7 +2515,7 @@ class xOption {
    * will be null.</p>
    */
 
-  Hashtable fields = null;
+  Hashtable<String, xOption> fields = null;
 
   /**
    * <p>The option for this xOption.</p>
@@ -2574,7 +2566,7 @@ class xOption {
 
     if (objectType && !item.isEmpty())
       {
-        fields = new Hashtable();
+        fields = new Hashtable<String, xOption>();
         item = getXSession().getNextItem();
 
         while (!item.matchesClose(label) && !(item instanceof XMLEndDocument))
