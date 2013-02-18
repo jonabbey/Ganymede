@@ -1880,7 +1880,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public synchronized ReturnVal reshuffleCategories(XMLItem categoryRoot)
   {
-    Hashtable categoryNames = new Hashtable();
+    HashSet<String> categoryNames = new HashSet<String>();
 
     if (!testXMLCategories(categoryRoot, categoryNames))
       {
@@ -1906,19 +1906,19 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * categories in the tree have unique names.
    */
 
-  public boolean testXMLCategories(XMLItem categoryRoot, Hashtable names)
+  public boolean testXMLCategories(XMLItem categoryRoot, HashSet<String> names)
   {
     if (categoryRoot.matches("category"))
       {
         // make sure we don't get duplicate category names
 
-        if (names.containsKey(categoryRoot.getAttrStr("name")))
+        if (names.contains(categoryRoot.getAttrStr("name")))
           {
             return false;
           }
         else
           {
-            names.put(categoryRoot.getAttrStr("name"), categoryRoot.getAttrStr("name"));
+            names.add(categoryRoot.getAttrStr("name"));
           }
 
         XMLItem children[] = categoryRoot.getChildren();
