@@ -1535,7 +1535,7 @@ public class xmlfield implements FieldType {
                           {
                             xOption fieldOption = (xOption) fieldOptions.nextElement();
 
-                            Hashtable fieldHash = owner.xSession.getFieldHash(option.getName());
+                            Hashtable<String, FieldTemplate> fieldHash = owner.xSession.getFieldHash(option.getName());
 
                             if (fieldHash == null)
                               {
@@ -1603,7 +1603,7 @@ public class xmlfield implements FieldType {
                           {
                             xPerm fieldPerm = (xPerm) fieldPerms.nextElement();
 
-                            Hashtable fieldHash = owner.xSession.getFieldHash(perm.getName());
+                            Hashtable<String, FieldTemplate> fieldHash = owner.xSession.getFieldHash(perm.getName());
 
                             if (fieldHash == null)
                               {

@@ -2622,9 +2622,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * returned.
    */
 
-  public FieldTemplate getObjectFieldType(Hashtable fieldHash, String fieldName)
+  public FieldTemplate getObjectFieldType(Hashtable<String, FieldTemplate> fieldHash, String fieldName)
   {
-    return (FieldTemplate) fieldHash.get(XMLUtils.XMLDecode(fieldName));
+    return fieldHash.get(XMLUtils.XMLDecode(fieldName));
   }
 
   /**
