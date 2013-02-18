@@ -1403,10 +1403,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     String currentTabName = ts.l("global.default_tab"); // "General"
 
-    for (int i = 0; i < fieldDefV.size(); i++)
+    for (XMLItem item: fieldDefV)
       {
-        XMLItem item = fieldDefV.get(i);
-
         if (item.matches("classdef"))
           {
             if (classSet)
@@ -2722,7 +2720,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     for (DBObjectBaseField field: customFields)
       {
-        result.addElement(field);
+        result.add(field);
       }
 
     // now if we are to return the built-in fields, go ahead and add
@@ -2732,7 +2730,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
       {
         for (DBObjectBaseField field: getStandardFields())
           {
-            result.addElement(field);
+            result.add(field);
           }
       }
 
@@ -4012,9 +4010,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     return list;
   }
 
-  public Set keys()
+  public Set<String> keys()
   {
-    Set keys = new HashSet(objectTable.size());
+    Set<String> keys = new HashSet<String>(objectTable.size());
 
     for (DBObject obj: getIterationSet())
       {
@@ -4031,20 +4029,12 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   public boolean containsValue(Object value)
   {
-    for (DBObject obj: getIterationSet())
-      {
-        if (obj.equals(value))
-          {
-            return true;
-          }
-      }
-
-    return false;
+    return getIterationSet().contains(value);
   }
 
-  public Set entrySet()
+  public Set<Entry> entrySet()
   {
-    Set entrySet = new HashSet(objectTable.size());
+    Set<Entry> entrySet = new HashSet<Entry>(objectTable.size());
 
     for (DBObject obj: getIterationSet())
       {
