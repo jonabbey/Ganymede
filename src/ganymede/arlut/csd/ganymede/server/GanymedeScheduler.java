@@ -680,7 +680,7 @@ public class GanymedeScheduler extends Thread {
 
     if (onDemand.containsKey(name))
       {
-        oldHandle = (scheduleHandle) onDemand.remove(name);
+        oldHandle = onDemand.remove(name);
       }
 
     if (oldHandle != null)
@@ -770,7 +770,7 @@ public class GanymedeScheduler extends Thread {
       }
     else
       {
-        scheduleHandle handle = (scheduleHandle) currentlyRunning.get(name);
+        scheduleHandle handle = currentlyRunning.get(name);
 
         if (handle != null)
           {
