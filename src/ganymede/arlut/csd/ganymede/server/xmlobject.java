@@ -160,7 +160,7 @@ public class xmlobject {
    * names to xmlfield objects.
    */
 
-  Hashtable fields = null;
+  Hashtable<String, xmlfield> fields = null;
 
   /**
    * Reference to server-side object, if we have already created it/got a reference
@@ -306,7 +306,7 @@ public class xmlobject {
 
     // okay, we should contain some fields, then
 
-    fields = new Hashtable();
+    fields = new Hashtable<String, xmlfield>();
 
     XMLItem nextItem = xSession.getNextItem();
 
@@ -478,13 +478,11 @@ public class xmlobject {
     // code, which may need to have higher fields set before accepting
     // choices for lower fields
 
-    Vector templateVector = Ganymede.db.getObjectBase(type).getFieldTemplateVector();
+    Vector<FieldTemplate> templateVector = Ganymede.db.getObjectBase(type).getFieldTemplateVector();
 
-    for (int i = 0; i < templateVector.size(); i++)
+    for (FieldTemplate template: templateVector)
       {
-        FieldTemplate template = (FieldTemplate) templateVector.elementAt(i);
-
-        xmlfield field = (xmlfield) fields.get(template.getName());
+        xmlfield field = fields.get(template.getName());
 
         if (field == null)
           {
@@ -667,12 +665,10 @@ public class xmlobject {
 
         // add the fields in the server's display order
 
-        Vector templateVector = xSession.getTemplateVector(type);
+        Vector<FieldTemplate> templateVector = xSession.getTemplateVector(type);
 
-        for (int i = 0; i < templateVector.size(); i++)
+        for (FieldTemplate template: templateVector)
           {
-            FieldTemplate template = (FieldTemplate) templateVector.elementAt(i);
-
             xmlfield field = (xmlfield) fields.get(template.getName());
 
             if (field == null)
