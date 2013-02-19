@@ -4024,6 +4024,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     return list;
   }
 
+  /**
+   * <p>Returns a Set of Strings containing the labels for all objects
+   * in htis DBObjectBase.</p>
+   */
+
   public Set<String> keys()
   {
     Set<String> keys = new HashSet<String>(objectTable.size());
