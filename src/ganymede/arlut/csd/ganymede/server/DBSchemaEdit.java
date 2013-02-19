@@ -54,7 +54,6 @@ import java.io.StreamTokenizer;
 import java.io.StringReader;
 import java.rmi.RemoteException;
 import java.rmi.server.Unreferenced;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
