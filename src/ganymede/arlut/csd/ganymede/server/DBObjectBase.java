@@ -506,7 +506,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   private DBSchemaEdit editor;
 
   /**
-   * <p>This List holds the current collection of {@link
+   * <p>This unmodifiable List holds the current collection of {@link
    * arlut.csd.ganymede.server.DBObject DBObject} objects in this
    * DBObjectBase, for enumeration access.  The GanymedeSession query
    * logic iterates over this List so that querying on single bases
@@ -3408,11 +3408,9 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
-   * <p>This method returns a List containing references to all
-   * objects in this DBObjectBase at the time the vector reference is
-   * accessed.  The List returned *must not* be modified by the
-   * caller, or else other threads iterating on that copy of the List
-   * will be disrupted.</p>
+   * <p>This method returns an unmodifiable List containing references
+   * to all objects in this DBObjectBase at the time the vector
+   * reference is accessed.</p>
    */
 
   public List<DBObject> getIterationSet()
