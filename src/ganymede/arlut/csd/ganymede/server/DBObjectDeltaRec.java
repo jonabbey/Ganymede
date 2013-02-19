@@ -86,8 +86,9 @@ public final class DBObjectDeltaRec implements FieldType {
   /* -- */
 
   /**
-   * This DBObjectDeltaRec constructor is used to generate a delta record
-   * that records the difference between two objects for the Ganymede journal
+   * <p>This DBObjectDeltaRec constructor is used to generate a delta
+   * record that records the difference between two objects for the
+   * Ganymede journa</p>
    */
 
   public DBObjectDeltaRec(DBObject oldObj, DBObject newObj)
@@ -195,10 +196,8 @@ public final class DBObjectDeltaRec implements FieldType {
   }
 
   /**
-   *
    * This DBObjectDeltaRec constructor is used to load a delta record
    * from a Journal stream.
-   *
    */
 
   public DBObjectDeltaRec(DataInput in) throws IOException
@@ -241,18 +240,23 @@ public final class DBObjectDeltaRec implements FieldType {
         for (int i = 0; i < fieldcount; i++)
           {
             status = "\nReading field code for field " + i;
+
             if (debug)
               {
                 System.err.println(status);
               }
+
             fieldcode = in.readShort();
             fieldDef = (DBObjectBaseField) baseDef.getField(fieldcode);
             typecode = fieldDef.getType();
             fieldName = fieldDef.getName();
+
             status = "Reading deletion boolean for field " + i;
+
             if (in.readBoolean())
               {
                 // we're deleting this field
+
                 if (debug)
                   {
                     System.err.println("Reading field deletion record field (" + fieldName + ":" + fieldcode + ") for field " + i);
@@ -265,26 +269,29 @@ public final class DBObjectDeltaRec implements FieldType {
             // okay, we've got a field redefinition.. check the type
             // code to make sure we don't have an incompatible journal
             // entry
+
             status = "Reading type code for field " + i;
+
             if (in.readShort() != typecode)
               {
                 throw new RuntimeException("Error, field type mismatch in journal file");
               }
 
             // ok.. now, is it a total redefinition, or a vector delta record?
+
             status = "Reading scalar/vector delta boolean for field " + i;
             scalar = in.readBoolean();
 
             if (scalar)
               {
-                fieldDeltaRec f_r = null;
                 status = "Reading field (" + fieldName + ":" + fieldcode +") for field " + i;
+
                 if (debug)
                   {
                     System.err.println(status);
                   }
 
-                f_r = new fieldDeltaRec(fieldcode, DBField.readField(obj, in, fieldDef));
+                fieldDeltaRec f_r = new fieldDeltaRec(fieldcode, DBField.readField(obj, in, fieldDef));
                 fieldRecs.add(f_r);
 
                 if (debug)
@@ -294,16 +301,17 @@ public final class DBObjectDeltaRec implements FieldType {
               }
             else
               {
-                // ok, we have a vector delta chunk
                 fieldDeltaRec fieldRec = new fieldDeltaRec(fieldcode);
                 Object value = null;
 
-                // read in the additions
                 status = "Reading vector addition count for field " + fieldName + "(" + i + ")";
+
                 if (debug)
                   {
                     System.err.println(status);
                   }
+
+                // read in additions to the vector
 
                 int size = in.readInt();
 
@@ -314,39 +322,49 @@ public final class DBObjectDeltaRec implements FieldType {
 
                 for (int j = 0; j < size; j++)
                   {
-                    // we only support 3 vector field types
+                    // we only support vectors of strings, invids, and
+                    // ip addresses
+
                     switch (typecode)
                       {
                       case STRING:
                         status = "Reading string addition " + j + " for field " + i + ":" + fieldName;
+
                         if (debug)
                           {
                             System.err.println(status);
                           }
+
                         value = in.readUTF();
                         break;
 
                       case INVID:
                         status = "Reading invid addition " + j + " for field " + i + ":" + fieldName;
+
                         if (debug)
                           {
                             System.err.println(status);
                           }
+
                         value = Invid.createInvid(in);
                         break;
 
                       case IP:
                         status = "Reading ip addition " + j + " for field " + i + ":" + fieldName;
+
                         if (debug)
                           {
                             System.err.println(status);
                           }
+
                         byte bytelength = in.readByte();
                         Byte[] bytes = new Byte[bytelength];
+
                         for (int k = 0; k < bytelength; k++)
                           {
                             bytes[k] = Byte.valueOf(in.readByte());
                           }
+
                         value = bytes;
                       }
 
@@ -354,13 +372,16 @@ public final class DBObjectDeltaRec implements FieldType {
                   }
 
                 // read in the deletions
+
                 status = "Reading vector deletion count for field " + i;
+
                 if (debug)
                   {
                     System.err.println(status);
                   }
 
                 size = in.readInt();
+
                 if (debug)
                   {
                     System.err.println(">> DBObjectDeltaRec(): reading " + size + " deletions.");
@@ -368,8 +389,6 @@ public final class DBObjectDeltaRec implements FieldType {
 
                 for (int j = 0; j < size; j++)
                   {
-                    // we only support 3 vector field types
-
                     switch (typecode)
                       {
                       case STRING:
@@ -386,15 +405,18 @@ public final class DBObjectDeltaRec implements FieldType {
                         status = "Reading IP deletion " + j + " for field " + i + ":" + fieldName;
                         byte bytelength = in.readByte();
                         Byte[] bytes = new Byte[bytelength];
+
                         for (int k = 0; k < bytelength; k++)
                           {
                             bytes[k] = Byte.valueOf(in.readByte());
                           }
+
                         value = bytes;
                       }
+
                     fieldRec.delValue(value);
                   }
-                // and save this field
+
                 fieldRecs.add(fieldRec);
               }
           }
@@ -408,9 +430,7 @@ public final class DBObjectDeltaRec implements FieldType {
   }
 
   /**
-   *
    * This method emits this delta rec to a file
-   *
    */
 
   public void emit(DataOutput out) throws IOException
@@ -431,16 +451,12 @@ public final class DBObjectDeltaRec implements FieldType {
 
     invid.emit(out);
 
-    // write the fieldrec count
-
     out.writeInt(fieldRecs.size());
 
     if (debug)
       {
         System.err.println("Emitting " + fieldRecs.size() + " field records for invid " + invid.toString());
       }
-
-    // now let's write out the fields
 
     for (fieldDeltaRec fdRec: fieldRecs)
       {
@@ -503,8 +519,6 @@ public final class DBObjectDeltaRec implements FieldType {
 
             for (Object value: fdRec.addValues)
               {
-                // we only support 3 vector field types
-
                 if (value instanceof String)
                   {
                     out.writeUTF((String) value);
@@ -543,8 +557,6 @@ public final class DBObjectDeltaRec implements FieldType {
 
             for (Object value: fdRec.delValues)
               {
-                // we only support 3 vector field types
-
                 if (value instanceof String)
                   {
                     out.writeUTF((String) value);
@@ -573,9 +585,9 @@ public final class DBObjectDeltaRec implements FieldType {
   }
 
   /**
-   * This method takes an object in its original state, and returns a
-   * new copy of the object with the changes embodied in this
-   * DBObjectDeltaRec applied to it.
+   * <p>This method takes an object in its original state, and returns
+   * a new copy of the object with the changes embodied in this
+   * DBObjectDeltaRec applied to it.</p>
    */
 
   public DBObject applyDelta(DBObject original)
@@ -587,20 +599,14 @@ public final class DBObjectDeltaRec implements FieldType {
 
     DBObject copy = new DBObject(original, null);
 
-    // now process the fieldDeltaRec's.
-
     for (fieldDeltaRec fieldRec: fieldRecs)
       {
-        // are we clearing this field?
-
         if (!fieldRec.vector && fieldRec.scalarValue == null)
           {
             copy.clearField(fieldRec.fieldcode);
 
             continue;
           }
-
-        // are we doing a replace or add?
 
         if (!fieldRec.vector)
           {
