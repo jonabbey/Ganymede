@@ -561,7 +561,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     try
       {
-        return getReturnVal(null, (reader != null && !reader.isDone()));
+        return getReturnVal(null, true);
       }
     finally
       {
@@ -573,10 +573,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * This method is called by the XML client once the end of the XML
-   * stream has been transmitted, whereupon the server will attempt
-   * to finalize the XML transaction and return an overall success or
-   * failure message in the ReturnVal.
+   * <p>This method is called by the XML client once the end of the
+   * XML stream has been transmitted, whereupon the server will
+   * attempt to finalize the XML transaction and return an overall
+   * success or failure message in the ReturnVal.</p>
    *
    * @see arlut.csd.ganymede.rmi.XMLSession
    */
