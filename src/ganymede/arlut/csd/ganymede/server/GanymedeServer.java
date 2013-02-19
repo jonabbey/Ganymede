@@ -1553,7 +1553,7 @@ public class GanymedeServer implements Server {
 
     try
       {
-        for (DBObjectBase base: Ganymede.db.objectBases.values())
+        for (DBObjectBase base: Ganymede.db.bases())
           {
             Ganymede.debug(ts.l("sweepInvids.sweeping", base.toString()));
 
@@ -1703,7 +1703,7 @@ public class GanymedeServer implements Server {
         // back pointers or virtual back pointer registrations in the
         // DBLinkTracker class.
 
-        for (DBObjectBase base: Ganymede.db.objectBases.values())
+        for (DBObjectBase base: Ganymede.db.bases())
           {
             Ganymede.debug(ts.l("checkInvids.checking", base.getName()));
 
@@ -1794,7 +1794,7 @@ public class GanymedeServer implements Server {
       {
         // loop over the object bases
 
-        for (DBObjectBase base: Ganymede.db.objectBases.values())
+        for (DBObjectBase base: Ganymede.db.bases())
           {
             if (!base.isEmbedded())
               {
@@ -1867,7 +1867,7 @@ public class GanymedeServer implements Server {
 
     try
       {
-        for (DBObjectBase base: Ganymede.db.objectBases.values())
+        for (DBObjectBase base: Ganymede.db.bases())
           {
             if (!base.isEmbedded())
               {
