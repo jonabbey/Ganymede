@@ -561,7 +561,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     try
       {
-        return getReturnVal(null, true);
+        return getReturnVal(null, reader != null && !reader.isDone());
       }
     finally
       {
@@ -959,8 +959,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
                 // don't bother processing rest of XML doc.. just jump
                 // down to finally clause
 
+                this.success = false;
+
                 return;
               }
+
+            this.success = true;
 
             nextElement = getNextItem();
           }
