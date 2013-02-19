@@ -1289,8 +1289,9 @@ public final class DBStore implements JythonMap {
   }
 
   /**
-   * Returns a Vector of {@link arlut.csd.ganymede.server.DBObjectBase
-   * DBObjectBases} currently defined in this DBStore.
+   * <p>Returns a Vector copy of the {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBases} currently
+   * defined in this DBStore.</p>
    */
 
   public Vector<DBObjectBase> getBases()
@@ -1303,6 +1304,19 @@ public final class DBStore implements JythonMap {
       }
 
     return result;
+  }
+
+  /**
+   * <p>Returns a directly iterable Collection view of the {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBases} currently
+   * defined in this DBStore.</p>
+   *
+   * <p>No copy is made, this is a direct view.</p>
+   */
+
+  public Collection<DBObjectBase> bases()
+  {
+    return objectBases.values();
   }
 
   /**
