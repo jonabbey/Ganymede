@@ -76,10 +76,8 @@ import arlut.csd.ganymede.common.Invid;
 
 public final class DBObjectDeltaRec implements FieldType {
 
-  // ---
-
   private Invid invid = null;
-  private Vector<fieldDeltaRec> fieldRecs = new Vector<fieldDeltaRec>(); // changes
+  private Vector<fieldDeltaRec> fieldRecs = new Vector<fieldDeltaRec>();
 
   /* -- */
 
