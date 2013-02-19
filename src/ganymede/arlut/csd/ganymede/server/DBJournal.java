@@ -475,7 +475,7 @@ public class DBJournal implements ObjectStatus {
                 // "Reading object type for object {0}"
                 status = ts.l("load.readingtype", iObj);
                 obj_type = jFile.readShort();
-                base = (DBObjectBase) store.objectBases.get(Short.valueOf(obj_type));
+                base = store.getObjectBase(obj_type);
 
                 switch (operation)
                   {

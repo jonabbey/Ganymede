@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -137,7 +137,7 @@ public class DBLinkTracker {
     DBLinkTrackerSession tracker = getSession(session);
 
     tracker.checkpoint(ckp_label);
-  } 
+  }
 
   /**
    * Removes a checkpoint from session's link tracker data, reverting
@@ -372,7 +372,7 @@ public class DBLinkTracker {
     // "Ganymede persistentLinks hash structure tracking {0} invid''s."
     Ganymede.debug(ts.l("checkInvids.backpointers2", Integer.valueOf(persistentLinks.targetToSourcesMap.size())));
 
-    for (DBObjectBase base: Ganymede.db.objectBases.values())
+    for (DBObjectBase base: Ganymede.db.bases())
       {
         for (DBObject object: base.getObjects())
           {

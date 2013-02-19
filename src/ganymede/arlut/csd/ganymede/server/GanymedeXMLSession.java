@@ -3309,11 +3309,6 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   private DBSchemaEdit editSchema()
   {
-    Enumeration en;
-    DBObjectBase base;
-
-    /* -- */
-
     // first, let's check to see if we're the only session in, and
     // if we are disable the semaphore.  We have to do all of this
     // in a block synchronized on GanymedeServer.lSemaphore so
@@ -3374,22 +3369,15 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         // "GanymedeXMLSession entering editSchema synchronization block"
         Ganymede.debug(ts.l("editSchema.entering_synchronized"));
 
-        en = Ganymede.db.objectBases.elements();
-
-        if (en != null)
+        for (DBObjectBase base: Ganymede.db.bases())
           {
-            while (en.hasMoreElements())
+            if (base.isLocked())
               {
-                base = (DBObjectBase) en.nextElement();
+                // "GanymedeXMLSession Can''t edit schema, previous lock held on object base {0}"
+                Ganymede.debug(ts.l("editSchema.base_blocked", base.getName()));
 
-                if (base.isLocked())
-                  {
-                    // "GanymedeXMLSession Can''t edit schema, previous lock held on object base {0}"
-                    Ganymede.debug(ts.l("editSchema.base_blocked", base.getName()));
-
-                    GanymedeServer.lSemaphore.enable("schema edit");
-                    return null;
-                  }
+                GanymedeServer.lSemaphore.enable("schema edit");
+                return null;
               }
           }
 

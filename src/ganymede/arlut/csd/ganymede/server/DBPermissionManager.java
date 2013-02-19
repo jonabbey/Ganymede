@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -1211,7 +1211,7 @@ public class DBPermissionManager {
 
     synchronized (Ganymede.db)
       {
-        for (DBObjectBase base: Ganymede.db.objectBases.values())
+        for (DBObjectBase base: Ganymede.db.bases())
           {
             base.addBaseToTransport(transport, null);
           }

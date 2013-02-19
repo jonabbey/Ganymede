@@ -289,7 +289,7 @@ public class DBEditSet {
     this.interactive = interactive;
     objects = Collections.synchronizedMap(new HashMap<Invid, DBEditObject>());
     logEvents = Collections.synchronizedList(new ArrayList<DBLogEvent>());
-    basesModified = new HashSet(dbStore.objectBases.size());
+    basesModified = new HashSet(dbStore.bases().size());
 
     if (session.GSession != null && session.GSession.isXMLSession() && Ganymede.allowMagicImport)
       {
