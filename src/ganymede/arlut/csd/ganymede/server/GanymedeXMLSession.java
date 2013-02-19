@@ -56,7 +56,6 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.rmi.RemoteException;
 import java.rmi.server.Unreferenced;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -3193,7 +3192,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     for (Map.Entry<Short, Hashtable> entry: objectStore.entrySet())
       {
         Short type = entry.getKey();
-        Hashtable objectHash = entry.getValue();
+        Hashtable<Object, Object> objectHash = entry.getValue();
 
         for (Object thing: objectHash.values())
           {
@@ -3209,12 +3208,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
                     // now go through the stored object and do lookups for
                     // any invid fields contained thereunder.
 
-                    Enumeration fieldEnum = storedObject.fields.elements();
-
-                    while (fieldEnum.hasMoreElements())
+                    for (xmlfield field: storedObject.fields.values())
                       {
-                        xmlfield field = (xmlfield) fieldEnum.nextElement();
-
                         if (field.getType() == FieldType.INVID && !field.fieldDef.isEditInPlace())
                           {
                             field.dereferenceInvids();
