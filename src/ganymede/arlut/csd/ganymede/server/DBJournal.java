@@ -500,7 +500,7 @@ public class DBJournal implements ObjectStatus {
                     status = ts.l("load.readingedited", iObj);
 
                     DBObjectDeltaRec delta = new DBObjectDeltaRec(jFile);
-                    DBObject original = DBStore.viewDBObject(delta.invid);
+                    DBObject original = DBStore.viewDBObject(delta.getInvid());
 
                     obj = delta.applyDelta(original);
 

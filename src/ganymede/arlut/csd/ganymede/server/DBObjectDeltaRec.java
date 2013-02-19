@@ -78,8 +78,8 @@ public final class DBObjectDeltaRec implements FieldType {
 
   // ---
 
-  Invid invid = null;
-  Vector<fieldDeltaRec> fieldRecs = new Vector<fieldDeltaRec>(); // changes
+  private Invid invid = null;
+  private Vector<fieldDeltaRec> fieldRecs = new Vector<fieldDeltaRec>(); // changes
 
   /* -- */
 
@@ -516,6 +516,11 @@ public final class DBObjectDeltaRec implements FieldType {
       }
 
     return copy;
+  }
+
+  public Invid getInvid()
+  {
+    return this.invid;
   }
 
   public String toString()
