@@ -187,6 +187,13 @@ public final class DBObjectDeltaRec implements FieldType {
       {
         this.invid = Invid.createInvid(in);
         DBObjectBase baseDef = Ganymede.db.getObjectBase(this.invid.getType());
+
+        if (baseDef == null)
+          {
+            throw new RuntimeException("Unrecognized object type in journal: " +
+                                       this.invid.getType());
+          }
+
         DBObject obj = Ganymede.db.viewDBObject(this.invid);
 
         int fieldcount = in.readInt();
@@ -194,7 +201,14 @@ public final class DBObjectDeltaRec implements FieldType {
         for (int i = 0; i < fieldcount; i++)
           {
             short fieldcode = in.readShort();
-            DBObjectBaseField fieldDef = (DBObjectBaseField) baseDef.getField(fieldcode);
+            DBObjectBaseField fieldDef = baseDef.getFieldDef(fieldcode);
+
+            if (fieldDef == null)
+              {
+                throw new RuntimeException("Unrecognized field identifier in journal " + fieldcode +
+                                           " for object type " + baseDef.getName());
+              }
+
             short typecode = fieldDef.getType();
             String fieldName = fieldDef.getName();
 
@@ -331,7 +345,7 @@ public final class DBObjectDeltaRec implements FieldType {
         // to verify that the schema hasn't undergone an incompatible
         // change since the journal was written.
 
-        DBObjectBaseField fieldDef = (DBObjectBaseField) baseDef.getField(fdRec.fieldcode);
+        DBObjectBaseField fieldDef = baseDef.getFieldDef(fdRec.fieldcode);
 
         out.writeShort(fieldDef.getType());
 
