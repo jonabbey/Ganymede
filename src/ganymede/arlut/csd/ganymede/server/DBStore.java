@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -1165,7 +1165,7 @@ public final class DBStore implements JythonMap {
         xmlOut.startElementIndent("ganydata");
         xmlOut.indentOut();
 
-        for (DBObjectBase base: getBases())
+        for (DBObjectBase base: objectBases.values())
           {
             if (base.isEmbedded())
               {
@@ -3045,7 +3045,7 @@ public final class DBStore implements JythonMap {
     return getBaseNameList().size();
   }
 
-  public Collection values()
+  public Collection<DBObjectBase> values()
   {
     return new ArrayList(getBases());
   }
