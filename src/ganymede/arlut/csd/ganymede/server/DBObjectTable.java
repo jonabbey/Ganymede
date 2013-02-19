@@ -52,7 +52,8 @@ package arlut.csd.ganymede.server;
 import java.lang.Iterable;
 
 import java.util.AbstractCollection;
-import java.util.Collection;;
+import java.util.Collection;
+import java.util.ConcurrentModificationException;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -97,6 +98,13 @@ public class DBObjectTable implements Iterable<DBObject> {
    */
 
   private float loadFactor;
+
+  /**
+   * Tracking value to detect concurrent modification for the
+   * enumerations and iterators we generate.
+   */
+
+  private transient int modGen = Integer.MIN_VALUE;
 
   /**
    * Constructs a new, empty DBObjectTable with the specified initial
@@ -144,6 +152,16 @@ public class DBObjectTable implements Iterable<DBObject> {
   }
 
   /**
+   * Returns a modification generation value for the enumerator and
+   * iterator that are generated from this DBObjectTable.
+   */
+
+  public int getModGen()
+  {
+    return this.modGen;
+  }
+
+  /**
    * Returns the number of objects in this DBObjectTable.
    *
    * @return  the number of objects in this DBObjectTable.
@@ -181,7 +199,7 @@ public class DBObjectTable implements Iterable<DBObject> {
 
   public synchronized Iterator<DBObject> iterator()
   {
-    return new DBObjectTableIterator(table);
+    return new DBObjectTableIterator(table, this);
   }
 
   /**
@@ -195,7 +213,7 @@ public class DBObjectTable implements Iterable<DBObject> {
 
   public synchronized Enumeration elements()
   {
-    return new DBObjectTableEnumerator(table);
+    return new DBObjectTableEnumerator(table, this);
   }
 
   /**
@@ -330,6 +348,8 @@ public class DBObjectTable implements Iterable<DBObject> {
 
   public void putNoSync(DBObject value)
   {
+    this.modGen++;
+
     // Make sure the value is not null
 
     if (value == null)
@@ -367,6 +387,8 @@ public class DBObjectTable implements Iterable<DBObject> {
 
   public synchronized void put(DBObject value)
   {
+    this.modGen++;
+
     // Make sure the value is not null
 
     if (value == null)
@@ -407,6 +429,8 @@ public class DBObjectTable implements Iterable<DBObject> {
 
   public void putNoSyncNoRemove(DBObject value)
   {
+    this.modGen++;
+
     // Make sure the value is not null
 
     if (value == null)
@@ -441,6 +465,8 @@ public class DBObjectTable implements Iterable<DBObject> {
 
   public void removeNoSync(int key)
   {
+    this.modGen++;
+
     DBObject tab[] = table;
     int index = (key & 0x7FFFFFFF) % tab.length;
 
@@ -473,6 +499,8 @@ public class DBObjectTable implements Iterable<DBObject> {
 
   public synchronized void remove(int key)
   {
+    this.modGen++;
+
     DBObject tab[] = table;
     int index = (key & 0x7FFFFFFF) % tab.length;
 
@@ -504,6 +532,8 @@ public class DBObjectTable implements Iterable<DBObject> {
 
   public synchronized void clear()
   {
+    this.modGen++;
+
     DBObject tab[] = table;
 
     /* -- */
@@ -544,16 +574,27 @@ class DBObjectTableEnumerator implements Enumeration {
   DBObject table[];
   DBObject entry;
 
+  private DBObjectTable parent;
+  private int modGen;
+
   /* -- */
 
-  DBObjectTableEnumerator(DBObject table[])
+  DBObjectTableEnumerator(DBObject table[], DBObjectTable parent)
   {
     this.table = table;
     this.index = table.length;
+
+    this.parent = parent;
+    this.modGen = parent.getModGen();
   }
 
   public boolean hasMoreElements()
   {
+    if (this.modGen != parent.getModGen())
+      {
+        throw new ConcurrentModificationException();
+      }
+
     if (entry != null)
       {
         return true;
@@ -572,6 +613,11 @@ class DBObjectTableEnumerator implements Enumeration {
 
   public Object nextElement()
   {
+    if (this.modGen != parent.getModGen())
+      {
+        throw new ConcurrentModificationException();
+      }
+
     if (entry == null)
       {
         while ((index-- > 0) && ((entry = table[index]) == null));
@@ -606,16 +652,27 @@ class DBObjectTableIterator implements Iterator<DBObject> {
   DBObject table[];
   DBObject entry;
 
+  private DBObjectTable parent;
+  private int modGen;
+
   /* -- */
 
-  DBObjectTableIterator(DBObject table[])
+  DBObjectTableIterator(DBObject[] table, DBObjectTable parent)
   {
     this.table = table;
     this.index = table.length;
+
+    this.parent = parent;
+    this.modGen = parent.getModGen();
   }
 
   public boolean hasNext()
   {
+    if (this.modGen != parent.getModGen())
+      {
+        throw new ConcurrentModificationException();
+      }
+
     if (entry != null)
       {
         return true;
@@ -634,6 +691,11 @@ class DBObjectTableIterator implements Iterator<DBObject> {
 
   public DBObject next()
   {
+    if (this.modGen != parent.getModGen())
+      {
+        throw new ConcurrentModificationException();
+      }
+
     if (entry == null)
       {
         while ((index-- > 0) && ((entry = table[index]) == null));
