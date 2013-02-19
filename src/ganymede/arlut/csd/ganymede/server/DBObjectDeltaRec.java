@@ -103,14 +103,8 @@ public final class DBObjectDeltaRec implements FieldType {
         throw new IllegalArgumentException("Old and New object id's don't match");
       }
 
-    /* - */
-
     this.invid = oldObj.getInvid();
-
     DBObjectBase objectBase = oldObj.getBase();
-    DBField origField, currentField;
-
-    /* -- */
 
     // algorithm: iterate over base.getFieldsInFieldOrder() to find
     // all fields possibly contained in the object.. for each field,
@@ -119,13 +113,13 @@ public final class DBObjectDeltaRec implements FieldType {
 
     // note that we're counting on objectBase.sortedFields not being
     // changed while we're iterating here.. this is an ok assumption,
-    // since only the loader and the schema editor will trigger changes
-    // in sortedFields.
+    // since only the schema editor will trigger changes in
+    // sortedFields.
 
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
       {
-        origField = (DBField) oldObj.getField(fieldDef.getID());
-        currentField = (DBField) newObj.getField(fieldDef.getID());
+        DBField origField = (DBField) oldObj.getField(fieldDef.getID());
+        DBField currentField = (DBField) newObj.getField(fieldDef.getID());
 
         if ((origField == null || !origField.isDefined()) &&
             (currentField == null || !currentField.isDefined()))
