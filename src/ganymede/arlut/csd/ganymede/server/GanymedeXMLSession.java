@@ -590,7 +590,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     parsing.waitForCleared();
 
-    return getReturnVal(null, success);
+    return getReturnVal(null, this.success);
   }
 
   /**
