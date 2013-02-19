@@ -1291,12 +1291,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
         err.println(ts.l("setXML.debugscanning"));
       }
 
-    /*
-     * loop over tab and field hierarchy, flatten everything out into
-     * a Vector so that we don't have to worry about the difference
-     * between a tab-container structure vs. a flat structure when it
-     * comes time to actually process the fields, below.
-     */
+    // loop over tab and field hierarchy, flatten everything out into
+    // a Vector so that we don't have to worry about the difference
+    // between a tab-container structure vs. a flat structure when it
+    // comes time to actually process the fields, below.
 
     List<XMLItem> fieldDefV = new ArrayList<XMLItem>();
     XMLItem children[] = root.getChildren();
