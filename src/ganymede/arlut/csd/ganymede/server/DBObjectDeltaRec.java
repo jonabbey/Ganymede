@@ -88,7 +88,7 @@ public final class DBObjectDeltaRec implements FieldType {
   /**
    * <p>This DBObjectDeltaRec constructor is used to generate a delta
    * record that records the difference between two objects for the
-   * Ganymede journa</p>
+   * Ganymede journal</p>
    */
 
   public DBObjectDeltaRec(DBObject oldObj, DBObject newObj)
