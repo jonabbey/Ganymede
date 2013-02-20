@@ -598,7 +598,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * to pull stderr messages from the server.</p>
    *
    * <p>This call will block on the server until err stream data is
-   * available, but will always block for at least half a second so
+   * available, but will always block for at least a quarter second so
    * that the client doesn't loop on getNextErrChunk() too fast.</p>
    *
    * <p>This method will return null after the server closes its error
@@ -631,11 +631,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
             try
               {
-                Thread.sleep(50); // slow our spin loop down
+                Thread.sleep(250); // slow our client down
               }
             catch (InterruptedException ex2)
               {
-                // ?
               }
 
             synchronized (errBuffer)
@@ -656,11 +655,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
             try
               {
-                Thread.sleep(50);
+                Thread.sleep(50); // slow our internal spin
               }
             catch (InterruptedException ex2)
               {
-                // ?
               }
           }
       }
