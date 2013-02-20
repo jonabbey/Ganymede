@@ -611,7 +611,6 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     String progress = null;
     StringBuffer errBuffer = errBuf.getBuffer();
-    boolean done = false;
 
     /* -- */
 
