@@ -615,52 +615,56 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     /* -- */
 
-    while (!done)
+    synchronized (errBuffer)
       {
+        progress = errBuffer.toString();
+        errBuffer.setLength(0);     // this doesn't actually free memory.. stoopid StringBuffer
+      }
+
+    while (progress.length() == 0)
+      {
+        if (!parsing.isSet())
+          {
+            return null;
+          }
+
+        try
+          {
+            Thread.sleep(50); // slow our internal spin
+          }
+        catch (InterruptedException ex2)
+          {
+          }
+
         synchronized (errBuffer)
           {
             progress = errBuffer.toString();
-            errBuffer.setLength(0);     // this doesn't actually free memory.. stoopid StringBuffer
+            errBuffer.setLength(0);
           }
+      }
 
-        if (progress.length() != 0)
-          {
-            done = true;
+    System.err.print(progress);
 
-            System.err.print(progress);
+    if (!parsing.isSet())
+      {
+        return progress;
+      }
 
-            try
-              {
-                Thread.sleep(250); // slow our client down
-              }
-            catch (InterruptedException ex2)
-              {
-              }
+    try
+      {
+        Thread.sleep(250); // slow our client down
+      }
+    catch (InterruptedException ex2)
+      {
+      }
 
-            synchronized (errBuffer)
-              {
-                String finalBit = errBuffer.toString();
-                errBuffer.setLength(0);
+    synchronized (errBuffer)
+      {
+        String finalBit = errBuffer.toString();
+        errBuffer.setLength(0);
 
-                progress = progress + finalBit;
-                System.err.print(finalBit);
-              }
-          }
-        else
-          {
-            if (!parsing.isSet())
-              {
-                return null;
-              }
-
-            try
-              {
-                Thread.sleep(50); // slow our internal spin
-              }
-            catch (InterruptedException ex2)
-              {
-              }
-          }
+        progress = progress + finalBit;
+        System.err.print(finalBit);
       }
 
     return progress;
