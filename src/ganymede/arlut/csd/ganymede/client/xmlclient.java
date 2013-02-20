@@ -15,8 +15,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -1396,7 +1398,6 @@ public final class xmlclient implements ClientListener, Runnable {
   public synchronized void run()
   {
     String result;
-    int count = 0;
 
     /* -- */
 
@@ -1430,15 +1431,6 @@ public final class xmlclient implements ClientListener, Runnable {
 
             this.finishedErrStream = true;
             this.notifyAll();
-
-            // we won't exit our err stream thread on one or two
-            // errors, but if we get a bunch, assume we've lost the
-            // connection and end the thread.
-
-            if (count++ > 3)
-              {
-                return;
-              }
           }
       }
   }
