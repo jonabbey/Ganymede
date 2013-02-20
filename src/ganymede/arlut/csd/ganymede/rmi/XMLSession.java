@@ -10,11 +10,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -76,7 +78,7 @@ public interface XMLSession extends java.rmi.Remote {
    * XML data for the server's continued processing and immediately
    * return a null value, indicating success.  The xmlSubmit() method
    * will only block if the server has filled up its internal buffers
-   * and must wait to digest more of the already submitted XML.</p> 
+   * and must wait to digest more of the already submitted XML.</p>
    */
 
   ReturnVal xmlSubmit(byte[] bytes) throws RemoteException;
@@ -95,7 +97,7 @@ public interface XMLSession extends java.rmi.Remote {
    * to pull stderr messages from the server.</p>
    *
    * <p>This call will block on the server until err stream data is
-   * available, but will always block for at least half a second so
+   * available, but will always block for at least a quarter second so
    * that the client doesn't loop on getNextErrChunk() too fast.</p>
    *
    * <p>This method will return null after the server closes its error
