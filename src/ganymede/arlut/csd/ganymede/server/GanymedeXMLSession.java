@@ -56,10 +56,12 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.rmi.RemoteException;
 import java.rmi.server.Unreferenced;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Vector;
@@ -3142,6 +3144,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   private void knitInvidReferences() throws NotLoggedInException
   {
+    List<xmlobject> xmlObjectsToProcess = new ArrayList<xmlobject>();
+
+    /* -- */
+
     for (Map.Entry<Short, Hashtable> entry: objectStore.entrySet())
       {
         Short type = entry.getKey();
@@ -3180,50 +3186,38 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
                                                         getTypeName(type.shortValue()), key));
                       }
                   }
+
+                if (storedObject.fields != null)
+                  {
+                    xmlObjectsToProcess.add(storedObject);
+                  }
               }
           }
       }
 
-    // now that we have forced the lookup and resolution of all
+    // Now that we have forced the lookup and resolution of all
     // labeled objects, we need to go through all objects that we've
     // seen reference to and try to look up all <invid> elements
-    // contained therein.  <invid> elements that point to objects we
+    // contained therein.
+    //
+    // <invid> elements that point to objects we
     // have just looked up above will be able to dereference those
-    // Invids by looking in this very objectStore hashing structure,
-    // even for objects that we have labeled but not yet created on
-    // the server.
+    // Invids by looking in the objectStore hashing structure, even
+    // for objects that we have labeled but not yet created on the
+    // server.
+    //
+    // Since the xmlfield dereferenceInvids() method can alter the
+    // objectStore hash structure, we're working with our own List of
+    // the xmlobjects we've seen, to avoid a
+    // ConcurrentModificationException.
 
-    // we have to copy the objectStore.entrySet() here so that the
-    // field.dereferenceInvids() method can update the objectStore
-    // with newly seen Invids.
-
-    for (Map.Entry<Short, Hashtable> entry: new Vector<Map.Entry<Short, Hashtable>>(objectStore.entrySet()))
+    for (xmlobject storedObject: xmlObjectsToProcess)
       {
-        Short type = entry.getKey();
-        Hashtable<Object, Object> objectHash = entry.getValue();
-
-        for (Object thing: objectHash.values())
+        for (xmlfield field: storedObject.fields.values())
           {
-            if (thing instanceof xmlobject)
+            if (field.getType() == FieldType.INVID && !field.fieldDef.isEditInPlace())
               {
-                xmlobject storedObject = (xmlobject) thing;
-
-                // an xmlobject to be deleted may not actually have
-                // any fields stored in it
-
-                if (storedObject.fields != null)
-                  {
-                    // now go through the stored object and do lookups for
-                    // any invid fields contained thereunder.
-
-                    for (xmlfield field: storedObject.fields.values())
-                      {
-                        if (field.getType() == FieldType.INVID && !field.fieldDef.isEditInPlace())
-                          {
-                            field.dereferenceInvids();
-                          }
-                      }
-                  }
+                field.dereferenceInvids();
               }
           }
       }
