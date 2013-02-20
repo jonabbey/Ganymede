@@ -2138,7 +2138,7 @@ class xInvid {
 
     if (objectId != null)
       {
-        invidPtr = getXSession().getInvid(typeId, objectId);
+        invidPtr = getXSession().getInvid(typeId, objectId); // XXX  modifies xSession's objectStore
 
         if (invidPtr == null)
           {

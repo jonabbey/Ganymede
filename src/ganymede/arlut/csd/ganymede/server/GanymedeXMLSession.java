@@ -3193,7 +3193,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     // even for objects that we have labeled but not yet created on
     // the server.
 
-    for (Map.Entry<Short, Hashtable> entry: objectStore.entrySet())
+    // we have to copy the objectStore.entrySet() here so that the
+    // field.dereferenceInvids() method can update the objectStore
+    // with newly seen Invids.
+
+    for (Map.Entry<Short, Hashtable> entry: new Vector<Map.Entry<Short, Hashtable>>(objectStore.entrySet()))
       {
         Short type = entry.getKey();
         Hashtable<Object, Object> objectHash = entry.getValue();
