@@ -440,8 +440,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         // GanymedeSession and call one of that class' getXML()
         // methods
 
-        pipe = new PipedOutputStream();
-        reader = new arlut.csd.Util.XMLReader(pipe, bufferSize, true, err);
+        this.pipe = new PipedOutputStream();
+        this.reader = new arlut.csd.Util.XMLReader(this.pipe, bufferSize, true, this.err);
       }
     catch (IOException ex)
       {
@@ -459,7 +459,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public Session getSession()
   {
-    return session;
+    return this.session;
   }
 
   /**
@@ -485,7 +485,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         System.err.println("xmlSubmit called on server");
       }
 
-    if (parsing.isSet())
+    if (this.parsing.isSet())
       {
         try
           {
@@ -521,7 +521,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
             int waitCount = 0;
 
-            while (reader != null && !reader.isDone() && waitCount < 40)
+            while (this.reader != null && !this.reader.isDone() && waitCount < 40)
               {
                 // "Waiting for reader to close down: {0,number,#}"
                 System.err.println(ts.l("xmlSubmit.waiting_for_reader", Integer.valueOf(waitCount)));
@@ -563,7 +563,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     try
       {
-        return getReturnVal(null, reader != null && !reader.isDone());
+        return getReturnVal(null, this.reader != null && !this.reader.isDone());
       }
     finally
       {
@@ -590,7 +590,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         System.err.println("xmlEnd() called");
       }
 
-    parsing.waitForCleared();
+    this.parsing.waitForCleared();
 
     return getReturnVal(null, this.success);
   }
@@ -613,7 +613,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   public String getNextErrChunk()
   {
     String progress = null;
-    StringBuffer errBuffer = errBuf.getBuffer();
+    StringBuffer errBuffer = this.errBuf.getBuffer();
 
     /* -- */
 
@@ -625,7 +625,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     while (progress.length() == 0)
       {
-        if (!parsing.isSet())
+        if (!this.parsing.isSet())
           {
             return null;
           }
@@ -647,7 +647,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     System.err.print(progress);
 
-    if (!parsing.isSet())
+    if (!this.parsing.isSet())
       {
         return progress;
       }
@@ -699,7 +699,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     // if the parser thread has completed, then parsing will be false
     // and the XML reader will have already been closed
 
-    if (parsing.isSet())
+    if (this.parsing.isSet())
       {
         if (debug)
           {
@@ -709,7 +709,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         // "Abort called, closing reader."
         System.err.println(ts.l("abort.aborting"));
 
-        reader.close();         // this will cause the XML Reader to halt
+        this.reader.close();         // this will cause the XML Reader to halt
       }
     else
       {
@@ -753,52 +753,52 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public void cleanupSchemaEdit()
   {
-    if (spacesToAdd != null)
+    if (this.spacesToAdd != null)
       {
-        spacesToAdd.setSize(0);
-        spacesToAdd = null;
+        this.spacesToAdd.setSize(0);
+        this.spacesToAdd = null;
       }
 
-    if (spacesToRemove != null)
+    if (this.spacesToRemove != null)
       {
-        spacesToRemove.setSize(0);
-        spacesToRemove = null;
+        this.spacesToRemove.setSize(0);
+        this.spacesToRemove = null;
       }
 
-    if (spacesToEdit != null)
+    if (this.spacesToEdit != null)
       {
-        spacesToEdit.setSize(0);
-        spacesToEdit = null;
+        this.spacesToEdit.setSize(0);
+        this.spacesToEdit = null;
       }
 
-    if (basesToAdd != null)
+    if (this.basesToAdd != null)
       {
-        basesToAdd.setSize(0);
-        basesToAdd = null;
+        this.basesToAdd.setSize(0);
+        this.basesToAdd = null;
       }
 
-    if (basesToRemove != null)
+    if (this.basesToRemove != null)
       {
-        basesToRemove.setSize(0);
-        basesToRemove = null;
+        this.basesToRemove.setSize(0);
+        this.basesToRemove = null;
       }
 
-    if (basesToEdit != null)
+    if (this.basesToEdit != null)
       {
-        basesToEdit.setSize(0);
-        basesToEdit = null;
+        this.basesToEdit.setSize(0);
+        this.basesToEdit = null;
       }
 
-    if (namespaceTree != null)
+    if (this.namespaceTree != null)
       {
-        namespaceTree.dissolve();
-        namespaceTree = null;
+        this.namespaceTree.dissolve();
+        this.namespaceTree = null;
       }
 
-    if (categoryTree != null)
+    if (this.categoryTree != null)
       {
-        categoryTree.dissolve();
-        categoryTree = null;
+        this.categoryTree.dissolve();
+        this.categoryTree = null;
       }
   }
 
@@ -992,7 +992,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             System.err.println("run() terminating");
           }
 
-        parsing.set(false);
+        this.parsing.set(false);
 
         cleanupSchemaEdit();
         cleanup();
@@ -1010,7 +1010,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     XMLItem item = null;
 
-    item = reader.getNextItem();
+    item = this.reader.getNextItem();
 
     if (item instanceof XMLError)
       {
@@ -1022,7 +1022,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         // "Warning!: {0}"
         tell(ts.l("getNextItem.warning", item));
 
-        item = reader.getNextItem();
+        item = this.reader.getNextItem();
       }
 
     return item;
@@ -1040,7 +1040,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     XMLItem item = null;
 
-    item = reader.peekNextItem();
+    item = this.reader.peekNextItem();
 
     if (item instanceof XMLError)
       {
@@ -1052,8 +1052,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         // "Warning!: {0}"
         tell(ts.l("getNextItem.warning", item));
 
-        reader.getNextItem();   // consume the peeked warning item
-        item = reader.peekNextItem();
+        this.reader.getNextItem();   // consume the peeked warning item
+        item = this.reader.peekNextItem();
       }
 
     return item;
@@ -1071,7 +1071,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   public boolean processSchema(XMLItem ganySchemaItem) throws SAXException
   {
     boolean _success = false;
-    XMLItem _schemaTree = reader.getNextTree(ganySchemaItem);
+    XMLItem _schemaTree = this.reader.getNextTree(ganySchemaItem);
 
     try
       {
@@ -1106,9 +1106,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
         // try to get a schema editing context
 
-        editor = editSchema();
+        this.editor = editSchema();
 
-        if (editor == null)
+        if (this.editor == null)
           {
             // "Couldn''t edit the schema.. other users logged in?"
             tell(ts.l("processSchema.editing_blocked"));
@@ -1133,7 +1133,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
         if (_schemaChildren[_nextchild].matches("namespaces"))
           {
-            namespaceTree = _schemaChildren[_nextchild++];
+            this.namespaceTree = _schemaChildren[_nextchild++];
           }
 
         if (_schemaChildren.length > _nextchild &&
@@ -1149,7 +1149,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
                 return false;
               }
 
-            categoryTree = _otdItem.getChildren()[0];
+            this.categoryTree = _otdItem.getChildren()[0];
           }
         else
           {
@@ -1167,7 +1167,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             tell(ts.l("processSchema.schemadebug_1"));
           }
 
-        if (namespaceTree != null)
+        if (this.namespaceTree != null)
           {
             if (!calculateNameSpaces())
               {
@@ -1185,7 +1185,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             tell(ts.l("processSchema.schemadebug_2"));
           }
 
-        for (XMLItem _space: spacesToAdd)
+        for (XMLItem _space: this.spacesToAdd)
           {
             String _name = _space.getAttrStr("name");
 
@@ -1212,7 +1212,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             // "\tCreating namespace {0}."
             tell(ts.l("processSchema.creating_namespace", _name));
 
-            NameSpace _aNewSpace = editor.createNewNameSpace(_name,!_sensitive);
+            NameSpace _aNewSpace = this.editor.createNewNameSpace(_name,!_sensitive);
 
             if (_aNewSpace == null)
               {
@@ -1246,12 +1246,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             tell(ts.l("processSchema.schemadebug_4"));
           }
 
-        for (String _basename: basesToRemove)
+        for (String _basename: this.basesToRemove)
           {
             // "\tDeleting object base {0}."
             tell(ts.l("processSchema.deleting_base", _basename));
 
-            if (!handleReturnVal(editor.deleteBase(_basename)))
+            if (!handleReturnVal(this.editor.deleteBase(_basename)))
               {
                 return false;
               }
@@ -1278,7 +1278,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             tell(ts.l("processSchema.schemadebug_6"));
           }
 
-        for (XMLItem _entry: basesToAdd)
+        for (XMLItem _entry: this.basesToAdd)
           {
             // "\tCreating object base {0}"
             tell(ts.l("processSchema.creating_objectbase", _entry.getAttrStr("name")));
@@ -1308,9 +1308,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             // also, we'll put it in the root category just so we can
             // get things in the category tree before we resequence it
 
-            DBObjectBase _newBase = (DBObjectBase) editor.createNewBase(editor.getRootCategory(),
-                                                                        _embedded,
-                                                                        _id.shortValue());
+            DBObjectBase _newBase = (DBObjectBase) this.editor.createNewBase(this.editor.getRootCategory(),
+                                                                             _embedded,
+                                                                             _id.shortValue());
 
             // if we failed to create the base, we'll have an
             // exception thrown.. our finally clause and higher level
@@ -1319,7 +1319,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             // don't yet try to resolve invid links, since we haven't
             // done a pass through basesToEdit to fix up fields yet
 
-            if (!handleReturnVal(_newBase.setXML(_entry, false, err)))
+            if (!handleReturnVal(_newBase.setXML(_entry, false, this.err)))
               {
                 return false;
               }
@@ -1333,11 +1333,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             tell(ts.l("processSchema.schemadebug_7"));
           }
 
-        for (XMLItem _entry: basesToEdit)
+        for (XMLItem _entry: this.basesToEdit)
           {
             Integer _id = _entry.getAttrInt("id");
 
-            DBObjectBase _oldBase = (DBObjectBase) editor.getBase(_id.shortValue());
+            DBObjectBase _oldBase = (DBObjectBase) this.editor.getBase(_id.shortValue());
 
             if (_oldBase == null)
               {
@@ -1360,7 +1360,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             // done a complete pass through basesToEdit to fix up
             // fields yet
 
-            if (!handleReturnVal(_oldBase.setXML(_entry, false, err)))
+            if (!handleReturnVal(_oldBase.setXML(_entry, false, this.err)))
               {
                 return false;
               }
@@ -1371,11 +1371,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         // fields, so now we can go back through both lists and finish
         // fixing up invid links.
 
-        for (XMLItem _entry: basesToAdd)
+        for (XMLItem _entry: this.basesToAdd)
           {
             Integer _id = _entry.getAttrInt("id");
 
-            DBObjectBase _oldBase = (DBObjectBase) editor.getBase(_id.shortValue());
+            DBObjectBase _oldBase = (DBObjectBase) this.editor.getBase(_id.shortValue());
 
             if (_oldBase == null)
               {
@@ -1393,17 +1393,17 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
             // tell("\tResolving " + _oldBase);
 
-            if (!handleReturnVal(_oldBase.setXML(_entry, true, err)))
+            if (!handleReturnVal(_oldBase.setXML(_entry, true, this.err)))
               {
                 return false;
               }
           }
 
-        for (XMLItem _entry: basesToEdit)
+        for (XMLItem _entry: this.basesToEdit)
           {
             Integer _id = _entry.getAttrInt("id");
 
-            DBObjectBase _oldBase = (DBObjectBase) editor.getBase(_id.shortValue());
+            DBObjectBase _oldBase = (DBObjectBase) this.editor.getBase(_id.shortValue());
 
             if (_oldBase == null)
               {
@@ -1419,7 +1419,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
                 tell(ts.l("processSchema.schemadebug_7_3", _oldBase.getName()));
               }
 
-            if (!handleReturnVal(_oldBase.setXML(_entry, true, err)))
+            if (!handleReturnVal(_oldBase.setXML(_entry, true, this.err)))
               {
                 return false;
               }
@@ -1451,7 +1451,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             // "\tDeleting name space {0}."
             tell(ts.l("processSchema.deleting_namespace", _name));
 
-            if (!handleReturnVal(editor.deleteNameSpace(_name)))
+            if (!handleReturnVal(this.editor.deleteNameSpace(_name)))
               {
                 return false;
               }
@@ -1474,7 +1474,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             // "\tFlipping name space {0}."
             tell(ts.l("processSchema.flipping_namespace", _name));
 
-            NameSpace _space = editor.getNameSpace(_name);
+            NameSpace _space = this.editor.getNameSpace(_name);
 
             _space.setInsensitive(!_val);
           }
@@ -1511,7 +1511,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
           {
             // "Committing schema edit."
             tell(ts.l("processSchema.committing"));
-            editor.commit();
+            this.editor.commit();
             this.editor = null;
             return true;
           }
@@ -1520,9 +1520,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             // "Releasing schema edit."
             tell(ts.l("processSchema.releasing"));
 
-            if (editor != null)
+            if (this.editor != null)
               {
-                editor.release();
+                this.editor.release();
                 this.editor = null;
               }
 
@@ -1539,7 +1539,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     try
       {
-        NameSpace[] _list = editor.getNameSpaces();
+        NameSpace[] _list = this.editor.getNameSpaces();
 
         Vector<String> _current = new Vector<String>(_list.length);
 
@@ -1550,7 +1550,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             _current.add(_ns.getName());
           }
 
-        XMLItem _XNamespaces[] = namespaceTree.getChildren();
+        XMLItem _XNamespaces[] = this.namespaceTree.getChildren();
 
         Vector<String> _newSpaces = new Vector<String>(_XNamespaces.length);
         Hashtable<String, XMLItem> _entries = new Hashtable<String, XMLItem>(_XNamespaces.length);
@@ -1592,11 +1592,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
         Vector<String> _additions = VectorUtils.difference(_newSpaces, _current);
 
-        spacesToAdd = new Vector<XMLItem>();
+        this.spacesToAdd = new Vector<XMLItem>();
 
         for (String _name: _additions)
           {
-            spacesToAdd.add(_entries.get(_name));
+            this.spacesToAdd.add(_entries.get(_name));
           }
 
         Vector<String> _possibleEdits = VectorUtils.intersection(_newSpaces, _current);
@@ -1612,7 +1612,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         for (String _name: _possibleEdits)
           {
             XMLItem _entry = _entries.get(_name);
-            NameSpace _oldEntry = editor.getNameSpace(_name);
+            NameSpace _oldEntry = this.editor.getNameSpace(_name);
 
             // yes, ==, not !=.. note that the _oldEntry check is for
             // insensitivity, not sensitivity.
@@ -1641,7 +1641,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     // create a list of Short base id's for of bases that we have
     // registered in the schema at present
 
-    DBObjectBase[] list = (DBObjectBase[]) editor.getBases();
+    DBObjectBase[] list = (DBObjectBase[]) this.editor.getBases();
     Vector<Short> current = new Vector(list.length);
 
     for (DBObjectBase base: list)
@@ -1722,7 +1722,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     Vector<Short> deletions = VectorUtils.difference(current, xmlBases);
 
-    basesToRemove = new Vector<String>();
+    this.basesToRemove = new Vector<String>();
 
     for (Short id: deletions)
       {
@@ -1730,7 +1730,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
           {
             // Base.getName() is defined to throw RemoteException
 
-            basesToRemove.add(editor.getBase(id.shortValue()).getName());
+            this.basesToRemove.add(this.editor.getBase(id.shortValue()).getName());
           }
         catch (RemoteException ex)
           {
@@ -1747,7 +1747,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     Vector<Short> additions = VectorUtils.difference(xmlBases, current);
     Vector<Short> edits = VectorUtils.intersection(xmlBases, current);
 
-    basesToAdd = new Vector<XMLItem>();
+    this.basesToAdd = new Vector<XMLItem>();
 
     for (Short id: additions)
       {
@@ -1762,16 +1762,16 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             return false;
           }
 
-        basesToAdd.add(entry);
+        this.basesToAdd.add(entry);
       }
 
-    basesToEdit = new Vector<XMLItem>();
+    this.basesToEdit = new Vector<XMLItem>();
 
     for (Short id: edits)
       {
         XMLItem entry = entries.get(id);
 
-        basesToEdit.add(entry);
+        this.basesToEdit.add(entry);
       }
 
     return true;
@@ -1821,11 +1821,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     /* -- */
 
-    for (XMLItem myBaseItem: basesToEdit)
+    for (XMLItem myBaseItem: this.basesToEdit)
       {
         name = XMLUtils.XMLDecode(myBaseItem.getAttrStr("name"));
 
-        numBaseRef = editor.getBase(myBaseItem.getAttrInt("id").shortValue());
+        numBaseRef = this.editor.getBase(myBaseItem.getAttrInt("id").shortValue());
 
         if (name.equals(numBaseRef.getName()))
           {
@@ -1835,7 +1835,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         // we need to rename the base pointed to by numBaseRef.. first
         // see if another base already has the name we want
 
-        nameBaseRef = editor.getBase(name);
+        nameBaseRef = this.editor.getBase(name);
 
         // if we found a base with the name we need, switch the two
         // names.  we know from calculateBases() that the user
@@ -1897,7 +1897,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         return Ganymede.createErrorDialog(ts.l("reshuffleCategories.failed_categories"));
       }
 
-    editor.rootCategory = _rootCategory;
+    this.editor.rootCategory = _rootCategory;
 
     return null;                // tada!
   }
@@ -1988,7 +1988,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
           }
         else if (_child.matches("objectdef"))
           {
-            DBObjectBase _base = (DBObjectBase) editor.getBase(_child.getAttrInt("id").shortValue());
+            DBObjectBase _base = (DBObjectBase) this.editor.getBase(_child.getAttrInt("id").shortValue());
             _root.addNodeAfter(_base, null);
           }
       }
@@ -2047,9 +2047,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
         while (!item.matchesClose("ganydata") && !(item instanceof XMLEndDocument))
           {
-            if (item.matches("comment") && reader.isNextCharData())
+            if (item.matches("comment") && this.reader.isNextCharData())
               {
-                this.comment = reader.getFollowingString(item, true);
+                this.comment = this.reader.getFollowingString(item, true);
               }
             else if (item.matches("object"))
               {
@@ -2121,19 +2121,19 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
                         objectRecord.forceCreate = true;
                       }
 
-                    createdObjects.add(objectRecord);
+                    this.createdObjects.add(objectRecord);
                   }
                 else if (mode.equals("edit"))
                   {
-                    editedObjects.add(objectRecord);
+                    this.editedObjects.add(objectRecord);
                   }
                 else if (mode.equals("delete"))
                   {
-                    deletedObjects.add(objectRecord);
+                    this.deletedObjects.add(objectRecord);
                   }
                 else if (mode.equals("inactivate"))
                   {
-                    inactivatedObjects.add(objectRecord);
+                    this.inactivatedObjects.add(objectRecord);
                   }
 
                 if (!storeObject(objectRecord))
@@ -2187,7 +2187,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       }
     finally
       {
-        reader.pushbackItem(item);  // let the run() method see what we ran into at the end
+        this.reader.pushbackItem(item);  // let the run() method see what we ran into at the end
 
         if (!committedTransaction)
           {
@@ -2222,8 +2222,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             fieldHash.put(tmpl.getName(), tmpl);
           }
 
-        objectTypes.put(base.getName(), fieldHash);
-        objectTypeIDs.put(Short.valueOf(base.getTypeID()), fieldHash);
+        this.objectTypes.put(base.getName(), fieldHash);
+        this.objectTypeIDs.put(Short.valueOf(base.getTypeID()), fieldHash);
       }
   }
 
@@ -2242,12 +2242,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         System.err.println("GanymedeXMLSession: storeObject(" + object + ")");
       }
 
-    Hashtable objectHash = objectStore.get(object.type);
+    Hashtable objectHash = this.objectStore.get(object.type);
 
     if (objectHash == null)
       {
         objectHash = new Hashtable(OBJECTHASHSIZE, 0.75f);
-        objectStore.put(object.type, objectHash);
+        this.objectStore.put(object.type, objectHash);
       }
 
     if (object.id != null)
@@ -2356,7 +2356,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public xmlobject getXMLObjectTarget(short typeId, String objectId)
   {
-    Hashtable objectHash = objectStore.get(Short.valueOf(typeId));
+    Hashtable objectHash = this.objectStore.get(Short.valueOf(typeId));
 
     if (objectHash == null)
       {
@@ -2394,7 +2394,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     /* -- */
 
     typeKey = Short.valueOf(typeId);
-    objectHash = objectStore.get(typeKey);
+    objectHash = this.objectStore.get(typeKey);
 
     if (objectHash == null)
       {
@@ -2402,7 +2402,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         // == null) logic below.
 
         objectHash = new Hashtable(OBJECTHASHSIZE, 0.75f);
-        objectStore.put(typeKey, objectHash);
+        this.objectStore.put(typeKey, objectHash);
       }
 
     Object element = objectHash.get(objId);
@@ -2504,7 +2504,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public xmlobject getObject(Short baseID, String objectID)
   {
-    Hashtable objectHash = objectStore.get(baseID);
+    Hashtable objectHash = this.objectStore.get(baseID);
 
     if (objectHash == null)
       {
@@ -2544,7 +2544,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public xmlobject getObject(Short baseID, Integer objectNum)
   {
-    Hashtable objectHash = objectStore.get(baseID);
+    Hashtable objectHash = this.objectStore.get(baseID);
 
     if (objectHash == null)
       {
@@ -2612,7 +2612,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public Hashtable<String, FieldTemplate> getFieldHash(String objectTypeName)
   {
-    return objectTypes.get(XMLUtils.XMLDecode(objectTypeName));
+    return this.objectTypes.get(XMLUtils.XMLDecode(objectTypeName));
   }
 
   /**
@@ -2649,7 +2649,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public FieldTemplate getFieldTemplate(Short type, String fieldName)
   {
-    Hashtable<String, FieldTemplate> fieldHash = objectTypeIDs.get(type);
+    Hashtable<String, FieldTemplate> fieldHash = this.objectTypeIDs.get(type);
 
     if (fieldHash == null)
       {
@@ -2683,7 +2683,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public void rememberEmbeddedObject(xmlobject object)
   {
-    this.embeddedObjects.addElement(object);
+    this.embeddedObjects.add(object);
   }
 
   /**
@@ -2743,7 +2743,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     try
       {
-        for (xmlobject newObject: createdObjects)
+        for (xmlobject newObject: this.createdObjects)
           {
             boolean newlyCreated = false;
 
@@ -2763,7 +2763,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
                 newlyCreated = true;
 
-                retVal = newObject.createOnServer(session);
+                retVal = newObject.createOnServer(this.session);
 
                 if (!ReturnVal.didSucceed(retVal))
                   {
@@ -2790,7 +2790,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
                     System.err.println("Editing pre-existing " + newObject);
                   }
 
-                retVal = newObject.editOnServer(session);
+                retVal = newObject.editOnServer(this.session);
 
                 if (!ReturnVal.didSucceed(retVal))
                   {
@@ -2852,11 +2852,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         // edited, and their non-invid fields are fixed up.  we need to do
         // the same for definitely edited objects
 
-        for (xmlobject object: editedObjects)
+        for (xmlobject object: this.editedObjects)
           {
             incCount(editCount, object.typeString);
 
-            retVal = object.editOnServer(session);
+            retVal = object.editOnServer(this.session);
 
             if (!ReturnVal.didSucceed(retVal))
               {
@@ -2899,7 +2899,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         // the newly created objects, which should be able to resolve
         // now.
 
-        for (xmlobject newObject: createdObjects)
+        for (xmlobject newObject: this.createdObjects)
           {
             retVal = newObject.registerFields(1); // just invids
 
@@ -2922,7 +2922,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
         // now we need to register fields in the edited objects
 
-        for (xmlobject object: editedObjects)
+        for (xmlobject object: this.editedObjects)
           {
             retVal = object.registerFields(1); // just invids, everything else we already did
 
@@ -2946,7 +2946,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         // finally we need to do the same for the objects we checked out
         // or created when handling embedded objects
 
-        for (xmlobject object: embeddedObjects)
+        for (xmlobject object: this.embeddedObjects)
           {
             retVal = object.registerFields(1); // only non-embedded invids
 
@@ -2969,7 +2969,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
         // now we need to inactivate any objects to be inactivated
 
-        for (xmlobject object: inactivatedObjects)
+        for (xmlobject object: this.inactivatedObjects)
           {
             incCount(inactivateCount, object.typeString);
 
@@ -3002,7 +3002,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
         // and we need to delete any objects to be deleted
 
-        for (xmlobject object: deletedObjects)
+        for (xmlobject object: this.deletedObjects)
           {
             Invid target = object.getInvid();
 
@@ -3148,7 +3148,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     /* -- */
 
-    for (Map.Entry<Short, Hashtable> entry: objectStore.entrySet())
+    for (Map.Entry<Short, Hashtable> entry: this.objectStore.entrySet())
       {
         Short type = entry.getKey();
         Hashtable<Object, Object> objectHash = entry.getValue();
