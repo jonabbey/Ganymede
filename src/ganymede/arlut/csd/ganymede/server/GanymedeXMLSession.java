@@ -964,8 +964,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
         while (!nextElement.matchesClose("ganymede") && !(nextElement instanceof XMLEndDocument))
           {
-            // "Skipping unrecognized element: {0}"
-            tell(ts.l("run.skipping", nextElement));
+            if (!(nextElement instanceof XMLCloseElement))
+              {
+                // "Skipping unrecognized element: {0}"
+                tell(ts.l("run.skipping", nextElement));
+              }
 
             nextElement = getNextItem();
           }
