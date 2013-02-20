@@ -302,7 +302,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * on behalf of the GanymedeXMLSession.
    */
 
-  public PrintWriter err = new PrintWriter(errBuf);
+  private PrintWriter err = new PrintWriter(this.errBuf);
 
   /**
    * <p>This flag is used to track whether the background parser thread
@@ -3425,7 +3425,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * receive.
    */
 
-  private void tell(String buf)
+  public void tell(String buf)
   {
     this.err.println(buf);
   }
@@ -3435,7 +3435,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * receive.
    */
 
-  private void tell(StackTraceElement[] buf)
+  public void tell(StackTraceElement[] buf)
   {
     this.err.println(buf);
   }

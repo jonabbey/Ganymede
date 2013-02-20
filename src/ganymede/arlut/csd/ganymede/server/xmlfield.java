@@ -188,11 +188,11 @@ public class xmlfield implements FieldType {
     String elementName = openElement.getName();
     fieldDef = owner.getFieldDef(elementName);
 
-    //    owner.xSession.err.println("parsing " + openElement);
+    //    owner.xSession.tell("parsing " + openElement);
 
     if (fieldDef == null)
       {
-        owner.xSession.err.println("\nDid not recognize field " + elementName + " in object " + owner);
+        owner.xSession.tell("\nDid not recognize field " + elementName + " in object " + owner);
 
         if (openElement.isEmpty())
           {
@@ -288,7 +288,7 @@ public class xmlfield implements FieldType {
           }
         else
           {
-            // owner.xSession.err.println("Parsing date for item " + nextItem);
+            // owner.xSession.tell("Parsing date for item " + nextItem);
 
             if (nextItem.matches(ADD) || nextItem.matches(ADDIFNOTPRESENT) || nextItem.matches(DELETE))
               {
@@ -421,7 +421,7 @@ public class xmlfield implements FieldType {
 
         if (!nextItem.matches("permissions"))
           {
-            owner.xSession.err.println("\nUnrecognized tag while parsing data for a permissions field: " + nextItem);
+            owner.xSession.tell("\nUnrecognized tag while parsing data for a permissions field: " + nextItem);
 
             skipToEndField(elementName);
 
@@ -555,7 +555,7 @@ public class xmlfield implements FieldType {
 
         if (!nextItem.matches("options"))
           {
-            owner.xSession.err.println("\nUnrecognized tag while parsing data for a field options field: " + nextItem);
+            owner.xSession.tell("\nUnrecognized tag while parsing data for a field options field: " + nextItem);
 
             skipToEndField(elementName);
 
@@ -636,8 +636,8 @@ public class xmlfield implements FieldType {
           {
             if (setMode)
               {
-                owner.xSession.err.println("\nxmlclient: error, can't enter " + nextItem.getName() +
-                                   " mode with a previous <set> directive in field " + openElement);
+                owner.xSession.tell("\nxmlclient: error, can't enter " + nextItem.getName() +
+                                    " mode with a previous <set> directive in field " + openElement);
 
                 throw new RuntimeException("xmlclient: error, can't enter " + nextItem.getName() +
                                            " mode with a previous <set> directive in field " + openElement);
@@ -662,8 +662,8 @@ public class xmlfield implements FieldType {
               }
             else
               {
-                owner.xSession.err.println("\nxmlclient: error, can't enter set" +
-                                   " mode with a previous mode directive in field " + openElement);
+                owner.xSession.tell("\nxmlclient: error, can't enter set" +
+                                    " mode with a previous mode directive in field " + openElement);
 
                 throw new RuntimeException("xmlclient: error, can't enter set" +
                                            " mode with a previous mode directive in field " + openElement);
@@ -682,8 +682,8 @@ public class xmlfield implements FieldType {
               }
             else
               {
-                owner.xSession.err.println("\nError, found a mismatched </" +
-                                   nextItem.getName() + "> while parsing a vector field.");
+                owner.xSession.tell("\nError, found a mismatched </" +
+                                    nextItem.getName() + "> while parsing a vector field.");
 
                 throw new RuntimeException("Error, found a mismatched </" +
                                            nextItem.getName() + "> while parsing a vector field.");
@@ -777,8 +777,8 @@ public class xmlfield implements FieldType {
               }
             else
               {
-                owner.xSession.err.println("xmlfield WARNING: couldn't get vector value for " + nextItem +
-                                   "in xml field object " + openElement);
+                owner.xSession.tell("xmlfield WARNING: couldn't get vector value for " + nextItem +
+                                    "in xml field object " + openElement);
               }
 
             nextItem = owner.xSession.getNextItem();
@@ -808,7 +808,7 @@ public class xmlfield implements FieldType {
 
     if (nextItem instanceof XMLEndDocument)
       {
-        owner.xSession.err.println("\nRan into end of XML file while processing field " + elementName);
+        owner.xSession.tell("\nRan into end of XML file while processing field " + elementName);
         throw new RuntimeException("Ran into end of XML file while processing field " + elementName);
       }
   }
@@ -840,7 +840,7 @@ public class xmlfield implements FieldType {
 
     if (!item.isEmpty())
       {
-        owner.xSession.err.println("\nError, found a non-empty boolean field value element: " + item);
+        owner.xSession.tell("\nError, found a non-empty boolean field value element: " + item);
       }
 
     return Boolean.valueOf(item.getAttrBoolean("val"));
@@ -858,20 +858,20 @@ public class xmlfield implements FieldType {
           }
         catch (NumberFormatException ex)
           {
-            owner.xSession.err.println("\nUnrecognized character string found when integer numeric value expected: " + item);
+            owner.xSession.tell("\nUnrecognized character string found when integer numeric value expected: " + item);
             return null;
           }
       }
 
     if (!item.matches("int"))
       {
-        owner.xSession.err.println("\nUnrecognized XML item found when int expected: " + item);
+        owner.xSession.tell("\nUnrecognized XML item found when int expected: " + item);
         return null;
       }
 
     if (!item.isEmpty())
       {
-        owner.xSession.err.println("\nError, found a non-empty int field value element: " + item);
+        owner.xSession.tell("\nError, found a non-empty int field value element: " + item);
       }
 
     return item.getAttrInt("val");
@@ -894,7 +894,7 @@ public class xmlfield implements FieldType {
 
     if (!item.isEmpty())
       {
-        owner.xSession.err.println("\nError, found a non-empty date field value element: " + item);
+        owner.xSession.tell("\nError, found a non-empty date field value element: " + item);
       }
 
     formattedDate = item.getAttrStr("val");
@@ -917,7 +917,7 @@ public class xmlfield implements FieldType {
 
         if (result1 == null)
           {
-            owner.xSession.err.println("\nError, could not parse date entity val " + formattedDate + " in element " + item);
+            owner.xSession.tell("\nError, could not parse date entity val " + formattedDate + " in element " + item);
           }
       }
 
@@ -932,9 +932,9 @@ public class xmlfield implements FieldType {
           }
         catch (NumberFormatException ex)
           {
-            owner.xSession.err.println("\nError, could not parse date numeric timecode " +
-                               timecodeStr + " in element " + item);
-            owner.xSession.err.println(ex.getMessage());
+            owner.xSession.tell("\nError, could not parse date numeric timecode " +
+                                timecodeStr + " in element " + item);
+            owner.xSession.tell(ex.getMessage());
           }
       }
 
@@ -950,13 +950,13 @@ public class xmlfield implements FieldType {
 
         if (timediff < -1000 || timediff > 1000)
           {
-            owner.xSession.err.println("\nWarning, date element " + item + " is not internally consistent.");
-            owner.xSession.err.println("Ignoring date string \"" + formattedDate + "\", which was parsed as ");
+            owner.xSession.tell("\nWarning, date element " + item + " is not internally consistent.");
+            owner.xSession.tell("Ignoring date string \"" + formattedDate + "\", which was parsed as ");
 
             synchronized (formatters[0])
               {
-                owner.xSession.err.println(formatters[0].format(result1));
-                owner.xSession.err.println("Using timecode data string \"" + formatters[0].format(result2) + "\".");
+                owner.xSession.tell(formatters[0].format(result1));
+                owner.xSession.tell("Using timecode data string \"" + formatters[0].format(result2) + "\".");
               }
           }
 
@@ -980,13 +980,13 @@ public class xmlfield implements FieldType {
   {
     if (!item.matches("string"))
       {
-        owner.xSession.err.println("\nUnrecognized XML item found when vector string element expected: " + item);
+        owner.xSession.tell("\nUnrecognized XML item found when vector string element expected: " + item);
         return null;
       }
 
     if (!item.isEmpty())
       {
-        owner.xSession.err.println("\nError, found a non-empty vector string element: " + item);
+        owner.xSession.tell("\nError, found a non-empty vector string element: " + item);
       }
 
     String result = item.getAttrStr("val");
@@ -1003,13 +1003,13 @@ public class xmlfield implements FieldType {
   {
     if (!item.matches("ip"))
       {
-        owner.xSession.err.println("\nUnrecognized XML item found when ip expected: " + item);
+        owner.xSession.tell("\nUnrecognized XML item found when ip expected: " + item);
         return null;
       }
 
     if (!item.isEmpty())
       {
-        owner.xSession.err.println("\nError, found a non-empty ip field value element: " + item);
+        owner.xSession.tell("\nError, found a non-empty ip field value element: " + item);
       }
 
     return item.getAttrStr("val");
@@ -1024,20 +1024,20 @@ public class xmlfield implements FieldType {
 
     if (!item.matches("float"))
       {
-        owner.xSession.err.println("\nUnrecognized XML item found when float expected: " + item);
+        owner.xSession.tell("\nUnrecognized XML item found when float expected: " + item);
         return null;
       }
 
     if (!item.isEmpty())
       {
-        owner.xSession.err.println("\nError, found a non-empty float field value element: " + item);
+        owner.xSession.tell("\nError, found a non-empty float field value element: " + item);
       }
 
     valStr = item.getAttrStr("val");
 
     if (valStr == null)
       {
-        owner.xSession.err.println("\nError, float element " + item + " has no val attribute.");
+        owner.xSession.tell("\nError, float element " + item + " has no val attribute.");
         return null;
       }
 
@@ -1047,7 +1047,7 @@ public class xmlfield implements FieldType {
       }
     catch (NumberFormatException ex)
       {
-        owner.xSession.err.println("\nError, float element " + item + " has a malformed val attribute.");
+        owner.xSession.tell("\nError, float element " + item + " has a malformed val attribute.");
         return null;
       }
 
@@ -1078,7 +1078,7 @@ public class xmlfield implements FieldType {
 
     if (debug)
       {
-        owner.xSession.err.println("Registering field " + this.toString());
+        owner.xSession.tell("Registering field " + this.toString());
       }
 
     try
@@ -1332,7 +1332,7 @@ public class xmlfield implements FieldType {
                   {
                     if (debug)
                       {
-                        owner.xSession.err.println("Need to create " + needToBeCreated.size() + " embedded objects");
+                        owner.xSession.tell("Need to create " + needToBeCreated.size() + " embedded objects");
                       }
 
                     for (int i = 0; i < needToBeCreated.size(); i++)
@@ -1350,7 +1350,7 @@ public class xmlfield implements FieldType {
 
                         if (debug)
                           {
-                            owner.xSession.err.println("Creating embedded object " + object);
+                            owner.xSession.tell("Creating embedded object " + object);
                           }
 
                         result = ReturnVal.merge(result, field.createNewEmbedded());
@@ -1361,11 +1361,11 @@ public class xmlfield implements FieldType {
 
                             if (msg != null)
                               {
-                                owner.xSession.err.println("Error creating new embedded " + object + ", reason: " + msg);
+                                owner.xSession.tell("Error creating new embedded " + object + ", reason: " + msg);
                               }
                             else
                               {
-                                owner.xSession.err.println("Error creating " + object + ", no reason given.");
+                                owner.xSession.tell("Error creating " + object + ", no reason given.");
                               }
                           }
                         else
@@ -1416,7 +1416,7 @@ public class xmlfield implements FieldType {
                   {
                     if (debug)
                       {
-                        owner.xSession.err.println("Need to edit " + needToBeEdited.size() + " embedded objects");
+                        owner.xSession.tell("Need to edit " + needToBeEdited.size() + " embedded objects");
                       }
 
                     for (int i = 0; i < needToBeEdited.size(); i++)
@@ -1425,7 +1425,7 @@ public class xmlfield implements FieldType {
 
                         if (debug)
                           {
-                            owner.xSession.err.println("Editing embedded object " + object);
+                            owner.xSession.tell("Editing embedded object " + object);
                           }
 
                         result = ReturnVal.merge(result, object.editOnServer(owner.xSession.session));
@@ -1436,13 +1436,13 @@ public class xmlfield implements FieldType {
 
                             if (msg != null)
                               {
-                                owner.xSession.err.println("Error editing previous embedded " + object +
-                                                   ", reason: " + msg);
+                                owner.xSession.tell("Error editing previous embedded " + object +
+                                                    ", reason: " + msg);
                               }
                             else
                               {
-                                owner.xSession.err.println("Error editing previous embedded " + object +
-                                                   ", no reason given.");
+                                owner.xSession.tell("Error editing previous embedded " + object +
+                                                    ", no reason given.");
                               }
                           }
 
@@ -1470,7 +1470,7 @@ public class xmlfield implements FieldType {
                   {
                     if (debug)
                       {
-                        owner.xSession.err.println("Need to remove " + needToBeRemoved.size() + " embedded objects");
+                        owner.xSession.tell("Need to remove " + needToBeRemoved.size() + " embedded objects");
                       }
 
                     for (int i = 0; i < needToBeRemoved.size(); i++)
@@ -1485,13 +1485,13 @@ public class xmlfield implements FieldType {
 
                             if (msg != null)
                               {
-                                owner.xSession.err.println("Error deleting embedded " + invid +
-                                                   ", reason: " + msg);
+                                owner.xSession.tell("Error deleting embedded " + invid +
+                                                    ", reason: " + msg);
                               }
                             else
                               {
-                                owner.xSession.err.println("Error deleting previous embedded " + invid +
-                                                   ", no reason given.");
+                                owner.xSession.tell("Error deleting previous embedded " + invid +
+                                                    ", no reason given.");
                               }
 
                             return result;
@@ -1535,8 +1535,8 @@ public class xmlfield implements FieldType {
 
                             if (fieldHash == null)
                               {
-                                owner.xSession.err.println("Error, can't process field options for object base " +
-                                                   XMLUtils.XMLDecode(option.getName()) + ", base not found.");
+                                owner.xSession.tell("Error, can't process field options for object base " +
+                                                    XMLUtils.XMLDecode(option.getName()) + ", base not found.");
                                 return new ReturnVal(false);
                               }
 
@@ -1544,9 +1544,9 @@ public class xmlfield implements FieldType {
 
                             if (optionFieldDef == null)
                               {
-                                owner.xSession.err.println("Error, can't process field options for field " +
-                                                   XMLUtils.XMLDecode(fieldOption.getName()) + " in object base " +
-                                                   XMLUtils.XMLDecode(option.getName()) + ", base not found.");
+                                owner.xSession.tell("Error, can't process field options for field " +
+                                                    XMLUtils.XMLDecode(fieldOption.getName()) + " in object base " +
+                                                    XMLUtils.XMLDecode(option.getName()) + ", base not found.");
                                 return new ReturnVal(false);
                               }
 
@@ -1599,8 +1599,8 @@ public class xmlfield implements FieldType {
 
                             if (fieldHash == null)
                               {
-                                owner.xSession.err.println("Error, can't process field permissions for object base " +
-                                                   XMLUtils.XMLDecode(perm.getName()) + ", base not found.");
+                                owner.xSession.tell("Error, can't process field permissions for object base " +
+                                                    XMLUtils.XMLDecode(perm.getName()) + ", base not found.");
                                 return new ReturnVal(false);
                               }
 
@@ -1608,9 +1608,9 @@ public class xmlfield implements FieldType {
 
                             if (permFieldDef == null)
                               {
-                                owner.xSession.err.println("Error, can't process field permissions for field " +
-                                                   XMLUtils.XMLDecode(fieldPerm.getName()) + " in object base " +
-                                                   XMLUtils.XMLDecode(perm.getName()) + ", base not found.");
+                                owner.xSession.tell("Error, can't process field permissions for field " +
+                                                    XMLUtils.XMLDecode(fieldPerm.getName()) + " in object base " +
+                                                    XMLUtils.XMLDecode(perm.getName()) + ", base not found.");
                                 return new ReturnVal(false);
                               }
 
@@ -1755,7 +1755,7 @@ public class xmlfield implements FieldType {
 
             if (debug && invid == null)
               {
-                owner.xSession.err.println("Couldn't find an invid from an xInvid.getInvid() call on " + x);
+                owner.xSession.tell("Couldn't find an invid from an xInvid.getInvid() call on " + x);
               }
           }
         else if (x instanceof xmlobject)
@@ -1764,12 +1764,12 @@ public class xmlfield implements FieldType {
 
             if (debug && invid == null)
               {
-                owner.xSession.err.println("Couldn't find an invid from an xmlobject.getInvid() call on " + x);
+                owner.xSession.tell("Couldn't find an invid from an xmlobject.getInvid() call on " + x);
               }
           }
         else
           {
-            owner.xSession.err.println("Unrecognized XML element while processing Invid vector: " + x);
+            owner.xSession.tell("Unrecognized XML element while processing Invid vector: " + x);
             continue;
           }
 
@@ -1779,7 +1779,7 @@ public class xmlfield implements FieldType {
           }
         else
           {
-            owner.xSession.err.println("Couldn't find invid for " + x);
+            owner.xSession.tell("Couldn't find invid for " + x);
           }
       }
 
@@ -1824,12 +1824,12 @@ public class xmlfield implements FieldType {
               }
             else if (debug)
               {
-                owner.xSession.err.println("Couldn't find invid for " + x);
+                owner.xSession.tell("Couldn't find invid for " + x);
               }
           }
         else
           {
-            owner.xSession.err.println("Unrecognized XML element while processing Invid vector: " + x);
+            owner.xSession.tell("Unrecognized XML element while processing Invid vector: " + x);
             continue;
           }
       }
@@ -1869,7 +1869,7 @@ public class xmlfield implements FieldType {
           }
         else
           {
-            owner.xSession.err.println("Unrecognized XML element while processing Invid vector: " + x);
+            owner.xSession.tell("Unrecognized XML element while processing Invid vector: " + x);
             continue;
           }
 
@@ -2021,14 +2021,14 @@ class xInvid {
   {
     if (!item.matches("invid"))
       {
-        getXSession().err.println("Unrecognized XML item found when invid element expected: " + item);
+        getXSession().tell("Unrecognized XML item found when invid element expected: " + item);
 
         throw new NullPointerException("Bad item!");
       }
 
     if (!item.isEmpty())
       {
-        getXSession().err.println("Error, found a non-empty invid element: " + item);
+        getXSession().tell("Error, found a non-empty invid element: " + item);
 
         throw new NullPointerException("Bad item!");
       }
@@ -2037,7 +2037,7 @@ class xInvid {
 
     if (typeString == null)
       {
-        getXSession().err.println("Missing or malformed invid type in element: " + item);
+        getXSession().tell("Missing or malformed invid type in element: " + item);
 
         throw new NullPointerException("Bad item!");
       }
@@ -2058,7 +2058,7 @@ class xInvid {
           }
         else
           {
-            getXSession().err.println("Unknown object target in invid field element: " + item);
+            getXSession().tell("Unknown object target in invid field element: " + item);
             throw new NullPointerException("Bad item!");
           }
       }
@@ -2082,7 +2082,7 @@ class xInvid {
       }
     catch (NullPointerException ex)
       {
-        getXSession().err.println("Unknown target type " + typeString +
+        getXSession().tell("Unknown target type " + typeString +
                            " in invid field element: " + item);
         throw new NullPointerException("Bad item!");
       }
@@ -2257,13 +2257,13 @@ class xPassword {
   {
     if (!item.matches("password"))
       {
-        getXSession().err.println("Unrecognized XML item found when password element expected: " + item);
+        getXSession().tell("Unrecognized XML item found when password element expected: " + item);
         throw new NullPointerException("Bad item!");
       }
 
     if (!item.isEmpty())
       {
-        getXSession().err.println("Error, found a non-empty password element: " + item);
+        getXSession().tell("Error, found a non-empty password element: " + item);
 
         throw new NullPointerException("Bad item!");
       }
@@ -2421,7 +2421,7 @@ class xPerm {
   {
     while (!(item instanceof XMLElement))
       {
-        getXSession().err.println("Unrecognized element encountered in xPerm constructor, skipping: " + item);
+        getXSession().tell("Unrecognized element encountered in xPerm constructor, skipping: " + item);
         item = getXSession().getNextItem();
       }
 
@@ -2436,7 +2436,7 @@ class xPerm {
 
     if (permbits == null)
       {
-        getXSession().err.println("No perm attributes found for xPerm item " + item);
+        getXSession().tell("No perm attributes found for xPerm item " + item);
       }
     else
       {
@@ -2542,7 +2542,7 @@ class xOption {
   {
     while (!(item instanceof XMLElement))
       {
-        getXSession().err.println("Unrecognized element encountered in xOption constructor, skipping: " + item);
+        getXSession().tell("Unrecognized element encountered in xOption constructor, skipping: " + item);
         item = getXSession().getNextItem();
       }
 
@@ -2557,7 +2557,7 @@ class xOption {
 
     if (myOption == null)
       {
-        getXSession().err.println("No perm attributes found for xOption item " + item);
+        getXSession().tell("No perm attributes found for xOption item " + item);
       }
     else
       {

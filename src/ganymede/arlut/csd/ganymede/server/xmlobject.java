@@ -242,7 +242,7 @@ public class xmlobject {
     catch (NullPointerException ex)
       {
         // "\n\nERROR: Unrecognized object type "{0}""
-        xSession.err.println(ts.l("init.unrecognized_type", openElement.getAttrStr("type")));
+        xSession.tell(ts.l("init.unrecognized_type", openElement.getAttrStr("type")));
       }
 
     id = openElement.getAttrStr("id"); // may be null
@@ -319,14 +319,14 @@ public class xmlobject {
 
             xmlfield field = new xmlfield(this, (XMLElement) nextItem);
 
-            //      xSession.err.println("Added new field: " + field.toString());
+            //      xSession.tell("Added new field: " + field.toString());
 
             fields.put(field.getName(), field);
           }
         else
           {
             // "Unrecognized XML content in object {0}: {1}"
-            xSession.err.println(ts.l("init.unrecognized_xml", openElement, nextItem));
+            xSession.tell(ts.l("init.unrecognized_xml", openElement, nextItem));
           }
 
         nextItem = xSession.getNextItem();
@@ -470,7 +470,7 @@ public class xmlobject {
 
     if (debug)
       {
-        xSession.err.println("Registering fields [" + mode + "] for object " + this.toString(false));
+        xSession.tell("Registering fields [" + mode + "] for object " + this.toString(false));
       }
 
     // we want to create/register the fields in their display order..
@@ -558,7 +558,7 @@ public class xmlobject {
 
         if (debug)
           {
-            xSession.err.println("xmlobject.getInvid() calling findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
+            xSession.tell("xmlobject.getInvid() calling findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
           }
 
         invid = xSession.session.findLabeledObject(id, type.shortValue());
@@ -567,7 +567,7 @@ public class xmlobject {
           {
             if (debug)
               {
-                xSession.err.println("xmlobject.getInvid() deciding known non existent on " + type + ":" + id);
+                xSession.tell("xmlobject.getInvid() deciding known non existent on " + type + ":" + id);
               }
 
             knownNonExistent = true;
@@ -575,8 +575,8 @@ public class xmlobject {
 
         if (debug)
           {
-            xSession.err.println("xmlobject called findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
-            xSession.err.println("findLabeledObject() returned " + invid + "[3]");
+            xSession.tell("xmlobject called findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
+            xSession.tell("findLabeledObject() returned " + invid + "[3]");
           }
       }
     else if (ownerField != null && index != -1)
