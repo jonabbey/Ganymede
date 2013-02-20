@@ -424,7 +424,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     // the stopParser() method if our server login gets forcibly
     // revoked.
 
-    session.setXSession(this);
+    this.session.setXSession(this);
 
     try
       {
@@ -476,7 +476,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public ReturnVal xmlSubmit(byte[] bytes) throws NotLoggedInException
   {
-    session.checklogin();
+    this.session.checklogin();
 
     if (debug)
       {
@@ -519,14 +519,14 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
             int waitCount = 0;
 
-            while (reader != null && !reader.isDone() && waitCount < 10)
+            while (reader != null && !reader.isDone() && waitCount < 40)
               {
                 // "Waiting for reader to close down: {0,number,#}"
                 System.err.println(ts.l("xmlSubmit.waiting_for_reader", Integer.valueOf(waitCount)));
 
                 try
                   {
-                    Thread.sleep(1000); // sleep for one second
+                    Thread.sleep(250); // sleep for a quarter second
                   }
                 catch (InterruptedException ex2)
                   {
@@ -631,15 +631,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
             try
               {
-                Thread.sleep(500); // sleep for one half second to slow the client/server spin loop down
+                Thread.sleep(50); // slow our spin loop down
               }
             catch (InterruptedException ex2)
               {
                 // ?
               }
-
-            // Now that we've waited, collect any additional
-            // accumulation and we'll return
 
             synchronized (errBuffer)
               {
@@ -659,7 +656,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
             try
               {
-                Thread.sleep(1000); // sleep for one second to allow more err stream data to accumulate
+                Thread.sleep(50);
               }
             catch (InterruptedException ex2)
               {
@@ -735,14 +732,14 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public void unreferenced()
   {
-    if (session != null)
+    if (this.session != null)
       {
         // set our underlying GanymedeSession's xSession to null so
         // that it will take things seriously when we tell it that it
         // is unreferenced.
 
-        session.setXSession(null);
-        session.unreferenced();
+        this.session.setXSession(null);
+        this.session.unreferenced();
       }
   }
 
@@ -812,7 +809,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         System.err.println("Entering cleanup");
       }
 
-    if (cleanedup.set(true))
+    if (this.cleanedup.set(true))
       {
         return;
       }
@@ -820,38 +817,37 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     // note, we must not clear errBuf here, as we may cleanup before
     // calling getReturnVal() to report to the client.
 
-    reader.close();
-    reader = null;
+    this.reader.close();
+    this.reader = null;
 
-    objectTypes.clear();
-    objectTypes = null;
+    this.objectTypes.clear();
+    this.objectTypes = null;
 
-    objectTypeIDs.clear();
-    objectTypeIDs = null;
+    this.objectTypeIDs.clear();
+    this.objectTypeIDs = null;
 
-    objectStore.clear();
-    objectStore = null;
+    this.objectStore.clear();
+    this.objectStore = null;
 
-    createdObjects.setSize(0);
-    createdObjects = null;
+    this.createdObjects.setSize(0);
+    this.createdObjects = null;
 
-    editedObjects.setSize(0);
-    editedObjects = null;
+    this.editedObjects.setSize(0);
+    this.editedObjects = null;
 
-    embeddedObjects.setSize(0);
-    embeddedObjects = null;
+    this.embeddedObjects.setSize(0);
+    this.embeddedObjects = null;
 
-    inactivatedObjects.setSize(0);
-    inactivatedObjects = null;
+    this.inactivatedObjects.setSize(0);
+    this.inactivatedObjects = null;
 
-    deletedObjects.setSize(0);
-    deletedObjects = null;
+    this.deletedObjects.setSize(0);
+    this.deletedObjects = null;
 
-    if (session != null && session.isLoggedIn())
+    if (this.session != null && this.session.isLoggedIn())
       {
-        session.logout();
-
-        session = null;
+        this.session.logout();
+        this.session = null;
       }
   }
 
@@ -876,7 +872,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (!(startDocument instanceof XMLStartDocument))
           {
             // "XML parser error: first element {0} not an XMLStartDocument"
-            err.println(ts.l("run.not_start_element", startDocument));
+            tell(ts.l("run.not_start_element", startDocument));
 
             return;
           }
@@ -891,7 +887,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (!docElement.matches("ganymede"))
           {
             // "Error, XML Stream does not contain a Ganymede XML file.\nUnrecognized XML element: {0}"
-            err.println(ts.l("run.bad_start_element", docElement));
+            tell(ts.l("run.bad_start_element", docElement));
 
             return;
           }
@@ -902,7 +898,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (majorI == null || majorI.intValue() > majorVersion)
           {
             // "Error, the Ganymede document element {0} does not contain a compatible major version number."
-            err.println(ts.l("run.bad_major_version", docElement));
+            tell(ts.l("run.bad_major_version", docElement));
 
             return;
           }
@@ -911,7 +907,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             (minorI == null || minorI.intValue() > minorVersion))
           {
             // "Error, the Ganymede document element {0} does not contain a compatible minor version number."
-            err.println(ts.l("run.bad_minor_version", docElement));
+            tell(ts.l("run.bad_minor_version", docElement));
 
             return;
           }
@@ -939,12 +935,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
               }
             else
               {
-                // if all we wind up doing is schema editing, we'll
-                // want return a positive success.  in
-                // integrateXMLTransaction(), below, we set
-                // this.success back to false until we know that we
-                // have successfully committed all the data in the
-                // <ganydata> block.
+                // so far, so good.  if we don't proceed to find a
+                // ganydata element, we'll want to return a positive
+                // success result to the client's xmlEnd() call.
 
                 this.success = true;
               }
@@ -954,25 +947,23 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
         if (nextElement.matches("ganydata"))
           {
-            if (!processData())
+            this.success = processData();
+
+            if (!this.success)
               {
                 // don't bother processing rest of XML doc.. just jump
                 // down to finally clause
 
-                this.success = false;
-
                 return;
               }
-
-            this.success = true;
 
             nextElement = getNextItem();
           }
 
-        while ((!nextElement.matchesClose("ganymede") && !(nextElement instanceof XMLCloseElement)) && !(nextElement instanceof XMLEndDocument))
+        while (!nextElement.matchesClose("ganymede") && !(nextElement instanceof XMLEndDocument))
           {
             // "Skipping unrecognized element: {0}"
-            err.println(ts.l("run.skipping", nextElement));
+            tell(ts.l("run.skipping", nextElement));
 
             nextElement = getNextItem();
           }
@@ -985,7 +976,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
         // "Caught exception for GanymedeXMLSession.run():\n{0}"
 
-        err.println(ts.l("run.exception", Ganymede.stackTrace(ex)));
+        tell(ts.l("run.exception", Ganymede.stackTrace(ex)));
       }
     finally
       {
@@ -1022,7 +1013,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     while (item instanceof XMLWarning)
       {
         // "Warning!: {0}"
-        err.println(ts.l("getNextItem.warning", item));
+        tell(ts.l("getNextItem.warning", item));
 
         item = reader.getNextItem();
       }
@@ -1052,7 +1043,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     while (item instanceof XMLWarning)
       {
         // "Warning!: {0}"
-        err.println(ts.l("getNextItem.warning", item));
+        tell(ts.l("getNextItem.warning", item));
 
         reader.getNextItem();   // consume the peeked warning item
         item = reader.peekNextItem();
@@ -1091,14 +1082,14 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if ((_schemaTree instanceof XMLError) ||
             (_schemaTree instanceof XMLEndDocument))
           {
-            err.println(_schemaTree.toString());
+            tell(_schemaTree.toString());
             return false;
           }
 
-        if (!session.getPermManager().isSuperGash())
+        if (!this.session.getPermManager().isSuperGash())
           {
             // "Skipping <ganyschema> element.. not logged in with supergash privileges."
-            err.println(ts.l("processSchema.bad_permissions"));
+            tell(ts.l("processSchema.bad_permissions"));
 
             return false;
           }
@@ -1113,7 +1104,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (editor == null)
           {
             // "Couldn''t edit the schema.. other users logged in?"
-            err.println(ts.l("processSchema.editing_blocked"));
+            tell(ts.l("processSchema.editing_blocked"));
 
             return false;
           }
@@ -1146,7 +1137,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             if (_otdItem.getChildren() == null || _otdItem.getChildren().length != 1)
               {
                 // "Error, the object_type_definitions element does not contain a single-rooted category tree."
-                err.println(ts.l("processSchema.bad_category_tree"));
+                tell(ts.l("processSchema.bad_category_tree"));
 
                 return false;
               }
@@ -1156,7 +1147,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         else
           {
             // "Couldn''t find <object_type_definitions>."
-            err.println(ts.l("processSchema.no_object_type_definitions"));
+            tell(ts.l("processSchema.no_object_type_definitions"));
 
             return false;
           }
@@ -1166,7 +1157,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (schemadebug)
           {
             // "1.  Calculate what name spaces need to be created, edited, or removed"
-            err.println(ts.l("processSchema.schemadebug_1"));
+            tell(ts.l("processSchema.schemadebug_1"));
           }
 
         if (namespaceTree != null)
@@ -1184,7 +1175,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (schemadebug)
           {
             // "2.  Create new name spaces."
-            err.println(ts.l("processSchema.schemadebug_2"));
+            tell(ts.l("processSchema.schemadebug_2"));
           }
 
         for (XMLItem _space: spacesToAdd)
@@ -1194,7 +1185,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             if (_name == null || _name.equals(""))
               {
                 // "Error, namespace item {0} has no name attribute."
-                err.println(ts.l("processSchema.no_name_namespace", _space));
+                tell(ts.l("processSchema.no_name_namespace", _space));
 
                 return false;
               }
@@ -1206,20 +1197,20 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             if (_space.getAttrStr("case-sensitive") == null)
               {
                 // "Warning, namespace item {0} has no case-sensitive attribute.  {0} will be created as case insensitive."
-                err.println(ts.l("processSchema.no_case_namespace", _space));
+                tell(ts.l("processSchema.no_case_namespace", _space));
               }
 
             boolean _sensitive = _space.getAttrBoolean("case-sensitive");
 
             // "\tCreating namespace {0}."
-            err.println(ts.l("processSchema.creating_namespace", _name));
+            tell(ts.l("processSchema.creating_namespace", _name));
 
             NameSpace _aNewSpace = editor.createNewNameSpace(_name,!_sensitive);
 
             if (_aNewSpace == null)
               {
                 // "Couldn''t create a new namespace for item {0}."
-                err.println(ts.l("processSchema.failed_namespace_create", _space));
+                tell(ts.l("processSchema.failed_namespace_create", _space));
 
                 return false;
               }
@@ -1230,7 +1221,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (schemadebug)
           {
             // "3.  Calculate what object bases we need to create, edit, or remove."
-            err.println(ts.l("processSchema.schemadebug_3"));
+            tell(ts.l("processSchema.schemadebug_3"));
           }
 
         if (categoryTree == null || !calculateBases())
@@ -1245,13 +1236,13 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (schemadebug)
           {
             // "4.  Delete any object bases that are not at least mentioned in the XML schema tree."
-            err.println(ts.l("processSchema.schemadebug_4"));
+            tell(ts.l("processSchema.schemadebug_4"));
           }
 
         for (String _basename: basesToRemove)
           {
             // "\tDeleting object base {0}."
-            err.println(ts.l("processSchema.deleting_base", _basename));
+            tell(ts.l("processSchema.deleting_base", _basename));
 
             if (!handleReturnVal(editor.deleteBase(_basename)))
               {
@@ -1264,7 +1255,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (schemadebug)
           {
             // "5.  Rename any object bases that need to be renamed."
-            err.println(ts.l("processSchema.schemadebug_5"));
+            tell(ts.l("processSchema.schemadebug_5"));
           }
 
         if (!handleBaseRenaming())
@@ -1277,13 +1268,13 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (schemadebug)
           {
             // "6.  Create all object bases on the basesToAdd list."
-            err.println(ts.l("processSchema.schemadebug_6"));
+            tell(ts.l("processSchema.schemadebug_6"));
           }
 
         for (XMLItem _entry: basesToAdd)
           {
             // "\tCreating object base {0}"
-            err.println(ts.l("processSchema.creating_objectbase", _entry.getAttrStr("name")));
+            tell(ts.l("processSchema.creating_objectbase", _entry.getAttrStr("name")));
 
             Integer _id = _entry.getAttrInt("id");
 
@@ -1332,7 +1323,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (schemadebug)
           {
             // "7.  Fix up fields in pre-existing object bases."
-            err.println(ts.l("processSchema.schemadebug_7"));
+            tell(ts.l("processSchema.schemadebug_7"));
           }
 
         for (XMLItem _entry: basesToEdit)
@@ -1344,7 +1335,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             if (_oldBase == null)
               {
                 // " Error, couldn''t find DBObjectBase for {0} in pass {1,number,#}."
-                err.println(ts.l("processSchema.bad_base", _entry.getTreeString(), Integer.valueOf(1)));
+                tell(ts.l("processSchema.bad_base", _entry.getTreeString(), Integer.valueOf(1)));
 
                 return false;
               }
@@ -1352,11 +1343,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             if (false)
               {
                 // "7.  pass 1 - fixups on {0}"
-                err.println(ts.l("processSchema.schemadebug_7_1", _oldBase.getName()));
+                tell(ts.l("processSchema.schemadebug_7_1", _oldBase.getName()));
               }
 
             // "\tEditing object base {0}"
-            err.println(ts.l("processSchema.editing_objectbase", _oldBase.getName()));
+            tell(ts.l("processSchema.editing_objectbase", _oldBase.getName()));
 
             // don't yet try to resolve invid links, since we haven't
             // done a complete pass through basesToEdit to fix up
@@ -1382,7 +1373,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             if (_oldBase == null)
               {
                 // " Error, couldn''t find DBObjectBase for {0} in pass {1,number,#}."
-                err.println(ts.l("processSchema.bad_base", _entry.getTreeString(), Integer.valueOf(2)));
+                tell(ts.l("processSchema.bad_base", _entry.getTreeString(), Integer.valueOf(2)));
 
                 return false;
               }
@@ -1390,10 +1381,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             if (schemadebug)
               {
                 // "7.  pass 2 - fixups on object base {0}"
-                err.println(ts.l("processSchema.schemadebug_7_2", _oldBase.getName()));
+                tell(ts.l("processSchema.schemadebug_7_2", _oldBase.getName()));
               }
 
-            //      err.println("\tResolving " + _oldBase);
+            // tell("\tResolving " + _oldBase);
 
             if (!handleReturnVal(_oldBase.setXML(_entry, true, err)))
               {
@@ -1410,7 +1401,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             if (_oldBase == null)
               {
                 // " Error, couldn''t find DBObjectBase for {0} in pass {1,number,#}."
-                err.println(ts.l("processSchema.bad_base", _entry.getTreeString(), Integer.valueOf(3)));
+                tell(ts.l("processSchema.bad_base", _entry.getTreeString(), Integer.valueOf(3)));
 
                 return false;
               }
@@ -1418,7 +1409,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             if (schemadebug)
               {
                 // "7.  pass 3 - fixups on object base {0}"
-                err.println(ts.l("processSchema.schemadebug_7_3", _oldBase.getName()));
+                tell(ts.l("processSchema.schemadebug_7_3", _oldBase.getName()));
               }
 
             if (!handleReturnVal(_oldBase.setXML(_entry, true, err)))
@@ -1432,7 +1423,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (schemadebug)
           {
             // "8.  Shuffle the Category tree to match the XML schema."
-            err.println(ts.l("processSchema.schemadebug_8"));
+            tell(ts.l("processSchema.schemadebug_8"));
           }
 
         if (!handleReturnVal(reshuffleCategories(categoryTree)))
@@ -1445,13 +1436,13 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (schemadebug)
           {
             // "9.  Clear out any name spaces that need it."
-            err.println(ts.l("processSchema.schemadebug_9"));
+            tell(ts.l("processSchema.schemadebug_9"));
           }
 
         for (String _name: spacesToRemove)
           {
             // "\tDeleting name space {0}."
-            err.println(ts.l("processSchema.deleting_namespace", _name));
+            tell(ts.l("processSchema.deleting_namespace", _name));
 
             if (!handleReturnVal(editor.deleteNameSpace(_name)))
               {
@@ -1465,7 +1456,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (schemadebug)
           {
             // "10.  Need to flip case sensitivity on namespaces that need it."
-            err.println(ts.l("processSchema.schemadebug_10"));
+            tell(ts.l("processSchema.schemadebug_10"));
           }
 
         for (XMLItem _entry: spacesToEdit)
@@ -1474,7 +1465,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             boolean _val = _entry.getAttrBoolean("case-sensitive");
 
             // "\tFlipping name space {0}."
-            err.println(ts.l("processSchema.flipping_namespace", _name));
+            tell(ts.l("processSchema.flipping_namespace", _name));
 
             NameSpace _space = editor.getNameSpace(_name);
 
@@ -1486,7 +1477,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (schemadebug)
           {
             // "Successfully completed XML schema edit."
-            err.println(ts.l("processSchema.schemadebug_success"));
+            tell(ts.l("processSchema.schemadebug_success"));
           }
 
         _success = true;
@@ -1494,7 +1485,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     catch (Throwable ex)
       {
         // "Caught Exception during XML schema editing.\n{0}"
-        err.println(ts.l("processSchema.exception", Ganymede.stackTrace(ex)));
+        tell(ts.l("processSchema.exception", Ganymede.stackTrace(ex)));
 
         _success = false;
         return false;
@@ -1512,7 +1503,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (_success)
           {
             // "Committing schema edit."
-            err.println(ts.l("processSchema.committing"));
+            tell(ts.l("processSchema.committing"));
             editor.commit();
             this.editor = null;
             return true;
@@ -1520,7 +1511,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         else
           {
             // "Releasing schema edit."
-            err.println(ts.l("processSchema.releasing"));
+            tell(ts.l("processSchema.releasing"));
 
             if (editor != null)
               {
@@ -1562,7 +1553,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             if (!_xns.matches("namespace"))
               {
                 // "Error, unrecognized element: {0} when expecting <namespace>."
-                err.println(ts.l("calculateNameSpaces.not_a_namespace", _xns));
+                tell(ts.l("calculateNameSpaces.not_a_namespace", _xns));
 
                 return false;
               }
@@ -1572,7 +1563,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             if (_entries.containsKey(_name))
               {
                 // "Error, found duplicate <namespace> name ''{0}''."
-                err.println(ts.l("calculateNameSpaces.duplicate_namespace", _name));
+                tell(ts.l("calculateNameSpaces.duplicate_namespace", _name));
 
                 return false;
               }
@@ -1673,7 +1664,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (id == null)
           {
             // "Error, couldn''t get id number for object definition item: {0}."
-            err.println(ts.l("calculateBases.missing_id", objectdef));
+            tell(ts.l("calculateBases.missing_id", objectdef));
 
             return false;
           }
@@ -1681,7 +1672,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (id.shortValue() < 0)
           {
             // "Error, can''t create or edit an object base with a negative id number: {0}."
-            err.println(ts.l("calculateBases.negative_id", objectdef));
+            tell(ts.l("calculateBases.negative_id", objectdef));
 
             return false;
           }
@@ -1689,7 +1680,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (name == null || name.equals(""))
           {
             // "Error, couldn''t get name for object definition item: {0}."
-            err.println(ts.l("calculateBases.missing_name", objectdef));
+            tell(ts.l("calculateBases.missing_name", objectdef));
 
             return false;
           }
@@ -1700,7 +1691,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (entries.containsKey(key))
           {
             // "Error, found duplicate object base id number in <ganyschema>: {0}."
-            err.println(ts.l("calculateBases.duplicate_id", objectdef));
+            tell(ts.l("calculateBases.duplicate_id", objectdef));
 
             return false;
           }
@@ -1708,7 +1699,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (nameTable.contains(name))
           {
             // "Error, found duplicate object base name in <ganyschema>: {0}."
-            err.println(ts.l("calculateBases.duplicate_name", objectdef));
+            tell(ts.l("calculateBases.duplicate_name", objectdef));
 
             return false;
           }
@@ -1759,7 +1750,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
           {
             // "Error, object type ids of less than 256 are reserved for new system-defined
             // object types, and may not be created with the xml schema editing system: {0}."
-            err.println(ts.l("calculateBases.reserved_object_base_id", entry));
+            tell(ts.l("calculateBases.reserved_object_base_id", entry));
 
             return false;
           }
@@ -1846,7 +1837,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         // when we get to it
 
         // "\tRenaming {0} to {1}."
-        err.println(ts.l("handleBaseRenaming.renaming_base", numBaseRef.getName(), name));
+        tell(ts.l("handleBaseRenaming.renaming_base", numBaseRef.getName(), name));
 
         if (nameBaseRef != null)
           {
@@ -1958,7 +1949,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     if (!categoryRoot.matches("category"))
       {
         // "buildXMLCategories() called with a bad XML element.  Expecting <category> element, found {0}."
-        err.println(ts.l("buildXMLCategories.bad_root", categoryRoot));
+        tell(ts.l("buildXMLCategories.bad_root", categoryRoot));
 
         return null;
       }
@@ -1970,7 +1961,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     catch (RemoteException ex)
       {
         // "Caught RMI export error in buildXMLCategories():\n{0}"
-        err.println(ts.l("buildXMLCategories.exception", Ganymede.stackTrace(ex)));
+        tell(ts.l("buildXMLCategories.exception", Ganymede.stackTrace(ex)));
 
         return null;
       }
@@ -2038,7 +2029,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     if (debug)
       {
-        err.println("processData");
+        tell("processData");
       }
 
     initializeLookups();
@@ -2080,7 +2071,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
                     // our finally clause will log us out
 
                     // "Error constructing xmlobject for {0}:\n{1}"
-                    err.println(ts.l("processData.xmlobject_init_failure", item, Ganymede.stackTrace(ex)));
+                    tell(ts.l("processData.xmlobject_init_failure", item, Ganymede.stackTrace(ex)));
 
                     return false;
                   }
@@ -2140,10 +2131,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
                 if (!storeObject(objectRecord))
                   {
-                    err.println();
+                    tell("");
 
                     // "Error, xml object {0} is not uniquely identified within the XML file."
-                    err.println(ts.l("processData.duplicate_xmlobject", objectRecord));
+                    tell(ts.l("processData.duplicate_xmlobject", objectRecord));
 
                     // our finally clause will log us out
 
@@ -2154,12 +2145,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             item = getNextItem();
           }
 
-        err.println();
+        tell("");
 
         // "Done scanning XML for data elements.  Integrating transaction for {0,number,#} <object> elements."
-        err.println(ts.l("processData.integrating", Integer.valueOf(totalCount)));
+        tell(ts.l("processData.integrating", Integer.valueOf(totalCount)));
 
-        err.println();
+        tell("");
 
         try
           {
@@ -2175,7 +2166,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (committedTransaction)
           {
             // "Finished integrating XML data transaction."
-            err.println(ts.l("processData.committed"));
+            tell(ts.l("processData.committed"));
           }
 
         return committedTransaction;
@@ -2183,7 +2174,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     catch (Exception ex)
       {
         // "Error, processData() caught an exception:\n{0}"
-        err.println(ts.l("processData.exception", Ganymede.stackTrace(ex)));
+        tell(ts.l("processData.exception", Ganymede.stackTrace(ex)));
 
         return false;
       }
@@ -2194,10 +2185,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (!committedTransaction)
           {
             // "Aborted XML data transaction, logging out."
-            err.println(ts.l("processData.aborted"));
+            tell(ts.l("processData.aborted"));
           }
 
-        session.logout();
+        this.session.logout();
       }
   }
 
@@ -2422,15 +2413,15 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
         if (false)
           {
-            err.println("Calling findLabeledObject() on " + typeId + ":" + objId);
+            tell("Calling findLabeledObject() on " + typeId + ":" + objId);
           }
 
-        invid = session.findLabeledObject(objId, typeId);
+        invid = this.session.findLabeledObject(objId, typeId);
 
         if (debug)
           {
-            err.println("Returned from findLabeledObject() on " + typeId + ":" + objId);
-            err.println("findLabeledObject() returned " + invid);
+            tell("Returned from findLabeledObject() on " + typeId + ":" + objId);
+            tell("findLabeledObject() returned " + invid);
           }
 
         if (invid != null)
@@ -2449,8 +2440,8 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
             if (debug)
               {
-                err.println("GanymedeXMLSession.getInvid() found xmlobject in objectHash for " + typeId + ":" + objId);
-                err.println("Found xmlobject is " + element.toString());
+                tell("GanymedeXMLSession.getInvid() found xmlobject in objectHash for " + typeId + ":" + objId);
+                tell("Found xmlobject is " + element.toString());
               }
 
             // if invid is null at this point, this object hasn't been
@@ -2707,30 +2698,33 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     /* -- */
 
-    if (cleanedup.isSet())
+    if (this.cleanedup.isSet())
       {
         return false;
       }
 
-    retVal = session.openTransaction("xmlclient", false); // non-interactive
+    retVal = this.session.openTransaction("xmlclient", false); // non-interactive
 
     if (!ReturnVal.didSucceed(retVal))
       {
         if (retVal.getDialog() != null)
           {
             // "GanymedeXMLSession Error: couldn''t open transaction {0}: {1}"
-            err.println(ts.l("integrateXMLTransaction.failed_open_msg", session.getSessionName(), retVal.getDialog().getText()));
+            tell(ts.l("integrateXMLTransaction.failed_open_msg",
+                      this.session.getSessionName(),
+                      retVal.getDialog().getText()));
           }
         else
           {
             // "GanymedeXMLSession Error: couldn''t open transaction {0}."
-            err.println(ts.l("integrateXMLTransaction.failed_open_no_msg", session.getSessionName()));
+            tell(ts.l("integrateXMLTransaction.failed_open_no_msg",
+                      this.session.getSessionName()));
           }
 
         return false;
       }
 
-    session.enableWizards(false); // we're not interactive, don't give us no wizards
+    this.session.enableWizards(false); // we're not interactive, don't give us no wizards
 
     // we first need to try to resolve all objects in our various
     // queues to find their invids.  if we find ones that don't match
@@ -2980,7 +2974,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
                 throw new XMLIntegrationException(ts.l("integrateXMLTransaction.what_invid_to_inactivate", object));
               }
 
-            retVal = session.inactivate_db_object(target);
+            retVal = this.session.inactivate_db_object(target);
 
             if (!ReturnVal.didSucceed(retVal))
               {
@@ -3008,14 +3002,14 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             if (target == null)
               {
                 // "Error, couldn''t find Invid for object to be deleted: {0}"
-                err.println(ts.l("integrateXMLTransaction.what_invid_to_delete", object));
+                tell(ts.l("integrateXMLTransaction.what_invid_to_delete", object));
 
                 continue;
               }
 
             incCount(deleteCount, object.typeString);
 
-            retVal = session.remove_db_object(target);
+            retVal = this.session.remove_db_object(target);
 
             if (!ReturnVal.didSucceed(retVal))
               {
@@ -3035,10 +3029,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
           }
 
         // "Committing transaction."
-        err.println(ts.l("integrateXMLTransaction.committing"));
-        err.println();
+        tell(ts.l("integrateXMLTransaction.committing"));
+        tell("");
 
-        retVal = session.commitTransaction(true, this.comment);
+        retVal = this.session.commitTransaction(true, // abort on fail
+                                                this.comment);
 
         if (!ReturnVal.didSucceed(retVal))
           {
@@ -3059,53 +3054,53 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         if (createCount.size() > 0)
           {
             // "Objects created:"
-            err.println(ts.l("integrateXMLTransaction.objects_created"));
+            tell(ts.l("integrateXMLTransaction.objects_created"));
 
             for (Map.Entry<String, Integer> item: createCount.entrySet())
               {
                 // "\t{0}: {1,number,#}"
-                err.println(ts.l("integrateXMLTransaction.object_count", item.getKey(), item.getValue()));
+                tell(ts.l("integrateXMLTransaction.object_count", item.getKey(), item.getValue()));
               }
           }
 
         if (editCount.size() > 0)
           {
             // "Objects edited:"
-            err.println(ts.l("integrateXMLTransaction.objects_edited"));
+            tell(ts.l("integrateXMLTransaction.objects_edited"));
 
             for (Map.Entry<String, Integer> item: editCount.entrySet())
               {
                 // "\t{0}: {1,number,#}"
-                err.println(ts.l("integrateXMLTransaction.object_count", item.getKey(), item.getValue()));
+                tell(ts.l("integrateXMLTransaction.object_count", item.getKey(), item.getValue()));
               }
           }
 
         if (deleteCount.size() > 0)
           {
             // "Objects deleted:"
-            err.println(ts.l("integrateXMLTransaction.objects_deleted"));
+            tell(ts.l("integrateXMLTransaction.objects_deleted"));
 
             for (Map.Entry<String, Integer> item: deleteCount.entrySet())
               {
                 // "\t{0}: {1,number,#}"
-                err.println(ts.l("integrateXMLTransaction.object_count", item.getKey(), item.getValue()));
+                tell(ts.l("integrateXMLTransaction.object_count", item.getKey(), item.getValue()));
               }
           }
 
         if (inactivateCount.size() > 0)
           {
             // "Objects inactivated:"
-            err.println(ts.l("integrateXMLTransaction.objects_inactivated"));
+            tell(ts.l("integrateXMLTransaction.objects_inactivated"));
 
             for (Map.Entry<String, Integer> item: inactivateCount.entrySet())
               {
                 // "\t{0}: {1,number,#}"
-                err.println(ts.l("integrateXMLTransaction.object_count", item.getKey(), item.getValue()));
+                tell(ts.l("integrateXMLTransaction.object_count", item.getKey(), item.getValue()));
               }
           }
 
         // "Transaction successfully committed."
-        err.println(ts.l("integrateXMLTransaction.thrill_of_victory"));
+        tell(ts.l("integrateXMLTransaction.thrill_of_victory"));
 
         return true;
       }
@@ -3113,13 +3108,13 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       {
         if (!(ex instanceof XMLIntegrationException))
           {
-            err.println(ex.getStackTrace());
+            tell(ex.getStackTrace());
           }
 
-        err.println(ex.getMessage());
+        tell(ex.getMessage());
 
         // "Errors encountered, aborting transaction. "
-        err.println(ts.l("integrateXMLTransaction.agony_of_defeat"));
+        tell(ts.l("integrateXMLTransaction.agony_of_defeat"));
 
         return false;
       }
@@ -3411,7 +3406,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     if (retval != null && retval.getDialogText() != null)
       {
-        err.println(retval.getDialogText());
+        tell(retval.getDialogText());
       }
 
     if (ReturnVal.didSucceed(retval))
@@ -3420,6 +3415,26 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       }
 
     return false;
+  }
+
+  /**
+   * Append some output to the error stream that the client will
+   * receive.
+   */
+
+  private void tell(String buf)
+  {
+    this.err.println(buf);
+  }
+
+  /**
+   * Append a stack trace to the error stream that the client will
+   * receive.
+   */
+
+  private void tell(StackTraceElement[] buf)
+  {
+    this.err.println(buf);
   }
 }
 
