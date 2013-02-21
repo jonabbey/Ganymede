@@ -619,7 +619,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     // block for output or until xml processing completes
 
-    while (errBuffer.length() == 0 && parsing.waitForCleared(20));
+    while (errBuffer.length() == 0 && parsing.waitForCleared(50));
 
     // then delay up to a hundred milliseconds to accumulate more
     // output and delay the remote client from spinning too fast
