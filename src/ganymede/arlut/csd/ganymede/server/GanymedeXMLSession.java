@@ -966,6 +966,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             System.err.println("run() terminating");
           }
 
+        this.err.close();
         this.parsing.set(false);
 
         cleanupSchemaEdit();
