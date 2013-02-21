@@ -600,7 +600,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * to pull stderr messages from the server.</p>
    *
    * <p>This call will block on the server until err stream data is
-   * available, but will block for at least a tenth of a second while
+   * available and will block for at least a tenth of a second while
    * the XML is still being processed so that the client doesn't loop
    * on getNextErrChunk() too fast.</p>
    *
