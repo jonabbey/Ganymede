@@ -9,11 +9,13 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -56,9 +58,9 @@ package arlut.csd.Util;
 /**
  * <p>Simple, synchronized boolean flag class.</p>
  *
- * <p>This class is useful for providing a reliable boolean flag that can
- * be examined by separate threads without worry over funky memory model behavior
- * on multiprocessor systems, etc.</p>
+ * <p>This class is useful for providing a reliable boolean flag that
+ * can be examined by separate threads without worry over funky memory
+ * model behavior on multiprocessor systems, etc.</p>
  *
  * <p>This class is serializable only because the Ganymede
  * scheduleHandle class includes a booleanSempahore for server-side
@@ -88,7 +90,7 @@ public class booleanSemaphore implements java.io.Serializable {
   /**
    * <p>Simple bidirectional test and set.</p>
    *
-   * @return The value that the booleanSemaphore had 
+   * @return The value that the booleanSemaphore had
    * before set() was called.
    */
 
@@ -107,9 +109,9 @@ public class booleanSemaphore implements java.io.Serializable {
   }
 
   /**
-   * <p>Safe, simple method to wait until this boolean semaphore has been
-   * cleared.  If the semaphore is already cleared at the time this
-   * method is called, this method will return immediately.</p>
+   * <p>Safe, simple method to wait until this boolean semaphore has
+   * been cleared.  If the semaphore is already cleared at the time
+   * this method is called, this method will return immediately.</p>
    *
    * <p>Note that this method will not time out.</p>
    */
@@ -141,12 +143,17 @@ public class booleanSemaphore implements java.io.Serializable {
 
   public synchronized boolean waitForCleared(long millis)
   {
+    if (!state)
+      {
+        return state;
+      }
+
     long waitTime = millis;
     long startTime = System.currentTimeMillis();
     long timeSoFar = 0;
-            
+
     /* -- */
-    
+
     while (state)
       {
         // we already know from above that we have to wait, so
@@ -176,9 +183,9 @@ public class booleanSemaphore implements java.io.Serializable {
   }
 
   /**
-   * <p>Safe, simple method to wait until this boolean semaphore has been
-   * set. If the semaphore is already set at the time this method is
-   * called, this method will return immediately.</p>
+   * <p>Safe, simple method to wait until this boolean semaphore has
+   * been set. If the semaphore is already set at the time this method
+   * is called, this method will return immediately.</p>
    *
    * <p>Note that this method will not time out.</p>
    */
@@ -204,18 +211,23 @@ public class booleanSemaphore implements java.io.Serializable {
    * is called, this method will return immediately.</p>
    *
    * @return the state of the semaphore at the time the method
-   * returns.. this will be true if the semaphore was set, or
-   * false if the wait timed out before the semaphore was set
+   * returns.. this will be true if the semaphore was set, or false if
+   * the wait timed out before the semaphore was set
    */
 
   public synchronized boolean waitForSet(long millis)
   {
+    if (state)
+      {
+        return state;
+      }
+
     long waitTime = millis;
     long startTime = System.currentTimeMillis();
     long timeSoFar = 0;
-            
+
     /* -- */
-    
+
     while (!state)
       {
         // we already know from above that we have to wait, so
