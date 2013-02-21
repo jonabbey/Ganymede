@@ -619,7 +619,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     // block for output or until xml processing completes
 
-    while (errBuffer.length() == 0 && parsing.waitForCleared(50));
+    while (errBuffer.length() == 0 && this.parsing.waitForCleared(50));
 
     // then delay up to a hundred milliseconds to accumulate more
     // output and delay the remote client from spinning too fast
@@ -3393,7 +3393,16 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public void tell(String buf)
   {
-    this.err.println(buf);
+    // synchronize on the parsing semaphore so that the
+    // getNextErrChunk() method won't have a possible race condition
+    // between the semaphore and the err PrintWriter.
+    //
+    // cf. http://en.wikipedia.org/wiki/Java_Memory_Model
+
+    synchronized (this.parsing)
+      {
+        this.err.println(buf);
+      }
   }
 
   /**
@@ -3403,7 +3412,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public void tell(StackTraceElement[] buf)
   {
-    this.err.println(buf);
+    synchronized (this.parsing)
+      {
+        this.err.println(buf);
+      }
   }
 }
 
