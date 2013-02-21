@@ -600,9 +600,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * to pull stderr messages from the server.</p>
    *
    * <p>This call will block on the server until err stream data is
-   * available, but will always block for at least a tenth of a second
-   * so that the client doesn't loop on getNextErrChunk() too
-   * fast.</p>
+   * available, but will block for at least a tenth of a second while
+   * the XML is still being processed so that the client doesn't loop
+   * on getNextErrChunk() too fast.</p>
    *
    * <p>This method will return null after the server closes its error
    * stream.</p>
@@ -612,64 +612,27 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public String getNextErrChunk()
   {
-    String progress = null;
     StringBuffer errBuffer = this.errBuf.getBuffer();
+    String progress;
 
     /* -- */
+
+    // block for output or until xml processing completes
+
+    while (errBuffer.length() == 0 && parsing.waitForCleared(20));
+
+    // then delay up to a hundred milliseconds to accumulate more
+    // output and delay the remote client from spinning too fast
+
+    this.parsing.waitForCleared(100);
 
     synchronized (errBuffer)
       {
         progress = errBuffer.toString();
-        errBuffer.setLength(0);     // this doesn't actually free memory.. stoopid StringBuffer
-      }
-
-    while (progress.length() == 0)
-      {
-        if (!this.parsing.isSet())
-          {
-            return null;
-          }
-
-        try
-          {
-            Thread.sleep(50); // slow our internal spin
-          }
-        catch (InterruptedException ex2)
-          {
-          }
-
-        synchronized (errBuffer)
-          {
-            progress = errBuffer.toString();
-            errBuffer.setLength(0);
-          }
-      }
-
-    System.err.print(progress);
-
-    if (!this.parsing.isSet())
-      {
-        return progress;
-      }
-
-    try
-      {
-        Thread.sleep(100); // slow our client down
-      }
-    catch (InterruptedException ex2)
-      {
-      }
-
-    synchronized (errBuffer)
-      {
-        String finalBit = errBuffer.toString();
         errBuffer.setLength(0);
-
-        progress = progress + finalBit;
-        System.err.print(finalBit);
       }
 
-    return progress;
+    return progress.length() == 0 ? null : progress;
   }
 
   /**
@@ -818,8 +781,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         return;
       }
 
-    // note, we must not clear errBuf here, as we may cleanup before
-    // calling getReturnVal() to report to the client.
+    // note, we must not clear errBuf here, as the client will keep
+    // calling getNextErrChunk() until it has received the entire
+    // output generated before this.parsing is set to false.
+    //
+    // likewise we're not going to null out our parsing semaphore.
 
     this.reader.close();
     this.reader = null;

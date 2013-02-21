@@ -97,9 +97,9 @@ public interface XMLSession extends java.rmi.Remote {
    * to pull stderr messages from the server.</p>
    *
    * <p>This call will block on the server until err stream data is
-   * available, but will always block for at least a tenth of a second
-   * so that the client doesn't loop on getNextErrChunk() too
-   * fast.</p>
+   * available, but will for at least a tenth of a second while the
+   * XML is still being processed so that the client doesn't loop on
+   * getNextErrChunk() too fast.</p>
    *
    * <p>This method will return null after the server closes its error
    * stream.</p>
