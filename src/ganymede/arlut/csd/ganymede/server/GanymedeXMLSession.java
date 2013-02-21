@@ -632,7 +632,15 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         errBuffer.setLength(0);
       }
 
-    return progress.length() == 0 ? null : progress;
+    if (progress.length() == 0)
+      {
+        return null;
+      }
+    else
+      {
+        System.err.println(progress);
+        return progress;
+      }
   }
 
   /**
