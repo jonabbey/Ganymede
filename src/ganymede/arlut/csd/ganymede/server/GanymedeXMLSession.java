@@ -1035,12 +1035,14 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   }
 
   /**
-   * This method is called after the &lt;ganyschema&gt; element has been
-   * read and consumes everything up to and including the matching
-   * &lt;/ganyschema&gt; element, if such is to be found.  Eventually,
-   * this method will actually process the contents of the
-   * &lt;ganyschema&gt; element and transmit the schema change information
-   * to the server.
+   * <p>This method is called after the &lt;ganyschema&gt; element has
+   * been read and consumes everything up to and including the
+   * matching &lt;/ganyschema&gt; element, if such is to be found.</p>
+   *
+   * <p>Assuming a valid &lt;ganyschema&gt; tree is read, this method
+   * will perform the actual edits to the server's schema required to
+   * bring the server's schema definition into compliance with that
+   * specified by the incoming XML stream.</p>
    */
 
   public boolean processSchema(XMLItem ganySchemaItem) throws SAXException
