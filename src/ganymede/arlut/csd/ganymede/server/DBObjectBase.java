@@ -1207,7 +1207,11 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   /**
    * <p>This method is used to read the definition for this
-   * DBObjectBase from an XMLItem &lt;objectdef&gt; tree.</p>
+   * DBObjectBase from an XMLItem &lt;objectdef&gt; tree and to make
+   * the appropriate modifications to this DBObjectBase to make it fit
+   * the specification provided in the XML, if at all possible.</p>
+   *
+   * <p>Called in the context of an XML-based schema edit.</p>
    */
 
   synchronized ReturnVal setXML(XMLItem root, boolean resolveInvidLinks, PrintWriter err)
@@ -1299,23 +1303,19 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     List<XMLItem> fieldDefV = new ArrayList<XMLItem>();
     XMLItem children[] = root.getChildren();
 
-    for (int i = 0; i < children.length; i++)
+    for (XMLItem item: children)
       {
-        XMLItem item = children[i];
-
         if (item.matches("tab"))
           {
             fieldDefV.add(item);
 
             XMLItem tabChildren[] = item.getChildren();
 
-            for (int j = 0; j < tabChildren.length; j++)
+            for (XMLItem childItem: tabChildren)
               {
-                item = tabChildren[j];
-
-                if (item.matches("fielddef"))
+                if (childItem.matches("fielddef"))
                   {
-                    fieldDefV.add(item);
+                    fieldDefV.add(childItem);
                   }
               }
           }
