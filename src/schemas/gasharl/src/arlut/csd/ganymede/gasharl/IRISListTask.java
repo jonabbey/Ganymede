@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -85,11 +85,9 @@ public class IRISListTask implements Runnable {
   GanymedeSession mySession = null;
 
   /**
-   *
    * Just Do It (tm)
    *
    * @see java.lang.Runnable
-   *
    */
 
   public void run()
@@ -104,50 +102,50 @@ public class IRISListTask implements Runnable {
 
     if (error != null)
       {
-	Ganymede.debug("Deferring IRISListTask task - semaphore disabled: " + error);
-	return;
+        Ganymede.debug("Deferring IRISListTask task - semaphore disabled: " + error);
+        return;
       }
 
     try
       {
-	try
-	  {
-	    // supergash level session
+        try
+          {
+            // supergash level session
 
-	    mySession = new GanymedeSession("IRIS Email List Task");
-	  }
-	catch (RemoteException ex)
-	  {
-	    Ganymede.debug("IRISListTask: Couldn't establish session");
-	    return;
-	  }
+            mySession = new GanymedeSession("IRIS Email List Task");
+          }
+        catch (RemoteException ex)
+          {
+            Ganymede.debug("IRISListTask: Couldn't establish session");
+            return;
+          }
 
-	// we don't want interactive handholding
+        // we don't want interactive handholding
 
-	mySession.enableWizards(false);
+        mySession.enableWizards(false);
 
-	mySession.enableOversight(false); // don't bother us about inconsistencies
+        mySession.enableOversight(false); // don't bother us about inconsistencies
 
-	ReturnVal retVal = mySession.openTransaction("IRIS Email List Update");
+        ReturnVal retVal = mySession.openTransaction("IRIS Email List Update");
 
-	if (retVal != null && !retVal.didSucceed())
-	  {
-	    Ganymede.debug("IRISListTask: Couldn't open transaction");
-	    return;
-	  }
+        if (retVal != null && !retVal.didSucceed())
+          {
+            Ganymede.debug("IRISListTask: Couldn't open transaction");
+            return;
+          }
 
-	transactionOpen = true;
+        transactionOpen = true;
 
-	if (updateLists())
-	  {
-	    mySession.commitTransaction(true);
-	  }
-	else
-	  {
-	    mySession.abortTransaction();
-	  }
+        if (updateLists())
+          {
+            mySession.commitTransaction(true);
+          }
+        else
+          {
+            mySession.abortTransaction();
+          }
 
-	transactionOpen = false;
+        transactionOpen = false;
       }
     catch (NotLoggedInException ex)
       {
@@ -157,18 +155,18 @@ public class IRISListTask implements Runnable {
       }
     catch (Throwable ex)
       {
-	Ganymede.debug("Caught " + ex.getMessage());
+        Ganymede.debug("Caught " + ex.getMessage());
 
-	ex.printStackTrace();
+        ex.printStackTrace();
       }
     finally
       {
-	if (transactionOpen)
-	  {
-	    Ganymede.debug("IRISListTask: Forced to terminate early, aborting transaction");
-	  }
+        if (transactionOpen)
+          {
+            Ganymede.debug("IRISListTask: Forced to terminate early, aborting transaction");
+          }
 
-	mySession.logout();
+        mySession.logout();
       }
   }
 
@@ -180,12 +178,12 @@ public class IRISListTask implements Runnable {
 
     for (DBObject list: lists)
       {
-	ReturnVal retVal = IRISListCustom.handleUpdate(list, mySession);
+        ReturnVal retVal = IRISListCustom.handleUpdate(list, mySession);
 
-	if (retVal != null && ReturnVal.didSucceed(retVal))
-	  {
-	    needCommit = true;
-	  }
+        if (retVal != null && ReturnVal.didSucceed(retVal))
+          {
+            needCommit = true;
+          }
       }
 
     return needCommit;

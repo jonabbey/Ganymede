@@ -12,8 +12,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -74,15 +76,14 @@ import arlut.csd.ganymede.server.GanymedeSession;
 ------------------------------------------------------------------------------*/
 
 /**
- *   Custom plug-in for managing fields in the email list object type.
+ * <p>Custom plug-in for managing fields in the IRIS email list object
+ * type.</p>
  */
 
 public class IRISListCustom extends DBEditObject implements SchemaConstants, IRISListSchema {
 
   /**
-   *
    * Customization Constructor
-   *
    */
 
   public IRISListCustom(DBObjectBase objectBase)
@@ -91,9 +92,7 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
   }
 
   /**
-   *
    * Create new object constructor
-   *
    */
 
   public IRISListCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset)
@@ -102,10 +101,8 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
   }
 
   /**
-   *
    * Check-out constructor, used by DBObject.createShadow()
    * to pull out an object for editing.
-   *
    */
 
   public IRISListCustom(DBObject original, DBEditSet editset)
@@ -127,7 +124,7 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
   {
     if (field.getID() == IRISListSchema.MEMBERS)
       {
-	return new QueryResult(true); // empty list
+        return new QueryResult(true); // empty list
       }
 
     return super.obtainChoiceList(field);
@@ -148,7 +145,7 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
   {
     if (field.getID() == IRISListSchema.MEMBERS)
       {
-	return false;		// don't force choice
+        return false;           // don't force choice
       }
 
     return super.mustChoose(field);
@@ -167,16 +164,18 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
    * to allow a link based on what field of what object wants to link
    * to it.</P>
    *
-   * <p>By default, the 3 variants of the DBEditObject anonymousLinkOK()
-   * method are chained together, so that the customizer can choose
-   * which level of detail he is interested in.
+   * <p>By default, the 3 variants of the DBEditObject
+   * anonymousLinkOK() method are chained together, so that the
+   * customizer can choose which level of detail he is interested in.
    * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField}'s
-   * {@link arlut.csd.ganymede.server.InvidDBField#bind(arlut.csd.ganymede.common.Invid,arlut.csd.ganymede.common.Invid,boolean) bind()}
-   * method calls this version.  This version calls the three parameter
-   * version, which calls the two parameter version, which returns
-   * false by default.  Customizers can implement any of the three
-   * versions, but unless you maintain the version chaining yourself,
-   * there's no point to implementing more than one of them.</P>
+   * {@link
+   * arlut.csd.ganymede.server.InvidDBField#bind(arlut.csd.ganymede.common.Invid,arlut.csd.ganymede.common.Invid,boolean)
+   * bind()} method calls this version.  This version calls the three
+   * parameter version, which calls the two parameter version, which
+   * returns false by default.  Customizers can implement any of the
+   * three versions, but unless you maintain the version chaining
+   * yourself, there's no point to implementing more than one of
+   * them.</P>
    *
    * <p><b>*PSEUDOSTATIC*</b></p>
    *
@@ -188,23 +187,23 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
    */
 
   public boolean anonymousLinkOK(DBObject targetObject, short targetFieldID,
-				 DBObject sourceObject, short sourceFieldID,
-				 GanymedeSession gsession)
+                                 DBObject sourceObject, short sourceFieldID,
+                                 GanymedeSession gsession)
   {
     // if someone tries to put this list in another email list, let
     // them.
 
     if ((targetFieldID == SchemaConstants.BackLinksField) &&
-	(sourceObject.getTypeID() == 274) && // email list
-	(sourceFieldID == 257))	// email list members
+        (sourceObject.getTypeID() == 274) && // email list
+        (sourceFieldID == 257)) // email list members
       {
-	return true;
+        return true;
       }
 
     // the default anonymousLinkOK() method returns false
 
     return super.anonymousLinkOK(targetObject, targetFieldID,
-				 sourceObject, sourceFieldID, gsession);
+                                 sourceObject, sourceFieldID, gsession);
   }
 
   /**
@@ -226,7 +225,7 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
 
     if (fieldid == LISTNAME)
       {
-	return true;
+        return true;
       }
 
     return super.fieldRequired(object, fieldid);
@@ -253,15 +252,15 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
   {
     if (field.getID() == QUERY)
       {
-	String queryString = (String) value;
+        String queryString = (String) value;
 
-	if (queryString != null && !queryString.trim().equals(""))
-	  {
-	    if (queryString.toLowerCase().contains("update"))
-	      {
-		return Ganymede.createErrorDialog("Update statements not allowed in Query field.");
-	      }
-	  }
+        if (queryString != null && !queryString.trim().equals(""))
+          {
+            if (queryString.toLowerCase().contains("update"))
+              {
+                return Ganymede.createErrorDialog("Update statements not allowed in Query field.");
+              }
+          }
       }
 
     return super.verifyNewValue(field, value);
@@ -313,27 +312,27 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
   {
     try
       {
-	if (field.getID() == QUERY)
-	  {
-	    String queryString = (String) value;
+        if (field.getID() == QUERY)
+          {
+            String queryString = (String) value;
 
-	    if (queryString == null || queryString.trim().equals(""))
-	      {
-		// set query members to the empty list
-		return setQueryMembers(new ArrayList<String>());
-	      }
-	    else
-	      {
-		try
-		  {
-		    return setQueryMembers(IRISLink.getUsernames(queryString));
-		  }
-		catch (java.sql.SQLException ex)
-		  {
-		    return Ganymede.createErrorDialog(ex.getMessage());
-		  }
-	      }
-	  }
+            if (queryString == null || queryString.trim().equals(""))
+              {
+                // set query members to the empty list
+                return setQueryMembers(new ArrayList<String>());
+              }
+            else
+              {
+                try
+                  {
+                    return setQueryMembers(IRISLink.getUsernames(queryString));
+                  }
+                catch (java.sql.SQLException ex)
+                  {
+                    return Ganymede.createErrorDialog(ex.getMessage());
+                  }
+              }
+          }
       }
     catch (NotLoggedInException ex)
       {
@@ -369,7 +368,7 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
   {
     if (fieldid == MEMBERS)
       {
-	return PermEntry.getPermEntry(true, false, true, true);
+        return PermEntry.getPermEntry(true, false, true, true);
       }
 
     return null;
@@ -391,34 +390,34 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
 
     try
       {
-	editset.checkpoint(x.toString());
+        editset.checkpoint(x.toString());
 
-	memberField.setUndefined(true);
+        memberField.setUndefined(true);
 
-	for (String username: users)
-	  {
-	    Invid userInvid = getGSession().findLabeledObject(username, SchemaConstants.UserBase);
+        for (String username: users)
+          {
+            Invid userInvid = getGSession().findLabeledObject(username, SchemaConstants.UserBase);
 
-	    if (userInvid != null)
-	      {
-		memberField.addElementLocal(userInvid);
-	      }
-	  }
+            if (userInvid != null)
+              {
+                memberField.addElementLocal(userInvid);
+              }
+          }
 
-	ReturnVal result = ReturnVal.success();
-	result.requestRefresh(this.getInvid(), MEMBERS);
+        ReturnVal result = ReturnVal.success();
+        result.requestRefresh(this.getInvid(), MEMBERS);
 
-	return result;
+        return result;
       }
     catch (Exception ex)
       {
-	editset.rollback(x.toString());
+        editset.rollback(x.toString());
 
-	throw new RuntimeException(ex);
+        throw new RuntimeException(ex);
       }
     finally
       {
-	editset.popCheckpoint(x.toString());
+        editset.popCheckpoint(x.toString());
       }
   }
 
@@ -437,35 +436,35 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
 
     if (queryString == null || queryString.trim().equals(""))
       {
-	return null;
+        return null;
       }
 
     List<String> userNames = null;
 
     try
       {
-	userNames = IRISLink.getUsernames(queryString);
+        userNames = IRISLink.getUsernames(queryString);
       }
     catch (java.sql.SQLException ex)
       {
-	return Ganymede.createErrorDialog(ex.getMessage());
+        return Ganymede.createErrorDialog(ex.getMessage());
       }
 
     List<Invid> userInvids = new ArrayList<Invid>();
 
     for (String user: userNames)
       {
-	Invid userInvid = gsession.findLabeledObject(user, SchemaConstants.UserBase);
+        Invid userInvid = gsession.findLabeledObject(user, SchemaConstants.UserBase);
 
-	if (userInvid != null)
-	  {
-	    userInvids.add(userInvid);
-	  }
+        if (userInvid != null)
+          {
+            userInvids.add(userInvid);
+          }
       }
 
     if (VectorUtils.equalMembers(userInvids, listObject.getFieldValuesLocal(IRISListSchema.MEMBERS)))
       {
-	return null;
+        return null;
       }
 
     // we need to make a change
@@ -474,7 +473,7 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
 
     if (!ReturnVal.didSucceed(retVal))
       {
-	return retVal;
+        return retVal;
       }
 
     IRISListCustom listEditObject = (IRISListCustom) retVal.getObject();
