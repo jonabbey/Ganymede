@@ -52,8 +52,8 @@ package arlut.csd.ganymede.gasharl;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import java.sql.*;
 import javax.sql.*;
@@ -223,17 +223,17 @@ public class IRISLink {
   }
 
   /**
-   * This executes any query that returns a list of single return
-   * values and returns those values as a List of Strings.
+   * <p>This executes any query that returns a list of single return
+   * values and returns those values as a Set of Strings.</p>
    *
-   * @return a List of String, or null if the query could not be
+   * @return a Set of String, or null if the query could not be
    * performed.
    */
 
-  public static List<String> getUsernames(String queryString) throws SQLException
+  public static Set<String> getUsernames(String queryString) throws SQLException
   {
     Connection myConn = null;
-    List<String> result = new ArrayList<String>();
+    Set<String> result = new HashSet<String>();
 
     try
       {

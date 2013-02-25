@@ -51,7 +51,9 @@ package arlut.csd.ganymede.gasharl;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import arlut.csd.Util.VectorUtils;
 
@@ -319,7 +321,7 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
             if (queryString == null || queryString.trim().equals(""))
               {
                 // set query members to the empty list
-                return setQueryMembers(new ArrayList<String>());
+                return setQueryMembers(new HashSet<String>());
               }
             else
               {
@@ -382,7 +384,7 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
    * RuntimeException on failure.</p>
    */
 
-  public ReturnVal setQueryMembers(List<String> users) throws NotLoggedInException
+  public ReturnVal setQueryMembers(Set<String> users) throws NotLoggedInException
   {
     DBField memberField = (DBField) this.getField(MEMBERS);
 
@@ -439,7 +441,7 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
         return null;
       }
 
-    List<String> userNames = null;
+    Set<String> userNames = null;
 
     try
       {
