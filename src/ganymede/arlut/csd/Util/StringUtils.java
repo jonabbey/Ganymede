@@ -73,7 +73,7 @@ public class StringUtils {
   {
     if (input == null)
       {
-        return "";
+        input = "";
       }
 
     String[] lines = lineSplit.split(input, -1);
@@ -550,12 +550,16 @@ public class StringUtils {
   {
     System.out.println("\n-------------------- String insertPrefixPerLine Tests --------------------\n");
 
-    String[] prefixText = {"Hi, my name\nis adam\nI am a test string\n\nHappy Birthday!\n",
+    String[] prefixText = {null,
+                           "",
+                           "Hi, my name\nis adam\nI am a test string\n\nHappy Birthday!\n",
                            "Hi, my name\nis adam\nI am a test string\n\nHappy Birthday!",
                            "Hi, my name\nis adam\nI am a test string\n\nHappy Birthday!\n\n",
                            "",
                            "\n"};
-    String[] prefixResult = {"test: Hi, my name\ntest: is adam\ntest: I am a test string\ntest: \ntest: Happy Birthday!\n",
+    String[] prefixResult = {"test: \n",
+                             "test: \n",
+                             "test: Hi, my name\ntest: is adam\ntest: I am a test string\ntest: \ntest: Happy Birthday!\n",
                              "test: Hi, my name\ntest: is adam\ntest: I am a test string\ntest: \ntest: Happy Birthday!\n",
                              "test: Hi, my name\ntest: is adam\ntest: I am a test string\ntest: \ntest: Happy Birthday!\ntest: \n",
                              "test: \n",
