@@ -552,10 +552,14 @@ public class StringUtils {
 
     String[] prefixText = {"Hi, my name\nis adam\nI am a test string\n\nHappy Birthday!\n",
                            "Hi, my name\nis adam\nI am a test string\n\nHappy Birthday!",
-                           "Hi, my name\nis adam\nI am a test string\n\nHappy Birthday!\n\n"};
+                           "Hi, my name\nis adam\nI am a test string\n\nHappy Birthday!\n\n",
+                           "",
+                           "\n"};
     String[] prefixResult = {"test: Hi, my name\ntest: is adam\ntest: I am a test string\ntest: \ntest: Happy Birthday!\n",
                              "test: Hi, my name\ntest: is adam\ntest: I am a test string\ntest: \ntest: Happy Birthday!\n",
-                             "test: Hi, my name\ntest: is adam\ntest: I am a test string\ntest: \ntest: Happy Birthday!\ntest: \n"};
+                             "test: Hi, my name\ntest: is adam\ntest: I am a test string\ntest: \ntest: Happy Birthday!\ntest: \n",
+                             "test: \n",
+                             "test: \n"};
 
     for (int i = 0; i < prefixText.length; i++)
       {
