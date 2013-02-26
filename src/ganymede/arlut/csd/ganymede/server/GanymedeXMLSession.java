@@ -657,6 +657,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     System.err.print(StringUtils.insertPrefixPerLine(x, getLogPrefix()));
   }
 
+  /**
+   * Writes to server stderr
+   */
+
   private void errPrint(String x)
   {
     System.err.print(x);
