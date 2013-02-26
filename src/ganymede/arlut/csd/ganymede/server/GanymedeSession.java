@@ -2931,6 +2931,20 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
+   * <p>This method returns the name of the persona who is active, the
+   * raw user name if no persona privileges have been assumed, or the
+   * name of the internal Ganymede task or process that is running the
+   * session if no user is attached to this session.</p>
+   *
+   * <p>Note: server-side, no checklogin()</p>
+   */
+
+  public String getIdentity()
+  {
+    return permManager.getIdentity();
+  }
+
+  /**
    * <p>This method returns the name of this session.  If this session is
    * being driven by a remote client, this name will be unique among
    * sessions on the server so that the admin console can distinguish
