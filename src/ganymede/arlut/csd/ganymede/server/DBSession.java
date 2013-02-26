@@ -1571,11 +1571,13 @@ final public class DBSession implements QueryDescriber {
 
     if (debug)
       {
+        // "{0}: entering commitTransaction"
         System.err.println(ts.l("commitTransaction.debug1", String.valueOf(key)));
       }
 
     if (editSet == null)
       {
+        // "{0}:commitTransaction called outside of a transaction"
         throw new RuntimeException(ts.l("commitTransaction.notransaction", String.valueOf(key)));
       }
 
@@ -1588,6 +1590,7 @@ final public class DBSession implements QueryDescriber {
 
     if (debug)
       {
+        // "{0}: committing editset"
         System.err.println(ts.l("commitTransaction.debug2", String.valueOf(key)));
       }
 
