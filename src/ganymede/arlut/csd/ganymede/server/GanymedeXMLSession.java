@@ -673,11 +673,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   private String getLogPrefix()
   {
-    if (this.session != null)
+    try
       {
         return "xml [" + this.session.getIdentity() + "]: ";
       }
-    else
+    catch (NullPointerException ex)
       {
         return "xml: ";
       }
