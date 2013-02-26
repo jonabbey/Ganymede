@@ -76,12 +76,24 @@ public class StringUtils {
         return "";
       }
 
+    String[] lines = lineSplit.split(input, -1);
     StringBuilder builder = new StringBuilder();
 
-    for (String line: lineSplit.split(input))
+    int upperLimit;
+
+    if (input.endsWith("\n"))
+      {
+        upperLimit = lines.length - 1;
+      }
+    else
+      {
+        upperLimit = lines.length;
+      }
+
+    for (int i = 0; i < upperLimit; i++)
       {
         builder.append(prefix);
-        builder.append(line);
+        builder.append(lines[i]);
         builder.append("\n");
       }
 
@@ -538,22 +550,29 @@ public class StringUtils {
   {
     System.out.println("\n-------------------- String insertPrefixPerLine Tests --------------------\n");
 
-    String prefixText = "Hi, my name\nis adam\nI am a test string\n\nHappy Birthday!\n";
-    String prefixResult ="test: Hi, my name\ntest: is adam\ntest: I am a test string\ntest: \ntest: Happy Birthday!\n";
+    String[] prefixText = {"Hi, my name\nis adam\nI am a test string\n\nHappy Birthday!\n",
+                           "Hi, my name\nis adam\nI am a test string\n\nHappy Birthday!",
+                           "Hi, my name\nis adam\nI am a test string\n\nHappy Birthday!\n\n"};
+    String[] prefixResult = {"test: Hi, my name\ntest: is adam\ntest: I am a test string\ntest: \ntest: Happy Birthday!\n",
+                             "test: Hi, my name\ntest: is adam\ntest: I am a test string\ntest: \ntest: Happy Birthday!\n",
+                             "test: Hi, my name\ntest: is adam\ntest: I am a test string\ntest: \ntest: Happy Birthday!\ntest: \n"};
 
-    if (prefixResult.equals(insertPrefixPerLine(prefixText, "test: ")))
+    for (int i = 0; i < prefixText.length; i++)
       {
-        System.out.println("Pass 1");
-      }
-    else
-      {
-        System.out.println("Fail 1");
+        if (prefixResult[i].equals(insertPrefixPerLine(prefixText[i], "test: ")))
+          {
+            System.out.println("Pass " + (i + 1));
+          }
+        else
+          {
+            System.out.println("Fail " + (i + 1));
 
-        System.out.println("Got:");
-        System.out.println("*" + insertPrefixPerLine(prefixText, "test: ") + "*");
+            System.out.println("Got:");
+            System.out.println("*" + insertPrefixPerLine(prefixText[i], "test: ") + "*");
 
-        System.out.println("Wanted:");
-        System.out.println("*" + prefixResult + "*");
+            System.out.println("Wanted:");
+            System.out.println("*" + prefixResult[i] + "*");
+          }
       }
 
     System.out.println("\n-------------------- String ensureEndsWith Tests --------------------\n");
