@@ -10,7 +10,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -47,6 +47,8 @@
 
 package arlut.csd.Util;
 
+import java.util.regex.Pattern;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                      StringUtils
@@ -59,6 +61,32 @@ package arlut.csd.Util;
  */
 
 public class StringUtils {
+
+  private static Pattern lineSplit = Pattern.compile("\n");
+
+  /**
+   * Takes a String, and returns a new String that has prefix
+   * prepended to each line in the original String.
+   */
+
+  public static String insertPrefixPerLine(String input, String prefix)
+  {
+    if (input == null)
+      {
+        return "";
+      }
+
+    StringBuilder builder = new StringBuilder();
+
+    for (String line: lineSplit.split(input))
+      {
+        builder.append(prefix);
+        builder.append(line);
+        builder.append("\n");
+      }
+
+    return builder.toString();
+  }
 
   /**
    * Simple method to exchange null strings for empty strings.
@@ -508,6 +536,26 @@ public class StringUtils {
 
   public static void main(String argv[])
   {
+    System.out.println("\n-------------------- String insertPrefixPerLine Tests --------------------\n");
+
+    String prefixText = "Hi, my name\nis adam\nI am a test string\n\nHappy Birthday!\n";
+    String prefixResult ="test: Hi, my name\ntest: is adam\ntest: I am a test string\ntest: \ntest: Happy Birthday!\n";
+
+    if (prefixResult.equals(insertPrefixPerLine(prefixText, "test: ")))
+      {
+        System.out.println("Pass 1");
+      }
+    else
+      {
+        System.out.println("Fail 1");
+
+        System.out.println("Got:");
+        System.out.println("*" + insertPrefixPerLine(prefixText, "test: ") + "*");
+
+        System.out.println("Wanted:");
+        System.out.println("*" + prefixResult + "*");
+      }
+
     System.out.println("\n-------------------- String ensureEndsWith Tests --------------------\n");
 
     String test = "Hi!";
