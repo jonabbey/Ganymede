@@ -70,6 +70,7 @@ import org.xml.sax.SAXException;
 
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.booleanSemaphore;
+import arlut.csd.Util.StringUtils;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.XMLCloseElement;
@@ -445,7 +446,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       }
     catch (IOException ex)
       {
-        System.err.println(ts.l("init.initialization_error", Ganymede.stackTrace(ex)));
+        errPrintln(ts.l("init.initialization_error", Ganymede.stackTrace(ex)));
         throw new RuntimeException(ex.getMessage());
       }
   }
@@ -482,7 +483,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     if (debug)
       {
-        System.err.println("xmlSubmit called on server");
+        errPrintln("xmlSubmit called on server");
       }
 
     if (this.parsing.isSet())
@@ -491,14 +492,14 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
           {
             if (debug)
               {
-                System.err.println("xmlSubmit byting");
+                errPrintln("xmlSubmit byting");
               }
 
             pipe.write(bytes);  // can block if the parser thread gets behind
 
             if (debug)
               {
-                System.err.println("xmlSubmit bit");
+                errPrintln("xmlSubmit bit");
               }
           }
         catch (IOException ex)
@@ -524,7 +525,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
             while (this.reader != null && !this.reader.isDone() && waitCount < 40)
               {
                 // "Waiting for reader to close down: {0,number,#}"
-                System.err.println(ts.l("xmlSubmit.waiting_for_reader", Integer.valueOf(waitCount)));
+                errPrintln(ts.l("xmlSubmit.waiting_for_reader", Integer.valueOf(waitCount)));
 
                 try
                   {
@@ -548,7 +549,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
               {
                 if (debug)
                   {
-                    System.err.println("xmlSubmit call returned on server 1");
+                    errPrintln("xmlSubmit call returned on server 1");
                   }
               }
           }
@@ -556,7 +557,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     else
       {
         // "GanymedeXMLSession.xmlSubmit(), parser already closed, skipping writing into pipe."
-        System.err.println(ts.l("xmlSubmit.parser_already_closed"));
+        errPrintln(ts.l("xmlSubmit.parser_already_closed"));
       }
 
     // if reader is not done, we're ok to continue
@@ -569,7 +570,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       {
         if (debug)
           {
-            System.err.println("xmlSubmit call returned on server 2");
+            errPrintln("xmlSubmit call returned on server 2");
           }
       }
   }
@@ -587,7 +588,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     if (debug)
       {
-        System.err.println("xmlEnd() called");
+        errPrintln("xmlEnd() called");
       }
 
     this.parsing.waitForCleared();
@@ -638,8 +639,40 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       }
     else
       {
-        System.err.println(progress);
+        errPrintln(progress);
+
         return progress;
+      }
+  }
+
+  /**
+   * Writes to server stderr with an identifying prefix
+   */
+
+  private void errPrintln(String x)
+  {
+    System.err.println(StringUtils.insertPrefixPerLine(x, getLogPrefix()));
+  }
+
+  private void errPrint(String x)
+  {
+    System.err.print(x);
+  }
+
+  /**
+   * Returns an identifying prefix string that should be prepended to
+   * logging to the Ganymede stderr..
+   */
+
+  private String getLogPrefix()
+  {
+    if (this.session != null)
+      {
+        return "xml [" + this.session.getIdentity() + "]: ";
+      }
+    else
+      {
+        return "xml: ";
       }
   }
 
@@ -655,7 +688,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     if (debug)
       {
-        System.err.println("GanymedeXMLSession abort");
+        errPrintln("GanymedeXMLSession abort");
 
         try
           {
@@ -674,11 +707,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       {
         if (debug)
           {
-            System.err.println("GanymedeXMLSession closing reader");
+            errPrintln("GanymedeXMLSession closing reader");
           }
 
         // "Abort called, closing reader."
-        System.err.println(ts.l("abort.aborting"));
+        errPrintln(ts.l("abort.aborting"));
 
         this.reader.close();         // this will cause the XML Reader to halt
       }
@@ -686,7 +719,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       {
         if (debug)
           {
-            System.err.println("GanymedeXMLSession closing already closed reader");
+            errPrintln("GanymedeXMLSession closing already closed reader");
           }
       }
   }
@@ -781,7 +814,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     if (debug)
       {
-        System.err.println("Entering cleanup");
+        errPrintln("Entering cleanup");
       }
 
     if (this.cleanedup.set(true))
@@ -842,7 +875,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       {
         if (debug)
           {
-            System.err.println("GanymedeXMLSession run getting startDocument");
+            errPrintln("GanymedeXMLSession run getting startDocument");
           }
 
         XMLItem startDocument = getNextItem();
@@ -857,7 +890,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
         if (debug)
           {
-            System.err.println("GanymedeXMLSession run getting docElement");
+            errPrintln("GanymedeXMLSession run getting docElement");
           }
 
         XMLItem docElement = getNextItem();
@@ -963,7 +996,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       {
         if (debug)
           {
-            System.err.println("run() terminating");
+            errPrintln("run() terminating");
           }
 
         this.err.close();
@@ -2062,7 +2095,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
                 if (modCount == 9)
                   {
-                    System.err.print(".");
+                    errPrint(".");
                     modCount = 0;
                   }
                 else
@@ -2186,7 +2219,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     if (debug)
       {
-        System.err.println("GanymedeXMLSession: initializeLookups");
+        errPrintln("GanymedeXMLSession: initializeLookups");
       }
 
     for (DBObjectBase base: Ganymede.db.getBases())
@@ -2216,7 +2249,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     if (false)
       {
-        System.err.println("GanymedeXMLSession: storeObject(" + object + ")");
+        errPrintln("GanymedeXMLSession: storeObject(" + object + ")");
       }
 
     Hashtable objectHash = this.objectStore.get(object.type);
@@ -2735,7 +2768,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
                 if (debug)
                   {
-                    System.err.println("Creating " + newObject);
+                    errPrintln("Creating " + newObject);
                   }
 
                 newlyCreated = true;
@@ -2764,7 +2797,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
                 if (debug)
                   {
-                    System.err.println("Editing pre-existing " + newObject);
+                    errPrintln("Editing pre-existing " + newObject);
                   }
 
                 retVal = newObject.editOnServer(this.session);
