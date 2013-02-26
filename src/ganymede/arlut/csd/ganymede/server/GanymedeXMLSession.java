@@ -651,7 +651,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   private void errPrintln(String x)
   {
-    System.err.println(StringUtils.insertPrefixPerLine(x, getLogPrefix()));
+    // StringUtils.insertPrefixPerLine will make sure we end with a
+    // newline, we don't need to do System.err.println() here.
+
+    System.err.print(StringUtils.insertPrefixPerLine(x, getLogPrefix()));
   }
 
   private void errPrint(String x)
