@@ -1444,6 +1444,17 @@ public final class xmlclient implements ClientListener, Runnable {
 
   private synchronized void terminate(int resultCode)
   {
+    while (!this.finishedErrStream)
+      {
+        try
+          {
+            this.wait();
+          }
+        catch (InterruptedException ex)
+          {
+          }
+      }
+
     err.flush();
     System.exit(resultCode);
   }
