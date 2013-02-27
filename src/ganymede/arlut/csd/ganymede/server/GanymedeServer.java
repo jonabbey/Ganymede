@@ -536,7 +536,7 @@ public class GanymedeServer implements Server {
                 // "{0} logged in from {1}"
                 Ganymede.debug(ts.l("processLogin.loggedin", session.getUserName(), session.getClientHostName()));
 
-                Vector objects = new Vector();
+                Vector<Invid> objects = new Vector<Invid>();
 
                 if (user != null)
                   {
@@ -587,7 +587,7 @@ public class GanymedeServer implements Server {
 
                 if (Ganymede.log != null)
                   {
-                    Vector recipients = new Vector();
+                    Vector<String> recipients = new Vector<String>();
 
                     //      recipients.add(clientName); // this might well bounce.  C'est la vie.
 
