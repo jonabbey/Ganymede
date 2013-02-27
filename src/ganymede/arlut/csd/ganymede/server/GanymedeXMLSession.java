@@ -417,6 +417,14 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   private booleanSemaphore cleanedup = new booleanSemaphore(false);
 
+  /**
+   * We'll cache our identity so that we can keep identifying our
+   * logging with our identity even after our underlying
+   * GanymedeSession is cleared out.
+   */
+
+  private String identity = null;
+
   /* -- */
 
   public GanymedeXMLSession(GanymedeSession session)
@@ -428,6 +436,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     // revoked.
 
     this.session.setXSession(this);
+    this.identity = this.session.getSessionName();
 
     try
       {
@@ -673,14 +682,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   private String getLogPrefix()
   {
-    try
-      {
-        return "xml [" + this.session.getIdentity() + "]: ";
-      }
-    catch (NullPointerException ex)
-      {
-        return "xml: ";
-      }
+    return "xml [" + this.identity + "]: ";
   }
 
   /**
