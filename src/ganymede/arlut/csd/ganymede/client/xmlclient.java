@@ -1449,16 +1449,19 @@ public final class xmlclient implements ClientListener, Runnable {
 
   private synchronized void terminate(int resultCode)
   {
-    int count =0;
+    int count = 0;
 
     while (!this.finishedErrStream)
       {
         try
           {
-            this.wait(500);
             count++;
+            this.wait(500);
           }
         catch (InterruptedException ex)
+          {
+          }
+        finally
           {
             if (count > 4)
               {
