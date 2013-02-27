@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -2749,8 +2749,8 @@ public class PasswordDBField extends DBField implements pass_field {
         // "Server: Error in PasswordDBField.setBCryptPass()"
         // "The hash text passed to setBCryptPass(), "{0}", is
         // not a well-formed, bCrypt hash text"
-        return Ganymede.createErrorDialog(ts.l("setShaUnixCryptPass.error_title"),
-                                          ts.l("setShaUnixCryptPass.format_error", this.getName()));
+        return Ganymede.createErrorDialog(ts.l("setBCryptPass.error_title"),
+                                          ts.l("setBCryptPass.format_error", this.getName()));
       }
 
     eObj = (DBEditObject) owner;
