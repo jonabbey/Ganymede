@@ -53,6 +53,7 @@
 package arlut.csd.ganymede.client;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -353,7 +354,11 @@ public final class xmlclient implements ClientListener, Runnable {
 
     /* -- */
 
-    this.err = new PrintWriter(System.err);
+    // buffer our output so that we will have less chance of blocking
+    // while waiting for the background thread to finish spinning on
+    // the getNextErrChunk() stream from the server
+
+    this.err = new PrintWriter(new BufferedOutputStream(System.err, 4194304));
 
     this.commandLine = hasCommandLine;
 
@@ -1444,14 +1449,21 @@ public final class xmlclient implements ClientListener, Runnable {
 
   private synchronized void terminate(int resultCode)
   {
+    int count =0;
+
     while (!this.finishedErrStream)
       {
         try
           {
-            this.wait();
+            this.wait(500);
+            count++;
           }
         catch (InterruptedException ex)
           {
+            if (count > 4)
+              {
+                System.exit(resultCode);
+              }
           }
       }
 
