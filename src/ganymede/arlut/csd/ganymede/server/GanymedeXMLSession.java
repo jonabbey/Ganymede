@@ -552,7 +552,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
             try
               {
-                return getReturnVal(null, false);
+                return getReturnVal(false);
               }
             finally
               {
@@ -573,7 +573,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     try
       {
-        return getReturnVal(null, this.reader != null && !this.reader.isDone());
+        return getReturnVal(this.reader != null && !this.reader.isDone());
       }
     finally
       {
@@ -608,7 +608,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     this.parsing.waitForCleared();
 
-    return getReturnVal(null, this.success);
+    return getReturnVal(this.success);
   }
 
   /**
@@ -3277,49 +3277,18 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   /**
    * This private helper method creates a ReturnVal object to be
-   * passed back to the xmlclient.  Any text printed to the err
-   * object will be included in the ReturnVal object, followed by
-   * the content of message, if any.  If success is true, the
-   * ReturnVal returned will encode that.  If success is false,
-   * the returned ReturnVal will indicate failure.
+   * passed back to the xmlclient.
    */
 
-  private ReturnVal getReturnVal(String message, boolean success)
+  private ReturnVal getReturnVal(boolean success)
   {
     if (success)
       {
-        if (message != null && message.length() > 0)
-          {
-            System.out.println(message);
-
-            ReturnVal retVal = new ReturnVal(true);
-
-            retVal.setDialog(new JDialogBuff(ts.l("getReturnVal.default_title"), // "XML client message"
-                                             message,
-                                             ts.l("getReturnVal.ok_button"), // "OK"
-                                             null,
-                                             "ok.gif"));
-
-            return retVal;
-          }
-        else
-          {
-            return null;        // success, nothing to report
-          }
+        return null;            // success, nothing to report
       }
     else
       {
-        if (message == null)
-          {
-            return new ReturnVal(false);
-          }
-        else
-          {
-            // we depend on createErrorDialog() to dump the progress to the server log
-
-            return Ganymede.createErrorDialog(ts.l("getReturnVal.failure_title"), // "XML client error"
-                                              message);
-          }
+        return new ReturnVal(false);
       }
   }
 
