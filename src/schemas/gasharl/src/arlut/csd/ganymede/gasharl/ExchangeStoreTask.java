@@ -14,9 +14,11 @@
    -----------------------------------------------------------------------
 
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -104,7 +106,7 @@ public class ExchangeStoreTask implements Runnable {
 
   static final boolean debug = true;
 
-  static final boolean skipSSLValidation = false;
+  static final boolean skipSSLValidation = true;
   static private Pattern homeMDBPat = Pattern.compile("CN=([^,]+)");
 
   /* -- */
