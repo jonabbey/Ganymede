@@ -1,5 +1,5 @@
                           Ganymede Installation Guide
-                           Release 2.0 - 22 November 2010
+                           Release 2.0 - 1 March 2013
 
    --------------------------------------------------------------------------
 
@@ -82,25 +82,28 @@
    |1. Requirements                                                         |
    +------------------------------------------------------------------------+
 
-   The Ganymede system is designed to be easy to install for anyone running a
-   Unix or Linux system with Java, Perl, Bourne Shell, and Apache Ant
-   installed. Ganymede 2.0 is designed to work with any version of Java equal
-   to or better than 6 (JDK1.6). You will need the full Java Development Kit
-   (JDK or SDK) on your UNIX server so that you can compile any custom
-   plug-in classes.
+   The Ganymede server is designed to be easy to install for anyone running a
+   Unix, Linux, or Mac OS X system with Java, Perl, Bourne Shell, and Apache
+   Ant installed. Ganymede 2.0 is designed to work with Java 6 or later. You
+   will need the full Java Development Kit (JDK or SDK) on your UNIX server
+   so that you can compile any custom plug-in classes.
 
    To run the Ganymede clients in a web browser on a desktop PC running some
-   version of Windows, you will want to download and install version 6
-   (JDK1.6) or better of the Java Runtime Environment (JRE) for Windows. The
-   Java Runtime Environment for Windows includes support for the Java
-   Plug-In, a code module that will allow you to run the latest JVM's inside
-   Netscape, Internet Explorer, Mozilla, and Firefox.
+   version of Windows, you will want to download and install version 6 or
+   better of the Java Runtime Environment (JRE) for Windows. Oracle's Java
+   Runtime Environment includes support for Java Web Start, a code module
+   that will allow you to launch the Ganymede client directly from your
+   choice of web browser.
 
-   You can download any current version of the Java platform for Solaris,
-   Linux, and Windows at http://java.sun.com/j2se/. The Ganymede server has
-   primarily been developed and tested on Solaris and Linux, but the Ganymede
-   clients have been successfully run on Solaris, Linux, Windows XP, Vista,
-   Mac OS X Jaguar and later, FreeBSD, AIX, HP/UX, and others.
+   You can download Oracle's official release of the Java platform for Mac OS
+   X, Linux, Windows or Solaris at
+   http://www.oracle.com/technetwork/java/javase/downloads/index.html/. The
+   Ganymede server has primarily been developed and tested on Linux, but the
+   Ganymede clients have been successfully run on Solaris, Linux, Windows XP,
+   Vista, Mac OS X Jaguar and later, FreeBSD, AIX, HP/UX, and others.
+
+   If you're running Linux, your distribution probably provides an up-to-date
+   version of OpenJDK, which Ganymede is also fully compatible with.
 
    As well as Java, you will need /bin/sh, Perl 5.003 (or later), and Apache
    Ant to build and install the Ganymede software. The Ganymede distribution,
@@ -221,10 +224,6 @@
            pick another port number to run the Ganymede registry on. You may
            want to use 1100, 1101, or another non-used tcp port.
 
-           Note that from version 2.0 onwards, the Ganymede server handles
-           the RMI registration as part of its normal functioning, and no
-           external rmiregistry process need be run.
-
    What port should the Ganymede server use to publish its RMI objects?
 
            The answer to this question will control what TCP port number the
@@ -285,22 +284,22 @@
 
    The bin/ directory contains:
 
-     * runServer, which actually runs the server
-     * stopServer, a script that can be used to cleanly shut the server down.
-     * xmlclient, a script that is used to load XML-formatted data into the
+     * runServer, which actually runs the server
+     * stopServer, a script that can be used to cleanly shut the server down.
+     * xmlclient, a script that is used to load XML-formatted data into the
        Ganymede server.
-     * logscan.pl, a script that is used by the server to accelerate searches
+     * logscan.pl, a script that is used by the server to accelerate searches
        through the Ganymede log file.
 
    The db/ directory contains:
 
-     * The ganymede.db file, which contains all data objects and schema
-       definitions held by the Ganymede server.
-     * A running journal file that records all transactions made by the
-       server so that the server can fully recover if it ever crashes or if
-       the system running it goes down.
-     * A comprehensive log file, which documents all changes made to the
-       database.
+     * The binary ganymede.db file, which contains all data objects and
+       schema definitions held by the Ganymede server.
+     * A running binary journal file that records all transactions made by
+       the server so that the server can fully recover if it ever crashes or
+       if the system running it goes down.
+     * A comprehensive human-readable and Ganymede-parseable log file, which
+       documents all changes made to the database.
 
    The jars/ directory contains the compiled java classes that actually
    comprise the Ganymede server and the Java-based stopServer and xmlclient
@@ -332,17 +331,17 @@
    installed your server and where Java is, and will then create a schema
    directory under your server directory. This directory should include:
 
-     * a custom.jar file that includes the Java classes to be added to your
+     * a custom.jar file that includes the Java classes to be added to your
        server by the schema kit
-     * a src/ directory that contains all of the Java source code that was
+     * a src/ directory that contains all of the Java source code that was
        compiled into the custom.jar file.
-     * a scripts/ directory, that contains various Perl scripts used by the
+     * a scripts/ directory, that contains various Perl scripts used by the
        schema kit.
-     * an output/ directory that contains any networking files that are
+     * an output/ directory that contains any networking files that are
        written out by the Ganymede server when transactions are committed, as
        well as the scripts that are run to handle external actions when those
        transactions are committed.
-     * and finally, you will probably see some kind of loader script that can
+     * and finally, you will probably see some kind of loader script that can
        import data from your existing environment and generate an XML file
        for use with the xmlclient.
 
@@ -430,15 +429,18 @@
    process. The Ganymede server is heavily multithreaded, so you should
    expect to see a bunch of Java threads running on such a Linux system.
 
-   When you want to shut the server down, you'll just need to order it to
-   shut down from the Ganymede admin console (which we'll talk about below),
-   or by using the stopServer script in the server's bin/ directory. Either
-   one will transmit to the server a shutdown message, which will result in
-   the server kicking any active users off the system, consolidating its
-   database to disk, and finally shutting down. The Ganymede server is
-   designed to recover smoothly on restart if it is killed or if the system
-   crashes or is rebooted at any point during its execution, but if the
-   server is not shut down cleanly, it might spend a bit of time
+   When you want to shut the server down, you can send the running Java
+   process a QUIT signal directly with the kill command on Unix-type systems,
+   or you can order it to shut down from the Ganymede admin console (which
+   we'll talk about below), or by using the stopServer script in the server's
+   bin/ directory.
+
+   Whichever you choose, the server will kick any active users off the
+   system, consolidate its database to disk, wait for any running builder
+   tasks to complete, and then cleanly shut down. The Ganymede server is
+   designed to recover smoothly on restart if it is forcibly killed or if the
+   system crashes or is rebooted at any point during its execution, but if
+   the server is not shut down cleanly, it might spend a bit of time
    consolidating data from its journal when it starts up again.
 
    +------------------------------------------------------------------------+
@@ -522,7 +524,7 @@
    The Ganymede system has two primary clients, the Ganymede GUI client and
    the Ganymede admin console. Both can be run from a UNIX command line with
    a shell script that will run java on them, or from a web browser with
-   support for Java 6 (JDK1.6) or better.
+   support for Java 6 or better.
 
    We have provided an install script for installing the Ganymede clients on
    a UNIX system. installClient will prompt you for the name of the machine
@@ -539,14 +541,15 @@
 
    Note that we don't provide any kind of script to install the Ganymede
    clients on a Windows or Macintosh system directly, but you can use a JNLP
-   launcher to achieve this. See the Web Server Configuration section of this
-   document, below, for details on supporting JNLP launch.
+   launcher like Java Web Start to achieve this. See the Web Server
+   Configuration section of this document, below, for details on supporting
+   JNLP launch.
 
    In general, you should be able to run the Ganymede clients on any platform
-   that supports Java 1.6 or better, as the clients are written in pure Java.
+   that supports Java 6 or better, as the clients are written in pure Java.
    The Ganymede clients are dual-mode, and will work both as an applet and as
    a command line application. If you are trying to run the clients on a
-   platform that supports Java 1.6 but which doesn't have a JNLP launcher
+   platform that supports Java 6 but which doesn't have a JNLP launcher
    available, you may want to examine the ganymede and ganymedeAdmin launch
    scripts installed by the installClient script and create appropriate
    translations of the launch scripts for your platform.
@@ -646,12 +649,12 @@
    a JNLP file to Java Web Start.
 
    IMPORTANT NOTE: whenever you run applets from the launch page using the
-   'Native' or 'Java Plug In' modes, the applets can only run as long as the
-   log-in applet is still displayed in the web browser. If you close the main
-   browser window or click to a different page (either by following a link or
-   by clicking back on the browser), the applet will be shut down. Both the
-   Ganymede client and admin console have been written so that this shut-down
-   is handled in an orderly fashion, but the shut-down is unavoidable, so be
+   'Native' mode, the applets can only run as long as the log-in applet is
+   still displayed in the web browser. If you close the main browser window
+   or click to a different page (either by following a link or by clicking
+   back on the browser), the applet will be shut down. Both the Ganymede
+   client and admin console have been written so that this shut-down is
+   handled in an orderly fashion, but the shut-down is unavoidable, so be
    sure not to disturb the applet frame while you are using the client or
    console.
 
@@ -663,14 +666,11 @@
    |9. Configure your web server to support Java Web Start                  |
    +------------------------------------------------------------------------+
 
-   Ganymede supports the use of Sun's Java Web Start (at
-   http://java.sun.com/products/javawebstart/) to handle launching the
+   Ganymede supports the use of Java Web Start (see
+   http://en.wikipedia.org/wiki/Java_Web_Start) to handle launching the
    Ganymede client and admin console. With Java Web Start, your users should
-   be able to run the Ganymede client applets on their Windows or Linux
-   desktops without needing to bother with a web browser. Users on platforms
-   other than Windows may want to look at the OpenJNLP project at
-   http://openjnlp.nanode.org/ or the JavaURL project at
-   http://www.amherst.edu/~tliron/javaurl/.
+   be able to run the Ganymede client applets on their Windows, Mac, or Linux
+   desktops without needing to bother with a web browser.
 
    In order to support any JNLP launcher service on the client, your web
    server has to be configured to identify the proper MIME type for the Java
@@ -711,3 +711,6 @@
    --------------------------------------------------------------------------
 
     Jonathan Abbey
+
+   This article is translated to Serbo-Croatian language by Anja Skrba from
+   Webhostinggeeks.com.
