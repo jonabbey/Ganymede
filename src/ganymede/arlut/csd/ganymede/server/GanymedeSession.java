@@ -2685,9 +2685,9 @@ final public class GanymedeSession implements Session, Unreferenced {
    * Ganymede objects in XML format matching the GanyQL search
    * criteria specified in the queryString.  The ReturnVal returned
    * will, if the operation is approved, contain a reference to an RMI
-   * FileTransmitter interface, which can be iteratively called by the
-   * XML client to pull pieces of the transmission down in
-   * sequence.</p>
+   * {@link arlut.csd.ganymede.rmi.FileTransmitter FileTransmitter}
+   * interface, which can be iteratively called by the XML client to
+   * pull pieces of the transmission down in sequence.</p>
    *
    * @see arlut.csd.ganymede.rmi.Session
    */
@@ -2729,10 +2729,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>This method is called by the XML client to initiate a dump of
    * Ganymede objects in XML format matching the search criteria
    * specified in the query object.  The ReturnVal returned will, if
-   * the operation is approved, contain a reference to an RMI
-   * FileTransmitter interface, which can be iteratively called by the
-   * XML client to pull pieces of the transmission down in
-   * sequence.</p>
+   * the operation is approved, contain a reference to an RMI {@link
+   * arlut.csd.ganymede.rmi.FileTransmitter FileTransmitter}
+   * interface, which can be iteratively called by the XML client to
+   * pull pieces of the transmission down in sequence.</p>
    *
    * @see arlut.csd.ganymede.rmi.Session
    */
@@ -2773,9 +2773,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>This method is called by the XML client to initiate a dump of
    * the server's schema definition in XML format.  The ReturnVal
    * returned will, if the operation is approved, contain a reference
-   * to an RMI FileTransmitter interface, which can be iteratively
-   * called by the XML client to pull pieces of the transmission down
-   * in sequence.</p>
+   * to an RMI {@link arlut.csd.ganymede.rmi.FileTransmitter
+   * FileTransmitter} interface, which can be iteratively called by
+   * the XML client to pull pieces of the transmission down in
+   * sequence.</p>
    *
    * <p>This method is only available to a supergash-privileged
    * GanymedeSession.</p>
@@ -2793,10 +2794,10 @@ final public class GanymedeSession implements Session, Unreferenced {
   /**
    * <p>This method is called by the XML client to initiate a dump of
    * the entire data contents of the server.  The ReturnVal returned
-   * will, if the operation is approved, contain a reference to
-   * an RMI FileTransmitter interface, which can be iteratively called
-   * by the XML client to pull pieces of the transmission down in
-   * sequence.</p>
+   * will, if the operation is approved, contain a reference to an RMI
+   * {@link arlut.csd.ganymede.rmi.FileTransmitter FileTransmitter}
+   * interface, which can be iteratively called by the XML client to
+   * pull pieces of the transmission down in sequence.</p>
    *
    * <p>This method is only available to a supergash-privileged
    * GanymedeSession.</p>
@@ -2825,9 +2826,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>This method is called by the XML client to initiate a dump of
    * the server's entire database, schema and data, in XML format.
    * The ReturnVal will, if the operation is approved, contain a
-   * reference to an RMI FileTransmitter interface, which can be
-   * iteratively called by the XML client to pull pieces of the
-   * transmission down in sequence.</p>
+   * reference to an RMI {@link arlut.csd.ganymede.rmi.FileTransmitter
+   * FileTransmitter} interface, which can be iteratively called by
+   * the XML client to pull pieces of the transmission down in
+   * sequence.</p>
    *
    * <p>This method is only available to a supergash-privileged
    * GanymedeSession.</p>

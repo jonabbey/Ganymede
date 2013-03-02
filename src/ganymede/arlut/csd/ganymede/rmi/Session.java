@@ -16,8 +16,8 @@
    -----------------------------------------------------------------------
 
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2012
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -77,7 +77,7 @@ import arlut.csd.ganymede.common.ReturnVal;
  * <p>Client side interface definition for the
  * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession} class.  The Session
  * interface is provided to the client by the
- * {@link arlut.csd.ganymede.server.GanymedeServer GanymedeServer}'s 
+ * {@link arlut.csd.ganymede.server.GanymedeServer GanymedeServer}'s
  * {@link arlut.csd.ganymede.rmi.Server#login(java.lang.String username, java.lang.String password) login()}
  * method, and provides the client with an RMI reference that can be used
  * to communicate with the Ganymede server.</p>
@@ -99,7 +99,7 @@ public interface Session extends Remote {
 
   /**
    * This method logs a client out and closes up any resources
-   * used by the client on the server. 
+   * used by the client on the server.
    */
 
   void        logout() throws RemoteException;
@@ -141,7 +141,7 @@ public interface Session extends Remote {
    * @return A StringBuffer containing the message, if found, or null if no
    * message exists for the key, or if onlyShowIfNew was set and the message
    * was not new.
-   *   
+   *
    */
 
   StringBuffer getMessage(String key, boolean onlyShowIfNew) throws RemoteException;
@@ -161,7 +161,7 @@ public interface Session extends Remote {
    * @return A StringBuffer containing the message, if found, or null if no
    * message exists for the key, or if onlyShowIfNew was set and the message
    * was not new.
-   *   
+   *
    */
 
   StringBuffer getMessageHTML(String key, boolean onlyShowIfNew) throws RemoteException;
@@ -352,7 +352,7 @@ public interface Session extends Remote {
    *
    * @return a ReturnVal object if the transaction could not be committed,
    *         or null if there were no problems.  If the transaction was
-   *         forcibly terminated due to a major error, the 
+   *         forcibly terminated due to a major error, the
    *         doNormalProcessing flag in the returned ReturnVal will be
    *         set to false.
    */
@@ -382,7 +382,7 @@ public interface Session extends Remote {
    *
    * @return a ReturnVal object if the transaction could not be committed,
    *         or null if there were no problems.  If the transaction was
-   *         forcibly terminated due to a major error, the 
+   *         forcibly terminated due to a major error, the
    *         doNormalProcessing flag in the returned ReturnVal will be
    *         set to false.
    */
@@ -414,7 +414,7 @@ public interface Session extends Remote {
    *
    * @return a ReturnVal object if the transaction could not be committed,
    *         or null if there were no problems.  If the transaction was
-   *         forcibly terminated due to a major error, the 
+   *         forcibly terminated due to a major error, the
    *         doNormalProcessing flag in the returned ReturnVal will be
    *         set to false.
    */
@@ -428,7 +428,7 @@ public interface Session extends Remote {
    * @return null if the transaction was cleared successfully,
    *         a non-null ReturnVal if there was some kind of abnormal condition.
    */
-  
+
   ReturnVal     abortTransaction() throws RemoteException;
 
   /**
@@ -493,7 +493,7 @@ public interface Session extends Remote {
 
   /**
    * <p>This method provides the hook for doing a
-   * fast database dump to a string form.  The 
+   * fast database dump to a string form.  The
    * {@link arlut.csd.ganymede.common.DumpResult DumpResult}
    * returned comprises a formatted dump of all visible
    * fields and objects that match the given query.</p>
@@ -509,7 +509,7 @@ public interface Session extends Remote {
 
   /**
    * <p>This method provides the hook for doing a
-   * fast database dump to a string form.  The 
+   * fast database dump to a string form.  The
    * {@link arlut.csd.ganymede.common.DumpResult DumpResult}
    * returned comprises a formatted dump of all visible
    * fields and objects that match the given query.</p>
@@ -718,7 +718,7 @@ public interface Session extends Remote {
    * <p>Keep in mind that only one Session can have a particular
    * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} checked out for
    * editing at a time.  Once checked out, the object will be unavailable
-   * to any other sessions until this session calls 
+   * to any other sessions until this session calls
    * {@link arlut.csd.ganymede.rmi.Session#commitTransaction() commitTransaction()}
    * or {@link arlut.csd.ganymede.rmi.Session#abortTransaction() abortTransaction()}.</p>
    *
@@ -737,7 +737,7 @@ public interface Session extends Remote {
    * <p>Keep in mind that only one Session can have a particular
    * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} checked out for
    * editing at a time.  Once created, the object will be unavailable
-   * to any other sessions until this session calls 
+   * to any other sessions until this session calls
    * {@link arlut.csd.ganymede.rmi.Session#commitTransaction() commitTransaction()}.</p>
    *
    * @param type The kind of object to create.
@@ -757,7 +757,7 @@ public interface Session extends Remote {
    * <p>Keep in mind that only one Session can have a particular
    * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} checked out for
    * editing at a time.  Once created, the object will be unavailable
-   * to any other sessions until this session calls 
+   * to any other sessions until this session calls
    * {@link arlut.csd.ganymede.rmi.Session#commitTransaction() commitTransaction()}.</p>
    *
    * @param objectType The kind of object to create.
@@ -781,7 +781,7 @@ public interface Session extends Remote {
    * invid type of object.</p>
    *
    * @return A ReturnVal carrying an object reference and/or error dialog
-   *    
+   *
    * @see arlut.csd.ganymede.rmi.Session
    */
 
@@ -791,7 +791,7 @@ public interface Session extends Remote {
    * <p>Inactivate an object in the database</p>
    *
    * <p>This method must be called within a transactional context.  The object's
-   * change in status will not be visible to other sessions until this session calls 
+   * change in status will not be visible to other sessions until this session calls
    * {@link arlut.csd.ganymede.rmi.Session#commitTransaction() commitTransaction()}.</p>
    *
    * <p>Objects inactivated will typically be altered to reflect their inactive
@@ -816,7 +816,7 @@ public interface Session extends Remote {
    *
    *
    * <p>This method must be called within a transactional context.  The object's
-   * change in status will not be visible to other sessions until this session calls 
+   * change in status will not be visible to other sessions until this session calls
    * {@link arlut.csd.ganymede.rmi.Session#commitTransaction() commitTransaction()}.</p>
    *
    * @see arlut.csd.ganymede.rmi.Session
@@ -836,7 +836,7 @@ public interface Session extends Remote {
    * in a dialog being returned in the ReturnVal.</p>
    *
    * <p>This method must be called within a transactional context.  The object's
-   * removal will not be visible to other sessions until this session calls 
+   * removal will not be visible to other sessions until this session calls
    * {@link arlut.csd.ganymede.rmi.Session#commitTransaction() commitTransaction()}.</p>
    *
    * @return a ReturnVal object if the object could not be inactivated,
@@ -850,8 +850,9 @@ public interface Session extends Remote {
    * Ganymede objects in XML format matching the GanyQL search
    * criteria specified in the queryString.  The ReturnVal returned
    * will, if the operation is approved, contain a reference to an RMI
-   * FileTransmitter interface, which can be iteratively called by the
-   * XML client to pull pieces of the transmission down in sequence.
+   * {@link arlut.csd.ganymede.rmi.FileTransmitter FileTransmitter}
+   * interface, which can be iteratively called by the XML client to
+   * pull pieces of the transmission down in sequence.
    */
 
   public ReturnVal runXMLQuery(String queryString) throws RemoteException;
@@ -860,9 +861,10 @@ public interface Session extends Remote {
    * This method is called by the XML client to initiate a dump of
    * Ganymede objects in XML format matching the search criteria
    * specified in the query object.  The ReturnVal returned will, if
-   * the operation is approved, contain a reference to an RMI
-   * FileTransmitter interface, which can be iteratively called by the
-   * XML client to pull pieces of the transmission down in sequence.
+   * the operation is approved, contain a reference to an RMI {@link
+   * arlut.csd.ganymede.rmi.FileTransmitter FileTransmitter}
+   * interface, which can be iteratively called by the XML client to
+   * pull pieces of the transmission down in sequence.
    */
 
   public ReturnVal runXMLQuery(Query query) throws RemoteException;
@@ -871,9 +873,10 @@ public interface Session extends Remote {
    * <p>This method is called by the XML client to initiate a dump of
    * the server's schema definition in XML format.  The ReturnVal
    * returned will, if the operation is approved, contain a reference
-   * to an RMI FileTransmitter interface, which can be iteratively
-   * called by the XML client to pull pieces of the transmission down
-   * in sequence.</p>
+   * to an RMI {@link arlut.csd.ganymede.rmi.FileTransmitter
+   * FileTransmitter} interface, which can be iteratively called by
+   * the XML client to pull pieces of the transmission down in
+   * sequence.</p>
    *
    * <p>This method is only available to a supergash-privileged
    * GanymedeSession.</p>
@@ -884,13 +887,13 @@ public interface Session extends Remote {
   /**
    * <p>This method is called by the XML client to initiate a dump of
    * the entire data contents of the server.  The ReturnVal returned
-   * will, if the operation is approved, contain a reference to
-   * an RMI FileTransmitter interface, which can be iteratively called
-   * by the XML client to pull pieces of the transmission down in
-   * sequence.</p>
+   * will, if the operation is approved, contain a reference to an RMI
+   * {@link arlut.csd.ganymede.rmi.FileTransmitter FileTransmitter}
+   * interface, which can be iteratively called by the XML client to
+   * pull pieces of the transmission down in sequence.</p>
    *
    * <p>This method is only available to a supergash-privileged
-   * GanymedeSession.</p> 
+   * GanymedeSession.</p>
    *
    * @param syncChannel The name of the sync channel whose constraints
    * we want to apply to this dump.  May be null if the client wants
@@ -909,9 +912,10 @@ public interface Session extends Remote {
    * <p>This method is called by the XML client to initiate a dump of
    * the server's entire database, schema and data, in XML format.
    * The ReturnVal will, if the operation is approved, contain a
-   * reference to an RMI FileTransmitter interface, which can be
-   * iteratively called by the XML client to pull pieces of the
-   * transmission down in sequence.</p>
+   * reference to an RMI {@link arlut.csd.ganymede.rmi.FileTransmitter
+   * FileTransmitter} interface, which can be iteratively called by
+   * the XML client to pull pieces of the transmission down in
+   * sequence.</p>
    *
    * <p>This method is only available to a supergash-privileged
    * GanymedeSession.</p>
