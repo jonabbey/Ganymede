@@ -192,7 +192,7 @@ public class DBPermissionManager {
    * <p>This variable stores the permission bits that are applicable
    * to objects that the current persona has ownership privilege over.
    * This matrix is always a permissive superset of {@link
-   * arlut.csd.ganymede.server.GanymedeSession#defaultPerms
+   * arlut.csd.ganymede.server.DBPermissionManager#defaultPerms
    * defaultPerms}.</p>
    */
 
@@ -219,7 +219,7 @@ public class DBPermissionManager {
    * and which the current admin has permission to delegate to
    * subordinate roles.  This matrix is always a permissive superset
    * of {@link
-   * arlut.csd.ganymede.server.GanymedeSession#delegatableDefaultPerms
+   * arlut.csd.ganymede.server.DBPermissionManager#delegatableDefaultPerms
    * delegatableDefaultPerms}.</p>
    */
 
@@ -1432,7 +1432,7 @@ public class DBPermissionManager {
    * bits for the field in the object.</p>
    *
    * <p>This method duplicates the logic of {@link
-   * arlut.csd.ganymede.server.GanymedeSession#getPerm(arlut.csd.ganymede.server.DBObject)
+   * arlut.csd.ganymede.server.DBPermissionManager#getPerm(arlut.csd.ganymede.server.DBObject)
    * getPerm(object)} internally for efficiency.  This method is
    * called <B>quite</B> a lot in the server, and has been tuned
    * to use the pre-calculated DBPermissionManager
@@ -1728,11 +1728,11 @@ public class DBPermissionManager {
    * that are not owned by this persona and to objects that are
    * owned.</p>
    *
-   * <p>This is used by the
-   * {@link arlut.csd.ganymede.server.DBPermissionManager#dump(arlut.csd.ganymede.common.Query) dump()}
-   * code to determine whether a field should
-   * be added to the set of possible fields to be returned at the
-   * time that the dump results are being prepared.</p>
+   * <p>This is used by the {@link
+   * arlut.csd.ganymede.server.GanymedeSession#dump(arlut.csd.ganymede.common.Query)
+   * dump()} code to determine whether a field should be added to the
+   * set of possible fields to be returned at the time that the dump
+   * results are being prepared.</p>
    *
    * @param includeOwnedPerms If true, this method will return the permission
    * that the current persona would have for an object that was owned

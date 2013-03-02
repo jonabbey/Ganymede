@@ -920,12 +920,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * without checking permissions.</p>
    *
    * <p>This method avoids checking permissions because it is used on
-   * the server side only and because it is involved in the
-   * {@link arlut.csd.ganymede.server.DBObject#getLabel() getLabel()}
-   * logic for {@link arlut.csd.ganymede.server.DBObject DBObject},
-   * which is invoked from {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
-   * {@link arlut.csd.ganymede.server.DBPermissionManager#getPerm(arlut.csd.ganymede.server.DBObject) getPerm()}
-   * method.</p>
+   * the server side only and because it is involved in the {@link
+   * arlut.csd.ganymede.server.DBObject#getLabel() getLabel()} logic
+   * for {@link arlut.csd.ganymede.server.DBObject DBObject}.</p>
    *
    * <p>If this method checked permissions and the getPerm() method
    * failed for some reason and tried to report the failure using

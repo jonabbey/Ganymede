@@ -2868,7 +2868,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * GanymedeSession that require the client to be logged in to
    * operate.</p>
    *
-   * <p>NB: the {@link arlut.csd.ganymede.server.logout()} method
+   * <p>NB: the {@link
+   * arlut.csd.ganymede.server.GanymedeSession#logout()} method
    * unexports this GanymedeSession object so that we shouldn't have
    * any more incoming RMI calls to worry about, but it's possible for
    * RMI calls to be in flight and blocking on the GanymedeSession

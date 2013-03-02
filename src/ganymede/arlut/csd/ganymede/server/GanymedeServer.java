@@ -1278,9 +1278,10 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   * <p>This method is used by the
-   * {@link arlut.csd.ganymede.server.GanymedeAdmin#shutdown(boolean) shutdown()}
-   * method to put the server into 'shutdown soon' mode.</p>
+   * <p>This method is used by the {@link
+   * arlut.csd.ganymede.server.GanymedeAdmin#shutdown(boolean,
+   * java.lang.String) shutdown()} method to put the server into
+   * 'shutdown soon' mode.</p>
    */
 
   public static void setShutdown(String reason)
