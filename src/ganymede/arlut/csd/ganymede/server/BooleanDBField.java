@@ -10,11 +10,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -101,10 +103,10 @@ public class BooleanDBField extends DBField implements boolean_field {
 
   /**
    * <P>No-value constructor.  Allows the construction of a
-   * 'non-initialized' field, for use where the 
+   * 'non-initialized' field, for use where the
    * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * definition indicates that a given field may be present,
-   * but for which no value has been stored in the 
+   * but for which no value has been stored in the
    * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
    *
    * <P>Used to provide the client a template for 'creating' this
@@ -115,7 +117,7 @@ public class BooleanDBField extends DBField implements boolean_field {
   {
     this.owner = owner;
     this.fieldcode = definition.getID();
-    
+
     value = null;
   }
 
@@ -129,7 +131,7 @@ public class BooleanDBField extends DBField implements boolean_field {
   {
     this.owner = owner;
     this.fieldcode = field.getID();
-    
+
     value = field.value;
   }
 
@@ -212,7 +214,7 @@ public class BooleanDBField extends DBField implements boolean_field {
       {
         return false;
       }
-    
+
     return ((Boolean) value).booleanValue();
   }
 
@@ -242,7 +244,7 @@ public class BooleanDBField extends DBField implements boolean_field {
       {
         return "null";
       }
-    
+
     return (this.value() ? trueStr: falseStr);
   }
 
@@ -299,7 +301,7 @@ public class BooleanDBField extends DBField implements boolean_field {
   // boolean_field methods
   //
   // ****
-  
+
   /**
    *
    * Returns true if this field is defined to have the true/false
