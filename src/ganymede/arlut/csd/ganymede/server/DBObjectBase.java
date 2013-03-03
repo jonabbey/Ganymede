@@ -1122,6 +1122,10 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
     xmlOut.attribute("id", java.lang.Short.toString(type_code));
     xmlOut.indentOut();
 
+    xmlOut.startElementIndent("label");
+    xmlOut.attribute("fieldid", java.lang.Integer.toString(label_id));
+    xmlOut.endElement("label");
+
     if (classname != null && !classname.equals(""))
       {
         xmlOut.startElementIndent("classdef");
@@ -1139,13 +1143,6 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
       {
         xmlOut.startElementIndent("embedded");
         xmlOut.endElement("embedded");
-      }
-
-    if (label_id != -1)
-      {
-        xmlOut.startElementIndent("label");
-        xmlOut.attribute("fieldid", java.lang.Integer.toString(label_id));
-        xmlOut.endElement("label");
       }
 
     emitXML_fields(xmlOut);
@@ -2599,9 +2596,7 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   /**
    * <p>Returns the short type id for the field designated as this
-   * object's primary label field, if any.  Objects do not need to
-   * have a primary label field designated if labels for this object
-   * type are dynamically generated.</p>
+   * object's primary label field.</p>
    *
    * @see arlut.csd.ganymede.rmi.Base
    */
@@ -2615,6 +2610,8 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
    * <p>Returns the field definition for the field designated as this
    * object's primary label field.  null is returned if no label has
    * been designated.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.Base
    */
 
   public DBObjectBaseField getLabelFieldDef()
