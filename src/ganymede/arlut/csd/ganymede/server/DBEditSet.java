@@ -288,7 +288,7 @@ public class DBEditSet {
     this.interactive = interactive;
     this.objects = Collections.synchronizedMap(new HashMap<Invid, DBEditObject>());
     logEvents = Collections.synchronizedList(new ArrayList<DBLogEvent>());
-    basesModified = new HashSet(dbStore.bases().size());
+    basesModified = new HashSet<DBObjectBase>(dbStore.bases().size());
 
     if (session.GSession != null && session.GSession.isXMLSession() && Ganymede.allowMagicImport)
       {
@@ -2396,8 +2396,8 @@ public class DBEditSet {
    * builder task completes and updates its lastRunTime field after we
    * have touched the timestamps on the changed bases.</p>
    *
-   * @param fieldsTouched hash of DBObjectBases that contain objects
-   * created, changed, or deleted during this transaction
+   * @param fieldsTouched Set of field types that were edited during
+   * this transaction
    */
 
   private final void commit_updateBases(Set<DBObjectBaseField> fieldsTouched)
