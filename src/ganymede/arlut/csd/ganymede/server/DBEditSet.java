@@ -286,7 +286,7 @@ public class DBEditSet {
     this.dbStore = dbStore;
     this.description = description;
     this.interactive = interactive;
-    objects = Collections.synchronizedMap(new HashMap<Invid, DBEditObject>());
+    this.objects = Collections.synchronizedMap(new HashMap<Invid, DBEditObject>());
     logEvents = Collections.synchronizedList(new ArrayList<DBLogEvent>());
     basesModified = new HashSet(dbStore.bases().size());
 
@@ -402,7 +402,7 @@ public class DBEditSet {
 
   public DBEditObject[] getObjectList()
   {
-    return objects.values().toArray(new DBEditObject[0]);
+    return this.objects.values().toArray(new DBEditObject[0]);
   }
 
   /**
@@ -427,7 +427,7 @@ public class DBEditSet {
 
   public DBEditObject findObject(Invid invid)
   {
-    return objects.get(invid);
+    return this.objects.get(invid);
   }
 
   /**
@@ -437,7 +437,7 @@ public class DBEditSet {
 
   public boolean isEditingObject(Invid invid)
   {
-    return objects.containsKey(invid);
+    return this.objects.containsKey(invid);
   }
 
   /**
@@ -470,9 +470,9 @@ public class DBEditSet {
         return false;
       }
 
-    if (!objects.containsKey(object.getInvid()))
+    if (!this.objects.containsKey(object.getInvid()))
       {
-        objects.put(object.getInvid(), object);
+        this.objects.put(object.getInvid(), object);
 
         // just need something to mark the slot in the hash table, to
         // indicate that this object's base is involved in the
@@ -892,7 +892,7 @@ public class DBEditSet {
 
     ArrayList<DBEditObject> drop = new ArrayList<DBEditObject>();
 
-    for (DBEditObject eobjRef: objects.values())
+    for (DBEditObject eobjRef: this.objects.values())
       {
         Invid tmpvid = eobjRef.getInvid();
 
@@ -936,7 +936,7 @@ public class DBEditSet {
 
     for (DBEditObject obj: drop)
       {
-        objects.remove(obj.getInvid());
+        this.objects.remove(obj.getInvid());
       }
 
     // and our namespaces
@@ -993,7 +993,7 @@ public class DBEditSet {
 
   public synchronized ReturnVal commit(String comment)
   {
-    if (objects == null)
+    if (this.objects == null)
       {
         throw new RuntimeException(ts.l("global.already"));
       }
@@ -1409,7 +1409,7 @@ public class DBEditSet {
 
     result = result.intern();
 
-    for (DBEditObject eObj: objects.values())
+    for (DBEditObject eObj: this.objects.values())
       {
         // force a change of date and modifier information
         // into the object without using the normal field
@@ -1755,7 +1755,7 @@ public class DBEditSet {
 
   private final void commit_handlePhase2()
   {
-    for (DBEditObject eObj: objects.values())
+    for (DBEditObject eObj: this.objects.values())
       {
         // tell the object to go ahead and do any external
         // commit actions.
@@ -1789,7 +1789,7 @@ public class DBEditSet {
 
   private final void commit_log_events(Set<DBObjectBaseField> fieldsTouched)
   {
-    for (DBEditObject eObj: objects.values())
+    for (DBEditObject eObj: this.objects.values())
       {
         try
           {
@@ -2221,7 +2221,7 @@ public class DBEditSet {
     // collect the list of invids that we know were touched in this
     // transaction for the start transaction log record
 
-    Vector<Invid> invids = new Vector<Invid>(objects.keySet());
+    Vector<Invid> invids = new Vector<Invid>(this.objects.keySet());
 
     synchronized (Ganymede.log)
       {
@@ -2276,12 +2276,12 @@ public class DBEditSet {
 
   private final void commit_replace_objects()
   {
-    for (DBEditObject eObj: objects.values())
+    for (DBEditObject eObj: this.objects.values())
       {
         commit_replace_object(eObj);
       }
 
-    objects.clear();
+    this.objects.clear();
   }
 
   /**
@@ -2472,12 +2472,12 @@ public class DBEditSet {
 
   private final void release()
   {
-    if (objects == null)
+    if (this.objects == null)
       {
         throw new RuntimeException(ts.l("global.already"));
       }
 
-    for (DBEditObject eObj: objects.values())
+    for (DBEditObject eObj: this.objects.values())
       {
         eObj.release(true);
 
@@ -2549,10 +2549,10 @@ public class DBEditSet {
 
   private void deconstruct()
   {
-    if (objects != null)
+    if (this.objects != null)
       {
-        objects.clear();
-        objects = null;
+        this.objects.clear();
+        this.objects = null;
       }
 
     if (logEvents != null)
