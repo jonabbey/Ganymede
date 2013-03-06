@@ -2763,6 +2763,21 @@ public class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
+   * <p>As getField(), but returns DBObjectBaseField rather than the
+   * BaseField interface.</p>
+   *
+   * <p>This is a server-side only method.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.BaseField
+   * @see arlut.csd.ganymede.rmi.Base
+   */
+
+  public DBObjectBaseField getFieldDef(Short id)
+  {
+    return fieldTable.get(id.shortValue());
+  }
+
+  /**
    * <p>Returns the field definition for the field matching id, or
    * null if no match found.</p>
    *
