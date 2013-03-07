@@ -2631,9 +2631,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
         if (val != null)
           {
-            Vector invids = new Vector();
+            Vector<Invid> invids = new Vector<Invid>();
 
-            invids.addElement(this.getInvid());
+            invids.add(this.getInvid());
 
             // "{0} {1} has been inactivated.\n\nThe object is due to be removed from the database at {2}.\n\n"
             editset.logEvent(new DBLogEvent("inactivateobject",
@@ -2648,9 +2648,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
           }
         else
           {
-            Vector invids = new Vector();
+            Vector<Invid> invids = new Vector<Invid>();
 
-            invids.addElement(this.getInvid());
+            invids.add(this.getInvid());
 
             // "{0} {1} has been inactivated.\n\nThe object has no removal date set.\n\n"
             editset.logEvent(new DBLogEvent("inactivateobject",
@@ -2735,9 +2735,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   {
     if (success)
       {
-        Vector invids = new Vector();
+        Vector<Invid> invids = new Vector<Invid>();
 
-        invids.addElement(this.getInvid());
+        invids.add(this.getInvid());
 
         // "{0} {1} has been reactivated.\n\n"
         editset.logEvent(new DBLogEvent("reactivateobject",
