@@ -163,8 +163,8 @@ refresh the jar files.
            debug="${debug.flag}"
            debuglevel="${debug.level}"
            encoding="UTF-8"
-           target="1.5"
-           source="1.5"
+           target="6"
+           source="6"
            deprecation="on"
            includeantruntime="false"
            srcdir="${src.dir}">
