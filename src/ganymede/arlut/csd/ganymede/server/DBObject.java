@@ -62,7 +62,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -1288,7 +1287,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public Vector<FieldInfo> getFieldInfoVector()
   {
-    Vector results = new Vector();
+    Vector<FieldInfo> results = new Vector<FieldInfo>();
     DBField field;
 
     /* -- */
@@ -1308,19 +1307,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
               {
                 try
                   {
-                    results.addElement(new FieldInfo(field));
+                    results.add(new FieldInfo(field));
                   }
                 catch (GanyPermissionsException ex)
                   {
                     // swallow the exception without comment, we'll
                     // just leave the field out of the vector
-                  }
-                catch (RemoteException ex)
-                  {
-                    // scream a bit about this exception so someone
-                    // can take a look at it.
-
-                    Ganymede.debug("Error in getFieldInfoVector():\n" + Ganymede.stackTrace(ex));
                   }
               }
           }
@@ -1887,7 +1879,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public final Vector<String> checkRequiredFields()
   {
-    Vector localFields = new Vector();
+    Vector<String> localFields = new Vector<String>();
 
     /* -- */
 
@@ -1921,7 +1913,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
                     if (field == null || !field.isDefined())
                       {
-                        localFields.addElement(fieldDef.getName());
+                        localFields.add(fieldDef.getName());
                       }
                   }
               }
