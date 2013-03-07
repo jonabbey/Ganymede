@@ -6,15 +6,16 @@
 
    Created: 21 Aug 1997
 
-
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -76,7 +77,6 @@ import arlut.csd.Util.VecQuickSort;
 ------------------------------------------------------------------------------*/
 
 /**
- *
  * <p>A sorted listbox that handles {@link arlut.csd.JDataComponent.listHandle listHandle}'s.
  * JstringListBox supports pop-up menus and uses the
  * @link arlut.csd.JDataComponent.JsetValueCallback JsetValueCallback}
@@ -95,38 +95,37 @@ import arlut.csd.Util.VecQuickSort;
  * @see arlut.csd.JDataComponent.listHandle
  * @see arlut.csd.JDataComponent.StringSelector
  * @see arlut.csd.JDataComponent.JsetValueCallback
- * @version $Id$
  * @author Mike Mulvaney
- *
  */
 
 public class JstringListBox extends JList implements ActionListener, ListSelectionListener,
-                                                     MouseListener, MouseMotionListener, 
+                                                     MouseListener, MouseMotionListener,
                                                      Comparator {
 
   static final boolean debug = false;
 
   // ---
 
-  int 
+  int
     width,
     popUpIndex = -1;
 
-  DefaultListModel 
+  DefaultListModel
     model = new DefaultListModel();
 
   /**
-   * <p>If true, this JstringListBox will allow nodes to be dragged up and
-   * down in the list.</p>
+   * <p>If true, this JstringListBox will allow nodes to be dragged up
+   * and down in the list.</p>
    */
 
   private boolean dragOk = false;
 
   /**
-   * <p>If true, the JstringListBox will sort items.  This variable is set
-   * by the value of the sort parameter in the most recent 
-   * {@link arlut.csd.JDataComponent.JstringListBox#load(java.util.Vector items, int width, boolean sort, java.util.Comparator comparator) load()}
-   * call.</p>
+   * <p>If true, the JstringListBox will sort items.  This variable is
+   * set by the value of the sort parameter in the most recent {@link
+   * arlut.csd.JDataComponent.JstringListBox#load(java.util.Vector
+   * items, int width, boolean sort, java.util.Comparator comparator)
+   * load()} call.</p>
    */
 
   private boolean doSort = false;
@@ -135,7 +134,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
    * <p>The callback we'l use to report user activities.</p>
    */
 
-  JsetValueCallback 
+  JsetValueCallback
     callback;
 
   /**
@@ -209,13 +208,12 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   * <p>This method loads a Vector of items into this
-   * list box.  Elements of the items Vector may
-   * be Strings or {@link arlut.csd.JDataComponent.listHandle listHandle}
-   * objects.</p>
+   * <p>This method loads a Vector of items into this list box.
+   * Elements of the items Vector may be Strings or {@link
+   * arlut.csd.JDataComponent.listHandle listHandle} objects.</p>
    *
-   * <p>If sort is true, the items will be sorted in
-   * display order before being loaded into this list box.</p>
+   * <p>If sort is true, the items will be sorted in display order
+   * before being loaded into this list box.</p>
    *
    * <p>Any values previously in the list box will be removed.</p>
    *
@@ -255,7 +253,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
           {
             return;
           }
-        
+
         if (items.elementAt(0) instanceof listHandle)
           {
             if (doSort)
@@ -266,9 +264,9 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
             for (int i = 0; i < items.size(); i++)
               {
                 listHandle handle = (listHandle) items.elementAt(i);
-                
+
                 insertHandleAt(handle, i);
-                
+
                 if (handle.toString().length() > maxWidthString.length())
                   {
                     maxWidthString = handle.toString();
@@ -282,7 +280,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
             for (int i = 0; i < items.size(); i++)
               {
                 String s = (String)items.elementAt(i);
-                
+
                 if (s.length() > maxWidthString.length())
                   {
                     maxWidthString = s;
@@ -295,11 +293,11 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
               {
                 new VecQuickSort(convertedVect, comparator).sort();
               }
-            
+
             for (int i = 0; i < convertedVect.size(); i++)
               {
                 listHandle handle = (listHandle) convertedVect.elementAt(i);
-                
+
                 insertHandleAt(handle, i);
               }
           }
@@ -330,7 +328,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
     for (int i = 0; i < model.getSize(); i++)
       {
         listHandle handle = (listHandle) model.getElementAt(i);
-        
+
         if (handle.getObject() != null && handle.getObject().equals(object))
           {
             handle.setLabel(newLabel);
@@ -424,9 +422,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   *
    * Convenience method to set the size on the model.
-   *
    */
 
   public void setSize(int size)
@@ -435,32 +431,41 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   * <p>Connects this JstringListBox to an implementaton of the
-   * {@link arlut.csd.JDataComponent.JsetValueCallback JsetValueCallback} interface
-   * in order to provide live notification of changes performed by the user.  The
-   * JsetValueCallback implementation is given the opportunity to approve any change
-   * made by the user before the GUI is updated to show the change.  The JsetValueCallback
-   * interface is also used to pass pop-up menu commands to the client.</p>
+   * <p>Connects this JstringListBox to an implementaton of the {@link
+   * arlut.csd.JDataComponent.JsetValueCallback JsetValueCallback}
+   * interface in order to provide live notification of changes
+   * performed by the user.  The JsetValueCallback implementation is
+   * given the opportunity to approve any change made by the user
+   * before the GUI is updated to show the change.  The
+   * JsetValueCallback interface is also used to pass pop-up menu
+   * commands to the client.</p>
    *
-   * <p>JstringListBox uses the following subclasses of
-   * {@link arlut.csd.JDataComponent.JValueObject JValueObject} to pass status updates to
-   * the callback.
+   * <p>JstringListBox uses the following subclasses of {@link
+   * arlut.csd.JDataComponent.JValueObject JValueObject} to pass
+   * status updates to the callback.
    *
    * <ul>
-   * <li>{@link arlut.csd.JDataComponent.JParameterValueObject} Action from a PopupMenu.  The Parameter is the ActionCommand
-   * string for the pop-up menu item selected, and the value is the object
-   * (or string if no object defined) associated with the item selected when the pop-up menu was fired.</li>
-   * <li>{@link arlut.csd.JDataComponent.JAddValueObject} Object has been selected.  Value is the object (or string) added.</li>
-   * <li>{@link arlut.csd.JDataComponent.JInsertValueObject} Object has been double-clicked.  Value is the object (or string) double-clicked.</li>
-   * <li>{@link arlut.csd.JDataComponent.JMoveValueObject} Object has been dragged up or down.  Index holds the index the object has been moved to.</li>
-   * <li>{@link arlut.csd.JDataComponent.JErrorValueObject} Something went wrong.  Value is the error message to be displayed to the user in whatever
-   * fashion is appropriate.</li>
+   * <li>{@link arlut.csd.JDataComponent.JParameterValueObject} Action
+   * from a PopupMenu.  The Parameter is the ActionCommand string for
+   * the pop-up menu item selected, and the value is the object (or
+   * string if no object defined) associated with the item selected
+   * when the pop-up menu was fired.</li>
+   * <li>{@link arlut.csd.JDataComponent.JAddValueObject} Object has
+   * been selected.  Value is the object (or string) added.</li>
+   * <li>{@link arlut.csd.JDataComponent.JInsertValueObject} Object
+   * has been double-clicked.  Value is the object (or string)
+   * double-clicked.</li>
+   * <li>{@link arlut.csd.JDataComponent.JMoveValueObject} Object has
+   * been dragged up or down.  Index holds the index the object has
+   * been moved to.</li>
+   * <li>{@link arlut.csd.JDataComponent.JErrorValueObject} Something
+   * went wrong.  Value is the error message to be displayed to the
+   * user in whatever fashion is appropriate.</li>
    * </ul>
    * </p>
    *
    * @see JsetValueCallback
    * @see JValueObject
-   *
    */
 
   public void setCallback(JsetValueCallback callback)
@@ -508,7 +513,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
           {
             i++;
           }
-            
+
         insertHandleAt(lh, i);
 
         addSelectionInterval(i, i);
@@ -566,9 +571,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   *
    * Use this one to skip the sorting.  Called by all the add methods.
-   *
    */
 
   public void insertHandleAt(listHandle handle, int row)
@@ -641,9 +644,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   *
    * Returns true if the list contains an object with the specified label.
-   *
    */
 
   public boolean containsLabel(String string)
@@ -652,10 +653,11 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   * Returns true if the list contains an object with the specified label.
+   * <p>Returns true if the list contains an object with the specified
+   * label.</p>
    *
-   * Since everything is a listHandle internally, this is the same as containsLabel
-   *
+   * <p>Since everything is a listHandle internally, this is the same
+   * as containsLabel</p>
    */
 
   public boolean containsString(String string)
@@ -702,20 +704,16 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   *
    * This selects the item with the given label.
-   *
    */
 
   public void setSelectedLabel(String s)
   {
     this.setSelectedLabel(s, false);
   }
-   
+
   /**
-   *
    * This selects the item with the given label.
-   *
    */
 
   public void setSelectedLabel(String s, boolean ensureVisible)
@@ -742,7 +740,6 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   *
    * Sets the selected item.
    *
    * @param o Can be listHandle or String
@@ -761,9 +758,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   *
    * This returns just the label.
-   *
    */
 
   public String getSelectedLabel()
@@ -772,9 +767,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   *
    * This returns the whole listHandle.
-   *
    */
 
   public listHandle getSelectedHandle()
@@ -783,9 +776,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   *
    * Returns all the selected handles.
-   *
    */
 
   @SuppressWarnings("deprecation")
@@ -794,7 +785,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   {
     Vector v = new Vector();
     Object[] values = getSelectedValues();
-    
+
     for (int i =0; i < values.length; i++)
       {
         v.addElement(values[i]);
@@ -810,7 +801,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   public Vector getHandles()
   {
     Vector v = new Vector();
-    
+
     for (int i =0; i < getModel().getSize(); i++)
       {
         v.addElement(getModel().getElementAt(i));
@@ -820,9 +811,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   *
    * This returns the object, without the label.
-   *
    */
 
   public Object getSelectedItem()
@@ -839,9 +828,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   *
    * For the ListSelectionListener
-   *
    */
 
   public void valueChanged(ListSelectionEvent e)
@@ -857,7 +844,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       {
         boolean ok = false;
 
-        try 
+        try
           {
             ok = callback.setValuePerformed(new JAddValueObject(this, selectedIndex));
           }
@@ -878,9 +865,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   *
    * For the MouseListener interface
-   *
    */
 
   public void mouseClicked(MouseEvent e)
@@ -895,7 +880,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
             if (e.getClickCount() == 2)
               {
                 boolean ok = false;
-            
+
                 int index = locationToIndex(e.getPoint());
 
                 if (debug)
@@ -911,7 +896,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
                   {
                     throw new RuntimeException("Double click produced: " + rx);
                   }
-            
+
                 if (debug)
                   {
                     System.out.println("setValue from JstringListBox=" + ok);
@@ -957,9 +942,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   *
    * For the MouseListener interface
-   *
    */
 
   public void mouseEntered(MouseEvent e)
@@ -967,9 +950,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   *
    * For the MouseListener interface
-   *
    */
 
   public void mouseExited(MouseEvent e)
@@ -977,9 +958,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   *
    * For the mouseListener interface
-   *
    */
 
   public void mousePressed(MouseEvent e)
@@ -997,9 +976,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   *
    * For the MouseListener interface
-   *
    */
 
   public void mouseReleased(MouseEvent e)
@@ -1010,9 +987,9 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
           {
             boolean ok = false;
 
-            try 
+            try
               {
-                ok = callback.setValuePerformed(new JMoveValueObject(this, 
+                ok = callback.setValuePerformed(new JMoveValueObject(this,
                                                                      startDragIndex,
                                                                      dragNode));
               }
@@ -1034,9 +1011,7 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   *
    * For the MouseMotionListener interface
-   *
    */
 
   public void mouseDragged(MouseEvent e)
@@ -1052,20 +1027,18 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
       {
         overIndex = model.getSize() - 1;
       }
-    
+
     if (overIndex != -1 && overIndex != dragNode)
       {
         moveItem(dragNode, overIndex);
-        
+
         dragNode = overIndex;
         setSelectedIndex(overIndex);
       }
   }
 
   /**
-   *
    * For the MouseMotionListener interface
-   *
    */
 
   public void mouseMoved(MouseEvent e)
@@ -1073,10 +1046,8 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
   }
 
   /**
-   *
    * For the pop up menu callback.  We use the popUpIndex variable to
    * identify the item in the list that the popup menu was issued on.
-   * 
    */
 
   public void actionPerformed(ActionEvent e)
