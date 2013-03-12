@@ -3031,11 +3031,12 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * <p>This method is used to find all objects which point to us through
-   * non-symmetric links, edit them, and break the link.  We do this
-   * by consulting the global Ganymede.db.backPointers DBLinkTracker
-   * to get the list of objects which point to us, and doing the
-   * unlink in a fashion similar to InvidDBField.unbindAll().</p>
+   * <p>This method is used to find all objects which point to us
+   * through non-symmetric links, edit them, and break the link.  We
+   * do this by consulting the global Ganymede.db.backPointers {@link
+   * arlut.csd.ganymede.server.DBLinkTracker DBLinkTracker} to get the
+   * list of objects which point to us, and doing the unlink in a
+   * fashion similar to InvidDBField.unbindAll().</p>
    *
    * <p><b>This method is private, and is not to be called by any code outside
    * of this class.</b></p>

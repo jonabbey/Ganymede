@@ -67,16 +67,38 @@ import java.util.Set;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class is responsible for tracking forward asymmetric links
- * from sources to targets in the Ganymede data store.</p>
+ * <p>This class performs in-memory tracking of non-symmetrical {@link
+ * arlut.csd.ganymede.server.InvidDBField} linkages between {@link
+ * arlut.csd.ganymede.server.DBObject DBObjects} in the Ganymede
+ * {@link arlut.csd.ganymede.server.DBStore DBStore}.</p>
  *
- * <p>This class makes it possible to efficiently delete objects from the
- * Ganymede datastore without having to scan the entire datastore in
- * search of objects that point to the to-be-deleted object.</p>
+ * <p>The DBLinkTracker instance held in the server's {@link
+ * arlut.csd.ganymede.server.Ganymede#db Ganymede.db} DBStore instance
+ * makes it possible to efficiently find all objects which point to an
+ * object to be deleted via {@link arlut.csd.ganymede.common.Invid
+ * Invid} pointers.</p>
  *
- * <p>Once the Invids for objects which link to a to-be-deleted object
- * are retrieved, the objects containing these Invids can (and will
- * be) edited to remove these links.</p>
+ * <p>The {@link
+ * arlut.csd.ganymede.server.DBEditObject#finalizeRemove(boolean,
+ * java.lang.String)} method uses DBLinkTracker to efficiently ensure
+ * that all DBObjects pointing to an object to be deleted are edited
+ * and any Invid references in the DBObject's InvidDBFields are
+ * removed.</p>
+ *
+ * <p>In addition, the {@link
+ * arlut.csd.ganymede.server.InvidDBField#bind(arlut.csd.ganymede.common.Invid,
+ * arlut.csd.ganymede.common.Invid, boolean) InvidDBField.bind()} and
+ * {@link
+ * arlut.csd.ganymede.server.InvidDBField#unbind(arlut.csd.ganymede.common.Invid,
+ * boolean) InvidDBField.unbind()} methods manipulate the
+ * DBLinkTracker when Invid linkages are created or removed at
+ * transaction commit time.</p>
+ *
+ * <p>As part of the {@link arlut.csd.ganymede.server.DBEditSet
+ * DBEditSet} transactional state for a {@link
+ * arlut.csd.ganymede.server.DBSession DBSession}, DBLinkTracker has
+ * explicit transaction support, and provides full checkpoint and
+ * rollback support.</p>
  */
 
 public class DBLinkTracker {
