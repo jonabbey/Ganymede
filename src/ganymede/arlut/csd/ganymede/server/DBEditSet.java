@@ -151,7 +151,7 @@ import arlut.csd.ganymede.common.SchemaConstants;
  * own cleanup.</p>
  */
 
-public class DBEditSet {
+public final class DBEditSet {
 
   /**
    * <p>TranslationService object for handling string localization in
