@@ -97,12 +97,15 @@ import arlut.csd.ganymede.rmi.invid_field;
  * or cleared will be checked out for editing and the corresponding back
  * pointer will be set or cleared as appropriate.</p>
  *
- * <p>In other words, the InvidDBField logic guarantees that all objects
- * references in the server are symmetric.  If one object points to
- * another via an InvidDBField, the target of that pointer will point
- * back, either through a field explicitly specified in the schema, or
- * through the server's in-memory {@link arlut.csd.ganymede.server.DBStore#aSymLinkTracker aSymLinkTracker}
- * hash structure.</p>
+ * <p>In other words, the InvidDBField logic guarantees that all
+ * objects references in the server are symmetric.  If one object
+ * points to another via an InvidDBField, the target of that pointer
+ * will point back, either through a field explicitly specified in the
+ * schema, or through the {@link
+ * arlut.csd.ganymede.server.DBLinkTracker DBLinkTracker} referenced
+ * in the DBStore {@link
+ * arlut.csd.ganymede.server.DBStore#aSymLinkTracker aSymLinkTracker}
+ * variable.</p>
  *
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
