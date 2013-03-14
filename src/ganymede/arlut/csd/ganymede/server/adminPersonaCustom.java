@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -72,9 +72,8 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * This file is a management class for admin personae objects in Ganymede.
- *
+ * This file is a management class for Admin Persona objects in
+ * Ganymede.
  */
 
 public class adminPersonaCustom extends DBEditObject implements SchemaConstants {
@@ -90,10 +89,10 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
     TranslationService.getTranslationService("arlut.csd.ganymede.server.adminPersonaCustom");
 
   /**
-   * <P>This method takes an Invid pointing to an Admin persona
-   * record, and returns a string that can be used to send
-   * email to that person.  This method will return null
-   * if no address could be determined for this administrator.</P>
+   * <p>This method takes an Invid pointing to an Admin Persona or
+   * User record, and returns a string that can be used to send email
+   * to that person.  This method will return null if no address could
+   * be determined for this administrator / user.</p>
    */
 
   static public String convertAdminInvidToString(Invid adminInvid, DBSession session)
@@ -223,13 +222,11 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
   }
 
   /**
-   *
    * We want any change to the 'name' or associated user field to
    * update our hidden label field, which both provides our composite
    * label and does our namespace checks for us.  We do this in
    * finalizeSetValue() so that this operation is always done, even
    * if our GanymedeSession's enableOversight is set to false.
-   *
    */
 
   public ReturnVal finalizeSetValue(DBField field, Object value)
@@ -268,9 +265,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
   }
 
   /**
-   *
    * This private method is used to keep the hidden label field up-to-date.
-   *
    */
 
   public ReturnVal refreshLabelField(String descrip, Invid userInvid, String newName)
@@ -322,15 +317,13 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
   }
 
   /**
+   * <p>This method returns a key that can be used by the client to
+   * cache the value returned by choices().  If the client already has
+   * the key cached on the client side, it can provide the choice list
+   * from its cache rather than calling choices() on this object
+   * again.</p>
    *
-   * This method returns a key that can be used by the client
-   * to cache the value returned by choices().  If the client
-   * already has the key cached on the client side, it
-   * can provide the choice list from its cache rather than
-   * calling choices() on this object again.
-   *
-   * If there is no caching key, this method will return null.
-   *
+   * <p>If there is no caching key, this method will return null.</p>
    */
 
   public Object obtainChoicesKey(DBField field)
@@ -347,15 +340,13 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
   }
 
   /**
+   * <p>This method provides a hook that can be used to generate
+   * choice lists for invid and string fields that provide such.
+   * String and Invid DBFields will call their owner's
+   * obtainChoiceList() method to get a list of valid choices.</p>
    *
-   * This method provides a hook that can be used to generate
-   * choice lists for invid and string fields that provide
-   * such.  String and Invid DBFields will call their owner's
-   * obtainChoiceList() method to get a list of valid choices.
-   *
-   * This method will provide a reasonable default for targetted
-   * invid fields.
-   *
+   * <p>This method will provide a reasonable default for targetted
+   * invid fields.</p>
    */
 
   public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
@@ -468,14 +459,12 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
   }
 
   /**
+   * <p>Customization method to control whether a specified field is
+   * required to be defined at commit time for a given object.</p>
    *
-   * Customization method to control whether a specified field
-   * is required to be defined at commit time for a given object.<br><br>
+   * <p>To be overridden in DBEditObject subclasses.</p>
    *
-   * To be overridden in DBEditObject subclasses.<br><br>
-   *
-   * <b>*PSEUDOSTATIC*</b>
-   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public boolean fieldRequired(DBObject object, short fieldid)
@@ -502,23 +491,21 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
   }
 
   /**
+   * <p>Customization method to verify whether the user should be able
+   * to see a specific field in a given object.  Instances of DBField
+   * will wind up calling up to here to let us override the normal
+   * visibility process.</p>
    *
-   * Customization method to verify whether the user should be able to
-   * see a specific field in a given object.  Instances of DBField will
-   * wind up calling up to here to let us override the normal visibility
-   * process.
+   * <p>Note that it is permissible for session to be null, in which
+   * case this method will always return the default visiblity for the
+   * field in question.</p>
    *
-   * Note that it is permissible for session to be null, in which case
-   * this method will always return the default visiblity for the field
-   * in question.
+   * <p>If field is not from an object of the same base as this
+   * DBEditObject, an exception will be thrown.</p>
    *
-   * If field is not from an object of the same base as this DBEditObject,
-   * an exception will be thrown.
+   * <p>To be overridden in DBEditObject subclasses.</p>
    *
-   * To be overridden in DBEditObject subclasses.
-   *
-   * <b>*PSEUDOSTATIC*</b>
-   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
   public boolean canSeeField(DBSession session, DBField field)
@@ -549,15 +536,13 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
   }
 
   /**
-   *
-   * This method is used to control whether or not it is acceptable to
-   * make a link to the given field in this DBObject type when the
+   * <p>This method is used to control whether or not it is acceptable
+   * to make a link to the given field in this DBObject type when the
    * user only has editing access for the source InvidDBField and not
-   * the target.
+   * the target.</p>
    *
    * @param object The object that the link is to be created in
    * @param fieldID The field that the link is to be created in
-   *
    */
 
   public boolean anonymousLinkOK(DBObject object, short fieldID)
