@@ -2198,7 +2198,7 @@ public final class InvidDBField extends DBField implements invid_field {
                     String fieldName = ((DBField) target.getField(targetField)).getName();
 
                     // "*** InvidDBField.test(): schema error!  back-reference field not an invid field!!\n\t>{0}:{1}, referenced from {2}:{3}"
-                    Ganymede.debug(ts.l("test.bad_symmetry", owner.lookupLabel(target), fieldName, objectName, getName()));
+                    Ganymede.debug(ts.l("test.bad_symmetry", target.getLabel(), fieldName, objectName, getName()));
                     result = false;
 
                     continue;
@@ -2315,7 +2315,7 @@ public final class InvidDBField extends DBField implements invid_field {
                   {
                     String fieldName = ((DBField) target.getField(targetField)).getName();
 
-                    Ganymede.debug(ts.l("test.bad_symmetry",  owner.lookupLabel(target), fieldName, objectName, getName()));
+                    Ganymede.debug(ts.l("test.bad_symmetry",  target.getLabel(), fieldName, objectName, getName()));
                     return false;
                   }
 
