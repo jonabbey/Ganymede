@@ -492,7 +492,7 @@ public final class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
  * to the client. It will use the Enumeration interface.
  */
 
-class DBBaseFieldTableEnumerator implements Enumeration {
+final class DBBaseFieldTableEnumerator implements Enumeration {
 
   short index;
   DBObjectBaseField table[];
@@ -544,7 +544,7 @@ class DBBaseFieldTableEnumerator implements Enumeration {
  * to the client. It will use the Iterator interface.
  */
 
-class DBBaseFieldTableIterator implements Iterator<DBObjectBaseField> {
+final class DBBaseFieldTableIterator implements Iterator<DBObjectBaseField> {
 
   short index;
   DBObjectBaseField table[];
@@ -602,7 +602,7 @@ class DBBaseFieldTableIterator implements Iterator<DBObjectBaseField> {
  * <p>This class should remain opaque to the client.</p>
  */
 
-class DBBaseFieldTableBuiltInIterator implements Iterator<DBObjectBaseField> {
+final class DBBaseFieldTableBuiltInIterator implements Iterator<DBObjectBaseField> {
 
   short index;
   DBObjectBaseField table[];
@@ -657,7 +657,7 @@ class DBBaseFieldTableBuiltInIterator implements Iterator<DBObjectBaseField> {
 
 ------------------------------------------------------------------------------*/
 
-class DBBaseFieldTableContainer extends AbstractCollection<DBObjectBaseField>
+final class DBBaseFieldTableContainer extends AbstractCollection<DBObjectBaseField>
 {
   private DBBaseFieldTable parent;
 

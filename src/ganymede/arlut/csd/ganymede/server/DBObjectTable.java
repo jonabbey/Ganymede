@@ -568,7 +568,7 @@ public final class DBObjectTable implements Iterable<DBObject> {
  * which will use the Enumeration interface.</p>
  */
 
-class DBObjectTableEnumerator implements Enumeration {
+final class DBObjectTableEnumerator implements Enumeration {
 
   int index;
   DBObject table[];
@@ -646,7 +646,7 @@ class DBObjectTableEnumerator implements Enumeration {
  * which will use the Iterator interface.</p>
  */
 
-class DBObjectTableIterator implements Iterator<DBObject> {
+final class DBObjectTableIterator implements Iterator<DBObject> {
 
   int index;
   DBObject table[];
@@ -723,7 +723,7 @@ class DBObjectTableIterator implements Iterator<DBObject> {
 
 ------------------------------------------------------------------------------*/
 
-class DBObjectTableContainer extends AbstractCollection<DBObject>
+final class DBObjectTableContainer extends AbstractCollection<DBObject>
 {
   private DBObjectTable parent;
 
