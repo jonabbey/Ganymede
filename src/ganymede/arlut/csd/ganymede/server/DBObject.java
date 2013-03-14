@@ -2311,6 +2311,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>This method will return null if the Invid provided does not
    * exist in the session or the persistent store.</p>
    *
+   * <p>This method returns the canonical label for the Invid, rather
+   * than using the possibly overridden lookupLabel() method to get
+   * the label.</p>
+   *
    * @param target The Invid whose label we want to retrieve.
    * @param forceOriginal If true and the lookup is being done in the
    * middle of an editing session, we'll return the label of the
@@ -2693,10 +2697,18 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   /**
    * <p>This method is used to provide a hook to allow different
-   * objects to generate different labels for a given object
-   * based on their perspective.  This is used to sort
-   * of hackishly simulate a relational-type capability for
-   * the purposes of viewing backlinks.</p>
+   * objects to generate different labels for a given object based on
+   * their perspective.  This is used to sort of hackishly simulate a
+   * relational-type capability for the purposes of viewing
+   * context-sensitive labels of objects that are linked from Invid
+   * fields in this object.</p>
+   *
+   * <p>This method primarily affects the results returned by {@link
+   * arlut.csd.ganymede.server.InvidDBField#encodedValues()}, but it
+   * can also affect the results shown by {@link
+   * arlut.csd.ganymede.server.DBQueryEngine#query(arlut.csd.ganymede.common.Query,
+   * arlut.csd.ganymede.server.DBEditObject)} when the
+   * perspectiveObject parameter is non-null.</p>
    *
    * <p>See the automounter map and NFS volume DBEditObject
    * subclasses for how this is to be used, if you have
