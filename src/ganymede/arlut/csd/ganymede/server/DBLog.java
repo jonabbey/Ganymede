@@ -1161,14 +1161,25 @@ final public class DBLog {
           }
         else
           {
-            name = event.adminName;     // hopefully this will be a valid email target.. used for bad login attempts
+            // If we're reporting a bad login, we'll try to ccToSelf
+            // even if we don't have u reasonable user/admin Invid for
+            // this event.
+            //
+            // This will let us send warning mail to users who enter
+            // their username/admin name correctly, but muff their
+            // password.
 
-            // skip any persona info after a colon in case the
-            // user tried logging in with admin privileges
-
-            if (name != null && name.indexOf(':') != -1)
+            if (event.eventClassToken.equals("badpass"))
               {
-                name = name.substring(0, name.indexOf(':'));
+                name = event.adminName;
+
+                // skip any persona info after a colon in case the
+                // user tried logging in with admin privileges
+
+                if (name != null && name.indexOf(':') != -1)
+                  {
+                    name = name.substring(0, name.indexOf(':'));
+                  }
               }
           }
 
