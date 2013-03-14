@@ -863,7 +863,7 @@ public final class DBEditSet {
         if (obj != null)
           {
             obj.rollback(objck.fields);
-            obj.status = objck.status;
+            obj.setStatus(objck.status);
           }
         else
           {

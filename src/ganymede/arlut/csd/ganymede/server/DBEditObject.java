@@ -210,14 +210,14 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * {@link arlut.csd.ganymede.common.ObjectStatus ObjectStatus}.
    */
 
-  byte status;
+  private byte status;
 
   /**
    * true if the object has a version currently
    * stored in the DBStore
    */
 
-  boolean stored;
+  final boolean stored;
 
   /**
    * transaction that this object has been checked out in
@@ -245,7 +245,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     super();
 
     this.objectBase = base;
-    editset = null;             // this will be our cue to our static handle status for our methods
+    this.stored = false;
+    this.editset = null;             // this will be our cue to our static handle status for our methods
   }
 
   /**

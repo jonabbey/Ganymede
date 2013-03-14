@@ -83,7 +83,7 @@ final class DBCheckPointObj {
   DBCheckPointObj(DBEditObject obj)
   {
     this.invid = obj.getInvid();
-    this.status = obj.status;
+    this.status = obj.getStatus();
     this.fields = obj.checkpoint();
   }
 }
