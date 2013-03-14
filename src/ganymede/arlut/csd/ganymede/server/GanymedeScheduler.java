@@ -113,7 +113,7 @@ import arlut.csd.ganymede.common.scheduleHandle;
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  */
 
-public class GanymedeScheduler extends Thread {
+public final class GanymedeScheduler extends Thread {
 
   /**
    * TranslationService object for handling string localization in the

@@ -104,7 +104,7 @@ import arlut.csd.ganymede.rmi.db_field;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-final public class DBSession implements QueryDescriber {
+public final class DBSession implements QueryDescriber {
 
   static boolean debug = false;
 

@@ -97,7 +97,7 @@ import arlut.csd.ganymede.rmi.adminSession;
  * will directly interact with.</p>
  */
 
-public class GanymedeServer implements Server {
+public final class GanymedeServer implements Server {
 
   /**
    * <p>TranslationService object for handling string localization in

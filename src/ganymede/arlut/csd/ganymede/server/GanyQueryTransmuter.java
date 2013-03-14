@@ -6,17 +6,19 @@
    takes a string query, applies an ANTLR grammar to it, and generates
    a traditional Ganymede-style arlut.csd.ganymede.common.Query out of
    it.
-   
+
    Created: 31 August 2004
 
    Module By: Deepak Giridharagopal, Jonathan Abbey
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -88,9 +90,10 @@ import java.util.HashMap;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class processes textual queries using an ANTLR-generated parser, and
- * generates an old, Ganymede-style arlut.csd.ganymede.common.Query, with attendant
- * arlut.csd.ganymede.common.QueryNode tree.
+ * <p>This class processes textual queries using an ANTLR-generated
+ * parser, and generates an old, Ganymede-style
+ * arlut.csd.ganymede.common.Query, with attendant
+ * arlut.csd.ganymede.common.QueryNode tree.</p>
  *
  * @see arlut.csd.ganymede.common.QueryNode
  * @see arlut.csd.ganymede.common.Query
@@ -99,7 +102,7 @@ import java.util.HashMap;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
-public class GanyQueryTransmuter {
+public final class GanyQueryTransmuter {
 
   private static HashMap op_scalar_mapping;
   private static HashMap op_vector_mapping;
@@ -244,7 +247,7 @@ public class GanyQueryTransmuter {
             if (where_node != null)
               {
                 QueryNode where_tree = parse_where_clause(where_node, objectBase);
-            
+
                 return where_tree;
               }
           }
@@ -305,7 +308,7 @@ public class GanyQueryTransmuter {
       {
         // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
         // "The object type "{0}" in the query''s from clause does not exist."
-        throw new GanyParseException(ts.l("global.parse_exception", 
+        throw new GanyParseException(ts.l("global.parse_exception",
                                           ts.l("parse_from_tree.bad_objectbase", from_objectbase),
                                           myQueryString, myQueryTree.toStringTree()));
       }
@@ -365,7 +368,7 @@ public class GanyQueryTransmuter {
     String op;
     Object argument;
     Tree field_node, argument_node;
-    
+
     /* -- */
 
     root_type = ast.getType();
@@ -402,7 +405,7 @@ public class GanyQueryTransmuter {
                                                   myQueryString,
                                                   myQueryTree.toStringTree()));
               }
-            
+
             if (field.getType() != FieldType.INVID)
               {
                 // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
@@ -430,7 +433,7 @@ public class GanyQueryTransmuter {
           }
 
         child2 = parse_where_clause(ast.getChild(1), target_objectbase);
-        
+
         return new QueryDeRefNode(field_name, child2);
 
       case QueryParser.BINARY_OPERATOR:
@@ -448,7 +451,7 @@ public class GanyQueryTransmuter {
         else
           {
             field = (DBObjectBaseField) base.getField(field_name);
-            
+
             if (field == null)
               {
                 // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
@@ -482,7 +485,7 @@ public class GanyQueryTransmuter {
          * of the field he's querying, then the query engine will try
          * its best to figure out what the user really meant.
          */
-         
+
         if (base == null)
           {
             if (op_vector_mapping.containsKey(op))
@@ -544,7 +547,7 @@ public class GanyQueryTransmuter {
                   }
               }
           }
-        
+
         if (base != null && scalar_operator != QueryDataNode.NONE && !valid_op(op, field_type))
           {
             // "An exception was encountered parsing your query string: {0}\nQuery: "{1}"\nExpanded Parse Tree: "{2}""
@@ -618,7 +621,7 @@ public class GanyQueryTransmuter {
         op_vector_mapping.containsKey(operator))
       {
         return Integer.valueOf(argument);
-      } 
+      }
 
     int field_type = field.getType();
 

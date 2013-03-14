@@ -73,7 +73,7 @@ import java.util.NoSuchElementException;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
+public final class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   /**
    * Array of DBObjectBaseField objects, sorted in id order.

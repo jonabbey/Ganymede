@@ -115,7 +115,7 @@ import arlut.csd.ganymede.rmi.SchemaEdit;
  * ganymede.db file before going in and editing your database schema.</p>
  */
 
-public class DBSchemaEdit implements Unreferenced, SchemaEdit {
+public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   final static boolean debug = false;
 

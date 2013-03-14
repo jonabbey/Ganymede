@@ -145,7 +145,7 @@ import arlut.csd.ganymede.rmi.Session;
  * the schema editor when the schema is being edited.</p>
  */
 
-public class DBObjectBase implements Base, CategoryNode, JythonMap {
+public final class DBObjectBase implements Base, CategoryNode, JythonMap {
 
   static boolean debug = true;
 

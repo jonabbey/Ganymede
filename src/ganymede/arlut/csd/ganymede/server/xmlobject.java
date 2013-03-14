@@ -83,7 +83,7 @@ import arlut.csd.ganymede.rmi.db_object;
  * @author Jonathan Abbey
  */
 
-public class xmlobject {
+public final class xmlobject {
 
   final static boolean debug = false;
 

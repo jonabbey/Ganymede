@@ -88,7 +88,7 @@ import arlut.csd.ganymede.rmi.CategoryNode;
  * tree.</p>
  */
 
-public class DBBaseCategory implements Category, CategoryNode {
+public final class DBBaseCategory implements Category, CategoryNode {
 
   private final static boolean debug = false;
 

@@ -89,7 +89,7 @@ import java.util.Vector;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-public class DBQueryEngine {
+public final class DBQueryEngine {
 
   static final boolean debug = false;
 

@@ -12,9 +12,11 @@
    -----------------------------------------------------------------------
 
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -65,12 +67,12 @@ import java.util.Set;
  * needs to attempt a multi-step operation that might not successfully
  * complete to be able to undo all changes made without having to
  * abort the entire transaction.</p>
- * 
- * <p>In other words, a DBCheckPoint is basically a transaction within 
+ *
+ * <p>In other words, a DBCheckPoint is basically a transaction within
  * a transaction.</p>
  */
 
-class DBCheckPoint {
+final class DBCheckPoint {
 
   static final boolean debug = false;
 
@@ -101,7 +103,7 @@ class DBCheckPoint {
 
         if (debug)
           {
-            System.err.println("DBCheckPoint: add " + obj.getLabel() + 
+            System.err.println("DBCheckPoint: add " + obj.getLabel() +
                                " (" + obj.getInvid().toString() + ")");
           }
 

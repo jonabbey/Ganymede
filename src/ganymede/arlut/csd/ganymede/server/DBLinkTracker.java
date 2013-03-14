@@ -101,7 +101,7 @@ import java.util.Set;
  * rollback support.</p>
  */
 
-public class DBLinkTracker {
+public final class DBLinkTracker {
 
   static final boolean debug = false;
 

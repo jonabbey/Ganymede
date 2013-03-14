@@ -73,7 +73,7 @@ import java.util.NoSuchElementException;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-public class DBObjectTable implements Iterable<DBObject> {
+public final class DBObjectTable implements Iterable<DBObject> {
 
   /**
    * The hash table data.

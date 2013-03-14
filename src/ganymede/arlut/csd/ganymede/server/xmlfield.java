@@ -97,7 +97,7 @@ import arlut.csd.ganymede.rmi.field_option_field;
  * @author Jonathan Abbey
  */
 
-public class xmlfield implements FieldType {
+public final class xmlfield implements FieldType {
 
   final static boolean debug = false;
 

@@ -85,7 +85,7 @@ import arlut.csd.ganymede.common.SchemaConstants;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-public class DBPermissionManager {
+public final class DBPermissionManager {
 
   static final boolean debug = false;
   static final boolean permsdebug = false;

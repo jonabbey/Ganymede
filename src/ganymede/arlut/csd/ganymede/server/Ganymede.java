@@ -161,7 +161,7 @@ import arlut.csd.ganymede.rmi.Server;
  * GanymedeSession class.</p>
  */
 
-public class Ganymede {
+public final class Ganymede {
 
   static public boolean debug = true;
 

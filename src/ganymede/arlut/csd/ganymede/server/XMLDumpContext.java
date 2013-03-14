@@ -10,11 +10,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2011
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -66,7 +68,7 @@ import java.io.IOException;
  * the server in doing an XML dump.
  */
 
-public class XMLDumpContext {
+public final class XMLDumpContext {
 
   /**
    * <p>If true, the Ganymede server thread using this XMLDumpContext
@@ -177,7 +179,7 @@ public class XMLDumpContext {
    *
    * @param xmlOut The XMLWriter to write to
    */
-  
+
   public XMLDumpContext(XMLWriter xmlOut)
   {
     this.xmlOut = xmlOut;
@@ -190,7 +192,7 @@ public class XMLDumpContext {
    * @param query The {@link arlut.csd.ganymede.common.Query} object
    * defining the fields to include
    */
-  
+
   public XMLDumpContext(XMLWriter xmlOut, Query query)
   {
     this.xmlOut = xmlOut;
@@ -216,7 +218,7 @@ public class XMLDumpContext {
    * stream will include an "oid" attribute which contains the precise
    * Invid of the object.
    */
-  
+
   public XMLDumpContext(XMLWriter xmlOut, boolean passwords, boolean historyInfo, SyncRunner syncConstraints, boolean includeOid)
   {
     this.xmlOut = xmlOut;

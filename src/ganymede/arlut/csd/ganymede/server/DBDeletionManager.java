@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -105,7 +105,7 @@ import arlut.csd.ganymede.common.Invid;
  * session's {@link arlut.csd.ganymede.server.DBEditSet}.</p>
  */
 
-public class DBDeletionManager {
+public final class DBDeletionManager {
 
   /**
    * <p>DBSession objects will appear as keys in this Map when those

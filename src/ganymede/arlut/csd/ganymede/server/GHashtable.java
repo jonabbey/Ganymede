@@ -4,17 +4,19 @@
 
    A subclass of Hashtable that supports case-insensitive
    hashing/retrieval.
-   
+
    Created: 10 April 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -57,11 +59,11 @@ import java.util.Hashtable;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>GHashtable is a Hashtable subclass that can map uppercase/lowercase keys
- * of the same string to identity.  It does this by basically mapping all
- * strings to the lowercase version internally.  The case sensitivity of
- * the hashtable is specified at hash creation time, and may not change
- * thereafter.</p>
+ * <p>GHashtable is a Hashtable subclass that can map
+ * uppercase/lowercase keys of the same string to identity.  It does
+ * this by basically mapping all strings to the lowercase version
+ * internally.  The case sensitivity of the hashtable is specified at
+ * hash creation time, and may not change thereafter.</p>
  *
  * <p>This hashtable also has special support for handling arrays of
  * Bytes as keys in the hash, using the {@link
@@ -71,7 +73,7 @@ import java.util.Hashtable;
  * objects.</p>
  */
 
-public class GHashtable extends Hashtable {
+public final class GHashtable extends Hashtable {
 
   public static String keyString(Object x)
   {
@@ -166,7 +168,7 @@ public class GHashtable extends Hashtable {
         Hashtable temp = new Hashtable(this.size());
 
         Enumeration x = this.keys();
-        
+
         while (x.hasMoreElements())
           {
             Object key = x.nextElement(); // GEnum strips off the GKey
@@ -183,7 +185,7 @@ public class GHashtable extends Hashtable {
         while (x.hasMoreElements())
           {
             Object key = x.nextElement();
-            
+
             this.put(key, temp.get(key));
           }
 
@@ -202,7 +204,7 @@ public class GHashtable extends Hashtable {
         while (x.hasMoreElements())
           {
             Object key = x.nextElement();
-            
+
             if (temp.containsKey(key))
               {
                 throw new IllegalStateException("collision detected switching to case insensitivity");
@@ -224,7 +226,7 @@ public class GHashtable extends Hashtable {
         while (x.hasMoreElements())
           {
             Object key = x.nextElement();
-            
+
             this.put(key, temp.get(key));
           }
 
@@ -334,7 +336,7 @@ public class GHashtable extends Hashtable {
 class GKey {
 
   Object
-    key, 
+    key,
     orig;
 
   /* -- */
@@ -387,7 +389,7 @@ class GKey {
 ------------------------------------------------------------------------------*/
 
 /**
- * This class is in support of the Hashtable keys() method, to provide an 
+ * This class is in support of the Hashtable keys() method, to provide an
  * enumeration which will 'unwrap' GKey objects to provide access to the original
  * key submitted to the GHashtable, with capitalization preserved.
  */
@@ -412,7 +414,7 @@ class GEnum implements Enumeration {
   public Object nextElement()
   {
     t = source.nextElement();
-    
+
     if (t instanceof GKey)
       {
         return ((GKey) t).origValue();

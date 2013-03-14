@@ -67,7 +67,7 @@ import arlut.csd.ganymede.common.Invid;
  * record the state of the fields in an object.</p>
  */
 
-class DBCheckPointObj {
+final class DBCheckPointObj {
 
   Invid invid;
   byte status;

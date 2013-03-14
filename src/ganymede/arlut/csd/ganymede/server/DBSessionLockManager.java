@@ -67,7 +67,7 @@ import java.util.Vector;
  * session.</p>
  */
 
-public class DBSessionLockManager {
+public final class DBSessionLockManager {
 
   private HashSet<DBLock> lockSet = new HashSet<DBLock>(31);
   private DBSession session;

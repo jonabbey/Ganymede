@@ -101,7 +101,7 @@ import arlut.csd.ganymede.rmi.db_field;
  * call methods on DBJournal.</p>
  */
 
-public class DBJournal implements ObjectStatus {
+public final class DBJournal implements ObjectStatus {
 
   static boolean debug = false;
   static DBStore store = null;
