@@ -223,23 +223,11 @@ class JythonServerProtocol {
     interp.exec("from arlut.csd.ganymede.common import *");
   }
 
-  public void createSession(String personaName)
+  public void createSession(DBObject personaObj, DBObject userObj)
   {
     try
       {
-        /* Snag the appropriate Admin Persona from the database */
-        DBObject persona = (DBObject) ((DBObjectBase) Ganymede.db.get("Admin Persona")).get(personaName);
-
-        /* If there is a user associated with this persona, snag it */
-        DBObject user = null;
-        InvidDBField userField = (InvidDBField) persona.get("User");
-        if (userField != null)
-          {
-            user = (DBObject) userField.getVal();
-          }
-
-        /* Now we have all we need to create the session */
-        session = new GanymedeSession(personaName, user, persona, false, false);
+        session = new GanymedeSession(personaObj.getLabel(), userObj, personaObj, false, false);
       }
     catch (RemoteException ex)
       {
@@ -437,8 +425,8 @@ class JythonServerWorker extends Thread {
               }
 
             /* Authenticate the user */
-            int validationResult = Ganymede.server.validateAdminUser(loginName,
-                                                                     password);
+            DBObject personaObj = Ganymede.server.validateAdminLogin(loginName, password);
+            int validationResult = Ganymede.server.validateConsoleAdminPersona(personaObj);
 
             /* A result of 3 means that this user has interpreter access
              * privileges. Anything else means that we give 'em the boot. */
@@ -467,7 +455,10 @@ class JythonServerWorker extends Thread {
             out.flush();
 
             /* Setup the interpreter session variable */
-            protocol.createSession(loginName);
+
+            DBObject userObj = Ganymede.server.getUserFromPersona(personaObj);
+
+            protocol.createSession(personaObj, userObj);
 
             /* Here is the read-eval-print loop */
             while ((inputLine = in.readLine()) != null)

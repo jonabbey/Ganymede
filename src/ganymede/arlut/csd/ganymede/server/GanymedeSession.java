@@ -456,7 +456,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * privileges.  The server may allow users to login directly with an
    * admin persona (supergash, say), if so configured.</p>
    *
-   * @param loginName The name for the user logging in
+   * @param sessionName The unique name assigned for this GanymedeServer
    * @param userObject The user record for this login
    * @param personaObject The user's initial admin persona
    * @param exportSession If true, we'll export this GanymedeSession
@@ -469,7 +469,7 @@ final public class GanymedeSession implements Session, Unreferenced {
    * @see arlut.csd.ganymede.rmi.Server#login(java.lang.String, java.lang.String)
    */
 
-  public GanymedeSession(String loginName, DBObject userObject,
+  public GanymedeSession(String sessionName, DBObject userObject,
                          DBObject personaObject,
                          boolean exportSession, boolean exportObjects) throws RemoteException
   {
@@ -486,10 +486,6 @@ final public class GanymedeSession implements Session, Unreferenced {
 
         Ganymede.rmi.publishObject(this);
       }
-
-    // find a unique name for this user session
-
-    String sessionName = GanymedeServer.registerUserSessionName(loginName);
 
     // find out where the user is coming from
 
