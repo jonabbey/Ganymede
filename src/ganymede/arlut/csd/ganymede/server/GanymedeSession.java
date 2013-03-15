@@ -493,36 +493,19 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     // find out where the user is coming from
 
-    try
-      {
-        String ipAddress = java.rmi.server.RemoteServer.getClientHost();
-
-        try
-          {
-            java.net.InetAddress addr = java.net.InetAddress.getByName(ipAddress);
-            clienthost = addr.getHostName();
-          }
-        catch (java.net.UnknownHostException ex)
-          {
-            clienthost = ipAddress;
-          }
-      }
-    catch (ServerNotActiveException ex)
-      {
-        clienthost = "(unknown)";
-      }
+    this.clienthost = GanymedeServer.getClientHost();
 
     // record our login time
 
-    connecttime = new Date();
+    this.connecttime = new Date();
 
     // construct our DBSession
 
-    dbSession = new DBSession(Ganymede.db, this, sessionName);
-    queryEngine = new DBQueryEngine(this, dbSession);
-    permManager = new DBPermissionManager(this).configureClientSession(userObject, personaObject, sessionName);
+    this.dbSession = new DBSession(Ganymede.db, this, sessionName);
+    this.queryEngine = new DBQueryEngine(this, dbSession);
+    this.permManager = new DBPermissionManager(this).configureClientSession(userObject, personaObject, sessionName);
 
-    loggedInSemaphore.set(true);
+    this.loggedInSemaphore.set(true);
 
     // set our initial status
 
