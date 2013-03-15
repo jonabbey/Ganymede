@@ -411,9 +411,13 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * non-editable objects, and if this is an editable object we'll
    * have created a vector when this field was initialized for
    * editing.</p>
+   *
+   * <p>Note that this method gives direct access to the value vector.
+   * Any modifications made to the returned vector will affect the
+   * value held in this field.</p>
    */
 
-  public final Vector getVectVal()
+  protected final Vector getVectVal()
   {
     return (Vector) value;
   }
