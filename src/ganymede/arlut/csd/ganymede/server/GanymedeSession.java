@@ -3240,6 +3240,32 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
+   * <p>This method is used to make an internal query that will only
+   * ever return 0 or 1 results.</p>
+   *
+   * @return null if no results were returned, or a valid Result if
+   * one result was returned.
+   */
+
+  public Result internalSingletonQuery(Query query)
+  {
+    Vector<Result> results = this.internalQuery(query);
+
+    if (results.size() == 0)
+      {
+        return null;
+      }
+    else if (results.size() == 1)
+      {
+        return results.get(0);
+      }
+    else
+      {
+        throw new IndexOutOfBoundsException("Too many results from Query");
+      }
+  }
+
+  /**
    * <p>This method is intended as a lightweight way of returning a
    * handy description of the type and label of the specified invid.
    * No locking is done, and the label returned will be viewed through
