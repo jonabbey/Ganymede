@@ -747,19 +747,13 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p>Returns the DBSession that this field is associated with or null
    * if it is being viewed from the persistent store.</p>
    *
-   * <p>Semi-deprecated.  Use getDBSession() instead for clarity.</p>
+   * @deprecated Use {@link getDBSession()} instead.
    */
 
+  @Deprecated
   public final DBSession getSession()
   {
-    try
-      {
-        return owner.getDBSession();
-      }
-    catch (NullPointerException ex)
-      {
-        return null;
-      }
+    return this.getDBSession();
   }
 
   /**
