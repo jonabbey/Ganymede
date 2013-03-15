@@ -298,12 +298,6 @@ public final class GanymedeServer implements Server {
       }
 
     GanymedeSession mySession = (GanymedeSession) retVal.getSession();
-
-    if (mySession == null)
-      {
-        return null;            // nope, no soup for you.
-      }
-
     GanymedeXMLSession xSession = new GanymedeXMLSession(mySession);
 
     // spawn the GanymedeXMLSession's background parser thread
