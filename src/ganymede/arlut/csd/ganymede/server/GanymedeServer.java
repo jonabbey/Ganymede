@@ -692,7 +692,8 @@ public final class GanymedeServer implements Server {
   public synchronized DBObject validateUserLogin(String userName, String clientPass)
   {
     Query userQuery = new Query(SchemaConstants.UserBase,
-                                new QueryDataNode(SchemaConstants.UserUserName, QueryDataNode.NOCASEEQ, userName),
+                                new QueryDataNode(SchemaConstants.UserUserName,
+                                                  QueryDataNode.NOCASEEQ, userName),
                                 false);
 
     Result result = loginSession.internalSingletonQuery(userQuery);
