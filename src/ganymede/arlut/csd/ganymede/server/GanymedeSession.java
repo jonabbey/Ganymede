@@ -2948,6 +2948,22 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
+   * <p>This method returns the Invid of the user who logged in, or
+   * the non-user-linked persona (supergash, monitor) if there was no
+   * underlying user attached to the persona.</p>
+   *
+   * <p>May return null if this session is being run by a Ganymede
+   * server task or internal process.</p>
+   *
+   * <p>Note: server-side, no checklogin()</p>
+   */
+
+  public Invid getIdentityInvid()
+  {
+    return permManager.getIdentityInvid();
+  }
+
+  /**
    * <p>This method returns the name of this session.  If this session is
    * being driven by a remote client, this name will be unique among
    * sessions on the server so that the admin console can distinguish
