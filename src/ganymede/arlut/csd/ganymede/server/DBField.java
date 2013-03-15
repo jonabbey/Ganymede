@@ -331,8 +331,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * Returns true if both field1 and field2 are non-null and belong to
-   * the same invid and share the same field id.
+   * <p>Returns true if both field1 and field2 are non-null and belong
+   * to the same Invid and share the same field id.</p>
    */
 
   public static boolean matches(DBField field1, DBField field2)
@@ -375,8 +375,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * This method is used to return a copy of this field, with the field's owner
-   * set to newOwner.
+   * <p>This method is used to return a copy of this field, with the
+   * field's owner set to newOwner.</p>
    */
 
   public final DBField getCopy(DBObject newOwner)
@@ -606,19 +606,20 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * Returns true if otherField has the same invid and field id as
-   * this field.
+   * <p>Returns true if otherField has the same invid and field id as
+   * this field.</p>
    */
 
   public boolean matches(DBField otherField)
   {
-    return otherField != null && otherField.getOwner().getInvid().equals(getOwner().getInvid()) &&
+    return otherField != null &&
+      otherField.getOwner().getInvid().equals(getOwner().getInvid()) &&
       otherField.getID() == getID();
   }
 
   /**
-   * <p>This method copies the current value of this DBField
-   * to target.  The target DBField must be contained within a
+   * <p>This method copies the current value of this DBField to
+   * target.  The target DBField must be contained within a
    * checked-out DBEditObject in order to be updated.  Any actions
    * that would normally occur from a user manually setting a value
    * into the field will occur.</p>
@@ -626,9 +627,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @param target The DBField to copy this field's contents to.
    * @param local If true, permissions checking is skipped.
    *
-   * @return A ReturnVal indicating success or failure.  May
-   * be simply 'null' to indicate success if no feedback need
-   * be provided.
+   * @return A ReturnVal indicating success or failure.  May be simply
+   * 'null' to indicate success if no feedback need be provided.
    */
 
   public synchronized ReturnVal copyFieldTo(DBField target, boolean local)
@@ -692,9 +692,10 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * {@link arlut.csd.ganymede.server.DBObjectBaseField} controlling
    * this field.</p>
    *
-   * <p>Returns a {@link arlut.csd.ganymede.common.ReturnVal} describing
-   * the error if the field's contents does not meet its constraints, or null
-   * if the field is in compliance with its constraints.</p>
+   * <p>Returns a {@link arlut.csd.ganymede.common.ReturnVal}
+   * describing the error if the field's contents does not meet its
+   * constraints, or null if the field is in compliance with its
+   * constraints.</p>
    */
 
   public ReturnVal validateContents()
@@ -738,9 +739,10 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * This method is intended to be called when this field is being checked into
-   * the database.  Subclasses of DBField will override this method to clean up
-   * data that is cached for speed during editing.
+   * <p>This method is intended to be called when this field is being
+   * checked into the database.  Subclasses of DBField will override
+   * this method to clean up data that is cached for speed during
+   * editing.</p>
    */
 
   public void cleanup()
@@ -1591,12 +1593,10 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
    * Returns the value of an element of this field,
    * if a vector.
    *
    * @see arlut.csd.ganymede.rmi.db_field
-   *
    */
 
   public Object getElement(int index) throws GanyPermissionsException
@@ -2818,7 +2818,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * be provided.
    */
 
-  public synchronized ReturnVal deleteElement(Object value, boolean local, boolean noWizards) throws GanyPermissionsException
+  public final synchronized ReturnVal deleteElement(Object value, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     if (!isEditable(local))     // *sync* GanymedeSession possible
       {
@@ -2868,7 +2868,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * be provided.
    */
 
-  public ReturnVal deleteAllElements() throws GanyPermissionsException
+  public final ReturnVal deleteAllElements() throws GanyPermissionsException
   {
     return this.deleteElements((Vector) this.getValues().clone());
   }
@@ -3154,7 +3154,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @param local If false, read permissin is checked for this field
    */
 
-  public boolean containsElement(Object value, boolean local) throws GanyPermissionsException
+  public final boolean containsElement(Object value, boolean local) throws GanyPermissionsException
   {
     if (!local && !verifyReadPermission())
       {
@@ -3172,9 +3172,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * Returns a {@link arlut.csd.ganymede.server.fieldDeltaRec fieldDeltaRec}
-   * object listing the changes between this field's state and that
-   * of the prior oldField state.
+   * Returns a {@link arlut.csd.ganymede.server.fieldDeltaRec
+   * fieldDeltaRec} object listing the changes between this field's
+   * state and that of the prior oldField state.
    */
 
   public fieldDeltaRec getVectorDiff(DBField oldField)
@@ -3225,7 +3225,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p>Used by the DBObject copy constructor.</p>
    */
 
-  synchronized void setOwner(DBObject owner)
+  synchronized final void setOwner(DBObject owner)
   {
     this.owner = owner;
   }
@@ -3245,7 +3245,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p><b>*Calls synchronized methods on DBNameSpace*</b></p>
    */
 
-  void unmark()
+  final void unmark()
   {
     DBNameSpace namespace;
     DBEditSet editset;
@@ -3308,7 +3308,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p><b>*Calls synchronized methods on DBNameSpace*</b></p>
    */
 
-  boolean unmark(Object value)
+  final boolean unmark(Object value)
   {
     DBNameSpace namespace;
     DBEditSet editset;
@@ -3344,7 +3344,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p><b>*Calls synchronized methods on DBNameSpace*</b></p>
    */
 
-  boolean mark()
+  final boolean mark()
   {
     DBNameSpace namespace;
     DBEditSet editset;
@@ -3400,7 +3400,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p><b>*Calls synchronized methods on DBNameSpace*</b></p>
    */
 
-  boolean mark(Object value)
+  final boolean mark(Object value)
   {
     DBNameSpace namespace;
     DBEditSet editset;
@@ -3563,9 +3563,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    }
 
   /**
-   * Overridable method to verify that the current
-   * DBSession / DBEditSet has permission to write
-   * values into this field.
+   * <p>Overridable method to verify that the current DBSession /
+   * DBEditSet has permission to write values into this field.</p>
    */
 
   public boolean verifyWritePermission()
@@ -3813,9 +3812,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
    * For debugging
-   *
    */
 
   public String toString()
@@ -3824,10 +3821,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * Handy utility method for reporting namespace conflict.  This
-   * method will work to identify the object and field which is in conflict,
-   * and will return an appropriate {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
-   * with an appropriate error dialog.
+   * <p>Handy utility method for reporting namespace conflict.  This
+   * method will work to identify the object and field which is in
+   * conflict, and will return an appropriate {@link
+   * arlut.csd.ganymede.common.ReturnVal ReturnVal} with an
+   * appropriate error dialog.</p>
    */
 
   public ReturnVal getConflictDialog(String methodName, Object conflictValue)
@@ -3883,8 +3881,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * Handy utility method for reporting an attempted duplicate
-   * submission to a vector field.
+   * <p>Handy utility method for reporting an attempted duplicate
+   * submission to a vector field.</p>
    */
 
   public ReturnVal getDuplicateValueDialog(String methodName, Object conflictValue)
@@ -3897,8 +3895,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * Handy utility method for reporting an attempted duplicate
-   * submission to a vector field.
+   * <p>Handy utility method for reporting an attempted duplicate
+   * submission to a vector field.</p>
    */
 
   public ReturnVal getDuplicateValuesDialog(String methodName, String conflictValues)
