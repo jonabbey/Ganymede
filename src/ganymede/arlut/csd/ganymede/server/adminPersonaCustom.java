@@ -434,9 +434,8 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
     // persona is not a member of the supergash owner set, which would
     // make roles superfluous
 
-    Vector roles = object.getFieldValuesLocal(SchemaConstants.PersonaPrivs);
-    Vector ownerSets = object.getFieldValuesLocal(SchemaConstants.PersonaGroupsField);
-
+    Vector<Invid> roles = (Vector<Invid>) object.getFieldValuesLocal(SchemaConstants.PersonaPrivs);
+    Vector<Invid> ownerSets = (Vector<Invid>) object.getFieldValuesLocal(SchemaConstants.PersonaGroupsField);
 
     Invid supergashPersona = Invid.createInvid(SchemaConstants.PersonaBase, SchemaConstants.PersonaSupergashObj);
     Invid monitor = Invid.createInvid(SchemaConstants.PersonaBase, SchemaConstants.PersonaMonitorObj);
@@ -448,9 +447,11 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     Invid supergashOwner = Invid.createInvid(SchemaConstants.OwnerBase, SchemaConstants.OwnerSupergash);
 
-    if ((roles != null && roles.size() != 0) || (ownerSets != null && ownerSets.contains(supergashOwner))) {
-      return null;
-    }
+    if (roles != null && roles.size() != 0 ||
+        ownerSets != null && ownerSets.contains(supergashOwner))
+      {
+        return null;
+      }
 
     // "Persona object "{0}" is incomplete. Personas must either have
     // a role defined or be a member of the supergash owner set."
