@@ -682,12 +682,12 @@ public final class GanymedeServer implements Server {
       }
 
     // don't let the monitor account login to the client
-
-    if (personaObj.getInvid().equals(Invid.createInvid(SchemaConstants.PersonaBase,
-                                                       SchemaConstants.PersonaMonitorObj)))
-      {
-        return null;
-      }
+    //
+    //    if (personaObj.getInvid().equals(Invid.createInvid(SchemaConstants.PersonaBase,
+    //                                                       SchemaConstants.PersonaMonitorObj)))
+    //      {
+    //        return null;
+    //      }
 
     DBObject userObj = getUserFromPersona(personaObj);
 
