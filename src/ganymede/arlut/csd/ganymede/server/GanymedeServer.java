@@ -664,7 +664,9 @@ public final class GanymedeServer implements Server {
 
   /**
    * <p>Returns a user or admin persona DBObject if the given
-   * user/admin name has the given password in the database.</p>
+   * user/admin name exists, and has the given password in the
+   * database, and is permitted to login and have a
+   * GanymedeSession.</p>
    *
    * <p>Returns null if no such user or admin persona / password pair
    * exists.</p>
