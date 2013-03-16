@@ -672,14 +672,29 @@ public final class GanymedeServer implements Server {
 
   public DBObject validateUserOrAdminLogin(String name, String clientPass)
   {
-    DBObject adminOrUserObj = this.validateAdminLogin(name, clientPass);
+    DBObject personaObj = this.validateAdminLogin(name, clientPass);
 
-    if (adminOrUserObj == null)
+    if (personaObj == null)
       {
-        adminOrUserObj = this.validateUserLogin(name, clientPass);
+        return this.validateUserLogin(name, clientPass);
       }
 
-    return adminOrUserObj;
+    // don't let the monitor account login to the client
+
+    if (personaObj.getInvid().equals(Invid.createInvid(SchemaConstants.PersonaBase,
+                                                       SchemaConstants.PersonaMonitorObj)))
+      {
+        return null;
+      }
+
+    DBObject userObj = getUserFromPersona(personaObj);
+
+    if (userObj != null && userObj.isInactivated())
+      {
+        return null;
+      }
+
+    return personaObj;
   }
 
   /**
