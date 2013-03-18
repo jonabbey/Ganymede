@@ -190,7 +190,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
               }
           }
 
-        GanymedeAdmin.consoles.removeAllElements();
+        GanymedeAdmin.consoles.clear();
       }
   }
 
@@ -673,7 +673,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
     this.adminName = adminName;
     this.clientHost = clientHost;
 
-    consoles.addElement(this);  // this can block if we are currently looping on consoles
+    consoles.add(this);  // this can block if we are currently looping on consoles
 
     try
       {
@@ -856,7 +856,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
       {
         if (consoles.contains(this))
           {
-            consoles.removeElement(this);
+            consoles.remove(this);
 
             String eventStr = null;
 
