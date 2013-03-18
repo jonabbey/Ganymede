@@ -126,7 +126,7 @@ public final class GanymedeServer implements Server {
    * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin}.</p>
    */
 
-  static private Vector<GanymedeSession> sessions = new Vector<GanymedeSession>();
+  static private Vector<GanymedeSession> userSessions = new Vector<GanymedeSession>();
 
   /**
    * <p>A hashtable mapping session names to identity.  Used by the
@@ -516,7 +516,7 @@ public final class GanymedeServer implements Server {
     // have to synchronize on sessions and risk nested monitor
     // deadlock
 
-    Vector<GanymedeSession> sessionsCopy = (Vector<GanymedeSession>) sessions.clone();
+    Vector<GanymedeSession> sessionsCopy = (Vector<GanymedeSession>) userSessions.clone();
 
     for (GanymedeSession session: sessionsCopy)
       {
@@ -535,7 +535,7 @@ public final class GanymedeServer implements Server {
     // clone the sessions Vector so any forceOff() won't disturb the
     // loop
 
-    Vector<GanymedeSession> sessionsCopy = (Vector<GanymedeSession>) sessions.clone();
+    Vector<GanymedeSession> sessionsCopy = (Vector<GanymedeSession>) userSessions.clone();
 
     for (GanymedeSession session: sessionsCopy)
       {
@@ -555,9 +555,9 @@ public final class GanymedeServer implements Server {
     // soon as we do a forceOff (which can cause the sessions Vector
     // to be modified in a way that would otherwise disturb the loop
 
-    synchronized (sessions)
+    synchronized (userSessions)
       {
-        for (GanymedeSession session: sessions)
+        for (GanymedeSession session: userSessions)
           {
             if (session.getSessionName().equals(username))
               {
@@ -1097,14 +1097,14 @@ public final class GanymedeServer implements Server {
         // "Server going down.. disconnecting clients"
         Ganymede.debug(ts.l("shutdown.clients"));
 
-        // forceOff modifies GanymedeServer.sessions, so we need to
-        // copy our list before we iterate over it.
+        // forceOff modifies GanymedeServer.userSessions, so we need
+        // to copy our list before we iterate over it.
 
         Vector<GanymedeSession> tempList = new Vector<GanymedeSession>();
 
-        synchronized (sessions)
+        synchronized (userSessions)
           {
-            for (GanymedeSession session: sessions)
+            for (GanymedeSession session: userSessions)
               {
                 tempList.add(session);
               }
@@ -1707,7 +1707,7 @@ public final class GanymedeServer implements Server {
    * <p>This method is called to add a remote user's
    * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
    * object to the GanymedeServer's static
-   * {@link arlut.csd.ganymede.server.GanymedeServer#sessions sessions}
+   * {@link arlut.csd.ganymede.server.GanymedeServer#userSessions userSessions}
    * field, which is used by the admin console code to iterate
    * over connected users when logging user actions to the
    * Ganymede admin console.</p>
@@ -1715,17 +1715,17 @@ public final class GanymedeServer implements Server {
 
   public static void monitorUserSession(GanymedeSession session)
   {
-    synchronized (sessions)
+    synchronized (userSessions)
       {
         sendMessageToRemoteSessions(ClientMessage.LOGIN, ts.l("addRemoteUser.logged_in", session.getUserName()));
 
         // we send the above message before adding the user to the
-        // sessions Vector so that the user doesn't get bothered with
-        // a 'you logged in' message
+        // userSessions Vector so that the user doesn't get bothered
+        // with a 'you logged in' message
 
-        sessions.add(session);
+        userSessions.add(session);
 
-        sendMessageToRemoteSessions(ClientMessage.LOGINCOUNT, Integer.toString(sessions.size()));
+        sendMessageToRemoteSessions(ClientMessage.LOGINCOUNT, Integer.toString(userSessions.size()));
       }
   }
 
@@ -1733,7 +1733,7 @@ public final class GanymedeServer implements Server {
    * <p>This method is called to remove a remote user's
    * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
    * object from the GanymedeServer's static
-   * {@link arlut.csd.ganymede.server.GanymedeServer#sessions sessions}
+   * {@link arlut.csd.ganymede.server.GanymedeServer#userSessions userSessions}
    * field, which is used by the admin console code to iterate
    * over connected users when logging user actions to the
    * Ganymede admin console.</p>
@@ -1741,16 +1741,16 @@ public final class GanymedeServer implements Server {
 
   public static void unmonitorUserSession(GanymedeSession session)
   {
-    synchronized (sessions)
+    synchronized (userSessions)
       {
-        if (sessions.remove(session))
+        if (userSessions.remove(session))
           {
             // we just removed the session of the user who logged out, so
             // they won't receive the log out message that we'll send to
             // the other clients
 
             sendMessageToRemoteSessions(ClientMessage.LOGOUT, ts.l("removeRemoteUser.logged_out", session.getUserName()));
-            sendMessageToRemoteSessions(ClientMessage.LOGINCOUNT, Integer.toString(sessions.size()));
+            sendMessageToRemoteSessions(ClientMessage.LOGINCOUNT, Integer.toString(userSessions.size()));
           }
       }
 
@@ -1770,11 +1770,11 @@ public final class GanymedeServer implements Server {
   {
     Vector<AdminEntry> entries = null;
 
-    synchronized (sessions)
+    synchronized (userSessions)
       {
-        entries = new Vector<AdminEntry>(sessions.size());
+        entries = new Vector<AdminEntry>(userSessions.size());
 
-        for (GanymedeSession session: sessions)
+        for (GanymedeSession session: userSessions)
           {
             if (session.isLoggedIn())
               {
@@ -1811,7 +1811,7 @@ public final class GanymedeServer implements Server {
 
   public static void sendMessageToRemoteSessions(int type, String message, GanymedeSession self)
   {
-    Vector<GanymedeSession> sessionsCopy = (Vector<GanymedeSession>) sessions.clone();
+    Vector<GanymedeSession> sessionsCopy = (Vector<GanymedeSession>) userSessions.clone();
 
     for (GanymedeSession session: sessionsCopy)
       {
