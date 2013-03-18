@@ -325,9 +325,9 @@ public final class GanymedeServer implements Server {
    * the GanymedeSession will be exported for remote RMI access.
    */
 
-  private synchronized ReturnVal processLogin(String clientName, String clientPass,
-                                              boolean directSession,
-                                              boolean exportObjects) throws RemoteException
+  private ReturnVal processLogin(String clientName, String clientPass,
+                                 boolean directSession,
+                                 boolean exportObjects) throws RemoteException
   {
     ReturnVal semaphoreResult = incrementAndTestLoginSemaphore();
 
@@ -578,7 +578,7 @@ public final class GanymedeServer implements Server {
    * @see arlut.csd.ganymede.rmi.Server
    */
 
-  public synchronized ReturnVal admin(String clientName, String clientPass) throws RemoteException
+  public ReturnVal admin(String clientName, String clientPass) throws RemoteException
   {
     String error = GanymedeServer.lSemaphore.checkEnabled();
 
@@ -703,7 +703,7 @@ public final class GanymedeServer implements Server {
    * <p>Returns null if no such user / password pair exists.</p>
    */
 
-  public synchronized DBObject validateUserLogin(String userName, String clientPass)
+  public DBObject validateUserLogin(String userName, String clientPass)
   {
     Query userQuery = new Query(SchemaConstants.UserBase,
                                 new QueryDataNode(SchemaConstants.UserUserName,
@@ -734,7 +734,7 @@ public final class GanymedeServer implements Server {
    * exists.</p>
    */
 
-  public synchronized DBObject validateAdminLogin(String personaName, String clientPass)
+  public DBObject validateAdminLogin(String personaName, String clientPass)
   {
     Query adminQuery = new Query(SchemaConstants.PersonaBase,
                                  new QueryDataNode(SchemaConstants.PersonaLabelField,
