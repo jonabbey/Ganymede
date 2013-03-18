@@ -580,22 +580,25 @@ public final class GanymedeServer implements Server {
 
   public ReturnVal admin(String clientName, String clientPass) throws RemoteException
   {
+    String clientHost = GanymedeServer.getClientHost();
     String error = GanymedeServer.lSemaphore.checkEnabled();
 
     if (error != null)
       {
+        // "Admin Console Connect Failure"
+        // "Can''t connect admin console to server.. semaphore disabled: {0}"
         return Ganymede.createErrorDialog(ts.l("admin.connect_failure"),
                                           ts.l("admin.semaphore_failure", error));
       }
 
     DBObject adminObj = validateAdminLogin(clientName, clientPass);
-    String clientHost = GanymedeServer.getClientHost();
     int validationResult = validateConsoleAdminPersona(adminObj);
 
     if (validationResult == 0)
       {
         if (Ganymede.log != null)
           {
+            // "Bad console attach attempt by: {0} from host {1}"
             Ganymede.log.logSystemEvent(new DBLogEvent("badpass",
                                                        ts.l("admin.badlogevent", clientName, clientHost),
                                                        null,
@@ -604,12 +607,11 @@ public final class GanymedeServer implements Server {
                                                        null));
           }
 
+        // "Login Failure"
+        // "Bad username and/or password for admin console"
         return Ganymede.createErrorDialog(ts.l("admin.badlogin"),
                                           ts.l("admin.baduserpass"));
       }
-
-    // creating a new GanymedeAdmin can block if we are currently
-    // looping over the connected consoles.
 
     adminSession aSession = new GanymedeAdmin(validationResult >= 2, clientName, clientHost);
 
