@@ -1100,15 +1100,7 @@ public final class GanymedeServer implements Server {
         // forceOff modifies GanymedeServer.userSessions, so we need
         // to copy our list before we iterate over it.
 
-        Vector<GanymedeSession> tempList = new Vector<GanymedeSession>();
-
-        synchronized (userSessions)
-          {
-            for (GanymedeSession session: userSessions)
-              {
-                tempList.add(session);
-              }
-          }
+        Vector<GanymedeSession> tempList = (Vector<GanymedeSession>) userSessions.clone();
 
         for (GanymedeSession temp: tempList)
           {
