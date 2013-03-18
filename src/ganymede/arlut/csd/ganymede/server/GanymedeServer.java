@@ -362,9 +362,6 @@ public final class GanymedeServer implements Server {
             clientName = userObj.getLabel();
           }
 
-        // the GanymedeSession constructor calls one of the
-        // register session name methods on us
-
         GanymedeSession session = new GanymedeSession(GanymedeServer.registerUserSessionName(clientName),
                                                       userObj, personaObj,
                                                       directSession,
