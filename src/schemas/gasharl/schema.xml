@@ -44,9 +44,9 @@
 
         <category name="Events">
 
-          <objectdef name="System_Events" id="4">
-            <classdef name="arlut.csd.ganymede.server.eventCustom" optionString=""/>
+          <objectdef name="System_Event" id="4">
             <label fieldid="100"/>
+            <classdef name="arlut.csd.ganymede.server.eventCustom" optionString=""/>
             <tab name="General">
               <fielddef name="Event_Token" id="100">
                 <comment>Single-word token for this event class</comment>
@@ -85,9 +85,9 @@
               </fielddef>
             </tab>
           </objectdef>
-          <objectdef name="Object_Events" id="6">
-            <classdef name="arlut.csd.ganymede.server.objectEventCustom" optionString=""/>
+          <objectdef name="Object_Event" id="6">
             <label fieldid="110"/>
+            <classdef name="arlut.csd.ganymede.server.objectEventCustom" optionString=""/>
             <tab name="General">
               <fielddef name="Hidden_Label" id="110">
                 <comment>Hidden composite label field.  The contents of this label field is automatically set from the Event Token and Object Type Name fields.</comment>
@@ -136,8 +136,8 @@
         <category name="Permissions">
 
           <objectdef name="Owner_Group" id="0">
-            <classdef name="arlut.csd.ganymede.server.ownerCustom" optionString=""/>
             <label fieldid="100"/>
+            <classdef name="arlut.csd.ganymede.server.ownerCustom" optionString=""/>
             <tab name="General">
               <fielddef name="Name" id="100">
                 <comment>The name of this ownership group</comment>
@@ -174,8 +174,8 @@
             </tab>
           </objectdef>
           <objectdef name="Admin_Persona" id="1">
-            <classdef name="arlut.csd.ganymede.server.adminPersonaCustom" optionString=""/>
             <label fieldid="108"/>
+            <classdef name="arlut.csd.ganymede.server.adminPersonaCustom" optionString=""/>
             <tab name="General">
               <fielddef name="User" id="103">
                 <comment>What user is this admin persona associated with?</comment>
@@ -239,8 +239,8 @@
             </tab>
           </objectdef>
           <objectdef name="Role" id="2">
-            <classdef name="arlut.csd.ganymede.server.permCustom" optionString=""/>
             <label fieldid="100"/>
+            <classdef name="arlut.csd.ganymede.server.permCustom" optionString=""/>
             <tab name="General">
               <fielddef name="Name" id="100">
                 <comment>The name of this permission matrix</comment>
@@ -271,8 +271,8 @@
         </category>
 
         <objectdef name="Task" id="5">
-          <classdef name="arlut.csd.ganymede.server.taskCustom" optionString=""/>
           <label fieldid="100"/>
+          <classdef name="arlut.csd.ganymede.server.taskCustom" optionString=""/>
           <tab name="General">
             <fielddef name="Task_Name" id="100">
               <typedef type="string">
@@ -308,8 +308,8 @@
           </tab>
         </objectdef>
         <objectdef name="Sync_Channel" id="7">
-          <classdef name="arlut.csd.ganymede.server.syncChannelCustom" optionString=""/>
           <label fieldid="100"/>
+          <classdef name="arlut.csd.ganymede.server.syncChannelCustom" optionString=""/>
           <tab name="General">
             <fielddef name="Name" id="100">
               <typedef type="string">
@@ -358,9 +358,9 @@
       <category name="User-Level Objects">
 
         <objectdef name="Embedded_Automounter_Map_Entry" id="278">
+          <label fieldid="258"/>
           <classdef name="arlut.csd.ganymede.gasharl.mapEntryCustom" optionString=""/>
           <embedded/>
-          <label fieldid="258"/>
           <tab name="General">
             <fielddef name="XML_Label" id="258">
               <comment>This label is for use with the Ganymede
@@ -384,8 +384,8 @@ xmlclient.</comment>
           </tab>
         </objectdef>
         <objectdef name="Email_Redirect" id="275">
-          <classdef name="arlut.csd.ganymede.gasharl.emailRedirectCustom" optionString=""/>
           <label fieldid="256"/>
+          <classdef name="arlut.csd.ganymede.gasharl.emailRedirectCustom" optionString=""/>
           <tab name="General">
             <fielddef name="Name" id="256">
               <typedef type="string">
@@ -410,8 +410,8 @@ xmlclient.</comment>
           </tab>
         </objectdef>
         <objectdef name="Email_List" id="274">
-          <classdef name="arlut.csd.ganymede.gasharl.emailListCustom" optionString=""/>
           <label fieldid="256"/>
+          <classdef name="arlut.csd.ganymede.gasharl.emailListCustom" optionString=""/>
           <tab name="General">
             <fielddef name="List_Name" id="256">
               <typedef type="string">
@@ -442,8 +442,8 @@ xmlclient.</comment>
           </tab>
         </objectdef>
         <objectdef name="User" id="3">
-          <classdef name="arlut.csd.ganymede.gasharl.userCustom" optionString=""/>
           <label fieldid="100"/>
+          <classdef name="arlut.csd.ganymede.gasharl.userCustom" optionString=""/>
           <tab name="General">
             <fielddef name="Username" id="100">
               <comment>User name for an individual privileged to log into Ganymede and/or the network</comment>
@@ -669,8 +669,8 @@ Limited to 16 for NFS.</comment>
           </tab>
         </objectdef>
         <objectdef name="Group" id="257">
-          <classdef name="arlut.csd.ganymede.gasharl.groupCustom" optionString=""/>
           <label fieldid="256"/>
+          <classdef name="arlut.csd.ganymede.gasharl.groupCustom" optionString=""/>
           <tab name="General">
             <fielddef name="GroupName" id="256">
               <typedef type="string">
@@ -736,8 +736,8 @@ Limited to 16 for NFS.</comment>
           </tab>
         </objectdef>
         <objectdef name="System" id="263">
-          <classdef name="arlut.csd.ganymede.gasharl.systemCustom" optionString=""/>
           <label fieldid="261"/>
+          <classdef name="arlut.csd.ganymede.gasharl.systemCustom" optionString=""/>
           <tab name="General">
             <fielddef name="System_Name" id="261">
               <comment>Name of this system, not including DNS domain information</comment>
@@ -843,8 +843,8 @@ in this field.&lt;/p&gt;&lt;/html&gt;</comment>
           </tab>
         </objectdef>
         <objectdef name="I.P._Network" id="267">
-          <classdef name="arlut.csd.ganymede.gasharl.networkCustom" optionString=""/>
           <label fieldid="261"/>
+          <classdef name="arlut.csd.ganymede.gasharl.networkCustom" optionString=""/>
           <tab name="General">
             <fielddef name="Network_Name" id="261">
               <comment>A descriptive name for this network</comment>
@@ -897,9 +897,9 @@ for this network.</comment>
           </tab>
         </objectdef>
         <objectdef name="Embedded_System_Interface" id="265">
+          <label fieldid="262"/>
           <classdef name="arlut.csd.ganymede.gasharl.interfaceCustom" optionString=""/>
           <embedded/>
-          <label fieldid="262"/>
           <tab name="General">
             <fielddef name="Label" id="262">
               <typedef type="string">
@@ -979,8 +979,8 @@ for this network.</comment>
             </tab>
           </objectdef>
           <objectdef name="User_Netgroup" id="270">
-            <classdef name="arlut.csd.ganymede.gasharl.userNetgroupCustom" optionString=""/>
             <label fieldid="256"/>
+            <classdef name="arlut.csd.ganymede.gasharl.userNetgroupCustom" optionString=""/>
             <tab name="General">
               <fielddef name="Netgroup_Name" id="256">
                 <typedef type="string">
@@ -1021,8 +1021,8 @@ for this network.</comment>
         <category name="Automounter">
 
           <objectdef name="Automounter_Map" id="277">
-            <classdef name="arlut.csd.ganymede.gasharl.mapCustom" optionString=""/>
             <label fieldid="256"/>
+            <classdef name="arlut.csd.ganymede.gasharl.mapCustom" optionString=""/>
             <tab name="General">
               <fielddef name="Map_Entries" id="257">
                 <typedef type="invid">
@@ -1041,8 +1041,8 @@ for this network.</comment>
             </tab>
           </objectdef>
           <objectdef name="NFS_Volume" id="276">
-            <classdef name="arlut.csd.ganymede.gasharl.volumeCustom" optionString=""/>
             <label fieldid="256"/>
+            <classdef name="arlut.csd.ganymede.gasharl.volumeCustom" optionString=""/>
             <tab name="General">
               <fielddef name="Volume_Label" id="256">
                 <typedef type="string">
@@ -1080,8 +1080,8 @@ for this network.</comment>
         </category>
 
         <objectdef name="DHCP_Group" id="262">
-          <classdef name="arlut.csd.ganymede.gasharl.dhcpGroupCustom" optionString=""/>
           <label fieldid="256"/>
+          <classdef name="arlut.csd.ganymede.gasharl.dhcpGroupCustom" optionString=""/>
           <tab name="General">
             <fielddef name="Name" id="256">
               <typedef type="string">
@@ -1106,9 +1106,9 @@ for this network.</comment>
           </tab>
         </objectdef>
         <objectdef name="DHCP_Option_Value" id="264">
+          <label fieldid="256"/>
           <classdef name="arlut.csd.ganymede.gasharl.dhcpEntryCustom" optionString=""/>
           <embedded/>
-          <label fieldid="256"/>
           <tab name="General">
             <fielddef name="Label" id="256">
               <typedef type="string">
@@ -1184,8 +1184,8 @@ for this network.</comment>
           </tab>
         </objectdef>
         <objectdef name="User_Category" id="279">
-          <classdef name="arlut.csd.ganymede.gasharl.userCategoryCustom" optionString=""/>
           <label fieldid="256"/>
+          <classdef name="arlut.csd.ganymede.gasharl.userCategoryCustom" optionString=""/>
           <tab name="General">
             <fielddef name="Category_Title" id="256">
               <typedef type="string">
@@ -1244,8 +1244,8 @@ for this network.</comment>
           </tab>
         </objectdef>
         <objectdef name="Room" id="269">
-          <classdef name="arlut.csd.ganymede.gasharl.roomCustom" optionString=""/>
           <label fieldid="256"/>
+          <classdef name="arlut.csd.ganymede.gasharl.roomCustom" optionString=""/>
           <tab name="General">
             <fielddef name="Room_Number" id="256">
               <typedef type="string">
@@ -1345,8 +1345,8 @@ conflicts with this name.</comment>
           </tab>
         </objectdef>
         <objectdef name="Mailman_List" id="260">
-          <classdef name="arlut.csd.ganymede.gasharl.MailmanListCustom" optionString=""/>
           <label fieldid="256"/>
+          <classdef name="arlut.csd.ganymede.gasharl.MailmanListCustom" optionString=""/>
           <tab name="General">
             <fielddef name="Name" id="256">
               <typedef type="string">
@@ -1384,8 +1384,8 @@ conflicts with this name.</comment>
           </tab>
         </objectdef>
         <objectdef name="DHCP_Option" id="266">
-          <classdef name="arlut.csd.ganymede.gasharl.dhcpOptionCustom" optionString=""/>
           <label fieldid="256"/>
+          <classdef name="arlut.csd.ganymede.gasharl.dhcpOptionCustom" optionString=""/>
           <tab name="General">
             <fielddef name="Option_Name" id="256">
               <typedef type="string">
@@ -1422,8 +1422,8 @@ if the client does not explicitly request it.</comment>
           </tab>
         </objectdef>
         <objectdef name="DHCP_Network" id="268">
-          <classdef name="arlut.csd.ganymede.gasharl.dhcpNetworkCustom" optionString=""/>
           <label fieldid="256"/>
+          <classdef name="arlut.csd.ganymede.gasharl.dhcpNetworkCustom" optionString=""/>
           <tab name="General">
             <fielddef name="Name" id="256">
               <typedef type="string">
@@ -1490,8 +1490,8 @@ if the client does not explicitly request it.</comment>
           </tab>
         </objectdef>
         <objectdef name="IRIS_List" id="282">
-          <classdef name="arlut.csd.ganymede.gasharl.IRISListCustom" optionString=""/>
           <label fieldid="256"/>
+          <classdef name="arlut.csd.ganymede.gasharl.IRISListCustom" optionString=""/>
           <tab name="General">
             <fielddef name="List_Name" id="256">
               <typedef type="string">
