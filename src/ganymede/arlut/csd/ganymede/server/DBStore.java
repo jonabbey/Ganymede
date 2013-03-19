@@ -1838,7 +1838,7 @@ public final class DBStore implements JythonMap {
 
         setBase(b);
 
-        // create System Events base
+        // create System Event base
 
         DBBaseCategory eventCategory = new DBBaseCategory(this, "Events", adminCategory);
         adminCategory.addNodeAfter(eventCategory, null);
@@ -1914,7 +1914,7 @@ public final class DBStore implements JythonMap {
 
         setBase(b);
 
-        // create Object Events base
+        // create Object Event base
 
         b = new DBObjectBase(this, false);
         b.setName("Object Event");
