@@ -760,8 +760,8 @@ public final class GanymedeServer implements Server {
    * This method determines whether the specified username/password
    * combination is valid for an admin persona.
    *
-   * @param DBObject corresponding to an admin object to check for
-   * console privs.
+   * @param adminObj DBObject corresponding to an admin object to
+   * check for console privs.
    * @return  0 if the admin doesn't have admin console privileges,
    *          1 the admin is allowed basic admin console access,
    *          2 the admin is allowed full admin console privileges,

@@ -753,7 +753,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p>Returns the DBSession that this field is associated with or null
    * if it is being viewed from the persistent store.</p>
    *
-   * @deprecated Use {@link getDBSession()} instead.
+   * @deprecated Use {@link #getDBSession()} instead.
    */
 
   @Deprecated

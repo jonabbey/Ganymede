@@ -728,7 +728,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>Returns the DBSession that this object is checked out in care
    * of, or null if it is checked out from the persistent store.</p>
    *
-   * @deprecated Use {@link getDBSession()} instead.
+   * @deprecated Use {@link #getDBSession()} instead.
    */
 
   @Deprecated
