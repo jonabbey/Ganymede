@@ -4016,10 +4016,24 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * of "foo".
    */
 
+  /**
+   * <p>Returns true if this DBObjectBase contains an object with key
+   * as the label.</p>
+   *
+   * <p>Used for Jython support.</p>
+   */
+
   public boolean has_key(Object key)
   {
     return keys().contains(key);
   }
+
+  /**
+   * <p>Returns a List of labels for objects contained in this
+   * DBObjectBase.</p>
+   *
+   * <p>Used for Jython support.</p>
+   */
 
   public List items()
   {
@@ -4039,6 +4053,8 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
   /**
    * <p>Returns a Set of Strings containing the labels for all objects
    * in htis DBObjectBase.</p>
+   *
+   * <p>Used for Jython support.</p>
    */
 
   public Set<String> keys()
@@ -4053,15 +4069,38 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
     return keys;
   }
 
+  /**
+   * <p>Returns true if this DBObjectBase contains an object with key
+   * as the label.</p>
+   *
+   * <p>An alternate name for {@link #has_key(java.lang.Object)}.</p>
+   *
+   * <p>Used for Jython support.</p>
+   */
+
   public boolean containsKey(Object key)
   {
     return has_key(key);
   }
 
+  /**
+   * <p>Returns true if this DBObjectBase contains an object that
+   * equals() value.</p>
+   *
+   * <p>Used for Jython support.</p>
+   */
+
   public boolean containsValue(Object value)
   {
     return getIterationSet().contains(value);
   }
+
+  /**
+   * <p>Returns a Set of &lt;label, DBObject&gt; entries, one for each
+   * DBObject contained in this DBObjectBase.</p>
+   *
+   * <p>Used for Jython support.</p>
+   */
 
   public Set<Entry> entrySet()
   {
@@ -4074,6 +4113,17 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     return entrySet;
   }
+
+  /**
+   * <p>Returns the DBObject in this DBObjectBase that matches key, or
+   * null if no such object can be found.</p>
+   *
+   * <p>key can be a PyInteger or Integer in order to fetch the
+   * DBObject by the object id number, a String in order to fetch by
+   * label.</p>
+   *
+   * <p>Used for Jython support.</p>
+   */
 
   public Object get(Object key)
   {
@@ -4088,12 +4138,6 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
       }
     else if (key instanceof String)
       {
-        //
-        // XXX I can't make heads or tails out of what Deepak was trying to do
-        // XXX in this section.. wtf?  - jon 19 aug 2005
-        //
-
-        /* Snag this object's label field */
         String labelFieldName = getLabelFieldName();
 
         if (labelFieldName == null)
@@ -4101,7 +4145,6 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
             return null;
           }
 
-        /* Now we'll check to see if there's a namespace on this field */
         DBNameSpace namespace = getFieldDef(labelFieldName).getNameSpace();
 
         if (namespace == null)
@@ -4120,33 +4163,66 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
             return null;
           }
       }
+
     return null;
   }
+
+  /**
+   * <p>Returns true if there are no objects in this DBObjectBase.</p>
+   *
+   * <p>Used for Jython support.</p>
+   */
 
   public boolean isEmpty()
   {
     return objectTable.isEmpty();
   }
 
+  /**
+   * <p>Returns a Set of Strings containing the labels for all objects
+   * in htis DBObjectBase.</p>
+   *
+   * <p>Used for Jython support.</p>
+   */
+
   public Set keySet()
   {
     return keys();
   }
+
+  /**
+   * <p>Returns the number of objects in this DBObjectBase.</p>
+   */
 
   public int size()
   {
     return objectTable.size();
   }
 
-  public Collection values()
+  /**
+   * <p>Returns a Collection of DBObjects contained in this
+   * DBObjectBase.</p>
+   */
+
+  public Collection<DBObject> values()
   {
     return getIterationSet();
   }
+
+  /**
+   * <p>Returns a String corresponding to the list of labels of
+   * objects in this DBObjectBase.</p>
+   */
 
   public String toString()
   {
     return keys().toString();
   }
+
+  /**
+   * <p>Static nested class to represent a label, DBObject
+   * pairing.</p>
+   */
 
   static class Entry implements Map.Entry
   {
@@ -4174,28 +4250,43 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
     }
   }
 
-  /*
-   * These methods are are no-ops since we don't want this object
-   * messed with via the Map interface.
+  /**
+   * <p>Unsupported operation that we have to support the Map
+   * interface.</p>
    */
 
   public void clear()
   {
-    return;
+    throw new UnsupportedOperationException();
   }
+
+  /**
+   * <p>Unsupported operation that we have to support the Map
+   * interface.</p>
+   */
 
   public Object put(Object key, Object value)
   {
-    return null;
+    throw new UnsupportedOperationException();
   }
+
+  /**
+   * <p>Unsupported operation that we have to support the Map
+   * interface.</p>
+   */
 
   public void putAll(Map t)
   {
-    return;
+    throw new UnsupportedOperationException();
   }
+
+  /**
+   * <p>Unsupported operation that we have to support the Map
+   * interface.</p>
+   */
 
   public Object remove(Object key)
   {
-    return null;
+    throw new UnsupportedOperationException();
   }
 }
