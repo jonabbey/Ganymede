@@ -414,6 +414,12 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    * GanymedeBuilderTasks} to determine whether a particular build
    * sequence is necessary.</p>
    *
+   * <p>Note that this timestamp will not be updated if the only
+   * changes to objects belonging to this DBObjectBase made during a
+   * given transaction are to the built-in fields.  We won't consider
+   * ourselves changed from a "is a build needed?" perspective if only
+   * the notes field was changed in one of our objects, say.</p>
+   *
    * <p>See also {@link
    * arlut.csd.ganymede.server.DBObjectBaseField#lastChange} for a
    * timestamp for the last time that a given field was changed in any

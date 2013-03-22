@@ -2402,23 +2402,36 @@ public final class DBEditSet {
 
   private final void commit_updateBases(Set<DBObjectBaseField> fieldsTouched)
   {
+    // very important, update the base's snapshot vector so that
+    // any new queries that are issued will proceed against the
+    // new state of objects in this base
+
     for (DBObjectBase base: basesModified)
       {
-        base.updateTimeStamp();
-
-        // and, very important, update the base's snapshot vector
-        // so that any new queries that are issued will proceed
-        // against the new state of objects in this base
-
         base.updateIterationSet();
       }
 
-    // And in addition to updating the time stamps on the object
-    // bases, update the time stamps on each field.
+    Set<DBObjectBase> updatedBases = new HashSet<DBObjectBase>();
+
+    // update the last-changed timestamp for all field definitions
+    // that had instances changed
 
     for (DBObjectBaseField fieldDef: fieldsTouched)
       {
         fieldDef.updateTimeStamp();
+
+        if (!fieldDef.isBuiltIn())
+          {
+            updatedBases.add(fieldDef.base());
+          }
+      }
+
+    // and for the DBObjectBases that had a non-built-in field changed
+    // in one or more of their objects.
+
+    for (DBObjectBase base: updatedBases)
+      {
+        base.updateTimeStamp();
       }
   }
 
