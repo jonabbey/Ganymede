@@ -2420,11 +2420,14 @@ public final class DBEditSet {
       {
         fieldDef.updateTimeStamp();
 
-        updatedBases.add(fieldDef.base());
+        if (!fieldDef.isBuiltIn())
+          {
+            updatedBases.add(fieldDef.base());
+          }
       }
 
-    // and for all DBObjectBases that had fields other than built-in
-    // the creator/modifier metadata fields changed
+    // and for the DBObjectBases that had a non-built-in field changed
+    // in one or more of their objects.
 
     for (DBObjectBase base: updatedBases)
       {

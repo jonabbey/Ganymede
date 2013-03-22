@@ -416,10 +416,9 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
    *
    * <p>Note that this timestamp will not be updated if the only
    * changes to objects belonging to this DBObjectBase made during a
-   * given transaction are to the built-in created / modified / time
-   * or text fields.  We won't consider ourselves changed from a "is a
-   * build needed?"  perspective if only the notes field was changed
-   * in one of our objects, say.</p>
+   * given transaction are to the built-in fields.  We won't consider
+   * ourselves changed from a "is a build needed?" perspective if only
+   * the notes field was changed in one of our objects, say.</p>
    *
    * <p>See also {@link
    * arlut.csd.ganymede.server.DBObjectBaseField#lastChange} for a
