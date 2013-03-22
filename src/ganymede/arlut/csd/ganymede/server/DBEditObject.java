@@ -3845,7 +3845,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
       {
-        // we don't care if certain fields change
+        // we don't care if certain fields change, as they are
+        // guaranteed to change whenever a transaction commits
 
         if (fieldDef.getID() == SchemaConstants.CreationDateField ||
             fieldDef.getID() == SchemaConstants.CreatorField ||
