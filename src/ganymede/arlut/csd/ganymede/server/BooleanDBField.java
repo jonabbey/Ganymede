@@ -366,17 +366,17 @@ public class BooleanDBField extends DBField implements boolean_field {
         // "Boolean Field Error"
         // "Don''t have permission to edit field {0} in object {1}."
         return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_subj"),
-                                          ts.l("verifyNewValue.error_perm", getName(), this.getOwner().getLabel()));
+                                          ts.l("verifyNewValue.error_perm", getName(), this.owner.getLabel()));
       }
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     if (!verifyTypeMatch(o))
       {
         // "Boolean Field Error"
         // "Submitted value {0} is not a boolean!  Major client error while trying to edit field {0} in object {1}."
         return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_subj"),
-                                          ts.l("verifyNewValue.error_type", getName(), this.getOwner().getLabel()));
+                                          ts.l("verifyNewValue.error_type", getName(), this.owner.getLabel()));
       }
 
     // have our parent make the final ok on the value

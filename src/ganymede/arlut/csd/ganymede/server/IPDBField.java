@@ -460,14 +460,14 @@ public class IPDBField extends DBField implements ip_field {
       {
         // "Can''t change IP field {1} in object {0}, due to a lack of permissions or due to the object being in a non-editable state."
         throw new GanyPermissionsException(ts.l("global.no_write_perms",
-                                                this.getOwner().getLabel(), getName()));
+                                                this.owner.getLabel(), getName()));
       }
 
     if (isVector())
       {
         // "Scalar method called on a vector field: {1} in object {0}"
         throw new IllegalArgumentException(ts.l("global.oops_vector",
-                                                this.getOwner().getLabel(), getName()));
+                                                this.owner.getLabel(), getName()));
       }
 
     if (value == null)
@@ -486,7 +486,7 @@ public class IPDBField extends DBField implements ip_field {
         return retVal;
       }
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
@@ -592,14 +592,14 @@ public class IPDBField extends DBField implements ip_field {
       {
         // "Can''t change IP field {1} in object {0}, due to a lack of permissions or due to the object being in a non-editable state."
         throw new GanyPermissionsException(ts.l("global.no_write_perms",
-                                                this.getOwner().getLabel(), getName()));
+                                                this.owner.getLabel(), getName()));
       }
 
     if (!isVector())
       {
         // "Vector method called on a scalar field: {1} in object {0}"
         throw new IllegalArgumentException(ts.l("global.oops_scalar",
-                                                this.getOwner().getLabel(), getName()));
+                                                this.owner.getLabel(), getName()));
       }
 
     if (value == null)
@@ -608,7 +608,7 @@ public class IPDBField extends DBField implements ip_field {
         // "Null value passed to {0}:{1}.setElement()"
         return Ganymede.createErrorDialog(ts.l("setElement.oops"),
                                           ts.l("setElement.null_value",
-                                               this.getOwner().getLabel(), getName()));
+                                               this.owner.getLabel(), getName()));
       }
 
     Vector values = getVectVal();
@@ -640,7 +640,7 @@ public class IPDBField extends DBField implements ip_field {
         return retVal;
       }
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
@@ -739,21 +739,21 @@ public class IPDBField extends DBField implements ip_field {
       {
         // "Can''t change IP field {1} in object {0}, due to a lack of permissions or due to the object being in a non-editable state."
         throw new GanyPermissionsException(ts.l("global.no_write_perms",
-                                                this.getOwner().getLabel(), getName()));
+                                                this.owner.getLabel(), getName()));
       }
 
     if (!isVector())
       {
         // "Vector method called on a scalar field: {1} in object {0}"
         throw new IllegalArgumentException(ts.l("global.oops_scalar",
-                                                this.getOwner().getLabel(), getName()));
+                                                this.owner.getLabel(), getName()));
       }
 
     if (submittedValue == null)
       {
         // "Null value passed to {0}:{1}.addElement()"
         throw new IllegalArgumentException(ts.l("addElement.null_value",
-                                                this.getOwner().getLabel(), getName()));
+                                                this.owner.getLabel(), getName()));
       }
 
     bytes = genIPbytes(submittedValue);
@@ -778,10 +778,10 @@ public class IPDBField extends DBField implements ip_field {
         // "Error in IPDBField.addElement(): Field {1} already at or beyond array size limit in object {0}"
         return Ganymede.createErrorDialog(ts.l("addElement.oops"),
                                           ts.l("addElement.too_big",
-                                               this.getOwner().getLabel(), getName()));
+                                               this.owner.getLabel(), getName()));
       }
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
@@ -871,14 +871,14 @@ public class IPDBField extends DBField implements ip_field {
       {
         // "Can''t change IP field {1} in object {0}, due to a lack of permissions or due to the object being in a non-editable state."
         throw new GanyPermissionsException(ts.l("global.no_write_perms",
-                                                this.getOwner().getLabel(), getName()));
+                                                this.owner.getLabel(), getName()));
       }
 
     if (!isVector())
       {
         // "Vector method called on a scalar field: {1} in object {0}"
         throw new IllegalArgumentException(ts.l("global.oops_scalar",
-                                                this.getOwner().getLabel(), getName()));
+                                                this.owner.getLabel(), getName()));
       }
 
     if (submittedValues == null || submittedValues.size() == 0)
@@ -887,7 +887,7 @@ public class IPDBField extends DBField implements ip_field {
         // "IPDBField.addElements(): Can''t add a null or empty vector to field {1} in object {0}"
         return Ganymede.createErrorDialog(ts.l("addElements.oops"),
                                           ts.l("addElements.null_value",
-                                               this.getOwner().getLabel(), getName()));
+                                               this.owner.getLabel(), getName()));
       }
 
     if (submittedValues == getVectVal())
@@ -907,7 +907,7 @@ public class IPDBField extends DBField implements ip_field {
         // "Error in IPDBField.addElements(): Field {1} in object {0} is limited to {2} items.  Can't add the {3} additional items requested."
         return Ganymede.createErrorDialog(ts.l("addElements.oops"),
                                           ts.l("addElements.too_big",
-                                               this.getOwner().getLabel(), getName(),
+                                               this.owner.getLabel(), getName(),
                                                Integer.valueOf(getMaxArraySize()),
                                                Integer.valueOf(submittedValues.size())));
       }
@@ -985,7 +985,7 @@ public class IPDBField extends DBField implements ip_field {
 
     // see if our container wants to intercede in the adding operation
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
     editset = eObj.getEditSet();
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
@@ -1099,7 +1099,7 @@ public class IPDBField extends DBField implements ip_field {
       {
         // "Scalar method called on a vector field: {1} in object {0}"
         throw new IllegalArgumentException(ts.l("global.oops_vector",
-                                                this.getOwner().getLabel(), getName()));
+                                                this.owner.getLabel(), getName()));
       }
 
     return (Byte[]) value;
@@ -1111,7 +1111,7 @@ public class IPDBField extends DBField implements ip_field {
       {
         // "Vector method called on a scalar field: {1} in object {0}"
         throw new IllegalArgumentException(ts.l("global.oops_scalar",
-                                                this.getOwner().getLabel(), getName()));
+                                                this.owner.getLabel(), getName()));
       }
 
     return (Byte[]) getVectVal().elementAt(index);
@@ -1262,7 +1262,7 @@ public class IPDBField extends DBField implements ip_field {
 
   public boolean v6Allowed()
   {
-    DBEditObject eObj = (DBEditObject) this.getOwner();
+    DBEditObject eObj = (DBEditObject) this.owner;
 
     return eObj.isIPv6OK(this);
   }
@@ -1402,7 +1402,7 @@ public class IPDBField extends DBField implements ip_field {
 
   public ReturnVal verifyNewValue(Object o)
   {
-    DBEditObject eObj = (DBEditObject) this.getOwner();
+    DBEditObject eObj = (DBEditObject) this.owner;
 
     if (!isEditable(true))
       {
@@ -1437,7 +1437,7 @@ public class IPDBField extends DBField implements ip_field {
       {
         // "Vector method called on a scalar field: {1} in object {0}"
         throw new IllegalArgumentException(ts.l("global.oops_scalar",
-                                                this.getOwner().getLabel(), getName()));
+                                                this.owner.getLabel(), getName()));
       }
 
     if (oldField == null)

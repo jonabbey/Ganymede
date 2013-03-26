@@ -612,7 +612,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   public Object key()
   {
-    return Integer.valueOf(this.getOwner().getID());
+    return Integer.valueOf(this.owner.getID());
   }
 
   /**
@@ -1256,7 +1256,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   public synchronized void rollback(Object oldval)
   {
-    if (!(this.getOwner() instanceof DBEditObject))
+    if (!(this.owner instanceof DBEditObject))
       {
         throw new RuntimeException("Invalid rollback on field " +
                                    getName() + ", not in an editable context");

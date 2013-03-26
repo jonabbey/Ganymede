@@ -295,7 +295,7 @@ public class FloatDBField extends DBField implements float_field {
         throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     return eObj.isFloatLimited(this);
   }
@@ -320,7 +320,7 @@ public class FloatDBField extends DBField implements float_field {
         throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     return eObj.minFloat(this);
   }
@@ -345,7 +345,7 @@ public class FloatDBField extends DBField implements float_field {
         throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     return eObj.maxFloat(this);
   }
@@ -368,7 +368,7 @@ public class FloatDBField extends DBField implements float_field {
 
     /* -- */
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     if (!verifyTypeMatch(o))
       {

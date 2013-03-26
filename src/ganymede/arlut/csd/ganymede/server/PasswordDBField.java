@@ -359,7 +359,7 @@ public class PasswordDBField extends DBField implements pass_field {
               }
 
             if (this.uncryptedPass != null &&
-                !(this.getOwner() instanceof DBEditObject) &&
+                !(this.owner instanceof DBEditObject) &&
                 field.hasChanged())
               {
                 history.add(uncryptedPass, new Date());
@@ -422,7 +422,7 @@ public class PasswordDBField extends DBField implements pass_field {
         // "You do not have permission to clear the "{0}" password field in object "{1}"."
         return Ganymede.createErrorDialog(ts.l("setUndefined.perm_error_subj"),
                                           ts.l("setUndefined.perm_error_text", this.getName(),
-                                               this.getOwner().getLabel()));
+                                               this.owner.getLabel()));
       }
 
     clear_stored();
@@ -580,7 +580,7 @@ public class PasswordDBField extends DBField implements pass_field {
             // "Can''t copy field "{0}" in object "{1}", no read privileges on source."
             return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
                                               ts.l("copyFieldTo.no_read", this.getName(),
-                                                   this.getOwner().getLabel()));
+                                                   this.owner.getLabel()));
           }
       }
 
@@ -590,7 +590,7 @@ public class PasswordDBField extends DBField implements pass_field {
         // "Can''t copy field "{0}" in object "{1}", no write privileges on target."
         return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
                                           ts.l("copyFieldTo.no_write", this.getName(),
-                                               this.getOwner().getLabel()));
+                                               this.owner.getLabel()));
       }
 
     target.cryptedPass = cryptedPass;
@@ -1886,7 +1886,7 @@ public class PasswordDBField extends DBField implements pass_field {
         return retVal;
       }
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
@@ -1911,7 +1911,7 @@ public class PasswordDBField extends DBField implements pass_field {
     // advisory-only messages that the wizardHook generated, even if
     // the finalizeSetValue() doesn't generate any.
 
-    retVal = ReturnVal.merge(retVal, ((DBEditObject) this.getOwner()).finalizeSetValue(this, null));
+    retVal = ReturnVal.merge(retVal, ((DBEditObject) this.owner).finalizeSetValue(this, null));
 
     if (!ReturnVal.didSucceed(retVal))
       {
@@ -1995,7 +1995,7 @@ public class PasswordDBField extends DBField implements pass_field {
         // "Don''t have permission to edit field {0} in object {1}."
         return Ganymede.createErrorDialog(ts.l("global.error_subj"),
                                           ts.l("global.perm_error_text", this.getName(),
-                                               this.getOwner().getLabel()));
+                                               this.owner.getLabel()));
       }
 
     if (!getFieldDef().isCrypted())
@@ -2006,7 +2006,7 @@ public class PasswordDBField extends DBField implements pass_field {
                                           ts.l("setCryptPass.error_text"));
       }
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
@@ -2024,7 +2024,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // call finalizeSetValue to allow for chained reactions
 
-    retVal = ReturnVal.merge(retVal, ((DBEditObject) this.getOwner()).finalizeSetValue(this, null));
+    retVal = ReturnVal.merge(retVal, ((DBEditObject) this.owner).finalizeSetValue(this, null));
 
     if (ReturnVal.didSucceed(retVal))
       {
@@ -2102,7 +2102,7 @@ public class PasswordDBField extends DBField implements pass_field {
         // "Don''t have permission to edit field {0} in object {1}."
         return Ganymede.createErrorDialog(ts.l("global.error_subj"),
                                           ts.l("global.perm_error_text", this.getName(),
-                                               this.getOwner().getLabel()));
+                                               this.owner.getLabel()));
       }
 
     if (!getFieldDef().isMD5Crypted())
@@ -2121,7 +2121,7 @@ public class PasswordDBField extends DBField implements pass_field {
                                           ts.l("setMD5CryptPass.format_error", text));
       }
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
@@ -2139,7 +2139,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // call finalizeSetValue to allow for chained reactions
 
-    retVal = ReturnVal.merge(retVal, ((DBEditObject) this.getOwner()).finalizeSetValue(this, null));
+    retVal = ReturnVal.merge(retVal, ((DBEditObject) this.owner).finalizeSetValue(this, null));
 
     if (ReturnVal.didSucceed(retVal))
       {
@@ -2219,7 +2219,7 @@ public class PasswordDBField extends DBField implements pass_field {
         // "Don''t have permission to edit field {0} in object {1}."
         return Ganymede.createErrorDialog(ts.l("global.error_subj"),
                                           ts.l("global.perm_error_text", this.getName(),
-                                               this.getOwner().getLabel()));
+                                               this.owner.getLabel()));
       }
 
     if (!getFieldDef().isApacheMD5Crypted())
@@ -2238,7 +2238,7 @@ public class PasswordDBField extends DBField implements pass_field {
                                           ts.l("setApacheMD5CryptPass.format_error", text));
       }
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
@@ -2256,7 +2256,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // call finalizeSetValue to allow for chained reactions
 
-    retVal = ReturnVal.merge(retVal, ((DBEditObject) this.getOwner()).finalizeSetValue(this, null));
+    retVal = ReturnVal.merge(retVal, ((DBEditObject) this.owner).finalizeSetValue(this, null));
 
     if (ReturnVal.didSucceed(retVal))
       {
@@ -2337,7 +2337,7 @@ public class PasswordDBField extends DBField implements pass_field {
         // "Don''t have permission to edit field {0} in object {1}."
         return Ganymede.createErrorDialog(ts.l("global.error_subj"),
                                           ts.l("global.perm_error_text", this.getName(),
-                                               this.getOwner().getLabel()));
+                                               this.owner.getLabel()));
       }
 
     if (!getFieldDef().isWinHashed())
@@ -2348,7 +2348,7 @@ public class PasswordDBField extends DBField implements pass_field {
                                           ts.l("setWinCryptedPass.error_text"));
       }
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
@@ -2366,7 +2366,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // call finalizeSetValue to allow for chained reactions
 
-    retVal = ReturnVal.merge(retVal, ((DBEditObject) this.getOwner()).finalizeSetValue(this, null));
+    retVal = ReturnVal.merge(retVal, ((DBEditObject) this.owner).finalizeSetValue(this, null));
 
     if (ReturnVal.didSucceed(retVal))
       {
@@ -2453,7 +2453,7 @@ public class PasswordDBField extends DBField implements pass_field {
         // "Don''t have permission to edit field {0} in object {1}."
         return Ganymede.createErrorDialog(ts.l("global.error_subj"),
                                           ts.l("global.perm_error_text", this.getName(),
-                                               this.getOwner().getLabel()));
+                                               this.owner.getLabel()));
       }
 
     if (!getFieldDef().isSSHAHashed())
@@ -2472,7 +2472,7 @@ public class PasswordDBField extends DBField implements pass_field {
                                           ts.l("setSSHAPass.format_error", this.getName()));
       }
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
@@ -2490,7 +2490,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // call finalizeSetValue to allow for chained reactions
 
-    retVal = ReturnVal.merge(retVal, ((DBEditObject) this.getOwner()).finalizeSetValue(this, null));
+    retVal = ReturnVal.merge(retVal, ((DBEditObject) this.owner).finalizeSetValue(this, null));
 
     if (ReturnVal.didSucceed(retVal))
       {
@@ -2604,7 +2604,7 @@ public class PasswordDBField extends DBField implements pass_field {
         // "Don''t have permission to edit field {0} in object {1}."
         return Ganymede.createErrorDialog(ts.l("global.error_subj"),
                                           ts.l("global.perm_error_text", this.getName(),
-                                               this.getOwner().getLabel()));
+                                               this.owner.getLabel()));
       }
 
     if (!getFieldDef().isShaUnixCrypted())
@@ -2624,7 +2624,7 @@ public class PasswordDBField extends DBField implements pass_field {
                                           ts.l("setShaUnixCryptPass.format_error", this.getName()));
       }
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
@@ -2642,7 +2642,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // call finalizeSetValue to allow for chained reactions
 
-    retVal = ReturnVal.merge(retVal, ((DBEditObject) this.getOwner()).finalizeSetValue(this, null));
+    retVal = ReturnVal.merge(retVal, ((DBEditObject) this.owner).finalizeSetValue(this, null));
 
     if (ReturnVal.didSucceed(retVal))
       {
@@ -2738,7 +2738,7 @@ public class PasswordDBField extends DBField implements pass_field {
         // "Don''t have permission to edit field {0} in object {1}."
         return Ganymede.createErrorDialog(ts.l("global.error_subj"),
                                           ts.l("global.perm_error_text", this.getName(),
-                                               this.getOwner().getLabel()));
+                                               this.owner.getLabel()));
       }
 
     if (!getFieldDef().isBCrypted())
@@ -2758,7 +2758,7 @@ public class PasswordDBField extends DBField implements pass_field {
                                           ts.l("setBCryptPass.format_error", this.getName()));
       }
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
@@ -2776,7 +2776,7 @@ public class PasswordDBField extends DBField implements pass_field {
 
     // call finalizeSetValue to allow for chained reactions
 
-    retVal = ReturnVal.merge(retVal, ((DBEditObject) this.getOwner()).finalizeSetValue(this, null));
+    retVal = ReturnVal.merge(retVal, ((DBEditObject) this.owner).finalizeSetValue(this, null));
 
     if (ReturnVal.didSucceed(retVal))
       {
@@ -2851,7 +2851,7 @@ public class PasswordDBField extends DBField implements pass_field {
         // "Don''t have permission to edit field {0} in object {1}."
         return Ganymede.createErrorDialog(ts.l("global.error_subj"),
                                           ts.l("global.perm_error_text", this.getName(),
-                                               this.getOwner().getLabel()));
+                                               this.owner.getLabel()));
       }
 
     settingCrypt = (crypt != null && !crypt.equals(""));
@@ -2915,7 +2915,7 @@ public class PasswordDBField extends DBField implements pass_field {
           }
       }
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
@@ -3029,7 +3029,7 @@ public class PasswordDBField extends DBField implements pass_field {
     // finalizeSetValue method.. this is just to allow for a generic
     // veto on all changes
 
-    retVal = ReturnVal.merge(retVal, ((DBEditObject) this.getOwner()).finalizeSetValue(this, null));
+    retVal = ReturnVal.merge(retVal, ((DBEditObject) this.owner).finalizeSetValue(this, null));
 
     if (ReturnVal.didSucceed(retVal))
       {
@@ -3118,10 +3118,10 @@ public class PasswordDBField extends DBField implements pass_field {
         // "Don''t have permission to edit field {0} in object {1}."
         return Ganymede.createErrorDialog(ts.l("global.error_subj"),
                                           ts.l("global.perm_error_text", this.getName(),
-                                               this.getOwner().getLabel()));
+                                               this.owner.getLabel()));
       }
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     if (!verifyTypeMatch(o))
       {
@@ -3196,7 +3196,7 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         try
           {
-            String cracklibCheck = CrackLib.fascistLook(Ganymede.crackLibPacker, s, this.getOwner().getLabel());
+            String cracklibCheck = CrackLib.fascistLook(Ganymede.crackLibPacker, s, this.owner.getLabel());
 
             if (cracklibCheck != null)
               {

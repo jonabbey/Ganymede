@@ -300,7 +300,7 @@ public class NumericDBField extends DBField implements num_field {
         throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     return eObj.isIntLimited(this);
   }
@@ -325,7 +325,7 @@ public class NumericDBField extends DBField implements num_field {
         throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     return eObj.minInt(this);
   }
@@ -350,7 +350,7 @@ public class NumericDBField extends DBField implements num_field {
         throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     return eObj.maxInt(this);
   }
@@ -389,7 +389,7 @@ public class NumericDBField extends DBField implements num_field {
         // "Submitted value {0} is not a number!  Major client error while trying to edit field {1} in object {2}."
         return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
                                           ts.l("verifyBasicConstraints.type_error",
-                                               o, this.getName(), this.getOwner().getLabel()));
+                                               o, this.getName(), this.owner.getLabel()));
       }
 
     return null;
@@ -403,7 +403,7 @@ public class NumericDBField extends DBField implements num_field {
 
     /* -- */
 
-    eObj = (DBEditObject) this.getOwner();
+    eObj = (DBEditObject) this.owner;
 
     if (o == null)
       {
