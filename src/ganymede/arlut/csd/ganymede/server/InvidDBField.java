@@ -126,9 +126,12 @@ public final class InvidDBField extends DBField implements invid_field {
    * a large vector add/delete.  Any time we change our value/values
    * actually contained in this field, we'll null this out.</p>
    *
-   * <p>Note that having this here costs us 4 bytes RAM for every InvidDBField
-   * held in the Ganymede server's database, but without it we'll have
-   * an extraordinarily painful time doing mass adds/deletes.</p>
+   * <p>Note that having this here costs us 4 bytes RAM for every
+   * InvidDBField held in the Ganymede server's database, but without
+   * it we'll have an extraordinarily painful time doing mass
+   * adds/deletes.</p>
+   *
+   * <p>Consulted by {#verifyNewValue(java.lang.Object, boolean)}.
    */
 
   private QueryResult qr = null;
@@ -323,6 +326,8 @@ public final class InvidDBField extends DBField implements invid_field {
       {
         this.value = Invid.createInvid(in.readShort(), in.readInt());
       }
+
+    this.qr = null;
   }
 
   /**
@@ -1768,7 +1773,7 @@ public final class InvidDBField extends DBField implements invid_field {
                 // here, we might get confused on our values loop.
 
                 values.remove(i);
-                qr = null;
+                this.qr = null;
 
                 return retVal;
               }
@@ -1819,8 +1824,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
         if (ReturnVal.didSucceed(retVal))
           {
-            value = null;
-            qr = null;
+            this.value = null;
+            this.qr = null;
 
             return retVal;
           }
@@ -1949,7 +1954,7 @@ public final class InvidDBField extends DBField implements invid_field {
         else
           {
             values.add(newInvid);
-            qr = null;
+            this.qr = null;
             return retVal;
           }
       }
@@ -1992,7 +1997,7 @@ public final class InvidDBField extends DBField implements invid_field {
         if (ReturnVal.didSucceed(retVal))
           {
             value = newInvid;
-            qr = null;
+            this.qr = null;
 
             return retVal;
           }
@@ -2392,7 +2397,7 @@ public final class InvidDBField extends DBField implements invid_field {
         if (ReturnVal.didSucceed(retVal))
           {
             this.value = value;
-            qr = null;
+            this.qr = null;
 
             // success!
 
@@ -2538,7 +2543,7 @@ public final class InvidDBField extends DBField implements invid_field {
         if (ReturnVal.didSucceed(retVal))
           {
             values.set(index, newRemote);
-            qr = null;
+            this.qr = null;
 
             // success!
 
@@ -2685,7 +2690,7 @@ public final class InvidDBField extends DBField implements invid_field {
         if (ReturnVal.didSucceed(retVal))
           {
             values.add(submittedValue);
-            qr = null;
+            this.qr = null;
 
             // success!
 
@@ -3060,7 +3065,7 @@ public final class InvidDBField extends DBField implements invid_field {
               }
           }
 
-        qr = null;
+        this.qr = null;
         success = true;
 
         // if we were not able to copy some of the values (and we
@@ -3276,7 +3281,7 @@ public final class InvidDBField extends DBField implements invid_field {
           }
 
         values.add(embeddedObj.getInvid());  // do a live modification of this field's invid vector
-        qr = null;
+        this.qr = null;
 
         // record that we created this forward asymmetric link
 
@@ -3513,7 +3518,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
             // success
 
-            qr = null;  // Clear the cache to force the choices to be read again
+            this.qr = null;  // Clear the cache to force the choices to be read again
             eObj.getDBSession().popCheckpoint(checkkey);
             checkpointed = false;
 
@@ -3654,7 +3659,7 @@ public final class InvidDBField extends DBField implements invid_field {
                     currentValues.remove(remote);
                   }
 
-                qr = null;
+                this.qr = null;
                 success = true;
               }
 
@@ -3686,7 +3691,7 @@ public final class InvidDBField extends DBField implements invid_field {
                 return retVal;
               }
 
-            qr = null;
+            this.qr = null;
             success = true;
 
             return retVal;
@@ -3864,11 +3869,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
     eObj = (DBEditObject) this.getOwner();
 
-    qr = eObj.obtainChoiceList(this); // non-filtered
+    this.qr = eObj.obtainChoiceList(this); // non-filtered
 
     if (applyFilter)
       {
-        qr = getGSession().filterQueryResult(qr);
+        this.qr = getGSession().filterQueryResult(this.qr);
       }
 
     return qr;
@@ -4008,11 +4013,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
         if (!local && mustChoose())
           {
-            if (qr == null && eObj.getDBSession().isInteractive())
+            if (this.qr == null && eObj.getDBSession().isInteractive())
               {
                 try
                   {
-                    qr = eObj.obtainChoiceList(this); // allow any value, even if filtered
+                    this.qr = eObj.obtainChoiceList(this); // allow any value, even if filtered
                   }
                 catch (NotLoggedInException ex)
                   {
@@ -4021,14 +4026,14 @@ public final class InvidDBField extends DBField implements invid_field {
                   }
               }
 
-            if (qr != null)
+            if (this.qr != null)
               {
                 if (debug)
                   {
                     Ganymede.debug("InvidDBField.verifyNewValue(): searching for matching choice");
                   }
 
-                if (!qr.containsInvid(inv))
+                if (!this.qr.containsInvid(inv))
                   {
                     String invLabel = Ganymede.internalSession.getDBSession().getObjectLabel(inv);
 
@@ -4040,7 +4045,7 @@ public final class InvidDBField extends DBField implements invid_field {
                     if (debug)
                       {
                         System.err.println("InvidDBField.verifyNewValue(" + invLabel + "): didn't match against");
-                        System.err.println(qr);
+                        System.err.println(this.qr);
                       }
 
                     return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
