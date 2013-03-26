@@ -55,8 +55,6 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Map;
 import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
@@ -246,37 +244,32 @@ public final class InvidDBField extends DBField implements invid_field {
 
   void emit(DataOutput out) throws IOException
   {
-    Invid temp;
-
-    /* -- */
-
     if (isVector())
       {
-        Vector values = getVectVal();
+        Vector<Invid> values = (Vector<Invid>) getVectVal();
 
         out.writeInt(values.size());
 
-        for (int i = 0; i < values.size(); i++)
+        for (Invid invid: values)
           {
-            temp = (Invid) values.elementAt(i);
-            out.writeShort(temp.getType());
-            out.writeInt(temp.getNum());
+            out.writeShort(invid.getType());
+            out.writeInt(invid.getNum());
           }
       }
     else
       {
-        temp = (Invid) this.value;
+        Invid invid = (Invid) this.value;
 
         try
           {
-            out.writeShort(temp.getType());
-            out.writeInt(temp.getNum());
+            out.writeShort(invid.getType());
+            out.writeInt(invid.getNum());
           }
         catch (NullPointerException ex)
           {
             System.err.println(this.getOwner().getLabel() + ":" + getName() + ": void value in emit");
 
-            if (temp == null)
+            if (invid == null)
               {
                 System.err.println(this.getOwner().getLabel() + ":" + getName() + ": field value itself is null");
               }
@@ -293,7 +286,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
   void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
-    Invid temp;
     int count;
 
     /* -- */
@@ -319,8 +311,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
             for (int i = 0; i < count; i++)
               {
-                temp = Invid.createInvid(in.readShort(), in.readInt());
-                v.addElement(temp);
+                v.add(Invid.createInvid(in.readShort(), in.readInt()));
               }
           }
         else
@@ -359,9 +350,9 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-        Vector values = getVectVal();
+        Vector<Invid> values = (Vector<Invid>) getVectVal();
 
-        for (int i = 0; i < values.size(); i++)
+        for (Invid invid: values)
           {
             if (!isEditInPlace())
               {
@@ -370,7 +361,7 @@ public final class InvidDBField extends DBField implements invid_field {
                 xmlOut.indentIn();
               }
 
-            emitInvidXML(xmlOut, (Invid) values.elementAt(i), isEditInPlace());
+            emitInvidXML(xmlOut, invid, isEditInPlace());
           }
 
         xmlOut.indent();
@@ -547,7 +538,7 @@ public final class InvidDBField extends DBField implements invid_field {
         throw new IllegalArgumentException(ts.l("value.type_mismatch2", getName(), this.getOwner().getLabel()));
       }
 
-    return (Invid) getVectVal().elementAt(index);
+    return (Invid) getVectVal().get(index);
   }
 
   /**
@@ -759,75 +750,10 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (isVector())
       {
-        Vector
-          added = new Vector(),
-          deleted = new Vector();
-
-        Enumeration en;
-
-        Object
-          element = null;
-
-        Invid
-          elementA = null;
-
-        boolean found = false;
-
-        Vector values = getVectVal();
-        Vector origValues = origI.getVectVal();
-
-        /* -- */
-
-        // find elements in the orig field that aren't in our present field
-
-        Hashtable currentElements = new Hashtable();
-
-        for (int i = 0; !found && i < values.size(); i++)
-          {
-            if (debug)
-              {
-                System.err.print(",");
-              }
-
-            element = values.elementAt(i);
-
-            currentElements.put(element, element);
-          }
-
-        en = origValues.elements();
-
-        while (en.hasMoreElements())
-          {
-            element = en.nextElement();
-
-            if (currentElements.get(element) == null)
-              {
-                deleted.addElement(element);
-              }
-          }
-
-        // find elements in our present field that aren't in the orig field
-
-        Hashtable origElements = new Hashtable();
-
-        for (int i = 0; !found && i < origValues.size(); i++)
-          {
-            element = origValues.elementAt(i);
-
-            origElements.put(element, element);
-          }
-
-        en = values.elements();
-
-        while (en.hasMoreElements())
-          {
-            element = en.nextElement();
-
-            if (origElements.get(element) == null)
-              {
-                added.addElement(element);
-              }
-          }
+        Vector<Invid> values = (Vector<Invid>) getVectVal();
+        Vector<Invid> origValues = (Vector<Invid>) origI.getVectVal();
+        Vector<Invid> deleted = VectorUtils.difference(origValues, values);
+        Vector<Invid> added = VectorUtils.difference(values, origValues);
 
         // were there any changes at all?
 
@@ -843,14 +769,14 @@ public final class InvidDBField extends DBField implements invid_field {
 
                 for (int i = 0; i < deleted.size(); i++)
                   {
-                    elementA = (Invid) deleted.elementAt(i);
+                    Invid invid = deleted.get(i);
 
                     if (i > 0)
                       {
                         deleteString.append(", ");
                       }
 
-                    deleteString.append(getRemoteLabel(gsession, elementA, true)); // get original if edited
+                    deleteString.append(getRemoteLabel(gsession, invid, true)); // get original if edited
                   }
 
                 // "\tDeleted: {0}\n"
@@ -863,14 +789,14 @@ public final class InvidDBField extends DBField implements invid_field {
 
                 for (int i = 0; i < added.size(); i++)
                   {
-                    elementA = (Invid) added.elementAt(i);
+                    Invid invid = added.get(i);
 
                     if (i > 0)
                       {
                         addString.append(", ");
                       }
 
-                    addString.append(getRemoteLabel(gsession, elementA, false));
+                    addString.append(getRemoteLabel(gsession, invid, false));
                   }
 
                 // "\tAdded: {0}\n"
@@ -1813,7 +1739,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
   synchronized final ReturnVal dissolve(Invid oldInvid, boolean local)
   {
-    Invid tmp;
     DBEditObject eObj;
 
     /* -- */
@@ -1825,13 +1750,11 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (isVector())
       {
-        Vector values = getVectVal();
+        Vector<Invid> values = (Vector<Invid>) this.getVectVal();
 
         for (int i = 0; i < values.size(); i++)
           {
-            tmp = (Invid) values.elementAt(i);
-
-            if (!tmp.equals(oldInvid))
+            if (!oldInvid.equals(values.get(i)))
               {
                 continue;
               }
@@ -1844,7 +1767,7 @@ public final class InvidDBField extends DBField implements invid_field {
                 // element and return.  note that if we didn't return
                 // here, we might get confused on our values loop.
 
-                values.removeElementAt(i);
+                values.remove(i);
                 qr = null;
 
                 return retVal;
@@ -1883,7 +1806,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-        tmp = (Invid) value;
+        Invid tmp = (Invid) value;
 
         if (!tmp.equals(oldInvid))
           {
@@ -1981,7 +1904,7 @@ public final class InvidDBField extends DBField implements invid_field {
                                               ts.l("establish.overrun_text", getName(), this.getOwner().getLabel()));
           }
 
-        Vector values = getVectVal();
+        Vector<Invid> values = (Vector<Invid>) this.getVectVal();
 
         // For everybody else, though, this is a no-no.
 
@@ -2025,7 +1948,7 @@ public final class InvidDBField extends DBField implements invid_field {
           }
         else
           {
-            values.addElement(newInvid);
+            values.add(newInvid);
             qr = null;
             return retVal;
           }
@@ -2113,7 +2036,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
   synchronized boolean test(DBSession session, String objectName)
   {
-    Invid temp = null;
     Invid myInvid = this.getOwner().getInvid();
     short targetField;
     DBObject target;
@@ -2136,14 +2058,12 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (isVector())
       {
-        Vector values = getVectVal();
+        Vector<Invid> values = (Vector<Invid>) getVectVal();
 
         // test for all values in our vector
 
-        for (int i = 0; i < values.size(); i++)
+        for (Invid temp: values)
           {
-            temp = (Invid) values.elementAt(i);
-
             if (asymBackPointer)
               {
                 target = session.viewDBObject(temp);
@@ -2227,23 +2147,11 @@ public final class InvidDBField extends DBField implements invid_field {
                       }
                     else
                       {
-                        boolean found = false;
-                        Invid testInv;
-                        Vector backValues = backField.getVectVal();
+                        Vector<Invid> backValues = (Vector<Invid>) backField.getVectVal();
 
                         /* -- */
 
-                        for (int j = 0; !found && (j < backValues.size()); j++)
-                          {
-                            testInv = (Invid) backValues.elementAt(j);
-
-                            if (myInvid.equals(testInv))
-                              {
-                                found = true;
-                              }
-                          }
-
-                        if (!found)
+                        if (!backValues.contains(myInvid))
                           {
                             // "*** InvidDBField.test(): No back-link invid found for invid {0} in object {1}:{2} in {3}"
                             Ganymede.debug(ts.l("test.no_symmetry", temp, objectName, getName(), backField.getName()));
@@ -2269,7 +2177,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else                        // scalar invid field case
       {
-        temp = (Invid) value;
+        Invid temp = (Invid) value;
 
         if (asymBackPointer)
           {
@@ -2326,7 +2234,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
                 if (backField.isVector())
                   {
-                    Vector backValues = backField.getVectVal();
+                    Vector<Invid> backValues = (Vector<Invid>) backField.getVectVal();
 
                     if (backValues == null)
                       {
@@ -2335,20 +2243,7 @@ public final class InvidDBField extends DBField implements invid_field {
                       }
                     else
                       {
-                        boolean found = false;
-                        Invid testInv;
-
-                        for (int j = 0; !found && (j < backValues.size()); j++)
-                          {
-                            testInv = (Invid) backValues.elementAt(j);
-
-                            if (myInvid.equals(testInv))
-                              {
-                                found = true;
-                              }
-                          }
-
-                        if (!found)
+                        if (!backValues.contains(myInvid))
                           {
                             Ganymede.debug(ts.l("test.no_symmetry", temp, objectName, getName(), backField.getName()));
                             return false;
@@ -2548,7 +2443,6 @@ public final class InvidDBField extends DBField implements invid_field {
   public synchronized ReturnVal setElement(int index, Object submittedValue, boolean local, boolean noWizards)
   {
     DBEditObject eObj;
-    Invid oldRemote, newRemote;
     ReturnVal retVal = null;
     String checkkey = null;
     boolean checkpointed = false;
@@ -2575,9 +2469,11 @@ public final class InvidDBField extends DBField implements invid_field {
                                           ts.l("global.no_perms", getName(), this.getOwner().getLabel()));
       }
 
-    Vector values = getVectVal();
+    Vector<Invid> values = (Vector<Invid>) getVectVal();
+    Invid oldRemote = values.get(index);
+    Invid newRemote = (Invid) submittedValue;
 
-    int oldIndex = values.indexOf(submittedValue);
+    int oldIndex = values.indexOf(newRemote);
 
     if (oldIndex == index)
       {
@@ -2585,20 +2481,10 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else if (oldIndex != -1)
       {
-        return getDuplicateValueDialog("setElement", submittedValue); // duplicate
+        return getDuplicateValueDialog("setElement", newRemote); // duplicate
       }
 
-    if (this.value.equals(values.elementAt(index)))
-      {
-        if (debug)
-          {
-            Ganymede.debug("InvidDBField.setElement(): no change");
-          }
-
-        return null;            // no change
-      }
-
-    retVal = verifyNewValue(submittedValue, local);
+    retVal = verifyNewValue(newRemote, local);
 
     if (!ReturnVal.didSucceed(retVal))
       {
@@ -2614,7 +2500,7 @@ public final class InvidDBField extends DBField implements invid_field {
         retVal = ReturnVal.merge(retVal, eObj.wizardHook(this,
                                                          DBEditObject.SETELEMENT,
                                                          Integer.valueOf(index),
-                                                         submittedValue));
+                                                         newRemote));
 
         // if a wizard intercedes, we are going to let it take the ball.
 
@@ -2624,10 +2510,7 @@ public final class InvidDBField extends DBField implements invid_field {
           }
       }
 
-    oldRemote = (Invid) values.elementAt(index);
-    newRemote = (Invid) submittedValue;
-
-    checkkey = RandomUtils.getSaltedString("setElement[" + getName() + ":" + this.getOwner().getLabel() + "]");
+    checkkey = RandomUtils.getSaltedString("setElement[" + getName() + ":" + eObj.getLabel() + "]");
 
     eObj.getDBSession().checkpoint(checkkey); // may block if another thread has checkpoint this transaction
 
@@ -2644,15 +2527,17 @@ public final class InvidDBField extends DBField implements invid_field {
             return retVal;
           }
 
-        // check our owner, do it.  Checking our owner should
-        // be the last thing we do.. if it returns true, nothing
-        // should stop us from running the change to completion
+        // Let our owner check things out with the finalizeSetElement call.
+        //
+        // Checking our owner should be the last thing we do.. if it
+        // returns true, nothing should stop us from running the
+        // change to completion
 
-        retVal = ReturnVal.merge(retVal, eObj.finalizeSetElement(this, index, submittedValue));
+        retVal = ReturnVal.merge(retVal, eObj.finalizeSetElement(this, index, newRemote));
 
         if (ReturnVal.didSucceed(retVal))
           {
-            values.setElementAt(submittedValue, index);
+            values.set(index, newRemote);
             qr = null;
 
             // success!
@@ -2799,7 +2684,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
         if (ReturnVal.didSucceed(retVal))
           {
-            values.addElement(submittedValue);
+            values.add(submittedValue);
             qr = null;
 
             // success!
@@ -2862,15 +2747,16 @@ public final class InvidDBField extends DBField implements invid_field {
     String checkkey = null;
     ReturnVal retVal = null;
     DBEditObject eObj;
-    Vector values;
-    Vector approvedValues = new Vector();
-    Vector failed_bindings = null;
+    Vector<Invid> values;
+    Vector<Invid> approvedValues = new Vector<Invid>();
+    Vector<Invid> failed_bindings = null;
+    Vector<Invid> newValues = (Vector<Invid>) submittedValues;
 
     /* -- */
 
     if (debug)
       {
-        System.err.println("InvidDBField.addElements(" + VectorUtils.vectorString(submittedValues) + ")");
+        System.err.println("InvidDBField.addElements(" + VectorUtils.vectorString(newValues) + ")");
       }
 
     if (isEditInPlace())
@@ -2891,9 +2777,9 @@ public final class InvidDBField extends DBField implements invid_field {
         throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), this.getOwner().getLabel()));
       }
 
-    values = getVectVal(); // cast once
+    values = (Vector<Invid>) getVectVal(); // cast once
 
-    if (submittedValues == null || submittedValues.size() == 0)
+    if (newValues == null || newValues.size() == 0)
       {
         return Ganymede.createErrorDialog(ts.l("addElements.error_sub"),
                                           ts.l("addElements.null_empty_param", getName()));
@@ -2901,16 +2787,16 @@ public final class InvidDBField extends DBField implements invid_field {
 
     // can we add this many values?
 
-    if (size() + submittedValues.size() > getMaxArraySize())
+    if (size() + newValues.size() > getMaxArraySize())
       {
         return Ganymede.createErrorDialog(ts.l("addElements.error_sub"),
-                                          ts.l("addElements.overflow_text", getName(), Integer.toString(submittedValues.size()),
+                                          ts.l("addElements.overflow_text", getName(), Integer.toString(newValues.size()),
                                                Integer.toString(size()), Integer.toString(getMaxArraySize())));
       }
 
     // Don't allow adding values we've already got
 
-    Vector duplicateValues = VectorUtils.intersection(getVectVal(), submittedValues);
+    Vector<Invid> duplicateValues = VectorUtils.intersection(values, newValues);
 
     if (duplicateValues.size() > 0)
       {
@@ -2923,7 +2809,7 @@ public final class InvidDBField extends DBField implements invid_field {
             // we use difference because we know that Ganymede vector
             // fields are not allowed to contain duplications
 
-            submittedValues = VectorUtils.difference(submittedValues, getVectVal());
+            newValues = VectorUtils.difference(newValues, values);
           }
       }
 
@@ -2933,9 +2819,9 @@ public final class InvidDBField extends DBField implements invid_field {
 
     StringBuilder errorBuf = new StringBuilder();
 
-    for (int i = 0; i < submittedValues.size(); i++)
+    for (Invid remote: newValues)
       {
-        retVal = verifyNewValue(submittedValues.elementAt(i), local);
+        retVal = verifyNewValue(remote, local);
 
         if (!ReturnVal.didSucceed(retVal))
           {
@@ -2958,7 +2844,7 @@ public final class InvidDBField extends DBField implements invid_field {
           }
         else
           {
-            approvedValues.addElement(submittedValues.elementAt(i));
+            approvedValues.add(remote);
           }
       }
 
@@ -2996,10 +2882,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     failed_bindings = null;
 
-    for (int i = 0; i < approvedValues.size(); i++)
+    for (Invid remote: approvedValues)
       {
-        Invid remote = (Invid) approvedValues.elementAt(i);
-
         ReturnVal newRetVal = checkBindConflict(remote);
 
         if (!ReturnVal.didSucceed(newRetVal))
@@ -3025,7 +2909,7 @@ public final class InvidDBField extends DBField implements invid_field {
                     failed_bindings = new Vector();
                   }
 
-                failed_bindings.addElement(remote);
+                failed_bindings.add(remote);
               }
           }
       }
@@ -3062,10 +2946,8 @@ public final class InvidDBField extends DBField implements invid_field {
         boolean any_success = false;
         failed_bindings = null;
 
-        for (int i = 0; i < approvedValues.size(); i++)
+        for (Invid remote: approvedValues)
           {
-            Invid remote = (Invid) approvedValues.elementAt(i);
-
             ReturnVal newRetVal = bind(null, remote, local); // bind us to the target field
 
             if (!ReturnVal.didSucceed(newRetVal))
@@ -3091,7 +2973,7 @@ public final class InvidDBField extends DBField implements invid_field {
                         failed_bindings = new Vector();
                       }
 
-                    failed_bindings.addElement(remote);
+                    failed_bindings.add(remote);
                   }
               }
             else
@@ -3129,13 +3011,13 @@ public final class InvidDBField extends DBField implements invid_field {
           {
             any_success = false;
 
-            for (int i = 0; i < approvedValues.size(); i++)
+            for (Invid remoteInvid: approvedValues)
               {
-                ReturnVal newRetVal = eObj.finalizeAddElement(this, approvedValues.elementAt(i));
+                ReturnVal newRetVal = eObj.finalizeAddElement(this, remoteInvid);
 
                 if (ReturnVal.didSucceed(newRetVal))
                   {
-                    values.addElement(approvedValues.elementAt(i));
+                    values.add(remoteInvid);
                     any_success = true;
                   }
                 else
@@ -3170,10 +3052,7 @@ public final class InvidDBField extends DBField implements invid_field {
                     System.err.println("InvidDBField.addElements(): finalize approved");
                   }
 
-                for (int i = 0; i < approvedValues.size(); i++)
-                  {
-                    values.addElement(approvedValues.elementAt(i));
-                  }
+                values.addAll(approvedValues);
               }
             else
               {
@@ -3396,7 +3275,7 @@ public final class InvidDBField extends DBField implements invid_field {
             return retVal;
           }
 
-        values.addElement(embeddedObj.getInvid());  // do a live modification of this field's invid vector
+        values.add(embeddedObj.getInvid());  // do a live modification of this field's invid vector
         qr = null;
 
         // record that we created this forward asymmetric link
@@ -3556,9 +3435,9 @@ public final class InvidDBField extends DBField implements invid_field {
         System.err.println("InvidDBField[" + toString() + ".deleteElement(" + index + ", " + local + ", " + noWizards + ")");
       }
 
-    Vector values = getVectVal();
+    Vector<Invid> values = (Vector<Invid>) getVectVal();
 
-    remote = (Invid) values.elementAt(index);
+    remote = values.get(index);
 
     eObj = (DBEditObject) this.getOwner();
 
@@ -3629,7 +3508,7 @@ public final class InvidDBField extends DBField implements invid_field {
               }
             else
               {
-                values.removeElementAt(index);
+                values.remove(index);
               }
 
             // success
@@ -3692,7 +3571,6 @@ public final class InvidDBField extends DBField implements invid_field {
     String checkkey = null;
     boolean success = false;
     DBEditObject eObj;
-    Vector currentValues;
 
     /* -- */
 
@@ -3707,11 +3585,12 @@ public final class InvidDBField extends DBField implements invid_field {
         throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), this.getOwner().getLabel()));
       }
 
-    currentValues = getVectVal();
+    Vector<Invid> invidsToDelete = (Vector<Invid>) valuesToDelete;
+    Vector<Invid> currentValues = (Vector<Invid>) getVectVal();
 
     // see if we are being asked to remove items not in our vector
 
-    Vector notPresent = VectorUtils.minus(valuesToDelete, currentValues);
+    Vector<Invid> notPresent = VectorUtils.difference(invidsToDelete, currentValues);
 
     if (notPresent.size() != 0)
       {
@@ -3730,7 +3609,7 @@ public final class InvidDBField extends DBField implements invid_field {
       {
         // Wizard check
 
-        retVal = eObj.wizardHook(this, DBEditObject.DELELEMENTS, valuesToDelete, null);
+        retVal = eObj.wizardHook(this, DBEditObject.DELELEMENTS, invidsToDelete, null);
 
         // if a wizard intercedes, we are going to let it take the ball.
 
@@ -3752,10 +3631,8 @@ public final class InvidDBField extends DBField implements invid_field {
       {
         if (!getFieldDef().isEditInPlace())
           {
-            for (int i = 0; i < valuesToDelete.size(); i++)
+            for (Invid remote: invidsToDelete)
               {
-                Invid remote = (Invid) valuesToDelete.elementAt(i);
-
                 retVal = ReturnVal.merge(retVal, unbind(remote, local));
 
                 if (!ReturnVal.didSucceed(retVal))
@@ -3768,13 +3645,13 @@ public final class InvidDBField extends DBField implements invid_field {
             // step, as we are meant to guarantee performance if
             // finalizeDeleteElements() returns a positive result.
 
-            retVal = ReturnVal.merge(retVal, eObj.finalizeDeleteElements(this, valuesToDelete));
+            retVal = ReturnVal.merge(retVal, eObj.finalizeDeleteElements(this, invidsToDelete));
 
             if (ReturnVal.didSucceed(retVal))
               {
-                for (int i = 0; i < valuesToDelete.size(); i++)
+                for (Invid remote: invidsToDelete)
                   {
-                    currentValues.removeElement(valuesToDelete.elementAt(i));
+                    currentValues.remove(remote);
                   }
 
                 qr = null;
@@ -3792,10 +3669,8 @@ public final class InvidDBField extends DBField implements invid_field {
             // DBEditObject.finalizeRemove() and
             // attemptAsymBackLinkClear().
 
-            for (int i = 0; i < valuesToDelete.size(); i++)
+            for (Invid remote: invidsToDelete)
               {
-                Invid remote = (Invid) valuesToDelete.elementAt(i);
-
                 retVal = ReturnVal.merge(retVal, eObj.getDBSession().deleteDBObject(remote));
 
                 if (!ReturnVal.didSucceed(retVal))
@@ -3804,7 +3679,7 @@ public final class InvidDBField extends DBField implements invid_field {
                   }
               }
 
-            retVal = ReturnVal.merge(retVal, eObj.finalizeDeleteElements(this, valuesToDelete));
+            retVal = ReturnVal.merge(retVal, eObj.finalizeDeleteElements(this, invidsToDelete));
 
             if (!ReturnVal.didSucceed(retVal))
               {
@@ -3858,9 +3733,7 @@ public final class InvidDBField extends DBField implements invid_field {
   public synchronized QueryResult encodedValues()
   {
     QueryResult results = new QueryResult();
-    Invid invid;
     String label;
-    DBObject object;
     GanymedeSession gsession = null;
 
     /* -- */
@@ -3870,7 +3743,7 @@ public final class InvidDBField extends DBField implements invid_field {
         throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), this.getOwner().getLabel()));
       }
 
-    Vector values = getVectVal();
+    Vector<Invid> values = (Vector<Invid>) getVectVal();
 
     gsession = getGSession();
 
@@ -3879,13 +3752,11 @@ public final class InvidDBField extends DBField implements invid_field {
         gsession = Ganymede.internalSession;
       }
 
-    for (int i = 0; i < values.size(); i++)
+    for (Invid invid: values)
       {
-        invid = (Invid) values.elementAt(i);
-
         if (gsession != null)
           {
-            object = gsession.getDBSession().viewDBObject(invid);
+            DBObject object = gsession.getDBSession().viewDBObject(invid);
 
             if (object == null)
               {
