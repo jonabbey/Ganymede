@@ -176,39 +176,6 @@ refresh the jar files.
       <src path="${src.dir}"/>
       <classpath refid="classpath"/>
     </javac>
-
-    <!-- Compile all of our Stub/Skel classes -->
-    <rmic base="${build.classes}">
-      <include name="arlut/csd/ganymede/server/GanymedeServer.class"/>
-      <include name="arlut/csd/ganymede/server/GanymedeSession.class"/>
-      <include name="arlut/csd/ganymede/server/GanymedeXMLSession.class"/>
-      <include name="arlut/csd/ganymede/server/GanymedeAdmin.class"/>
-      <include name="arlut/csd/ganymede/server/DBSchemaEdit.class"/>
-      <include name="arlut/csd/ganymede/server/DBBaseCategory.class"/>
-      <include name="arlut/csd/ganymede/server/DBObjectBase.class"/>
-      <include name="arlut/csd/ganymede/server/DBObjectBaseField.class"/>
-      <include name="arlut/csd/ganymede/server/DBNameSpace.class"/>
-      <include name="arlut/csd/ganymede/server/DBObject.class"/>
-      <include name="arlut/csd/ganymede/server/DBField.class"/>
-
-      <include name="arlut/csd/ganymede/server/PermissionMatrixDBField.class"/>
-      <include name="arlut/csd/ganymede/server/InvidDBField.class"/>
-      <include name="arlut/csd/ganymede/server/StringDBField.class"/>
-      <include name="arlut/csd/ganymede/server/BooleanDBField.class"/>
-      <include name="arlut/csd/ganymede/server/DateDBField.class"/>
-      <include name="arlut/csd/ganymede/server/NumericDBField.class"/>
-      <include name="arlut/csd/ganymede/server/PasswordDBField.class"/>
-      <include name="arlut/csd/ganymede/server/IPDBField.class"/>
-      <include name="arlut/csd/ganymede/server/FloatDBField.class"/>
-      <include name="arlut/csd/ganymede/server/FieldOptionDBField.class"/>
-
-      <include name="arlut/csd/ganymede/server/GanymediatorWizard.class"/>
-
-      <include name="arlut/csd/ganymede/server/serverAdminAsyncResponder.class"/>
-      <include name="arlut/csd/ganymede/server/serverClientAsyncResponder.class"/>
-      
-      <include name="arlut/csd/ganymede/server/XMLTransmitter.class"/>
-    </rmic>
   </target>
 
   <target name ="validate">
@@ -250,9 +217,6 @@ refresh the jar files.
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/server/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/common/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/rmi/*.class"/>
-      
-      <fileset dir="${build.classes}" includes="arlut/csd/ganymede/client/FileReceiverBase*_Stub.class"/>
-
       <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/server/**"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/common/**"/>
       <fileset dir="${resources.dir}" includes="org/solinger/**"/>
@@ -275,7 +239,6 @@ refresh the jar files.
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/client/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/common/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/rmi/*.class"/>
-      <fileset dir="${build.classes}" includes="arlut/csd/ganymede/server/*_Stub.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/client/password/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/client/arl_phone/*.class"/>
       <fileset dir="${build.classes}" includes="com/jclark/**/*.class"/>
@@ -314,8 +277,6 @@ refresh the jar files.
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/admin/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/common/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/rmi/*.class"/>
-
-      <fileset dir="${build.classes}" includes="arlut/csd/ganymede/server/*_Stub.class"/>
 
       <!-- Ugh, we need the server-side GanymedeScheduler included, since the scheduleHandle
            that we can transmit from the server to the admin console includes a GanymedeScheduler
