@@ -257,6 +257,11 @@ public class VectorUtils {
    * <p>This method returns a Vector containing the set of objects
    * contained in vectA that are not contained in vectB.</p>
    *
+   * <p>NB: This method differs from minus(), which explicitly handles
+   * lists with duplicate members and returns an algebraic count of
+   * the non-duplicates.  By contrast, difference() returns a Vector
+   * with no duplicates.</p>
+   *
    * <p>This method will always return a new, non-null Vector, even if
    * vectA and/or vectB are null.</p>
    */
@@ -267,19 +272,21 @@ public class VectorUtils {
 
     /* -- */
 
-    if (vectA == null)
+    if (vectA == null || vectA.size() == 0)
       {
         return result;
       }
 
-    if (vectB == null)
+    if (vectB == null || vectB.size() == 0)
       {
-        return new Vector<E>(vectA);
+        return new Vector<E>(new HashSet<E>(vectA)); // remove duplicates
       }
 
-    if (vectA.size() + vectB.size() < 10) // ass
+    if (vectA.size() + vectB.size() < 5) // ass, from my
       {
-        for (E item: vectA)
+        HashSet<E> workSetA = new HashSet<E>(vectA);
+
+        for (E item: workSetA)
           {
             if (!vectB.contains(item))
               {
@@ -289,11 +296,12 @@ public class VectorUtils {
       }
     else
       {
-        Set<E> workSet = new HashSet<E>(vectB);
+        HashSet<E> workSetA = new HashSet<E>(vectA);
+        HashSet<E> workSetB = new HashSet<E>(vectB);
 
-        for (E item: vectA)
+        for (E item: workSetA)
           {
-            if (!workSet.contains(item))
+            if (!workSetB.contains(item))
               {
                 result.add(item);
               }
@@ -356,8 +364,12 @@ public class VectorUtils {
 
   /**
    * <p>This method returns a Vector containing the elements of vectA minus
-   * the elements of vectB.  If vectA has an element in the Vector 5 times
-   * and vectB has it 3 times, the result will have it two times.</p>
+   * the elements of vectB.</p>
+   *
+   * <p>NB: This method is not a synonym for difference().  With
+   * minus(), if vectA has an element in the Vector 5 times and vectB
+   * has it 3 times, the result will have it two times.  difference()
+   * always returns a Vector without duplicates</p>
    *
    * <p>This method will always return a new, non-null Vector, even if
    * vectA and/or vectB are null.</p>
