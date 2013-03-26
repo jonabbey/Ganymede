@@ -10,10 +10,10 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Contact information
@@ -68,17 +68,18 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>DateDBField is a subclass of {@link arlut.csd.ganymede.server.DBField DBField}
- * for the storage and handling of Date
- * fields in the {@link arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede
- * server.</P>
+ * <p>DateDBField is a subclass of {@link
+ * arlut.csd.ganymede.server.DBField DBField} for the storage and
+ * handling of Date fields in the {@link
+ * arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede
+ * server.</p>
  *
- * <P>The Ganymede client talks to DateDBFields through the
- * {@link arlut.csd.ganymede.rmi.date_field date_field} RMI interface.</P> 
+ * <p>The Ganymede client talks to DateDBFields through the {@link
+ * arlut.csd.ganymede.rmi.date_field date_field} RMI interface.</p>
  *
- * <P>Ganymede uses the standard Java Date class, which can encode dates
- * from roughly 300 million years B.C. to 300 million years A.D., with
- * millisecond resolution.  No Y2k problems here. ;-)</P>
+ * <p>Ganymede uses the standard Java Date class, which can encode
+ * dates from roughly 300 million years B.C. to 300 million years
+ * A.D., with millisecond resolution.  No Y2k problems here. ;-)</p>
  */
 
 public class DateDBField extends DBField implements date_field {
@@ -96,37 +97,37 @@ public class DateDBField extends DBField implements date_field {
   // ---
 
   /**
-   * <P>Receive constructor.  Used to create a DateDBField from a
-   * {@link arlut.csd.ganymede.server.DBStore DBStore}/{@link arlut.csd.ganymede.server.DBJournal DBJournal}
-   * DataInput stream.</P>
+   * <p>Receive constructor.  Used to create a DateDBField from a
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}/{@link
+   * arlut.csd.ganymede.server.DBJournal DBJournal} DataInput
+   * stream.</p>
    */
 
   DateDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
-    value = null;
-    this.owner = owner;
-    this.fieldcode = definition.getID();
+    super(owner, definition.getID());
+
+    this.value = null;
     receive(in, definition);
   }
 
   /**
-   * <P>No-value constructor.  Allows the construction of a
-   * 'non-initialized' field, for use where the 
-   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
-   * definition indicates that a given field may be present,
-   * but for which no value has been stored in the 
-   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
+   * <p>No-value constructor.  Allows the construction of a
+   * 'non-initialized' field, for use where the {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} definition
+   * indicates that a given field may be present, but for which no
+   * value has been stored in the {@link
+   * arlut.csd.ganymede.server.DBStore DBStore}.</p>
    *
-   * <P>Used to provide the client a template for 'creating' this
-   * field if so desired.</P>
+   * <p>Used to provide the client a template for 'creating' this
+   * field if so desired.</p>
    */
 
   DateDBField(DBObject owner, DBObjectBaseField definition)
   {
-    this.owner = owner;
-    this.fieldcode = definition.getID();
-    
-    value = null;
+    super(owner, definition.getID());
+
+    this.value = null;
   }
 
   /**
@@ -137,16 +138,15 @@ public class DateDBField extends DBField implements date_field {
 
   public DateDBField(DBObject owner, DateDBField field)
   {
-    this.owner = owner;
-    this.fieldcode = field.getID();
+    super(owner, field.getID());
 
     if (field.value instanceof Date)
       {
-        value = new Date(((Date) field.value).getTime());
+        this.value = new Date(((Date) field.value).getTime());
       }
     else
       {
-        value = field.value;
+        this.value = field.value;
       }
   }
 
@@ -158,8 +158,8 @@ public class DateDBField extends DBField implements date_field {
 
   public DateDBField(DBObject owner, Date value, DBObjectBaseField definition)
   {
-    this.owner = owner;
-    this.fieldcode = definition.getID();
+    super(owner, definition.getID());
+
     this.value = value;
   }
 
@@ -171,6 +171,8 @@ public class DateDBField extends DBField implements date_field {
 
   public DateDBField(DBObject owner, Vector values, DBObjectBaseField definition)
   {
+    super(owner, definition.getID());
+
     throw new IllegalArgumentException("vector constructor called on scalar field");
   }
 
@@ -244,7 +246,7 @@ public class DateDBField extends DBField implements date_field {
         // "null"
         return ts.l("getValueString.null");
       }
-    
+
     // pass the date through the localized default formatter rather
     // than using the toString() method.
 
@@ -269,13 +271,13 @@ public class DateDBField extends DBField implements date_field {
   }
 
   /**
-   * <P>Returns a String representing the change in value between this
+   * <p>Returns a String representing the change in value between this
    * field and orig.  This String is intended for logging and email,
    * not for any sort of programmatic activity.  The format of the
    * generated string is not defined, but is intended to be suitable
-   * for inclusion in a log entry and in an email message.</P>
+   * for inclusion in a log entry and in an email message.</p>
    *
-   * <P>If there is no change in the field, null will be returned.</P>
+   * <p>If there is no change in the field, null will be returned.</p>
    */
 
   public String getDiffString(DBField orig)
@@ -299,7 +301,7 @@ public class DateDBField extends DBField implements date_field {
 
         // "\tNew: {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz}\n"
         result.append(ts.l("getDiffString.new", this.value));
-        
+
         return result.toString();
       }
     else
@@ -315,13 +317,13 @@ public class DateDBField extends DBField implements date_field {
   // ****
 
   /**
-   * <P>Returns true if this date field has a minimum and/or maximum date
-   * set.</P>
+   * <p>Returns true if this date field has a minimum and/or maximum date
+   * set.</p>
    *
-   * <P>We depend on our owner's 
+   * <p>We depend on our owner's
    * {@link arlut.csd.ganymede.server.DBEditObject#isDateLimited(arlut.csd.ganymede.server.DBField) isDateLimited()}
    * method to tell us whether this Date field should be limited or not
-   * in this editing context.</P>
+   * in this editing context.</p>
    *
    * @see arlut.csd.ganymede.rmi.date_field
    */
@@ -337,17 +339,18 @@ public class DateDBField extends DBField implements date_field {
         throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
-    eObj = (DBEditObject) owner;
+    eObj = (DBEditObject) this.getOwner();
 
     return eObj.isDateLimited(this);
   }
 
   /**
-   * <P>Returns the earliest date acceptable for this field</P>
+   * <p>Returns the earliest date acceptable for this field</p>
    *
-   * <P>We depend on our owner's 
-   * {@link arlut.csd.ganymede.server.DBEditObject#minDate(arlut.csd.ganymede.server.DBField) minDate()}
-   * method to tell us what the earliest acceptable Date for this field is.</P>
+   * <p>We depend on our owner's {@link
+   * arlut.csd.ganymede.server.DBEditObject#minDate(arlut.csd.ganymede.server.DBField)
+   * minDate()} method to tell us what the earliest acceptable Date
+   * for this field is.</p>
    *
    * @see arlut.csd.ganymede.rmi.date_field
    */
@@ -363,17 +366,18 @@ public class DateDBField extends DBField implements date_field {
         throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
-    eObj = (DBEditObject) owner;
+    eObj = (DBEditObject) this.getOwner();
 
     return eObj.minDate(this);
   }
 
   /**
-   * <P>Returns the latest date acceptable for this field</P>
+   * <p>Returns the latest date acceptable for this field</p>
    *
-   * <P>We depend on our owner's 
-   * {@link arlut.csd.ganymede.server.DBEditObject#maxDate(arlut.csd.ganymede.server.DBField) maxDate()}
-   * method to tell us what the earliest acceptable Date for this field is.</P>
+   * <p>We depend on our owner's {@link
+   * arlut.csd.ganymede.server.DBEditObject#maxDate(arlut.csd.ganymede.server.DBField)
+   * maxDate()} method to tell us what the earliest acceptable Date
+   * for this field is.</p>
    *
    * @see arlut.csd.ganymede.rmi.date_field
    */
@@ -389,7 +393,7 @@ public class DateDBField extends DBField implements date_field {
         throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
-    eObj = (DBEditObject) owner;
+    eObj = (DBEditObject) this.getOwner();
 
     return eObj.maxDate(this);
   }
@@ -417,17 +421,17 @@ public class DateDBField extends DBField implements date_field {
         // "Date Field Error"
         // "Don''t have permission to edit field {0} in object {1}."
         return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
-                                          ts.l("verifyNewValue.bad_perm", getName(), owner.getLabel()));
+                                          ts.l("verifyNewValue.bad_perm", getName(), this.getOwner().getLabel()));
       }
 
-    eObj = (DBEditObject) owner;
+    eObj = (DBEditObject) this.getOwner();
 
     if (!verifyTypeMatch(o))
       {
         // "Date Field Error"
         // "Type error.  Submitted value {0} is not a Date!  Major client error while trying to edit field {1} in object {2}."
         return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
-                                          ts.l("verifyNewValue.bad_type", o, getName(), owner.getLabel()));
+                                          ts.l("verifyNewValue.bad_type", o, getName(), this.getOwner().getLabel()));
       }
 
     if (o == null)
@@ -449,7 +453,7 @@ public class DateDBField extends DBField implements date_field {
                 // "Submitted Date {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz} is out of range for field {1} in object {2}.\n
                 // This field will not accept dates before {3,date,EEE, MMM d yyyy hh:mm:ss aaa zz}."
                 return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
-                                                  ts.l("verifyNewValue.under_range", d, getName(), owner.getLabel(), d2));
+                                                  ts.l("verifyNewValue.under_range", d, getName(), this.getOwner().getLabel(), d2));
               }
           }
 
@@ -462,7 +466,7 @@ public class DateDBField extends DBField implements date_field {
                 // "Submitted Date {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz} is out of range for field {1} in object {2}.\n
                 // This field will not accept dates after {3,date,EEE, MMM d yyyy hh:mm:ss aaa zz}."
                 return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
-                                                  ts.l("verifyNewValue.over_range", d, getName(), owner.getLabel(), d2));
+                                                  ts.l("verifyNewValue.over_range", d, getName(), this.getOwner().getLabel(), d2));
               }
           }
       }

@@ -348,30 +348,35 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   // ---
 
   /**
-   * the object's current value.  May be a Vector for vector fields, in
-   * which case getVectVal() may be used to perform the cast.
+   * <p>The object's current value.  May be a Vector for vector
+   * fields, in which case getVectVal() may be used to perform the
+   * cast.</p>
+   *
+   * <p>package private</p>
    */
 
   Object value = null;
 
   /**
-   * The object this field is contained within, package private.
+   * The object this field is contained within.
    */
 
-  DBObject owner;
+  private final DBObject owner;
 
   /**
-   * The identifying field number for this field within the
-   * owning object.  This number is an index into the
-   * owning object type's field dictionary.
+   * The identifying field number for this field within the owning
+   * object.  This number is an index into the owning object type's
+   * field dictionary.
    */
 
-  short fieldcode;
+  private final short fieldcode;
 
   /* -- */
 
-  public DBField()
+  public DBField(DBObject owner, short fieldcode)
   {
+    this.owner = owner;
+    this.fieldcode = fieldcode;
   }
 
   /**
@@ -3215,17 +3220,6 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
       }
 
     return deltaRec;
-  }
-
-  /**
-   * <p>Package-domain method to set the owner of this field.</p>
-   *
-   * <p>Used by the DBObject copy constructor.</p>
-   */
-
-  synchronized final void setOwner(DBObject owner)
-  {
-    this.owner = owner;
   }
 
   // ****

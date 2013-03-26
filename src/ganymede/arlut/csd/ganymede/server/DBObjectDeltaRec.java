@@ -460,15 +460,15 @@ public final class DBObjectDeltaRec implements FieldType {
 
         if (!fieldRec.vector)
           {
-            fieldRec.scalarValue.setOwner(copy);
+            DBField fieldCopy = DBField.copyField(copy, fieldRec.scalarValue);
 
             if (copy.getField(fieldRec.fieldcode) != null)
               {
-                copy.replaceField(fieldRec.scalarValue);
+                copy.replaceField(fieldCopy);
               }
             else
               {
-                copy.addField(fieldRec.scalarValue);
+                copy.addField(fieldCopy);
               }
 
             continue;

@@ -92,25 +92,26 @@ public class StringDBField extends DBField implements string_field {
 
   /**
    * <p>Receive constructor.  Used to create a StringDBField from a
-   * {@link arlut.csd.ganymede.server.DBStore DBStore}/{@link arlut.csd.ganymede.server.DBJournal DBJournal}
-   * DataInput stream.</p>
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}/{@link
+   * arlut.csd.ganymede.server.DBJournal DBJournal} DataInput
+   * stream.</p>
    */
 
   StringDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
-    value = null;
-    this.owner = owner;
-    this.fieldcode = definition.getID();
+    super(owner, definition.getID());
+
+    this.value = null;
     receive(in, definition);
   }
 
   /**
    * <p>No-value constructor.  Allows the construction of a
-   * 'non-initialized' field, for use where the
-   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
-   * definition indicates that a given field may be present,
-   * but for which no value has been stored in the
-   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</p>
+   * 'non-initialized' field, for use where the {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} definition
+   * indicates that a given field may be present, but for which no
+   * value has been stored in the {@link
+   * arlut.csd.ganymede.server.DBStore DBStore}.</p>
    *
    * <p>Used to provide the client a template for 'creating' this
    * field if so desired.</p>
@@ -118,16 +119,15 @@ public class StringDBField extends DBField implements string_field {
 
   StringDBField(DBObject owner, DBObjectBaseField definition)
   {
-    this.owner = owner;
-    this.fieldcode = definition.getID();
+    super(owner, definition.getID());
 
     if (isVector())
       {
-        value = new Vector();
+        this.value = new Vector();
       }
     else
       {
-        value = null;
+        this.value = null;
       }
   }
 
@@ -137,16 +137,15 @@ public class StringDBField extends DBField implements string_field {
 
   public StringDBField(DBObject owner, StringDBField field)
   {
-    this.owner = owner;
-    this.fieldcode = field.getID();
+    super(owner, field.getID());
 
     if (isVector())
       {
-        value = field.getVectVal().clone();
+        this.value = field.getVectVal().clone();
       }
     else
       {
-        value = field.value;
+        this.value = field.value;
       }
   }
 
@@ -156,13 +155,13 @@ public class StringDBField extends DBField implements string_field {
 
   public StringDBField(DBObject owner, String value, DBObjectBaseField definition)
   {
+    super(owner, definition.getID());
+
     if (definition.isArray())
       {
         throw new IllegalArgumentException("scalar constructor called on vector field");
       }
 
-    this.owner = owner;
-    this.fieldcode = definition.getID();
     this.value = value;
   }
 
@@ -172,21 +171,20 @@ public class StringDBField extends DBField implements string_field {
 
   public StringDBField(DBObject owner, Vector values, DBObjectBaseField definition)
   {
+    super(owner, definition.getID());
+
     if (!definition.isArray())
       {
         throw new IllegalArgumentException("vector constructor called on scalar field");
       }
 
-    this.owner = owner;
-    this.fieldcode = definition.getID();
-
     if (values == null)
       {
-        value = new Vector();
+        this.value = new Vector();
       }
     else
       {
-        value = values.clone();
+        this.value = values.clone();
       }
   }
 
@@ -656,9 +654,9 @@ public class StringDBField extends DBField implements string_field {
 
   public boolean canChoose() throws NotLoggedInException
   {
-    if (owner instanceof DBEditObject)
+    if (this.getOwner() instanceof DBEditObject)
       {
-        return (((DBEditObject) owner).obtainChoiceList(this) != null);
+        return (((DBEditObject) this.getOwner()).obtainChoiceList(this) != null);
       }
     else
       {
@@ -683,9 +681,9 @@ public class StringDBField extends DBField implements string_field {
         return false;
       }
 
-    if (owner instanceof DBEditObject)
+    if (this.getOwner() instanceof DBEditObject)
       {
-        return ((DBEditObject) owner).mustChoose(this);
+        return ((DBEditObject) this.getOwner()).mustChoose(this);
       }
 
     return false;
@@ -701,7 +699,7 @@ public class StringDBField extends DBField implements string_field {
 
   public boolean excludeSelected(db_field x)
   {
-    return ((DBEditObject) owner).excludeSelected(x, this);
+    return ((DBEditObject) this.getOwner()).excludeSelected(x, this);
   }
 
   /**
@@ -716,12 +714,12 @@ public class StringDBField extends DBField implements string_field {
 
   public QueryResult choices() throws NotLoggedInException
   {
-    if (!(owner instanceof DBEditObject))
+    if (!(this.getOwner() instanceof DBEditObject))
       {
         throw new IllegalArgumentException("can't get choice list on non-editable object");
       }
 
-    return ((DBEditObject) owner).obtainChoiceList(this);
+    return ((DBEditObject) this.getOwner()).obtainChoiceList(this);
   }
 
   /**
@@ -736,9 +734,9 @@ public class StringDBField extends DBField implements string_field {
 
   public Object choicesKey()
   {
-    if (owner instanceof DBEditObject)
+    if (this.getOwner() instanceof DBEditObject)
       {
-        return ((DBEditObject) owner).obtainChoicesKey(this);
+        return ((DBEditObject) this.getOwner()).obtainChoicesKey(this);
       }
     else
       {
@@ -831,7 +829,7 @@ public class StringDBField extends DBField implements string_field {
         // "Submitted value {0} is not a String!  Major client error while trying to edit field {1} in object {2}."
         return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
                                           ts.l("verifyBasicConstraints.type_error",
-                                               o, this.getName(), owner.getLabel()));
+                                               o, this.getName(), this.getOwner().getLabel()));
       }
 
     String s = (String) o;
@@ -844,7 +842,8 @@ public class StringDBField extends DBField implements string_field {
 
         return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
                                           ts.l("verifyBasicConstraints.overlength",
-                                               s, this.getName(), owner.getLabel(), Integer.valueOf(this.maxSize())));
+                                               s, this.getName(), this.getOwner().getLabel(),
+                                               Integer.valueOf(this.maxSize())));
       }
 
     if (s.length() < minSize())
@@ -855,7 +854,8 @@ public class StringDBField extends DBField implements string_field {
 
         return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
                                           ts.l("verifyBasicConstraints.underlength",
-                                               s, this.getName(), owner.getLabel(), Integer.valueOf(this.minSize())));
+                                               s, this.getName(), this.getOwner().getLabel(),
+                                               Integer.valueOf(this.minSize())));
       }
 
     if (getFieldDef().getRegexp() != null)
@@ -874,7 +874,8 @@ public class StringDBField extends DBField implements string_field {
 
                 return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
                                                   ts.l("verifyBasicConstraints.regexp_nodesc",
-                                                       s, this.getName(), owner.getLabel(), getFieldDef().getRegexpPat()));
+                                                       s, this.getName(), this.getOwner().getLabel(),
+                                                       getFieldDef().getRegexpPat()));
               }
             else
               {
@@ -886,7 +887,7 @@ public class StringDBField extends DBField implements string_field {
 
                 return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
                                                   ts.l("verifyBasicConstraints.regexp_desc",
-                                                       s, this.getName(), owner.getLabel(), desc));
+                                                       s, this.getName(), this.getOwner().getLabel(), desc));
               }
           }
       }
@@ -902,7 +903,7 @@ public class StringDBField extends DBField implements string_field {
                 // "String value "{0}" contains a character '{1}' which is not allowed in field {2} in object {3}."
                 return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
                                                   ts.l("verifyBasicConstraints.bad_char",
-                                                       s, Character.valueOf(s.charAt(i)), this.getName(), owner.getLabel()));
+                                                       s, Character.valueOf(s.charAt(i)), this.getName(), this.getOwner().getLabel()));
               }
           }
       }
@@ -918,7 +919,7 @@ public class StringDBField extends DBField implements string_field {
                 // "String value "{0}" contains a character '{1}' which is not allowed in field {2} in object {3}."
                 return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
                                                   ts.l("verifyBasicConstraints.bad_char",
-                                                       s, Character.valueOf(s.charAt(i)), this.getName(), owner.getLabel()));
+                                                       s, Character.valueOf(s.charAt(i)), this.getName(), this.getOwner().getLabel()));
               }
           }
       }
@@ -964,10 +965,10 @@ public class StringDBField extends DBField implements string_field {
     if (!isEditable(true))
       {
         // "Don''t have permission to edit field {0} in object {1}."
-        return Ganymede.createErrorDialog(ts.l("verifyNewValue.non_editable", getName(), owner.getLabel()));
+        return Ganymede.createErrorDialog(ts.l("verifyNewValue.non_editable", getName(), this.getOwner().getLabel()));
       }
 
-    eObj = (DBEditObject) owner;
+    eObj = (DBEditObject) this.getOwner();
 
     // for a null value, have the DBEditObject plugin check it and
     // give the yea/nay.
@@ -997,7 +998,7 @@ public class StringDBField extends DBField implements string_field {
                 // "String value "{0}" is not a valid choice for field {1} in object {2}."
 
                 return Ganymede.createErrorDialog(ts.l("verifyNewValue.invalid_choice",
-                                                       s, getName(), owner.getLabel()));
+                                                       s, getName(), eObj.getLabel()));
               }
           }
       }

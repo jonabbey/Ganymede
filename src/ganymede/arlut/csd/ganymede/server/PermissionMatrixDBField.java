@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -461,9 +461,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
                           DataInput in,
                           DBObjectBaseField definition) throws IOException
   {
-    value = null;
-    this.owner = owner;
-    this.fieldcode = definition.getID();
+    super(owner, definition.getID());
+
+    this.value = null;
     receive(in, definition);
   }
 
@@ -481,11 +481,10 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   PermissionMatrixDBField(DBObject owner, DBObjectBaseField definition)
   {
-    this.owner = owner;
-    this.fieldcode = definition.getID();
+    super(owner, definition.getID());
 
-    matrix = new Hashtable();
-    value = null;
+    this.matrix = new Hashtable<String, PermEntry>();
+    this.value = null;
   }
 
   /**
@@ -494,15 +493,15 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public PermissionMatrixDBField(DBObject owner, PermissionMatrixDBField field)
   {
-    value = null;
+    super(owner, field.getID());
+
+    this.value = null;
 
     if (debug)
       {
         System.err.println("PermissionMatrixDBField: Copy constructor");
       }
 
-    this.fieldcode = field.getID();
-    this.owner = owner;
     this.matrix = new Hashtable<String, PermEntry>(field.matrix.size());
 
     for (String key: field.matrix.keySet())
@@ -644,7 +643,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public Object key()
   {
-    return Integer.valueOf(owner.getID());
+    return Integer.valueOf(this.getOwner().getID());
   }
 
   /**
@@ -993,24 +992,24 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public PermMatrix getTemplateMatrix()
   {
-    if (!(owner instanceof DBEditObject))
+    if (!(this.getOwner() instanceof DBEditObject))
       {
         return null;
       }
 
-    if (owner.gSession.getPermManager().isSuperGash())
+    if (this.getOwner().gSession.getPermManager().isSuperGash())
       {
         return null;
       }
 
     if (getID() == SchemaConstants.RoleMatrix)
       {
-        return owner.gSession.getPermManager().getDelegatablePersonaPerms();
+        return this.getOwner().gSession.getPermManager().getDelegatablePersonaPerms();
       }
 
     if (getID() == SchemaConstants.RoleDefaultMatrix)
       {
-        return owner.gSession.getPermManager().getDelegatableDefaultPerms();
+        return this.getOwner().gSession.getPermManager().getDelegatableDefaultPerms();
       }
 
     return null;
@@ -1345,7 +1344,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public synchronized void rollback(Object oldval)
   {
-    if (!(owner instanceof DBEditObject))
+    if (!(this.getOwner() instanceof DBEditObject))
       {
         throw new RuntimeException("Invalid rollback on field " +
                                    getName() + ", not in an editable context");
@@ -1379,12 +1378,12 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public boolean allowablePermEntry(short baseID, short fieldID, PermEntry entry)
   {
-    if (owner.gSession == null)
+    if (this.getOwner().gSession == null)
       {
         return false;
       }
 
-    if (owner.gSession.getPermManager().isSuperGash())
+    if (this.getOwner().gSession.getPermManager().isSuperGash())
       {
         return true;
       }
@@ -1396,7 +1395,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     if (getID() == SchemaConstants.RoleMatrix)
       {
-        if (owner.gSession.getPermManager().getPersonaPerms() == null)
+        if (this.getOwner().gSession.getPermManager().getPersonaPerms() == null)
           {
             return false;
           }
@@ -1405,11 +1404,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
         if (fieldID < 0)
           {
-            adminPriv = (PermEntry) owner.gSession.getPermManager().getDelegatablePersonaPerms().getPerm(baseID);
+            adminPriv = (PermEntry) this.getOwner().gSession.getPermManager().getDelegatablePersonaPerms().getPerm(baseID);
           }
         else
           {
-            adminPriv = (PermEntry) owner.gSession.getPermManager().getDelegatablePersonaPerms().getPerm(baseID, fieldID);
+            adminPriv = (PermEntry) this.getOwner().gSession.getPermManager().getDelegatablePersonaPerms().getPerm(baseID, fieldID);
           }
 
         // the adminPriv should have all the bits set that we are seeking to set
@@ -1418,7 +1417,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       }
     else if (getID() == SchemaConstants.RoleDefaultMatrix)
       {
-        if (owner.gSession.getPermManager().getDefaultPerms() == null)
+        if (this.getOwner().gSession.getPermManager().getDefaultPerms() == null)
           {
             return false;
           }
@@ -1427,11 +1426,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
         if (fieldID < 0)
           {
-            adminPriv = (PermEntry) owner.gSession.getPermManager().getDelegatableDefaultPerms().getPerm(baseID);
+            adminPriv = (PermEntry) this.getOwner().gSession.getPermManager().getDelegatableDefaultPerms().getPerm(baseID);
           }
         else
           {
-            adminPriv = (PermEntry) owner.gSession.getPermManager().getDelegatableDefaultPerms().getPerm(baseID, fieldID);
+            adminPriv = (PermEntry) this.getOwner().gSession.getPermManager().getDelegatableDefaultPerms().getPerm(baseID, fieldID);
           }
 
         // the adminPriv should have all the bits set that we are seeking to set

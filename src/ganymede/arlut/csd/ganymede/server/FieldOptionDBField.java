@@ -8,17 +8,19 @@
    attached to it in this field type.  These option values are used to
    control how objects and fields are processed with respect to a
    specific SyncChannel.
-   
+
    Created: 25 January 2005
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -79,7 +81,7 @@ import arlut.csd.ganymede.rmi.field_option_field;
 
 ------------------------------------------------------------------------------*/
 
-/** 
+/**
  * <p>FieldOptionDBField is a subclass of {@link
  * arlut.csd.ganymede.server.DBField DBField} for the storage and
  * handling of Ganymede metadata.  In particular, the
@@ -214,7 +216,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * This utility method extracts the 
+   * This utility method extracts the
    * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField} name from a coded
    * field option entry key.
    */
@@ -224,7 +226,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     int sepIndex;
     short basenum;
     DBObjectBase base;
-    
+
     String fieldId;
     short fieldnum;
     DBObjectBaseField field;
@@ -248,7 +250,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
             else
               {
                 fieldId = entry.substring(sepIndex+1);
-            
+
                 if (fieldId.equals(":"))
                   {
                     fieldname = "[base]";
@@ -314,7 +316,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     int sepIndex;
     short basenum;
     DBObjectBase base;
-    
+
     String fieldId;
     short fieldnum;
     DBObjectBaseField field;
@@ -340,15 +342,15 @@ public class FieldOptionDBField extends DBField implements field_option_field {
         else
           {
             fieldId = entry.substring(sepIndex+1);
-            
+
             if (!fieldId.equals(":"))
               {
                 try
                   {
                     fieldnum = Short.valueOf(fieldId).shortValue();
-                    
+
                     field = (DBObjectBaseField) base.getField(fieldnum);
-                    
+
                     if (field == null)
                       {
                         return false;
@@ -447,27 +449,27 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   /**
    * Receive constructor.  Used to create a FieldOptionDBField from a
-   * {@link arlut.csd.ganymede.server.DBStore DBStore}/{@link arlut.csd.ganymede.server.DBJournal DBJournal}
-   * DataInput stream.
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}/{@link
+   * arlut.csd.ganymede.server.DBJournal DBJournal} DataInput stream.
    */
 
-  FieldOptionDBField(DBObject owner, 
+  FieldOptionDBField(DBObject owner,
                      DataInput in,
                      DBObjectBaseField definition) throws IOException
   {
-    value = null;
-    this.owner = owner;
-    this.fieldcode = definition.getID();
+    super(owner, definition.getID());
+
+    this.value = null;
     receive(in, definition);
   }
 
   /**
    * <p>No-value constructor.  Allows the construction of a
-   * 'non-initialized' field, for use where the 
-   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
-   * definition indicates that a given field may be present,
-   * but for which no value has been stored in the 
-   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</p>
+   * 'non-initialized' field, for use where the {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} definition
+   * indicates that a given field may be present, but for which no
+   * value has been stored in the {@link
+   * arlut.csd.ganymede.server.DBStore DBStore}.</p>
    *
    * <p>Used to provide the client a template for 'creating' this
    * field if so desired.</p>
@@ -475,11 +477,10 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   FieldOptionDBField(DBObject owner, DBObjectBaseField definition)
   {
-    this.owner = owner;
-    this.fieldcode = definition.getID();
-    
-    matrix = new HashMap<String, SyncPrefEnum>();
-    value = null;
+    super(owner, definition.getID());
+
+    this.matrix = new HashMap<String, SyncPrefEnum>();
+    this.value = null;
   }
 
   /**
@@ -488,20 +489,9 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   public FieldOptionDBField(DBObject owner, FieldOptionDBField field)
   {
-    Object key;
-    String option;
+    super(owner, field.getID());
 
-    /* -- */
-
-    value = null;
-
-    if (debug)
-      {
-        System.err.println("FieldOptionDBField: Copy constructor");
-      }
-
-    this.fieldcode = field.getID();
-    this.owner = owner;
+    this.value = null;
 
     // strings are immutable, so we can safely copy the matrix
 
@@ -544,7 +534,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   public boolean equals(Object obj)
   {
     FieldOptionDBField fodb;
-    
+
     /* -- */
 
     if (obj == null)
@@ -561,7 +551,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     synchronized (fodb.matrix)
       {
-        return this.matrix.equals(fodb.matrix); 
+        return this.matrix.equals(fodb.matrix);
       }
   }
 
@@ -622,7 +612,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   public Object key()
   {
-    return Integer.valueOf(owner.getID());
+    return Integer.valueOf(this.getOwner().getID());
   }
 
   /**
@@ -634,7 +624,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     return null;
   }
 
-  /** 
+  /**
    * <p>Returns an Object carrying the value held in this field.</p>
    *
    * <p>This is intended to be used within the Ganymede server, it bypasses
@@ -712,7 +702,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
       {
         matrix = new HashMap<String, SyncPrefEnum>(tableSize * 2 + 1);
       }
-    
+
     for (int i = 0; i < tableSize; i++)
       {
         matrix.put(in.readUTF(), SyncPrefEnum.find(in.readUTF()));
@@ -876,7 +866,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
       {
         return null;
       }
-    
+
     Set<String> myKeys = new HashSet<String>(matrix.keySet());
     Set<String> newKeys = new HashSet<String>(myKeys);
 
@@ -957,7 +947,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <p>Returns a SyncPrefEnum representing this field option field's 
+   * <p>Returns a SyncPrefEnum representing this field option field's
    * option on the base &lt;base&gt;</p>
    *
    * @see arlut.csd.ganymede.rmi.field_option_field
@@ -969,7 +959,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <p>Returns a SyncPrefEnum representing this field option field's 
+   * <p>Returns a SyncPrefEnum representing this field option field's
    * option on the field &lt;field&gt; in base &lt;base&gt;</p>
    *
    * @see arlut.csd.ganymede.rmi.field_option_field
@@ -988,7 +978,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
   }
 
   /**
-   * <p>Returns a SyncPrefEnum object representing this field option field's 
+   * <p>Returns a SyncPrefEnum object representing this field option field's
    * option on the base &lt;base&gt;</p>
    *
    * @see arlut.csd.ganymede.rmi.field_option_field
@@ -1084,7 +1074,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
         if (debug)
           {
-            System.err.println("FieldOptionDBField: base " + 
+            System.err.println("FieldOptionDBField: base " +
                                baseID + ", field " + fieldID + " cleared.");
           }
       }
@@ -1094,7 +1084,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
         if (debug)
           {
-            System.err.println("FieldOptionDBField: base " + 
+            System.err.println("FieldOptionDBField: base " +
                                baseID + ", field " + fieldID + " set to \"" + option + "\"");
           }
       }
@@ -1156,17 +1146,17 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
         if (debug)
           {
-            System.err.println("FieldOptionDBField: base " + 
+            System.err.println("FieldOptionDBField: base " +
                                baseID + " cleared.");
           }
       }
     else
       {
         matrix.put(matrixEntry(baseID), option);
-        
+
         if (debug)
           {
-            System.err.println("FieldOptionDBField: base " + 
+            System.err.println("FieldOptionDBField: base " +
                                baseID + " set to \"" + option + "\"");
           }
       }
@@ -1201,9 +1191,9 @@ public class FieldOptionDBField extends DBField implements field_option_field {
           {
             if (debug)
               {
-                System.err.println("**** FieldOptionDBField.clean(): throwing out invalid entry " + 
-                                   decodeBaseName(key) + " " + 
-                                   decodeFieldName(key) + " ---- " + 
+                System.err.println("**** FieldOptionDBField.clean(): throwing out invalid entry " +
+                                   decodeBaseName(key) + " " +
+                                   decodeFieldName(key) + " ---- " +
                                    matrix.get(key));
               }
 
@@ -1230,7 +1220,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * HashMap, used to encode the option for a given {@link
    * arlut.csd.ganymede.server.DBObjectBase DBObjectBase}.
    */
-  
+
   public static String matrixEntry(short baseID)
   {
     return (baseID + "::");
@@ -1266,9 +1256,9 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   public synchronized void rollback(Object oldval)
   {
-    if (!(owner instanceof DBEditObject))
+    if (!(this.getOwner() instanceof DBEditObject))
       {
-        throw new RuntimeException("Invalid rollback on field " + 
+        throw new RuntimeException("Invalid rollback on field " +
                                    getName() + ", not in an editable context");
       }
 
@@ -1284,7 +1274,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
         return;
       }
 
-    throw new RuntimeException("Invalid rollback on field " + 
+    throw new RuntimeException("Invalid rollback on field " +
                                getName() + ", not a FieldOptionMatrixCkPoint");
   }
 
@@ -1306,11 +1296,11 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Helper class used to handle checkpointing of a 
+ * <p>Helper class used to handle checkpointing of a
  * {@link arlut.csd.ganymede.server.FieldOptionDBField FieldOptionDBField}'s
  * state.</p>
  *
- * <p>See {@link arlut.csd.ganymede.server.FieldOptionDBField#checkpoint() 
+ * <p>See {@link arlut.csd.ganymede.server.FieldOptionDBField#checkpoint()
  * FieldOptionDBField.checkpoint()} for more detail.</p>
  */
 
