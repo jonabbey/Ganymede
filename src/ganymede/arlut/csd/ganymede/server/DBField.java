@@ -633,10 +633,6 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
   public synchronized ReturnVal copyFieldTo(DBField target, boolean local)
   {
-    ReturnVal retVal;
-
-    /* -- */
-
     if (!local)
       {
         if (!verifyReadPermission())
@@ -679,15 +675,12 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
         // We'll use addElementsLocal() here because we've already
         // verified read permission and write permission, above.
 
-        retVal = target.addElementsLocal(valuesToCopy, true, true);
+        // This could fail if we don't have write privileges for the
+        // target field, so we'll return an error code back to the
+        // cloneFromObject() method, which will pass it in an over-all
+        // advisory (non-fatal) warning back to the client
 
-        // the above operation could fail if we don't have write
-        // privileges for the target field, so we'll return an error
-        // code back to the cloneFromObject() method, which will pass
-        // it in an over-all advisory (non-fatal) warning back to the
-        // client
-
-        return retVal;
+        return target.addElementsLocal(valuesToCopy, true, true);
       }
   }
 
