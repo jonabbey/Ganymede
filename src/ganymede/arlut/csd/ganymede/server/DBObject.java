@@ -1454,7 +1454,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * elements.</p>
    */
 
-  public final void replaceField(DBField field)
+  final void replaceField(DBField field)
   {
     if (fieldAry == null)
       {
@@ -1493,7 +1493,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * method will return without changing the fieldAry.</p>
    */
 
-  public final void clearField(short id)
+  final void clearField(short id)
   {
     if (fieldAry == null)
       {
@@ -1520,13 +1520,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <p>This method retrieves a DBField from this object's
-   * fieldAry DBField array.  retrieveField() uses a hashing algorithm to
-   * try and speed up field retrieving, but we are optimizing
-   * for low memory usage rather than O(1) operations.</p>
+   * <p>This method retrieves a DBField from this object's fieldAry
+   * DBField array.  retrieveField() uses a hashing algorithm to try
+   * and speed up field retrieving, but we are optimizing for low
+   * memory usage rather than O(1) operations.</p>
    */
 
-  public final DBField retrieveField(short id)
+  final DBField retrieveField(short id)
   {
     if (fieldAry == null)
       {
@@ -1553,7 +1553,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * structure.</p>
    */
 
-  public final DBField retrieveField(String fieldName)
+  final DBField retrieveField(String fieldName)
   {
     if (fieldAry == null)
       {
@@ -1581,7 +1581,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @return -1 if we couldn't find a field with the given id
    */
 
-  public final short findField(short id)
+  private final short findField(short id)
   {
     if (fieldAry == null)
       {
@@ -2849,7 +2849,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
                   }
                 else
                   {
-                    results.add((Invid) invField.value);
+                    results.add((Invid) invField.getValueLocal());
                   }
               }
           }
