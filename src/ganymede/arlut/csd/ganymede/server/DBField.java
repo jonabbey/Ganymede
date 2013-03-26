@@ -361,7 +361,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * The object this field is contained within.
    */
 
-  private final DBObject owner;
+  final DBObject owner;
 
   /**
    * The identifying field number for this field within the owning
@@ -369,7 +369,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * field dictionary.
    */
 
-  private final short fieldcode;
+  final short fieldcode;
 
   /* -- */
 
