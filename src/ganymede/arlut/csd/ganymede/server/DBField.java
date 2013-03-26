@@ -669,6 +669,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
         valuesToCopy = getValuesLocal();
 
+        if (valuesToCopy == null || valuesToCopy.size() == 0)
+          {
+            return null;
+          }
+
         // We want to inhibit wizards and allow partial failure.
         //
         // We'll use addElementsLocal() here because we've already
