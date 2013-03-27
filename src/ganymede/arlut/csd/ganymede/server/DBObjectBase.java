@@ -3380,8 +3380,9 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
 
     this.reloadCustomClass();
 
-    // all objects stored in this object base need to be updated
-    // to point to the edited object base
+    // all objects stored in this object base need to be updated to
+    // point to the edited object base, and to have deleted field
+    // types removed from objects in the object base.
 
     this.updateBaseRefs();
 
@@ -3443,8 +3444,9 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
   }
 
   /**
-   * <p>This method is used to update base references in objects after
-   * this base has replaced an old version via the SchemaEditor.</p>
+   * <p>This method is used to update base references and remove
+   * deleted field types in objects after this base has replaced an
+   * old version via the SchemaEditor.</p>
    */
 
   private void updateBaseRefs()
