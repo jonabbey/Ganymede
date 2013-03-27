@@ -3321,7 +3321,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public void clear()
   {
-    return;
+    throw new UnsupportedOperationException();
   }
 
   /**
@@ -3330,7 +3330,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public Object put(Object key, Object value)
   {
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   /**
@@ -3339,7 +3339,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public void putAll(Map t)
   {
-    return;
+    throw new UnsupportedOperationException();
   }
 
   /**
@@ -3348,6 +3348,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public Object remove(Object key)
   {
-    return null;
+    throw new UnsupportedOperationException();
   }
 }
