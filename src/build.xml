@@ -188,6 +188,13 @@ refresh the jar files.
          classes seem to require the pre-generated Skel classes to be
          present on the server.
 
+         Debian bug: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=605458
+         IcedTea bug: http://icedtea.classpath.org/bugzilla/show_bug.cgi?id=568
+
+         Ideally we should be able to get rid of this <rmic> element
+         entirely, but we're keeping it until the above bugs are dealt
+         with and trickle down to our users.
+
          28 March 2013 -->
 
     <rmic base="${build.classes}">
