@@ -184,8 +184,9 @@ refresh the jar files.
          allowing the Ganymede client running via Javaws to
          auto-generate the stub proxy classes.
 
-         We do leave off putting the skel classes in the server jar,
-	 though.)
+         To go along with that, the old-school pre-generated Stub
+         classes seem to require the pre-generated Skel classes to be
+         present on the server.
 
          28 March 2013 -->
 
