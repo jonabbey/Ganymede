@@ -2,23 +2,21 @@
 
    TextAreaRenderer.java
 
-   This Module encapsulates some more user interactions with a Jtable, including
-   right click menus to sort and remove columns
-   
+   This Module encapsulates some more user interactions with a Jtable,
+   including right click menus to sort and remove columns
+
    Created: 26 January 2006
-   Last Mod Date: $Date: 2006-01-02 16:39:01 -0600 (Mon, 02 Jan 2006) $
-   Last Revision Changed: $Rev: 7283 $
-   Last Changed By: $Author: falazar $
-   SVN URL: $HeadURL: https://tools.arlut.utexas.edu/svn/ganymede/branches/falazar_playground/src/ganymede/arlut/csd/JTable/SmartTable.java $
 
    Module By: James Ratcliff, falazar@arlut.utexas.edu
 
    -----------------------------------------------------------------------
 
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -47,7 +45,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 */
-         
+
 package arlut.csd.JTable;
 
 import javax.swing.*;
@@ -59,9 +57,10 @@ import java.util.*;
 /*------------------------------------------------------------------------------
                                                                            class
                                                                 TextAreaRenderer
+
 ------------------------------------------------------------------------------*/
 
-public class TextAreaRenderer extends JTextArea implements TableCellRenderer 
+public class TextAreaRenderer extends JTextArea implements TableCellRenderer
 {
   private final DefaultTableCellRenderer adaptee = new DefaultTableCellRenderer();
 
@@ -82,14 +81,14 @@ public class TextAreaRenderer extends JTextArea implements TableCellRenderer
 
   /* -- */
 
-  public TextAreaRenderer() 
+  public TextAreaRenderer()
   {
     setLineWrap(true);
     setWrapStyleWord(true);
   }
 
   public Component getTableCellRendererComponent(JTable table, Object obj, boolean isSelected,
-                                                 boolean hasFocus, int row, int column) 
+                                                 boolean hasFocus, int row, int column)
   {
     // set the colours, etc. using the standard for that platform
     adaptee.getTableCellRendererComponent(table, obj, isSelected, hasFocus, row, column);
@@ -139,11 +138,11 @@ public class TextAreaRenderer extends JTextArea implements TableCellRenderer
     return metrics.stringWidth(obj.toString());
   }
 
-  private void addSize(JTable table, int row, int column, int height) 
+  private void addSize(JTable table, int row, int column, int height)
   {
     HashMap<Integer, HashMap<Integer, Integer>> rows = cellSizes.get(table);
 
-    if (rows == null) 
+    if (rows == null)
       {
         rows = new HashMap<Integer, HashMap<Integer, Integer>>();
         cellSizes.put(table, rows);
@@ -151,7 +150,7 @@ public class TextAreaRenderer extends JTextArea implements TableCellRenderer
 
     HashMap<Integer, Integer> rowheights = rows.get(Integer.valueOf(row));
 
-    if (rowheights == null) 
+    if (rowheights == null)
       {
         rowheights = new HashMap<Integer, Integer>();
         rows.put(Integer.valueOf(row), rowheights);
@@ -166,17 +165,17 @@ public class TextAreaRenderer extends JTextArea implements TableCellRenderer
    * its hash table for this row.
    */
 
-  private int findTotalMaximumRowSize(JTable table, int row) 
+  private int findTotalMaximumRowSize(JTable table, int row)
   {
     int maximum_height = 0;
     Enumeration columns = table.getColumnModel().getColumns();
 
-    while (columns.hasMoreElements()) 
+    while (columns.hasMoreElements())
       {
         TableColumn tc = (TableColumn) columns.nextElement();
         TableCellRenderer cellRenderer = tc.getCellRenderer();
 
-        if (cellRenderer instanceof TextAreaRenderer) 
+        if (cellRenderer instanceof TextAreaRenderer)
           {
             TextAreaRenderer tar = (TextAreaRenderer) cellRenderer;
             maximum_height = Math.max(maximum_height, tar.findMaximumRowSize(table, row));
@@ -186,7 +185,7 @@ public class TextAreaRenderer extends JTextArea implements TableCellRenderer
     return maximum_height;
   }
 
-  private int findMaximumRowSize(JTable table, int row) 
+  private int findMaximumRowSize(JTable table, int row)
   {
     Map rows = (Map) cellSizes.get(table);
 
@@ -204,7 +203,7 @@ public class TextAreaRenderer extends JTextArea implements TableCellRenderer
 
     int maximum_height = 0;
 
-    for (Iterator it = rowheights.entrySet().iterator(); it.hasNext();) 
+    for (Iterator it = rowheights.entrySet().iterator(); it.hasNext();)
       {
         Map.Entry entry = (Map.Entry) it.next();
         int cellHeight = ((Integer) entry.getValue()).intValue();
@@ -214,4 +213,4 @@ public class TextAreaRenderer extends JTextArea implements TableCellRenderer
     return maximum_height;
   }
 }
-  
+

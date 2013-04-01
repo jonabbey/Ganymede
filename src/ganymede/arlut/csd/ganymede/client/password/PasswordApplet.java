@@ -6,20 +6,15 @@
 
    Created: 28 January 1998
 
-   Last Mod Date: $Date$
-   Last Revision Changed: $Rev$
-   Last Changed By: $Author$
-   SVN URL: $HeadURL$
-
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
 
    Copyright (C) 1996 - 2004
    The University of Texas at Austin
- 
+
    Contact information
 
    Author Email: ganymede_author@arlut.utexas.edu
@@ -94,7 +89,7 @@ public class PasswordApplet extends Applet implements ActionListener{
 
   GridBagLayout
     gbl;
-  
+
   GridBagConstraints
     gbc;
 
@@ -108,17 +103,17 @@ public class PasswordApplet extends Applet implements ActionListener{
 
     if (serverhost == null || serverhost.equals(""))
       {
-	serverhost = getCodeBase().getHost();
+        serverhost = getCodeBase().getHost();
       }
 
     try
       {
-	client = new PasswordClient("//" + serverhost + "/ganymede.server");
+        client = new PasswordClient("//" + serverhost + "/ganymede.server");
       }
     catch (java.rmi.RemoteException rx)
       {
-	add(new Label("Could not login to server:" + rx));
-	return;
+        add(new Label("Could not login to server:" + rx));
+        return;
       }
 
     setLayout(new BorderLayout());
@@ -131,7 +126,7 @@ public class PasswordApplet extends Applet implements ActionListener{
 
     gbc.anchor = GridBagConstraints.NORTHWEST;
     gbc.insets = new Insets(2,2,2,2);
-    
+
     panel.setLayout(gbl);
 
     gbc.gridx = 0;
@@ -157,7 +152,7 @@ public class PasswordApplet extends Applet implements ActionListener{
 
     gbc.gridx = 0;
     gbc.gridy = 2;
-    
+
     Label np = new Label("New Password:");
     gbl.setConstraints(np, gbc);
     panel.add(np);
@@ -188,26 +183,26 @@ public class PasswordApplet extends Applet implements ActionListener{
 
     if (newPasswordField2.getText().equals(newPasswordField1.getText()))
       {
-	ok = client.changePassword(usernameField.getText(), oldPasswordField.getText(), newPasswordField2.getText());
+        ok = client.changePassword(usernameField.getText(), oldPasswordField.getText(), newPasswordField2.getText());
       }
     else
       {
-	System.out.println("New passwords are not the smae");
-	displayDialog("New passwords are not the same.");
+        System.out.println("New passwords are not the smae");
+        displayDialog("New passwords are not the same.");
       }
-    
+
     if (ok)
       {
-	System.out.println("Password change successful.");
-	displayDialog("Password change successful.");
+        System.out.println("Password change successful.");
+        displayDialog("Password change successful.");
 
-	oldPasswordField.setText("");
-	newPasswordField1.setText("");
-	newPasswordField2.setText("");
+        oldPasswordField.setText("");
+        newPasswordField1.setText("");
+        newPasswordField2.setText("");
       }
     else
       {
-	displayDialog("Password change failed.");
+        displayDialog("Password change failed.");
       }
   }
 
@@ -215,37 +210,37 @@ public class PasswordApplet extends Applet implements ActionListener{
   {
     if (d == null)
       {
-	Component frame = getParent();
+        Component frame = getParent();
 
-	while (!(frame instanceof Frame))
-	  {
-	    frame = ((Component)frame).getParent();
-	  }
+        while (!(frame instanceof Frame))
+          {
+            frame = ((Component)frame).getParent();
+          }
 
-	d = new Dialog((Frame)frame, "Password change");
-	  
-	d.setLayout(new BorderLayout());
-	  
-	dLabel = new Label(message);
-	d.add("Center", dLabel);
-	  
-	okB = new Button("ok");
-	okB.addActionListener(new ActionListener () {
-	  public void actionPerformed(ActionEvent e) 
-	    {
-	      d.setVisible(false);
-	    }});
-	Panel okP = new Panel();
-	okP.add(okB);
-	d.add("South", okP);
+        d = new Dialog((Frame)frame, "Password change");
+
+        d.setLayout(new BorderLayout());
+
+        dLabel = new Label(message);
+        d.add("Center", dLabel);
+
+        okB = new Button("ok");
+        okB.addActionListener(new ActionListener () {
+          public void actionPerformed(ActionEvent e)
+            {
+              d.setVisible(false);
+            }});
+        Panel okP = new Panel();
+        okP.add(okB);
+        d.add("South", okP);
       }
     else
       {
-	dLabel.setText(message);
+        dLabel.setText(message);
       }
-    
+
     d.pack();
-    
+
     d.setVisible(true);
   }
 }
