@@ -479,6 +479,17 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
+   * <p>Returns the primary label of this remote object.</p>
+   *
+   * <p>For convenience in custom DBEditObject subclasses.</p>
+   */
+
+  public final String getLabel(Invid invid)
+  {
+    return getDBSession().getObjectLabel(invid);
+  }
+
+  /**
    * <p>If this object type is embedded, this method will return the
    * desired display label for the embedded object.</p>
    *
