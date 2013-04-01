@@ -3,21 +3,19 @@
    MailmanServerSchema.java
 
    An interface defining constants to be used by the Mailman Server code.
-   
+
    Created: 23 April 1998
-   Last Mod Date: $Date: 2004-12-01 01:53:51 -0600 (Wed, 01 Dec 2004) $
-   Last Revision Changed: $Rev: 5857 $
-   Last Changed By: $Author: broccol $
-   SVN URL: $HeadURL: http://tools.arlut.utexas.edu/svn/ganymede/trunk/ganymede/src/schemas/gasharl/src/arlut/csd/ganymede/gasharl/emailRedirectSchema.java $
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2010
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -70,7 +68,7 @@ public interface MailmanServerSchema {
   // you change the schema for the MailmanServer, you'll want to change
   // this file to match.
 
-  final static short SERVERNAME=256; 
+  final static short SERVERNAME=256;
   final static short HOST=257;
   final static short LISTS=258;
 }

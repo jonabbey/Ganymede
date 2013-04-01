@@ -4,15 +4,16 @@
 
    Created: 16 November 2001
 
-
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -88,7 +89,7 @@ public class SVNVersion {
 
     return release_string;
   }
-  
+
   /**
    * <p>This method parses SVN HeadURL and Date tokens and returns a string which
    * describes the release number and date.</p>
@@ -98,7 +99,7 @@ public class SVNVersion {
   {
     if (SVN_release_name.length () <= 9)
       {
-        return "version unknown" + " - " + SVN_release_date; 
+        return "version unknown" + " - " + SVN_release_date;
       }
 
     String release_number = release_identifier;
@@ -126,9 +127,9 @@ public class SVNVersion {
               release_number = release_name.substring(branch_match + 1, branch_match+10);
 
               // convert XXXYYYZZZ style version number to x.y.z
-        
+
               // i.e., 001000008 to 1.0.8
-        
+
               String a = release_number.substring(0, 3);
               String b = release_number.substring(3, 6);
               String c = release_number.substring(6, 9);
