@@ -188,9 +188,7 @@ copy_file("webforms/ganymede_splash.png", "$installdir/ganymede_splash.png");
 # Customize and copy the client web pages
 
 install_file("webforms/index.html", "$installdir/index.html");
-install_file("webforms/client_plugin.html", "$installdir/client_plugin.html");
 install_file("webforms/client_native.html", "$installdir/client_native.html");
-install_file("webforms/console_plugin.html", "$installdir/console_plugin.html");
 install_file("webforms/console_native.html", "$installdir/console_native.html");
 install_file("webforms/ganypass.pl", "$installdir/ganypass.pl");
 install_file("webforms/gany_query.pl", "$installdir/gany_query.pl");
