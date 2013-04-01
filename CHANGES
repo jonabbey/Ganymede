@@ -1,12 +1,12 @@
 Ganymede Release 2.0
-4 February 2013
+1 April 2013
 CHANGES
 
 ---------------------------------------------
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: 4 February 2013
+RELEASE DATE: 1 April 2013
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -2100,6 +2100,14 @@ still pop up a nuisance dialog to the user.
 
 When viewing an inactivated object, the client will now include the
 inactivated status in the text of the object window's title bar.
+
+156. [SERVER] Added a handy getLabel(Invid) method for DBEditObject subclassers
+
+This is now being used by the updated userKit, and makes things a bit
+easier when looking up remote labels in custom object code.
+
+Note that GanymedeBuilderTask has already provided this, so this is
+just meant for custom DBEditObject subclasses.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
