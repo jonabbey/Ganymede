@@ -8,17 +8,19 @@
    Invid's are intended to be immutable once created.
 
    Data type for invid objects;
-   
+
    Created: 11 April 1996
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -168,7 +170,7 @@ public final class Invid implements java.io.Serializable {
 
     try
       {
-        return createInvid(Short.valueOf(first).shortValue(), 
+        return createInvid(Short.valueOf(first).shortValue(),
                            Integer.valueOf(last).intValue());
       }
     catch (NumberFormatException ex)
@@ -189,8 +191,8 @@ public final class Invid implements java.io.Serializable {
 
   // ---
 
-  private short type;
-  private int num;
+  private final short type;
+  private final int num;
   private transient boolean interned = false;
 
   // constructor
@@ -200,7 +202,7 @@ public final class Invid implements java.io.Serializable {
    * create Invids, please.
    */
 
-  private Invid(short type, int num) 
+  private Invid(short type, int num)
   {
     this.type = type;
     this.num = num;
@@ -307,12 +309,12 @@ public final class Invid implements java.io.Serializable {
 
   // pull the values
 
-  public short getType() 
+  public short getType()
   {
     return type;
   }
 
-  public int getNum() 
+  public int getNum()
   {
     return num;
   }
@@ -324,7 +326,7 @@ public final class Invid implements java.io.Serializable {
 
   /**
    *
-   * Method to write this Invid out to a stream. 
+   * Method to write this Invid out to a stream.
    *
    */
 

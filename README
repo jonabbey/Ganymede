@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-22 January 2013
+16 March 2013
 README
 
 ---------------------------------------------
@@ -63,7 +63,7 @@ or you can browse the repository using gitweb via
 
   http://git.arlut.utexas.edu/?p=ganymede
 
-We're also on GitHub at
+You can also fork Ganymede on GitHub!  Our repo is at
 
   https://github.com/jonabbey/Ganymede
 

@@ -5,17 +5,19 @@
    This class stores a complete record of a single sub-transactional event,
    to be emitted to the DBLog log file, or sent to a set of users via
    email..
-   
+
    Created: 31 October 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -71,7 +73,7 @@ import arlut.csd.ganymede.common.Invid;
  * email..
  */
 
-public class DBLogEvent {
+public final class DBLogEvent {
 
   Date time;
   String transactionID;
@@ -83,7 +85,7 @@ public class DBLogEvent {
 
   private List<Invid> objects;
   private List<String> notifyList = Collections.emptyList();
-  
+
   /**
    * Will be true if this log event has already had its email
    * recipient list expanded in keeping with systemic logging rules.

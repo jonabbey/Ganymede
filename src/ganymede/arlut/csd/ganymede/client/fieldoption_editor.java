@@ -10,11 +10,13 @@
    Module By: Deepak Giridharagopal
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -76,7 +78,7 @@ import arlut.csd.ganymede.rmi.*;
  * the permissions editor widget, and uses the same TreeTable component.
  */
 
-public class fieldoption_editor extends JFrame 
+public class fieldoption_editor extends JFrame
 {
   /**
    * TranslationService object for handling string localization in
@@ -192,10 +194,10 @@ public class fieldoption_editor extends JFrame
     UIManager.put("Tree.closedIcon", new ImageIcon(PackageResources.getImageResource(this, "folder.gif", getClass())));
     UIManager.put("Tree.expandedIcon", new ImageIcon(PackageResources.getImageResource(this, "minus.gif", getClass())));
     UIManager.put("Tree.collapsedIcon", new ImageIcon(PackageResources.getImageResource(this, "plus.gif", getClass())));
-    
+
     /* Group the OK and Cancel buttons together */
 
-    Choice_Buttons = new JPanel(); 
+    Choice_Buttons = new JPanel();
 
     if (editable)
       {
@@ -223,7 +225,7 @@ public class fieldoption_editor extends JFrame
 
     /* Group the Expand and Collapse buttons together */
 
-    Expansion_Buttons = new JPanel(); 
+    Expansion_Buttons = new JPanel();
     Expansion_Buttons.setBorder(new EmptyBorder(new Insets(5,5,5,5)));
     Expansion_Buttons.setLayout(new GridLayout(1,2));
     Expansion_Buttons.add(ExpandButton);
@@ -252,7 +254,7 @@ public class fieldoption_editor extends JFrame
       {
         gc.processExceptionRethrow(ex);
       }
-    
+
     TreeTableModel model = new FieldOptionModel(rowRootNode, this);
     treeTable = new JTreeTable(model);
 
@@ -278,7 +280,7 @@ public class fieldoption_editor extends JFrame
     edit_pane.getViewport().setOpaque(true);
     edit_pane.getViewport().setBackground(Color.white);
 
-    Base_Panel = new JPanel(); 
+    Base_Panel = new JPanel();
     Base_Panel.setLayout(new BorderLayout());
     Base_Panel.add("Center", edit_pane);
     Base_Panel.add("South", All_Buttons);
@@ -291,7 +293,7 @@ public class fieldoption_editor extends JFrame
     getContentPane().add("Center", Bordered_Panel);
 
     /* Register event handlers */
-    
+
     if (editable)
       {
         OkButton.addActionListener(new ActionListener()
@@ -328,7 +330,7 @@ public class fieldoption_editor extends JFrame
                                          expandAllNodes();
                                        }
                                    });
- 
+
     CollapseButton.addActionListener(new ActionListener()
                                      {
                                        public void actionPerformed(ActionEvent e)
@@ -336,7 +338,7 @@ public class fieldoption_editor extends JFrame
                                            collapseAllNodes();
                                          }
                                      });
- 
+
     gc.setWaitCursor();
     setSize(550,550);
     this.setLocationRelativeTo(parent);
@@ -350,15 +352,14 @@ public class fieldoption_editor extends JFrame
    * It returns a DefaultMutableTreeNode as the root of the tree structure
    */
 
-  private DefaultMutableTreeNode initRowTree() throws RemoteException 
+  private DefaultMutableTreeNode initRowTree() throws RemoteException
   {
     FieldOptionMatrix matrix;
     BaseDump base;
     FieldTemplate template;
     SyncPrefEnum basevalue, fieldvalue;
     SyncPrefEnum entry;
-    Vector fields;
-    Enumeration en;
+    Vector<FieldTemplate> fields;
     short id;
     String name;
     DefaultMutableTreeNode rootNode, baseNode, fieldNode;
@@ -367,14 +368,13 @@ public class fieldoption_editor extends JFrame
 
     rootNode = new DefaultMutableTreeNode(new FieldOptionRow(null, null, SyncPrefEnum.NEVER));
 
-    /* Get a list of base types from the gclient 
+    /* Get a list of base types from the gclient
      * (we really just care about their names and id's)
      */
-    en = gc.getBaseList().elements();
 
-    while (en.hasMoreElements())
+    for (Base baseRef: gc.getBaseList())
       {
-        base = (BaseDump) en.nextElement();
+        base = (BaseDump) baseRef;
         id = base.getTypeID();
         name = base.getName();
 
@@ -396,12 +396,12 @@ public class fieldoption_editor extends JFrame
         rootNode.add(baseNode);
 
         /* Now add all of the fields for this base as child nodes */
-        fields = (Vector) gc.getTemplateVector(id);
+        fields = (Vector<FieldTemplate>) gc.getTemplateVector(id);
 
-        for (int j=0; fields != null && (j < fields.size()); j++) 
+        for (int j=0; fields != null && (j < fields.size()); j++)
           {
             /* get the field options for this field */
-            template = (FieldTemplate) fields.elementAt(j);
+            template = fields.get(j);
 
             if (base.isEmbedded() && template.getID() == SchemaConstants.ContainerField)
               {
@@ -416,7 +416,7 @@ public class fieldoption_editor extends JFrame
                  * field, use the record for the base */
                 fieldvalue = basevalue;
               }
-            else 
+            else
               {
                 /* FIXME: This assumes that the field options are stored in
                  * the database as Strings containing integers. At the moment,
@@ -438,7 +438,7 @@ public class fieldoption_editor extends JFrame
               }
           }
       }
-    
+
     return rootNode;
   }
 
@@ -452,7 +452,7 @@ public class fieldoption_editor extends JFrame
     for (Enumeration e = root.children(); e.hasMoreElements();)
     {
       DefaultMutableTreeNode child = (DefaultMutableTreeNode) e.nextElement();
-      FieldOptionRow myRow = (FieldOptionRow)child.getUserObject(); 
+      FieldOptionRow myRow = (FieldOptionRow)child.getUserObject();
 
       if (myRow.isBase())
         {
@@ -470,8 +470,8 @@ public class fieldoption_editor extends JFrame
     if (truth_value)
       {
         setVisible(true);
-      } 
-    else 
+      }
+    else
       {
         isActive = false;
         cleanUp();
@@ -518,12 +518,12 @@ public class fieldoption_editor extends JFrame
 
   private void collapseAllNodes()
   {
-    for (Enumeration en = (rowRootNode.children()); en.hasMoreElements();) 
+    for (Enumeration en = (rowRootNode.children()); en.hasMoreElements();)
       {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode)en.nextElement();
         TreePath path = new TreePath(node.getPath());
         tree.collapsePath(path);
-      } 
+      }
   }
 
   /**
@@ -533,7 +533,7 @@ public class fieldoption_editor extends JFrame
 
   private void smartExpandNodes()
   {
-    for (Enumeration en = (rowRootNode.children()); en.hasMoreElements();) 
+    for (Enumeration en = (rowRootNode.children()); en.hasMoreElements();)
       {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode)en.nextElement();
         FieldOptionRow row = (FieldOptionRow)node.getUserObject();
@@ -558,20 +558,20 @@ public class fieldoption_editor extends JFrame
     String baseName, templateName;
     FieldTemplate template;
     SyncPrefEnum value;
-   
+
     if (debug)
       {
         System.out.println("Ok was pushed");
       }
-    
+
     Enumeration en = rowRootNode.preorderEnumeration();
-    
-    while (en.hasMoreElements()) 
+
+    while (en.hasMoreElements())
       {
         DefaultMutableTreeNode node = (DefaultMutableTreeNode)en.nextElement();
         ref = (FieldOptionRow)node.getUserObject();
-      
-        if (ref.isChanged()) 
+
+        if (ref.isChanged())
           {
             gc.somethingChanged();
 
@@ -638,7 +638,7 @@ public class fieldoption_editor extends JFrame
     CollapseButton = null;
     parent = null;
   }
-} 
+}
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -688,23 +688,23 @@ class FieldOptionRow
 
   /* -- */
 
-  public FieldOptionRow(BaseDump base, FieldTemplate field, SyncPrefEnum opValue) 
+  public FieldOptionRow(BaseDump base, FieldTemplate field, SyncPrefEnum opValue)
   {
     this.opValue = opValue;
 
-    if (base == null) 
+    if (base == null)
       {
         reference = null;
         name = "Root";
       }
     else
       {
-        if (field == null) 
+        if (field == null)
           {
             reference = base;
             name = base.getName();
-          } 
-        else 
+          }
+        else
           {
             reference = field;
             name = field.getName();
@@ -712,18 +712,18 @@ class FieldOptionRow
           }
       }
   }
-  
-  public String toString() 
+
+  public String toString()
   {
     return name;
-  } 
+  }
 
-  public boolean isChanged() 
+  public boolean isChanged()
   {
     return changed;
   }
-  
-  public void setChanged(boolean value) 
+
+  public void setChanged(boolean value)
   {
     changed = value;
   }
@@ -737,7 +737,7 @@ class FieldOptionRow
   {
     this.builtin = builtin;
   }
-  
+
   public SyncPrefEnum getOptionValue()
   {
     return opValue;
@@ -752,7 +752,7 @@ class FieldOptionRow
    * Returns the current base or field object
    */
 
-  public Object getReference() 
+  public Object getReference()
   {
     return reference;
   }
@@ -761,7 +761,7 @@ class FieldOptionRow
    * Returns if the current row is dealing w/ base or field
    */
 
-  public boolean isBase() 
+  public boolean isBase()
   {
     if (reference instanceof BaseDump)
       {
@@ -782,7 +782,7 @@ class FieldOptionRow
 
 /**
  * Custom TreeTableModel model for use with the Ganymede client's
- * {@link arlut.csd.ganymede.client.fieldoption_editor fieldoption_editor} 
+ * {@link arlut.csd.ganymede.client.fieldoption_editor fieldoption_editor}
  * field options editor dialog.
  */
 
@@ -801,14 +801,14 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel
   fieldoption_editor foe = null;
 
   /* -- */
-  
+
   public FieldOptionModel(DefaultMutableTreeNode root, fieldoption_editor foe)
   {
-    super(root); 
+    super(root);
 
     this.foe = foe;
   }
-  
+
   //
   // The TreeModel interface
   //
@@ -817,17 +817,17 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel
   {
     return ((DefaultMutableTreeNode)node).getChildCount();
   }
-  
+
   public Object getChild(Object node, int i)
-  { 
+  {
     return ((DefaultMutableTreeNode)node).getChildAt(i);
   }
-  
+
   public boolean isLeaf(Object node)
-  { 
+  {
     return ((DefaultMutableTreeNode)node).isLeaf();
   }
-  
+
   //
   //  The TreeTableNode interface.
   //
@@ -836,22 +836,22 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel
   {
     return cNames.length;
   }
-  
+
   public String getColumnName(int column)
   {
     return cNames[column];
   }
-  
+
   public Class getColumnClass(int column)
   {
     return cTypes[column];
   }
-  
-  public Object getValueAt(Object node, int column) 
+
+  public Object getValueAt(Object node, int column)
   {
-    FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject(); 
-    
-    switch(column) 
+    FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject();
+
+    switch(column)
       {
       case 1:
         return myRow.getOptionValue();
@@ -859,8 +859,8 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel
 
     return null;
   }
-  
-  public boolean isCellEditable(Object node, int col) 
+
+  public boolean isCellEditable(Object node, int col)
   {
     // the tree column must not be editable, since the tree can't edit
     // into the table properly.  We'll depend on the JTreeTable's
@@ -869,10 +869,10 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel
 
     return !foe.treeTable.isHierarchical(col);
   }
-  
-  public void setValueAt(Object value, Object node, int col) 
+
+  public void setValueAt(Object value, Object node, int col)
   {
-    FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject(); 
+    FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject();
 
     if (fieldoption_editor.debug)
       {
@@ -908,8 +908,8 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel
       case 1:
         myRow.setOptionValue(newVal);
         myRow.setChanged(true);
-      
-        if (myRow.isBase()) 
+
+        if (myRow.isBase())
           {
             setBaseChildren((DefaultMutableTreeNode)node, newVal);
 
@@ -930,10 +930,10 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel
           }
         break;
       }
-    
+
     /* Update table to reflect these changes */
     TreeNode[] path = ((DefaultMutableTreeNode)node).getPath();
-    fireTreeNodesChanged(FieldOptionModel.this, path, null, null);    
+    fireTreeNodesChanged(FieldOptionModel.this, path, null, null);
   }
 
   /**
@@ -958,30 +958,30 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel
     /* How many nodes have values other than 0? */
     int numNonZeroNodes = 0;
 
-    for (Enumeration e = ((DefaultMutableTreeNode)node).children(); e.hasMoreElements();) 
+    for (Enumeration e = ((DefaultMutableTreeNode)node).children(); e.hasMoreElements();)
       {
         if (((SyncPrefEnum) getValueAt(e.nextElement(), 1)) != SyncPrefEnum.NEVER)
           {
             numNonZeroNodes++;
           }
       }
-    
+
     if (checked && (numNonZeroNodes == 0))
       {
-        FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject(); 
+        FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject();
         myRow.setOptionValue(SyncPrefEnum.NEVER);
         myRow.setChanged(true);
       }
     else if (!checked && (numNonZeroNodes > 0))
       {
-        FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject(); 
+        FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)node).getUserObject();
         myRow.setOptionValue(SyncPrefEnum.WHENCHANGED);
         myRow.setChanged(true);
       }
 
     /* Update table to reflect these changes */
     TreeNode[] path = ((DefaultMutableTreeNode)node).getPath();
-    fireTreeNodesChanged(FieldOptionModel.this, path, null, null);    
+    fireTreeNodesChanged(FieldOptionModel.this, path, null, null);
   }
 
   /**
@@ -990,9 +990,9 @@ class FieldOptionModel extends AbstractTreeTableModel implements TreeTableModel
 
   public void setBaseChildren(DefaultMutableTreeNode node, SyncPrefEnum value)
   {
-    for (Enumeration e = node.children(); e.hasMoreElements();) 
+    for (Enumeration e = node.children(); e.hasMoreElements();)
       {
-        FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)e.nextElement()).getUserObject(); 
+        FieldOptionRow myRow = (FieldOptionRow)((DefaultMutableTreeNode)e.nextElement()).getUserObject();
         myRow.setOptionValue(value);
         myRow.setChanged(true);
       }
@@ -1128,7 +1128,7 @@ class DelegateEditor extends javax.swing.AbstractCellEditor implements TableCell
     this.model = model;
     this.treetable = treetable;
   }
-  
+
   /**
    * Implementing the TableCellEditor interface
    */
@@ -1247,8 +1247,8 @@ class CheckBoxRenderer extends JCheckBox implements TableCellRenderer, ActionLis
       }
   }
 
-  public Component getTableCellRendererComponent(JTable table, 
-                                                 Object value, 
+  public Component getTableCellRendererComponent(JTable table,
+                                                 Object value,
                                                  boolean isSelected,
                                                  boolean hasFocus,
                                                  int row,
@@ -1271,7 +1271,7 @@ class CheckBoxRenderer extends JCheckBox implements TableCellRenderer, ActionLis
 
 ------------------------------------------------------------------------------*/
 
-/** 
+/**
  * Renders the field options for a DBObjectBaseField
  */
 
@@ -1288,7 +1288,7 @@ class ComboRenderer extends JComboBox implements TableCellRenderer, ItemListener
    */
 
   int selindex;
-  
+
   /* -- */
 
   public ComboRenderer(boolean editable, JTreeTable treetable, SyncPrefEnum selectionIndex)
@@ -1303,8 +1303,8 @@ class ComboRenderer extends JComboBox implements TableCellRenderer, ItemListener
     setBackground(treetable.getTree().getBackground());
     setSelectedIndex(selectionIndex.ord());
   }
-  
-  public Component getTableCellRendererComponent(JTable table, 
+
+  public Component getTableCellRendererComponent(JTable table,
                                                  Object value,
                                                  boolean isSelected,
                                                  boolean hasFocus,

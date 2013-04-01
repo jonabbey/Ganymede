@@ -72,11 +72,8 @@ import arlut.csd.ganymede.common.ErrorTypeEnum;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.Query;
-import arlut.csd.ganymede.common.QueryAndNode;
 import arlut.csd.ganymede.common.QueryDataNode;
 import arlut.csd.ganymede.common.QueryNode;
-import arlut.csd.ganymede.common.QueryNotNode;
-import arlut.csd.ganymede.common.QueryOrNode;
 import arlut.csd.ganymede.common.Result;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
@@ -97,7 +94,7 @@ import arlut.csd.ganymede.rmi.adminSession;
  * will directly interact with.</p>
  */
 
-public class GanymedeServer implements Server {
+public final class GanymedeServer implements Server {
 
   /**
    * <p>TranslationService object for handling string localization in
@@ -126,7 +123,7 @@ public class GanymedeServer implements Server {
    * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin}.</p>
    */
 
-  static private Vector<GanymedeSession> sessions = new Vector<GanymedeSession>();
+  static private Vector<GanymedeSession> userSessions = new Vector<GanymedeSession>();
 
   /**
    * <p>A hashtable mapping session names to identity.  Used by the
@@ -265,7 +262,7 @@ public class GanymedeServer implements Server {
 
   public ReturnVal login(String username, String password) throws RemoteException
   {
-    return processLogin(username, password, true);
+    return processLogin(username, password, true, true);
   }
 
   /**
@@ -290,7 +287,7 @@ public class GanymedeServer implements Server {
 
   public ReturnVal xmlLogin(String username, String password) throws RemoteException
   {
-    ReturnVal retVal = processLogin(username, password, false);
+    ReturnVal retVal = processLogin(username, password, true, false);
 
     if (!retVal.didSucceed())   // XXX processLogin never returns null
       {
@@ -298,12 +295,6 @@ public class GanymedeServer implements Server {
       }
 
     GanymedeSession mySession = (GanymedeSession) retVal.getSession();
-
-    if (mySession == null)
-      {
-        return null;            // nope, no soup for you.
-      }
-
     GanymedeXMLSession xSession = new GanymedeXMLSession(mySession);
 
     // spawn the GanymedeXMLSession's background parser thread
@@ -328,284 +319,57 @@ public class GanymedeServer implements Server {
    *
    * @param clientName The user/persona name to be logged in
    * @param clientPass The password (in plaintext) to authenticate with
-   * @param directSession If true, the GanymedeSession returned will export objects
-   * created or referenced by the GanymedeSession for direct RMI access
+   * @param directSession If true, the GanymedeSession returned be
+   * published for remote RMI access.
+   * @param exportObjects If true, the DBObjects viewed and edited by
+   * the GanymedeSession will be exported for remote RMI access.
    */
 
-  private ReturnVal processLogin(String clientName, String clientPass, boolean directSession) throws RemoteException
+  private ReturnVal processLogin(String clientName, String clientPass,
+                                 boolean directSession,
+                                 boolean exportObjects) throws RemoteException
   {
-    String clienthost = null;
-    boolean found = false;
-    boolean success = false;
-    Query userQuery;
-    QueryNode root;
-    DBObject user = null, persona = null;
-    PasswordDBField pdbf;
+    ReturnVal semaphoreResult = incrementAndTestLoginSemaphore();
 
-    /* -- */
-
-    String error = GanymedeServer.lSemaphore.increment();
-
-    if (error != null)
+    if (!ReturnVal.didSucceed(semaphoreResult))
       {
-        if (error.equals("shutdown"))
-          {
-            if (shutdownReason != null)
-              {
-                // "No logins allowed"
-                // "The server is currently waiting to shut down.  No logins will be accepted until the server has restarted.\n\nReason for shutdown: {0}"
-                return Ganymede.createErrorDialog(ts.l("processLogin.nologins"),
-                                                  ts.l("processLogin.nologins_shutdown_reason", shutdownReason));
-              }
-            else
-              {
-                // "No logins allowed"
-                // "The server is currently waiting to shut down.  No logins will be accepted until the server has restarted."
-                return Ganymede.createErrorDialog(ts.l("processLogin.nologins"),
-                                                  ts.l("processLogin.nologins_shutdown"));
-              }
-          }
-        else
-          {
-            return Ganymede.createErrorDialog(ts.l("processLogin.nologins"),
-                                              ts.l("processLogin.nologins_semaphore", error));
-          }
+        return semaphoreResult;
       }
 
-    // massive try so we decrement our loginSemaphore if the login
-    // doesn't go through cleanly
+    boolean success = false;
 
     try
       {
-        synchronized (this)
+        DBObject userOrAdminObj = validateUserOrAdminLogin(clientName, clientPass);
+
+        if (userOrAdminObj == null)
           {
-            // force logins to lowercase so we can keep track of
-            // things cleanly..  we do a case insensitive match
-            // against user/persona name later on, but we want to have
-            // a canonical name to track multiple logins with.
-
-            clientName = clientName.toLowerCase();
-
-            root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.NOCASEEQ, clientName);
-            userQuery = new Query(SchemaConstants.UserBase, root, false);
-
-            Vector<Result> results = loginSession.internalQuery(userQuery);
-
-            // results.size() really shouldn't be any larger than 1,
-            // since we are doing a match on username and username is
-            // managed by a namespace in the schema.
-
-            for (Result result: results)
-              {
-                user = loginSession.getDBSession().viewDBObject(result.getInvid());
-
-                pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
-
-                if (pdbf != null && pdbf.matchPlainText(clientPass))
-                  {
-                    found = true;
-
-                    // and re-canonicalize the name so that later on
-                    // we can match when we do case sensitive searches
-
-                    clientName = user.getLabel();
-                  }
-              }
-
-            // if we didn't find a user, perhaps they tried logging in
-            // by entering their persona name directly?  For the time
-            // being we are allowing this, so we'll go ahead and look
-            // for a matching persona.
-
-            if (!found)
-              {
-                // we want to match against either the persona name
-                // field or the new persona label field.  This lets us
-                // work with old versions of the database or new.
-                // Going forward we'll want to match here against the
-                // PersonaLabelField.
-
-                // note.. this is a hack for compatibility.. the
-                // personalabelfield will always be good, but if it
-                // does not exist, we'll go ahead and match against
-                // the persona name field as long as we don't have an
-                // associated user in that persona.. this is to avoid
-                // confusing 'broccol:supergash' with 'supergash'
-
-                // the persona label field would be like
-                // 'broccol:supergash', whereas the persona name would
-                // be 'supergash', which could be confused with the
-                // supergash account.
-
-                root = new QueryOrNode(new QueryDataNode(SchemaConstants.PersonaLabelField,
-                                                         QueryDataNode.NOCASEEQ, clientName),
-                                       new QueryAndNode(new QueryDataNode(SchemaConstants.PersonaNameField,
-                                                                          QueryDataNode.NOCASEEQ, clientName),
-                                                        new QueryNotNode(new QueryDataNode(SchemaConstants.PersonaAssocUser,
-                                                                                           QueryDataNode.DEFINED, null))));
-
-                userQuery = new Query(SchemaConstants.PersonaBase, root, false);
-
-                results = loginSession.internalQuery(userQuery);
-
-                // find the entry with the matching name and the
-                // matching password.  We no longer expect the
-                // PersonaNameField to be managed by a namespace, so
-                // we could conceivably get multiple matches back from
-                // our query.  This is particularly true if the user
-                // tries to log in as 'GASH Admin', which might be the
-                // "name" of many persona accounts.  In this case
-                // we'll depend on the password telling us which to
-                // match against.
-
-                // once we get all the ganymede.db files transitioned
-                // over to the new persona format, we'll probably want
-                // to just match against PersonaLabelField to avoid
-                // the possibility of ambiguous admin selection here.
-
-                for (Result result: results)
-                  {
-                    persona = loginSession.getDBSession().viewDBObject(result.getInvid());
-
-                    pdbf = (PasswordDBField) persona.getField(SchemaConstants.PersonaPasswordField);
-
-                    if (pdbf == null)
-                      {
-                        System.err.println(ts.l("processLogin.nopersonapass", persona.getLabel()));
-                      }
-                    else
-                      {
-                        if (clientPass == null)
-                          {
-                            System.err.println(ts.l("processLogin.nopass"));
-                          }
-                        else
-                          {
-                            if (pdbf.matchPlainText(clientPass))
-                              {
-                                found = true;
-                              }
-                          }
-                      }
-                  }
-
-                // okay, if the user logged in directly to his persona
-                // (broccol:GASH Admin, etc.), try to find his base user
-                // account.
-
-                if (found && clientName.indexOf(':') != -1)
-                  {
-                    String userName = clientName.substring(0, clientName.indexOf(':'));
-
-                    root = new QueryDataNode(SchemaConstants.UserUserName,QueryDataNode.EQUALS, userName);
-                    userQuery = new Query(SchemaConstants.UserBase, root, false);
-
-                    results = loginSession.internalQuery(userQuery);
-
-                    if (results.size() == 1)
-                      {
-                        user = loginSession.getDBSession().viewDBObject(results.get(0).getInvid());
-
-                        // recanonicalize
-
-                        clientName = user.getLabel();
-
-                        if (user.isInactivated())
-                          {
-                            found = false;
-                            user = null;
-                          }
-                      }
-                  }
-              }
-
-            if (found)
-              {
-                // the GanymedeSession constructor calls one of the
-                // register session name methods on us
-
-                GanymedeSession session = new GanymedeSession(clientName,
-                                                              user, persona,
-                                                              directSession);
-
-                monitorUserSession(session);
-
-                // "{0} logged in from {1}"
-                Ganymede.debug(ts.l("processLogin.loggedin", session.getUserName(), session.getClientHostName()));
-
-                Vector objects = new Vector();
-
-                if (user != null)
-                  {
-                    objects.add(user.getInvid());
-                  }
-                else
-                  {
-                    objects.add(persona.getInvid());
-                  }
-
-                if (Ganymede.log != null)
-                  {
-                    Ganymede.log.logSystemEvent(new DBLogEvent("normallogin",
-                                                               ts.l("processLogin.logevent", clientName, session.getClientHostName()),
-                                                               null,
-                                                               clientName,
-                                                               objects,
-                                                               null));
-                  }
-
-                success = true;
-
-                ReturnVal retVal = ReturnVal.success();
-                retVal.setSession(session);
-
-                return retVal;
-              }
-            else
-              {
-                try
-                  {
-                    String ipAddress = UnicastRemoteObject.getClientHost();
-
-                    try
-                      {
-                        java.net.InetAddress addr = java.net.InetAddress.getByName(ipAddress);
-                        clienthost = addr.getHostName();
-                      }
-                    catch (java.net.UnknownHostException ex)
-                      {
-                        clienthost = ipAddress;
-                      }
-                  }
-                catch (ServerNotActiveException ex)
-                  {
-                    clienthost = "unknown";
-                  }
-
-                if (Ganymede.log != null)
-                  {
-                    Vector recipients = new Vector();
-
-                    //      recipients.add(clientName); // this might well bounce.  C'est la vie.
-
-                    Ganymede.log.logSystemEvent(new DBLogEvent("badpass",
-                                                               ts.l("processLogin.badlogevent", clientName, clienthost),
-                                                               null,
-                                                               clientName,
-                                                               null,
-                                                               recipients));
-                  }
-
-                // "Bad login attempt"
-                // "Bad username or password, login rejected."
-                ReturnVal badCredsRetVal = Ganymede.createErrorDialog(ts.l("processLogin.badlogin"),
-                                                                      ts.l("processLogin.badlogintext"));
-
-                badCredsRetVal.setErrorType(ErrorTypeEnum.BADCREDS);
-
-                return badCredsRetVal;
-              }
+            return reportFailedLogin(clientName);
           }
+
+        DBObject personaObj = null;
+        DBObject userObj = null;
+
+        if (userOrAdminObj.getTypeID() == SchemaConstants.PersonaBase)
+          {
+            personaObj = userOrAdminObj;
+            userObj = getUserFromPersona(personaObj);
+            clientName = personaObj.getLabel(); // canonicalize
+          }
+        else if (userOrAdminObj.getTypeID() == SchemaConstants.UserBase)
+          {
+            userObj = userOrAdminObj;
+            clientName = userObj.getLabel();
+          }
+
+        GanymedeSession session = new GanymedeSession(GanymedeServer.registerUserSessionName(clientName),
+                                                      userObj, personaObj,
+                                                      directSession,
+                                                      exportObjects);
+        monitorUserSession(session);
+        success = true;
+
+        return reportSuccessLogin(session);
       }
     finally
       {
@@ -614,157 +378,123 @@ public class GanymedeServer implements Server {
             GanymedeServer.lSemaphore.decrement();
 
             // notify the consoles after decrementing the login
-            // semaphore so the notify won't show the semaphore
-            // increment
+            // semaphore so the notify won't show the transient
+            // semaphore increment
 
-            Ganymede.debug(ts.l("processLogin.badlogevent", clientName, clienthost));
+            Ganymede.debug(ts.l("reportFailedLogin.badlogevent", clientName, GanymedeServer.getClientHost()));
           }
       }
   }
 
   /**
-   * <p>Handy public accessor for the login semaphore, for
-   * possible use by plug-in task code.</p>
+   * Returns null if we were able to increment the login semaphore, or
+   * a ReturnVal encoding the problem if not.
    */
 
-  public static loginSemaphore getLoginSemaphore()
+  private ReturnVal incrementAndTestLoginSemaphore()
   {
-    return GanymedeServer.lSemaphore;
-  }
+    String error = GanymedeServer.lSemaphore.increment();
 
-  /**
-   * <p>Gated enabled test.  If this method returns null, logins are allowed
-   * at the time checkEnabled() is called.  This method is to be used by admin
-   * consoles, which should not connect to the server during schema editing or
-   * server shut down, but which should not affect the login count for reasons
-   * of blocking a schema edit disable, say.</p>
-   *
-   * @return null if logins are currently enabled, or a message string if they
-   * are disabled.
-   */
-
-  public static String checkEnabled()
-  {
-    return GanymedeServer.lSemaphore.checkEnabled();
-  }
-
-  /**
-   * <p>This method is called to add a remote user's
-   * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
-   * object to the GanymedeServer's static
-   * {@link arlut.csd.ganymede.server.GanymedeServer#sessions sessions}
-   * field, which is used by the admin console code to iterate
-   * over connected users when logging user actions to the
-   * Ganymede admin console.</p>
-   */
-
-  public static void monitorUserSession(GanymedeSession session)
-  {
-    synchronized (sessions)
+    if ("shutdown".equals(error))
       {
-        sendMessageToRemoteSessions(ClientMessage.LOGIN, ts.l("addRemoteUser.logged_in", session.getUserName()));
-
-        // we send the above message before adding the user to the
-        // sessions Vector so that the user doesn't get bothered with
-        // a 'you logged in' message
-
-        sessions.add(session);
-
-        sendMessageToRemoteSessions(ClientMessage.LOGINCOUNT, Integer.toString(sessions.size()));
-      }
-  }
-
-  /**
-   * <p>This method is called to remove a remote user's
-   * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
-   * object from the GanymedeServer's static
-   * {@link arlut.csd.ganymede.server.GanymedeServer#sessions sessions}
-   * field, which is used by the admin console code to iterate
-   * over connected users when logging user actions to the
-   * Ganymede admin console.</p>
-   */
-
-  public static void unmonitorUserSession(GanymedeSession session)
-  {
-    synchronized (sessions)
-      {
-        if (sessions.remove(session))
+        if (shutdownReason != null)
           {
-            // we just removed the session of the user who logged out, so
-            // they won't receive the log out message that we'll send to
-            // the other clients
-
-            sendMessageToRemoteSessions(ClientMessage.LOGOUT, ts.l("removeRemoteUser.logged_out", session.getUserName()));
-            sendMessageToRemoteSessions(ClientMessage.LOGINCOUNT, Integer.toString(sessions.size()));
+            // "No logins allowed"
+            // "The server is currently waiting to shut down.  No
+            // logins will be accepted until the server has
+            // restarted.\n\nReason for shutdown: {0}"
+            return Ganymede.createErrorDialog(ts.l("incrementAndTestLoginSemaphore.nologins"),
+                                              ts.l("incrementAndTestLoginSemaphore.nologins_shutdown_reason",
+                                                   shutdownReason));
           }
-      }
-
-    // update the admin consoles
-
-    GanymedeAdmin.refreshUsers();
-  }
-
-  /**
-   * <p>This method is used by the
-   * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin}
-   * refreshUsers() method to get a summary of the state of the
-   * monitored user sessions.</p>
-   */
-
-  public static Vector<AdminEntry> getUserTable()
-  {
-    Vector<AdminEntry> entries = null;
-
-    synchronized (sessions)
-      {
-        entries = new Vector<AdminEntry>(sessions.size());
-
-        for (GanymedeSession session: sessions)
+        else
           {
-            if (session.isLoggedIn())
-              {
-                entries.add(session.getAdminEntry());
-              }
+            // "No logins allowed"
+            // "The server is currently waiting to shut down.  No
+            // logins will be accepted until the server has
+            // restarted."
+            return Ganymede.createErrorDialog(ts.l("incrementAndTestLoginSemaphore.nologins"),
+                                              ts.l("incrementAndTestLoginSemaphore.nologins_shutdown"));
           }
       }
-
-    return entries;
-  }
-
-  /**
-   * Used by the Ganymede server to transmit notifications to
-   * connected clients.
-   *
-   * @param type Should be a valid value from arlut.csd.common.ClientMessage
-   * @param message The message to send
-   */
-
-  public static void sendMessageToRemoteSessions(int type, String message)
-  {
-    sendMessageToRemoteSessions(type, message, null);
-  }
-
-  /**
-   * Used by the Ganymede server to transmit notifications to
-   * connected clients.
-   *
-   * @param type Should be a valid value from arlut.csd.common.ClientMessage
-   * @param message The message to send
-   * @param self If non-null, sendMessageToRemoteSessions will skip sending the
-   * message to self
-   */
-
-  public static void sendMessageToRemoteSessions(int type, String message, GanymedeSession self)
-  {
-    Vector<GanymedeSession> sessionsCopy = (Vector<GanymedeSession>) sessions.clone();
-
-    for (GanymedeSession session: sessionsCopy)
+    else if (error != null)
       {
-        if (session != self)
-          {
-            session.sendMessage(type, message);
-          }
+        // "No logins allowed"
+        // "Can''t log in to the Ganymede server.. semaphore disabled: {0}"
+        return Ganymede.createErrorDialog(ts.l("incrementAndTestLoginSemaphore.nologins"),
+                                          ts.l("incrementAndTestLoginSemaphore.nologins_semaphore", error));
       }
+
+    return null;
+  }
+
+  /**
+   * <p>Logs and reports a failed login for user / admin clientName
+   * coming from host clientHost.</p>
+   *
+   * <p>Returns a ReturnVal to pass back to the client describing the
+   * failure.</p>
+   */
+
+  private ReturnVal reportFailedLogin(String clientName)
+  {
+    if (Ganymede.log != null)
+      {
+        // "Bad login attempt for username: {0} from host {1}"
+        Ganymede.log.logSystemEvent(new DBLogEvent("badpass",
+                                                   ts.l("reportFailedLogin.badlogevent",
+                                                        clientName,
+                                                        GanymedeServer.getClientHost()),
+                                                   null,
+                                                   clientName,
+                                                   null,
+                                                   null));
+      }
+
+    // "Bad login attempt"
+    // "Bad username or password, login rejected."
+    ReturnVal badCredsRetVal = Ganymede.createErrorDialog(ts.l("reportFailedLogin.badlogin"),
+                                                          ts.l("reportFailedLogin.badlogintext"));
+
+    badCredsRetVal.setErrorType(ErrorTypeEnum.BADCREDS);
+
+    return badCredsRetVal;
+  }
+
+  /**
+   * <p>Logs the successful login of a user and returns a ReturnVal
+   * that includes a remote reference to the newly created
+   * GanymedeSession.</p>
+   */
+
+  private ReturnVal reportSuccessLogin(GanymedeSession session)
+  {
+    // "{0} logged in from {1}"
+    Ganymede.debug(ts.l("reportSuccessLogin.loggedin",
+                        session.getIdentity(),
+                        session.getClientHostName()));
+
+    if (Ganymede.log != null)
+      {
+        Vector<Invid> objects = new Vector<Invid>();
+
+        objects.add(session.getIdentityInvid());
+
+        // "OK login for username: {0} from host {1}"
+        Ganymede.log.logSystemEvent(new DBLogEvent("normallogin",
+                                                   ts.l("reportSuccessLogin.logevent",
+                                                        session.getIdentity(),
+                                                        session.getClientHostName()),
+                                                   session.getIdentityInvid(),
+                                                   session.getIdentity(),
+                                                   objects,
+                                                   null));
+      }
+
+    ReturnVal retVal = ReturnVal.success();
+    retVal.setSession(session);
+
+    return retVal;
   }
 
   /**
@@ -780,7 +510,7 @@ public class GanymedeServer implements Server {
     // have to synchronize on sessions and risk nested monitor
     // deadlock
 
-    Vector<GanymedeSession> sessionsCopy = (Vector<GanymedeSession>) sessions.clone();
+    Vector<GanymedeSession> sessionsCopy = (Vector<GanymedeSession>) userSessions.clone();
 
     for (GanymedeSession session: sessionsCopy)
       {
@@ -799,7 +529,7 @@ public class GanymedeServer implements Server {
     // clone the sessions Vector so any forceOff() won't disturb the
     // loop
 
-    Vector<GanymedeSession> sessionsCopy = (Vector<GanymedeSession>) sessions.clone();
+    Vector<GanymedeSession> sessionsCopy = (Vector<GanymedeSession>) userSessions.clone();
 
     for (GanymedeSession session: sessionsCopy)
       {
@@ -819,9 +549,9 @@ public class GanymedeServer implements Server {
     // soon as we do a forceOff (which can cause the sessions Vector
     // to be modified in a way that would otherwise disturb the loop
 
-    synchronized (sessions)
+    synchronized (userSessions)
       {
-        for (GanymedeSession session: sessions)
+        for (GanymedeSession session: userSessions)
           {
             if (session.getSessionName().equals(username))
               {
@@ -833,6 +563,266 @@ public class GanymedeServer implements Server {
 
     return false;
   }
+
+  /**
+   * <p>This public remotely accessible method is called by the
+   * Ganymede admin console and/or the Ganymede stopServer script to
+   * establish a new admin console connection to the server.
+   * Establishes an GanymedeAdmin object in the server.</p>
+   *
+   * <p>Adds &lt;admin&gt; as a monitoring admin console.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.Server
+   */
+
+  public ReturnVal admin(String clientName, String clientPass) throws RemoteException
+  {
+    String clientHost = GanymedeServer.getClientHost();
+    String error = GanymedeServer.lSemaphore.checkEnabled();
+
+    if (error != null)
+      {
+        // "Admin Console Connect Failure"
+        // "Can''t connect admin console to server.. semaphore disabled: {0}"
+        return Ganymede.createErrorDialog(ts.l("admin.connect_failure"),
+                                          ts.l("admin.semaphore_failure", error));
+      }
+
+    DBObject adminObj = validateAdminLogin(clientName, clientPass);
+    int validationResult = validateConsoleAdminPersona(adminObj);
+
+    if (validationResult == 0)
+      {
+        if (Ganymede.log != null)
+          {
+            // "Bad console attach attempt by: {0} from host {1}"
+            Ganymede.log.logSystemEvent(new DBLogEvent("badpass",
+                                                       ts.l("admin.badlogevent", clientName, clientHost),
+                                                       null,
+                                                       clientName,
+                                                       null,
+                                                       null));
+          }
+
+        // "Login Failure"
+        // "Bad username and/or password for admin console"
+        return Ganymede.createErrorDialog(ts.l("admin.badlogin"),
+                                          ts.l("admin.baduserpass"));
+      }
+
+    adminSession aSession = new GanymedeAdmin(validationResult >= 2, clientName, clientHost);
+
+    // now Ganymede.debug() will write to the newly attached console,
+    // even though we haven't returned the admin session to the admin
+    // console client
+
+    String eventStr = ts.l("admin.goodlogevent", clientName, clientHost);
+
+    Ganymede.debug(eventStr);
+
+    if (Ganymede.log != null)
+      {
+        Ganymede.log.logSystemEvent(new DBLogEvent("adminconnect",
+                                                   eventStr,
+                                                   null,
+                                                   clientName,
+                                                   null,
+                                                   null));
+      }
+
+    ReturnVal retVal = new ReturnVal(true);
+    retVal.setAdminSession(aSession);
+
+    return retVal;
+  }
+
+  /**
+   * <p>Returns the user linked to the provided personaObj, or null if
+   * no user is attached.</p>
+   */
+
+  public DBObject getUserFromPersona(DBObject personaObj)
+  {
+    if (personaObj.getTypeID() != SchemaConstants.PersonaBase)
+      {
+        throw new IllegalArgumentException();
+      }
+
+    Invid userInvid = (Invid) personaObj.getFieldValueLocal(SchemaConstants.PersonaAssocUser);
+
+    if (userInvid == null)
+      {
+        return null;
+      }
+
+    return loginSession.getDBSession().viewDBObject(userInvid);
+  }
+
+  /**
+   * <p>Returns a user or admin persona DBObject if the given
+   * user/admin name exists, and has the given password in the
+   * database, and is permitted to login and have a
+   * GanymedeSession.</p>
+   *
+   * <p>Returns null if no such user or admin persona / password pair
+   * exists.</p>
+   */
+
+  public DBObject validateUserOrAdminLogin(String name, String clientPass)
+  {
+    DBObject personaObj = this.validateAdminLogin(name, clientPass);
+
+    if (personaObj == null)
+      {
+        return this.validateUserLogin(name, clientPass);
+      }
+
+    // don't let the monitor account login to the client
+    //
+    //    if (personaObj.getInvid().equals(Invid.createInvid(SchemaConstants.PersonaBase,
+    //                                                       SchemaConstants.PersonaMonitorObj)))
+    //      {
+    //        return null;
+    //      }
+
+    DBObject userObj = getUserFromPersona(personaObj);
+
+    if (userObj != null && userObj.isInactivated())
+      {
+        return null;
+      }
+
+    return personaObj;
+  }
+
+  /**
+   * <p>Returns a user DBObject if the given user name has the given
+   * password in the database.</p>
+   *
+   * <p>Returns null if no such user / password pair exists.</p>
+   */
+
+  public DBObject validateUserLogin(String userName, String clientPass)
+  {
+    Query userQuery = new Query(SchemaConstants.UserBase,
+                                new QueryDataNode(SchemaConstants.UserUserName,
+                                                  QueryDataNode.NOCASEEQ, userName),
+                                false);
+
+    Result result = loginSession.internalSingletonQuery(userQuery);
+
+    if (result != null)
+      {
+        DBObject user = loginSession.getDBSession().viewDBObject(result.getInvid());
+        PasswordDBField pdbf = (PasswordDBField) user.getField(SchemaConstants.UserPassword);
+
+        if (pdbf != null && pdbf.matchPlainText(clientPass))
+          {
+            return user;
+          }
+      }
+
+    return null;
+  }
+
+  /**
+   * <p>Returns an admin persona DBObject if the given personaName
+   * exists and has the given password in the database.</p>
+   *
+   * <p>Returns null if no such admin persona / password pair
+   * exists.</p>
+   */
+
+  public DBObject validateAdminLogin(String personaName, String clientPass)
+  {
+    Query adminQuery = new Query(SchemaConstants.PersonaBase,
+                                 new QueryDataNode(SchemaConstants.PersonaLabelField,
+                                                   QueryDataNode.NOCASEEQ, personaName),
+                                 false);
+
+    Result result = loginSession.internalSingletonQuery(adminQuery);
+
+    if (result != null)
+      {
+        DBObject personaObj = loginSession.getDBSession().viewDBObject(result.getInvid());
+        PasswordDBField pdbf = (PasswordDBField) personaObj.getField(SchemaConstants.PersonaPasswordField);
+
+        if (pdbf != null && pdbf.matchPlainText(clientPass))
+          {
+            return personaObj;
+          }
+      }
+
+    return null;
+  }
+
+  /**
+   * This method determines whether the specified username/password
+   * combination is valid for an admin persona.
+   *
+   * @param adminObj DBObject corresponding to an admin object to
+   * check for console privs.
+   * @return  0 if the admin doesn't have admin console privileges,
+   *          1 the admin is allowed basic admin console access,
+   *          2 the admin is allowed full admin console privileges,
+   *          3 the admin is allowed interpreter access.
+   */
+
+  public int validateConsoleAdminPersona(DBObject adminObj)
+  {
+    if (adminObj == null)
+      {
+        return 0;
+      }
+
+    if (adminObj.getTypeID() != SchemaConstants.PersonaBase)
+      {
+        throw new RuntimeException("Invalid object type");
+      }
+
+    // Are we the One True Amazing Supergash Root User Person? He
+    // gets full privileges by default.
+
+    if (adminObj.getInvid().equals(Invid.createInvid(SchemaConstants.PersonaBase,
+                                                     SchemaConstants.PersonaSupergashObj)))
+      {
+        return 3;
+      }
+    else
+      {
+        // Is this user prohibited from accessing the admin
+        // console?
+
+        if (!adminObj.isSet(SchemaConstants.PersonaAdminConsole))
+          {
+            return 0;
+          }
+
+        // Ok, they can access the admin console...but do they
+        // have full privileges?
+
+        if (!adminObj.isSet(SchemaConstants.PersonaAdminPower))
+          {
+            return 1;
+          }
+
+        // Ok, they have full privileges...but can they access the
+        // admin interpreter?
+
+        if (!adminObj.isSet(SchemaConstants.PersonaInterpreterPower))
+          {
+            return 2;
+          }
+
+        return 3;
+      }
+  }
+
+  /** ------------------------------------------------------------------------------
+
+      Static Methods
+
+      ------------------------------------------------------------------------------ */
 
   /**
    * <p>This method is used by GanymedeSession.login() to find and
@@ -973,311 +963,10 @@ public class GanymedeServer implements Server {
   }
 
   /**
-   * <p>This method retrieves a message from a specified directory in
-   * the Ganymede installation and passes it back as a StringBuffer.
-   * Used by the Ganymede server to pass motd information to the
-   * client.</p>
-   *
-   * @param key A text key indicating the file to be retrieved, minus
-   * the .txt or .html extension
-   * @param userToDateCompare If not null, the Invid of a user on whose behalf
-   * we want to retrieve the message.  If the user has logged in more recently
-   * than the timestamp of the file has changed, we will return a null result
-   * @param html If true, return the .html version.  If false, return the .txt
-   * version.
-   */
-
-  public static StringBuffer getTextMessage(String key, Invid userToDateCompare,
-                                            boolean html)
-  {
-    if ((key.indexOf('/') != -1) || (key.indexOf('\\') != -1))
-      {
-        throw new IllegalArgumentException(ts.l("getTextMessage.badargs"));
-      }
-
-    if (html)
-      {
-        key = key + ".html";
-      }
-    else
-      {
-        key = key + ".txt";
-      }
-
-    if (Ganymede.messageDirectoryProperty == null)
-      {
-        Ganymede.debug(ts.l("getTextMessage.nodir", key));
-        return null;
-      }
-
-    /* - */
-
-    String filename = arlut.csd.Util.PathComplete.completePath(Ganymede.messageDirectoryProperty) + key;
-    File messageFile;
-
-    /* -- */
-
-    messageFile = new File(filename);
-
-    if (!messageFile.exists() || ! messageFile.isFile())
-      {
-        return null;
-      }
-
-    if (userToDateCompare != null)
-      {
-        Date lastlogout = (Date) userLogOuts.get(userToDateCompare);
-
-        if (lastlogout != null)
-          {
-            Date timestamp = new Date(messageFile.lastModified());
-
-            if (lastlogout.after(timestamp))
-              {
-                return null;
-              }
-          }
-      }
-
-    // okay, read and copy!
-
-    BufferedReader in = null;
-    StringBuffer result = null;
-
-    try
-      {
-        in = new BufferedReader(new FileReader(messageFile));
-
-        result = new StringBuffer();
-
-        try
-          {
-            String line = in.readLine();
-
-            while (line != null)
-              {
-                result.append(line);
-                result.append("\n");
-                line = in.readLine();
-              }
-          }
-        catch (IOException ex)
-          {
-            Ganymede.debug(ts.l("getTextMessage.IOExceptionReport", filename, ex.getMessage()));
-            Ganymede.debug(result.toString());
-          }
-      }
-    catch (FileNotFoundException ex)
-      {
-        Ganymede.debug("getTextMessage(" + key + "): FileNotFoundException");
-        return null;
-      }
-    finally
-      {
-        if (in != null)
-          {
-            try
-              {
-                in.close();
-              }
-            catch (IOException ex)
-              {
-              }
-          }
-      }
-
-    return result;
-  }
-
-  /**
-   * <p>This public remotely accessible method is called by the
-   * Ganymede admin console and/or the Ganymede stopServer script to
-   * establish a new admin console connection to the server.
-   * Establishes an GanymedeAdmin object in the server.</p>
-   *
-   * <p>Adds &lt;admin&gt; as a monitoring admin console.</p>
-   *
-   * @see arlut.csd.ganymede.rmi.Server
-   */
-
-  public synchronized ReturnVal admin(String clientName, String clientPass) throws RemoteException
-  {
-    boolean fullprivs = false;
-    boolean found = false;
-    Query userQuery;
-    QueryNode root;
-    DBObject obj;
-    PasswordDBField pdbf;
-    int validationResult;
-
-    String clienthost;
-
-    String error = GanymedeServer.lSemaphore.checkEnabled();
-
-    if (error != null)
-      {
-        return Ganymede.createErrorDialog(ts.l("admin.connect_failure"),
-                                          ts.l("admin.semaphore_failure", error));
-      }
-
-    try
-      {
-        String ipAddress = UnicastRemoteObject.getClientHost();
-
-        try
-          {
-            java.net.InetAddress addr = java.net.InetAddress.getByName(ipAddress);
-            clienthost = addr.getHostName();
-          }
-        catch (java.net.UnknownHostException ex)
-          {
-            clienthost = ipAddress;
-          }
-      }
-    catch (ServerNotActiveException ex)
-      {
-        clienthost = "unknown";
-      }
-
-    validationResult = validateAdminUser(clientName, clientPass);
-
-    if (validationResult == 0)
-      {
-        if (Ganymede.log != null)
-          {
-            Ganymede.log.logSystemEvent(new DBLogEvent("badpass",
-                                                       ts.l("admin.badlogevent", clientName, clienthost),
-                                                       null,
-                                                       clientName,
-                                                       null,
-                                                       null));
-          }
-
-        return Ganymede.createErrorDialog(ts.l("admin.badlogin"),
-                                          ts.l("admin.baduserpass"));
-      }
-
-    if (validationResult == 1)
-      {
-        fullprivs = false;
-      }
-    else if (validationResult >= 2)
-      {
-        fullprivs = true;
-      }
-
-    // creating a new GanymedeAdmin can block if we are currently
-    // looping over the connected consoles.
-
-    adminSession aSession = new GanymedeAdmin(fullprivs, clientName, clienthost);
-
-    // now Ganymede.debug() will write to the newly attached console,
-    // even though we haven't returned the admin session to the admin
-    // console client
-
-    String eventStr = ts.l("admin.goodlogevent", clientName, clienthost);
-
-    Ganymede.debug(eventStr);
-
-    if (Ganymede.log != null)
-      {
-        Ganymede.log.logSystemEvent(new DBLogEvent("adminconnect",
-                                                   eventStr,
-                                                   null,
-                                                   clientName,
-                                                   null,
-                                                   null));
-      }
-
-    ReturnVal retVal = new ReturnVal(true);
-    retVal.setAdminSession(aSession);
-
-    return retVal;
-  }
-
-  /**
-   * This method determines whether the specified username/password combination
-   * is valid.
-   *
-   * @param clientName The username
-   * @param clientPass The password
-   * @return 0 if the login fails,
-   * 0 if the login succeeds but the user doesn't have admin console privileges,
-   * 1 if the login succeeds and the user is allowed basic admin console access,
-   * 2 if the login succeeds and the user is allowed full admin console privileges,
-   * 3 if the login succeeds and the user is allowed interpreter access.
-   */
-
-  public synchronized int validateAdminUser(String clientName, String clientPass)
-  {
-    Query userQuery;
-    QueryNode root;
-    DBObject obj;
-    PasswordDBField pdbf;
-
-    root = new QueryDataNode(SchemaConstants.PersonaLabelField, QueryDataNode.EQUALS, clientName);
-    userQuery = new Query(SchemaConstants.PersonaBase, root, false);
-    Vector<Result> results = loginSession.internalQuery(userQuery);
-
-    // If there is no admin persona with the given name, then bail
-    if (results.size() == 0)
-      {
-        return 0;
-      }
-
-    obj = loginSession.getDBSession().viewDBObject(results.get(0).getInvid());
-    pdbf = (PasswordDBField) obj.getField(SchemaConstants.PersonaPasswordField);
-
-    if (pdbf != null && pdbf.matchPlainText(clientPass))
-      {
-        // Are we the One True Amazing Supergash Root User Person? He
-        // gets full privileges by default.
-
-        if (obj.getInvid().equals(Invid.createInvid(SchemaConstants.PersonaBase,
-                                                    SchemaConstants.PersonaSupergashObj)))
-          {
-            return 3;
-          }
-        else
-          {
-            // Is this user prohibited from accessing the admin
-            // console?
-
-            if (!obj.isSet(SchemaConstants.PersonaAdminConsole))
-              {
-                return 0;
-              }
-
-            // Ok, they can access the admin console...but do they
-            // have full privileges?
-
-            if (!obj.isSet(SchemaConstants.PersonaAdminPower))
-              {
-                return 1;
-              }
-
-            // Ok, they have full privileges...but can they access the
-            // admin interpreter?
-
-            if (!obj.isSet(SchemaConstants.PersonaInterpreterPower))
-              {
-                return 2;
-              }
-
-            return 3;
-          }
-      }
-    else
-      // The password didn't match
-      {
-        return 0;
-      }
-  }
-
-  /**
-   * <p>This method is used by the
-   * {@link arlut.csd.ganymede.server.GanymedeAdmin#shutdown(boolean) shutdown()}
-   * method to put the server into 'shutdown soon' mode.</p>
+   * <p>This method is used by the {@link
+   * arlut.csd.ganymede.server.GanymedeAdmin#shutdown(boolean,
+   * java.lang.String) shutdown()} method to put the server into
+   * 'shutdown soon' mode.</p>
    */
 
   public static void setShutdown(String reason)
@@ -1404,18 +1093,10 @@ public class GanymedeServer implements Server {
         // "Server going down.. disconnecting clients"
         Ganymede.debug(ts.l("shutdown.clients"));
 
-        // forceOff modifies GanymedeServer.sessions, so we need to
-        // copy our list before we iterate over it.
+        // forceOff modifies GanymedeServer.userSessions, so we need
+        // to copy our list before we iterate over it.
 
-        Vector<GanymedeSession> tempList = new Vector<GanymedeSession>();
-
-        synchronized (sessions)
-          {
-            for (GanymedeSession session: sessions)
-              {
-                tempList.add(session);
-              }
-          }
+        Vector<GanymedeSession> tempList = (Vector<GanymedeSession>) userSessions.clone();
 
         for (GanymedeSession temp: tempList)
           {
@@ -1503,6 +1184,36 @@ public class GanymedeServer implements Server {
   }
 
   /**
+   * <p>Returns the name of the client that is doing an RMI call on
+   * the server.</p>
+   *
+   * <p>Will return "unknown" if the thread that calls this method
+   * wasn't initiated by an RMI call.</p>
+   */
+
+  public static String getClientHost()
+  {
+    try
+      {
+        String ipAddress = UnicastRemoteObject.getClientHost();
+
+        try
+          {
+            java.net.InetAddress addr = java.net.InetAddress.getByName(ipAddress);
+            return addr.getHostName();
+          }
+        catch (java.net.UnknownHostException ex)
+          {
+            return ipAddress;
+          }
+      }
+    catch (ServerNotActiveException ex)
+      {
+        return "unknown";
+      }
+  }
+
+  /**
    * <p>This method is triggered from the admin console when the user
    * runs an 'Invid Sweep'.  It is designed to scan through the
    * Ganymede datastore's reference fields and clean out any
@@ -1550,7 +1261,7 @@ public class GanymedeServer implements Server {
 
     try
       {
-        for (DBObjectBase base: Ganymede.db.objectBases.values())
+        for (DBObjectBase base: Ganymede.db.bases())
           {
             Ganymede.debug(ts.l("sweepInvids.sweeping", base.toString()));
 
@@ -1700,7 +1411,7 @@ public class GanymedeServer implements Server {
         // back pointers or virtual back pointer registrations in the
         // DBLinkTracker class.
 
-        for (DBObjectBase base: Ganymede.db.objectBases.values())
+        for (DBObjectBase base: Ganymede.db.bases())
           {
             Ganymede.debug(ts.l("checkInvids.checking", base.getName()));
 
@@ -1791,7 +1502,7 @@ public class GanymedeServer implements Server {
       {
         // loop over the object bases
 
-        for (DBObjectBase base: Ganymede.db.objectBases.values())
+        for (DBObjectBase base: Ganymede.db.bases())
           {
             if (!base.isEmbedded())
               {
@@ -1864,7 +1575,7 @@ public class GanymedeServer implements Server {
 
     try
       {
-        for (DBObjectBase base: Ganymede.db.objectBases.values())
+        for (DBObjectBase base: Ganymede.db.bases())
           {
             if (!base.isEmbedded())
               {
@@ -1951,5 +1662,272 @@ public class GanymedeServer implements Server {
       {
         gSession.logout();
       }
+  }
+
+
+  /**
+   * <p>Handy public accessor for the login semaphore, for
+   * possible use by plug-in task code.</p>
+   */
+
+  public static loginSemaphore getLoginSemaphore()
+  {
+    return GanymedeServer.lSemaphore;
+  }
+
+  /**
+   * <p>Gated enabled test.  If this method returns null, logins are allowed
+   * at the time checkEnabled() is called.  This method is to be used by admin
+   * consoles, which should not connect to the server during schema editing or
+   * server shut down, but which should not affect the login count for reasons
+   * of blocking a schema edit disable, say.</p>
+   *
+   * @return null if logins are currently enabled, or a message string if they
+   * are disabled.
+   */
+
+  public static String checkEnabled()
+  {
+    return GanymedeServer.lSemaphore.checkEnabled();
+  }
+
+  /**
+   * <p>This method is called to add a remote user's
+   * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
+   * object to the GanymedeServer's static
+   * {@link arlut.csd.ganymede.server.GanymedeServer#userSessions userSessions}
+   * field, which is used by the admin console code to iterate
+   * over connected users when logging user actions to the
+   * Ganymede admin console.</p>
+   */
+
+  public static void monitorUserSession(GanymedeSession session)
+  {
+    synchronized (userSessions)
+      {
+        sendMessageToRemoteSessions(ClientMessage.LOGIN, ts.l("addRemoteUser.logged_in", session.getUserName()));
+
+        // we send the above message before adding the user to the
+        // userSessions Vector so that the user doesn't get bothered
+        // with a 'you logged in' message
+
+        userSessions.add(session);
+
+        sendMessageToRemoteSessions(ClientMessage.LOGINCOUNT, Integer.toString(userSessions.size()));
+      }
+  }
+
+  /**
+   * <p>This method is called to remove a remote user's
+   * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}
+   * object from the GanymedeServer's static
+   * {@link arlut.csd.ganymede.server.GanymedeServer#userSessions userSessions}
+   * field, which is used by the admin console code to iterate
+   * over connected users when logging user actions to the
+   * Ganymede admin console.</p>
+   */
+
+  public static void unmonitorUserSession(GanymedeSession session)
+  {
+    synchronized (userSessions)
+      {
+        if (userSessions.remove(session))
+          {
+            // we just removed the session of the user who logged out, so
+            // they won't receive the log out message that we'll send to
+            // the other clients
+
+            sendMessageToRemoteSessions(ClientMessage.LOGOUT, ts.l("removeRemoteUser.logged_out", session.getUserName()));
+            sendMessageToRemoteSessions(ClientMessage.LOGINCOUNT, Integer.toString(userSessions.size()));
+          }
+      }
+
+    // update the admin consoles
+
+    GanymedeAdmin.refreshUsers();
+  }
+
+  /**
+   * <p>This method is used by the
+   * {@link arlut.csd.ganymede.server.GanymedeAdmin GanymedeAdmin}
+   * refreshUsers() method to get a summary of the state of the
+   * monitored user sessions.</p>
+   */
+
+  public static Vector<AdminEntry> getUserTable()
+  {
+    Vector<AdminEntry> entries = null;
+
+    synchronized (userSessions)
+      {
+        entries = new Vector<AdminEntry>(userSessions.size());
+
+        for (GanymedeSession session: userSessions)
+          {
+            if (session.isLoggedIn())
+              {
+                entries.add(session.getAdminEntry());
+              }
+          }
+      }
+
+    return entries;
+  }
+
+  /**
+   * <p>Used by the Ganymede server to transmit notifications to
+   * connected clients.</p>
+   *
+   * @param type Should be a valid value from arlut.csd.common.ClientMessage
+   * @param message The message to send
+   */
+
+  public static void sendMessageToRemoteSessions(int type, String message)
+  {
+    sendMessageToRemoteSessions(type, message, null);
+  }
+
+  /**
+   * <p>Used by the Ganymede server to transmit notifications to
+   * connected clients.</p>
+   *
+   * @param type Should be a valid value from arlut.csd.common.ClientMessage
+   * @param message The message to send
+   * @param self If non-null, sendMessageToRemoteSessions will skip sending the
+   * message to self
+   */
+
+  public static void sendMessageToRemoteSessions(int type, String message, GanymedeSession self)
+  {
+    Vector<GanymedeSession> sessionsCopy = (Vector<GanymedeSession>) userSessions.clone();
+
+    for (GanymedeSession session: sessionsCopy)
+      {
+        if (session != self)
+          {
+            session.sendMessage(type, message);
+          }
+      }
+  }
+
+
+  /**
+   * <p>This method retrieves a message from a specified directory in
+   * the Ganymede installation and passes it back as a StringBuffer.
+   * Used by the Ganymede server to pass motd information to the
+   * client.</p>
+   *
+   * @param key A text key indicating the file to be retrieved, minus
+   * the .txt or .html extension
+   *
+   * @param userToDateCompare If not null, the Invid of a user on
+   * whose behalf we want to retrieve the message.  If the user has
+   * logged in more recently than the timestamp of the file has
+   * changed, we will return a null result
+   *
+   * @param html If true, return the .html version.  If false, return
+   * the .txt version.
+   */
+
+  public static StringBuffer getTextMessage(String key, Invid userToDateCompare,
+                                            boolean html)
+  {
+    if ((key.indexOf('/') != -1) || (key.indexOf('\\') != -1))
+      {
+        throw new IllegalArgumentException(ts.l("getTextMessage.badargs"));
+      }
+
+    if (html)
+      {
+        key = key + ".html";
+      }
+    else
+      {
+        key = key + ".txt";
+      }
+
+    if (Ganymede.messageDirectoryProperty == null)
+      {
+        Ganymede.debug(ts.l("getTextMessage.nodir", key));
+        return null;
+      }
+
+    /* - */
+
+    String filename = arlut.csd.Util.PathComplete.completePath(Ganymede.messageDirectoryProperty) + key;
+    File messageFile;
+
+    /* -- */
+
+    messageFile = new File(filename);
+
+    if (!messageFile.exists() || ! messageFile.isFile())
+      {
+        return null;
+      }
+
+    if (userToDateCompare != null)
+      {
+        Date lastlogout = (Date) userLogOuts.get(userToDateCompare);
+
+        if (lastlogout != null)
+          {
+            Date timestamp = new Date(messageFile.lastModified());
+
+            if (lastlogout.after(timestamp))
+              {
+                return null;
+              }
+          }
+      }
+
+    // okay, read and copy!
+
+    BufferedReader in = null;
+    StringBuffer result = null;
+
+    try
+      {
+        in = new BufferedReader(new FileReader(messageFile));
+
+        result = new StringBuffer();
+
+        try
+          {
+            String line = in.readLine();
+
+            while (line != null)
+              {
+                result.append(line);
+                result.append("\n");
+                line = in.readLine();
+              }
+          }
+        catch (IOException ex)
+          {
+            Ganymede.debug(ts.l("getTextMessage.IOExceptionReport", filename, ex.getMessage()));
+            Ganymede.debug(result.toString());
+          }
+      }
+    catch (FileNotFoundException ex)
+      {
+        Ganymede.debug("getTextMessage(" + key + "): FileNotFoundException");
+        return null;
+      }
+    finally
+      {
+        if (in != null)
+          {
+            try
+              {
+                in.close();
+              }
+            catch (IOException ex)
+              {
+              }
+          }
+      }
+
+    return result;
   }
 }

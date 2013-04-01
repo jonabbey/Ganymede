@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -1165,7 +1165,7 @@ public final class DBStore implements JythonMap {
         xmlOut.startElementIndent("ganydata");
         xmlOut.indentOut();
 
-        for (DBObjectBase base: getBases())
+        for (DBObjectBase base: objectBases.values())
           {
             if (base.isEmbedded())
               {
@@ -1289,8 +1289,9 @@ public final class DBStore implements JythonMap {
   }
 
   /**
-   * Returns a Vector of {@link arlut.csd.ganymede.server.DBObjectBase
-   * DBObjectBases} currently defined in this DBStore.
+   * <p>Returns a Vector copy of the {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBases} currently
+   * defined in this DBStore.</p>
    */
 
   public Vector<DBObjectBase> getBases()
@@ -1303,6 +1304,19 @@ public final class DBStore implements JythonMap {
       }
 
     return result;
+  }
+
+  /**
+   * <p>Returns a directly iterable Collection view of the {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBases} currently
+   * defined in this DBStore.</p>
+   *
+   * <p>No copy is made, this is a direct view.</p>
+   */
+
+  public Collection<DBObjectBase> bases()
+  {
+    return objectBases.values();
   }
 
   /**
@@ -1824,7 +1838,7 @@ public final class DBStore implements JythonMap {
 
         setBase(b);
 
-        // create System Events base
+        // create System Event base
 
         DBBaseCategory eventCategory = new DBBaseCategory(this, "Events", adminCategory);
         adminCategory.addNodeAfter(eventCategory, null);
@@ -1900,7 +1914,7 @@ public final class DBStore implements JythonMap {
 
         setBase(b);
 
-        // create Object Events base
+        // create Object Event base
 
         b = new DBObjectBase(this, false);
         b.setName("Object Event");
@@ -3031,7 +3045,7 @@ public final class DBStore implements JythonMap {
     return getBaseNameList().size();
   }
 
-  public Collection values()
+  public Collection<DBObjectBase> values()
   {
     return new ArrayList(getBases());
   }

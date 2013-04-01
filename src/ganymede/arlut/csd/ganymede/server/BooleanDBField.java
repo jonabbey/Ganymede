@@ -10,11 +10,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -64,13 +66,15 @@ import arlut.csd.ganymede.rmi.boolean_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>BooleanDBField is a subclass of {@link arlut.csd.ganymede.server.DBField DBField}
- * for the storage and handling of boolean
- * fields in the {@link arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede
- * server.</P>
+ * <p>BooleanDBField is a subclass of {@link
+ * arlut.csd.ganymede.server.DBField DBField} for the storage and
+ * handling of boolean fields in the {@link
+ * arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede
+ * server.</p>
  *
- * <P>The Ganymede client talks to BooleanDBFields through the
- * {@link arlut.csd.ganymede.rmi.boolean_field boolean_field} RMI interface.</P> 
+ * <p>The Ganymede client talks to BooleanDBFields through the {@link
+ * arlut.csd.ganymede.rmi.boolean_field boolean_field} RMI
+ * interface.</p>
  */
 
 public class BooleanDBField extends DBField implements boolean_field {
@@ -86,37 +90,37 @@ public class BooleanDBField extends DBField implements boolean_field {
   public static final String falseStr = ts.l("global.false"); // "False"
 
   /**
-   * <P>Receive constructor.  Used to create a BooleanDBField from a
-   * {@link arlut.csd.ganymede.server.DBStore DBStore}/{@link arlut.csd.ganymede.server.DBJournal DBJournal}
-   * DataInput stream.</P>
+   * <p>Receive constructor.  Used to create a BooleanDBField from a
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}/{@link
+   * arlut.csd.ganymede.server.DBJournal DBJournal} DataInput
+   * stream.</p>
    */
 
   BooleanDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
-    value = null;
-    this.owner = owner;
-    this.fieldcode = definition.getID();
+    super(owner, definition.getID());
+
+    this.value = null;
     receive(in, definition);
   }
 
   /**
-   * <P>No-value constructor.  Allows the construction of a
-   * 'non-initialized' field, for use where the 
-   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
-   * definition indicates that a given field may be present,
-   * but for which no value has been stored in the 
-   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
+   * <p>No-value constructor.  Allows the construction of a
+   * 'non-initialized' field, for use where the {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} definition
+   * indicates that a given field may be present, but for which no
+   * value has been stored in the {@link
+   * arlut.csd.ganymede.server.DBStore DBStore}.</p>
    *
-   * <P>Used to provide the client a template for 'creating' this
-   * field if so desired.</P>
+   * <p>Used to provide the client a template for 'creating' this
+   * field if so desired.</p>
    */
 
   BooleanDBField(DBObject owner, DBObjectBaseField definition)
   {
-    this.owner = owner;
-    this.fieldcode = definition.getID();
-    
-    value = null;
+    super(owner, definition.getID());
+
+    this.value = null;
   }
 
   /**
@@ -127,10 +131,9 @@ public class BooleanDBField extends DBField implements boolean_field {
 
   public BooleanDBField(DBObject owner, BooleanDBField field)
   {
-    this.owner = owner;
-    this.fieldcode = field.getID();
-    
-    value = field.value;
+    super(owner, field.getID());
+
+    this.value = field.value;
   }
 
   /**
@@ -141,8 +144,8 @@ public class BooleanDBField extends DBField implements boolean_field {
 
   public BooleanDBField(DBObject owner, boolean value, DBObjectBaseField definition)
   {
-    this.owner = owner;
-    this.fieldcode = definition.getID();
+    super(owner, definition.getID());
+
     this.value = Boolean.valueOf(value);
   }
 
@@ -154,6 +157,8 @@ public class BooleanDBField extends DBField implements boolean_field {
 
   public BooleanDBField(DBObject owner, Vector values, DBObjectBaseField definition)
   {
+    super(owner, definition.getID());
+
     throw new IllegalArgumentException("vector constructor called on scalar field");
   }
 
@@ -212,7 +217,7 @@ public class BooleanDBField extends DBField implements boolean_field {
       {
         return false;
       }
-    
+
     return ((Boolean) value).booleanValue();
   }
 
@@ -222,21 +227,18 @@ public class BooleanDBField extends DBField implements boolean_field {
   }
 
   /**
-   * <P>This method returns a text encoded value for this BooleanDBField
-   * without checking permissions.</P>
+   * <p>This method returns a text encoded value for this BooleanDBField
+   * without checking permissions.</p>
    *
-   * <P>This method avoids checking permissions because it is used on
-   * the server side only and because it is involved in the 
-   * {@link arlut.csd.ganymede.server.DBObject#getLabel() getLabel()}
-   * logic for {@link arlut.csd.ganymede.server.DBObject DBObject}, 
-   * which is invoked from {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
-   * {@link arlut.csd.ganymede.server.GanymedeSession#getPerm(arlut.csd.ganymede.server.DBObject) getPerm()} 
-   * method.</P>
+   * <p>This method avoids checking permissions because it is used on
+   * the server side only and because it is involved in the {@link
+   * arlut.csd.ganymede.server.DBObject#getLabel() getLabel()} logic
+   * for {@link arlut.csd.ganymede.server.DBObject DBObject}.</p>
    *
-   * <P>If this method checked permissions and the getPerm() method
+   * <p>If this method checked permissions and the getPerm() method
    * failed for some reason and tried to report the failure using
    * object.getLabel(), as it does at present, the server could get
-   * into an infinite loop.</P>
+   * into an infinite loop.</p>
    */
 
   public synchronized String getValueString()
@@ -245,7 +247,7 @@ public class BooleanDBField extends DBField implements boolean_field {
       {
         return "null";
       }
-    
+
     return (this.value() ? trueStr: falseStr);
   }
 
@@ -262,13 +264,13 @@ public class BooleanDBField extends DBField implements boolean_field {
   }
 
   /**
-   * <P>Returns a String representing the change in value between this
+   * <p>Returns a String representing the change in value between this
    * field and orig.  This String is intended for logging and email,
    * not for any sort of programmatic activity.  The format of the
    * generated string is not defined, but is intended to be suitable
-   * for inclusion in a log entry and in an email message.</P>
+   * for inclusion in a log entry and in an email message.</p>
    *
-   * <P>If there is no change in the field, null will be returned.</P>
+   * <p>If there is no change in the field, null will be returned.</p>
    */
 
   public String getDiffString(DBField orig)
@@ -302,7 +304,7 @@ public class BooleanDBField extends DBField implements boolean_field {
   // boolean_field methods
   //
   // ****
-  
+
   /**
    *
    * Returns true if this field is defined to have the true/false
@@ -364,17 +366,17 @@ public class BooleanDBField extends DBField implements boolean_field {
         // "Boolean Field Error"
         // "Don''t have permission to edit field {0} in object {1}."
         return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_subj"),
-                                          ts.l("verifyNewValue.error_perm", getName(), owner.getLabel()));
+                                          ts.l("verifyNewValue.error_perm", getName(), this.owner.getLabel()));
       }
 
-    eObj = (DBEditObject) owner;
+    eObj = (DBEditObject) this.owner;
 
     if (!verifyTypeMatch(o))
       {
         // "Boolean Field Error"
         // "Submitted value {0} is not a boolean!  Major client error while trying to edit field {0} in object {1}."
         return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_subj"),
-                                          ts.l("verifyNewValue.error_type", getName(), owner.getLabel()));
+                                          ts.l("verifyNewValue.error_type", getName(), this.owner.getLabel()));
       }
 
     // have our parent make the final ok on the value

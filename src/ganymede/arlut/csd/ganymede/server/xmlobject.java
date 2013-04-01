@@ -11,11 +11,13 @@
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -73,14 +75,15 @@ import arlut.csd.ganymede.rmi.db_object;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class is a data holding structure that is intended to hold
+ * <p>This class is a data holding structure that is intended to hold
  * object and field data for an XML object element for {@link
- * arlut.csd.ganymede.server.GanymedeXMLSession GanymedeXMLSession}.
+ * arlut.csd.ganymede.server.GanymedeXMLSession
+ * GanymedeXMLSession}.</p>
  *
  * @author Jonathan Abbey
  */
 
-public class xmlobject {
+public final class xmlobject {
 
   final static boolean debug = false;
 
@@ -107,7 +110,7 @@ public class xmlobject {
 
   /**
    * Action mode for this object, should be null,
-   * "create", "edit", "delete", or "inactivate". 
+   * "create", "edit", "delete", or "inactivate".
    */
 
   String actionMode = null;
@@ -157,7 +160,7 @@ public class xmlobject {
    * names to xmlfield objects.
    */
 
-  Hashtable fields = null;
+  Hashtable<String, xmlfield> fields = null;
 
   /**
    * Reference to server-side object, if we have already created it/got a reference
@@ -210,7 +213,7 @@ public class xmlobject {
    * XML stream up to and including the matching close element for
    * this object.</p>
    */
-  
+
   public xmlobject(XMLElement openElement, GanymedeXMLSession xSession, xmlfield ownerField) throws SAXException
   {
     this.xSession = xSession;
@@ -239,7 +242,7 @@ public class xmlobject {
     catch (NullPointerException ex)
       {
         // "\n\nERROR: Unrecognized object type "{0}""
-        xSession.err.println(ts.l("init.unrecognized_type", openElement.getAttrStr("type")));
+        xSession.tell(ts.l("init.unrecognized_type", openElement.getAttrStr("type")));
       }
 
     id = openElement.getAttrStr("id"); // may be null
@@ -303,7 +306,7 @@ public class xmlobject {
 
     // okay, we should contain some fields, then
 
-    fields = new Hashtable();
+    fields = new Hashtable<String, xmlfield>();
 
     XMLItem nextItem = xSession.getNextItem();
 
@@ -316,14 +319,14 @@ public class xmlobject {
 
             xmlfield field = new xmlfield(this, (XMLElement) nextItem);
 
-            //      xSession.err.println("Added new field: " + field.toString());       
+            //      xSession.tell("Added new field: " + field.toString());
 
             fields.put(field.getName(), field);
           }
         else
           {
             // "Unrecognized XML content in object {0}: {1}"
-            xSession.err.println(ts.l("init.unrecognized_xml", openElement, nextItem));
+            xSession.tell(ts.l("init.unrecognized_xml", openElement, nextItem));
           }
 
         nextItem = xSession.getNextItem();
@@ -395,7 +398,7 @@ public class xmlobject {
     Invid localInvid;
 
     /* -- */
-    
+
     // just to check our logic.. we shouldn't be getting a create and
     // an edit directive on the same object from the XML file
 
@@ -436,21 +439,22 @@ public class xmlobject {
       }
     else
       {
-        throw new RuntimeException("Couldn't find object on server to edit it: " + 
+        throw new RuntimeException("Couldn't find object on server to edit it: " +
                                    this.toString());
       }
   }
 
   /**
-   * This method uploads field information contained in this object
+   * <p>This method uploads field information contained in this object
    * up to the Ganymede server.  Unfortunately, we can't necessarily
    * upload all the field information all at once, as we have to
    * create all the objects and set enough information into them that
    * they can properly be addressed, before we can set all the invid
    * fields.  The mode paramater controls this, allowing this method
-   * to be called in multiple passes.
+   * to be called in multiple passes.</p>
    *
-   * @param mode 0 to register all non-invids, 1 to register just invids, 2 to register both
+   * @param mode 0 to register all non-invids, 1 to register just
+   * invids, 2 to register both
    */
 
   public ReturnVal registerFields(int mode) throws NotLoggedInException
@@ -466,7 +470,7 @@ public class xmlobject {
 
     if (debug)
       {
-        xSession.err.println("Registering fields [" + mode + "] for object " + this.toString(false));
+        xSession.tell("Registering fields [" + mode + "] for object " + this.toString(false));
       }
 
     // we want to create/register the fields in their display order..
@@ -474,13 +478,11 @@ public class xmlobject {
     // code, which may need to have higher fields set before accepting
     // choices for lower fields
 
-    Vector templateVector = Ganymede.db.getObjectBase(type).getFieldTemplateVector();
+    Vector<FieldTemplate> templateVector = Ganymede.db.getObjectBase(type).getFieldTemplateVector();
 
-    for (int i = 0; i < templateVector.size(); i++)
+    for (FieldTemplate template: templateVector)
       {
-        FieldTemplate template = (FieldTemplate) templateVector.elementAt(i);
-
-        xmlfield field = (xmlfield) fields.get(template.getName());
+        xmlfield field = fields.get(template.getName());
 
         if (field == null)
           {
@@ -556,7 +558,7 @@ public class xmlobject {
 
         if (debug)
           {
-            xSession.err.println("xmlobject.getInvid() calling findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
+            xSession.tell("xmlobject.getInvid() calling findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
           }
 
         invid = xSession.session.findLabeledObject(id, type.shortValue());
@@ -565,7 +567,7 @@ public class xmlobject {
           {
             if (debug)
               {
-                xSession.err.println("xmlobject.getInvid() deciding known non existent on " + type + ":" + id);
+                xSession.tell("xmlobject.getInvid() deciding known non existent on " + type + ":" + id);
               }
 
             knownNonExistent = true;
@@ -573,8 +575,8 @@ public class xmlobject {
 
         if (debug)
           {
-            xSession.err.println("xmlobject called findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
-            xSession.err.println("findLabeledObject() returned " + invid + "[3]");
+            xSession.tell("xmlobject called findLabeledObject() on " + type.shortValue() + ":" + id + "[3]");
+            xSession.tell("findLabeledObject() returned " + invid + "[3]");
           }
       }
     else if (ownerField != null && index != -1)
@@ -663,12 +665,10 @@ public class xmlobject {
 
         // add the fields in the server's display order
 
-        Vector templateVector = xSession.getTemplateVector(type);
+        Vector<FieldTemplate> templateVector = xSession.getTemplateVector(type);
 
-        for (int i = 0; i < templateVector.size(); i++)
+        for (FieldTemplate template: templateVector)
           {
-            FieldTemplate template = (FieldTemplate) templateVector.elementAt(i);
-
             xmlfield field = (xmlfield) fields.get(template.getName());
 
             if (field == null)

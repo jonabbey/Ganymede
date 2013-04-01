@@ -3,17 +3,19 @@
    DBJournal.java
 
    Class to handle the journal file for the DBStore.
-   
+
    Created: 3 December 1996
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2011
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -67,37 +69,39 @@ import arlut.csd.ganymede.rmi.db_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>The DBJournal class is used to provide journalling of changes to the
- * {@link arlut.csd.ganymede.server.DBStore DBStore}
- * during operations.  The Journal file will contain a complete list of all
- * changes made since the last dump of the complete DBStore.  The Journal file
- * is composed of a header block followed by a number of transactions.</p>
+ * <p>The DBJournal class is used to provide journalling of changes to
+ * the {@link arlut.csd.ganymede.server.DBStore DBStore} during
+ * operations.  The Journal file will contain a complete list of all
+ * changes made since the last dump of the complete DBStore.  The
+ * Journal file is composed of a header block followed by a number of
+ * transactions.</p>
  *
- * <p>Each transaction consists of a number of object modification records, each
- * record specifying the creation, deletion, or modification of a particular
- * object.  At the end of the transaction, a marker indicates the completion of
- * the transaction.  At DBStore startup time, the journal is read in and all
- * complete transactions recorded are performed on the main DBStore.</p>
+ * <p>Each transaction consists of a number of object modification
+ * records, each record specifying the creation, deletion, or
+ * modification of a particular object.  At the end of the
+ * transaction, a marker indicates the completion of the transaction.
+ * At DBStore startup time, the journal is read in and all complete
+ * transactions recorded are performed on the main DBStore.</p>
  *
- * <p>Generally, if the DBStore was shut down correctly, the entire memory
- * structure of the DBStore will be cleanly dumped out and the Journal will
- * be removed.  The Journal is intended to insure that the DBStore remains
- * transaction consistent if the server running Ganymede crashes during
- * runtime.</p>
+ * <p>Generally, if the DBStore was shut down correctly, the entire
+ * memory structure of the DBStore will be cleanly dumped out and the
+ * Journal will be removed.  The Journal is intended to insure that
+ * the DBStore remains transaction consistent if the server running
+ * Ganymede crashes during runtime.</p>
  *
- * <p>See the {@link arlut.csd.ganymede.server.DBEditSet DBEditSet} class for
- * more information on Ganymede transactions.</p>
+ * <p>See the {@link arlut.csd.ganymede.server.DBEditSet DBEditSet}
+ * class for more information on Ganymede transactions.</p>
  *
- * <p>Nota bene: this class includes synchronized methods which serialize
- * operations on the Ganymede transaction journal.  The DBJournal
- * monitor is intended to be the innermost monitor for operations
- * involving the DBStore and DBJournal objects.  Synchronized methods
- * in DBJournal must not call synchronized methods on DBStore, as
- * synchronized DBStore methods can and will call methods on
- * DBJournal.</p>
+ * <p>Nota bene: this class includes synchronized methods which
+ * serialize operations on the Ganymede transaction journal.  The
+ * DBJournal monitor is intended to be the innermost monitor for
+ * operations involving the DBStore and DBJournal objects.
+ * Synchronized methods in DBJournal must not call synchronized
+ * methods on DBStore, as synchronized DBStore methods can and will
+ * call methods on DBJournal.</p>
  */
 
-public class DBJournal implements ObjectStatus {
+public final class DBJournal implements ObjectStatus {
 
   static boolean debug = false;
   static DBStore store = null;
@@ -158,16 +162,17 @@ public class DBJournal implements ObjectStatus {
   /* -- */
 
   /**
-   * <p>The DBJournal constructor takes a filename and creates a DBJournal object.
-   * If the file named does not exist, the DBJournal constructor will create
-   * the file and write the DBJournal header, leaving the file pointer pointing
-   * to the end of the file.  If the Journal file does exist, the constructor
-   * will advance the file pointer to the end of the file.</p>
+   * <p>The DBJournal constructor takes a filename and creates a
+   * DBJournal object.  If the file named does not exist, the
+   * DBJournal constructor will create the file and write the
+   * DBJournal header, leaving the file pointer pointing to the end of
+   * the file.  If the Journal file does exist, the constructor will
+   * advance the file pointer to the end of the file.</p>
    *
-   * <p>In either case, the file will be made ready for new transactions to be
-   * written.</p>
+   * <p>In either case, the file will be made ready for new
+   * transactions to be written.</p>
    */
-  
+
   public DBJournal(DBStore store, String filename) throws IOException
   {
     this.store = store;
@@ -192,7 +197,7 @@ public class DBJournal implements ObjectStatus {
 
     if (!file.exists())
       {
-        // create an empty Journal file 
+        // create an empty Journal file
         // "Creating Journal File"
         debug(ts.l("init.creating"));
 
@@ -253,10 +258,9 @@ public class DBJournal implements ObjectStatus {
         throw new RuntimeException(ts.l("isAtLeast.notloaded"));
       }
 
-    return (this.file_major_version > major || 
+    return (this.file_major_version > major ||
             (this.file_major_version == major && this.file_minor_version >= minor));
   }
-
 
   /**
    * <p>This method returns true if the disk file being loaded by this DBStore
@@ -271,7 +275,7 @@ public class DBJournal implements ObjectStatus {
         throw new RuntimeException(ts.l("isLessThan.notloaded"));
       }
 
-    return (this.file_major_version < major || 
+    return (this.file_major_version < major ||
             (this.file_major_version == major && this.file_minor_version < minor));
   }
 
@@ -324,9 +328,10 @@ public class DBJournal implements ObjectStatus {
   }
 
   /**
-   * The reset() method is used to copy the journal file to a safe location and
-   * truncate it.  reset() should be called immediately after the DBStore is
-   * dumped to disk and before the DumpLock is relinquished.
+   * <p>The reset() method is used to copy the journal file to a safe
+   * location and truncate it.  reset() should be called immediately
+   * after the DBStore is dumped to disk and before the DumpLock is
+   * relinquished.</p>
    */
 
   public synchronized void reset() throws IOException
@@ -399,7 +404,7 @@ public class DBJournal implements ObjectStatus {
     Date transactionDate = null;
     int object_count = 0;
     boolean EOFok = true;
-    Vector entries = null;
+    Vector<JournalEntry> entries = null;
     byte operation;
     short obj_type, obj_id;
     DBObjectBase base;
@@ -408,7 +413,7 @@ public class DBJournal implements ObjectStatus {
     int nextTransactionNumber = 0;
     /* - */
 
-    entries = new Vector();
+    entries = new Vector<JournalEntry>();
 
     // skip past the journal header block
     readHeaders();
@@ -429,7 +434,7 @@ public class DBJournal implements ObjectStatus {
                 // "DBJournal.load(): Transaction open string match OK"
                 debug(ts.l("load.okmatch"));
               }
-            
+
             EOFok = false;
 
             // "Reading transaction time"
@@ -470,11 +475,11 @@ public class DBJournal implements ObjectStatus {
                 // "Reading object type for object {0}"
                 status = ts.l("load.readingtype", iObj);
                 obj_type = jFile.readShort();
-                base = (DBObjectBase) store.objectBases.get(Short.valueOf(obj_type));
+                base = store.getObjectBase(obj_type);
 
                 switch (operation)
                   {
-                  case CREATE:          
+                  case CREATE:
                     // "Reading created object {0}"
                     status = ts.l("load.readingcreated", iObj);
 
@@ -487,7 +492,7 @@ public class DBJournal implements ObjectStatus {
                         printObject(obj);
                       }
 
-                    entries.addElement(new JournalEntry(base, obj.getID(), obj));
+                    entries.add(new JournalEntry(base, obj.getID(), obj));
                     break;
 
                   case EDIT:
@@ -495,7 +500,7 @@ public class DBJournal implements ObjectStatus {
                     status = ts.l("load.readingedited", iObj);
 
                     DBObjectDeltaRec delta = new DBObjectDeltaRec(jFile);
-                    DBObject original = DBStore.viewDBObject(delta.invid);
+                    DBObject original = DBStore.viewDBObject(delta.getInvid());
 
                     obj = delta.applyDelta(original);
 
@@ -516,7 +521,7 @@ public class DBJournal implements ObjectStatus {
                         printObject(obj);
                       }
 
-                    entries.addElement(new JournalEntry(base, obj.getID(), obj));
+                    entries.add(new JournalEntry(base, obj.getID(), obj));
                     break;
 
                   case DELETE:
@@ -527,8 +532,8 @@ public class DBJournal implements ObjectStatus {
 
                     // "Delete: {0}:{1}"
                     debug(ts.l("load.delete", base.getName(), Short.valueOf(obj_id)));
-                
-                    entries.addElement(new JournalEntry(base, obj_id, null));
+
+                    entries.add(new JournalEntry(base, obj_id, null));
                     break;
                   }
               }
@@ -541,9 +546,9 @@ public class DBJournal implements ObjectStatus {
             Long transTimeDebug = jFile.readLong();
             debug("closeDebug and transTimeDebug:"+ closeDebug +"*"+ transTimeDebug.toString()+"* transaction_time:"+transaction_time);
 
-            //if ((jFile.readUTF().compareTo(CLOSETRANS) != 0) || 
+            //if ((jFile.readUTF().compareTo(CLOSETRANS) != 0) ||
             //  (jFile.readLong() != transaction_time))
-            if ((closeDebug.compareTo(CLOSETRANS) != 0) || 
+            if ((closeDebug.compareTo(CLOSETRANS) != 0) ||
                 (transTimeDebug != transaction_time))
               {
                 // "Transaction close timestamp mismatch"
@@ -606,9 +611,10 @@ public class DBJournal implements ObjectStatus {
             debug(ts.l("load.processing", Integer.valueOf(entries.size())));
 
             // okay, process this transaction
-            for (int i = 0; i < entries.size(); i++)
+
+            for (JournalEntry entry: entries)
               {
-                ((JournalEntry) entries.elementAt(i)).process(store);
+                entry.process(store);
               }
 
             // clear the entries we've now processed
@@ -663,7 +669,6 @@ public class DBJournal implements ObjectStatus {
 
   public synchronized DBJournalTransaction writeTransaction(DBEditSet transaction) throws IOException
   {
-    DBEditObject eObj;
     DBJournalTransaction transRecord;
     Date now;
     DBEditObject[] objects = transaction.getObjectList();
@@ -687,20 +692,18 @@ public class DBJournal implements ObjectStatus {
 
         // "Objects in Transaction: {0}"
         debug(ts.l("writeTransaction.objcount", Integer.valueOf(objects.length)));
-        
+
         jFile.writeInt(objects.length);
-        
-        for (int i = 0; i < objects.length; i++)
+
+        for (DBEditObject eObj: objects)
           {
-            eObj = objects[i];
-            
             switch (eObj.getStatus())
               {
               case CREATING:
                 jFile.writeByte(CREATE);
                 jFile.writeShort(eObj.objectBase.getTypeID());
                 eObj.emit(jFile);
-                
+
                 if (debug)
                   {
                     // "Creating object:"
@@ -709,51 +712,51 @@ public class DBJournal implements ObjectStatus {
                   }
 
                 break;
-                
+
               case EDITING:
                 jFile.writeByte(EDIT);
                 jFile.writeShort(eObj.objectBase.getTypeID());
-                
+
                 DBObjectDeltaRec delta = new DBObjectDeltaRec(eObj.original, eObj);
                 delta.emit(jFile);
-                
+
                 if (debug)
                   {
                     // "Wrote object edit record:\n\t{0}"
                     System.err.print(ts.l("writeTransaction.wroteobjedit",
-                                          StringUtils.replaceStr(delta.toString(),"\n","\n\t")));                   
+                                          StringUtils.replaceStr(delta.toString(),"\n","\n\t")));
                   }
-                
+
                 break;
-                
+
               case DELETING:
                 jFile.writeByte(DELETE);
                 jFile.writeShort(eObj.objectBase.getTypeID());
                 jFile.writeShort(eObj.getID());
-                
+
                 // "Wrote object deletion record:\n\t{0} : {1}"
                 debug(ts.l("writeTransaction.wroteobjdel", eObj.objectBase.getName(),Integer.valueOf(eObj.getID())));
                 break;
-                
+
               case DROPPING:
                 if (debug)
                   {
                     // "Dropping object:"
-                    System.err.println(ts.l("writeTransaction.dropping"));                  
+                    System.err.println(ts.l("writeTransaction.dropping"));
                     printObject(eObj);
                   }
 
                 break;
               }
           }
-        
+
         dirty = true;
-        
+
         // write out the end of transaction stamp.. the transaction_time
         // is used to verify that we completed this write okay.
         jFile.writeUTF(CLOSETRANS);
         jFile.writeLong(transRecord.getTime());
-        
+
         // "Transaction {0} persisted to Journal."
         debug(ts.l("writeTransaction.written", now));
       }
@@ -778,7 +781,7 @@ public class DBJournal implements ObjectStatus {
             Ganymede.debug(ts.l("writeTransaction.badundo", inex.toString()));
           }
       }
-    
+
     return transRecord;
   }
 
@@ -852,7 +855,7 @@ public class DBJournal implements ObjectStatus {
    * to clear the incompleteTransaction record.  This method does
    * that. </p>
    */
-  
+
   public void clearIncompleteTransaction()
   {
     this.incompleteTransaction = null;
@@ -881,7 +884,7 @@ public class DBJournal implements ObjectStatus {
     debug(ts.l("readHeaders.loading", filename));
 
     jFile.seek(0);
-  
+
     if (DBJournal.id_string.compareTo(jFile.readUTF()) != 0)
       {
         // "Error, id_string mismatch.. wrong file type?"
@@ -920,7 +923,7 @@ public class DBJournal implements ObjectStatus {
         if (file_dbstore_major_version != store.file_major || file_dbstore_minor_version != store.file_minor)
           {
             throw new RuntimeException("DBStore and Journal file versions do not match. ");
-          }     
+          }
       }
 
     if (debug)
@@ -937,8 +940,8 @@ public class DBJournal implements ObjectStatus {
 
   private void printObject(DBObject obj)
   {
-    String objectStr = obj.getPrintString();    
-    objectStr = StringUtils.replaceStr(objectStr, "\n", "\n\t");    
+    String objectStr = obj.getPrintString();
+    objectStr = StringUtils.replaceStr(objectStr, "\n", "\n\t");
     System.err.println("\t" + objectStr);
   }
 
@@ -963,9 +966,9 @@ public class DBJournal implements ObjectStatus {
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class holds data corresponding to a modification record for
+ * <p>This class holds data corresponding to a modification record for
  * a single object in the server's {@link
- * arlut.csd.ganymede.server.DBJournal DBJournal} class.</P>
+ * arlut.csd.ganymede.server.DBJournal DBJournal} class.</p>
  */
 
 class JournalEntry {
@@ -979,7 +982,7 @@ class JournalEntry {
   DBObject obj;                 // if null, we'll delete
 
   /* -- */
-  
+
   public JournalEntry(DBObjectBase base, int id, DBObject obj)
   {
     this.base = base;
@@ -1030,12 +1033,10 @@ class JournalEntry {
 
             // and we need to clear out any namespace pointers
 
-            db_field[] tempFields = oldObject.listFields();
+            DBField[] tempFields = (DBField[]) oldObject.listFields();
 
-            for (int i = 0; i < tempFields.length; i++)
+            for (DBField _field: tempFields)
               {
-                DBField _field = (DBField) tempFields[i];
-
                 definition = _field.getFieldDef();
 
                 if (definition.getNameSpace() != null)
@@ -1088,13 +1089,12 @@ class JournalEntry {
         // this assumption here unless we're going to go to the trouble of doing multiple
         // passes through the set of changes in this transaction, first unmarking any
         // values freed by object deletion or changes, then going through and allocating
-        // new values.  We may still wind up doing this. 
+        // new values.  We may still wind up doing this.
 
-        db_field[] tempFields = obj.listFields();
+        DBField[] tempFields = (DBField[]) obj.listFields();
 
-        for (int i = 0; i < tempFields.length; i++)
+        for (DBField _field: tempFields)
           {
-            DBField _field = (DBField) tempFields[i];
             definition = _field.getFieldDef();
 
             if (definition.getNameSpace() != null)
@@ -1102,7 +1102,7 @@ class JournalEntry {
                 if (_field.isVector())
                   {
                     // mark the elements in the vector in the namespace
-                    // note that we don't use the namespace mark method here, 
+                    // note that we don't use the namespace mark method here,
                     // because we are just setting up the namespace, not
                     // manipulating it in the context of an editset
 

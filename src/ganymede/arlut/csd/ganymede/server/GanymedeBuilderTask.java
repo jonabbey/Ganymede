@@ -633,7 +633,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * id numbers of the fields to examine.
    */
 
-  protected final boolean baseChanged(short baseid, List fieldIds)
+  protected final boolean baseChanged(short baseid, List<Short> fieldIds)
   {
     if (forceAllBases || (oldLastRunTime == null))
       {
@@ -666,14 +666,9 @@ public abstract class GanymedeBuilderTask implements Runnable {
         throw new IllegalArgumentException(ts.l("baseChanged.empty"));
       }
 
-    DBObjectBaseField fieldDef = null;
-
-    Iterator iterator = fieldIds.iterator();
-
-    while (iterator.hasNext())
+    for (Short idObj: fieldIds)
       {
-        Short idObj = (Short) iterator.next();
-        fieldDef = (DBObjectBaseField) base.getField(idObj);
+        DBObjectBaseField fieldDef = base.getFieldDef(idObj);
 
         if (fieldDef != null && fieldDef.getTimeStamp().after(oldLastRunTime))
           {
@@ -744,7 +739,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * @return An Enumeration of {@link arlut.csd.ganymede.server.DBObject DBObject} references
    */
 
-  protected final Enumeration enumerateObjects(short baseid)
+  protected final Enumeration<DBObject> enumerateObjects(short baseid)
   {
     // this works only because we've already got our lock
     // established..  otherwise, we'd have to use the query system.

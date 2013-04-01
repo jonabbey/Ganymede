@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -89,7 +89,7 @@ import java.util.Vector;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-public class DBQueryEngine {
+public final class DBQueryEngine {
 
   static final boolean debug = false;
 
@@ -815,7 +815,7 @@ public class DBQueryEngine {
                     // owner object will be in the version we are
                     // editing, if any
 
-                    resultobject = resultfield.owner;
+                    resultobject = resultfield.getOwner();
 
                     if (debug)
                       {

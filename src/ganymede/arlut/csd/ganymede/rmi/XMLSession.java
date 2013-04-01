@@ -10,11 +10,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -76,30 +78,45 @@ public interface XMLSession extends java.rmi.Remote {
    * XML data for the server's continued processing and immediately
    * return a null value, indicating success.  The xmlSubmit() method
    * will only block if the server has filled up its internal buffers
-   * and must wait to digest more of the already submitted XML.</p> 
+   * and must wait to digest more of the already submitted XML.</p>
    */
 
   ReturnVal xmlSubmit(byte[] bytes) throws RemoteException;
 
   /**
-   * <p>This method is called by the XML client once the end of the XML
-   * stream has been transmitted, whereupon the server will attempt
-   * to finalize the XML transaction and return an overall success or
-   * failure message in the ReturnVal.</p>
+   * <p>This method is called by the XML client once the end of the
+   * XML stream has been transmitted, whereupon the server will
+   * attempt to finalize the XML transaction and return an overall
+   * success or failure indication in the ReturnVal.</p>
+   *
+   * <p>xmlEnd() only returns a success / failure indication in the
+   * returned ReturnVal.  In order to get all diagnostic / progress
+   * messages explaining the success or failure, the client is obliged
+   * to maintain a thread calling getNextErrChunk() until
+   * getNextErrChunk() returns null.</p>
    */
 
   ReturnVal xmlEnd() throws RemoteException;
 
   /**
-   * <p>This method is called by the XML client on a dedicated thread
-   * to pull stderr messages from the server.</p>
+   * <p>Returns chunks of diagnostic / progress messages produced on
+   * the server during the processing of XML submitted with
+   * xmlSubmit().</p>
    *
-   * <p>This call will block on the server until err stream data is
-   * available, but will always block for at least half a second so
-   * that the client doesn't loop on getNextErrChunk() too fast.</p>
+   * <p>This call will block on the server until more message data is
+   * available and will for at least a tenth of a second while the XML
+   * is still being processed so that the client doesn't loop on
+   * getNextErrChunk() too fast.</p>
    *
-   * <p>This method will return null after the server closes its error
-   * stream.</p>
+   * <p>Once this XMLSession has finished processing the submitted XML
+   * and everything in the diagnostic / progress message stream has
+   * been retrieved by calls to getNextErrChunk(), getNextErrChunk()
+   * will return null.</p>
+   *
+   * <p>The XML client is meant to run a dedicated thread to
+   * repeatedly call this method to collect diagnostic / progress data
+   * until getNextErrChunk() returns null.  This thread will generally
+   * last beyond the time of the XML client's xmlEnd() call.</p>
    */
 
   String getNextErrChunk() throws RemoteException;

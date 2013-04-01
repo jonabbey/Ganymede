@@ -161,7 +161,7 @@ import arlut.csd.ganymede.rmi.Server;
  * GanymedeSession class.</p>
  */
 
-public class Ganymede {
+public final class Ganymede {
 
   static public boolean debug = true;
 
@@ -532,7 +532,7 @@ public class Ganymede {
    *
    * @param argv - command line arguments.
    *
-   * @throw GanymedeStartupException if a required parameter is missing.
+   * @throws GanymedeStartupException if a required parameter is missing.
    */
 
   static private void checkArgs(String argv[]) throws GanymedeStartupException
@@ -604,7 +604,7 @@ public class Ganymede {
    * <p>This method loads properties from the ganymede.properties
    * file.</p>
    *
-   * @throw GanymedeStartupException If all necessary properties could
+   * @throws GanymedeStartupException If all necessary properties could
    * not be loaded.
    */
 

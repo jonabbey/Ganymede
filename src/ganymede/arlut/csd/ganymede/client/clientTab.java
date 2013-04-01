@@ -4,17 +4,19 @@
 
    Simple class to hold containerPanels for the custom (server-side
    defined) tabs in the framePanel in the Ganymede client.
-   
+
    Created: 10 June 2005
 
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2005
+
+   Copyright (C) 1996 - 2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -101,12 +103,12 @@ public abstract class clientTab {
    * JTabbedPane.
    */
 
-  public void addToPane(Vector tabList)
+  public void addToPane(Vector<clientTab> tabList)
   {
     synchronized (tabList)
       {
         pane.addTab(getTabName(), icon, getComponent());
-        tabList.addElement(this);
+        tabList.add(this);
       }
   }
 
@@ -114,7 +116,7 @@ public abstract class clientTab {
   {
     return this.tabName;
   }
-  
+
   /**
    * This method provides the javax.swing.JComponent that this tab
    * will contain.  The various subclasses must define this method.

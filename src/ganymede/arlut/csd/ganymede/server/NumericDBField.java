@@ -12,9 +12,11 @@
    -----------------------------------------------------------------------
 
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -65,13 +67,14 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>NumericDBField is a subclass of {@link arlut.csd.ganymede.server.DBField DBField}
- * for the storage and handling of numeric
- * fields in the {@link arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede
- * server.</P>
+ * <p>NumericDBField is a subclass of {@link
+ * arlut.csd.ganymede.server.DBField DBField} for the storage and
+ * handling of numeric fields in the {@link
+ * arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede
+ * server.</p>
  *
- * <P>The Ganymede client talks to NumericDBFields through the
- * {@link arlut.csd.ganymede.rmi.num_field num_field} RMI interface.</P> 
+ * <p>The Ganymede client talks to NumericDBFields through the
+ * {@link arlut.csd.ganymede.rmi.num_field num_field} RMI interface.</p>
  */
 
 public class NumericDBField extends DBField implements num_field {
@@ -84,37 +87,36 @@ public class NumericDBField extends DBField implements num_field {
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.NumericDBField");
 
   /**
-   * <P>Receive constructor.  Used to create a NumericDBField from a
+   * <p>Receive constructor.  Used to create a NumericDBField from a
    * {@link arlut.csd.ganymede.server.DBStore DBStore}/{@link arlut.csd.ganymede.server.DBJournal DBJournal}
-   * DataInput stream.</P>
+   * DataInput stream.</p>
    */
 
   NumericDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
-    value = null;
-    this.owner = owner;
-    this.fieldcode = definition.getID();
+    super(owner, definition.getID());
+
+    this.value = null;
     receive(in, definition);
   }
 
   /**
-   * <P>No-value constructor.  Allows the construction of a
-   * 'non-initialized' field, for use where the 
+   * <p>No-value constructor.  Allows the construction of a
+   * 'non-initialized' field, for use where the
    * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * definition indicates that a given field may be present,
-   * but for which no value has been stored in the 
-   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
+   * but for which no value has been stored in the
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</p>
    *
-   * <P>Used to provide the client a template for 'creating' this
-   * field if so desired.</P>
+   * <p>Used to provide the client a template for 'creating' this
+   * field if so desired.</p>
    */
 
   NumericDBField(DBObject owner, DBObjectBaseField definition)
   {
-    this.owner = owner;
-    this.fieldcode = definition.getID();
-    
-    value = null;
+    super(owner, definition.getID());
+
+    this.value = null;
   }
 
   /**
@@ -125,10 +127,9 @@ public class NumericDBField extends DBField implements num_field {
 
   public NumericDBField(DBObject owner, NumericDBField field)
   {
-    this.owner = owner;
-    this.fieldcode = field.getID();
-    
-    value = field.value;
+    super(owner, field.getID());
+
+    this.value = field.value;
   }
 
   /**
@@ -139,8 +140,8 @@ public class NumericDBField extends DBField implements num_field {
 
   public NumericDBField(DBObject owner, int value, DBObjectBaseField definition)
   {
-    this.owner = owner;
-    this.fieldcode = definition.getID();
+    super(owner, definition.getID());
+
     this.value = Integer.valueOf(value);
   }
 
@@ -152,6 +153,8 @@ public class NumericDBField extends DBField implements num_field {
 
   public NumericDBField(DBObject owner, Vector values, DBObjectBaseField definition)
   {
+    super(owner, definition.getID());
+
     throw new IllegalArgumentException("vector constructor called on scalar field");
   }
 
@@ -232,13 +235,13 @@ public class NumericDBField extends DBField implements num_field {
   }
 
   /**
-   * <P>Returns a String representing the change in value between this
+   * <p>Returns a String representing the change in value between this
    * field and orig.  This String is intended for logging and email,
    * not for any sort of programmatic activity.  The format of the
    * generated string is not defined, but is intended to be suitable
-   * for inclusion in a log entry and in an email message.</P>
+   * for inclusion in a log entry and in an email message.</p>
    *
-   * <P>If there is no change in the field, null will be returned.</P>
+   * <p>If there is no change in the field, null will be returned.</p>
    */
 
   public String getDiffString(DBField orig)
@@ -297,7 +300,7 @@ public class NumericDBField extends DBField implements num_field {
         throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
-    eObj = (DBEditObject) owner;
+    eObj = (DBEditObject) this.owner;
 
     return eObj.isIntLimited(this);
   }
@@ -305,10 +308,10 @@ public class NumericDBField extends DBField implements num_field {
   /**
    *
    * Returns the minimum acceptable value for this field if this field
-   * has max/min limitations.  
+   * has max/min limitations.
    *
    * @see arlut.csd.ganymede.rmi.num_field
-   * 
+   *
    */
 
   public int getMinValue()
@@ -322,7 +325,7 @@ public class NumericDBField extends DBField implements num_field {
         throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
-    eObj = (DBEditObject) owner;
+    eObj = (DBEditObject) this.owner;
 
     return eObj.minInt(this);
   }
@@ -333,7 +336,7 @@ public class NumericDBField extends DBField implements num_field {
    * has max/min limitations.
    *
    * @see arlut.csd.ganymede.rmi.num_field
-   * 
+   *
    */
 
   public int getMaxValue()
@@ -347,7 +350,7 @@ public class NumericDBField extends DBField implements num_field {
         throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
-    eObj = (DBEditObject) owner;
+    eObj = (DBEditObject) this.owner;
 
     return eObj.maxInt(this);
   }
@@ -386,7 +389,7 @@ public class NumericDBField extends DBField implements num_field {
         // "Submitted value {0} is not a number!  Major client error while trying to edit field {1} in object {2}."
         return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
                                           ts.l("verifyBasicConstraints.type_error",
-                                               o, this.getName(), owner.getLabel()));
+                                               o, this.getName(), this.owner.getLabel()));
       }
 
     return null;
@@ -400,7 +403,7 @@ public class NumericDBField extends DBField implements num_field {
 
     /* -- */
 
-    eObj = (DBEditObject) owner;
+    eObj = (DBEditObject) this.owner;
 
     if (o == null)
       {
@@ -422,7 +425,7 @@ public class NumericDBField extends DBField implements num_field {
           {
             return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
                                               ts.l("verifyNewValue.over_range",
-                                                   I, this.getName(), owner.getLabel(),
+                                                   I, this.getName(), eObj.getLabel(),
                                                    Integer.valueOf(this.getMinValue())));
           }
 
@@ -430,7 +433,7 @@ public class NumericDBField extends DBField implements num_field {
           {
             return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
                                               ts.l("verifyNewValue.under_range",
-                                                   I, this.getName(), owner.getLabel(),
+                                                   I, this.getName(), eObj.getLabel(),
                                                    Integer.valueOf(this.getMinValue())));
           }
       }

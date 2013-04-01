@@ -10,11 +10,13 @@
    Module By: John Knutson, johnk@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -64,13 +66,14 @@ import arlut.csd.ganymede.rmi.float_field;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>FloatDBField is a subclass of {@link arlut.csd.ganymede.server.DBField DBField}
- * for the storage and handling of float
- * fields in the {@link arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede
- * server.</P>
+ * <p>FloatDBField is a subclass of {@link
+ * arlut.csd.ganymede.server.DBField DBField} for the storage and
+ * handling of float fields in the {@link
+ * arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede
+ * server.</p>
  *
- * <P>The Ganymede client talks to FloatDBFields through the
- * {@link arlut.csd.ganymede.rmi.float_field float_field} RMI interface.</P> 
+ * <p>The Ganymede client talks to FloatDBFields through the {@link
+ * arlut.csd.ganymede.rmi.float_field float_field} RMI interface.</p>
  */
 
 public class FloatDBField extends DBField implements float_field {
@@ -83,37 +86,36 @@ public class FloatDBField extends DBField implements float_field {
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.FloatDBField");
 
   /**
-   * <P>Receive constructor.  Used to create a FloatDBField from a
+   * <p>Receive constructor.  Used to create a FloatDBField from a
    * {@link arlut.csd.ganymede.server.DBStore DBStore}/{@link arlut.csd.ganymede.server.DBJournal DBJournal}
-   * DataInput stream.</P>
+   * DataInput stream.</p>
    */
 
   FloatDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
-    value = null;
-    this.owner = owner;
-    this.fieldcode = definition.getID();
+    super(owner, definition.getID());
+
+    this.value = null;
     receive(in, definition);
   }
 
   /**
-   * <P>No-value constructor.  Allows the construction of a
-   * 'non-initialized' field, for use where the 
+   * <p>No-value constructor.  Allows the construction of a
+   * 'non-initialized' field, for use where the
    * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * definition indicates that a given field may be present,
-   * but for which no value has been stored in the 
-   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
+   * but for which no value has been stored in the
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</p>
    *
-   * <P>Used to provide the client a template for 'creating' this
-   * field if so desired.</P>
+   * <p>Used to provide the client a template for 'creating' this
+   * field if so desired.</p>
    */
 
   FloatDBField(DBObject owner, DBObjectBaseField definition)
   {
-    this.owner = owner;
-    this.fieldcode = definition.getID();
-    
-    value = null;
+    super(owner, definition.getID());
+
+    this.value = null;
   }
 
   /**
@@ -124,10 +126,9 @@ public class FloatDBField extends DBField implements float_field {
 
   public FloatDBField(DBObject owner, FloatDBField field)
   {
-    this.owner = owner;
-    this.fieldcode = field.getID();
-    
-    value = field.value;
+    super(owner, field.getID());
+
+    this.value = field.value;
   }
 
   /**
@@ -138,8 +139,8 @@ public class FloatDBField extends DBField implements float_field {
 
   public FloatDBField(DBObject owner, double value, DBObjectBaseField definition)
   {
-    this.owner = owner;
-    this.fieldcode = definition.getID();
+    super(owner, definition.getID());
+
     this.value = new Double(value);
   }
 
@@ -151,6 +152,8 @@ public class FloatDBField extends DBField implements float_field {
 
   public FloatDBField(DBObject owner, Vector values, DBObjectBaseField definition)
   {
+    super(owner, definition.getID());
+
     throw new IllegalArgumentException("vector constructor called on scalar field");
   }
 
@@ -233,13 +236,13 @@ public class FloatDBField extends DBField implements float_field {
   }
 
   /**
-   * <P>Returns a String representing the change in value between this
+   * <p>Returns a String representing the change in value between this
    * field and orig.  This String is intended for logging and email,
    * not for any sort of programmatic activity.  The format of the
    * generated string is not defined, but is intended to be suitable
-   * for inclusion in a log entry and in an email message.</P>
+   * for inclusion in a log entry and in an email message.</p>
    *
-   * <P>If there is no change in the field, null will be returned.</P>
+   * <p>If there is no change in the field, null will be returned.</p>
    */
 
   public String getDiffString(DBField orig)
@@ -292,7 +295,7 @@ public class FloatDBField extends DBField implements float_field {
         throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
-    eObj = (DBEditObject) owner;
+    eObj = (DBEditObject) this.owner;
 
     return eObj.isFloatLimited(this);
   }
@@ -300,10 +303,10 @@ public class FloatDBField extends DBField implements float_field {
   /**
    *
    * Returns the minimum acceptable value for this field if this field
-   * has max/min limitations.  
+   * has max/min limitations.
    *
    * @see arlut.csd.ganymede.rmi.float_field
-   * 
+   *
    */
 
   public double getMinValue()
@@ -317,7 +320,7 @@ public class FloatDBField extends DBField implements float_field {
         throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
-    eObj = (DBEditObject) owner;
+    eObj = (DBEditObject) this.owner;
 
     return eObj.minFloat(this);
   }
@@ -328,7 +331,7 @@ public class FloatDBField extends DBField implements float_field {
    * has max/min limitations.
    *
    * @see arlut.csd.ganymede.rmi.float_field
-   * 
+   *
    */
 
   public double getMaxValue()
@@ -342,7 +345,7 @@ public class FloatDBField extends DBField implements float_field {
         throw new IllegalArgumentException("not applicable to a non-editable field/object");
       }
 
-    eObj = (DBEditObject) owner;
+    eObj = (DBEditObject) this.owner;
 
     return eObj.maxFloat(this);
   }
@@ -365,14 +368,14 @@ public class FloatDBField extends DBField implements float_field {
 
     /* -- */
 
-    eObj = (DBEditObject) owner;
+    eObj = (DBEditObject) this.owner;
 
     if (!verifyTypeMatch(o))
       {
         // "Float Field Error"
         // "Submitted value {0} is not a Double!  Major client error while trying to edit field {1} in object {2}."
         return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-                                          ts.l("verifyNewValue.type_error", o, getName(), owner.getLabel()));
+                                          ts.l("verifyNewValue.type_error", o, getName(), eObj.getLabel()));
       }
 
     if (o == null)
@@ -389,7 +392,7 @@ public class FloatDBField extends DBField implements float_field {
             // "Float Field Error"
             // "Submitted float {0} is out of range for field {1} in object {2}.  This field will not accept floats less than {3}."
             return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-                                              ts.l("verifyNewValue.low_value_error", I, getName(), owner.getLabel(), new Double(getMinValue())));
+                                              ts.l("verifyNewValue.low_value_error", I, getName(), eObj.getLabel(), new Double(getMinValue())));
           }
 
         if (getMaxValue() < I.doubleValue())
@@ -397,7 +400,7 @@ public class FloatDBField extends DBField implements float_field {
             // "Float Field Error"
             // "Submitted float {0} is out of range for field {1} in object {2}.  This field will not accept floats greater than {3}."
             return Ganymede.createErrorDialog(ts.l("global.error_subj"),
-                                              ts.l("verifyNewValue.high_value_error", I, getName(), owner.getLabel(), new Double(getMaxValue())));
+                                              ts.l("verifyNewValue.high_value_error", I, getName(), eObj.getLabel(), new Double(getMaxValue())));
           }
       }
 

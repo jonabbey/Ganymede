@@ -15,7 +15,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -190,7 +190,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
               }
           }
 
-        GanymedeAdmin.consoles.removeAllElements();
+        GanymedeAdmin.consoles.clear();
       }
   }
 
@@ -673,7 +673,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
     this.adminName = adminName;
     this.clientHost = clientHost;
 
-    consoles.addElement(this);  // this can block if we are currently looping on consoles
+    consoles.add(this);  // this can block if we are currently looping on consoles
 
     try
       {
@@ -856,7 +856,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
       {
         if (consoles.contains(this))
           {
-            consoles.removeElement(this);
+            consoles.remove(this);
 
             String eventStr = null;
 
@@ -1426,11 +1426,6 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
   public SchemaEdit editSchema()
   {
-    Enumeration en;
-    DBObjectBase base;
-
-    /* -- */
-
     if (!fullprivs)
       {
         // "Attempt made to edit schema by a non-privileged console: {0}"
@@ -1486,24 +1481,17 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
         // "Admin console {0} entering editSchema synchronization block."
         Ganymede.debug(ts.l("editSchema.synchronizing", this.toString()));
 
-        en = Ganymede.db.objectBases.elements();
-
-        if (en != null)
+        for (DBObjectBase base: Ganymede.db.bases())
           {
-            while (en.hasMoreElements())
+            if (base.isLocked())
               {
-                base = (DBObjectBase) en.nextElement();
+                // "Admin console {0} can''t edit Schema, lock held on {1}."
+                Ganymede.debug(ts.l("editSchema.locked_base", this.toString(), base.getName()));
 
-                if (base.isLocked())
-                  {
-                    // "Admin console {0} can''t edit Schema, lock held on {1}."
-                    Ganymede.debug(ts.l("editSchema.locked_base", this.toString(), base.getName()));
+                // "schema edit"
+                GanymedeServer.lSemaphore.enable(ts.l("editSchema.semaphore_token"));
 
-                    // "schema edit"
-                    GanymedeServer.lSemaphore.enable(ts.l("editSchema.semaphore_token"));
-
-                    return null;
-                  }
+                return null;
               }
           }
 

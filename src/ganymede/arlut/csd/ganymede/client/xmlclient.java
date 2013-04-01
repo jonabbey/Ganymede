@@ -15,8 +15,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -51,6 +53,7 @@
 package arlut.csd.ganymede.client;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -351,7 +354,11 @@ public final class xmlclient implements ClientListener, Runnable {
 
     /* -- */
 
-    this.err = new PrintWriter(System.err);
+    // buffer our output so that we will have less chance of blocking
+    // while waiting for the background thread to finish spinning on
+    // the getNextErrChunk() stream from the server
+
+    this.err = new PrintWriter(new BufferedOutputStream(System.err, 4194304));
 
     this.commandLine = hasCommandLine;
 
@@ -821,8 +828,20 @@ public final class xmlclient implements ClientListener, Runnable {
         return false;
       }
 
-    // since we're transmitting changes, we'll need a
-    // GanymedeXMLSession on the server side.
+    // XXX
+    //
+    // I don't feel particularly good about having to pass the
+    // username and password to the server and creating an entirely
+    // separate session when we're already logged in with the GUI
+    // client, but the GanymedeXMLSession and the xmlclient were not
+    // originally designed with the idea that XML could be submitted
+    // to the server from within an active GUI client.
+    //
+    // This could be better integrated to re-use the existing
+    // authentication, somehow.  Some way that doesn't require the gui
+    // client to retain its username and password in memory on the off
+    // chance the user will want to submit an XML file without
+    // internal credentials. ;-/
 
     this.xSession = client.xmlLogin(username, password);
 
@@ -1384,7 +1403,6 @@ public final class xmlclient implements ClientListener, Runnable {
   public synchronized void run()
   {
     String result;
-    int count = 0;
 
     /* -- */
 
@@ -1418,15 +1436,6 @@ public final class xmlclient implements ClientListener, Runnable {
 
             this.finishedErrStream = true;
             this.notifyAll();
-
-            // we won't exit our err stream thread on one or two
-            // errors, but if we get a bunch, assume we've lost the
-            // connection and end the thread.
-
-            if (count++ > 3)
-              {
-                return;
-              }
           }
       }
   }
@@ -1440,6 +1449,27 @@ public final class xmlclient implements ClientListener, Runnable {
 
   private synchronized void terminate(int resultCode)
   {
+    int count = 0;
+
+    while (!this.finishedErrStream)
+      {
+        try
+          {
+            count++;
+            this.wait(500);
+          }
+        catch (InterruptedException ex)
+          {
+          }
+        finally
+          {
+            if (count > 4)
+              {
+                System.exit(resultCode);
+              }
+          }
+      }
+
     err.flush();
     System.exit(resultCode);
   }

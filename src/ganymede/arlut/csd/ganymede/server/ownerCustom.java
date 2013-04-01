@@ -249,6 +249,11 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
    * the given object is changed in a transaction.  Used for letting end-users
    * be notified of changes to their account, etc.</p>
    *
+   * <p>If no email targets are present in this object, either a null value
+   * or an empty List may be returned.</p>
+   *
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
+   *
    * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
@@ -279,12 +284,22 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
               {
                 DBObject adminObj = session.viewDBObject(admin, true);
 
-                set.addAll((List<String>)adminObj.getEmailTargets());
+                List<String> emailTargets = (List<String>) adminObj.getEmailTargets();
+
+                if (emailTargets != null)
+                  {
+                    set.addAll(emailTargets);
+                  }
               }
           }
       }
 
-    set.addAll((List<String>) object.getFieldValuesLocal(SchemaConstants.OwnerExternalMail));
+    List<String> externalOwners = (List<String>) object.getFieldValuesLocal(SchemaConstants.OwnerExternalMail);
+
+    if (externalOwners != null)
+      {
+        set.addAll(externalOwners);
+      }
 
     return new ArrayList<String>(set);
   }

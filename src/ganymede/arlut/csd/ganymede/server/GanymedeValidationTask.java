@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -66,10 +66,8 @@ import arlut.csd.ganymede.common.ReturnVal;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * This class goes through all objects in the database and checks to
- * make sure all required fields are set in all objects.
- *
+ * <p>This task goes through all objects in the database and checks to
+ * make sure all required fields are set in all objects.</p>
  */
 
 public class GanymedeValidationTask implements Runnable {
@@ -102,10 +100,6 @@ public class GanymedeValidationTask implements Runnable {
   {
     GanymedeSession mySession = null;
     boolean everythingsfine = true;
-    List<DBObject> objects;
-    Vector missingFields;
-    DBObjectBase base;
-    Enumeration baseEnum;
     Thread currentThread = java.lang.Thread.currentThread();
 
     /* -- */
@@ -139,9 +133,7 @@ public class GanymedeValidationTask implements Runnable {
         // over all the object types defined in the server and scan
         // each for objects to be inactivated and/or removed.
 
-        baseEnum = Ganymede.db.objectBases.elements();
-
-        while (baseEnum.hasMoreElements())
+        for (DBObjectBase base: Ganymede.db.bases())
           {
             if (currentThread.isInterrupted())
               {
@@ -149,9 +141,7 @@ public class GanymedeValidationTask implements Runnable {
                 throw new InterruptedException(ts.l("run.interrupted"));
               }
 
-            base = (DBObjectBase) baseEnum.nextElement();
-
-            objects = mySession.getDBSession().getTransactionalObjects(base.getTypeID());
+            List<DBObject> objects = mySession.getDBSession().getTransactionalObjects(base.getTypeID());
 
             if (debug)
               {
@@ -166,7 +156,7 @@ public class GanymedeValidationTask implements Runnable {
                     throw new InterruptedException(ts.l("run.interrupted"));
                   }
 
-                missingFields = object.checkRequiredFields();
+                Vector<String> missingFields = object.checkRequiredFields();
 
                 if (missingFields != null)
                   {

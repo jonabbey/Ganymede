@@ -334,8 +334,15 @@ final public class GanymedeSession implements Session, Unreferenced {
   private AdminEntry userInfo = null;
 
   /**
-   * If true, this GanymedeSession will export its objects and fields for
-   * direct access via RMI.
+   * If true, this GanymedeSession will export itself and its
+   * asyncPort for direct access via RMI.
+   */
+
+  private boolean exportSession = false;
+
+  /**
+   * If true, this GanymedeSession will export its DBObjects and
+   * DBFields for direct access via RMI.
    */
 
   private boolean exportObjects = false;
@@ -425,6 +432,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     loggedInSemaphore.set(true);
 
+    this.exportSession = false;
     this.exportObjects = false;
     clienthost = Ganymede.serverHostProperty;
 
@@ -448,69 +456,52 @@ final public class GanymedeSession implements Session, Unreferenced {
    * privileges.  The server may allow users to login directly with an
    * admin persona (supergash, say), if so configured.</p>
    *
-   * @param loginName The name for the user logging in
+   * @param sessionName The unique name assigned for this GanymedeServer
    * @param userObject The user record for this login
    * @param personaObject The user's initial admin persona
+   * @param exportSession If true, we'll export this GanymedeSession
+   * and our asyncPort for access by the client.
    * @param exportObjects If true, we'll export any viewed or edited
    * objects for direct RMI access.  We don't need to do this is we're
    * being driven by a server-side {@link
    * arlut.csd.ganymede.server.GanymedeXMLSession}, for instance.
-   *
+
    * @see arlut.csd.ganymede.rmi.Server#login(java.lang.String, java.lang.String)
    */
 
-  public GanymedeSession(String loginName, DBObject userObject,
-                         DBObject personaObject, boolean exportObjects) throws RemoteException
+  public GanymedeSession(String sessionName, DBObject userObject,
+                         DBObject personaObject,
+                         boolean exportSession, boolean exportObjects) throws RemoteException
   {
     this.userSession = true;
 
     // record whether we should export our objects
 
     this.exportObjects = exportObjects;
+    this.exportSession = exportSession;
 
-    if (this.exportObjects)
+    if (this.exportSession)
       {
         asyncPort = new serverClientAsyncResponder();
 
         Ganymede.rmi.publishObject(this);
       }
 
-    // find a unique name for this user session
-
-    String sessionName = GanymedeServer.registerUserSessionName(loginName);
-
     // find out where the user is coming from
 
-    try
-      {
-        String ipAddress = java.rmi.server.RemoteServer.getClientHost();
-
-        try
-          {
-            java.net.InetAddress addr = java.net.InetAddress.getByName(ipAddress);
-            clienthost = addr.getHostName();
-          }
-        catch (java.net.UnknownHostException ex)
-          {
-            clienthost = ipAddress;
-          }
-      }
-    catch (ServerNotActiveException ex)
-      {
-        clienthost = "(unknown)";
-      }
+    this.clienthost = GanymedeServer.getClientHost();
 
     // record our login time
 
-    connecttime = new Date();
+    this.connecttime = new Date();
 
     // construct our DBSession
 
-    dbSession = new DBSession(Ganymede.db, this, sessionName);
-    queryEngine = new DBQueryEngine(this, dbSession);
-    permManager = new DBPermissionManager(this).configureClientSession(userObject, personaObject, sessionName);
+    this.dbSession = new DBSession(Ganymede.db, this, sessionName);
+    this.queryEngine = new DBQueryEngine(this, dbSession);
+    this.permManager = new DBPermissionManager(this).configureClientSession(userObject, personaObject, sessionName);
 
-    loggedInSemaphore.set(true);
+    this.loggedInSemaphore.set(true);
 
     // set our initial status
 
@@ -1347,7 +1338,7 @@ final public class GanymedeSession implements Session, Unreferenced {
 
         // create the signature
 
-        if (exportObjects)
+        if (this.exportSession)
           {
             // "This message was sent by {0}, who is running the Ganymede client on {1}."
             signature.append(ts.l("sendMail.signature", permManager.getUserName(), getClientHostName()));
@@ -1442,7 +1433,7 @@ final public class GanymedeSession implements Session, Unreferenced {
             asciiContent.append("\n\n");
           }
 
-        if (exportObjects)
+        if (this.exportSession)
           {
             // "This message was sent by {0}, who is running the Ganymede client on {1}."
             signature.append(ts.l("sendMail.signature", permManager.getUserName(), getClientHostName()));
@@ -2673,9 +2664,9 @@ final public class GanymedeSession implements Session, Unreferenced {
    * Ganymede objects in XML format matching the GanyQL search
    * criteria specified in the queryString.  The ReturnVal returned
    * will, if the operation is approved, contain a reference to an RMI
-   * FileTransmitter interface, which can be iteratively called by the
-   * XML client to pull pieces of the transmission down in
-   * sequence.</p>
+   * {@link arlut.csd.ganymede.rmi.FileTransmitter FileTransmitter}
+   * interface, which can be iteratively called by the XML client to
+   * pull pieces of the transmission down in sequence.</p>
    *
    * @see arlut.csd.ganymede.rmi.Session
    */
@@ -2717,10 +2708,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>This method is called by the XML client to initiate a dump of
    * Ganymede objects in XML format matching the search criteria
    * specified in the query object.  The ReturnVal returned will, if
-   * the operation is approved, contain a reference to an RMI
-   * FileTransmitter interface, which can be iteratively called by the
-   * XML client to pull pieces of the transmission down in
-   * sequence.</p>
+   * the operation is approved, contain a reference to an RMI {@link
+   * arlut.csd.ganymede.rmi.FileTransmitter FileTransmitter}
+   * interface, which can be iteratively called by the XML client to
+   * pull pieces of the transmission down in sequence.</p>
    *
    * @see arlut.csd.ganymede.rmi.Session
    */
@@ -2761,9 +2752,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>This method is called by the XML client to initiate a dump of
    * the server's schema definition in XML format.  The ReturnVal
    * returned will, if the operation is approved, contain a reference
-   * to an RMI FileTransmitter interface, which can be iteratively
-   * called by the XML client to pull pieces of the transmission down
-   * in sequence.</p>
+   * to an RMI {@link arlut.csd.ganymede.rmi.FileTransmitter
+   * FileTransmitter} interface, which can be iteratively called by
+   * the XML client to pull pieces of the transmission down in
+   * sequence.</p>
    *
    * <p>This method is only available to a supergash-privileged
    * GanymedeSession.</p>
@@ -2781,10 +2773,10 @@ final public class GanymedeSession implements Session, Unreferenced {
   /**
    * <p>This method is called by the XML client to initiate a dump of
    * the entire data contents of the server.  The ReturnVal returned
-   * will, if the operation is approved, contain a reference to
-   * an RMI FileTransmitter interface, which can be iteratively called
-   * by the XML client to pull pieces of the transmission down in
-   * sequence.</p>
+   * will, if the operation is approved, contain a reference to an RMI
+   * {@link arlut.csd.ganymede.rmi.FileTransmitter FileTransmitter}
+   * interface, which can be iteratively called by the XML client to
+   * pull pieces of the transmission down in sequence.</p>
    *
    * <p>This method is only available to a supergash-privileged
    * GanymedeSession.</p>
@@ -2813,9 +2805,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    * <p>This method is called by the XML client to initiate a dump of
    * the server's entire database, schema and data, in XML format.
    * The ReturnVal will, if the operation is approved, contain a
-   * reference to an RMI FileTransmitter interface, which can be
-   * iteratively called by the XML client to pull pieces of the
-   * transmission down in sequence.</p>
+   * reference to an RMI {@link arlut.csd.ganymede.rmi.FileTransmitter
+   * FileTransmitter} interface, which can be iteratively called by
+   * the XML client to pull pieces of the transmission down in
+   * sequence.</p>
    *
    * <p>This method is only available to a supergash-privileged
    * GanymedeSession.</p>
@@ -2854,7 +2847,8 @@ final public class GanymedeSession implements Session, Unreferenced {
    * GanymedeSession that require the client to be logged in to
    * operate.</p>
    *
-   * <p>NB: the {@link arlut.csd.ganymede.server.logout()} method
+   * <p>NB: the {@link
+   * arlut.csd.ganymede.server.GanymedeSession#logout()} method
    * unexports this GanymedeSession object so that we shouldn't have
    * any more incoming RMI calls to worry about, but it's possible for
    * RMI calls to be in flight and blocking on the GanymedeSession
@@ -2916,6 +2910,36 @@ final public class GanymedeSession implements Session, Unreferenced {
   public String getUserName()
   {
     return permManager.getUserName();
+  }
+
+  /**
+   * <p>This method returns the name of the persona who is active, the
+   * raw user name if no persona privileges have been assumed, or the
+   * name of the internal Ganymede task or process that is running the
+   * session if no user is attached to this session.</p>
+   *
+   * <p>Note: server-side, no checklogin()</p>
+   */
+
+  public String getIdentity()
+  {
+    return permManager.getIdentity();
+  }
+
+  /**
+   * <p>This method returns the Invid of the user who logged in, or
+   * the non-user-linked persona (supergash, monitor) if there was no
+   * underlying user attached to the persona.</p>
+   *
+   * <p>May return null if this session is being run by a Ganymede
+   * server task or internal process.</p>
+   *
+   * <p>Note: server-side, no checklogin()</p>
+   */
+
+  public Invid getIdentityInvid()
+  {
+    return permManager.getIdentityInvid();
   }
 
   /**
@@ -3073,15 +3097,10 @@ final public class GanymedeSession implements Session, Unreferenced {
 
             dbSession.logout(); // *sync* DBSession
 
-            if (exportObjects)
+            if (this.exportSession)
               {
                 this.asyncPort.shutdown();
                 this.asyncPort = null;
-
-                // If we have DBObjects left exported through RMI, make
-                // them forcibly inaccesible
-
-                unexportObjects(true);
 
                 // if we ourselves were exported, unexport
 
@@ -3092,6 +3111,11 @@ final public class GanymedeSession implements Session, Unreferenced {
                 // everything guarded by checklogin() in case there
                 // are incoming RMI calls blocking on the
                 // GanymedeSession object monitor.
+              }
+
+            if (this.exportObjects)
+              {
+                unexportObjects(true);
               }
 
             // if we're a userSession and weren't forced off, do
@@ -3195,6 +3219,32 @@ final public class GanymedeSession implements Session, Unreferenced {
   }
 
   /**
+   * <p>This method is used to make an internal query that will only
+   * ever return 0 or 1 results.</p>
+   *
+   * @return null if no results were returned, or a valid Result if
+   * one result was returned.
+   */
+
+  public Result internalSingletonQuery(Query query)
+  {
+    Vector<Result> results = this.internalQuery(query);
+
+    if (results.size() == 0)
+      {
+        return null;
+      }
+    else if (results.size() == 1)
+      {
+        return results.get(0);
+      }
+    else
+      {
+        throw new IndexOutOfBoundsException("Too many results from Query");
+      }
+  }
+
+  /**
    * <p>This method is intended as a lightweight way of returning a
    * handy description of the type and label of the specified invid.
    * No locking is done, and the label returned will be viewed through
@@ -3268,7 +3318,7 @@ final public class GanymedeSession implements Session, Unreferenced {
   {
     DBObject newObj;
     ReturnVal retVal = null;
-    Vector ownerInvids = null;
+    Vector<Invid> ownerInvids = null;
 
     /* -- */
 
@@ -3668,7 +3718,7 @@ final public class GanymedeSession implements Session, Unreferenced {
     // excessive communications with the admin console, but no point
     // in getting ourselves all worked up here.
 
-    if (!exportObjects)
+    if (!this.exportObjects)
       {
         return;
       }

@@ -10,7 +10,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -47,6 +47,8 @@
 
 package arlut.csd.Util;
 
+import java.util.regex.Pattern;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                      StringUtils
@@ -59,6 +61,44 @@ package arlut.csd.Util;
  */
 
 public class StringUtils {
+
+  private static Pattern lineSplit = Pattern.compile("\n");
+
+  /**
+   * Takes a String, and returns a new String that has prefix
+   * prepended to each line in the original String.
+   */
+
+  public static String insertPrefixPerLine(String input, String prefix)
+  {
+    if (input == null)
+      {
+        input = "";
+      }
+
+    String[] lines = lineSplit.split(input, -1);
+    StringBuilder builder = new StringBuilder();
+
+    int upperLimit;
+
+    if (input.endsWith("\n"))
+      {
+        upperLimit = lines.length - 1;
+      }
+    else
+      {
+        upperLimit = lines.length;
+      }
+
+    for (int i = 0; i < upperLimit; i++)
+      {
+        builder.append(prefix);
+        builder.append(lines[i]);
+        builder.append("\n");
+      }
+
+    return builder.toString();
+  }
 
   /**
    * Simple method to exchange null strings for empty strings.
@@ -508,6 +548,41 @@ public class StringUtils {
 
   public static void main(String argv[])
   {
+    System.out.println("\n-------------------- String insertPrefixPerLine Tests --------------------\n");
+
+    String[] prefixText = {null,
+                           "",
+                           "Hi, my name\nis adam\nI am a test string\n\nHappy Birthday!\n",
+                           "Hi, my name\nis adam\nI am a test string\n\nHappy Birthday!",
+                           "Hi, my name\nis adam\nI am a test string\n\nHappy Birthday!\n\n",
+                           "",
+                           "\n"};
+    String[] prefixResult = {"test: \n",
+                             "test: \n",
+                             "test: Hi, my name\ntest: is adam\ntest: I am a test string\ntest: \ntest: Happy Birthday!\n",
+                             "test: Hi, my name\ntest: is adam\ntest: I am a test string\ntest: \ntest: Happy Birthday!\n",
+                             "test: Hi, my name\ntest: is adam\ntest: I am a test string\ntest: \ntest: Happy Birthday!\ntest: \n",
+                             "test: \n",
+                             "test: \n"};
+
+    for (int i = 0; i < prefixText.length; i++)
+      {
+        if (prefixResult[i].equals(insertPrefixPerLine(prefixText[i], "test: ")))
+          {
+            System.out.println("Pass " + (i + 1));
+          }
+        else
+          {
+            System.out.println("Fail " + (i + 1));
+
+            System.out.println("Got:");
+            System.out.println("*" + insertPrefixPerLine(prefixText[i], "test: ") + "*");
+
+            System.out.println("Wanted:");
+            System.out.println("*" + prefixResult[i] + "*");
+          }
+      }
+
     System.out.println("\n-------------------- String ensureEndsWith Tests --------------------\n");
 
     String test = "Hi!";

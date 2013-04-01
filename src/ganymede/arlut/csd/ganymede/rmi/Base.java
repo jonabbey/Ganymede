@@ -3,17 +3,19 @@
    Base.java
 
    Client side interface to the object type dictionary
-   
+
    Created: 17 April 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -60,15 +62,16 @@ import arlut.csd.ganymede.common.ReturnVal;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>Client side interface definition for the Ganymede
- * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} class.  This
- * interface allows the client to query type information remotely, and allows
- * the schema editor in the admin console to remotely edit object type information.</P>
+ * <p>Client side interface definition for the Ganymede {@link
+ * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} class.  This
+ * interface allows the client to query type information remotely, and
+ * allows the schema editor in the admin console to remotely edit
+ * object type information.</p>
  *
- * <P>The {@link arlut.csd.ganymede.rmi.Category Category} interface is also vital to
- * the client and schema editor's work with object types.</P>
+ * <p>The {@link arlut.csd.ganymede.rmi.Category Category} interface
+ * is also vital to the client and schema editor's work with object
+ * types.</p>
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
 
@@ -162,7 +165,7 @@ public interface Base extends CategoryNode, Remote {
    * types, in random order.</P>
    */
 
-  public Vector getFields(boolean includeBuiltIns) throws RemoteException;
+  public Vector<? extends BaseField> getFields(boolean includeBuiltIns) throws RemoteException;
 
   /**
    * <p>This method returns a list of all
@@ -170,7 +173,7 @@ public interface Base extends CategoryNode, Remote {
    * fields defined by this object type, in random order.</p>
    */
 
-  public Vector getFields() throws RemoteException;
+  public Vector<? extends BaseField> getFields() throws RemoteException;
 
   /**
    * Returns the field definition for the field matching id,
@@ -194,7 +197,6 @@ public interface Base extends CategoryNode, Remote {
   public boolean canCreate(Session session) throws RemoteException;
 
   /**
-   *
    * Returns true if this object type can be inactivated.  Not all
    * object types will have inactivation protocols defined in the
    * server.  Those that do not can just be deleted.
@@ -294,7 +296,7 @@ public interface Base extends CategoryNode, Remote {
    * from a {@link arlut.csd.ganymede.rmi.SchemaEdit SchemaEdit} reference
    * by the Ganymede schema editor.</p>
    */
- 
+
   public Category getCategory() throws RemoteException;
 
   /**
@@ -311,7 +313,7 @@ public interface Base extends CategoryNode, Remote {
   public BaseField createNewField() throws RemoteException;
 
   /**
-   * <p>This method is used to remove a field definition from 
+   * <p>This method is used to remove a field definition from
    * the current schema.</p>
    *
    * <p>Of course, this removal will only take effect if

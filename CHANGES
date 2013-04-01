@@ -1,12 +1,12 @@
 Ganymede Release 2.0
-22 January 2013
+4 February 2013
 CHANGES
 
 ---------------------------------------------
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: 3 January 2013
+RELEASE DATE: 4 February 2013
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -2094,6 +2094,12 @@ The client now simply clears the password field and prompts for
 re-entry if the user provides invalid credentials.  All other causes
 for login failure (server going down, schema being edited, etc.) will
 still pop up a nuisance dialog to the user.
+
+155. [CLIENT] The client will now indicate when a viewed object is
+              inactivated in the object window title bar
+
+When viewing an inactivated object, the client will now include the
+inactivated status in the text of the object window's title bar.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 

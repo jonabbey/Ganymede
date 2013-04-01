@@ -54,6 +54,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Vector;
@@ -112,7 +113,7 @@ import arlut.csd.ganymede.common.scheduleHandle;
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  */
 
-public class GanymedeScheduler extends Thread {
+public final class GanymedeScheduler extends Thread {
 
   /**
    * TranslationService object for handling string localization in the
@@ -674,12 +675,12 @@ public class GanymedeScheduler extends Thread {
 
     if (currentlyScheduled.containsKey(name))
       {
-        oldHandle = (scheduleHandle) currentlyScheduled.remove(name);
+        oldHandle = currentlyScheduled.remove(name);
       }
 
     if (onDemand.containsKey(name))
       {
-        oldHandle = (scheduleHandle) onDemand.remove(name);
+        oldHandle = onDemand.remove(name);
       }
 
     if (oldHandle != null)
@@ -709,11 +710,11 @@ public class GanymedeScheduler extends Thread {
       }
     else
       {
-        scheduleHandle handle = (scheduleHandle) currentlyScheduled.get(name);
+        scheduleHandle handle = currentlyScheduled.get(name);
 
         if (handle == null)
           {
-            handle = (scheduleHandle) onDemand.get(name);
+            handle = onDemand.get(name);
           }
 
         if (handle == null)
@@ -769,7 +770,7 @@ public class GanymedeScheduler extends Thread {
       }
     else
       {
-        scheduleHandle handle = (scheduleHandle) currentlyRunning.get(name);
+        scheduleHandle handle = currentlyRunning.get(name);
 
         if (handle != null)
           {
@@ -781,7 +782,7 @@ public class GanymedeScheduler extends Thread {
             return true;
           }
 
-        handle = (scheduleHandle) onDemand.get(name);
+        handle = onDemand.get(name);
 
         if (handle == null)
           {
@@ -814,7 +815,7 @@ public class GanymedeScheduler extends Thread {
       }
     else
       {
-        scheduleHandle handle = (scheduleHandle) currentlyRunning.get(name);
+        scheduleHandle handle = currentlyRunning.get(name);
 
         if (handle == null)
           {
@@ -960,16 +961,16 @@ public class GanymedeScheduler extends Thread {
 
     /* -- */
 
-    handle = (scheduleHandle) currentlyRunning.get(name);
+    handle = currentlyRunning.get(name);
 
     if (handle == null)
       {
-        handle = (scheduleHandle) currentlyScheduled.get(name);
+        handle = currentlyScheduled.get(name);
       }
 
     if (handle == null)
       {
-        handle = (scheduleHandle) onDemand.get(name);
+        handle = onDemand.get(name);
       }
 
     return handle;
@@ -995,7 +996,6 @@ public class GanymedeScheduler extends Thread {
   public synchronized void run()
   {
     long currentTime, sleepTime;
-    scheduleHandle handle;
 
     /* -- */
 
@@ -1092,22 +1092,14 @@ public class GanymedeScheduler extends Thread {
 
                     if (currentTime >= nextAction.getTime())
                       {
-                        Vector toRun = new Vector();
+                        Vector<scheduleHandle> toRun = new Vector<scheduleHandle>();
                         Date nextRun = null;
-                        Enumeration en;
 
-                        en = currentlyScheduled.elements();
-
-                        // enum may be empty if the task that we woke ourselves
-                        // up for was unregistered while we were sleeping
-
-                        while (en.hasMoreElements())
+                        for (scheduleHandle handle: currentlyScheduled.values())
                           {
-                            handle = (scheduleHandle) en.nextElement();
-
                             if (handle.startTime.getTime() <= currentTime)
                               {
-                                toRun.addElement(handle);
+                                toRun.add(handle);
                               }
                             else
                               {
@@ -1124,10 +1116,8 @@ public class GanymedeScheduler extends Thread {
 
                         nextAction = nextRun;
 
-                        for (int i = 0; i < toRun.size(); i++)
+                        for (scheduleHandle handle: toRun)
                           {
-                            handle = (scheduleHandle) toRun.elementAt(i);
-
                             if (debug)
                               {
                                 System.err.println("Ganymede Scheduler loop running " + handle);
@@ -1301,23 +1291,14 @@ public class GanymedeScheduler extends Thread {
 
   private synchronized void cleanUp()
   {
-    scheduleHandle handle;
-    Enumeration en;
-
-    /* -- */
-
     // note that it is only safe to do this loop on the
     // currentlyRunning enumeration because cleanUp() is
     // synchronized.. any threads that finish up will have to wait
     // until we return before getting into
     // GanymedeScheduler.notifyCompletion()
 
-    en = currentlyRunning.elements();
-
-    while (en.hasMoreElements())
+    for (scheduleHandle handle: currentlyRunning.values())
       {
-        handle = (scheduleHandle) en.nextElement();
-
         handle.stop();
       }
   }
@@ -1330,36 +1311,18 @@ public class GanymedeScheduler extends Thread {
 
   private synchronized void updateTaskInfo(boolean updateConsoles)
   {
-    Enumeration<scheduleHandle> en;
-
-    /* -- */
-
     if (debug)
       {
         System.err.println("Ganymede Scheduler running updateTaskInfo()");
       }
 
-    taskList.setSize(0);
+    HashSet<scheduleHandle> tempSet = new HashSet<scheduleHandle>();
 
-    en = currentlyScheduled.elements();
+    tempSet.addAll(currentlyScheduled.values());
+    tempSet.addAll(currentlyRunning.values());
+    tempSet.addAll(onDemand.values());
 
-    while (en.hasMoreElements())
-      {
-        VectorUtils.unionAdd(taskList, en.nextElement());
-      }
-
-    en = currentlyRunning.elements();
-    while (en.hasMoreElements())
-      {
-        VectorUtils.unionAdd(taskList, en.nextElement());
-      }
-
-    en = onDemand.elements();
-    while (en.hasMoreElements())
-      {
-        VectorUtils.unionAdd(taskList, en.nextElement());
-      }
-
+    taskList = new Vector<scheduleHandle>(tempSet);
     taskListInitialized = true;
 
     if (reportTasks && updateConsoles)

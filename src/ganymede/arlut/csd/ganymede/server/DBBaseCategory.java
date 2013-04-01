@@ -4,16 +4,16 @@
 
    This module represents an objectbase folder in the server's
    category hierarchy.
-   
+
    Created: 11 August 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2012
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -73,19 +73,22 @@ import arlut.csd.ganymede.rmi.CategoryNode;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>A DBBaseCategory is a 'red folder node' in the server's category and object
- * hierarchy.  The purpose of DBBaseCategory is to be able to group object
- * types with related purpose into a common folder for display on the client.</P>
+ * <p>A DBBaseCategory is a 'red folder node' in the server's category
+ * and object hierarchy.  The purpose of DBBaseCategory is to be able
+ * to group object types with related purpose into a common folder for
+ * display on the client.</p>
  *
- * <P>The {@link arlut.csd.ganymede.server.DBStore DBStore} contains a tree of 
- * {@link arlut.csd.ganymede.rmi.CategoryNode CategoryNode}s, each of which is either
- * a {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} or a DBBaseCategory.  The
- * {@link arlut.csd.ganymede.rmi.Category Category} RMI interface is used by the
- * server and the schema editor to perform browsing and manipulating the server's
- * category tree.</P>
+ * <p>The {@link arlut.csd.ganymede.server.DBStore DBStore} contains a
+ * tree of {@link arlut.csd.ganymede.rmi.CategoryNode CategoryNode}s,
+ * each of which is either a {@link
+ * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} or a
+ * DBBaseCategory.  The {@link arlut.csd.ganymede.rmi.Category
+ * Category} RMI interface is used by the server and the schema editor
+ * to perform browsing and manipulating the server's category
+ * tree.</p>
  */
 
-public class DBBaseCategory implements Category, CategoryNode {
+public final class DBBaseCategory implements Category, CategoryNode {
 
   private final static boolean debug = false;
 
@@ -98,7 +101,7 @@ public class DBBaseCategory implements Category, CategoryNode {
 
   private static Comparator comparator =
     new Comparator() {
-    public int compare(Object a, Object b) 
+    public int compare(Object a, Object b)
       {
         int valA, valB;
 
@@ -125,11 +128,11 @@ public class DBBaseCategory implements Category, CategoryNode {
             return -1;
           }
         else if (valB > valA)
-          { 
+          {
             return 1;
-          } 
+          }
         else
-          { 
+          {
             return 0;
           }
       }
@@ -274,7 +277,7 @@ public class DBBaseCategory implements Category, CategoryNode {
     this.baseHash = baseHash;
 
     setName(rootCategory.getName());
-    
+
     recurseDown(rootCategory, baseHash, editor);
 
     Ganymede.rmi.publishObject(this);
@@ -314,12 +317,12 @@ public class DBBaseCategory implements Category, CategoryNode {
 
             // a new copy, with the same objects under it
 
-            newBase = new DBObjectBase(oldBase, editor); 
+            newBase = new DBObjectBase(oldBase, editor);
             baseHash.put(newBase.getKey(), newBase);
 
             if (false)
               {
-                Ganymede.debug("Created newBase " + newBase.getName() + 
+                Ganymede.debug("Created newBase " + newBase.getName() +
                                " in recursive category tree duplication");
               }
 
@@ -340,7 +343,7 @@ public class DBBaseCategory implements Category, CategoryNode {
 
             if (false)
               {
-                Ganymede.debug("Created newCategory " + newCategory.getName() + 
+                Ganymede.debug("Created newCategory " + newCategory.getName() +
                                " in recursive category tree duplication");
               }
 
@@ -403,10 +406,10 @@ public class DBBaseCategory implements Category, CategoryNode {
 
   synchronized void receive(DataInput in, DBBaseCategory parent) throws IOException
   {
-    String 
+    String
       pathName;
 
-    int 
+    int
       count,
       lastSlash;
 
@@ -418,7 +421,7 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     // we stopped using an explicitly stored display order field at
     // DBStore 2.0
-    
+
     if (store.isLessThan(2,0))
       {
         tmp_displayOrder = in.readInt();
@@ -431,7 +434,7 @@ public class DBBaseCategory implements Category, CategoryNode {
     // now parse our path name to get our path
 
     lastSlash = pathName.lastIndexOf('/');
-    
+
     // and take our leaf's name
 
     name = pathName.substring(lastSlash + 1);
@@ -446,7 +449,7 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     if (false)
       {
-        System.err.println("DBBaseCategory.receive(): reading in " + count + 
+        System.err.println("DBBaseCategory.receive(): reading in " + count +
                            " subcategories and bases");
       }
 
@@ -527,7 +530,7 @@ public class DBBaseCategory implements Category, CategoryNode {
    * @param session The {@link arlut.csd.ganymede.server.GanymedeSession
    * GanymedeSession} that we consult to determine the permissions to
    * be encoded in the returned {@link arlut.csd.ganymede.common.CategoryTransport CategoryTransport}.
-   * 
+   *
    * @param hideNonEditables If true, the CategoryTransport returned
    * will only include those object types that are editable by the
    * client.
@@ -595,7 +598,7 @@ public class DBBaseCategory implements Category, CategoryNode {
             else if (node instanceof DBBaseCategory)
               {
                 DBBaseCategory subCategory = (DBBaseCategory) node;
-                
+
                 if (session == null ||
                     (hideNonEditables && subCategory.containsEditableBase(session)) ||
                     (!hideNonEditables && subCategory.containsVisibleBase(session)))
@@ -698,12 +701,13 @@ public class DBBaseCategory implements Category, CategoryNode {
   }
 
   /**
-   * <p>Re-sorts this category's contents based on the tmp_displayOrder field.</p>
+   * <p>Re-sorts this category's contents based on the
+   * tmp_displayOrder field.</p>
    *
    * <p>We only use this when loading DBBaseCategory's from old-style
    * ganymede.db files.  The modern way of doing things depends on the
    * order of categories within a contents Vector, and needs no
-   * explicit tmp_displayOrder or sorting to be done.</p> 
+   * explicit tmp_displayOrder or sorting to be done.</p>
    */
 
   public void resort()
@@ -934,7 +938,7 @@ public class DBBaseCategory implements Category, CategoryNode {
       {
         try
           {
-            System.err.println("DBBaseCategory<" + getName() + ">.addNodeAfter(" + 
+            System.err.println("DBBaseCategory<" + getName() + ">.addNodeAfter(" +
                                node.getPath() + "," + prevNodeName +")");
           }
         catch (RemoteException ex)
@@ -973,7 +977,7 @@ public class DBBaseCategory implements Category, CategoryNode {
 
     if (prevNodeName == null)
       {
-        contents.addElement(node);
+        contents.add(node);
       }
     else
       {
@@ -1036,7 +1040,7 @@ public class DBBaseCategory implements Category, CategoryNode {
       {
         try
           {
-            System.err.println("DBBaseCategory<" + getName() + ">.addNodeBefore(" + 
+            System.err.println("DBBaseCategory<" + getName() + ">.addNodeBefore(" +
                                node.getPath() + "," + nextNodeName +")");
           }
         catch (RemoteException ex)
@@ -1088,7 +1092,7 @@ public class DBBaseCategory implements Category, CategoryNode {
       {
         for (int i = 0; i < contents.size(); i++)
           {
-            CategoryNode cNode = (CategoryNode) contents.elementAt(i);
+            CategoryNode cNode = contents.get(i);
 
             try
               {
@@ -1122,7 +1126,7 @@ public class DBBaseCategory implements Category, CategoryNode {
       }
   }
 
-  /** 
+  /**
    * <p>This method can be used to move a Category from another
    * Category to this Category, or to move a Category around within
    * this Category.</p>
@@ -1132,7 +1136,7 @@ public class DBBaseCategory implements Category, CategoryNode {
    * to be placed after in this category, or null if the node is to
    * be placed at the first element of this category
    *
-   * @see arlut.csd.ganymede.rmi.Category 
+   * @see arlut.csd.ganymede.rmi.Category
    */
 
   public synchronized void moveCategoryNode(String catPath, String prevNodeName)
@@ -1169,7 +1173,7 @@ public class DBBaseCategory implements Category, CategoryNode {
       {
         if (debug)
           {
-            System.err.println("DBBaseCategory.moveCategoryNode(): moving node from " + 
+            System.err.println("DBBaseCategory.moveCategoryNode(): moving node from " +
                                oldCategory.getPath() + " to " + getPath());
           }
 
@@ -1200,7 +1204,7 @@ public class DBBaseCategory implements Category, CategoryNode {
       {
         for (int i = 0; i < contents.size(); i++)
           {
-            CategoryNode cNode = (CategoryNode) contents.elementAt(i);
+            CategoryNode cNode = contents.get(i);
 
             try
               {
@@ -1261,7 +1265,7 @@ public class DBBaseCategory implements Category, CategoryNode {
           {
             try
               {
-                Ganymede.debug(" examining: " + ((CategoryNode) contents.elementAt(i)).getPath());
+                Ganymede.debug(" examining: " + contents.get(i).getPath());
               }
             catch (RemoteException ex)
               {
@@ -1270,7 +1274,7 @@ public class DBBaseCategory implements Category, CategoryNode {
               }
           }
 
-        if (contents.elementAt(i).equals(node))
+        if (contents.get(i).equals(node))
           {
             index = i;
           }
@@ -1319,7 +1323,7 @@ public class DBBaseCategory implements Category, CategoryNode {
       i,
       index = -1;
 
-    CategoryNode 
+    CategoryNode
       node = null;
 
     /* -- */
@@ -1340,10 +1344,10 @@ public class DBBaseCategory implements Category, CategoryNode {
       {
         if (debug)
           {
-            Ganymede.debug(" examining: " + contents.elementAt(i));
+            Ganymede.debug(" examining: " + contents.get(i));
           }
 
-        node = (CategoryNode) contents.elementAt(i);
+        node = contents.get(i);
 
         try
           {
@@ -1365,7 +1369,7 @@ public class DBBaseCategory implements Category, CategoryNode {
     else if (debug)
       {
         System.err.println("DBBaseCategory.removeNode(): found node " + node);
-        
+
         if (node instanceof DBObjectBase)
           {
             System.err.println("DBBaseCategory.removeNode(): node is DBObjectBase");

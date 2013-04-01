@@ -14,7 +14,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -339,16 +339,14 @@ public class QueryResult implements java.io.Serializable {
   // ***
 
   /**
-   *
-   * This method is used by arlut.csd.ganymede.client.objectList to
+   * <p>This method is used by arlut.csd.ganymede.client.objectList to
    * get access to the raw and sorted vector of ObjectHandle's
-   * post-serialization.
+   * post-serialization.</p>
    *
-   * Note that this method does not clone our handles vector, we'll just
-   * assume that whatever the objectList class on the client does to this
-   * vector, we're not going to disturb anyone else who will be looking
-   * at the handle list on this query result object.
-   *
+   * <p>Note that this method does not clone our handles vector, we'll
+   * just assume that whatever the objectList class on the client does
+   * to this vector, we're not going to disturb anyone else who will
+   * be looking at the handle list on this query result object.</p>
    */
 
   public Vector<ObjectHandle> getHandles()

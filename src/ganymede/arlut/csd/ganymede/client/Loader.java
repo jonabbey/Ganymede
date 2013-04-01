@@ -4,17 +4,19 @@
 
    A convenient initialization thread, does start up stuff for
    the client.
-   
+
    Created: 1 October 1997
 
    Module By: Michael Mulvaney
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -65,11 +67,10 @@ import arlut.csd.ganymede.rmi.Session;
 ------------------------------------------------------------------------------*/
 
 /**
- * Client-side cache for loading object and field type definitions
+ * <p>Client-side cache for loading object and field type definitions
  * from the server in the background during the client's start-up, and
- * providing that information to the client during its operations.
+ * providing that information to the client during its operations.</p>
  *
- * @version $Id$
  * @author Mike Mulvaney
  */
 
@@ -77,13 +78,19 @@ public class Loader extends Thread {
 
   private static final boolean debug = false;
 
-  private Hashtable 
-    baseMap,
-    baseNames,
-    baseToShort,
+  private Hashtable<Short, Base>
+    baseMap;
+
+  private Hashtable<Base, String>
+    baseNames;
+
+  private Hashtable<Base, Short>
+    baseToShort;
+
+  private Hashtable<String, Short>
     nameShorts;
 
-  private Vector
+  private Vector<Base>
     baseList;
 
   private volatile boolean
@@ -99,15 +106,15 @@ public class Loader extends Thread {
   /**
    * Hash mapping Short object type id's to Vectors of
    * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}'s,
-   * used by the client to quickly look up information about fields 
-   * in order to populate 
+   * used by the client to quickly look up information about fields
+   * in order to populate
    * {@link arlut.csd.ganymede.client.containerPanel containerPanel}'s.
    *
    * This hash is used by
    * {@link arlut.csd.ganymede.client.gclient#getTemplateVector(java.lang.Short) getTemplateVector}.
    */
 
-  private Hashtable templateHash;
+  private Hashtable<Short, Vector<FieldTemplate>> templateHash;
 
   /**
    * Hash mapping Short object type id's to a Hash that
@@ -115,7 +122,7 @@ public class Loader extends Thread {
    * object
    */
 
-  private Hashtable templateNameHash;
+  private Hashtable<Short, Hashtable<String, FieldTemplate>> templateNameHash;
 
   /* -- */
 
@@ -165,7 +172,7 @@ public class Loader extends Thread {
               {
                 System.err.println("**Stopping before baseNames are loaded");
               }
-            
+
             baseNamesLoaded = true;
           }
 
@@ -177,7 +184,7 @@ public class Loader extends Thread {
               {
                 System.err.println("**Stopping before baseMap is loaded");
               }
-                
+
             baseMapLoaded = true;
           }
 
@@ -231,7 +238,7 @@ public class Loader extends Thread {
 
     isShutdown = true;
 
-    synchronized (this) 
+    synchronized (this)
       {
         // setting isShutdown to true should cause the loader run
         // method to quickly drop out and set the loader flags to
@@ -340,7 +347,7 @@ public class Loader extends Thread {
    * block until the information is available.</p>
    */
 
-  public Vector getBaseList()
+  public Vector<Base> getBaseList()
   {
     if (!baseListLoaded && !isShutdown)
       {
@@ -352,7 +359,7 @@ public class Loader extends Thread {
                   {
                     System.err.println("Dang, have to wait to get the base list");
                   }
-                
+
                 try
                   {
                     this.wait();
@@ -389,7 +396,7 @@ public class Loader extends Thread {
    * method will block until the information is available.</p>
    */
 
-  public Hashtable getBaseNames()
+  public Hashtable<Base, String> getBaseNames()
   {
     if (!baseNamesLoaded && !isShutdown)
       {
@@ -416,7 +423,7 @@ public class Loader extends Thread {
               }
           }
       }
-    
+
     if (debug)
       {
         if (baseNames == null)
@@ -441,7 +448,7 @@ public class Loader extends Thread {
    * method will block until the information is available.</p>
    */
 
-  public Hashtable getBaseMap()
+  public Hashtable<Short, Base> getBaseMap()
   {
     if (!baseMapLoaded && !isShutdown)
       {
@@ -495,7 +502,7 @@ public class Loader extends Thread {
    * method will block until the information is available.</p>
    */
 
-  public Hashtable getBaseToShort()
+  public Hashtable<Base, Short> getBaseToShort()
   {
     // baseToShort is loaded in the loadBaseMap function, so we can just
     // check to see if the baseMapLoaded is true.
@@ -550,7 +557,7 @@ public class Loader extends Thread {
    * method will block until the information is available.</p>
    */
 
-  public Hashtable getNameToShort()
+  public Hashtable<String, Short> getNameToShort()
   {
     // baseToShort is loaded in the loadBaseMap function, so we can just
     // check to see if the baseMapLoaded is true.
@@ -615,16 +622,16 @@ public class Loader extends Thread {
   {
     if (templateNameHash == null)
       {
-        templateNameHash = new Hashtable();
+        templateNameHash = new Hashtable<Short, Hashtable<String, FieldTemplate>>();
       }
 
-    Hashtable nameHash = (Hashtable) templateNameHash.get(objectid);
+    Hashtable<String, FieldTemplate> nameHash = templateNameHash.get(objectid);
 
     if (nameHash == null)
       {
         getTemplateVector(objectid);
 
-        nameHash = (Hashtable) templateNameHash.get(objectid);
+        nameHash = templateNameHash.get(objectid);
 
         if (nameHash == null)
           {
@@ -632,33 +639,33 @@ public class Loader extends Thread {
           }
       }
 
-    return (FieldTemplate) nameHash.get(fieldname);
+    return nameHash.get(fieldname);
   }
 
   /**
-   * Returns a vector of 
+   * Returns a vector of
    * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}'s.
    *
    * @param id Object type id to retrieve field information for.
    */
 
-  public Vector getTemplateVector(short id)
+  public Vector<FieldTemplate> getTemplateVector(short id)
   {
     return getTemplateVector(Short.valueOf(id));
   }
 
   /**
-   * Returns a vector of 
+   * Returns a vector of
    * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}'s
-   * listing fields and field informaton for the object type identified by 
+   * listing fields and field informaton for the object type identified by
    * id.
    *
    * @param id The id number of the object type to be returned the base id.
    */
 
-  public synchronized Vector getTemplateVector(Short id)
+  public synchronized Vector<FieldTemplate> getTemplateVector(Short id)
   {
-    Vector result = null;
+    Vector<FieldTemplate> result = null;
 
     /* -- */
 
@@ -678,12 +685,12 @@ public class Loader extends Thread {
 
         if (templateHash == null)
           {
-            templateHash = new Hashtable();
+            templateHash = new Hashtable<Short, Vector<FieldTemplate>>();
           }
-        
+
         if (templateHash.containsKey(id))
           {
-            result = (Vector) templateHash.get(id);
+            result = templateHash.get(id);
           }
         else
           {
@@ -698,7 +705,7 @@ public class Loader extends Thread {
                 throw new RuntimeException("Could not get field templates: " + rx);
               }
           }
-        
+
         return result;
       }
     finally
@@ -709,25 +716,24 @@ public class Loader extends Thread {
 
   /* -- Private methods  --  */
 
-  private void constructTemplateNameHash(Short objectId, Vector fieldTemplates)
+  private void constructTemplateNameHash(Short objectId, Vector<FieldTemplate> fieldTemplates)
   {
-    Hashtable nameHash = new Hashtable();
+    Hashtable nameHash = new Hashtable<String, FieldTemplate>();
 
-    for (int i = 0; i < fieldTemplates.size(); i++)
+    for (FieldTemplate x: fieldTemplates)
       {
-        FieldTemplate x = (FieldTemplate) fieldTemplates.elementAt(i);
         nameHash.put(x.getName(), x);
       }
 
     if (templateNameHash == null)
       {
-        templateNameHash = new Hashtable();
+        templateNameHash = new Hashtable<Short, Hashtable<String, FieldTemplate>>();
       }
 
     templateNameHash.put(objectId, nameHash);
   }
 
-  /** 
+  /**
    * loadBaseList loads a sorted Vector of types from the server.
    */
 
@@ -764,17 +770,15 @@ public class Loader extends Thread {
 
   private synchronized void loadBaseNames() throws RemoteException
   {
-    baseNames = new Hashtable();
-    
-    Base b;
-    Vector list = getBaseList();
+    baseNames = new Hashtable<Base, String>();
 
-    for (int i = 0; i < list.size(); i++)
+    Vector<Base> list = getBaseList();
+
+    for (Base b: list)
       {
-        b = (Base)list.elementAt(i);
         baseNames.put(b, b.getName());
       }
-      
+
     if (debug)
       {
         System.err.println("Finished loading base list");
@@ -791,22 +795,20 @@ public class Loader extends Thread {
 
   private synchronized void loadBaseMap() throws RemoteException
   {
-    Base base;
+    Vector<Base> myBaseList;
     int size;
-    Vector myBaseList;
 
     /* -- */
 
     myBaseList = getBaseList();
     size = myBaseList.size();
 
-    baseMap = new Hashtable(size);
-    baseToShort = new Hashtable(size);
-    nameShorts = new Hashtable(size);
+    baseMap = new Hashtable<Short, Base>(size);
+    baseToShort = new Hashtable<Base, Short>(size);
+    nameShorts = new Hashtable<String, Short>(size);
 
-    for (int i = 0; i < size; i++)
+    for (Base base: myBaseList)
       {
-        base = (Base) myBaseList.elementAt(i);
         Short id = Short.valueOf(base.getTypeID());
 
         baseMap.put(id, base);

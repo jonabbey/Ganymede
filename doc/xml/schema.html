@@ -102,8 +102,8 @@
         &lt;category name="Admin-Level Objects"&gt;
           &lt;category name="Events"&gt;
             &lt;objectdef name="System_Events" id="4"&gt;
-              &lt;classdef name="arlut.csd.ganymede.eventCustom"/&gt;
               &lt;label fieldid="100"/&gt;
+              &lt;classdef name="arlut.csd.ganymede.eventCustom"/&gt;
               &lt;tab name="General"/&gt;
                 &lt;fielddef name="Event_Token" id="100"&gt;
                   &lt;comment&gt;Single-word token for this event class&lt;/comment&gt;
@@ -177,12 +177,33 @@
        &lt;objectdef name="User" id="3"&gt;
     </pre>
 
-    <p>Within the <b>objectdef</b> element, there are a couple of
-    optional elements that define optional characteristics of the
-    object, followed by a series of <b>fielddef</b> elements.</p>
+    <p>The <b>objectdef</b> element must contain the
+    mandatory <b>&lt;label&gt;</b> element to control what
+    namespace-controlled field will act as the object's label.  There
+    can also be an optional <b>&lt;classdef&gt;</b> element to define
+    the Java plugin class used to control operations on the object,
+    along with an optional <b>&lt;embedded&gt;</b> element to
+    designate objects that are to be contained in other objects.
+    After these two or three top-level elements, there will be a
+    series of
+    <b>tab</b> elements, which in turn will contain <b>fielddef</b>
+    elements to define the tabs and fields in this object type.</p>
 
-    <p>The optional elements are the <b>&lt;classdef&gt;</b>,
-    <b>&lt;embedded&gt;</b> and <b>&lt;label&gt;</b> elements.</p>
+    <p>The mandatory <b>label</b> element has a <b>fieldid</b>
+    attribute which gives the numeric field id of the field within the
+    object which is to serve as the label field.  Objects must have
+    one and only one designated label field and it must refer to a
+    namespace-controlled String, IP, or Numeric field defined within
+    the &lt;objectdef&gt; element.  Float, Password, Permission
+    Matrix, Object Reference, Field Option, and Boolean fields may not
+    be specified as label fields.  The <b>label</b> element must be
+    empty.</p>
+
+    <p>Example:</p>
+
+    <pre>
+       &lt;label fieldid="100"/&gt;
+    </pre>
 
     <p>The <b>classdef</b> element, if present, specifies the fully
     qualified class name of a Java class to be loaded by the server to
@@ -199,7 +220,7 @@
     Jython support, you'd need to set <b>classdef</b> to
     <code><b>arlut.csd.ganymede.server.JythonEditObjectFactory</b></code>.</p>
 
-    <p>See <a href="customization/index.html">the
+    <p>See <a href="../customization/index.html" target="_top">the
     DBEditObject subclassing guide</a> for details on the use of
     custom classes in the Ganymede server. The <b>classdef</b> element
     must be empty.  That is, it must not contain any other
@@ -231,24 +252,8 @@
        &lt;embedded/&gt;
     </pre>
 
-    <p>The optional <b>label</b> element has a <b>fieldid</b>
-    attribute which gives the numeric field id of the field within the
-    object which is to serve as the label field.  Objects do not need
-    to have designated label fields, but if they do, they can have
-    only one, and it must refer to a String, IP, Numeric, or Floating
-    Point field defined within the &lt;objectdef&gt; element.
-    Password, Permission Matrix, Object Reference, and Boolean fields
-    may not be specified as label fields.  The <b>label</b> element
-    must be empty.</p>
-
-    <p>Example:</p>
-
-    <pre>
-       &lt;label fieldid="100"/&gt;
-    </pre>
-
-    <p>Once the optional elements are out of the way, we get down to
-    the meat of an object definition element.. the fields, and the
+    <p>Once these top-level elements are out of the way, we get down
+    to the meat of an object definition element.. the fields, and the
     tabs they are contained in.  The <b>objectdef</b> element contains
     a series of one or more <b>tab</b> elements.  These <b>tab</b>
     elements, in turn, contain <b>fielddef</b> elements, one for each
@@ -774,9 +779,9 @@
 	  will store the contents of this password in the Salted SHA-1
 	  format used by OpenLDAP.  This is Netscape's salted variant
 	  of the FIPS SHA-1 standard.  SHA-1 is described at <a
-	  href="http://en.wikipedia.org/wiki/SHA-1">http://en.wikipedia.org/wiki/SHA-1</a>,
+	  href="http://en.wikipedia.org/wiki/SHA-1" target="_top">http://en.wikipedia.org/wiki/SHA-1</a>,
 	  while SSHA is described at
-	  <a href="http://www.openldap.org/faq/data/cache/347.html">http://www.openldap.org/faq/data/cache/347.html</a>.</p>
+	  <a href="http://www.openldap.org/faq/data/cache/347.html" target="_top">http://www.openldap.org/faq/data/cache/347.html</a>.</p>
 	</td>
 	<td>&lt;sshaHashed/&gt;</td>
       </tr>
@@ -792,7 +797,7 @@
 	  under consideration for adoption by Sun, IBM, and HP).</p>
 
           <p>See
-          <a href="http://people.redhat.com/drepper/sha-crypt.html">http://people.redhat.com/drepper/sha-crypt.html</a>
+          <a href="http://people.redhat.com/drepper/sha-crypt.html" target="_top">http://people.redhat.com/drepper/sha-crypt.html</a>
           for complete details on this algorithm.</p>
 
           <p>Note that this algorithm is only starting to be supported.  It works properly
@@ -915,8 +920,8 @@
 
     <pre>
           &lt;objectdef name="User" id="3"&gt;
-            &lt;classdef name="arlut.csd.ganymede.gasharl.userCustom"/&gt;
             &lt;label fieldid="100"/&gt;
+            &lt;classdef name="arlut.csd.ganymede.gasharl.userCustom"/&gt;
             &lt;tab name="General"/&gt;
               &lt;fielddef name="Username" id="100"&gt;
                 &lt;comment&gt;User name for an individual privileged to log into Ganymede and/or the network&lt;/comment&gt;

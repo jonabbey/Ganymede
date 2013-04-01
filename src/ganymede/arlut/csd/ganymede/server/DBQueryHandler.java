@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -76,8 +76,8 @@ import arlut.csd.Util.TranslationService;
  * database.  Static methods in this class are used to test a query
  * tree against an individual object in the database.</p>
  *
- * <p>The {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
- * {@link arlut.csd.ganymede.server.GanymedeSession#queryDispatch(arlut.csd.ganymede.common.Query,
+ * <p>The {@link arlut.csd.ganymede.server.DBQueryEngine DBQueryEngine}'s
+ * {@link arlut.csd.ganymede.server.DBQueryEngine#queryDispatch(arlut.csd.ganymede.common.Query,
  * boolean, boolean, arlut.csd.ganymede.server.DBLock, arlut.csd.ganymede.server.DBEditObject)
  * queryDispatch()}
  * method contains most of the query engine's

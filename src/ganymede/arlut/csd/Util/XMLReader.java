@@ -7,15 +7,16 @@
 
    Created: 7 March 2000
 
-
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -75,24 +76,24 @@ import org.xml.sax.helpers.DefaultHandler;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class is intended to serve as a stream-oriented pull proxy, allowing
- * the Ganymede server to read XML entity and character data from a SAX parser
- * entity by entity, rather than through the use of a callback interface, as is
- * traditionally done with SAX.</P>
+ * <p>This class is intended to serve as a stream-oriented pull proxy,
+ * allowing the Ganymede server to read XML entity and character data
+ * from a SAX parser entity by entity, rather than through the use of
+ * a callback interface, as is traditionally done with SAX.</p>
  *
- * <P>When instantiated, the XMLReader creates a background thread
+ * <p>When instantiated, the XMLReader creates a background thread
  * that receives SAX events from the Java 1.4 JAXP SAX2 parser.  These
  * SAX events are converted to {@link arlut.csd.Util.XMLItem XMLItem}
  * objects and saved in an internal buffer.  The user of the XMLReader
  * class calls getNextItem() to retrieve these XMLItem objects from
- * the XMLReader buffer, in order of receipt.</P>
+ * the XMLReader buffer, in order of receipt.</p>
  *
- * <P>The background parse thread is throttled back as needed to avoid overflowing
- * the XMLReader's internal buffer.</P>
+ * <p>The background parse thread is throttled back as needed to avoid
+ * overflowing the XMLReader's internal buffer.</p>
  */
 
 public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Runnable {
-  
+
   public final static boolean debug = false;
 
   private javax.xml.parsers.SAXParser parser;
@@ -107,7 +108,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   /**
    * Set the lowWaterMark to something low on a single processor
    * system, to something high (equal to bufferSize?) on a
-   * multi-processor native threads system.  
+   * multi-processor native threads system.
    */
 
   private int lowWaterMark;
@@ -115,7 +116,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   /**
    * Set the highWaterMark to something high if on a single processor
    * system, to something low (equal to 0) on a multi-processor
-   * native threads system.  
+   * native threads system.
    */
 
   private int highWaterMark;
@@ -158,7 +159,6 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   {
     this(xmlFile, bufferSize, skipWhiteSpace, new PrintWriter(System.err));
   }
-
 
   /**
    * @param xmlFile A File object to read
@@ -257,7 +257,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
    * elements.
    */
 
-  public XMLReader(PipedOutputStream sourcePipe, int bufferSize, 
+  public XMLReader(PipedOutputStream sourcePipe, int bufferSize,
                    boolean skipWhiteSpace) throws IOException
   {
     this(sourcePipe, bufferSize, skipWhiteSpace, new PrintWriter(System.err));
@@ -277,7 +277,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
    * @param err A PrintWriter object to send debugging/error output to
    */
 
-  public XMLReader(PipedOutputStream sourcePipe, int bufferSize, 
+  public XMLReader(PipedOutputStream sourcePipe, int bufferSize,
                    boolean skipWhiteSpace, PrintWriter err) throws IOException
   {
     try
@@ -307,13 +307,13 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   }
 
   /**
-   * <P>getNextItem() returns the next {@link arlut.csd.Util.XMLItem XMLItem}
+   * <p>getNextItem() returns the next {@link arlut.csd.Util.XMLItem XMLItem}
    * from the XMLReader's buffer.  If the background thread's parsing has fallen
    * behind, getNextItem() will block until either data is made available from
-   * the parse thread, or the XMLReader is closed.</P>
+   * the parse thread, or the XMLReader is closed.</p>
    *
-   * <P>getNextItem() returns null when there are no more XML elements or character
-   * data to be read from the XMLReader stream.</P>
+   * <p>getNextItem() returns null when there are no more XML elements or character
+   * data to be read from the XMLReader stream.</p>
    *
    * @param skipWhiteSpaceChars if true, getNextItem() will silently eat any
    * all-whitespace character data.
@@ -398,13 +398,13 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   }
 
   /**
-   * <P>getNextItem() returns the next {@link arlut.csd.Util.XMLItem XMLItem}
+   * <p>getNextItem() returns the next {@link arlut.csd.Util.XMLItem XMLItem}
    * from the XMLReader's buffer.  If the background thread's parsing has fallen
    * behind, getNextItem() will block until either data is made available from
-   * the parse thread, or the XMLReader is closed.</P>
+   * the parse thread, or the XMLReader is closed.</p>
    *
-   * <P>getNextItem() returns null when there are no more XML elements or character
-   * data to be read from the XMLReader stream.</P>
+   * <p>getNextItem() returns null when there are no more XML elements or character
+   * data to be read from the XMLReader stream.</p>
    */
 
   public XMLItem getNextItem()
@@ -413,13 +413,13 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   }
 
   /**
-   * <P>peekNextItem() returns the next {@link arlut.csd.Util.XMLItem XMLItem}
+   * <p>peekNextItem() returns the next {@link arlut.csd.Util.XMLItem XMLItem}
    * from the XMLReader's buffer.  If the background thread's parsing has fallen
    * behind, peekNextItem() will block until either data is made available from
-   * the parse thread, or the XMLReader is closed.</P>
+   * the parse thread, or the XMLReader is closed.</p>
    *
-   * <P>peekNextItem() returns null when there are no more XML elements or character
-   * data to be read from the XMLReader stream.</P>
+   * <p>peekNextItem() returns null when there are no more XML elements or character
+   * data to be read from the XMLReader stream.</p>
    *
    * @param skipWhiteSpaceChars if true, peekNextItem() will silently eat any
    * all-whitespace character data.  Any all-whitespace character data eaten
@@ -494,13 +494,13 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   }
 
   /**
-   * <P>peekNextItem() returns the next {@link arlut.csd.Util.XMLItem XMLItem}
+   * <p>peekNextItem() returns the next {@link arlut.csd.Util.XMLItem XMLItem}
    * from the XMLReader's buffer.  If the background thread's parsing has fallen
    * behind, peekNextItem() will block until either data is made available from
-   * the parse thread, or the XMLReader is closed.</P>
+   * the parse thread, or the XMLReader is closed.</p>
    *
-   * <P>peekNextItem() returns null when there are no more XML elements or character
-   * data to be read from the XMLReader stream.</P>
+   * <p>peekNextItem() returns null when there are no more XML elements or character
+   * data to be read from the XMLReader stream.</p>
    */
 
   public XMLItem peekNextItem()
@@ -509,10 +509,11 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   }
 
   /**
-   * <P>pushbackItem() may be used to push the most recently read XMLItem back
-   * onto the XMLReader's buffer.  The XMLReader code guarantees that there
-   * will be room to handle a single item pushback, but two pushbacks in a row
-   * with no getNextItem() call in between will cause an exception to be thrown.</P>
+   * <p>pushbackItem() may be used to push the most recently read
+   * XMLItem back onto the XMLReader's buffer.  The XMLReader code
+   * guarantees that there will be room to handle a single item
+   * pushback, but two pushbacks in a row with no getNextItem() call
+   * in between will cause an exception to be thrown.</p>
    */
 
   public void pushbackItem(XMLItem item)
@@ -528,20 +529,21 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
         buffer.notifyAll();     // in case we have multiple threads consuming
       }
   }
-  
+
   /**
-   * <P>This method is intended to be called in the situation where we
-   * have some text between an open and close tag, as in '<open>Some string</open>'.</P>
+   * <p>This method is intended to be called in the situation where we
+   * have some text between an open and close tag, as in '<open>Some
+   * string</open>'.</p>
    *
-   * <P>getFollowingString() does not expect there to be any other XML 
-   * elements between the open and close element in the stream.</P>
+   * <p>getFollowingString() does not expect there to be any other XML
+   * elements between the open and close element in the stream.</p>
    *
-   * <P>getFollowingString() expects the openElement to have already been consumed
-   * from the reader at the time that it is called, and will consume the
-   * close element before returning.</P>
+   * <p>getFollowingString() expects the openElement to have already
+   * been consumed from the reader at the time that it is called, and
+   * will consume the close element before returning.</p>
    *
-   * <P>If there is no character data between openElement and the matching closeElement,
-   * null will be returned.</P>
+   * <p>If there is no character data between openElement and the
+   * matching closeElement, null will be returned.</p>
    */
 
   public String getFollowingString(XMLItem openItem, boolean skipWhiteSpace)
@@ -595,7 +597,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
         //err.println(">>> " + tagName + " seeking: " + nextItem);
         nextItem = getNextItem(skipWhiteSpace);
       }
-    
+
     if (nextItem == null)
       {
         IllegalArgumentException ex = new IllegalArgumentException("unexpected end of stream");
@@ -606,29 +608,29 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   }
 
   /**
-   * <P>This method reads the next XMLItem from the reader stream and,
+   * <p>This method reads the next XMLItem from the reader stream and,
    * if it is an non-empty XMLElement, will return that element as the
    * root node of a tree of all elements contained under it.  All
    * XMLItems in the tree will be linked using the getParent() and
-   * getChildren() methods supported by every XMLItem class.</P>
+   * getChildren() methods supported by every XMLItem class.</p>
    *
-   * <P>If getNextTree returns a multi-node tree, all XMLCloseElements
+   * <p>If getNextTree returns a multi-node tree, all XMLCloseElements
    * read from the reader stream will be eaten, and will not appear in
    * the tree returned.  The XMLCloseElements are used to determine
    * where the list of children should end, and so are implicitly
    * captured in the tree returned.  If any XMLError or XMLEndDocument
    * items are found while searching for the completion of an open
    * element's tree, that will be returned directly, and all items
-   * loaded from the reader in building the tree will be thrown
-   * away.  XMLWarning elements will be returned at the point at which
-   * they were encountered in the tree parsing.</P>
+   * loaded from the reader in building the tree will be thrown away.
+   * XMLWarning elements will be returned at the point at which they
+   * were encountered in the tree parsing.</p>
    *
-   * <P>This method is recursive, and so may cause a
+   * <p>This method is recursive, and so may cause a
    * StackOverflowError to be thrown if the XML under the startingItem
-   * is extremely deeply nested.</P> 
+   * is extremely deeply nested.</p>
    *
-   * <P>This variant of getNextItem() uses the default skipWhiteSpace setting for
-   * this XMLReader.</P> 
+   * <p>This variant of getNextItem() uses the default skipWhiteSpace
+   * setting for this XMLReader.</p>
    */
 
   public XMLItem getNextTree()
@@ -637,38 +639,38 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   }
 
   /**
-   * <P>This method takes an optional XMLItem and, if it is an
+   * <p>This method takes an optional XMLItem and, if it is an
    * non-empty XMLElement, will return that element as the root node
    * of a tree of all elements contained under it.  All XMLItems in
    * the tree will be linked using the getParent() and getChildren()
-   * methods supported by every XMLItem class.</P>
+   * methods supported by every XMLItem class.</p>
    *
-   * <P>If getNextTree returns a multi-node tree, all XMLCloseElements
+   * <p>If getNextTree returns a multi-node tree, all XMLCloseElements
    * read from the reader stream will be eaten, and will not appear in
    * the tree returned.  The XMLCloseElements are used to determine
    * where the list of children should end, and so are implicitly
    * captured in the tree returned.  If any XMLError or XMLEndDocument
    * items are found while searching for the completion of an open
    * element's tree, that will be returned directly, and all items
-   * loaded from the reader in building the tree will be thrown
-   * away.  XMLWarning elements will be returned at the point at which
-   * they were encountered in the tree parsing.</P>
+   * loaded from the reader in building the tree will be thrown away.
+   * XMLWarning elements will be returned at the point at which they
+   * were encountered in the tree parsing.</p>
    *
-   * <P>This method is recursive, and so may cause a
+   * <p>This method is recursive, and so may cause a
    * StackOverflowError to be thrown if the XML under the startingItem
-   * is extremely deeply nested.</P> 
+   * is extremely deeply nested.</p>
    *
-   * <P>Note that the startingItem is optional, and if it is present,
-   * it must be the last XMLItem read from this XMLReader.. getNextTree()
-   * assumes that the XMLReader is primed to read the first XMLItem following
-   * the startingItem if startingItem is provided.  If startingItem is not
-   * provided, getNextTree() will read the next item from the XMLReader,
-   * and make that the root of the tree returned.  If the next item is not
-   * a non-empty XML element start tag, the next item will be returned by
-   * itself.</P>
+   * <p>Note that the startingItem is optional, and if it is present,
+   * it must be the last XMLItem read from this
+   * XMLReader.. getNextTree() assumes that the XMLReader is primed to
+   * read the first XMLItem following the startingItem if startingItem
+   * is provided.  If startingItem is not provided, getNextTree() will
+   * read the next item from the XMLReader, and make that the root of
+   * the tree returned.  If the next item is not a non-empty XML
+   * element start tag, the next item will be returned by itself.</p>
    *
-   * <P>This variant of getNextItem() uses the default skipWhiteSpace setting for
-   * this XMLReader.</P>
+   * <p>This variant of getNextItem() uses the default skipWhiteSpace
+   * setting for this XMLReader.</p>
    */
 
   public XMLItem getNextTree(XMLItem startingItem)
@@ -677,35 +679,35 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   }
 
   /**
-   * <P>This method takes an optional XMLItem and, if it is an
+   * <p>This method takes an optional XMLItem and, if it is an
    * non-empty XMLElement, will return that element as the root node
    * of a tree of all elements contained under it.  All XMLItems in
    * the tree will be linked using the getParent() and getChildren()
-   * methods supported by every XMLItem class.</P>
+   * methods supported by every XMLItem class.</p>
    *
-   * <P>If getNextTree returns a multi-node tree, all XMLCloseElements
+   * <p>If getNextTree returns a multi-node tree, all XMLCloseElements
    * read from the reader stream will be eaten, and will not appear in
    * the tree returned.  The XMLCloseElements are used to determine
    * where the list of children should end, and so are implicitly
    * captured in the tree returned.  If any XMLError or XMLEndDocument
    * items are found while searching for the completion of an open
    * element's tree, that will be returned directly, and all items
-   * loaded from the reader in building the tree will be thrown
-   * away.  XMLWarning elements will be returned at the point at which
-   * they were encountered in the tree parsing.</P>
+   * loaded from the reader in building the tree will be thrown away.
+   * XMLWarning elements will be returned at the point at which they
+   * were encountered in the tree parsing.</p>
    *
-   * <P>This method is recursive, and so may cause a
+   * <p>This method is recursive, and so may cause a
    * StackOverflowError to be thrown if the XML under the startingItem
-   * is extremely deeply nested.</P> 
+   * is extremely deeply nested.</p>
    *
-   * <P>Note that the startingItem is optional, and if it is present,
-   * it must be the last XMLItem read from this XMLReader.. getNextTree()
-   * assumes that the XMLReader is primed to read the first XMLItem following
-   * the startingItem if startingItem is provided.  If startingItem is not
-   * provided, getNextTree() will read the next item from the XMLReader,
-   * and make that the root of the tree returned.  If the next item is not
-   * a non-empty XML element start tag, the next item will be returned by
-   * itself.</P>
+   * <p>Note that the startingItem is optional, and if it is present,
+   * it must be the last XMLItem read from this
+   * XMLReader.. getNextTree() assumes that the XMLReader is primed to
+   * read the first XMLItem following the startingItem if startingItem
+   * is provided.  If startingItem is not provided, getNextTree() will
+   * read the next item from the XMLReader, and make that the root of
+   * the tree returned.  If the next item is not a non-empty XML
+   * element start tag, the next item will be returned by itself.</p>
    */
 
   public XMLItem getNextTree(XMLItem startingItem, boolean skipWhiteSpace)
@@ -723,7 +725,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
       {
         return startingItem;
       }
-    
+
     List<XMLItem> children = new ArrayList<XMLItem>();
 
     while (true)
@@ -747,12 +749,12 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
             if (children.size() > 0)
               {
                 XMLItem[] childrenAry = new XMLItem[children.size()];
-                
+
                 for (int i = 0; i < children.size(); i++)
                   {
                     childrenAry[i] = children.get(i);
                   }
-                
+
                 startingItem.setChildren(childrenAry);
               }
 
@@ -765,18 +767,17 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   }
 
   /**
-   * <P>This method returns true if the next thing to be read in the
-   * input stream is non-whitespace character data rather than an
-   * open or close element tag.</P>
+   * <p>This method returns true if the next thing to be read in the
+   * input stream is non-whitespace character data rather than an open
+   * or close element tag.</p>
    *
-   * <P>Calling this method has the side effect that if the next
-   * data in the stream is a block of all-whitespace
-   * character data, that all-whitespace character data will be
-   * silently eaten.</P>
+   * <p>Calling this method has the side effect that if the next data
+   * in the stream is a block of all-whitespace character data, that
+   * all-whitespace character data will be silently eaten.</p>
    *
-   * <P>This method goes well with getFollowingString();  you can
-   * call this method first to verify that the next data is indeed
-   * char data, then call getFollowingString() to get all of it.</P>
+   * <p>This method goes well with getFollowingString(); you can call
+   * this method first to verify that the next data is indeed char
+   * data, then call getFollowingString() to get all of it.</p>
    */
 
   public boolean isNextCharData()
@@ -787,10 +788,10 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   }
 
   /**
-   * <P>close() causes the XMLReader to terminate its operations as soon
-   * as possible.  Once close() has been called, the background XML parser
-   * will terminate with a SAXException the next time a SAX callback is
-   * performed.
+   * <p>close() causes the XMLReader to terminate its operations as
+   * soon as possible.  Once close() has been called, the background
+   * XML parser will terminate with a SAXException the next time a SAX
+   * callback is performed.</p>
    */
 
   public void close()
@@ -804,7 +805,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
     if (false)                  // XXX debug XXX
       {
         // bounce a runtime exception to get our stack trace
-        
+
         try
           {
             throw new RuntimeException("XMLReader.close() called");
@@ -843,7 +844,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
                 err.println(circleBuffer.getContents());
                 err.flush();
               }
-            
+
             return;
           }
       }
@@ -1006,7 +1007,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
           }
 
         bufferContents--;
-        
+
         return result;
       }
   }
@@ -1021,12 +1022,12 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 
   /**
    * <p>The locator allows the application to determine the end
-   * position of any document-related event, even if the parser is
-   * not reporting an error.  Typically, the application will
-   * use this information for reporting its own errors (such as
-   * character content that does not match an application's
-   * business rules).  The information returned by the locator
-   * is probably not sufficient for use with a search engine.</p>
+   * position of any document-related event, even if the parser is not
+   * reporting an error.  Typically, the application will use this
+   * information for reporting its own errors (such as character
+   * content that does not match an application's business rules).
+   * The information returned by the locator is probably not
+   * sufficient for use with a search engine.</p>
    *
    * <p>Note that the locator will return correct information only
    * during the invocation of the events in this interface.  The
@@ -1075,7 +1076,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
             SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
             throw ex;
           }
-        
+
         pourIntoBuffer(new XMLStartDocument());
       }
   }
@@ -1134,9 +1135,9 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
    * Receive notification of the beginning of an element.
    *
    * <p>The Parser will invoke this method at the beginning of every
-   * element in the XML document; there will be a corresponding
-   * {@link #endElement endElement} event for every startElement event
-   * (even when the element is empty). All of the element's content will be
+   * element in the XML document; there will be a corresponding {@link
+   * #endElement endElement} event for every startElement event (even
+   * when the element is empty). All of the element's content will be
    * reported, in order, before the corresponding endElement
    * event.</p>
    *
@@ -1149,13 +1150,13 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
    * <li>the qualified (prefixed) name.</li>
    * </ol>
    *
-   * <p>Any or all of these may be provided, depending on the
-   * values of the <var>http://xml.org/sax/features/namespaces</var>
-   * and the <var>http://xml.org/sax/features/namespace-prefixes</var>
+   * <p>Any or all of these may be provided, depending on the values
+   * of the <var>http://xml.org/sax/features/namespaces</var> and the
+   * <var>http://xml.org/sax/features/namespace-prefixes</var>
    * properties:</p>
    *
    * <ul>
-   * <li>the Namespace URI and local name are required when 
+   * <li>the Namespace URI and local name are required when
    * the namespaces property is <var>true</var> (the default), and are
    * optional when the namespaces property is <var>false</var> (if one is
    * specified, both must be);</li>
@@ -1166,15 +1167,16 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
    *
    * <p>Note that the attribute list provided will contain only
    * attributes with explicit values (specified or defaulted):
-   * #IMPLIED attributes will be omitted.  The attribute list
-   * will contain attributes used for Namespace declarations
-   * (xmlns* attributes) only if the
+   * #IMPLIED attributes will be omitted.  The attribute list will
+   * contain attributes used for Namespace declarations (xmlns*
+   * attributes) only if the
    * <code>http://xml.org/sax/features/namespace-prefixes</code>
-   * property is true (it is false by default, and support for a 
-   * true value is optional).</p>
+   * property is true (it is false by default, and support for a true
+   * value is optional).</p>
    *
-   * <p>Like {@link #characters characters()}, attribute values may have
-   * characters that need more than one <code>char</code> value.  </p>
+   * <p>Like {@link #characters characters()}, attribute values may
+   * have characters that need more than one <code>char</code>
+   * value.</p>
    *
    * @param uri the Namespace URI, or the empty string if the
    *        element has no Namespace URI or if Namespace
@@ -1221,7 +1223,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
             SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
             throw ex;
           }
-        
+
         halfElement = new XMLElement(qName, atts);
 
         buffer.notifyAll();
@@ -1229,12 +1231,12 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   }
 
   /**
-   * Receive notification of the end of an element.
+   * <p>Receive notification of the end of an element.</p>
    *
    * <p>The SAX parser will invoke this method at the end of every
-   * element in the XML document; there will be a corresponding
-   * {@link #startElement startElement} event for every endElement 
-   * event (even when the element is empty).</p>
+   * element in the XML document; there will be a corresponding {@link
+   * #startElement startElement} event for every endElement event
+   * (even when the element is empty).</p>
    *
    * <p>For information on the names, see startElement.</p>
    *
@@ -1246,8 +1248,9 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
    *        performed
    * @param qName the qualified XML name (with prefix), or the
    *        empty string if qualified names are not available
+   *
    * @throws org.xml.sax.SAXException any SAX exception, possibly
-   *            wrapping another exception
+   *         wrapping another exception
    */
 
   public void endElement(String uri, String localName, String qName) throws SAXException
@@ -1278,58 +1281,62 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
           }
 
         completeElement();
-        
+
         if (done)
           {
             SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
             throw ex;
           }
-        
+
         pourIntoBuffer(new XMLCloseElement(qName));
       }
   }
 
   /**
-   * Receive notification of character data.
+   * <p>Receive notification of character data.</p>
    *
    * <p>The Parser will call this method to report each chunk of
    * character data.  SAX parsers may return all contiguous character
-   * data in a single chunk, or they may split it into several
-   * chunks; however, all of the characters in any single event
-   * must come from the same external entity so that the Locator
-   * provides useful information.</p>
+   * data in a single chunk, or they may split it into several chunks;
+   * however, all of the characters in any single event must come from
+   * the same external entity so that the Locator provides useful
+   * information.</p>
    *
    * <p>The application must not attempt to read from the array
    * outside of the specified range.</p>
    *
    * <p>Individual characters may consist of more than one Java
-   * <code>char</code> value.  There are two important cases where this
-   * happens, because characters can't be represented in just sixteen bits.
-   * In one case, characters are represented in a <em>Surrogate Pair</em>,
-   * using two special Unicode values. Such characters are in the so-called
-   * "Astral Planes", with a code point above U+FFFF.  A second case involves
-   * composite characters, such as a base character combining with one or
-   * more accent characters. </p>
+   * <code>char</code> value.  There are two important cases where
+   * this happens, because characters can't be represented in just
+   * sixteen bits.  In one case, characters are represented in a
+   * <em>Surrogate Pair</em>, using two special Unicode values. Such
+   * characters are in the so-called "Astral Planes", with a code
+   * point above U+FFFF.  A second case involves composite characters,
+   * such as a base character combining with one or more accent
+   * characters. </p>
    *
    * <p> Your code should not assume that algorithms using
    * <code>char</code>-at-a-time idioms will be working in character
-   * units; in some cases they will split characters.  This is relevant
-   * wherever XML permits arbitrary characters, such as attribute values,
-   * processing instruction data, and comments as well as in data reported
-   * from this method.  It's also generally relevant whenever Java code
-   * manipulates internationalized text; the issue isn't unique to XML.</p>
+   * units; in some cases they will split characters.  This is
+   * relevant wherever XML permits arbitrary characters, such as
+   * attribute values, processing instruction data, and comments as
+   * well as in data reported from this method.  It's also generally
+   * relevant whenever Java code manipulates internationalized text;
+   * the issue isn't unique to XML.</p>
    *
    * <p>Note that some parsers will report whitespace in element
-   * content using the {@link #ignorableWhitespace ignorableWhitespace}
-   * method rather than this one (validating parsers <em>must</em> 
-   * do so).</p>
+   * content using the {@link #ignorableWhitespace
+   * ignorableWhitespace} method rather than this one (validating
+   * parsers <em>must</em> do so).</p>
    *
    * @param ch the characters from the XML document
    * @param start the start position in the array
    * @param length the number of characters to read from the array
+   *
    * @throws org.xml.sax.SAXException any SAX exception, possibly
    *            wrapping another exception
-   * @see #ignorableWhitespace 
+   *
+   * @see #ignorableWhitespace
    * @see org.xml.sax.Locator
    */
 
@@ -1364,13 +1371,14 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   }
 
   /**
-   * Receive notification of ignorable whitespace in element content.
+   * <p>Receive notification of ignorable whitespace in element
+   * content.</p>
    *
    * <p>Validating Parsers must use this method to report each chunk
    * of whitespace in element content (see the W3C XML 1.0
    * recommendation, section 2.10): non-validating parsers may also
-   * use this method if they are capable of parsing and using
-   * content models.</p>
+   * use this method if they are capable of parsing and using content
+   * models.</p>
    *
    * <p>SAX parsers may return all contiguous whitespace in a single
    * chunk, or they may split it into several chunks; however, all of
@@ -1384,8 +1392,10 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
    * @param ch the characters from the XML document
    * @param start the start position in the array
    * @param length the number of characters to read from the array
+   *
    * @throws org.xml.sax.SAXException any SAX exception, possibly
    *            wrapping another exception
+   *
    * @see #characters
    */
 
@@ -1415,16 +1425,16 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
             SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
             throw ex;
           }
-        
+
         pourIntoBuffer(new XMLCharData(ch, start, length));
       }
   }
 
   /**
-   * Receive notification of a warning.
+   * <p>Receive notification of a warning.</p>
    *
-   * <p>SAX parsers will use this method to report conditions that
-   * are not errors or fatal errors as defined by the XML 1.0
+   * <p>SAX parsers will use this method to report conditions that are
+   * not errors or fatal errors as defined by the XML 1.0
    * recommendation.  The default behaviour is to take no action.</p>
    *
    * <p>The SAX parser must continue to provide normal parsing events
@@ -1433,9 +1443,11 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
    *
    * @param exception The warning information encapsulated in a
    *                  SAX parse exception.
+   *
    * @exception org.xml.sax.SAXException Any SAX exception, possibly
    *            wrapping another exception.
-   * @see org.xml.sax.SAXParseException 
+   *
+   * @see org.xml.sax.SAXParseException
    */
 
   public void warning(SAXParseException exception) throws SAXException
@@ -1464,13 +1476,13 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
             SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
             throw ex;
           }
-        
+
         pourIntoBuffer(new XMLWarning(exception, locator));
       }
   }
 
   /**
-   * Receive notification of a recoverable error.
+   * <p>Receive notification of a recoverable error.</p>
    *
    * <p>This corresponds to the definition of "error" in section 1.2
    * of the W3C XML 1.0 Recommendation.  For example, a validating
@@ -1487,9 +1499,11 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
    *
    * @param exception The error information encapsulated in a
    *                  SAX parse exception.
+   *
    * @exception org.xml.sax.SAXException Any SAX exception, possibly
    *            wrapping another exception.
-   * @see org.xml.sax.SAXParseException 
+   *
+   * @see org.xml.sax.SAXParseException
    */
 
   public void error(SAXParseException exception) throws SAXException
@@ -1525,23 +1539,25 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
   }
 
   /**
-   * Receive notification of a non-recoverable error.
+   * <p>Receive notification of a non-recoverable error.</p>
    *
-   * <p>This corresponds to the definition of "fatal error" in
-   * section 1.2 of the W3C XML 1.0 Recommendation.  For example, a
-   * parser would use this callback to report the violation of a
+   * <p>This corresponds to the definition of "fatal error" in section
+   * 1.2 of the W3C XML 1.0 Recommendation.  For example, a parser
+   * would use this callback to report the violation of a
    * well-formedness constraint.</p>
    *
    * <p>The application must assume that the document is unusable
-   * after the parser has invoked this method, and should continue
-   * (if at all) only for the sake of collecting addition error
-   * messages: in fact, SAX parsers are free to stop reporting any
-   * other events once this method has been invoked.</p>
+   * after the parser has invoked this method, and should continue (if
+   * at all) only for the sake of collecting addition error messages:
+   * in fact, SAX parsers are free to stop reporting any other events
+   * once this method has been invoked.</p>
    *
    * @param exception The error information encapsulated in a
-   *                  SAX parse exception.  
+   *                  SAX parse exception.
+   *
    * @exception org.xml.sax.SAXException Any SAX exception, possibly
    *            wrapping another exception.
+   *
    * @see org.xml.sax.SAXParseException
    */
 
@@ -1571,7 +1587,7 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
             SAXException ex = new SAXException("parse thread halted.. app code closed XMLReader stream.");
             throw ex;
           }
-        
+
         done = true;
         err.println(exception.getMessage());
         pourIntoBuffer(new XMLError(exception, locator, true));

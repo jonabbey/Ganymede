@@ -12,11 +12,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -104,7 +106,7 @@ public class ExchangeStoreTask implements Runnable {
 
   static final boolean debug = true;
 
-  static final boolean skipSSLValidation = false;
+  static final boolean skipSSLValidation = true;
   static private Pattern homeMDBPat = Pattern.compile("CN=([^,]+)");
 
   /* -- */
@@ -128,121 +130,121 @@ public class ExchangeStoreTask implements Runnable {
     Ganymede.debug("Exchange Store Task: Starting");
 
     String error = GanymedeServer.checkEnabled();
-	
+
     if (error != null)
       {
-	Ganymede.debug("Deferring Exchange Store Task - semaphore disabled: " + error);
-	return;
+        Ganymede.debug("Deferring Exchange Store Task - semaphore disabled: " + error);
+        return;
       }
 
     try
       {
-	try
-	  {
-	    mySession = new GanymedeSession("ExchangeStoreTask");
-	  }
-	catch (RemoteException ex)
-	  {
-	    Ganymede.debug("Exchange Store Task: Couldn't establish session");
-	    return;
-	  }
+        try
+          {
+            mySession = new GanymedeSession("ExchangeStoreTask");
+          }
+        catch (RemoteException ex)
+          {
+            Ganymede.debug("Exchange Store Task: Couldn't establish session");
+            return;
+          }
 
-	// we don't want interactive handholding
+        // we don't want interactive handholding
 
-	mySession.enableWizards(false);
+        mySession.enableWizards(false);
 
-	// and we want forced required fields oversight..
+        // and we want forced required fields oversight..
 
-	mySession.enableOversight(true);
-	
-	ReturnVal retVal = mySession.openTransaction("Exchange Store Task");
+        mySession.enableOversight(true);
 
-	if (retVal != null && !retVal.didSucceed())
-	  {
-	    Ganymede.debug("Exchange Store Task: Couldn't open transaction");
-	    return;
-	  }
+        ReturnVal retVal = mySession.openTransaction("Exchange Store Task");
 
-	transactionOpen = true;
-	
-	// do the stuff
+        if (retVal != null && !retVal.didSucceed())
+          {
+            Ganymede.debug("Exchange Store Task: Couldn't open transaction");
+            return;
+          }
 
-	try
-	  {
-	    Map<String,String> map = getMailStores();
+        transactionOpen = true;
 
-	    for (Map.Entry<String, String> entry: map.entrySet())
-	      {
-		Invid x = mySession.findLabeledObject(entry.getKey(), exchangeStoreSchema.BASE);
+        // do the stuff
 
-		if (x == null)
-		  {
-		    ReturnVal r = mySession.create_db_object(exchangeStoreSchema.BASE);
+        try
+          {
+            Map<String,String> map = getMailStores();
 
-		    db_object obj = r.getObject();
+            for (Map.Entry<String, String> entry: map.entrySet())
+              {
+                Invid x = mySession.findLabeledObject(entry.getKey(), exchangeStoreSchema.BASE);
 
-		    r = obj.setFieldValue(exchangeStoreSchema.MAILSTORENAME, entry.getKey());
+                if (x == null)
+                  {
+                    ReturnVal r = mySession.create_db_object(exchangeStoreSchema.BASE);
 
-		    if (!ReturnVal.didSucceed(r))
-		      {
-			throw new RuntimeException("Error setting MAIL STORE NAME: " + r.toString());
-		      }
+                    db_object obj = r.getObject();
 
-		    r = obj.setFieldValue(exchangeStoreSchema.EXCHANGEMDB, entry.getValue());
+                    r = obj.setFieldValue(exchangeStoreSchema.MAILSTORENAME, entry.getKey());
 
-		    if (!ReturnVal.didSucceed(r))
-		      {
-			throw new RuntimeException("Error setting EXCHANGEMDB: " + r.toString());
-		      }
-		  }
-	      }
-	  }
-	catch (Throwable ex)
-	  {
-	    Ganymede.debug("Exchange Store Query / Update bailed");
-	    mySession.abortTransaction();
-	    return;
-	  }
+                    if (!ReturnVal.didSucceed(r))
+                      {
+                        throw new RuntimeException("Error setting MAIL STORE NAME: " + r.toString());
+                      }
 
-	retVal = mySession.commitTransaction();
+                    r = obj.setFieldValue(exchangeStoreSchema.EXCHANGEMDB, entry.getValue());
 
-	if (retVal != null && !retVal.didSucceed())
-	  {
-	    // if doNormalProcessing is true, the
-	    // transaction was not cleared, but was
-	    // left open for a re-try.  Abort it.
+                    if (!ReturnVal.didSucceed(r))
+                      {
+                        throw new RuntimeException("Error setting EXCHANGEMDB: " + r.toString());
+                      }
+                  }
+              }
+          }
+        catch (Throwable ex)
+          {
+            Ganymede.debug("Exchange Store Query / Update bailed");
+            mySession.abortTransaction();
+            return;
+          }
 
-	    if (retVal.doNormalProcessing)
-	      {
-		Ganymede.debug("Exchange Store Task: couldn't fully commit, trying to abort.");
+        retVal = mySession.commitTransaction();
 
-		mySession.abortTransaction();
-	      }
+        if (retVal != null && !retVal.didSucceed())
+          {
+            // if doNormalProcessing is true, the
+            // transaction was not cleared, but was
+            // left open for a re-try.  Abort it.
 
-	    Ganymede.debug("Exchange Store Task: Couldn't successfully commit transaction");
-	  }
-	else
-	  {
-	    Ganymede.debug("Exchange Store Task: Transaction committed");
-	  }
+            if (retVal.doNormalProcessing)
+              {
+                Ganymede.debug("Exchange Store Task: couldn't fully commit, trying to abort.");
 
-	transactionOpen = false;
+                mySession.abortTransaction();
+              }
+
+            Ganymede.debug("Exchange Store Task: Couldn't successfully commit transaction");
+          }
+        else
+          {
+            Ganymede.debug("Exchange Store Task: Transaction committed");
+          }
+
+        transactionOpen = false;
       }
     catch (NotLoggedInException ex)
       {
       }
     catch (Throwable ex)
       {
-	Ganymede.debug("Caught " + ex.getMessage());
+        Ganymede.debug("Caught " + ex.getMessage());
       }
     finally
       {
-	if (transactionOpen)
-	  {
-	    Ganymede.debug("Exchange Store Task: Forced to terminate early, aborting transaction");
-	  }
+        if (transactionOpen)
+          {
+            Ganymede.debug("Exchange Store Task: Forced to terminate early, aborting transaction");
+          }
 
-	mySession.logout();
+        mySession.logout();
       }
   }
 
@@ -260,17 +262,17 @@ public class ExchangeStoreTask implements Runnable {
 
     if (url == null)
       {
-	throw new IllegalArgumentException("Missing Active Directory url from properties file");
+        throw new IllegalArgumentException("Missing Active Directory url from properties file");
       }
 
     if (principal == null)
       {
-	throw new IllegalArgumentException("Missing Active Directory security principal from properties file");
+        throw new IllegalArgumentException("Missing Active Directory security principal from properties file");
       }
 
     if (password == null)
       {
-	throw new IllegalArgumentException("Missing Active Directory security password from properties file");
+        throw new IllegalArgumentException("Missing Active Directory security password from properties file");
       }
 
     env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
@@ -281,64 +283,64 @@ public class ExchangeStoreTask implements Runnable {
 
     if (skipSSLValidation)
       {
-	env.put("java.naming.ldap.factory.socket", BlindSSLSocketFactory.class.getName());
+        env.put("java.naming.ldap.factory.socket", BlindSSLSocketFactory.class.getName());
       }
 
     DirContext ctx = null;
 
     try
       {
-	ctx = new InitialDirContext(env);
+        ctx = new InitialDirContext(env);
 
-	Attributes matchAttrs = new BasicAttributes();
-	matchAttrs.put(new BasicAttribute("homeMDB"));
-	matchAttrs.put(new BasicAttribute("msExchMailboxGuid"));
+        Attributes matchAttrs = new BasicAttributes();
+        matchAttrs.put(new BasicAttribute("homeMDB"));
+        matchAttrs.put(new BasicAttribute("msExchMailboxGuid"));
 
-	NamingEnumeration answer = ctx.search("CN=Microsoft Exchange System Objects", matchAttrs);
+        NamingEnumeration answer = ctx.search("CN=Microsoft Exchange System Objects", matchAttrs);
 
-	while (answer.hasMore())
-	  {
-	    SearchResult sr = (SearchResult) answer.next();
+        while (answer.hasMore())
+          {
+            SearchResult sr = (SearchResult) answer.next();
 
-	    NamingEnumeration<Attribute> e = (NamingEnumeration<Attribute>)sr.getAttributes().getAll();
+            NamingEnumeration<Attribute> e = (NamingEnumeration<Attribute>)sr.getAttributes().getAll();
 
-	    while (e.hasMore())
-	      {
-		Attribute a = e.next();
+            while (e.hasMore())
+              {
+                Attribute a = e.next();
 
-		if (a.getID().equals("homeMDB"))
-		  {
-		    String value = (String) a.get();
+                if (a.getID().equals("homeMDB"))
+                  {
+                    String value = (String) a.get();
 
-		    Matcher m = homeMDBPat.matcher(value);
-		    
-		    if (m.find())
-		      {
-			map.put(m.group(1), value);
-		      }
-		  }
-	      }
-	  }
+                    Matcher m = homeMDBPat.matcher(value);
+
+                    if (m.find())
+                      {
+                        map.put(m.group(1), value);
+                      }
+                  }
+              }
+          }
       }
     catch (NamingException ex)
       {
-	ex.printStackTrace();
+        ex.printStackTrace();
       }
     finally
       {
-	if (ctx != null)
-	  {
-	    try
-	      {
-		ctx.close();
-	      }
-	    catch (NamingException ex)
-	      {
-		ex.printStackTrace();
-	      }
-	  }
+        if (ctx != null)
+          {
+            try
+              {
+                ctx.close();
+              }
+            catch (NamingException ex)
+              {
+                ex.printStackTrace();
+              }
+          }
       }
-   
+
     return map;
   }
 
@@ -346,7 +348,7 @@ public class ExchangeStoreTask implements Runnable {
   {
     if (args.length == 0)
       {
-	throw new IllegalArgumentException("Missing command line argument for properties file");
+        throw new IllegalArgumentException("Missing command line argument for properties file");
       }
 
     FileInputStream fis = null;
@@ -354,26 +356,26 @@ public class ExchangeStoreTask implements Runnable {
 
     try
       {
-	fis = new FileInputStream(args[0]);
-	bis = new BufferedInputStream(fis);
-	System.getProperties().load(bis);
+        fis = new FileInputStream(args[0]);
+        bis = new BufferedInputStream(fis);
+        System.getProperties().load(bis);
       }
     catch (IOException ex)
       {
-	throw new IllegalArgumentException("Couldn't load properties file " + args[0]);
+        throw new IllegalArgumentException("Couldn't load properties file " + args[0]);
       }
     finally
       {
-	try
-	  {
-	    if (bis != null)
-	      {
-		bis.close();
-	      }
-	  }
-	catch (IOException ex)
-	  {
-	  }
+        try
+          {
+            if (bis != null)
+              {
+                bis.close();
+              }
+          }
+        catch (IOException ex)
+          {
+          }
       }
 
     ExchangeStoreTask task = new ExchangeStoreTask();
@@ -382,7 +384,7 @@ public class ExchangeStoreTask implements Runnable {
 
     for (Map.Entry<String,String> store: storeMap.entrySet())
       {
-	System.out.println(store.getKey() + ":" + store.getValue());
+        System.out.println(store.getKey() + ":" + store.getValue());
       }
   }
 }

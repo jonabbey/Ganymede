@@ -60,6 +60,10 @@ package arlut.csd.ganymede.common;
  * <p>A simple interface that can be used on the Ganymede server to
  * provide name lookups for the toString() method of a Query object
  * chain.</p>
+ *
+ * <p>This interface exists so that the Query object's class
+ * definition doesn't require a specific reference to a server-side
+ * class that we aren't going to provide in the client jar file.</p>
  */
 
 public interface QueryDescriber {

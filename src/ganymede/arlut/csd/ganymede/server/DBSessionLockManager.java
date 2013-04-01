@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -50,7 +50,6 @@
 
 package arlut.csd.ganymede.server;
 
-import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Vector;
 
@@ -68,7 +67,7 @@ import java.util.Vector;
  * session.</p>
  */
 
-public class DBSessionLockManager {
+public final class DBSessionLockManager {
 
   private HashSet<DBLock> lockSet = new HashSet<DBLock>(31);
   private DBSession session;

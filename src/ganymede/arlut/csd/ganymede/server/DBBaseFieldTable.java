@@ -4,17 +4,19 @@
 
    A customized variant of the java.util.Hashtable class that is
    tuned for use as Ganymede's base field hashes.
-   
+
    Created: 9 June 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2009
+
+   Copyright (C) 1996 - 2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -49,6 +51,9 @@ package arlut.csd.ganymede.server;
 
 import java.lang.Iterable;
 
+import java.util.AbstractCollection;
+import java.util.Collection;
+import java.util.ConcurrentModificationException;
 import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -64,17 +69,24 @@ import java.util.NoSuchElementException;
  * tuned for use in managing
  * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField}s
  * in a Ganymede {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}.</p>
- * 
+ *
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
+public final class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   /**
    * Array of DBObjectBaseField objects, sorted in id order.
    */
 
   private transient DBObjectBaseField[] table;
+
+  /**
+   * Tracking value to detect concurrent modification for the
+   * enumerations and iterators we generate.
+   */
+
+  private transient int modGen = Integer.MIN_VALUE;
 
   /**
    * Constructs a new, empty DBBaseFieldTable.
@@ -84,14 +96,26 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
   {
     table = new DBObjectBaseField[0];
   }
-  
+
+  /**
+   * Returns a modification generation value for the enumerator and
+   * iterator that are generated from this DBBaseFieldTable..
+   */
+
+  public int getModGen()
+  {
+    return this.modGen;
+  }
+
   /**
    * This method sets the contents of the DBBaseFieldTable.  The
    * fieldAry array must be sorted in increasing field id order.
    */
-  
+
   public void replaceContents(DBObjectBaseField fieldAry[])
   {
+    this.modGen++;
+
     this.table = fieldAry;
   }
 
@@ -101,7 +125,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
    * @return  the number of objects in this DBBaseFieldTable.
    */
 
-  public int size() 
+  public int size()
   {
     return table.length;
   }
@@ -113,7 +137,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
    *          <code>false</code> otherwise.
    */
 
-  public boolean isEmpty() 
+  public boolean isEmpty()
   {
     return table.length == 0;
   }
@@ -133,7 +157,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   public synchronized Iterator<DBObjectBaseField> iterator()
   {
-    return new DBBaseFieldTableIterator(table);
+    return new DBBaseFieldTableIterator(table, this);
   }
 
   /**
@@ -146,7 +170,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   public synchronized Iterator<DBObjectBaseField> builtInIterator()
   {
-    return new DBBaseFieldTableBuiltInIterator(table);
+    return new DBBaseFieldTableBuiltInIterator(table, this);
   }
 
   /**
@@ -161,7 +185,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   public synchronized Enumeration elements()
   {
-    return new DBBaseFieldTableEnumerator(table);
+    return new DBBaseFieldTableEnumerator(table, this);
   }
 
   /**
@@ -172,7 +196,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
    *
    */
 
-  public boolean contains(DBObjectBaseField value) 
+  public boolean contains(DBObjectBaseField value)
   {
     int index = java.util.Arrays.binarySearch(table, value);
 
@@ -186,23 +210,22 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   /**
    * Tests if a DBObjectBaseField with the specified object id is in this DBBaseFieldTable.
-   * 
-   * @param   key   possible object id.
    *
+   * @param   key   possible object id.
    */
 
-  public boolean containsKey(Short key) 
+  public boolean containsKey(Short key)
   {
     return java.util.Arrays.binarySearch(table, key) >= 0;
   }
 
   /**
    * Tests if a DBObjectBaseField with the specified object id is in this DBBaseFieldTable.
-   * 
+   *
    * @param   key   possible object id.
    */
 
-  public synchronized boolean containsKey(short key) 
+  public synchronized boolean containsKey(short key)
   {
     return java.util.Arrays.binarySearch(table, key) >= 0;
   }
@@ -229,7 +252,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
    * null if no object with that id is in this table.
    */
 
-  public DBObjectBaseField getNoSync(short key) 
+  public DBObjectBaseField getNoSync(short key)
   {
     int index = java.util.Arrays.binarySearch(table, key);
 
@@ -246,7 +269,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
    * null if no object with that id is in this table.
    */
 
-  public synchronized DBObjectBaseField get(short key) 
+  public synchronized DBObjectBaseField get(short key)
   {
     int index = java.util.Arrays.binarySearch(table, key);
 
@@ -259,44 +282,46 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
   }
 
   /**
-   * Returns the DBObjectBaseField with the specified name from this
-   * DBBaseFieldTable, or null if no object with that name is in this
-   * table.
+   * <p>Returns the DBObjectBaseField with the specified name from
+   * this DBBaseFieldTable, or null if no object with that name is in
+   * this table.</p>
    *
-   * This method is unprotected by synchronization, so you must be
-   * sure to use higher level synchronization to use this safely.
+   * <p>This method is unprotected by synchronization, so you must be
+   * sure to use higher level synchronization to use this safely.</p>
    */
 
-  public DBObjectBaseField getNoSync(String name) 
+  public DBObjectBaseField getNoSync(String name)
   {
     return this.findByName(name);
   }
 
   /**
-   * Returns the DBObjectBaseField with the specified name from this
-   * DBBaseFieldTable, or null if no object with that name is in this
-   * table.
+   * <p>Returns the DBObjectBaseField with the specified name from
+   * this DBBaseFieldTable, or null if no object with that name is in
+   * this table.</p>
    *
-   * The comparisons done in this method are case insensitive.
+   * <p>The comparisons done in this method are case insensitive.</p>
    */
 
-  public synchronized DBObjectBaseField get(String name) 
+  public synchronized DBObjectBaseField get(String name)
   {
     return this.findByName(name);
   }
 
   /**
-   * Inserts a DBObjectBaseField into this DBBaseFieldTable.
+   * <p>Inserts a DBObjectBaseField into this DBBaseFieldTable.</p>
    *
-   * This put is not sync'ed, and should only be used with
-   * higher level sync provisions.
+   * <p>This put is not sync'ed, and should only be used with higher
+   * level sync provisions.</p>
    */
 
-  public void putNoSync(DBObjectBaseField value) 
+  public void putNoSync(DBObjectBaseField value)
   {
+    this.modGen++;
+
     // Make sure the value is not null
 
-    if (value == null) 
+    if (value == null)
       {
         throw new NullPointerException();
       }
@@ -361,7 +386,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
    * Inserts a DBObjectBaseField into this DBBaseFieldTable
    */
 
-  public synchronized void put(DBObjectBaseField value) 
+  public synchronized void put(DBObjectBaseField value)
   {
     putNoSync(value);
   }
@@ -373,7 +398,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
    * higher level sync provisions.</p>
    */
 
-  public void putNoSyncNoRemove(DBObjectBaseField value) 
+  public void putNoSyncNoRemove(DBObjectBaseField value)
   {
     putNoSync(value);
   }
@@ -382,8 +407,10 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
    * Removes the DBObjectBaseField with the given id from this DBBaseFieldTable.
    */
 
-  private void removeNoSync(short key) 
+  private void removeNoSync(short key)
   {
+    this.modGen++;
+
     int index = java.util.Arrays.binarySearch(table, key);
 
     if (index < 0)
@@ -410,7 +437,7 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
    * Removes the DBObjectBaseField with the given id from this DBBaseFieldTable.
    */
 
-  public synchronized void remove(short key) 
+  public synchronized void remove(short key)
   {
     removeNoSync(key);
   }
@@ -419,8 +446,10 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
    * Clears this DBBaseFieldTable.
    */
 
-  public synchronized void clear() 
+  public synchronized void clear()
   {
+    this.modGen++;
+
     table = new DBObjectBaseField[0];
   }
 
@@ -431,15 +460,24 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 
   private final DBObjectBaseField findByName(String name)
   {
-    for (int i = 0; i < table.length; i++)
+    for (DBObjectBaseField field: table)
       {
-        if (table[i].getName().equalsIgnoreCase(name))
+        if (field.getName().equalsIgnoreCase(name))
           {
-            return table[i];
+            return field;
           }
       }
 
     return null;
+  }
+
+  /**
+   * <p>Returns a non-editable Collection view of this DBBaseFieldTable.</p>
+   */
+
+  public Collection<DBObjectBaseField> values()
+  {
+    return new DBBaseFieldTableContainer(this);
   }
 }
 
@@ -450,30 +488,46 @@ public class DBBaseFieldTable implements Iterable<DBObjectBaseField> {
 ------------------------------------------------------------------------------*/
 
 /**
- * A DBBaseFieldTable enumerator class.  This class should remain opaque 
- * to the client. It will use the Enumeration interface. 
+ * A DBBaseFieldTable enumerator class.  This class should remain opaque
+ * to the client. It will use the Enumeration interface.
  */
 
-class DBBaseFieldTableEnumerator implements Enumeration {
+final class DBBaseFieldTableEnumerator implements Enumeration {
 
   short index;
   DBObjectBaseField table[];
 
+  private DBBaseFieldTable parent;
+  private int modGen;
+
   /* -- */
 
-  DBBaseFieldTableEnumerator(DBObjectBaseField table[]) 
+  DBBaseFieldTableEnumerator(DBObjectBaseField table[], DBBaseFieldTable parent)
   {
     this.table = table;
     this.index = 0;
+
+    this.parent = parent;
+    this.modGen = parent.getModGen();
   }
-        
-  public boolean hasMoreElements() 
+
+  public boolean hasMoreElements()
   {
+    if (parent.getModGen() != this.modGen)
+      {
+        throw new ConcurrentModificationException();
+      }
+
     return index < table.length;
   }
 
-  public Object nextElement() 
+  public Object nextElement()
   {
+    if (parent.getModGen() != this.modGen)
+      {
+        throw new ConcurrentModificationException();
+      }
+
     return table[index++];
   }
 }
@@ -486,30 +540,46 @@ class DBBaseFieldTableEnumerator implements Enumeration {
 ------------------------------------------------------------------------------*/
 
 /**
- * A DBBaseFieldTable Iterator class.  This class should remain opaque 
- * to the client. It will use the Iterator interface. 
+ * A DBBaseFieldTable Iterator class.  This class should remain opaque
+ * to the client. It will use the Iterator interface.
  */
 
-class DBBaseFieldTableIterator implements Iterator<DBObjectBaseField> {
+final class DBBaseFieldTableIterator implements Iterator<DBObjectBaseField> {
 
   short index;
   DBObjectBaseField table[];
 
+  private DBBaseFieldTable parent;
+  private int modGen;
+
   /* -- */
 
-  DBBaseFieldTableIterator(DBObjectBaseField table[]) 
+  DBBaseFieldTableIterator(DBObjectBaseField table[], DBBaseFieldTable parent)
   {
     this.table = table;
     this.index = 0;
+
+    this.parent = parent;
+    this.modGen = parent.getModGen();
   }
-        
-  public boolean hasNext() 
+
+  public boolean hasNext()
   {
+    if (parent.getModGen() != this.modGen)
+      {
+        throw new ConcurrentModificationException();
+      }
+
     return index < table.length;
   }
 
-  public DBObjectBaseField next() 
+  public DBObjectBaseField next()
   {
+    if (parent.getModGen() != this.modGen)
+      {
+        throw new ConcurrentModificationException();
+      }
+
     return table[index++];
   }
 
@@ -532,21 +602,32 @@ class DBBaseFieldTableIterator implements Iterator<DBObjectBaseField> {
  * <p>This class should remain opaque to the client.</p>
  */
 
-class DBBaseFieldTableBuiltInIterator implements Iterator<DBObjectBaseField> {
+final class DBBaseFieldTableBuiltInIterator implements Iterator<DBObjectBaseField> {
 
   short index;
   DBObjectBaseField table[];
 
+  private DBBaseFieldTable parent;
+  private int modGen;
+
   /* -- */
 
-  DBBaseFieldTableBuiltInIterator(DBObjectBaseField table[]) 
+  DBBaseFieldTableBuiltInIterator(DBObjectBaseField table[], DBBaseFieldTable parent)
   {
     this.table = table;
     this.index = 0;
+
+    this.parent = parent;
+    this.modGen = parent.getModGen();
   }
-        
-  public boolean hasNext() 
+
+  public boolean hasNext()
   {
+    if (parent.getModGen() != this.modGen)
+      {
+        throw new ConcurrentModificationException();
+      }
+
     // we know all the built-ins will come before the custom fields,
     // because we the table is kept in ascending field id order.  when
     // we see a non-builtIn() field def, we'll stop.
@@ -554,8 +635,13 @@ class DBBaseFieldTableBuiltInIterator implements Iterator<DBObjectBaseField> {
     return index < table.length && table[index].isBuiltIn();
   }
 
-  public DBObjectBaseField next() 
+  public DBObjectBaseField next()
   {
+    if (parent.getModGen() != this.modGen)
+      {
+        throw new ConcurrentModificationException();
+      }
+
     return table[index++];
   }
 
@@ -565,3 +651,30 @@ class DBBaseFieldTableBuiltInIterator implements Iterator<DBObjectBaseField> {
   }
 }
 
+/*------------------------------------------------------------------------------
+                                                                           class
+                                                       DBBaseFieldTableContainer
+
+------------------------------------------------------------------------------*/
+
+final class DBBaseFieldTableContainer extends AbstractCollection<DBObjectBaseField>
+{
+  private DBBaseFieldTable parent;
+
+  /* -- */
+
+  DBBaseFieldTableContainer(DBBaseFieldTable parent)
+  {
+    this.parent = parent;
+  }
+
+  public int size()
+  {
+    return parent.size();
+  }
+
+  public Iterator<DBObjectBaseField> iterator()
+  {
+    return parent.iterator();
+  }
+}

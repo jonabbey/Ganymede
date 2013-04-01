@@ -13,7 +13,9 @@
    Ganymede Directory Management System
 
    Copyright (C) 1996-2011
-   The University of Texas at Austin
+   The University of Texas at Austinb
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -550,11 +552,11 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
   }
 
   /**
-   * <P>Returns true if this StringSelector is editable.</P>
+   * <p>Returns true if this StringSelector is editable.</p>
    *
-   * <P>Non-editable StringSelector's only have the chosen list.
+   * <p>Non-editable StringSelector's only have the chosen list.
    * Editable StringSelector's have both the chosen and available
-   * lists.</P>
+   * lists.</p>
    */
 
   public boolean isEditable()

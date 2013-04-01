@@ -12,8 +12,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -217,7 +219,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
    * is kept private.</p>
    */
 
-  private Vector containerPanels = new Vector();
+  private Vector<containerPanel> containerPanels = new Vector<containerPanel>();
 
   /**
    * Vector of {@link arlut.csd.ganymede.common.FieldTemplate
@@ -225,7 +227,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
    * enumerate this object's fields.
    */
 
-  Vector templates;
+  Vector<FieldTemplate> templates;
 
   /**
    * Vector of {@link arlut.csd.ganymede.client.clientTab} objects
@@ -233,7 +235,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
    * tab definitions.
    */
 
-  private Vector tabList = new Vector();
+  private Vector<clientTab> tabList = new Vector<clientTab>();
 
   private imageTab image_tab;
   private personaeTab personae_tab;
@@ -390,7 +392,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
   public void load()
   {
-    Vector infoVector = null;
+    Vector<FieldInfo> infoVector = null;
 
     /* -- */
 
@@ -430,10 +432,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
         serverTab newTab = null;
         serverTab oldTab = null;
 
-        for (int i = 0; i < templates.size(); i++)
+        for (FieldTemplate template: templates)
           {
-            FieldTemplate template = (FieldTemplate) templates.elementAt(i);
-
             // make sure that we don't create a tab if the field isn't
             // actually present in this instance of the object
 
@@ -442,7 +442,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
             for (int j = 0; !field_present && j < infoVector.size(); j++)
               {
-                FieldInfo field_info = (FieldInfo) infoVector.elementAt(j);
+                FieldInfo field_info = infoVector.get(j);
 
                 if (field_info.getID() == fieldID)
                   {
@@ -1729,7 +1729,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     if (containerPanels != null)
       {
-        containerPanels.addElement(cp);
+        containerPanels.add(cp);
       }
   }
 
@@ -1737,7 +1737,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   {
     if (containerPanels != null)
       {
-        containerPanels.removeElement(cp);
+        containerPanels.remove(cp);
       }
   }
 
@@ -1787,7 +1787,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
             i = containerPanels.size() - 1;
           }
 
-        containerPanel cp = (containerPanel) containerPanels.elementAt(i);
+        containerPanel cp = containerPanels.get(i);
 
         if (debug)
           {
@@ -1817,12 +1817,12 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
   }
 
   /**
-   * If this object window contains any editable containerPanels, this
-   * method will examine all Invid fields contained within and change
-   * the label of the Invid parameter to the newLabel.
+   * <p>If this object window contains any editable containerPanels,
+   * this method will examine all Invid fields contained within and
+   * change the label of the Invid parameter to the newLabel.</p>
    *
-   * This method will also relabel the object window to reflect the
-   * new title, if we're open for editing.
+   * <p>This method will also relabel the object window to reflect the
+   * new title, if we're open for editing.</p>
    */
 
   public synchronized void relabelObject(Invid invid, String newLabel)
@@ -1831,7 +1831,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
       {
         if (editable)
           {
-            String newTitle = wp.getWindowTitle(editable, isCreating, gc.getObjectType(invid), newLabel);
+            String newTitle = wp.getWindowTitle(editable, isCreating, false, gc.getObjectType(invid), newLabel);
             wp.setWindowTitle(this, newTitle);
           }
 
@@ -1863,7 +1863,7 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
             i = containerPanels.size() - 1;
           }
 
-        containerPanel cp = (containerPanel) containerPanels.elementAt(i);
+        containerPanel cp = containerPanels.get(i);
 
         cp.updateInvidLabels(invid, newLabel);
       }
@@ -2117,9 +2117,8 @@ public class framePanel extends JInternalFrame implements ChangeListener, Action
 
     if (containerPanels != null)
       {
-        for (int i = 0; i < containerPanels.size(); i++)
+        for (containerPanel cp: containerPanels)
           {
-            containerPanel cp = (containerPanel)containerPanels.elementAt(i);
             cp.cleanup();
           }
 

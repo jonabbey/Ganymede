@@ -10,10 +10,10 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2012
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -149,7 +149,7 @@ import arlut.csd.ganymede.rmi.db_field;
  * look around at the code.</p>
  *
  * <p>Note that while DBField was designed to be subclassed, it should only be
- * necessary for adding a new data type to the server.  All other likely 
+ * necessary for adding a new data type to the server.  All other likely
  * customizations you'd want to do are handled by
  * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} customization methods.  Most
  * DBField methods at some point call methods on the DBObject/DBEditObject
@@ -160,8 +160,8 @@ import arlut.csd.ganymede.rmi.db_field;
  * <p>An important note about synchronization: it is possible to encounter a
  * condition called a <b>nested monitor deadlock</b>, where a synchronized
  * method on a field can block trying to enter a synchronized method on
- * a {@link arlut.csd.ganymede.server.DBSession DBSession}, 
- * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}, or 
+ * a {@link arlut.csd.ganymede.server.DBSession DBSession},
+ * {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}, or
  * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject} object that is itself blocked
  * on another thread trying to call a synchronized method on the same field.</p>
  *
@@ -331,8 +331,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * Returns true if both field1 and field2 are non-null and belong to
-   * the same invid and share the same field id.
+   * <p>Returns true if both field1 and field2 are non-null and belong
+   * to the same Invid and share the same field id.</p>
    */
 
   public static boolean matches(DBField field1, DBField field2)
@@ -348,35 +348,40 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   // ---
 
   /**
-   * the object's current value.  May be a Vector for vector fields, in
-   * which case getVectVal() may be used to perform the cast.
+   * <p>The object's current value.  May be a Vector for vector
+   * fields, in which case getVectVal() may be used to perform the
+   * cast.</p>
+   *
+   * <p>package private</p>
    */
 
   Object value = null;
-  
-  /**
-   * The object this field is contained within, package private.
-   */
-
-  DBObject owner;
 
   /**
-   * The identifying field number for this field within the
-   * owning object.  This number is an index into the
-   * owning object type's field dictionary.
+   * The object this field is contained within.
    */
 
-  short fieldcode;
+  final DBObject owner;
+
+  /**
+   * The identifying field number for this field within the owning
+   * object.  This number is an index into the owning object type's
+   * field dictionary.
+   */
+
+  final short fieldcode;
 
   /* -- */
 
-  public DBField()
+  public DBField(DBObject owner, short fieldcode)
   {
+    this.owner = owner;
+    this.fieldcode = fieldcode;
   }
 
   /**
-   * This method is used to return a copy of this field, with the field's owner
-   * set to newOwner.
+   * <p>This method is used to return a copy of this field, with the
+   * field's owner set to newOwner.</p>
    */
 
   public final DBField getCopy(DBObject newOwner)
@@ -411,9 +416,13 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * non-editable objects, and if this is an editable object we'll
    * have created a vector when this field was initialized for
    * editing.</p>
+   *
+   * <p>Note that this method gives direct access to the value vector.
+   * Any modifications made to the returned vector will affect the
+   * value held in this field.</p>
    */
-  
-  public final Vector getVectVal()
+
+  protected final Vector getVectVal()
   {
     return (Vector) value;
   }
@@ -508,8 +517,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     else
       {
         return getFieldDef().getMaxArraySize();
-      }     
-  }      
+      }
+  }
 
   /**
    * <p>This method is responsible for writing out the contents of
@@ -561,7 +570,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p>This method is ok to be synchronized because it does not call
    * synchronized methods on any other object that is likely to have
    * another thread trying to call another synchronized method on
-   * us.</p> 
+   * us.</p>
    */
 
   public synchronized boolean equals(Object obj)
@@ -602,19 +611,20 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * Returns true if otherField has the same invid and field id as
-   * this field.
+   * <p>Returns true if otherField has the same invid and field id as
+   * this field.</p>
    */
 
   public boolean matches(DBField otherField)
   {
-    return otherField != null && otherField.getOwner().getInvid().equals(getOwner().getInvid()) &&
+    return otherField != null &&
+      otherField.getOwner().getInvid().equals(getOwner().getInvid()) &&
       otherField.getID() == getID();
   }
 
   /**
-   * <p>This method copies the current value of this DBField
-   * to target.  The target DBField must be contained within a
+   * <p>This method copies the current value of this DBField to
+   * target.  The target DBField must be contained within a
    * checked-out DBEditObject in order to be updated.  Any actions
    * that would normally occur from a user manually setting a value
    * into the field will occur.</p>
@@ -622,17 +632,12 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @param target The DBField to copy this field's contents to.
    * @param local If true, permissions checking is skipped.
    *
-   * @return A ReturnVal indicating success or failure.  May
-   * be simply 'null' to indicate success if no feedback need
-   * be provided.
+   * @return A ReturnVal indicating success or failure.  May be simply
+   * 'null' to indicate success if no feedback need be provided.
    */
 
   public synchronized ReturnVal copyFieldTo(DBField target, boolean local)
   {
-    ReturnVal retVal;
-
-    /* -- */
-
     if (!local)
       {
         if (!verifyReadPermission())
@@ -643,7 +648,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
                                               ts.l("copyFieldTo.no_read", getName(), owner.getLabel()));
           }
       }
-        
+
     if (!target.isEditable(local))
       {
         // "Copy field error"
@@ -665,20 +670,22 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
         valuesToCopy = getValuesLocal();
 
+        if (valuesToCopy == null || valuesToCopy.size() == 0)
+          {
+            return null;
+          }
+
         // We want to inhibit wizards and allow partial failure.
         //
         // We'll use addElementsLocal() here because we've already
         // verified read permission and write permission, above.
 
-        retVal = target.addElementsLocal(valuesToCopy, true, true);
+        // This could fail if we don't have write privileges for the
+        // target field, so we'll return an error code back to the
+        // cloneFromObject() method, which will pass it in an over-all
+        // advisory (non-fatal) warning back to the client
 
-        // the above operation could fail if we don't have write
-        // privileges for the target field, so we'll return an error
-        // code back to the cloneFromObject() method, which will pass
-        // it in an over-all advisory (non-fatal) warning back to the
-        // client
-        
-        return retVal;
+        return target.addElementsLocal(valuesToCopy, true, true);
       }
   }
 
@@ -688,9 +695,10 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * {@link arlut.csd.ganymede.server.DBObjectBaseField} controlling
    * this field.</p>
    *
-   * <p>Returns a {@link arlut.csd.ganymede.common.ReturnVal} describing
-   * the error if the field's contents does not meet its constraints, or null
-   * if the field is in compliance with its constraints.</p>
+   * <p>Returns a {@link arlut.csd.ganymede.common.ReturnVal}
+   * describing the error if the field's contents does not meet its
+   * constraints, or null if the field is in compliance with its
+   * constraints.</p>
    */
 
   public ReturnVal validateContents()
@@ -707,10 +715,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
             synchronized (values)
               {
-                for (int i = 0; i < values.size(); i++)
+                for (Object element: values)
                   {
-                    Object element = values.elementAt(i);
-
                     ReturnVal retVal = this.verifyBasicConstraints(element);
 
                     if (!ReturnVal.didSucceed(retVal))
@@ -736,9 +742,10 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * This method is intended to be called when this field is being checked into
-   * the database.  Subclasses of DBField will override this method to clean up
-   * data that is cached for speed during editing.
+   * <p>This method is intended to be called when this field is being
+   * checked into the database.  Subclasses of DBField will override
+   * this method to clean up data that is cached for speed during
+   * editing.</p>
    */
 
   public void cleanup()
@@ -749,19 +756,13 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p>Returns the DBSession that this field is associated with or null
    * if it is being viewed from the persistent store.</p>
    *
-   * <p>Semi-deprecated.  Use getDBSession() instead for clarity.</p>
+   * @deprecated Use {@link #getDBSession()} instead.
    */
 
+  @Deprecated
   public final DBSession getSession()
   {
-    try
-      {
-        return owner.getDBSession();
-      }
-    catch (NullPointerException ex)
-      {
-        return null;
-      }
+    return this.getDBSession();
   }
 
   /**
@@ -802,7 +803,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   // ****
   //
   // db_field methods
-  // 
+  //
   // ****
 
   /**
@@ -922,12 +923,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * without checking permissions.</p>
    *
    * <p>This method avoids checking permissions because it is used on
-   * the server side only and because it is involved in the 
-   * {@link arlut.csd.ganymede.server.DBObject#getLabel() getLabel()}
-   * logic for {@link arlut.csd.ganymede.server.DBObject DBObject}, 
-   * which is invoked from {@link arlut.csd.ganymede.server.GanymedeSession GanymedeSession}'s
-   * {@link arlut.csd.ganymede.server.DBPermissionManager#getPerm(arlut.csd.ganymede.server.DBObject) getPerm()}
-   * method.</p>
+   * the server side only and because it is involved in the {@link
+   * arlut.csd.ganymede.server.DBObject#getLabel() getLabel()} logic
+   * for {@link arlut.csd.ganymede.server.DBObject DBObject}.</p>
    *
    * <p>If this method checked permissions and the getPerm() method
    * failed for some reason and tried to report the failure using
@@ -1138,7 +1136,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p><b>*Deadlock Hazard.*</b></p>>
    *
    * @param local If true, skip permissions checking
-   *   
+   *
    */
 
   public final boolean isEditable(boolean local)
@@ -1190,7 +1188,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
   public final boolean isVisible()
   {
-    return verifyReadPermission() && 
+    return verifyReadPermission() &&
       getFieldDef().base().getObjectHook().canSeeField(null, this);
   }
 
@@ -1493,7 +1491,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
         // Wizard check
-        
+
         retVal = ReturnVal.merge(retVal, eObj.wizardHook(this, DBEditObject.SETVAL, submittedValue, null));
 
         // if a wizard intercedes, we are going to let it take the
@@ -1528,7 +1526,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
                   {
                     mark(this.value); // we aren't clearing the old value after all
                   }
-                
+
                 return getConflictDialog("DBField.setValue()", submittedValue);
               }
           }
@@ -1558,11 +1556,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
       }
 
     // go ahead and return the dialog that was set by finalizeSetValue().
-    
+
     return retVal;
   }
 
-  /** 
+  /**
    * <p>Returns a Vector of the values of the elements in this field,
    * if a vector.</p>
    *
@@ -1598,12 +1596,10 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
    * Returns the value of an element of this field,
    * if a vector.
    *
    * @see arlut.csd.ganymede.rmi.db_field
-   *
    */
 
   public Object getElement(int index) throws GanyPermissionsException
@@ -1676,7 +1672,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * be simply 'null' to indicate success if no feedback need
    * be provided.
    */
-  
+
   public final ReturnVal setElement(int index, Object value) throws GanyPermissionsException
   {
     if (!isVector())
@@ -1687,7 +1683,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     if (value == null)
       {
         return Ganymede.createErrorDialog("Field Error",
-                                          "Null value passed to " + owner.getLabel() + ":" + 
+                                          "Null value passed to " + owner.getLabel() + ":" +
                                           getName() + ".setElement()");
       }
 
@@ -1729,7 +1725,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * be simply 'null' to indicate success if no feedback need
    * be provided.
    */
-  
+
   public final ReturnVal setElementLocal(int index, Object value)
   {
     if (!isVector())
@@ -1795,7 +1791,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p>Note that vector fields in Ganymede are not allowed to contain
    * duplicate values.</p>
    */
-  
+
   public synchronized ReturnVal setElement(int index, Object submittedValue, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     ReturnVal retVal = null;
@@ -2133,7 +2129,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     if (ReturnVal.didSucceed(retVal))
       {
         getVectVal().addElement(submittedValue);
-      } 
+      }
     else
       {
         if (ns != null)
@@ -2355,7 +2351,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * be provided.
    */
 
-  public synchronized ReturnVal addElements(Vector submittedValues, boolean local, 
+  public synchronized ReturnVal addElements(Vector submittedValues, boolean local,
                                             boolean noWizards, boolean copyFieldMode) throws GanyPermissionsException
   {
     ReturnVal retVal = null;
@@ -2439,7 +2435,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
           {
             submittedValues.set(i, ((Invid) submittedValue).intern());
           }
-        
+
         retVal = verifyNewValue(submittedValue);
 
         if (ReturnVal.hasTransformedValue(retVal))
@@ -2515,7 +2511,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
                     return getConflictDialog("DBField.addElements()", approvedValues.elementAt(i));
                   }
               }
-        
+
             for (int i = 0; i < approvedValues.size(); i++)
               {
                 if (!ns.mark(editset, approvedValues.elementAt(i), this))
@@ -2548,7 +2544,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
         // if we were not able to copy some of the values (and we
         // had copyFieldMode set), encode a description of what
         // happened along with the success code
-        
+
         if (errorBuf.length() != 0)
           {
             // "Warning"
@@ -2568,7 +2564,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
             retVal.requestRefresh(owner.getInvid(), this.getID());
           }
-      } 
+      }
     else
       {
         if (ns != null)
@@ -2611,7 +2607,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   /**
    * <p>Deletes an element of this field, if a vector.</p>
    *
-   * <p>The ReturnVal object returned encodes success or failure, 
+   * <p>The ReturnVal object returned encodes success or failure,
    * and may optionally pass back a dialog.</p>
    *
    * <p>The ReturnVal resulting from a successful deleteElement will
@@ -2738,20 +2734,20 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
         // if this field no longer contains the element that
         // we are deleting, we're going to unmark that value
         // in our namespace
-        
+
         if (!values.contains(valueToDelete))
           {
             unmark(valueToDelete);
           }
       }
 
-    return retVal;    
+    return retVal;
   }
 
   /**
    * <p>Deletes an element of this field, if a vector.</p>
    *
-   * <p>The ReturnVal object returned encodes success or failure, 
+   * <p>The ReturnVal object returned encodes success or failure,
    * and may optionally pass back a dialog.</p>
    *
    * <p>The ReturnVal resulting from a successful deleteElement will
@@ -2825,7 +2821,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * be provided.
    */
 
-  public synchronized ReturnVal deleteElement(Object value, boolean local, boolean noWizards) throws GanyPermissionsException
+  public final synchronized ReturnVal deleteElement(Object value, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     if (!isEditable(local))     // *sync* GanymedeSession possible
       {
@@ -2862,7 +2858,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    *
    * <p>The ReturnVal object returned encodes success or failure, and
    * may optionally pass back a dialog.  If a success code is returned,
-   * all elements in values was removed from this field.  If a 
+   * all elements in values was removed from this field.  If a
    * failure code is returned, no elements in values were removed.</p>
    *
    * <p>The ReturnVal resulting from a successful deleteAllElements will
@@ -2875,7 +2871,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * be provided.
    */
 
-  public ReturnVal deleteAllElements() throws GanyPermissionsException
+  public final ReturnVal deleteAllElements() throws GanyPermissionsException
   {
     return this.deleteElements((Vector) this.getValues().clone());
   }
@@ -2889,7 +2885,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    *
    * <p>The ReturnVal object returned encodes success or failure, and
    * may optionally pass back a dialog.  If a success code is returned,
-   * all elements in values was removed from this field.  If a 
+   * all elements in values was removed from this field.  If a
    * failure code is returned, no elements in values were removed.</p>
    *
    * <p>The ReturnVal resulting from a successful deleteElements will
@@ -2916,7 +2912,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    *
    * <p>The ReturnVal object returned encodes success or failure, and
    * may optionally pass back a dialog.  If a success code is returned,
-   * all elements in values was removed from this field.  If a 
+   * all elements in values was removed from this field.  If a
    * failure code is returned, no elements in values were removed.</p>
    *
    * <p>Server-side method only</p>
@@ -2947,7 +2943,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    *
    * <p>The ReturnVal object returned encodes success or failure, and
    * may optionally pass back a dialog.  If a success code is returned,
-   * all elements in values was removed from this field.  If a 
+   * all elements in values was removed from this field.  If a
    * failure code is returned, no elements in values were removed.</p>
    *
    * <p>Server-side method only</p>
@@ -2971,7 +2967,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    *
    * <p>The ReturnVal object returned encodes success or failure, and
    * may optionally pass back a dialog.  If a success code is returned,
-   * all elements in values was removed from this field.  If a 
+   * all elements in values was removed from this field.  If a
    * failure code is returned, no elements in values were removed.</p>
    *
    * <p>Server-side method only</p>
@@ -3161,7 +3157,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @param local If false, read permissin is checked for this field
    */
 
-  public boolean containsElement(Object value, boolean local) throws GanyPermissionsException
+  public final boolean containsElement(Object value, boolean local) throws GanyPermissionsException
   {
     if (!local && !verifyReadPermission())
       {
@@ -3179,9 +3175,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * Returns a {@link arlut.csd.ganymede.server.fieldDeltaRec fieldDeltaRec} 
-   * object listing the changes between this field's state and that
-   * of the prior oldField state.
+   * Returns a {@link arlut.csd.ganymede.server.fieldDeltaRec
+   * fieldDeltaRec} object listing the changes between this field's
+   * state and that of the prior oldField state.
    */
 
   public fieldDeltaRec getVectorDiff(DBField oldField)
@@ -3226,24 +3222,13 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     return deltaRec;
   }
 
-  /**
-   * <p>Package-domain method to set the owner of this field.</p>
-   *
-   * <p>Used by the DBObject copy constructor.</p>
-   */
-
-  synchronized void setOwner(DBObject owner)
-  {
-    this.owner = owner;
-  }
-
   // ****
   //
   // Server-side namespace management functions
   //
   // ****
 
-  /** 
+  /**
    * <p>unmark() is used to make any and all namespace values in this
    * field as available for use by other objects in the same editset.
    * When the editset is committed, any unmarked values will be
@@ -3252,7 +3237,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p><b>*Calls synchronized methods on DBNameSpace*</b></p>
    */
 
-  void unmark()
+  final void unmark()
   {
     DBNameSpace namespace;
     DBEditSet editset;
@@ -3285,7 +3270,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
                     throw new RuntimeException(ts.l("global.bad_unmark", this.key(), this));
                   }
               }
-        
+
             for (int i = 0; i < size(); i++)
               {
                 if (!namespace.unmark(editset, key(i), this))
@@ -3315,7 +3300,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p><b>*Calls synchronized methods on DBNameSpace*</b></p>
    */
 
-  boolean unmark(Object value)
+  final boolean unmark(Object value)
   {
     DBNameSpace namespace;
     DBEditSet editset;
@@ -3338,7 +3323,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     return namespace.unmark(editset, value, this);
   }
 
-  /** 
+  /**
    * <p>mark() is used to mark any and all values in this field as taken
    * in the namespace.  When the editset is committed, marked values
    * will be permanently reserved in the namespace.  If the editset is
@@ -3347,11 +3332,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    *
    * <p>If there is no namespace associated with this field, this
    * method will always return true, as a no-op.</p>
-   *  
+   *
    * <p><b>*Calls synchronized methods on DBNameSpace*</b></p>
    */
 
-  boolean mark()
+  final boolean mark()
   {
     DBNameSpace namespace;
     DBEditSet editset;
@@ -3382,7 +3367,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
                     return false;
                   }
               }
-        
+
             for (int i = 0; i < size(); i++)
               {
                 if (!namespace.mark(editset, key(i), this))
@@ -3403,11 +3388,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * (add it, set it, etc.), it just marks it.  This is to be used by
    * the vector modifiers (setElement, addElement, etc.)  to keep
    * track of namespace modifications as we go along.</p>
-   * 
+   *
    * <p><b>*Calls synchronized methods on DBNameSpace*</b></p>
    */
 
-  boolean mark(Object value)
+  final boolean mark(Object value)
   {
     DBNameSpace namespace;
     DBEditSet editset;
@@ -3485,12 +3470,12 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * by whatever means (vector add, vector replacement, scalar
    * replacement).</p>
    *
-   * <p>This method is expected to call the 
-   * {@link arlut.csd.ganymede.server.DBEditObject#verifyNewValue(arlut.csd.ganymede.server.DBField,java.lang.Object)} 
+   * <p>This method is expected to call the
+   * {@link arlut.csd.ganymede.server.DBEditObject#verifyNewValue(arlut.csd.ganymede.server.DBField,java.lang.Object)}
    * method on {@link arlut.csd.ganymede.server.DBEditObject} in order to allow custom
    * plugin classes to deny any given value that the plugin might not
    * care for, for whatever reason.  Otherwise, the go/no-go decision
-   * will be made based on the checks performed by 
+   * will be made based on the checks performed by
    * {@link arlut.csd.ganymede.server.DBField#verifyBasicConstraints(java.lang.Object) verifyBasicConstraints}.</p>
    *
    * <p>The ReturnVal that is returned may have transformedValue set, in
@@ -3506,7 +3491,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
   abstract public ReturnVal verifyNewValue(Object o);
 
-  /** 
+  /**
    * <p>Overridable method to verify that the current {@link
    * arlut.csd.ganymede.server.DBSession DBSession} / {@link
    * arlut.csd.ganymede.server.DBEditSet DBEditSet} has permission to read
@@ -3530,7 +3515,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
      return pe.isVisible();
    }
 
-  /** 
+  /**
    * <p>Overridable method to verify that the current {@link
    * arlut.csd.ganymede.server.DBSession DBSession} / {@link
    * arlut.csd.ganymede.server.DBEditSet DBEditSet} has permission to read
@@ -3570,9 +3555,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    }
 
   /**
-   * Overridable method to verify that the current
-   * DBSession / DBEditSet has permission to write
-   * values into this field.
+   * <p>Overridable method to verify that the current DBSession /
+   * DBEditSet has permission to write values into this field.</p>
    */
 
   public boolean verifyWritePermission()
@@ -3620,7 +3604,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     return getVectVal().indexOf(value);
   }
 
-  /** 
+  /**
    * <p>Returns a Vector of the values of the elements in this field, if
    * a vector.</p>
    *
@@ -3649,7 +3633,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     return getVectVal();
   }
 
-  /** 
+  /**
    * <p>Returns an Object carrying the value held in this field.</p>
    *
    * <p>This is intended to be used within the Ganymede server, it bypasses
@@ -3718,7 +3702,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * the {@link arlut.csd.ganymede.server.DBEditSet#rollback(java.lang.String) rollback()}
    * method will always rollback all objects in the transaction at the same
    * time.  It is not necessary to have the InvidDBField subclass handle
-   * binding/unbinding during rollback, since all objects which could conceivably 
+   * binding/unbinding during rollback, since all objects which could conceivably
    * be involved in a link will also have their own states rolled back.</p>
    *
    * <p>Called by {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}'s
@@ -3730,7 +3714,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (!(owner instanceof DBEditObject))
       {
-        throw new RuntimeException("Invalid rollback on field " + 
+        throw new RuntimeException("Invalid rollback on field " +
                                    getName() + ", not in an editable context");
       }
 
@@ -3738,7 +3722,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
       {
         if (!(oldval instanceof Vector))
           {
-            throw new RuntimeException("Invalid vector rollback on field " + 
+            throw new RuntimeException("Invalid vector rollback on field " +
                                        getName());
           }
         else
@@ -3760,7 +3744,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
       {
         if (!verifyTypeMatch(oldval))
           {
-            throw new RuntimeException("Invalid scalar rollback on field " + 
+            throw new RuntimeException("Invalid scalar rollback on field " +
                                        getName());
           }
         else
@@ -3781,7 +3765,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * the field.</p>
    *
    * <p>This makes for a significant bit of overhead on client calls
-   * to the field modifier methods, but this is avoided if code 
+   * to the field modifier methods, but this is avoided if code
    * on the server uses setValueLocal(), setElementLocal(), addElementLocal(),
    * or deleteElementLocal() to make changes to a field.</p>
    *
@@ -3794,7 +3778,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    *
    * return field.rescanThisField(field.setValueLocal(null));
    *
-   * </pre> 
+   * </pre>
    */
 
   public final ReturnVal rescanThisField(ReturnVal original)
@@ -3813,16 +3797,14 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
       {
         original.setObjectLabelChanged(owner.getInvid(), this.getValueString());
       }
-      
+
     original.addRescanField(getOwner().getInvid(), getID());
 
     return original;
   }
 
   /**
-   *
    * For debugging
-   *
    */
 
   public String toString()
@@ -3831,10 +3813,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * Handy utility method for reporting namespace conflict.  This
-   * method will work to identify the object and field which is in conflict,
-   * and will return an appropriate {@link arlut.csd.ganymede.common.ReturnVal ReturnVal}
-   * with an appropriate error dialog.
+   * <p>Handy utility method for reporting namespace conflict.  This
+   * method will work to identify the object and field which is in
+   * conflict, and will return an appropriate {@link
+   * arlut.csd.ganymede.common.ReturnVal ReturnVal} with an
+   * appropriate error dialog.</p>
    */
 
   public ReturnVal getConflictDialog(String methodName, Object conflictValue)
@@ -3890,8 +3873,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * Handy utility method for reporting an attempted duplicate
-   * submission to a vector field.
+   * <p>Handy utility method for reporting an attempted duplicate
+   * submission to a vector field.</p>
    */
 
   public ReturnVal getDuplicateValueDialog(String methodName, Object conflictValue)
@@ -3904,8 +3887,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * Handy utility method for reporting an attempted duplicate
-   * submission to a vector field.
+   * <p>Handy utility method for reporting an attempted duplicate
+   * submission to a vector field.</p>
    */
 
   public ReturnVal getDuplicateValuesDialog(String methodName, String conflictValues)
@@ -3915,65 +3898,5 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     return Ganymede.createErrorDialog(ts.l("getDuplicateValueDialog.error_in_method_title", methodName),
                                       ts.l("getDuplicateValuesDialog.error_body",
                                            conflictValues, getName(), owner.getLabel()));
-  }
-
-  /**
-   * <p>This method is for use primarily within a Jython context and accessed by
-   * calling ".val" on a {@link arlut.csd.ganymede.server.DBField DBField} object,
-   * but it can theoretically be used in Java code in lieu of calling
-   * {@link arlut.csd.ganymede.server.DBField#getValue getValue} or
-   * {@link arlut.csd.ganymede.server.DBField#getValues getValues} (but <b>there
-   * are some subtle differences! </b>).</p>
-   * 
-   * <p>This method will return this field's value, be it vector or scalar.
-   * However, when it encounters an {@link arlut.csd.ganymede.common.Invid Invid}
-   * object (either as the value proper or as a member of this fields value
-   * vector), it will instead return the
-   * {@link arlut.csd.ganymede.server.DBObject DBObject} that the Invid points to.</p>
-   * 
-   * @return This field's value. This can take the form of scalar types,
-   *         {@link arlut.csd.ganymede.server.DBObject DBObjects}, or a
-   *         {@link java.util.Vector Vector}containing either.
-   */
-  public Object getVal()
-  {
-    if (isVector())
-      {
-        Vector values = getValuesLocal();
-        
-        /* Dereference each Invid object in the values vector */
-        List returnList = new ArrayList(values.size());
-        for (Iterator iter = values.iterator(); iter.hasNext();)
-          {
-            returnList.add(dereferenceObject(iter.next()));
-          }
-          
-        return returnList;
-      }
-    else
-      {
-        /* Return the field value, and dereference it if it is an Invid */
-        return dereferenceObject(getValueLocal());
-      }
-  }
-  
-  /**
-   * If the argument is an Invid, this method will return a reference to the
-   * actual DBObject the Invid points to. Otherwise, it returns the same object
-   * that was passed in.
-   *
-   * @param obj 
-   * @return a DBObject if <b>obj</b> is an Invid, otherwise return <b>obj</b>
-   */
-  private Object dereferenceObject(Object obj)
-  {
-    if (obj instanceof Invid)
-      {
-        return Ganymede.db.getObject((Invid) obj);
-      }
-    else
-      {
-        return obj;
-      }
   }
 }

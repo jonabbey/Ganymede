@@ -16,7 +16,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -98,7 +98,7 @@ import arlut.csd.Util.VectorUtils;
  * the logfile orderly.</p>
  */
 
-public class DBLog {
+final public class DBLog {
 
   static final boolean debug = false;
 
@@ -500,7 +500,7 @@ public class DBLog {
       {
         logController.writeEvent(event);
 
-        type = (systemEventType) sysEventCodes.get(event.eventClassToken);
+        type = sysEventCodes.get(event.eventClassToken);
 
         if (type == null)
           {
@@ -727,7 +727,7 @@ public class DBLog {
     // check out the 'starttransaction' system event object to see if we're going
     // to do mailing for transaction summaries
 
-    this.transactionControl = (systemEventType) sysEventCodes.get("starttransaction");
+    this.transactionControl = sysEventCodes.get("starttransaction");
   }
 
   /**
@@ -1036,8 +1036,8 @@ public class DBLog {
   }
 
   /**
-   * <P>This method is used to scan the log for log events that match
-   * invid and that have occurred since sinceTime.</P>
+   * <p>This method is used to scan the log for log events that match
+   * invid and that have occurred since sinceTime.</p>
    *
    * @param invid If not null, retrieveHistory() will only return events involving
    * this object invid.
@@ -1075,8 +1075,8 @@ public class DBLog {
   // -----
 
   /**
-   * <P>This sends out system ("global") event mail to the appropriate
-   * users, based on the system event record's flags.</P>
+   * <p>This sends out system ("global") event mail to the appropriate
+   * users, based on the system event record's flags.</p>
    *
    * @return List of email addresses this event was sent to for system
    * event notification.  All email addresses in this List will have
@@ -1102,7 +1102,7 @@ public class DBLog {
 
     updateSysEventCodeHash();
 
-    type = (systemEventType) sysEventCodes.get(event.eventClassToken);
+    type = sysEventCodes.get(event.eventClassToken);
 
     if (type == null || !type.mail)
       {
@@ -1161,14 +1161,25 @@ public class DBLog {
           }
         else
           {
-            name = event.adminName;     // hopefully this will be a valid email target.. used for bad login attempts
+            // If we're reporting a bad login, we'll try to ccToSelf
+            // even if we don't have u reasonable user/admin Invid for
+            // this event.
+            //
+            // This will let us send warning mail to users who enter
+            // their username/admin name correctly, but muff their
+            // password.
 
-            // skip any persona info after a colon in case the
-            // user tried logging in with admin privileges
-
-            if (name != null && name.indexOf(':') != -1)
+            if (event.eventClassToken.equals("badpass"))
               {
-                name = name.substring(0, name.indexOf(':'));
+                name = event.adminName;
+
+                // skip any persona info after a colon in case the
+                // user tried logging in with admin privileges
+
+                if (name != null && name.indexOf(':') != -1)
+                  {
+                    name = name.substring(0, name.indexOf(':'));
+                  }
               }
           }
 

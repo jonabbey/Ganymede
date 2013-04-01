@@ -10,11 +10,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -60,13 +62,13 @@ package arlut.csd.ganymede.server;
  * persisted to Ganymede's replay journal.</p>
  */
 
-class DBJournalTransaction {
+final class DBJournalTransaction {
 
   /**
    * <p>The time stamp of the transaction.</p>
    */
 
-  private long time;
+  private final long time;
 
   /**
    * <p>This offset records the write position in the journal that
@@ -74,20 +76,20 @@ class DBJournalTransaction {
    * transaction from the journal, rather than finalizing it.</p>
    */
 
-  private long fileOffset;
+  private final long fileOffset;
 
   /**
    * <p>The sequential transaction number.</p>
    */
 
-  private int transactionNumber;
+  private final int transactionNumber;
 
   /**
    * <p>The admin, user, or task name which initiated the
    * transaction.</p>
    */
 
-  private String username;
+  private final String username;
 
   /* -- */
 

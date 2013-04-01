@@ -236,7 +236,7 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * synchronization guide</a> for more details on all of this.</p>
  */
 
-public class SyncRunner implements Runnable {
+public final class SyncRunner implements Runnable {
 
   /**
    * <p>TranslationService object for handling string localization in

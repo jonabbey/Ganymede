@@ -13,8 +13,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -50,8 +52,8 @@ package arlut.csd.ganymede.gasharl;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 import java.sql.*;
 import javax.sql.*;
@@ -89,46 +91,46 @@ public class IRISLink {
   {
     if (source != null)
       {
-	return source;
+        return source;
       }
 
     source = new ComboPooledDataSource();
 
     try
       {
-	source.setDriverClass("oracle.jdbc.OracleDriver");
+        source.setDriverClass("oracle.jdbc.OracleDriver");
       }
     catch (java.beans.PropertyVetoException ex)
       {
-	throw new RuntimeException(ex);
+        throw new RuntimeException(ex);
       }
 
     String debugProperty = System.getProperty("iris.debug");
 
     if (debugProperty != null)
       {
-	debug = true;
+        debug = true;
       }
 
     String hostProperty = System.getProperty("iris.host");
 
     if (hostProperty == null)
       {
-	throw new NullPointerException("iris.host not found");
+        throw new NullPointerException("iris.host not found");
       }
 
     String portProperty = System.getProperty("iris.port");
 
     if (portProperty == null)
       {
-	throw new NullPointerException("iris.port not found");
+        throw new NullPointerException("iris.port not found");
       }
 
     String schemaProperty = System.getProperty("iris.schema");
 
     if (schemaProperty == null)
       {
-	throw new NullPointerException("iris.schema not found");
+        throw new NullPointerException("iris.schema not found");
       }
 
     StringBuilder url = new StringBuilder("jdbc:oracle:thin:");
@@ -142,9 +144,9 @@ public class IRISLink {
 
     if (debug)
       {
-	System.err.println("**** ---- ****");
-	System.err.println("**** URL is " + url + " ****");
-	System.err.println("**** ---- ****");
+        System.err.println("**** ---- ****");
+        System.err.println("**** URL is " + url + " ****");
+        System.err.println("**** ---- ****");
       }
 
     source.setJdbcUrl(url.toString());
@@ -153,7 +155,7 @@ public class IRISLink {
 
     if (usernameProperty == null)
       {
-	throw new NullPointerException("iris.username not found");
+        throw new NullPointerException("iris.username not found");
       }
 
     source.setUser(usernameProperty);
@@ -162,7 +164,7 @@ public class IRISLink {
 
     if (passwordProperty == null)
       {
-	throw new NullPointerException("iris.password not found");
+        throw new NullPointerException("iris.password not found");
       }
 
     source.setPassword(passwordProperty);
@@ -188,13 +190,13 @@ public class IRISLink {
   {
     try
       {
-	return getSource().getConnection();
+        return getSource().getConnection();
       }
     catch (SQLException ex)
       {
-	ex.printStackTrace();
+        ex.printStackTrace();
 
-	return null;
+        return null;
       }
   }
 
@@ -202,17 +204,17 @@ public class IRISLink {
   {
     if (getSource() instanceof PooledDataSource)
       {
-	PooledDataSource pds = (PooledDataSource) getSource();
+        PooledDataSource pds = (PooledDataSource) getSource();
 
-	try
-	  {
-	    System.err.println("num_connections: " + pds.getNumConnectionsDefaultUser());
-	    System.err.println("num_busy_connections: " + pds.getNumBusyConnectionsDefaultUser());
-	    System.err.println("num_idle_connections: " + pds.getNumIdleConnectionsDefaultUser());
-	  }
-	catch (SQLException sqlex)
-	  {
-	  }
+        try
+          {
+            System.err.println("num_connections: " + pds.getNumConnectionsDefaultUser());
+            System.err.println("num_busy_connections: " + pds.getNumBusyConnectionsDefaultUser());
+            System.err.println("num_idle_connections: " + pds.getNumIdleConnectionsDefaultUser());
+          }
+        catch (SQLException sqlex)
+          {
+          }
       }
 
     ex.printStackTrace();
@@ -221,43 +223,43 @@ public class IRISLink {
   }
 
   /**
-   * This executes any query that returns a list of single return
-   * values and returns those values as a List of Strings.
+   * <p>This executes any query that returns a list of single return
+   * values and returns those values as a Set of Strings.</p>
    *
-   * @return a List of String, or null if the query could not be
+   * @return a Set of String, or null if the query could not be
    * performed.
    */
 
-  public static List<String> getUsernames(String queryString) throws SQLException
+  public static Set<String> getUsernames(String queryString) throws SQLException
   {
     Connection myConn = null;
-    List<String> result = new ArrayList<String>();
+    Set<String> result = new HashSet<String>();
 
     try
       {
-	myConn = getConnection();
+        myConn = getConnection();
 
-	Statement query = myConn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+        Statement query = myConn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 
-	ResultSet rs = query.executeQuery(queryString);
+        ResultSet rs = query.executeQuery(queryString);
 
-	try
-	  {
-	    while (rs.next())
-	      {
-		result.add(rs.getString(1));
-	      }
-	  }
-	finally
-	  {
-	    rs.close();
-	  }
+        try
+          {
+            while (rs.next())
+              {
+                result.add(rs.getString(1));
+              }
+          }
+        finally
+          {
+            rs.close();
+          }
 
-	return result;
+        return result;
       }
     finally
       {
-	myConn.close();
+        myConn.close();
       }
   }
 
@@ -280,69 +282,69 @@ public class IRISLink {
 
     try
       {
-	myConn = getConnection();
+        myConn = getConnection();
 
-	String queryString = "select BADGE_NUMBER from HR_EMPLOYEES_GA_VW where NETWORK_USER_ID = ?";
-	PreparedStatement queryName = myConn.prepareStatement(queryString);
+        String queryString = "select BADGE_NUMBER from HR_EMPLOYEES_GA_VW where NETWORK_USER_ID = ?";
+        PreparedStatement queryName = myConn.prepareStatement(queryString);
 
-	queryName.setString(1, username);
+        queryName.setString(1, username);
 
-	ResultSet rs = queryName.executeQuery();
+        ResultSet rs = queryName.executeQuery();
 
-	try
-	  {
-	    if (rs.next())
-	      {
-		String badge = rs.getString(1);
+        try
+          {
+            if (rs.next())
+              {
+                String badge = rs.getString(1);
 
-		// strip leading zeros, if any
+                // strip leading zeros, if any
 
-		if (numericBadgePattern.matcher(badge).matches())
-		  {
-		    try
-		      {
-			return Integer.valueOf(badge).toString();
-		      }
-		    catch (NumberFormatException ex)
-		      {
-			Ganymede.debug("Huh, NumberFormatException from a badge (" + badge + ") that matched numericBadgePattern.  Weird!");
+                if (numericBadgePattern.matcher(badge).matches())
+                  {
+                    try
+                      {
+                        return Integer.valueOf(badge).toString();
+                      }
+                    catch (NumberFormatException ex)
+                      {
+                        Ganymede.debug("Huh, NumberFormatException from a badge (" + badge + ") that matched numericBadgePattern.  Weird!");
 
-			Ganymede.logError(ex);
+                        Ganymede.logError(ex);
 
-			return badge;
-		      }
-		  }
+                        return badge;
+                      }
+                  }
 
-		return rs.getString(1);
-	      }
-	    else
-	      {
-		return null;
-	      }
-	  }
-	finally
-	  {
-	    rs.close();
-	  }
+                return rs.getString(1);
+              }
+            else
+              {
+                return null;
+              }
+          }
+        finally
+          {
+            rs.close();
+          }
       }
     catch (SQLException ex)
       {
-	rethrowException(ex);
+        rethrowException(ex);
 
-	// the compiler doesn't realize that rethrowException()
-	// always throws an exception..
+        // the compiler doesn't realize that rethrowException()
+        // always throws an exception..
 
-	return null;
+        return null;
       }
     finally
       {
-	try
-	  {
-	    myConn.close();
-	  }
-	catch (SQLException ex)
-	  {
-	  }
+        try
+          {
+            myConn.close();
+          }
+        catch (SQLException ex)
+          {
+          }
       }
   }
 
@@ -366,49 +368,49 @@ public class IRISLink {
 
     try
       {
-	myConn = getConnection();
+        myConn = getConnection();
 
-	String queryString = "select NETWORK_USER_ID from HR_EMPLOYEES_GA_VW where BADGE_NUMBER = ?";
-	PreparedStatement queryName = myConn.prepareStatement(queryString);
+        String queryString = "select NETWORK_USER_ID from HR_EMPLOYEES_GA_VW where BADGE_NUMBER = ?";
+        PreparedStatement queryName = myConn.prepareStatement(queryString);
 
-	queryName.setString(1, badge);
+        queryName.setString(1, badge);
 
-	ResultSet rs = queryName.executeQuery();
+        ResultSet rs = queryName.executeQuery();
 
-	try
-	  {
-	    if (rs.next())
-	      {
-		return rs.getString(1);
-	      }
-	    else
-	      {
-		return null;
-	      }
-	  }
-	finally
-	  {
-	    rs.close();
-	  }
+        try
+          {
+            if (rs.next())
+              {
+                return rs.getString(1);
+              }
+            else
+              {
+                return null;
+              }
+          }
+        finally
+          {
+            rs.close();
+          }
       }
     catch (SQLException ex)
       {
-	rethrowException(ex);
+        rethrowException(ex);
 
-	// the compiler doesn't realize that rethrowException()
-	// always throws an exception..
+        // the compiler doesn't realize that rethrowException()
+        // always throws an exception..
 
-	return null;
+        return null;
       }
     finally
       {
-	try
-	  {
-	    myConn.close();
-	  }
-	catch (SQLException ex)
-	  {
-	  }
+        try
+          {
+            myConn.close();
+          }
+        catch (SQLException ex)
+          {
+          }
       }
   }
 
@@ -426,49 +428,49 @@ public class IRISLink {
 
     try
       {
-	myConn = getConnection();
+        myConn = getConnection();
 
-	String queryString = "select EMPLOYEE_NAME from HR_EMPLOYEES_GA_VW where NETWORK_USER_ID = ?";
-	PreparedStatement queryName = myConn.prepareStatement(queryString);
+        String queryString = "select EMPLOYEE_NAME from HR_EMPLOYEES_GA_VW where NETWORK_USER_ID = ?";
+        PreparedStatement queryName = myConn.prepareStatement(queryString);
 
-	queryName.setString(1, username);
+        queryName.setString(1, username);
 
-	ResultSet rs = queryName.executeQuery();
+        ResultSet rs = queryName.executeQuery();
 
-	try
-	  {
-	    if (rs.next())
-	      {
-		return rs.getString(1);
-	      }
-	    else
-	      {
-		return null;
-	      }
-	  }
-	finally
-	  {
-	    rs.close();
-	  }
+        try
+          {
+            if (rs.next())
+              {
+                return rs.getString(1);
+              }
+            else
+              {
+                return null;
+              }
+          }
+        finally
+          {
+            rs.close();
+          }
       }
     catch (SQLException ex)
       {
-	rethrowException(ex);
+        rethrowException(ex);
 
-	// the compiler doesn't realize that rethrowException()
-	// always throws an exception..
+        // the compiler doesn't realize that rethrowException()
+        // always throws an exception..
 
-	return null;
+        return null;
       }
     finally
       {
-	try
-	  {
-	    myConn.close();
-	  }
-	catch (SQLException ex)
-	  {
-	  }
+        try
+          {
+            myConn.close();
+          }
+        catch (SQLException ex)
+          {
+          }
       }
   }
 
@@ -482,49 +484,49 @@ public class IRISLink {
 
     try
       {
-	myConn = getConnection();
+        myConn = getConnection();
 
-	String queryString = "select ARL_PHONE from HR_EMPLOYEES_GA_VW where BADGE_NUMBER = ?";
-	PreparedStatement queryName = myConn.prepareStatement(queryString);
+        String queryString = "select ARL_PHONE from HR_EMPLOYEES_GA_VW where BADGE_NUMBER = ?";
+        PreparedStatement queryName = myConn.prepareStatement(queryString);
 
-	queryName.setString(1, bufBadge(badge));
+        queryName.setString(1, bufBadge(badge));
 
-	ResultSet rs = queryName.executeQuery();
+        ResultSet rs = queryName.executeQuery();
 
-	try
-	  {
-	    if (rs.next())
-	      {
-		return rs.getString(1);
-	      }
-	    else
-	      {
-		return null;
-	      }
-	  }
-	finally
-	  {
-	    rs.close();
-	  }
+        try
+          {
+            if (rs.next())
+              {
+                return rs.getString(1);
+              }
+            else
+              {
+                return null;
+              }
+          }
+        finally
+          {
+            rs.close();
+          }
       }
     catch (SQLException ex)
       {
-	rethrowException(ex);
+        rethrowException(ex);
 
-	// the compiler doesn't realize that rethrowException()
-	// always throws an exception..
+        // the compiler doesn't realize that rethrowException()
+        // always throws an exception..
 
-	return null;
+        return null;
       }
     finally
       {
-	try
-	  {
-	    myConn.close();
-	  }
-	catch (SQLException ex)
-	  {
-	  }
+        try
+          {
+            myConn.close();
+          }
+        catch (SQLException ex)
+          {
+          }
       }
   }
 
@@ -544,12 +546,12 @@ public class IRISLink {
 
     if (historicalBadgeString == null)
       {
-	return true;
+        return true;
       }
 
     if (badge.equals(historicalBadgeString))
       {
-	return true;
+        return true;
       }
 
     // Okay, we don't have a badge string match.  Is this due to the
@@ -559,20 +561,20 @@ public class IRISLink {
 
     if (m.matches())
       {
-	try
-	  {
-	    // strip off 0
+        try
+          {
+            // strip off 0
 
-	    badge = Integer.valueOf(badge).toString();
+            badge = Integer.valueOf(badge).toString();
 
-	    return (badge.equals(historicalBadgeString));
-	  }
-	catch (NumberFormatException ex)
-	  {
-	    Ganymede.logError(ex);
+            return (badge.equals(historicalBadgeString));
+          }
+        catch (NumberFormatException ex)
+          {
+            Ganymede.logError(ex);
 
-	    throw ex;
-	  }
+            throw ex;
+          }
       }
 
     return false;
@@ -584,42 +586,42 @@ public class IRISLink {
 
     try
       {
-	myConn = getConnection();
+        myConn = getConnection();
 
-	String queryString = "select BADGE_NUMBER from HR_EMPLOYEES_GA_VW where BADGE_NUMBER = ?";
-	PreparedStatement queryName = myConn.prepareStatement(queryString);
+        String queryString = "select BADGE_NUMBER from HR_EMPLOYEES_GA_VW where BADGE_NUMBER = ?";
+        PreparedStatement queryName = myConn.prepareStatement(queryString);
 
-	queryName.setString(1, bufBadge(badge));
+        queryName.setString(1, bufBadge(badge));
 
-	ResultSet rs = queryName.executeQuery();
+        ResultSet rs = queryName.executeQuery();
 
-	try
-	  {
-	    return rs.next();
-	  }
-	finally
-	  {
-	    rs.close();
-	  }
+        try
+          {
+            return rs.next();
+          }
+        finally
+          {
+            rs.close();
+          }
       }
     catch (SQLException ex)
       {
-	rethrowException(ex);
+        rethrowException(ex);
 
-	// the compiler doesn't realize that rethrowException()
-	// always throws an exception..
+        // the compiler doesn't realize that rethrowException()
+        // always throws an exception..
 
-	return false;
+        return false;
       }
     finally
       {
-	try
-	  {
-	    myConn.close();
-	  }
-	catch (SQLException ex)
-	  {
-	  }
+        try
+          {
+            myConn.close();
+          }
+        catch (SQLException ex)
+          {
+          }
       }
   }
 
@@ -635,7 +637,7 @@ public class IRISLink {
   {
     while (badge.length() < 5)
       {
-	badge = "0" + badge;
+        badge = "0" + badge;
       }
 
     return badge;

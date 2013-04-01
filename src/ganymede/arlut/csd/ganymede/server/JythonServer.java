@@ -5,17 +5,19 @@
    The JythonServer class is used to provide a tcp port on the
    Ganymede server which can be telnetted to in order to interact with
    a Python (Jython) console.
-   
+
    Created: 19 July 2004
 
    Module By: Deepak Giridharagopal, deepak@brownman.org
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -84,13 +86,13 @@ import arlut.csd.Util.TranslationService;
 
 public class JythonServer extends Thread {
 
-  /* The server's listener socket */ 
+  /* The server's listener socket */
   private ServerSocket sock = null;
-  
-  /* boolean flag for indicating that we should stop listening for new 
+
+  /* boolean flag for indicating that we should stop listening for new
    * connections */
   private boolean shutdownRequested = false;
-  
+
   /* Lock to synchronize on when changing the shutdown flag */
   private Object lock = new Object();
 
@@ -98,7 +100,7 @@ public class JythonServer extends Thread {
   {
     super("JythonServer");
   }
-   
+
   public void run(int portNumber)
   {
     try
@@ -111,13 +113,13 @@ public class JythonServer extends Thread {
       }
   }
 
-  private void listen(int portNumber) throws IOException 
+  private void listen(int portNumber) throws IOException
   {
     Socket s;
     Thread t;
-    
+
     PySystemState.initialize();
-    
+
     try
       {
         sock = new ServerSocket(portNumber);
@@ -131,7 +133,7 @@ public class JythonServer extends Thread {
     while (true)
       {
         s = sock.accept();
-        
+
         synchronized (lock)
           {
             if (shutdownRequested)
@@ -146,14 +148,14 @@ public class JythonServer extends Thread {
 
     sock.close();
   }
-  
+
   public void shutdown()
   {
-    synchronized (lock) 
+    synchronized (lock)
     {
       shutdownRequested = true;
     }
-    
+
     /* Now close the ServerSocket */
     try
       {
@@ -171,7 +173,7 @@ public class JythonServer extends Thread {
                                                             JythonServerProtocol
 
 ------------------------------------------------------------------------------*/
-  
+
 /**
  * Implementation of the server I/O protocol. Principally, it reads in lines
  * of input from the client and execs them inside a Jython interpreter.
@@ -194,50 +196,38 @@ class JythonServerProtocol {
    * <p>The session associated with this telnet connection.</p>
    */
   public GanymedeSession session;
-  
+
   private Socket socket;
   private InteractiveConsole interp;
   private StringWriter buffer;
   private String prompt = ">>> ";
 
-  public JythonServerProtocol(Socket sock) 
+  public JythonServerProtocol(Socket sock)
   {
     JythonServerProtocol.doneString = ts.l("global.done");
 
     this.socket = sock;
-    
+
     buffer = new StringWriter(64);
-    
+
     interp = new InteractiveConsole();
     interp.setOut(buffer);
     interp.setErr(buffer);
-    
+
     /* Import the additional Jython library routines */
     interp.exec("import sys");
     interp.exec("sys.path.append( sys.prefix + '" + System.getProperty("file.separator") + "' + 'jython-lib.jar' )");
-    
+
     /* Seed the interpreter with a pointer to important Ganymede classes */
     interp.exec("from arlut.csd.ganymede.server import *");
     interp.exec("from arlut.csd.ganymede.common import *");
   }
 
-  public void createSession(String personaName)
+  public void createSession(DBObject personaObj, DBObject userObj)
   {
     try
       {
-        /* Snag the appropriate Admin Persona from the database */
-        DBObject persona = (DBObject) ((DBObjectBase) Ganymede.db.get("Admin Persona")).get(personaName);
-        
-        /* If there is a user associated with this persona, snag it */
-        DBObject user = null;
-        InvidDBField userField = (InvidDBField) persona.get("User");
-        if (userField != null)
-          {
-            user = (DBObject) userField.getVal();
-          }
-        
-        /* Now we have all we need to create the session */
-        session = new GanymedeSession(personaName, user, persona, false);
+        session = new GanymedeSession(personaObj.getLabel(), userObj, personaObj, false, false);
       }
     catch (RemoteException ex)
       {
@@ -247,18 +237,18 @@ class JythonServerProtocol {
 
     interp.set("session", session);
   }
-  
+
   public String processInput(String input)
   {
     String output;
     boolean moreInputRequired;
-    
+
     if (input == null)
       {
         // '\nHello {0}\nWelcome to the Ganymede Jython interpreter!\n\nType "quit" to exit.\n{1}'
         return ts.l("processInput.greeting", socket.getInetAddress().getHostAddress(), prompt);
       }
-    
+
     if (input.equals(ts.l("processInput.quitcommand")))
       {
         return doneString;
@@ -271,19 +261,19 @@ class JythonServerProtocol {
           {
             return "... ";
           }
-        
+
         buffer.flush();
         output = buffer.toString();
         interp.resetbuffer();
         buffer.getBuffer().setLength(0);
       }
-    catch (PyException pex) 
+    catch (PyException pex)
       {
         output = buffer.toString() + "\n" + pex.toString();
         interp.resetbuffer();
         buffer.getBuffer().setLength(0);
       }
-    
+
     return output + prompt;
   }
 }
@@ -293,7 +283,7 @@ class JythonServerProtocol {
                                                               JythonServerWorker
 
 ------------------------------------------------------------------------------*/
-  
+
 /**
  * Handles passing input and output to the above Protocol class.
  *
@@ -308,11 +298,11 @@ class JythonServerWorker extends Thread {
    */
 
   private static TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.JythonServerWorker");
-  
+
   private Socket socket = null;
   private JythonServerProtocol protocol = null;
 
-  public JythonServerWorker(Socket socket, JythonServerProtocol protocol) 
+  public JythonServerWorker(Socket socket, JythonServerProtocol protocol)
   {
     super("JythonServerWorker");
     this.socket = socket;
@@ -327,9 +317,9 @@ class JythonServerWorker extends Thread {
         InputStream rawInput = socket.getInputStream();
         PrintWriter out = new PrintWriter(rawOutput, true);
         BufferedReader in = new BufferedReader(new InputStreamReader(rawInput));
-      
+
         String inputLine, outputLine;
-        
+
         /* Check to make sure that this telnet session is from localhost */
         InetAddress clientAddress = socket.getInetAddress();
         if (!clientAddress.equals(java.net.InetAddress.getByName(Ganymede.serverHostProperty))
@@ -365,7 +355,7 @@ class JythonServerWorker extends Thread {
 
             return;
           }
-        
+
         try
           {
             // "Username"
@@ -375,7 +365,7 @@ class JythonServerWorker extends Thread {
             String loginName = in.readLine();
 
             /* Telnet terminal codes */
-            
+
             /* IAC WILL ECHO */
             byte[] echoOff = { (byte)255, (byte)251, (byte)1 };
             /* IAC DO ECHO */
@@ -387,12 +377,12 @@ class JythonServerWorker extends Thread {
             /* Holds the client response to each terminal code */
             byte[] responseBuffer = new byte[3];
 
-            // "Password" 
+            // "Password"
             out.print(ts.l("run.password"));
             out.print(": ");
             out.flush();
 
-            /* Disable client-side character echo while the user types in 
+            /* Disable client-side character echo while the user types in
              * the password  */
             rawOutput.write(echoOff);
             rawOutput.flush();
@@ -435,8 +425,8 @@ class JythonServerWorker extends Thread {
               }
 
             /* Authenticate the user */
-            int validationResult = Ganymede.server.validateAdminUser(loginName,
-                                                                     password);
+            DBObject personaObj = Ganymede.server.validateAdminLogin(loginName, password);
+            int validationResult = Ganymede.server.validateConsoleAdminPersona(personaObj);
 
             /* A result of 3 means that this user has interpreter access
              * privileges. Anything else means that we give 'em the boot. */
@@ -458,14 +448,17 @@ class JythonServerWorker extends Thread {
                 socket.close();
                 return;
               }
-    
+
             /* Send the HELO */
             outputLine = protocol.processInput(null);
             out.print(outputLine);
             out.flush();
 
             /* Setup the interpreter session variable */
-            protocol.createSession(loginName);
+
+            DBObject userObj = Ganymede.server.getUserFromPersona(personaObj);
+
+            protocol.createSession(personaObj, userObj);
 
             /* Here is the read-eval-print loop */
             while ((inputLine = in.readLine()) != null)

@@ -12,9 +12,11 @@
    -----------------------------------------------------------------------
 
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -70,21 +72,22 @@ import arlut.csd.Util.VectorUtils;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>IPDBField is a subclass of {@link arlut.csd.ganymede.server.DBField DBField}
- * for the storage and handling of IPv4/IPv6 address
- * fields in the {@link arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede
- * server.</P>
+ * <p>IPDBField is a subclass of {@link
+ * arlut.csd.ganymede.server.DBField DBField} for the storage and
+ * handling of IPv4/IPv6 address fields in the {@link
+ * arlut.csd.ganymede.server.DBStore DBStore} on the Ganymede
+ * server.</p>
  *
- * <P>The Ganymede client talks to IPDBFields through the
- * {@link arlut.csd.ganymede.rmi.ip_field ip_field} RMI interface.</P> 
+ * <p>The Ganymede client talks to IPDBFields through the {@link
+ * arlut.csd.ganymede.rmi.ip_field ip_field} RMI interface.</p>
  *
- * <P>Note that wherever Ganymede manipulates IP addresses, it does so
+ * <p>Note that wherever Ganymede manipulates IP addresses, it does so
  * in terms of unsigned byte arrays.  Since Java does not provide an
  * unsigned byte type, Ganymede uses the {@link
  * arlut.csd.ganymede.server.IPDBField#s2u(byte) s2u()} and {@link
- * arlut.csd.ganymede.server.IPDBField#u2s(int) u2s()} static methods defined
- * in this class to convert from the signed Java byte to the Ganymede
- * 0-255 IP octet range.</P>
+ * arlut.csd.ganymede.server.IPDBField#u2s(int) u2s()} static methods
+ * defined in this class to convert from the signed Java byte to the
+ * Ganymede 0-255 IP octet range.</p>
  */
 
 public class IPDBField extends DBField implements ip_field {
@@ -103,43 +106,43 @@ public class IPDBField extends DBField implements ip_field {
   // --
 
   /**
-   * <P>Receive constructor.  Used to create a IPDBField from a
-   * {@link arlut.csd.ganymede.server.DBStore DBStore}/{@link arlut.csd.ganymede.server.DBJournal DBJournal}
-   * DataInput stream.</P>
+   * <p>Receive constructor.  Used to create a IPDBField from a {@link
+   * arlut.csd.ganymede.server.DBStore DBStore}/{@link
+   * arlut.csd.ganymede.server.DBJournal DBJournal} DataInput
+   * stream.</p>
    */
 
   IPDBField(DBObject owner, DataInput in, DBObjectBaseField definition) throws IOException
   {
-    value = null;
-    this.owner = owner;
-    this.fieldcode = definition.getID();
+    super(owner, definition.getID());
+
+    this.value = null;
     receive(in, definition);
   }
 
   /**
-   * <P>No-value constructor.  Allows the construction of a
-   * 'non-initialized' field, for use where the 
+   * <p>No-value constructor.  Allows the construction of a
+   * 'non-initialized' field, for use where the
    * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
    * definition indicates that a given field may be present,
-   * but for which no value has been stored in the 
-   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</P>
+   * but for which no value has been stored in the
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.</p>
    *
-   * <P>Used to provide the client a template for 'creating' this
-   * field if so desired.</P>
+   * <p>Used to provide the client a template for 'creating' this
+   * field if so desired.</p>
    */
 
   IPDBField(DBObject owner, DBObjectBaseField definition)
   {
-    this.owner = owner;
-    this.fieldcode = definition.getID();
-    
+    super(owner, definition.getID());
+
     if (isVector())
       {
-        value = new Vector();
+        this.value = new Vector();
       }
     else
       {
-        value = null;
+        this.value = null;
       }
   }
 
@@ -151,16 +154,15 @@ public class IPDBField extends DBField implements ip_field {
 
   public IPDBField(DBObject owner, IPDBField field)
   {
-    this.owner = owner;
-    this.fieldcode = field.getID();
-    
+    super(owner, field.getID());
+
     if (isVector())
       {
-        value = field.getVectVal().clone();
+        this.value = field.getVectVal().clone();
       }
     else
       {
-        value = field.value;
+        this.value = field.value;
       }
   }
 
@@ -172,13 +174,13 @@ public class IPDBField extends DBField implements ip_field {
 
   public IPDBField(DBObject owner, Date value, DBObjectBaseField definition)
   {
+    super(owner, definition.getID());
+
     if (definition.isArray())
       {
         throw new IllegalArgumentException("scalar constructor called on vector field");
       }
 
-    this.owner = owner;
-    this.fieldcode = definition.getID();
     this.value = value;
   }
 
@@ -190,21 +192,20 @@ public class IPDBField extends DBField implements ip_field {
 
   public IPDBField(DBObject owner, Vector values, DBObjectBaseField definition)
   {
+    super(owner, definition.getID());
+
     if (!definition.isArray())
       {
         throw new IllegalArgumentException("vector constructor called on scalar field");
       }
 
-    this.owner = owner;
-    this.fieldcode = definition.getID();
-
     if (values == null)
       {
-        value = new Vector();
+        this.value = new Vector();
       }
     else
       {
-        value = values.clone();
+        this.value = values.clone();
       }
   }
 
@@ -272,7 +273,7 @@ public class IPDBField extends DBField implements ip_field {
             byte length = in.readByte();
 
             Byte[] element = new Byte[length];
-            
+
             for (int j = 0; j < length; j++)
               {
                 element[j] = Byte.valueOf(in.readByte());
@@ -284,9 +285,9 @@ public class IPDBField extends DBField implements ip_field {
     else
       {
         byte length = in.readByte();
-            
+
         Byte[] element = new Byte[length];
-            
+
         for (int j = 0; j < length; j++)
           {
             element[j] = Byte.valueOf(in.readByte());
@@ -321,7 +322,7 @@ public class IPDBField extends DBField implements ip_field {
 
             emitIPXML(xmlOut, (Byte[]) values.elementAt(i));
           }
-        
+
         xmlOut.indent();
       }
 
@@ -367,7 +368,7 @@ public class IPDBField extends DBField implements ip_field {
     for (int i = 0; i < values.size(); i++)
       {
         Byte[] localBytes = (Byte[]) values.elementAt(i);
-        
+
         if (equalTest(localBytes, foreignBytes))
           {
             return i;
@@ -433,17 +434,17 @@ public class IPDBField extends DBField implements ip_field {
   // ****
 
   /**
-   * <P>Sets the value of this field, if a scalar.</P>
+   * <p>Sets the value of this field, if a scalar.</p>
    *
-   * <P>The {@link arlut.csd.ganymede.common.ReturnVal ReturnVal} object returned encodes
+   * <p>The {@link arlut.csd.ganymede.common.ReturnVal ReturnVal} object returned encodes
    * success or failure, and may optionally
-   * pass back a dialog.</P>
+   * pass back a dialog.</p>
    *
-   * <P>Note that IPDBField needs its own setValue() method
+   * <p>Note that IPDBField needs its own setValue() method
    * (rather than using {@link arlut.csd.ganymede.server.DBField#setValue(java.lang.Object, boolean)
    * DBField.setValue()}
    * because it needs to be able to accept either a Byte[] array or
-   * a String with IP information in either IPv4 or IPv6 encoding.</P>
+   * a String with IP information in either IPv4 or IPv6 encoding.</p>
    */
 
   public ReturnVal setValue(Object value, boolean local, boolean noWizards) throws GanyPermissionsException
@@ -458,13 +459,15 @@ public class IPDBField extends DBField implements ip_field {
     if (!isEditable(local))
       {
         // "Can''t change IP field {1} in object {0}, due to a lack of permissions or due to the object being in a non-editable state."
-        throw new GanyPermissionsException(ts.l("global.no_write_perms", owner.getLabel(), getName()));
+        throw new GanyPermissionsException(ts.l("global.no_write_perms",
+                                                this.owner.getLabel(), getName()));
       }
 
     if (isVector())
       {
         // "Scalar method called on a vector field: {1} in object {0}"
-        throw new IllegalArgumentException(ts.l("global.oops_vector", owner.getLabel(), getName()));
+        throw new IllegalArgumentException(ts.l("global.oops_vector",
+                                                this.owner.getLabel(), getName()));
       }
 
     if (value == null)
@@ -477,13 +480,13 @@ public class IPDBField extends DBField implements ip_field {
       }
 
     retVal = verifyNewValue(bytes);
-      
+
     if (!ReturnVal.didSucceed(retVal))
       {
         return retVal;
       }
 
-    eObj = (DBEditObject) owner;
+    eObj = (DBEditObject) this.owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
@@ -492,7 +495,7 @@ public class IPDBField extends DBField implements ip_field {
         retVal = ReturnVal.merge(retVal, eObj.wizardHook(this, DBEditObject.SETVAL, bytes, null));
 
         // if a wizard intercedes, we are going to let it take the ball.
-        
+
         if (ReturnVal.wizardHandled(retVal))
           {
             return retVal;
@@ -560,22 +563,22 @@ public class IPDBField extends DBField implements ip_field {
 
 
   /**
-   * <P>Sets the value of this field, if a vector.</P>
+   * <p>Sets the value of this field, if a vector.</p>
    *
-   * <P>The {@link arlut.csd.ganymede.common.ReturnVal ReturnVal} object returned encodes
+   * <p>The {@link arlut.csd.ganymede.common.ReturnVal ReturnVal} object returned encodes
    * success or failure, and may optionally
-   * pass back a dialog.</P>
+   * pass back a dialog.</p>
    *
    * <p>Note that vector fields in Ganymede are not allowed to contain
    * duplicate values.</p>
    *
-   * <P>Note that IPDBField needs its own setElement() method
+   * <p>Note that IPDBField needs its own setElement() method
    * (rather than using {@link arlut.csd.ganymede.server.DBField#setElement(int, java.lang.Object, boolean)
    * DBField.setElement()}
    * because it needs to be able to accept either a Byte[] array or
-   * a String with IP information in either IPv4 or IPv6 encoding.</P>
+   * a String with IP information in either IPv4 or IPv6 encoding.</p>
    */
-  
+
   public ReturnVal setElement(int index, Object value, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     DBNameSpace ns;
@@ -588,13 +591,15 @@ public class IPDBField extends DBField implements ip_field {
     if (!isEditable(local))
       {
         // "Can''t change IP field {1} in object {0}, due to a lack of permissions or due to the object being in a non-editable state."
-        throw new GanyPermissionsException(ts.l("global.no_write_perms", owner.getLabel(), getName()));
+        throw new GanyPermissionsException(ts.l("global.no_write_perms",
+                                                this.owner.getLabel(), getName()));
       }
 
     if (!isVector())
       {
         // "Vector method called on a scalar field: {1} in object {0}"
-        throw new IllegalArgumentException(ts.l("global.oops_scalar", owner.getLabel(), getName()));
+        throw new IllegalArgumentException(ts.l("global.oops_scalar",
+                                                this.owner.getLabel(), getName()));
       }
 
     if (value == null)
@@ -602,7 +607,8 @@ public class IPDBField extends DBField implements ip_field {
         // "Server: Error in IPDBField.setElement()"
         // "Null value passed to {0}:{1}.setElement()"
         return Ganymede.createErrorDialog(ts.l("setElement.oops"),
-                                          ts.l("setElement.null_value", owner.getLabel(), getName()));
+                                          ts.l("setElement.null_value",
+                                               this.owner.getLabel(), getName()));
       }
 
     Vector values = getVectVal();
@@ -628,13 +634,13 @@ public class IPDBField extends DBField implements ip_field {
       }
 
     retVal = verifyNewValue(bytes);
-      
+
     if (!ReturnVal.didSucceed(retVal))
       {
         return retVal;
       }
 
-    eObj = (DBEditObject) owner;
+    eObj = (DBEditObject) this.owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
@@ -668,7 +674,7 @@ public class IPDBField extends DBField implements ip_field {
             if (!mark(bytes))
               {
                 mark(values.elementAt(index)); // we aren't clearing the old value after all
-            
+
                 // "Server: Error in IPDBField.setElement()"
                 // "IP address {0} already in use in the server"
                 return Ganymede.createErrorDialog(ts.l("setElement.oops"),
@@ -704,20 +710,20 @@ public class IPDBField extends DBField implements ip_field {
   }
 
   /**
-   * <P>Adds an element to the end of this field, if a vector.</P>
+   * <p>Adds an element to the end of this field, if a vector.</p>
    *
-   * <P>The {@link arlut.csd.ganymede.common.ReturnVal ReturnVal} object returned encodes
+   * <p>The {@link arlut.csd.ganymede.common.ReturnVal ReturnVal} object returned encodes
    * success or failure, and may optionally
-   * pass back a dialog.</P>
+   * pass back a dialog.</p>
    *
    * <p>Note that vector fields in Ganymede are not allowed to contain
    * duplicate values.</p>
    *
-   * <P>Note that IPDBField needs its own addElement() method
+   * <p>Note that IPDBField needs its own addElement() method
    * (rather than using {@link arlut.csd.ganymede.server.DBField#addElement(java.lang.Object, boolean)
    * DBField.addElement()}
    * because it needs to be able to accept either a Byte[] array or
-   * a String with IP information in either IPv4 or IPv6 encoding.</P>
+   * a String with IP information in either IPv4 or IPv6 encoding.</p>
    */
 
   public ReturnVal addElement(Object submittedValue, boolean local, boolean noWizards) throws GanyPermissionsException
@@ -732,19 +738,22 @@ public class IPDBField extends DBField implements ip_field {
     if (!isEditable(local))
       {
         // "Can''t change IP field {1} in object {0}, due to a lack of permissions or due to the object being in a non-editable state."
-        throw new GanyPermissionsException(ts.l("global.no_write_perms", owner.getLabel(), getName()));
+        throw new GanyPermissionsException(ts.l("global.no_write_perms",
+                                                this.owner.getLabel(), getName()));
       }
 
     if (!isVector())
       {
         // "Vector method called on a scalar field: {1} in object {0}"
-        throw new IllegalArgumentException(ts.l("global.oops_scalar", owner.getLabel(), getName()));
+        throw new IllegalArgumentException(ts.l("global.oops_scalar",
+                                                this.owner.getLabel(), getName()));
       }
 
     if (submittedValue == null)
       {
         // "Null value passed to {0}:{1}.addElement()"
-        throw new IllegalArgumentException(ts.l("addElement.null_value", owner.getLabel(), getName()));
+        throw new IllegalArgumentException(ts.l("addElement.null_value",
+                                                this.owner.getLabel(), getName()));
       }
 
     bytes = genIPbytes(submittedValue);
@@ -768,10 +777,11 @@ public class IPDBField extends DBField implements ip_field {
         // "Server: Error in IPDBField.addElement()"
         // "Error in IPDBField.addElement(): Field {1} already at or beyond array size limit in object {0}"
         return Ganymede.createErrorDialog(ts.l("addElement.oops"),
-                                          ts.l("addElement.too_big", owner.getLabel(), getName()));
+                                          ts.l("addElement.too_big",
+                                               this.owner.getLabel(), getName()));
       }
 
-    eObj = (DBEditObject) owner;
+    eObj = (DBEditObject) this.owner;
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
       {
@@ -805,7 +815,7 @@ public class IPDBField extends DBField implements ip_field {
     if (ReturnVal.didSucceed(retVal))
       {
         getVectVal().addElement(bytes);
-      } 
+      }
     else
       {
         if (ns != null)
@@ -824,7 +834,7 @@ public class IPDBField extends DBField implements ip_field {
    * addElement() repeatedly, as addElements() can do a single
    * server checkpoint before attempting to add all the values.</p>
    *
-   * <P>Server-side method only</P>
+   * <p>Server-side method only</p>
    *
    * <p>The ReturnVal object returned encodes success or failure, and
    * may optionally pass back a dialog. If a success code is returned,
@@ -845,7 +855,7 @@ public class IPDBField extends DBField implements ip_field {
    * and skip the rest.
    */
 
-  public synchronized ReturnVal addElements(Vector submittedValues, boolean local, 
+  public synchronized ReturnVal addElements(Vector submittedValues, boolean local,
                                             boolean noWizards, boolean copyFieldMode) throws GanyPermissionsException
   {
     ReturnVal retVal = null;
@@ -860,13 +870,15 @@ public class IPDBField extends DBField implements ip_field {
     if (!isEditable(local))     // *sync* on GanymedeSession possible
       {
         // "Can''t change IP field {1} in object {0}, due to a lack of permissions or due to the object being in a non-editable state."
-        throw new GanyPermissionsException(ts.l("global.no_write_perms", owner.getLabel(), getName()));
+        throw new GanyPermissionsException(ts.l("global.no_write_perms",
+                                                this.owner.getLabel(), getName()));
       }
 
     if (!isVector())
       {
         // "Vector method called on a scalar field: {1} in object {0}"
-        throw new IllegalArgumentException(ts.l("global.oops_scalar", owner.getLabel(), getName()));
+        throw new IllegalArgumentException(ts.l("global.oops_scalar",
+                                                this.owner.getLabel(), getName()));
       }
 
     if (submittedValues == null || submittedValues.size() == 0)
@@ -874,7 +886,8 @@ public class IPDBField extends DBField implements ip_field {
         // "Server: Error in IPDBField.addElements()"
         // "IPDBField.addElements(): Can''t add a null or empty vector to field {1} in object {0}"
         return Ganymede.createErrorDialog(ts.l("addElements.oops"),
-                                          ts.l("addElements.null_value", owner.getLabel(), getName()));
+                                          ts.l("addElements.null_value",
+                                               this.owner.getLabel(), getName()));
       }
 
     if (submittedValues == getVectVal())
@@ -893,7 +906,9 @@ public class IPDBField extends DBField implements ip_field {
         // "Server: Error in IPDBField.addElements()"
         // "Error in IPDBField.addElements(): Field {1} in object {0} is limited to {2} items.  Can't add the {3} additional items requested."
         return Ganymede.createErrorDialog(ts.l("addElements.oops"),
-                                          ts.l("addElements.too_big", owner.getLabel(), getName(), Integer.valueOf(getMaxArraySize()),
+                                          ts.l("addElements.too_big",
+                                               this.owner.getLabel(), getName(),
+                                               Integer.valueOf(getMaxArraySize()),
                                                Integer.valueOf(submittedValues.size())));
       }
 
@@ -970,7 +985,7 @@ public class IPDBField extends DBField implements ip_field {
 
     // see if our container wants to intercede in the adding operation
 
-    eObj = (DBEditObject) owner;
+    eObj = (DBEditObject) this.owner;
     editset = eObj.getEditSet();
 
     if (!noWizards && !local && eObj.getGSession().enableOversight)
@@ -1003,7 +1018,7 @@ public class IPDBField extends DBField implements ip_field {
                     return getConflictDialog("DBField.addElements()", approvedValues.elementAt(i));
                   }
               }
-        
+
             for (int i = 0; i < approvedValues.size(); i++)
               {
                 if (!ns.mark(editset, approvedValues.elementAt(i), this))
@@ -1033,7 +1048,7 @@ public class IPDBField extends DBField implements ip_field {
         // if we were not able to copy some of the values (and we
         // had copyFieldMode set), encode a description of what
         // happened along with the success code
-        
+
         if (errorBuf.length() != 0)
           {
             retVal.setDialog(new JDialogBuff("Warning",
@@ -1042,7 +1057,7 @@ public class IPDBField extends DBField implements ip_field {
                                              null,
                                              "ok.gif"));
           }
-      } 
+      }
     else
       {
         if (ns != null)
@@ -1083,7 +1098,8 @@ public class IPDBField extends DBField implements ip_field {
     if (isVector())
       {
         // "Scalar method called on a vector field: {1} in object {0}"
-        throw new IllegalArgumentException(ts.l("global.oops_vector", owner.getLabel(), getName()));
+        throw new IllegalArgumentException(ts.l("global.oops_vector",
+                                                this.owner.getLabel(), getName()));
       }
 
     return (Byte[]) value;
@@ -1094,7 +1110,8 @@ public class IPDBField extends DBField implements ip_field {
     if (!isVector())
       {
         // "Vector method called on a scalar field: {1} in object {0}"
-        throw new IllegalArgumentException(ts.l("global.oops_scalar", owner.getLabel(), getName()));
+        throw new IllegalArgumentException(ts.l("global.oops_scalar",
+                                                this.owner.getLabel(), getName()));
       }
 
     return (Byte[]) getVectVal().elementAt(index);
@@ -1143,13 +1160,13 @@ public class IPDBField extends DBField implements ip_field {
   }
 
   /**
-   * <P>Returns a String representing the change in value between this
+   * <p>Returns a String representing the change in value between this
    * field and orig.  This String is intended for logging and email,
    * not for any sort of programmatic activity.  The format of the
    * generated string is not defined, but is intended to be suitable
-   * for inclusion in a log entry and in an email message.</P>
+   * for inclusion in a log entry and in an email message.</p>
    *
-   * <P>If there is no change in the field, null will be returned.</P>
+   * <p>If there is no change in the field, null will be returned.</p>
    */
 
   public synchronized String getDiffString(DBField orig)
@@ -1226,7 +1243,7 @@ public class IPDBField extends DBField implements ip_field {
         result.append("\n\tNew: ");
         result.append(genIPString(y));
         result.append("\n");
-        
+
         return result.toString();
       }
   }
@@ -1245,7 +1262,7 @@ public class IPDBField extends DBField implements ip_field {
 
   public boolean v6Allowed()
   {
-    DBEditObject eObj = (DBEditObject) owner;
+    DBEditObject eObj = (DBEditObject) this.owner;
 
     return eObj.isIPv6OK(this);
   }
@@ -1288,7 +1305,7 @@ public class IPDBField extends DBField implements ip_field {
    * @param index Array index for the value to be checked
    *
    * @see arlut.csd.ganymede.rmi.ip_field
-   * 
+   *
    */
 
   public boolean isIPV4(short index)
@@ -1347,7 +1364,7 @@ public class IPDBField extends DBField implements ip_field {
    * @param index Array index for the value to be checked
    *
    * @see arlut.csd.ganymede.rmi.ip_field
-   * 
+   *
    */
 
   public boolean isIPV6(short index)
@@ -1385,25 +1402,21 @@ public class IPDBField extends DBField implements ip_field {
 
   public ReturnVal verifyNewValue(Object o)
   {
-    DBEditObject eObj;
-
-    /* -- */
+    DBEditObject eObj = (DBEditObject) this.owner;
 
     if (!isEditable(true))
       {
         return Ganymede.createErrorDialog("IP Field Error",
                                           "Don't have permission to edit field " + getName() +
-                                          " in object " + owner.getLabel());
+                                          " in object " + eObj.getLabel());
       }
-
-    eObj = (DBEditObject) owner;
 
     if (!verifyTypeMatch(o))
       {
         return Ganymede.createErrorDialog("IP Field Error",
                                           "Submitted value " + o + " is not a IP address!  Major client error while" +
                                           " trying to edit field " + getName() +
-                                          " in object " + owner.getLabel());
+                                          " in object " + eObj.getLabel());
       }
 
     // have our parent make the final ok on the value
@@ -1413,7 +1426,7 @@ public class IPDBField extends DBField implements ip_field {
 
 
   /**
-   * Returns a {@link arlut.csd.ganymede.server.fieldDeltaRec fieldDeltaRec} 
+   * Returns a {@link arlut.csd.ganymede.server.fieldDeltaRec fieldDeltaRec}
    * object listing the changes between this field's state and that
    * of the prior oldField state.
    */
@@ -1423,7 +1436,8 @@ public class IPDBField extends DBField implements ip_field {
     if (!isVector())
       {
         // "Vector method called on a scalar field: {1} in object {0}"
-        throw new IllegalArgumentException(ts.l("global.oops_scalar", owner.getLabel(), getName()));
+        throw new IllegalArgumentException(ts.l("global.oops_scalar",
+                                                this.owner.getLabel(), getName()));
       }
 
     if (oldField == null)
@@ -1452,7 +1466,7 @@ public class IPDBField extends DBField implements ip_field {
     return deltaRec;
   }
 
-  // 
+  //
   // helper methods for the encoding/decoding methods
   // to follow.
   //
@@ -1519,7 +1533,7 @@ public class IPDBField extends DBField implements ip_field {
       {
         return genIPV4string(octets);
       }
-    
+
     return genIPV6string(octets);
   }
 
@@ -1740,7 +1754,7 @@ public class IPDBField extends DBField implements ip_field {
     result.append(absoctets[2].toString());
     result.append(".");
     result.append(absoctets[3].toString());
-    
+
     return result.toString();
   }
 
@@ -1749,7 +1763,7 @@ public class IPDBField extends DBField implements ip_field {
    * This method takes an IPv6 string in any of the standard RFC 1884
    * formats or a standard IPv4 string and generates an array of 16
    * bytes that the Ganymede server can accept as an IPv6 address.
-   * 
+   *
    */
 
   public static Byte[] genIPV6bytes(String input)
@@ -1872,7 +1886,7 @@ public class IPDBField extends DBField implements ip_field {
         result[13] = ipv4bytes[1];
         result[14] = ipv4bytes[2];
         result[15] = ipv4bytes[3];
-        
+
         return result;
       }
 
@@ -1928,7 +1942,7 @@ public class IPDBField extends DBField implements ip_field {
     for (int i = 0; i < segments.size(); i++)
       {
         tmp = (String) segments.elementAt(i);
-        
+
         if (tmp.equals(""))
           {
             beforeRegion = false;
@@ -1970,7 +1984,7 @@ public class IPDBField extends DBField implements ip_field {
         System.err.println("tailOffset = " + tailOffset);
       }
 
-    // 
+    //
 
     for (int i = 0; i < compressBoundary; i++)
       {
@@ -2105,7 +2119,7 @@ public class IPDBField extends DBField implements ip_field {
 
         //      System.err.println("Hex for " + stanzas[i] + " is " + stanzaStrings[i]);
       }
-    
+
     // okay, we've got 8 stanzas.. now we have to determine
     // if we want to collapse any part of it to ::
 
@@ -2125,14 +2139,14 @@ public class IPDBField extends DBField implements ip_field {
               {
                 // just counting up
               }
-            
+
             localHi = j-1;
 
             if ((localHi - localLo) > (hiCompress - loCompress))
               {
                 hiCompress = localHi;
                 loCompress = localLo;
-                
+
                 i = localHi;    // continue our outer loop after this block
               }
           }
@@ -2152,7 +2166,7 @@ public class IPDBField extends DBField implements ip_field {
         return "::" + absoctets[12].toString() + "." + absoctets[13].toString() + "." +
           absoctets[14].toString() + "." + absoctets[15].toString();
       }
-    else if ((loCompress == 0) && (hiCompress == 4) && 
+    else if ((loCompress == 0) && (hiCompress == 4) &&
              (absoctets[10].shortValue() == 255) && (absoctets[11].shortValue() == 255))
       {
         return "::FFFF:" + absoctets[12].toString() + "." + absoctets[13].toString() + "." +
@@ -2173,12 +2187,12 @@ public class IPDBField extends DBField implements ip_field {
               {
                 result.append(":");
               }
-            
+
             result.append(stanzaStrings[i++]);
           }
 
         result.append("::");
-        
+
         j = hiCompress + 1;
 
         while (j < 8)
@@ -2187,7 +2201,7 @@ public class IPDBField extends DBField implements ip_field {
               {
                 result.append(":");
               }
-            
+
             result.append(stanzaStrings[j++]);
           }
       }
@@ -2201,11 +2215,11 @@ public class IPDBField extends DBField implements ip_field {
               {
                 result.append(":");
               }
-            
+
             result.append(stanzaStrings[i]);
           }
       }
-    
+
     return result.toString().toUpperCase();
   }
 

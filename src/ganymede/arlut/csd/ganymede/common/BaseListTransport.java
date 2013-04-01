@@ -5,17 +5,19 @@
    This class is intended to provide a serializable object that
    can be used to bulk-dump a static description of the object
    types on the server to the client.
-   
+
    Created: 2 March 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -49,6 +51,8 @@
 
 package arlut.csd.ganymede.common;
 
+import arlut.csd.ganymede.rmi.Base;
+
 import java.util.Vector;
 
 /*------------------------------------------------------------------------------
@@ -58,11 +62,9 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * This class is intended to provide a serializable object that
- * can be used to bulk-dump a static description of the category
- * and base structures on the server to the client.
- *
+ * <p>This class is intended to provide a serializable object that can
+ * be used to bulk-dump a static description of the category and base
+ * structures on the server to the client.</p>
  */
 
 public class BaseListTransport implements java.io.Serializable {
@@ -86,12 +88,12 @@ public class BaseListTransport implements java.io.Serializable {
    *
    */
 
-  public Vector getBaseList()
+  public Vector<Base> getBaseList()
   {
     String token;
     BaseDump baseChild;
     char[] src;
-    Vector results = new Vector();
+    Vector<Base> results = new Vector<Base>();
 
     /* -- */
 
@@ -109,7 +111,7 @@ public class BaseListTransport implements java.io.Serializable {
 
         baseChild = new BaseDump(this, src, lastIndex);
         lastIndex = baseChild.getLastIndex();
-        results.addElement(baseChild);
+        results.add(baseChild);
       }
 
     return results;
@@ -124,7 +126,7 @@ public class BaseListTransport implements java.io.Serializable {
   /**
    * <p>This method is provided so that server-side code can add chunks of data for serialization.
    * In the BaseListTransport case, the
-   * {@link arlut.csd.ganymede.server.DBObjectBase#addBaseToTransport(arlut.csd.ganymede.common.BaseListTransport,arlut.csd.ganymede.server.GanymedeSession)} 
+   * {@link arlut.csd.ganymede.server.DBObjectBase#addBaseToTransport(arlut.csd.ganymede.common.BaseListTransport,arlut.csd.ganymede.server.GanymedeSession)}
    * method is responsible for calling addChunk to build
    * 'this' up for serialization.</p>
    */
@@ -153,7 +155,7 @@ public class BaseListTransport implements java.io.Serializable {
         buffer.append("|");
         return;
       }
-        
+
     for (int j = 0; j < chars.length; j++)
       {
         if (chars[j] == '|')

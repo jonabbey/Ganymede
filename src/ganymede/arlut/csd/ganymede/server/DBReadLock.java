@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -84,7 +84,7 @@ import java.util.Vector;
  * arlut.csd.ganymede.server.DBDumpLock DBDumpLock} for details.</p>
  */
 
-public class DBReadLock extends DBLock {
+public final class DBReadLock extends DBLock {
 
   static final boolean debug = false;
 

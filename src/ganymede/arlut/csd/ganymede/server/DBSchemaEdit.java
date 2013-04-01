@@ -54,7 +54,6 @@ import java.io.StreamTokenizer;
 import java.io.StringReader;
 import java.rmi.RemoteException;
 import java.rmi.server.Unreferenced;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
@@ -116,7 +115,7 @@ import arlut.csd.ganymede.rmi.SchemaEdit;
  * ganymede.db file before going in and editing your database schema.</p>
  */
 
-public class DBSchemaEdit implements Unreferenced, SchemaEdit {
+public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   final static boolean debug = false;
 

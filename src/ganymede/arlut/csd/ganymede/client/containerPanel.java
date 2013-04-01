@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -226,7 +226,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * whose field id's are listed in this vector.
    */
 
-  private Vector updatesWhileLoading = new Vector();
+  private Vector<Short> updatesWhileLoading = new Vector();
 
   /**
    * Vector used to list vectorPanels embedded in this object window.
@@ -236,7 +236,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * embedded objects.
    */
 
-  Vector vectorPanelList = new Vector();
+  Vector<vectorPanel> vectorPanelList = new Vector();
 
   /**
    * To help avoid recursive problems, we keep track of any
@@ -252,34 +252,34 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * {@link arlut.csd.ganymede.rmi.db_field db_field}'s.
    */
 
-  private Hashtable objectHash = new Hashtable();
+  private Hashtable<Component, db_field> objectHash = new Hashtable<Component, db_field>();
 
   /**
    * Hashtable mapping GUI components to their associated
    * FieldTemplate objects.
    */
 
-  private Hashtable objectTemplateHash = new Hashtable();
+  private Hashtable<JComponent, FieldTemplate> objectTemplateHash = new Hashtable<JComponent, FieldTemplate>();
 
   /**
    * Hashtable mapping Short Field ID numbers to their associated
    * GUI components.
    */
 
-  private Hashtable idHash = new Hashtable();
+  private Hashtable<Short, Component> idHash = new Hashtable<Short, Component>();
 
   /**
    * <p>Hashtable mapping the combo boxes contained within
    * {@link arlut.csd.ganymede.client.JInvidChooser JInvidChooser}
    * GUI components to their associated
-   * {@link arlut.csd.ganymede.rmi.db_field db_field}'s.</p>
+   * {@link arlut.csd.ganymede.rmi.invid_field invid_field}'s.</p>
    *
    * <p>This is required because while we want to hide or reveal the JInvidChooser
    * as a whole, we'll get itemStateChanged() calls from the combo
    * box within the JInvidChooser.</p>
    */
 
-  private Hashtable invidChooserHash = new Hashtable();
+  private Hashtable<JComboBox, invid_field> invidChooserHash = new Hashtable<JComboBox, invid_field>();
 
   /**
    * Vector of {@link arlut.csd.ganymede.common.FieldInfo FieldInfo} objects
@@ -287,7 +287,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * and update.
    */
 
-  private Vector infoVector = null;
+  private Vector<FieldInfo> infoVector = null;
 
   /**
    * Vector of {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}
@@ -295,7 +295,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * this object.
    */
 
-  private Vector templates = null;
+  private Vector<FieldTemplate> templates = null;
 
   /**
    * The name of the tab this containerPanel is limited to showing
@@ -530,7 +530,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * FieldInfo Vector that only needs to be downloaded once.
    */
 
-  public void setInfoVector(Vector infoVector)
+  public void setInfoVector(Vector<FieldInfo> infoVector)
   {
     this.infoVector = infoVector;
   }
@@ -657,9 +657,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
           {
             int totalSize = 0;
 
-            for (int i = 0; i < infoSize; i++)
+            for (FieldInfo info: infoVector)
               {
-                FieldInfo info = (FieldInfo)infoVector.elementAt(i);
                 FieldTemplate template = findtemplate(info.getID());
 
                 if (this.tabName == null)
@@ -702,7 +701,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
             try
               {
-                fieldInfo = (FieldInfo) infoVector.elementAt(i);
+                fieldInfo = infoVector.get(i);
                 ID = fieldInfo.getID();
                 fieldTemplate = findtemplate(ID);
 
@@ -813,20 +812,11 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
   private final FieldTemplate findtemplate(short type)
   {
-    FieldTemplate result;
-    int tsize;
-
-    /* -- */
-
-    tsize = templates.size();
-
-    for (int i = 0; i < tsize; i++)
+    for (FieldTemplate template: templates)
       {
-        result = (FieldTemplate) templates.elementAt(i);
-
-        if (result.getID() == type)
+        if (template.getID() == type)
           {
-            return result;
+            return template;
           }
       }
 
@@ -924,10 +914,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
         return;
       }
 
-    Enumeration en;
-
-    /* -- */
-
     if (debug)
       {
         println("Updating container panel");
@@ -937,16 +923,13 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     try
       {
-        en = objectHash.keys();
-
-        while (en.hasMoreElements())
+        for (Component comp: objectHash.keySet())
           {
-            updateComponent((Component)en.nextElement());
+            updateComponent(comp);
           }
 
         invalidate();
         frame.validate();
-
       }
     finally
       {
@@ -968,10 +951,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
   public void updateInvidLabels(Invid invid, String newLabel)
   {
-    Enumeration en;
-
-    /* -- */
-
     if (debug)
       {
         println("Updating container panel");
@@ -981,13 +960,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     try
       {
-        en = objectHash.keys();
-
-        while (en.hasMoreElements())
+        for (Component element: objectHash.keySet())
           {
-            Component element = (Component) en.nextElement();
-
-            db_field field = (db_field) objectHash.get(element);
+            db_field field = objectHash.get(element);
 
             if (field instanceof invid_field)
               {
@@ -1038,7 +1013,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
    * @param fields Vector of Shorts, field ID's
    */
 
-  public void update(Vector fields)
+  public void update(Vector<Short> fields)
   {
     if (!editable)
       {
@@ -1063,7 +1038,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     // of all the fields that need to be updated, and call update on
     // them after the load is finished.
 
-    synchronized(updatesWhileLoading)
+    synchronized (updatesWhileLoading)
       {
         if (!loaded)
           {
@@ -1073,9 +1048,9 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
             if (loading)
               {
-                for (int i = 0; i < fields.size(); i++)
+                for (Short key: fields)
                   {
-                    updatesWhileLoading.addElement(fields.elementAt(i));
+                    updatesWhileLoading.add(key);
                   }
               }
 
@@ -1087,14 +1062,12 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     try
       {
-        for (int i = 0; i < fields.size(); i++)
+        for (Short fieldID: fields)
           {
             if (!keepLoading())
               {
                 return;
               }
-
-            Short fieldID = (Short) fields.elementAt(i);
 
             // if we're not an embedded container panel, check to see if
             // we should update either the expiration field or the removal
@@ -1114,7 +1087,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
                   }
               }
 
-            c = (Component) idHash.get(fieldID);
+            c = idHash.get(fieldID);
 
             if (c == null)
               {
@@ -1159,7 +1132,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     try
       {
-        db_field field = (db_field) objectHash.get(comp);
+        db_field field = objectHash.get(comp);
 
         // by getting a FieldInfo, we'll save a call to the server by
         // not having to repeatedly probe the field for elements of
@@ -1295,7 +1268,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
             // First we need to rebuild the list of choices
 
-            Vector labels = null;
+            Vector<String> labels = null;
             Object key = sf.choicesKey();
 
             // if our choices key is null, we're not going to use a cached copy..
@@ -1340,7 +1313,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
                     if (choicesV == null)
                       {
-                        labels = new Vector();
+                        labels = new Vector<String>();
                       }
                     else
                       {
@@ -1359,7 +1332,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
             if (!mustChoose || currentValue == null)
               {
                 // "<none>"
-                labels.addElement(ts.l("global.none"));
+                labels.add(ts.l("global.none"));
               }
 
             if (currentValue == null)
@@ -1408,7 +1381,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
             // First we need to rebuild the list of choices
 
-            Vector choiceHandles = null;
+            Vector<listHandle> choiceHandles = null;
             Object key = invf.choicesKey();
 
             // if our choices key is null, we're not going to use a cached copy..
@@ -1425,7 +1398,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
                 if (qr == null)
                   {
-                    choiceHandles = new Vector();  // empty
+                    choiceHandles = new Vector<listHandle>();  // empty
                   }
                 else
                   {
@@ -1462,7 +1435,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
                     if (choicesV == null)
                       {
-                        choiceHandles = new Vector();
+                        choiceHandles = new Vector<listHandle>();
                       }
                     else
                       {
@@ -1855,7 +1828,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
             (v.getSource() instanceof JdateField) ||
             (v.getSource() instanceof JstringArea))
           {
-            db_field field = (db_field) objectHash.get(v.getSource());
+            db_field field = objectHash.get(v.getSource());
 
             /* -- */
 
@@ -2142,7 +2115,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     /* -- */
 
-    field = (db_field) objectHash.get(cb);
+    field = objectHash.get(cb);
 
     if (field == null)
       {
@@ -2249,11 +2222,11 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     // objectHash.  Other comboBoxes are part of JInvidChoosers, and
     // they will be in the invidChooserHash
 
-    db_field field = (db_field) objectHash.get(cb);
+    db_field field = objectHash.get(cb);
 
     if (field == null)
       {
-        field = (db_field) invidChooserHash.get(cb);
+        field = invidChooserHash.get(cb);
 
         if (field == null)
           {
@@ -2841,7 +2814,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     vectorPanel vp = new vectorPanel(field, fieldTemplate, winP, editable && fieldInfo.isEditable(),
                                      isEditInPlace, this, isCreating);
-    vectorPanelList.addElement(vp);
+    vectorPanelList.add(vp);
 
     registerComponent(vp, field, fieldTemplate);
 
@@ -3566,7 +3539,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     // DBEditObject.anonymousLinkOK() nonetheless give us rights
     // to link.
 
-    Vector choices = list.getListHandles(false, true);
+    Vector<listHandle> choices = list.getListHandles(false, true);
 
     Invid currentChoice = (Invid) fieldInfo.getValue();
     String currentChoiceLabel = null;
@@ -3599,10 +3572,8 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     if (currentChoice != null)
       {
-        for (int j = 0; j < choices.size(); j++)
+        for (listHandle thisChoice: choices)
           {
-            listHandle thisChoice = (listHandle) choices.elementAt(j);
-
             if (thisChoice.getObject() == null)
               {
                 println("Current object " + thisChoice + " is null.");
@@ -3624,7 +3595,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
         if (!found)
           {
             currentListHandle = new listHandle(gc.getSession().viewObjectLabel(currentChoice), currentChoice);
-            choices.addElement(currentListHandle);
+            choices.add(currentListHandle);
           }
       }
 
@@ -3753,10 +3724,10 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     bytes = (Byte[]) fieldInfo.getValue();
 
-        if (bytes != null)
-          {
-            ipf.setValue(bytes);
-          }
+    if (bytes != null)
+      {
+        ipf.setValue(bytes);
+      }
 
     ipf.setCallback(this);
 
@@ -3789,10 +3760,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
   public synchronized final void cleanup()
   {
-    Enumeration en;
-
-    /* -- */
-
     if (debug)
       {
         printErr("containerPanel cleanUp()");

@@ -73,7 +73,7 @@ import java.util.Vector;
  * in fact be dependent on external synchronization.</p>
  */
 
-public class DBLockSync {
+public final class DBLockSync {
 
   /**
    * <p>Identifier keys for current {@link arlut.csd.ganymede.server.DBLock

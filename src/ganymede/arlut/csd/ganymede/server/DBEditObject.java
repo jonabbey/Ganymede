@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -54,7 +54,6 @@ import java.io.IOException;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -211,14 +210,14 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * {@link arlut.csd.ganymede.common.ObjectStatus ObjectStatus}.
    */
 
-  byte status;
+  private byte status;
 
   /**
    * true if the object has a version currently
    * stored in the DBStore
    */
 
-  boolean stored;
+  final boolean stored;
 
   /**
    * transaction that this object has been checked out in
@@ -246,7 +245,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     super();
 
     this.objectBase = base;
-    editset = null;             // this will be our cue to our static handle status for our methods
+    this.stored = false;
+    this.editset = null;             // this will be our cue to our static handle status for our methods
   }
 
   /**
@@ -1506,32 +1506,32 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    *
    * <p>When this method is called, the DBEditObject has been created,
    * its ownership set, and all fields defined in the controlling
-   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}
-   * have been instantiated without defined
-   * values.  If this DBEditObject is an embedded type, it will
-   * have been linked into its parent object before this method
-   * is called.</p>
+   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} have
+   * been instantiated without defined values.  If this DBEditObject
+   * is an embedded type, it will have been linked into its parent
+   * object before this method is called.</p>
    *
-   * <p>This method is responsible for filling in any default
-   * values that can be calculated from the
-   * {@link arlut.csd.ganymede.server.DBSession DBSession}
-   * associated with the editset defined in this DBEditObject.</p>
+   * <p>This method is responsible for filling in any default values
+   * that can be calculated from the {@link
+   * arlut.csd.ganymede.server.DBSession DBSession} associated with
+   * the editset defined in this DBEditObject.</p>
    *
    * <p>If initialization fails for some reason, initializeNewObject()
    * will return a ReturnVal with an error result..  If the owning
    * GanymedeSession is not in bulk-loading mode (i.e.,
    * GanymedeSession.enableOversight is true), {@link
-   * arlut.csd.ganymede.server.DBSession#createDBObject(short, arlut.csd.ganymede.common.Invid, java.util.Vector)
+   * arlut.csd.ganymede.server.DBSession#createDBObject(short,
+   * arlut.csd.ganymede.common.Invid, java.util.Vector)
    * DBSession.createDBObject()} will checkpoint the transaction
-   * before calling this method.  If this method returns a failure code, the
-   * calling method will rollback the transaction.  This method has no
-   * responsibility for undoing partial initialization, the
-   * checkpoint/rollback logic will take care of that.</p>
+   * before calling this method.  If this method returns a failure
+   * code, the calling method will rollback the transaction.  This
+   * method has no responsibility for undoing partial initialization,
+   * the checkpoint/rollback logic will take care of that.</p>
    *
-   * <p>If enableOversight is false, DBSession.createDBObject() will not
-   * checkpoint the transaction status prior to calling initializeNewObject(),
-   * so it is the responsibility of this method to handle any checkpointing
-   * needed.</p>
+   * <p>If enableOversight is false, DBSession.createDBObject() will
+   * not checkpoint the transaction status prior to calling
+   * initializeNewObject(), so it is the responsibility of this method
+   * to handle any checkpointing needed.</p>
    *
    * <p>This method should be overridden in subclasses.</p>
    *
@@ -1628,8 +1628,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   public ReturnVal cloneFromObject(DBSession session, DBObject origObj, boolean local)
   {
     ReturnVal retVal;
-    Vector origFields;
-    DBField origField;
+    Vector<DBField> origFields;
     DBField newField;
     boolean problem = false;
     StringBuilder resultBuf = new StringBuilder();
@@ -1646,10 +1645,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     origFields = origObj.getFieldVector(true); // don't clone system fields
 
-    for (int i = 0; i < origFields.size(); i++)
+    for (DBField origField: origFields)
       {
-        origField = (DBField) origFields.elementAt(i);
-
         if (canCloneField(session, origObj, origField))
           {
             newField = retrieveField(origField.getID());
@@ -2559,43 +2556,44 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * <p>This method handles inactivation logic for this object type.  A
-   * DBEditObject must first be checked out for editing, then the
+   * <p>This method handles inactivation logic for this object type.
+   * A DBEditObject must first be checked out for editing, then the
    * inactivate() method can then be called on the object to put the
    * object into inactive mode.  inactivate() will set the object's
    * removal date and fix up any other state information to reflect
    * the object's inactive status.</p>
    *
    * <p>inactive() is designed to run synchronously with the user's
-   * request for inactivation.  It can return a wizard reference
-   * in the ReturnVal object returned, to guide the user through
-   * a set of interactive dialogs to inactive the object.</p>
+   * request for inactivation.  It can return a wizard reference in
+   * the ReturnVal object returned, to guide the user through a set of
+   * interactive dialogs to inactive the object.</p>
    *
-   * <p>The inactive() method can cause other objects to be deleted, can cause
-   * strings to be removed from fields in other objects, whatever.</p>
+   * <p>The inactive() method can cause other objects to be deleted,
+   * can cause strings to be removed from fields in other objects,
+   * whatever.</p>
    *
-   * <p>If inactivate() returns a ReturnVal that has its success flag set
-   * to false and does not include a JDialogBuff for further
+   * <p>If inactivate() returns a ReturnVal that has its success flag
+   * set to false and does not include a JDialogBuff for further
    * interaction with the user, then DBSEssion.inactivateDBObject()
    * method will rollback any changes made by this method.</p>
    *
-   * <p>If inactivate() returns a success value, we expect that the object
-   * will have a removal date set.</p>
+   * <p>If inactivate() returns a success value, we expect that the
+   * object will have a removal date set.</p>
    *
    * <p>IMPORTANT NOTE 1: This method is intended to be called by the
    * DBSession.inactivateDBObject() method, which establishes a
    * checkpoint before calling inactivate.  If this method is not
-   * called by DBSession.inactivateDBObject(), you need to push
-   * a checkpoint with the key 'inactivate'+label, where label is
-   * the returned name of this object.</p>
+   * called by DBSession.inactivateDBObject(), you need to push a
+   * checkpoint with the key 'inactivate'+label, where label is the
+   * returned name of this object.</p>
    *
-   * <p>IMPORTANT NOTE 2: If a custom object's inactivate() logic decides
-   * to enter into a wizard interaction with the user, that logic is
-   * responsible for calling finalizeInactivate() with a boolean
-   * indicating ultimate success of the operation.</p>
+   * <p>IMPORTANT NOTE 2: If a custom object's inactivate() logic
+   * decides to enter into a wizard interaction with the user, that
+   * logic is responsible for calling finalizeInactivate() with a
+   * boolean indicating ultimate success of the operation.</p>
    *
-   * <p>Finally, it is up to commitPhase1() and commitPhase2() to handle
-   * any external actions related to object inactivation when
+   * <p>Finally, it is up to commitPhase1() and commitPhase2() to
+   * handle any external actions related to object inactivation when
    * the transaction is committed..</p>
    *
    * @see #commitPhase1()
@@ -2634,9 +2632,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
         if (val != null)
           {
-            Vector invids = new Vector();
+            Vector<Invid> invids = new Vector<Invid>();
 
-            invids.addElement(this.getInvid());
+            invids.add(this.getInvid());
 
             // "{0} {1} has been inactivated.\n\nThe object is due to be removed from the database at {2}.\n\n"
             editset.logEvent(new DBLogEvent("inactivateobject",
@@ -2651,9 +2649,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
           }
         else
           {
-            Vector invids = new Vector();
+            Vector<Invid> invids = new Vector<Invid>();
 
-            invids.addElement(this.getInvid());
+            invids.add(this.getInvid());
 
             // "{0} {1} has been inactivated.\n\nThe object has no removal date set.\n\n"
             editset.logEvent(new DBLogEvent("inactivateobject",
@@ -2738,9 +2736,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   {
     if (success)
       {
-        Vector invids = new Vector();
+        Vector<Invid> invids = new Vector<Invid>();
 
-        invids.addElement(this.getInvid());
+        invids.add(this.getInvid());
 
         // "{0} {1} has been reactivated.\n\n"
         editset.logEvent(new DBLogEvent("reactivateobject",
@@ -2829,7 +2827,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   public final synchronized ReturnVal finalizeRemove(boolean success, String ckp_label)
   {
     ReturnVal retVal = null;
-    DBField field;
     String label = getLabel();  // remember the label before we clear it
 
     /* -- */
@@ -2857,24 +2854,22 @@ public class DBEditObject extends DBObject implements ObjectStatus {
       {
         // get a sync'ed snapshot of this object's fields
 
-        Vector fieldVect = getFieldVect();
+        Vector<DBField> fieldVect = getFieldVect();
 
-        for (int i = 0; i < fieldVect.size(); i++)
+        for (DBField memberField: fieldVect)
           {
-            field = (DBField) fieldVect.elementAt(i);
-
             // we can't clear field 0 (the owner/container field) yet,
             // since we need that for permissions verifications for
             // other fields
 
-            if (field.getID() == 0)
+            if (memberField.getID() == 0)
               {
                 continue;
               }
 
-            if (field.isVector())
+            if (memberField.isVector())
               {
-                while (field.size() > 0)
+                while (memberField.size() > 0)
                   {
                     try
                       {
@@ -2882,7 +2877,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
                         // deleteElement() will convert this request into
                         // a deletion of the embedded object if necessary
 
-                        retVal = ReturnVal.merge(retVal, field.deleteElement(0)); // *sync*
+                        retVal = ReturnVal.merge(retVal, memberField.deleteElement(0)); // *sync*
 
                         if (!ReturnVal.didSucceed(retVal))
                           {
@@ -2896,7 +2891,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
                             // "Server: Error in DBEditObject.finalizeRemove()"
                             // "Custom code disapproved of deleting element from field {0}."
                             return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
-                                                              ts.l("finalizeRemove.badDelete", field.getName()));
+                                                              ts.l("finalizeRemove.badDelete", memberField.getName()));
                           }
                       }
                     catch (GanyPermissionsException ex)
@@ -2906,7 +2901,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
                         // "Server: Error in DBEditObject.finalizeRemove()"
                         // "Permissions violation during attempted deletion of element from field {0}."
                         return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
-                                                          ts.l("finalizeRemove.badDeletePerm", field.getName()));
+                                                          ts.l("finalizeRemove.badDeletePerm", memberField.getName()));
                       }
                   }
               }
@@ -2918,11 +2913,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
                 // linking), i.p. addresses and strings (for the
                 // namespace) here anyway.
 
-                if (field.getType() != PERMISSIONMATRIX &&
-                    field.getType() != PASSWORD &&
-                    field.getType() != FIELDOPTIONS)
+                if (memberField.getType() != PERMISSIONMATRIX &&
+                    memberField.getType() != PASSWORD &&
+                    memberField.getType() != FIELDOPTIONS)
                   {
-                    retVal = ReturnVal.merge(retVal, field.setValueLocal(null)); // *sync*
+                    retVal = ReturnVal.merge(retVal, memberField.setValueLocal(null)); // *sync*
 
                     if (!ReturnVal.didSucceed(retVal))
                       {
@@ -2936,7 +2931,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
                         // "Server: Error in DBEditObject.finalizeRemove()"
                         // "Custom code disapproved of clearing the value held in field {0}."
                         return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
-                                                          ts.l("finalizeRemove.badScalarClear", field.getName()));
+                                                          ts.l("finalizeRemove.badScalarClear", memberField.getName()));
                       }
                   }
                 else
@@ -2947,7 +2942,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
                     try
                       {
-                        field.setUndefined(true);
+                        memberField.setUndefined(true);
                       }
                     catch (GanyPermissionsException ex)
                       {
@@ -2959,7 +2954,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
         // ok, we've cleared all fields but field 0.. clear that to finish up.
 
-        field = retrieveField((short) 0);
+        DBField field = retrieveField((short) 0);
 
         if (field != null)
           {
@@ -3037,11 +3032,12 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * <p>This method is used to find all objects which point to us through
-   * non-symmetric links, edit them, and break the link.  We do this
-   * by consulting the global Ganymede.db.backPointers DBLinkTracker
-   * to get the list of objects which point to us, and doing the
-   * unlink in a fashion similar to InvidDBField.unbindAll().</p>
+   * <p>This method is used to find all objects which point to us
+   * through non-symmetric links, edit them, and break the link.  We
+   * do this by consulting the global Ganymede.db.backPointers {@link
+   * arlut.csd.ganymede.server.DBLinkTracker DBLinkTracker} to get the
+   * list of objects which point to us, and doing the unlink in a
+   * fashion similar to InvidDBField.unbindAll().</p>
    *
    * <p><b>This method is private, and is not to be called by any code outside
    * of this class.</b></p>
@@ -3085,8 +3081,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * editing, and clearing our own Invid out of all of the remote
    * object's asymmetric Invid fields.</p>
    *
-   * <p>This method does no checkpointing, so attemptAsymBackLinkClear()
-   * has to do that for us.</p>
+   * <p>This method does no checkpointing, so
+   * attemptAsymBackLinkClear() has to do that for us.</p>
    *
    * @param remote An Invid for an object that we believe has
    * asymmetric forward links to us.
@@ -3153,12 +3149,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     // get a thread sync'ed snapshot of the fields in the remote object
 
-    Vector fieldVect = remobj.getFieldVect();
+    Vector<DBField> fieldVect = remobj.getFieldVect();
 
-    for (int i = 0; i < fieldVect.size(); i++)
+    for (DBField tmpField: fieldVect)
       {
-        DBField tmpField = (DBField) fieldVect.elementAt(i);
-
         if (!(tmpField instanceof InvidDBField))
           {
             continue;
@@ -3290,18 +3284,20 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * <p>This method provides a pre-commit hook that runs after the user
-   * has hit commit but before the system has established write locks
-   * for the commit.</p>
+   * <p>This method provides a pre-commit hook that runs after the
+   * user has hit commit but before the system has established write
+   * locks for the commit.</p>
    *
    * <p>The intended purpose of this hook is to allow objects that
    * dynamically maintain hidden label fields to update those fields
-   * from the contents of the object's other fields at commit time.</p>
+   * from the contents of the object's other fields at commit
+   * time.</p>
    *
-   * <p>This method runs in a checkpointed context.  If this method fails
-   * in any operation, you should return a ReturnVal with a failure
-   * dialog encoded, and the transaction's commit will be blocked and
-   * a dialog explaining the problem will be presented to the user.</p>
+   * <p>This method runs in a checkpointed context.  If this method
+   * fails in any operation, you should return a ReturnVal with a
+   * failure dialog encoded, and the transaction's commit will be
+   * blocked and a dialog explaining the problem will be presented to
+   * the user.</p>
    *
    * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
@@ -3574,11 +3570,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * hashtable.</p>
    */
 
-  final Hashtable checkpoint()
+  final Hashtable<Short, Object> checkpoint()
   {
-    Object key, value;
-    Hashtable result = new Hashtable();
-    DBField field;
+    Short key;
+    Object value;
+    Hashtable<Short, Object> result = new Hashtable<Short, Object>();
 
     /* -- */
 
@@ -3588,10 +3584,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     synchronized (fieldAry)
       {
-        for (int i = 0; i < fieldAry.length; i++)
+        for (DBField field: fieldAry)
           {
-            field = fieldAry[i];
-
             key = Short.valueOf(field.getID());
             value = field.checkpoint();
 
@@ -3625,24 +3619,13 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * restore its state.</p>
    */
 
-  synchronized final void rollback(Hashtable ckpoint)
+  synchronized final void rollback(Hashtable<Short, Object> ckpoint)
   {
-    Enumeration en;
-    Short key;
-    Object value;
-    DBField field;
-
-    /* -- */
-
-    en = ckpoint.keys();
-
-    while (en.hasMoreElements())
+    for (Short key: ckpoint.keySet())
       {
-        key = (Short) en.nextElement();
+        DBField field = retrieveField(key.shortValue());
 
-        field = retrieveField(key.shortValue());
-
-        value = ckpoint.get(key);
+        Object value = ckpoint.get(key);
 
         // again, we use a reference to ourselves as a
         // hackish way of representing null in the
@@ -3862,7 +3845,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
       {
-        // we don't care if certain fields change
+        // we don't care if certain fields change, as they are
+        // guaranteed to change whenever a transaction commits
 
         if (fieldDef.getID() == SchemaConstants.CreationDateField ||
             fieldDef.getID() == SchemaConstants.CreatorField ||

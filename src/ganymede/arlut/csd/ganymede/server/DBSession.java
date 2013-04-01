@@ -104,7 +104,7 @@ import arlut.csd.ganymede.rmi.db_field;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-final public class DBSession implements QueryDescriber {
+public final class DBSession implements QueryDescriber {
 
   static boolean debug = false;
 
@@ -254,7 +254,7 @@ final public class DBSession implements QueryDescriber {
    * @see arlut.csd.ganymede.server.DBStore
    */
 
-  public synchronized ReturnVal createDBObject(short object_type, Invid chosenSlot, Vector owners)
+  public synchronized ReturnVal createDBObject(short object_type, Invid chosenSlot, Vector<Invid> owners)
   {
     DBObjectBase base;
     DBEditObject e_object;
@@ -302,14 +302,11 @@ final public class DBSession implements QueryDescriber {
         if (!base.isEmbedded() && (owners != null))
           {
             InvidDBField inf = (InvidDBField) e_object.getField(SchemaConstants.OwnerListField);
-            Invid tmpInvid;
 
             /* -- */
 
-            for (int i = 0; i < owners.size(); i++)
+            for (Invid tmpInvid: owners)
               {
-                tmpInvid = (Invid) owners.elementAt(i);
-
                 if (tmpInvid.getType() != SchemaConstants.OwnerBase)
                   {
                     throw new RuntimeException(ts.l("createDBObject.badowner"));
@@ -322,13 +319,13 @@ final public class DBSession implements QueryDescriber {
                     continue;
                   }
 
-                retVal = inf.addElementLocal(owners.elementAt(i));
+                retVal = inf.addElementLocal(tmpInvid);
 
                 if (!ReturnVal.didSucceed(retVal))
                   {
                     try
                       {
-                        DBObject owner = viewDBObject((Invid) owners.elementAt(i));
+                        DBObject owner = viewDBObject(tmpInvid);
                         String name = owner.getLabel();
 
                         String checkedOutBy = owner.shadowObject.editset.description;
@@ -520,7 +517,7 @@ final public class DBSession implements QueryDescriber {
    * @see arlut.csd.ganymede.server.DBStore
    */
 
-  public ReturnVal createDBObject(short object_type, Vector owners)
+  public ReturnVal createDBObject(short object_type, Vector<Invid> owners)
   {
     return createDBObject(object_type, null, owners);
   }
@@ -1574,11 +1571,13 @@ final public class DBSession implements QueryDescriber {
 
     if (debug)
       {
+        // "{0}: entering commitTransaction"
         System.err.println(ts.l("commitTransaction.debug1", String.valueOf(key)));
       }
 
     if (editSet == null)
       {
+        // "{0}:commitTransaction called outside of a transaction"
         throw new RuntimeException(ts.l("commitTransaction.notransaction", String.valueOf(key)));
       }
 
@@ -1591,6 +1590,7 @@ final public class DBSession implements QueryDescriber {
 
     if (debug)
       {
+        // "{0}: committing editset"
         System.err.println(ts.l("commitTransaction.debug2", String.valueOf(key)));
       }
 

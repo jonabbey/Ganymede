@@ -3,18 +3,19 @@
    FixedListCompare.java
 
    Comparison interface for arlut.csd.Util sort classes.
-   
-   Created: 3 July 2001
 
+   Created: 3 July 2001
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -57,13 +58,12 @@ import java.util.Vector;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This class implements the Comparator
+ * <p>This class implements the Comparator
  * interface, and provides a sort comparator that can sort things
  * according to a fixed ordering.  Items not in the original ordered
  * list will be placed after items in the original list, and in
- * alphabetical toString() order relative to each other.</P>
+ * alphabetical toString() order relative to each other.</p>
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
@@ -89,10 +89,8 @@ public class FixedListCompare implements Comparator {
   }
 
   /**
-   *
    * Comparator for arlut.csd.Util sort classes.  compare returns
-   * -1 if a < b, 0 if a = b, and 1 if a > b in sort order.
-   *
+   * -1 if a &lt; b, 0 if a = b, and 1 if a &gt; b in sort order.
    */
 
   public int compare(Object a, Object b)

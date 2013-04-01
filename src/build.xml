@@ -163,8 +163,8 @@ refresh the jar files.
            debug="${debug.flag}"
            debuglevel="${debug.level}"
            encoding="UTF-8"
-           target="1.5"
-           source="1.5"
+           target="6"
+           source="6"
            deprecation="on"
            includeantruntime="false"
            srcdir="${src.dir}">
@@ -177,7 +177,26 @@ refresh the jar files.
       <classpath refid="classpath"/>
     </javac>
 
-    <!-- Compile all of our Stub/Skel classes -->
+    <!-- Compile all of our Stub classes -->
+
+    <!-- (We shouldn't need to do this since Java 5, but at least some
+         versions of Debian running OpenJDK seem to have problems
+         allowing the Ganymede client running via Javaws to
+         auto-generate the stub proxy classes.
+
+         To go along with that, the old-school pre-generated Stub
+         classes seem to require the pre-generated Skel classes to be
+         present on the server.
+
+         Debian bug: http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=605458
+         IcedTea bug: http://icedtea.classpath.org/bugzilla/show_bug.cgi?id=568
+
+         Ideally we should be able to get rid of this <rmic> element
+         entirely, but we're keeping it until the above bugs are dealt
+         with and trickle down to our users.
+
+         28 March 2013 -->
+
     <rmic base="${build.classes}">
       <include name="arlut/csd/ganymede/server/GanymedeServer.class"/>
       <include name="arlut/csd/ganymede/server/GanymedeSession.class"/>
@@ -251,8 +270,6 @@ refresh the jar files.
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/common/*.class"/>
       <fileset dir="${build.classes}" includes="arlut/csd/ganymede/rmi/*.class"/>
       
-      <fileset dir="${build.classes}" includes="arlut/csd/ganymede/client/FileReceiverBase*_Stub.class"/>
-
       <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/server/**"/>
       <fileset dir="${resources.dir}" includes="arlut/csd/ganymede/common/**"/>
       <fileset dir="${resources.dir}" includes="org/solinger/**"/>

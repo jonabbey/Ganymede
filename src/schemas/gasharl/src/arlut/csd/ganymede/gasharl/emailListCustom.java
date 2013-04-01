@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -122,35 +122,34 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
   }
 
   /**
-   * <P>This method is used to provide a hook to allow different
-   * objects to generate different labels for a given object
-   * based on their perspective.  This is used to sort
-   * of hackishly simulate a relational-type capability for
-   * the purposes of viewing backlinks.</P>
+   * <p>This method is used to provide a hook to allow different
+   * objects to generate different labels for a given object based on
+   * their perspective.  This is used to sort of hackishly simulate a
+   * relational-type capability for the purposes of viewing
+   * backlinks.</p>
    *
-   * <P>See the automounter map and NFS volume DBEditObject
-   * subclasses for how this is to be used, if you have
-   * them.</P>
+   * <p>See the automounter map and NFS volume DBEditObject subclasses
+   * for how this is to be used, if you have them.</p>
    */
 
   public String lookupLabel(DBObject object)
   {
     if (object.getTypeID() == SchemaConstants.UserBase)
       {
-	String fullName = (String) object.getFieldValueLocal(userSchema.FULLNAME);
-	String name = (String) object.getFieldValueLocal(userSchema.USERNAME);
+        String fullName = (String) object.getFieldValueLocal(userSchema.FULLNAME);
+        String name = (String) object.getFieldValueLocal(userSchema.USERNAME);
 
-	if (fullName != null && name != null)
-	  {
-	    return name + " (" + fullName + ")";
-	  }
+        if (fullName != null && name != null)
+          {
+            return name + " (" + fullName + ")";
+          }
       }
 
     // mark email lists
 
     if (object.getTypeID() == 274)
       {
-	return super.lookupLabel(object) + " (email list)";
+        return super.lookupLabel(object) + " (email list)";
       }
 
     // and groups
@@ -171,24 +170,22 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
 
     if (object.getTypeID() == 275)
       {
-	Vector addresses = object.getFieldValuesLocal((short) 257);
+        Vector addresses = object.getFieldValuesLocal((short) 257);
 
-	return super.lookupLabel(object) + " (" + VectorUtils.vectorString(addresses) + ")";
+        return super.lookupLabel(object) + " (" + VectorUtils.vectorString(addresses) + ")";
       }
 
     return super.lookupLabel(object);
   }
 
   /**
+   * <p>This method returns a key that can be used by the client to
+   * cache the value returned by choices().  If the client already has
+   * the key cached on the client side, it can provide the choice list
+   * from its cache rather than calling choices() on this object
+   * again.</p>
    *
-   * This method returns a key that can be used by the client
-   * to cache the value returned by choices().  If the client
-   * already has the key cached on the client side, it
-   * can provide the choice list from its cache rather than
-   * calling choices() on this object again.<br><br>
-   *
-   * If there is no caching key, this method will return null.
-   *
+   * <p>If there is no caching key, this method will return null.</p>
    */
 
   public Object obtainChoicesKey(DBField field)
@@ -198,43 +195,42 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
 
     if (field.getID() == MEMBERS)
       {
-	return null;
+        return null;
       }
 
     return super.obtainChoicesKey(field);
   }
 
   /**
+   * <p>This method provides a hook that can be used to generate
+   * choice lists for invid and string fields that provide such.
+   * String and Invid DBFields will call their owner's
+   * obtainChoiceList() method to get a list of valid choices.</p>
    *
-   * This method provides a hook that can be used to generate
-   * choice lists for invid and string fields that provide
-   * such.  String and Invid DBFields will call their owner's
-   * obtainChoiceList() method to get a list of valid choices.<br><br>
-   *
-   * This method will provide a reasonable default for targetted
-   * invid fields.
+   * <p>This method will provide a reasonable default for targetted
+   * invid fields.</p>
    */
 
   public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (field.getID() != emailListSchema.MEMBERS)
       {
-	return super.obtainChoiceList(field);
+        return super.obtainChoiceList(field);
       }
 
     if (membersChoice == null)
       {
-	// we want to present a list of all users, mail groups besides
-	// this one, and external mail aliases (email addresses that
-	// have local aliases in ARL's mail system) as valid choices
-	// for the MEMBERS field.
+        // we want to present a list of all users, mail groups besides
+        // this one, and external mail aliases (email addresses that
+        // have local aliases in ARL's mail system) as valid choices
+        // for the MEMBERS field.
 
-	Query query1 = new Query(SchemaConstants.UserBase, null, false); // list all users
+        Query query1 = new Query(SchemaConstants.UserBase, null, false); // list all users
 
-	Query query2 = new Query((short) 275, null, false); // list all external email targets
+        Query query2 = new Query((short) 275, null, false); // list all external email targets
 
-	QueryNode root3 = new QueryNotNode(new QueryDataNode((short) -2, QueryDataNode.EQUALS, this.getInvid()));
-	Query query3 = new Query((short) 274, root3, false); // list all other email groups, but not ourselves
+        QueryNode root3 = new QueryNotNode(new QueryDataNode((short) -2, QueryDataNode.EQUALS, this.getInvid()));
+        Query query3 = new Query((short) 274, root3, false); // list all other email groups, but not ourselves
 
         // we also need to union in user netgroups and account groups
         // that have the 'Can Receive Email' box checked.
@@ -249,14 +245,14 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
         QueryNode root5 = new QueryDataNode(userNetgroupSchema.EMAILOK, QueryDataNode.DEFINED, null);
         Query query5 = new Query((short) 270, root4, false);
 
-	QueryResult result = editset.getDBSession().getGSession().query(query1, this);
+        QueryResult result = editset.getDBSession().getGSession().query(query1, this);
 
-	result.append(editset.getDBSession().getGSession().query(query2, this));
-	result.append(editset.getDBSession().getGSession().query(query3, this));
-	result.append(editset.getDBSession().getGSession().query(query4, this));
-	result.append(editset.getDBSession().getGSession().query(query5, this));
+        result.append(editset.getDBSession().getGSession().query(query2, this));
+        result.append(editset.getDBSession().getGSession().query(query3, this));
+        result.append(editset.getDBSession().getGSession().query(query4, this));
+        result.append(editset.getDBSession().getGSession().query(query5, this));
 
-	membersChoice = result;
+        membersChoice = result;
       }
 
     return membersChoice;
@@ -296,23 +292,23 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
    */
 
   public boolean anonymousLinkOK(DBObject targetObject, short targetFieldID,
-				 DBObject sourceObject, short sourceFieldID,
-				 GanymedeSession gsession)
+                                 DBObject sourceObject, short sourceFieldID,
+                                 GanymedeSession gsession)
   {
     // if someone tries to put this list in another email list, let
     // them.
 
     if ((targetFieldID == SchemaConstants.BackLinksField) &&
-	(sourceObject.getTypeID() == 274) && // email list
-	(sourceFieldID == 257))	// email list members
+        (sourceObject.getTypeID() == 274) && // email list
+        (sourceFieldID == 257)) // email list members
       {
-	return true;
+        return true;
       }
 
     // the default anonymousLinkOK() method returns false
 
     return super.anonymousLinkOK(targetObject, targetFieldID,
-				 sourceObject, sourceFieldID, gsession);
+                                 sourceObject, sourceFieldID, gsession);
   }
 
   /**
@@ -334,7 +330,7 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
 
     if (fieldid == 256)
       {
-	return true;
+        return true;
       }
 
     return super.fieldRequired(object, fieldid);
@@ -364,7 +360,7 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
   {
     if (field.getID() != emailListSchema.MEMBERS && field.getID() != emailListSchema.EXTERNALTARGETS)
       {
-	return null;
+        return null;
       }
 
     Vector newItemVect = new Vector();
@@ -398,7 +394,7 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
   {
     if (field.getID() != emailListSchema.MEMBERS && field.getID() != emailListSchema.EXTERNALTARGETS)
       {
-	return null;
+        return null;
       }
 
     return null;

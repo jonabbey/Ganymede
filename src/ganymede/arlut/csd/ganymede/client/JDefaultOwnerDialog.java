@@ -3,17 +3,19 @@
    JDefaultOwnerDialog.java
 
    A dialog to choose filtering options.
-   
+
    Created: ??
 
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2009
+
+   Copyright (C) 1996 - 2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -97,7 +99,7 @@ public class JDefaultOwnerDialog extends StandardDialog implements ActionListene
    * the dialog back up.
    */
 
-  private static Vector last_chosen;
+  private static Vector<listHandle> last_chosen;
 
   /**
    * We'll create ourselves a static monitor object to use to
@@ -111,7 +113,7 @@ public class JDefaultOwnerDialog extends StandardDialog implements ActionListene
 
   JButton ok, cancel;
 
-  Vector
+  Vector<Invid>
     chosen;
 
   gclient gc;
@@ -139,22 +141,21 @@ public class JDefaultOwnerDialog extends StandardDialog implements ActionListene
     // did we previously have a list of chosen owner group invid's
     // selected?
 
-    chosen = new Vector();
-    Vector handleVector = null;
+    this.chosen = new Vector<Invid>();
+    Vector<listHandle> handleVector = null;
 
     synchronized(JDefaultOwnerDialog.last_chosen_lock)
       {
         if (JDefaultOwnerDialog.last_chosen != null)
           {
-            handleVector = new Vector();
+            handleVector = new Vector<listHandle>();
 
-            for (int i = 0; i < JDefaultOwnerDialog.last_chosen.size(); i++)
+            for (listHandle lh: JDefaultOwnerDialog.last_chosen)
               {
-                listHandle lh = (listHandle) JDefaultOwnerDialog.last_chosen.elementAt(i);
                 Invid element_invid = (Invid) lh.getObject();
 
                 handleVector.add(lh);
-                chosen.add(element_invid);
+                this.chosen.add(element_invid);
               }
           }
       }
@@ -169,7 +170,7 @@ public class JDefaultOwnerDialog extends StandardDialog implements ActionListene
 
     cancel = new JButton(StringDialog.getDefaultCancel());
     cancel.addActionListener(this);
-    
+
     if (glogin.isRunningOnMac())
       {
         JPanel p = new JPanel();
@@ -181,7 +182,7 @@ public class JDefaultOwnerDialog extends StandardDialog implements ActionListene
         macPanel.add(p, BorderLayout.EAST);
 
         macPanel.setBorder(gc.raisedBorder);
-    
+
         getContentPane().add("South", macPanel);
       }
     else
@@ -190,7 +191,7 @@ public class JDefaultOwnerDialog extends StandardDialog implements ActionListene
         p.add(ok);
         p.add(cancel);
         p.setBorder(gc.raisedBorder);
-    
+
         getContentPane().add("South", p);
       }
 
@@ -207,16 +208,13 @@ public class JDefaultOwnerDialog extends StandardDialog implements ActionListene
             System.out.println("Adding element");
           }
 
-        chosen.addElement(e.getValue());
+        this.chosen.add((Invid) e.getValue());
       }
     else if (e instanceof JAddVectorValueObject)
       {
-        Vector newElements = (Vector) e.getValue();
+        Vector<Invid> newElements = (Vector<Invid>) e.getValue();
 
-        for (int i = 0; i < newElements.size(); i++)
-          {
-            chosen.addElement(newElements.elementAt(i));
-          }
+        this.chosen.addAll(newElements);
       }
     else if (e instanceof JDeleteValueObject)
       {
@@ -224,19 +222,17 @@ public class JDefaultOwnerDialog extends StandardDialog implements ActionListene
           {
             System.out.println("removing element");
           }
-        chosen.removeElement(e.getValue());
+
+        this.chosen.remove((Invid) e.getValue());
       }
     else if (e instanceof JDeleteVectorValueObject)
       {
-        Vector newElements = (Vector) e.getValue();
+        Vector<Invid> delElements = (Vector<Invid>) e.getValue();
 
-        for (int i = 0; i < newElements.size(); i++)
-          {
-            chosen.removeElement(newElements.elementAt(i));
-          }
+        this.chosen.removeAll(delElements);
       }
 
-    ok.setEnabled(chosen.size () != 0);
+    ok.setEnabled(this.chosen.size() != 0);
 
     return true;
   }
@@ -247,8 +243,8 @@ public class JDefaultOwnerDialog extends StandardDialog implements ActionListene
       {
         try
           {
-            retVal = gc.getSession().setDefaultOwner(chosen);
-            
+            retVal = gc.getSession().setDefaultOwner(this.chosen);
+
             retVal = gc.handleReturnVal(retVal);
 
             if (retVal == null || retVal.didSucceed())
@@ -259,7 +255,7 @@ public class JDefaultOwnerDialog extends StandardDialog implements ActionListene
                   {
                     if (JDefaultOwnerDialog.last_chosen == null)
                       {
-                        JDefaultOwnerDialog.last_chosen = new Vector();
+                        JDefaultOwnerDialog.last_chosen = new Vector<listHandle>();
                       }
                     else
                       {
@@ -284,13 +280,14 @@ public class JDefaultOwnerDialog extends StandardDialog implements ActionListene
   }
 
   /**
-   * Shows the dialog, and returns the ReturnVal after we make our
+   * <p>Shows the dialog, and returns the ReturnVal after we make our
    * call to the server to set the default owner list.  If the dialog
    * was closed manually (by clicking the 'close window' button), this
-   * method will a failure result.
+   * method will a failure result.</p>
    *
-   * Use this instead of setVisible().
+   * <p>Use this instead of setVisible().</p>
    */
+
   public ReturnVal chooseOwner()
   {
     this.group_chosen = false;
@@ -314,10 +311,10 @@ public class JDefaultOwnerDialog extends StandardDialog implements ActionListene
   }
 
   /**
-   * This method makes the JDefaultOwnerDialog forget the last set of
-   * default owner invids chosen.  The next time a JDefaultOwnerDialog
-   * instance is created, it will not pre-select the previous list of
-   * owners.
+   * <p>This method makes the JDefaultOwnerDialog forget the last set
+   * of default owner invids chosen.  The next time a
+   * JDefaultOwnerDialog instance is created, it will not pre-select
+   * the previous list of owners.</p>
    */
 
   public static void clear()

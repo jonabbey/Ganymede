@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -52,7 +52,6 @@ package arlut.csd.ganymede.server;
 
 import java.rmi.RemoteException;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Vector;
 
 import arlut.csd.ganymede.common.Invid;
@@ -74,16 +73,17 @@ import arlut.csd.ganymede.common.SchemaConstants;
  * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}.</p>
  *
  * <p>The GanymedeExpirationTask scans through all objects in the
- * database and handles expiration and/or removal for any object whose Expiration
- * or Removal timestamps have passed.</p>
+ * database and handles expiration and/or removal for any object whose
+ * Expiration or Removal timestamps have passed.</p>
  *
  * <p>GanymedeExpirationTask is designed to be run once a day by the
- * GanymedeScheduler, but running it more often won't hurt anything.</p>
+ * GanymedeScheduler, but running it more often won't hurt
+ * anything.</p>
  *
- * <p>The standard GanymedeExpirationTask is paired with the
- * standard {@link arlut.csd.ganymede.server.GanymedeWarningTask GanymedeWarningTask} task,
- * which sends out email warning of expirations and removals to occur in the
- * near future.</p>
+ * <p>The standard GanymedeExpirationTask is paired with the standard
+ * {@link arlut.csd.ganymede.server.GanymedeWarningTask
+ * GanymedeWarningTask} task, which sends out email warning of
+ * expirations and removals to occur in the near future.</p>
  */
 
 public class GanymedeExpirationTask implements Runnable {
@@ -156,13 +156,7 @@ public class GanymedeExpirationTask implements Runnable {
 
         started = true;
 
-        Query q;
-        Vector results;
-        Result result;
-        Invid invid;
         Date currentTime = new Date();
-        DBObjectBase base;
-        Enumeration baseEnum, en;
         QueryDataNode expireNode = new QueryDataNode(SchemaConstants.ExpirationField,
                                                      QueryDataNode.LESSEQ,
                                                      currentTime);
@@ -177,16 +171,12 @@ public class GanymedeExpirationTask implements Runnable {
         // over all the object types defined in the server and scan
         // each for objects to be inactivated and/or removed.
 
-        baseEnum = Ganymede.db.objectBases.elements();
-
-        while (baseEnum.hasMoreElements())
+        for (DBObjectBase base: Ganymede.db.bases())
           {
             if (currentThread.isInterrupted())
               {
                 throw new InterruptedException("scheduler ordering shutdown");
               }
-
-            base = (DBObjectBase) baseEnum.nextElement();
 
             // embedded objects are inactivated with their parents, we don't
             // handle them separately
@@ -201,22 +191,16 @@ public class GanymedeExpirationTask implements Runnable {
                 Ganymede.debug("Sweeping base " + base.getName() + " for expired objects");
               }
 
-            q = new Query(base.getTypeID(), expireNode, false);
+            Query q = new Query(base.getTypeID(), expireNode, false);
 
-            results = mySession.internalQuery(q);
-
-            en = results.elements();
-
-            while (en.hasMoreElements())
+            for (Result result: mySession.internalQuery(q))
               {
                 if (currentThread.isInterrupted())
                   {
                     throw new InterruptedException("scheduler ordering shutdown");
                   }
 
-                result = (Result) en.nextElement();
-
-                invid = result.getInvid();
+                Invid invid = result.getInvid();
 
                 if (debug)
                   {
@@ -258,16 +242,12 @@ public class GanymedeExpirationTask implements Runnable {
 
         // now the removals
 
-        baseEnum = Ganymede.db.objectBases.elements();
-
-        while (baseEnum.hasMoreElements())
+        for (DBObjectBase base: Ganymede.db.bases())
           {
             if (currentThread.isInterrupted())
               {
                 throw new InterruptedException("scheduler ordering shutdown");
               }
-
-            base = (DBObjectBase) baseEnum.nextElement();
 
             // embedded objects are removed with their parents, we don't
             // handle them separately
@@ -283,22 +263,16 @@ public class GanymedeExpirationTask implements Runnable {
                                " for objects to be removed");
               }
 
-            q = new Query(base.getTypeID(), removeNode, false);
+            Query q = new Query(base.getTypeID(), removeNode, false);
 
-            results = mySession.internalQuery(q);
-
-            en = results.elements();
-
-            while (en.hasMoreElements())
+            for (Result result: mySession.internalQuery(q))
               {
                 if (currentThread.isInterrupted())
                   {
                     throw new InterruptedException("scheduler ordering shutdown");
                   }
 
-                result = (Result) en.nextElement();
-
-                invid = result.getInvid();
+                Invid invid = result.getInvid();
 
                 if (debug)
                   {

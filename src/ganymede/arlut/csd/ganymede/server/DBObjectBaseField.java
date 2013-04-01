@@ -10,11 +10,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2011
+
+   Copyright (C) 1996 - 2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -76,27 +78,33 @@ import arlut.csd.ganymede.rmi.BaseField;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>An entry in the Ganymede server's {@link arlut.csd.ganymede.server.DBStore DBStore}
- * schema dictionary.  DBStore contains a collection of 
- * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects, which define
- * the schema information for a particular type of object held in the Ganymede
- * database.  A DBObjectBaseField is contained within a DBObjectBase, and defines
- * the name, id, type, and constraints of a particular field that can be held
- * in {@link arlut.csd.ganymede.server.DBObject DBObjects} of that type, including
- * a controlling {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace}, if
- * appropriate.</P>
+ * <p>An entry in the Ganymede server's {@link
+ * arlut.csd.ganymede.server.DBStore DBStore} schema dictionary.
+ * DBStore contains a collection of {@link
+ * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} objects, which
+ * define the schema information for a particular type of object held
+ * in the Ganymede database.  A DBObjectBaseField is contained within
+ * a DBObjectBase, and defines the name, id, type, and constraints of
+ * a particular field that can be held in {@link
+ * arlut.csd.ganymede.server.DBObject DBObjects} of that type,
+ * including a controlling {@link
+ * arlut.csd.ganymede.server.DBNameSpace DBNameSpace}, if
+ * appropriate.</p>
  *
- * <P>Each {@link arlut.csd.ganymede.server.DBField DBField} held in the server's
- * database holds a reference to a DBObjectBaseField, and the DBField's methods
- * will consult the DBObjectBaseField during run-time to make decisions based
- * on specified constraints defined in the DBObjectBaseField.</P>
+ * <p>Each {@link arlut.csd.ganymede.server.DBField DBField} held in
+ * the server's database holds a reference to a DBObjectBaseField, and
+ * the DBField's methods will consult the DBObjectBaseField during
+ * run-time to make decisions based on specified constraints defined
+ * in the DBObjectBaseField.</p>
  *
- * <P>The Ganymede schema editor uses the {@link arlut.csd.ganymede.rmi.BaseField BaseField}
- * remote interface to make changes to a DBObjectBaseField's constraint information
- * during schema editing. The Ganymede client may also use the BaseField interface
- * to learn about the field's type information, but it may also download a
- * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate} that carries a
- * DBObjectBaseField's type information in an efficiently retrieved summary.</P>
+ * <p>The Ganymede schema editor uses the {@link
+ * arlut.csd.ganymede.rmi.BaseField BaseField} remote interface to
+ * make changes to a DBObjectBaseField's constraint information during
+ * schema editing. The Ganymede client may also use the BaseField
+ * interface to learn about the field's type information, but it may
+ * also download a {@link arlut.csd.ganymede.common.FieldTemplate
+ * FieldTemplate} that carries a DBObjectBaseField's type information
+ * in an efficiently retrieved summary.</p>
  */
 
 public final class DBObjectBaseField implements BaseField, FieldType, Comparable {
@@ -235,7 +243,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * Invid DBObjectBaseField linked to a field from an XML file, and
    * we'll need to do type resolution once the schema is completely
    * loaded from an XML stream.  Once this happens, targetField will
-   * be set properly, and targetFieldStr will be set to null.  
+   * be set properly, and targetFieldStr will be set to null.
    */
 
   private String targetFieldStr = null;
@@ -327,8 +335,8 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   private FieldTemplate template;
 
   /**
-   * <P>A three state flag used by isInUse() to report whether or
-   * not a particular field is in use in the loaded database.</P>
+   * <p>A three state flag used by isInUse() to report whether or
+   * not a particular field is in use in the loaded database.</p>
    */
 
   private Boolean inUseCache = null;
@@ -371,12 +379,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     this.base = base;
     this.editor = base.getEditor();
-    
+
     field_name = "";
     comment = "";
 
     tabName = ts.l("receive.default_tab_name");  // "General"
-    
+
     field_code = -1;
     field_type = -1;
     lastChange = new Date();
@@ -397,10 +405,10 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /**
-   * Copy constructor, used during schema editing.
+   * <p>Copy constructor, used during schema editing.</p>
    *
-   * <b>IMPORTANT: BE SURE TO ALWAYS EDIT THIS METHOD IF YOU ADD ANY
-   * FIELDS TO THIS CLASS!</b>
+   * <p><b>IMPORTANT: BE SURE TO ALWAYS EDIT THIS METHOD IF YOU ADD
+   * ANY FIELDS TO THIS CLASS!</b></p>
    */
 
   DBObjectBaseField(DBObjectBaseField original, DBObjectBase newBase) throws RemoteException
@@ -468,10 +476,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /**
-   * <P>This method is used to allow objects in this base to notify us
+   * <p>This method is used to allow objects in this base to notify us
    * when instances of fields of this kind are changed.  It is called
    * from the {@link arlut.csd.ganymede.server.DBEditSet DBEditSet}
-   * commit() method.</P>
+   * {@link
+   * arlut.csd.ganymede.server.DBEditSet#commit_updateBases(java.util.Set)}
+   * method.</p>
    */
 
   void updateTimeStamp()
@@ -480,8 +490,8 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /**
-   * <P>Returns a Date object containing the time that any changes were
-   * committed to instances of fields specified by this DBObjectBaseField.</P> 
+   * <p>Returns a Date object containing the time that any changes were
+   * committed to instances of fields specified by this DBObjectBaseField.</p>
    */
 
   public Date getTimeStamp()
@@ -563,7 +573,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
           {
             out.writeUTF(okChars);
           }
-        
+
         if (badChars == null)
           {
             out.writeUTF("");
@@ -643,7 +653,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
           {
             out.writeUTF(okChars);
           }
-        
+
         if (badChars == null)
           {
             out.writeUTF("");
@@ -794,7 +804,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
         minLength = in.readShort();
         maxLength = in.readShort();
         okChars = in.readUTF();
-        
+
         if (okChars.equals(""))
           {
             okChars = null;
@@ -808,14 +818,14 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
           }
 
         nameSpaceId = in.readUTF();
-        
+
         if (!nameSpaceId.equals(""))
           {
             setNameSpace(nameSpaceId);
           }
 
         // at file version 1.9, we introduced multiLine
-        
+
         if (base.getStore().isAtLeast(1,9))
           {
             multiLine = in.readBoolean();
@@ -826,7 +836,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
           }
 
         // at file version 1.14, we introduced regexps for string fields
-        
+
         if (base.getStore().isAtLeast(1,14))
           {
             setRegexpPat(in.readUTF());
@@ -858,7 +868,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
         if (base.getStore().isAtLeast(1,8))
           {
             nameSpaceId = in.readUTF();
-            
+
             if (!nameSpaceId.equals(""))
               {
                 setNameSpace(nameSpaceId);
@@ -876,7 +886,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
         if (base.getStore().isAtLeast(1,8))
           {
             nameSpaceId = in.readUTF();
-            
+
             if (!nameSpaceId.equals(""))
               {
                 setNameSpace(nameSpaceId);
@@ -919,7 +929,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
         minLength = in.readShort();
         maxLength = in.readShort();
         okChars = in.readUTF();
-        
+
         if (okChars.equals(""))
           {
             okChars = null;
@@ -1071,7 +1081,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       }
 
     xmlOut.startElementIndent("typedef");
-    
+
     switch (field_type)
       {
       case FieldType.BOOLEAN:
@@ -1171,7 +1181,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
             xmlOut.attribute("val", badChars);
             xmlOut.endElement("badchars");
           }
-        
+
         if (namespace != null)
           {
             xmlOut.startElementIndent("namespace");
@@ -1297,7 +1307,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
             xmlOut.attribute("val", java.lang.Short.toString(minLength));
             xmlOut.endElement("minlength");
           }
-        
+
         if (maxLength != Short.MAX_VALUE)
           {
             xmlOut.startElementIndent("maxlength");
@@ -1399,7 +1409,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
             xmlOut.endElement("plaintext");
           }
       }
-    
+
     xmlOut.indentIn();
 
     if (nonEmpty)
@@ -1414,8 +1424,8 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /**
-   * <P>This method is used to read the definition for this
-   * DBObjectBaseField from a &lt;fielddef&gt; XMLItem tree.</P>
+   * <p>This method is used to read the definition for this
+   * DBObjectBaseField from a &lt;fielddef&gt; XMLItem tree.</p>
    */
 
   synchronized ReturnVal setXML(XMLItem root, boolean doLinkResolve, PrintWriter err)
@@ -1627,7 +1637,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
                   }
               }
             else if (item.getAttrStr("type").equals("ip"))
-              {         
+              {
                 retVal = doIPXML(item);
 
                 if (!ReturnVal.didSucceed(retVal))
@@ -1666,7 +1676,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     // set the options
 
     retVal = setComment(_comment);
-    
+
     if (!ReturnVal.didSucceed(retVal))
       {
         // "XML"
@@ -1676,7 +1686,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       }
 
     visibility = _visibility;
-    
+
     return null;
   }
 
@@ -1805,11 +1815,11 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
                                                root.getTreeString(),
                                                retVal.getDialogText()));
       }
-                
+
     if (_vect)
       {
         retVal = setMaxArraySize(_maxSize);
-        
+
         if (!ReturnVal.didSucceed(retVal))
           {
             // "XML"
@@ -1849,7 +1859,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       }
 
     retVal = setOKChars(_okChars);
-    
+
     if (!ReturnVal.didSucceed(retVal))
       {
         // "XML"
@@ -1860,9 +1870,9 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
                                                root.getTreeString(),
                                                retVal.getDialogText()));
       }
-    
+
     retVal = setBadChars(_badChars);
-    
+
     if (!ReturnVal.didSucceed(retVal))
       {
         // "XML"
@@ -1875,7 +1885,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       }
 
     retVal = setRegexpPat(_regexp);
-    
+
     if (!ReturnVal.didSucceed(retVal))
       {
         // "XML"
@@ -1901,7 +1911,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       }
 
     retVal = setMultiLine(_multiline);
-    
+
     if (!ReturnVal.didSucceed(retVal))
       {
         // "XML"
@@ -1923,7 +1933,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
                                           ts.l("doStringXML.bad_namespace",
                                                _namespace,
                                                root.getTreeString(),
-                                               retVal.getDialogText()));                                          
+                                               retVal.getDialogText()));
       }
 
     return null;
@@ -2003,11 +2013,11 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
                                                root.getTreeString(),
                                                retVal.getDialogText()));
       }
-                
+
     if (_labeled)
       {
         retVal = setTrueLabel(_trueLabel);
-        
+
         if (!ReturnVal.didSucceed(retVal))
           {
             // "XML"
@@ -2020,7 +2030,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
           }
 
         retVal = setFalseLabel(_falseLabel);
-        
+
         if (!ReturnVal.didSucceed(retVal))
           {
             // "XML"
@@ -2184,7 +2194,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
                                                                child, root.getTreeString()));
                       }
                   }
-                
+
               }
             else if (child.matches("shaUnixCrypted"))
               {
@@ -2262,7 +2272,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       }
 
     retVal = setOKChars(_okChars);
-    
+
     if (!ReturnVal.didSucceed(retVal))
       {
         // "XML"
@@ -2271,9 +2281,9 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
                                           ts.l("doPasswordXML.bad_ok_chars", _okChars,
                                                root.getTreeString(), retVal.getDialogText()));
       }
-    
+
     retVal = setBadChars(_badChars);
-    
+
     if (!ReturnVal.didSucceed(retVal))
       {
         // "XML"
@@ -2418,7 +2428,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
             return retVal;
           }
-        
+
         retVal = setShaUnixCryptRounds(_shaUnixCryptRounds);
 
         if (!ReturnVal.didSucceed(retVal))
@@ -2517,7 +2527,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     // now do all the setting
 
     retVal = setArray(_vect);
-  
+
     if (!ReturnVal.didSucceed(retVal))
       {
         // "XML"
@@ -2528,11 +2538,11 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
                                                root.getTreeString(),
                                                retVal.getDialogText()));
       }
-                
+
     if (_vect)
       {
         retVal = setMaxArraySize(_maxSize);
-        
+
         if (!ReturnVal.didSucceed(retVal))
           {
             // "XML"
@@ -2600,7 +2610,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
         for (int j = 0; j < typeChildren.length; j++)
           {
             XMLItem child = typeChildren[j];
-            
+
             if (child.matches("namespace"))
               {
                 _namespace = child.getAttrStr("val");
@@ -2693,7 +2703,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
               {
                 _targetobjectStr = XMLUtils.XMLDecode(child.getAttrStr("name"));
                 _targetobject = child.getAttrInt("id");
-            
+
                 if (_targetobjectStr == null && _targetobject == null)
                   {
                     // "XML"
@@ -2744,11 +2754,11 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
                                           ts.l("doInvidXML.bad_vector_op",
                                                Boolean.valueOf(_vect), root.getTreeString(), retVal.getDialogText()));
       }
-                
+
     if (_vect)
       {
         retVal = setMaxArraySize(_maxSize);
-        
+
         if (!ReturnVal.didSucceed(retVal))
           {
             // "XML"
@@ -2891,7 +2901,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     return this.getID() < 100;
   }
-  
+
   /**
    * <p>This method returns true if this field definition can be removed
    * by the schema editor.</p>
@@ -2933,7 +2943,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
     this.visibility = visibility;
   }
-  
+
   /**
    * Server-side method used to set the status of this field's
    * isInUseCache.
@@ -2998,7 +3008,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
         template = new FieldTemplate(this);
       }
-    
+
     return template;
   }
 
@@ -3050,7 +3060,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
         return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
                                           ts.l("setName.system_field"));
       }
-    
+
     if (name == null || name.equals(""))
       {
         // "Schema Editing Error"
@@ -3140,9 +3150,9 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       }
 
     this.tabName = s;
-    
+
     return null;
-  }      
+  }
 
   /**
    * <p>Returns the comment defined in the schema for this field</p>
@@ -3173,9 +3183,9 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
         comment = s;
       }
-    
+
     return null;
-  }      
+  }
 
   /**
    * <p>Returns the field type</p>
@@ -3207,12 +3217,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /**
-   * <p>Sets the {@link arlut.csd.ganymede.common.FieldType field type}
-   * for this field.  Changing the basic type of a field that is already being
-   * used in the server will cause very bad things to happen.  The
-   * right way to change an existing field is to delete the field, commit
-   * the schema edit, edit the schema again, and recreate the field with
-   * the desired field type.</P>
+   * <p>Sets the {@link arlut.csd.ganymede.common.FieldType field
+   * type} for this field.  Changing the basic type of a field that is
+   * already being used in the server will cause very bad things to
+   * happen.  The right way to change an existing field is to delete
+   * the field, commit the schema edit, edit the schema again, and
+   * recreate the field with the desired field type.</p>
    *
    * <p>If the new field type is not string, invid, or IP, the field
    * will be made a scalar field.</p>
@@ -3381,7 +3391,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   {
     return (field_type == IP);
   }
-  
+
   /**
    * <p>Returns true if this field is a vector field, false otherwise.</p>
    *
@@ -3397,7 +3407,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>Set this field to be a vector or scalar.  If b is true, this field will
    * be a vector, if false, scalar.</p>
    *
-   * <p>Only strings, invid's, and ip fields may be vectors.  Attempting to 
+   * <p>Only strings, invid's, and ip fields may be vectors.  Attempting to
    * setArray(true) for other field types will cause an IllegalArgumentException
    * to be thrown.</p>
    *
@@ -3405,7 +3415,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * scalar to vector, but a vector to scalar change is an incompatible
    * change.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public synchronized ReturnVal setArray(boolean b)
@@ -3450,7 +3460,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>Returns id code for this field.  Each field in a
    * {@link arlut.csd.ganymede.server.DBObject DBObject}
    * has a unique code which identifies the field.  This code represents
-   * the field in the on-disk data store, and is used by 
+   * the field in the on-disk data store, and is used by
    * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}
    * to choose what field to change in the setField method.</p>
    *
@@ -3466,7 +3476,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>This method is used to set this field's id in the containing
    * DBObjectBase.  This method will return a failure if an id is
    * selected which is already in use in another field in this object
-   * definition.</p> 
+   * definition.</p>
    */
 
   public ReturnVal setID(short id)
@@ -3542,7 +3552,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   /**
    * <p>Set the maximum number of values allowed in this vector field.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public synchronized ReturnVal setMaxArraySize(short limit)
@@ -3598,7 +3608,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
         throw new IllegalStateException(ts.l("global.not_boolean", this.toString()));
       }
-    
+
     return labeled;
   }
 
@@ -3625,14 +3635,14 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
       {
         throw new IllegalStateException(ts.l("global.not_boolean", this.toString()));
       }
-    
+
     labeled = b;
 
     return null;
   }
 
   /**
-   * <p>Returns the true Label if this is a labeled boolean field</p> 
+   * <p>Returns the true Label if this is a labeled boolean field</p>
    *
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a labeled boolean type.</p>
@@ -3683,7 +3693,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /**
-   * <p>Returns the false Label if this is a labeled boolean field</p> 
+   * <p>Returns the false Label if this is a labeled boolean field</p>
    *
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a labeled boolean type.</p>
@@ -3787,7 +3797,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
         return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
                                           ts.l("global.system_field", this.toString()));
       }
-    
+
     minLength = val;
 
     if (isEditing() && isInUse())
@@ -3801,9 +3811,9 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /**
-   * <p>Returns the maximum acceptable string length if this is a string 
+   * <p>Returns the maximum acceptable string length if this is a string
    * or password field.</p>
-   * 
+   *
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string or password type.</p>
    *
@@ -3820,14 +3830,14 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     return maxLength;
   }
 
-  /** 
+  /**
    * <p>Sets the maximum acceptable length for this string or
    * password field.</p>
    *
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string or password type.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public synchronized ReturnVal setMaxLength(short val)
@@ -3851,7 +3861,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
         return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
                                           ts.l("global.system_field", this.toString()));
       }
-    
+
     maxLength = val;
 
     if (isEditing() && isInUse())
@@ -3884,8 +3894,8 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /**
-   * <p>Sets the set of characters that are allowed in this string or 
-   * password field.  If s is null, all characters by default 
+   * <p>Sets the set of characters that are allowed in this string or
+   * password field.  If s is null, all characters by default
    * are acceptable.</p>
    *
    * <p>This method will throw an IllegalArgumentException if
@@ -3929,7 +3939,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
   }
 
   /**
-   * <p>Returns the set of unacceptable characters if this is a 
+   * <p>Returns the set of unacceptable characters if this is a
    * string or password field.</p>
    *
    * <p>This method will throw an IllegalArgumentException if
@@ -3955,7 +3965,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string or password type.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public synchronized ReturnVal setBadChars(String s)
@@ -4019,7 +4029,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string type.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public synchronized ReturnVal setMultiLine(boolean b)
@@ -4079,7 +4089,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string type.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public String getRegexpDesc()
@@ -4098,7 +4108,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string type.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public synchronized ReturnVal setRegexpPat(String s)
@@ -4157,7 +4167,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string type.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public synchronized ReturnVal setRegexpDesc(String s)
@@ -4187,9 +4197,9 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     return null;
   }
 
-  /** 
+  /**
    * <p>Returns the DBNameSpace that this string, numeric, or IP
-   * field is associated with.</p> 
+   * field is associated with.</p>
    */
 
   public DBNameSpace getNameSpace()
@@ -4234,7 +4244,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a string, numeric, or IP type.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public synchronized ReturnVal setNameSpace(String nameSpaceId)
@@ -4297,7 +4307,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
               {
                 namespace.schemaEditCheckout();
               }
-            
+
             namespace.schemaEditUnregister(base.getTypeID(), getID());
           }
 
@@ -4311,11 +4321,11 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
 
         Enumeration values;
         DBNameSpace oldNamespace, tmpNS;
-        
+
         /* -- */
 
         oldNamespace = namespace;
-        
+
         values = base.getStore().nameSpaces.elements();
         namespace = null;
 
@@ -4337,32 +4347,32 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
                   {
                     oldNamespace.schemaEditCheckout();
                   }
-                
+
                 oldNamespace.schemaEditUnregister(base.getTypeID(), getID());
               }
-            
+
             if (namespace != null && namespace != oldNamespace)
               {
                 if (!namespace.isSchemaEditInProgress())
                   {
                     namespace.schemaEditCheckout();
                   }
-                
+
                 // make sure that we can allocate all values already attached to this
                 // field
-                
+
                 boolean success = true;
                 DBField lastFieldTried = null;
-                
+
                 for (DBObject obj: base.getObjects())
                   {
                     lastFieldTried = (DBField) obj.getField(getID());
-                    
+
                     if (lastFieldTried == null)
                       {
                         continue;
                       }
-                    
+
                     if (!this.isArray())
                       {
                         success = namespace.schemaEditRegister(lastFieldTried.key(), lastFieldTried);
@@ -4469,7 +4479,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
         return Ganymede.createErrorDialog(ts.l("global.schema_editing_error"),
                                           ts.l("setEditInPlace.in_use", this.toString()));
       }
-    
+
     editInPlace = b;
 
     if (editInPlace)
@@ -4534,7 +4544,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not an invid type.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public synchronized ReturnVal setTargetBase(short val)
@@ -4611,7 +4621,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not an invid type.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public synchronized ReturnVal setTargetBase(String baseName)
@@ -4819,7 +4829,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
                                                   ts.l("setTargetField.bad_base_num", Integer.valueOf(allowedTarget), Integer.valueOf(val),
                                                        this.toString()));
               }
-        
+
             DBObjectBaseField bF = b.getFieldDef(val);
 
             if (bF == null)
@@ -4922,7 +4932,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
                                               ts.l("setTargetField.bad_base", Integer.valueOf(allowedTarget),
                                                    fieldName, this.toString()));
           }
-        
+
         bF = b.getField(fieldName);
 
         if (bF == null)
@@ -5008,7 +5018,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    */
 
   public ReturnVal setCracklibChecked(boolean use_cracklib, boolean supergash_exception)
-  {    
+  {
     securityCheck();
 
     if (!isPassword())
@@ -5089,7 +5099,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    */
 
   public ReturnVal setHistoryChecked(boolean use_history, boolean supergash_exception, int depth)
-  {    
+  {
     securityCheck();
 
     if (!isPassword())
@@ -5141,7 +5151,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    */
 
   public ReturnVal setCrypted(boolean b)
-  {    
+  {
     securityCheck();
 
     if (!isPassword())
@@ -5154,12 +5164,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     return null;
   }
 
-  /** 
+  /**
    * <p>This method returns true if this is a password field that
    * stores passwords in OpenBSD/FreeBSD/PAM md5crypt() format, and
    * can thus accept pre-crypted passwords.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isMD5Crypted()
@@ -5179,11 +5189,11 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a password type.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public ReturnVal setMD5Crypted(boolean b)
-  {    
+  {
     securityCheck();
 
     if (!isPassword())
@@ -5196,12 +5206,12 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     return null;
   }
 
-  /** 
+  /**
    * <p>This method returns true if this is a password field that
    * stores passwords in Apache md5crypt() format, and
    * can thus accept pre-crypted passwords.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isApacheMD5Crypted()
@@ -5221,7 +5231,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a password type.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public ReturnVal setApacheMD5Crypted(boolean b)
@@ -5238,7 +5248,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     return null;
   }
 
-  /** 
+  /**
    * <p>This method returns true if this is a password field that will
    * store passwords in the two hashing formats used by Samba/Windows,
    * the older 14-char LANMAN hash, and the newer md5/Unicode hash
@@ -5246,7 +5256,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * hashing formats, they will not be kept in plaintext on disk,
    * unless isPlainText() returns true.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isWinHashed()
@@ -5264,7 +5274,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a password type.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public ReturnVal setWinHashed(boolean b)
@@ -5281,14 +5291,14 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     return null;
   }
 
-  /** 
+  /**
    * <p>This method returns true if this is a password field that will
    * store passwords in the Netscape SSHA (salted SHA) hash format,
    * used in LDAP. If passwords are stored in the SSHA hashing format,
    * they will not be kept in plaintext on disk, unless isPlainText()
    * returns true.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isSSHAHashed()
@@ -5306,11 +5316,11 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>This method will throw an IllegalArgumentException if
    * this field definition is not a password type.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public ReturnVal setSSHAHashed(boolean b)
-  {    
+  {
     securityCheck();
 
     if (!isPassword())
@@ -5323,14 +5333,14 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     return null;
   }
 
-  /** 
+  /**
    * <p>This method returns true if this is a password field that will
    * store passwords in the OpenBSD BCrypt format.</p>
    *
    * <p>If passwords are stored in the BCrypt format, they will not be
    * kept in plaintext on disk, unless isPlainText() returns true.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isBCrypted()
@@ -5348,7 +5358,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>This method will throw an IllegalArgumentException if this field
    * definition is not a password type.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public ReturnVal setBCrypted(boolean b)
@@ -5365,13 +5375,13 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     return null;
   }
 
-  /** 
+  /**
    * <p>This method returns the complexity factor (in the exponential
    * number of rounds) to be applied to password hash text generated
    * in this password field definition by the OpenBSD BCrypt
    * format.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public int getBCryptRounds()
@@ -5388,7 +5398,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>This method will throw an IllegalArgumentException if this
    * field definition is not a BCrypt using password type.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public ReturnVal setBCryptRounds(int n)
@@ -5420,7 +5430,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     return null;
   }
 
-  /** 
+  /**
    * <p>This method returns true if this is a password field that will
    * store passwords in the SHA Unix Crypt format, specified by Ulrich
    * Drepper at http://people.redhat.com/drepper/sha-crypt.html.</p>
@@ -5429,7 +5439,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * not be kept in plaintext on disk, unless isPlainText() returns
    * true.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isShaUnixCrypted()
@@ -5448,11 +5458,11 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>This method will throw an IllegalArgumentException if this field
    * definition is not a password type.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public ReturnVal setShaUnixCrypted(boolean b)
-  {    
+  {
     securityCheck();
 
     if (!isPassword())
@@ -5465,13 +5475,13 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     return null;
   }
 
-  /** 
+  /**
    * <p>This method returns true if this is a shaUnixCrypted password
    * field that will store passwords using the SHA512 variant of the
    * SHA Unix Crypt format, specified by Ulrich Drepper at
    * http://people.redhat.com/drepper/sha-crypt.html.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public boolean isShaUnixCrypted512()
@@ -5488,7 +5498,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>This method will throw an IllegalArgumentException if this field
    * definition is not a ShaUnixCrypt using password type.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public ReturnVal setShaUnixCrypted512(boolean b)
@@ -5510,14 +5520,14 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
     return null;
   }
 
-  /** 
+  /**
    * This method returns the complexity factor (in number of rounds)
    * to be applied to password hash text generated in this password
    * field definition by the SHA Unix Crypt format, specified by
    * Ulrich Drepper at
    * http://people.redhat.com/drepper/sha-crypt.html.
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public int getShaUnixCryptRounds()
@@ -5535,7 +5545,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * This method will throw an IllegalArgumentException if this field
    * definition is not a ShaUnixCrypt using password type.
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public ReturnVal setShaUnixCryptRounds(int n)
@@ -5900,7 +5910,7 @@ public final class DBObjectBaseField implements BaseField, FieldType, Comparable
    * <p>This method is only for human information, and the precise
    * results returned are subject to change at any time.</p>
    *
-   * @see arlut.csd.ganymede.rmi.BaseField 
+   * @see arlut.csd.ganymede.rmi.BaseField
    */
 
   public String getTypeDesc()

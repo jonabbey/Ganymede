@@ -4,17 +4,19 @@
 
    This class is the dialog that is presented to the user when they go to
    create a new object in the client.
-   
+
    Created: 17 September 1998
 
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2009
+
+   Copyright (C) 1996 - 2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -78,15 +80,15 @@ import arlut.csd.ganymede.rmi.Base;
 ------------------------------------------------------------------------------*/
 
 /**
- * Dialog used to create new objects from the client's toolbar or
+ * <p>Dialog used to create new objects from the client's toolbar or
  * menu.  The dialog shows the user a list of object types and prompts
  * the user to pick an object type to create.  If the user selects one
  * and clicks ok, we'll try to create a new object for the user and
  * put up a window for the user to edit the new object with if we
- * succeed.
+ * succeed.</p>
  *
- * This dialog is modal, and will block on the GUI thread until it is
- * closed.
+ * <p>This dialog is modal, and will block on the GUI thread until it
+ * is closed.</p>
  *
  * @author Mike Mulvaney
  */
@@ -122,7 +124,7 @@ public class createObjectDialog extends StandardDialog implements ActionListener
 
   /* -- */
 
-  public createObjectDialog(gclient client) 
+  public createObjectDialog(gclient client)
   {
     // "Create Object"
     super(client, ts.l("init.dialog_title"), StandardDialog.ModalityType.DOCUMENT_MODAL);
@@ -156,29 +158,23 @@ public class createObjectDialog extends StandardDialog implements ActionListener
 
     // get list of types from gclient
 
-    Vector bases = client.getBaseList();
-    Hashtable baseToShort = client.getBaseToShort();
-    Hashtable baseNames = client.getBaseNames();
+    Vector<Base> bases = client.getBaseList();
+    Hashtable<Base, Short> baseToShort = client.getBaseToShort();
+    Hashtable<Base, String> baseNames = client.getBaseNames();
 
-    Base thisBase = null;
-
-    Vector listHandles = new Vector();
+    Vector<listHandle> listHandles = new Vector<listHandle>();
 
     try
       {
-        for (int i = 0; i < bases.size(); i++)
+        for (Base thisBase: bases)
           {
-            thisBase = (Base)bases.elementAt(i);
-            
-            String name = (String)baseNames.get(thisBase);
-                
-            // For some reason, baseNames.get is returning null sometimes.
+            String name = baseNames.get(thisBase);
 
             if (name == null)
               {
                 name = thisBase.getName();
               }
-                
+
             if (thisBase.isEmbedded())
               {
                 continue;
@@ -187,7 +183,7 @@ public class createObjectDialog extends StandardDialog implements ActionListener
             if (thisBase.canCreate(null))
               {
                 listHandle lh = new listHandle(name, (Short)baseToShort.get(thisBase));
-                listHandles.addElement(lh);
+                listHandles.add(lh);
               }
           }
       }
@@ -207,11 +203,11 @@ public class createObjectDialog extends StandardDialog implements ActionListener
 
         if (defaultType != null)
           {
-            for (int i = 0; i < listHandles.size(); i++)
+            for (listHandle handle: listHandles)
               {
-                if (defaultType.equals(((listHandle) listHandles.elementAt(i)).getLabel()))
+                if (defaultType.equals(handle.getLabel()))
                   {
-                    types.setSelectedItem(listHandles.elementAt(i));
+                    types.setSelectedItem(handle);
                     break;
                   }
               }
@@ -242,7 +238,7 @@ public class createObjectDialog extends StandardDialog implements ActionListener
     gbc.gridx = 2;
     gbl.setConstraints(types, gbc);
     p.add(types);
-    
+
     JPanel buttonP = new JPanel();
     ok = new JButton(StringDialog.getDefaultOk());
     ok.addActionListener(this);
@@ -290,9 +286,9 @@ public class createObjectDialog extends StandardDialog implements ActionListener
     setVisible(true);
   }
 
-  public void actionPerformed(ActionEvent e) 
+  public void actionPerformed(ActionEvent e)
   {
-    if (e.getSource() == ok) 
+    if (e.getSource() == ok)
       {
         listHandle choice = (listHandle)types.getSelectedItem();
 
@@ -310,7 +306,7 @@ public class createObjectDialog extends StandardDialog implements ActionListener
             gc.createObject(type.shortValue());
           }
       }
-    else if (e.getSource() == cancel) 
+    else if (e.getSource() == cancel)
       {
         setVisible(false);
       }

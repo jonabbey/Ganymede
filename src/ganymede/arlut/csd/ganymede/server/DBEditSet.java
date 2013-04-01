@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -55,7 +55,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -85,63 +84,74 @@ import arlut.csd.ganymede.common.SchemaConstants;
  * <p>DBEditSet is the basic transactional unit.  All changes to the
  * database during normal operations are made in the context of a
  * DBEditSet, which may then be committed or rolled back as an atomic
- * operation.  Each {@link arlut.csd.ganymede.server.DBSession DBSession} will
- * have at most one DBEditSet transaction object active at any time.</p>
+ * operation.  Each {@link arlut.csd.ganymede.server.DBSession
+ * DBSession} will have at most one DBEditSet transaction object
+ * active at any time.</p>
  *
- * <p>A DBEditSet tracks several things for the server, including instances of
- * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}'s that were created
- * or checked-out from the {@link arlut.csd.ganymede.server.DBStore DBStore},
- * {@link arlut.csd.ganymede.server.DBNameSpace DBNameSpace} values that were reserved
- * during the course of the transaction, and {@link arlut.csd.ganymede.server.DBLogEvent DBLogEvent}
- * objects to be recorded in the {@link arlut.csd.ganymede.server.DBLog DBLog} and/or
- * mailed out to various interested parties when the transaction is committed.</p>
+ * <p>A DBEditSet tracks several things for the server, including
+ * instances of {@link arlut.csd.ganymede.server.DBEditObject
+ * DBEditObject}'s that were created or checked-out from the {@link
+ * arlut.csd.ganymede.server.DBStore DBStore}, {@link
+ * arlut.csd.ganymede.server.DBNameSpace DBNameSpace} values that were
+ * reserved during the course of the transaction, and {@link
+ * arlut.csd.ganymede.server.DBLogEvent DBLogEvent} objects to be
+ * recorded in the {@link arlut.csd.ganymede.server.DBLog DBLog}
+ * and/or mailed out to various interested parties when the
+ * transaction is committed.</p>
  *
  * <p>DBEditSet's transaction logic is based on a two-phase commit
  * protocol, where all DBEditObject's involved in the transaction are
  * given an initial opportunity to approve or reject the transaction's
  * commit before the DBEditSet commit method goes back and 'locks-in'
  * the changes.  DBEditObjects are able to initiate changes external
- * to the Ganymede database in their
- * {@link arlut.csd.ganymede.server.DBEditObject#commitPhase2() commitPhase2()}
- * methods, if needed.</p>
+ * to the Ganymede database in their {@link
+ * arlut.csd.ganymede.server.DBEditObject#commitPhase2()
+ * commitPhase2()} methods, if needed.</p>
  *
- * <p>When a DBEditSet is committed, a {@link arlut.csd.ganymede.server.DBWriteLock DBWriteLock}
- * is established on all {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}'s
- * involved in the transaction.  All objects checked out by that transaction
- * are then updated in the DBStore, and a summary of changes is recorded to the
- * DBStore {@link arlut.csd.ganymede.server.DBJournal DBJournal}.  The database as
- * a whole will not be dumped to disk unless and until the
- * {@link arlut.csd.ganymede.server.dumpTask dumpTask} is run, or until the server
- * undergoes a formal shutdown.</p>
+ * <p>When a DBEditSet is committed, a {@link
+ * arlut.csd.ganymede.server.DBWriteLock DBWriteLock} is established
+ * on all {@link arlut.csd.ganymede.server.DBObjectBase
+ * DBObjectBase}'s involved in the transaction.  All objects checked
+ * out by that transaction are then updated in the DBStore, and a
+ * summary of changes is recorded to the DBStore {@link
+ * arlut.csd.ganymede.server.DBJournal DBJournal}.  The database as a
+ * whole will not be dumped to disk unless and until the {@link
+ * arlut.csd.ganymede.server.dumpTask dumpTask} is run, or until the
+ * server undergoes a formal shutdown.</p>
  *
- * <p>Typically, the {@link arlut.csd.ganymede.server.DBEditSet#commit(java.lang.String) commit()}
- * method is called by the
- * {@link arlut.csd.ganymede.server.GanymedeSession#commitTransaction(boolean) GanymedeSession.commitTransaction()}
- * method, which will induce the server to schedule any commit-time build
- * tasks registered with the {@link arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}.</p>
+ * <p>Typically, the {@link
+ * arlut.csd.ganymede.server.DBEditSet#commit(java.lang.String)
+ * commit()} method is called by the {@link
+ * arlut.csd.ganymede.server.GanymedeSession#commitTransaction(boolean)
+ * GanymedeSession.commitTransaction()} method, which will induce the
+ * server to schedule any commit-time build tasks registered with the
+ * {@link arlut.csd.ganymede.server.GanymedeScheduler
+ * GanymedeScheduler}.</p>
  *
  * <p>If a DBEditSet commit() operation fails catastrophically, or if
- * {@link arlut.csd.ganymede.server.DBEditSet#abort() abort()} is called,
- * all DBEditObjects created or checked out during the course of the
- * transaction will be discarded, all DBNameSpace values allocated will
- * be relinquished, and any logging information for the abandoned transaction
- * will be forgotten.</p>
+ * {@link arlut.csd.ganymede.server.DBEditSet#abort() abort()} is
+ * called, all DBEditObjects created or checked out during the course
+ * of the transaction will be discarded, all DBNameSpace values
+ * allocated will be relinquished, and any logging information for the
+ * abandoned transaction will be forgotten.</p>
  *
- * <p>As if all that wasn't enough, the DBEditSet class also maintains a stack
- * of {@link arlut.csd.ganymede.server.DBCheckPoint DBCheckPoint} objects to enable
- * users to set checkpoints during the course of a transaction.  These objects
- * are basically a snapshot of the transaction's state at the moment of the
- * checkpoint, and are used to rollback the transaction to a known state if
- * a series of linked operations within a transaction cannot all be completed.</p>
+ * <p>As if all that wasn't enough, the DBEditSet class also maintains
+ * a stack of {@link arlut.csd.ganymede.server.DBCheckPoint
+ * DBCheckPoint} objects to enable users to set checkpoints during the
+ * course of a transaction.  These objects are basically a snapshot of
+ * the transaction's state at the moment of the checkpoint, and are
+ * used to rollback the transaction to a known state if a series of
+ * linked operations within a transaction cannot all be completed.</p>
  *
- * <p>Finally, note that the DBEditSet class does not actually track namespace
- * value allocations.. instead, the DBNameSpace class is responsible for recording
- * a list of values allocated by each active DBEditSet.  When a DBEditSet commits
- * or releases, all DBNameSpace objects in the server are informed of this, whereupon
- * they do their own cleanup.</p>
+ * <p>Finally, note that the DBEditSet class does not actually track
+ * namespace value allocations.. instead, the DBNameSpace class is
+ * responsible for recording a list of values allocated by each active
+ * DBEditSet.  When a DBEditSet commits or releases, all DBNameSpace
+ * objects in the server are informed of this, whereupon they do their
+ * own cleanup.</p>
  */
 
-public class DBEditSet {
+public final class DBEditSet {
 
   /**
    * <p>TranslationService object for handling string localization in
@@ -276,9 +286,9 @@ public class DBEditSet {
     this.dbStore = dbStore;
     this.description = description;
     this.interactive = interactive;
-    objects = Collections.synchronizedMap(new HashMap<Invid, DBEditObject>());
+    this.objects = Collections.synchronizedMap(new HashMap<Invid, DBEditObject>());
     logEvents = Collections.synchronizedList(new ArrayList<DBLogEvent>());
-    basesModified = new HashSet(dbStore.objectBases.size());
+    basesModified = new HashSet<DBObjectBase>(dbStore.bases().size());
 
     if (session.GSession != null && session.GSession.isXMLSession() && Ganymede.allowMagicImport)
       {
@@ -392,7 +402,7 @@ public class DBEditSet {
 
   public DBEditObject[] getObjectList()
   {
-    return objects.values().toArray(new DBEditObject[0]);
+    return this.objects.values().toArray(new DBEditObject[0]);
   }
 
   /**
@@ -417,7 +427,7 @@ public class DBEditSet {
 
   public DBEditObject findObject(Invid invid)
   {
-    return objects.get(invid);
+    return this.objects.get(invid);
   }
 
   /**
@@ -427,7 +437,7 @@ public class DBEditSet {
 
   public boolean isEditingObject(Invid invid)
   {
-    return objects.containsKey(invid);
+    return this.objects.containsKey(invid);
   }
 
   /**
@@ -460,9 +470,9 @@ public class DBEditSet {
         return false;
       }
 
-    if (!objects.containsKey(object.getInvid()))
+    if (!this.objects.containsKey(object.getInvid()))
       {
-        objects.put(object.getInvid(), object);
+        this.objects.put(object.getInvid(), object);
 
         // just need something to mark the slot in the hash table, to
         // indicate that this object's base is involved in the
@@ -853,7 +863,7 @@ public class DBEditSet {
         if (obj != null)
           {
             obj.rollback(objck.fields);
-            obj.status = objck.status;
+            obj.setStatus(objck.status);
           }
         else
           {
@@ -882,7 +892,7 @@ public class DBEditSet {
 
     ArrayList<DBEditObject> drop = new ArrayList<DBEditObject>();
 
-    for (DBEditObject eobjRef: objects.values())
+    for (DBEditObject eobjRef: this.objects.values())
       {
         Invid tmpvid = eobjRef.getInvid();
 
@@ -926,7 +936,7 @@ public class DBEditSet {
 
     for (DBEditObject obj: drop)
       {
-        objects.remove(obj.getInvid());
+        this.objects.remove(obj.getInvid());
       }
 
     // and our namespaces
@@ -983,7 +993,7 @@ public class DBEditSet {
 
   public synchronized ReturnVal commit(String comment)
   {
-    if (objects == null)
+    if (this.objects == null)
       {
         throw new RuntimeException(ts.l("global.already"));
       }
@@ -1044,13 +1054,13 @@ public class DBEditSet {
   }
 
   /**
-   * This hook is run before we lock the bases, so we're still able to
-   * make changes to our objects in transaction.
+   * <p>This hook is run before we lock the bases, so we're still able
+   * to make changes to our objects in transaction.</p>
    *
-   * The main use of this hook will be to allow DBEditObject
+   * <p>The main use of this hook will be to allow DBEditObject
    * subclasses to refresh their hidden unique label fields, if any.
    * If such a hook has a problem, it should return a ReturnVal
-   * indicating the problem.
+   * indicating the problem.</p>
    */
 
   private final void commit_run_precommit_hooks() throws CommitException
@@ -1399,7 +1409,7 @@ public class DBEditSet {
 
     result = result.intern();
 
-    for (DBEditObject eObj: objects.values())
+    for (DBEditObject eObj: this.objects.values())
       {
         // force a change of date and modifier information
         // into the object without using the normal field
@@ -1745,7 +1755,7 @@ public class DBEditSet {
 
   private final void commit_handlePhase2()
   {
-    for (DBEditObject eObj: objects.values())
+    for (DBEditObject eObj: this.objects.values())
       {
         // tell the object to go ahead and do any external
         // commit actions.
@@ -1766,20 +1776,20 @@ public class DBEditSet {
   }
 
   /**
-   * This private helper method is executed in the middle of the
+   * <p>This private helper method is executed in the middle of the
    * commit() method, and handles logging for any changes made to
-   * objects during the committed transaction.
+   * objects during the committed transaction.</p>
    *
-   * While this method is examining each object in the transaction to
-   * determine the diffs, we'll also take the opportunity to track the
-   * identity of all fields in all object bases that have themselves
-   * been touched.  We use the fieldsTouched Set for this purpose,
-   * storing the DBObjectBaseFields that were touched.
+   * <p>While this method is examining each object in the transaction
+   * to determine the diffs, we'll also take the opportunity to track
+   * the identity of all fields in all object bases that have
+   * themselves been touched.  We use the fieldsTouched Set for this
+   * purpose, storing the DBObjectBaseFields that were touched.</p>
    */
 
   private final void commit_log_events(Set<DBObjectBaseField> fieldsTouched)
   {
-    for (DBEditObject eObj: objects.values())
+    for (DBEditObject eObj: this.objects.values())
       {
         try
           {
@@ -2211,7 +2221,7 @@ public class DBEditSet {
     // collect the list of invids that we know were touched in this
     // transaction for the start transaction log record
 
-    Vector<Invid> invids = new Vector<Invid>(objects.keySet());
+    Vector<Invid> invids = new Vector<Invid>(this.objects.keySet());
 
     synchronized (Ganymede.log)
       {
@@ -2266,12 +2276,12 @@ public class DBEditSet {
 
   private final void commit_replace_objects()
   {
-    for (DBEditObject eObj: objects.values())
+    for (DBEditObject eObj: this.objects.values())
       {
         commit_replace_object(eObj);
       }
 
-    objects.clear();
+    this.objects.clear();
   }
 
   /**
@@ -2378,16 +2388,16 @@ public class DBEditSet {
   }
 
   /**
-   * Private helper method for commit() which causes all bases that
-   * were touched by this transaction to be updated.
+   * <p>Private helper method for commit() which causes all bases that
+   * were touched by this transaction to be updated.</p>
    *
-   * This should be run as late as possible in the commit()
+   * <p>This should be run as late as possible in the commit()
    * sequence to minimize the chance that a previously scheduled
    * builder task completes and updates its lastRunTime field after we
-   * have touched the timestamps on the changed bases.
+   * have touched the timestamps on the changed bases.</p>
    *
-   * @param fieldsTouched hash of DBObjectBases that contain objects
-   * created, changed, or deleted during this transaction
+   * @param fieldsTouched Set of field types that were edited during
+   * this transaction
    */
 
   private final void commit_updateBases(Set<DBObjectBaseField> fieldsTouched)
@@ -2453,20 +2463,21 @@ public class DBEditSet {
    * course of actions on this transaction will be reverted to their
    * state when this transaction was created. </p>
    *
-   * <p>Note that this does not mean that the entire DBStore will revert
-   * to its state at the beginning of this transaction;  any changes not
-   * relating to objects and namespace values connected to this transaction
-   * will not be affected by this transaction's release. </p>
+   * <p>Note that this does not mean that the entire DBStore will
+   * revert to its state at the beginning of this transaction; any
+   * changes not relating to objects and namespace values connected to
+   * this transaction will not be affected by this transaction's
+   * release. </p>
    */
 
   private final void release()
   {
-    if (objects == null)
+    if (this.objects == null)
       {
         throw new RuntimeException(ts.l("global.already"));
       }
 
-    for (DBEditObject eObj: objects.values())
+    for (DBEditObject eObj: this.objects.values())
       {
         eObj.release(true);
 
@@ -2538,10 +2549,10 @@ public class DBEditSet {
 
   private void deconstruct()
   {
-    if (objects != null)
+    if (this.objects != null)
       {
-        objects.clear();
-        objects = null;
+        this.objects.clear();
+        this.objects = null;
       }
 
     if (logEvents != null)

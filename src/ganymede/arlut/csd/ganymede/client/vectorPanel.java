@@ -15,8 +15,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -91,21 +93,23 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * A GUI vector panel that is designed to be placed inside a
- * {@link arlut.csd.ganymede.client.containerPanel containerPanel} within the client.
- * This vector panel is intended to support vectors of discrete GUI components that
- * are mapped to elements in a server-side vector {@link arlut.csd.ganymede.rmi.db_field db_field},
- * but right now it only supports IP Address fields and edit-in-place
- * containerPanels.  Most of the code in this class is dedicated to handling
- * vectors of embedded containerPanels.
+ * <p>A GUI vector panel that is designed to be placed inside a {@link
+ * arlut.csd.ganymede.client.containerPanel containerPanel} within the
+ * client.  This vector panel is intended to support vectors of
+ * discrete GUI components that are mapped to elements in a
+ * server-side vector {@link arlut.csd.ganymede.rmi.db_field
+ * db_field}, but right now it only supports IP Address fields and
+ * edit-in-place containerPanels.  Most of the code in this class is
+ * dedicated to handling vectors of embedded containerPanels.</p>
  *
- * Whatever sort of GUI components/database elements this vectorPanel is managing,
- * all GUI components will be wrapped by
- * {@link arlut.csd.ganymede.client.elementWrapper elementWrapper}'s, which are responsible
- * for hiding and revealing the GUI component on the user's command.
+ * <p>Whatever sort of GUI components/database elements this
+ * vectorPanel is managing, all GUI components will be wrapped by
+ * {@link arlut.csd.ganymede.client.elementWrapper elementWrapper}'s,
+ * which are responsible for hiding and revealing the GUI component on
+ * the user's command.</p>
  *
- * vectorPanel handles communications with the server to manage the server-side
- * db_field.
+ * <p>vectorPanel handles communications with the server to manage the
+ * server-side db_field.</p>
  *
  * @see arlut.csd.ganymede.client.elementWrapper
  * @see containerPanel
@@ -131,7 +135,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
    * the actual GUI components added to this vector, not the elementWrappers.
    */
 
-  Vector
+  Vector<Component>
     compVector;
 
   /**
@@ -156,7 +160,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
    * components.
    */
 
-  Hashtable
+  Hashtable<Component, elementWrapper>
     ewHash;
 
   /**
@@ -309,8 +313,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
     addMouseListener(this);
 
-    compVector = new Vector();
-    ewHash = new Hashtable();
+    compVector = new Vector<Component>();
+    ewHash = new Hashtable<Component, elementWrapper>();
 
     createVectorComponents();
   }
@@ -464,13 +468,14 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * Creates a new element in the vector {@link arlut.csd.ganymede.rmi.db_field db_field}
-   * this vectorPanel is connected to.  Creates and adds the GUI component for the new
-   * element to the vectorPanel.
+   * <p>Creates a new element in the vector {@link
+   * arlut.csd.ganymede.rmi.db_field db_field} this vectorPanel is
+   * connected to.  Creates and adds the GUI component for the new
+   * element to the vectorPanel.</p>
    *
-   * This is called when the add button is clicked, but there is no reason
-   * why it couldn't be called from other places if you wanted to add a new
-   * element.
+   * <p>This is called when the add button is clicked, but there is no
+   * reason why it couldn't be called from other places if you wanted
+   * to add a new element.</p>
    */
 
   public void addNewElement()
@@ -591,13 +596,13 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * Adds a new element to the vectorPanel.
+   * <p>Adds a new element to the vectorPanel.</p>
    *
-   * This element gets the default title, and will not be opened in expanded
-   * form.
+   * <p>This element gets the default title, and will not be opened in
+   * expanded form.</p>
    *
-   * The vectorPanel will be revalidated to trigger a GUI refresh
-   * after this element is added.
+   * <p>The vectorPanel will be revalidated to trigger a GUI refresh
+   * after this element is added.</p>
    *
    * @param c Component to be added
    */
@@ -608,10 +613,10 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * Adds a new element to the vectorPanel.
+   * <p>Adds a new element to the vectorPanel.</p>
    *
-   * This element gets the default title, and will not be expanded
-   * immediately.
+   * <p>This element gets the default title, and will not be expanded
+   * immediately.</p>
    *
    * @param c Component to be added
    * @param invalidateNow If true, invalidate()/validate() will be called.
@@ -624,10 +629,10 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * Adds a new element to the vectorPanel.
+   * <p>Adds a new element to the vectorPanel.</p>
    *
-   * The vectorPanel will be revalidated to trigger a GUI refresh
-   * after this element is added.
+   * <p>The vectorPanel will be revalidated to trigger a GUI refresh
+   * after this element is added.</p>
    *
    * @param title String used in the "title" of the elementWrapper
    * @param c Component to be added
@@ -639,12 +644,13 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * Adds a new element to the vectorPanel.
+   * <p>Adds a new element to the vectorPanel.</p>
    *
-   * This element will be immediately expanded if &lt;expand&gt; is true.
+   * <p>This element will be immediately expanded if &lt;expand&gt; is
+   * true.</p>
    *
-   * The vectorPanel will be revalidated to trigger a GUI refresh
-   * after this element is added.
+   * <p>The vectorPanel will be revalidated to trigger a GUI refresh
+   * after this element is added.</p>
    *
    * @param title String used in the "title" of the elementWrapper
    * @param c Component to be added
@@ -657,7 +663,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * Add a new element to the vectorPanel.
+   * <p>Add a new element to the vectorPanel.</p>
    *
    * @param title String used in the "title" of the elementWrapper
    * @param c Component to be added
@@ -673,7 +679,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
         throw new IllegalArgumentException("vectorPanel.addElement(): Component parameter is null");
       }
 
-    compVector.addElement(c);
+    compVector.add(c);
 
     if (debug)
       {
@@ -725,7 +731,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * Removes an element from the vector panel.
+   * <p>Removes an element from the vector panel.</p>
    *
    * @param ew Component to be removed.
    */
@@ -794,15 +800,17 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * Refreshes the vectorPanel.
+   * <p>Refreshes the vectorPanel.</p>
    *
-   * This will refresh every containerPanel and IPField in this vectorPanel, and
-   * will add or remove entries as needed to bring this vectorPanel into synchronization
-   * with the field on the server that this vectorPanel is attached to.
+   * <p>This will refresh every containerPanel and IPField in this
+   * vectorPanel, and will add or remove entries as needed to bring
+   * this vectorPanel into synchronization with the field on the
+   * server that this vectorPanel is attached to.</p>
    *
-   * New containerPanel elements will always be added to the end of the vector..
-   * we aren't worried about the order of the vector we're handling, just
-   * the values and the proper association between the GUI component and the server field.
+   * <p>New containerPanel elements will always be added to the end of
+   * the vector..  we aren't worried about the order of the vector
+   * we're handling, just the values and the proper association
+   * between the GUI component and the server field.</p>
    */
 
   public void refresh()
@@ -879,7 +887,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
                       cp.updateAll();
                       */
 
-                    elementWrapper ew = (elementWrapper) ewHash.get(cp);
+                    elementWrapper ew = ewHash.get(cp);
 
                     ew.setIndex(localIndex);
                     ew.refreshTitle();
@@ -902,7 +910,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
                     // the server doesn't have this invid anymore, so
                     // we need to take it out of this vector panel
 
-                    elementWrapper ew = (elementWrapper) ewHash.get(cp);
+                    elementWrapper ew = ewHash.get(cp);
 
                     removeElement(ew);
 
@@ -974,7 +982,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
                     ipf.setValue((Byte[])my_field.getElement(i));
 
-                    elementWrapper ew = (elementWrapper) ewHash.get(ipf);
+                    elementWrapper ew = ewHash.get(ipf);
 
                     ew.setIndex(i);
                   }
@@ -1006,7 +1014,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
             for (int i = fieldCount; i >= size; i--)
               {
-                removeElement((elementWrapper) ewHash.get(compVector.elementAt(i)));
+                removeElement(ewHash.get(compVector.elementAt(i)));
               }
           }
         else
@@ -1036,18 +1044,13 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * Expand all the levels.
+   * <p>Expand all the levels.</p>
    */
 
   public void expandAllLevels()
   {
-    Enumeration wrappers = ewHash.keys();
-
-    /* -- */
-
-    while (wrappers.hasMoreElements())
+    for (elementWrapper ew: ewHash.values())
       {
-        elementWrapper ew = (elementWrapper)ewHash.get(wrappers.nextElement());
         ew.open();
 
         Component comp = ew.getComponent();
@@ -1061,9 +1064,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
             containerPanel cp = (containerPanel)comp;
 
-            for (int i = 0; i < cp.vectorPanelList.size(); i++)
+            for (vectorPanel vp: cp.vectorPanelList)
               {
-                ((vectorPanel)cp.vectorPanelList.elementAt(i)).expandLevels(true);
+                vp.expandLevels(true);
               }
           }
         else if (debug)
@@ -1077,7 +1080,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * Expands all closed elementWrappers in this vectorPanel
+   * <p>Expands all closed elementWrappers in this vectorPanel</p>
    *
    * @param recursive If true, it will expand any vector panels inside
    * the containerPanels in this vectorPanel as well.  The current
@@ -1102,13 +1105,8 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
       {
         setWaitCursor();
 
-        Enumeration wrappers = ewHash.keys();
-
-        /* -- */
-
-        while (wrappers.hasMoreElements())
+        for (elementWrapper ew: ewHash.values())
           {
-            elementWrapper ew = (elementWrapper)ewHash.get(wrappers.nextElement());
             ew.open();
           }
 
@@ -1134,17 +1132,12 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
   public void closeLevels(boolean recursive)
   {
-    Enumeration wrappers = ewHash.keys();
-
-    /* -- */
-
     setWaitCursor();
 
     try
       {
-        while (wrappers.hasMoreElements())
+        for (elementWrapper ew: ewHash.values())
           {
-            elementWrapper ew = (elementWrapper)ewHash.get(wrappers.nextElement());
             ew.close();
 
             if (recursive)
@@ -1155,9 +1148,9 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
                   {
                     containerPanel cp = (containerPanel)comp;
 
-                    for (int i = 0; i < cp.vectorPanelList.size(); i++)
+                    for (vectorPanel vp: cp.vectorPanelList)
                       {
-                        ((vectorPanel)cp.vectorPanelList.elementAt(i)).closeLevels(true);
+                        vp.closeLevels(true);
                       }
                   }
               }
@@ -1294,10 +1287,11 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * Server dispatch method for value change messages passed us by elementWrappers.
+   * <p>Server dispatch method for value change messages passed us by
+   * elementWrappers.</p>
    *
-   * Currently used only for IP fields, as embedded containerPanels communicate
-   * their field changes directly to the server.
+   * <p>Currently used only for IP fields, as embedded containerPanels
+   * communicate their field changes directly to the server.</p>
    */
 
   public boolean changeElement(Object obj, short index) throws RemoteException
@@ -1420,10 +1414,12 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
   }
 
   /**
-   * Returns true if the vector field we are connected to is editable.
+   * <p>Returns true if the vector field we are connected to is
+   * editable.</p>
    *
-   * This method will call the server to query the field the first time it
-   * is called.  It will return the cached result thereafter.
+   * <p>This method will call the server to query the field the first
+   * time it is called.  It will return the cached result
+   * thereafter.</p>
    */
 
   public boolean isFieldEditable()

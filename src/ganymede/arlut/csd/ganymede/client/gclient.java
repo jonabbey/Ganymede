@@ -11,7 +11,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -73,7 +73,9 @@ import java.io.StringWriter;
 import java.rmi.RemoteException;
 import java.util.Comparator;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Vector;
 
 import java.util.prefs.*;
@@ -366,14 +368,14 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   //
 
   /**
-   * Cache of {@link arlut.csd.ganymede.common.Invid invid}'s for objects
-   * that might have been changed by the client.  The keys and the
-   * values in this hash are the same.  The collection of tree nodes
-   * corresponding to invid's listed in changedHash will be refreshed
-   * by the client when a server is committed or canceled.
+   * Cache of {@link arlut.csd.ganymede.common.Invid invid}'s for
+   * objects that might have been changed by the client.  The
+   * collection of tree nodes corresponding to invid's listed in
+   * changedSet will be refreshed by the client when a server is
+   * committed or canceled.
    */
 
-  private Hashtable changedHash = new Hashtable();
+  private HashSet<Invid> changedSet = new HashSet<Invid>();
 
   /**
    * Mapping of {@link arlut.csd.ganymede.common.Invid invid}'s for objects
@@ -383,7 +385,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    * about managing the client's tree display.
    */
 
-  private Hashtable deleteHash = new Hashtable();
+  private Hashtable<Invid, CacheInfo> deleteHash = new Hashtable<Invid, CacheInfo>();
 
   /**
    * Mapping of {@link arlut.csd.ganymede.common.Invid invid}'s for objects
@@ -393,7 +395,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    * about managing the client's tree display.
    */
 
-  private Hashtable createHash = new Hashtable();
+  private Hashtable<Invid, CacheInfo> createHash = new Hashtable<Invid, CacheInfo>();
 
   /**
    * Hash of {@link arlut.csd.ganymede.common.Invid invid}'s corresponding
@@ -403,15 +405,15 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    * hash and put into createHash.
    */
 
-  private Hashtable createdObjectsWithoutNodes = new Hashtable();
+  private Hashtable<Invid, BaseNode> createdObjectsWithoutNodes = new Hashtable<Invid, BaseNode>();
 
   /**
    * Hash mapping Short {@link arlut.csd.ganymede.rmi.Base Base} id's to
-   * the corresponding {@link arlut.csd.ganymede.client.BaseNode BaseNode}
+   * the corresponding {@link arlut.csd.ganymede.client.BaseNode BaseNode} or
    * displayed in the client's tree display.
    */
 
-  protected Hashtable shortToBaseNodeHash = new Hashtable();
+  protected Hashtable<Short, BaseNode> shortToBaseNodeHash = new Hashtable<Short, BaseNode>();
 
   /**
    * Hash mapping {@link arlut.csd.ganymede.common.Invid Invid}'s for objects
@@ -420,7 +422,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    * client's tree display.
    */
 
-  protected Hashtable invidNodeHash = new Hashtable();
+  protected Hashtable<Invid, InvidNode> invidNodeHash = new Hashtable<Invid, InvidNode>();
 
   /**
    * <p>Our main cache, keeps information about all objects we've learned
@@ -474,8 +476,10 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   aboutJavaDialog
     java_ver_dialog = null;
 
-  Vector
-    personae,
+  Vector<String>
+    personae;
+
+  Vector<listHandle>
     ownerGroups = null;  // Vector of owner groups
 
   // Dialog and GUI objects
@@ -1158,7 +1162,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     personaListener = new PersonaListener(session, this);
 
-    if ((personae != null) && personae.size() > 1)
+   if (personae != null && personae.size() > 1)
       {
         // "Change Persona"
         changePersonaMI = new JMenuItem(dialogMenuName(ts.l("createMenuBar.action_menu_0")));
@@ -1608,7 +1612,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    * @param id Object type id to retrieve field information for.
    */
 
-  public Vector getTemplateVector(short id)
+  public Vector<FieldTemplate> getTemplateVector(short id)
   {
     return loader.getTemplateVector(Short.valueOf(id));
   }
@@ -1621,12 +1625,8 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   public FieldTemplate getFieldTemplate(short objType, short fieldId)
   {
-    Vector vect = loader.getTemplateVector(Short.valueOf(objType));
-
-    for (int i = 0; i < vect.size(); i++)
+    for (FieldTemplate template: loader.getTemplateVector(Short.valueOf(objType)))
       {
-        FieldTemplate template = (FieldTemplate) vect.elementAt(i);
-
         if (template.getID() == fieldId)
           {
             return template;
@@ -1645,7 +1645,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    * @param id The id number of the object type to be returned the base id.
    */
 
-  public Vector getTemplateVector(Short id)
+  public Vector<FieldTemplate> getTemplateVector(Short id)
   {
     return loader.getTemplateVector(id);
   }
@@ -1856,7 +1856,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    * Always use this instead of trying to access baseNames directly.</p>
    */
 
-  public final Hashtable getBaseNames()
+  public final Hashtable<Base, String> getBaseNames()
   {
     return loader.getBaseNames();
   }
@@ -1871,7 +1871,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    * directly.</p>
    */
 
-  public final synchronized Vector getBaseList()
+  public final synchronized Vector<Base> getBaseList()
   {
     return loader.getBaseList();
   }
@@ -1885,7 +1885,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    * directly.</p>
    */
 
-  public Hashtable getBaseMap()
+  public Hashtable<Short, Base> getBaseMap()
   {
     return loader.getBaseMap();
   }
@@ -3146,16 +3146,16 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
         Base base = (Base)node;
         boolean canCreate = base.canCreate(getSession());
 
-        newNode = new BaseNode(parentNode, base.getName(), base, prevNode,
-                               true,
-                               OPEN_BASE,
-                               CLOSED_BASE,
-                               canCreate ? pMenuEditableCreatable : pMenuEditable,
-                               canCreate);
+        BaseNode newBaseNode = new BaseNode(parentNode, base.getName(), base, prevNode,
+                                            true,
+                                            OPEN_BASE,
+                                            CLOSED_BASE,
+                                            canCreate ? pMenuEditableCreatable : pMenuEditable,
+                                            canCreate);
+        newNode = newBaseNode;
 
-        ((BaseNode) newNode).showAll(!hideNonEditables);
-
-        shortToBaseNodeHash.put(((BaseNode)newNode).getTypeID(), newNode);
+        newBaseNode.showAll(!hideNonEditables);
+        shortToBaseNodeHash.put(newBaseNode.getTypeID(), newBaseNode);
       }
     else if (node instanceof Category)
       {
@@ -3201,7 +3201,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     InvidNode oldNode, newNode, fNode;
 
     ObjectHandle handle = null;
-    Vector objectHandles;
+    Vector<ObjectHandle> objectHandles;
     objectList objectlist = null;
 
     Short Id;
@@ -3238,7 +3238,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
       {
         if (i < objectHandles.size())
           {
-            handle = (ObjectHandle) objectHandles.elementAt(i);
+            handle = objectHandles.get(i);
 
             if (!node.isShowAll() && !handle.isEditable())
               {
@@ -3372,23 +3372,15 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   void refreshTreeAfterCommit() throws RemoteException
   {
-    Invid invid = null;
-    InvidNode node = null;
-
-    /* -- */
-
     //
     // First get rid of deleted nodes
     //
 
     synchronized (deleteHash)
       {
-        Enumeration deleted = deleteHash.keys();
-
-        while (deleted.hasMoreElements())
+        for (Invid invid: deleteHash.keySet())
           {
-            invid = (Invid)deleted.nextElement();
-            node = (InvidNode)invidNodeHash.get(invid);
+            InvidNode node = invidNodeHash.get(invid);
 
             if (node != null)
               {
@@ -3414,32 +3406,14 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     // Now change the created nodes
     //
 
-    invid = null;
+    Vector<Invid> changedInvids = new Vector<Invid>();
 
-    Vector changedInvids = new Vector();
-    Enumeration created = createHash.keys();
-
-    while (created.hasMoreElements())
-      {
-        invid = (Invid) created.nextElement();
-
-        changedInvids.addElement(invid);
-      }
+    changedInvids.addAll(createHash.keySet());
+    changedInvids.addAll(changedSet);
 
     createHash.clear();
+    changedSet.clear();
     createdObjectsWithoutNodes.clear();
-
-    invid = null;
-    Enumeration changed = changedHash.keys();
-
-    while (changed.hasMoreElements())
-      {
-        invid = (Invid) changed.nextElement();
-
-        changedInvids.addElement(invid);
-      }
-
-    changedHash.clear();
 
     if (changedInvids.size() > 0)
       {
@@ -3489,18 +3463,17 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
         // now get the results
 
-        Vector handleList = result.getHandles();
+        Vector<ObjectHandle> handleList = result.getHandles();
 
         // and update anything we've got in the tree
 
-        for (int i = 0; i < handleList.size(); i++)
+        for (ObjectHandle newHandle: handleList)
           {
-            ObjectHandle newHandle = (ObjectHandle) handleList.elementAt(i);
             invid = newHandle.getInvid();
 
             objectTypeKey = Short.valueOf(invid.getType());
 
-            InvidNode nodeToUpdate = (InvidNode) invidNodeHash.get(invid);
+            InvidNode nodeToUpdate = invidNodeHash.get(invid);
 
             if (nodeToUpdate != null)
               {
@@ -3514,7 +3487,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
                 if (paramVect == null)
                   {
-                    changedHash.remove(newHandle.getInvid());
+                    changedSet.remove(newHandle.getInvid());
                   }
 
                 setIconForNode(newHandle.getInvid());
@@ -3661,7 +3634,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
                 node.setImages(OPEN_FIELD_REMOVESET, CLOSED_FIELD_REMOVESET);
               }
-            else if (changedHash.containsKey(invid))
+            else if (changedSet.contains(invid))
               {
                 if (treeNodeDebug)
                   {
@@ -3852,7 +3825,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
         wp.addWindow(invid, o, true, originalWindow);
 
-        changedHash.put(invid, invid);
+        changedSet.add(invid);
 
         // we don't need to do a full refresh of it, since we've just
         // checked it out..
@@ -4407,7 +4380,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
           {
             // remember that we changed this object for the refreshChangedObjectHandles
 
-            changedHash.put(invid, invid);
+            changedSet.add(invid);
 
             // refresh it now
 
@@ -4496,7 +4469,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
         // remember that this invid has been edited, and will need
         // to be refreshed on commit
 
-        changedHash.put(invid, invid);
+        changedSet.add(invid);
 
         refreshChangedObject(invid);
 
@@ -5283,12 +5256,12 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     synchronized (deleteHash)
       {
-        Enumeration dels = deleteHash.keys();
+        Iterator<Invid> it = deleteHash.keySet().iterator();
 
-        while (dels.hasMoreElements())
+        while (it.hasNext())
           {
-            invid = (Invid)dels.nextElement();
-            info = (CacheInfo)deleteHash.get(invid);
+            invid = it.next();
+            info = deleteHash.get(invid);
 
             list = cachedLists.getList(info.getBaseID());
 
@@ -5313,7 +5286,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
                     if (handle != null)
                       {
                         list.addObjectHandle(handle);
-                        node = (InvidNode)invidNodeHash.get(invid);
+                        node = invidNodeHash.get(invid);
 
                         if (node != null)
                           {
@@ -5323,13 +5296,13 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
                   }
               }
 
-            deleteHash.remove(invid);
+            it.remove();
             setIconForNode(invid);
           }
       }
 
-    node = null;
     invid = null;
+    node = null;
     list = null;
     info = null;
 
@@ -5337,12 +5310,12 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     synchronized (createHash)
       {
-        Enumeration created = createHash.keys();
+        Iterator<Invid> it = createHash.keySet().iterator();
 
-        while (created.hasMoreElements())
+        while (it.hasNext())
           {
-            invid = (Invid) created.nextElement();
-            info = (CacheInfo)createHash.get(invid);
+            invid = it.next();
+            info = createHash.get(invid);
 
             list = cachedLists.getList(info.getBaseID());
 
@@ -5356,9 +5329,9 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
                 list.removeInvid(invid);
               }
 
-            createHash.remove(invid);
+            it.remove();
 
-            node = (InvidNode)invidNodeHash.get(invid);
+            node = invidNodeHash.get(invid);
 
             if (node != null)
               {
@@ -5372,19 +5345,9 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
     // Now go through changed list and revert any names that may be needed
 
-    Vector changedInvids = new Vector();
+    Vector<Invid> changedInvids = new Vector<Invid>(changedSet);
 
-    synchronized (changedHash)
-      {
-        Enumeration changed = changedHash.keys();
-
-        while (changed.hasMoreElements())
-          {
-            changedInvids.addElement(changed.nextElement());
-          }
-
-        changedHash.clear();
-      }
+    changedSet.clear();
 
     refreshChangedObjectHandles(changedInvids, true);
 
@@ -6198,13 +6161,13 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   // Utilities
 
   /**
-   * Sorts a vector of listHandles.
+   * <p>Sorts a vector of listHandles in place.</p>
    *
    * @param v Vector to be sorted
    * @return Vector of sorted listHandles(sorted by label)
    */
 
-  public Vector sortListHandleVector(Vector v)
+  public Vector<listHandle> sortListHandleVector(Vector<listHandle> v)
   {
     (new VecQuickSort(v,
                       new Comparator() {
@@ -6237,12 +6200,12 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   }
 
   /**
-   * Sort a vector of Strings
+   * <p>Sort a vector of Strings in-place.</p>
    *
    * @return Vector of sorted Strings.
    */
 
-  public Vector sortStringVector(Vector v)
+  public Vector<String> sortStringVector(Vector<String> v)
   {
     new VecQuickSort(v, null).sort();
 
@@ -6250,10 +6213,10 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   }
 
   /**
-   * This method updates the commit button's label, with the text set
-   * according to whether the user has the 'Prompt for Comments on
+   * <p>This method updates the commit button's label, with the text
+   * set according to whether the user has the 'Prompt for Comments on
    * Commit' menu item checked and whether or not the Alt/Option key
-   * is held down.
+   * is held down.</p>
    */
 
   public void refreshCommitLabel()
@@ -6297,10 +6260,10 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
     statusBorder = null;
     statusBorderRaised = null;
 
-    if (changedHash != null)
+    if (changedSet != null)
       {
-        changedHash.clear();
-        changedHash = null;
+        changedSet.clear();
+        changedSet = null;
       }
 
     if (deleteHash != null)
