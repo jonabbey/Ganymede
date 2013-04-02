@@ -518,6 +518,8 @@ public final class Ganymede {
       }
     catch (GanymedeStartupException ex)
       {
+        ex.printStackTrace();
+
         if (Ganymede.server != null)
           {
             GanymedeServer.shutdown(null);
