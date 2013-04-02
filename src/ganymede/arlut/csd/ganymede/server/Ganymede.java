@@ -1328,6 +1328,8 @@ public final class Ganymede {
 
   static public void bindGanymedeRMI() throws GanymedeStartupException
   {
+    String bindingName = null;
+
     try
       {
         // "Binding GanymedeServer in RMI Registry"
@@ -1404,20 +1406,31 @@ public final class Ganymede {
 
         // tell the RMI registry where to find the server
 
-        Naming.bind("rmi://" + hostname + ":" + registryPortProperty + "/ganymede.server",
-                      server);
+        bindingName = "rmi://" + hostname + ":" + registryPortProperty + "/ganymede.server";
+
+        Naming.bind(bindingName, server);
       }
     catch (RuntimeException ex)
       {
+        if (bindingName == null)
+          {
+            bindingName = "unknown";
+          }
+
         // We're catching RuntimeException separately to placate
         // FindBugs.
-        // "Couldn''t establish server binding: "
-        throw new GanymedeStartupException(ts.l("main.error_no_binding") + ex);
+        // "Couldn''t establish server binding {0}: "
+        throw new GanymedeStartupException(ts.l("main.error_no_binding", bindingName) + ex);
       }
     catch (Exception ex)
       {
-        // "Couldn''t establish server binding: "
-        throw new GanymedeStartupException(ts.l("main.error_no_binding") + ex);
+        if (bindingName == null)
+          {
+            bindingName = "unknown";
+          }
+
+        // "Couldn''t establish server binding {0}: "
+        throw new GanymedeStartupException(ts.l("main.error_no_binding", bindingName) + ex);
       }
   }
 
