@@ -1420,7 +1420,7 @@ public final class Ganymede {
         // We're catching RuntimeException separately to placate
         // FindBugs.
         // "Couldn''t establish server binding {0}: "
-        throw new GanymedeStartupException(ts.l("main.error_no_binding", bindingName) + ex);
+        throw new GanymedeStartupException(ts.l("main.error_no_binding", bindingName) + ex, ex);
       }
     catch (Exception ex)
       {
@@ -1430,7 +1430,7 @@ public final class Ganymede {
           }
 
         // "Couldn''t establish server binding {0}: "
-        throw new GanymedeStartupException(ts.l("main.error_no_binding", bindingName) + ex);
+        throw new GanymedeStartupException(ts.l("main.error_no_binding", bindingName) + ex, ex);
       }
   }
 
@@ -2084,6 +2084,11 @@ class GanymedeStartupException extends Exception {
     super(mesg);
   }
 
+  public GanymedeStartupException(String mesg, Throwable thr)
+  {
+    super(mesg, thr);
+  }
+
   /**
    * This method is called to handle error processing logic for this
    * GanymedeStartupException.
@@ -2126,6 +2131,11 @@ class GanymedeSilentStartupException extends GanymedeStartupException {
   public GanymedeSilentStartupException(String mesg)
   {
     super(mesg);
+  }
+
+  public GanymedeSilentStartupException(String mesg, Throwable thr)
+  {
+    super(mesg, thr);
   }
 
   /**
