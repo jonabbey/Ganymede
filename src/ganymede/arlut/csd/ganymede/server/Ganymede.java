@@ -2083,6 +2083,11 @@ class GanymedeStartupException extends Exception {
     // "Shutting down."
     Ganymede.debug("\n" + Ganymede.ts.l("main.info_shutting_down") + "\n");
 
+    if (Ganymede.server != null)
+      {
+        GanymedeServer.shutdown(null);
+      }
+
     System.exit(1);
   }
 }
@@ -2123,6 +2128,11 @@ class GanymedeSilentStartupException extends GanymedeStartupException {
     if (getMessage() != null)
       {
         System.err.println(getMessage());
+      }
+
+    if (Ganymede.server != null)
+      {
+        GanymedeServer.shutdown(null);
       }
 
     System.exit(1);
