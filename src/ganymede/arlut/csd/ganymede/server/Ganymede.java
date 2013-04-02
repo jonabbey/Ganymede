@@ -1388,13 +1388,6 @@ public final class Ganymede {
 
                 throw new GanymedeSilentStartupException();
               }
-            else
-              {
-                // "Avoiding loopback {0} definition, binding to {1}"
-                debug(ts.l("main.info_avoiding_loopback",
-                           java.net.InetAddress.getLocalHost().getHostName(),
-                           hostname));
-              }
           }
 
         // tell the RMI registry where to find the server
