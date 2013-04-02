@@ -1337,70 +1337,63 @@ public final class Ganymede {
 
         String hostname = null;
 
-        if (!java.net.InetAddress.getLocalHost().getHostAddress().equals("127.0.0.1"))
+        if (serverHostProperty != null && !serverHostProperty.equals(""))
           {
-            hostname = java.net.InetAddress.getLocalHost().getHostName();
+            hostname = java.net.InetAddress.getByName(serverHostProperty).getHostAddress();
           }
         else
+          {
+            hostname = java.net.InetAddress.getLocalHost().getHostAddress();
+          }
+
+        if (hostname.equals("127.0.0.1"))
           {
             // we don't want to bind to a system name that will
             // resolve to 127.0.0.1, or else otherwise the rmiregistry
             // will attempt to report our address as loopback, which
             // won't do anyone any good
 
-            // try to use the name specified in our ganymede.properties File
-
-            if (serverHostProperty != null && !serverHostProperty.equals(""))
+            if (forcelocalhost)
               {
-                hostname = serverHostProperty;
+                debug("\n** " + ts.l("main.warning") + " **\n");
+              }
+            else
+              {
+                debug("\n** " + ts.l("main.error") + " **\n");
+              }
 
-                if (java.net.InetAddress.getByName(hostname).getHostAddress().equals("127.0.0.1"))
-                  {
-                    // nope, give up
+            // "Both the system hostname ({0}) and the
+            // ganymede.serverhost definition ({1}) resolve to
+            // the 127.0.0.1 loopback address"
+            debug(ts.l("main.error_loopback",
+                       java.net.InetAddress.getLocalHost().getHostName(),
+                       serverHostProperty));
+            debug("\n");
 
-                    if (forcelocalhost)
-                      {
-                        debug("\n** " + ts.l("main.warning") + " **\n");
-                      }
-                    else
-                      {
-                        debug("\n** " + ts.l("main.error") + " **\n");
-                      }
+            // "The Ganymede server must have an externally
+            // accessible IP address or else clients            \
+            // will not be able to communicate with the
+            // Ganymede server from other than localhost."
+            debug(ts.l("main.error_loopback_explain"));
 
-                    // "Both the system hostname ({0}) and the
-                    // ganymede.serverhost definition ({1}) resolve to
-                    // the 127.0.0.1 loopback address"
-                    debug(ts.l("main.error_loopback",
-                                        java.net.InetAddress.getLocalHost().getHostName(),
-                                        serverHostProperty));
-                    debug("\n");
+            if (!forcelocalhost)
+              {
+                // "If you really want to be only usable for
+                // localhost, edit the runServer script to use
+                // the -forcelocalhost option"
+                debug(ts.l("main.error_loopback_explain2"));
 
-                    // "The Ganymede server must have an externally
-                    // accessible IP address or else clients \
-                    // will not be able to communicate with the
-                    // Ganymede server from other than localhost."
-                    debug(ts.l("main.error_loopback_explain"));
+                // "Shutting down."
+                debug("\n" + ts.l("main.info_shutting_down") + "\n");
 
-                    if (!forcelocalhost)
-                      {
-                        // "If you really want to be only usable for
-                        // localhost, edit the runServer script to use
-                        // the -forcelocalhost option"
-                        debug(ts.l("main.error_loopback_explain2"));
-
-                        // "Shutting down."
-                        debug("\n" + ts.l("main.info_shutting_down") + "\n");
-
-                        throw new GanymedeSilentStartupException();
-                      }
-                  }
-                else
-                  {
-                    // "Avoiding loopback {0} definition, binding to {1}"
-                    debug(ts.l("main.info_avoiding_loopback",
-                                        java.net.InetAddress.getLocalHost().getHostName(),
-                                        hostname));
-                  }
+                throw new GanymedeSilentStartupException();
+              }
+            else
+              {
+                // "Avoiding loopback {0} definition, binding to {1}"
+                debug(ts.l("main.info_avoiding_loopback",
+                           java.net.InetAddress.getLocalHost().getHostName(),
+                           hostname));
               }
           }
 
