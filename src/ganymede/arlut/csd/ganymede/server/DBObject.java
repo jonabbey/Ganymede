@@ -1705,15 +1705,25 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <p>Get complete list of DBFields contained in this object.
-   * The list returned will appear in field id order.</p>
+   * <p>Get complete list of db_fields contained in this object.  The
+   * list returned will appear in field id order.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final db_field[] listFields()
   {
-    db_field result[];
+    return (db_field[]) listDBFields();
+  }
+
+  /**
+   * <p>Get complete list of DBFields contained in this object.  The
+   * list returned will appear in field id order.</p>
+   */
+
+  public final DBField[] listDBFields()
+  {
+    DBField result[];
     short count = 0;
 
     if (fieldAry == null)
@@ -1731,7 +1741,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
               }
           }
 
-        result = new db_field[count];
+        result = new DBField[count];
 
         count = 0;
 

@@ -414,19 +414,12 @@ public final class DBSession implements QueryDescriber {
 
     if (false)
       {
-        try
-          {
-            Ganymede.debug(ts.l("createDBObject.created", e_object.getLabel(), e_object.getInvid().toString()));
-            db_field[] fields = e_object.listFields();
+        Ganymede.debug(ts.l("createDBObject.created", e_object.getLabel(), e_object.getInvid().toString()));
+        DBField[] fields = e_object.listDBFields();
 
-            for (int i = 0; i < fields.length; i++)
-              {
-                Ganymede.debug(ts.l("createDBObject.field_report", Integer.valueOf(i), Integer.valueOf(fields[i].getID()), fields[i].getName()));
-              }
-          }
-        catch (java.rmi.RemoteException ex)
+        for (int i = 0; i < fields.length; i++)
           {
-            Ganymede.debug("Whoah!" + ex);
+            Ganymede.debug(ts.l("createDBObject.field_report", Integer.valueOf(i), Integer.valueOf(fields[i].getID()), fields[i].getName()));
           }
       }
 

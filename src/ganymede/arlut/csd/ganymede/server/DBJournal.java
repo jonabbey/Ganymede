@@ -1033,7 +1033,7 @@ class JournalEntry {
 
             // and we need to clear out any namespace pointers
 
-            DBField[] tempFields = (DBField[]) oldObject.listFields();
+            DBField[] tempFields = oldObject.listDBFields();
 
             for (DBField _field: tempFields)
               {
@@ -1091,7 +1091,7 @@ class JournalEntry {
         // values freed by object deletion or changes, then going through and allocating
         // new values.  We may still wind up doing this.
 
-        DBField[] tempFields = (DBField[]) obj.listFields();
+        DBField[] tempFields = obj.listDBFields();
 
         for (DBField _field: tempFields)
           {
