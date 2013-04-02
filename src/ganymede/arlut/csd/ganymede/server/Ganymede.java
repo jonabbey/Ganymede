@@ -1362,16 +1362,16 @@ public final class Ganymede {
                 debug("\n** " + ts.l("main.error") + " **\n");
               }
 
-            // "Both the system hostname ({0}) and the
-            // ganymede.serverhost definition ({1}) resolve to
-            // the 127.0.0.1 loopback address"
+            // "The system hostname ({0}) and/or the
+            // ganymede.serverhost definition ({1}) resolve to the
+            // 127.0.0.1 loopback address"
             debug(ts.l("main.error_loopback",
                        java.net.InetAddress.getLocalHost().getHostName(),
                        serverHostProperty));
             debug("\n");
 
             // "The Ganymede server must have an externally
-            // accessible IP address or else clients            \
+            // accessible IP address or else clients
             // will not be able to communicate with the
             // Ganymede server from other than localhost."
             debug(ts.l("main.error_loopback_explain"));
@@ -1387,13 +1387,6 @@ public final class Ganymede {
                 debug("\n" + ts.l("main.info_shutting_down") + "\n");
 
                 throw new GanymedeSilentStartupException();
-              }
-            else
-              {
-                // "Avoiding loopback {0} definition, binding to {1}"
-                debug(ts.l("main.info_avoiding_loopback",
-                           java.net.InetAddress.getLocalHost().getHostName(),
-                           hostname));
               }
           }
 
