@@ -1175,7 +1175,13 @@ public final class GanymedeServer implements Server {
 
         arlut.csd.ganymede.common.Invid.printCount();
 
-        java.lang.Runtime.getRuntime().removeShutdownHook(Ganymede.signalHandlingThread);
+        try
+          {
+            java.lang.Runtime.getRuntime().removeShutdownHook(Ganymede.signalHandlingThread);
+          }
+        catch (Throwable shutdownEx)
+          {
+          }
 
         System.exit(0);
 
