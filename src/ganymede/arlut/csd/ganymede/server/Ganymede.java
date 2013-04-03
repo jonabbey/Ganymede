@@ -1368,7 +1368,6 @@ public final class Ganymede {
             debug(ts.l("main.error_loopback",
                        java.net.InetAddress.getLocalHost().getHostName(),
                        serverHostProperty));
-            debug("\n");
 
             // "The Ganymede server must have an externally
             // accessible IP address or else clients
@@ -1393,6 +1392,9 @@ public final class Ganymede {
         // tell the RMI registry where to find the server
 
         bindingName = "rmi://" + hostname + ":" + registryPortProperty + "/ganymede.server";
+
+        // "Binding server to {0}"
+        debug("\n" + ts.l("main.info_binding_hostname", bindingName));
 
         Naming.bind(bindingName, server);
       }
