@@ -265,6 +265,7 @@ public final class xmlclient implements ClientListener, Runnable {
       }
     finally
       {
+        xc.err.flush();
         xc.terminate(1);
       }
   }
