@@ -1389,6 +1389,16 @@ public final class Ganymede {
               }
           }
 
+        // make sure we use the same IP address for our skel proxy
+        // generation as we are doing for our RMI binding
+        //
+        // this is necesssary in the case where we are deliberately
+        // binding to 127.0.0.1 due to network routing / firewall
+        // issues, and we don't want the skel classes to try to use
+        // the host's default IP address
+
+        System.setProperty("java.rmi.server.hostname", hostname);
+
         // tell the RMI registry where to find the server
 
         bindingName = "rmi://" + hostname + ":" + registryPortProperty + "/ganymede.server";
