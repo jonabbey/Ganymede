@@ -462,6 +462,20 @@ public final class Ganymede {
 
         initializeCrackLib();
 
+        // figure out what IP address / hostname we're going to use
+
+        String hostname = getServerHost();
+
+        // make sure we use the same IP address for our skel proxy
+        // generation as we are doing for our RMI binding
+        //
+        // this is necesssary in the case where we are deliberately
+        // binding to 127.0.0.1 due to network routing / firewall
+        // issues, and we don't want the skel classes to try to use
+        // the host's default IP address
+
+        System.setProperty("java.rmi.server.hostname", hostname);
+
         // Create our GanymedeRMIManager to handle RMI exports.  We need
         // to create this before creating our DBStore, as some of the
         // components of DBStore are to be made accessible through RMI
@@ -498,7 +512,7 @@ public final class Ganymede {
         // Take care of any startup-time database modifications
 
         startupHook();
-        bindGanymedeRMI();
+        bindGanymedeRMI(hostname);
 
         // At this point clients can log in to the server.. the RMI system
         // will spawn threads as necessary to handle RMI client activity..
@@ -1321,21 +1335,14 @@ public final class Ganymede {
       }
   }
 
-  /**
-   * <p>Bind the GanymedeServer object in the RMI registry so clients
-   * and admin consoles can connect to us.</p>
-   */
-
-  static public void bindGanymedeRMI() throws GanymedeStartupException
+  static public String getServerHost() throws GanymedeStartupException
   {
-    String bindingName = null;
+    String hostname = null;
 
     try
       {
         // "Binding GanymedeServer in RMI Registry"
         debug(ts.l("main.info_binding_registry"));
-
-        String hostname = null;
 
         if (serverHostProperty != null && !serverHostProperty.equals(""))
           {
@@ -1388,7 +1395,26 @@ public final class Ganymede {
                 throw new GanymedeSilentStartupException();
               }
           }
+      }
+    catch (Throwable ex)
+      {
+        throw new GanymedeStartupException(ex);
+      }
 
+    return hostname;
+  }
+
+  /**
+   * <p>Bind the GanymedeServer object in the RMI registry so clients
+   * and admin consoles can connect to us.</p>
+   */
+
+  static public void bindGanymedeRMI(String hostname) throws GanymedeStartupException
+  {
+    String bindingName = null;
+
+    try
+      {
         // tell the RMI registry where to find the server
 
         bindingName = "rmi://" + hostname + ":" + registryPortProperty + "/ganymede.server";
@@ -2067,6 +2093,11 @@ class GanymedeStartupException extends Exception {
   {
   }
 
+  public GanymedeStartupException(Throwable thr)
+  {
+    super(thr);
+  }
+
   public GanymedeStartupException(String mesg)
   {
     super(mesg);
@@ -2114,6 +2145,11 @@ class GanymedeSilentStartupException extends GanymedeStartupException {
 
   public GanymedeSilentStartupException()
   {
+  }
+
+  public GanymedeSilentStartupException(Throwable thr)
+  {
+    super(thr);
   }
 
   public GanymedeSilentStartupException(String mesg)
