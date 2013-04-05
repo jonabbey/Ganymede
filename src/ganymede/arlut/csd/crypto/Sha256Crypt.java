@@ -23,9 +23,9 @@
 
    http://people.redhat.com/drepper/SHA-crypt.txt
 
-   This Java Port is  
+   This Java Port is
 
-     Copyright (c) 2008-2012 The University of Texas at Austin.
+     Copyright (c) 2008-2013 The University of Texas at Austin.
 
      All rights reserved.
 
@@ -52,28 +52,29 @@ import java.security.MessageDigest;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class defines a method, {@link
+ * <p>This class defines a method, {@link
  * Sha256Crypt#Sha256_crypt(java.lang.String, java.lang.String, int)
  * Sha256_crypt()}, which takes a password and a salt string and
- * generates a Sha256 encrypted password entry.
+ * generates a Sha256 encrypted password entry.</p>
  *
- * This class implements the new generation, scalable, SHA256-based
+ * <p>This class implements the new generation, scalable, SHA256-based
  * Unix 'crypt' algorithm developed by a group of engineers from Red
  * Hat, Sun, IBM, and HP for common use in the Unix and Linux
- * /etc/shadow files.
+ * /etc/shadow files.</p>
  *
- * The Linux glibc library (starting at version 2.7) includes support
- * for validating passwords hashed using this algorithm.
+ * <p>The Linux glibc library (starting at version 2.7) includes
+ * support for validating passwords hashed using this algorithm.</p>
  *
- * The algorithm itself was released into the Public Domain by Ulrich
- * Drepper &lt;drepper@redhat.com&gt;.  A discussion of the rationale and
- * development of this algorithm is at
+ * <p>The algorithm itself was released into the Public Domain by
+ * Ulrich Drepper &lt;drepper@redhat.com&gt;.  A discussion of the
+ * rationale and development of this algorithm is at</p>
  *
- * http://people.redhat.com/drepper/sha-crypt.html
+ * <p>http://people.redhat.com/drepper/sha-crypt.html</p>
  *
- * and the specification and a sample C language implementation is at
+ * <p>and the specification and a sample C language implementation is
+ * at</p>
  *
- * http://people.redhat.com/drepper/SHA-crypt.txt
+ * <p>http://people.redhat.com/drepper/SHA-crypt.txt</p>
  */
 
 public final class Sha256Crypt
@@ -100,10 +101,11 @@ public final class Sha256Crypt
   }
 
   /**
-   * This method actually generates an Sha256 crypted password hash
-   * from a plaintext password and a salt.
+   * <p>This method actually generates an Sha256 crypted password hash
+   * from a plaintext password and a salt.</p>
    *
-   * The resulting string will be in the form '$5$&lt;rounds=n&gt;$&lt;salt&gt;$&lt;hashed mess&gt;
+   * <p>The resulting string will be in the form
+   * '$5$&lt;rounds=n&gt;$&lt;salt&gt;$&lt;hashed mess&gt;</p>
    *
    * @param keyStr Plaintext password
    *
@@ -147,6 +149,11 @@ public final class Sha256Crypt
             include_round_count = true;
           }
 
+        if (saltStr.length() > SALT_LEN_MAX)
+          {
+            saltStr = saltStr.substring(0, SALT_LEN_MAX);
+          }
+
         // gnu libc's crypt(3) implementation allows the salt to end
         // in $ which is then ignored.
 
@@ -154,10 +161,12 @@ public final class Sha256Crypt
           {
             saltStr = saltStr.substring(0, saltStr.length() - 1);
           }
-
-        if (saltStr.length() > SALT_LEN_MAX)
+        else
           {
-            saltStr = saltStr.substring(0, SALT_LEN_MAX);
+            if (saltStr.indexOf("$") != -1)
+              {
+                saltStr = saltStr.substring(0, saltStr.indexOf("$"));
+              }
           }
       }
     else
@@ -339,8 +348,9 @@ public final class Sha256Crypt
   }
 
   /**
-   * This method tests a plaintext password against a SHA256 Unix
-   * Crypt'ed hash and returns true if the password matches the hash.
+   * <p>This method tests a plaintext password against a SHA256 Unix
+   * Crypt'ed hash and returns true if the password matches the
+   * hash.</p>
    *
    * @param plaintextPass The plaintext password text to test.
    * @param sha256CryptText The hash text we're testing against.
@@ -408,8 +418,8 @@ public final class Sha256Crypt
   }
 
   /**
-   * Validate our implementation using test data from Ulrich Drepper's
-   * C implementation.
+   * <p>Validate our implementation using test data from Ulrich
+   * Drepper's C implementation.</p>
    */
 
   private static void selfTest()
@@ -426,40 +436,34 @@ public final class Sha256Crypt
       };
 
     System.out.println("Starting Sha256Crypt tests now...");
-    String result;
 
-    String salt = "$5$saltstring";
-    String msg = "Hello world!";
-    String res = "$5$saltstring$5B8vYYiY.CVt1RlTTf8KbXBH3hsxY/GNooZaBBGWEc5";
-
-    result = Sha256_crypt(msg, salt, 0);
-
-    System.out.println("result is:"+result);
-    System.out.println("should be:"+res);
-
-    if (result.equals(res))
+    for (int t=0; t<(msgs.length/3); t++)
       {
-        System.out.println("Passed well");
-      }
-    else
-      {
-        System.out.println("Failed Badly");
-      }
+        String saltPrefix = msgs[t*3];
+        String plainText = msgs[t*3+1];
+        String cryptText = msgs[t*3+2];
 
-    for (int t=0; t<7; t++)
-      {
-        result = Sha256_crypt(msgs[t*3+1], msgs[t*3], 0);
+        String result = Sha256_crypt(plainText, saltPrefix, 0);
 
         System.out.println("test " + t + " result is:" + result);
-        System.out.println("test " + t + " should be:" + msgs[t*3+2]);
+        System.out.println("test " + t + " should be:" + cryptText);
 
-        if (result.equals(msgs[t*3+2]))
+        if (result.equals(cryptText))
           {
-            System.out.println("Passed well");
+            System.out.println("Passed crypt well");
           }
         else
           {
-            System.out.println("Failed Badly");
+            System.out.println("Failed Crypt Badly");
+          }
+
+        if (verifyPassword(plainText, cryptText))
+          {
+            System.out.println("Passed verifyPassword well");
+          }
+        else
+          {
+            System.out.println("Failed verifyPassword Badly");
           }
       }
   }
