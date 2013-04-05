@@ -23,9 +23,9 @@
 
    http://people.redhat.com/drepper/SHA-crypt.txt
 
-   This Java Port is  
+   This Java Port is
 
-     Copyright (c) 2008-2012 The University of Texas at Austin.
+     Copyright (c) 2008-2013 The University of Texas at Austin.
 
      All rights reserved.
 
@@ -52,28 +52,29 @@ import java.security.MessageDigest;
 ------------------------------------------------------------------------------*/
 
 /**
- * This class defines a method, {@link
+ * <p>This class defines a method, {@link
  * Sha512Crypt#Sha512_crypt(java.lang.String, java.lang.String, int)
  * Sha512_crypt()}, which takes a password and a salt string and
- * generates a Sha512 encrypted password entry.
+ * generates a Sha512 encrypted password entry.</p>
  *
- * This class implements the new generation, scalable, SHA512-based
+ * <p>This class implements the new generation, scalable, SHA512-based
  * Unix 'crypt' algorithm developed by a group of engineers from Red
  * Hat, Sun, IBM, and HP for common use in the Unix and Linux
- * /etc/shadow files.
+ * /etc/shadow files.</p>
  *
- * The Linux glibc library (starting at version 2.7) includes support
- * for validating passwords hashed using this algorithm.
+ * <p>The Linux glibc library (starting at version 2.7) includes
+ * support for validating passwords hashed using this algorithm.</p>
  *
- * The algorithm itself was released into the Public Domain by Ulrich
- * Drepper &lt;drepper@redhat.com&gt;.  A discussion of the rationale and
- * development of this algorithm is at
+ * <p>The algorithm itself was released into the Public Domain by
+ * Ulrich Drepper &lt;drepper@redhat.com&gt;.  A discussion of the
+ * rationale and development of this algorithm is at</p>
  *
- * http://people.redhat.com/drepper/sha-crypt.html
+ * <p>http://people.redhat.com/drepper/sha-crypt.html</p>
  *
- * and the specification and a sample C language implementation is at
+ * <p>and the specification and a sample C language implementation is
+ * at</p>
  *
- * http://people.redhat.com/drepper/SHA-crypt.txt
+ * <p>http://people.redhat.com/drepper/SHA-crypt.txt</p>
  */
 
 public final class Sha512Crypt
@@ -100,11 +101,11 @@ public final class Sha512Crypt
   }
 
   /**
-   * This method actually generates an
-   * Sha512 crypted password hash from a plaintext password and a
-   * salt.
+   * <p>This method actually generates an Sha512 crypted password hash
+   * from a plaintext password and a salt.</p>
    *
-   * <p>The resulting string will be in the form '$6$&lt;rounds=n&gt;$&lt;salt&gt;$&lt;hashed mess&gt;</p>
+   * <p>The resulting string will be in the form
+   * '$6$&lt;rounds=n&gt;$&lt;salt&gt;$&lt;hashed mess&gt;</p>
    *
    * @param keyStr Plaintext password
    *
@@ -149,6 +150,11 @@ public final class Sha512Crypt
             include_round_count = true;
           }
 
+        if (saltStr.length() > SALT_LEN_MAX)
+          {
+            saltStr = saltStr.substring(0, SALT_LEN_MAX);
+          }
+
         // gnu libc's crypt(3) implementation allows the salt to end
         // in $ which is then ignored.
 
@@ -156,10 +162,12 @@ public final class Sha512Crypt
           {
             saltStr = saltStr.substring(0, saltStr.length() - 1);
           }
-
-        if (saltStr.length() > SALT_LEN_MAX)
+        else
           {
-            saltStr = saltStr.substring(0, SALT_LEN_MAX);
+            if (saltStr.indexOf("$") != -1)
+              {
+                saltStr = saltStr.substring(0, saltStr.indexOf("$"));
+              }
           }
       }
     else
@@ -352,8 +360,9 @@ public final class Sha512Crypt
   }
 
   /**
-   * This method tests a plaintext password against a SHA512 Unix
-   * Crypt'ed hash and returns true if the password matches the hash.
+   * <p>This method tests a plaintext password against a SHA512 Unix
+   * Crypt'ed hash and returns true if the password matches the
+   * hash.</p>
    *
    * @param plaintextPass The plaintext password text to test.
    * @param sha512CryptText The hash text we're testing against.
@@ -421,8 +430,8 @@ public final class Sha512Crypt
   }
 
   /**
-   * Validate our implementation using test data from Ulrich Drepper's
-   * C implementation.
+   * <p>Validate our implementation using test data from Ulrich
+   * Drepper's C implementation.</p>
    */
 
   private static void selfTest()
@@ -430,7 +439,7 @@ public final class Sha512Crypt
     String msgs[] =
       {
         "$6$saltstring", "Hello world!", "$6$saltstring$svn8UoSVapNtMuq1ukKS4tPQd8iKwSMHWjl/O817G3uBnIFNjnQJuesI68u4OTLiBFdcbYEdFCoEOfaS35inz1",
-        "$6$xxxxxxxx",  "geheim", "$6$xxxxxxxx$wuSdyeOvQXjj/nNoWnjjo.6OxUWrQFRIj019kh1cDpun6l6cpr3ywSrBprYRYZXcm4Kv9lboCEFI3GzBkdNAz/",                                                                                                                                                  "$6$xxxxxxxx$", "geheim", "$6$xxxxxxxx$wuSdyeOvQXjj/nNoWnjjo.6OxUWrQFRIj019kh1cDpun6l6cpr3ywSrBprYRYZXcm4Kv9lboCEFI3GzBkdNAz/",
+        "$6$xxxxxxxx",  "geheim", "$6$xxxxxxxx$wuSdyeOvQXjj/nNoWnjjo.6OxUWrQFRIj019kh1cDpun6l6cpr3ywSrBprYRYZXcm4Kv9lboCEFI3GzBkdNAz/",
         "$6$rounds=10000$saltstringsaltstring", "Hello world!", "$6$rounds=10000$saltstringsaltst$OW1/O6BYHV6BcXZu8QVeXbDWra3Oeqh0sbHbbMCVNSnCM/UrjmM0Dp8vOuZeHBy/YTBmSK6H9qs/y3RnOaw5v.",
         "$6$rounds=5000$toolongsaltstring", "This is just a test", "$6$rounds=5000$toolongsaltstrin$lQ8jolhgVRVhY4b5pZKaysCLi0QBxGoNeKQzQ3glMhwllF7oGDZxUhx1yxdYcz/e1JSbq3y6JMxxl8audkUEm0",
         "$6$rounds=1400$anotherlongsaltstring", "a very much longer text to encrypt.  This one even stretches over morethan one line.", "$6$rounds=1400$anotherlongsalts$POfYwTEok97VWcjxIiSOjiykti.o/pQs.wPvMxQ6Fm7I6IoYN3CmLs66x9t0oSwbtEW7o7UmJEiDwGqd8p4ur1",
@@ -440,22 +449,34 @@ public final class Sha512Crypt
       };
 
     System.out.println("Starting Sha512Crypt tests now...");
-    String result;
 
-    for (int t=0; t<7; t++)
+    for (int t=0; t<(msgs.length/3); t++)
       {
-        result = Sha512_crypt(msgs[t*3+1], msgs[t*3], 0);
+        String saltPrefix = msgs[t*3];
+        String plainText = msgs[t*3+1];
+        String cryptText = msgs[t*3+2];
+
+        String result = Sha512_crypt(plainText, cryptText, 0);
 
         System.out.println("test " + t + " result is:" + result);
-        System.out.println("test " + t + " should be:" + msgs[t*3+2]);
+        System.out.println("test " + t + " should be:" + cryptText);
 
-        if (result.equals(msgs[t*3+2]))
+        if (result.equals(cryptText))
           {
-            System.out.println("Passed well");
+            System.out.println("Passed Crypt well");
           }
         else
           {
-            System.out.println("Failed Badly");
+            System.out.println("Failed Crypt Badly");
+          }
+
+        if (verifyPassword(plainText, cryptText))
+          {
+            System.out.println("Passed verifyPassword well");
+          }
+        else
+          {
+            System.out.println("Failed verifyPassword Badly");
           }
       }
   }
