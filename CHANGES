@@ -2130,6 +2130,21 @@ because Ganymede always uses 16 character salt strings when generating
 ShaCrypt hashtext, but it came up when using the updated userKit to
 import shacrypt passwords from older /etc/shadow passwords on Linux.
 
+159. [SERVER] Improved handling of RMI edge cases in server startup
+
+The Ganymede server was not fully configuring the RMI system to
+completely honor the ganymede.serverhost property.  The RMI regsitry
+was being bound to the hostname / IP address listed in this property,
+but the server-side RMI proxies were using whatever name was returned
+from the Java networking libraries for the identity of the localhost.
+
+This made it impossible to successfully run Ganymede on a system whose
+public IP address was firewalled.
+
+It is now possible to explicitly set this property to 127.0.0.1, and
+all server and client operations will now work properly over the
+dedicated loopback address.
+
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
 RELEASE DATE: March 1, 2004
