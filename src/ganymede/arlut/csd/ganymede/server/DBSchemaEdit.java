@@ -407,10 +407,6 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
    * <p>Returns an array of Base references from the current
    * (non-committed) state of the system.</p>
    *
-   * @param embedded If true, getBases() will only show bases that are intended
-   * for embedding in other objects.  If false, getBases() will only show bases
-   * that are not to be embedded.
-   *
    * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
 
