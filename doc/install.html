@@ -9,7 +9,7 @@
 
 <img src="gifs/ganymede_title.gif" height="200" width="560" alt="Ganymede Logo"/>
 
-<h1>Ganymede Installation Guide<br/>Release 2.0 - 1 March 2013</h1>
+<h1>Ganymede Installation Guide<br/>Release 2.0 - 5 April 2013</h1>
 
 <hr/>
 
@@ -121,12 +121,8 @@ with Java 6 or later.  You will need the full Java Development Kit
 (JDK or SDK) on your UNIX server so that you can compile any custom
 plug-in classes.</p>
 
-<p>To run the Ganymede clients in a web browser on a desktop PC
-running some version of Windows, you will want to download and install
-version 6 or better of the Java Runtime Environment (JRE) for Windows.
-Oracle's Java Runtime Environment includes support for Java Web Start,
-a code module that will allow you to launch the Ganymede client
-directly from your choice of web browser.</p>
+<p>Ganymede has no dependencies on any Java classes other than what
+comes with the JDK or in the Ganymede distribution.</p>
 
 <p>You can download Oracle's official release of the Java platform for
 Mac OS X, Linux, Windows or Solaris
@@ -143,11 +139,31 @@ with.</p>
 <p>As well as Java, you will need /bin/sh, Perl 5.003 (or later), and
 Apache Ant to build and install the Ganymede software.  The Ganymede
 distribution, server and client, is designed to be unpacked and
-installed on a UNIX-style system.  There is no graphical installer
-provided for Windows.  Instead, you have to install the clients on the
-UNIX or Mac OS X system and then use a web server to publish the
-clients to your network, using either the Java Plugin or the Java Web
-Start tools.</p>
+installed on a UNIX-style system.</p>
+
+<p>There are command line client scripts for Unix style systems
+(<a href="glossary.html#ganymede">ganymede</a>,
+ <a href="glossary.html#ganymedeAdmin">ganymedeAdmin</a>,
+ <a href="glossary.html#xmlclient2">xmlclient</a>),
+but most of your users will probably use Java Web Start to run the
+graphical clients on their desktops.</p>
+
+<p>To run the Ganymede clients in a web browser on a desktop PC
+running some version of Windows, you will want to download and install
+version 6 or better of the Java Runtime Environment (JRE) for Windows.
+Oracle's Java Runtime Environment includes support for Java Web Start,
+a code module that will allow you to launch the Ganymede client
+directly from your choice of web browser.</p>
+
+<p>In order to user Java Web Start, you'll need a web server on your
+network that can serve the clients to your network.  We typically run
+a limited web server on the same system that we run the Ganymede
+server, but you don't have to.</p>
+
+<p>We don't provide any files for launching the Ganymede client from
+the Mac, Windows, or Linux GUI environments, but Java Web Start will
+offer to create desktop icons to run the Ganymede client the first
+time your users run Ganymede from the web.</p>
 
     <table border="1" cellpadding="3" cellspacing="0" width="100%">
       <tr bgcolor="#CCFFCC">
@@ -243,40 +259,36 @@ directory.</p>
       that any reference to the old path has been updated.</p>
 </dd>
 
-<dt><b>What is the name of the system that the server will run on?</b></dt>
+<dt><b>What is the name / IP address that the Ganymede server will run on?</b></dt>
 <dd>
-	<p>This information is used by the <a
-	href="glossary.html#stopServer">stopServer</a> and <a
-	href="glossary.html#xmlclient">xmlclient</a> clients that are
-	installed into the server tree.  This may be an I.P. address
-	or a fully qualified DNS host name.  The installServer script
-	will provide the name of the system you are on as a
-	default.</p>
+	<p>This information is used to configure the RMI system in the
+	server and in
+	the <a href="glossary.html#stopServer">stopServer</a>
+	and <a href="glossary.html#xmlclient">xmlclient</a> clients
+	that are installed into the server tree.  This may be an
+	i.p. address or a fully qualified DNS host name.  The
+	installServer script will provide the name of the system you
+	are on as a default.</p>
 
-	<p>Note that the Ganymede server needs to know a name for the
-	server that will resolve to a network-accessible I.P. address.
-	Some Linux systems are configured by default so that the
-	system 'hostname' command returns the system's name without
-	any DNS domain information, and so that the system's name is
-	mapped to '127.0.0.1' in the /etc/hosts file.  On such
-	systems, the Ganymede server may report an error message on
-	startup, complaining that the system hostname and the
-	<code><b>ganymede.serverhost</b></code> definition both
-	resolve to '127.0.0.1'.</p>
+	<p>Note that the Ganymede server needs to know a name or
+	address for the server that will resolve to an i.p. address
+	that is accessible by your clients.</p>
 
 	<p>By answering this question with either a fully qualified
 	DNS name or a network-accessible numeric address, the Ganymede
 	server will be able to generate a proper network address for
-	clients to use.  If you discover after installing the server
-	that you need to change the name that the Ganymede server uses
-	to identify its network address, you can edit the <a
-	href="glossary.html#ganymede.properties">ganymede.properties</a>
+	clients to use.</p>
+
+	<p>If you discover after installing the server that you need
+	to change the name that the Ganymede server uses to identify
+	its network address, you can edit
+	the <a href="glossary.html#ganymede.properties">ganymede.properties</a>
 	file and change the <code><b>ganymede.serverhost</b></code>
-	definition to something that will resolve to a network accessible
-	address.</p>
+	definition to something that will resolve to a network
+	accessible address.</p>
 </dd>
 
-<dt><b>What port should the Ganymede server use for its RMI registry?</b></dt>
+<dt><b>What port should the Ganymede server use for its internal RMI registry?</b></dt>
 <dd>
 	<p>The RMI registry is a network lookup service that is used
 	to initialize communications between the Ganymede clients and
@@ -336,16 +348,16 @@ directory.</p>
 
 <dt><b>What name do you want the Ganymede monitor account to have?</b></dt>
 <dd>
-	<p>The monitor account has no privileges to do anything at all
-	to other than to login with the Ganymede admin console and
-	view the server's activity log.</p>
+	<p>The monitor account is an unprivileged (non-admin end user
+	equivalent) user that is granted the privilege to login to the
+	Ganymede admin console and monitor the server's performance
+	and activity logging, without being able to stop the server,
+	edit the schema, or trigger server tasks.</p>
 </dd>
 
 <dt><b>What password do you want the monitor account to have?</b></dt>
 <dd>
-	<p>This password provides the right to watch the server's
-	activities using the admin console, but provides no permission
-	to log into the server and view or edit any data.</p>
+	<p>The password for the monitor account.</p>
 </dd>
 
 </dl>
@@ -363,8 +375,8 @@ resource.</p>
 
     <ul>
       <li><a href="glossary.html#runServer">runServer</a>, which actually runs the server</li>
-      <li><a href="glossary.html#stopServer">stopServer</a>, a script that can
-	be used to cleanly shut the server down.</li>
+      <li><a href="glossary.html#stopServer">stopServer</a>, a script
+	that can be used to cleanly shut the server down.</li>
       <li><a href="glossary.html#xmlclient">xmlclient</a>, a script that is
 	used to load XML-formatted data into the Ganymede server.</li>
       <li><a href="glossary.html#logscan">logscan.pl</a>, a script that is
@@ -544,15 +556,9 @@ somewhere else, you can use <code>logrmi=filename</code> rather than
 accepting the default RMI log file that <code>-logrmi</code> will
 generate for you.</p>
 
-<p>While the server is running, you should see at least one Java
-process running, that being the Ganymede server.  If you are running
-the Ganymede server on certain older versions of the Linux system, you
-may see what looks like a very large number of Java processes running.
-This is perfectly normal.  In those versions of Linux, the
-<code>ps</code> and <code>top</code> commands will show you a separate
-entry for each thread that is running in a given process.  The
-Ganymede server is heavily multithreaded, so you should expect to see
-a bunch of Java threads running on such a Linux system.</p>
+<p>While the server is running, you should see one Java process
+running, that being the Ganymede server.  All builds and other
+background activity are done with threads in this single process.</p>
 
 <p>When you want to shut the server down, you can send the running
 Java process a QUIT signal directly with the kill command on Unix-type
@@ -670,13 +676,12 @@ command line with a shell script that will run java on them, or from a
 web browser with support for Java 6 or better.</p>
 
 <p>We have provided an install script for installing the Ganymede
-clients on a UNIX system.  <a
-href="glossary.html#installClient">installClient</a> will prompt you
-for the name of the machine that will be running your Ganymede server,
-and the directory which will contain the bin, html, and jars
-directories. The install script will then customize and install
-scripts for you so that the end-user client and admin console can
-easily be run.</p>
+clients on a UNIX
+system.  <a href="glossary.html#installClient">installClient</a> will
+prompt you for the name of the machine that will be running your
+Ganymede server, and the directory which will contain the client.  The
+install script will then customize and install scripts for you so that
+the end-user client and admin console can easily be run.</p>
 
 <p>Don't try to install the client files and the server into the same
 directory.. the two are meant to be installed separately, in separate
@@ -718,7 +723,7 @@ will ask you a small number of questions, including the following:</p>
 <dl>
 <dt><b>What is the name of the system that the server will run on?</b></dt>
 <dd>
-	<p>This question is used to configure the applet launch page
+	<p>The answer to this question is used to configure the applet launch page
 	that your users will access to run the Ganymede applets.  This
 	should be the name of the system on which you are going to run
 	the Ganymede server.</p>
@@ -848,27 +853,11 @@ support this option.</p>
     type for the Java Network Launch Protocol (.jnlp) files that tell
     the Java Web Start system how to manage the Ganymede clients.</p>
 
-    <p>If you are running Apache, configuring your web server to
-    support the Java Web Start option for launching the Ganymede
-    clients is simple.  You just need to add the following line to
-    your httpd.conf:</p>
-
-    <pre>
-        AddType application/x-java-jnlp-file .jnlp
-    </pre>
-
-    <p>Alternately, you can add the following line to your server's mime.types
-    file:</p>
-
-    <pre>
-        application/x-java-jnlp-file jnlp
-    </pre>
-
-    <p>Whichever approach you choose, you may need to cause your web
-    server to re-read its configuration file.  With an Apache server,
-    this can be achieved by sending a HUP signal to the server.  If
-    you don't know what that means, simply stopping and restarting
-    your web server should work too.</p>
+    <p>These days, all web servers you are likely to use should know
+    the appropriate mime type for JNLP files, but if you have problems
+    launching the clients, make sure that your web server environment
+    knows to assign <code>.jnlp</code> files the
+    <code>application/x-java-jnlp-file</code> MIME type.
 
     <p>In addition to the server-side configuration, your users' web
     browsers must be configured to run the JNLP launcher when a
@@ -886,10 +875,5 @@ support this option.</p>
     <hr/>
 
     <address><a href="mailto:jonabbey@arlut.utexas.edu">Jonathan Abbey</a></address>
-
-    <p><i>This article is translated
-    to <a href="http://science.webhostinggeeks.com/ganymede-upustvo">Serbo-Croatian</a>
-    language by Anja Skrba from <a href="http://webhostinggeeks.com/">
-    Webhostinggeeks.com</a></i>.</p>
   </body>
 </html>
