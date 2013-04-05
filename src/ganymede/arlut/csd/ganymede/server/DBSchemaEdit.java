@@ -325,8 +325,8 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * Returns an array of bases from the current (non-committed) state
-   * of the system.
+   * <p>Returns an array of Base references from the current
+   * (non-committed) state of the system.</p>
    *
    * @param embedded If true, getBases() will only show bases that are intended
    * for embedding in other objects.  If false, getBases() will only show bases
@@ -335,9 +335,23 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
    * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
 
-  public synchronized Base[] getBases(boolean embedded)
+  public Base[] getBases(boolean embedded)
   {
-    Base[] bases;
+    return (Base[]) this.getDBBases(embedded);
+  }
+
+  /**
+   * <p>Returns an array of DBObjectBase from the current
+   * (non-committed) state of the system.</p>
+   *
+   * @param embedded If true, getBases() will only show bases that are intended
+   * for embedding in other objects.  If false, getBases() will only show bases
+   * that are not to be embedded.
+   */
+
+  public synchronized DBObjectBase[] getDBBases(boolean embedded)
+  {
+    DBObjectBase[] bases;
     int i = 0;
     int size = 0;
 
@@ -366,7 +380,7 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     // and create the return list
 
-    bases = new Base[size];
+    bases = new DBObjectBase[size];
 
     for (DBObjectBase base: newBases.values())
       {
@@ -390,20 +404,34 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
   }
 
   /**
-   * Returns an array of bases from the current (non-committed) state
-   * of the system.
+   * <p>Returns an array of Base references from the current
+   * (non-committed) state of the system.</p>
+   *
+   * @param embedded If true, getBases() will only show bases that are intended
+   * for embedding in other objects.  If false, getBases() will only show bases
+   * that are not to be embedded.
    *
    * @see arlut.csd.ganymede.rmi.SchemaEdit
    */
 
-  public synchronized Base[] getBases()
+  public Base[] getBases()
   {
-    Base[] bases;
+    return (Base[]) this.getDBBases();
+  }
+
+  /**
+   * <p>Returns an array of DBObjectBases from the current
+   * (non-committed) state of the system.</p>
+   */
+
+  public synchronized DBObjectBase[] getDBBases()
+  {
+    DBObjectBase[] bases;
     int i = 0;
 
     /* -- */
 
-    bases = new Base[newBases.size()];
+    bases = new DBObjectBase[newBases.size()];
 
     for (DBObjectBase base: newBases.values())
       {

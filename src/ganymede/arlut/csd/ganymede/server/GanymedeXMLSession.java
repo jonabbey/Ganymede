@@ -1674,7 +1674,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     // create a list of Short base id's for of bases that we have
     // registered in the schema at present
 
-    DBObjectBase[] list = (DBObjectBase[]) this.editor.getBases();
+    DBObjectBase[] list = this.editor.getDBBases();
     Vector<Short> current = new Vector(list.length);
 
     for (DBObjectBase base: list)
