@@ -32,6 +32,7 @@
     <jar href="ganymedeAdmin.jar"/>
     <property name="ganymede.serverhost" value="#SERVERHOST"/>
     <property name="ganymede.registryPort" value="#REGISTRYPORT"/>
+    <property name="java.rmi.server.useCodebaseOnly" value="true"/>
 
   <!-- If you want to force a language on the client, set and
        uncomment the following:
