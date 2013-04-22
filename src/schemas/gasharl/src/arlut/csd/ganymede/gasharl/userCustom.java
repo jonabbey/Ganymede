@@ -53,15 +53,17 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.HashSet;
 import java.io.PrintWriter;
 import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.Vector;
@@ -402,17 +404,17 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
           {
             // find the auto.home.default map, if we can.
 
-            Vector results = getGSession().internalQuery(new Query((short) 277, // automounter map
-                                                                   new QueryDataNode(QueryDataNode.EQUALS,
-                                                                                     "auto.home.default"),
-                                                                   false));
+            Vector<Result> results = getGSession().internalQuery(new Query((short) 277, // automounter map
+                                                                           new QueryDataNode(QueryDataNode.EQUALS,
+                                                                                             "auto.home.default"),
+                                                                           false));
 
             // if we found auto.home.default, set the new volume entry map
             // field to point to auto.home.default.
 
             if (results != null && results.size() == 1)
               {
-                Result objid = (Result) results.elementAt(0);
+                Result objid = results.get(0);
 
                 DBEditObject eObj = getDBSession().editDBObject(invid);
                 invf = (InvidDBField) eObj.getField(mapEntrySchema.MAP);
@@ -717,12 +719,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   {
     ReturnVal retVal = null;
     InvidDBField volumeMapEntries = (InvidDBField) getField(userSchema.VOLUMES);
-    Vector values = volumeMapEntries.getValuesLocal();
+    Vector<Invid> values = (Vector<Invid>) volumeMapEntries.getValuesLocal();
 
-    for (int i = 0; i < values.size(); i++)
+    for (Invid entryInvid: values)
       {
-        Invid entryInvid = (Invid) values.elementAt(i);
-
         DBEditObject eObj = getDBSession().editDBObject(entryInvid);
 
         Invid mapInvid = (Invid) eObj.getFieldValueLocal(mapEntrySchema.MAP);
@@ -1010,18 +1010,18 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
         InvidDBField newVolumes = (InvidDBField) getField(userSchema.VOLUMES);
         InvidDBField oldVolumes = (InvidDBField) origObj.getField(userSchema.VOLUMES);
 
-        Vector newOnes;
-        Vector oldOnes;
+        Vector<Invid> newOnes;
+        Vector<Invid> oldOnes;
 
         if (local)
           {
-            newOnes = (Vector) newVolumes.getValuesLocal().clone();
-            oldOnes = (Vector) oldVolumes.getValuesLocal().clone();
+            newOnes = (Vector<Invid>) newVolumes.getValuesLocal().clone();
+            oldOnes = (Vector<Invid>) oldVolumes.getValuesLocal().clone();
           }
         else
           {
-            newOnes = newVolumes.getValuesLocal();
-            oldOnes = oldVolumes.getValuesLocal();
+            newOnes = (Vector<Invid>) newVolumes.getValuesLocal();
+            oldOnes = (Vector<Invid>) oldVolumes.getValuesLocal();
           }
 
         DBObject origVolume;
@@ -1035,8 +1035,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
                 System.err.println("User clone sub " + i);
               }
 
-            workingVolume = (DBEditObject) dbSession.editDBObject((Invid) newOnes.elementAt(i));
-            origVolume = dbSession.viewDBObject((Invid) oldOnes.elementAt(i));
+            workingVolume = (DBEditObject) dbSession.editDBObject(newOnes.get(i));
+            origVolume = dbSession.viewDBObject(oldOnes.get(i));
 
             if (debug)
               {
@@ -1102,7 +1102,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
                 newInvid = tmpVal.getInvid();
 
                 workingVolume = (DBEditObject) dbSession.editDBObject(newInvid);
-                origVolume = dbSession.viewDBObject((Invid) oldOnes.elementAt(i));
+                origVolume = dbSession.viewDBObject(oldOnes.get(i));
 
                 if (debug)
                   {
@@ -1236,7 +1236,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   @Override public boolean reactToRemovalWarning(DBObject object, int days)
   {
     StringDBField deliveryAddresses = null;
-    Vector values = null;
+    Vector<String> values = null;
 
     deliveryAddresses = (StringDBField) object.getField(userSchema.EMAILTARGET);
 
@@ -1247,12 +1247,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
         return false;
       }
 
-    values = deliveryAddresses.getValuesLocal();
+    values = (Vector<String>) deliveryAddresses.getValuesLocal();
 
-    for (int i = 0; i < values.size(); i++)
+    for (String x: values)
       {
-        String x = (String) values.elementAt(i);
-
         if (x.endsWith("@arlex.arlut.utexas.edu"))
           {
             Vector toAddresses = new Vector();
@@ -2111,12 +2109,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   @Override public ReturnVal remove()
   {
     StringDBField deliveryAddresses = (StringDBField) this.getField(userSchema.EMAILTARGET);
-    Vector values = deliveryAddresses.getValuesLocal();
+    Vector<String> values = (Vector<String>) deliveryAddresses.getValuesLocal();
 
-    for (int i = 0; i < values.size(); i++)
+    for (String x: values)
       {
-        String x = (String) values.elementAt(i);
-
         if (x.endsWith("@arlex.arlut.utexas.edu"))
           {
             Vector toAddresses = new Vector();
@@ -2279,11 +2275,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         // and any aliases defined
 
-        Vector values = ((DBField) getField(ALIASES)).getValuesLocal();
+        Vector<String> values = (Vector<String>) ((DBField) getField(ALIASES)).getValuesLocal();
 
-        for (int i = 0; i < values.size(); i++)
+        for (String str: values)
           {
-            result.addRow(null, (String) values.elementAt(i), false);
+            result.addRow(null, str, false);
           }
 
         return result;
@@ -2304,13 +2300,10 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
         groupChoices = new QueryResult();
 
-        Vector invids = getFieldValuesLocal(GROUPLIST); // groups list
-        Invid invid;
+        Vector<Invid> invids = (Vector<Invid>) getFieldValuesLocal(GROUPLIST); // groups list
 
-        for (int i = 0; i < invids.size(); i++)
+        for (Invid invid: invids)
           {
-            invid = (Invid) invids.elementAt(i);
-
             // must be editable because the client cares
 
             groupChoices.addRow(invid, gSession.getDBSession().getObjectLabel(invid), true);
@@ -2344,16 +2337,16 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
                 System.err.println("userCustom - issuing query");
               }
 
-            Vector results = internalSession().internalQuery(query);
+            Vector<Result> results = internalSession().internalQuery(query);
 
             if (debug)
               {
                 System.err.println("userCustom - processing query results");
               }
 
-            for (int i = 0; i < results.size(); i++)
+            for (Result result: results)
               {
-                shellChoices.addRow(null, results.elementAt(i).toString(), false); // no invid
+                shellChoices.addRow(null, result.toString(), false); // no invid
               }
 
             if (shellChoiceStamp == null)
@@ -2569,7 +2562,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   @Override public synchronized ReturnVal finalizeSetValue(DBField field, Object value)
   {
     InvidDBField inv;
-    Vector personaeInvids;
     String oldName;
     StringDBField sf;
 
@@ -2833,11 +2825,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
             // rename all the associated personae with the new user name
 
-            personaeInvids = inv.getValuesLocal();
+            Vector<Invid> personaeInvids = (Vector<Invid>) inv.getValuesLocal();
 
-            for (int i = 0; i < personaeInvids.size(); i++)
+            for (Invid invid: personaeInvids)
               {
-                adminPersonaCustom adminObj = (adminPersonaCustom) getDBSession().editDBObject((Invid) personaeInvids.elementAt(i));
+                adminPersonaCustom adminObj = (adminPersonaCustom) getDBSession().editDBObject(invid);
 
                 adminObj.refreshLabelField(null, null, (String) value);
               }
@@ -3198,8 +3190,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
                 int index = ((Integer) param1).intValue();
 
-                Vector valueAry = getFieldValuesLocal(GROUPLIST);
-                Invid delVal = (Invid) valueAry.elementAt(index);
+                Vector<Invid> valueAry = (Vector<Invid>) getFieldValuesLocal(GROUPLIST);
+                Invid delVal = valueAry.get(index);
 
                 if (debug)
                   {
@@ -3590,7 +3582,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     // get the volumes defined for the user on auto.home.default
 
     InvidDBField mapEntries = (InvidDBField) getField(userSchema.VOLUMES);
-    Vector entries = mapEntries.getValuesLocal();
+    Vector<Invid> entries = (Vector<Invid>) mapEntries.getValuesLocal();
 
     if (entries.size() < 1)
       {
@@ -3599,9 +3591,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
         return;
       }
 
-    for (int i = 0; i < entries.size(); i++)
+    for (Invid entry: entries)
       {
-        user_added_to_vol((Invid) entries.elementAt(i));
+        user_added_to_vol(entry);
       }
   }
 
@@ -3632,12 +3624,12 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     Integer id = (Integer) getFieldValueLocal(userSchema.UID);
     Invid homegroupInvid = (Invid) getFieldValueLocal(userSchema.HOMEGROUP);
 
-    Vector ownerInvids = (Vector) this.getFieldValuesLocal(SchemaConstants.OwnerListField);
+    Vector<Invid> ownerInvids = (Vector<Invid>) this.getFieldValuesLocal(SchemaConstants.OwnerListField);
     String ownerName;
 
     if (ownerInvids != null && ownerInvids.size() > 0)
       {
-        Invid ownerOne = (Invid) ownerInvids.elementAt(0);
+        Invid ownerOne = ownerInvids.get(0);
 
         DBObject ownerObj = getDBSession().viewDBObject(ownerOne);
         ownerName = ownerObj.getLabel();
@@ -3866,7 +3858,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     DBObject obj = getOriginal();
 
     InvidDBField mapEntries = (InvidDBField) obj.getField(userSchema.VOLUMES);
-    Vector entries = mapEntries.getValuesLocal();
+    Vector<Invid> entries = (Vector<Invid>) mapEntries.getValuesLocal();
 
     if (entries.size() < 1)
       {
@@ -3875,9 +3867,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
         return;
       }
 
-    for (int i = 0; i < entries.size(); i++)
+    for (Invid entry: entries)
       {
-        mail_user_removed_from_vol((Invid) entries.elementAt(i));
+        mail_user_removed_from_vol(entry);
       }
   }
 
@@ -4071,45 +4063,36 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
         return;
       }
 
-    Hashtable oldEntryMap = new Hashtable();
-    Hashtable newEntryMap = new Hashtable();
+    Map<String, Invid> oldEntryMap = new HashMap<String, Invid>();
+    Map<String, Invid> newEntryMap = new HashMap<String, Invid>();
 
-    Hashtable oldVolMap = new Hashtable();
-    Hashtable newVolMap = new Hashtable();
+    Map<Invid, Invid> oldVolMap = new HashMap<Invid, Invid>();
+    Map<Invid, Invid> newVolMap = new HashMap<Invid, Invid>();
 
-    Vector oldMapNames = new Vector();
-    Vector newMapNames = new Vector();
+    List<String> oldMapNames = new ArrayList<String>();
+    List<String> newMapNames = new ArrayList<String>();
 
-    Vector oldVolumes = new Vector();
-    Vector newVolumes = new Vector();
+    List<Invid> oldVolumes = new ArrayList<Invid>();
+    List<Invid> newVolumes = new ArrayList<Invid>();
 
-    Invid mapEntryInvid;
-    Invid volumeId;
-
-    DBObject mapEntryObj;
-    mapEntryCustom mapEntry;
-    String mapName;
-
-    Vector oldEntries = original.getFieldValuesLocal(userSchema.VOLUMES);
+    Vector<Invid> oldEntries = (Vector<Invid>) original.getFieldValuesLocal(userSchema.VOLUMES);
 
     if (oldEntries != null)
       {
-        for (int i = 0; i < oldEntries.size(); i++)
+        for (Invid mapEntryInvid: oldEntries)
           {
-            mapEntryInvid = (Invid) oldEntries.elementAt(i);
-
-            mapEntryObj = getDBSession().viewDBObject(mapEntryInvid);
+            DBObject mapEntryObj = getDBSession().viewDBObject(mapEntryInvid);
 
             if (mapEntryObj instanceof mapEntryCustom)
               {
-                mapEntry = (mapEntryCustom) mapEntryObj;
+                mapEntryCustom mapEntry = (mapEntryCustom) mapEntryObj;
 
-                mapName = mapEntry.getOriginalMapName();
-                volumeId = mapEntry.getOriginalVolumeInvid();
+                String mapName = mapEntry.getOriginalMapName();
+                Invid volumeId = mapEntry.getOriginalVolumeInvid();
 
-                oldVolumes.addElement(volumeId);
                 oldEntryMap.put(mapName, mapEntryInvid);
-                oldMapNames.addElement(mapName);
+                oldVolumes.add(volumeId);
+                oldMapNames.add(mapName);
 
                 // if we see the same volume in multiple maps, we'll just
                 // remember the last one seen.. doesn't matter much, for
@@ -4125,25 +4108,24 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
           }
       }
 
-    Vector newEntries = getFieldValuesLocal(userSchema.VOLUMES);
+    Vector<Invid> newEntries = (Vector<Invid>) getFieldValuesLocal(userSchema.VOLUMES);
 
     if (newEntries != null)
       {
-        for (int i = 0; i < newEntries.size(); i++)
+        for (Invid mapEntryInvid: newEntries)
           {
-            mapEntryInvid = (Invid) newEntries.elementAt(i);
-            mapEntryObj = getDBSession().viewDBObject(mapEntryInvid);
+            DBObject mapEntryObj = getDBSession().viewDBObject(mapEntryInvid);
 
             if (mapEntryObj instanceof mapEntryCustom)
               {
-                mapEntry = (mapEntryCustom) mapEntryObj;
+                mapEntryCustom mapEntry = (mapEntryCustom) mapEntryObj;
 
-                mapName = mapEntry.getMapName();
-                volumeId = mapEntry.getVolumeInvid();
+                String mapName = mapEntry.getMapName();
+                Invid volumeId = mapEntry.getVolumeInvid();
 
-                newVolumes.addElement(volumeId);
                 newEntryMap.put(mapName, mapEntryInvid);
-                newMapNames.addElement(mapName);
+                newVolumes.add(volumeId);
+                newMapNames.add(mapName);
 
                 // if we see the same volume in multiple maps, we'll just
                 // remember the last one seen.. doesn't matter much, for
@@ -4159,29 +4141,26 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
           }
       }
 
-    Vector addedVolumes = VectorUtils.difference(newVolumes, oldVolumes);
-    Vector deletedVolumes = VectorUtils.difference(oldVolumes, newVolumes);
+    List<Invid> addedVolumes = VectorUtils.difference(newVolumes, oldVolumes);
+    List<Invid> deletedVolumes = VectorUtils.difference(oldVolumes, newVolumes);
+    List<String> keptMapNames = VectorUtils.intersection(newMapNames, oldMapNames);
 
-    Vector keptMapNames = VectorUtils.intersection(newMapNames, oldMapNames);
-
-    for (int i = 0; i < keptMapNames.size(); i++)
+    for (String mapName: keptMapNames)
       {
-        mapName = (String) keptMapNames.elementAt(i);
-
         if (debug)
           {
             System.err.println("Checking map " + mapName + " for a volume change");
           }
 
-        Invid oldMapEntryInvid = (Invid) oldEntryMap.get(mapName);
-        Invid newMapEntryInvid = (Invid) newEntryMap.get(mapName);
+        Invid oldMapEntryInvid = oldEntryMap.get(mapName);
+        Invid newMapEntryInvid = newEntryMap.get(mapName);
 
         if (oldMapEntryInvid.equals(newMapEntryInvid))
           {
             // we know the map entry obj is an editing copy, don't
             // need to check here
 
-            mapEntry = (mapEntryCustom) getDBSession().viewDBObject(oldMapEntryInvid);
+            mapEntryCustom mapEntry = (mapEntryCustom) getDBSession().viewDBObject(oldMapEntryInvid);
 
             Invid oldVolInvid = mapEntry.getOriginalVolumeInvid();
             Invid newVolInvid = mapEntry.getVolumeInvid();
@@ -4203,16 +4182,14 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
                 // between these volumes, don't need to do anything more
                 // for it
 
-                deletedVolumes.removeElement(oldVolInvid);
-                addedVolumes.removeElement(newVolInvid);
+                deletedVolumes.remove(oldVolInvid);
+                addedVolumes.remove(newVolInvid);
               }
           }
       }
 
-    for (int i = 0; i < addedVolumes.size(); i++)
+    for (Invid volumeId: addedVolumes)
       {
-        volumeId = (Invid) addedVolumes.elementAt(i);
-
         if (debug)
           {
             System.err.println("Gained volume " + volumeId);
@@ -4221,13 +4198,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
         // the user might have the same volume registered on multiple
         // maps, but we don't care enough to send mail out for it
 
-        user_added_to_vol((Invid) newVolMap.get(volumeId));
+        user_added_to_vol(newVolMap.get(volumeId));
       }
 
-    for (int i = 0; i < deletedVolumes.size(); i++)
+    for (Invid volumeId: deletedVolumes)
       {
-        volumeId = (Invid) deletedVolumes.elementAt(i);
-
         if (debug)
           {
             System.err.println("Lost volume " + volumeId);
@@ -4237,7 +4212,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
         // multiple maps, but we don't care enough to send mail out
         // for it
 
-        mail_user_removed_from_vol((Invid) oldVolMap.get(volumeId));
+        mail_user_removed_from_vol(oldVolMap.get(volumeId));
       }
   }
 
@@ -4273,7 +4248,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     Invid newSysInvid;
     String newSysName;
 
-    Vector objects = new Vector();
+    Vector<Invid> objects = new Vector<Invid>();
 
     StringBuilder buffer = new StringBuilder();
 
@@ -4284,7 +4259,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     oldVolName = volumeObj.getLabel();
     oldVolPath = (String) volumeObj.getFieldValueLocal(volumeSchema.PATH);
     oldSysInvid = (Invid) volumeObj.getFieldValueLocal(volumeSchema.HOST);
-    objects.addElement(oldSysInvid);
+    objects.add(oldSysInvid);
     sysObj = getDBSession().viewDBObject(oldSysInvid, true);
     oldSysName = sysObj.getLabel();
 
@@ -4293,7 +4268,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     newVolName = volumeObj.getLabel();
     newVolPath = (String) volumeObj.getFieldValueLocal(volumeSchema.PATH);
     newSysInvid = (Invid) volumeObj.getFieldValueLocal(volumeSchema.HOST);
-    objects.addElement(newSysInvid);
+    objects.add(newSysInvid);
     sysObj = getDBSession().viewDBObject(newSysInvid);
     newSysName = sysObj.getLabel();
 
@@ -4439,8 +4414,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
         Invid admin = getGSession().getPermManager().getPersonaInvid();
         String adminName = getGSession().getPermManager().getUserName();
-        Vector objects = new Vector();
-        objects.addElement(getInvid());
+        Vector<Invid> objects = new Vector<Invid>();
+        objects.add(getInvid());
 
         StringBuilder buffer = new StringBuilder();
 
