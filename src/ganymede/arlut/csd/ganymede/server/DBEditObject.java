@@ -229,16 +229,17 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   /* -- */
 
   /**
-   * Dummy constructor, is responsible for creating a DBEditObject
+   * <p>Dummy constructor, is responsible for creating a DBEditObject
    * strictly for the purpose of having a handle to call our
-   * pseudostatic customization methods on.
+   * pseudostatic customization methods on.</p>
    *
-   * This is the version of the constructor that the
-   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}'s
-   * {@link arlut.csd.ganymede.server.DBObjectBase#createHook() createHook()}
-   * method uses to create the {@link arlut.csd.ganymede.server.DBObjectBase#objectHook objectHook}
-   * object.
-   **/
+   * <p>This is the version of the constructor that the {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase}'s {@link
+   * arlut.csd.ganymede.server.DBObjectBase#createHook() createHook()}
+   * method uses to create the {@link
+   * arlut.csd.ganymede.server.DBObjectBase#objectHook objectHook}
+   * object.</p>
+   */
 
   public DBEditObject(DBObjectBase base)
   {
@@ -666,23 +667,27 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * to allow a link based on what field of what object wants to link
    * to it.</p>
    *
-   * <p>By default, the 3 variants of the DBEditObject anonymousLinkOK()
-   * method are chained together, so that the customizer can choose
-   * which level of detail he is interested in.
+   * <p>By default, the 3 variants of the DBEditObject
+   * anonymousLinkOK() method are chained together, so that the
+   * customizer can choose which level of detail he is interested in.
    * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField}'s
-   * {@link arlut.csd.ganymede.server.InvidDBField#bind(arlut.csd.ganymede.common.Invid,arlut.csd.ganymede.common.Invid,boolean) bind()}
-   * method calls this version.  This version calls the three parameter
-   * version, which calls the two parameter version, which returns
-   * false by default.  Customizers can implement any of the three
-   * versions, but unless you maintain the version chaining yourself,
-   * there's no point to implementing more than one of them.</p>
+   * {@link
+   * arlut.csd.ganymede.server.InvidDBField#bind(arlut.csd.ganymede.common.Invid,arlut.csd.ganymede.common.Invid,boolean)
+   * bind()} method calls this version.  This version calls the three
+   * parameter version, which calls the two parameter version, which
+   * returns false by default.  Customizers can implement any of the
+   * three versions, but unless you maintain the version chaining
+   * yourself, there's no point to implementing more than one of
+   * them.</p>
    *
-   * <p>Note that the {@link arlut.csd.ganymede.server.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.server.DBField)
-   * choiceListHasExceptions()} method will call this version of anonymousLinkOK()
-   * with a null targetObject, to determine that the client should not
-   * use its cache for an InvidDBField's choices.  Any overriding done
-   * of this method must be able to handle a null targetObject, or else
-   * an exception will be thrown inappropriately.</p>
+   * <p>Note that the {@link
+   * arlut.csd.ganymede.server.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.server.DBField)
+   * choiceListHasExceptions()} method will call this version of
+   * anonymousLinkOK() with a null targetObject, to determine that the
+   * client should not use its cache for an InvidDBField's choices.
+   * Any overriding done of this method must be able to handle a null
+   * targetObject, or else an exception will be thrown
+   * inappropriately.</p>
    *
    * <p>The only reason to consult targetObject in any case is to
    * allow or disallow anonymous object linking to a field based on
@@ -698,7 +703,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * @param targetFieldID The field that the link is to be created in
    * @param sourceObject The object on the other side of the proposed link
    * @param sourceFieldID  The field on the other side of the proposed link
-   * @param gsession Who is trying to do this linking?  */
+   * @param gsession Who is trying to do this linking?
+   */
 
   public boolean anonymousLinkOK(DBObject targetObject, short targetFieldID,
                                  DBObject sourceObject, short sourceFieldID,
@@ -1007,20 +1013,20 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * <p>Customization method to verify overall consistency of
-   * a DBObject.  This method is intended to be overridden
-   * in DBEditObject subclasses, and will be called by
-   * {@link arlut.csd.ganymede.server.DBEditObject#commitPhase1() commitPhase1()}
-   * to verify the readiness of this object for commit.  The
-   * DBObject passed to this method will be a DBEditObject,
-   * complete with that object's GanymedeSession reference
-   * if this method is called during transaction commit, and
-   * that session reference may be used by the verifying code if
-   * the code needs to access the database.</p>
+   * <p>Customization method to verify overall consistency of a
+   * DBObject.  This method is intended to be overridden in
+   * DBEditObject subclasses, and will be called by {@link
+   * arlut.csd.ganymede.server.DBEditObject#commitPhase1()
+   * commitPhase1()} to verify the readiness of this object for
+   * commit.  The DBObject passed to this method will be a
+   * DBEditObject, complete with that object's GanymedeSession
+   * reference if this method is called during transaction commit, and
+   * that session reference may be used by the verifying code if the
+   * code needs to access the database.</p>
    *
-   * <p>This method is for custom checks specific to custom DBEditObject
-   * subclasses.  Standard checking for missing fields for which
-   * fieldRequired() returns true is done by {@link
+   * <p>This method is for custom checks specific to custom
+   * DBEditObject subclasses.  Standard checking for missing fields
+   * for which fieldRequired() returns true is done by {@link
    * arlut.csd.ganymede.server.DBEditSet#commit_checkObjectMissingFields(arlut.csd.ganymede.server.DBEditObject)}
    * during {@link
    * arlut.csd.ganymede.server.DBEditSet#commit_handlePhase1()}.</p>
@@ -1587,7 +1593,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * list will not be seen.</p>
    *
    * <p>To be overridden on necessity in DBEditObject subclasses.</p>
-   *
    */
 
   public boolean instantiateNewField(short fieldID)
@@ -1599,27 +1604,31 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * <p>Hook to allow the cloning of an object.  If this object type
    * supports cloning (which should be very much customized for this
    * object type.. creation of the ancillary objects, which fields to
-   * clone, etc.), this customization method will actually do the work.</p>
+   * clone, etc.), this customization method will actually do the
+   * work.</p>
    *
-   * <p>This method is called on a newly created object, in order
-   * to clone the state of origObj into it.  This method does not actually
-   * create a new object.. that is handled by
-   * {@link arlut.csd.ganymede.server.GanymedeSession#clone_db_object(arlut.csd.ganymede.common.Invid) clone_db_object()}
-   * before this method is called on the newly created object.</p>
+   * <p>This method is called on a newly created object, in order to
+   * clone the state of origObj into it.  This method does not
+   * actually create a new object.. that is handled by {@link
+   * arlut.csd.ganymede.server.GanymedeSession#clone_db_object(arlut.csd.ganymede.common.Invid)
+   * clone_db_object()} before this method is called on the newly
+   * created object.</p>
    *
-   * <p>The default (DBEditObject) implementation of this method will only clone
-   * fields for which
-   * {@link arlut.csd.ganymede.server.DBEditObject#canCloneField(arlut.csd.ganymede.server.DBSession,
-   * arlut.csd.ganymede.server.DBObject, arlut.csd.ganymede.server.DBField) canCloneField()}
-   * returns true, and which are not connected to a namespace (and
-   * thus could not possibly be cloned, because the values are
-   * constrained to be unique and non-duplicated).</p>
+   * <p>The default (DBEditObject) implementation of this method will
+   * only clone fields for which {@link
+   * arlut.csd.ganymede.server.DBEditObject#canCloneField(arlut.csd.ganymede.server.DBSession,
+   * arlut.csd.ganymede.server.DBObject,
+   * arlut.csd.ganymede.server.DBField) canCloneField()} returns true,
+   * and which are not connected to a namespace (and thus could not
+   * possibly be cloned, because the values are constrained to be
+   * unique and non-duplicated).</p>
    *
-   * <p>If one or more fields in the original object are unreadable by the cloning
-   * session, we will provide a list of fields that could not be cloned due to
-   * a lack of read permissions in a dialog in the ReturnVal.  Such a problem will
-   * not result in a failure code being returned, however.. the clone will succeed,
-   * but an informative dialog will be provided to the user.</p>
+   * <p>If one or more fields in the original object are unreadable by
+   * the cloning session, we will provide a list of fields that could
+   * not be cloned due to a lack of read permissions in a dialog in
+   * the ReturnVal.  Such a problem will not result in a failure code
+   * being returned, however.. the clone will succeed, but an
+   * informative dialog will be provided to the user.</p>
    *
    * <p>To be overridden on necessity in DBEditObject subclasses, but
    * this method's default logic will probably do what you need it to
