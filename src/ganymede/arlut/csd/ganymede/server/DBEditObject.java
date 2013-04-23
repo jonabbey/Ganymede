@@ -3978,8 +3978,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
                     changed.append("\n");
                     changed.append(diff);
 
-                    diffFound = true;
-
                     if (debug)
                       {
                         System.err.println("Field changed: " +
@@ -3992,6 +3990,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
                     changed.append(fieldDef.getName());
                     changed.append("\n");
                   }
+
+                diffFound = true;
               }
           }
       }
