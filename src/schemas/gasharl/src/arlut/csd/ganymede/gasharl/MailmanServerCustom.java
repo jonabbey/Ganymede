@@ -108,17 +108,25 @@ public class MailmanServerCustom extends DBEditObject implements SchemaConstants
     super(original, editset);
   }
 
-
   /**
+   * <p>Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.</p>
    *
-   * Customization method to control whether a specified field
-   * is required to be defined at commit time for a given object.<br><br>
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * To be overridden in DBEditObject subclasses.
+   * <p>Note that this method will not be called if the controlling
+   * GanymedeSession's enableOversight is turned off, as in
+   * bulk loading.</p>
    *
+   * <p>Note as well that the designated label field for objects are
+   * always required, whatever this method returns, and that this
+   * requirement holds without regard to the GanymedeSession's
+   * enableOversight value.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean fieldRequired(DBObject object, short fieldid)
+  @Override public boolean fieldRequired(DBObject object, short fieldid)
   {
     switch (fieldid)
       {
@@ -129,6 +137,4 @@ public class MailmanServerCustom extends DBEditObject implements SchemaConstants
 
     return false;
   }
-
-
 }
