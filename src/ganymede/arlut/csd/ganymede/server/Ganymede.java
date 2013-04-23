@@ -1011,7 +1011,7 @@ public final class Ganymede {
 
     // Start up the RMI registry thread.
 
-    // "Creating RMI registry on port {0,number,integer}"
+    // "Creating RMI registry on port {0}"
     debug(ts.l("main.info_starting_registry", registryPortProperty));
 
     try
