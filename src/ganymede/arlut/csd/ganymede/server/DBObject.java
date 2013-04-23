@@ -2483,6 +2483,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (field == null)
       {
+        // Okay, this field doesn't have a copy of the desired field.
+        // Let's see if we can go ahead and return a synthesized
+        // EmptyVector to the caller.
+
         DBObjectBaseField fieldDef = this.getFieldDef(fieldName);
 
         if (fieldDef == null)
@@ -2490,20 +2494,33 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
             throw new RuntimeException("No field named " + fieldName + " defined.");
           }
 
-        isVector = fieldDef.isArray();
-      }
-    else
-      {
-        isVector = field.isVector();
+        if (this.permManager != null)
+          {
+            PermEntry perm = this.permManager.getPerm(this, fieldDef.getID());
+
+            if (!perm.isVisible())
+              {
+                // "Don''t have permission to read field {0} in object {1}"
+                throw new GanyPermissionsException(ts.l("global.no_read_perms", fieldName, this.getLabel()));
+              }
+          }
+
+        if (!fieldDef.isArray())
+          {
+            // "Couldn't get vector values on scalar field {0}"
+            throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
+          }
+
+        return new EmptyVector();
       }
 
-    if (!isVector)
+    if (!field.isVector())
       {
         // "Couldn't get vector values on scalar field {0}"
         throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
       }
 
-    return this.getFieldValues(field);
+    return field.getValues();
   }
 
   /**
@@ -2529,49 +2546,48 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     if (field == null)
       {
+        // Okay, this field doesn't have a copy of the desired field.
+        // Let's see if we can go ahead and return a synthesized
+        // EmptyVector to the caller.
+
         DBObjectBaseField fieldDef = this.getFieldDef(fieldID);
 
         if (fieldDef == null)
           {
             throw new RuntimeException("No field numbered " + fieldID + " is defined.");
           }
-        else
+
+        fieldName = fieldDef.getName();
+
+        if (this.permManager != null)
           {
-            fieldName = fieldDef.getName();
+            PermEntry perm = this.permManager.getPerm(this, fieldID);
+
+            if (!perm.isVisible())
+              {
+                // "Don''t have permission to read field {0} in object {1}"
+                throw new GanyPermissionsException(ts.l("global.no_read_perms", fieldName, this.getLabel()));
+              }
           }
 
-        isVector = fieldDef.isArray();
-      }
-    else
-      {
-        fieldName = field.getName();
-        isVector = field.isVector();
+        if (!fieldDef.isArray())
+          {
+            // "Couldn't get vector values on scalar field {0}"
+            throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
+          }
+
+        return new EmptyVector();
       }
 
-    if (!isVector)
+    fieldName = field.getName();
+
+    if (!field.isVector())
       {
         // "Couldn't get vector values on scalar field {0}"
         throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
       }
 
-    return this.getFieldValues(field);
-  }
-
-  private Vector getFieldValues(DBField f) throws GanyPermissionsException
-  {
-    if (f == null)
-      {
-        return new EmptyVector();
-      }
-
-    Vector result = f.getValues();
-
-    if (result == null)
-      {
-        result = new EmptyVector();
-      }
-
-    return result;
+    return field.getValues();
   }
 
   /**
@@ -2606,20 +2622,22 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
             throw new RuntimeException("No field named " + fieldName + " defined.");
           }
 
-        isVector = fieldDef.isArray();
-      }
-    else
-      {
-        isVector = field.isVector();
+        if (!fieldDef.isArray())
+          {
+            // "Couldn't get vector values on scalar field {0}"
+            throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
+          }
+
+        return new EmptyVector();
       }
 
-    if (!isVector)
+    if (!field.isVector())
       {
         // "Couldn't get vector values on scalar field {0}"
         throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
       }
 
-    return this.getFieldValuesLocal(field);
+    return field.getValuesLocal();
   }
 
   /**
@@ -2655,43 +2673,27 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
           {
             throw new RuntimeException("No field numbered " + fieldID + " is defined.");
           }
-        else
+
+        fieldName = fieldDef.getName();
+
+        if (!fieldDef.isArray())
           {
-            fieldName = fieldDef.getName();
+            // "Couldn't get vector values on scalar field {0}"
+            throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
           }
 
-        isVector = fieldDef.isArray();
-      }
-    else
-      {
-        fieldName = field.getName();
-        isVector = field.isVector();
+        return new EmptyVector();
       }
 
-    if (!isVector)
+    fieldName = field.getName();
+
+    if (!field.isVector())
       {
         // "Couldn't get vector values on scalar field {0}"
         throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
       }
 
-    return this.getFieldValuesLocal(field);
-  }
-
-  private Vector getFieldValuesLocal(DBField f)
-  {
-    if (f == null)
-      {
-        return new EmptyVector();
-      }
-
-    Vector result = f.getValuesLocal();
-
-    if (result == null)
-      {
-        result = new EmptyVector();
-      }
-
-    return result;
+    return field.getValuesLocal();
   }
 
   /**
