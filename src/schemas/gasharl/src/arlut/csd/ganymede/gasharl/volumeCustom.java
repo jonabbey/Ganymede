@@ -272,13 +272,22 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
    * objects to generate different labels for a given object based on
    * their perspective.  This is used to sort of hackishly simulate a
    * relational-type capability for the purposes of viewing
-   * backlinks.</p>
+   * context-sensitive labels of objects that are linked from Invid
+   * fields in this object.</p>
    *
-   * <p>See the automounter map and NFS volume DBEditObject subclasses
-   * for how this is to be used, if you have them.</p>
+   * <p>This method primarily affects the results returned by {@link
+   * arlut.csd.ganymede.server.InvidDBField#encodedValues()}, but it
+   * can also affect the results shown by {@link
+   * arlut.csd.ganymede.server.DBQueryEngine#query(arlut.csd.ganymede.common.Query,
+   * arlut.csd.ganymede.server.DBEditObject)} when the
+   * perspectiveObject parameter is non-null.</p>
+   *
+   * <p>See the automounter map and NFS volume DBEditObject
+   * subclasses for how this is to be used, if you have
+   * them.</p>
    */
 
-  public String lookupLabel(DBObject object)
+  @Override public String lookupLabel(DBObject object)
   {
     // we want to create our own, map-centric view of mapEntry objects
 
