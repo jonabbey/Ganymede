@@ -73,6 +73,16 @@ final public class EmptyVector<E> extends Vector<E>
   {
   }
 
+  /**
+   * If code clones this EmptyVector, go ahead and give them back a
+   * mutable Vector they can play with.
+   */
+
+  @Override public Object clone()
+  {
+    return new Vector();
+  }
+
   @Override public synchronized void trimToSize()
   {
     return;
