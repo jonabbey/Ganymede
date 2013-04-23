@@ -3,17 +3,19 @@
    dhcpEntryCustom.java
 
    This file is a management class for Automounter map entry objects in Ganymede.
-   
+
    Created: 10 October 2007
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -75,10 +77,8 @@ import arlut.csd.ganymede.server.StringDBField;
 ------------------------------------------------------------------------------*/
 
 /**
- *
  * This class represents the option value objects that are embedded in
  * the options field in the DHCP Entry object.
- *
  */
 
 public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dhcpEntrySchema {
@@ -120,40 +120,62 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
   }
 
   /**
+   * <p>Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.</p>
    *
-   * Customization method to control whether a specified field
-   * is required to be defined at commit time for a given object.<br><br>
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * To be overridden in DBEditObject subclasses.
+   * <p>Note that this method will not be called if the controlling
+   * GanymedeSession's enableOversight is turned off, as in
+   * bulk loading.</p>
    *
+   * <p>Note as well that the designated label field for objects are
+   * always required, whatever this method returns, and that this
+   * requirement holds without regard to the GanymedeSession's
+   * enableOversight value.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean fieldRequired(DBObject object, short fieldid)
+  @Override public boolean fieldRequired(DBObject object, short fieldid)
   {
     switch (fieldid)
       {
       case dhcpEntrySchema.LABEL:
       case dhcpEntrySchema.TYPE:
       case dhcpEntrySchema.VALUE:
-	return true;
+        return true;
       }
 
     return false;
   }
 
   /**
+   * <p>This method returns a key that can be used by the client to
+   * cache the value returned by choices().  If the client already has
+   * the key cached on the client side, it can provide the choice list
+   * from its cache rather than calling choices() on this object
+   * again.</p>
    *
-   * This method returns a key that can be used by the client
-   * to cache the value returned by choices().  If the client
-   * already has the key cached on the client side, it
-   * can provide the choice list from its cache rather than
-   * calling choices() on this object again.<br><br>
+   * <p>The default logic in this method is designed to cause the
+   * client to cache choice lists for invid fields in the 'all objects
+   * of invid target type' cache bucket.  If your InvidDBField needs
+   * to provide a restricted subset of objects of the targeted type as
+   * the choice list, you'll need to override this method to either
+   * return null (to turn off choice list caching), or generate some
+   * kind of unique key that won't collide with the Short objects used
+   * to represent the default object list caches.</p>
    *
-   * If there is no caching key, this method will return null.
+   * <p>See also the {@link
+   * arlut.csd.ganymede.server.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.server.DBField)}
+   * hook, which controls whether or not the default logic will
+   * encourage the client to cache a given InvidDBField's choice
+   * list.</p>
    *
+   * <p>If there is no caching key, this method will return null.</p>
    */
 
-  public Object obtainChoicesKey(DBField field)
+  @Override public Object obtainChoicesKey(DBField field)
   {
     // We want to have the client always query for values in the type
     // field, since we are going to be dynamically filtering values
@@ -162,29 +184,32 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
 
     if (field.getID() == dhcpEntrySchema.TYPE)
       {
-	return null;
+        return null;
       }
 
     return super.obtainChoicesKey(field);
   }
 
   /**
-   *
-   * This method provides a hook that can be used to generate
+   * <p>This method provides a hook that can be used to generate
    * choice lists for invid and string fields that provide
    * such.  String and Invid DBFields will call their owner's
-   * obtainChoiceList() method to get a list of valid choices.<br><br>
+   * obtainChoiceList() method to get a list of valid choices.</p>
    *
-   * This method will provide a reasonable default for targetted
-   * invid fields.
-   * 
+   * <p>This method will provide a reasonable default for targetted
+   * invid fields, filtered by the GanymedeSession's
+   * visibilityFilterInvids list.</p>
+   *
+   * <p>NOTE: This method does not need to be synchronized.  Making this
+   * synchronized can lead to DBEditObject/DBSession nested monitor
+   * deadlocks.</p>
    */
 
-  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
+  @Override public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (field.getID() != dhcpEntrySchema.TYPE)
       {
-	return super.obtainChoiceList(field);
+        return super.obtainChoiceList(field);
       }
 
     // Dynamically construct our custom filtered list of available
@@ -196,33 +221,31 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
     // entry should belong to.  We don't want it to include any types
     // that we already have an entry for.
 
-    Vector typesToSkip = new Vector();
+    Vector<Invid> typesToSkip = new Vector();
 
-    Vector siblings = getSiblingInvids();
+    Vector<Invid> siblings = getSiblingInvids();
     Invid typeInvid;
 
     for (int i = 0; i < siblings.size(); i++)
       {
-	DBObject entry = lookupInvid((Invid) siblings.elementAt(i), false);
-	typeInvid = (Invid) entry.getFieldValueLocal(dhcpEntrySchema.TYPE);
-	typesToSkip.addElement(typeInvid);
+        DBObject entry = lookupInvid(siblings.get(i), false);
+        typeInvid = (Invid) entry.getFieldValueLocal(dhcpEntrySchema.TYPE);
+        typesToSkip.add(typeInvid);
       }
-    
+
     // ok, typesToSkip has a list of invid's to skip in our choice
     // list.
 
-    Vector suggestedTypes = super.obtainChoiceList(field).getInvids();
-    Vector acceptableTypes = VectorUtils.difference(suggestedTypes, typesToSkip);
+    Vector<Invid> suggestedTypes = super.obtainChoiceList(field).getInvids();
+    Vector<Invid> acceptableTypes = VectorUtils.difference(suggestedTypes, typesToSkip);
 
     QueryResult result = new QueryResult();
 
-    for (int i = 0; i < acceptableTypes.size(); i++)
+    for (Invid type: acceptableTypes)
       {
-	typeInvid = (Invid) acceptableTypes.elementAt(i);
-
-        result.addRow(typeInvid, lookupInvidLabel(typeInvid), false);
+        result.addRow(type, lookupInvidLabel(type), false);
       }
-    
+
     return result;
   }
 
@@ -256,71 +279,78 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
     return object.getParentInvid().getType() == (short) 268;
   }
 
-
-  private Vector getSiblingInvids()
+  private Vector<Invid> getSiblingInvids()
   {
-    Vector result = null;
+    Vector<Invid> result = null;
 
     if (ownedByDHCPGroup())
       {
-        result = (Vector) getParentObj().getFieldValuesLocal(dhcpGroupSchema.OPTIONS).clone();
+        result = (Vector<Invid>) getParentObj().getFieldValuesLocal(dhcpGroupSchema.OPTIONS).clone();
       }
     else if (ownedBySystem())
       {
-        result = (Vector) getParentObj().getFieldValuesLocal(systemSchema.DHCPOPTIONS).clone();
+        result = (Vector<Invid>) getParentObj().getFieldValuesLocal(systemSchema.DHCPOPTIONS).clone();
       }
     else if (ownedByDHCPNetwork())
       {
-	Vector optionsVect = (Vector) getParentObj().getFieldValuesLocal(dhcpNetworkSchema.OPTIONS).clone();
+        Vector<Invid> optionsVect = (Vector<Invid>) getParentObj().getFieldValuesLocal(dhcpNetworkSchema.OPTIONS).clone();
 
-	if (optionsVect.contains(getInvid()))
-	  {
-	    result = optionsVect;
-	  }
-	else if (getParentObj().isDefined(dhcpNetworkSchema.GUEST_OPTIONS))
-	  {
-	    Vector guestOptionsVect = (Vector) getParentObj().getFieldValuesLocal(dhcpNetworkSchema.GUEST_OPTIONS).clone();
+        if (optionsVect.contains(getInvid()))
+          {
+            result = optionsVect;
+          }
+        else if (getParentObj().isDefined(dhcpNetworkSchema.GUEST_OPTIONS))
+          {
+            Vector<Invid> guestOptionsVect = (Vector<Invid>) getParentObj().getFieldValuesLocal(dhcpNetworkSchema.GUEST_OPTIONS).clone();
 
-	    if (guestOptionsVect.contains(getInvid()))
-	      {
-		result = guestOptionsVect;
-	      }
-	  }
+            if (guestOptionsVect.contains(getInvid()))
+              {
+                result = guestOptionsVect;
+              }
+          }
 
-	if (result == null)
-	  {
-	    throw new RuntimeException("couldn't find our own invid in parent dhcp network fields.");
-	  }
+        if (result == null)
+          {
+            throw new RuntimeException("couldn't find our own invid in parent dhcp network fields.");
+          }
       }
 
     // we are not our own sibling.
 
-    result.removeElement(getInvid());
+    result.remove(getInvid());
 
     return result;
   }
 
   /**
-   * This method provides a pre-commit hook that runs after the user
-   * has hit commit but before the system has established write locks
-   * for the commit.
+   * <p>This method provides a pre-commit hook that runs after the
+   * user has hit commit but before the system has established write
+   * locks for the commit.</p>
    *
-   * The intended purpose of this hook is to allow objects that
+   * <p>The intended purpose of this hook is to allow objects that
    * dynamically maintain hidden label fields to update those fields
-   * from the contents of the object's other fields at commit time.
+   * from the contents of the object's other fields at commit
+   * time.</p>
    *
-   * This method runs in a checkpointed context.  If this method fails
-   * in any operation, you should return a ReturnVal with a failure
-   * dialog encoded, and the transaction's commit will be blocked and
-   * a dialog explaining the problem will be presented to the user.
+   * <p>This method runs in a checkpointed context.  If this method
+   * fails in any operation, you should return a ReturnVal with a
+   * failure dialog encoded, and the transaction's commit will be
+   * blocked and a dialog explaining the problem will be presented to
+   * the user.</p>
+   *
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
-  public ReturnVal preCommitHook()
+  @Override public ReturnVal preCommitHook()
   {
     if (this.getStatus() == ObjectStatus.DELETING ||
-	this.getStatus() == ObjectStatus.DROPPING)
+        this.getStatus() == ObjectStatus.DROPPING)
       {
-	return null;
+        return null;
       }
 
     String parentName = lookupInvidLabel((Invid) getFieldValueLocal(SchemaConstants.ContainerField));
@@ -341,20 +371,21 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
     return setFieldValueLocal(dhcpEntrySchema.LABEL, parentName + ":" + String.valueOf(lookupInvidLabel(typeInvid)));
   }
 
+
   /**
-   * If this DBEditObject is managing an embedded object, the
+   * <p>If this DBEditObject is managing an embedded object, the
    * getEmbeddedObjectLabel() can be overridden to display a synthetic
    * label in the context of viewing or editing the containing object,
-   * and when doing queries on the containing type.
+   * and when doing queries on the containing type.</p>
    *
-   * The getLabel() method will not consult this hook, however, and
+   * <p>The getLabel() method will not consult this hook, however, and
    * embedded objects will be represented with their unique label
-   * field when processed in an XML context.
+   * field when processed in an XML context.</p>
    *
    * <b>*PSEUDOSTATIC*</b>
    */
 
-  public final String getEmbeddedObjectDisplayLabelHook(DBObject object)
+  @Override public final String getEmbeddedObjectDisplayLabelHook(DBObject object)
   {
     InvidDBField typeField;
     StringDBField valueField;
@@ -364,7 +395,7 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
 
     if ((object == null) || (object.getTypeID() != getTypeID()))
       {
-	return null;
+        return null;
       }
 
     typeField = (InvidDBField) object.getField(TYPE);
@@ -390,7 +421,7 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
   }
 
   /**
-   * This method allows the DBEditObject to have executive approval
+   * <p>This method allows the DBEditObject to have executive approval
    * of any scalar set operation, and to take any special actions in
    * reaction to the set.  When a scalar field has its value set, it
    * will call its owners finalizeSetValue() method, passing itself as
@@ -398,40 +429,40 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
    * approved as the &lt;value&gt; parameter.  A Ganymede customizer
    * who creates custom subclasses of the DBEditObject class can
    * override the finalizeSetValue() method and write his own logic
-   * to examine any change and either approve or reject the change.
+   * to examine any change and either approve or reject the change.</p>
    *
-   * A custom finalizeSetValue() method will typically need to
+   * <p>A custom finalizeSetValue() method will typically need to
    * examine the field parameter to see which field is being changed,
    * and then do the appropriate checking based on the value
    * parameter.  The finalizeSetValue() method can call the normal
    * this.getFieldValueLocal() type calls to examine the current state
    * of the object, if such information is necessary to make
-   * appropriate decisions.
+   * appropriate decisions.</p>
    *
-   * If finalizeSetValue() returns null or a ReturnVal object with
+   * <p>If finalizeSetValue() returns null or a ReturnVal object with
    * a positive success value, the DBField that called us is
    * guaranteed to proceed to make the change to its value.  If this
    * method returns a non-success code in its ReturnVal, as with the
    * result of a call to Ganymede.createErrorDialog(), the DBField
    * that called us will not make the change, and the field will be
    * left unchanged.  Any error dialog returned from finalizeSetValue()
-   * will be passed to the user.
+   * will be passed to the user.</p>
    *
-   * The DBField that called us will take care of all standard
+   * <p>The DBField that called us will take care of all standard
    * checks on the operation (including a call to our own
    * verifyNewValue() method before calling this method.  Under normal
    * circumstances, we won't need to do anything here.
    * finalizeSetValue() is useful when you need to do unusually
    * involved checks, and for when you want a chance to trigger other
    * changes in response to a particular field's value being
-   * changed.
+   * changed.</p>
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
    */
 
-  public synchronized ReturnVal finalizeSetValue(DBField field, Object value)
+  @Override public synchronized ReturnVal finalizeSetValue(DBField field, Object value)
   {
     ReturnVal result = null;
     Invid parentInvid = getParentInvid();
@@ -445,22 +476,22 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
       {
         Invid oldInvid = (Invid) field.getValueLocal();
 
-	if (oldInvid == null)
-	  {
-	    // we set the type after the value.  make sure the value
-	    // is compatible with the type.
+        if (oldInvid == null)
+          {
+            // we set the type after the value.  make sure the value
+            // is compatible with the type.
 
-	    StringDBField valueField = (StringDBField) this.getField(dhcpEntrySchema.VALUE);
-	    String valueString = (String) valueField.getValueLocal();
-		  
-	    if (valueString != null)
-	      {
-		DBObject verifyObject = lookupInvid((Invid) value);
+            StringDBField valueField = (StringDBField) this.getField(dhcpEntrySchema.VALUE);
+            String valueString = (String) valueField.getValueLocal();
 
-		result = ReturnVal.merge(result, dhcpOptionCustom.verifyAcceptableValue(verifyObject, valueString));
-	      }
-	  }
-	else
+            if (valueString != null)
+              {
+                DBObject verifyObject = lookupInvid((Invid) value);
+
+                result = ReturnVal.merge(result, dhcpOptionCustom.verifyAcceptableValue(verifyObject, valueString));
+              }
+          }
+        else
           {
             DBObject oldOptionObject = lookupInvid(oldInvid);
             String oldOptionType = (String) oldOptionObject.getFieldValueLocal(dhcpOptionSchema.OPTIONTYPE);
@@ -481,7 +512,7 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
                   {
                     return result;
                   }
-            
+
                 if (result == null)
                   {
                     result = new ReturnVal(true, true);
@@ -512,38 +543,38 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
           {
             // force the client to requery legal (and non-taken) types
 
-            Vector siblings = getSiblingInvids();
+            Vector<Invid> siblings = getSiblingInvids();
 
-            for (int i = 0; i < siblings.size(); i++)
+            for (Invid sibling: siblings)
               {
-                result.addRescanField((Invid) siblings.elementAt(i), dhcpEntrySchema.TYPE);
+                result.addRescanField(sibling, dhcpEntrySchema.TYPE);
               }
           }
 
         return result;
       }
 
-    return result;		// success by default
+    return result;              // success by default
   }
 
   /**
-   * This method provides a hook that can be used to check any values
+   * <p>This method provides a hook that can be used to check any values
    * to be set in any field in this object.  Subclasses of
    * DBEditObject should override this method, implementing basically
    * a large switch statement to check for any given field whether the
    * submitted value is acceptable given the current state of the
-   * object.
+   * object.</p>
    *
-   * Question: what synchronization issues are going to be needed
+   * <p>Question: what synchronization issues are going to be needed
    * between DBEditObject and DBField to insure that we can have
-   * a reliable verifyNewValue method here?
+   * a reliable verifyNewValue method here?</p>
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
    */
 
-  public ReturnVal verifyNewValue(DBField field, Object value)
+  @Override public ReturnVal verifyNewValue(DBField field, Object value)
   {
     if (field.getID() == dhcpEntrySchema.VALUE)
       {
@@ -552,21 +583,21 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
             Ganymede.debug("attempting to verify: " + String.valueOf(value));
           }
 
-	String inString = (String) value;
-	String transformedString;
+        String inString = (String) value;
+        String transformedString;
 
-	if ((inString == null) || (inString.equals("")))
-	  {
-	    return null; // okay by us!
-	  }
+        if ((inString == null) || (inString.equals("")))
+          {
+            return null; // okay by us!
+          }
 
         Invid dhcpType = (Invid) getFieldValueLocal(dhcpEntrySchema.TYPE);
 
-	if (dhcpType == null)
-	  {
-	    // okay, we'll verify it later.
-	    return null;
-	  }
+        if (dhcpType == null)
+          {
+            // okay, we'll verify it later.
+            return null;
+          }
 
         DBObject verifyObject = lookupInvid(dhcpType);
 
@@ -579,7 +610,7 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
                 Ganymede.debug("verifying as is: " + String.valueOf(value));
               }
 
-	    return super.verifyNewValue(field, value); // no change, so no problem
+            return super.verifyNewValue(field, value); // no change, so no problem
           }
         else if (retVal.didSucceed() && retVal.hasTransformedValue())
           {
@@ -593,32 +624,31 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
   }
 
   /**
-   *
-   * Customization method to verify whether the user should be able to
-   * see a specific field in a given object.  Instances of DBField will
+   * <p>Customization method to verify whether the user should be able to
+   * see a specific field in a given object.  Instances of
+   * {@link arlut.csd.ganymede.server.DBField DBField} will
    * wind up calling up to here to let us override the normal visibility
-   * process.<br><br>
+   * process.</p>
    *
-   * Note that it is permissible for session to be null, in which case
+   * <p>Note that it is permissible for session to be null, in which case
    * this method will always return the default visiblity for the field
-   * in question.<br><br>
+   * in question.</p>
    *
-   * If field is not from an object of the same base as this DBEditObject,
-   * an exception will be thrown.<br><br>
+   * <p>If field is not from an object of the same base as this DBEditObject,
+   * an exception will be thrown.</p>
    *
-   * To be overridden in DBEditObject subclasses.
-   * 
-   * <b>*PSEUDOSTATIC*</b>
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean canSeeField(DBSession session, DBField field)
+  @Override public boolean canSeeField(DBSession session, DBField field)
   {
     // don't show off our hidden label for direct editing or viewing
 
     if (field.getID() == dhcpEntrySchema.LABEL)
       {
-	return false;
+        return false;
       }
 
     return super.canSeeField(session, field);
