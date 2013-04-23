@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -120,26 +120,34 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   * This method provides a pre-commit hook that runs after the user
-   * has hit commit but before the system has established write locks
-   * for the commit.
+   * <p>This method provides a pre-commit hook that runs after the
+   * user has hit commit but before the system has established write
+   * locks for the commit.</p>
    *
-   * The intended purpose of this hook is to allow objects that
+   * <p>The intended purpose of this hook is to allow objects that
    * dynamically maintain hidden label fields to update those fields
-   * from the contents of the object's other fields at commit time.
+   * from the contents of the object's other fields at commit
+   * time.</p>
    *
-   * This method runs in a checkpointed context.  If this method fails
-   * in any operation, you should return a ReturnVal with a failure
-   * dialog encoded, and the transaction's commit will be blocked and
-   * a dialog explaining the problem will be presented to the user.
+   * <p>This method runs in a checkpointed context.  If this method
+   * fails in any operation, you should return a ReturnVal with a
+   * failure dialog encoded, and the transaction's commit will be
+   * blocked and a dialog explaining the problem will be presented to
+   * the user.</p>
+   *
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
-  public ReturnVal preCommitHook()
+  @Override public ReturnVal preCommitHook()
   {
     if (this.getStatus() == ObjectStatus.DELETING ||
-	this.getStatus() == ObjectStatus.DROPPING)
+        this.getStatus() == ObjectStatus.DROPPING)
       {
-	return null;
+        return null;
       }
 
     // if we changed networks so as not to require a MAC address for
@@ -179,7 +187,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     if (ipfield != null)
       {
-	ipString = ipfield.getValueString();
+        ipString = ipfield.getValueString();
       }
 
     return genLabel(name, ipString, macAddress);
@@ -195,89 +203,105 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     if (interfaceName != null)
       {
-	result.append(interfaceName);
+        result.append(interfaceName);
       }
 
     if (ipString != null && !ipString.equals(""))
       {
-	if (result.length() != 0)
-	  {
-	    result.append(" ");
-	  }
+        if (result.length() != 0)
+          {
+            result.append(" ");
+          }
 
-	result.append("[");
-	result.append(ipString);
-	openIP = true;
+        result.append("[");
+        result.append(ipString);
+        openIP = true;
       }
 
     if (macAddress != null && macAddress.length() != 0)
       {
-	if (result.length() != 0)
-	  {
-	    result.append(" ");
-	  }
+        if (result.length() != 0)
+          {
+            result.append(" ");
+          }
 
-	if (openIP)
-	  {
-	    result.append("- ");
-	  }
-	else
-	  {
-	    result.append("[");
-	  }
+        if (openIP)
+          {
+            result.append("- ");
+          }
+        else
+          {
+            result.append("[");
+          }
 
-	result.append(macAddress);
+        result.append(macAddress);
 
-	openMAC = true;
+        openMAC = true;
       }
 
     if (openIP || openMAC)
       {
-	result.append("]");
+        result.append("]");
       }
 
     return result.toString();
   }
 
   /**
+   * <p>This method returns a key that can be used by the client to
+   * cache the value returned by choices().  If the client already has
+   * the key cached on the client side, it can provide the choice list
+   * from its cache rather than calling choices() on this object
+   * again.</p>
    *
-   * This method returns a key that can be used by the client
-   * to cache the value returned by choices().  If the client
-   * already has the key cached on the client side, it
-   * can provide the choice list from its cache rather than
-   * calling choices() on this object again.<br><br>
+   * <p>The default logic in this method is designed to cause the
+   * client to cache choice lists for invid fields in the 'all objects
+   * of invid target type' cache bucket.  If your InvidDBField needs
+   * to provide a restricted subset of objects of the targeted type as
+   * the choice list, you'll need to override this method to either
+   * return null (to turn off choice list caching), or generate some
+   * kind of unique key that won't collide with the Short objects used
+   * to represent the default object list caches.</p>
    *
-   * If there is no caching key, this method will return null.
+   * <p>See also the {@link
+   * arlut.csd.ganymede.server.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.server.DBField)}
+   * hook, which controls whether or not the default logic will
+   * encourage the client to cache a given InvidDBField's choice
+   * list.</p>
    *
+   * <p>If there is no caching key, this method will return null.</p>
    */
 
-  public Object obtainChoicesKey(DBField field)
+  @Override public Object obtainChoicesKey(DBField field)
   {
     if (field.getID() == interfaceSchema.IPNET)
       {
-	return null;		// no caching net choices, thankyouverymuch
+        return null;            // no caching net choices, thankyouverymuch
       }
 
     return super.obtainChoicesKey(field);
   }
 
   /**
-   *
-   * This method provides a hook that can be used to generate
+   * <p>This method provides a hook that can be used to generate
    * choice lists for invid and string fields that provide
    * such.  String and Invid DBFields will call their owner's
-   * obtainChoiceList() method to get a list of valid choices.<br><br>
+   * obtainChoiceList() method to get a list of valid choices.</p>
    *
-   * This method will provide a reasonable default for targetted
-   * invid fields.
+   * <p>This method will provide a reasonable default for targetted
+   * invid fields, filtered by the GanymedeSession's
+   * visibilityFilterInvids list.</p>
    *
+   * <p>NOTE: This method does not need to be synchronized.  Making this
+   * synchronized can lead to DBEditObject/DBSession nested monitor
+   * deadlocks.</p>
    */
 
-  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
+  @Override public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (field.getID() != interfaceSchema.IPNET)
       {
-	return super.obtainChoiceList(field);
+        return super.obtainChoiceList(field);
       }
 
     QueryResult result = new QueryResult();
@@ -285,34 +309,37 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     // get the vector of currently available nets from our containing
     // System
 
-    Vector ipNetVec = getParentSysObj().getAvailableNets();
+    Vector<ObjectHandle> ipNetVec = getParentSysObj().getAvailableNets();
 
     if (ipNetVec != null)
       {
-	for (int i = 0; i < ipNetVec.size(); i++)
-	  {
-	    result.addRow((ObjectHandle) ipNetVec.elementAt(i));
-	  }
+        for (ObjectHandle handle: ipNetVec)
+          {
+            result.addRow(handle);
+          }
       }
 
     if (debug)
       {
-	System.err.println("interfaceCustom: net choice for invid " + getInvid() + ":\n" +
-			   result.getBuffer());
+        System.err.println("interfaceCustom: net choice for invid " + getInvid() + ":\n" +
+                           result.getBuffer());
       }
 
     return result;
   }
 
   /**
-   *
-   * This method provides a hook that a DBEditObject subclass
+   * <p>This method provides a hook that a DBEditObject subclass
    * can use to indicate whether a given field can only
-   * choose from a choice provided by obtainChoiceList()
+   * choose from a choice provided by obtainChoiceList()</p>
    *
+   * <p>To be overridden on necessity in DBEditObject subclasses,
+   * particularly if you have a StringDBField that you want to force
+   * to pick from the list of choices provided by your DBEditObject
+   * subclass' obtainChoiceList() method.</p>
    */
 
-  public boolean mustChoose(DBField field)
+  @Override public boolean mustChoose(DBField field)
   {
     // Don't force the IPNET field to be chosen from the choices()
     // list, since the custom finalizeSetValue logic in this class
@@ -324,26 +351,26 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     if (field.getID() == interfaceSchema.IPNET)
       {
-	return false;
+        return false;
       }
 
     return super.mustChoose(field);
   }
 
   /**
-   * If this DBEditObject is managing an embedded object, the
+   * <p>If this DBEditObject is managing an embedded object, the
    * getEmbeddedObjectLabel() can be overridden to display a synthetic
    * label in the context of viewing or editing the containing object,
-   * and when doing queries on the containing type.
+   * and when doing queries on the containing type.</p>
    *
-   * The getLabel() method will not consult this hook, however, and
+   * <p>The getLabel() method will not consult this hook, however, and
    * embedded objects will be represented with their unique label
-   * field when processed in an XML context.
+   * field when processed in an XML context.</p>
    *
    * <b>*PSEUDOSTATIC*</b>
    */
 
-  public String getEmbeddedObjectDisplayLabelHook(DBObject object)
+  @Override public String getEmbeddedObjectDisplayLabelHook(DBObject object)
   {
     DBObject parent = object.getParentObj();
 
@@ -366,32 +393,31 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
-   * Customization method to verify whether the user should be able to
-   * see a specific field in a given object.  Instances of DBField will
+   * <p>Customization method to verify whether the user should be able to
+   * see a specific field in a given object.  Instances of
+   * {@link arlut.csd.ganymede.server.DBField DBField} will
    * wind up calling up to here to let us override the normal visibility
-   * process.<br><br>
+   * process.</p>
    *
-   * Note that it is permissible for session to be null, in which case
+   * <p>Note that it is permissible for session to be null, in which case
    * this method will always return the default visiblity for the field
-   * in question.<br><br>
+   * in question.</p>
    *
-   * If field is not from an object of the same base as this DBEditObject,
-   * an exception will be thrown.<br><br>
+   * <p>If field is not from an object of the same base as this DBEditObject,
+   * an exception will be thrown.</p>
    *
-   * To be overridden in DBEditObject subclasses.
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
-   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean canSeeField(DBSession session, DBField field)
+  @Override public boolean canSeeField(DBSession session, DBField field)
   {
     // don't show off our hidden label for direct editing or viewing
 
     if (field.getID() == interfaceSchema.HIDDENLABEL)
       {
-	return false;
+        return false;
       }
 
     // For the rest of our fields that we are concerned with, the
@@ -401,42 +427,42 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     if (!(field.getOwner() instanceof interfaceCustom) && (session == null))
       {
-	return true;
+        return true;
       }
 
     // if we only have a single interface in this system, we don't
     // want the name field to be visible
 
     if ((field.getID() == interfaceSchema.NAME) ||
-	(field.getID() == interfaceSchema.ALIASES))
+        (field.getID() == interfaceSchema.ALIASES))
       {
-	interfaceCustom iObj;
-	DBObject owner = field.getOwner();
+        interfaceCustom iObj;
+        DBObject owner = field.getOwner();
 
-	if (owner instanceof interfaceCustom)
-	  {
-	    iObj = (interfaceCustom) owner;
-	  }
-	else
-	  {
-	    iObj = (interfaceCustom) session.editDBObject(owner.getInvid());
-	  }
+        if (owner instanceof interfaceCustom)
+          {
+            iObj = (interfaceCustom) owner;
+          }
+        else
+          {
+            iObj = (interfaceCustom) session.editDBObject(owner.getInvid());
+          }
 
-	Vector siblings = iObj.getSiblingInvids();
+        Vector<Invid> siblings = iObj.getSiblingInvids();
 
-	if (siblings.size() == 0)
-	  {
-	    return false;
-	  }
-	else
-	  {
-	    return true;
-	  }
+        if (siblings.size() == 0)
+          {
+            return false;
+          }
+        else
+          {
+            return true;
+          }
       }
 
     if (field.getID() == interfaceSchema.ETHERNETINFO)
       {
-	DBObject owner = field.getOwner();
+        DBObject owner = field.getOwner();
         DBObject networkObj = owner.lookupInvid((Invid)owner.getFieldValueLocal(interfaceSchema.IPNET));
 
         if (networkObj != null && !networkObj.isSet(networkSchema.MACREQUIRED))
@@ -449,38 +475,46 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
+   * <p>Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.</p>
    *
-   * Customization method to control whether a specified field
-   * is required to be defined at commit time for a given object.<br><br>
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * To be overridden in DBEditObject subclasses.
+   * <p>Note that this method will not be called if the controlling
+   * GanymedeSession's enableOversight is turned off, as in
+   * bulk loading.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p>Note as well that the designated label field for objects are
+   * always required, whatever this method returns, and that this
+   * requirement holds without regard to the GanymedeSession's
+   * enableOversight value.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean fieldRequired(DBObject object, short fieldid)
+  @Override public boolean fieldRequired(DBObject object, short fieldid)
   {
     switch (fieldid)
       {
       case interfaceSchema.NAME:
 
-	// the name is required if and only if the parent
-	// object has more than one interface
+        // the name is required if and only if the parent
+        // object has more than one interface
 
-	Vector siblings = getSiblingInvids(object);
+        Vector<Invid> siblings = getSiblingInvids(object);
 
-	if (siblings.size() == 0)
-	  {
-	    return false;
-	  }
-	else
-	  {
-	    return true;
-	  }
+        if (siblings.size() == 0)
+          {
+            return false;
+          }
+        else
+          {
+            return true;
+          }
 
       case interfaceSchema.ADDRESS:
       case interfaceSchema.IPNET:
-	return true;
+        return true;
 
       case interfaceSchema.ETHERNETINFO:
         DBObject networkObj = object.lookupInvid((Invid)object.getFieldValueLocal(interfaceSchema.IPNET));
@@ -499,29 +533,55 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   * This method allows the DBEditObject to have executive approval of
-   * any scalar set operation, and to take any special actions in
-   * reaction to the set.. if this method returns null or a success
-   * code in its ReturnVal, the DBField that called us will proceed to
-   * make the change to its value.  If this method returns a
-   * non-success code in its ReturnVal, the DBField that called us
-   * will not make the change, and the field will be left
-   * unchanged.
+   * <p>This method allows the DBEditObject to have executive approval
+   * of any scalar set operation, and to take any special actions in
+   * reaction to the set.  When a scalar field has its value set, it
+   * will call its owners finalizeSetValue() method, passing itself as
+   * the &lt;field&gt; parameter, and passing the new value to be
+   * approved as the &lt;value&gt; parameter.  A Ganymede customizer
+   * who creates custom subclasses of the DBEditObject class can
+   * override the finalizeSetValue() method and write his own logic
+   * to examine any change and either approve or reject the change.</p>
    *
-   * The DBField that called us will take care of all possible checks
-   * on the operation (including a call to our own verifyNewValue()
-   * method.  Under normal circumstances, we won't need to do anything
-   * here.
+   * <p>A custom finalizeSetValue() method will typically need to
+   * examine the field parameter to see which field is being changed,
+   * and then do the appropriate checking based on the value
+   * parameter.  The finalizeSetValue() method can call the normal
+   * this.getFieldValueLocal() type calls to examine the current state
+   * of the object, if such information is necessary to make
+   * appropriate decisions.</p>
+   *
+   * <p>If finalizeSetValue() returns null or a ReturnVal object with
+   * a positive success value, the DBField that called us is
+   * guaranteed to proceed to make the change to its value.  If this
+   * method returns a non-success code in its ReturnVal, as with the
+   * result of a call to Ganymede.createErrorDialog(), the DBField
+   * that called us will not make the change, and the field will be
+   * left unchanged.  Any error dialog returned from finalizeSetValue()
+   * will be passed to the user.</p>
+   *
+   * <p>The DBField that called us will take care of all standard
+   * checks on the operation (including a call to our own
+   * verifyNewValue() method before calling this method.  Under normal
+   * circumstances, we won't need to do anything here.
+   * finalizeSetValue() is useful when you need to do unusually
+   * involved checks, and for when you want a chance to trigger other
+   * changes in response to a particular field's value being
+   * changed.</p>
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
-  public ReturnVal finalizeSetValue(DBField field, Object value)
+  @Override public ReturnVal finalizeSetValue(DBField field, Object value)
   {
     // if this embedded interface is being removed, we won't try to get
     // fancy with the address/ipnet stuff.
 
     if (isDeleting())
       {
-	return null;
+        return null;
       }
 
     // we don't want to mess with the available-network
@@ -529,163 +589,163 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     //    if (!gSession.enableOversight || !gSession.enableWizards)
     //      {
-    //	return null;
+    //  return null;
     //      }
 
     if (field.getID() == interfaceSchema.IPNET)
       {
-	// if this net change was initiated by an approved ADDRESS change,
-	// we're not going to try to second-guess their address choice.
+        // if this net change was initiated by an approved ADDRESS change,
+        // we're not going to try to second-guess their address choice.
 
-	if (inFinalizeAddrChange)
-	  {
+        if (inFinalizeAddrChange)
+          {
             ReturnVal retVal = new ReturnVal(true, true);
             retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
 
-	    return retVal;
-	  }
+            return retVal;
+          }
 
-	// if the net is being set to a net that matches what's already
-	// in the address field for some reason, we'll go ahead and ok it
+        // if the net is being set to a net that matches what's already
+        // in the address field for some reason, we'll go ahead and ok it
 
-	Byte[] address = (Byte[]) getFieldValueLocal(interfaceSchema.ADDRESS);
+        Byte[] address = (Byte[]) getFieldValueLocal(interfaceSchema.ADDRESS);
 
-	if (address != null && systemCustom.checkMatchingNet(getDBSession(), (Invid) value, address))
-	  {
-	    if (debug)
-	      {
-		System.err.println("interfaceCustom.finalizeSetValue(): approving ipnet change");
-	      }
+        if (address != null && systemCustom.checkMatchingNet(getDBSession(), (Invid) value, address))
+          {
+            if (debug)
+              {
+                System.err.println("interfaceCustom.finalizeSetValue(): approving ipnet change");
+              }
 
             ReturnVal retVal = new ReturnVal(true, true);
             retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
 
-	    return retVal;
-	  }
+            return retVal;
+          }
 
-	// okay, we didn't match, tell the system object to remember the
-	// address that was formerly associated with the old network value
+        // okay, we didn't match, tell the system object to remember the
+        // address that was formerly associated with the old network value
 
-	if (field.getValueLocal() != null)
-	  {
-	    getParentSysObj().saveAddress(address);
-	  }
+        if (field.getValueLocal() != null)
+          {
+            getParentSysObj().saveAddress(address);
+          }
 
-	if (value == null)
-	  {
-	    IPDBField ipfield = (IPDBField) getField(interfaceSchema.ADDRESS);
+        if (value == null)
+          {
+            IPDBField ipfield = (IPDBField) getField(interfaceSchema.ADDRESS);
 
-	    inFinalizeNetChange = true;
-	    ipfield.setValueLocal(null);
-	    inFinalizeNetChange = false;
+            inFinalizeNetChange = true;
+            ipfield.setValueLocal(null);
+            inFinalizeNetChange = false;
 
-	    ReturnVal retVal = new ReturnVal(true, true);
-	    retVal.addRescanField(this.getInvid(), interfaceSchema.ADDRESS);
+            ReturnVal retVal = new ReturnVal(true, true);
+            retVal.addRescanField(this.getInvid(), interfaceSchema.ADDRESS);
             retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
 
-	    return retVal;
-	  }
+            return retVal;
+          }
 
-	// now find a new address for this object based on the network we
-	// are being asked to change to.
+        // now find a new address for this object based on the network we
+        // are being asked to change to.
 
-	address = getParentSysObj().getAddress((Invid) value);
+        address = getParentSysObj().getAddress((Invid) value);
 
-	if (address == null)
-	  {
-	    return Ganymede.createErrorDialog("Network Full",
-					      "There are no more addresses available in the " +
-					      getDBSession().getObjectLabel((Invid) value) +
-					      " network.");
-	  }
+        if (address == null)
+          {
+            return Ganymede.createErrorDialog("Network Full",
+                                              "There are no more addresses available in the " +
+                                              getDBSession().getObjectLabel((Invid) value) +
+                                              " network.");
+          }
 
-	// we've got a new IP address, go ahead and set it
+        // we've got a new IP address, go ahead and set it
 
-	IPDBField ipfield = (IPDBField) getField(interfaceSchema.ADDRESS);
+        IPDBField ipfield = (IPDBField) getField(interfaceSchema.ADDRESS);
 
-	// set the inFinalizeNetChange variable around the call to
-	// setValueLocal() so that the recursive call to finalizeSetValue()
-	// doesn't waste time trying to find a network to match the
-	// new address before we complete the network change
+        // set the inFinalizeNetChange variable around the call to
+        // setValueLocal() so that the recursive call to finalizeSetValue()
+        // doesn't waste time trying to find a network to match the
+        // new address before we complete the network change
 
-	inFinalizeNetChange = true;
-	ipfield.setValueLocal(address);
-	inFinalizeNetChange = false;
+        inFinalizeNetChange = true;
+        ipfield.setValueLocal(address);
+        inFinalizeNetChange = false;
 
-	// and tell the client to rescan the address field to update
-	// the display
+        // and tell the client to rescan the address field to update
+        // the display
 
-	ReturnVal retVal = new ReturnVal(true, true);
-	retVal.addRescanField(this.getInvid(), interfaceSchema.ADDRESS);
+        ReturnVal retVal = new ReturnVal(true, true);
+        retVal.addRescanField(this.getInvid(), interfaceSchema.ADDRESS);
 
         // and tell the client to rescan the ethernet info field as
         // well, in case we don't need it any more
 
-	retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
+        retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
 
-	return retVal;
+        return retVal;
       }
 
     if (field.getID() == interfaceSchema.ADDRESS)
       {
-	Invid netInvid = (Invid) getFieldValueLocal(interfaceSchema.IPNET);
-	Byte[] address = (Byte[]) value;
+        Invid netInvid = (Invid) getFieldValueLocal(interfaceSchema.IPNET);
+        Byte[] address = (Byte[]) value;
 
-	// if the address is being set in response to a network change,
-	// don't bounce back and set the network again
+        // if the address is being set in response to a network change,
+        // don't bounce back and set the network again
 
-	if (inFinalizeNetChange)
-	  {
-	    return null;
-	  }
+        if (inFinalizeNetChange)
+          {
+            return null;
+          }
 
-	if (systemCustom.checkMatchingNet(getDBSession(), netInvid, address))
-	  {
-	    // fine, no change to the network required
+        if (systemCustom.checkMatchingNet(getDBSession(), netInvid, address))
+          {
+            // fine, no change to the network required
 
-	    return null;
-	  }
+            return null;
+          }
 
-	// we need to find a new network to match, and to set that
-	// into our network field
+        // we need to find a new network to match, and to set that
+        // into our network field
 
-	netInvid = getParentSysObj().findMatchingNet(address);
+        netInvid = getParentSysObj().findMatchingNet(address);
 
-	if (netInvid == null)
-	  {
-	    return Ganymede.createErrorDialog("Unacceptable IP address",
-					      "IP address " + IPDBField.genIPString(address) +
-					      " does not match any network available to you.");
-	  }
+        if (netInvid == null)
+          {
+            return Ganymede.createErrorDialog("Unacceptable IP address",
+                                              "IP address " + IPDBField.genIPString(address) +
+                                              " does not match any network available to you.");
+          }
 
-	// we need to fix up the IP Network link to point to the
-	// network that matches the new address.  We set
-	// inFinalizeAddrChange to let the recursive call to
-	// finalizeSetValue() spawned by setFieldValue() know not to
-	// try and choose a new IP address before we get a chance to
-	// return and okay the IP address change we are processing.
+        // we need to fix up the IP Network link to point to the
+        // network that matches the new address.  We set
+        // inFinalizeAddrChange to let the recursive call to
+        // finalizeSetValue() spawned by setFieldValue() know not to
+        // try and choose a new IP address before we get a chance to
+        // return and okay the IP address change we are processing.
 
-	try
-	  {
-	    inFinalizeAddrChange = true;
-	    ReturnVal retVal = setFieldValue(interfaceSchema.IPNET, netInvid);
-	    inFinalizeAddrChange = false;
+        try
+          {
+            inFinalizeAddrChange = true;
+            ReturnVal retVal = setFieldValue(interfaceSchema.IPNET, netInvid);
+            inFinalizeAddrChange = false;
 
-	    if (retVal != null && !retVal.didSucceed())
-	      {
-		return Ganymede.createErrorDialog("schema error",
-						  "interfaceCustom.finalizeSetValue(): failed to set ip net");
-	      }
+            if (retVal != null && !retVal.didSucceed())
+              {
+                return Ganymede.createErrorDialog("schema error",
+                                                  "interfaceCustom.finalizeSetValue(): failed to set ip net");
+              }
 
-	    retVal = new ReturnVal(true, true);
-	    retVal.addRescanField(this.getInvid(), interfaceSchema.IPNET);
+            retVal = new ReturnVal(true, true);
+            retVal.addRescanField(this.getInvid(), interfaceSchema.IPNET);
 
-	    return retVal;
-	  }
-	catch (GanyPermissionsException ex)
-	  {
-	    return Ganymede.createErrorDialog("permissions", "permissions error setting network " + ex);
-	  }
+            return retVal;
+          }
+        catch (GanyPermissionsException ex)
+          {
+            return Ganymede.createErrorDialog("permissions", "permissions error setting network " + ex);
+          }
       }
 
     return null;
@@ -695,45 +755,41 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   {
     if (sysObj == null)
       {
-	Invid sysInvid = (Invid) getFieldValueLocal(SchemaConstants.ContainerField);
+        Invid sysInvid = (Invid) getFieldValueLocal(SchemaConstants.ContainerField);
 
-	// we *have* to use editDBObject() here because we need access to the custom
-	// object.. it makes no sense for us to be pulled out for editing without
-	// our parent also being edited.
+        // we *have* to use editDBObject() here because we need access to the custom
+        // object.. it makes no sense for us to be pulled out for editing without
+        // our parent also being edited.
 
-	if (sysInvid != null)
-	  {
-	    sysObj = (systemCustom) getDBSession().editDBObject(sysInvid);
-	  }
+        if (sysInvid != null)
+          {
+            sysObj = (systemCustom) getDBSession().editDBObject(sysInvid);
+          }
       }
 
     return sysObj;
   }
 
   /**
-   *
-   * This private method returns a vector of invids, being a list of
-   * other interfaces defined in the system we are defined in.
-   *
+   * <p>This private method returns a vector of invids, being a list
+   * of other interfaces defined in the system we are defined in.</p>
    */
 
-  private Vector getSiblingInvids()
+  private Vector<Invid> getSiblingInvids()
   {
     return getSiblingInvids(this);
   }
 
   /**
+   * <p>This private method returns a vector of invids, being a list of
+   * other interfaces defined in the system we are defined in.</p>
    *
-   * This private method returns a vector of invids, being a list of
-   * other interfaces defined in the system we are defined in.
-   *
-   * <b>*PSEUDOSTATIC*</b>
-   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  private Vector getSiblingInvids(DBObject object)
+  private Vector<Invid> getSiblingInvids(DBObject object)
   {
-    Vector result;
+    Vector<Invid> result;
     DBObject parentObj;
 
     /* -- */
@@ -748,82 +804,84 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     try
       {
-	result = (Vector) parentObj.getFieldValuesLocal(systemSchema.INTERFACES).clone();
+        result = (Vector<Invid>) parentObj.getFieldValuesLocal(systemSchema.INTERFACES).clone();
       }
     catch (NullPointerException ex)
       {
-	return new Vector();
+        return new Vector<Invid>();
       }
 
     // we are not our own sibling.
 
-    result.removeElement(object.getInvid());
+    result.remove(object.getInvid());
 
     if (debug)
       {
-	System.err.println("interfaceCustom.getSiblingInvids(): " + object.getInvid() +
-			   " has return value: " + result);
+        System.err.println("interfaceCustom.getSiblingInvids(): " + object.getInvid() +
+                           " has return value: " + result);
       }
 
     return result;
   }
 
   /**
-   *
-   * This method provides a hook that can be used to check any values
+   * <p>This method provides a hook that can be used to check any values
    * to be set in any field in this object.  Subclasses of
    * DBEditObject should override this method, implementing basically
    * a large switch statement to check for any given field whether the
    * submitted value is acceptable given the current state of the
-   * object.
+   * object.</p>
    *
-   * Question: what synchronization issues are going to be needed
+   * <p>Question: what synchronization issues are going to be needed
    * between DBEditObject and DBField to insure that we can have
-   * a reliable verifyNewValue method here?
+   * a reliable verifyNewValue method here?</p>
    *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
-  public ReturnVal verifyNewValue(DBField field, Object value)
+  @Override public ReturnVal verifyNewValue(DBField field, Object value)
   {
     if (field.getID() == interfaceSchema.ETHERNETINFO)
       {
-	// no worries about thread synchronization here, since
-	// equality and assignment are both atomic operators
+        // no worries about thread synchronization here, since
+        // equality and assignment are both atomic operators
 
-	String etherString = (String) value;
-	String transformedString;
+        String etherString = (String) value;
+        String transformedString;
 
-	if ((etherString == null) || (etherString.equals("")))
-	  {
-	    return null; // okay by us!
-	  }
+        if ((etherString == null) || (etherString.equals("")))
+          {
+            return null; // okay by us!
+          }
 
-	try
-	  {
-	    transformedString = verifyAndTransformEthernetInfo(etherString);
-	  }
-	catch (MACAddressException ex)
-	  {
-	    return Ganymede.createErrorDialog("Bad Ethernet Address",
-					      "You entered an invalid ethernet address (" + etherString +
-					      ")\n\nEthernet addresses should be in the form of 6 colon-separated" +
-					      " hexadecimal numbers.\n\nExample:\n01:a2:cc:04:12:2d\n");
-	  }
+        try
+          {
+            transformedString = verifyAndTransformEthernetInfo(etherString);
+          }
+        catch (MACAddressException ex)
+          {
+            return Ganymede.createErrorDialog("Bad Ethernet Address",
+                                              "You entered an invalid ethernet address (" + etherString +
+                                              ")\n\nEthernet addresses should be in the form of 6 colon-separated" +
+                                              " hexadecimal numbers.\n\nExample:\n01:a2:cc:04:12:2d\n");
+          }
 
-	if (transformedString.equals(etherString))
-	  {
-	    return super.verifyNewValue(field, value); // no change, so no problem
-	  }
+        if (transformedString.equals(etherString))
+          {
+            return super.verifyNewValue(field, value); // no change, so no problem
+          }
 
-	// tell the client that we'd like it to take the string that
-	// they gave us and replace it with the reformatted one we
-	// crafted.
+        // tell the client that we'd like it to take the string that
+        // they gave us and replace it with the reformatted one we
+        // crafted.
 
-	ReturnVal result = ReturnVal.success();
+        ReturnVal result = ReturnVal.success();
 
-	result.setTransformedValueObject(transformedString, this.getInvid(), field.getID());
+        result.setTransformedValueObject(transformedString, this.getInvid(), field.getID());
 
-	return result;
+        return result;
       }
 
     return super.verifyNewValue(field, value);
@@ -845,14 +903,14 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     if (input == null)
       {
-	return null;
+        return null;
       }
 
     input = input.trim();
 
     if (input.equals("0"))
       {
-	return "00:00:00:00:00:00";
+        return "00:00:00:00:00:00";
       }
 
     char [] ary = input.toCharArray();
@@ -861,38 +919,38 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     for (int i = 0; i < ary.length; i++)
       {
-	if (Character.digit(ary[i], 16) != -1)
-	  {
-	    digit_count++;
-	  }
+        if (Character.digit(ary[i], 16) != -1)
+          {
+            digit_count++;
+          }
       }
 
     if (digit_count == 12)
       {
-	// yay, we've got precisely enough hex digits for an ethernet
-	// address, whatever the separators may or may not be. Go
-	// through and extract them and generate a new string.
+        // yay, we've got precisely enough hex digits for an ethernet
+        // address, whatever the separators may or may not be. Go
+        // through and extract them and generate a new string.
 
-	StringBuilder result = new StringBuilder();
+        StringBuilder result = new StringBuilder();
 
-	digit_count = 0;
+        digit_count = 0;
 
-	for (int i = 0; i < ary.length; i++)
-	  {
-	    if (Character.digit(ary[i], 16) != -1)
-	      {
-		if (digit_count > 0 && digit_count % 2 == 0)
-		  {
-		    result.append(":");
-		  }
+        for (int i = 0; i < ary.length; i++)
+          {
+            if (Character.digit(ary[i], 16) != -1)
+              {
+                if (digit_count > 0 && digit_count % 2 == 0)
+                  {
+                    result.append(":");
+                  }
 
-		result.append(ary[i]);
+                result.append(ary[i]);
 
-		digit_count++;
-	      }
-	  }
+                digit_count++;
+              }
+          }
 
-	return result.toString().toLowerCase();
+        return result.toString().toLowerCase();
       }
 
     // we'll try to deal with missing leading zeros on hex bytes, but
@@ -900,7 +958,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     if (digit_count < 6 || digit_count > 12)
       {
-	throw new MACAddressException();
+        throw new MACAddressException();
       }
 
     // now, even though we have less than 12 hex digits, we may still have
@@ -913,60 +971,67 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     if (pieces.length != 6)
       {
-	throw new MACAddressException();
+        throw new MACAddressException();
       }
 
     StringBuilder result = new StringBuilder();
 
     for (int i = 0; i < pieces.length; i++)
       {
-	if (pieces[i].length() > 2)
-	  {
-	    throw new MACAddressException();
-	  }
+        if (pieces[i].length() > 2)
+          {
+            throw new MACAddressException();
+          }
 
-	if (pieces[i].length() == 1 && Character.digit(pieces[i].charAt(0), 16) != -1)
-	  {
-	    if (result.length() != 0)
-	      {
-		result.append(":");
-	      }
+        if (pieces[i].length() == 1 && Character.digit(pieces[i].charAt(0), 16) != -1)
+          {
+            if (result.length() != 0)
+              {
+                result.append(":");
+              }
 
-	    result.append("0");
-	    result.append(pieces[i].charAt(0));
-	    continue;
-	  }
+            result.append("0");
+            result.append(pieces[i].charAt(0));
+            continue;
+          }
 
-	if (pieces[i].length() == 2 && Character.digit(pieces[i].charAt(0), 16) != -1 && Character.digit(pieces[i].charAt(1), 16) != -1)
-	  {
-	    if (result.length() != 0)
-	      {
-		result.append(":");
-	      }
+        if (pieces[i].length() == 2 && Character.digit(pieces[i].charAt(0), 16) != -1 && Character.digit(pieces[i].charAt(1), 16) != -1)
+          {
+            if (result.length() != 0)
+              {
+                result.append(":");
+              }
 
-	    result.append(pieces[i]);
-	    continue;
-	  }
+            result.append(pieces[i]);
+            continue;
+          }
 
-	throw new MACAddressException();
+        throw new MACAddressException();
       }
 
     return result.toString().toLowerCase();
   }
 
   /**
-   * <p>Customization method to verify overall consistency of
-   * a DBObject.  This method is intended to be overridden
-   * in DBEditObject subclasses, and will be called by
-   * {@link arlut.csd.ganymede.server.DBEditObject#commitPhase1() commitPhase1()}
-   * to verify the readiness of this object for commit.  The
-   * DBObject passed to this method will be a DBEditObject,
-   * complete with that object's GanymedeSession reference
-   * if this method is called during transaction commit, and
-   * that session reference may be used by the verifying code if
-   * the code needs to access the database.</p>
+   * <p>Customization method to verify overall consistency of a
+   * DBObject.  This method is intended to be overridden in
+   * DBEditObject subclasses, and will be called by {@link
+   * arlut.csd.ganymede.server.DBEditObject#commitPhase1()
+   * commitPhase1()} to verify the readiness of this object for
+   * commit.  The DBObject passed to this method will be a
+   * DBEditObject, complete with that object's GanymedeSession
+   * reference if this method is called during transaction commit, and
+   * that session reference may be used by the verifying code if the
+   * code needs to access the database.</p>
    *
-   * <p>To be overridden in DBEditObject subclasses.</p>
+   * <p>This method is for custom checks specific to custom
+   * DBEditObject subclasses.  Standard checking for missing fields
+   * for which fieldRequired() returns true is done by {@link
+   * arlut.csd.ganymede.server.DBEditSet#commit_checkObjectMissingFields(arlut.csd.ganymede.server.DBEditObject)}
+   * during {@link
+   * arlut.csd.ganymede.server.DBEditSet#commit_handlePhase1()}.</p>
+   *
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
    * <p><b>*PSEUDOSTATIC*</b></p>
    *
@@ -975,14 +1040,14 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
    * be provided.
    */
 
-  public ReturnVal consistencyCheck(DBObject object)
+  @Override public ReturnVal consistencyCheck(DBObject object)
   {
     Byte[] address = (Byte[]) object.getFieldValueLocal(interfaceSchema.ADDRESS);
     Invid netInvid = (Invid) object.getFieldValueLocal(interfaceSchema.IPNET);
 
     if (address != null && !systemCustom.checkMatchingNet(getDBSession(), netInvid, address))
       {
-	return Ganymede.createErrorDialog("Bad IP Address", "Error, I.P. number/network mismatch in " + object.toString());
+        return Ganymede.createErrorDialog("Bad IP Address", "Error, I.P. number/network mismatch in " + object.toString());
       }
 
     return null;
@@ -999,7 +1064,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   {
     if ((x < 0) || (x > 255))
       {
-	throw new IllegalArgumentException("Out of range: " + x);
+        throw new IllegalArgumentException("Out of range: " + x);
       }
 
     return (byte) (x - 128);
