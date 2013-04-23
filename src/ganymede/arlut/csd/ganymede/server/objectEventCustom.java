@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -146,7 +146,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
    * <p>To be overridden in DBEditObject subclasses.</p>
    */
 
-  public boolean fieldRequired(DBObject object, short fieldid)
+  @Override public boolean fieldRequired(DBObject object, short fieldid)
   {
     // both fields defined in event are required
 
@@ -167,7 +167,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
    * choose from a choice provided by obtainChoiceList()
    */
 
-  public boolean mustChoose(DBField field)
+  @Override public boolean mustChoose(DBField field)
   {
     // by default, we assume that InvidDBField's are always
     // must choose.
@@ -195,7 +195,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
    * invid fields.</p>
    */
 
-  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
+  @Override public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (field.getID() == SchemaConstants.ObjectEventObjectName)
       {
@@ -225,21 +225,46 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
   /**
    * <p>This method allows the DBEditObject to have executive approval
    * of any scalar set operation, and to take any special actions in
-   * reaction to the set.. if this method returns true, the DBField
-   * that called us will proceed to make the change to it's value.  If
-   * this method returns false, the DBField that called us will not
-   * make the change, and the field will be left unchanged.</p>
+   * reaction to the set.  When a scalar field has its value set, it
+   * will call its owners finalizeSetValue() method, passing itself as
+   * the &lt;field&gt; parameter, and passing the new value to be
+   * approved as the &lt;value&gt; parameter.  A Ganymede customizer
+   * who creates custom subclasses of the DBEditObject class can
+   * override the finalizeSetValue() method and write his own logic
+   * to examine any change and either approve or reject the change.</p>
    *
-   * <p>The DBField that called us will take care of all possible checks
-   * on the operation (including a call to our own verifyNewValue()
-   * method.  Under normal circumstances, we won't need to do anything
-   * here.</p>
+   * <p>A custom finalizeSetValue() method will typically need to
+   * examine the field parameter to see which field is being changed,
+   * and then do the appropriate checking based on the value
+   * parameter.  The finalizeSetValue() method can call the normal
+   * this.getFieldValueLocal() type calls to examine the current state
+   * of the object, if such information is necessary to make
+   * appropriate decisions.</p>
    *
-   * <p>If we do return false, we should set editset.setLastError to
-   * provide feedback to the client about what we disapproved of.</p>
+   * <p>If finalizeSetValue() returns null or a ReturnVal object with
+   * a positive success value, the DBField that called us is
+   * guaranteed to proceed to make the change to its value.  If this
+   * method returns a non-success code in its ReturnVal, as with the
+   * result of a call to Ganymede.createErrorDialog(), the DBField
+   * that called us will not make the change, and the field will be
+   * left unchanged.  Any error dialog returned from finalizeSetValue()
+   * will be passed to the user.</p>
+   *
+   * <p>The DBField that called us will take care of all standard
+   * checks on the operation (including a call to our own
+   * verifyNewValue() method before calling this method.  Under normal
+   * circumstances, we won't need to do anything here.
+   * finalizeSetValue() is useful when you need to do unusually
+   * involved checks, and for when you want a chance to trigger other
+   * changes in response to a particular field's value being
+   * changed.</p>
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
-  public ReturnVal finalizeSetValue(DBField field, Object value)
+  @Override public ReturnVal finalizeSetValue(DBField field, Object value)
   {
     if (field.getID() == SchemaConstants.ObjectEventObjectName)
       {
@@ -298,9 +323,15 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
    * failure dialog encoded, and the transaction's commit will be
    * blocked and a dialog explaining the problem will be presented to
    * the user.</p>
+   *
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
-  public ReturnVal preCommitHook()
+  @Override public ReturnVal preCommitHook()
   {
     if (this.getStatus() == ObjectStatus.DELETING ||
         this.getStatus() == ObjectStatus.DROPPING)
@@ -359,7 +390,7 @@ public class objectEventCustom extends DBEditObject implements SchemaConstants {
    * <p>To be overridden in DBEditObject subclasses.</p>
    */
 
-  public boolean canSeeField(DBSession session, DBField field)
+  @Override public boolean canSeeField(DBSession session, DBField field)
   {
     // by default, return the field definition's visibility
 

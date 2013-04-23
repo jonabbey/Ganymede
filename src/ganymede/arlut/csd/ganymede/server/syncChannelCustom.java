@@ -3,17 +3,19 @@
    syncChannelCustom.java
 
    This file is a management class for sync channel definitions in Ganymede.
-   
+
    Created: 2 February 2005
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -111,7 +113,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
     super(original, editset);
   }
 
-  public ReturnVal initializeNewObject()
+  @Override public ReturnVal initializeNewObject()
   {
     // we don't want to do any of this initialization during
     // bulk-loading.
@@ -124,7 +126,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
     // a newly created Sync Channel object have its type set to manual
 
     StringDBField typeField = (StringDBField) getField(SchemaConstants.SyncChannelTypeString);
-    
+
     typeField.setValueLocal(ts.l("global.manual"));
 
     return null;
@@ -136,7 +138,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
    * choose from a choice provided by obtainChoiceList()
    */
 
-  public boolean mustChoose(DBField field)
+  @Override public boolean mustChoose(DBField field)
   {
     if (field.getID() == SchemaConstants.SyncChannelTypeString)
       {
@@ -155,7 +157,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
    * obtainChoiceList() method to get a list of valid choices.
    */
 
-  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
+  @Override public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (field.getID() == SchemaConstants.SyncChannelTypeString)
       {
@@ -164,10 +166,10 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
         syncTypes.addRow(ts.l("global.manual"));
         syncTypes.addRow(ts.l("global.incremental"));
         syncTypes.addRow(ts.l("global.fullstate"));
-        
+
         return syncTypes;
       }
-    
+
     return super.obtainChoiceList(field);
   }
 
@@ -189,7 +191,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
    * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean fieldRequired(DBObject object, short fieldid)
+  @Override public boolean fieldRequired(DBObject object, short fieldid)
   {
     switch (fieldid)
       {
@@ -261,7 +263,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
    * be provided.
    */
 
-  public ReturnVal finalizeSetValue(DBField field, Object value)
+  @Override public ReturnVal finalizeSetValue(DBField field, Object value)
   {
     // if we change the SyncChannelTypeString field, we'll need to
     // hide or reveal the appropriate fields, by telling the client to
@@ -335,7 +337,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
    * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean canSeeField(DBSession session, DBField field)
+  @Override public boolean canSeeField(DBSession session, DBField field)
   {
     if (field.getFieldDef().base() != this.objectBase)
       {
@@ -349,7 +351,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 
         // this may throw a NullPointerException if there is no
         // numeric type index set
- 
+
         typeVal = ((Integer) myObj.getFieldValueLocal(SchemaConstants.SyncChannelTypeNum)).intValue();
 
         SyncType type = SyncType.get(typeVal);
@@ -381,7 +383,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 
     // by default, return the field definition's visibility
 
-    return field.getFieldDef().isVisible(); 
+    return field.getFieldDef().isVisible();
   }
 
   /**
@@ -391,7 +393,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
    * has a restricted range of possibilities.
    */
 
-  public boolean isIntLimited(DBField field)
+  @Override public boolean isIntLimited(DBField field)
   {
     if (field.getID() == SchemaConstants.SyncChannelTypeNum)
       {
@@ -407,7 +409,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
    * {@link arlut.csd.ganymede.server.NumericDBField NumericDBField}.
    */
 
-  public int minInt(DBField field)
+  @Override public int minInt(DBField field)
   {
     if (field.getID() == SchemaConstants.SyncChannelTypeNum)
       {
@@ -419,11 +421,11 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
 
   /**
    * This method is used to specify the maximum acceptable value
-   * for the specified    
+   * for the specified
    * {@link arlut.csd.ganymede.server.NumericDBField NumericDBField}.
    */
 
-  public int maxInt(DBField field)
+  @Override public int maxInt(DBField field)
   {
     if (field.getID() == SchemaConstants.SyncChannelTypeNum)
       {
@@ -469,7 +471,7 @@ public class syncChannelCustom extends DBEditObject implements SchemaConstants {
    * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    */
 
-  public void commitPhase2()
+  @Override public void commitPhase2()
   {
     String origName = null;
 

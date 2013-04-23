@@ -3,17 +3,19 @@
    taskCustom.java
 
    This file is a management class for task records in Ganymede.
-   
+
    Created: 5 February 1999
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -116,14 +118,17 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
-   * This method provides a hook that a DBEditObject subclass
+   * <p>This method provides a hook that a DBEditObject subclass
    * can use to indicate whether a given field can only
-   * choose from a choice provided by obtainChoiceList()
+   * choose from a choice provided by obtainChoiceList()</p>
    *
+   * <p>To be overridden on necessity in DBEditObject subclasses,
+   * particularly if you have a StringDBField that you want to force
+   * to pick from the list of choices provided by your DBEditObject
+   * subclass' obtainChoiceList() method.</p>
    */
 
-  public boolean mustChoose(DBField field)
+  @Override public boolean mustChoose(DBField field)
   {
     if (field.getID() == SchemaConstants.TaskPeriodUnit)
       {
@@ -134,18 +139,21 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
-   * This method provides a hook that can be used to generate
+   * <p>This method provides a hook that can be used to generate
    * choice lists for invid and string fields that provide
    * such.  String and Invid DBFields will call their owner's
-   * obtainChoiceList() method to get a list of valid choices.
+   * obtainChoiceList() method to get a list of valid choices.</p>
    *
-   * This method will provide a reasonable default for targeted
-   * invid fields.
-   * 
+   * <p>This method will provide a reasonable default for targetted
+   * invid fields, filtered by the GanymedeSession's
+   * visibilityFilterInvids list.</p>
+   *
+   * <p>NOTE: This method does not need to be synchronized.  Making this
+   * synchronized can lead to DBEditObject/DBSession nested monitor
+   * deadlocks.</p>
    */
 
-  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
+  @Override public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (field.getID() == SchemaConstants.TaskPeriodUnit)
       {
@@ -156,21 +164,24 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
+   * <p>Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.</p>
    *
-   * Customization method to control whether a specified field
-   * is required to be defined at commit time for a given object.<br><br>
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * To be overridden in DBEditObject subclasses.<br><br>
-   *
-   * Note that this method will not be called if the controlling
+   * <p>Note that this method will not be called if the controlling
    * GanymedeSession's enableOversight is turned off, as in
-   * bulk loading.<br><br>
+   * bulk loading.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
+   * <p>Note as well that the designated label field for objects are
+   * always required, whatever this method returns, and that this
+   * requirement holds without regard to the GanymedeSession's
+   * enableOversight value.</p>
    *
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean fieldRequired(DBObject object, short fieldid)
+  @Override public boolean fieldRequired(DBObject object, short fieldid)
   {
     if (fieldid == SchemaConstants.TaskName || fieldid == SchemaConstants.TaskClass)
       {
@@ -186,14 +197,12 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * This method provides a hook that a DBEditObject subclass
    * can use to indicate that a given Numeric field has a restricted
    * range of possibilities.
-   *
    */
 
-  public boolean isIntLimited(DBField field)
+  @Override public boolean isIntLimited(DBField field)
   {
     if (field.getID() == SchemaConstants.TaskPeriodCount)
       {
@@ -204,13 +213,11 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * This method is used to specify the minimum acceptable value
    * for the specified field.
-   *
    */
 
-  public int minInt(DBField field)
+  @Override public int minInt(DBField field)
   {
     if (field.getID() == SchemaConstants.TaskPeriodCount)
       {
@@ -221,26 +228,48 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
+   * <p>This method allows the DBEditObject to have executive approval
+   * of any scalar set operation, and to take any special actions in
+   * reaction to the set.  When a scalar field has its value set, it
+   * will call its owners finalizeSetValue() method, passing itself as
+   * the &lt;field&gt; parameter, and passing the new value to be
+   * approved as the &lt;value&gt; parameter.  A Ganymede customizer
+   * who creates custom subclasses of the DBEditObject class can
+   * override the finalizeSetValue() method and write his own logic
+   * to examine any change and either approve or reject the change.</p>
    *
-   * This method allows the DBEditObject to have executive approval
-   * of any scalar set operation, and to take any special actions
-   * in reaction to the set.. if this method returns true, the
-   * DBField that called us will proceed to make the change to
-   * it's value.  If this method returns false, the DBField
-   * that called us will not make the change, and the field
-   * will be left unchanged.<br><br>
+   * <p>A custom finalizeSetValue() method will typically need to
+   * examine the field parameter to see which field is being changed,
+   * and then do the appropriate checking based on the value
+   * parameter.  The finalizeSetValue() method can call the normal
+   * this.getFieldValueLocal() type calls to examine the current state
+   * of the object, if such information is necessary to make
+   * appropriate decisions.</p>
    *
-   * The DBField that called us will take care of all possible checks
-   * on the operation (including a call to our own verifyNewValue()
-   * method.  Under normal circumstances, we won't need to do anything
-   * here.<br><br>
+   * <p>If finalizeSetValue() returns null or a ReturnVal object with
+   * a positive success value, the DBField that called us is
+   * guaranteed to proceed to make the change to its value.  If this
+   * method returns a non-success code in its ReturnVal, as with the
+   * result of a call to Ganymede.createErrorDialog(), the DBField
+   * that called us will not make the change, and the field will be
+   * left unchanged.  Any error dialog returned from finalizeSetValue()
+   * will be passed to the user.</p>
    *
-   * If we do return false, we should set editset.setLastError to
-   * provide feedback to the client about what we disapproved of.
-   *  
+   * <p>The DBField that called us will take care of all standard
+   * checks on the operation (including a call to our own
+   * verifyNewValue() method before calling this method.  Under normal
+   * circumstances, we won't need to do anything here.
+   * finalizeSetValue() is useful when you need to do unusually
+   * involved checks, and for when you want a chance to trigger other
+   * changes in response to a particular field's value being
+   * changed.</p>
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
-  public ReturnVal finalizeSetValue(DBField field, Object value)
+  @Override public ReturnVal finalizeSetValue(DBField field, Object value)
   {
     // if we have either of the check boxes toggled, we're going
     // to toggle the other.  We'll also signal the client to
@@ -254,7 +283,7 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
 
         ReturnVal result = new ReturnVal(true);
         result.setRescanAll(field.getOwner().getInvid());
-                
+
         if (boolVal)
           {
             setFieldValueLocal(SchemaConstants.TaskRunPeriodically, Boolean.FALSE);
@@ -282,26 +311,25 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
-   * Customization method to verify whether the user should be able to
-   * see a specific field in a given object.  Instances of DBField will
+   * <p>Customization method to verify whether the user should be able to
+   * see a specific field in a given object.  Instances of
+   * {@link arlut.csd.ganymede.server.DBField DBField} will
    * wind up calling up to here to let us override the normal visibility
-   * process.<br><br>
+   * process.</p>
    *
-   * Note that it is permissible for session to be null, in which case
+   * <p>Note that it is permissible for session to be null, in which case
    * this method will always return the default visiblity for the field
-   * in question.<br><br>
+   * in question.</p>
    *
-   * If field is not from an object of the same base as this DBEditObject,
-   * an exception will be thrown.<br><br>
+   * <p>If field is not from an object of the same base as this DBEditObject,
+   * an exception will be thrown.</p>
    *
-   * To be overridden in DBEditObject subclasses.<br><br>
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <b>*PSEUDOSTATIC*</b>
-   * 
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean canSeeField(DBSession session, DBField field)
+  @Override public boolean canSeeField(DBSession session, DBField field)
   {
     if (field.getFieldDef().base() != this.objectBase)
       {
@@ -317,35 +345,53 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
           case SchemaConstants.TaskPeriodUnit:
           case SchemaConstants.TaskPeriodCount:
           case SchemaConstants.TaskPeriodAnchor:
-            
+
             return myObj.isSet(SchemaConstants.TaskRunPeriodically);
           }
       }
 
     // by default, return the field definition's visibility
 
-    return field.getFieldDef().isVisible(); 
+    return field.getFieldDef().isVisible();
   }
 
   /**
+   * <p>This method is a hook for subclasses to override to
+   * pass the phase-two commit command to external processes.</p>
    *
-   * This method is a hook for subclasses to override to
-   * pass the phase-two commit command to external processes.<br><br>
-   *
-   * For normal usage this method would not be overridden.  For
+   * <p>For normal usage this method would not be overridden.  For
    * cases in which change to an object would result in an external
    * process being initiated whose <b>success or failure would not
    * affect the successful commit of this DBEditObject in the
-   * Ganymede server</b>, the process invokation should be placed here,
-   * rather than in commitPhase1().<br><br>
+   * Ganymede server</b>, the process invocation should be placed here,
+   * rather than in
+   * {@link arlut.csd.ganymede.server.DBEditObject#commitPhase1() commitPhase1()}.</p>
    *
-   * Subclasses that override this method may wish to make this method 
-   * synchronized.
+   * <p>commitPhase2() is generally the last method called on a
+   * DBEditObject before it is discarded by the server in the
+   * {@link arlut.csd.ganymede.server.DBEditSet DBEditSet}
+   * {@link arlut.csd.ganymede.server.DBEditSet#commit(java.lang.String) commit()} method.</p>
    *
-   * @see arlut.csd.ganymede.server.DBEditSet
+   * <p>Subclasses that override this method may wish to make this method
+   * synchronized.</p>
+   *
+   * <p><b>WARNING!</b> this method is called at a time when portions
+   * of the database are locked for the transaction's integration into
+   * the database.  You must not call methods that seek to gain a lock
+   * on the Ganymede database.  At this point, this means no composite
+   * queries on embedded object types, where you seek an object based
+   * on a field in an embedded object and in the object itself, using
+   * the GanymedeSession query calls, or else you will lock the server.</p>
+   *
+   * <p>This method should NEVER try to edit or change any DBEditObject
+   * in the server.. at this point in the game, the server has fixed the
+   * transaction working set and is depending on commitPhase2() not trying
+   * to make changes internal to the server.</p>
+   *
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    */
 
-  public void commitPhase2()
+  @Override public void commitPhase2()
   {
     String origName = null, taskName;
 
@@ -391,5 +437,4 @@ public class taskCustom extends DBEditObject implements SchemaConstants {
         Ganymede.scheduler.registerTaskObject(this);
       }
   }
-
 }

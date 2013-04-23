@@ -3,17 +3,19 @@
    permCustom.java
 
    This file is a management class for Role records in Ganymede.
-   
+
    Created: 21 January 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2009
+
+   Copyright (C) 1996 - 2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -100,24 +102,24 @@ public class permCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
-   * This method provides a hook that can be used to indicate whether
+   * <p>This method provides a hook that can be used to indicate whether
    * a field that is defined in this object's field dictionary
-   * should be newly instantiated in this particular object.
+   * should be newly instantiated in this particular object.</p>
    *
-   * This method does not affect those fields which are actually present
-   * in the object's record in the DBStore.  What this method allows
+   * <p>This method does not affect those fields which are actually present
+   * in a previously existing object's record in the
+   * {@link arlut.csd.ganymede.server.DBStore DBStore}.  What this method allows
    * you to do is have a subclass decide whether it wants to instantiate
    * a potential field (one that is declared in the field dictionary for
    * this object, but which doesn't happen to be presently defined in
-   * this object) in this particular object.
+   * this object) in this particular object.</p>
    *
-   * A concrete example will help here.  The Permissions Object type
+   * <p>A concrete example will help here.  The Permissions Object type
    * (base number SchemaConstants.PermBase) holds a permission
    * matrix, a descriptive title, and a list of admin personae that hold
-   * those permissions for objects they own.
+   * those permissions for objects they own.</p>
    *
-   * There are a few specific instances of SchemaConstants.PermBase
+   * <p>There are a few specific instances of SchemaConstants.PermBase
    * that don't properly need the list of admin personae, as their
    * object invids are hard-coded into the Ganymede security system, and
    * their permission matrices are automatically consulted in certain
@@ -127,11 +129,12 @@ public class permCustom extends DBEditObject implements SchemaConstants {
    * false if the fieldID corresponds to the admin personae list if the
    * object's ID is that of one of these special objects.  As a result,
    * when the objects are viewed by an administrator, the admin personae
-   * list will not be seen.
+   * list will not be seen.</p>
    *
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    */
 
-  public boolean instantiateNewField(short fieldID)
+  @Override public boolean instantiateNewField(short fieldID)
   {
     if (fieldID == SchemaConstants.RolePersonae)
       {
@@ -145,24 +148,25 @@ public class permCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
-   * Customization method to verify whether the user should be able to
-   * see a specific field in a given object.  Instances of DBField will
+   * <p>Customization method to verify whether the user should be able to
+   * see a specific field in a given object.  Instances of
+   * {@link arlut.csd.ganymede.server.DBField DBField} will
    * wind up calling up to here to let us override the normal visibility
-   * process.<br><br>
+   * process.</p>
    *
-   * Note that it is permissible for session to be null, in which case
+   * <p>Note that it is permissible for session to be null, in which case
    * this method will always return the default visiblity for the field
-   * in question.<br><br>
+   * in question.</p>
    *
-   * If field is not from an object of the same base as this DBEditObject,
-   * an exception will be thrown.<br><br>
+   * <p>If field is not from an object of the same base as this DBEditObject,
+   * an exception will be thrown.</p>
    *
-   * To be overridden in DBEditObject subclasses.
-   * 
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean canSeeField(DBSession session, DBField field)
+  @Override public boolean canSeeField(DBSession session, DBField field)
   {
     // since the default permission object is always delegatable, we
     // won't show the checkbox in this case.

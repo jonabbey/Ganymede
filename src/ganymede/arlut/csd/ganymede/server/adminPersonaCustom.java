@@ -169,7 +169,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
    * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean hasEmailTarget(DBObject object)
+  @Override public boolean hasEmailTarget(DBObject object)
   {
     return true;
   }
@@ -184,7 +184,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
    * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public List<String> getEmailTargets(DBObject object)
+  @Override public List<String> getEmailTargets(DBObject object)
   {
     List<String> x = new ArrayList<String>();
 
@@ -222,14 +222,56 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
   }
 
   /**
-   * We want any change to the 'name' or associated user field to
+   * <p>We want any change to the 'name' or associated user field to
    * update our hidden label field, which both provides our composite
    * label and does our namespace checks for us.  We do this in
    * finalizeSetValue() so that this operation is always done, even
-   * if our GanymedeSession's enableOversight is set to false.
+   * if our GanymedeSession's enableOversight is set to false.</p>
+   *
+   * <p>----</p>
+   *
+   * <p>This method allows the DBEditObject to have executive approval
+   * of any scalar set operation, and to take any special actions in
+   * reaction to the set.  When a scalar field has its value set, it
+   * will call its owners finalizeSetValue() method, passing itself as
+   * the &lt;field&gt; parameter, and passing the new value to be
+   * approved as the &lt;value&gt; parameter.  A Ganymede customizer
+   * who creates custom subclasses of the DBEditObject class can
+   * override the finalizeSetValue() method and write his own logic
+   * to examine any change and either approve or reject the change.</p>
+   *
+   * <p>A custom finalizeSetValue() method will typically need to
+   * examine the field parameter to see which field is being changed,
+   * and then do the appropriate checking based on the value
+   * parameter.  The finalizeSetValue() method can call the normal
+   * this.getFieldValueLocal() type calls to examine the current state
+   * of the object, if such information is necessary to make
+   * appropriate decisions.</p>
+   *
+   * <p>If finalizeSetValue() returns null or a ReturnVal object with
+   * a positive success value, the DBField that called us is
+   * guaranteed to proceed to make the change to its value.  If this
+   * method returns a non-success code in its ReturnVal, as with the
+   * result of a call to Ganymede.createErrorDialog(), the DBField
+   * that called us will not make the change, and the field will be
+   * left unchanged.  Any error dialog returned from finalizeSetValue()
+   * will be passed to the user.</p>
+   *
+   * <p>The DBField that called us will take care of all standard
+   * checks on the operation (including a call to our own
+   * verifyNewValue() method before calling this method.  Under normal
+   * circumstances, we won't need to do anything here.
+   * finalizeSetValue() is useful when you need to do unusually
+   * involved checks, and for when you want a chance to trigger other
+   * changes in response to a particular field's value being
+   * changed.</p>
+   *
+   * @return A ReturnVal indicating success or failure.  May
+   * be simply 'null' to indicate success if no feedback need
+   * be provided.
    */
 
-  public ReturnVal finalizeSetValue(DBField field, Object value)
+  @Override public ReturnVal finalizeSetValue(DBField field, Object value)
   {
     if (field.getID() == SchemaConstants.PersonaNameField)
       {
@@ -326,7 +368,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
    * <p>If there is no caching key, this method will return null.</p>
    */
 
-  public Object obtainChoicesKey(DBField field)
+  @Override public Object obtainChoicesKey(DBField field)
   {
     // by default, we return a Short containing the base
     // id for the field's target
@@ -349,7 +391,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
    * invid fields.</p>
    */
 
-  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
+  @Override public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (debug)
       {
@@ -428,7 +470,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
    * be provided.
    */
 
-  public ReturnVal consistencyCheck(DBObject object)
+  @Override public ReturnVal consistencyCheck(DBObject object)
   {
     // we want to return a failure if there is no role set and if the
     // persona is not a member of the supergash owner set, which would
@@ -468,7 +510,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
    * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean fieldRequired(DBObject object, short fieldid)
+  @Override public boolean fieldRequired(DBObject object, short fieldid)
   {
     switch (fieldid)
       {
@@ -509,7 +551,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
    * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean canSeeField(DBSession session, DBField field)
+  @Override public boolean canSeeField(DBSession session, DBField field)
   {
     // hide the label field.. this cannot be changed by the client,
     // and should be treated as a 'behind-the-scenes' field used to
@@ -546,7 +588,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
    * @param fieldID The field that the link is to be created in
    */
 
-  public boolean anonymousLinkOK(DBObject object, short fieldID)
+  @Override public boolean anonymousLinkOK(DBObject object, short fieldID)
   {
     // if they have permission to edit an owner group, who are
     // we to say no?
