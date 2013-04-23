@@ -3,17 +3,19 @@
    contractCustom.java
 
    This file is a management class for automounter map objects in Ganymede.
-   
+
    Created: 15 March 1999
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -62,9 +64,7 @@ import arlut.csd.ganymede.server.DBObjectBase;
 public class contractCustom extends DBEditObject implements SchemaConstants {
 
   /**
-   *
    * Customization Constructor
-   *
    */
 
   public contractCustom(DBObjectBase objectBase)
@@ -73,9 +73,7 @@ public class contractCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * Create new object constructor
-   *
    */
 
   public contractCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset)
@@ -84,10 +82,8 @@ public class contractCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * Check-out constructor, used by DBObject.createShadow()
    * to pull out an object for editing.
-   *
    */
 
   public contractCustom(DBObject original, DBEditSet editset)
@@ -96,12 +92,38 @@ public class contractCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
+   * <p>This method is used to control whether or not it is acceptable to
+   * make a link to the given field in this
+   * {@link arlut.csd.ganymede.server.DBObject DBObject} type when the
+   * user only has editing access for the source
+   * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField} and not
+   * the target.</p>
    *
-   * This method is used to control whether or not it is acceptable to
-   * make a link to the given field in this DBObject type when the
-   * user only has editing access for the source InvidDBField and not
-   * the target.
+   * <p>See {@link arlut.csd.ganymede.server.DBEditObject#anonymousLinkOK(arlut.csd.ganymede.server.DBObject,short,
+   * arlut.csd.ganymede.server.DBObject,short,arlut.csd.ganymede.server.GanymedeSession)
+   * anonymousLinkOK(obj,short,obj,short,GanymedeSession)} for details on
+   * anonymousLinkOK() method chaining.</p>
    *
+   * <p>Note that the {@link
+   * arlut.csd.ganymede.server.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.server.DBField)
+   * choiceListHasExceptions()} method will call this version of anonymousLinkOK()
+   * with a null targetObject, to determine that the client should not
+   * use its cache for an InvidDBField's choices.  Any overriding done
+   * of this method must be able to handle a null targetObject, or else
+   * an exception will be thrown inappropriately.</p>
+   *
+   * <p>The only reason to consult targetObject in any case is to
+   * allow or disallow anonymous object linking to a field based on
+   * the current state of the target object.  If you are just writing
+   * generic anonymous linking rules for a field in this object type,
+   * targetObject won't concern you anyway.  If you do care about the
+   * targetObject's state, though, you have to be prepared to handle
+   * a null valued targetObject.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   *
+   * @param targetObject The object that the link is to be created in (may be null)
+   * @param targetFieldID The field that the link is to be created in
    */
 
   public boolean anonymousLinkOK(DBObject object, short fieldID)
@@ -110,9 +132,9 @@ public class contractCustom extends DBEditObject implements SchemaConstants {
 
     if (fieldID == contractSchema.CONTRACTGROUPS)
       {
-	return true;
+        return true;
       }
 
-    return false;
+    return super.anonymousLinkOK(object, fieldID);
   }
 }
