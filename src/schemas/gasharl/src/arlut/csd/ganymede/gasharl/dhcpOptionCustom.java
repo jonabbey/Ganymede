@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -270,14 +270,14 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
    * be provided.
    */
 
-  public ReturnVal initializeNewObject()
+  @Override public ReturnVal initializeNewObject()
   {
     // we don't want to do any of this initialization during
     // bulk-loading.
 
     if (!getGSession().enableOversight)
       {
-	return null;
+        return null;
       }
 
     BooleanDBField custom = (BooleanDBField) getField(dhcpOptionSchema.CUSTOMOPTION);
@@ -292,7 +292,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
    * <p>To be overridden in DBEditObject subclasses.</p>
    */
 
-  public boolean fieldRequired(DBObject object, short fieldid)
+  @Override public boolean fieldRequired(DBObject object, short fieldid)
   {
     switch (fieldid)
       {
@@ -301,7 +301,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
         return true;
 
       case dhcpOptionSchema.CUSTOMCODE:
-	return object.isSet(dhcpOptionSchema.CUSTOMOPTION);
+        return object.isSet(dhcpOptionSchema.CUSTOMOPTION);
       }
 
     return false;
@@ -326,7 +326,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
    * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean canSeeField(DBSession session, DBField field)
+  @Override public boolean canSeeField(DBSession session, DBField field)
   {
     if (field.getID() == dhcpOptionSchema.CUSTOMOPTION)
       {
@@ -352,11 +352,11 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
    * <p>If there is no caching key, this method will return null.</p>
    */
 
-  public Object obtainChoicesKey(DBField field)
+  @Override public Object obtainChoicesKey(DBField field)
   {
     if (field.getID() == volumeSchema.ENTRIES)
       {
-	return null;
+        return null;
       }
 
     return super.obtainChoicesKey(field);
@@ -373,11 +373,11 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
    * subclass' obtainChoiceList() method.</p>
    */
 
-  public boolean mustChoose(DBField field)
+  @Override public boolean mustChoose(DBField field)
   {
     if (field.getID() == dhcpOptionSchema.OPTIONTYPE)
       {
-	return true;
+        return true;
       }
 
     return super.mustChoose(field);
@@ -393,7 +393,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
    * invid fields.</p>
    */
 
-  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
+  @Override public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (field.getID() == dhcpOptionSchema.OPTIONTYPE)
       {
@@ -438,7 +438,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
    * @param targetFieldID The field that the link is to be created in
    */
 
-  public boolean anonymousLinkOK(DBObject targetObject, short targetFieldID)
+  @Override public boolean anonymousLinkOK(DBObject targetObject, short targetFieldID)
   {
     return true;                // anybody can link to us, we don't care.
   }
@@ -471,26 +471,26 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
    * be provided.
    */
 
-  public ReturnVal consistencyCheck(DBObject object)
+  @Override public ReturnVal consistencyCheck(DBObject object)
   {
     String name = (String) object.getFieldValueLocal(dhcpOptionSchema.OPTIONNAME);
     boolean builtIn = object.isSet(dhcpOptionSchema.BUILTIN);
 
     if (builtIn && !builtInOptions.contains(name))
       {
-	return Ganymede.createErrorDialog("Option name " + name + " is not a supported built-in keyword in our DHCP server.");
+        return Ganymede.createErrorDialog("Option name " + name + " is not a supported built-in keyword in our DHCP server.");
       }
 
     boolean custom = object.isSet(dhcpOptionSchema.CUSTOMOPTION);
 
     if (!custom && !supportedOptions.contains(name) && !builtInOptions.contains(name))
       {
-	return Ganymede.createErrorDialog("Option name " + name + " is not a recognized standard option supported by our DHCP server.  You will need to set this as a custom option with a numeric custom option code.");
+        return Ganymede.createErrorDialog("Option name " + name + " is not a recognized standard option supported by our DHCP server.  You will need to set this as a custom option with a numeric custom option code.");
       }
 
     if (custom && (supportedOptions.contains(name) || builtInOptions.contains(name)))
       {
-	return Ganymede.createErrorDialog("Option name " + name + " is a standard option supported by our DHCP server.  It cannot be created as a custom valued option type.");
+        return Ganymede.createErrorDialog("Option name " + name + " is a standard option supported by our DHCP server.  It cannot be created as a custom valued option type.");
       }
 
     return null;
@@ -569,10 +569,26 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
    * set using Windows style password hashes.  param1 will be the password in
    * LANMAN hash form, param2 will be the password in NT Unicode MD4 hash
    * form.  Either or both of param1 and param2 may be null.</dd>
-   * <dt>11 - SETPASSSSHA</dt>
+   * <dt>11 - SETPASSAPACHEMD5</dt>
+   * <dd>This operation is used when a password field is having its
+   * password set using the Apache variant of the md5crypt algorithm.
+   * param1 will be the password in Apache md5crypt hash form, or null
+   * if the password hash is being cleared.  param2 will be null.</dd>
+   * <dt>12 - SETPASSSSHA</dt>
    * <dd>This operation is used when a password field is having its
    * password set using the OpenLDAP-style SSHA password hash.  param1
    * will be the password in SSHA form, or null if the password is
+   * being cleared.  param2 will be null.</dd>
+   * <dt>13 - SETPASS_SHAUNIXCRYPT</dt>
+   * <dd>This operation is used when a password field is having its
+   * password set using Ulrich Drepper's SHA256 or SHA512 Unix Crypt
+   * algorithms.  param1 will be the password in SHA Unix Crypt form,
+   * or null if the password is being cleared.  param2 will be
+   * null.</dd>
+   * <dt>14 - SETPASS_BCRYPT</dt>
+   * <dd>This operation is used when a password field is having its
+   * password set using the OpenBSD-style BCrypt password hash.  param1
+   * will be the password in BCrypt form, or null if the password is
    * being cleared.  param2 will be null.</dd>
    * </dl>
    *
@@ -592,7 +608,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
    * for the respond() method in GanymediatorWizard subclasses.
    */
 
-  public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
+  @Override public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
   {
     // if the BUILTIN check box is toggled, we'll need to refresh the
     // visibility of the CUSTOMOPTION and CUSTOMCODE fields.
@@ -606,12 +622,12 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
                 ReturnVal innerRetVal = null;
                 DBEditObject parent = (DBEditObject) field.getOwner();
 
-		String name = (String) parent.getFieldValueLocal(dhcpOptionSchema.OPTIONNAME);
+                String name = (String) parent.getFieldValueLocal(dhcpOptionSchema.OPTIONNAME);
 
-		if (name != null && !builtInOptions.contains(name))
-		  {
-		    return Ganymede.createErrorDialog("Option name " + name + " not supported as a 'built-in' option type in dhcpd server.");
-		  }
+                if (name != null && !builtInOptions.contains(name))
+                  {
+                    return Ganymede.createErrorDialog("Option name " + name + " not supported as a 'built-in' option type in dhcpd server.");
+                  }
 
                 innerRetVal = parent.setFieldValueLocal(dhcpOptionSchema.CUSTOMOPTION, Boolean.FALSE);
 
@@ -669,16 +685,16 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
    * be provided.
    */
 
-  public ReturnVal verifyNewValue(DBField field, Object value)
+  @Override public ReturnVal verifyNewValue(DBField field, Object value)
   {
     if (field.getID() == dhcpOptionSchema.OPTIONNAME)
       {
         String valueStr = (String) value;
 
-	if (valueStr == null)
-	  {
-	    return null;
-	  }
+        if (valueStr == null)
+          {
+            return null;
+          }
 
         if (valueStr.startsWith("dhcp.") ||
             valueStr.startsWith("server.") ||
@@ -796,40 +812,40 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
       }
     else if (currentType.equals("ip-address"))
       {
-	return validateIP(object, value);
+        return validateIP(object, value);
       }
     else if (currentType.equals("array of ip-address"))
       {
-	StringBuilder resultBuilder = new StringBuilder();
-	String pieces[] = value.split(",\\s*");
+        StringBuilder resultBuilder = new StringBuilder();
+        String pieces[] = value.split(",\\s*");
 
-	boolean first_pass = true;
+        boolean first_pass = true;
 
-	for (String piece: pieces)
-	  {
-	    ReturnVal retVal = validateIP(object, piece);
+        for (String piece: pieces)
+          {
+            ReturnVal retVal = validateIP(object, piece);
 
-	    if (!retVal.didSucceed())
-	      {
-		return retVal;
-	      }
+            if (!retVal.didSucceed())
+              {
+                return retVal;
+              }
 
-	    if (first_pass)
-	      {
-		first_pass = false;
-	      }
-	    else
-	      {
-		resultBuilder.append(", ");
-	      }
+            if (first_pass)
+              {
+                first_pass = false;
+              }
+            else
+              {
+                resultBuilder.append(", ");
+              }
 
-	    resultBuilder.append((String) retVal.getTransformedValueObject());
-	  }
+            resultBuilder.append((String) retVal.getTransformedValueObject());
+          }
 
-	ReturnVal retVal = new ReturnVal(true, true);
-	retVal.setTransformedValueObject(resultBuilder.toString());
+        ReturnVal retVal = new ReturnVal(true, true);
+        retVal.setTransformedValueObject(resultBuilder.toString());
 
-	return retVal;
+        return retVal;
       }
     else
       {
@@ -844,85 +860,85 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
 
     try
       {
-	parsedAddress = IPDBField.genIPV4bytes(ipOrHost);
+        parsedAddress = IPDBField.genIPV4bytes(ipOrHost);
       }
     catch (IllegalArgumentException ex)
       {
-	String hostname = null;
+        String hostname = null;
 
-	if (hostNameRegex.matcher(ipOrHost).matches())
-	  {
-	    hostname = ipOrHost;
-	  }
-	else
-	  {
-	    Matcher m = arlDomainNameRegex.matcher(ipOrHost);
+        if (hostNameRegex.matcher(ipOrHost).matches())
+          {
+            hostname = ipOrHost;
+          }
+        else
+          {
+            Matcher m = arlDomainNameRegex.matcher(ipOrHost);
 
-	    if (m.matches())
-	      {
-		hostname = m.group(1);
-	      }
-	  }
+            if (m.matches())
+              {
+                hostname = m.group(1);
+              }
+          }
 
-	if (hostname == null)
-	  {
-	    return Ganymede.createErrorDialog("Unacceptable value",
-					      "This dhcp option type requires an IP address");
-	  }
-	else
-	  {
-	    String query = "select object from 'Embedded System Interface' where " +
-	      "'Containing Object'->('System Name' ==_ci '" + hostname + "' or 'Aliases' ==_ci '" + hostname + "') or " +
-	      "'Name' ==_ci '" + hostname + "' or 'Aliases' ==_ci '" + hostname + "'";
+        if (hostname == null)
+          {
+            return Ganymede.createErrorDialog("Unacceptable value",
+                                              "This dhcp option type requires an IP address");
+          }
+        else
+          {
+            String query = "select object from 'Embedded System Interface' where " +
+              "'Containing Object'->('System Name' ==_ci '" + hostname + "' or 'Aliases' ==_ci '" + hostname + "') or " +
+              "'Name' ==_ci '" + hostname + "' or 'Aliases' ==_ci '" + hostname + "'";
 
-	    QueryResult results = null;
+            QueryResult results = null;
 
-	    try
-	      {
-		if (object.getGSession() == null)
-		  {
-		    results = Ganymede.getInternalSession().query(query);
-		  }
-		else
-		  {
-		    results = object.getGSession().query(query);
-		  }
-	      }
-	    catch (NotLoggedInException exa)
-	      {
-		return Ganymede.createErrorDialog("Internal error",
-						  exa.getMessage());
-	      }
-	    catch (GanyParseException exb)
-	      {
-		return Ganymede.createErrorDialog("Internal error",
-						  exb.getMessage());
-	      }
+            try
+              {
+                if (object.getGSession() == null)
+                  {
+                    results = Ganymede.getInternalSession().query(query);
+                  }
+                else
+                  {
+                    results = object.getGSession().query(query);
+                  }
+              }
+            catch (NotLoggedInException exa)
+              {
+                return Ganymede.createErrorDialog("Internal error",
+                                                  exa.getMessage());
+              }
+            catch (GanyParseException exb)
+              {
+                return Ganymede.createErrorDialog("Internal error",
+                                                  exb.getMessage());
+              }
 
-	    if (results.size() != 1)
-	      {
-		return Ganymede.createErrorDialog("Unacceptable error",
-						  "This dhcp option type requires an IP address.\n\n" +
-						  "Couldn't recognize hostname " + ipOrHost);
-	      }
+            if (results.size() != 1)
+              {
+                return Ganymede.createErrorDialog("Unacceptable error",
+                                                  "This dhcp option type requires an IP address.\n\n" +
+                                                  "Couldn't recognize hostname " + ipOrHost);
+              }
 
-	    try
-	      {
-		Invid interfaceInvid = results.getInvid(0);
-		DBObject interfaceObject = object.lookupInvid(interfaceInvid);
-		DBField ipField = (DBField) interfaceObject.getField(interfaceSchema.ADDRESS);
+            try
+              {
+                Invid interfaceInvid = results.getInvid(0);
+                DBObject interfaceObject = object.lookupInvid(interfaceInvid);
+                DBField ipField = (DBField) interfaceObject.getField(interfaceSchema.ADDRESS);
 
-		ReturnVal retVal = new ReturnVal(true, true);
-		retVal.setTransformedValueObject(ipField.getEncodingString());
+                ReturnVal retVal = new ReturnVal(true, true);
+                retVal.setTransformedValueObject(ipField.getEncodingString());
 
-		return retVal;
-	      }
-	    catch (NullPointerException ex2)
-	      {
-		return Ganymede.createErrorDialog("Internal error",
-						  ex2.getMessage());
-	      }
-	  }
+                return retVal;
+              }
+            catch (NullPointerException ex2)
+              {
+                return Ganymede.createErrorDialog("Internal error",
+                                                  ex2.getMessage());
+              }
+          }
       }
 
     ReturnVal retVal = new ReturnVal(true, true);
