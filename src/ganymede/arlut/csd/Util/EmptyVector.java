@@ -69,11 +69,8 @@ import java.util.Vector;
 
 final public class EmptyVector<E> extends Vector<E>
 {
-  private List<E> contents;
-
   public EmptyVector()
   {
-    contents = Collections.unmodifiableList(new ArrayList<E>());
   }
 
   @Override public synchronized void trimToSize()
@@ -123,12 +120,12 @@ final public class EmptyVector<E> extends Vector<E>
 
   @Override public synchronized E set(int index, E element)
   {
-    return contents.set(index, element);
+    throw new UnsupportedOperationException();
   }
 
   @Override public synchronized boolean add(E obj)
   {
-    return contents.add(obj);
+    throw new UnsupportedOperationException();
   }
 
   @Override public synchronized boolean remove(Object obj)
@@ -168,21 +165,21 @@ final public class EmptyVector<E> extends Vector<E>
 
   @Override public synchronized List<E> subList(int fromIndex, int toIndex)
   {
-    return contents.subList(fromIndex, toIndex);
+    return Collections.EMPTY_LIST.subList(fromIndex, toIndex);
   }
 
   @Override public synchronized ListIterator<E> listIterator(int index)
   {
-    return contents.listIterator(index);
+    return Collections.EMPTY_LIST.listIterator(index);
   }
 
   @Override public synchronized ListIterator<E> listIterator()
   {
-    return contents.listIterator();
+    return Collections.EMPTY_LIST.listIterator();
   }
 
   @Override public synchronized Iterator<E> iterator()
   {
-    return contents.iterator();
+    return Collections.EMPTY_LIST.iterator();
   }
 }
