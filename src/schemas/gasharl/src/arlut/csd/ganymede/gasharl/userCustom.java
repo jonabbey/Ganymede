@@ -1523,7 +1523,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     Vector<String> aliases = (Vector<String>) object.getFieldValuesLocal(ALIASES);
 
     if (!StringUtils.stringEquals(signature, myUsername) &&
-        (aliases == null || !aliases.contains(signature)))
+        !aliases.contains(signature))
       {
         return Ganymede.createErrorDialog("Bad Signature Alias",
                                           "Ganymede server configuration error.  The signature alias (" + signature + ") for this user is " +
@@ -1535,28 +1535,25 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     Invid homeGroupInvid = (Invid) object.getFieldValueLocal(HOMEGROUP);
     Vector<Invid> myGroups = (Vector<Invid>) object.getFieldValuesLocal(GROUPLIST);
 
-    if (myGroups != null)
+    if (!myGroups.contains(homeGroupInvid))
       {
-        if (!myGroups.contains(homeGroupInvid))
-          {
-            DBObject homeGroupObj = object.lookupInvid(homeGroupInvid, false);
+        DBObject homeGroupObj = object.lookupInvid(homeGroupInvid, false);
 
-            if (homeGroupObj != null)
-              {
-                return Ganymede.createErrorDialog("Bad Home Group",
-                                                  "Ganymede server configuration error.  The home group (" +
-                                                  homeGroupObj.getLabel() + ") for this user is " +
-                                                  "not a valid choice.");
-              }
-            else
-              {
-                return Ganymede.createErrorDialog("Bad Home Group",
-                                                  "Ganymede server configuration error.  The home group " +
-                                                  "for this user does not point to a valid object.");
-              }
+        if (homeGroupObj != null)
+          {
+            return Ganymede.createErrorDialog("Bad Home Group",
+                                              "Ganymede server configuration error.  The home group (" +
+                                              homeGroupObj.getLabel() + ") for this user is " +
+                                              "not a valid choice.");
+          }
+        else
+          {
+            return Ganymede.createErrorDialog("Bad Home Group",
+                                              "Ganymede server configuration error.  The home group " +
+                                              "for this user does not point to a valid object.");
           }
       }
-    else
+    else if (myGroups.size() == 0)
       {
         return Ganymede.createErrorDialog("Missing Groups",
                                           "This user is not a member of any groups.");
@@ -1569,7 +1566,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
         Vector<Invid> personaeList = (Vector<Invid>) object.getFieldValuesLocal(PERSONAE);
 
-        if ((personaeList == null || personaeList.size() == 0) && categoryName.equals("normal"))
+        if (personaeList.size() == 0 && categoryName.equals("normal"))
           {
             String badge = (String) object.getFieldValueLocal(BADGE);
 
@@ -1603,7 +1600,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
                     Vector<Invid> personae = (Vector<Invid>) conflictUserObject.getFieldValuesLocal(PERSONAE);
 
-                    if (personae != null && personae.size() > 0)
+                    if (personae.size() > 0)
                       {
                         badge_is_admin = true;
                       }
@@ -3627,7 +3624,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     Vector<Invid> ownerInvids = (Vector<Invid>) this.getFieldValuesLocal(SchemaConstants.OwnerListField);
     String ownerName;
 
-    if (ownerInvids != null && ownerInvids.size() > 0)
+    if (ownerInvids.size() > 0)
       {
         Invid ownerOne = ownerInvids.get(0);
 
@@ -4077,66 +4074,60 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     Vector<Invid> oldEntries = (Vector<Invid>) original.getFieldValuesLocal(userSchema.VOLUMES);
 
-    if (oldEntries != null)
+    for (Invid mapEntryInvid: oldEntries)
       {
-        for (Invid mapEntryInvid: oldEntries)
+        DBObject mapEntryObj = getDBSession().viewDBObject(mapEntryInvid);
+
+        if (mapEntryObj instanceof mapEntryCustom)
           {
-            DBObject mapEntryObj = getDBSession().viewDBObject(mapEntryInvid);
+            mapEntryCustom mapEntry = (mapEntryCustom) mapEntryObj;
 
-            if (mapEntryObj instanceof mapEntryCustom)
+            String mapName = mapEntry.getOriginalMapName();
+            Invid volumeId = mapEntry.getOriginalVolumeInvid();
+
+            oldEntryMap.put(mapName, mapEntryInvid);
+            oldVolumes.add(volumeId);
+            oldMapNames.add(mapName);
+
+            // if we see the same volume in multiple maps, we'll just
+            // remember the last one seen.. doesn't matter much, for
+            // our purposes
+
+            oldVolMap.put(volumeId, mapEntryInvid);
+
+            if (debug)
               {
-                mapEntryCustom mapEntry = (mapEntryCustom) mapEntryObj;
-
-                String mapName = mapEntry.getOriginalMapName();
-                Invid volumeId = mapEntry.getOriginalVolumeInvid();
-
-                oldEntryMap.put(mapName, mapEntryInvid);
-                oldVolumes.add(volumeId);
-                oldMapNames.add(mapName);
-
-                // if we see the same volume in multiple maps, we'll just
-                // remember the last one seen.. doesn't matter much, for
-                // our purposes
-
-                oldVolMap.put(volumeId, mapEntryInvid);
-
-                if (debug)
-                  {
-                    System.err.println("Old entry.. " + mapName + ", " + volumeId);
-                  }
+                System.err.println("Old entry.. " + mapName + ", " + volumeId);
               }
           }
       }
 
     Vector<Invid> newEntries = (Vector<Invid>) getFieldValuesLocal(userSchema.VOLUMES);
 
-    if (newEntries != null)
+    for (Invid mapEntryInvid: newEntries)
       {
-        for (Invid mapEntryInvid: newEntries)
+        DBObject mapEntryObj = getDBSession().viewDBObject(mapEntryInvid);
+
+        if (mapEntryObj instanceof mapEntryCustom)
           {
-            DBObject mapEntryObj = getDBSession().viewDBObject(mapEntryInvid);
+            mapEntryCustom mapEntry = (mapEntryCustom) mapEntryObj;
 
-            if (mapEntryObj instanceof mapEntryCustom)
+            String mapName = mapEntry.getMapName();
+            Invid volumeId = mapEntry.getVolumeInvid();
+
+            newEntryMap.put(mapName, mapEntryInvid);
+            newVolumes.add(volumeId);
+            newMapNames.add(mapName);
+
+            // if we see the same volume in multiple maps, we'll just
+            // remember the last one seen.. doesn't matter much, for
+            // our purposes
+
+            newVolMap.put(volumeId, mapEntryInvid);
+
+            if (debug)
               {
-                mapEntryCustom mapEntry = (mapEntryCustom) mapEntryObj;
-
-                String mapName = mapEntry.getMapName();
-                Invid volumeId = mapEntry.getVolumeInvid();
-
-                newEntryMap.put(mapName, mapEntryInvid);
-                newVolumes.add(volumeId);
-                newMapNames.add(mapName);
-
-                // if we see the same volume in multiple maps, we'll just
-                // remember the last one seen.. doesn't matter much, for
-                // our purposes
-
-                newVolMap.put(volumeId, mapEntryInvid);
-
-                if (debug)
-                  {
-                    System.err.println("New entry.. " + mapName + ", " + volumeId);
-                  }
+                System.err.println("New entry.. " + mapName + ", " + volumeId);
               }
           }
       }
