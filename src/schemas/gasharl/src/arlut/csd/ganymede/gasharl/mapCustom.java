@@ -107,15 +107,24 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
   }
 
   /**
+   * <p>Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.</p>
    *
-   * Customization method to control whether a specified field
-   * is required to be defined at commit time for a given object.<br><br>
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * To be overridden in DBEditObject subclasses.
+   * <p>Note that this method will not be called if the controlling
+   * GanymedeSession's enableOversight is turned off, as in
+   * bulk loading.</p>
    *
+   * <p>Note as well that the designated label field for objects are
+   * always required, whatever this method returns, and that this
+   * requirement holds without regard to the GanymedeSession's
+   * enableOversight value.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean fieldRequired(DBObject object, short fieldid)
+  @Override public boolean fieldRequired(DBObject object, short fieldid)
   {
     if (fieldid == mapSchema.MAPNAME)
       {
@@ -126,15 +135,41 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
   }
 
   /**
+   * <p>This method is used to control whether or not it is acceptable to
+   * make a link to the given field in this
+   * {@link arlut.csd.ganymede.server.DBObject DBObject} type when the
+   * user only has editing access for the source
+   * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField} and not
+   * the target.</p>
    *
-   * This method is used to control whether or not it is acceptable to
-   * make a link to the given field in this DBObject type when the
-   * user only has editing access for the source InvidDBField and not
-   * the target.
+   * <p>See {@link arlut.csd.ganymede.server.DBEditObject#anonymousLinkOK(arlut.csd.ganymede.server.DBObject,short,
+   * arlut.csd.ganymede.server.DBObject,short,arlut.csd.ganymede.server.GanymedeSession)
+   * anonymousLinkOK(obj,short,obj,short,GanymedeSession)} for details on
+   * anonymousLinkOK() method chaining.</p>
    *
+   * <p>Note that the {@link
+   * arlut.csd.ganymede.server.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.server.DBField)
+   * choiceListHasExceptions()} method will call this version of anonymousLinkOK()
+   * with a null targetObject, to determine that the client should not
+   * use its cache for an InvidDBField's choices.  Any overriding done
+   * of this method must be able to handle a null targetObject, or else
+   * an exception will be thrown inappropriately.</p>
+   *
+   * <p>The only reason to consult targetObject in any case is to
+   * allow or disallow anonymous object linking to a field based on
+   * the current state of the target object.  If you are just writing
+   * generic anonymous linking rules for a field in this object type,
+   * targetObject won't concern you anyway.  If you do care about the
+   * targetObject's state, though, you have to be prepared to handle
+   * a null valued targetObject.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   *
+   * @param targetObject The object that the link is to be created in (may be null)
+   * @param targetFieldID The field that the link is to be created in
    */
 
-  public boolean anonymousLinkOK(DBObject object, short fieldID)
+  @Override public boolean anonymousLinkOK(DBObject object, short fieldID)
   {
     // we want anyone to be able to link into the auto.home.default
     // map.
@@ -160,18 +195,30 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
   }
 
   /**
-   *
-   * This method returns a key that can be used by the client
+   * <p>This method returns a key that can be used by the client
    * to cache the value returned by choices().  If the client
    * already has the key cached on the client side, it
    * can provide the choice list from its cache rather than
-   * calling choices() on this object again.<br><br>
+   * calling choices() on this object again.</p>
    *
-   * If there is no caching key, this method will return null.
+   * <p>The default logic in this method is designed to cause the client
+   * to cache choice lists for invid fields in the 'all objects of
+   * invid target type' cache bucket.  If your InvidDBField needs to
+   * provide a restricted subset of objects of the targeted type as
+   * the choice list, you'll need to override this method to either
+   * return null (to turn off choice list caching), or generate some
+   * kind of unique key that won't collide with the Short objects used
+   * to represent the default object list caches.</p>
    *
+   * <p>See also the {@link
+   * arlut.csd.ganymede.server.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.server.DBField)}
+   * hook, which controls whether or not the default logic will
+   * encourage the client to cache a given InvidDBField's choice list.</p>
+   *
+   * <p>If there is no caching key, this method will return null.</p>
    */
 
-  public Object obtainChoicesKey(DBField field)
+  @Override public Object obtainChoicesKey(DBField field)
   {
     if (field.getID() == ENTRIES)
       {
@@ -182,18 +229,21 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
   }
 
   /**
-   *
-   * This method provides a hook that can be used to generate
+   * <p>This method provides a hook that can be used to generate
    * choice lists for invid and string fields that provide
    * such.  String and Invid DBFields will call their owner's
-   * obtainChoiceList() method to get a list of valid choices.<br><br>
+   * obtainChoiceList() method to get a list of valid choices.</p>
    *
-   * This method will provide a reasonable default for targetted
-   * invid fields.
+   * <p>This method will provide a reasonable default for targetted
+   * invid fields, filtered by the GanymedeSession's
+   * visibilityFilterInvids list.</p>
    *
+   * <p>NOTE: This method does not need to be synchronized.  Making this
+   * synchronized can lead to DBEditObject/DBSession nested monitor
+   * deadlocks.</p>
    */
 
-  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
+  @Override public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (field.getID() == ENTRIES)
       {
@@ -204,13 +254,118 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
   }
 
   /**
+   * <p>This method is the hook that DBEditObject subclasses use to interpose
+   * {@link arlut.csd.ganymede.server.GanymediatorWizard wizards} when a field's
+   * value is being changed.</p>
    *
-   * This is the hook that DBEditObject subclasses use to interpose wizards when
-   * a field's value is being changed.
+   * <p>Whenever a field is changed in this object, this method will be
+   * called with details about the change. This method can refuse to
+   * perform the operation, it can make changes to other objects in
+   * the database in response to the requested operation, or it can
+   * choose to allow the operation to continue as requested.</p>
    *
+   * <p>In the latter two cases, the wizardHook code may specify a list
+   * of fields and/or objects that the client may need to update in
+   * order to maintain a consistent view of the database.</p>
+   *
+   * <p>If server-local code has called
+   * {@link arlut.csd.ganymede.server.GanymedeSession#enableOversight(boolean)
+   * enableOversight(false)},
+   * this method will never be
+   * called.  This mode of operation is intended only for initial
+   * bulk-loading of the database.</p>
+   *
+   * <p>This method may also be bypassed when server-side code uses
+   * setValueLocal() and the like to make changes in the database.</p>
+   *
+   * <p>This method is called before the finalize*() methods.. the finalize*()
+   * methods is where last minute cascading changes should be performed..
+   * Note as well that wizardHook() is called before the namespace checking
+   * for the proposed value is performed, while the finalize*() methods are
+   * called after the namespace checking.</p>
+   *
+   * <p>The operation parameter will be a small integer, and should hold one of the
+   * following values:</p>
+   *
+   * <dl>
+   * <dt>1 - SETVAL</dt>
+   * <dd>This operation is used whenever a simple scalar field is having
+   * it's value set.  param1 will be the value being placed into the field.</dd>
+   * <dt>2 - SETELEMENT</dt>
+   * <dd>This operation is used whenever a value in a vector field is being
+   * set.  param1 will be an Integer holding the element index, and
+   * param2 will be the value being set.</dd>
+   * <dt>3 - ADDELEMENT</dt>
+   * <dd>This operation is used whenever a value is being added to the
+   * end of a vector field.  param1 will be the value being added.</dd>
+   * <dt>4 - DELELEMENT</dt>
+   * <dd>This operation is used whenever a value in a vector field is being
+   * deleted.  param1 will be an Integer holding the element index.</dd>
+   * <dt>5 - ADDELEMENTS</dt>
+   * <dd>This operation is used whenever a set of elements is being
+   * added to a vector field en masse.  param1 will be a Vector containing
+   * the values that are being added.</dd>
+   * <dt>6 - DELELEMENTS</dt>
+   * <dd>This operation is used whenever a set of elements is being
+   * deleted from a vector field en masse.  param1 will be a Vector containing
+   * the values that are being deleted.</dd>
+   * <dt>7 - SETPASSPLAIN</dt>
+   * <dd>This operation is used when a password field is having its password
+   * set using a plaintext source.  param1 will be a String containing the
+   * submitted password, or null if the password is being cleared.</dd>
+   * <dt>8 - SETPASSCRYPT</dt>
+   * <dd>This operation is used when a password field is having its password
+   * set using a UNIX crypt() hashed source.  param1 will be a String containing the
+   * submitted hashed password, or null if the password is being cleared.</dd>
+   * <dt>9 - SETPASSMD5</dt>
+   * <dd>This operation is used when a password field is having its password
+   * set using an md5Ccrypt() hashed source.  param1 will be a String containing the
+   * submitted hashed password, or null if the password is being cleared.</dd>
+   * <dt>10 - SETPASSWINHASHES</dt>
+   * <dd>This operation is used when a password field is having its password
+   * set using Windows style password hashes.  param1 will be the password in
+   * LANMAN hash form, param2 will be the password in NT Unicode MD4 hash
+   * form.  Either or both of param1 and param2 may be null.</dd>
+   * <dt>11 - SETPASSAPACHEMD5</dt>
+   * <dd>This operation is used when a password field is having its
+   * password set using the Apache variant of the md5crypt algorithm.
+   * param1 will be the password in Apache md5crypt hash form, or null
+   * if the password hash is being cleared.  param2 will be null.</dd>
+   * <dt>12 - SETPASSSSHA</dt>
+   * <dd>This operation is used when a password field is having its
+   * password set using the OpenLDAP-style SSHA password hash.  param1
+   * will be the password in SSHA form, or null if the password is
+   * being cleared.  param2 will be null.</dd>
+   * <dt>13 - SETPASS_SHAUNIXCRYPT</dt>
+   * <dd>This operation is used when a password field is having its
+   * password set using Ulrich Drepper's SHA256 or SHA512 Unix Crypt
+   * algorithms.  param1 will be the password in SHA Unix Crypt form,
+   * or null if the password is being cleared.  param2 will be
+   * null.</dd>
+   * <dt>14 - SETPASS_BCRYPT</dt>
+   * <dd>This operation is used when a password field is having its
+   * password set using the OpenBSD-style BCrypt password hash.  param1
+   * will be the password in BCrypt form, or null if the password is
+   * being cleared.  param2 will be null.</dd>
+   * </dl>
+   *
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
+   *
+   * @return null if the operation is approved without comment, or a
+   * ReturnVal object indicating success or failure, objects and
+   * fields to be rescanned by the client, and a doNormalProcessing
+   * flag that will indicate to the field code whether or not the
+   * operation should continue to completion using the field's
+   * standard logic.  <b>It is very important that wizardHook return a
+   * new ReturnVal(true, true) if the wizardHook wishes to simply
+   * specify rescan information while having the field perform its
+   * standard operation.</b> wizardHook() may return new
+   * ReturnVal(true, false) if the wizardHook performs the operation
+   * (or a logically related operation) itself.  The same holds true
+   * for the respond() method in GanymediatorWizard subclasses.
    */
 
-  public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
+  @Override public ReturnVal wizardHook(DBField field, int operation, Object param1, Object param2)
   {
     try
       {
@@ -247,7 +402,7 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
                 // DBField.deleteElement() try to do it in its naive
                 // fashion.
 
-                Vector entries = getFieldValuesLocal(ENTRIES);
+                Vector<Invid> entries = (Vector<Invid>) getFieldValuesLocal(ENTRIES);
 
                 if (entries == null)
                   {
@@ -259,7 +414,7 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 
                 try
                   {
-                    invid = (Invid) entries.elementAt(index);
+                    invid = entries.get(index);
                   }
                 catch (ClassCastException ex)
                   {
@@ -332,22 +487,32 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
       }
   }
 
+
   /**
    * <p>This method is used to provide a hook to allow different
    * objects to generate different labels for a given object based on
    * their perspective.  This is used to sort of hackishly simulate a
    * relational-type capability for the purposes of viewing
-   * backlinks.</p>
+   * context-sensitive labels of objects that are linked from Invid
+   * fields in this object.</p>
    *
-   * <p>See the automounter map and NFS volume DBEditObject subclasses
-   * for how this is to be used, if you have them.</p>
+   * <p>This method primarily affects the results returned by {@link
+   * arlut.csd.ganymede.server.InvidDBField#encodedValues()}, but it
+   * can also affect the results shown by {@link
+   * arlut.csd.ganymede.server.DBQueryEngine#query(arlut.csd.ganymede.common.Query,
+   * arlut.csd.ganymede.server.DBEditObject)} when the
+   * perspectiveObject parameter is non-null.</p>
+   *
+   * <p>See the automounter map and NFS volume DBEditObject
+   * subclasses for how this is to be used, if you have
+   * them.</p>
    */
 
-  public String lookupLabel(DBObject object)
+  @Override public String lookupLabel(DBObject object)
   {
     // we want to create our own, map-centric view of mapEntry objects
 
-    if (object.getTypeID() == 278)
+    if (object.getTypeID() == mapEntrySchema.BASE)
       {
         String userName, volName;
         Invid tmpInvid;
@@ -371,7 +536,7 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
             userName = tmpInvid.toString();
           }
 
-        iField = (InvidDBField) object.getField((short) 257); // volume invid
+        iField = (InvidDBField) object.getField(mapEntrySchema.VOLUME); // volume invid
 
         if (iField == null)
           {
@@ -400,5 +565,4 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
         return super.lookupLabel(object);
       }
   }
-
 }
