@@ -417,6 +417,16 @@ public final class GanymedeServer implements Server {
                                               ts.l("incrementAndTestLoginSemaphore.nologins_shutdown"));
           }
       }
+    else if (error != null && error.startsWith("schema edit:"))
+      {
+        String adminName = error.substring("schema edit:".length());
+
+        // "No logins allowed"
+        // "Logins to the Ganymede server are temporarily unavailable.
+        // Admin {0} is editing the server''s schema definition."
+        return Ganymede.createErrorDialog(ts.l("incrementAndTestLoginSemaphore.nologins"),
+                                          ts.l("incrementAndTestLoginSemaphore.nologins_schema_edit", adminName));
+      }
     else if (error != null)
       {
         // "No logins allowed"

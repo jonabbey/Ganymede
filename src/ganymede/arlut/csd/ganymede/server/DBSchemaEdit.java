@@ -142,6 +142,18 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
   private final DBStore store;
 
   /**
+   * The name of the admin who is editing the schema.
+   */
+
+  private final String adminName;
+
+  /**
+   * The token that was used to lock the server for schema edit.
+   */
+
+  private final String disableToken;
+
+  /**
    * A copy of the DBObjectBase objects comprising the DBStore's
    * database.  All changes made during Base editing are performed on
    * the copies held in this hashtable.. if the DBSchemaEdit session
@@ -173,18 +185,25 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
    * critical section synchronized on the Ganymede.db.lockSync object.
    */
 
-  public DBSchemaEdit() throws RemoteException
+  public DBSchemaEdit(String adminName) throws RemoteException
   {
     if (debug)
       {
         System.err.println("DBSchemaEdit constructor entered");
       }
 
+    this.adminName = adminName;
+
+    // NB: disableToken must be "schema edit:" followed by the admin
+    // name to match logic in GanymedeAdmin and GanymedeServer
+
+    this.disableToken = "schema edit:" + adminName;
+
     // the GanymedeAdmin editSchema() method should have disabled the
     // login semaphore with a "schema edit" condition.  Check this
     // just to be sure.
 
-    if (!"schema edit".equals(GanymedeServer.lSemaphore.checkEnabled()))
+    if (!this.disableToken.equals(GanymedeServer.lSemaphore.checkEnabled()))
       {
         throw new RuntimeException("can't edit schema without lock");
       }
@@ -1006,8 +1025,7 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
     GanymedeAdmin.setState(DBStore.normal_state); // "Normal Operation"
 
     Ganymede.debug("DBSchemaEdit: Re-enabling logins.");
-
-    GanymedeServer.lSemaphore.enable("schema edit");
+    GanymedeServer.lSemaphore.enable(this.disableToken);
 
     return null;
   }
@@ -1088,7 +1106,7 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
     rootCategory = null;
 
-    GanymedeServer.lSemaphore.enable("schema edit");
+    GanymedeServer.lSemaphore.enable(this.disableToken);
 
     return;
   }

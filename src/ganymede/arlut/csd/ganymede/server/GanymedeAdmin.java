@@ -615,14 +615,20 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * at some later point.
    */
 
-  private String adminName;
+  private final String adminName;
 
   /**
    * The name or ip address of the system that this admin console
    * is attached from.
    */
 
-  private String clientHost;
+  private final String clientHost;
+
+  /**
+   * The string token used to lock the server's lsemaphore.
+   */
+
+  private final String schemaDisableToken;
 
   /**
    * If true, the admin console is attached with full privileges to
@@ -672,6 +678,11 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
     this.fullprivs = fullprivs;
     this.adminName = adminName;
     this.clientHost = clientHost;
+
+    // NB: disableToken must be "schema edit:" followed by the admin
+    // name to match logic in GanymedeServer and DBSchemaEdit
+
+    this.schemaDisableToken = "schema edit:" + adminName;
 
     consoles.add(this);  // this can block if we are currently looping on consoles
 
@@ -1438,13 +1449,10 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     try
       {
-        // "schema edit"
-        String token = ts.l("editSchema.semaphore_token");
-
         // Check to see if the server is in its standard state with no
         // user sessions on the lSemaphore, without blocking.
 
-        String semaphoreCondition = GanymedeServer.lSemaphore.disable(token, true, 0);
+        String semaphoreCondition = GanymedeServer.lSemaphore.disable(this.schemaDisableToken, true, 0);
 
         if (semaphoreCondition != null)
           {
@@ -1487,9 +1495,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
               {
                 // "Admin console {0} can''t edit Schema, lock held on {1}."
                 Ganymede.debug(ts.l("editSchema.locked_base", this.toString(), base.getName()));
-
-                // "schema edit"
-                GanymedeServer.lSemaphore.enable(ts.l("editSchema.semaphore_token"));
+                GanymedeServer.lSemaphore.enable(this.schemaDisableToken);
 
                 return null;
               }
@@ -1505,7 +1511,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
         try
           {
-            DBSchemaEdit result = new DBSchemaEdit();
+            DBSchemaEdit result = new DBSchemaEdit(this.adminName);
 
             // we've created our copy of all of our DBObjectBase and
             // DBObjectBaseField objects above.  We're going to return
@@ -1515,8 +1521,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
           }
         catch (RemoteException ex)
           {
-            // "schema edit"
-            GanymedeServer.lSemaphore.enable(ts.l("editSchema.semaphore_token"));
+            GanymedeServer.lSemaphore.enable(this.schemaDisableToken);
             return null;
           }
       }

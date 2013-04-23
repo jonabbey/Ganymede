@@ -3390,7 +3390,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
         try
           {
-            DBSchemaEdit result = new DBSchemaEdit();
+            DBSchemaEdit result = new DBSchemaEdit(this.session.getIdentity());
             return result;
           }
         catch (RemoteException ex)
