@@ -1187,11 +1187,11 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
           }
       }
 
-    Vector<String> x = new Vector<String>();
+    Vector<String> targets = new Vector<String>();
 
-    x.add(object.getLabel());   // let our mail system handle routing.
+    targets.add(object.getLabel());   // let our mail system handle routing.
 
-    return x;
+    return targets;
   }
 
   /**
@@ -1520,7 +1520,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     String signature = (String) object.getFieldValueLocal(SIGNATURE);
     String myUsername = (String) object.getLabel();
-    Vector aliases = object.getFieldValuesLocal(ALIASES);
+    Vector<String> aliases = (Vector<String>) object.getFieldValuesLocal(ALIASES);
 
     if (!StringUtils.stringEquals(signature, myUsername) &&
         (aliases == null || !aliases.contains(signature)))
@@ -1533,7 +1533,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     // and the home group as well
 
     Invid homeGroupInvid = (Invid) object.getFieldValueLocal(HOMEGROUP);
-    Vector myGroups = object.getFieldValuesLocal(GROUPLIST);
+    Vector<Invid> myGroups = (Vector<Invid>) object.getFieldValuesLocal(GROUPLIST);
 
     if (myGroups != null)
       {
@@ -1567,7 +1567,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     if (object.isDefined(BADGE))
       {
-        Vector personaeList = object.getFieldValuesLocal(PERSONAE);
+        Vector<Invid> personaeList = (Vector<Invid>) object.getFieldValuesLocal(PERSONAE);
 
         if ((personaeList == null || personaeList.size() == 0) && categoryName.equals("normal"))
           {
@@ -1601,7 +1601,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
                     DBObject conflictUserObject = lookupInvid(matchInvid, false);
 
-                    Vector personae = conflictUserObject.getFieldValuesLocal(PERSONAE);
+                    Vector<Invid> personae = (Vector<Invid>) conflictUserObject.getFieldValuesLocal(PERSONAE);
 
                     if (personae != null && personae.size() > 0)
                       {
@@ -3285,7 +3285,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
                 // see if any of the values is the home group
 
-                Vector valuesToDelete = (Vector) param1;
+                Vector<Invid> valuesToDelete = (Vector<Invid>) param1;
 
                 if (!valuesToDelete.contains(getFieldValueLocal(HOMEGROUP)))
                   {
