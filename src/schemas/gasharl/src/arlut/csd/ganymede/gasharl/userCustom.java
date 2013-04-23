@@ -696,9 +696,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         if (titleString != null)
           {
-            Vector objVect = new Vector();
+            Vector<Invid> objVect = new Vector<Invid>();
 
-            objVect.addElement(this.getInvid());
+            objVect.add(this.getInvid());
 
             // we want to sent to the user but not to the owners
 
@@ -1253,9 +1253,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
         if (x.endsWith("@arlex.arlut.utexas.edu"))
           {
-            Vector toAddresses = new Vector();
-            toAddresses.addElement("pcshelp@arlut.utexas.edu");
-            toAddresses.addElement("broccol@arlut.utexas.edu");
+            Vector<String> toAddresses = new Vector<String>();
+            toAddresses.add("pcshelp@arlut.utexas.edu");
+            toAddresses.add("broccol@arlut.utexas.edu");
 
             Ganymede.log.sendMail(toAddresses,
                                   "Exchange User " + object.getLabel() + " Scheduled for Deletion",
@@ -2115,9 +2115,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
       {
         if (x.endsWith("@arlex.arlut.utexas.edu"))
           {
-            Vector toAddresses = new Vector();
-            toAddresses.addElement("pcshelp@arlut.utexas.edu");
-            toAddresses.addElement("broccol@arlut.utexas.edu");
+            Vector<String> toAddresses = new Vector<String>();
+            toAddresses.add("pcshelp@arlut.utexas.edu");
+            toAddresses.add("broccol@arlut.utexas.edu");
 
             this.getEditSet().logMail(toAddresses,
                                       "Exchange User " + this.getLabel() + " Deleted",
