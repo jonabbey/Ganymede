@@ -680,7 +680,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
     this.clientHost = clientHost;
 
     // NB: disableToken must be "schema edit:" followed by the admin
-    // name to match logic in GanymedeServer and DBSchemaEdit
+    // name to match logic in GanymedeServer, DBSchemaEdit, and
+    // GanymedeXMLSession
 
     this.schemaDisableToken = "schema edit:" + adminName;
 

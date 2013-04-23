@@ -3308,6 +3308,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   private DBSchemaEdit editSchema()
   {
+    // NB: disableToken must be "schema edit:" followed by the admin
+    // name to match logic in GanymedeServer, GanymedeAdmin, and
+    // DBSchemaEdit
+
+    String schemaDisableToken = "schema edit:" + this.session.getIdentity();
+
     // first, let's check to see if we're the only session in, and
     // if we are disable the semaphore.  We have to do all of this
     // in a block synchronized on GanymedeServer.lSemaphore so
@@ -3330,7 +3336,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
         try
           {
-            String semaphoreCondition = GanymedeServer.lSemaphore.disable("schema edit", false, 0);
+            String semaphoreCondition = GanymedeServer.lSemaphore.disable(schemaDisableToken, false, 0);
 
             if (semaphoreCondition != null)
               {
@@ -3375,7 +3381,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
                 // "GanymedeXMLSession Can''t edit schema, previous lock held on object base {0}"
                 Ganymede.debug(ts.l("editSchema.base_blocked", base.getName()));
 
-                GanymedeServer.lSemaphore.enable("schema edit");
+                GanymedeServer.lSemaphore.enable(schemaDisableToken);
                 return null;
               }
           }
@@ -3395,7 +3401,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
           }
         catch (RemoteException ex)
           {
-            GanymedeServer.lSemaphore.enable("schema edit");
+            GanymedeServer.lSemaphore.enable(schemaDisableToken);
             return null;
           }
       }

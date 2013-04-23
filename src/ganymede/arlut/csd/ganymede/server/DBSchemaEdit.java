@@ -195,7 +195,8 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
     this.adminName = adminName;
 
     // NB: disableToken must be "schema edit:" followed by the admin
-    // name to match logic in GanymedeAdmin and GanymedeServer
+    // name to match logic in GanymedeServer, GanymedeAdmin, and
+    // GanymedeXMLSession
 
     this.disableToken = "schema edit:" + adminName;
 
