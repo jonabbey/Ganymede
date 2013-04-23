@@ -138,7 +138,7 @@ public final class DBReadLock extends DBLock {
    * GanymedeBuilderTask}.
    */
 
-  public void establish(Object key) throws InterruptedException
+  @Override public final void establish(Object key) throws InterruptedException
   {
     boolean okay = false;
 
@@ -258,7 +258,7 @@ public final class DBReadLock extends DBLock {
    * methods in other threads to proceed.</p>
    */
 
-  public void release()
+  @Override public final void release()
   {
     if (debug)
       {
@@ -335,7 +335,7 @@ public final class DBReadLock extends DBLock {
    * need to check to see if its lock was pulled.</p>
    */
 
-  public void abort()
+  @Override public final void abort()
   {
     synchronized (lockSync)
       {

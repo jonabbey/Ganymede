@@ -129,7 +129,7 @@ final class DBDumpLock extends DBLock {
    * GanymedeBuilderTask}.
    */
 
-  public void establish(Object key) throws InterruptedException
+  @Override public final void establish(Object key) throws InterruptedException
   {
     boolean waiting = false;
     boolean okay = false;
@@ -225,7 +225,7 @@ final class DBDumpLock extends DBLock {
    * <p>Release this lock on all bases locked</p>
    */
 
-  public void release()
+  @Override public final void release()
   {
     synchronized (lockSync)
       {
@@ -276,7 +276,7 @@ final class DBDumpLock extends DBLock {
    * InterruptedException.</p>
    */
 
-  public void abort()
+  @Override public final void abort()
   {
     synchronized (lockSync)
       {
