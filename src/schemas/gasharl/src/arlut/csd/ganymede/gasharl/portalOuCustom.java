@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -116,20 +116,30 @@ public class portalOuCustom extends DBEditObject implements SchemaConstants, map
    * <p>Customization method to control whether a specified field
    * is required to be defined at commit time for a given object.</p>
    *
-   * <p>To be overridden in DBEditObject subclasses.</p>
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
+   *
+   * <p>Note that this method will not be called if the controlling
+   * GanymedeSession's enableOversight is turned off, as in
+   * bulk loading.</p>
+   *
+   * <p>Note as well that the designated label field for objects are
+   * always required, whatever this method returns, and that this
+   * requirement holds without regard to the GanymedeSession's
+   * enableOversight value.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean fieldRequired(DBObject object, short fieldid)
+  @Override public boolean fieldRequired(DBObject object, short fieldid)
   {
     if (fieldid == portalOuSchema.OU ||
-	fieldid == portalOuSchema.NAME)
+        fieldid == portalOuSchema.NAME)
       {
-	return true;
+        return true;
       }
 
     return false;
   }
-
 
   /**
    * <p>This method provides a hook that can be used by subclasses of
@@ -178,7 +188,7 @@ public class portalOuCustom extends DBEditObject implements SchemaConstants, map
    * generation of the extra attributes.
    */
 
-  public String[] getMyExtraInvidAttributes(DBObject myObj, String syncChannel, boolean forceOriginal)
+  @Override public String[] getMyExtraInvidAttributes(DBObject myObj, String syncChannel, boolean forceOriginal)
   {
     String[] results = new String[2];
     results[0] = "ou";
