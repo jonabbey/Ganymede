@@ -149,6 +149,11 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
 
     DBField field = (DBField) object.getField(fieldid);
 
+    if (field == null)
+      {
+        return null;
+      }
+
     String label = field.getValueString();
 
     // XXX Note: this schema assumes that all users will have entries in auto.home.default
