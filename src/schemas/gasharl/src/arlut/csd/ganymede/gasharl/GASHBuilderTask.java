@@ -1159,7 +1159,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
               }
 
             String username = (String) user.getFieldValueLocal(SchemaConstants.UserUserName);
-            Vector deliveryAddresses = user.getFieldValuesLocal(userSchema.EMAILTARGET);
+            Vector<String> deliveryAddresses = (Vector<String>) user.getFieldValuesLocal(userSchema.EMAILTARGET);
 
             // first all users
 
@@ -1167,12 +1167,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
               {
                 boolean allSeen = true;
 
-                for (int i = 0; i < deliveryAddresses.size(); i++)
+                for (String addr: deliveryAddresses)
                   {
-                    if (!targets.contains(deliveryAddresses.elementAt(i)))
+                    if (!targets.contains(addr))
                       {
                         allSeen = false;
-                        targets.add(deliveryAddresses.elementAt(i));
+                        targets.add(addr);
                       }
                   }
 
@@ -1190,12 +1190,12 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
               {
                 boolean allSeen = true;
 
-                for (int i = 0; i < deliveryAddresses.size(); i++)
+                for (String addr: deliveryAddresses)
                   {
-                    if (!targets2.contains(deliveryAddresses.elementAt(i)))
+                    if (!targets2.contains(addr))
                       {
                         allSeen = false;
-                        targets2.add(deliveryAddresses.elementAt(i));
+                        targets2.add(addr);
                       }
                   }
 
@@ -1235,10 +1235,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     String groupname;
     String pass;
     int gid;
-    Vector users = new Vector();
+    Vector<String> users = new Vector<String>();
 
-    Vector invids;
-    Invid userInvid;
+    Vector<Invid> invids;
     String userName;
     String contract;
     String description;
@@ -1253,24 +1252,15 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     gid = ((Integer) object.getFieldValueLocal(groupSchema.GID)).intValue();
 
-    invids = object.getFieldValuesLocal(groupSchema.USERS);
+    invids = (Vector<Invid>) object.getFieldValuesLocal(groupSchema.USERS);
 
-    if (invids == null)
+    for (Invid userInvid: invids)
       {
-        // System.err.println("GASHBuilder.writeGroupLine(): null user list for group " + groupname);
-      }
-    else
-      {
-        for (int i = 0; i < invids.size(); i++)
+        userName = getLabel(userInvid);
+
+        if (userName != null)
           {
-            userInvid = (Invid) invids.elementAt(i);
-
-            userName = getLabel(userInvid);
-
-            if (userName != null)
-              {
-                users.addElement(userName);
-              }
+            users.add(userName);
           }
       }
 
@@ -1288,7 +1278,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
             result.append(",");
           }
 
-        result.append((String) users.elementAt(i));
+        result.append(users.get(i));
       }
 
     // okay, this marks the end of what we care about for the NIS
@@ -1339,22 +1329,19 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   private void writeGroupOwnerLine(DBObject object, PrintWriter writer)
   {
     String groupname;
-    Vector ownerList;
-    Vector ownerStringList = new Vector();
+    Vector<Invid> ownerList;
+    Vector<String> ownerStringList = new Vector<String>();
 
     /* -- */
 
     result.setLength(0);
 
     groupname = (String) object.getFieldValueLocal(groupSchema.GROUPNAME);
-    ownerList = object.getFieldValuesLocal(SchemaConstants.OwnerListField);
+    ownerList = (Vector<Invid>) object.getFieldValuesLocal(SchemaConstants.OwnerListField);
 
-    if (ownerList != null)
+    for (Invid invid: ownerList)
       {
-        for (int i = 0; i < ownerList.size(); i++)
-          {
-            ownerStringList.addElement(getLabel((Invid) ownerList.elementAt(i)));
-          }
+        ownerStringList.add(getLabel(invid));
       }
 
     // now build our output line
@@ -1369,7 +1356,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
             result.append(",");
           }
 
-        result.append((String) ownerStringList.elementAt(i));
+        result.append(ownerStringList.get(i));
       }
 
     writer.println(result.toString());
@@ -1434,11 +1421,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     StringBuilder buffer = new StringBuilder();
 
     String name;
-    Vector users;
-    Vector memberNetgroups;
-
-    Invid ref;
-    String refLabel;
+    Vector<Invid> users;
+    Vector<Invid> memberNetgroups;
 
     int lengthlimit;
     int subgroup = 1;
@@ -1447,8 +1431,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     /* -- */
 
     name = (String) object.getFieldValueLocal(userNetgroupSchema.NETGROUPNAME);
-    users = object.getFieldValuesLocal(userNetgroupSchema.USERS);
-    memberNetgroups = object.getFieldValuesLocal(userNetgroupSchema.MEMBERGROUPS);
+    users = (Vector<Invid>) object.getFieldValuesLocal(userNetgroupSchema.USERS);
+    memberNetgroups = (Vector<Invid>) object.getFieldValuesLocal(userNetgroupSchema.MEMBERGROUPS);
 
     // NIS limits the length of a line to 1024 characters.
     // If the line looks like it'll go over, we'll truncate
@@ -1469,70 +1453,62 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     buffer.append(name);
 
-    if (memberNetgroups != null)
+    for (Invid ref: memberNetgroups)
       {
-        for (int i = 0; i < memberNetgroups.size(); i++)
+        String refLabel = getLabel(ref);
+
+        if (buffer.length() + refLabel.length() > lengthlimit)
           {
-            ref = (Invid) memberNetgroups.elementAt(i);
-            refLabel = getLabel(ref);
-
-            if (buffer.length() + refLabel.length() > lengthlimit)
+            if (subgroup > 1)
               {
-                if (subgroup > 1)
-                  {
-                    subname = name + "-ext" + subgroup;
-                  }
-                else
-                  {
-                    subname = name + "-ext";
-                  }
-
-                buffer.append(" ");
-                buffer.append(subname);
-                writer.println(buffer.toString());
-                buffer = new StringBuilder();
-                buffer.append(subname);
-
-                subgroup++;
+                subname = name + "-ext" + subgroup;
+              }
+            else
+              {
+                subname = name + "-ext";
               }
 
             buffer.append(" ");
-            buffer.append(refLabel);
+            buffer.append(subname);
+            writer.println(buffer.toString());
+            buffer = new StringBuilder();
+            buffer.append(subname);
+
+            subgroup++;
           }
+
+        buffer.append(" ");
+        buffer.append(refLabel);
       }
 
-    if (users != null)
+    for (Invid ref: users)
       {
-        for (int i = 0; i < users.size(); i++)
+        String refLabel = getLabel(ref);
+
+        if (buffer.length() + refLabel.length() > lengthlimit)
           {
-            ref = (Invid) users.elementAt(i);
-            refLabel = getLabel(ref);
-
-            if (buffer.length() + refLabel.length() > lengthlimit)
+            if (subgroup > 1)
               {
-                if (subgroup > 1)
-                  {
-                    subname = name + "-ext" + subgroup;
-                  }
-                else
-                  {
-                    subname = name + "-ext";
-                  }
-
-                buffer.append(" ");
-                buffer.append(subname);
-                writer.println(buffer.toString());
-                buffer = new StringBuilder();
-                buffer.append(subname);
-
-                subgroup++;
+                subname = name + "-ext" + subgroup;
+              }
+            else
+              {
+                subname = name + "-ext";
               }
 
             buffer.append(" ");
-            buffer.append("(-,");
-            buffer.append(refLabel);
-            buffer.append(",)");
+            buffer.append(subname);
+            writer.println(buffer.toString());
+            buffer = new StringBuilder();
+            buffer.append(subname);
+
+            subgroup++;
           }
+
+        buffer.append(" ");
+        buffer.append("(-,");
+        buffer.append(refLabel);
+        buffer.append(",)");
       }
 
     writer.println(buffer.toString());
@@ -1552,11 +1528,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     StringBuilder buffer = new StringBuilder();
 
     String name;
-    Vector systems;
-    Vector memberNetgroups;
-
-    Invid ref;
-    String refLabel;
+    Vector<Invid> systems;
+    Vector<Invid> memberNetgroups;
 
     int lengthlimit;
     int subgroup = 1;
@@ -1565,8 +1538,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     /* -- */
 
     name = (String) object.getFieldValueLocal(systemNetgroupSchema.NETGROUPNAME);
-    systems = object.getFieldValuesLocal(systemNetgroupSchema.SYSTEMS);
-    memberNetgroups = object.getFieldValuesLocal(systemNetgroupSchema.MEMBERGROUPS);
+    systems = (Vector<Invid>) object.getFieldValuesLocal(systemNetgroupSchema.SYSTEMS);
+    memberNetgroups = (Vector<Invid>) object.getFieldValuesLocal(systemNetgroupSchema.MEMBERGROUPS);
 
     // NIS limits the length of a line to 1024 characters.
     // If the line looks like it'll go over, we'll truncate
@@ -1588,90 +1561,79 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     buffer.append(name);
 
-    if (memberNetgroups != null)
+    for (Invid ref: memberNetgroups)
       {
-        for (int i = 0; i < memberNetgroups.size(); i++)
+        String refLabel = getLabel(ref);
+
+        if (buffer.length() + refLabel.length() > lengthlimit)
           {
-            ref = (Invid) memberNetgroups.elementAt(i);
-            refLabel = getLabel(ref);
-
-            if (buffer.length() + refLabel.length() > lengthlimit)
+            if (subgroup > 1)
               {
-                if (subgroup > 1)
-                  {
-                    subname = name + "-ext" + subgroup;
-                  }
-                else
-                  {
-                    subname = name + "-ext";
-                  }
-
-                buffer.append(" ");
-                buffer.append(subname);
-                writer.println(buffer.toString());
-                buffer = new StringBuilder();
-                buffer.append(subname);
-
-                subgroup++;
+                subname = name + "-ext" + subgroup;
+              }
+            else
+              {
+                subname = name + "-ext";
               }
 
             buffer.append(" ");
-            buffer.append(refLabel);
+            buffer.append(subname);
+            writer.println(buffer.toString());
+            buffer = new StringBuilder();
+            buffer.append(subname);
+
+            subgroup++;
           }
+
+        buffer.append(" ");
+        buffer.append(refLabel);
       }
 
-    if (systems != null)
+    for (Invid ref: systems)
       {
-        for (int i = 0; i < systems.size(); i++)
+        String refLabel = getLabel(ref);
+        refLabel += dnsdomain;
+
+        if (buffer.length() + refLabel.length() > lengthlimit)
           {
-            ref = (Invid) systems.elementAt(i);
-            refLabel = getLabel(ref);
-            refLabel += dnsdomain;
-
-            if (buffer.length() + refLabel.length() > lengthlimit)
+            if (subgroup > 1)
               {
-                if (subgroup > 1)
-                  {
-                    subname = name + "-ext" + subgroup;
-                  }
-                else
-                  {
-                    subname = name + "-ext";
-                  }
-
-                buffer.append(" ");
-                buffer.append(subname);
-                writer.println(buffer.toString());
-                buffer = new StringBuilder();
-                buffer.append(subname);
-
-                subgroup++;
+                subname = name + "-ext" + subgroup;
+              }
+            else
+              {
+                subname = name + "-ext";
               }
 
             buffer.append(" ");
-            buffer.append("(");
-            buffer.append(refLabel);
-            buffer.append(",-,)");
+            buffer.append(subname);
+            writer.println(buffer.toString());
+            buffer = new StringBuilder();
+            buffer.append(subname);
+
+            subgroup++;
           }
+
+        buffer.append(" ");
+        buffer.append("(");
+        buffer.append(refLabel);
+        buffer.append(",-,)");
       }
 
     writer.println(buffer.toString());
   }
 
   /**
-   *
    * This method generates a simplified user netgroup file, which maps
    * user netgroups to user names without including any system
    * netgroups or sub-groups.  effectively, this maps netgroup names
    * to the transitive closure of members.
-   *
    */
 
   private boolean writeUserNetgroupFile()
   {
     PrintWriter writer = null;
-    String name;
-    Hashtable members = new Hashtable();
+    Hashtable<String, String> members = new Hashtable<String, String>();
 
     /* -- */
 
@@ -1690,7 +1652,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         for (DBObject netgroup: getObjects(userNetgroupSchema.BASE))
           {
-            name = (String) netgroup.getFieldValueLocal(userNetgroupSchema.NETGROUPNAME);
+            String name = (String) netgroup.getFieldValueLocal(userNetgroupSchema.NETGROUPNAME);
 
             members.clear();
             unionizeMembers(netgroup, members);
@@ -1699,14 +1661,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
               {
                 writer.print(name);
 
-                Enumeration users = members.elements();
-
-                while (users.hasMoreElements())
+                for (String member: members.values())
                   {
-                    name = (String) users.nextElement();
-
                     writer.print(" ");
-                    writer.print(name);
+                    writer.print(member);
                   }
 
                 writer.println();
@@ -1722,45 +1680,27 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
-   *
    * Recursive helper method for writeUserNetgroupFile().. takes
    * a netgroup object and a hashtable, inserts all user members
    * in the netgroup object into the hash, then calls itself
    * on all member groups in the netgroup.
-   *
    */
 
-  private void unionizeMembers(DBObject netgroup, Hashtable hash)
+  private void unionizeMembers(DBObject netgroup, Hashtable<String, String> hash)
   {
-    Vector users;
-    Vector memberNetgroups;
+    Vector<Invid> memberNetgroups = (Vector<Invid>) netgroup.getFieldValuesLocal(userNetgroupSchema.MEMBERGROUPS);
+    Vector<Invid> users = (Vector<Invid>) netgroup.getFieldValuesLocal(userNetgroupSchema.USERS);
 
-    Invid ref;
-    String member;
-    DBObject subNetgroup;
-
-    /* -- */
-
-    memberNetgroups = netgroup.getFieldValuesLocal(userNetgroupSchema.MEMBERGROUPS);
-    users = netgroup.getFieldValuesLocal(userNetgroupSchema.USERS);
-
-    if (users != null)
+    for (Invid ref: users)
       {
-        for (int i = 0; i < users.size(); i++)
-          {
-            ref = (Invid) users.elementAt(i);
-            member = getLabel(ref);
-            hash.put(member, member);
-          }
+        String member = getLabel(ref);
+        hash.put(member, member);
       }
 
-    if (memberNetgroups != null)
+    for (Invid ref: memberNetgroups)
       {
-        for (int i = 0; i < memberNetgroups.size(); i++)
-          {
-            subNetgroup = getObject((Invid)memberNetgroups.elementAt(i));
-            unionizeMembers(subNetgroup, hash);
-          }
+        DBObject subNetgroup = getObject(ref);
+        unionizeMembers(subNetgroup, hash);
       }
   }
 
@@ -1868,12 +1808,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         try
           {
             List<Invid> tempVect = (List<Invid>) map.getFieldValuesLocal(mapSchema.ENTRIES);
-
-            if (tempVect == null)
-              {
-                autoFile.close();
-                continue;
-              }
 
             for (Invid ref: tempVect)
               {
@@ -2126,28 +2060,21 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     // Loop over aliases target.
     List<String> aliases = (List<String>) object.getFieldValuesLocal(MailmanListSchema.ALIASES);
 
-    if (aliases == null)
+    for (String aliasName: aliases)
       {
-        System.err.println("GASHBuilder.writeMailmanAliases(): null alias list for mailman list name " + name);
-      }
-    else
-      {
-        for (String aliasName: aliases)
+        if (aliasName != null)
           {
-            if (aliasName != null)
-              {
-                result.setLength(0);
-                result.append("<xxx>");
-                result.append(aliasName);
-                result.append(":");
-                result.append(aliasName);
-                result.append(":");
-                result.append(aliasName);
-                result.append("@");
-                result.append(hostname);
-                result.append(".arlut.utexas.edu");
-                writer.println(result.toString());
-              }
+            result.setLength(0);
+            result.append("<xxx>");
+            result.append(aliasName);
+            result.append(":");
+            result.append(aliasName);
+            result.append(":");
+            result.append(aliasName);
+            result.append("@");
+            result.append(hostname);
+            result.append(".arlut.utexas.edu");
+            writer.println(result.toString());
           }
       }
   }
@@ -2191,45 +2118,39 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.append(":");
     result.append(signature);
 
-    if (aliases != null)
+    // we don't include the username in the list of aliases,
+    // but the build/gash stuff requires that it be included
+    // in aliases_info, so if we didn't write it out as the
+    // signature, make it the second alias.  The ordering
+    // doesn't matter past the first, so this is ok.
+
+    if (!signature.equals(username))
       {
-        // we don't include the username in the list of aliases,
-        // but the build/gash stuff requires that it be included
-        // in aliases_info, so if we didn't write it out as the
-        // signature, make it the second alias.  The ordering
-        // doesn't matter past the first, so this is ok.
+        result.append(", ");
+        result.append(username);
+      }
 
-        if (!signature.equals(username))
+    for (String alias: aliases)
+      {
+        if (alias.equals(signature))
           {
-            result.append(", ");
-            result.append(username);
+            continue;
           }
 
-        for (String alias: aliases)
-          {
-            if (alias.equals(signature))
-              {
-                continue;
-              }
-
-            result.append(", ");
-            result.append(alias);
-          }
+        result.append(", ");
+        result.append(alias);
       }
 
     result.append(":");
 
-    if (addresses != null)
+    for (int i = 0; i < addresses.size(); i++)
       {
-        for (int i = 0; i < addresses.size(); i++)
+        if (i > 0)
           {
-            if (i > 0)
-              {
-                result.append(", ");
-              }
-
-            result.append(addresses.get(i));
+            result.append(", ");
           }
+
+        result.append(addresses.get(i));
       }
 
     writer.println(result.toString());
@@ -2261,9 +2182,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   private void writeGroupAlias(DBObject object, PrintWriter writer)
   {
     String groupname;
-    Vector group_targets;
-    Vector group_aliases;
-    Vector external_targets;
+    Vector<Invid> group_targets;
+    Vector<String> group_aliases;
+    Vector<String> external_targets;
     Invid memberInvid;
     String target;
 
@@ -2276,27 +2197,24 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.setLength(0);
 
     groupname = (String) object.getFieldValueLocal(emailListSchema.LISTNAME);
-    group_aliases = object.getFieldValuesLocal(emailListSchema.ALIASES);
-    group_targets = object.getFieldValuesLocal(emailListSchema.MEMBERS);
-    external_targets = object.getFieldValuesLocal(emailListSchema.EXTERNALTARGETS);
+    group_aliases = (Vector<String>) object.getFieldValuesLocal(emailListSchema.ALIASES);
+    group_targets = (Vector<Invid>) object.getFieldValuesLocal(emailListSchema.MEMBERS);
+    external_targets = (Vector<String>) object.getFieldValuesLocal(emailListSchema.EXTERNALTARGETS);
 
     result.append(":");
     result.append(groupname);
     result.append(":");
 
-    if (group_aliases != null)
+    for (int i = 0; i < group_aliases.size(); i++)
       {
-        for (int i = 0; i < group_aliases.size(); i++)
+        String alias = group_aliases.get(i);
+
+        if (i > 0)
           {
-            String alias = (String) group_aliases.elementAt(i);
-
-            if (i > 0)
-              {
-                result.append(", ");
-              }
-
-            result.append(alias);
+            result.append(", ");
           }
+
+        result.append(alias);
       }
 
     result.append(":");
@@ -2308,99 +2226,93 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     lengthlimit_remaining = 900 - result.length();
 
-    if (group_targets != null)
+    for (int i = 0; i < group_targets.size(); i++)
       {
-        for (int i = 0; i < group_targets.size(); i++)
+        memberInvid = group_targets.get(i);
+
+        if (isVeryDeadUser(memberInvid))
           {
-            memberInvid = (Invid) group_targets.elementAt(i);
-
-            if (isVeryDeadUser(memberInvid))
-              {
-                continue;
-              }
-
-            if (i > 0)
-              {
-                result.append(", ");
-              }
-
-            target = getLabel(memberInvid);
-
-            if (2 + target.length() > lengthlimit_remaining)
-              {
-                if (subgroup > 1)
-                  {
-                    subname = groupname + "-gext" + subgroup;
-                  }
-                else
-                  {
-                    subname = groupname + "-gext";
-                  }
-
-                // point to the linked sublist, terminate this entry
-                // line
-
-                result.append(subname);
-                result.append("\n");
-
-                // and initialize the next line, containing the linked
-                // sublist
-
-                result.append(":xxx:");
-                result.append(subname);
-                result.append(":");
-                lengthlimit_remaining = 900 - subname.length() - 6;
-
-                subgroup++;
-              }
-
-            result.append(target);
-            lengthlimit_remaining = lengthlimit_remaining - (2 + target.length());
+            continue;
           }
+
+        if (i > 0)
+          {
+            result.append(", ");
+          }
+
+        target = getLabel(memberInvid);
+
+        if (2 + target.length() > lengthlimit_remaining)
+          {
+            if (subgroup > 1)
+              {
+                subname = groupname + "-gext" + subgroup;
+              }
+            else
+              {
+                subname = groupname + "-gext";
+              }
+
+            // point to the linked sublist, terminate this entry
+            // line
+
+            result.append(subname);
+            result.append("\n");
+
+            // and initialize the next line, containing the linked
+            // sublist
+
+            result.append(":xxx:");
+            result.append(subname);
+            result.append(":");
+            lengthlimit_remaining = 900 - subname.length() - 6;
+
+            subgroup++;
+          }
+
+        result.append(target);
+        lengthlimit_remaining = lengthlimit_remaining - (2 + target.length());
       }
 
-    if (external_targets != null)
+    for (int i = 0; i < external_targets.size(); i++)
       {
-        for (int i = 0; i < external_targets.size(); i++)
+        if ((i > 0) || (group_targets != null && group_targets.size() > 0))
           {
-            if ((i > 0) || (group_targets != null && group_targets.size() > 0))
-              {
-                result.append(", ");
-              }
-
-            target = (String) external_targets.elementAt(i);
-
-            if (2 + target.length() > lengthlimit_remaining)
-              {
-                if (subgroup > 1)
-                  {
-                    subname = groupname + "-gext" + subgroup;
-                  }
-                else
-                  {
-                    subname = groupname + "-gext";
-                  }
-
-                // point to the linked sublist, terminate this entry
-                // line
-
-                result.append(subname);
-                result.append("\n");
-
-                // and initialize the next line, containing the linked
-                // sublist
-
-                result.append(":xxx:");
-                result.append(subname);
-                result.append(":");
-                lengthlimit_remaining = 900 - subname.length() - 6;
-
-                subgroup++;
-              }
-
-            result.append(target);
-            lengthlimit_remaining = lengthlimit_remaining - (2 + target.length());
+            result.append(", ");
           }
+
+        target = external_targets.get(i);
+
+        if (2 + target.length() > lengthlimit_remaining)
+          {
+            if (subgroup > 1)
+              {
+                subname = groupname + "-gext" + subgroup;
+              }
+            else
+              {
+                subname = groupname + "-gext";
+              }
+
+            // point to the linked sublist, terminate this entry
+            // line
+
+            result.append(subname);
+            result.append("\n");
+
+            // and initialize the next line, containing the linked
+            // sublist
+
+            result.append(":xxx:");
+            result.append(subname);
+            result.append(":");
+            lengthlimit_remaining = 900 - subname.length() - 6;
+
+            subgroup++;
+          }
+
+        result.append(target);
+        lengthlimit_remaining = lengthlimit_remaining - (2 + target.length());
       }
 
     writer.println(result.toString());
@@ -2433,7 +2345,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   private void writeAccountGroupAlias(DBObject object, PrintWriter writer)
   {
     String groupname;
-    Vector group_targets;
+    Vector<Invid> group_targets;
     Invid userInvid;
     String target;
 
@@ -2451,7 +2363,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.setLength(0);
 
     groupname = (String) object.getFieldValueLocal(groupSchema.GROUPNAME);
-    group_targets = object.getFieldValuesLocal(groupSchema.USERS);
+    group_targets = (Vector<Invid>) object.getFieldValuesLocal(groupSchema.USERS);
 
     result.append(":xxx:");
     result.append(groupname);
@@ -2464,55 +2376,52 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     lengthlimit_remaining = 900 - result.length();
 
-    if (group_targets != null)
+    for (int i = 0; i < group_targets.size(); i++)
       {
-        for (int i = 0; i < group_targets.size(); i++)
+        userInvid = group_targets.get(i);
+
+        if (isVeryDeadUser(userInvid))
           {
-            userInvid = (Invid) group_targets.elementAt(i);
-
-            if (isVeryDeadUser(userInvid))
-              {
-                continue;
-              }
-
-            if (i > 0)
-              {
-                result.append(", ");
-              }
-
-            target = getLabel(userInvid);
-
-            if (2 + target.length() > lengthlimit_remaining)
-              {
-                if (subgroup > 1)
-                  {
-                    subname = groupname + "-gext" + subgroup;
-                  }
-                else
-                  {
-                    subname = groupname + "-gext";
-                  }
-
-                // point to the linked sublist, terminate this entry
-                // line
-
-                result.append(subname);
-                result.append("\n");
-
-                // and initialize the next line, containing the linked
-                // sublist
-
-                result.append(":xxx:");
-                result.append(subname);
-                result.append(":");
-                lengthlimit_remaining = 900 - subname.length() - 6;
-
-                subgroup++;
-              }
-
-            result.append(target);
-            lengthlimit_remaining = lengthlimit_remaining - (2 + target.length());
+            continue;
           }
+
+        if (i > 0)
+          {
+            result.append(", ");
+          }
+
+        target = getLabel(userInvid);
+
+        if (2 + target.length() > lengthlimit_remaining)
+          {
+            if (subgroup > 1)
+              {
+                subname = groupname + "-gext" + subgroup;
+              }
+            else
+              {
+                subname = groupname + "-gext";
+              }
+
+            // point to the linked sublist, terminate this entry
+            // line
+
+            result.append(subname);
+            result.append("\n");
+
+            // and initialize the next line, containing the linked
+            // sublist
+
+            result.append(":xxx:");
+            result.append(subname);
+            result.append(":");
+            lengthlimit_remaining = 900 - subname.length() - 6;
+
+            subgroup++;
+          }
+
+        result.append(target);
+        lengthlimit_remaining = lengthlimit_remaining - (2 + target.length());
       }
 
     writer.println(result.toString());
@@ -2542,9 +2451,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   private void writeUserNetgroupAlias(DBObject object, PrintWriter writer)
   {
     String groupname;
-    Vector group_targets;
-    Vector sub_netgroups;
-    Vector targets;
+    Vector<Invid> group_targets;
+    Vector<Invid> sub_netgroups;
+    Vector<String> targets;
 
     String target;
 
@@ -2562,36 +2471,28 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.setLength(0);
 
     groupname = (String) object.getFieldValueLocal(userNetgroupSchema.NETGROUPNAME);
-    group_targets = object.getFieldValuesLocal(userNetgroupSchema.USERS);
-    sub_netgroups = object.getFieldValuesLocal(userNetgroupSchema.MEMBERGROUPS);
+    group_targets = (Vector<Invid>) object.getFieldValuesLocal(userNetgroupSchema.USERS);
+    sub_netgroups = (Vector<Invid>) object.getFieldValuesLocal(userNetgroupSchema.MEMBERGROUPS);
 
-    targets = new Vector();
+    targets = new Vector<String>();
 
-    if (group_targets != null)
+    for (Invid targetInvid: group_targets)
       {
-        for (int i = 0; i < group_targets.size(); i++)
+        if (isVeryDeadUser(targetInvid))
           {
-            Invid targetInvid = (Invid) group_targets.elementAt(i);
-
-            if (isVeryDeadUser(targetInvid))
-              {
-                continue;
-              }
-
-            targets.addElement(getLabel(targetInvid));
+            continue;
           }
+
+        targets.add(getLabel(targetInvid));
       }
 
-    if (sub_netgroups != null)
+    for (Invid subnetInvid: sub_netgroups)
       {
-        for (int i = 0; i < sub_netgroups.size(); i++)
-          {
-            DBObject subnetgroup = getObject((Invid) sub_netgroups.elementAt(i));
+        DBObject subnetgroup = getObject(subnetInvid);
 
-            if (subnetgroup.isSet(userNetgroupSchema.EMAILOK))
-              {
-                targets.addElement(subnetgroup.getLabel());
-              }
+        if (subnetgroup.isSet(userNetgroupSchema.EMAILOK))
+          {
+            targets.add(subnetgroup.getLabel());
           }
       }
 
@@ -2613,7 +2514,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
             result.append(", ");
           }
 
-        target = (String) targets.elementAt(i);
+        target = targets.get(i);
 
         if (2 + target.length() > lengthlimit_remaining)
           {
@@ -2676,35 +2577,21 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
   private void writeExternalAlias(DBObject object, PrintWriter writer)
   {
-    String name;
-    Vector aliases;
-    String alias;
-    Vector targets;
-    String target;
-
-    /* -- */
-
     result.setLength(0);
 
-    name = (String) object.getFieldValueLocal(emailRedirectSchema.NAME);
-    targets = object.getFieldValuesLocal(emailRedirectSchema.TARGETS);
-    aliases = object.getFieldValuesLocal(emailRedirectSchema.ALIASES);
+    String name = (String) object.getFieldValueLocal(emailRedirectSchema.NAME);
+    Vector<String> targets = (Vector<String>) object.getFieldValuesLocal(emailRedirectSchema.TARGETS);
+    Vector<String> aliases = (Vector<String>) object.getFieldValuesLocal(emailRedirectSchema.ALIASES);
 
     result.append("<xxx>");
     result.append(name);
     result.append(":");
     result.append(name);        // the name is one of the aliases
 
-    if (aliases != null)
+    for (String alias: aliases)
       {
-        for (int i = 0; i < aliases.size(); i++)
-          {
-            result.append(", ");
-
-            alias = (String) aliases.elementAt(i);
-
-            result.append(alias);
-          }
+        result.append(", ");
+        result.append(alias);
       }
 
     result.append(":");
@@ -2713,19 +2600,14 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     // NullPointerExceptions pop up then having to recompile to
     // fix.
 
-    if (targets != null)
+    for (int i = 0; i < targets.size(); i++)
       {
-        for (int i = 0; i < targets.size(); i++)
+        if (i > 0)
           {
-            if (i > 0)
-              {
-                result.append(", ");
-              }
-
-            target = (String) targets.elementAt(i);
-
-            result.append(target);
+            result.append(", ");
           }
+
+        result.append(targets.get(i));
       }
 
     writer.println(result.toString());
@@ -2756,8 +2638,8 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   private void writeIRISListAlias(DBObject object, PrintWriter writer)
   {
     String listname;
-    Vector list_members;
-    Vector list_aliases;
+    Vector<Invid> list_members;
+    Vector<String> list_aliases;
     Invid memberInvid;
     String target;
 
@@ -2770,26 +2652,21 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.setLength(0);
 
     listname = (String) object.getFieldValueLocal(IRISListSchema.LISTNAME);
-    list_aliases = object.getFieldValuesLocal(IRISListSchema.ALIASES);
-    list_members = object.getFieldValuesLocal(IRISListSchema.MEMBERS);
+    list_aliases = (Vector<String>) object.getFieldValuesLocal(IRISListSchema.ALIASES);
+    list_members = (Vector<Invid>) object.getFieldValuesLocal(IRISListSchema.MEMBERS);
 
     result.append(":");
     result.append(listname);
     result.append(":");
 
-    if (list_aliases != null)
+    for (int i = 0; i < list_aliases.size(); i++)
       {
-        for (int i = 0; i < list_aliases.size(); i++)
+        if (i > 0)
           {
-            String alias = (String) list_aliases.elementAt(i);
-
-            if (i > 0)
-              {
-                result.append(", ");
-              }
-
-            result.append(alias);
+            result.append(", ");
           }
+
+        result.append(list_aliases.get(i));
       }
 
     result.append(":");
@@ -2801,55 +2678,52 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     lengthlimit_remaining = 900 - result.length();
 
-    if (list_members != null)
+    for (int i = 0; i < list_members.size(); i++)
       {
-        for (int i = 0; i < list_members.size(); i++)
+        memberInvid = list_members.get(i);
+
+        if (isVeryDeadUser(memberInvid))
           {
-            memberInvid = (Invid) list_members.elementAt(i);
-
-            if (isVeryDeadUser(memberInvid))
-              {
-                continue;
-              }
-
-            if (i > 0)
-              {
-                result.append(", ");
-              }
-
-            target = getLabel(memberInvid);
-
-            if (2 + target.length() > lengthlimit_remaining)
-              {
-                if (subgroup > 1)
-                  {
-                    subname = listname + "-gext" + subgroup;
-                  }
-                else
-                  {
-                    subname = listname + "-gext";
-                  }
-
-                // point to the linked sublist, terminate this entry
-                // line
-
-                result.append(subname);
-                result.append("\n");
-
-                // and initialize the next line, containing the linked
-                // sublist
-
-                result.append(":xxx:");
-                result.append(subname);
-                result.append(":");
-                lengthlimit_remaining = 900 - subname.length() - 6;
-
-                subgroup++;
-              }
-
-            result.append(target);
-            lengthlimit_remaining = lengthlimit_remaining - (2 + target.length());
+            continue;
           }
+
+        if (i > 0)
+          {
+            result.append(", ");
+          }
+
+        target = getLabel(memberInvid);
+
+        if (2 + target.length() > lengthlimit_remaining)
+          {
+            if (subgroup > 1)
+              {
+                subname = listname + "-gext" + subgroup;
+              }
+            else
+              {
+                subname = listname + "-gext";
+              }
+
+            // point to the linked sublist, terminate this entry
+            // line
+
+            result.append(subname);
+            result.append("\n");
+
+            // and initialize the next line, containing the linked
+            // sublist
+
+            result.append(":xxx:");
+            result.append(subname);
+            result.append(":");
+            lengthlimit_remaining = 900 - subname.length() - 6;
+
+            subgroup++;
+          }
+
+        result.append(target);
+        lengthlimit_remaining = lengthlimit_remaining - (2 + target.length());
       }
 
     writer.println(result.toString());
@@ -2995,71 +2869,49 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     String username = (String) object.getFieldValueLocal(userSchema.USERNAME);
     String signature = (String) object.getFieldValueLocal(userSchema.SIGNATURE);
 
-    result.setLength(0);
-
+    Vector<String> aliases = (Vector<String>) object.getFieldValuesLocal(userSchema.ALIASES).clone();
     Vector<String> addresses = (Vector<String>) object.getFieldValuesLocal(userSchema.EMAILTARGET);
 
-    if (!empty(addresses))
+    if (empty(addresses))
       {
-        result.setLength(0);
-        result.append(signature);
-        result.append(": ");
-
-        for (int i = 0; i < addresses.size(); i++)
-          {
-            if (i > 0)
-              {
-                result.append(", ");
-              }
-
-            result.append(fixup(addresses.get(i)));
-          }
-
-        writer.println(result.toString().toLowerCase());
+        return;
       }
 
-    Vector<String> aliases = (Vector<String>) object.getFieldValuesLocal(userSchema.ALIASES);
+    // write out the delivery targets of the signature alias as the
+    // first entry
 
-    if (!empty(aliases))
+    writer.print(signature);
+    writer.print(": ");
+
+    for (int i = 0; i < addresses.size(); i++)
       {
-        for (String alias: aliases)
+        if (i > 0)
           {
-            if (alias.equals(signature))
-              {
-                continue;
-              }
-
-            writer.print(alias.toLowerCase());
-            writer.print(": ");
-            writer.println(signature.toLowerCase());
+            result.append(", ");
           }
+
+        writer.print(fixup(addresses.get(i)));
       }
 
-    if (!empty(aliases) && !empty(addresses))
+    writer.println();
+
+    // in case the username wasn't the signature alias
+
+    aliases.add(username);
+
+    // for each alias, write out a delivery targets to the signature
+    // alias
+
+    for (String alias: aliases)
       {
-        for (String alias: aliases)
+        if (alias.equals(signature))
           {
-            if (!alias.equals(signature))
-              {
-                continue;
-              }
-
-            result.setLength(0);
-            result.append(username);
-            result.append(": ");
-
-            for (int i = 0; i < addresses.size(); i++)
-              {
-                if (i > 0)
-                  {
-                    result.append(", ");
-                  }
-
-                result.append(fixup(addresses.get(i)));
-              }
-
-            writer.println(result.toString().toLowerCase());
+            continue;
           }
+
+        writer.print(alias.toLowerCase());
+        writer.print(": ");
+        writer.println(signature.toLowerCase());
       }
   }
 
@@ -3108,30 +2960,27 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.append("@arlut.utexas.edu.");
     writer.println(result.toString().toLowerCase());
 
-    if (!empty(aliases))
+    for (String alias: aliases)
       {
-        for (String alias: aliases)
+        if (alias.equals(signature))
           {
-            if (alias.equals(signature))
-              {
-                result.setLength(0);
-                result.append(username);
-                result.append(": ");
-                result.append(signature);
-                result.append("@arlut.utexas.edu.");
+            result.setLength(0);
+            result.append(username);
+            result.append(": ");
+            result.append(signature);
+            result.append("@arlut.utexas.edu.");
 
-                writer.println(result.toString().toLowerCase());
-              }
-            else
-              {
-                result.setLength(0);
-                result.append(alias);
-                result.append(": ");
-                result.append(signature);
-                result.append("@arlut.utexas.edu.");
+            writer.println(result.toString().toLowerCase());
+          }
+        else
+          {
+            result.setLength(0);
+            result.append(alias);
+            result.append(": ");
+            result.append(signature);
+            result.append("@arlut.utexas.edu.");
 
-                writer.println(result.toString().toLowerCase());
-              }
+            writer.println(result.toString().toLowerCase());
           }
       }
   }
@@ -3170,23 +3019,20 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     Vector<String> group_aliases = (Vector<String>) object.getFieldValuesLocal(emailListSchema.ALIASES);
     Vector<Invid> group_targets = (Vector<Invid>) object.getFieldValuesLocal(emailListSchema.MEMBERS);
     Vector<String> external_targets = (Vector<String>) object.getFieldValuesLocal(emailListSchema.EXTERNALTARGETS);
-    Integer didSomething = 0;
+    boolean didSomething = false;
 
     //  if the idea is to write each group out as the full list, then,
     //  okay, i guess we can do that.  actually, that is a chore,
     //  isn't it?  so let's spit out each alias and the groupname,
     //  then just do the groupname once.
 
-    if (!empty(group_aliases))
+    for (String alias: group_aliases)
       {
-        for (String alias: group_aliases)
-          {
-            result.setLength(0);
-            result.append(alias);
-            result.append(": ");
-            result.append(groupname);
-            writer.println(result.toString().toLowerCase());
-          }
+        result.setLength(0);
+        result.append(alias);
+        result.append(": ");
+        result.append(groupname);
+        writer.println(result.toString().toLowerCase());
       }
 
     // whoops.  need to know that we have something to spit out.
@@ -3197,42 +3043,36 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         result.append(groupname);
         result.append(": ");
 
-        if (!empty(group_targets))
+        for (int i = 0; i < group_targets.size(); i++)
           {
-            for (int i = 0; i < group_targets.size(); i++)
+            Invid memberInvid = group_targets.get(i);
+
+            if (isVeryDeadUser(memberInvid))
               {
-                Invid memberInvid = (Invid) group_targets.get(i);
-
-                if (isVeryDeadUser(memberInvid))
-                  {
-                    continue;
-                  }
-
-                if (i > 0)
-                  {
-                    result.append(", ");
-                  }
-
-                result.append(getLabel(memberInvid));
-                didSomething++;
+                continue;
               }
+
+            if (i > 0)
+              {
+                result.append(", ");
+              }
+
+            result.append(getLabel(memberInvid));
+            didSomething = true;
           }
 
-        if (!empty(external_targets))
+        for (int i = 0; i < external_targets.size(); i++)
           {
-            for (int i = 0; i < external_targets.size(); i++)
+            if (i > 0 || !empty(group_targets))
               {
-                if (i > 0 || !empty(group_targets))
-                  {
-                    result.append(", ");
-                  }
-
-                result.append(external_targets.get(i));
-                didSomething++;
+                result.append(", ");
               }
+
+            result.append(external_targets.get(i));
+            didSomething = true;
           }
 
-        if( didSomething > 0 )
+        if (didSomething)
           {
             writer.println(result.toString().toLowerCase());
           }
@@ -3346,29 +3186,23 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     Vector<String> targets = new Vector<String>();
 
-    if (!empty(group_targets))
+    for (Invid targetInvid: group_targets)
       {
-        for (Invid targetInvid: group_targets)
+        if (isVeryDeadUser(targetInvid))
           {
-            if (isVeryDeadUser(targetInvid))
-              {
-                continue;
-              }
-
-            targets.add(getLabel(targetInvid));
+            continue;
           }
+
+        targets.add(getLabel(targetInvid));
       }
 
-    if (!empty(sub_netgroups))
+    for (Invid subNetGroup: sub_netgroups)
       {
-        for (Invid subNetGroup: sub_netgroups)
-          {
-            DBObject subnetgroup = getObject(subNetGroup);
+        DBObject subnetgroup = getObject(subNetGroup);
 
-            if (subnetgroup.isSet(userNetgroupSchema.EMAILOK))
-              {
-                targets.add(subnetgroup.getLabel());
-              }
+        if (subnetgroup.isSet(userNetgroupSchema.EMAILOK))
+          {
+            targets.add(subnetgroup.getLabel());
           }
       }
 
@@ -3427,18 +3261,15 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     Vector<String> targets = (Vector<String>) object.getFieldValuesLocal(emailRedirectSchema.TARGETS);
     Vector<String> aliases = (Vector<String>) object.getFieldValuesLocal(emailRedirectSchema.ALIASES);
 
-    if (!empty(aliases))
+    for (String alias: aliases)
       {
-        for (String alias: aliases)
+        if (!alias.equals(name))
           {
-            if (!alias.equals(name))
-              {
-                result.setLength(0);
-                result.append(alias);
-                result.append(": ");
-                result.append(name);
-                writer.println(result.toString().toLowerCase());
-              }
+            result.setLength(0);
+            result.append(alias);
+            result.append(": ");
+            result.append(name);
+            writer.println(result.toString().toLowerCase());
           }
       }
 
@@ -3499,16 +3330,13 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
         Vector<String> addresses = (Vector<String>) loluser.getFieldValuesLocal(userSchema.EMAILTARGET);
 
-        if (!empty(addresses))
+        for (String address: addresses)
           {
-            for (String address: addresses)
-              {
-                String host = getEmailHost(fixup(address));
+            String host = getEmailHost(fixup(address));
 
-                if (host.endsWith("arlut.utexas.edu"))
-                  {
-                    set.add(host);
-                  }
+            if (host.endsWith("arlut.utexas.edu"))
+              {
+                set.add(host);
               }
           }
       }
@@ -3517,16 +3345,13 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
         Vector<String> targets = (Vector<String>) external.getFieldValuesLocal(emailRedirectSchema.TARGETS);
 
-        if (!empty(targets))
+        for (String target: targets)
           {
-            for (String target: targets)
-              {
-                String host = getEmailHost(fixup(target));
+            String host = getEmailHost(fixup(target));
 
-                if (host.endsWith("arlut.utexas.edu"))
-                  {
-                    set.add(host);
-                  }
+            if (host.endsWith("arlut.utexas.edu"))
+              {
+                set.add(host);
               }
           }
       }
@@ -3573,34 +3398,28 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         Vector<String> aliases = (Vector<String>) user.getFieldValuesLocal(userSchema.ALIASES);
 
-        if (aliases != null)
+        for (String alias: aliases)
           {
-            for (String alias: aliases)
-              {
-                set.add(alias);
-              }
+            set.add(alias);
           }
 
         Vector<String> targets = (Vector<String>) user.getFieldValuesLocal(userSchema.EMAILTARGET);
 
-        if (targets != null)
+        for (String target: targets)
           {
-            for (String target: targets)
+            String account = getEmailAccount(target);
+            String host = getEmailHost(target);
+
+            if (host.endsWith("arlut.utexas.edu"))
               {
-                String account = getEmailAccount(target);
-                String host = getEmailHost(target);
+                // account could be the user's name or any of his
+                // aliases, above, but set.add() will check that
+                // for us efficiently
+                //
+                // we could check for whether account is equals to
+                // "no_longer_employed" here..
 
-                if (host.endsWith("arlut.utexas.edu"))
-                  {
-                    // account could be the user's name or any of his
-                    // aliases, above, but set.add() will check that
-                    // for us efficiently
-                    //
-                    // we could check for whether account is equals to
-                    // "no_longer_employed" here..
-
-                    set.add(account);
-                  }
+                set.add(account);
               }
           }
       }
@@ -3617,23 +3436,17 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
             set.add(groupname);
           }
 
-        if (!empty(group_aliases))
+        for (String alias: group_aliases)
           {
-            for (String alias: group_aliases)
-              {
-                set.add(alias);
-              }
+            set.add(alias);
           }
 
 
-        if (!empty(group_targets))
+        for (Invid memberInvid: group_targets)
           {
-            for (Invid memberInvid: group_targets)
+            if (!isVeryDeadUser(memberInvid))
               {
-                if (!isVeryDeadUser(memberInvid))
-                  {
-                    set.add(getLabel(memberInvid));
-                  }
+                set.add(getLabel(memberInvid));
               }
           }
       }
@@ -3666,30 +3479,24 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
         Vector<String> aliases = (Vector<String>) external.getFieldValuesLocal(emailRedirectSchema.ALIASES);
 
-        if (!empty(aliases))
+        for (String alias: aliases)
           {
-            for (String alias: aliases)
+            if (!alias.equals(name))
               {
-                if (!alias.equals(name))
-                  {
-                    set.add(alias);
-                  }
+                set.add(alias);
               }
           }
 
         Vector<String> targets = (Vector<String>) external.getFieldValuesLocal(emailRedirectSchema.TARGETS);
 
-        if (!empty(targets))
+        for (String target: targets)
           {
-            for (String target: targets)
-              {
-                String host = getEmailHost(target);
-                String user = getEmailAccount(target);
+            String host = getEmailHost(target);
+            String user = getEmailAccount(target);
 
-                if (host.endsWith("arlut.utexas.edu"))
-                  {
-                    set.add(user);
-                  }
+            if (host.endsWith("arlut.utexas.edu"))
+              {
+                set.add(user);
               }
           }
       }
@@ -3813,9 +3620,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         return false;
       }
 
-    Vector emailTargets = userObject.getFieldValuesLocal(userSchema.EMAILTARGET);
+    Vector<String> emailTargets = (Vector<String>) userObject.getFieldValuesLocal(userSchema.EMAILTARGET);
 
-    if (emailTargets == null)
+    if (empty(emailTargets))
       {
         // huh, no targets?  that's pretty dead!
 
@@ -3830,7 +3637,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
         return false;
       }
 
-    String target = (String) emailTargets.elementAt(0);
+    String target = emailTargets.get(0);
 
     if (target.indexOf('@') == -1)
       {
@@ -4663,7 +4470,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   private void writeSysDataLine(DBObject object, PrintWriter writer)
   {
     String sysname;
-    Vector interfaceInvids;
+    Vector<Invid> interfaceInvids;
     Invid roomInvid;
     String room;
     String interfaceName;
@@ -4678,101 +4485,96 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     sysname = (String) object.getFieldValueLocal(systemSchema.SYSTEMNAME);
     sysname += dnsdomain;
 
-    interfaceInvids = object.getFieldValuesLocal(systemSchema.INTERFACES);
+    interfaceInvids = (Vector<Invid>) object.getFieldValuesLocal(systemSchema.INTERFACES);
 
-    if (interfaceInvids != null)
+    for (Invid interfaceInvid: interfaceInvids)
       {
-        for (int i = 0; i < interfaceInvids.size(); i++)
+        String local_sysname = null;
+
+        /* -- */
+
+        result.setLength(0);
+
+        DBObject interfaceObj = getObject(interfaceInvid);
+        interfaceName = getInterfaceHostname(interfaceObj);
+
+        if (interfaceName != null)
           {
-            String local_sysname;
-            DBObject interfaceObj;
-
-            /* -- */
-
-            result.setLength(0);
-
-            interfaceObj = getObject((Invid) interfaceInvids.elementAt(i));
-
-            interfaceName = getInterfaceHostname(interfaceObj);
-
-            if (interfaceName != null)
-              {
-                local_sysname = interfaceName;
-              }
-            else
-              {
-                local_sysname = sysname;
-              }
-
-            roomInvid = (Invid) object.getFieldValueLocal(systemSchema.ROOM);
-
-            if (roomInvid != null)
-              {
-                room = getLabel(roomInvid);
-              }
-            else
-              {
-                room = "<unknown>";
-              }
-
-            primaryUserInvid = (Invid) object.getFieldValueLocal(systemSchema.PRIMARYUSER);
-
-            if (primaryUserInvid != null)
-              {
-                primaryUser = getLabel(primaryUserInvid);
-              }
-
-            try
-              {
-                IPstring = ((IPDBField) interfaceObj.getField(interfaceSchema.ADDRESS)).getValueString();
-                MACstring = ((StringDBField) interfaceObj.getField(interfaceSchema.ETHERNETINFO)).getValueString();
-                MACstring = MACstring.replace('-',':');
-              }
-            catch (NullPointerException ex)
-              {
-              }
-
-            if (IPstring == null || MACstring == null)
-              {
-                continue;
-              }
-
-            try
-              {
-                ownerString = ((InvidDBField) object.getField(SchemaConstants.OwnerListField)).getValueString();
-              }
-            catch (Exception ex)
-              {
-                ownerString = null;
-              }
-
-            result.append(IPstring);
-            result.append("|");
-            result.append(MACstring);
-            result.append("|");
-            result.append(local_sysname);
-            result.append("|");
-
-            if (ownerString == null || ownerString.equals(""))
-              {
-                result.append("supergash");
-              }
-            else
-              {
-                result.append(ownerString);
-              }
-
-            result.append("|");
-            result.append(room);
-            result.append("|");
-
-            if (primaryUser != null)
-              {
-                result.append(primaryUser);
-              }
-
-            writer.println(result.toString());
+            local_sysname = interfaceName;
           }
+        else
+          {
+            local_sysname = sysname;
+          }
+
+        roomInvid = (Invid) object.getFieldValueLocal(systemSchema.ROOM);
+
+        if (roomInvid != null)
+          {
+            room = getLabel(roomInvid);
+          }
+        else
+          {
+            room = "<unknown>";
+          }
+
+        primaryUserInvid = (Invid) object.getFieldValueLocal(systemSchema.PRIMARYUSER);
+
+        if (primaryUserInvid != null)
+          {
+            primaryUser = getLabel(primaryUserInvid);
+          }
+
+        try
+          {
+            IPstring = ((IPDBField) interfaceObj.getField(interfaceSchema.ADDRESS)).getValueString();
+            MACstring = ((StringDBField) interfaceObj.getField(interfaceSchema.ETHERNETINFO)).getValueString();
+            MACstring = MACstring.replace('-',':');
+          }
+        catch (NullPointerException ex)
+          {
+          }
+
+        if (IPstring == null || MACstring == null)
+          {
+            continue;
+          }
+
+        try
+          {
+            ownerString = ((InvidDBField) object.getField(SchemaConstants.OwnerListField)).getValueString();
+          }
+        catch (Exception ex)
+          {
+            ownerString = null;
+          }
+
+        result.append(IPstring);
+        result.append("|");
+        result.append(MACstring);
+        result.append("|");
+        result.append(local_sysname);
+        result.append("|");
+
+        if (ownerString == null || ownerString.equals(""))
+          {
+            result.append("supergash");
+          }
+        else
+          {
+            result.append(ownerString);
+          }
+
+        result.append("|");
+        result.append(room);
+        result.append("|");
+
+        if (primaryUser != null)
+          {
+            result.append(primaryUser);
+          }
+
+        writer.println(result.toString());
       }
   }
 
@@ -4848,9 +4650,9 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   private void writeSystem(DBObject object, PrintWriter writer)
   {
     String sysname;
-    Vector interfaceInvids;
-    Vector interfaceNames = new Vector();
-    Vector sysAliases;
+    Vector<Invid> interfaceInvids;
+    Vector<String> interfaceNames = new Vector<String>();
+    Vector<String> sysAliases;
     Invid roomInvid;
     String room;
     Invid typeInvid;
@@ -4869,22 +4671,19 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     sysname = (String) object.getFieldValueLocal(systemSchema.SYSTEMNAME);
     sysname += dnsdomain;
 
-    interfaceInvids = object.getFieldValuesLocal(systemSchema.INTERFACES);
+    interfaceInvids = (Vector<Invid>) object.getFieldValuesLocal(systemSchema.INTERFACES);
 
-    if (interfaceInvids != null)
+    for (Invid interfaceInvid: interfaceInvids)
       {
-        for (int i = 0; i < interfaceInvids.size(); i++)
-          {
-            interfaceName = getInterfaceHostname(getObject((Invid) interfaceInvids.elementAt(i)));
+        interfaceName = getInterfaceHostname(getObject(interfaceInvid));
 
-            if (interfaceName != null)
-              {
-                interfaceNames.addElement(interfaceName);
-              }
+        if (interfaceName != null)
+          {
+            interfaceNames.add(interfaceName);
           }
       }
 
-    sysAliases = object.getFieldValuesLocal(systemSchema.SYSTEMALIASES);
+    sysAliases = (Vector<String>) object.getFieldValuesLocal(systemSchema.SYSTEMALIASES);
 
     roomInvid = (Invid) object.getFieldValueLocal(systemSchema.ROOM);
 
@@ -4926,23 +4725,18 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     result.append(sysname);
     result.append(", ");
 
-    // interfaceNames may be empty, but never null
-
-    for (int i = 0; i < interfaceNames.size(); i++)
+    for (String name: interfaceNames)
       {
-        result.append((String) interfaceNames.elementAt(i));
+        result.append(name);
         result.append(" ");
       }
 
     result.append(", ");
 
-    if (sysAliases != null)
+    for (String name: sysAliases)
       {
-        for (int i = 0; i < sysAliases.size(); i++)
-          {
-            result.append((String) sysAliases.elementAt(i));
-            result.append(" ");
-          }
+        result.append(name);
+        result.append(" ");
       }
 
     result.append(": : ");      // no admins
@@ -5004,7 +4798,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     String sysname;
     String IPString;
     String MAC;
-    Vector hostAliases = null;
+    Vector<String> hostAliases = null;
 
     IPDBField ipField;
 
@@ -5062,7 +4856,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     hostname = (String) object.getFieldValueLocal(interfaceSchema.NAME);
 
-    hostAliases = object.getFieldValuesLocal(interfaceSchema.ALIASES);
+    hostAliases = (Vector<String>) object.getFieldValuesLocal(interfaceSchema.ALIASES);
 
     // now build our output line
 
@@ -5079,13 +4873,10 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     result.append(",");
 
-    if (hostAliases != null)
+    for (String name: hostAliases)
       {
-        for (int i = 0; i < hostAliases.size(); i++)
-          {
-            result.append(" ");
-            result.append((String) hostAliases.elementAt(i));
-          }
+        result.append(" ");
+        result.append(name);
       }
 
     result.append(" : ");
@@ -5412,7 +5203,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   private void writeDHCPSystem(DBObject object, Writer writer)
   {
     String sysname = null;
-    Vector interfaceInvids = null;
+    Vector<Invid> interfaceInvids = null;
     DBObject interfaceObj = null;
     IPDBField ipField = null;
     String ipAddress = null;
@@ -5425,15 +5216,15 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     /* -- */
 
-    interfaceInvids = object.getFieldValuesLocal(systemSchema.INTERFACES);
+    interfaceInvids = (Vector<Invid>) object.getFieldValuesLocal(systemSchema.INTERFACES);
 
-    if (interfaceInvids == null || interfaceInvids.size() > 1)
+    if (interfaceInvids.size() != 1)
       {
         return;                 // we don't write out DHCP for systems
                                 // with more than one interface
       }
 
-    interfaceObj = getObject((Invid) interfaceInvids.elementAt(0));
+    interfaceObj = getObject(interfaceInvids.get(0));
 
     ipField = (IPDBField) interfaceObj.getField(interfaceSchema.ADDRESS);
     ipAddress = ipField.getEncodingString();
@@ -5473,11 +5264,11 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
     if (object.isDefined(systemSchema.DHCPGROUPS))
       {
-        Vector dhcpGroupInvids = object.getFieldValuesLocal(systemSchema.DHCPGROUPS);
+        Vector<Invid> dhcpGroupInvids = (Vector<Invid>) object.getFieldValuesLocal(systemSchema.DHCPGROUPS);
 
-        for (int i = 0; dhcpGroupInvids != null && i < dhcpGroupInvids.size(); i++)
+        for (Invid dhcpInvid: dhcpGroupInvids)
           {
-            DBObject dhcpGroup = getObject((Invid) dhcpGroupInvids.elementAt(i));
+            DBObject dhcpGroup = getObject(dhcpInvid);
 
             findDHCPOptions(options, dhcpGroup.getFieldValuesLocal(dhcpGroupSchema.OPTIONS));
           }
