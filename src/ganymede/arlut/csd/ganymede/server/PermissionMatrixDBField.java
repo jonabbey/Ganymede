@@ -123,7 +123,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
-  public boolean isDefined()
+  @Override public boolean isDefined()
   {
     return matrix.size() > 0;
   }
@@ -149,7 +149,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * operation.  Caveat Coder.</p>
    */
 
-  public synchronized ReturnVal setUndefined(boolean local)
+  @Override public synchronized ReturnVal setUndefined(boolean local)
   {
     if (isEditable(local))
       {
@@ -519,14 +519,14 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   // we never allow setValue
 
-  public boolean verifyTypeMatch(Object v)
+  @Override public boolean verifyTypeMatch(Object v)
   {
     return false;
   }
 
   // we never allow setValue
 
-  public ReturnVal verifyNewValue(Object v)
+  @Override public ReturnVal verifyNewValue(Object v)
   {
     return Ganymede.createErrorDialog("Permission Matrix Field Error",
                                       "setValue() not allowed on PermissionMatrixDBField.");
@@ -536,7 +536,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * We don't expect these fields to ever be stored in a hash.
    */
 
-  public int hashCode()
+  @Override public int hashCode()
   {
     throw new UnsupportedOperationException();
   }
@@ -545,7 +545,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * Fancy equals method really does check for value equality.
    */
 
-  public synchronized boolean equals(Object obj)
+  @Override public synchronized boolean equals(Object obj)
   {
     PermissionMatrixDBField pmdb;
 
@@ -597,7 +597,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * @param local If true, permissions checking is skipped.
    */
 
-  public synchronized ReturnVal copyFieldTo(DBField target, boolean local)
+  @Override public synchronized ReturnVal copyFieldTo(DBField target, boolean local)
   {
     if (!local)
       {
@@ -641,7 +641,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * i.d.
    */
 
-  public Object key()
+  @Override public Object key()
   {
     return Integer.valueOf(this.owner.getID());
   }
@@ -650,7 +650,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * We always return null here..
    */
 
-  public Object getValue()
+  @Override public Object getValue()
   {
     return null;
   }
@@ -662,7 +662,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * the permissions checking that getValues() does.</p>
    */
 
-  public Object getValueLocal()
+  @Override public Object getValueLocal()
   {
     return null;
   }
@@ -675,7 +675,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * set() methods below.</p>
    */
 
-  public ReturnVal setValue(Object value, boolean local, boolean noWizards)
+  @Override public ReturnVal setValue(Object value, boolean local, boolean noWizards)
   {
     // "Server: Error in PermissionMatrixDBField.setValue()"
     // "Error.. can''t call setValue() on a PermissionMatrixDBField."
@@ -683,12 +683,12 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
                                       ts.l("setValue.error_text"));
   }
 
-  public Object clone() throws CloneNotSupportedException
+  @Override public Object clone() throws CloneNotSupportedException
   {
     throw new CloneNotSupportedException();
   }
 
-  synchronized void emit(DataOutput out) throws IOException
+  @Override synchronized void emit(DataOutput out) throws IOException
   {
     if (debug)
       {
@@ -721,7 +721,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       }
   }
 
-  synchronized void receive(DataInput in, DBObjectBaseField definition) throws IOException
+  @Override synchronized void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
     int tableSize;
     PermEntry pe;
@@ -748,7 +748,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       }
   }
 
-  void emitXML(XMLDumpContext dump) throws IOException
+  @Override void emitXML(XMLDumpContext dump) throws IOException
   {
     this.emitXML(dump, true);
   }
@@ -835,7 +835,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       }
   }
 
-  public synchronized String getValueString()
+  @Override public synchronized String getValueString()
   {
     StringBuilder result = new StringBuilder();
 
@@ -869,7 +869,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * matrices, let's just give enough so they know what we are.
    */
 
-  public String getEncodingString()
+  @Override public String getEncodingString()
   {
     if (!verifyReadPermission())
       {
@@ -889,7 +889,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * <p>If there is no change in the field, null will be returned.</p>
    */
 
-  public String getDiffString(DBField orig)
+  @Override public String getDiffString(DBField orig)
   {
     StringBuilder result = new StringBuilder();
     PermissionMatrixDBField origP;
@@ -1322,7 +1322,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * if need be.
    */
 
-  public synchronized Object checkpoint()
+  @Override public synchronized Object checkpoint()
   {
     if (matrix != null)
       {
@@ -1342,7 +1342,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * without creating or changing this DBField's object identity.</p>
    */
 
-  public synchronized void rollback(Object oldval)
+  @Override public synchronized void rollback(Object oldval)
   {
     if (!(this.owner instanceof DBEditObject))
       {

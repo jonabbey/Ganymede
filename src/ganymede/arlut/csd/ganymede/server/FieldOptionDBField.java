@@ -128,7 +128,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
-  public boolean isDefined()
+  @Override public boolean isDefined()
   {
     return this.matrix.size() > 0;
   }
@@ -154,7 +154,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * operation.  Caveat Coder.</p>
    */
 
-  public synchronized ReturnVal setUndefined(boolean local)
+  @Override public synchronized ReturnVal setUndefined(boolean local)
   {
     if (isEditable(local))
       {
@@ -503,14 +503,14 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   // we never allow setValue
 
-  public boolean verifyTypeMatch(Object v)
+  @Override public boolean verifyTypeMatch(Object v)
   {
     return false;
   }
 
   // we never allow setValue
 
-  public ReturnVal verifyNewValue(Object v)
+  @Override public ReturnVal verifyNewValue(Object v)
   {
     // "Field Option Field Error"
     // "Error.. verifyNewValue() method not supported on FieldOptionDBField."
@@ -522,7 +522,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * We don't expect these fields to ever be stored in a hash.
    */
 
-  public int hashCode()
+  @Override public int hashCode()
   {
     throw new UnsupportedOperationException();
   }
@@ -531,7 +531,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * fancy equals method really does check for value equality
    */
 
-  public boolean equals(Object obj)
+  @Override public boolean equals(Object obj)
   {
     FieldOptionDBField fodb;
 
@@ -566,7 +566,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * @param local If true, permissions checking is skipped.
    */
 
-  public synchronized ReturnVal copyFieldTo(DBField target, boolean local)
+  @Override public synchronized ReturnVal copyFieldTo(DBField target, boolean local)
   {
     if (!local)
       {
@@ -610,7 +610,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * i.d.
    */
 
-  public Object key()
+  @Override public Object key()
   {
     return Integer.valueOf(this.owner.getID());
   }
@@ -619,7 +619,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * We always return null here..
    */
 
-  public Object getValue()
+  @Override public Object getValue()
   {
     return null;
   }
@@ -631,7 +631,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * the permissions checking that getValues() does.</p>
    */
 
-  public Object getValueLocal()
+  @Override public Object getValueLocal()
   {
     return null;
   }
@@ -642,7 +642,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * methods below.
    */
 
-  public ReturnVal setValue(Object value, boolean local, boolean noWizards)
+  @Override public ReturnVal setValue(Object value, boolean local, boolean noWizards)
   {
     // "Field Option Field Error"
     // "Error.. setValue() on method not supported on FieldOptionDBField."
@@ -650,12 +650,12 @@ public class FieldOptionDBField extends DBField implements field_option_field {
                                       ts.l("setValue.error_text"));
   }
 
-  public Object clone() throws CloneNotSupportedException
+  @Override public Object clone() throws CloneNotSupportedException
   {
     throw new CloneNotSupportedException();
   }
 
-  synchronized void emit(DataOutput out) throws IOException
+  @Override synchronized void emit(DataOutput out) throws IOException
   {
     if (debug)
       {
@@ -686,7 +686,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
       }
   }
 
-  synchronized void receive(DataInput in, DBObjectBaseField definition) throws IOException
+  @Override synchronized void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
     int tableSize;
 
@@ -714,7 +714,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * out this field to disk.  It is mated with receiveXML().
    */
 
-  void emitXML(XMLDumpContext xmlOut) throws IOException
+  @Override void emitXML(XMLDumpContext xmlOut) throws IOException
   {
     this.emitXML(xmlOut, true);
   }
@@ -803,7 +803,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
       }
   }
 
-  public synchronized String getValueString()
+  @Override public synchronized String getValueString()
   {
     StringBuilder result = new StringBuilder();
 
@@ -826,7 +826,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * option matrices, let's just give enough so they know what we are.
    */
 
-  public String getEncodingString()
+  @Override public String getEncodingString()
   {
     if (!verifyReadPermission())
       {
@@ -846,7 +846,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * <p>If there is no change in the field, null will be returned.</p>
    */
 
-  public String getDiffString(DBField orig)
+  @Override public String getDiffString(DBField orig)
   {
     StringBuilder result = new StringBuilder();
     FieldOptionDBField origFO;
@@ -1234,7 +1234,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * if need be.
    */
 
-  public synchronized Object checkpoint()
+  @Override public synchronized Object checkpoint()
   {
     if (matrix != null)
       {
@@ -1254,7 +1254,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
    * without creating or changing this DBField's object identity.</p>
    */
 
-  public synchronized void rollback(Object oldval)
+  @Override public synchronized void rollback(Object oldval)
   {
     if (!(this.owner instanceof DBEditObject))
       {

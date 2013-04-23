@@ -162,12 +162,12 @@ public class FloatDBField extends DBField implements float_field {
     throw new CloneNotSupportedException();
   }
 
-  void emit(DataOutput out) throws IOException
+  @Override void emit(DataOutput out) throws IOException
   {
     out.writeDouble(((Double) value).doubleValue());
   }
 
-  void receive(DataInput in, DBObjectBaseField definition) throws IOException
+  @Override void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
     value = new Double(in.readDouble());
   }
@@ -177,7 +177,7 @@ public class FloatDBField extends DBField implements float_field {
    * out this field to disk.</p>
    */
 
-  synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
+  @Override synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
     xmlOut.startElementIndent(this.getXMLName());
     emitDoubleXML(xmlOut, value());
@@ -214,7 +214,7 @@ public class FloatDBField extends DBField implements float_field {
     throw new IllegalArgumentException("vector accessor called on scalar field");
   }
 
-  public synchronized String getValueString()
+  @Override public synchronized String getValueString()
   {
     if (value == null)
       {
@@ -230,7 +230,7 @@ public class FloatDBField extends DBField implements float_field {
    *
    */
 
-  public String getEncodingString()
+  @Override public String getEncodingString()
   {
     return getValueString();
   }
@@ -245,7 +245,7 @@ public class FloatDBField extends DBField implements float_field {
    * <p>If there is no change in the field, null will be returned.</p>
    */
 
-  public String getDiffString(DBField orig)
+  @Override public String getDiffString(DBField orig)
   {
     FloatDBField origN;
 
@@ -356,12 +356,12 @@ public class FloatDBField extends DBField implements float_field {
   //
   // ****
 
-  public boolean verifyTypeMatch(Object o)
+  @Override public boolean verifyTypeMatch(Object o)
   {
     return ((o == null) || (o instanceof Double));
   }
 
-  public ReturnVal verifyNewValue(Object o)
+  @Override public ReturnVal verifyNewValue(Object o)
   {
     DBEditObject eObj;
     Double I;

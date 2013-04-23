@@ -188,12 +188,12 @@ public class StringDBField extends DBField implements string_field {
       }
   }
 
-  public Object clone() throws CloneNotSupportedException
+  @Override public Object clone() throws CloneNotSupportedException
   {
     throw new CloneNotSupportedException();
   }
 
-  void emit(DataOutput out) throws IOException
+  @Override void emit(DataOutput out) throws IOException
   {
     if (isVector())
       {
@@ -225,7 +225,7 @@ public class StringDBField extends DBField implements string_field {
       }
   }
 
-  void receive(DataInput in, DBObjectBaseField definition) throws IOException
+  @Override void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
     int count;
 
@@ -262,7 +262,7 @@ public class StringDBField extends DBField implements string_field {
    * out this field to disk.</p>
    */
 
-  synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
+  @Override synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
     xmlOut.startElementIndent(this.getXMLName());
 
@@ -336,7 +336,7 @@ public class StringDBField extends DBField implements string_field {
    * into an infinite loop.</p>
    */
 
-  public synchronized String getValueString()
+  @Override public synchronized String getValueString()
   {
     if (!isVector())
       {
@@ -398,7 +398,7 @@ public class StringDBField extends DBField implements string_field {
    * result.</p>
    */
 
-  public String getEncodingString()
+  @Override public String getEncodingString()
   {
     return getValueString();
   }
@@ -413,7 +413,7 @@ public class StringDBField extends DBField implements string_field {
    * <p>If there is no change in the field, null will be returned.</p>
    */
 
-  public synchronized String getDiffString(DBField orig)
+  @Override public synchronized String getDiffString(DBField orig)
   {
     StringBuilder result = new StringBuilder();
     StringDBField origS;
@@ -569,7 +569,7 @@ public class StringDBField extends DBField implements string_field {
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
-  public synchronized boolean isDefined()
+  @Override public synchronized boolean isDefined()
   {
     if (isVector())
       {
@@ -801,7 +801,7 @@ public class StringDBField extends DBField implements string_field {
   // ****
 
 
-  public boolean verifyTypeMatch(Object o)
+  @Override public boolean verifyTypeMatch(Object o)
   {
     return ((o == null) || (o instanceof String));
   }
@@ -822,7 +822,7 @@ public class StringDBField extends DBField implements string_field {
    * component of verifyNewValue() to verify new values.</p>
    */
 
-  public ReturnVal verifyBasicConstraints(Object o)
+  @Override public ReturnVal verifyBasicConstraints(Object o)
   {
     if (!verifyTypeMatch(o))
       {
@@ -953,7 +953,7 @@ public class StringDBField extends DBField implements string_field {
    * This usage of transformedValue is for canonicalizing input data.</p>
    */
 
-  public ReturnVal verifyNewValue(Object o)
+  @Override public ReturnVal verifyNewValue(Object o)
   {
     DBEditObject eObj;
     String s;

@@ -245,7 +245,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * Ganymede.db file and/or to the Journal file.
    */
 
-  void emit(DataOutput out) throws IOException
+  @Override void emit(DataOutput out) throws IOException
   {
     if (isVector())
       {
@@ -287,7 +287,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * Ganymede.db file and/or from the Journal file.
    */
 
-  void receive(DataInput in, DBObjectBaseField definition) throws IOException
+  @Override void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
     int count;
 
@@ -335,7 +335,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * out this field to disk.
    */
 
-  synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
+  @Override synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
     // if we're the containing object field in an embedded object, we
     // don't need to describe ourselves to the XML file.. our
@@ -561,7 +561,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * into an infinite loop.</p>
    */
 
-  public synchronized String getValueString()
+  @Override public synchronized String getValueString()
   {
     GanymedeSession gsession = null;
 
@@ -710,7 +710,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * we'll do that here for now.
    */
 
-  public String getEncodingString()
+  @Override public String getEncodingString()
   {
     return getValueString();
   }
@@ -725,7 +725,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * <p>If there is no change in the field, null will be returned.</p>
    */
 
-  public synchronized String getDiffString(DBField orig)
+  @Override public synchronized String getDiffString(DBField orig)
   {
     StringBuilder result = new StringBuilder();
     InvidDBField origI;
@@ -2302,7 +2302,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * be provided.
    */
 
-  public synchronized ReturnVal setValue(Object value, boolean local, boolean noWizards)
+  @Override public synchronized ReturnVal setValue(Object value, boolean local, boolean noWizards)
   {
     DBEditObject eObj;
     Invid oldRemote, newRemote;
@@ -2445,7 +2445,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * be provided.
    */
 
-  public synchronized ReturnVal setElement(int index, Object submittedValue, boolean local, boolean noWizards)
+  @Override public synchronized ReturnVal setElement(int index, Object submittedValue, boolean local, boolean noWizards)
   {
     DBEditObject eObj;
     ReturnVal retVal = null;
@@ -2587,7 +2587,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * be provided.
    */
 
-  public synchronized ReturnVal addElement(Object submittedValue, boolean local, boolean noWizards)
+  @Override public synchronized ReturnVal addElement(Object submittedValue, boolean local, boolean noWizards)
   {
     DBEditObject eObj;
     Invid remote;
@@ -2744,9 +2744,9 @@ public final class InvidDBField extends DBField implements invid_field {
    * be provided.
    */
 
-  public synchronized ReturnVal addElements(Vector submittedValues, boolean local,
-                                            boolean noWizards,
-                                            boolean partialSuccessOk)
+  @Override public synchronized ReturnVal addElements(Vector submittedValues, boolean local,
+                                                      boolean noWizards,
+                                                      boolean partialSuccessOk)
   {
     boolean success = false;
     String checkkey = null;
@@ -3414,7 +3414,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * client can use to display the error condition.</p>
    */
 
-  public synchronized ReturnVal deleteElement(int index, boolean local, boolean noWizards)
+  @Override public synchronized ReturnVal deleteElement(int index, boolean local, boolean noWizards)
   {
     DBEditObject eObj;
     Invid remote;
@@ -3570,7 +3570,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * be provided.
    */
 
-  public synchronized ReturnVal deleteElements(Vector valuesToDelete, boolean local, boolean noWizards)
+  @Override public synchronized ReturnVal deleteElements(Vector valuesToDelete, boolean local, boolean noWizards)
   {
     ReturnVal retVal = null;
     String checkkey = null;
@@ -3923,7 +3923,7 @@ public final class InvidDBField extends DBField implements invid_field {
   //
   // ****
 
-  public boolean verifyTypeMatch(Object o)
+  @Override public boolean verifyTypeMatch(Object o)
   {
     return ((o == null) || (o instanceof Invid));
   }
@@ -3956,7 +3956,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * be provided.
    */
 
-  public ReturnVal verifyNewValue(Object o)
+  @Override public ReturnVal verifyNewValue(Object o)
   {
     return verifyNewValue(o, false);
   }

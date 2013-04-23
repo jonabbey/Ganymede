@@ -386,7 +386,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
-  public boolean isDefined()
+  @Override public boolean isDefined()
   {
     return (cryptedPass != null || md5CryptPass != null ||
             apacheMd5CryptPass != null || uncryptedPass != null || lanHash != null
@@ -414,7 +414,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * operation.  Caveat Coder.</p>
    */
 
-  public synchronized ReturnVal setUndefined(boolean local)
+  @Override public synchronized ReturnVal setUndefined(boolean local)
   {
     if (!isEditable(local))
       {
@@ -498,7 +498,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * We don't expect these fields to ever be stored in a hash.
    */
 
-  public int hashCode()
+  @Override public int hashCode()
   {
     throw new UnsupportedOperationException();
   }
@@ -511,7 +511,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * call synchronized methods on any other object.</p>
    */
 
-  public synchronized boolean equals(Object obj)
+  @Override public synchronized boolean equals(Object obj)
   {
     if (obj == null)
       {
@@ -563,15 +563,19 @@ public class PasswordDBField extends DBField implements pass_field {
    * into the field will occur.</p>
    *
    * <p>NOTE: this method is mainly used in cloning objects, and
-   * {@link arlut.csd.ganymede.server.DBEditObject#cloneFromObject(arlut.csd.ganymede.server.DBSession, arlut.csd.ganymede.server.DBObject, boolean) cloneFromObject}
+   * {@link
+   * arlut.csd.ganymede.server.DBEditObject#cloneFromObject(arlut.csd.ganymede.server.DBSession,
+   * arlut.csd.ganymede.server.DBObject, boolean) cloneFromObject}
    * doesn't allow cloning of password fields by default.</p>
    *
    * @param target The DBField to copy this field's contents to.
    * @param local If true, permissions checking is skipped.
    */
 
-  public synchronized ReturnVal copyFieldTo(PasswordDBField target, boolean local)
+  @Override public synchronized ReturnVal copyFieldTo(DBField target, boolean local)
   {
+    PasswordDBField targetField = (PasswordDBField) target;
+
     if (!local)
       {
         if (!verifyReadPermission())
@@ -584,7 +588,7 @@ public class PasswordDBField extends DBField implements pass_field {
           }
       }
 
-    if (!target.isEditable(local))
+    if (!targetField.isEditable(local))
       {
         // "Error Copying Password Field"
         // "Can''t copy field "{0}" in object "{1}", no write privileges on target."
@@ -593,17 +597,17 @@ public class PasswordDBField extends DBField implements pass_field {
                                                this.owner.getLabel()));
       }
 
-    target.cryptedPass = cryptedPass;
-    target.md5CryptPass = md5CryptPass;
-    target.apacheMd5CryptPass = apacheMd5CryptPass;
-    target.lanHash = lanHash;
-    target.ntHash = ntHash;
-    target.uncryptedPass = uncryptedPass;
-    target.bCryptPass = bCryptPass;
-    target.sshaHash = sshaHash;
-    target.shaUnixCrypt = shaUnixCrypt;
+    targetField.cryptedPass = cryptedPass;
+    targetField.md5CryptPass = md5CryptPass;
+    targetField.apacheMd5CryptPass = apacheMd5CryptPass;
+    targetField.lanHash = lanHash;
+    targetField.ntHash = ntHash;
+    targetField.uncryptedPass = uncryptedPass;
+    targetField.bCryptPass = bCryptPass;
+    targetField.sshaHash = sshaHash;
+    targetField.shaUnixCrypt = shaUnixCrypt;
 
-    target.history = history;
+    targetField.history = history;
 
     return null;                // simple success value
   }
@@ -613,12 +617,12 @@ public class PasswordDBField extends DBField implements pass_field {
    * Subclasses need to override this method in subclass.
    */
 
-  public Object key()
+  @Override public Object key()
   {
     throw new IllegalArgumentException("PasswordDBFields may not be tracked in namespaces");
   }
 
-  public Object clone() throws CloneNotSupportedException
+  @Override public Object clone() throws CloneNotSupportedException
   {
     throw new CloneNotSupportedException();
   }
@@ -635,7 +639,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * ahead of the field's contents.</p>
    */
 
-  void emit(DataOutput out) throws IOException
+  @Override void emit(DataOutput out) throws IOException
   {
     boolean need_to_write_all_hashes = writeOutAllStoredValues();
     boolean wrote_hash = false;
@@ -882,7 +886,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * the field's id and type information has been read.</p>
    */
 
-  void receive(DataInput in, DBObjectBaseField definition) throws IOException
+  @Override void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
     clear_stored();
 
@@ -1025,7 +1029,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * out this field to disk.
    */
 
-  void emitXML(XMLDumpContext dump) throws IOException
+  @Override void emitXML(XMLDumpContext dump) throws IOException
   {
     this.emitXML(dump, true);
   }
@@ -1129,7 +1133,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
-  public Object getValue()
+  @Override public Object getValue()
   {
     return null;
   }
@@ -1145,7 +1149,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * password information in crypted or non-crypted form.</p>
    */
 
-  public Object getValueLocal()
+  @Override public Object getValueLocal()
   {
     return null;
   }
@@ -1174,7 +1178,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * into an infinite loop.</p>
    */
 
-  public synchronized String getValueString()
+  @Override public synchronized String getValueString()
   {
     if (this.isDefined())
       {
@@ -1236,7 +1240,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * The default getValueString() encoding is acceptable.
    */
 
-  public String getEncodingString()
+  @Override public String getEncodingString()
   {
     return getValueString();
   }
@@ -1254,7 +1258,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * <p>If there is no change in the field, null will be returned.</p>
    */
 
-  public String getDiffString(DBField orig)
+  @Override public String getDiffString(DBField orig)
   {
     PasswordDBField origP;
 
@@ -1839,7 +1843,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
-  public ReturnVal setValue(Object value, boolean local, boolean noWizards)
+  @Override public ReturnVal setValue(Object value, boolean local, boolean noWizards)
   {
     // "The setValue() method is not supported on the PasswordDBField."
     throw new IllegalArgumentException(ts.l("setValue.invalid_call"));
@@ -3096,7 +3100,7 @@ public class PasswordDBField extends DBField implements pass_field {
   //
   // ****
 
-  public boolean verifyTypeMatch(Object o)
+  @Override public boolean verifyTypeMatch(Object o)
   {
     return ((o == null) || (o instanceof String));
   }
@@ -3105,7 +3109,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * Generally only for when we get a plaintext submission..
    */
 
-  public ReturnVal verifyNewValue(Object o)
+  @Override public ReturnVal verifyNewValue(Object o)
   {
     DBEditObject eObj;
     String s;

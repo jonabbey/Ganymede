@@ -162,17 +162,17 @@ public class BooleanDBField extends DBField implements boolean_field {
     throw new IllegalArgumentException("vector constructor called on scalar field");
   }
 
-  public Object clone() throws CloneNotSupportedException
+  @Override public Object clone() throws CloneNotSupportedException
   {
     throw new CloneNotSupportedException();
   }
 
-  void emit(DataOutput out) throws IOException
+  @Override void emit(DataOutput out) throws IOException
   {
     out.writeBoolean(value());
   }
 
-  void receive(DataInput in, DBObjectBaseField definition) throws IOException
+  @Override void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
     value = Boolean.valueOf(in.readBoolean());
   }
@@ -182,7 +182,7 @@ public class BooleanDBField extends DBField implements boolean_field {
    * out this field to disk.</p>
    */
 
-  synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
+  @Override synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
     xmlOut.indent();
 
@@ -200,7 +200,7 @@ public class BooleanDBField extends DBField implements boolean_field {
    *
    */
 
-  public boolean isDefined()
+  @Override public boolean isDefined()
   {
     return value();
   }
@@ -241,7 +241,7 @@ public class BooleanDBField extends DBField implements boolean_field {
    * into an infinite loop.</p>
    */
 
-  public synchronized String getValueString()
+  @Override public synchronized String getValueString()
   {
     if (value == null)
       {
@@ -252,13 +252,10 @@ public class BooleanDBField extends DBField implements boolean_field {
   }
 
   /**
-   *
    * The normal boolean getValueString() encoding is adequate.
-   *
-   *
    */
 
-  public String getEncodingString()
+  @Override public String getEncodingString()
   {
     return getValueString();
   }
@@ -273,7 +270,7 @@ public class BooleanDBField extends DBField implements boolean_field {
    * <p>If there is no change in the field, null will be returned.</p>
    */
 
-  public String getDiffString(DBField orig)
+  @Override public String getDiffString(DBField orig)
   {
     BooleanDBField origB;
 
@@ -350,12 +347,12 @@ public class BooleanDBField extends DBField implements boolean_field {
   //
   // ****
 
-  public boolean verifyTypeMatch(Object o)
+  @Override public boolean verifyTypeMatch(Object o)
   {
     return ((o == null) || (o instanceof Boolean));
   }
 
-  public ReturnVal verifyNewValue(Object o)
+  @Override public ReturnVal verifyNewValue(Object o)
   {
     DBEditObject eObj;
 

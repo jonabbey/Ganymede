@@ -158,17 +158,17 @@ public class NumericDBField extends DBField implements num_field {
     throw new IllegalArgumentException("vector constructor called on scalar field");
   }
 
-  public Object clone() throws CloneNotSupportedException
+  @Override public Object clone() throws CloneNotSupportedException
   {
     throw new CloneNotSupportedException();
   }
 
-  void emit(DataOutput out) throws IOException
+  @Override void emit(DataOutput out) throws IOException
   {
     out.writeInt(((Integer) value).intValue());
   }
 
-  void receive(DataInput in, DBObjectBaseField definition) throws IOException
+  @Override void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
     value = Integer.valueOf(in.readInt());
   }
@@ -178,7 +178,7 @@ public class NumericDBField extends DBField implements num_field {
    * out this field to disk.</p>
    */
 
-  synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
+  @Override synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
     xmlOut.startElementIndent(this.getXMLName());
     emitIntXML(xmlOut, value());
@@ -213,7 +213,7 @@ public class NumericDBField extends DBField implements num_field {
     throw new IllegalArgumentException("vector accessor called on scalar field");
   }
 
-  public synchronized String getValueString()
+  @Override public synchronized String getValueString()
   {
     if (value == null)
       {
@@ -229,7 +229,7 @@ public class NumericDBField extends DBField implements num_field {
    *
    */
 
-  public String getEncodingString()
+  @Override public String getEncodingString()
   {
     return getValueString();
   }
@@ -244,7 +244,7 @@ public class NumericDBField extends DBField implements num_field {
    * <p>If there is no change in the field, null will be returned.</p>
    */
 
-  public String getDiffString(DBField orig)
+  @Override public String getDiffString(DBField orig)
   {
     NumericDBField origN;
     StringBuilder result = new StringBuilder();
@@ -361,7 +361,7 @@ public class NumericDBField extends DBField implements num_field {
   //
   // ****
 
-  public boolean verifyTypeMatch(Object o)
+  @Override public boolean verifyTypeMatch(Object o)
   {
     return ((o == null) || (o instanceof Integer));
   }
@@ -382,7 +382,7 @@ public class NumericDBField extends DBField implements num_field {
    * component of verifyNewValue() to verify new values.
    */
 
-  public ReturnVal verifyBasicConstraints(Object o)
+  @Override public ReturnVal verifyBasicConstraints(Object o)
   {
     if (!verifyTypeMatch(o))
       {
@@ -395,7 +395,7 @@ public class NumericDBField extends DBField implements num_field {
     return null;
   }
 
-  public ReturnVal verifyNewValue(Object o)
+  @Override public ReturnVal verifyNewValue(Object o)
   {
     DBEditObject eObj;
     Integer I;

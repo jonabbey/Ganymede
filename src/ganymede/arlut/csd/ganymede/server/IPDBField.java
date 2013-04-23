@@ -214,7 +214,7 @@ public class IPDBField extends DBField implements ip_field {
     throw new CloneNotSupportedException();
   }
 
-  void emit(DataOutput out) throws IOException
+  @Override void emit(DataOutput out) throws IOException
   {
     if (isVector())
       {
@@ -247,7 +247,7 @@ public class IPDBField extends DBField implements ip_field {
       }
   }
 
-  void receive(DataInput in, DBObjectBaseField definition) throws IOException
+  @Override void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
     int count;
 
@@ -302,7 +302,7 @@ public class IPDBField extends DBField implements ip_field {
    * out this field to disk.</p>
    */
 
-  synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
+  @Override synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
     xmlOut.startElementIndent(this.getXMLName());
 
@@ -447,7 +447,7 @@ public class IPDBField extends DBField implements ip_field {
    * a String with IP information in either IPv4 or IPv6 encoding.</p>
    */
 
-  public ReturnVal setValue(Object value, boolean local, boolean noWizards) throws GanyPermissionsException
+  @Override public ReturnVal setValue(Object value, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     DBNameSpace ns;
     DBEditObject eObj;
@@ -579,7 +579,7 @@ public class IPDBField extends DBField implements ip_field {
    * a String with IP information in either IPv4 or IPv6 encoding.</p>
    */
 
-  public ReturnVal setElement(int index, Object value, boolean local, boolean noWizards) throws GanyPermissionsException
+  @Override public ReturnVal setElement(int index, Object value, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     DBNameSpace ns;
     DBEditObject eObj;
@@ -726,7 +726,7 @@ public class IPDBField extends DBField implements ip_field {
    * a String with IP information in either IPv4 or IPv6 encoding.</p>
    */
 
-  public ReturnVal addElement(Object submittedValue, boolean local, boolean noWizards) throws GanyPermissionsException
+  @Override public ReturnVal addElement(Object submittedValue, boolean local, boolean noWizards) throws GanyPermissionsException
   {
     DBNameSpace ns;
     DBEditObject eObj;
@@ -855,8 +855,8 @@ public class IPDBField extends DBField implements ip_field {
    * and skip the rest.
    */
 
-  public synchronized ReturnVal addElements(Vector submittedValues, boolean local,
-                                            boolean noWizards, boolean copyFieldMode) throws GanyPermissionsException
+  @Override public synchronized ReturnVal addElements(Vector submittedValues, boolean local,
+                                                      boolean noWizards, boolean copyFieldMode) throws GanyPermissionsException
   {
     ReturnVal retVal = null;
     ReturnVal newRetVal = null;
@@ -1117,7 +1117,7 @@ public class IPDBField extends DBField implements ip_field {
     return (Byte[]) getVectVal().elementAt(index);
   }
 
-  public synchronized String getValueString()
+  @Override public synchronized String getValueString()
   {
     if (!isVector())
       {
@@ -1154,7 +1154,7 @@ public class IPDBField extends DBField implements ip_field {
    *
    */
 
-  public String getEncodingString()
+  @Override public String getEncodingString()
   {
     return getValueString();
   }
@@ -1169,7 +1169,7 @@ public class IPDBField extends DBField implements ip_field {
    * <p>If there is no change in the field, null will be returned.</p>
    */
 
-  public synchronized String getDiffString(DBField orig)
+  @Override public synchronized String getDiffString(DBField orig)
   {
     StringBuilder result = new StringBuilder();
     IPDBField origI;
@@ -1392,7 +1392,7 @@ public class IPDBField extends DBField implements ip_field {
   //
   // ****
 
-  public boolean verifyTypeMatch(Object o)
+  @Override public boolean verifyTypeMatch(Object o)
   {
     return ((o == null) ||
             (o instanceof Byte[] &&
@@ -1400,7 +1400,7 @@ public class IPDBField extends DBField implements ip_field {
               (((Byte[]) o).length == 16))));
   }
 
-  public ReturnVal verifyNewValue(Object o)
+  @Override public ReturnVal verifyNewValue(Object o)
   {
     DBEditObject eObj = (DBEditObject) this.owner;
 
@@ -1431,7 +1431,7 @@ public class IPDBField extends DBField implements ip_field {
    * of the prior oldField state.
    */
 
-  public fieldDeltaRec getVectorDiff(DBField oldField)
+  @Override public fieldDeltaRec getVectorDiff(DBField oldField)
   {
     if (!isVector())
       {
