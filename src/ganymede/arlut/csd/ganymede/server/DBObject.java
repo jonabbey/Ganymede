@@ -70,6 +70,7 @@ import java.util.Vector;
 
 import org.python.core.PyInteger;
 
+import arlut.csd.Util.EmptyVector;
 import arlut.csd.Util.JythonMap;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
@@ -992,7 +993,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
         fieldcode = in.readShort();
 
-        definition = objectBase.getFieldDef(fieldcode);
+        definition = this.getFieldDef(fieldcode);
 
         // we used to have a couple of Invid vector fields that we
         // have gotten rid of, for the sake of improving Ganymede's
@@ -2465,12 +2466,44 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * method saves a roundtrip to the server, which is
    * particularly useful in database loading.</p>
    *
+   * <p>If no such Vector field is defined on this object type, an
+   * IllegalArgumentException will be thrown.  If the field is defined
+   * on this object type but is undefined in this individual object,
+   * an immutable empty Vector will be returned.</p>
+   *
+   * <p>Will never return null.</p>
+   *
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final Vector getFieldValues(String fieldName) throws GanyPermissionsException
   {
-    return getFieldValues((DBField) getField(fieldName));
+    DBField field = (DBField) this.getField(fieldName);
+    boolean isVector = false;
+
+    if (field == null)
+      {
+        DBObjectBaseField fieldDef = this.getFieldDef(fieldName);
+
+        if (fieldDef == null)
+          {
+            throw new RuntimeException("No field named " + fieldName + " defined.");
+          }
+
+        isVector = fieldDef.isArray();
+      }
+    else
+      {
+        isVector = field.isVector();
+      }
+
+    if (!isVector)
+      {
+        // "Couldn't get vector values on scalar field {0}"
+        throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
+      }
+
+    return this.getFieldValues(field);
   }
 
   /**
@@ -2478,28 +2511,67 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * method saves a roundtrip to the server, which is
    * particularly useful in database loading.</p>
    *
+   * <p>If no such Vector field is defined on this object type, an
+   * IllegalArgumentException will be thrown.  If the field is defined
+   * on this object type but is undefined in this individual object,
+   * an immutable empty Vector will be returned.</p>
+   *
+   * <p>Will never return null.</p>
+   *
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final Vector getFieldValues(short fieldID) throws GanyPermissionsException
   {
-    return getFieldValues((DBField) getField(fieldID));
+    DBField field = (DBField) this.getField(fieldID);
+    String fieldName = null;
+    boolean isVector = false;
+
+    if (field == null)
+      {
+        DBObjectBaseField fieldDef = this.getFieldDef(fieldID);
+
+        if (fieldDef == null)
+          {
+            throw new RuntimeException("No field numbered " + fieldID + " is defined.");
+          }
+        else
+          {
+            fieldName = fieldDef.getName();
+          }
+
+        isVector = fieldDef.isArray();
+      }
+    else
+      {
+        fieldName = field.getName();
+        isVector = field.isVector();
+      }
+
+    if (!isVector)
+      {
+        // "Couldn't get vector values on scalar field {0}"
+        throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
+      }
+
+    return this.getFieldValues(field);
   }
 
   private Vector getFieldValues(DBField f) throws GanyPermissionsException
   {
     if (f == null)
       {
-        return null;
+        return new EmptyVector();
       }
 
-    if (!f.isVector())
+    Vector result = f.getValues();
+
+    if (result == null)
       {
-        // "Couldn't get vector values on scalar field {0}"
-        throw new IllegalArgumentException(ts.l("getFieldValues.badtype", f.getName()));
+        result = new EmptyVector();
       }
 
-    return f.getValues();
+    return result;
   }
 
   /**
@@ -2511,11 +2583,43 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * is not a clone, but is direct access to the vector held in the
    * DBField.  Clone the vector you get back if you need to do
    * anything with it other than read it.</p>
+   *
+   * <p>If no such Vector field is defined on this object type, an
+   * IllegalArgumentException will be thrown.  If the field is defined
+   * on this object type but is undefined in this individual object,
+   * an immutable empty Vector will be returned.</p>
+   *
+   * <p>Will never return null.</p>
    */
 
   public final Vector getFieldValuesLocal(String fieldName)
   {
-    return getFieldValuesLocal((DBField) getField(fieldName));
+    DBField field = (DBField) this.getField(fieldName);
+    boolean isVector = false;
+
+    if (field == null)
+      {
+        DBObjectBaseField fieldDef = this.getFieldDef(fieldName);
+
+        if (fieldDef == null)
+          {
+            throw new RuntimeException("No field named " + fieldName + " defined.");
+          }
+
+        isVector = fieldDef.isArray();
+      }
+    else
+      {
+        isVector = field.isVector();
+      }
+
+    if (!isVector)
+      {
+        // "Couldn't get vector values on scalar field {0}"
+        throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
+      }
+
+    return this.getFieldValuesLocal(field);
   }
 
   /**
@@ -2528,27 +2632,66 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * held in the DBField.  Clone the vector you get back
    * if you need to do anything with it other than read
    * it.</p>
+   *
+   * <p>If no such Vector field is defined on this object type, an
+   * IllegalArgumentException will be thrown.  If the field is defined
+   * on this object type but is undefined in this individual object,
+   * an immutable empty Vector will be returned.</p>
+   *
+   * <p>Will never return null.</p>
    */
 
   public final Vector getFieldValuesLocal(short fieldID)
   {
-    return getFieldValuesLocal((DBField) getField(fieldID));
+    DBField field = (DBField) this.getField(fieldID);
+    String fieldName = null;
+    boolean isVector = false;
+
+    if (field == null)
+      {
+        DBObjectBaseField fieldDef = this.getFieldDef(fieldID);
+
+        if (fieldDef == null)
+          {
+            throw new RuntimeException("No field numbered " + fieldID + " is defined.");
+          }
+        else
+          {
+            fieldName = fieldDef.getName();
+          }
+
+        isVector = fieldDef.isArray();
+      }
+    else
+      {
+        fieldName = field.getName();
+        isVector = field.isVector();
+      }
+
+    if (!isVector)
+      {
+        // "Couldn't get vector values on scalar field {0}"
+        throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
+      }
+
+    return this.getFieldValuesLocal(field);
   }
 
   private Vector getFieldValuesLocal(DBField f)
   {
     if (f == null)
       {
-        return null;
+        return new EmptyVector();
       }
 
-    if (!f.isVector())
+    Vector result = f.getValuesLocal();
+
+    if (result == null)
       {
-        // "Couldn't get vector values on scalar field {0}"
-        throw new IllegalArgumentException(ts.l("getFieldValues.badtype", f.getName()));
+        result = new EmptyVector();
       }
 
-    return f.getValuesLocal();
+    return result;
   }
 
   /**

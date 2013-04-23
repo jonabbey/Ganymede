@@ -4,17 +4,19 @@
 
    This interface defines the methods that the client can remotely
    call on a object held in the Ganymede server.
-   
+
    Created: 11 April 1996
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -268,6 +270,13 @@ public interface db_object extends java.rmi.Remote {
   /**
    * <p>Shortcut method to get a vector field's values.  Using this
    * method saves a roundtrip to the server.</p>
+   *
+   * <p>If no such Vector field is defined on this object type, an
+   * IllegalArgumentException will be thrown.  If the field is defined
+   * on this object type but is undefined in this individual object,
+   * an immutable empty Vector will be returned.</p>
+   *
+   * <p>Will never return null.</p>
    */
 
   public Vector getFieldValues(String fieldName) throws RemoteException;
@@ -275,6 +284,13 @@ public interface db_object extends java.rmi.Remote {
   /**
    * <p>Shortcut method to get a vector field's values.  Using this
    * method saves a roundtrip to the server.</p>
+   *
+   * <p>If no such Vector field is defined on this object type, an
+   * IllegalArgumentException will be thrown.  If the field is defined
+   * on this object type but is undefined in this individual object,
+   * an immutable empty Vector will be returned.</p>
+   *
+   * <p>Will never return null.</p>
    */
 
   public Vector getFieldValues(short fieldID) throws RemoteException;
