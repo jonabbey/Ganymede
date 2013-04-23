@@ -851,7 +851,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public db_field getLabelField()
+  public final db_field getLabelField()
   {
     return getField(objectBase.getLabelField());
   }
@@ -863,7 +863,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public short getLabelFieldID()
+  public final short getLabelFieldID()
   {
     return objectBase.getLabelField();
   }
@@ -874,7 +874,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public boolean isEmbedded()
+  public final boolean isEmbedded()
   {
     return objectBase.isEmbedded();
   }
@@ -888,7 +888,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * {@link arlut.csd.ganymede.server.DBStore DBStore} writing stream.
    */
 
-  void emit(DataOutput out) throws IOException
+  final void emit(DataOutput out) throws IOException
   {
     //    System.err.println("Emitting " + objectBase.getName() + " <" + id + ">");
 
@@ -945,7 +945,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * database.</p>
    */
 
-  synchronized void receive(DataInput in, boolean journalProcessing) throws IOException
+  final synchronized void receive(DataInput in, boolean journalProcessing) throws IOException
   {
     DBField
       tmp = null;
@@ -1143,7 +1143,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>This method is used when this object is being dumped.</p>
    */
 
-  synchronized public void emitXML(XMLDumpContext xmlOut) throws IOException
+  public final synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
     xmlOut.startElementIndent("object");
     xmlOut.attribute("type", XMLUtils.XMLEncode(getTypeName()));
@@ -1195,7 +1195,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @param editset The transaction to own this shadow.
    */
 
-  synchronized DBEditObject createShadow(DBEditSet editset)
+  final synchronized DBEditObject createShadow(DBEditSet editset)
   {
     if (shadowObject != null)
       {
@@ -1241,7 +1241,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.server.DBEditSet#release()
    */
 
-  synchronized boolean clearShadow(DBEditSet editset)
+  final synchronized boolean clearShadow(DBEditSet editset)
   {
     if (editset != shadowObject.editset)
       {
@@ -1279,7 +1279,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public Vector<FieldInfo> getFieldInfoVector()
+  public final Vector<FieldInfo> getFieldInfoVector()
   {
     Vector<FieldInfo> results = new Vector<FieldInfo>();
     DBField field;
@@ -1764,7 +1764,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public boolean canInactivate()
+  public final boolean canInactivate()
   {
     return objectBase.canInactivate();
   }
@@ -2030,7 +2030,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public String getImageURL()
+  public final String getImageURL()
   {
     return objectBase.getObjectHook().getImageURLForObject(this);
   }

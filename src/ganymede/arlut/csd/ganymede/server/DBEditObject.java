@@ -469,7 +469,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public final String getLabel()
+  @Override public final String getLabel()
   {
     if (getStatus() == DELETING)
       {
@@ -501,7 +501,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public final String getEmbeddedObjectDisplayLabel()
+  @Override public final String getEmbeddedObjectDisplayLabel()
   {
     if (getStatus() == DELETING)
       {
@@ -586,7 +586,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public final ReturnVal setFieldValue(short fieldID, Object value) throws GanyPermissionsException
+  @Override public final ReturnVal setFieldValue(short fieldID, Object value) throws GanyPermissionsException
   {
     DBField field = retrieveField(fieldID);
 
