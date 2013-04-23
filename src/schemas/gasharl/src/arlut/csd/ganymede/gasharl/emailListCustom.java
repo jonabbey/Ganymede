@@ -132,7 +132,7 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
    * for how this is to be used, if you have them.</p>
    */
 
-  public String lookupLabel(DBObject object)
+  @Override public String lookupLabel(DBObject object)
   {
     if (object.getTypeID() == SchemaConstants.UserBase)
       {
@@ -147,30 +147,30 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
 
     // mark email lists
 
-    if (object.getTypeID() == 274)
+    if (object.getTypeID() == emailListSchema.BASE)
       {
         return super.lookupLabel(object) + " (email list)";
       }
 
     // and groups
 
-    if (object.getTypeID() == 257)
+    if (object.getTypeID() == groupSchema.BASE)
       {
         return super.lookupLabel(object) + " (group)";
       }
 
     // and user netgroups
 
-    if (object.getTypeID() == 270)
+    if (object.getTypeID() == userNetgroupSchema.BASE)
       {
         return super.lookupLabel(object) + " (user netgroup)";
       }
 
-    // mark external email records
+    // mark email redirects
 
-    if (object.getTypeID() == 275)
+    if (object.getTypeID() == emailRedirectSchema.BASE)
       {
-        Vector addresses = object.getFieldValuesLocal((short) 257);
+        Vector<Invid> addresses = (Vector<Invid>) object.getFieldValuesLocal(emailListSchema.MEMBERS);
 
         return super.lookupLabel(object) + " (" + VectorUtils.vectorString(addresses) + ")";
       }
@@ -188,7 +188,7 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
    * <p>If there is no caching key, this method will return null.</p>
    */
 
-  public Object obtainChoicesKey(DBField field)
+  @Override public Object obtainChoicesKey(DBField field)
   {
     // we don't want the members field to be cached, since we are
     // amalgamating several kinds of things into one invid field.
@@ -211,7 +211,7 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
    * invid fields.</p>
    */
 
-  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
+  @Override public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (field.getID() != emailListSchema.MEMBERS)
       {
@@ -225,12 +225,11 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
         // have local aliases in ARL's mail system) as valid choices
         // for the MEMBERS field.
 
-        Query query1 = new Query(SchemaConstants.UserBase, null, false); // list all users
-
-        Query query2 = new Query((short) 275, null, false); // list all external email targets
+        Query query1 = new Query(SchemaConstants.UserBase, null, false);
+        Query query2 = new Query(emailRedirectSchema.BASE, null, false);
 
         QueryNode root3 = new QueryNotNode(new QueryDataNode((short) -2, QueryDataNode.EQUALS, this.getInvid()));
-        Query query3 = new Query((short) 274, root3, false); // list all other email groups, but not ourselves
+        Query query3 = new Query(emailListSchema.BASE, root3, false);
 
         // we also need to union in user netgroups and account groups
         // that have the 'Can Receive Email' box checked.
@@ -238,12 +237,12 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
         // first groups
 
         QueryNode root4 = new QueryDataNode(groupSchema.EMAILOK, QueryDataNode.DEFINED, null);
-        Query query4 = new Query((short) 257, root4, false);
+        Query query4 = new Query(groupSchema.BASE, root4, false);
 
         // and then user netgroups
 
         QueryNode root5 = new QueryDataNode(userNetgroupSchema.EMAILOK, QueryDataNode.DEFINED, null);
-        Query query5 = new Query((short) 270, root4, false);
+        Query query5 = new Query(userNetgroupSchema.BASE, root4, false);
 
         QueryResult result = editset.getDBSession().getGSession().query(query1, this);
 
@@ -291,16 +290,16 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
    * @param gsession Who is trying to do this linking?
    */
 
-  public boolean anonymousLinkOK(DBObject targetObject, short targetFieldID,
-                                 DBObject sourceObject, short sourceFieldID,
-                                 GanymedeSession gsession)
+  @Override public boolean anonymousLinkOK(DBObject targetObject, short targetFieldID,
+                                           DBObject sourceObject, short sourceFieldID,
+                                           GanymedeSession gsession)
   {
     // if someone tries to put this list in another email list, let
     // them.
 
     if ((targetFieldID == SchemaConstants.BackLinksField) &&
-        (sourceObject.getTypeID() == 274) && // email list
-        (sourceFieldID == 257)) // email list members
+        (sourceObject.getTypeID() == emailListSchema.BASE) &&
+        (sourceFieldID == emailListSchema.MEMBERS))
       {
         return true;
       }
@@ -324,79 +323,15 @@ public class emailListCustom extends DBEditObject implements SchemaConstants, em
    * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean fieldRequired(DBObject object, short fieldid)
+  @Override public boolean fieldRequired(DBObject object, short fieldid)
   {
     // the email list name is required
 
-    if (fieldid == 256)
+    if (fieldid == emailListSchema.LISTNAME)
       {
         return true;
       }
 
     return super.fieldRequired(object, fieldid);
-  }
-
-  /**
-   * <p>This method allows the DBEditObject to have executive approval
-   * of any vector add operation, and to take any special actions in
-   * reaction to the add.. if this method returns null or a success
-   * code in its ReturnVal, the DBField that called us is guaranteed
-   * to proceed to make the change to its vector.  If this method
-   * returns a non-success code in its ReturnVal, the DBField that
-   * called us will not make the change, and the field will be left
-   * unchanged.</p>
-   *
-   * <p>The &lt;field&gt; parameter identifies the field that is
-   * requesting approval for item deletion, and the &lt;value&gt;
-   * parameter carries the value to be added.</p>
-   *
-   * <p>The DBField that called us will take care of all standard
-   * checks on the operation (including vector bounds, etc.) before
-   * calling this method.  Under normal circumstances, we won't need
-   * to do anything here.</p>
-   */
-
-  public ReturnVal finalizeAddElement(DBField field, Object value)
-  {
-    if (field.getID() != emailListSchema.MEMBERS && field.getID() != emailListSchema.EXTERNALTARGETS)
-      {
-        return null;
-      }
-
-    Vector newItemVect = new Vector();
-
-    newItemVect.addElement(value);
-
-    return null;
-  }
-
-  /**
-   * <p>This method allows the DBEditObject to have executive approval
-   * of any vector-vector add operation, and to take any special
-   * actions in reaction to the add.. if this method returns null or a
-   * success code in its ReturnVal, the DBField that called us is
-   * guaranteed to proceed to make the change to its vector.  If this
-   * method returns a non-success code in its ReturnVal, the DBField
-   * that called us will not make the change, and the field will be
-   * left unchanged.</p>
-   *
-   * <p>The &lt;field&gt; parameter identifies the field that is
-   * requesting approval for item deletion, and the &lt;submittedValues&gt;
-   * parameter carries the values to be added.</p>
-   *
-   * <p>The DBField that called us will take care of all standard
-   * checks on the operation (including vector bounds, etc.) before
-   * calling this method.  Under normal circumstances, we won't need
-   * to do anything here.</p>
-   */
-
-  public ReturnVal finalizeAddElements(DBField field, Vector submittedValues)
-  {
-    if (field.getID() != emailListSchema.MEMBERS && field.getID() != emailListSchema.EXTERNALTARGETS)
-      {
-        return null;
-      }
-
-    return null;
   }
 }
