@@ -3963,11 +3963,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
           }
         else
           {
-            if (okToLogField(currentField) && okToLogField(origField))
-              {
-                String diff = currentField.getDiffString(origField);
+            String diff = currentField.getDiffString(origField);
 
-                if (diff != null)
+            if (diff != null)
+              {
+                if (okToLogField(currentField) && okToLogField(origField))
                   {
                     if (changedFieldDefs != null)
                       {
@@ -3987,11 +3987,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
                                            diff);
                       }
                   }
-              }
-            else
-              {
-                changed.append(fieldDef.getName());
-                changed.append("\n");
+                else
+                  {
+                    changed.append(fieldDef.getName());
+                    changed.append("\n");
+                  }
               }
           }
       }
