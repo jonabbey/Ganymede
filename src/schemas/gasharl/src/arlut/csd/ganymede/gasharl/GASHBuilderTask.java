@@ -2887,7 +2887,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       {
         if (i > 0)
           {
-            result.append(", ");
+            writer.print(", ");
           }
 
         writer.print(fixup(addresses.get(i)));
