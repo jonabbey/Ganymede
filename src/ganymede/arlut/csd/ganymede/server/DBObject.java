@@ -2479,7 +2479,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   public final Vector getFieldValues(String fieldName) throws GanyPermissionsException
   {
     DBField field = (DBField) this.getField(fieldName);
-    boolean isVector = false;
 
     if (field == null)
       {
@@ -2542,7 +2541,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     DBField field = (DBField) this.getField(fieldID);
     String fieldName = null;
-    boolean isVector = false;
 
     if (field == null)
       {
@@ -2611,7 +2609,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   public final Vector getFieldValuesLocal(String fieldName)
   {
     DBField field = (DBField) this.getField(fieldName);
-    boolean isVector = false;
 
     if (field == null)
       {
@@ -2663,7 +2660,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     DBField field = (DBField) this.getField(fieldID);
     String fieldName = null;
-    boolean isVector = false;
 
     if (field == null)
       {
