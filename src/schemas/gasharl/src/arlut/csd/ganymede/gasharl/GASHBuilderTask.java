@@ -165,7 +165,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    * execution of builderPhase2.
    */
 
-  public boolean builderPhase1()
+  @Override public boolean builderPhase1()
   {
     PrintWriter out;
     boolean success = false;
@@ -478,7 +478,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
    *
    */
 
-  public boolean builderPhase2()
+  @Override public boolean builderPhase2()
   {
     File
       file;
