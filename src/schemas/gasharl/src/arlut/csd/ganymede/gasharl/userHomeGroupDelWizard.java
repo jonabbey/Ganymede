@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -152,17 +152,17 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
    */
 
   public userHomeGroupDelWizard(GanymedeSession session,
-				userCustom userObject,
-				Object param) throws RemoteException
+                                userCustom userObject,
+                                Object param) throws RemoteException
   {
-    super(session);		// register ourselves
+    super(session);             // register ourselves
 
     this.session = session;
     this.userObject = userObject;
 
     if (!(param instanceof Integer))
       {
-	throw new IllegalArgumentException("Error, expecting an Integer array index");
+        throw new IllegalArgumentException("Error, expecting an Integer array index");
       }
 
     this.index = ((Integer) param).intValue();
@@ -181,10 +181,10 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
   public ReturnVal cancel()
   {
     return fail("Home Group Removal Canceled",
-		"Home Group Removal Canceled",
-		"OK",
-		null,
-		"ok.gif");
+                "Home Group Removal Canceled",
+                "OK",
+                null,
+                "ok.gif");
   }
 
   /**
@@ -205,16 +205,16 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
 
     if (userObject.groupChoices.size() == 1)
       {
-	buffer.append("Can't delete lone group for user ");
-	buffer.append(userObject.getLabel());
-	buffer.append("\n\nYou may not delete the last group from a user's account.  All active users in UNIX need ");
-	buffer.append("to be a member of at least a single account group.");
+        buffer.append("Can't delete lone group for user ");
+        buffer.append(userObject.getLabel());
+        buffer.append("\n\nYou may not delete the last group from a user's account.  All active users in UNIX need ");
+        buffer.append("to be a member of at least a single account group.");
 
-	return fail("User Home Group Change Dialog",
-		    buffer.toString(),
-		    "OK",
-		    null,
-		    "error.gif");
+        return fail("User Home Group Change Dialog",
+                    buffer.toString(),
+                    "OK",
+                    null,
+                    "error.gif");
       }
 
     buffer.append("Changing home group for user ");
@@ -224,10 +224,10 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
     buffer.append("to be the default group for this user at login time.");
 
     return continueOn("User Home Group Change Dialog",
-		      buffer.toString(),
-		      "Next",
-		      "Cancel",
-		      "question.gif");
+                      buffer.toString(),
+                      "Next",
+                      "Cancel",
+                      "question.gif");
   }
 
   public ReturnVal processDialog1()
@@ -239,10 +239,10 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
     System.err.println("userHomeGroupDelWizard.respond(): state == 1");
 
     retVal = continueOn("Home Group Change",
-			"What group do you want to set as the new default for this user?",
-			"OK",
-			"Cancel",
-			"question.gif");
+                        "What group do you want to set as the new default for this user?",
+                        "OK",
+                        "Cancel",
+                        "question.gif");
 
     // get the list of choices, synthesize a list that contains every choice but
     // the one being deleted
@@ -253,23 +253,23 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
 
     // Which group is being deleted?
 
-    Invid val = (Invid) userObject.getFieldValuesLocal(GROUPLIST).elementAt(index);
+    Invid val = (Invid) userObject.getFieldValuesLocal(GROUPLIST).get(index);
 
     // Make a list of all choices except the one being deleted
 
-    Vector choices = new Vector();
+    Vector<String> choices = new Vector<String>();
 
     for (int i = 0; i < groupChoice.size(); i++)
       {
-	if (!groupChoice.getInvid(i).equals(val))
-	  {
-	    choices.addElement(groupChoice.getLabel(i));
-	  }
+        if (!groupChoice.getInvid(i).equals(val))
+          {
+            choices.add(groupChoice.getLabel(i));
+          }
       }
 
     retVal.getDialog().addChoice("New Home Group",
-				 choices,
-				 (String) choices.elementAt(0));
+                                 choices,
+                                 choices.get(0));
 
     System.err.println("userHomeGroupDelWizard.respond(): state == 2, returning dialog");
 
@@ -320,110 +320,110 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
 
     for (int i = 0; i < groupChoice.size(); i++)
       {
-	if (groupChoice.getLabel(i).equals(group))
-	  {
-	    found = true;
+        if (groupChoice.getLabel(i).equals(group))
+          {
+            found = true;
 
-	    // right now, this might fail if the user is in a group
-	    // that the current admin doesn't have permission to edit.
-	    // Unlinking for groups is free (see groupCustom), but
-	    // adding, even adding to the home users field for users
-	    // that are already in the superset users list is not
-	    // automatically permitted.  This may change.
+            // right now, this might fail if the user is in a group
+            // that the current admin doesn't have permission to edit.
+            // Unlinking for groups is free (see groupCustom), but
+            // adding, even adding to the home users field for users
+            // that are already in the superset users list is not
+            // automatically permitted.  This may change.
 
-	    try
-	      {
-		retVal = userObject.setFieldValue(HOMEGROUP, groupChoice.getInvid(i));
-	      }
-	    catch (GanyPermissionsException ex)
-	      {
-		retVal = Ganymede.createErrorDialog("permissions" , "permissions error setting home group " + ex);
-	      }
+            try
+              {
+                retVal = userObject.setFieldValue(HOMEGROUP, groupChoice.getInvid(i));
+              }
+            catch (GanyPermissionsException ex)
+              {
+                retVal = Ganymede.createErrorDialog("permissions" , "permissions error setting home group " + ex);
+              }
 
-	    break;
-	  }
+            break;
+          }
       }
 
     if (!found)
       {
-	return fail("Home Group Removal Cancelled",
-		    "Home Group Removal Cancelled\n\nError, couldn't deal with the group selected",
-		    "OK",
-		    null,
-		    "ok.gif");
+        return fail("Home Group Removal Cancelled",
+                    "Home Group Removal Cancelled\n\nError, couldn't deal with the group selected",
+                    "OK",
+                    null,
+                    "ok.gif");
       }
 
     if (retVal == null || retVal.didSucceed())
       {
-	// we're all systems go, go ahead and do the group
-	// deletion that started this whole thing
+        // we're all systems go, go ahead and do the group
+        // deletion that started this whole thing
 
-	state = DONE;	// let the wizardHook know to go ahead and pass
-				// this operation through now
+        state = DONE;   // let the wizardHook know to go ahead and pass
+                                // this operation through now
 
-	InvidDBField invF = (InvidDBField) userObject.getField(GROUPLIST);
+        InvidDBField invF = (InvidDBField) userObject.getField(GROUPLIST);
 
-	// note that this deleteElement() operation will pass
-	// through userObject.wizardHook().  wizardHook will see that we are
-	// an active userHomeGroupDelWizard, and are at state DONE, so it
-	// will go ahead and unregister us and let the GROUPLIST modification
-	// go through to completion.
+        // note that this deleteElement() operation will pass
+        // through userObject.wizardHook().  wizardHook will see that we are
+        // an active userHomeGroupDelWizard, and are at state DONE, so it
+        // will go ahead and unregister us and let the GROUPLIST modification
+        // go through to completion.
 
-	try
-	  {
-	    retVal = invF.deleteElement(index);
-	  }
-	catch (GanyPermissionsException ex)
-	  {
-	    retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
-						"Permissions error in deleting old home group.");
-	  }
+        try
+          {
+            retVal = invF.deleteElement(index);
+          }
+        catch (GanyPermissionsException ex)
+          {
+            retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
+                                                "Permissions error in deleting old home group.");
+          }
 
-	if (retVal == null || retVal.didSucceed())
-	  {
-	    retVal = success("Home Group Change Performed",
-			     "The user's old home group has been successfully removed, and a new default set.",
-			     "OK",
-			     null,
-			     "ok.gif");
+        if (retVal == null || retVal.didSucceed())
+          {
+            retVal = success("Home Group Change Performed",
+                             "The user's old home group has been successfully removed, and a new default set.",
+                             "OK",
+                             null,
+                             "ok.gif");
 
-	    retVal.addRescanField(userObject.getInvid(), HOMEGROUP);
+            retVal.addRescanField(userObject.getInvid(), HOMEGROUP);
 
-	    // we succeeded, so pop off our checkpoint
+            // we succeeded, so pop off our checkpoint
 
-	    session.getDBSession().popCheckpoint(checkPointKey);
+            session.getDBSession().popCheckpoint(checkPointKey);
 
-	    return retVal;
-	  }
-	else
-	  {
-	    // try to undo everything.. if we can, we'll go ahead
-	    // and return the failure report from invF.deleteElement()
+            return retVal;
+          }
+        else
+          {
+            // try to undo everything.. if we can, we'll go ahead
+            // and return the failure report from invF.deleteElement()
 
-	    if (!session.getDBSession().rollback(checkPointKey))
-	      {
-		retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
-						    "Ran into a problem during home group deletion, and rollback failed");
-	      }
+            if (!session.getDBSession().rollback(checkPointKey))
+              {
+                retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
+                                                    "Ran into a problem during home group deletion, and rollback failed");
+              }
 
-	    return retVal;
-	  }
+            return retVal;
+          }
       }
     else if (retVal.getDialog() == null)
       {
-	// argh, failure with no explanation..
+        // argh, failure with no explanation..
 
-	if (!session.getDBSession().rollback(checkPointKey))
-	  {
-	    retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
-						"Ran into a problem during home group change, and rollback failed");
-	  }
+        if (!session.getDBSession().rollback(checkPointKey))
+          {
+            retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
+                                                "Ran into a problem during home group change, and rollback failed");
+          }
 
-	return retVal;
+        return retVal;
       }
     else
       {
-	return retVal;
+        return retVal;
       }
   }
 

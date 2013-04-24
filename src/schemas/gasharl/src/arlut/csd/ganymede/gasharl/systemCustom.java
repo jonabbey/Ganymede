@@ -610,7 +610,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
             // what networks are available to us?
 
-            Query netQuery = new Query((short) 267);
+            Query netQuery = new Query(networkSchema.BASE);
 
             QueryResult netsEditable = editset.getDBSession().getGSession().query(netQuery);
 
@@ -618,9 +618,8 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
             // add any nets that are already connected to interfaces
 
-            for (int i = 0; i < interfaces.size(); i++)
+            for (Invid interfaceInvid: interfaces)
               {
-                Invid interfaceInvid = interfaces.get(i);
                 DBObject interfaceObj = (DBObject) getDBSession().viewDBObject(interfaceInvid);
                 Invid netInvid = (Invid) interfaceObj.getFieldValueLocal(interfaceSchema.IPNET);
 
@@ -637,13 +636,12 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
                 boolean found = false;
 
-                for (int j = 0; j < netsToChooseFrom.size(); j++)
+                for (ObjectHandle handle: netsToChooseFrom)
                   {
-                    ObjectHandle handle = netsToChooseFrom.get(j);
-
                     if (handle.getInvid().equals(netInvid))
                       {
                         found = true;
+                        break;
                       }
                   }
 
@@ -1098,7 +1096,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
       {
         Vector<Invid> interfaces = (Vector<Invid>) getFieldValuesLocal(systemSchema.INTERFACES);
 
-        if (interfaces == null)
+        if (interfaces.size() == 0)
           {
             return null;
           }

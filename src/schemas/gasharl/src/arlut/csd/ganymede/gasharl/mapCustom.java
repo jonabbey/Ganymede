@@ -404,12 +404,6 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 
                 Vector<Invid> entries = (Vector<Invid>) getFieldValuesLocal(ENTRIES);
 
-                if (entries == null)
-                  {
-                    return Ganymede.createErrorDialog("Logic error in server",
-                                                      "mapCustom.wizardHook(): can't delete element out of empty field");
-                  }
-
                 Invid invid = null;     // the invid for the entry
 
                 try

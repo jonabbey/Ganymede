@@ -205,9 +205,9 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
     Vector<Invid> owners = (Vector<Invid>) getFieldValuesLocal(SchemaConstants.OwnerListField);
 
-    if (owners != null && owners.size() > 0)
+    if (owners.size() > 0)
       {
-        Invid primaryOwner = (Invid) owners.elementAt(0);
+        Invid primaryOwner = owners.get(0);
 
         DBObject owner = getDBSession().viewDBObject(primaryOwner);
 

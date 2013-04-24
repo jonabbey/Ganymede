@@ -789,27 +789,15 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
   private Vector<Invid> getSiblingInvids(DBObject object)
   {
-    Vector<Invid> result;
-    DBObject parentObj;
-
-    /* -- */
-
     // we can't use getParentSysObj() because that only works in an editing
     // context.  The checkRequiredFields() call may be called from a task
     // that wants to just sweep through the database looking for incomplete
     // objects, so we arrange to find a DBObject reference to parentObj
     // so that we can get access to the list of our siblings.
 
-    parentObj = object.getParentObj();
+    DBObject parentObj = object.getParentObj();
 
-    try
-      {
-        result = (Vector<Invid>) parentObj.getFieldValuesLocal(systemSchema.INTERFACES).clone();
-      }
-    catch (NullPointerException ex)
-      {
-        return new Vector<Invid>();
-      }
+    Vector<Invid> result = (Vector<Invid>) parentObj.getFieldValuesLocal(systemSchema.INTERFACES).clone();
 
     // we are not our own sibling.
 

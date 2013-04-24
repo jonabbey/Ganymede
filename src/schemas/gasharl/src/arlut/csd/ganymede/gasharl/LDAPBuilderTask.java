@@ -462,16 +462,13 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
     writeLDIF(out, "dn", "cn=" + group.getLabel() + ",cn=groups," + dnBase);
     writeLDIF(out, "gidNumber", group.getFieldValueLocal(groupSchema.GID).toString());
 
-    Vector users = group.getFieldValuesLocal(groupSchema.USERS);
+    Vector<Invid> users = (Vector<Invid>) group.getFieldValuesLocal(groupSchema.USERS);
 
-    if (users != null)
+    for (Invid userInvid: users)
       {
-        for (int i = 0; i < users.size(); i++)
-          {
-            DBObject user = getObject((Invid) users.elementAt(i));
+        DBObject user = getObject(userInvid);
 
-            writeLDIF(out, "memberUid", user.getLabel());
-          }
+        writeLDIF(out, "memberUid", user.getLabel());
       }
 
     writeLDIF(out, "objectClass", "posixGroup");
@@ -499,12 +496,8 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
       name,
       membername;
 
-    Vector
-      contents,
-      memberNetgroups;
-
-    Invid
-      invid;
+    Vector<Invid> contents;
+    Vector<Invid> memberNetgroups;
 
     /* Let's figure out what kind of netgroup this is: user or system */
     short typeid = netgroup.getTypeID();
@@ -513,15 +506,15 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
       {
         /* This is a user netgroup */
         name = (String) netgroup.getFieldValueLocal(userNetgroupSchema.NETGROUPNAME);
-        contents = netgroup.getFieldValuesLocal(userNetgroupSchema.USERS);
-        memberNetgroups = netgroup.getFieldValuesLocal(userNetgroupSchema.MEMBERGROUPS);
+        contents = (Vector<Invid>) netgroup.getFieldValuesLocal(userNetgroupSchema.USERS);
+        memberNetgroups = (Vector<Invid>) netgroup.getFieldValuesLocal(userNetgroupSchema.MEMBERGROUPS);
       }
     else
       {
         /* This is a system netgroup */
         name = (String) netgroup.getFieldValueLocal(systemNetgroupSchema.NETGROUPNAME);
-        contents = netgroup.getFieldValuesLocal(systemNetgroupSchema.SYSTEMS);
-        memberNetgroups = netgroup.getFieldValuesLocal(systemNetgroupSchema.MEMBERGROUPS);
+        contents = (Vector<Invid>) netgroup.getFieldValuesLocal(systemNetgroupSchema.SYSTEMS);
+        memberNetgroups = (Vector<Invid>) netgroup.getFieldValuesLocal(systemNetgroupSchema.MEMBERGROUPS);
       }
 
     /* Write out the LDIF header for this netgroup. We'll make the CN the netgroup name. */
@@ -529,41 +522,33 @@ public class LDAPBuilderTask extends GanymedeBuilderTask {
     writeLDIF(out, "objectclass", "nisNetgroup");
     writeLDIF(out, "cn", name);
 
-    if (contents != null)
+    for (Invid invid: contents)
       {
-        for (Iterator iter = contents.iterator(); iter.hasNext();)
+        membername = getLabel(invid);
+        typeid = invid.getType();
+
+        /* The members of this netgroup can either be User objects or System objects.
+         * We need to write out the correct LDIF triple for each case. An LDIF netgroup
+         * triple is of the form (hostname,username,domain), where each part is optional.
+         */
+
+        if (typeid == SchemaConstants.UserBase)
           {
-            invid = (Invid) iter.next();
-            membername = getLabel(invid);
-            typeid = invid.getType();
-
-            /* The members of this netgroup can either be User objects or System objects.
-             * We need to write out the correct LDIF triple for each case. An LDIF netgroup
-             * triple is of the form (hostname,username,domain), where each part is optional.
-             */
-
-            if (typeid == SchemaConstants.UserBase)
-              {
-                writeLDIF(out, "nisNetgroupTriple", "(," + membername + ",)");
-              }
-            else if (typeid == 263)
-              {
-                writeLDIF(out, "nisNetgroupTriple", "(" + membername + dnsdomain + ",,)");
-              }
+            writeLDIF(out, "nisNetgroupTriple", "(," + membername + ",)");
+          }
+        else if (typeid == 263)
+          {
+            writeLDIF(out, "nisNetgroupTriple", "(" + membername + dnsdomain + ",,)");
           }
       }
 
     /* This part handles prining out what sub-netgroups belong to this one. This
      * is done by using the LDAP attribute "memberNisNetgroup". */
 
-    if (memberNetgroups != null)
+    for (Invid invid: memberNetgroups)
       {
-        for (Iterator iter = memberNetgroups.iterator(); iter.hasNext();)
-          {
-            invid = (Invid) iter.next();
-            membername = getLabel(invid);
-            writeLDIF(out, "memberNisNetgroup", membername);
-          }
+        membername = getLabel(invid);
+        writeLDIF(out, "memberNisNetgroup", membername);
       }
 
     out.println();

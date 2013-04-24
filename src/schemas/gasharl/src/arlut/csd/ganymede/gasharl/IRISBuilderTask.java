@@ -363,16 +363,11 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
   {
     Hashtable table = new Hashtable();
 
-    Vector netgroups = user.getFieldValuesLocal(userSchema.NETGROUPS);
+    Vector<Invid> netgroups = (Vector<Invid>) user.getFieldValuesLocal(userSchema.NETGROUPS);
 
-    if (netgroups == null)
+    for (Invid netgroupInvid: netgroups)
       {
-        return false;
-      }
-
-    for (int i = 0; i < netgroups.size(); i++)
-      {
-        DBObject netgroup = getObject((Invid) netgroups.elementAt(i));
+        DBObject netgroup = getObject(netgroupInvid);
 
         if (netgroup_or_parent_equals(netgroup, netgroupName))
           {
@@ -406,11 +401,6 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 
     Vector<Invid> members = (Vector<Invid>) mailListObject.getFieldValuesLocal(emailListSchema.MEMBERS);
 
-    if (members == null)
-      {
-        return false;
-      }
-
     for (Invid inv: members)
       {
         if (inv.equals(user.getInvid()))
@@ -440,16 +430,11 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
         return true;
       }
 
-    Vector netgroups = netgroup.getFieldValuesLocal(userNetgroupSchema.OWNERNETGROUPS);
+    Vector<Invid> netgroups = (Vector<Invid>) netgroup.getFieldValuesLocal(userNetgroupSchema.OWNERNETGROUPS);
 
-    if (netgroups == null)
+    for (Invid netgroupInvid: netgroups)
       {
-        return false;
-      }
-
-    for (int i = 0; i < netgroups.size(); i++)
-      {
-        if (netgroup_or_parent_equals(getObject((Invid) netgroups.elementAt(i)), netgroupName))
+        if (netgroup_or_parent_equals(getObject(netgroupInvid), netgroupName))
           {
             return true;
           }

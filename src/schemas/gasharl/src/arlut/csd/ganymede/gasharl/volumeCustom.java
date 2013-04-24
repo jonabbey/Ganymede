@@ -474,7 +474,7 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 
             Vector<Invid> entries = (Vector<Invid>) getFieldValuesLocal(volumeSchema.ENTRIES);
 
-            if (entries == null)
+            if (entries.size() == 0)
               {
                 return Ganymede.createErrorDialog("Logic error in server",
                                                   "volumeCustom.wizardHook(): can't delete element out of empty field");

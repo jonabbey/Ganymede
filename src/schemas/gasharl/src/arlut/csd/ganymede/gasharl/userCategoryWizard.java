@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -161,7 +161,7 @@ public class userCategoryWizard extends GanymediatorWizard {
    * List of email addresses to send the change notification to.
    */
 
-  Vector notifyList = null;
+  Vector<String> notifyList = null;
 
   /**
    * Do we need to set an expiration date?
@@ -209,11 +209,11 @@ public class userCategoryWizard extends GanymediatorWizard {
    */
 
   public userCategoryWizard(GanymedeSession session,
-			    userCustom userObject,
-			    Invid oldInvid,
-			    Invid newInvid) throws RemoteException
+                            userCustom userObject,
+                            Invid oldInvid,
+                            Invid newInvid) throws RemoteException
   {
-    super(session);		// register ourselves
+    super(session);             // register ourselves
 
     this.session = session;
     this.userObject = userObject;
@@ -223,110 +223,110 @@ public class userCategoryWizard extends GanymediatorWizard {
 
     if (oldInvid != null)
       {
-	this.oldCategory = userObject.getDBSession().viewDBObject(oldInvid);
+        this.oldCategory = userObject.getDBSession().viewDBObject(oldInvid);
       }
 
     if (newInvid != null)
       {
-	this.newCategory = userObject.getDBSession().viewDBObject(newInvid);
+        this.newCategory = userObject.getDBSession().viewDBObject(newInvid);
       }
 
     if (oldCategory != null)
       {
-	if (debug)
-	  {
-	    System.err.println("userCategoryWizard(): oldCategory = " + oldCategory.getLabel());
-	  }
+        if (debug)
+          {
+            System.err.println("userCategoryWizard(): oldCategory = " + oldCategory.getLabel());
+          }
 
-	Boolean notifyBoolean = (Boolean) oldCategory.getFieldValueLocal(userCategorySchema.APPROVALREQ);
+        Boolean notifyBoolean = (Boolean) oldCategory.getFieldValueLocal(userCategorySchema.APPROVALREQ);
 
-	if (notifyBoolean != null && notifyBoolean.booleanValue())
-	  {
-	    this.notificationRequired = true;
+        if (notifyBoolean != null && notifyBoolean.booleanValue())
+          {
+            this.notificationRequired = true;
 
-	    Vector notifyList2 = oldCategory.getFieldValuesLocal(userCategorySchema.APPROVALLIST);
+            Vector<String> notifyList2 = (Vector<String>) oldCategory.getFieldValuesLocal(userCategorySchema.APPROVALLIST);
 
-	    this.notifyList = arlut.csd.Util.VectorUtils.union(this.notifyList, notifyList2);
-	  }
+            this.notifyList = arlut.csd.Util.VectorUtils.union(this.notifyList, notifyList2);
+          }
       }
     else if (debug)
       {
-	System.err.println("userCategoryWizard(): oldCategory = null");
+        System.err.println("userCategoryWizard(): oldCategory = null");
       }
 
     if (newCategory != null)
       {
-	if (debug)
-	  {
-	    System.err.println("userCategoryWizard(): newCategory = " + newCategory.getLabel());
-	  }
+        if (debug)
+          {
+            System.err.println("userCategoryWizard(): newCategory = " + newCategory.getLabel());
+          }
 
-	Boolean notifyBoolean = (Boolean) newCategory.getFieldValueLocal(userCategorySchema.APPROVALREQ);
+        Boolean notifyBoolean = (Boolean) newCategory.getFieldValueLocal(userCategorySchema.APPROVALREQ);
 
-	if (notifyBoolean != null && notifyBoolean.booleanValue())
-	  {
-	    this.notificationRequired = true;
+        if (notifyBoolean != null && notifyBoolean.booleanValue())
+          {
+            this.notificationRequired = true;
 
-	    Vector notifyList2 = newCategory.getFieldValuesLocal(userCategorySchema.APPROVALLIST);
+            Vector<String> notifyList2 = (Vector<String>) newCategory.getFieldValuesLocal(userCategorySchema.APPROVALLIST);
 
-	    this.notifyList = arlut.csd.Util.VectorUtils.union(this.notifyList, notifyList2);
-	  }
+            this.notifyList = arlut.csd.Util.VectorUtils.union(this.notifyList, notifyList2);
+          }
 
-	// get the number of days in the future that the user's
-	// expiration may be set to.
+        // get the number of days in the future that the user's
+        // expiration may be set to.
 
-	Integer timelimit = (Integer) newCategory.getFieldValueLocal(userCategorySchema.LIMIT);
+        Integer timelimit = (Integer) newCategory.getFieldValueLocal(userCategorySchema.LIMIT);
 
-	if (timelimit != null)
-	  {
-	    int days = timelimit.intValue();
+        if (timelimit != null)
+          {
+            int days = timelimit.intValue();
 
-	    if (debug)
-	      {
-		System.err.println("userCategoryWizard(): termination limit days = " + days);
-	      }
+            if (debug)
+              {
+                System.err.println("userCategoryWizard(): termination limit days = " + days);
+              }
 
-	    Date nowDate = new Date();
-	    Calendar cal = Calendar.getInstance();
+            Date nowDate = new Date();
+            Calendar cal = Calendar.getInstance();
 
-	    cal.setTime(nowDate);
-	    cal.add(Calendar.DATE, days);
+            cal.setTime(nowDate);
+            cal.add(Calendar.DATE, days);
 
-	    this.terminationDate = cal.getTime();
+            this.terminationDate = cal.getTime();
 
-	    if (debug)
-	      {
-		System.err.println("userCategoryWizard(): termination limit = " + terminationDate.toString());
-	      }
-	  }
-	else if (debug)
-	  {
-	    System.err.println("userCategoryWizard(): no limit set");
-	  }
+            if (debug)
+              {
+                System.err.println("userCategoryWizard(): termination limit = " + terminationDate.toString());
+              }
+          }
+        else if (debug)
+          {
+            System.err.println("userCategoryWizard(): no limit set");
+          }
 
-	Boolean expireBoolean = (Boolean) newCategory.getFieldValueLocal(userCategorySchema.EXPIRE);
+        Boolean expireBoolean = (Boolean) newCategory.getFieldValueLocal(userCategorySchema.EXPIRE);
 
-	if ((expireBoolean != null && expireBoolean.booleanValue()) ||
-	    (terminationDate != null))
-	  {
-	    this.needExpireDate = true;
-	  }
+        if ((expireBoolean != null && expireBoolean.booleanValue()) ||
+            (terminationDate != null))
+          {
+            this.needExpireDate = true;
+          }
       }
     else if (debug)
       {
-	System.err.println("userCategoryWizard(): newCategory = null");
+        System.err.println("userCategoryWizard(): newCategory = null");
       }
 
     if (debug)
       {
-	if (needExpireDate)
-	  {
-	    System.err.println("userCategoryWizard(): needExpireDate is true");
-	  }
-	else
-	  {
-	    System.err.println("userCategoryWizard(): needExpireDate is false");
-	  }
+        if (needExpireDate)
+          {
+            System.err.println("userCategoryWizard(): needExpireDate is true");
+          }
+        else
+          {
+            System.err.println("userCategoryWizard(): needExpireDate is false");
+          }
       }
 
     // what is the user's expiration set to now?
@@ -346,10 +346,10 @@ public class userCategoryWizard extends GanymediatorWizard {
   public ReturnVal cancel()
   {
     return fail("Category Change Cancelled",
-		"Category Change Cancelled",
-		"OK",
-		null,
-		"ok.gif");
+                "Category Change Cancelled",
+                "OK",
+                null,
+                "ok.gif");
   }
 
 
@@ -365,69 +365,69 @@ public class userCategoryWizard extends GanymediatorWizard {
     /* -- */
 
     if ((oldCatInvid == null) && !notificationRequired &&
-	(notifyList == null) && !needExpireDate)
+        (notifyList == null) && !needExpireDate)
       {
-	// don't need to ask the user anything, let things go on.
+        // don't need to ask the user anything, let things go on.
 
-	return null;
+        return null;
       }
 
     if (oldCatInvid == null)
       {
-	tempBuffer.append("In order to put user ");
-	tempBuffer.append(userObject.getLabel());
-	tempBuffer.append(" in category ");
-	tempBuffer.append(newCategory.getLabel());
-	tempBuffer.append(", ");
+        tempBuffer.append("In order to put user ");
+        tempBuffer.append(userObject.getLabel());
+        tempBuffer.append(" in category ");
+        tempBuffer.append(newCategory.getLabel());
+        tempBuffer.append(", ");
 
-	if (needExpireDate)
-	  {
-	    tempBuffer.append("you need to set an expiration date for this user");
+        if (needExpireDate)
+          {
+            tempBuffer.append("you need to set an expiration date for this user");
 
-	    if (notificationRequired)
-	      {
-		tempBuffer.append(" and enter a short justification for this classification.");
-	      }
-	  }
-	else if (notificationRequired)
-	  {
-	    tempBuffer.append(" you must enter a short justification for this classification.");
-	  }
+            if (notificationRequired)
+              {
+                tempBuffer.append(" and enter a short justification for this classification.");
+              }
+          }
+        else if (notificationRequired)
+          {
+            tempBuffer.append(" you must enter a short justification for this classification.");
+          }
       }
     else
       {
-	tempBuffer.append("In order to move user ");
-	tempBuffer.append(userObject.getLabel());
-	tempBuffer.append(" from category ");
-	tempBuffer.append(oldCategory.getLabel());
-	tempBuffer.append(" to category ");
-	tempBuffer.append(newCategory.getLabel());
-	tempBuffer.append(", ");
+        tempBuffer.append("In order to move user ");
+        tempBuffer.append(userObject.getLabel());
+        tempBuffer.append(" from category ");
+        tempBuffer.append(oldCategory.getLabel());
+        tempBuffer.append(" to category ");
+        tempBuffer.append(newCategory.getLabel());
+        tempBuffer.append(", ");
 
-	if (needExpireDate)
-	  {
-	    tempBuffer.append("you need to set an expiration date for this user");
+        if (needExpireDate)
+          {
+            tempBuffer.append("you need to set an expiration date for this user");
 
-	    if (notificationRequired)
-	      {
-		tempBuffer.append(" and enter a short justification for the new classification.");
-	      }
-	  }
-	else if (notificationRequired)
-	  {
-	    tempBuffer.append(" you must enter a short justification for the new classification.");
-	  }
+            if (notificationRequired)
+              {
+                tempBuffer.append(" and enter a short justification for the new classification.");
+              }
+          }
+        else if (notificationRequired)
+          {
+            tempBuffer.append(" you must enter a short justification for the new classification.");
+          }
       }
 
     retVal = continueOn("User Category Change Dialog",
-			tempBuffer.toString(),
-			"Next",
-			"Cancel",
-			"question.gif");
+                        tempBuffer.toString(),
+                        "Next",
+                        "Cancel",
+                        "question.gif");
 
     if (!needExpireDate)
       {
-	setNextState(2);	// from GanymediatorWizard
+        setNextState(2);        // from GanymediatorWizard
       }
 
     return retVal;
@@ -449,7 +449,7 @@ public class userCategoryWizard extends GanymediatorWizard {
 
     if (debug)
       {
-	System.err.println("Entering userCategoryWizard.processDialog1()");
+        System.err.println("Entering userCategoryWizard.processDialog1()");
       }
 
     tempBuffer.append("Category ");
@@ -458,15 +458,15 @@ public class userCategoryWizard extends GanymediatorWizard {
 
     if (terminationDate != null)
       {
-	tempBuffer.append("  You may set this expiration date to any day on or before\n\n");
-	tempBuffer.append(terminationDate.toString());
+        tempBuffer.append("  You may set this expiration date to any day on or before\n\n");
+        tempBuffer.append(terminationDate.toString());
       }
 
     retVal = continueOn("Category Requires an Expiration",
-			tempBuffer.toString(),
-			"Next",
-			"Cancel",
-			"question.gif");
+                        tempBuffer.toString(),
+                        "Next",
+                        "Cancel",
+                        "question.gif");
 
     retVal.getDialog().addDate("Expiration Date:", expirationDate, terminationDate);
 
@@ -488,64 +488,64 @@ public class userCategoryWizard extends GanymediatorWizard {
 
     if (debug)
       {
-	System.err.println("Entering userCategoryWizard.processDialog2()");
+        System.err.println("Entering userCategoryWizard.processDialog2()");
       }
 
     if (needExpireDate)
       {
-	if (debug)
-	  {
-	    System.err.println("userCategoryWizard.processDialog2(): processing date");
-	  }
+        if (debug)
+          {
+            System.err.println("userCategoryWizard.processDialog2(): processing date");
+          }
 
-	this.expirationDate = (Date) getParam("Expiration Date:");
+        this.expirationDate = (Date) getParam("Expiration Date:");
 
-	if (this.expirationDate == null)
-	  {
-	    return fail("Category Change Cancelled",
-			"Error, an expiration date is required to put " + userObject.getLabel() +
-			" into category " + newCategory.getLabel() + ".",
-			"OK", null, "ok.gif");
-	  }
+        if (this.expirationDate == null)
+          {
+            return fail("Category Change Cancelled",
+                        "Error, an expiration date is required to put " + userObject.getLabel() +
+                        " into category " + newCategory.getLabel() + ".",
+                        "OK", null, "ok.gif");
+          }
       }
 
     // if we need to get an explanation from the user, ask for it here.
 
     if (notificationRequired)
       {
-	if (debug)
-	  {
-	    System.err.println("userCategoryWizard.processDialog2(): prompting for notification");
-	  }
+        if (debug)
+          {
+            System.err.println("userCategoryWizard.processDialog2(): prompting for notification");
+          }
 
-	StringBuffer tempBuffer = new StringBuffer();
+        StringBuffer tempBuffer = new StringBuffer();
 
-	tempBuffer.append("Before you can change ");
-	tempBuffer.append(userObject.getLabel());
-	tempBuffer.append("'s classification, you need to provide a short justification of ");
+        tempBuffer.append("Before you can change ");
+        tempBuffer.append(userObject.getLabel());
+        tempBuffer.append("'s classification, you need to provide a short justification of ");
 
-	if (oldCatInvid == null)
-	  {
-	    tempBuffer.append("this user's classification.");
-	  }
-	else
-	  {
-	    tempBuffer.append("this user's change in classification.");
-	  }
+        if (oldCatInvid == null)
+          {
+            tempBuffer.append("this user's classification.");
+          }
+        else
+          {
+            tempBuffer.append("this user's change in classification.");
+          }
 
-	retVal = continueOn("Justification for Category Change",
-			    tempBuffer.toString(),
-			    "Next",
-			    "Cancel",
-			    "question.gif");
+        retVal = continueOn("Justification for Category Change",
+                            tempBuffer.toString(),
+                            "Next",
+                            "Cancel",
+                            "question.gif");
 
-	retVal.getDialog().addMultiString("Reason:", null);
+        retVal.getDialog().addMultiString("Reason:", null);
 
-	return retVal;
+        return retVal;
       }
     else
       {
-	return doIt();
+        return doIt();
       }
   }
 
@@ -559,21 +559,21 @@ public class userCategoryWizard extends GanymediatorWizard {
   {
     if (debug)
       {
-	System.err.println("Entering userCategoryWizard.processDialog3()");
+        System.err.println("Entering userCategoryWizard.processDialog3()");
       }
 
     this.justification = (String) getParam("Reason:");
 
     if (this.justification == null || this.justification.equals(""))
       {
-	return fail("Category Change Cancelled",
-		    "Error, an explanation is required to put " + userObject.getLabel() +
-		    " into category " + newCategory.getLabel() + ".",
-		    "OK", null, "ok.gif");
+        return fail("Category Change Cancelled",
+                    "Error, an explanation is required to put " + userObject.getLabel() +
+                    " into category " + newCategory.getLabel() + ".",
+                    "OK", null, "ok.gif");
       }
     else if (debug)
       {
-	System.err.println("userCategoryWizard.processDialog3(): justification = \n" + justification);
+        System.err.println("userCategoryWizard.processDialog3(): justification = \n" + justification);
       }
 
     return doIt();
@@ -593,7 +593,7 @@ public class userCategoryWizard extends GanymediatorWizard {
 
     if (debug)
       {
-	System.err.println("Entering userCategoryWizard.doIt()");
+        System.err.println("Entering userCategoryWizard.doIt()");
       }
 
     // let the userCustom object know that we approve the category change.
@@ -608,92 +608,92 @@ public class userCategoryWizard extends GanymediatorWizard {
 
     if (debug)
       {
-	if (newCatInvid != null)
-	  {
-	    System.err.println("userCategoryWizard.doIt(): setting category to " + newCatInvid);
-	  }
-	else
-	  {
-	    System.err.println("userCategoryWizard.doIt(): setting category to null");
-	  }
+        if (newCatInvid != null)
+          {
+            System.err.println("userCategoryWizard.doIt(): setting category to " + newCatInvid);
+          }
+        else
+          {
+            System.err.println("userCategoryWizard.doIt(): setting category to null");
+          }
       }
 
     try
       {
-	retVal = userObject.setFieldValue(userCustom.CATEGORY, newCatInvid);
+        retVal = userObject.setFieldValue(userCustom.CATEGORY, newCatInvid);
       }
     catch (GanyPermissionsException ex)
       {
-	return Ganymede.createErrorDialog("permissions", "permissions error setting category. " + ex);
+        return Ganymede.createErrorDialog("permissions", "permissions error setting category. " + ex);
       }
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return retVal;
+        return retVal;
       }
 
     if (debug)
       {
-	if (expirationDate != null)
-	  {
-	    System.err.println("userCategoryWizard.doIt(): setting expiration to " + expirationDate);
-	  }
-	else
-	  {
-	    System.err.println("userCategoryWizard.doIt(): setting date to null");
-	  }
+        if (expirationDate != null)
+          {
+            System.err.println("userCategoryWizard.doIt(): setting expiration to " + expirationDate);
+          }
+        else
+          {
+            System.err.println("userCategoryWizard.doIt(): setting date to null");
+          }
       }
 
     try
       {
-	retVal = userObject.setFieldValue(SchemaConstants.ExpirationField, expirationDate);
+        retVal = userObject.setFieldValue(SchemaConstants.ExpirationField, expirationDate);
       }
     catch (GanyPermissionsException ex)
       {
-	return Ganymede.createErrorDialog("permissions", "permissions error setting expiration date " + ex);
+        return Ganymede.createErrorDialog("permissions", "permissions error setting expiration date " + ex);
       }
 
     if (retVal != null && !retVal.didSucceed())
       {
-	return retVal;
+        return retVal;
       }
 
     StringBuffer tempBuffer = new StringBuffer();
 
     if (oldCatInvid == null)
       {
-	tempBuffer.append("User ");
-	tempBuffer.append(userObject.getLabel());
-	tempBuffer.append(" has been placed in category ");
-	tempBuffer.append(newCategory.getLabel());
-	tempBuffer.append(".");
+        tempBuffer.append("User ");
+        tempBuffer.append(userObject.getLabel());
+        tempBuffer.append(" has been placed in category ");
+        tempBuffer.append(newCategory.getLabel());
+        tempBuffer.append(".");
       }
     else
       {
-	tempBuffer.append("User ");
-	tempBuffer.append(userObject.getLabel());
-	tempBuffer.append(" has been reclassified as ");
-	tempBuffer.append(newCategory.getLabel());
-	tempBuffer.append(".");
+        tempBuffer.append("User ");
+        tempBuffer.append(userObject.getLabel());
+        tempBuffer.append(" has been reclassified as ");
+        tempBuffer.append(newCategory.getLabel());
+        tempBuffer.append(".");
       }
 
     if (justification != null)
       {
-	tempBuffer.append("\n\n");
-	tempBuffer.append(justification);
+        tempBuffer.append("\n\n");
+        tempBuffer.append(justification);
       }
 
     if (notifyList != null)
       {
-	userObject.getEditSet().logMail(notifyList,
-					"CategorySet: User " + userObject.getLabel() + " in " +
-					newCategory.getLabel(),
-					tempBuffer.toString());
+        userObject.getEditSet().logMail(notifyList,
+                                        "CategorySet: User " + userObject.getLabel() + " in " +
+                                        newCategory.getLabel(),
+                                        tempBuffer.toString());
       }
 
     retVal = success("Category Changed",
-		     tempBuffer.toString(),
-		     "OK", null, "ok.gif");
+                     tempBuffer.toString(),
+                     "OK", null, "ok.gif");
 
     retVal.addRescanField(userObject.getInvid(), SchemaConstants.ExpirationField);
 
