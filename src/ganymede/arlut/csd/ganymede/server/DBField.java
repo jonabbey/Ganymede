@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.lang.reflect.*;
 import java.rmi.Remote;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -1470,6 +1471,10 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     else if (submittedValue instanceof Invid)
       {
         submittedValue = ((Invid) submittedValue).intern();
+      }
+    else if (submittedValue instanceof Date)
+      {
+        submittedValue = new Date(((Date) submittedValue).getTime()); // defensive copy
       }
 
     retVal = verifyNewValue(submittedValue);
