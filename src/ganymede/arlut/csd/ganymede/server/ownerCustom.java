@@ -91,10 +91,10 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
    * of email addresses for that owner group.</p>
    */
 
-  static public Vector getAddresses(Invid ownerInvid, DBSession session)
+  static public Vector<String> getAddresses(Invid ownerInvid, DBSession session)
   {
     DBObject ownerGroup;
-    Vector result = new Vector();
+    Vector<String> result = new Vector<String>();
     StringDBField externalAddresses;
 
     /* -- */
@@ -123,24 +123,19 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
 
     if (cc != null && cc.booleanValue())
       {
-        Vector adminList = new Vector();
-        Vector adminInvidList;
-        Invid adminInvid;
+        Vector<String> adminList = new Vector();
+        Vector<Invid> adminInvidList;
         String adminAddr;
 
-        adminInvidList = ownerGroup.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
+        adminInvidList = (Vector<Invid>) ownerGroup.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
 
-        if (adminInvidList != null)
+        for (Invid adminInvid: adminInvidList)
           {
-            for (int i = 0; i < adminInvidList.size(); i++)
-              {
-                adminInvid = (Invid) adminInvidList.elementAt(i);
-                adminAddr = adminPersonaCustom.convertAdminInvidToString(adminInvid, session);
+            adminAddr = adminPersonaCustom.convertAdminInvidToString(adminInvid, session);
 
-                if (adminAddr != null)
-                  {
-                    adminList.addElement(adminAddr);
-                  }
+            if (adminAddr != null)
+              {
+                adminList.add(adminAddr);
               }
           }
 
@@ -159,7 +154,7 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
         // externalAddresses.getValuesLocal() if result is currently
         // null.
 
-        result = VectorUtils.union(result, externalAddresses.getValuesLocal());
+        result = VectorUtils.union(result, (Vector<String>) externalAddresses.getValuesLocal());
       }
 
     return result;

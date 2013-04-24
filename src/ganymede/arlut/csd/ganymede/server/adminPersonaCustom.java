@@ -489,16 +489,14 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
 
     Invid supergashOwner = Invid.createInvid(SchemaConstants.OwnerBase, SchemaConstants.OwnerSupergash);
 
-    if (roles != null && roles.size() != 0 ||
-        ownerSets != null && ownerSets.contains(supergashOwner))
+    if (roles.size() == 0 && !ownerSets.contains(supergashOwner))
       {
-        return null;
+        // "Persona object "{0}" is incomplete. Personas must either have
+        // a role defined or be a member of the supergash owner set."
+        return Ganymede.createErrorDialog(ts.l("consistencyCheck.role_needed", this.getLabel()));
       }
 
-    // "Persona object "{0}" is incomplete. Personas must either have
-    // a role defined or be a member of the supergash owner set."
-
-    return Ganymede.createErrorDialog(ts.l("consistencyCheck.role_needed", this.getLabel()));
+    return null;
   }
 
   /**

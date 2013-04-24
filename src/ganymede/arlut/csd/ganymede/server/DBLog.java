@@ -2012,8 +2012,6 @@ final public class DBLog {
                 continue;
               }
 
-            // *** Caution!  getValuesLocal() does not clone the field's contents..
-
             ownerGroupInvids.addAll((List<Invid>) ownersField.getValuesLocal());
           }
       }
