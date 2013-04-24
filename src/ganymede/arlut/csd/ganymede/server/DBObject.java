@@ -2462,9 +2462,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <p>Shortcut method to set a field's value.  Using this
-   * method saves a roundtrip to the server, which is
-   * particularly useful in database loading.</p>
+   * <p>Shortcut method to set a field's value.  Using this method
+   * saves a roundtrip to the server, which is particularly useful in
+   * database loading.</p>
+   *
+   * <p>The Vector returned by getFieldValues() is a cloned copy of
+   * the vector held in the DBField.</p>
    *
    * <p>If no such Vector field is defined on this object type, an
    * IllegalArgumentException will be thrown.  If the field is defined
@@ -2483,8 +2486,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     if (field == null)
       {
         // Okay, this field doesn't have a copy of the desired field.
-        // Let's see if we can go ahead and return a synthesized
-        // EmptyVector to the caller.
+        // Let's see if we can go ahead and return an empty
+        // synthesized Vector to the caller.
 
         DBObjectBaseField fieldDef = this.getFieldDef(fieldName);
 
@@ -2510,7 +2513,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
             throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
           }
 
-        return new EmptyVector();
+        return new Vector();
       }
 
     if (!field.isVector())
@@ -2526,6 +2529,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>Shortcut method to set a field's value.  Using this
    * method saves a roundtrip to the server, which is
    * particularly useful in database loading.</p>
+   *
+   * <p>The Vector returned by getFieldValues() is a cloned copy of
+   * the vector held in the DBField.</p>
    *
    * <p>If no such Vector field is defined on this object type, an
    * IllegalArgumentException will be thrown.  If the field is defined
@@ -2574,7 +2580,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
             throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
           }
 
-        return new EmptyVector();
+        return new Vector();
       }
 
     fieldName = field.getName();
@@ -2593,10 +2599,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * method, but it can be a quick way to get a vector of
    * elements.</p>
    *
-   * <p><b>Warning!</b> The Vector returned by getFieldValuesLocal()
-   * is not a clone, but is direct access to the vector held in the
-   * DBField.  Clone the vector you get back if you need to do
-   * anything with it other than read it.</p>
+   * <p>The Vector returned by getFieldValuesLocal() is a cloned copy
+   * of the vector held in the DBField.</p>
    *
    * <p>If no such Vector field is defined on this object type, an
    * IllegalArgumentException will be thrown.  If the field is defined
@@ -2625,7 +2629,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
             throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
           }
 
-        return new EmptyVector();
+        return new Vector();
       }
 
     if (!field.isVector())
@@ -2642,11 +2646,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * is a server-side method, but it can be a quick
    * way to get a vector of elements.</p>
    *
-   * <p><b>Warning!</b>  The Vector returned by getFieldValuesLocal()
-   * is not a clone, but is direct access to the vector
-   * held in the DBField.  Clone the vector you get back
-   * if you need to do anything with it other than read
-   * it.</p>
+   * <p>The Vector returned by getFieldValuesLocal() is a cloned copy
+   * of the vector held in the DBField.</p>
    *
    * <p>If no such Vector field is defined on this object type, an
    * IllegalArgumentException will be thrown.  If the field is defined
@@ -2678,7 +2679,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
             throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
           }
 
-        return new EmptyVector();
+        return new Vector();
       }
 
     fieldName = field.getName();

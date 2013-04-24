@@ -668,7 +668,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
         /* -- */
 
-        valuesToCopy = getValuesLocal();
+        valuesToCopy = getVectVal();
 
         if (valuesToCopy == null || valuesToCopy.size() == 0)
           {
@@ -1569,11 +1569,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    *
    * <p>This method checks for read permissions.</p>
    *
-   * <p><b>Be very careful using this for server-side code, because
-   * the Vector returned is not cloned from the field's actual data
-   * Vector, for performance reasons.  If this is called by the client,
-   * the serialization process will protect us from the client being
-   * able to mess with our contents.</b></p>
+   * <p>This method returns a safe copy of the contained Vector.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_field
    */
@@ -1592,7 +1588,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
         throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
-    return getVectVal();
+    return new Vector(getVectVal()); // defensive copy
   }
 
   /**
@@ -3611,15 +3607,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p>This is intended to be used within the Ganymede server, it
    * bypasses the permissions checking that getValues() does.</p>
    *
-   * <p>The server code <b>*must not*</b> make any modifications to the
-   * returned vector as doing such may violate the namespace maintenance
-   * logic.  Always, <b>always</b>, use the addElement(), deleteElement(),
-   * setElement() methods in this class.</p>
-   *
-   * <p>Remember, this method gives you <b>*direct access</b> to the vector
-   * from this field.  Always always clone the Vector returned if you
-   * find you need to modify the results you get back.  I'm trusting you
-   * here.  Pay attention.</p>
+   * <p>This method returns a safe copy of the contained Vector.</p>
    */
 
   public Vector getValuesLocal()
@@ -3630,7 +3618,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
         throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
-    return getVectVal();
+    return new Vector(getVectVal()); // defensive copy
   }
 
   /**
