@@ -1010,19 +1010,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
         InvidDBField newVolumes = (InvidDBField) getField(userSchema.VOLUMES);
         InvidDBField oldVolumes = (InvidDBField) origObj.getField(userSchema.VOLUMES);
 
-        Vector<Invid> newOnes;
-        Vector<Invid> oldOnes;
-
-        if (local)
-          {
-            newOnes = (Vector<Invid>) newVolumes.getValuesLocal().clone();
-            oldOnes = (Vector<Invid>) oldVolumes.getValuesLocal().clone();
-          }
-        else
-          {
-            newOnes = (Vector<Invid>) newVolumes.getValuesLocal();
-            oldOnes = (Vector<Invid>) oldVolumes.getValuesLocal();
-          }
+        Vector<Invid> newOnes = (Vector<Invid>) newVolumes.getValuesLocal();
+        Vector<Invid> oldOnes = (Vector<Invid>) oldVolumes.getValuesLocal();
 
         DBObject origVolume;
         DBEditObject workingVolume;

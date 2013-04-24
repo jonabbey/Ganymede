@@ -2869,7 +2869,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
     String username = (String) object.getFieldValueLocal(userSchema.USERNAME);
     String signature = (String) object.getFieldValueLocal(userSchema.SIGNATURE);
 
-    Vector<String> aliases = (Vector<String>) object.getFieldValuesLocal(userSchema.ALIASES).clone();
+    Vector<String> aliases = (Vector<String>) object.getFieldValuesLocal(userSchema.ALIASES);
     Vector<String> addresses = (Vector<String>) object.getFieldValuesLocal(userSchema.EMAILTARGET);
 
     if (empty(addresses))

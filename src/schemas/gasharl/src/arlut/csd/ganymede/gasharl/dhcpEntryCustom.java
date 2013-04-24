@@ -285,15 +285,15 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
 
     if (ownedByDHCPGroup())
       {
-        result = (Vector<Invid>) getParentObj().getFieldValuesLocal(dhcpGroupSchema.OPTIONS).clone();
+        result = (Vector<Invid>) getParentObj().getFieldValuesLocal(dhcpGroupSchema.OPTIONS);
       }
     else if (ownedBySystem())
       {
-        result = (Vector<Invid>) getParentObj().getFieldValuesLocal(systemSchema.DHCPOPTIONS).clone();
+        result = (Vector<Invid>) getParentObj().getFieldValuesLocal(systemSchema.DHCPOPTIONS);
       }
     else if (ownedByDHCPNetwork())
       {
-        Vector<Invid> optionsVect = (Vector<Invid>) getParentObj().getFieldValuesLocal(dhcpNetworkSchema.OPTIONS).clone();
+        Vector<Invid> optionsVect = (Vector<Invid>) getParentObj().getFieldValuesLocal(dhcpNetworkSchema.OPTIONS);
 
         if (optionsVect.contains(getInvid()))
           {
@@ -301,7 +301,7 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
           }
         else if (getParentObj().isDefined(dhcpNetworkSchema.GUEST_OPTIONS))
           {
-            Vector<Invid> guestOptionsVect = (Vector<Invid>) getParentObj().getFieldValuesLocal(dhcpNetworkSchema.GUEST_OPTIONS).clone();
+            Vector<Invid> guestOptionsVect = (Vector<Invid>) getParentObj().getFieldValuesLocal(dhcpNetworkSchema.GUEST_OPTIONS);
 
             if (guestOptionsVect.contains(getInvid()))
               {

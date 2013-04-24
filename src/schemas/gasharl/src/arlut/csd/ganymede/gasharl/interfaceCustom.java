@@ -797,7 +797,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     DBObject parentObj = object.getParentObj();
 
-    Vector<Invid> result = (Vector<Invid>) parentObj.getFieldValuesLocal(systemSchema.INTERFACES).clone();
+    Vector<Invid> result = (Vector<Invid>) parentObj.getFieldValuesLocal(systemSchema.INTERFACES);
 
     // we are not our own sibling.
 

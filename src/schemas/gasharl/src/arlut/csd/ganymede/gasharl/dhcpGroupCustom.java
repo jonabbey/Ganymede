@@ -304,8 +304,8 @@ public class dhcpGroupCustom extends DBEditObject implements SchemaConstants, dh
         InvidDBField newOptions = (InvidDBField) getField(dhcpGroupSchema.OPTIONS);
         InvidDBField oldOptions = (InvidDBField) origObj.getField(dhcpGroupSchema.OPTIONS);
 
-        Vector<Invid> newOnes = (Vector<Invid>) newOptions.getValuesLocal().clone();
-        Vector<Invid> oldOnes = (Vector<Invid>) oldOptions.getValuesLocal().clone();
+        Vector<Invid> newOnes = (Vector<Invid>) newOptions.getValuesLocal();
+        Vector<Invid> oldOnes = (Vector<Invid>) oldOptions.getValuesLocal();
 
         DBObject origOption;
         DBEditObject workingOption;

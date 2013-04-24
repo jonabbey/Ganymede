@@ -352,11 +352,10 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
     return retVal;
   }
 
-
   public ReturnVal CopyOptions(DBSession session, InvidDBField oldOptions, InvidDBField newOptions, boolean local)
   {
-    Vector<Invid> newOnes = (Vector<Invid>) newOptions.getValuesLocal().clone();
-    Vector<Invid> oldOnes = (Vector<Invid>) oldOptions.getValuesLocal().clone();
+    Vector<Invid> newOnes = (Vector<Invid>) newOptions.getValuesLocal();
+    Vector<Invid> oldOnes = (Vector<Invid>) oldOptions.getValuesLocal();
 
     DBObject origOption;
     DBEditObject workingOption;

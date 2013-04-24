@@ -337,8 +337,8 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
         InvidDBField newInterfaces = (InvidDBField) getField(systemSchema.INTERFACES);
         InvidDBField oldInterfaces = (InvidDBField) origObj.getField(systemSchema.INTERFACES);
 
-        Vector<Invid> newOnes = (Vector<Invid>) newInterfaces.getValuesLocal().clone();
-        Vector<Invid> oldOnes = (Vector<Invid>) oldInterfaces.getValuesLocal().clone();
+        Vector<Invid> newOnes = (Vector<Invid>) newInterfaces.getValuesLocal();
+        Vector<Invid> oldOnes = (Vector<Invid>) oldInterfaces.getValuesLocal();
 
         DBObject origVolume;
         DBEditObject workingVolume;
@@ -438,7 +438,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
             InvidDBField newOptions = (InvidDBField) getField(systemSchema.DHCPOPTIONS);
             InvidDBField oldOptions = (InvidDBField) origObj.getField(systemSchema.DHCPOPTIONS);
 
-            oldOnes = (Vector) oldOptions.getValuesLocal().clone();
+            oldOnes = (Vector<Invid>) oldOptions.getValuesLocal();
 
             DBObject origOption;
             DBEditObject workingOption;

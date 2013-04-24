@@ -536,7 +536,7 @@ public class mapEntryCustom extends DBEditObject implements SchemaConstants, map
     Invid userInvid = (Invid) getFieldValueLocal(mapEntrySchema.CONTAININGUSER);
     DBObject user = getDBSession().viewDBObject(userInvid);
 
-    result = (Vector<Invid>) user.getFieldValuesLocal(userSchema.VOLUMES).clone();
+    result = (Vector<Invid>) user.getFieldValuesLocal(userSchema.VOLUMES);
 
     // we are not our own sibling.
 
