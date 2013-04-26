@@ -1284,69 +1284,66 @@ public final class GanymedeServer implements Server {
 
                 // loop 3: iterate over the fields present in this object
 
-                synchronized (object.fieldAry)
+                for (DBField field: object.getFieldVect())
                   {
-                    for (DBField field: object.fieldAry)
+                    if (field == null || !(field instanceof InvidDBField))
                       {
-                        if (field == null || !(field instanceof InvidDBField))
+                        continue;   // only check invid fields
+                      }
+
+                    InvidDBField iField = (InvidDBField) field;
+
+                    if (iField.isVector())
+                      {
+                        Vector<Invid> tempVector = (Vector<Invid>) iField.getVectVal();
+                        vectorEmpty = true;
+
+                        // clear out the invid's held in this field pending
+                        // successful lookup
+
+                        iField.value = new Vector();
+
+                        for (Invid invid: tempVector)
                           {
-                            continue;   // only check invid fields
-                          }
-
-                        InvidDBField iField = (InvidDBField) field;
-
-                        if (iField.isVector())
-                          {
-                            Vector<Invid> tempVector = (Vector<Invid>) iField.getVectVal();
-                            vectorEmpty = true;
-
-                            // clear out the invid's held in this field pending
-                            // successful lookup
-
-                            iField.value = new Vector();
-
-                            for (Invid invid: tempVector)
+                            if (session.viewDBObject(invid) != null)
                               {
-                                if (session.viewDBObject(invid) != null)
-                                  {
-                                    iField.getVectVal().add(invid); // keep this invid
-                                    vectorEmpty = false;
-                                  }
-                                else
-                                  {
-                                    Ganymede.debug(ts.l("sweepInvids.removing_vector",
-                                                        invid.toString(),
-                                                        iField.getName(),
-                                                        base.getName(),
-                                                        object.getLabel()));
-
-                                    swept = true;
-                                  }
+                                iField.getVectVal().add(invid); // keep this invid
+                                vectorEmpty = false;
                               }
-
-                            // now, if the vector is totally empty, we'll be removing
-                            // this field from definition
-
-                            if (vectorEmpty)
+                            else
                               {
-                                removeVector.add(Short.valueOf(iField.getID()));
-                              }
-                          }
-                        else
-                          {
-                            Invid invid = (Invid) iField.value;
-
-                            if (session.viewDBObject(invid) == null)
-                              {
-                                swept = true;
-                                removeVector.add(Short.valueOf(iField.getID()));
-
-                                Ganymede.debug(ts.l("sweepInvids.removing_scalar",
+                                Ganymede.debug(ts.l("sweepInvids.removing_vector",
                                                     invid.toString(),
                                                     iField.getName(),
                                                     base.getName(),
                                                     object.getLabel()));
+
+                                swept = true;
                               }
+                          }
+
+                        // now, if the vector is totally empty, we'll be removing
+                        // this field from definition
+
+                        if (vectorEmpty)
+                          {
+                            removeVector.add(Short.valueOf(iField.getID()));
+                          }
+                      }
+                    else
+                      {
+                        Invid invid = (Invid) iField.value;
+
+                        if (session.viewDBObject(invid) == null)
+                          {
+                            swept = true;
+                            removeVector.add(Short.valueOf(iField.getID()));
+
+                            Ganymede.debug(ts.l("sweepInvids.removing_scalar",
+                                                invid.toString(),
+                                                iField.getName(),
+                                                base.getName(),
+                                                object.getLabel()));
                           }
                       }
                   }
@@ -1430,23 +1427,20 @@ public final class GanymedeServer implements Server {
 
             for (DBObject object: base.getObjects())
               {
-                synchronized (object.fieldAry)
+                for (DBField field: object.getFieldVect())
                   {
-                    for (DBField field: object.fieldAry)
+                    // we only care about invid fields
+
+                    if (field == null || !(field instanceof InvidDBField))
                       {
-                        // we only care about invid fields
+                        continue;
+                      }
 
-                        if (field == null || !(field instanceof InvidDBField))
-                          {
-                            continue;
-                          }
+                    InvidDBField iField = (InvidDBField) field;
 
-                        InvidDBField iField = (InvidDBField) field;
-
-                        if (!iField.test(session, (base.getName() + ":" + object.getLabel())))
-                          {
-                            ok = false;
-                          }
+                    if (!iField.test(session, (base.getName() + ":" + object.getLabel())))
+                      {
+                        ok = false;
                       }
                   }
               }
