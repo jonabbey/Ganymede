@@ -1180,6 +1180,15 @@ final public class DBLog {
                   {
                     name = name.substring(0, name.indexOf(':'));
                   }
+
+                // don't bother trying to send mail if the username
+                // attempted has a space in it, we know that won't fly
+                // as valid email address.
+
+                if (name.indexOf(' ') != -1)
+                  {
+                    name = null;
+                  }
               }
           }
 
