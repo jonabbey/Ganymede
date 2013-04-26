@@ -1,12 +1,12 @@
 Ganymede Release 2.0
-5 April 2013
+24 April 2013
 CHANGES
 
 ---------------------------------------------
 
 -------------------- Changes from 1.0.12 to 2.0.0 -------------------
 
-RELEASE DATE: 5 April 2013
+RELEASE DATE: 24 April 2013
 
 1. [EVERYTHING] Ganymede Rebooted.. Subversion, Ant
 
@@ -2144,6 +2144,37 @@ public IP address was firewalled.
 It is now possible to explicitly set this property to 127.0.0.1, and
 all server and client operations will now work properly over the
 dedicated loopback address.
+
+160. [SERVER] Improvements in internal encapsulation and multithreaded security
+
+Previouly, developers of plugin classes were required to deal with
+making defensive clone() calls on the results from
+
+  DBObject.getFieldValues()
+  DBObject.getFieldValuesLocal()
+  DBField.getValues()
+  DBField.getValuesLocal()
+
+As well as dealing with possible null values from
+
+  DBObject.getFieldValues()
+  DBObject.getFieldValuesLocal()
+
+Now, the DBObject getFieldValues methods will always return an empty
+Vector where previously they would return null, and the DBField
+getValues methods will return a copy of the internal field Vector,
+rather than providing direct access.
+
+In addition, the DBField and DateDBField class now cooperate to make
+defensive copies of Date objects passed or returned from DateDBField
+objects.
+
+161. [SERVER, GASHARL] Made more DBObject methods final, added @Override annotations
+
+I went through and made a bunch of previously unprotected methods
+final, and have added the @Override annotation to intentionally
+overridden methods in the arlut.csd.ganymede.server and
+arlut.csd.ganymede.schemas.gasharl packages.
 
 -------------------- Changes from 1.0.11 to 1.0.12 -------------------
 
