@@ -265,7 +265,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public DBEditObject(DBObjectBase objectBase, Invid invid, DBEditSet editset)
   {
-    super(objectBase, invid.getNum());
+    super(objectBase, invid.getNum(), editset.getDBSession().getGSession());
 
     if (editset == null)
       {
@@ -273,9 +273,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
         throw new NullPointerException(ts.l("init.notrans"));
       }
 
-    original = null;
+    this.original = null;
     this.editset = editset;
-    this.gSession = editset.getDBSession().getGSession();
     commitSemaphore.set(false);
     stored = false;
     status = CREATING;
@@ -331,12 +330,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public DBEditObject(DBObject original, DBEditSet editset)
   {
-    super(original.objectBase, original.getID());
+    super(original.objectBase, original.getID(), editset.getDBSession().getGSession());
 
     /* -- */
 
     this.editset = editset;
-    this.gSession = editset.getDBSession().getGSession();
 
     commitSemaphore.set(false);
     stored = true;
@@ -1596,7 +1594,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public boolean instantiateNewField(short fieldID)
   {
-    return gSession.getPermManager().getPerm(getTypeID(), fieldID, true).isCreatable(); // *sync* GanymedeSession
+    return getGSession().getPermManager().getPerm(getTypeID(), fieldID, true).isCreatable(); // *sync* GanymedeSession
   }
 
   /**
@@ -2401,7 +2399,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     return targetBase.getObjectHook().anonymousLinkOK(null, targetField,
                                                       this, field.getID(),
-                                                      this.gSession);
+                                                      this.getGSession());
   }
 
   /**
@@ -2661,8 +2659,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
                                                  getTypeName(),
                                                  getLabel(),
                                                  getFieldValueLocal(SchemaConstants.RemovalField).toString()),
-                                            gSession.getPermManager().getResponsibleInvid(),
-                                            gSession.getPermManager().getIdentity(),
+                                            getGSession().getPermManager().getResponsibleInvid(),
+                                            getGSession().getPermManager().getIdentity(),
                                             invids,
                                             getEmailTargets(this)));
           }
@@ -2675,8 +2673,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
             // "{0} {1} has been inactivated.\n\nThe object has no removal date set.\n\n"
             editset.logEvent(new DBLogEvent("inactivateobject",
                                             ts.l("finalizeInactivate.noRemove", getTypeName(), getLabel()),
-                                            gSession.getPermManager().getResponsibleInvid(),
-                                            gSession.getPermManager().getIdentity(),
+                                            getGSession().getPermManager().getResponsibleInvid(),
+                                            getGSession().getPermManager().getIdentity(),
                                             invids,
                                             getEmailTargets(this)));
           }
@@ -2762,8 +2760,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
         // "{0} {1} has been reactivated.\n\n"
         editset.logEvent(new DBLogEvent("reactivateobject",
                                         ts.l("finalizeReactivate.message", getTypeName(), getLabel()),
-                                        gSession.getPermManager().getResponsibleInvid(),
-                                        gSession.getPermManager().getIdentity(),
+                                        getGSession().getPermManager().getResponsibleInvid(),
+                                        getGSession().getPermManager().getIdentity(),
                                         invids,
                                         getEmailTargets(this)));
 

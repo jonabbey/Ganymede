@@ -248,7 +248,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * Ganymede Session, we record that here.
    */
 
-  protected GanymedeSession gSession = null;
+  protected final GanymedeSession gSession;
 
   /**
    * If thisobject is being viewed in a particular permissions
@@ -282,6 +282,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     this.permManager = null;
     this.myInvid = null;
+    this.gSession = null;
   }
 
   /**
@@ -292,10 +293,11 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * create object constructor.</p>
    */
 
-  DBObject(DBObjectBase objectBase, int id)
+  DBObject(DBObjectBase objectBase, int id, GanymedeSession gSession)
   {
     this.permManager = null;
     this.objectBase = objectBase;
+    this.gSession = gSession;
     this.myInvid = Invid.createInvid(objectBase.getTypeID(), id);
   }
 
@@ -314,6 +316,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     this.permManager = null;
     this.objectBase = objectBase;
     this.myInvid = receive(in, journalProcessing);
+    this.gSession = null;
 
     DBObject.objectCount++;
   }
@@ -342,6 +345,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     this.permManager = null;
     this.objectBase = eObj.objectBase;
     this.myInvid = eObj.getInvid();
+    this.gSession = null;
 
     synchronized (eObj.fieldAry)
       {
@@ -426,6 +430,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     this.objectBase = original.objectBase;
     this.myInvid = original.myInvid;
+    this.gSession = gSession;
 
     if (original.fieldAry == null)
       {
@@ -445,8 +450,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
             fieldAry[i] = original.fieldAry[i].getCopy(this);
           }
       }
-
-    this.gSession = gSession;
 
     if (gSession == null)
       {
