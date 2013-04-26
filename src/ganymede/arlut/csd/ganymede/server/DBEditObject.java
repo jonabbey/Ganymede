@@ -331,7 +331,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public DBEditObject(DBObject original, DBEditSet editset)
   {
-    super(original.objectBase);
+    super(original.objectBase, original.getID());
 
     /* -- */
 
@@ -343,7 +343,6 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     status = EDITING;
 
     this.original = original;
-    this.myInvid = original.myInvid;
     this.objectBase = original.objectBase;
 
     // clone the fields from the original object

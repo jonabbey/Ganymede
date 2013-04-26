@@ -62,7 +62,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -214,7 +213,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * The type definition for this object.
    */
 
-  protected DBObjectBase objectBase;
+  protected DBObjectBase objectBase = null;
 
   /**
    * <p>Our fields, ordered by ascending field id.</p>
@@ -226,14 +225,14 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.server.DBField
    */
 
-  protected DBField[] fieldAry;
+  DBField[] fieldAry = null;
 
   /**
    * Permission cache for our fields, in ascending field id order
    * using the same indexing as fieldAry.
    */
 
-  protected PermEntry[] permCacheAry;
+  private PermEntry[] permCacheAry = null;
 
   /**
    * If this object is being edited or removed, this points
@@ -242,28 +241,28 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * and we are available for someone to edit.
    */
 
-  DBEditObject shadowObject;
+  DBEditObject shadowObject = null;
 
   /**
    * If this object is being viewed by a particular
    * Ganymede Session, we record that here.
    */
 
-  protected GanymedeSession gSession;
+  protected GanymedeSession gSession = null;
 
   /**
    * If thisobject is being viewed in a particular permissions
    * context, we record the permManager here.
    */
 
-  protected DBPermissionManager permManager;
+  private final DBPermissionManager permManager;
 
   /**
    * A fixed copy of our Invid, so that we don't have to create
    * new ones all the time when people call getInvid() on us.
    */
 
-  Invid myInvid = null;
+  private final Invid myInvid;
 
   /**
    * used by the DBObjectTable logic
@@ -281,33 +280,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public DBObject()
   {
-    gSession = null;
-    permManager = null;
-  }
-
-  /**
-   * <p>Base constructor, used to create a new object of
-   * type objectBase.  Note that DBObject itself is
-   * a mere carrier of data and there is nothing application
-   * type specific in a base DBObject.  The only type
-   * information is represented by the DBObjectBase passed
-   * in to this constructor.</p>
-   *
-   * <p>This constructor is used through super() chaining
-   * by the DBEditObject check-out constructor.</p>
-   */
-
-  DBObject(DBObjectBase objectBase)
-  {
-    this.objectBase = objectBase;
-    fieldAry = null;
-    permCacheAry = null;
-
-    shadowObject = null;
-
-    myInvid = Invid.createInvid(objectBase.getTypeID(), 0);
-    gSession = null;
-    permManager = null;
+    this.permManager = null;
+    this.myInvid = null;
   }
 
   /**
@@ -320,10 +294,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   DBObject(DBObjectBase objectBase, int id)
   {
-    this(objectBase);
-    myInvid = Invid.createInvid(objectBase.getTypeID(), id);
-    gSession = null;
-    permManager = null;
+    this.permManager = null;
+    this.objectBase = objectBase;
+    this.myInvid = Invid.createInvid(objectBase.getTypeID(), id);
   }
 
   /**
@@ -338,11 +311,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         throw new RuntimeException("Error, null object base");
       }
 
+    this.permManager = null;
     this.objectBase = objectBase;
-    shadowObject = null;
-    receive(in, journalProcessing);
-    gSession = null;
-    permManager = null;
+    this.myInvid = receive(in, journalProcessing);
 
     DBObject.objectCount++;
   }
@@ -362,28 +333,23 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   DBObject(DBEditObject eObj)
   {
-    DBField field;
-
-    /* -- */
-
-    objectBase = eObj.objectBase;
-    myInvid = eObj.myInvid;
-
-    shadowObject = null;
-
-    short count = 0;
-
     if (eObj.fieldAry == null)
       {
         // "Error, tried to call the DBObject view-copy constructor with a pseudo-static DBEditObject"
         throw new NullPointerException(ts.l("global.pseudostatic_constructor"));
       }
 
+    this.permManager = null;
+    this.objectBase = eObj.objectBase;
+    this.myInvid = eObj.getInvid();
+
     synchronized (eObj.fieldAry)
       {
+        short count = 0;
+
         for (short i = 0; i < eObj.fieldAry.length; i++)
           {
-            field = eObj.fieldAry[i];
+            DBField field = eObj.fieldAry[i];
 
             if (field != null && field.isDefined())
               {
@@ -400,7 +366,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
         for (short i = 0; i < eObj.fieldAry.length; i++)
           {
-            field = eObj.fieldAry[i];
+            DBField field = eObj.fieldAry[i];
 
             if (field != null && field.isDefined())
               {
@@ -444,9 +410,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
               }
           }
       }
-
-    gSession = null;
-    permManager = null;
   }
 
   /**
@@ -461,14 +424,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public DBObject(DBObject original, GanymedeSession gSession)
   {
-    DBField field;
-
-    /* -- */
-
-    objectBase = original.objectBase;
-    myInvid = original.myInvid;
-
-    shadowObject = null;
+    this.objectBase = original.objectBase;
+    this.myInvid = original.myInvid;
 
     if (original.fieldAry == null)
       {
@@ -946,7 +903,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * database.</p>
    */
 
-  final synchronized void receive(DataInput in, boolean journalProcessing) throws IOException
+  final synchronized Invid receive(DataInput in, boolean journalProcessing) throws IOException
   {
     DBField
       tmp = null;
@@ -962,15 +919,17 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       tmp_count,
       upgradeSkipCount = 0;
 
+    Invid receivedInvid = null;
+
     /* -- */
 
     // get our unique id
 
-    myInvid = Invid.createInvid(objectBase.getTypeID(), in.readInt());
+    receivedInvid = Invid.createInvid(objectBase.getTypeID(), in.readInt());
 
     if (debugReceive)
       {
-        System.err.println("Reading invid " + myInvid);
+        System.err.println("Reading invid " + receivedInvid);
       }
 
     // get number of fields
@@ -1138,6 +1097,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         // "Skipped over {0} objects in deprecated OwnerObjectsOwned field while reading owner group {1}"
         System.err.println(ts.l("receive.upgradeSkippingOwned", Integer.valueOf(upgradeSkipCount), this.getLabel()));
       }
+
+    return receivedInvid;
   }
 
   /**
@@ -1320,6 +1281,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>This method provides a Vector copy of the DBFields contained
    * in this object in a fashion that does not contribute to fieldAry
    * threadlock.</p>
+   *
+   * <p>Server-side only.</p>
    */
 
   public final Vector<DBField> getFieldVect()
