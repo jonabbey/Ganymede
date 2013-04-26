@@ -328,7 +328,7 @@ public final class DBSession implements QueryDescriber {
                         DBObject owner = viewDBObject(tmpInvid);
                         String name = owner.getLabel();
 
-                        String checkedOutBy = owner.shadowObject.editset.description;
+                        String checkedOutBy = owner.getShadow().editset.description;
 
                         retVal.getDialog().appendText("\n" + ts.l("createDBObject.checkedout", name, checkedOutBy));
                       }
@@ -759,7 +759,7 @@ public final class DBSession implements QueryDescriber {
         // okay, we found it and we've got a transaction open.. see if the
         // object is being edited and, if so, if it is us that is doing it
 
-        DBEditObject shadow = obj.shadowObject;
+        DBEditObject shadow = obj.getShadow();
 
         if (shadow == null || shadow.getDBSession() != this)
           {

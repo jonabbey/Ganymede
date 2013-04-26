@@ -241,7 +241,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * and we are available for someone to edit.
    */
 
-  DBEditObject shadowObject = null;
+  private DBEditObject shadowObject = null;
 
   /**
    * If this object is being viewed by a particular
@@ -1159,7 +1159,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   final synchronized DBEditObject createShadow(DBEditSet editset)
   {
-    if (shadowObject != null)
+    if (this.shadowObject != null)
       {
         // this object has already been checked out
         // for editing / deleting
@@ -1167,16 +1167,16 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         return null;
       }
 
-    shadowObject = objectBase.createNewObject(this, editset);
+    this.shadowObject = objectBase.createNewObject(this, editset);
 
     // if this object currently points to an object that
     // is being deleted by way of an asymmetric InvidDBField,
     // addObject() may fail.  In this case, we have to deny
     // the edit
 
-    if (!editset.addObject(shadowObject))
+    if (!editset.addObject(this.shadowObject))
       {
-        shadowObject = null;
+        this.shadowObject = null;
         return null;
       }
 
@@ -1189,9 +1189,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         editset.session.GSession.checkOut(); // update session checked out count
       }
 
-    objectBase.getStore().checkOut(); // update checked out count
+    this.objectBase.getStore().checkOut(); // update checked out count
 
-    return shadowObject;
+    return this.shadowObject;
   }
 
   /**
@@ -1205,7 +1205,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   final synchronized boolean clearShadow(DBEditSet editset)
   {
-    if (editset != shadowObject.editset)
+    if (editset != this.shadowObject.editset)
       {
         // couldn't clear the shadow..  this editSet
         // wasn't the one to create the shadow
@@ -1216,16 +1216,29 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         return false;
       }
 
-    shadowObject = null;
+    this.shadowObject = null;
 
     if (editset.session.GSession != null)
       {
         editset.session.GSession.checkIn();
       }
 
-    objectBase.getStore().checkIn(); // update checked out count
+    this.objectBase.getStore().checkIn(); // update checked out count
 
     return true;
+  }
+
+  /**
+   * <p>If this object is currently being edited by an active
+   * GanymedeSession, this method will return a pointer to the
+   * DBEditObject that is handling the edits.</p>
+   *
+   * <p>Otherwise, getShadow() returns null.</p>
+   */
+
+  final public DBEditObject getShadow()
+  {
+    return this.shadowObject;
   }
 
   /**

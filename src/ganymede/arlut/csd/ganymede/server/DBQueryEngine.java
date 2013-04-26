@@ -939,9 +939,11 @@ public final class DBQueryEngine {
 
             // if we're editing it, let's look at our version of it
 
-            if (obj.shadowObject != null && obj.shadowObject.getDBSession() == dbSession)
+            DBEditObject shadowObject = obj.getShadow();
+
+            if (shadowObject != null && shadowObject.getDBSession() == dbSession)
               {
-                obj = obj.shadowObject;
+                obj = shadowObject;
               }
 
             if (DBQueryHandler.matches(gSession, query, obj))

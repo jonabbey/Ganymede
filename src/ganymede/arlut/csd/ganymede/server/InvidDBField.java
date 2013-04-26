@@ -1136,7 +1136,7 @@ public final class InvidDBField extends DBField implements invid_field {
             try
               {
                 String edit_username, edit_hostname;
-                DBEditObject editing = remobj.shadowObject;
+                DBEditObject editing = remobj.getShadow();
 
                 if (editing != null)
                   {
@@ -1304,7 +1304,7 @@ public final class InvidDBField extends DBField implements invid_field {
         try
           {
             String edit_username, edit_hostname;
-            DBEditObject editing = remobj.shadowObject;
+            DBEditObject editing = remobj.getShadow();
 
             if (editing != null)
               {
@@ -1589,7 +1589,7 @@ public final class InvidDBField extends DBField implements invid_field {
                 try
                   {
                     String edit_username, edit_hostname;
-                    DBEditObject editing = remobj.shadowObject;
+                    DBEditObject editing = remobj.getShadow();
 
                     edit_username = editing.gSession.getPermManager().getBaseIdentity();
                     edit_hostname = editing.gSession.getClientHostName();

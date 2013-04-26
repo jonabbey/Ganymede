@@ -2163,7 +2163,7 @@ final public class GanymedeSession implements Session, Unreferenced {
             String edit_username;
             String edit_hostname;
 
-            DBEditObject editing = obj.shadowObject;
+            DBEditObject editing = obj.getShadow();
 
             try
               {
