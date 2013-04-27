@@ -1343,46 +1343,10 @@ public final class InvidDBField extends DBField implements invid_field {
 
         if (newRefField == null)
           {
-            // editDBObject() will create undefined fields for all
-            // fields defined in the DBObjectBase as long as the user
-            // had permission to create those fields, so if we got a
-            // null field, we either have a schema corruption problem
-            // or a permission to create field problem.
-
-            DBObjectBaseField fieldDef = newRef.getFieldDef(targetField);
-
-            if (fieldDef == null)
-              {
-                // "InvidDBField.bind(): Couldn''t link to new reference"
-                // "Your operation could not succeed due to a possible inconsistency in the server database.  Target field number {0} in object {1} does not exist."
-                return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
-                                                  ts.l("bind.inconsistency", Integer.toString(targetField), newRef.getLabel()));
-              }
-            else
-              {
-                if (anonymous2)
-                  {
-                    // the object was created at check-out time
-                    // without the invid target field, due to the
-                    // admin's default permissions.  But we know that
-                    // the object has allowed anonymous linking by way
-                    // of the anonymousLinkOK() method, so we'll go
-                    // ahead and create an empty InvidDBField in the
-                    // target object directly.  The accessor methods
-                    // on the field will enforce standard Ganymede
-                    // permissions hereafter.
-
-                    newRefField = (InvidDBField) DBField.createTypedField(newRef, fieldDef);
-                    newRef.addField(newRefField);
-                  }
-                else
-                  {
-                    // "InvidDBField.bind(): Couldn''t link to new reference"
-                    // "Your operation could not succeed because you do not have permission to create the (previously undefined) {0} field in the {1} {2} object."
-                    return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
-                                                      ts.l("bind.no_create_perm", fieldDef.getName(), newRef.getLabel(), newRef.getTypeName()));
-                  }
-              }
+            // "InvidDBField.bind(): Couldn''t link to new reference"
+            // "Your operation could not succeed due to a possible inconsistency in the server database.  Target field number {0} in object {1} does not exist."
+            return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+                                              ts.l("bind.inconsistency", Integer.toString(targetField), newRef.getLabel()));
           }
       }
     catch (ClassCastException ex)
