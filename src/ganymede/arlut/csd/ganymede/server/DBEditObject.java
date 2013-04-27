@@ -243,9 +243,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public DBEditObject(DBObjectBase base)
   {
-    super();
+    super(base);
 
-    this.objectBase = base;
     this.stored = false;
     this.editset = null;             // this will be our cue to our static handle status for our methods
   }
@@ -265,61 +264,13 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
   public DBEditObject(DBObjectBase objectBase, Invid invid, DBEditSet editset)
   {
-    super(objectBase, invid.getNum(), editset.getDBSession().getGSession());
-
-    if (editset == null)
-      {
-        // "Null DBEditSet"
-        throw new NullPointerException(ts.l("init.notrans"));
-      }
+    super(objectBase, invid, editset);
 
     this.original = null;
     this.editset = editset;
     commitSemaphore.set(false);
-    stored = false;
-    status = CREATING;
-
-    /* -- */
-
-    synchronized (objectBase)
-      {
-        int count = 0;
-
-        for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
-          {
-            // check for permission to create a particular field
-
-            if (checkNewField(fieldDef.getID()))
-              {
-                count++;
-              }
-          }
-
-        fieldAry = new DBField[count];
-
-        int i = 0;
-
-        // the iterator on DBBaseFieldTable gives us the field
-        // defintion objects in field id order, which we need to order
-        // the fieldAry elements properly.
-
-        for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
-          {
-            if (!checkNewField(fieldDef.getID()))
-              {
-                continue;
-              }
-
-            DBField newField = DBField.createTypedField(this, fieldDef);
-
-            if (newField == null)
-              {
-                throw new NullPointerException("Error creating typed field when creating object");
-              }
-
-            fieldAry[i++] = newField;
-          }
-      }
+    this.stored = false;
+    this.status = CREATING;
   }
 
   /**
@@ -335,80 +286,33 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     /* -- */
 
     this.editset = editset;
-
-    commitSemaphore.set(false);
-    stored = true;
-    status = EDITING;
-
+    this.commitSemaphore.set(false);
+    this.stored = true;
+    this.status = EDITING;
     this.original = original;
-    this.objectBase = original.objectBase;
-
-    // clone the fields from the original object
-    // since we own these, the field-modifying
-    // methods on the copied fields will allow editing
-    // to go forward
-
-    Vector<DBField> fieldVect = original.getFieldVect();
-
-    int count = 0;
-    int j = 0;
-
-    DBField field = fieldVect.elementAt(j);
-
-    for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
-      {
-        if (field != null && fieldDef.getID() == field.getID())
-          {
-            count++;
-
-            if (++j < fieldVect.size())
-              {
-                field = fieldVect.elementAt(j);
-              }
-            else
-              {
-                field = null;   // end of the fields in fieldVect
-              }
-          }
-        else
-          {
-            if (checkNewField(fieldDef.getID()))
-              {
-                count++;
-              }
-          }
-      }
-
-    this.fieldAry = new DBField[count];
 
     int i = 0;
-    j = 0;
-
-    field = fieldVect.elementAt(j);
+    DBField newFields[] = new DBField[objectBase.getFieldCount()];
 
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
       {
-        if (field != null && fieldDef.getID() == field.getID())
-          {
-            fieldAry[i++] = DBField.copyField(this, field);
+        short id = fieldDef.getID();
+        DBField originalField = original.retrieveField(id);
+        DBField copyField;
 
-            if (++j < fieldVect.size())
-              {
-                field = fieldVect.elementAt(j);
-              }
-            else
-              {
-                field = null;
-              }
+        if (originalField != null)
+          {
+            copyField = DBField.copyField(this, originalField);
           }
         else
           {
-            if (checkNewField(fieldDef.getID()))
-              {
-                fieldAry[i++] = DBField.createTypedField(this, fieldDef);
-              }
+            copyField = DBField.createTypedField(this, fieldDef);
           }
+
+        newFields[i++] = copyField;
       }
+
+    this.setAllFields(newFields);
   }
 
   /**
@@ -3599,24 +3503,23 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     // call any methods within the sync block that should trigger any
     // external synchronization issues
 
-    synchronized (fieldAry)
+    Vector<DBField> fields = this.getFieldVect();
+
+    for (DBField field: fields)
       {
-        for (DBField field: fieldAry)
+        key = Short.valueOf(field.getID());
+        value = field.checkpoint();
+
+        if (value != null)
           {
-            key = Short.valueOf(field.getID());
-            value = field.checkpoint();
+            result.put(key, value);
+          }
+        else
+          {
+            // hack, hack.. we're using a reference
+            // to this object to represent a null value
 
-            if (value != null)
-              {
-                result.put(key, value);
-              }
-            else
-              {
-                // hack, hack.. we're using a reference
-                // to this object to represent a null value
-
-                result.put(key, this);
-              }
+            result.put(key, this);
           }
       }
 

@@ -3,7 +3,7 @@
    DBObjectDeltaRec.java
 
    This class is used to represent a record of changes that need to be
-   made to a DBObject in the DBStore.
+   made to an individual DBObject in the DBStore.
 
    This class will be used in to handle writing and reading records of
    changes made to objects in the Ganymede journal file.
@@ -55,6 +55,9 @@ package arlut.csd.ganymede.server;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.Vector;
 
 import arlut.csd.ganymede.common.FieldType;
@@ -68,13 +71,13 @@ import arlut.csd.ganymede.common.Invid;
 
 /**
  * <p>This class is used to represent a record of changes that need to
- * be made to a DBObject in the DBStore.</p>
+ * be made to an individual DBObject in the DBStore.</p>
  *
  * <p>This class will be used in to handle writing and reading records
  * of changes made to objects in the Ganymede journal file.</p>
  */
 
-public final class DBObjectDeltaRec implements FieldType {
+public final class DBObjectDeltaRec implements FieldType, Iterable<fieldDeltaRec> {
 
   private Invid invid = null;
   private Vector<fieldDeltaRec> fieldRecs = new Vector<fieldDeltaRec>();
@@ -435,85 +438,13 @@ public final class DBObjectDeltaRec implements FieldType {
   }
 
   /**
-   * <p>This method takes an object in its original state, and returns
-   * a new copy of the object with the changes embodied in this
-   * DBObjectDeltaRec applied to it.</p>
+   * <p>Returns an Iterator over the fieldDeltaRec objects contained
+   * in this DBObjectDeltaRec.</p>
    */
 
-  public DBObject applyDelta(DBObject original)
+  public synchronized Iterator<fieldDeltaRec> iterator()
   {
-    if (!original.getInvid().equals(this.invid))
-      {
-        throw new IllegalArgumentException("Error, object identity mismatch");
-      }
-
-    DBObject copy = new DBObject(original, null);
-
-    for (fieldDeltaRec fieldRec: this.fieldRecs)
-      {
-        if (!fieldRec.vector && fieldRec.scalarValue == null)
-          {
-            copy.clearField(fieldRec.fieldcode);
-
-            continue;
-          }
-
-        if (!fieldRec.vector)
-          {
-            DBField fieldCopy = DBField.copyField(copy, fieldRec.scalarValue);
-
-            if (copy.getField(fieldRec.fieldcode) != null)
-              {
-                copy.replaceField(fieldCopy);
-              }
-            else
-              {
-                copy.addField(fieldCopy);
-              }
-
-            continue;
-          }
-
-        // ok, we must be doing a vector mod
-
-        // remember that we are intentionally bypassing the DBField's
-        // add/remove logic, as we assume that this DBObjectDeltaRec
-        // was generated as a result of a properly checked operation.
-
-        // Also, since we know that only string, invid, and IP fields
-        // can be vectors, we don't have to worry about the password
-        // and permission matrix special-case logic.
-
-        DBField field = copy.retrieveField(fieldRec.fieldcode);
-
-        if (fieldRec.addValues != null)
-          {
-            for (Object value: fieldRec.addValues)
-              {
-                if (value instanceof IPwrap)
-                  {
-                    value = ((IPwrap) value).address;
-                  }
-
-                field.getVectVal().add(value);
-              }
-          }
-
-        if (fieldRec.delValues != null)
-          {
-            for (Object value: fieldRec.delValues)
-              {
-                if (value instanceof IPwrap)
-                  {
-                    value = ((IPwrap) value).address;
-                  }
-
-                field.getVectVal().remove(value);
-              }
-          }
-      }
-
-    return copy;
+    return this.fieldRecs.iterator();
   }
 
   public Invid getInvid()
