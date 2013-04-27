@@ -125,8 +125,8 @@ public final class DBObjectTable implements Iterable<DBObject> {
       }
 
     this.loadFactor = loadFactor;
-    table = new DBObject[initialCapacity];
-    threshold = (int)(initialCapacity * loadFactor);
+    this.table = new DBObject[initialCapacity];
+    this.threshold = (int)(initialCapacity * loadFactor);
   }
 
   /**
@@ -169,7 +169,7 @@ public final class DBObjectTable implements Iterable<DBObject> {
 
   public int size()
   {
-    return count;
+    return this.count;
   }
 
   /**
@@ -181,7 +181,7 @@ public final class DBObjectTable implements Iterable<DBObject> {
 
   public boolean isEmpty()
   {
-    return count == 0;
+    return this.count == 0;
   }
 
   /**
@@ -243,11 +243,9 @@ public final class DBObjectTable implements Iterable<DBObject> {
 
   public synchronized boolean containsKey(int key)
   {
-    DBObject tab[] = table;
+    int index = (key & 0x7FFFFFFF) % this.table.length;
 
-    int index = (key & 0x7FFFFFFF) % tab.length;
-
-    for (DBObject e = tab[index] ; e != null ; e = e.next)
+    for (DBObject e = this.table[index] ; e != null ; e = e.next)
       {
         if (e.hashCode() == key)
           {
@@ -266,11 +264,9 @@ public final class DBObjectTable implements Iterable<DBObject> {
 
   public DBObject getNoSync(int key)
   {
-    DBObject tab[] = table;
+    int index = (key & 0x7FFFFFFF) % this.table.length;
 
-    int index = (key & 0x7FFFFFFF) % tab.length;
-
-    for (DBObject e = tab[index] ; e != null ; e = e.next)
+    for (DBObject e = this.table[index] ; e != null ; e = e.next)
       {
         if (e.hashCode() == key)
           {
@@ -289,11 +285,9 @@ public final class DBObjectTable implements Iterable<DBObject> {
 
   public synchronized DBObject get(int key)
   {
-    DBObject tab[] = table;
+    int index = (key & 0x7FFFFFFF) % this.table.length;
 
-    int index = (key & 0x7FFFFFFF) % tab.length;
-
-    for (DBObject e = tab[index] ; e != null ; e = e.next)
+    for (DBObject e = this.table[index] ; e != null ; e = e.next)
       {
         if (e.hashCode() == key)
           {
@@ -319,8 +313,7 @@ public final class DBObjectTable implements Iterable<DBObject> {
     int newCapacity = oldCapacity * 2 + 1;
     DBObject newTable[] = new DBObject[newCapacity];
 
-    threshold = (int)(newCapacity * loadFactor);
-    table = newTable;
+    this.threshold = (int)(newCapacity * loadFactor);
 
     //System.out.println("rehash old=" + oldCapacity + ", new=" +
     //newCapacity + ", thresh=" + threshold + ", count=" + count);
@@ -337,6 +330,8 @@ public final class DBObjectTable implements Iterable<DBObject> {
             newTable[index] = e;
           }
       }
+
+    this.table = newTable;
   }
 
   /**
@@ -361,9 +356,8 @@ public final class DBObjectTable implements Iterable<DBObject> {
 
     removeNoSync(value.hashCode());
 
-    DBObject tab[] = table;
     int hash = value.hashCode();
-    int index = (hash & 0x7FFFFFFF) % tab.length;
+    int index = (hash & 0x7FFFFFFF) % this.table.length;
 
     if (count > threshold)
       {
@@ -375,9 +369,11 @@ public final class DBObjectTable implements Iterable<DBObject> {
 
     // Insert the new entry.
 
-    value.next = tab[index];
-    tab[index] = value;
-    count++;
+    value.next = this.table[index];
+    this.table[index] = value;
+
+    this.count++;
+
     return;
   }
 
@@ -387,14 +383,12 @@ public final class DBObjectTable implements Iterable<DBObject> {
 
   public synchronized void put(DBObject value)
   {
-    this.modGen++;
-
-    // Make sure the value is not null
-
     if (value == null)
       {
         throw new NullPointerException();
       }
+
+    this.modGen++;
 
     // Makes sure the object is not already in the hashtable.
     // Note that we are sync'ed, so we can use the non-sync'ed
@@ -402,20 +396,20 @@ public final class DBObjectTable implements Iterable<DBObject> {
 
     removeNoSync(value.hashCode());
 
-    if (count > threshold)
+    if (this.count > this.threshold)
       {
         rehash();
       }
 
-    DBObject tab[] = table;
     int hash = value.hashCode();
-    int index = (hash & 0x7FFFFFFF) % tab.length;
+    int index = (hash & 0x7FFFFFFF) % this.table.length;
 
     // Insert the new entry.
 
-    value.next = tab[index];
-    tab[index] = value;
-    count++;
+    value.next = this.table[index];
+    this.table[index] = value;
+
+    this.count++;
 
     return;
   }
@@ -438,11 +432,10 @@ public final class DBObjectTable implements Iterable<DBObject> {
         throw new NullPointerException();
       }
 
-    DBObject tab[] = table;
     int hash = value.hashCode();
-    int index = (hash & 0x7FFFFFFF) % tab.length;
+    int index = (hash & 0x7FFFFFFF) % this.table.length;
 
-    if (count > threshold)
+    if (this.count > this.threshold)
       {
         rehash();
         putNoSync(value);
@@ -452,9 +445,11 @@ public final class DBObjectTable implements Iterable<DBObject> {
 
     // Insert the new entry.
 
-    value.next = tab[index];
-    tab[index] = value;
-    count++;
+    value.next = this.table[index];
+    this.table[index] = value;
+
+    this.count++;
+
     return;
   }
 
@@ -467,10 +462,9 @@ public final class DBObjectTable implements Iterable<DBObject> {
   {
     this.modGen++;
 
-    DBObject tab[] = table;
-    int index = (key & 0x7FFFFFFF) % tab.length;
+    int index = (key & 0x7FFFFFFF) % this.table.length;
 
-    for (DBObject e = tab[index], prev = null ; e != null ; prev = e, e = e.next)
+    for (DBObject e = this.table[index], prev = null ; e != null ; prev = e, e = e.next)
       {
         if (e.hashCode() == key)
           {
@@ -480,10 +474,10 @@ public final class DBObjectTable implements Iterable<DBObject> {
               }
             else
               {
-                tab[index] = e.next;
+                this.table[index] = e.next;
               }
 
-            count--;
+            this.count--;
 
             return;
           }
@@ -501,10 +495,9 @@ public final class DBObjectTable implements Iterable<DBObject> {
   {
     this.modGen++;
 
-    DBObject tab[] = table;
-    int index = (key & 0x7FFFFFFF) % tab.length;
+    int index = (key & 0x7FFFFFFF) % this.table.length;
 
-    for (DBObject e = tab[index], prev = null ; e != null ; prev = e, e = e.next)
+    for (DBObject e = this.table[index], prev = null ; e != null ; prev = e, e = e.next)
       {
         if (e.hashCode() == key)
           {
@@ -514,16 +507,55 @@ public final class DBObjectTable implements Iterable<DBObject> {
               }
             else
               {
-                tab[index] = e.next;
+                this.table[index] = e.next;
               }
 
-            count--;
+            this.count--;
 
             return;
           }
       }
 
     return;
+  }
+
+  /**
+   * <p>Replaces a DBObject in the table in-place without disturbing
+   * any Iterators running.</p>
+   */
+
+  public void replaceNoSync(DBObject replaceObject)
+  {
+    if (replaceObject == null)
+      {
+        throw new NullPointerException();
+      }
+
+    int key = replaceObject.getInvid().getNum();
+    int index = (key & 0x7FFFFFFF) % this.table.length;
+
+    for (DBObject e = this.table[index], prev = null ; e != null ; prev = e, e = e.next)
+      {
+        if (e.hashCode() == key)
+          {
+            if (prev == null)
+              {
+                replaceObject.next = this.table[index].next;
+                this.table[index] = replaceObject;
+              }
+            else
+              {
+                replaceObject.next = e.next;
+                prev.next = replaceObject;
+              }
+
+            this.count--;
+
+            return;
+          }
+      }
+
+    throw new IllegalStateException("No original found to replace.");
   }
 
   /**
@@ -534,13 +566,9 @@ public final class DBObjectTable implements Iterable<DBObject> {
   {
     this.modGen++;
 
-    DBObject tab[] = table;
-
-    /* -- */
-
-    for (int index = tab.length; --index >= 0; )
+    for (int index = this.table.length; --index >= 0; )
       {
-        tab[index] = null;
+        this.table[index] = null;
       }
 
     count = 0;
