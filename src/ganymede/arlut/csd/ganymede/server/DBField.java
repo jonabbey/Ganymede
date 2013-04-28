@@ -236,7 +236,12 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * and attach it to a DBObject, using the appropriate DBField
    * subclass' copy constructor.</p>
    *
-   * <p>Used by the DBEditObject's check-out and check-in constructor.</p>
+   * <p>Used by the DBEditObject's check-out and check-in constructor,
+   * but not by object cloning, which is creating a new object whose
+   * fields are being copied from the old object as if a user was
+   * doing it manually.  This copyField method, by contrast, will only
+   * do a dumb data copy, and will not fix up and InvidDBField
+   * bindings, etc.</p>
    *
    * <p>Note that it is essential that this method never throw an
    * uncaught exception, because that will break commits in a very
@@ -629,6 +634,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * checked-out DBEditObject in order to be updated.  Any actions
    * that would normally occur from a user manually setting a value
    * into the field will occur.</p>
+   *
+   * <p>This includes most particularly the InvidDBField bind
+   * logic.</p>
    *
    * @param target The DBField to copy this field's contents to.
    * @param local If true, permissions checking is skipped.
