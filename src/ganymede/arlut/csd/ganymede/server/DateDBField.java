@@ -226,6 +226,11 @@ public class DateDBField extends DBField implements date_field {
 
   public Date value()
   {
+    if (value == null)
+      {
+        return null;
+      }
+
     return new Date(((Date) value).getTime()); // return a defensive copy
   }
 
