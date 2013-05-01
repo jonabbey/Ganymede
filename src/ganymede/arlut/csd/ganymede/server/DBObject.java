@@ -3205,13 +3205,31 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
                           }
                       }
 
-                    if (prefix != null)
+                    if (remObj != null)
                       {
-                        remObj.appendObjectInfo(buffer, prefix + "\t", local);
+                        if (prefix != null)
+                          {
+                            remObj.appendObjectInfo(buffer, prefix + "\t", local);
+                          }
+                        else
+                          {
+                            remObj.appendObjectInfo(buffer, "\t", local);
+                          }
                       }
                     else
                       {
-                        remObj.appendObjectInfo(buffer, "\t", local);
+                        // remObj shouldn't be null during normal
+                        // operations, but it might be if we're doing
+                        // debug logging during loading, or something.
+
+                        if (prefix != null)
+                          {
+                            buffer.append(prefix + "\t" + x);
+                          }
+                        else
+                          {
+                            buffer.append("\t" + x);
+                          }
                       }
                   }
               }
