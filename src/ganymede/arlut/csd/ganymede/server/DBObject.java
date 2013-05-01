@@ -314,8 +314,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     this.gSession = null;
     this.permManager = null;
-    this.myInvid = receive(in, journalProcessing);
     this.objectBase = objectBase;
+    this.myInvid = receive(in, journalProcessing);
 
     DBObject.objectCount++;
   }
