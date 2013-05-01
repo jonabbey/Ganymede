@@ -482,7 +482,14 @@ public final class SyncRunner implements Runnable {
 
     FieldOptionDBField f = (FieldOptionDBField) syncChannel.getField(SchemaConstants.SyncChannelFields);
 
-    this.matrix = new HashMap<String, SyncPrefEnum>(f.matrix);
+    if (f == null)
+      {
+        this.matrix = new HashMap<String, SyncPrefEnum>();
+      }
+    else
+      {
+        this.matrix = new HashMap<String, SyncPrefEnum>(f.matrix);
+      }
   }
 
   /**
