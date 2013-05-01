@@ -69,7 +69,6 @@ import java.util.Vector;
 
 import org.python.core.PyInteger;
 
-import arlut.csd.Util.EmptyVector;
 import arlut.csd.Util.JythonMap;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
@@ -280,9 +279,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public DBObject()
   {
+    this.gSession = null;
     this.permManager = null;
     this.myInvid = null;
-    this.gSession = null;
   }
 
   /**
@@ -295,10 +294,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   DBObject(DBObjectBase objectBase, int id, GanymedeSession gSession)
   {
-    this.permManager = null;
-    this.objectBase = objectBase;
     this.gSession = gSession;
+    this.permManager = null;
     this.myInvid = Invid.createInvid(objectBase.getTypeID(), id);
+    this.objectBase = objectBase;
   }
 
   /**
@@ -313,10 +312,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         throw new RuntimeException("Error, null object base");
       }
 
-    this.permManager = null;
-    this.objectBase = objectBase;
-    this.myInvid = receive(in, journalProcessing);
     this.gSession = null;
+    this.permManager = null;
+    this.myInvid = receive(in, journalProcessing);
+    this.objectBase = objectBase;
 
     DBObject.objectCount++;
   }
@@ -342,10 +341,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         throw new NullPointerException(ts.l("global.pseudostatic_constructor"));
       }
 
-    this.permManager = null;
-    this.objectBase = eObj.objectBase;
-    this.myInvid = eObj.getInvid();
     this.gSession = null;
+    this.permManager = null;
+    this.myInvid = eObj.getInvid();
+    this.objectBase = eObj.objectBase;
 
     synchronized (eObj.fieldAry)
       {
@@ -428,9 +427,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public DBObject(DBObject original, GanymedeSession gSession)
   {
-    this.objectBase = original.objectBase;
-    this.myInvid = original.myInvid;
     this.gSession = gSession;
+    this.myInvid = original.myInvid;
+    this.objectBase = original.objectBase;
 
     if (original.fieldAry == null)
       {
@@ -2451,7 +2450,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>If no such Vector field is defined on this object type, an
    * IllegalArgumentException will be thrown.  If the field is defined
    * on this object type but is undefined in this individual object,
-   * an immutable empty Vector will be returned.</p>
+   * an empty Vector, detached from the field's internal state will be
+   * returned.</p>
    *
    * <p>Will never return null.</p>
    *
@@ -2515,7 +2515,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>If no such Vector field is defined on this object type, an
    * IllegalArgumentException will be thrown.  If the field is defined
    * on this object type but is undefined in this individual object,
-   * an immutable empty Vector will be returned.</p>
+   * an empty Vector, detached from the field's internal state will be
+   * returned.</p>
    *
    * <p>Will never return null.</p>
    *
@@ -2530,8 +2531,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     if (field == null)
       {
         // Okay, this field doesn't have a copy of the desired field.
-        // Let's see if we can go ahead and return a synthesized
-        // EmptyVector to the caller.
+        // Let's see if we can go ahead and return a new, empty Vector
+        // to the caller.
 
         DBObjectBaseField fieldDef = this.getFieldDef(fieldID);
 
@@ -2584,7 +2585,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>If no such Vector field is defined on this object type, an
    * IllegalArgumentException will be thrown.  If the field is defined
    * on this object type but is undefined in this individual object,
-   * an immutable empty Vector will be returned.</p>
+   * an empty Vector, detached from the field's internal state will be
+   * returned.</p>
    *
    * <p>Will never return null.</p>
    */
@@ -2631,7 +2633,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>If no such Vector field is defined on this object type, an
    * IllegalArgumentException will be thrown.  If the field is defined
    * on this object type but is undefined in this individual object,
-   * an immutable empty Vector will be returned.</p>
+   * an empty Vector, detached from the field's internal state will be
+   * returned.</p>
    *
    * <p>Will never return null.</p>
    */
