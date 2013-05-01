@@ -690,14 +690,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-        if (!isVector())
-          {
-            return this.value().toString();
-          }
-        else
-          {
-            return VectorUtils.vectorString(this.getVectVal());
-          }
+        return invid.toString();
       }
   }
 
