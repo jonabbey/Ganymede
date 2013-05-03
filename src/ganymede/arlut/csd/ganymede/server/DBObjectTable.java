@@ -320,10 +320,9 @@ public final class DBObjectTable implements Iterable<DBObject> {
 
     for (int i = oldCapacity ; i-- > 0 ;)
       {
-        for (DBObject old = oldTable[i] ; old != null ; )
+        for (DBObject old = oldTable[i] ; old != null ; old = old.next)
           {
             DBObject e = old;
-            old = old.next;
 
             int index = (e.hashCode() & 0x7FFFFFFF) % newCapacity;
             e.next = newTable[index];

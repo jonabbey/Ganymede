@@ -274,7 +274,7 @@ public interface db_object extends java.rmi.Remote {
    * <p>If no such Vector field is defined on this object type, an
    * IllegalArgumentException will be thrown.  If the field is defined
    * on this object type but is undefined in this individual object,
-   * an immutable empty Vector will be returned.</p>
+   * an empty Vector will be created and returned.</p>
    *
    * <p>Will never return null.</p>
    */
@@ -288,7 +288,7 @@ public interface db_object extends java.rmi.Remote {
    * <p>If no such Vector field is defined on this object type, an
    * IllegalArgumentException will be thrown.  If the field is defined
    * on this object type but is undefined in this individual object,
-   * an immutable empty Vector will be returned.</p>
+   * an empty Vector will be created and returned.</p>
    *
    * <p>Will never return null.</p>
    */

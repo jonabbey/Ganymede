@@ -2206,7 +2206,7 @@ public final class DBPermissionManager {
   /**
    * <p>Recursive helper method for personaMatch.. this method does a
    * depth first search up the owner tree for each Invid contained in
-   * the invids Vector to see if the gSession's personaInvid is a
+   * the owners Vector to see if the gSession's personaInvid is a
    * member of any of the containing owner groups.</p>
    *
    * @param owners A vector of invids pointing to OwnerBase objects
@@ -2486,10 +2486,6 @@ public final class DBPermissionManager {
       }
 
     owners = (Vector<Invid>) inf.getValuesLocal();
-
-    // *** Caution!  getValuesLocal() does not clone the field's contents..
-    //
-    // DO NOT modify owners here!
 
     if (owners == null)
       {

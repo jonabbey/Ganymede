@@ -125,13 +125,12 @@ public class ownerCustom extends DBEditObject implements SchemaConstants {
       {
         Vector<String> adminList = new Vector();
         Vector<Invid> adminInvidList;
-        String adminAddr;
 
         adminInvidList = (Vector<Invid>) ownerGroup.getFieldValuesLocal(SchemaConstants.OwnerMembersField);
 
         for (Invid adminInvid: adminInvidList)
           {
-            adminAddr = adminPersonaCustom.convertAdminInvidToString(adminInvid, session);
+            String adminAddr = adminPersonaCustom.convertAdminInvidToString(adminInvid, session);
 
             if (adminAddr != null)
               {

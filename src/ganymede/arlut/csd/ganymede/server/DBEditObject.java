@@ -251,14 +251,14 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * <p>Creation constructor, is responsible for creating a new editable
-   * object with all fields listed in the
-   * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField} instantiated
-   * but undefined.</p>
+   * <p>Creation constructor, is responsible for creating a new
+   * editable object with all fields listed in the {@link
+   * arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField}
+   * instantiated but undefined.</p>
    *
-   * <p>This constructor is not really intended to be overridden in subclasses.
-   * Creation time field value initialization is to be handled by
-   * initializeNewObject().</p>
+   * <p>This constructor is not really intended to be called via
+   * super() from subclass constructors.  Creation time field value
+   * initialization is to be handled by initializeNewObject().</p>
    *
    * @see arlut.csd.ganymede.server.DBField
    */
@@ -323,9 +323,9 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * Check-out constructor, used by
-   * {@link arlut.csd.ganymede.server.DBObject#createShadow(arlut.csd.ganymede.server.DBEditSet) DBObject.createShadow()}
-   * to pull out an object for editing.
+   * <p>Check-out constructor, used by {@link
+   * arlut.csd.ganymede.server.DBObject#createShadow(arlut.csd.ganymede.server.DBEditSet)
+   * DBObject.createShadow()} to pull out an object for editing.</p>
    */
 
   public DBEditObject(DBObject original, DBEditSet editset)
@@ -3964,13 +3964,13 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
             if (diff != null)
               {
+                if (changedFieldDefs != null)
+                  {
+                    changedFieldDefs.add(fieldDef);
+                  }
+
                 if (okToLogField(currentField) && okToLogField(origField))
                   {
-                    if (changedFieldDefs != null)
-                      {
-                        changedFieldDefs.add(fieldDef);
-                      }
-
                     changed.append(fieldDef.getName());
                     changed.append("\n");
                     changed.append(diff);

@@ -1946,11 +1946,13 @@ public final class DBEditSet {
         // We'll call diff() to update the fieldsTouched hashtable,
         // but we won't use the string generated, since
         // getPrintString() does a better job of describing the
-        // contents of embedded objects.  This forced use of diff()
-        // isn't elegant, but as DBField was originally defined, it's
-        // only through the use of the diff strings that we have a
-        // unified way to determine change, and we don't want to have
-        // to re-do that work in all the DBField subclasses.
+        // contents of (newly-created) embedded objects.
+        //
+        // This forced use of diff() isn't elegant, but as DBField was
+        // originally defined, it's only through the use of the diff
+        // strings that we have a unified way to determine change, and
+        // we don't want to have to re-do that work in all the DBField
+        // subclasses.
 
         eObj.diff(fieldsTouched);
 
