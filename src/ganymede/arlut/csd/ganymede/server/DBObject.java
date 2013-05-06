@@ -251,13 +251,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   protected final GanymedeSession gSession;
 
   /**
-   * If this object is being viewed in a particular permissions
-   * context, we record the permManager here.
-   */
-
-  private final DBPermissionManager permManager;
-
-  /**
    * A fixed copy of our Invid, so that we don't have to create
    * new ones all the time when people call getInvid() on us.
    */
@@ -282,7 +275,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     this.objectBase = base;
     this.gSession = null;
-    this.permManager = null;
     this.permCacheAry = null;
     this.fieldAry = null;
     this.myInvid = null;
@@ -299,7 +291,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   DBObject(DBObjectBase objectBase, int id, GanymedeSession gSession)
   {
     this.gSession = gSession;
-    this.permManager = gSession.getPermManager();
     this.objectBase = objectBase;
     this.myInvid = Invid.createInvid(objectBase.getTypeID(), id);
     this.fieldAry = new DBField[objectBase.getFieldCount()];
@@ -319,7 +310,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       }
 
     this.gSession = null;
-    this.permManager = null;
     this.permCacheAry = null;
     this.objectBase = objectBase;
     this.myInvid = Invid.createInvid(objectBase.getTypeID(), in.readInt());
@@ -364,7 +354,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       }
 
     this.gSession = null;
-    this.permManager = null;
     this.permCacheAry = null;
     this.objectBase = eObj.objectBase;
     this.myInvid = eObj.getInvid();
@@ -449,7 +438,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     this.objectBase = typeDefinition;
     this.myInvid = original.myInvid;
     this.gSession = null;
-    this.permManager = null;
     this.permCacheAry = null;
 
     DBField oldAry[] = original.fieldAry;
@@ -521,15 +509,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
             fieldAry[i] = original.fieldAry[i].getCopy(this);
           }
       }
-
-    if (gSession == null)
-      {
-        this.permManager = null;
-      }
-    else
-      {
-        this.permManager = gSession.getPermManager();
-      }
   }
 
   /**
@@ -555,7 +534,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     this.objectBase = objectBase;
     this.gSession = editset.getDBSession().getGSession();
-    this.permManager = this.gSession.getPermManager();
     this.myInvid = invid;
 
     /* -- */
@@ -598,7 +576,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     this.objectBase = original.objectBase;
     this.myInvid = original.myInvid;
     this.gSession = null;
-    this.permManager = null;
 
     Map<Short, DBField> fieldMap = new HashMap<Short, DBField>();
 
@@ -842,6 +819,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   public final synchronized PermEntry getFieldPerm(short fieldcode)
   {
     PermEntry result = null;
+    DBPermissionManager permManager = null;
 
     /* -- */
 
@@ -850,9 +828,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
-    if (permManager == null)
+    if (this.gSession == null)
       {
         return PermEntry.fullPerms; // assume supergash if we have no session
+      }
+    else
+      {
+        permManager = this.gSession.getPermManager();
       }
 
     short index = findField(fieldcode);
@@ -2630,9 +2612,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
             throw new RuntimeException("No field named " + fieldName + " defined.");
           }
 
-        if (this.permManager != null)
+        if (this.gSession != null)
           {
-            PermEntry perm = this.permManager.getPerm(this, fieldDef.getID());
+            PermEntry perm = this.gSession.getPermManager().getPerm(this, fieldDef.getID());
 
             if (!perm.isVisible())
               {
@@ -2698,9 +2680,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
         fieldName = fieldDef.getName();
 
-        if (this.permManager != null)
+        if (this.gSession != null)
           {
-            PermEntry perm = this.permManager.getPerm(this, fieldID);
+            PermEntry perm = this.gSession.getPermManager().getPerm(this, fieldID);
 
             if (!perm.isVisible())
               {
@@ -3185,7 +3167,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     StringBuffer result = new StringBuffer();
 
-    if (permManager != null && !permManager.getPerm(this).isVisible())
+    if (this.gSession != null && !this.gSession.getPermManager().getPerm(this).isVisible())
       {
         return result;
       }

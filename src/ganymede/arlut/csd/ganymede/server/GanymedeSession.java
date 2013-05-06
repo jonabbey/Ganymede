@@ -3163,7 +3163,6 @@ final public class GanymedeSession implements Session, Unreferenced {
             Ganymede.debug(ts.l("logout.logged_off", permManager.getUserName()));
           }
 
-        permManager = null;
         queryEngine = null;
       }
   }
