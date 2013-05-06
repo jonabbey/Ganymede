@@ -215,7 +215,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   /**
    * <p>Our fields, ordered by ascending field id.</p>
    *
-   * <p>This member variable will be null in the case where we are
+   * <p>This reference will be null in the case where we are
    * constructed as a DBEditObject subclass for use as a pseudo-static
    * objectHook.</p>
    *
@@ -225,37 +225,40 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   private final DBField[] fieldAry;
 
   /**
-   * Permission cache for our fields, in ascending field id order
-   * using the same indexing as fieldAry.
+   * <p>Permission cache for our fields, in ascending field id order
+   * using the same indexing as fieldAry.</p>
+   *
+   * <p>This reference will be null unless this instance was checked
+   * out for editing or viewing by a specific GanymedeSession.</p>
    */
 
   private final PermEntry[] permCacheAry;
 
   /**
-   * If this object is being edited or removed, this points
-   * to the DBEditObject copy that is being edited.  If
-   * this object is not being edited, this field will be null,
-   * and we are available for someone to edit.
+   * <p>If this object is being edited or removed, this points to the
+   * DBEditObject copy that is being edited.  If this object is not
+   * being edited, this field will be null, and we are available for
+   * someone to edit.</p>
    */
 
   private DBEditObject shadowObject = null;
 
   /**
-   * If this object is being viewed by a particular
-   * Ganymede Session, we record that here.
+   * <p>If this object is being viewed by a particular Ganymede
+   * Session, we record that here.</p>
    */
 
   protected final GanymedeSession gSession;
 
   /**
-   * A fixed copy of our Invid, so that we don't have to create
-   * new ones all the time when people call getInvid() on us.
+   * <p>A fixed copy of our Invid, so that we don't have to create new
+   * ones all the time when people call getInvid() on us.</p>
    */
 
   private final Invid myInvid;
 
   /**
-   * used by the DBObjectTable logic
+   * <p>Used by the DBObjectTable logic for hash bucket chaining.</p>
    */
 
   DBObject next = null;
