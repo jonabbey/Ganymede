@@ -70,7 +70,6 @@ import org.python.core.PyInteger;
 
 import arlut.csd.Util.JythonMap;
 import arlut.csd.Util.TranslationService;
-import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.XMLUtils;
 import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.FieldInfo;
