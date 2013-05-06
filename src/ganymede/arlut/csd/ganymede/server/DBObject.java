@@ -315,7 +315,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     this.gSession = null;
     this.permManager = null;
     this.objectBase = objectBase;
-    this.myInvid = receive(in, journalProcessing);
+    this.myInvid = Invid.createInvid(objectBase.getTypeID(), in.readInt());
+
+    this.receive(in, journalProcessing);
 
     DBObject.objectCount++;
   }
@@ -905,7 +907,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * database.</p>
    */
 
-  final synchronized Invid receive(DataInput in, boolean journalProcessing) throws IOException
+  private synchronized void receive(DataInput in, boolean journalProcessing) throws IOException
   {
     DBField
       tmp = null;
@@ -921,18 +923,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       tmp_count,
       upgradeSkipCount = 0;
 
-    Invid receivedInvid = null;
-
     /* -- */
 
-    // get our unique id
-
-    receivedInvid = Invid.createInvid(objectBase.getTypeID(), in.readInt());
-
-    if (debugReceive)
-      {
-        System.err.println("Reading invid " + receivedInvid);
-      }
 
     // get number of fields
 
@@ -1099,8 +1091,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         // "Skipped over {0} objects in deprecated OwnerObjectsOwned field while reading owner group {1}"
         System.err.println(ts.l("receive.upgradeSkippingOwned", Integer.valueOf(upgradeSkipCount), this.getLabel()));
       }
-
-    return receivedInvid;
   }
 
   /**
