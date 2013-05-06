@@ -1623,10 +1623,6 @@ public final class DBPermissionManager {
         return objectPerm;
       }
 
-    // we want to return the more restrictive permissions of the
-    // object's permissions and the field's permissions.. we can never
-    // look at a field in an object we can't look at.
-
     if (permsdebug)
       {
         System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") returning field perms");
@@ -1636,11 +1632,9 @@ public final class DBPermissionManager {
         System.err.println("expandFieldPerm = " + expandFieldPerm);
       }
 
-    // we never want to allow users who don't own an object to edit
-    // the object ownership list, nor do we ever want to allow
-    // non-privileged end users to edit the ownership list.
-
-    // nor do we allow editing the historical fields
+    // we want to return the more restrictive permissions of the
+    // object's permissions and the field's permissions.. we can never
+    // look at a field in an object we can't look at.
 
     if ((fieldId == SchemaConstants.OwnerListField &&
         (!objectIsOwned || personaObj == null)) ||
