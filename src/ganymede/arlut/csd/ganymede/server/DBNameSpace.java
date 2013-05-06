@@ -1242,7 +1242,7 @@ public final class DBNameSpace implements NameSpace {
 
         DBNameSpaceHandle handle = (DBNameSpaceHandle) saveHash.get(key);
 
-        DBNameSpaceHandle handleCopy = (DBNameSpaceHandle) handle.clone();
+        DBNameSpaceHandle handleCopy = new DBNameSpaceHandle(handle);
 
         if (handleCopy.isCheckedOut())
           {
@@ -1687,7 +1687,7 @@ public final class DBNameSpace implements NameSpace {
         {
           DBNameSpaceHandle handle = space.getHandle(value);
 
-          handle = (DBNameSpaceHandle) handle.clone();
+          handle = new DBNameSpaceHandle(handle);
 
           uniqueHash.put(value, handle);
         }
@@ -1740,7 +1740,7 @@ public final class DBNameSpace implements NameSpace {
  * value.
  */
 
-class DBNameSpaceHandle implements Cloneable {
+class DBNameSpaceHandle {
 
   /**
    * So that the namespace hash can be used as an index,
@@ -1774,6 +1774,16 @@ class DBNameSpaceHandle implements Cloneable {
   public DBNameSpaceHandle(DBField field)
   {
     setPersistentField(field);
+  }
+
+  /**
+   * Copy constructor
+   */
+
+  public DBNameSpaceHandle(DBNameSpaceHandle orig)
+  {
+    this.persistentFieldId = orig.persistentFieldId;
+    this.persistentFieldInvid = orig.persistentFieldInvid;
   }
 
   /**
@@ -2098,22 +2108,6 @@ class DBNameSpaceHandle implements Cloneable {
   {
     throw new UnsupportedOperationException();
   }
-
-  /**
-   * We want to allow cloning.
-   */
-
-  public Object clone()
-  {
-    try
-      {
-        return super.clone();
-      }
-    catch (CloneNotSupportedException ex)
-      {
-        throw new RuntimeException(ex.getMessage());
-      }
-  }
 }
 
 /*------------------------------------------------------------------------------
@@ -2203,7 +2197,7 @@ class DBNameSpaceEditingHandle extends DBNameSpaceHandle {
 
   public DBNameSpaceEditingHandle(DBEditSet owner, DBNameSpaceHandle original)
   {
-    super(null);
+    super((DBField) null);
 
     this.editingTransaction = owner;
     this.original = original;

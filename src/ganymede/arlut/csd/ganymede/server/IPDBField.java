@@ -158,7 +158,7 @@ public class IPDBField extends DBField implements ip_field {
 
     if (isVector())
       {
-        this.value = field.getVectVal().clone();
+        this.value = new Vector(field.getVectVal());
       }
     else
       {
@@ -205,7 +205,7 @@ public class IPDBField extends DBField implements ip_field {
       }
     else
       {
-        this.value = values.clone();
+        this.value = new Vector(values);
       }
   }
 

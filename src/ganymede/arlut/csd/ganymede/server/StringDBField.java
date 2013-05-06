@@ -141,7 +141,7 @@ public class StringDBField extends DBField implements string_field {
 
     if (isVector())
       {
-        this.value = field.getVectVal().clone();
+        this.value = new Vector(field.getVectVal());
       }
     else
       {
@@ -184,7 +184,7 @@ public class StringDBField extends DBField implements string_field {
       }
     else
       {
-        this.value = values.clone();
+        this.value = new Vector(values);
       }
   }
 

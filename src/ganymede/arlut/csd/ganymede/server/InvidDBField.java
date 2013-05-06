@@ -186,7 +186,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (isVector())
       {
-        this.value = (Vector) field.getVectVal().clone();
+        this.value = new Vector(field.getVectVal());
       }
     else
       {
@@ -231,7 +231,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-        this.value = values.clone();
+        this.value = new Vector(values);
       }
   }
 

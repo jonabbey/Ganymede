@@ -630,7 +630,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     // keys and values of the matrix are treated as immutable (they
     // are replaced, not changed in-place)
 
-    ((PermissionMatrixDBField) target).matrix = (Hashtable<String, PermEntry>) this.matrix.clone();
+    ((PermissionMatrixDBField) target).matrix = new Hashtable<String, PermEntry>(this.matrix);
 
     return null;
   }
@@ -1451,7 +1451,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   public Hashtable<String, PermEntry> getInnerMatrix()
   {
-    return (Hashtable<String, PermEntry>) this.matrix.clone();
+    return new Hashtable<String, PermEntry>(this.matrix);
   }
 
   /**

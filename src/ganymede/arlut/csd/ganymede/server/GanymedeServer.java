@@ -520,7 +520,7 @@ public final class GanymedeServer implements Server {
     // have to synchronize on sessions and risk nested monitor
     // deadlock
 
-    Vector<GanymedeSession> sessionsCopy = (Vector<GanymedeSession>) userSessions.clone();
+    Vector<GanymedeSession> sessionsCopy = new Vector<GanymedeSession>(userSessions);
 
     for (GanymedeSession session: sessionsCopy)
       {
@@ -539,7 +539,7 @@ public final class GanymedeServer implements Server {
     // clone the sessions Vector so any forceOff() won't disturb the
     // loop
 
-    Vector<GanymedeSession> sessionsCopy = (Vector<GanymedeSession>) userSessions.clone();
+    Vector<GanymedeSession> sessionsCopy = new Vector<GanymedeSession>(userSessions);
 
     for (GanymedeSession session: sessionsCopy)
       {
@@ -1106,7 +1106,7 @@ public final class GanymedeServer implements Server {
         // forceOff modifies GanymedeServer.userSessions, so we need
         // to copy our list before we iterate over it.
 
-        Vector<GanymedeSession> tempList = (Vector<GanymedeSession>) userSessions.clone();
+        Vector<GanymedeSession> tempList = new Vector<GanymedeSession>(userSessions);
 
         for (GanymedeSession temp: tempList)
           {
@@ -1778,7 +1778,7 @@ public final class GanymedeServer implements Server {
 
   public static void sendMessageToRemoteSessions(int type, String message, GanymedeSession self)
   {
-    Vector<GanymedeSession> sessionsCopy = (Vector<GanymedeSession>) userSessions.clone();
+    Vector<GanymedeSession> sessionsCopy = new Vector<GanymedeSession>(userSessions);
 
     for (GanymedeSession session: sessionsCopy)
       {

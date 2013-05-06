@@ -1086,7 +1086,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
         // we have to clone our values Vector in order to use
         // deleteElements().
 
-        Vector currentValues = (Vector) getVectVal().clone();
+        Vector currentValues = new Vector(getVectVal());
 
         if (currentValues.size() != 0)
           {
@@ -2882,7 +2882,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
   public final ReturnVal deleteAllElements() throws GanyPermissionsException
   {
-    return this.deleteElements((Vector) this.getValues().clone());
+    return this.deleteElements(this.getValues());
   }
 
   /**
@@ -3681,7 +3681,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (isVector())
       {
-        return getVectVal().clone();
+        return new Vector(getVectVal());
       }
     else
       {
