@@ -280,13 +280,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public DBObject(DBObjectBase base)
   {
+    this.objectBase = base;
     this.gSession = null;
     this.permManager = null;
     this.permCacheAry = null;
     this.fieldAry = null;
     this.myInvid = null;
-    this.gSession = null;
-    this.objectBase = base;
   }
 
   /**
@@ -336,7 +335,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
       }
 
     this.fieldAry = new DBField[tmp_count];
-    this.gSession = null;
     this.receive(in, journalProcessing);
 
     DBObject.objectCount++;
@@ -370,7 +368,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     this.permCacheAry = null;
     this.objectBase = eObj.objectBase;
     this.myInvid = eObj.getInvid();
-    this.objectBase = eObj.objectBase;
 
     synchronized (eObj)
       {
