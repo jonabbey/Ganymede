@@ -660,8 +660,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
           }
       }
 
+    this.permCacheAry = null;
     this.fieldAry = new DBField[fieldMap.size()];
-    this.permCacheAry = new PermEntry[fieldMap.size()];
 
     int i = 0;
 
