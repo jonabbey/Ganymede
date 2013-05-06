@@ -1636,6 +1636,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   /**
    * <p>This method clears any cached PermEntry value for the
    * given field id.</p>.
+   *
+   * <p>It is intended for use by custom DBEditObject subclasses which
+   * oversee some of their own permissions.  By calling this method, a
+   * subclass can remove a cached field permission and cause the
+   * permissions system to consult with the controlling custom
+   * DBEditObject subclass afresh.</p>
    */
 
   public final void clearFieldPerm(short id)
