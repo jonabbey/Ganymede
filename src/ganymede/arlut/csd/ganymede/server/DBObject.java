@@ -337,7 +337,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
     this.fieldAry = new DBField[tmp_count];
     this.gSession = null;
-
     this.receive(in, journalProcessing);
 
     DBObject.objectCount++;
