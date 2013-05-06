@@ -857,9 +857,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
               {
                 result = permManager.getPerm(this);
               }
-          }
 
-        permCacheAry[index] = result;
+            permCacheAry[index] = result;
+          }
       }
 
     return result;
@@ -1554,83 +1554,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
             bubbleField = currentField;
 
             i++;
-          }
-      }
-  }
-
-  /**
-   * <p>This method replaces a DBField with a given field id in this
-   * object's fieldAry DBField array with a new DBField sharing the
-   * same id.  If this DBObject does not contain a field with the same
-   * id as the field argument for this method, no action will be taken
-   * and an IllegalArgumentException will be thrown.</p>
-   *
-   * <p>replaceField() saves fields in field id order to try and speed
-   * up field retrieving, by allowing us to do boolean search to find
-   * elements.</p>
-   */
-
-  final void replaceField(DBField field)
-  {
-    if (fieldAry == null)
-      {
-        throw new NullPointerException(ts.l("global.pseudostatic"));
-      }
-
-    if (field == null)
-      {
-        // "null value passed to replaceField"
-        throw new IllegalArgumentException(ts.l("replaceField.null"));
-      }
-
-    synchronized (fieldAry)
-      {
-        int index = java.util.Arrays.binarySearch(fieldAry, field);
-
-        if (index < 0)
-          {
-            // "Error, DBObject.replaceField could not find matching field"
-            throw new IllegalArgumentException(ts.l("replaceField.none"));
-          }
-
-        fieldAry[index] = field;
-
-        if (permCacheAry != null)
-          {
-            permCacheAry[index] = null;
-          }
-      }
-  }
-
-  /**
-   * <p>This method removes a DBField that has the a field id matching
-   * the argument from this object's fieldAry.  This method will never
-   * fail..  if there is no field matching the given field id, the
-   * method will return without changing the fieldAry.</p>
-   */
-
-  final void clearField(short id)
-  {
-    if (fieldAry == null)
-      {
-        throw new NullPointerException(ts.l("global.pseudostatic"));
-      }
-
-    synchronized (fieldAry)
-      {
-        int index = java.util.Arrays.binarySearch(fieldAry, id);
-
-        if (index < 0)
-          {
-            // "Error, DBObject.replaceField could not find matching field"
-            throw new IllegalArgumentException(ts.l("replaceField.none"));
-          }
-
-        fieldAry[index] = null;
-
-        if (permCacheAry != null)
-          {
-            permCacheAry[index] = null;
           }
       }
   }

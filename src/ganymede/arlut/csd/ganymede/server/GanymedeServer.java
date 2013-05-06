@@ -1237,11 +1237,7 @@ public final class GanymedeServer implements Server {
 
   public boolean sweepInvids()
   {
-    Vector<Short>
-      removeVector;
-
     boolean
-      vectorEmpty = true,
       swept = false;
 
     // XXX
@@ -1280,8 +1276,6 @@ public final class GanymedeServer implements Server {
 
             for (DBObject object: base.getObjects())
               {
-                removeVector = new Vector<Short>();
-
                 // loop 3: iterate over the fields present in this object
 
                 for (DBField field: object.getFieldVect())
@@ -1296,7 +1290,6 @@ public final class GanymedeServer implements Server {
                     if (iField.isVector())
                       {
                         Vector<Invid> tempVector = (Vector<Invid>) iField.getVectVal();
-                        vectorEmpty = true;
 
                         // clear out the invid's held in this field pending
                         // successful lookup
@@ -1308,7 +1301,6 @@ public final class GanymedeServer implements Server {
                             if (session.viewDBObject(invid) != null)
                               {
                                 iField.getVectVal().add(invid); // keep this invid
-                                vectorEmpty = false;
                               }
                             else
                               {
@@ -1322,13 +1314,6 @@ public final class GanymedeServer implements Server {
                               }
                           }
 
-                        // now, if the vector is totally empty, we'll be removing
-                        // this field from definition
-
-                        if (vectorEmpty)
-                          {
-                            removeVector.add(Short.valueOf(iField.getID()));
-                          }
                       }
                     else
                       {
@@ -1337,7 +1322,6 @@ public final class GanymedeServer implements Server {
                         if (session.viewDBObject(invid) == null)
                           {
                             swept = true;
-                            removeVector.add(Short.valueOf(iField.getID()));
 
                             Ganymede.debug(ts.l("sweepInvids.removing_scalar",
                                                 invid.toString(),
@@ -1346,18 +1330,6 @@ public final class GanymedeServer implements Server {
                                                 object.getLabel()));
                           }
                       }
-                  }
-
-                // need to remove undefined fields now
-
-                for (Short fieldID: removeVector)
-                  {
-                    object.clearField(fieldID.shortValue());
-
-                    Ganymede.debug(ts.l("sweepInvids.undefining",
-                                        fieldID.toString(),
-                                        base.getName(),
-                                        object.getLabel()));
                   }
               }
           }
