@@ -1285,12 +1285,14 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * <p>Returns the value of this field, if a scalar.  An IllegalArgumentException
-   * will be thrown if this field is a vector.</p>
+   * <p>Returns the value of this field, if a scalar.  An
+   * IllegalArgumentException will be thrown if this field is a
+   * vector.</p>
    *
    * <p>This method will throw a GanyPermissionsException if this
    * DBObject is being viewed by a GanymedeSession, and that
-   * GanymedeSession lacks appropriate permission to see the value.</p>
+   * GanymedeSession lacks appropriate permission to see the
+   * value.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_field
    */
@@ -1455,6 +1457,12 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     /* -- */
 
+    if (!isEditable(local))     // *sync* possible
+      {
+        // "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
+        throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
+      }
+
     if (isVector())
       {
         // "Scalar method called on a vector field: {0} in object {1}"
@@ -1464,12 +1472,6 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     if (this.value == submittedValue || (this.value != null && this.value.equals(submittedValue)))
       {
         return null;            // no change (useful for null and for xmlclient)
-      }
-
-    if (!isEditable(local))     // *sync* possible
-      {
-        // "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
-        throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
       }
 
     if (submittedValue instanceof String)
