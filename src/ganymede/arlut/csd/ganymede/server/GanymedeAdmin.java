@@ -866,37 +866,32 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
         asyncPort.shutdown();
       }
 
-    synchronized (GanymedeAdmin.consoles)
+    if (consoles.remove(this))
       {
-        if (consoles.contains(this))
+        String eventStr = null;
+
+        if (reason == null)
           {
-            consoles.remove(this);
-
-            String eventStr = null;
-
-            if (reason == null)
-              {
-                // "Admin console {0} detached from {1}"
-                eventStr = ts.l("logout.without_reason", adminName, clientHost);
-              }
-            else
-              {
-                // "Admin console {0} detached from {1}: {2}"
-                eventStr = ts.l("logout.with_reason", adminName, clientHost, reason);
-              }
-
-            if (Ganymede.log != null)
-              {
-                Ganymede.log.logSystemEvent(new DBLogEvent("admindisconnect",
-                                                           eventStr,
-                                                           null,
-                                                           adminName,
-                                                           null,
-                                                           null));
-              }
-
-            setConsoleCount();
+            // "Admin console {0} detached from {1}"
+            eventStr = ts.l("logout.without_reason", adminName, clientHost);
           }
+        else
+          {
+            // "Admin console {0} detached from {1}: {2}"
+            eventStr = ts.l("logout.with_reason", adminName, clientHost, reason);
+          }
+
+        if (Ganymede.log != null)
+          {
+            Ganymede.log.logSystemEvent(new DBLogEvent("admindisconnect",
+                                                       eventStr,
+                                                       null,
+                                                       adminName,
+                                                       null,
+                                                       null));
+          }
+
+        setConsoleCount();
       }
   }
 
