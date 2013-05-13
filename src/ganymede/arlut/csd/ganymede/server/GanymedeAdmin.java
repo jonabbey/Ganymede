@@ -881,6 +881,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
             eventStr = ts.l("logout.with_reason", adminName, clientHost, reason);
           }
 
+        Ganymede.debug(eventStr);
+
         if (Ganymede.log != null)
           {
             Ganymede.log.logSystemEvent(new DBLogEvent("admindisconnect",
