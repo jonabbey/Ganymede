@@ -836,6 +836,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * is looping over the static GanymedeAdmin.consoles Vector, or else
    * the Vector will be changed from within the loop, possibly
    * resulting in an exception being thrown.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.adminSession
    */
 
   public void logout()
@@ -927,6 +929,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * personal system firewall.  The serverAdminAsyncResponder blocks
    * while there is no message to send, and the console will poll for
    * new messages.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.adminSession
    */
 
   public AdminAsyncResponder getAsyncPort() throws RemoteException
@@ -950,6 +954,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.adminSession
    */
 
   public void refreshMe() throws RemoteException
@@ -988,6 +994,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.adminSession
    */
 
   public ReturnVal forceBuild()
@@ -1015,6 +1023,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.adminSession
    */
 
   public ReturnVal killAll()
@@ -1040,6 +1050,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.adminSession
    */
 
   public ReturnVal kill(String user)
@@ -1075,6 +1087,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * out.  No new users will be allowed to login.
    *
    * @param reason Message to be logged and displayed to any users connected.
+   *
+   * @see arlut.csd.ganymede.rmi.adminSession
    */
 
   public ReturnVal shutdown(boolean waitForUsers, String reason)
@@ -1111,6 +1125,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * and may be called remotely by attached admin consoles.</p>
    *
    * @see arlut.csd.ganymede.server.DBStore#dump(java.lang.String, boolean, boolean)
+   *
+   * @see arlut.csd.ganymede.rmi.adminSession
    */
 
   public ReturnVal dumpDB()
@@ -1162,6 +1178,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.adminSession
    */
 
   public ReturnVal runInvidTest()
@@ -1205,6 +1223,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.adminSession
    */
 
   public ReturnVal runInvidSweep()
@@ -1237,6 +1257,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.adminSession
    */
 
   public ReturnVal runEmbeddedTest()
@@ -1275,6 +1297,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.adminSession
    */
 
   public ReturnVal runEmbeddedSweep()
@@ -1300,6 +1324,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * and may be called remotely by attached admin consoles.</p>
    *
    * @param name The name of the task to run
+   *
+   * @see arlut.csd.ganymede.rmi.adminSession
    */
 
   public ReturnVal runTaskNow(String name)
@@ -1333,6 +1359,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * and may be called remotely by attached admin consoles.</p>
    *
    * @param name The name of the task to interrupt
+   *
+   * @see arlut.csd.ganymede.rmi.adminSession
    */
 
   public ReturnVal stopTask(String name)
@@ -1365,6 +1393,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * and may be called remotely by attached admin consoles.</p>
    *
    * @param name The name of the task to disable
+   *
+   * @see arlut.csd.ganymede.rmi.adminSession
    */
 
   public ReturnVal disableTask(String name)
@@ -1396,6 +1426,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * and may be called remotely by attached admin consoles.</p>
    *
    * @param name The name of the task to enable
+   *
+   * @see arlut.csd.ganymede.rmi.adminSession
    */
 
   public ReturnVal enableTask(String name)
@@ -1434,6 +1466,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * <p>This method is part of the {@link
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.adminSession
    */
 
   public SchemaEdit editSchema()
@@ -1538,6 +1572,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    *
    * <p>Otherwise, the server will return information about all logins
    * and logouts that occurred after startDate.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.adminSession
    */
 
   public String getLoginHistory(Date startDate)
