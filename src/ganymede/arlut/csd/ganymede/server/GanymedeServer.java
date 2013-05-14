@@ -1088,8 +1088,18 @@ public final class GanymedeServer implements Server {
 
     if (GanymedeServer.shutdownReason == null)
       {
-        // "Server going down"
-        shuttingDownNowMsg = ts.l("shutdown.clientNotification");
+        if (GanymedeServer.shutdownAdmin == null)
+          {
+            // "Server going down"
+            shuttingDownNowMsg = ts.l("shutdown.clientNotification");
+          }
+        else
+          {
+            // "Ganymede admin ''{0}'' on host ''{1}'' shutting down server"
+            shuttingDownNowMsg = ts.l("shutdown.console_notify_admin",
+                                      shutdownAdmin.getAdminName(),
+                                      shutdownAdmin.getAdminHost());
+          }
       }
     else
       {
