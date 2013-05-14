@@ -61,6 +61,7 @@ import java.util.Vector;
 
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.AdminEntry;
+import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.scheduleHandle;
 import arlut.csd.ganymede.rmi.AdminAsyncResponder;
@@ -609,6 +610,13 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   /* --- */
 
   /**
+   * <p>The Invid of the admin that logged in to get this
+   * GanymedeAdmin object on the server.</p>
+   */
+
+  private final Invid adminInvid;
+
+  /**
    * The name that the admin console authenticated with.  We
    * keep it here rather than asking the console later so that
    * the console can't decide it should call itself 'supergash'
@@ -660,7 +668,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * calling this constructor.</p>
    */
 
-  public GanymedeAdmin(boolean fullprivs, String adminName, String clientHost) throws RemoteException
+  public GanymedeAdmin(boolean fullprivs, Invid adminInvid, String adminName, String clientHost) throws RemoteException
   {
     Ganymede.rmi.publishObject(this);
 
@@ -676,6 +684,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     this.asyncPort = new serverAdminAsyncResponder();
     this.fullprivs = fullprivs;
+    this.adminInvid = adminInvid;
     this.adminName = adminName;
     this.clientHost = clientHost;
 
@@ -1100,7 +1109,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     if (waitForUsers)
       {
-        GanymedeServer.setShutdown(reason);
+        GanymedeServer.setShutdown(reason, this.adminInvid);
 
         // "Server Set For Shutdown"
         // "The server is prepared for shut down.  Shutdown will commence as soon as all current users log out."
@@ -1109,8 +1118,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
       }
     else
       {
-        return GanymedeServer.shutdown(reason); // we may never return if the shutdown succeeds.. the client
-                                                // will catch an exception in that case.
+        return GanymedeServer.shutdown(reason, this.adminInvid); // we may never return if the shutdown succeeds.. the client
+                                                                 // will catch an exception in that case.
       }
   }
 

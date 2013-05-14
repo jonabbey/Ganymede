@@ -187,6 +187,14 @@ public final class GanymedeServer implements Server {
   static private String shutdownReason = null;
 
   /**
+   * <p>If the server was ordered to shut down by an admin on the
+   * admin console or via the stopServer command line tool, record the
+   * admin's identity here.</p>
+   */
+
+  static private Invid shutdownAdmin = null;
+
+  /**
    * <p>During the login process, we need to get exclusive access over
    * an extended time to synchronized methods in a privileged
    * GanymedeSession to do the query operations for login.  If we used
@@ -620,7 +628,7 @@ public final class GanymedeServer implements Server {
                                           ts.l("admin.baduserpass"));
       }
 
-    adminSession aSession = new GanymedeAdmin(validationResult >= 2, clientName, clientHost);
+    adminSession aSession = new GanymedeAdmin(validationResult >= 2, adminObj.getInvid(), clientName, clientHost);
 
     // now Ganymede.debug() will write to the newly attached console,
     // even though we haven't returned the admin session to the admin
@@ -945,7 +953,7 @@ public final class GanymedeServer implements Server {
                         {
                         }
 
-                      GanymedeServer.shutdown(null);
+                      GanymedeServer.shutdown();
                     }
                   }, ts.l("clearActiveUser.deathThread"));
 
@@ -979,11 +987,16 @@ public final class GanymedeServer implements Server {
    * 'shutdown soon' mode.</p>
    */
 
-  public static void setShutdown(String reason)
+  public static void setShutdown(String reason, Invid adminInvid)
   {
     if (reason != null)
       {
         GanymedeServer.shutdownReason = reason;
+      }
+
+    if (adminInvid != null)
+      {
+        GanymedeServer.shutdownAdmin = adminInvid;
       }
 
     // turn off the login semaphore.  this will block any new clients
@@ -1005,7 +1018,7 @@ public final class GanymedeServer implements Server {
       {
         GanymedeAdmin.setState(ts.l("setShutDown.nousers_state"));
 
-        GanymedeServer.shutdown(null);
+        GanymedeServer.shutdown();
 
         return;
       }
@@ -1020,14 +1033,29 @@ public final class GanymedeServer implements Server {
   }
 
   /**
+   * <p>Shut down the server without changing any previously set
+   * shutdownReason or shutdownAdmin identifier.</p>
+   */
+
+  public static ReturnVal shutdown()
+  {
+    return GanymedeServer.shutdown(null, null);
+  }
+
+  /**
    * <p>This method actually does the shutdown.</p>
    */
 
-  public static ReturnVal shutdown(String reason)
+  public static ReturnVal shutdown(String reason, Invid adminInvid)
   {
     if (reason != null)
       {
         GanymedeServer.shutdownReason = reason;
+      }
+
+    if (adminInvid != null)
+      {
+        GanymedeServer.shutdownAdmin = adminInvid;
       }
 
     String semaphoreState = GanymedeServer.lSemaphore.checkEnabled();
@@ -1144,9 +1172,22 @@ public final class GanymedeServer implements Server {
 
         if (Ganymede.log != null)
           {
+            String shutdownMsg = null;
+
+            if (shutdownReason == null)
+              {
+                // "Server shutdown"
+                shutdownMsg = ts.l("shutdown.logevent");
+              }
+            else
+              {
+                // Server shutdown for ''{0}''
+                shutdownMsg = ts.l("shutdown.logevent_reason", shutdownReason);
+              }
+
             Ganymede.log.logSystemEvent(new DBLogEvent("shutdown",
-                                                       ts.l("shutdown.logevent"),
-                                                       null,
+                                                       shutdownMsg,
+                                                       shutdownAdmin,
                                                        null,
                                                        null,
                                                        null));

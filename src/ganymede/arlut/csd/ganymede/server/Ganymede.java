@@ -1482,7 +1482,7 @@ public final class Ganymede {
         public void run() {
           try
             {
-              GanymedeServer.shutdown(null);
+              GanymedeServer.shutdown("SIGQUIT received", null);
             }
           finally
             {
@@ -2122,7 +2122,7 @@ class GanymedeStartupException extends Exception {
 
     if (Ganymede.server != null)
       {
-        GanymedeServer.shutdown(null);
+        GanymedeServer.shutdown("Error thrown during startup", null);
       }
 
     System.exit(1);
@@ -2179,7 +2179,7 @@ class GanymedeSilentStartupException extends GanymedeStartupException {
 
     if (Ganymede.server != null)
       {
-        GanymedeServer.shutdown(null);
+        GanymedeServer.shutdown("Error thrown during startup", null);
       }
 
     System.exit(1);
