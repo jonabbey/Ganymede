@@ -242,6 +242,8 @@ public final class GanymedeServer implements Server {
    * {@link arlut.csd.ganymede.client.ClientBase ClientBase} class can
    * test to see whether it has truly gotten a valid RMI reference to
    * the server.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.Server
    */
 
   public boolean up() throws RemoteException
@@ -395,8 +397,8 @@ public final class GanymedeServer implements Server {
   }
 
   /**
-   * Returns null if we were able to increment the login semaphore, or
-   * a ReturnVal encoding the problem if not.
+   * <p>Returns null if we were able to increment the login semaphore,
+   * or a ReturnVal encoding the problem if not.</p>
    */
 
   private ReturnVal incrementAndTestLoginSemaphore()
@@ -516,9 +518,9 @@ public final class GanymedeServer implements Server {
   }
 
   /**
-   * This method is called by the {@link
+   * <p>This method is called by the {@link
    * arlut.csd.ganymede.server.timeOutTask timeOutTask} scheduled
-   * task, and forces an idle time check on any users logged in.
+   * task, and forces an idle time check on any users logged in.</p>
    */
 
   public void clearIdleSessions()
