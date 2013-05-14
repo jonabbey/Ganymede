@@ -192,7 +192,7 @@ public final class GanymedeServer implements Server {
    * admin's identity here.</p>
    */
 
-  static private Invid shutdownAdmin = null;
+  static private GanymedeAdmin shutdownAdmin = null;
 
   /**
    * <p>During the login process, we need to get exclusive access over
@@ -989,16 +989,16 @@ public final class GanymedeServer implements Server {
    * 'shutdown soon' mode.</p>
    */
 
-  public static void setShutdown(String reason, Invid adminInvid)
+  public static void setShutdown(String reason, GanymedeAdmin adminConsole)
   {
     if (reason != null)
       {
         GanymedeServer.shutdownReason = reason;
       }
 
-    if (adminInvid != null)
+    if (adminConsole != null)
       {
-        GanymedeServer.shutdownAdmin = adminInvid;
+        GanymedeServer.shutdownAdmin = adminConsole;
       }
 
     // turn off the login semaphore.  this will block any new clients
@@ -1048,16 +1048,16 @@ public final class GanymedeServer implements Server {
    * <p>This method actually does the shutdown.</p>
    */
 
-  public static ReturnVal shutdown(String reason, Invid adminInvid)
+  public static ReturnVal shutdown(String reason, GanymedeAdmin adminConsole)
   {
     if (reason != null)
       {
         GanymedeServer.shutdownReason = reason;
       }
 
-    if (adminInvid != null)
+    if (adminConsole != null)
       {
-        GanymedeServer.shutdownAdmin = adminInvid;
+        GanymedeServer.shutdownAdmin = adminConsole;
       }
 
     String semaphoreState = GanymedeServer.lSemaphore.checkEnabled();
@@ -1083,6 +1083,32 @@ public final class GanymedeServer implements Server {
                                               ts.l("shutdown.failure_text", semaphoreState));
           }
       }
+
+    String shuttingDownNowMsg = null;
+
+    if (GanymedeServer.shutdownReason == null)
+      {
+        // "Server going down"
+        shuttingDownNowMsg = ts.l("shutdown.clientNotification");
+      }
+    else
+      {
+        if (GanymedeServer.shutdownAdmin == null)
+          {
+            // "Ganymede server going down for ''{0}''"
+            shuttingDownNowMsg = ts.l("shutdown.console_notify_reason", GanymedeServer.shutdownReason);
+          }
+        else
+          {
+            // "Ganymede admin ''{1}'' on host ''{2}'' shutting down server for ''{0}''"
+            shuttingDownNowMsg = ts.l("shutdown.console_notify_reason_admin",
+                                      GanymedeServer.shutdownReason,
+                                      shutdownAdmin.getAdminName(),
+                                      shutdownAdmin.getAdminHost());
+          }
+      }
+
+    Ganymede.debug(shuttingDownNowMsg);
 
     // "Server going down.. waiting for any builder tasks to finish phase 2"
     Ganymede.debug(ts.l("shutdown.goingdown"));
@@ -1140,16 +1166,7 @@ public final class GanymedeServer implements Server {
 
         for (GanymedeSession temp: tempList)
           {
-            if (shutdownReason != null)
-              {
-                // "Server going down"
-                temp.forceOff(ts.l("shutdown.clientNotification"));
-              }
-            else
-              {
-                // "Server going down\n\nReason:{0}"
-                temp.forceOff(ts.l("shutdown.clientNotification_reason", shutdownReason));
-              }
+            temp.forceOff(shuttingDownNowMsg);
           }
 
         // "Server going down.. interrupting scheduler"
@@ -1160,6 +1177,7 @@ public final class GanymedeServer implements Server {
         // "Server going down.. disconnecting consoles"
         Ganymede.debug(ts.l("shutdown.consoles"));
 
+        // "Server going down now."
         GanymedeAdmin.closeAllConsoles(ts.l("shutdown.byeconsoles"));
 
         // disconnect the Jython server
@@ -1174,25 +1192,24 @@ public final class GanymedeServer implements Server {
 
         if (Ganymede.log != null)
           {
-            String shutdownMsg = null;
-
-            if (shutdownReason == null)
+            if (shutdownAdmin == null)
               {
-                // "Server shutdown"
-                shutdownMsg = ts.l("shutdown.logevent");
+                Ganymede.log.logSystemEvent(new DBLogEvent("shutdown",
+                                                           shuttingDownNowMsg,
+                                                           null,
+                                                           null,
+                                                           null,
+                                                           null));
               }
             else
               {
-                // Server shutdown for ''{0}''
-                shutdownMsg = ts.l("shutdown.logevent_reason", shutdownReason);
+                Ganymede.log.logSystemEvent(new DBLogEvent("shutdown",
+                                                           shuttingDownNowMsg,
+                                                           shutdownAdmin.getAdminInvid(),
+                                                           null,
+                                                           null,
+                                                           null));
               }
-
-            Ganymede.log.logSystemEvent(new DBLogEvent("shutdown",
-                                                       shutdownMsg,
-                                                       shutdownAdmin,
-                                                       null,
-                                                       null,
-                                                       null));
 
             System.err.println();
 

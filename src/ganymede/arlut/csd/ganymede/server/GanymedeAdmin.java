@@ -1089,10 +1089,11 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
    * and may be called remotely by attached admin consoles.</p>
    *
-   * @param waitForUsers if true, shutdown will be deferred until all users are logged
-   * out.  No new users will be allowed to login.
+   * @param waitForUsers if true, shutdown will be deferred until all
+   * users are logged out.  No new users will be allowed to login.
    *
-   * @param reason Message to be logged and displayed to any users connected.
+   * @param reason Message to be logged and displayed to any users
+   * connected.
    *
    * @see arlut.csd.ganymede.rmi.adminSession
    */
@@ -1109,7 +1110,7 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
 
     if (waitForUsers)
       {
-        GanymedeServer.setShutdown(reason, this.adminInvid);
+        GanymedeServer.setShutdown(reason, this);
 
         // "Server Set For Shutdown"
         // "The server is prepared for shut down.  Shutdown will commence as soon as all current users log out."
@@ -1118,8 +1119,8 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
       }
     else
       {
-        return GanymedeServer.shutdown(reason, this.adminInvid); // we may never return if the shutdown succeeds.. the client
-                                                                 // will catch an exception in that case.
+        return GanymedeServer.shutdown(reason, this); // we may never return if the shutdown succeeds.. the client
+                                                      // will catch an exception in that case.
       }
   }
 
@@ -1127,10 +1128,12 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
    * <p>Dumps the current state of the db to disk.</p>
    *
    * <p>This method is part of the {@link
-   * arlut.csd.ganymede.rmi.adminSession adminSession} remote interface,
-   * and may be called remotely by attached admin consoles.</p>
+   * arlut.csd.ganymede.rmi.adminSession adminSession} remote
+   * interface, and may be called remotely by attached admin
+   * consoles.</p>
    *
-   * @see arlut.csd.ganymede.server.DBStore#dump(java.lang.String, boolean, boolean)
+   * @see arlut.csd.ganymede.server.DBStore#dump(java.lang.String,
+   * boolean, boolean)
    *
    * @see arlut.csd.ganymede.rmi.adminSession
    */
@@ -1585,5 +1588,34 @@ final class GanymedeAdmin implements adminSession, Unreferenced {
   public String getLoginHistory(Date startDate)
   {
     return Ganymede.log.retrieveHistory(null, startDate, null, false, false, true).toString();
+  }
+
+  /**
+   * <p>Return the Invid of the admin who is logged into this console.</p>
+   */
+
+  public Invid getAdminInvid()
+  {
+    return this.adminInvid;
+  }
+
+  /**
+   * <p>Return the login name of the admin who is logged into this
+   * console.</p>
+   */
+
+  public String getAdminName()
+  {
+    return this.adminName;
+  }
+
+  /**
+   * <p>Return the hostname from which the admin who is logged into
+   * this console is connected.</p>
+   */
+
+  public String getAdminHost()
+  {
+    return this.clientHost;
   }
 }
