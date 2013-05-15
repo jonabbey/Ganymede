@@ -87,6 +87,7 @@ import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
@@ -1542,7 +1543,12 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
 
         try
           {
-            success = adminDispatch.shutdown(waitForUsers, null);
+
+	    // TODO HERE IS THE ACTUAL CALL JAMES...  TEST
+	    String reason = shutdownDialog.getReasonField();
+
+            //success = adminDispatch.shutdown(waitForUsers, null);
+            success = adminDispatch.shutdown(waitForUsers, reason);
           }
         catch (RemoteException ex)
           {
@@ -2015,6 +2021,9 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
   JLabel
     imageCanvas;
 
+  JTextArea 
+    reasonField;
+
   JButton
     button1, button2, button3;
 
@@ -2030,16 +2039,42 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
 
     this.addWindowListener(this);
 
-    gbl = new GridBagLayout();
-    gbc = new GridBagConstraints();
-
-    gbc.insets = new Insets(4,4,4,4);
-
     mainPanel = new JPanel();
     mainPanel.setBorder(new CompoundBorder(new EtchedBorder(),
                                            new EmptyBorder(10, 10, 10, 10)));
+    gbl = new GridBagLayout();
+    gbc = new GridBagConstraints();
+    gbc.insets = new Insets(4,4,4,4);
+
     mainPanel.setLayout(gbl);
     setContentPane(mainPanel);
+
+
+    //
+    // Image on left hand side
+    //
+
+    image = arlut.csd.Util.PackageResources.getImageResource(frame, "question.gif", frame.getClass());
+    imagePanel = new JPanel();
+
+    if (image != null)
+      {
+        imageCanvas = new JLabel(new ImageIcon(image));
+        imagePanel.add(imageCanvas);
+      }
+    else
+      {
+        imagePanel.add(Box.createGlue());
+      }
+ 
+    gbc.gridx = 0;
+    gbc.gridy = 0;
+    gbc.gridwidth = 1;
+    gbc.gridheight = GridBagConstraints.REMAINDER;
+    gbc.weightx = 0.0;
+    gbc.anchor = GridBagConstraints.NORTH;
+    gbl.setConstraints(imagePanel, gbc);
+    mainPanel.add(imagePanel);
 
     //
     // Text message under title
@@ -2048,27 +2083,52 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
     // "Are you sure you want to shut down the Ganymede server\nrunning at {0}?"
 
     textLabel = new JMultiLineLabel(ts.l("global.question", GASHAdmin.server_url));
-
-    gbc.gridy = 0;
     gbc.gridx = 1;
-    gbc.gridwidth = 1;
+    gbc.gridy = 0;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridheight = 1;
     gbl.setConstraints(textLabel, gbc);
     mainPanel.add(textLabel);
+
 
     //
     // Separator goes all the way accross
     //
 
     JSeparator sep = new JSeparator();
-
-    gbc.gridx = 0;
-    gbc.gridy = 2;
-    gbc.gridwidth = 2;
+    gbc.gridx = 1;
+    gbc.gridy = 1;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridheight = 1;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbl.setConstraints(sep, gbc);
     mainPanel.add(sep);
+
+
+    // TODO add localization.
+    // Label:   Reason:
+    JLabel reasonLabel = new JLabel("Reason: ");
+    gbc.gridx = 1;
+    gbc.gridy = 2;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.anchor = GridBagConstraints.NORTH;
+    gbl.setConstraints(reasonLabel, gbc);
+    mainPanel.add(reasonLabel);
+
+
+    // JAMES DEBUG AREA
+    // Textarea for reason of shutdown.
+    reasonField = new JTextArea(4,40);
+    gbc.gridx = 2;
+    gbc.gridy = 2;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbl.setConstraints(reasonField, gbc);
+    mainPanel.add(reasonField);
+
 
     //
     // ButtonPanel takes up the bottom of the dialog
@@ -2092,39 +2152,14 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
     // buttonPanel goes underneath
     //
 
-    gbc.gridx = 0;
-    gbc.gridy = 3;
-    gbc.gridwidth = 2;
+    gbc.gridx = 1;
+    gbc.gridy = 5;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridheight = 1;
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbl.setConstraints(buttonPanel, gbc);
     mainPanel.add(buttonPanel);
 
-    //
-    // Image on left hand side
-    //
-
-    image = arlut.csd.Util.PackageResources.getImageResource(frame, "question.gif", frame.getClass());
-    imagePanel = new JPanel();
-
-    if (image != null)
-      {
-        imageCanvas = new JLabel(new ImageIcon(image));
-        imagePanel.add(imageCanvas);
-      }
-    else
-      {
-        imagePanel.add(Box.createGlue());
-      }
-
-    gbc.gridx = 0;
-    gbc.gridy = 0;
-    gbc.gridwidth = 1;
-    gbc.gridheight = 2;
-    gbc.weightx = 0.0;
-    gbc.fill = GridBagConstraints.NONE;
-    gbl.setConstraints(imagePanel, gbc);
-    mainPanel.add(imagePanel);
 
     pack();
   }
@@ -2183,6 +2218,13 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
 
     setVisible(false);
   }
+
+
+  public String getReasonField()
+  {
+    return this.reasonField.getText();
+  }
+
 
   // WindowListener methods
 
