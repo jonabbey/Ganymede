@@ -185,7 +185,7 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
     gbc.gridy = 0;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridheight = 1;
-    gbc.anchor = GridBagConstraints.WEST; // TODO TEST
+    gbc.anchor = GridBagConstraints.WEST; 
     gbl.setConstraints(textLabel, gbc);
     mainPanel.add(textLabel);
 
@@ -216,7 +216,6 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
     mainPanel.add(reasonLabel);
 
 
-    // JAMES DEBUG AREA
     // Textarea for reason of shutdown.
     reasonField = new JTextArea(4,40);
     gbc.gridx = 2;
