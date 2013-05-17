@@ -1,6 +1,6 @@
 /*
    GASHAdminFrame.java
-
+ 
    Admin console for the Java RMI Gash Server
 
    Created: 7 September 2003
@@ -50,11 +50,8 @@ package arlut.csd.ganymede.admin;
 import java.awt.AWTEvent;
 import java.awt.BorderLayout;
 import java.awt.Color;
-//import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.EventQueue;
-//import java.awt.Font;
-//import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
@@ -72,9 +69,6 @@ import java.rmi.server.RemoteServer;
 import java.util.prefs.Preferences;
 
 import javax.swing.Box;
-//import javax.swing.ImageIcon;
-//import javax.swing.JButton;
-//import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -83,17 +77,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-//import javax.swing.JSeparator;
 import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextPane;
-//import javax.swing.JTextArea;
 import javax.swing.JTextField;
-//import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-//import javax.swing.border.CompoundBorder;
-//import javax.swing.border.EmptyBorder;
-//import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
 import javax.swing.text.BadLocationException;
@@ -108,13 +96,10 @@ import arlut.csd.JDataComponent.JSetValueObject;
 import arlut.csd.JDataComponent.JValueObject;
 import arlut.csd.JDataComponent.JErrorValueObject;
 import arlut.csd.JDataComponent.JsetValueCallback;
-//import arlut.csd.JDataComponent.JFocusRootPanel;
-//import arlut.csd.JDataComponent.JMultiLineLabel;
 import arlut.csd.JDataComponent.LAFMenu;
 import arlut.csd.JDialog.DialogRsrc;
 import arlut.csd.JDialog.JErrorDialog;
 import arlut.csd.JDialog.StringDialog;
-//import arlut.csd.JDialog.messageDialog;
 import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.aboutGanyDialog;
 import arlut.csd.JDialog.aboutJavaDialog;

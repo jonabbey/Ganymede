@@ -47,10 +47,6 @@
 
 package arlut.csd.ganymede.admin;
 
-//import java.awt.Dialog;
-//import java.awt.Dimension;
-//import java.awt.EventQueue;
-//import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -60,72 +56,25 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-//import java.io.IOException;
-/*
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.rmi.RemoteException;
-import java.rmi.server.RemoteServer;
-import java.util.prefs.Preferences;
-*/
 
 import javax.swing.Box;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-//import javax.swing.JDialog;
-//import javax.swing.JFrame;
 import javax.swing.JLabel;
-//import javax.swing.JMenu;
-//import javax.swing.JMenuBar;
-//import javax.swing.JMenuItem;
 import javax.swing.JPanel;
-//import javax.swing.JPopupMenu;
-//import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
-//import javax.swing.JSplitPane;
-//import javax.swing.JTabbedPane;
-//import javax.swing.JTextPane;
 import javax.swing.JTextArea;
-//import javax.swing.JTextField;
-//import javax.swing.SwingConstants;
-//import javax.swing.SwingUtilities;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
-//import javax.swing.border.TitledBorder;
-
-//import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-//import javax.swing.text.MutableAttributeSet;
-//import javax.swing.text.Position;
-//import javax.swing.text.SimpleAttributeSet;
-//import javax.swing.text.StyleConstants;
 
-//import arlut.csd.ganymede.common.windowSizer;
-//import arlut.csd.JDataComponent.JSetValueObject;
-//import arlut.csd.JDataComponent.JValueObject;
-//import arlut.csd.JDataComponent.JErrorValueObject;
-//import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.JDataComponent.JFocusRootPanel;
-import arlut.csd.JDataComponent.JMultiLineLabel;
-//import arlut.csd.JDataComponent.LAFMenu;
-/*
-import arlut.csd.JDialog.DialogRsrc;
-import arlut.csd.JDialog.JErrorDialog;
-import arlut.csd.JDialog.StringDialog;
-import arlut.csd.JDialog.messageDialog;
-*/
 import arlut.csd.JDialog.StandardDialog;
 
-//import arlut.csd.JDialog.aboutGanyDialog;
-//import arlut.csd.JDialog.aboutJavaDialog;
-//import arlut.csd.JTable.rowSelectCallback;
-//import arlut.csd.JTable.rowTable;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.TranslationService;
 
-//import apple.dts.samplecode.osxadapter.OSXAdapter;
- 
 
 
 
@@ -162,7 +111,7 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
   JPanel
     mainPanel, imagePanel, buttonPanel;
 
-  JMultiLineLabel
+  JLabel
     textLabel;
 
   Image image;
@@ -231,7 +180,7 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
 
     // "Are you sure you want to shut down the Ganymede server\nrunning at {0}?"
 
-    textLabel = new JMultiLineLabel(ts.l("global.question", GASHAdmin.server_url));
+    textLabel = new JLabel(ts.l("global.question", GASHAdmin.server_url));
     gbc.gridx = 1;
     gbc.gridy = 0;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
