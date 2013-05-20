@@ -1,6 +1,6 @@
 /*
    GASHAdminFrame.java
- 
+
    Admin console for the Java RMI Gash Server
 
    Created: 7 September 2003
@@ -117,11 +117,10 @@ import apple.dts.samplecode.osxadapter.OSXAdapter;
 ------------------------------------------------------------------------------*/
 
 /**
- *
- * GASHAdminFrame is the main class for the Ganymede admin console.  The
- * GASHAdminFrame constructor is the first piece of common code that is executed
- * both in an applet context and as a stand-alone app.
- *
+ * GASHAdminFrame is the main class for the Ganymede admin console.
+ * The GASHAdminFrame constructor is the first piece of common code
+ * that is executed both in an applet context and as a stand-alone
+ * app.
  */
 
 public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectCallback, JsetValueCallback {
@@ -1529,8 +1528,8 @@ public class GASHAdminFrame extends JFrame implements ActionListener, rowSelectC
         try
           {
 
-	    // TODO HERE IS THE ACTUAL CALL JAMES...  TEST
-	    String reason = shutdownDialog.getReasonField();
+            // TODO HERE IS THE ACTUAL CALL JAMES...  TEST
+            String reason = shutdownDialog.getReasonField();
 
             //success = adminDispatch.shutdown(waitForUsers, null);
             success = adminDispatch.shutdown(waitForUsers, reason);

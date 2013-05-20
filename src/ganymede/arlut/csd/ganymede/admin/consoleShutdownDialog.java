@@ -1,9 +1,9 @@
 /*
    consoleShutdownDialog.java
 
-   A simple dialog for shutting down the Ganymede Server. 
+   A simple dialog for shutting down the Ganymede Server.
 
-   Created: 15 May 2013 
+   Created: 15 May 2013
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu, James Ratcliff falazar@arlut.utexas.edu
 
@@ -76,8 +76,6 @@ import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.TranslationService;
 
 
-
-
 /*------------------------------------------------------------------------------
                                                                            class
                                                            consoleShutdownDialog
@@ -119,7 +117,7 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
   JLabel
     imageCanvas, reasonLabel;
 
-  JTextArea 
+  JTextArea
     reasonField;
 
   JButton
@@ -147,7 +145,6 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
     mainPanel.setLayout(gbl);
     setContentPane(mainPanel);
 
-
     //
     // Image on left hand side
     //
@@ -164,7 +161,7 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
       {
         imagePanel.add(Box.createGlue());
       }
- 
+
     gbc.gridx = 0;
     gbc.gridy = 0;
     gbc.gridwidth = 1;
@@ -178,17 +175,15 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
     // Text message under title
     //
 
-    // "Are you sure you want to shut down the Ganymede server\nrunning at {0}?"
-
+    // "<html>Are you sure you want to shut down the Ganymede server<br/>running at {0}?</html>"
     textLabel = new JLabel(ts.l("global.question", GASHAdmin.server_url));
     gbc.gridx = 1;
     gbc.gridy = 0;
     gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridheight = 1;
-    gbc.anchor = GridBagConstraints.WEST; 
+    gbc.anchor = GridBagConstraints.WEST;
     gbl.setConstraints(textLabel, gbc);
     mainPanel.add(textLabel);
-
 
     //
     // Separator goes all the way accross
@@ -203,8 +198,7 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
     gbl.setConstraints(sep, gbc);
     mainPanel.add(sep);
 
-
-    // Label:   Reason:
+    // "Reason:"
     reasonLabel = new JLabel(ts.l("global.shutdown_reason_label"));
     gbc.gridx = 1;
     gbc.gridy = 2;
@@ -214,7 +208,6 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
     gbc.anchor = GridBagConstraints.NORTH;
     gbl.setConstraints(reasonLabel, gbc);
     mainPanel.add(reasonLabel);
-
 
     // Textarea for reason of shutdown.
     reasonField = new JTextArea(4,40);
@@ -226,21 +219,23 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
     gbl.setConstraints(reasonField, gbc);
     mainPanel.add(reasonField);
 
-
     //
     // ButtonPanel takes up the bottom of the dialog
     //
 
     buttonPanel = new JFocusRootPanel();
 
+    // "Yes, Immediately"
     button1 = new JButton(ts.l("global.right_now_button"));
     button1.addActionListener(this);
     buttonPanel.add(button1);
 
+    // "Yes, When All Users Log Off"
     button2 = new JButton(ts.l("global.later_button"));
     button2.addActionListener(this);
     buttonPanel.add(button2);
 
+    // "No, Cancel"
     button3 = new JButton(ts.l("global.no_button"));
     button3.addActionListener(this);
     buttonPanel.add(button3);
@@ -256,7 +251,6 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
     gbc.fill = GridBagConstraints.HORIZONTAL;
     gbl.setConstraints(buttonPanel, gbc);
     mainPanel.add(buttonPanel);
-
 
     pack();
   }
@@ -367,6 +361,6 @@ class consoleShutdownDialog extends StandardDialog implements ActionListener, Wi
 
   public void windowOpened(WindowEvent event)
   {
-    button3.requestFocus();
+    reasonField.requestFocus();
   }
 }
