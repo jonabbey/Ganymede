@@ -267,7 +267,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
           }
 
         writeMailDirect2();
-        writeMailDirect3();     // the new gany_iris_export.txt file for Carrie
+        writeMailDirect3and4();     // the new gany_iris_export.txt file for Carrie
         writeSambafileVersion1();
         writeSambafileVersion2();
         writeUserSyncFile();
@@ -969,36 +969,40 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
-   * we write out a file that maps badge numbers to a
-   * user's primary email address and user name for the
-   * personnel office's phonebook database to use
+   * <p>We write out a couple of files that maps badge numbers to a
+   * user's primary email address and user name for the personnel
+   * office's phonebook database to use</p>
    *
-   * This method writes lines to the gany_iris_export.txt GASH output
-   * file.
+   * <p>This method writes lines to the gany_iris_export.txt GASH
+   * output file.</p>
    *
-   * The lines in this file look like the following.
+   * <p>The lines in this file look like the following.</p>
    *
-   * XXXXXXYYYYYYYYZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+   * <pre>XXXXXXYYYYYYYYZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ</pre>
    *
-   * Where XXXXXX is the badge number with trailing spaces if necessary,
-   * YYYYYYYY is the username with trailing spaces if necessary (up to 8 chars),
-   * and ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ is the email
+   * <p>Where XXXXXX is the badge number with trailing spaces if
+   * necessary, YYYYYYYY is the username with trailing spaces if
+   * necessary (up to 8 chars in one file, 12 in second), and
+   * ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ is the email
    * address, with trailing spaces if necessary (up to 50 characters,
-   * 32 plus '@arlut.utexas.edu'.
-   *
+   * 32 plus '@arlut.utexas.edu'.</p>
    */
 
-  private void writeMailDirect3()
+  private void writeMailDirect3and4()
+  {
+    writeIRISMailFile(path + "gany_iris_export.txt", 8);
+    writeIRISMailFile(path + "gany_iris_export_long.txt", 12);
+  }
+
+  private void writeIRISMailFile(String exportFilePath, int userFieldLength)
   {
     PrintWriter out;
     HashMap<String, DBObject> map = new HashMap<String, DBObject>(); // map badge numbers to DBObject
     HashMap<String, String> results = new HashMap<String, String>(); // map badge numbers to strings
 
-    /* -- */
-
     try
       {
-        out = openOutFile(path + "gany_iris_export.txt", "gasharl");
+        out = openOutFile(exportFilePath, "gasharl");
       }
     catch (IOException ex)
       {
@@ -1050,7 +1054,7 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
 
                 result.append(username);
 
-                length = 8 - username.length();
+                length = userFieldLength - username.length();
 
                 for (int i = 0; i < length; i++)
                   {
@@ -1084,15 +1088,15 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
       }
   }
 
-
   /**
-   * This method writes out a simple list of all ARL employees who are
-   * to receive email when lab-wide email is sent.
+   * <p>This method writes out a simple list of all ARL employees who
+   * are to receive email when lab-wide email is sent.</p>
    *
-   * The file is simple, and contains one user name per line.
+   * <p>The file is simple, and contains one user name per line.</p>
    *
-   * We take the trouble in this method to eliminate redundant
-   * mailings that would come to the same person if
+   * <p>We take the trouble in this method to eliminate redundant
+   * mailings that would come to the same person if they were in
+   * multiple component lists.</p>
    */
 
   private boolean writeEmailLists()
@@ -1218,16 +1222,15 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
+   * <p>This method writes out a line to the group_info GASH source
+   * file.</p>
    *
-   * This method writes out a line to the group_info GASH source file.
+   * <p>The lines in this file look like the following.</p>
    *
-   * The lines in this file look like the following.
-   *
-   * adgacc:ZzZz:4015:hammp,jgeorge,dd,doodle,dhoss,corbett,monk
+   * <pre>adgacc:ZzZz:4015:hammp,jgeorge,dd,doodle,dhoss,corbett,monk</pre>
    *
    * @param object An object from the Ganymede user object base
    * @param writer The destination for this user line
-   *
    */
 
   private void writeGroupLine(DBObject object, PrintWriter writer)
