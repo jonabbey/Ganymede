@@ -1086,7 +1086,7 @@ public final class GanymedeServer implements Server {
 
     String shuttingDownNowMsg = null;
 
-    if (GanymedeServer.shutdownReason == null)
+    if (GanymedeServer.shutdownReason == null || GanymedeServer.shutdownReason.trim().equals(""))
       {
         if (GanymedeServer.shutdownAdmin == null)
           {
