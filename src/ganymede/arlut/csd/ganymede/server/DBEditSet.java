@@ -287,8 +287,8 @@ public final class DBEditSet {
     this.description = description;
     this.interactive = interactive;
     this.objects = Collections.synchronizedMap(new HashMap<Invid, DBEditObject>());
-    logEvents = Collections.synchronizedList(new ArrayList<DBLogEvent>());
-    basesModified = new HashSet<DBObjectBase>(dbStore.bases().size());
+    this.logEvents = Collections.synchronizedList(new ArrayList<DBLogEvent>());
+    this.basesModified = new HashSet<DBObjectBase>(dbStore.bases().size());
 
     if (session.GSession != null && session.GSession.isXMLSession() && Ganymede.allowMagicImport)
       {
@@ -478,7 +478,7 @@ public final class DBEditSet {
         // indicate that this object's base is involved in the
         // transaction.
 
-        basesModified.add(object.objectBase);
+        this.basesModified.add(object.objectBase);
       }
 
     return true;
@@ -1142,7 +1142,7 @@ public final class DBEditSet {
 
     /* -- */
 
-    for (DBObjectBase base: basesModified)
+    for (DBObjectBase base: this.basesModified)
       {
         baseSet.add(base);
       }
@@ -1152,6 +1152,7 @@ public final class DBEditSet {
 
     if (wLock != null)
       {
+        // "Error!  DBEditSet {0} commit already has writeLock established!"
         throw new Error(ts.l("commit_lockBases.wLock", description));
       }
 
@@ -2404,7 +2405,7 @@ public final class DBEditSet {
 
   private final void commit_updateBases(Set<DBObjectBaseField> fieldsTouched)
   {
-    for (DBObjectBase base: basesModified)
+    for (DBObjectBase base: this.basesModified)
       {
         base.updateTimeStamp();
 
@@ -2557,27 +2558,27 @@ public final class DBEditSet {
         this.objects = null;
       }
 
-    if (logEvents != null)
+    if (this.logEvents != null)
       {
-        logEvents.clear();
-        logEvents = null;
+        this.logEvents.clear();
+        this.logEvents = null;
       }
 
-    if (basesModified != null)
+    if (this.basesModified != null)
       {
-        basesModified.clear();
-        basesModified = null;
+        this.basesModified.clear();
+        this.basesModified = null;
       }
 
-    dbStore = null;
-    session = null;
+    this.dbStore = null;
+    this.session = null;
 
-    description = null;
+    this.description = null;
 
-    if (checkpoints != null)
+    if (this.checkpoints != null)
       {
-        checkpoints.clear();
-        checkpoints = null;
+        this.checkpoints.clear();
+        this.checkpoints = null;
       }
 
     this.notifyAll();           // wake up any late checkpointers
