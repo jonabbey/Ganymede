@@ -1365,9 +1365,26 @@ public final class DBEditSet {
       {
         StringBuilder errorBuf = new StringBuilder();
 
-        errorBuf.append(ts.l("commit_checkObjectMissingFields.missing_fields_text",
-                             eObj.getTypeName(),
-                             eObj.getLabel()));
+        if (!eObj.isEmbedded())
+          {
+            // "Error, {0} object {1} has not been completely filled out.  The following fields need to be filled in before this transaction can be committed:\n\n"
+            errorBuf.append(ts.l("commit_checkObjectMissingFields.missing_fields_text",
+                                 eObj.getTypeName(),
+                                 eObj.getLabel()));
+          }
+        else
+          {
+            DBObject topContainerObj = this.session.getContainingObj(eObj);
+
+            // "Error, {0} object {1} contained within {2} object {3} has not been completely filled out.
+            //
+            // The following fields need to be filled in before this transaction can be committed:\n\n"
+            errorBuf.append(ts.l("commit_checkObjectMissingFields.embedded_missing_fields_text",
+                                 eObj.getTypeName(),
+                                 eObj.getLabel(),
+                                 topContainerObj.getTypeName(),
+                                 topContainerObj.getLabel()));
+          }
 
         for (String fieldName: missingFields)
           {
@@ -1375,6 +1392,7 @@ public final class DBEditSet {
             errorBuf.append("\n");
           }
 
+        // "Error, required fields not filled in"
         retVal = Ganymede.createErrorDialog(ts.l("commit_checkObjectMissingFields.missing_fields"),
                                             errorBuf.toString());
 
