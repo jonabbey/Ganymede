@@ -1095,7 +1095,7 @@ public final class GanymedeServer implements Server {
           }
         else
           {
-            // "Ganymede admin ''{0}'' on host ''{1}'' shutting down server"
+            // "Ganymede admin {0} on host {1} shutting down server"
             shuttingDownNowMsg = ts.l("shutdown.console_notify_admin",
                                       shutdownAdmin.getAdminName(),
                                       shutdownAdmin.getAdminHost());
@@ -1110,7 +1110,7 @@ public final class GanymedeServer implements Server {
           }
         else
           {
-            // "Ganymede admin ''{1}'' on host ''{2}'' shutting down server for ''{0}''"
+            // "Ganymede admin {1} on host {2} shutting down server for ''{0}''"
             shuttingDownNowMsg = ts.l("shutdown.console_notify_reason_admin",
                                       GanymedeServer.shutdownReason,
                                       shutdownAdmin.getAdminName(),
