@@ -2680,7 +2680,7 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
           {
             if (retVal.getErrorType() == ErrorTypeEnum.SHOWOBJECT)
               {
-                Invid objInvid = findParentObject(retVal.getInvid());
+                Invid objInvid = findParentInvid(retVal.getInvid());
 
                 if (objInvid != null)
                   {
@@ -2850,39 +2850,35 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
    * to talk to the server to find the top-most parent.
    */
 
-  public Invid findParentObject(Invid invid)
+  public Invid findParentInvid(Invid invid)
   {
     if (invid == null)
       {
         return null;
       }
 
+    Invid parentInvid = invid;
+
     try
       {
-        Invid parentInvid = invid;
-        ReturnVal rv = handleReturnVal(session.view_db_object(parentInvid));
-
-        if (!ReturnVal.didSucceed(rv))
+        while (true)
           {
-            return null;
-          }
-
-        db_object o = (db_object) rv.getObject();
-
-        while (o.isEmbedded())
-          {
-            parentInvid = (Invid) o.getFieldValue(SchemaConstants.ContainerField);
-            rv = handleReturnVal(session.view_db_object(parentInvid));
+            ReturnVal rv = handleReturnVal(session.view_db_object(parentInvid));
 
             if (!ReturnVal.didSucceed(rv))
               {
                 return null;
               }
 
-            o = (db_object) rv.getObject();
-          }
+            db_object o = (db_object) rv.getObject();
 
-        return o.getInvid();
+            if (!o.isEmbedded())
+              {
+                return o.getInvid();
+              }
+
+            parentInvid = (Invid) o.getFieldValue(SchemaConstants.ContainerField);
+          }
       }
     catch (RemoteException ex)
       {
