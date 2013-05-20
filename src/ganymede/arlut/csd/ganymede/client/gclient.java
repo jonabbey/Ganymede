@@ -2680,18 +2680,24 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
           {
             if (retVal.getErrorType() == ErrorTypeEnum.SHOWOBJECT)
               {
-                Invid objInvid = findParentObject(retVal.getInvid());
-
-                if (objInvid != null)
+                try
                   {
-                    if (wp.isOpenForEdit(objInvid))
+                    Invid objInvid = findParentObject(retVal.getInvid());
+
+                    if (objInvid != null)
                       {
-                        wp.showWindow(objInvid);
+                        if (wp.isOpenForEdit(objInvid))
+                          {
+                            wp.showWindow(objInvid);
+                          }
+                        else if (invidHasBeenEdited(objInvid) && !deleteHash.containsKey(objInvid))
+                          {
+                            this.editObject(objInvid, null);
+                          }
                       }
-                    else if (invidHasBeenEdited(objInvid) && !deleteHash.containsKey(objInvid))
-                      {
-                        this.editObject(objInvid, null);
-                      }
+                  }
+                catch (RemoteException ex)
+                  {
                   }
               }
 
