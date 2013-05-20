@@ -2680,24 +2680,18 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
           {
             if (retVal.getErrorType() == ErrorTypeEnum.SHOWOBJECT)
               {
-                try
-                  {
-                    Invid objInvid = findParentObject(retVal.getInvid());
+                Invid objInvid = findParentObject(retVal.getInvid());
 
-                    if (objInvid != null)
-                      {
-                        if (wp.isOpenForEdit(objInvid))
-                          {
-                            wp.showWindow(objInvid);
-                          }
-                        else if (invidHasBeenEdited(objInvid) && !deleteHash.containsKey(objInvid))
-                          {
-                            this.editObject(objInvid, null);
-                          }
-                      }
-                  }
-                catch (RemoteException ex)
+                if (objInvid != null)
                   {
+                    if (wp.isOpenForEdit(objInvid))
+                      {
+                        wp.showWindow(objInvid);
+                      }
+                    else if (invidHasBeenEdited(objInvid) && !deleteHash.containsKey(objInvid))
+                      {
+                        this.editObject(objInvid, null);
+                      }
                   }
               }
 
@@ -2851,34 +2845,49 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
 
   /**
    * <p>Find the top-most parent Invid of the given Invid.</p>
+   *
+   * @return null if invid is null or if there is an exception trying
+   * to talk to the server to find the top-most parent.
    */
 
-  public Invid findParentObject(Invid invid) throws RemoteException
+  public Invid findParentObject(Invid invid)
   {
-    Invid parentInvid = invid;
-    ReturnVal rv = handleReturnVal(session.view_db_object(parentInvid));
-
-    if (!ReturnVal.didSucceed(rv))
+    if (invid == null)
       {
         return null;
       }
 
-    db_object o = (db_object) rv.getObject();
-
-    while (o.isEmbedded())
+    try
       {
-        parentInvid = (Invid) o.getFieldValue(SchemaConstants.ContainerField);
-        rv = handleReturnVal(session.view_db_object(parentInvid));
+        Invid parentInvid = invid;
+        ReturnVal rv = handleReturnVal(session.view_db_object(parentInvid));
 
         if (!ReturnVal.didSucceed(rv))
           {
             return null;
           }
 
-        o = (db_object) rv.getObject();
-      }
+        db_object o = (db_object) rv.getObject();
 
-    return o.getInvid();
+        while (o.isEmbedded())
+          {
+            parentInvid = (Invid) o.getFieldValue(SchemaConstants.ContainerField);
+            rv = handleReturnVal(session.view_db_object(parentInvid));
+
+            if (!ReturnVal.didSucceed(rv))
+              {
+                return null;
+              }
+
+            o = (db_object) rv.getObject();
+          }
+
+        return o.getInvid();
+      }
+    catch (RemoteException ex)
+      {
+        return null;
+      }
   }
 
   // Private methods
