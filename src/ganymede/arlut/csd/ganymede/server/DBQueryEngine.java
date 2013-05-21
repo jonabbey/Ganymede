@@ -893,7 +893,7 @@ public final class DBQueryEngine {
    * for an Invid, or because we're doing a direct equality test on a
    * namespace controlled field, we'll return true.</p>
    *
-   * <p>Otherwise, we'll return false, and internalQuery() will need
+   * <p>Otherwise, we'll return false, and queryDispatch() will need
    * to do an iteration over the objectbase to check the objects one
    * by one.</p>
    */
