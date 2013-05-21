@@ -130,11 +130,11 @@ public class DBQueryHandler {
   }
 
   /**
-   * Recursive static method to compare a Query tree against an object in the database.
+   * Recursive static method to compare a Query tree against an object
+   * in the database.
    *
-   * @param session The GanymedeSession performing the query.  This parameter is
-   * used to access the database to find the object's label if the query contains
-   * any clauses matching against the object's label.
+   * @param session The GanymedeSession performing the query.  Used
+   * for permissions checking and object lookups.
    * @param qN The QueryNode being compared to this object.
    * @param obj The object being tested.
    */
@@ -214,11 +214,11 @@ public class DBQueryHandler {
                   {
                     Invid invid = (Invid) values.get(i);
 
-                    DBObject derefObj = DBStore.viewDBObject(invid);
+                    DBObject derefObj = session.getDBSession().viewDBObject(invid);
 
                     // *race*
                     //
-                    // At this point, the GanymedeSession
+                    // At this point, the DBQueryEngine
                     // queryDispatch() method that called us is
                     // iterating over a fixed DBObjectBase
                     // "iterationSet" vector, and it is entirely
@@ -230,7 +230,7 @@ public class DBQueryHandler {
                     // persistent store and we come across a stale
                     // Invid while attempting to do a dereference, we
                     // can get a null derefObj from the synchronous
-                    // DBStore.viewDBObject() call, above.
+                    // viewDBObject() call, above.
                     //
                     // In that case, we want to ignore the obsolete
                     // link, rather than chase it into a
@@ -253,7 +253,7 @@ public class DBQueryHandler {
               {
                 Invid invid = (Invid) invidField.getValueLocal();
 
-                DBObject derefObj = DBStore.viewDBObject(invid);
+                DBObject derefObj = session.getDBSession().viewDBObject(invid);
 
                 // *race*
                 //
