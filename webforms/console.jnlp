@@ -22,7 +22,7 @@
     <title>Ganymede Admin Console</title>
     <vendor>Applied Research Laboratories</vendor>
     <homepage href="http://www.arlut.utexas.edu/gash2"/>
-    <icon href="#WEBROOT/icon.gif" kind="default"/>
+    <icon href="#WEBROOT/ganymede_admin_128.png" kind="default" width="98" height="98"/>
     <icon href="#WEBROOT/ganymede_splash.png" kind="splash"/>
     <description>Ganymede Admin Console</description>
   </information>
@@ -32,6 +32,7 @@
     <jar href="ganymedeAdmin.jar"/>
     <property name="ganymede.serverhost" value="#SERVERHOST"/>
     <property name="ganymede.registryPort" value="#REGISTRYPORT"/>
+    <property name="java.rmi.server.useCodebaseOnly" value="true"/>
 
   <!-- If you want to force a language on the client, set and
        uncomment the following:

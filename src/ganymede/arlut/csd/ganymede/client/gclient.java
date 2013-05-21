@@ -142,6 +142,7 @@ import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.RegexpException;
 import arlut.csd.ganymede.common.ReturnVal;
+import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.common.windowSizer;
 import arlut.csd.ganymede.rmi.Base;
 import arlut.csd.ganymede.rmi.Category;
@@ -2622,6 +2623,16 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
   }
 
   /**
+   * Returns true if this Invid has been created or edited during the
+   * current transaction.
+   */
+
+  public boolean invidHasBeenEdited(Invid invid)
+  {
+    return changedSet.contains(invid) || createHash.containsKey(invid);
+  }
+
+  /**
    * True if we are in an applet context, meaning we don't have access
    * to local files, etc.
    */
@@ -2669,8 +2680,19 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
           {
             if (retVal.getErrorType() == ErrorTypeEnum.SHOWOBJECT)
               {
-                Invid objInvid = retVal.getInvid();
-                wp.showWindow(objInvid);
+                Invid objInvid = findParentInvid(retVal.getInvid());
+
+                if (objInvid != null)
+                  {
+                    if (wp.isOpenForEdit(objInvid))
+                      {
+                        wp.showWindow(objInvid);
+                      }
+                    else if (invidHasBeenEdited(objInvid) && !deleteHash.containsKey(objInvid))
+                      {
+                        this.editObject(objInvid, null);
+                      }
+                  }
               }
 
             if (debug)
@@ -2819,6 +2841,49 @@ public final class gclient extends JFrame implements treeCallback, ActionListene
       }
 
     return retVal;
+  }
+
+  /**
+   * <p>Find the top-most parent Invid of the given Invid.</p>
+   *
+   * @return null if invid is null or if there is an exception trying
+   * to talk to the server to find the top-most parent.
+   */
+
+  public Invid findParentInvid(Invid invid)
+  {
+    if (invid == null)
+      {
+        return null;
+      }
+
+    Invid parentInvid = invid;
+
+    try
+      {
+        while (true)
+          {
+            ReturnVal rv = handleReturnVal(session.view_db_object(parentInvid));
+
+            if (!ReturnVal.didSucceed(rv))
+              {
+                return null;
+              }
+
+            db_object o = (db_object) rv.getObject();
+
+            if (!o.isEmbedded())
+              {
+                return o.getInvid();
+              }
+
+            parentInvid = (Invid) o.getFieldValue(SchemaConstants.ContainerField);
+          }
+      }
+    catch (RemoteException ex)
+      {
+        return null;
+      }
   }
 
   // Private methods

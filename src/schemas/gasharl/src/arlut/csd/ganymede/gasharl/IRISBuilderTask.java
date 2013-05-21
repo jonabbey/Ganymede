@@ -111,15 +111,22 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
   }
 
   /**
+   * <p>This method is intended to be overridden by subclasses of
+   * GanymedeBuilderTask.</p>
    *
-   * This method runs with a dumpLock obtained for the builder task.
+   * <p>This method runs with a dumpLock obtained for the builder
+   * task.</p>
    *
-   * Code run in builderPhase1() can call enumerateObjects() and
-   * baseChanged().
+   * <p>Code run in builderPhase1() can call enumerateObjects() and
+   * baseChanged().  Note that the Enumeration of objects returned by
+   * enumerateObjects() is only valid and should only be consulted
+   * while builderPhase1 is running.. as soon as builderPhase1
+   * returns, the dumpLock used to make the enumerateObjects() call
+   * safe to use is relinquished, and any Enumerations obtained will
+   * then be unsafe to depend on.</p>
    *
    * @return true if builderPhase1 made changes necessitating the
    * execution of builderPhase2.
-   *
    */
 
   public boolean builderPhase1()
@@ -363,16 +370,11 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
   {
     Hashtable table = new Hashtable();
 
-    Vector netgroups = user.getFieldValuesLocal(userSchema.NETGROUPS);
+    Vector<Invid> netgroups = (Vector<Invid>) user.getFieldValuesLocal(userSchema.NETGROUPS);
 
-    if (netgroups == null)
+    for (Invid netgroupInvid: netgroups)
       {
-        return false;
-      }
-
-    for (int i = 0; i < netgroups.size(); i++)
-      {
-        DBObject netgroup = getObject((Invid) netgroups.elementAt(i));
+        DBObject netgroup = getObject(netgroupInvid);
 
         if (netgroup_or_parent_equals(netgroup, netgroupName))
           {
@@ -406,11 +408,6 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
 
     Vector<Invid> members = (Vector<Invid>) mailListObject.getFieldValuesLocal(emailListSchema.MEMBERS);
 
-    if (members == null)
-      {
-        return false;
-      }
-
     for (Invid inv: members)
       {
         if (inv.equals(user.getInvid()))
@@ -440,16 +437,11 @@ public class IRISBuilderTask extends GanymedeBuilderTask {
         return true;
       }
 
-    Vector netgroups = netgroup.getFieldValuesLocal(userNetgroupSchema.OWNERNETGROUPS);
+    Vector<Invid> netgroups = (Vector<Invid>) netgroup.getFieldValuesLocal(userNetgroupSchema.OWNERNETGROUPS);
 
-    if (netgroups == null)
+    for (Invid netgroupInvid: netgroups)
       {
-        return false;
-      }
-
-    for (int i = 0; i < netgroups.size(); i++)
-      {
-        if (netgroup_or_parent_equals(getObject((Invid) netgroups.elementAt(i)), netgroupName))
+        if (netgroup_or_parent_equals(getObject(netgroupInvid), netgroupName))
           {
             return true;
           }

@@ -14,7 +14,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -236,7 +236,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * deleted.
    */
 
-  private static Hashtable backupsBusy = new Hashtable();
+  private static Hashtable<String, Integer> backupsBusy = new Hashtable<String, Integer>();
   private static String basePath = null;
   private static long rollunderTime = 0;
   private static long rolloverTime = 0;
@@ -262,7 +262,12 @@ public abstract class GanymedeBuilderTask implements Runnable {
   protected Date oldLastRunTime;
   GanymedeSession session = null;
   DBDumpLock lock;
-  Vector optionsCache = null;
+
+  /**
+   * A list of options that were defined on this GanymedeBuilderTask.
+   */
+
+  private Vector<String> optionsCache = null;
 
   /**
    * If this flag is true, baseChanged() will always return true,
@@ -971,8 +976,8 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * subclass whose constructor takes an Invid parameter and which
    * sets taskDefObjInvid in GanymedeBuilderTask.</p>
    *
-   * <p>That is, if the task object for this task has an option strings
-   * vector with the following contents:</p>
+   * <p>That is, if the task object for this task has an option
+   * strings vector with the following contents:</p>
    *
    * <pre>
    *  useMD5
@@ -981,34 +986,21 @@ public abstract class GanymedeBuilderTask implements Runnable {
    *
    * <p>then a call to isOptionSet with 'useMD5' or 'useShadow', of
    * any capitalization, will return true.  Any other parameter
-   * provided to isOptionSet() will cause null to be returned.</p>
+   * provided to isOptionSet() will cause false to be returned.</p>
    */
 
   protected boolean isOptionSet(String option)
   {
-    if (option != null && !option.equals(""))
+    if (option == null || option.equals(""))
       {
-        Vector options = optionsCache;
+        return false;
+      }
 
-        if (options == null)
+    for (String x: this.getOptionStrings())
+      {
+        if (x.equalsIgnoreCase(option))
           {
-            optionsCache = getOptionStrings();
-            options = optionsCache;
-          }
-
-        if (options == null)
-          {
-            return false;
-          }
-
-        for (int i = 0; i < options.size(); i++)
-          {
-            String x = (String) options.elementAt(i);
-
-            if (x.equalsIgnoreCase(option))
-              {
-                return true;
-              }
+            return true;
           }
       }
 
@@ -1017,17 +1009,18 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   /**
    * <p>This method retrieves the value associated with the provided
-   * option name if this builder task was registered with taskDefObjInvid
-   * set by a subclass whose constructor takes an Invid parameter and which
-   * sets taskDefObjInvid in GanymedeBuilderTask.</p>
+   * option name if this builder task was registered with
+   * taskDefObjInvid set by a subclass whose constructor takes an
+   * Invid parameter and which sets taskDefObjInvid in
+   * GanymedeBuilderTask.</p>
    *
    * <p>getOptionValue() will search through the option strings for
    * the task object associated with this task and return the
    * substring after the '=' character, if the option name is found on
    * the left.</p>
    *
-   * <p>That is, if the task object for this task has an option strings
-   * vector with the following contents:</p>
+   * <p>That is, if the task object for this task has an option
+   * strings vector with the following contents:</p>
    *
    * <pre>
    *  useMD5
@@ -1035,44 +1028,32 @@ public abstract class GanymedeBuilderTask implements Runnable {
    *  useShadow
    * </pre>
    *
-   * <p>then a call to getOptionValue() with 'buildPath', of any capitalization,
-   * as the parameter will return '/var/ganymede/schema/NT'.</p>
+   * <p>then a call to getOptionValue() with 'buildPath', of any
+   * capitalization, as the parameter will return
+   * '/var/ganymede/schema/NT'.</p>
    *
-   * <p>Any other parameter provided to getOptionValue() will cause null to
-   * be returned.</p>
+   * <p>Any other parameter provided to getOptionValue() will cause
+   * null to be returned.</p>
    */
 
   protected String getOptionValue(String option)
   {
-    if (option != null && !option.equals(""))
+    if (option == null || option.equals(""))
       {
-        Vector options = optionsCache;
+        return null;
+      }
 
-        if (options == null)
+    // get the prefix we'll search for
+
+    String matchPat = option + "=";
+
+    // and spin til we find it
+
+    for (String x: getOptionStrings())
+      {
+        if (x.startsWith(matchPat))
           {
-            optionsCache = getOptionStrings();
-            options = optionsCache;
-          }
-
-        if (options == null)
-          {
-            return null;
-          }
-
-        // get the prefix we'll search for
-
-        String matchPat = option + "=";
-
-        // and spin til we find it
-
-        for (int i = 0; i < options.size(); i++)
-          {
-            String x = (String) options.elementAt(i);
-
-            if (x.startsWith(matchPat))
-              {
-                return x.substring(matchPat.length());
-              }
+            return x.substring(matchPat.length());
           }
       }
 
@@ -1080,31 +1061,36 @@ public abstract class GanymedeBuilderTask implements Runnable {
   }
 
   /**
-   * This method returns the Vector of option strings registered
-   * for this task object in the Ganymede database, or null if no
-   * option strings are defined.
+   * <p>This method returns the Vector of option strings registered
+   * for this task object in the Ganymede database.</p>
+   *
+   * <p>If there are no option strings defined, an empty Vector will
+   * be returned.</p>
    */
 
-  final Vector getOptionStrings()
+  final Vector<String> getOptionStrings()
   {
+    if (this.optionsCache != null)
+      {
+        return this.optionsCache;
+      }
+
+    Vector<String> options = null;
+
     if (taskDefObjInvid != null)
       {
         DBObject taskDefObj = getObject(taskDefObjInvid);
 
-        Vector options = taskDefObj.getFieldValuesLocal(SchemaConstants.TaskOptionStrings);
-
-        if (options == null || options.size() == 0)
-          {
-            return null;
-          }
-
-        // dup the vector for safety, since we are getting direct
-        // access to the Vector in the database
-
-        return (Vector) options.clone();
+        options = (Vector<String>) taskDefObj.getFieldValuesLocal(SchemaConstants.TaskOptionStrings);
+      }
+    else
+      {
+        options = (Vector<String>) new Vector();
       }
 
-    return null;
+    this.optionsCache = options;
+
+    return options;
   }
 
   /**
@@ -1128,20 +1114,21 @@ public abstract class GanymedeBuilderTask implements Runnable {
   }
 
   /**
-   * <p>This method opens the specified file for writing out a text stream.</p>
+   * <p>This method opens the specified file for writing out a text
+   * stream.</p>
    *
-   * <p>If the <code>ganymede.builder.backups</code> property is set to a
-   * path in the Ganymede server's ganymede.properties file,
+   * <p>If the <code>ganymede.builder.backups</code> property is set
+   * to a path in the Ganymede server's ganymede.properties file,
    * openOutFile() will look to see if the filename provided as a
    * parameter already exists.  If it does, it will be copied to a
    * subdirectory of the <code>ganymede.builder.backups</code>
    * directory.  This subdirectory will be named with the date in
    * which the backups therein were copied.</p>
    *
-   * <p>If <code>ganymede.builder.backups</code> is set, the first time
-   * openOutFile() is called after midnight, openOutFile will zip all
-   * the files in any preceding days' backup subdirectories into one
-   * zip file per day.</p>
+   * <p>If <code>ganymede.builder.backups</code> is set, the first
+   * time openOutFile() is called after midnight, openOutFile will zip
+   * all the files in any preceding days' backup subdirectories into
+   * one zip file per day.</p>
    *
    * @param filename The fully specified path to the file to open
    */
@@ -1152,10 +1139,11 @@ public abstract class GanymedeBuilderTask implements Runnable {
   }
 
   /**
-   * <p>This method opens the specified file for writing out a text stream.</p>
+   * <p>This method opens the specified file for writing out a text
+   * stream.</p>
    *
-   * <p>If the <code>ganymede.builder.backups</code> property is set to a
-   * path in the Ganymede server's ganymede.properties file,
+   * <p>If the <code>ganymede.builder.backups</code> property is set
+   * to a path in the Ganymede server's ganymede.properties file,
    * openOutFile() will look to see if the filename provided as a
    * parameter already exists.  If it does, it will be copied to a
    * subdirectory of the <code>ganymede.builder.backups</code>
@@ -1168,9 +1156,9 @@ public abstract class GanymedeBuilderTask implements Runnable {
    * zip file per day.</p>
    *
    * @param filename The name of the file to open
-   * @param taskName The name of the builder task that is writing this file.  Used
-   * to create a unique name (across tasks) for the backup copy of the file when
-   * we overwrite an existing file.
+   * @param taskName The name of the builder task that is writing this
+   * file.  Used to create a unique name (across tasks) for the backup
+   * copy of the file when we overwrite an existing file.
    */
 
   protected synchronized PrintWriter openOutFile(String filename, String taskName) throws IOException
@@ -1260,7 +1248,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   private static synchronized void incBusy(String path)
   {
-    Integer x = (Integer) backupsBusy.get(path);
+    Integer x = backupsBusy.get(path);
 
     if (x == null)
       {
@@ -1274,7 +1262,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   private static synchronized void decBusy(String path)
   {
-    Integer x = (Integer) backupsBusy.get(path);
+    Integer x = backupsBusy.get(path);
 
     // we never should get a null value here.. go ahead
     // and throw NullPointerException if we do
@@ -1317,7 +1305,7 @@ public abstract class GanymedeBuilderTask implements Runnable {
 
   private static synchronized int busyCount(String path)
   {
-    Integer x = (Integer) backupsBusy.get(path);
+    Integer x = backupsBusy.get(path);
 
     if (x == null)
       {

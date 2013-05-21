@@ -502,10 +502,9 @@ public class OpenNetBuilderTask extends GanymedeBuilderTask {
     String groupname;
     String pass;
     int gid;
-    Vector users = new Vector();
+    Vector<String> users = new Vector<String>();
 
-    Vector invids;
-    Invid userInvid;
+    Vector<Invid> invids;
     String userName;
     String contract;
     String description;
@@ -520,24 +519,15 @@ public class OpenNetBuilderTask extends GanymedeBuilderTask {
 
     gid = ((Integer) object.getFieldValueLocal(groupSchema.GID)).intValue();
 
-    invids = object.getFieldValuesLocal(groupSchema.USERS);
+    invids = (Vector<Invid>) object.getFieldValuesLocal(groupSchema.USERS);
 
-    if (invids == null)
+    for (Invid userInvid: invids)
       {
-        // System.err.println("OpenNetBuilder.writeGroupLine(): null user list for group " + groupname);
-      }
-    else
-      {
-        for (int i = 0; i < invids.size(); i++)
+        userName = getLabel(userInvid);
+
+        if (userName != null)
           {
-            userInvid = (Invid) invids.elementAt(i);
-
-            userName = getLabel(userInvid);
-
-            if (userName != null)
-              {
-                users.addElement(userName);
-              }
+            users.add(userName);
           }
       }
 
@@ -555,7 +545,7 @@ public class OpenNetBuilderTask extends GanymedeBuilderTask {
             result.append(",");
           }
 
-        result.append((String) users.elementAt(i));
+        result.append(users.get(i));
       }
 
     // okay, this marks the end of what we care about for the NIS

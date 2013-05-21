@@ -117,13 +117,13 @@ public class PermMatrix implements java.io.Serializable {
       }
     else
       {
-        this.matrix = (Hashtable<String, PermEntry>) orig.clone();
+        this.matrix = new Hashtable<String, PermEntry>(orig);
       }
   }
 
   public PermMatrix(PermMatrix orig)
   {
-    this.matrix = (Hashtable<String, PermEntry>) orig.matrix.clone();
+    this.matrix = new Hashtable<String, PermEntry>(orig.matrix);
   }
 
   /**
@@ -150,7 +150,7 @@ public class PermMatrix implements java.io.Serializable {
 
   public Hashtable<String, PermEntry> getMatrixClone()
   {
-    return (Hashtable<String, PermEntry>) matrix.clone();
+    return new Hashtable<String, PermEntry>(matrix);
   }
 
   /**

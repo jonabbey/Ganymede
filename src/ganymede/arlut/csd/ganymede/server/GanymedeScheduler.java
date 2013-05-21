@@ -1353,7 +1353,7 @@ public final class GanymedeScheduler extends Thread {
     // communicating with the admin consoles asynchronously, using the
     // serverAdminProxy.
 
-    return (Vector<scheduleHandle>) taskList.clone();
+    return new Vector<scheduleHandle>(taskList);
   }
 }
 

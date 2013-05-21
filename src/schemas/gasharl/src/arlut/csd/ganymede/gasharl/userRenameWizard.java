@@ -3,17 +3,19 @@
    userRenameWizard.java
 
    A wizard to manage user rename interactions for the userCustom object.
-   
+
    Created: 29 January 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -71,7 +73,7 @@ import arlut.csd.ganymede.server.StringDBField;
  * wants to do this.
  *
  * @see arlut.csd.ganymede.common.ReturnVal
- * @see arlut.csd.ganymede.rmi.Ganymediator 
+ * @see arlut.csd.ganymede.rmi.Ganymediator
  */
 
 public class userRenameWizard extends GanymediatorWizard {
@@ -85,14 +87,14 @@ public class userRenameWizard extends GanymediatorWizard {
   GanymedeSession session;
 
   /**
-   * Keeps track of the state of the wizard.  Each time respond() is called,
+   * <p>Keeps track of the state of the wizard.  Each time respond() is called,
    * state is checked to see what results from the user are expected and
-   * what the appropriate dialogs or actions to perform in turn are.<br>
-   * 
-   * state is also used by the userCustom object to make sure that
+   * what the appropriate dialogs or actions to perform in turn are.</p>
+   *
+   * <p>state is also used by the userCustom object to make sure that
    * we have finished our interactions with the user when we tell the
-   * user object to go ahead and remove the group.  <br>
-   * 
+   * user object to go ahead and remove the group.</p>
+   *
    * <pre>
    * Values:
    *         1 - Wizard has been initialized, initial explanatory dialog
@@ -138,7 +140,6 @@ public class userRenameWizard extends GanymediatorWizard {
    */
 
   /**
-   *
    * This constructor registers the wizard as an active wizard
    * on the provided session.
    *
@@ -146,16 +147,15 @@ public class userRenameWizard extends GanymediatorWizard {
    * use to interact with the Ganymede data store.
    * @param userObject The user object that this wizard will work with.
    * @param newname The proposed new name for the user.
-   *
    */
 
-  public userRenameWizard(GanymedeSession session, 
-         		  userCustom userObject, 
-		          DBField field,
-		          String newname,
-			  String oldname) throws RemoteException
+  public userRenameWizard(GanymedeSession session,
+                          userCustom userObject,
+                          DBField field,
+                          String newname,
+                          String oldname) throws RemoteException
   {
-    super(session);		// register ourselves
+    super(session);             // register ourselves
 
     this.session = session;
     this.userObject = userObject;
@@ -165,27 +165,23 @@ public class userRenameWizard extends GanymediatorWizard {
   }
 
   /**
-   *
    * This method provides a default response if a user
    * hits cancel on a wizard dialog.  This should be
    * subclassed if a wizard wants to provide a more
    * detailed cancel response.
-   *
    */
 
-  public ReturnVal cancel()
+  @Override public ReturnVal cancel()
   {
     return fail("User Rename Cancelled",
-		"OK, good decision.",
-		"Yeah, I guess",
-		null,
-		"ok.gif");
+                "OK, good decision.",
+                "Yeah, I guess",
+                null,
+                "ok.gif");
   }
 
   /**
-   *
    * This method starts off the wizard process
-   *
    */
 
   public ReturnVal processDialog0()
@@ -195,13 +191,13 @@ public class userRenameWizard extends GanymediatorWizard {
     /* -- */
 
     retVal = continueOn("User Rename Dialog",
-			"Warning.\n\n" + 
-			"Renaming a user is a serious operation, with serious potential consequences.\n\n"+
-			"If you rename this user, the user's directory and mail file will need to be renamed.\n\n"+
-			"Any scripts or programs that refer to this user's name will need to be changed.",
-			"OK",
-			"Never Mind",
-			"question.gif");
+                        "Warning.\n\n" +
+                        "Renaming a user is a serious operation, with serious potential consequences.\n\n"+
+                        "If you rename this user, the user's directory and mail file will need to be renamed.\n\n"+
+                        "Any scripts or programs that refer to this user's name will need to be changed.",
+                        "OK",
+                        "Never Mind",
+                        "question.gif");
 
     retVal.getDialog().addBoolean("Keep old name as an email alias?");
 
@@ -209,10 +205,8 @@ public class userRenameWizard extends GanymediatorWizard {
   }
 
   /**
-   *
    * The client will call us in this state with a Boolean
    * param for key "Keep old name as an email alias?"
-   *
    */
 
   public ReturnVal processDialog1()
@@ -232,17 +226,16 @@ public class userRenameWizard extends GanymediatorWizard {
 
     if (aliases != null)
       {
-	if (aliases.containsElementLocal(newname))
-	  {
-	    aliases.deleteElementLocal(newname);
-	  }
+        if (aliases.containsElementLocal(newname))
+          {
+            aliases.deleteElementLocal(newname);
+          }
       }
-
 
     System.err.println("userRenameWizard: Calling field.setValue()");
 
-    state = DONE;		// let the userCustom wizardHook know to go 
-				// ahead and pass this operation through now
+    state = DONE;               // let the userCustom wizardHook know to go
+                                // ahead and pass this operation through now
 
     // note that this setValue() operation will pass
     // through userObject.wizardHook().  wizardHook will see that we are
@@ -252,11 +245,11 @@ public class userRenameWizard extends GanymediatorWizard {
 
     try
       {
-	retVal = field.setValue(newname);
+        retVal = field.setValue(newname);
       }
     catch (GanyPermissionsException ex)
       {
-	retVal = Ganymede.createErrorDialog("permissions", "permissions error setting user name " + ex);
+        retVal = Ganymede.createErrorDialog("permissions", "permissions error setting user name " + ex);
       }
 
     System.err.println("userRenameWizard: Returned from field.setValue()");
@@ -265,34 +258,32 @@ public class userRenameWizard extends GanymediatorWizard {
 
     if (answer != null && answer.booleanValue())
       {
-	aliases.addElementLocal(oldname);
+        aliases.addElementLocal(oldname);
       }
 
     if (retVal == null)
       {
-	retVal = success("User Rename Performed",
-			 "OK, User renamed.",
-			 "Thanks",
-			 null,
-			 "ok.gif");
+        retVal = success("User Rename Performed",
+                         "OK, User renamed.",
+                         "Thanks",
+                         null,
+                         "ok.gif");
 
-	retVal.addRescanField(userObject.getInvid(), userSchema.SIGNATURE);
-	retVal.addRescanField(userObject.getInvid(), userSchema.HOMEDIR);
+        retVal.addRescanField(userObject.getInvid(), userSchema.SIGNATURE);
+        retVal.addRescanField(userObject.getInvid(), userSchema.HOMEDIR);
       }
     else if (retVal.didSucceed())
       {
-	retVal.setDialog(new JDialogBuff("User Rename Performed",
-					 "OK, User renamed.",
-					 "Thanks",
-					 null,
-					 "ok.gif"));
+        retVal.setDialog(new JDialogBuff("User Rename Performed",
+                                         "OK, User renamed.",
+                                         "Thanks",
+                                         null,
+                                         "ok.gif"));
 
-	retVal.addRescanField(userObject.getInvid(), userSchema.SIGNATURE);
-	retVal.addRescanField(userObject.getInvid(), userSchema.HOMEDIR);
+        retVal.addRescanField(userObject.getInvid(), userSchema.SIGNATURE);
+        retVal.addRescanField(userObject.getInvid(), userSchema.HOMEDIR);
       }
 
     return retVal;
   }
-
-
 }

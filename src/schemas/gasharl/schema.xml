@@ -448,7 +448,7 @@ xmlclient.</comment>
             <fielddef name="Username" id="100">
               <comment>User name for an individual privileged to log into Ganymede and/or the network</comment>
               <typedef type="string">
-                <maxlength val="8"/>
+                <maxlength val="10"/>
                 <badchars val=" :"/>
                 <namespace val="username"/>
                 <regexp val="^[a-z]+[a-z|\d|-]*$" desc="Usernames must start with a letter followed by letters, digits, or dashes"/>

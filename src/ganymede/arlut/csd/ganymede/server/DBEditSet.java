@@ -287,8 +287,8 @@ public final class DBEditSet {
     this.description = description;
     this.interactive = interactive;
     this.objects = Collections.synchronizedMap(new HashMap<Invid, DBEditObject>());
-    logEvents = Collections.synchronizedList(new ArrayList<DBLogEvent>());
-    basesModified = new HashSet<DBObjectBase>(dbStore.bases().size());
+    this.logEvents = Collections.synchronizedList(new ArrayList<DBLogEvent>());
+    this.basesModified = new HashSet<DBObjectBase>(dbStore.bases().size());
 
     if (session.GSession != null && session.GSession.isXMLSession() && Ganymede.allowMagicImport)
       {
@@ -478,7 +478,7 @@ public final class DBEditSet {
         // indicate that this object's base is involved in the
         // transaction.
 
-        basesModified.add(object.objectBase);
+        this.basesModified.add(object.objectBase);
       }
 
     return true;
@@ -1142,7 +1142,7 @@ public final class DBEditSet {
 
     /* -- */
 
-    for (DBObjectBase base: basesModified)
+    for (DBObjectBase base: this.basesModified)
       {
         baseSet.add(base);
       }
@@ -1152,6 +1152,7 @@ public final class DBEditSet {
 
     if (wLock != null)
       {
+        // "Error!  DBEditSet {0} commit already has writeLock established!"
         throw new Error(ts.l("commit_lockBases.wLock", description));
       }
 
@@ -1364,9 +1365,26 @@ public final class DBEditSet {
       {
         StringBuilder errorBuf = new StringBuilder();
 
-        errorBuf.append(ts.l("commit_checkObjectMissingFields.missing_fields_text",
-                             eObj.getTypeName(),
-                             eObj.getLabel()));
+        if (!eObj.isEmbedded())
+          {
+            // "Error, {0} object {1} has not been completely filled out.  The following fields need to be filled in before this transaction can be committed:\n\n"
+            errorBuf.append(ts.l("commit_checkObjectMissingFields.missing_fields_text",
+                                 eObj.getTypeName(),
+                                 eObj.getLabel()));
+          }
+        else
+          {
+            DBObject topContainerObj = this.session.getContainingObj(eObj);
+
+            // "Error, {0} object {1} contained within {2} object {3} has not been completely filled out.
+            //
+            // The following fields need to be filled in before this transaction can be committed:\n\n"
+            errorBuf.append(ts.l("commit_checkObjectMissingFields.embedded_missing_fields_text",
+                                 eObj.getTypeName(),
+                                 eObj.getLabel(),
+                                 topContainerObj.getTypeName(),
+                                 topContainerObj.getLabel()));
+          }
 
         for (String fieldName: missingFields)
           {
@@ -1374,6 +1392,7 @@ public final class DBEditSet {
             errorBuf.append("\n");
           }
 
+        // "Error, required fields not filled in"
         retVal = Ganymede.createErrorDialog(ts.l("commit_checkObjectMissingFields.missing_fields"),
                                             errorBuf.toString());
 
@@ -1946,11 +1965,13 @@ public final class DBEditSet {
         // We'll call diff() to update the fieldsTouched hashtable,
         // but we won't use the string generated, since
         // getPrintString() does a better job of describing the
-        // contents of embedded objects.  This forced use of diff()
-        // isn't elegant, but as DBField was originally defined, it's
-        // only through the use of the diff strings that we have a
-        // unified way to determine change, and we don't want to have
-        // to re-do that work in all the DBField subclasses.
+        // contents of (newly-created) embedded objects.
+        //
+        // This forced use of diff() isn't elegant, but as DBField was
+        // originally defined, it's only through the use of the diff
+        // strings that we have a unified way to determine change, and
+        // we don't want to have to re-do that work in all the DBField
+        // subclasses.
 
         eObj.diff(fieldsTouched);
 
@@ -2402,7 +2423,7 @@ public final class DBEditSet {
 
   private final void commit_updateBases(Set<DBObjectBaseField> fieldsTouched)
   {
-    for (DBObjectBase base: basesModified)
+    for (DBObjectBase base: this.basesModified)
       {
         base.updateTimeStamp();
 
@@ -2555,27 +2576,27 @@ public final class DBEditSet {
         this.objects = null;
       }
 
-    if (logEvents != null)
+    if (this.logEvents != null)
       {
-        logEvents.clear();
-        logEvents = null;
+        this.logEvents.clear();
+        this.logEvents = null;
       }
 
-    if (basesModified != null)
+    if (this.basesModified != null)
       {
-        basesModified.clear();
-        basesModified = null;
+        this.basesModified.clear();
+        this.basesModified = null;
       }
 
-    dbStore = null;
-    session = null;
+    this.dbStore = null;
+    this.session = null;
 
-    description = null;
+    this.description = null;
 
-    if (checkpoints != null)
+    if (this.checkpoints != null)
       {
-        checkpoints.clear();
-        checkpoints = null;
+        this.checkpoints.clear();
+        this.checkpoints = null;
       }
 
     this.notifyAll();           // wake up any late checkpointers

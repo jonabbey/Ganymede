@@ -186,7 +186,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (isVector())
       {
-        this.value = (Vector) field.getVectVal().clone();
+        this.value = new Vector(field.getVectVal());
       }
     else
       {
@@ -231,7 +231,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-        this.value = values.clone();
+        this.value = new Vector(values);
       }
   }
 
@@ -245,7 +245,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * Ganymede.db file and/or to the Journal file.
    */
 
-  void emit(DataOutput out) throws IOException
+  @Override void emit(DataOutput out) throws IOException
   {
     if (isVector())
       {
@@ -287,7 +287,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * Ganymede.db file and/or from the Journal file.
    */
 
-  void receive(DataInput in, DBObjectBaseField definition) throws IOException
+  @Override void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
     int count;
 
@@ -335,7 +335,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * out this field to disk.
    */
 
-  synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
+  @Override synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
     // if we're the containing object field in an embedded object, we
     // don't need to describe ourselves to the XML file.. our
@@ -561,7 +561,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * into an infinite loop.</p>
    */
 
-  public synchronized String getValueString()
+  @Override public synchronized String getValueString()
   {
     GanymedeSession gsession = null;
 
@@ -690,14 +690,7 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-        if (!isVector())
-          {
-            return this.value().toString();
-          }
-        else
-          {
-            return VectorUtils.vectorString(this.getVectVal());
-          }
+        return invid.toString();
       }
   }
 
@@ -710,7 +703,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * we'll do that here for now.
    */
 
-  public String getEncodingString()
+  @Override public String getEncodingString()
   {
     return getValueString();
   }
@@ -725,7 +718,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * <p>If there is no change in the field, null will be returned.</p>
    */
 
-  public synchronized String getDiffString(DBField orig)
+  @Override public synchronized String getDiffString(DBField orig)
   {
     StringBuilder result = new StringBuilder();
     InvidDBField origI;
@@ -1136,7 +1129,7 @@ public final class InvidDBField extends DBField implements invid_field {
             try
               {
                 String edit_username, edit_hostname;
-                DBEditObject editing = remobj.shadowObject;
+                DBEditObject editing = remobj.getShadow();
 
                 if (editing != null)
                   {
@@ -1304,7 +1297,7 @@ public final class InvidDBField extends DBField implements invid_field {
         try
           {
             String edit_username, edit_hostname;
-            DBEditObject editing = remobj.shadowObject;
+            DBEditObject editing = remobj.getShadow();
 
             if (editing != null)
               {
@@ -1350,46 +1343,10 @@ public final class InvidDBField extends DBField implements invid_field {
 
         if (newRefField == null)
           {
-            // editDBObject() will create undefined fields for all
-            // fields defined in the DBObjectBase as long as the user
-            // had permission to create those fields, so if we got a
-            // null field, we either have a schema corruption problem
-            // or a permission to create field problem.
-
-            DBObjectBaseField fieldDef = newRef.getFieldDef(targetField);
-
-            if (fieldDef == null)
-              {
-                // "InvidDBField.bind(): Couldn''t link to new reference"
-                // "Your operation could not succeed due to a possible inconsistency in the server database.  Target field number {0} in object {1} does not exist."
-                return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
-                                                  ts.l("bind.inconsistency", Integer.toString(targetField), newRef.getLabel()));
-              }
-            else
-              {
-                if (anonymous2)
-                  {
-                    // the object was created at check-out time
-                    // without the invid target field, due to the
-                    // admin's default permissions.  But we know that
-                    // the object has allowed anonymous linking by way
-                    // of the anonymousLinkOK() method, so we'll go
-                    // ahead and create an empty InvidDBField in the
-                    // target object directly.  The accessor methods
-                    // on the field will enforce standard Ganymede
-                    // permissions hereafter.
-
-                    newRefField = (InvidDBField) DBField.createTypedField(newRef, fieldDef);
-                    newRef.addField(newRefField);
-                  }
-                else
-                  {
-                    // "InvidDBField.bind(): Couldn''t link to new reference"
-                    // "Your operation could not succeed because you do not have permission to create the (previously undefined) {0} field in the {1} {2} object."
-                    return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
-                                                      ts.l("bind.no_create_perm", fieldDef.getName(), newRef.getLabel(), newRef.getTypeName()));
-                  }
-              }
+            // "InvidDBField.bind(): Couldn''t link to new reference"
+            // "Your operation could not succeed due to a possible inconsistency in the server database.  Target field number {0} in object {1} does not exist."
+            return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+                                              ts.l("bind.inconsistency", Integer.toString(targetField), newRef.getLabel()));
           }
       }
     catch (ClassCastException ex)
@@ -1589,7 +1546,7 @@ public final class InvidDBField extends DBField implements invid_field {
                 try
                   {
                     String edit_username, edit_hostname;
-                    DBEditObject editing = remobj.shadowObject;
+                    DBEditObject editing = remobj.getShadow();
 
                     edit_username = editing.gSession.getPermManager().getBaseIdentity();
                     edit_hostname = editing.gSession.getClientHostName();
@@ -2302,7 +2259,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * be provided.
    */
 
-  public synchronized ReturnVal setValue(Object value, boolean local, boolean noWizards)
+  @Override public synchronized ReturnVal setValue(Object value, boolean local, boolean noWizards)
   {
     DBEditObject eObj;
     Invid oldRemote, newRemote;
@@ -2445,7 +2402,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * be provided.
    */
 
-  public synchronized ReturnVal setElement(int index, Object submittedValue, boolean local, boolean noWizards)
+  @Override public synchronized ReturnVal setElement(int index, Object submittedValue, boolean local, boolean noWizards)
   {
     DBEditObject eObj;
     ReturnVal retVal = null;
@@ -2587,7 +2544,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * be provided.
    */
 
-  public synchronized ReturnVal addElement(Object submittedValue, boolean local, boolean noWizards)
+  @Override public synchronized ReturnVal addElement(Object submittedValue, boolean local, boolean noWizards)
   {
     DBEditObject eObj;
     Invid remote;
@@ -2744,9 +2701,9 @@ public final class InvidDBField extends DBField implements invid_field {
    * be provided.
    */
 
-  public synchronized ReturnVal addElements(Vector submittedValues, boolean local,
-                                            boolean noWizards,
-                                            boolean partialSuccessOk)
+  @Override public synchronized ReturnVal addElements(Vector submittedValues, boolean local,
+                                                      boolean noWizards,
+                                                      boolean partialSuccessOk)
   {
     boolean success = false;
     String checkkey = null;
@@ -3414,7 +3371,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * client can use to display the error condition.</p>
    */
 
-  public synchronized ReturnVal deleteElement(int index, boolean local, boolean noWizards)
+  @Override public synchronized ReturnVal deleteElement(int index, boolean local, boolean noWizards)
   {
     DBEditObject eObj;
     Invid remote;
@@ -3570,7 +3527,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * be provided.
    */
 
-  public synchronized ReturnVal deleteElements(Vector valuesToDelete, boolean local, boolean noWizards)
+  @Override public synchronized ReturnVal deleteElements(Vector valuesToDelete, boolean local, boolean noWizards)
   {
     ReturnVal retVal = null;
     String checkkey = null;
@@ -3923,7 +3880,7 @@ public final class InvidDBField extends DBField implements invid_field {
   //
   // ****
 
-  public boolean verifyTypeMatch(Object o)
+  @Override public boolean verifyTypeMatch(Object o)
   {
     return ((o == null) || (o instanceof Invid));
   }
@@ -3956,7 +3913,7 @@ public final class InvidDBField extends DBField implements invid_field {
    * be provided.
    */
 
-  public ReturnVal verifyNewValue(Object o)
+  @Override public ReturnVal verifyNewValue(Object o)
   {
     return verifyNewValue(o, false);
   }

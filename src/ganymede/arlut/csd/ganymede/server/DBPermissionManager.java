@@ -1623,10 +1623,6 @@ public final class DBPermissionManager {
         return objectPerm;
       }
 
-    // we want to return the more restrictive permissions of the
-    // object's permissions and the field's permissions.. we can never
-    // look at a field in an object we can't look at.
-
     if (permsdebug)
       {
         System.err.println("DBPermissionManager.getPerm(" + object + "," + fieldId + ") returning field perms");
@@ -1636,11 +1632,9 @@ public final class DBPermissionManager {
         System.err.println("expandFieldPerm = " + expandFieldPerm);
       }
 
-    // we never want to allow users who don't own an object to edit
-    // the object ownership list, nor do we ever want to allow
-    // non-privileged end users to edit the ownership list.
-
-    // nor do we allow editing the historical fields
+    // we want to return the more restrictive permissions of the
+    // object's permissions and the field's permissions.. we can never
+    // look at a field in an object we can't look at.
 
     if ((fieldId == SchemaConstants.OwnerListField &&
         (!objectIsOwned || personaObj == null)) ||
@@ -2024,16 +2018,6 @@ public final class DBPermissionManager {
               {
                 Vector<Invid> vals = (Vector<Invid>) idbf.getValuesLocal();
 
-                // *** Caution!  getValuesLocal() does not clone the
-                // field's contents, and neither do we, for speed
-                // reasons.  Since we get personaObj using
-                // viewDBObject(), and we made sure that we got a
-                // non-editable view, there's no chance that this loop
-                // will get trashed by another thread messing with
-                // vals.
-
-                // DO NOT modify vals here!
-
                 // loop over the owner groups this persona is a member
                 // of, see if it includes the supergash owner group
 
@@ -2089,10 +2073,6 @@ public final class DBPermissionManager {
                 if (idbf != null)
                   {
                     Vector<Invid> vals = (Vector<Invid>) idbf.getValuesLocal();
-
-                    // *** Caution!  getValuesLocal() does not clone the field's contents..
-                    //
-                    // DO NOT modify vals here!
 
                     PermissionMatrixDBField pmdbf, pmdbf2;
                     Hashtable<String, PermEntry> pmdbfMatrix1 = null, pmdbfMatrix2 = null;
@@ -2220,7 +2200,7 @@ public final class DBPermissionManager {
   /**
    * <p>Recursive helper method for personaMatch.. this method does a
    * depth first search up the owner tree for each Invid contained in
-   * the invids Vector to see if the gSession's personaInvid is a
+   * the owners Vector to see if the gSession's personaInvid is a
    * member of any of the containing owner groups.</p>
    *
    * @param owners A vector of invids pointing to OwnerBase objects
@@ -2320,33 +2300,16 @@ public final class DBPermissionManager {
 
   public boolean personaMatch(DBObject obj)
   {
-    Vector<Invid> owners;
-    InvidDBField inf;
     boolean showit = false;
 
     /* -- */
 
     if (obj == null || personaInvid == null)
       {
-        //      Ganymede.debug("Null obj/personaInvid");
         return false;
       }
 
-    inf = (InvidDBField) obj.getField(SchemaConstants.OwnerListField); // owner or container
-
-    if (inf == null)
-      {
-        owners = new Vector<Invid>();
-      }
-    else
-      {
-        // we have to clone the value returned to us by
-        // getValuesLocal() because getValuesLocal() returns the
-        // actual vector held in the field, and if we were to change
-        // that, bad things would happen.
-
-        owners = (Vector<Invid>) inf.getValuesLocal().clone();
-      }
+    Vector<Invid> owners = (Vector<Invid>) obj.getFieldValuesLocal(SchemaConstants.OwnerListField); // owner or container
 
     // All owner group objects are considered to be self-owning.
 
@@ -2375,46 +2338,30 @@ public final class DBPermissionManager {
             showit = true;
           }
 
-        InvidDBField inf2 = (InvidDBField) obj.getField(SchemaConstants.PersonaGroupsField);
+        Vector<Invid> values = (Vector<Invid>) obj.getFieldValuesLocal(SchemaConstants.PersonaGroupsField);
 
-        if (inf2 != null)
+        if (permsdebug)
           {
-            if (permsdebug)
+            for (int i = 0; i < values.size(); i++)
               {
-                Vector<Invid> values = (Vector<Invid>) inf2.getValuesLocal();
-
-                // *** Caution!  getValuesLocal() does not clone the field's contents..
-                //
-                // DO NOT modify values here!
-
-                // it's okay to loop on this field since we should be
-                // looking at a DBObject and not a DBEditObject
-
-                for (int i = 0; i < values.size(); i++)
+                if (i > 0)
                   {
-                    if (i > 0)
-                      {
-                        System.err.print(", ");
-                      }
-
-                    System.err.print(values.get(i));
+                    System.err.print(", ");
                   }
 
-                System.err.println();
+                System.err.print(values.get(i));
               }
 
-            // we don't have to clone inf2.getValuesLocal() since union() will copy
-            // the elements rather than just setting owners to the vector returned
-            // by inf2.getValuesLocal() if owners is currently null.
-
-            owners = arlut.csd.Util.VectorUtils.union(owners, (Vector<Invid>) inf2.getValuesLocal());
+            System.err.println();
           }
-        else
+
+        owners = arlut.csd.Util.VectorUtils.union(owners, values);
+      }
+    else
+      {
+        if (permsdebug)
           {
-            if (permsdebug)
-              {
-                System.err.println("<no owner groups in this persona>");
-              }
+            System.err.println("<no owner groups in this persona>");
           }
       }
 
@@ -2533,10 +2480,6 @@ public final class DBPermissionManager {
       }
 
     owners = (Vector<Invid>) inf.getValuesLocal();
-
-    // *** Caution!  getValuesLocal() does not clone the field's contents..
-    //
-    // DO NOT modify owners here!
 
     if (owners == null)
       {

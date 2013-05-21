@@ -502,7 +502,7 @@ public final class DBJournal implements ObjectStatus {
                     DBObjectDeltaRec delta = new DBObjectDeltaRec(jFile);
                     DBObject original = DBStore.viewDBObject(delta.getInvid());
 
-                    obj = delta.applyDelta(original);
+                    obj = new DBObject(original, delta);
 
                     // we have to do the delta.toString() after we apply the delta so that
                     // the scalarValue fields get parented

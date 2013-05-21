@@ -55,14 +55,12 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.PrintWriter;
-import java.rmi.NoSuchObjectException;
 import java.rmi.Remote;
-import java.rmi.RemoteException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,7 +70,6 @@ import org.python.core.PyInteger;
 
 import arlut.csd.Util.JythonMap;
 import arlut.csd.Util.TranslationService;
-import arlut.csd.Util.VectorUtils;
 import arlut.csd.Util.XMLUtils;
 import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.FieldInfo;
@@ -213,59 +210,55 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * The type definition for this object.
    */
 
-  protected DBObjectBase objectBase;
+  protected final DBObjectBase objectBase;
 
   /**
    * <p>Our fields, ordered by ascending field id.</p>
    *
-   * <p>This member variable will be null in the case where we are
+   * <p>This reference will be null in the case where we are
    * constructed as a DBEditObject subclass for use as a pseudo-static
    * objectHook.</p>
    *
    * @see arlut.csd.ganymede.server.DBField
    */
 
-  protected DBField[] fieldAry;
+  private final DBField[] fieldAry;
 
   /**
-   * Permission cache for our fields, in ascending field id order
-   * using the same indexing as fieldAry.
+   * <p>Permission cache for our fields, in ascending field id order
+   * using the same indexing as fieldAry.</p>
+   *
+   * <p>This reference will be null unless this instance was checked
+   * out for editing or viewing by a specific GanymedeSession.</p>
    */
 
-  protected PermEntry[] permCacheAry;
+  private final PermEntry[] permCacheAry;
 
   /**
-   * If this object is being edited or removed, this points
-   * to the DBEditObject copy that is being edited.  If
-   * this object is not being edited, this field will be null,
-   * and we are available for someone to edit.
+   * <p>If this object is being edited or removed, this points to the
+   * DBEditObject copy that is being edited.  If this object is not
+   * being edited, this field will be null, and we are available for
+   * someone to edit.</p>
    */
 
-  DBEditObject shadowObject;
+  private DBEditObject shadowObject = null;
 
   /**
-   * If this object is being viewed by a particular
-   * Ganymede Session, we record that here.
+   * <p>If this object is being viewed by a particular Ganymede
+   * Session, we record that here.</p>
    */
 
-  protected GanymedeSession gSession;
+  protected final GanymedeSession gSession;
 
   /**
-   * If thisobject is being viewed in a particular permissions
-   * context, we record the permManager here.
+   * <p>A fixed copy of our Invid, so that we don't have to create new
+   * ones all the time when people call getInvid() on us.</p>
    */
 
-  protected DBPermissionManager permManager;
+  private final Invid myInvid;
 
   /**
-   * A fixed copy of our Invid, so that we don't have to create
-   * new ones all the time when people call getInvid() on us.
-   */
-
-  Invid myInvid = null;
-
-  /**
-   * used by the DBObjectTable logic
+   * <p>Used by the DBObjectTable logic for hash bucket chaining.</p>
    */
 
   DBObject next = null;
@@ -278,51 +271,30 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * pseudo-static objectHook case.</p>
    */
 
-  public DBObject()
+  public DBObject(DBObjectBase base)
   {
-    gSession = null;
-    permManager = null;
+    this.objectBase = base;
+    this.gSession = null;
+    this.permCacheAry = null;
+    this.fieldAry = null;
+    this.myInvid = null;
   }
 
   /**
-   * <p>Base constructor, used to create a new object of
-   * type objectBase.  Note that DBObject itself is
-   * a mere carrier of data and there is nothing application
-   * type specific in a base DBObject.  The only type
-   * information is represented by the DBObjectBase passed
-   * in to this constructor.</p>
-   *
-   * <p>This constructor is used through super() chaining
-   * by the DBEditObject check-out constructor.</p>
-   */
-
-  DBObject(DBObjectBase objectBase)
-  {
-    this.objectBase = objectBase;
-    fieldAry = null;
-    permCacheAry = null;
-
-    shadowObject = null;
-
-    myInvid = Invid.createInvid(objectBase.getTypeID(), 0);
-    gSession = null;
-    permManager = null;
-  }
-
-  /**
-   * <p>Constructor to create an object of type objectBase
-   * with the specified object number.</p>
+   * <p>Constructor to create an object of type objectBase with the
+   * specified object number.</p>
    *
    * <p>This is used through super() chaining by the DBEditObject
-   * create object constructor.</p>
+   * check-out object constructor.</p>
    */
 
-  DBObject(DBObjectBase objectBase, int id)
+  DBObject(DBObjectBase objectBase, int id, GanymedeSession gSession)
   {
-    this(objectBase);
-    myInvid = Invid.createInvid(objectBase.getTypeID(), id);
-    gSession = null;
-    permManager = null;
+    this.gSession = gSession;
+    this.objectBase = objectBase;
+    this.myInvid = Invid.createInvid(objectBase.getTypeID(), id);
+    this.fieldAry = new DBField[objectBase.getFieldCount()];
+    this.permCacheAry = new PermEntry[objectBase.getFieldCount()];
   }
 
   /**
@@ -337,11 +309,23 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         throw new RuntimeException("Error, null object base");
       }
 
+    this.gSession = null;
+    this.permCacheAry = null;
     this.objectBase = objectBase;
-    shadowObject = null;
-    receive(in, journalProcessing);
-    gSession = null;
-    permManager = null;
+    this.myInvid = Invid.createInvid(objectBase.getTypeID(), in.readInt());
+
+    // number of fields
+
+    int tmp_count = in.readShort();
+
+    if (debug && tmp_count == 0)
+      {
+        // "DBObject.receive(): No fields reading object {0}"
+        System.err.println(ts.l("receive.nofields", Integer.valueOf(getID())));
+      }
+
+    this.fieldAry = new DBField[tmp_count];
+    this.receive(in, journalProcessing);
 
     DBObject.objectCount++;
   }
@@ -361,29 +345,25 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   DBObject(DBEditObject eObj)
   {
-    DBField field;
+    List<DBField> copyFields = eObj.getFieldVect();
 
-    /* -- */
-
-    objectBase = eObj.objectBase;
-    myInvid = eObj.myInvid;
-
-    shadowObject = null;
-
-    short count = 0;
-
-    if (eObj.fieldAry == null)
+    if (copyFields == null)
       {
-        // "Error, tried to call the DBObject view-copy constructor with a pseudo-static DBEditObject"
+        // "Error, tried to call the DBObject check-in constructor with a pseudo-static DBEditObject"
         throw new NullPointerException(ts.l("global.pseudostatic_constructor"));
       }
 
-    synchronized (eObj.fieldAry)
-      {
-        for (short i = 0; i < eObj.fieldAry.length; i++)
-          {
-            field = eObj.fieldAry[i];
+    this.gSession = null;
+    this.permCacheAry = null;
+    this.objectBase = eObj.objectBase;
+    this.myInvid = eObj.getInvid();
 
+    synchronized (eObj)
+      {
+        short count = 0;
+
+        for (DBField field: copyFields)
+          {
             if (field != null && field.isDefined())
               {
                 count++;
@@ -393,14 +373,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         // put any defined fields into the object we're going
         // to commit back into our DBStore
 
-        fieldAry = new DBField[count];
+        this.fieldAry = new DBField[count];
 
         int j = 0;
 
-        for (short i = 0; i < eObj.fieldAry.length; i++)
+        for (DBField field: copyFields)
           {
-            field = eObj.fieldAry[i];
-
             if (field != null && field.isDefined())
               {
                 // clean up any cached data the field was holding during
@@ -443,9 +421,60 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
               }
           }
       }
+  }
 
-    gSession = null;
-    permManager = null;
+  /**
+   * <p>This constructor is used to make a copy of a DBObject with an
+   * updated DBObjectBase type definition, in order to replace an
+   * object in a DBObjectBase table with a new version referencing an
+   * updated DBObjectBase type definition.</p>
+   *
+   * <p>Any fields that are no longer present in the typeDefinition
+   * are excluded from the copy made.</p>
+   */
+
+  public DBObject(DBObject original, DBObjectBase typeDefinition)
+  {
+    this.objectBase = typeDefinition;
+    this.myInvid = original.myInvid;
+    this.gSession = null;
+    this.permCacheAry = null;
+
+    DBField oldAry[] = original.fieldAry;
+    int count = 0;
+
+    synchronized (oldAry)
+      {
+        for (DBField field: oldAry)
+          {
+            if (field == null)
+              {
+                continue;
+              }
+
+            if (typeDefinition.getField(field.getID()) != null && field.isDefined())
+              {
+                count++;
+              }
+          }
+
+        this.fieldAry = new DBField[count];
+
+        int i = 0;
+
+        for (DBField field: oldAry)
+          {
+            if (field == null)
+              {
+                continue;
+              }
+
+            if (typeDefinition.getField(field.getID()) != null && field.isDefined())
+              {
+                this.fieldAry[i++] = field;
+              }
+          }
+      }
   }
 
   /**
@@ -460,43 +489,164 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
   public DBObject(DBObject original, GanymedeSession gSession)
   {
-    DBField field;
+    this.gSession = gSession;
+    this.myInvid = original.myInvid;
+    this.objectBase = original.objectBase;
 
-    /* -- */
-
-    objectBase = original.objectBase;
-    myInvid = original.myInvid;
-
-    shadowObject = null;
-
-    if (original.fieldAry == null)
+    if (original == null || original.fieldAry == null)
       {
         throw new NullPointerException(ts.l("global.pseudostatic_constructor"));
       }
 
+    this.permCacheAry = new PermEntry[original.fieldAry.length];
+
     synchronized (original.fieldAry)
       {
-        // make fieldAry big enough to hold all fields defined, because
-        // DBObjectDeltaRec uses this constructor when doing
-        // journal edits to an object
-
-        fieldAry = new DBField[original.fieldAry.length];
+        this.fieldAry = new DBField[original.fieldAry.length];
 
         for (int i = 0; i < original.fieldAry.length; i++)
           {
             fieldAry[i] = original.fieldAry[i].getCopy(this);
           }
       }
+  }
 
-    this.gSession = gSession;
+  /**
+   * <p>Creation constructor, is responsible for creating a new
+   * editable object with all fields listed in the {@link
+   * arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField}
+   * instantiated but undefined.</p>
+   *
+   * <p>This constructor is not really intended to be overridden in subclasses.
+   * Creation time field value initialization is to be handled by
+   * initializeNewObject().</p>
+   *
+   * @see arlut.csd.ganymede.server.DBField
+   */
 
-    if (gSession == null)
+  DBObject(DBObjectBase objectBase, Invid invid, DBEditSet editset)
+  {
+    if (editset == null)
       {
-        this.permManager = null;
+        // "Null DBEditSet"
+        throw new NullPointerException(ts.l("init.notrans"));
       }
-    else
+
+    this.objectBase = objectBase;
+    this.gSession = editset.getDBSession().getGSession();
+    this.myInvid = invid;
+
+    /* -- */
+
+    synchronized (objectBase)
       {
-        this.permManager = gSession.getPermManager();
+        this.fieldAry = new DBField[objectBase.getFieldCount()];
+        this.permCacheAry = new PermEntry[objectBase.getFieldCount()];
+
+        int i = 0;
+
+        // the iterator on DBBaseFieldTable gives us the field
+        // defintion objects in field id order, which we need to order
+        // the fieldAry elements properly.
+
+        for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
+          {
+            DBField newField = DBField.createTypedField(this, fieldDef);
+
+            if (newField == null)
+              {
+                throw new NullPointerException("Error creating typed field when creating object");
+              }
+
+            fieldAry[i++] = newField;
+          }
+      }
+  }
+
+  /**
+   * <p>Copy constructor that takes a DBObject and a DBObjectDeltaRec
+   * and creates a new DBObject with the changes in delta applied to
+   * the original.</p>
+   *
+   * <p>The original object is not modified.</p>
+   */
+
+  DBObject(DBObject original, DBObjectDeltaRec delta)
+  {
+    this.objectBase = original.objectBase;
+    this.myInvid = original.myInvid;
+    this.gSession = null;
+
+    Map<Short, DBField> fieldMap = new HashMap<Short, DBField>();
+
+    DBField[] originals = original.listDBFields();
+
+    for (DBField field: originals)
+      {
+        fieldMap.put(field.getID(), DBField.copyField(this, field));
+      }
+
+    for (fieldDeltaRec fieldRec: delta)
+      {
+        if (!fieldRec.vector)
+          {
+            if (fieldRec.scalarValue == null)
+              {
+                fieldMap.remove(fieldRec.fieldcode);
+                continue;
+              }
+            else
+              {
+                fieldMap.put(fieldRec.fieldcode, DBField.copyField(this, fieldRec.scalarValue));
+              }
+          }
+        else
+          {
+            DBField fieldCopy = DBField.copyField(this, original.retrieveField(fieldRec.fieldcode));
+
+            if (fieldRec.addValues != null)
+              {
+                for (Object value: fieldRec.addValues)
+                  {
+                    if (value instanceof IPwrap)
+                      {
+                        value = ((IPwrap) value).address;
+                      }
+
+                    fieldCopy.getVectVal().add(value);
+                  }
+              }
+
+            if (fieldRec.delValues != null)
+              {
+                for (Object value: fieldRec.delValues)
+                  {
+                    if (value instanceof IPwrap)
+                      {
+                        value = ((IPwrap) value).address;
+                      }
+
+                    fieldCopy.getVectVal().remove(value);
+                  }
+              }
+
+            if (fieldCopy.isDefined())
+              {
+                fieldMap.put(fieldRec.fieldcode, fieldCopy);
+              }
+          }
+      }
+
+    this.permCacheAry = null;
+    this.fieldAry = new DBField[fieldMap.size()];
+
+    int i = 0;
+
+    for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
+      {
+        DBField field = fieldMap.get(fieldDef.getID());
+
+        fieldAry[i++] = field;
       }
   }
 
@@ -669,6 +819,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   public final synchronized PermEntry getFieldPerm(short fieldcode)
   {
     PermEntry result = null;
+    DBPermissionManager permManager = null;
 
     /* -- */
 
@@ -677,9 +828,13 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         throw new NullPointerException(ts.l("global.pseudostatic"));
       }
 
-    if (permManager == null)
+    if (this.gSession == null)
       {
         return PermEntry.fullPerms; // assume supergash if we have no session
+      }
+    else
+      {
+        permManager = this.gSession.getPermManager();
       }
 
     short index = findField(fieldcode);
@@ -690,26 +845,22 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         throw new IllegalArgumentException(ts.l("getFieldPerm.nofield", Integer.valueOf(fieldcode)));
       }
 
-    if (permCacheAry == null)
-      {
-        permCacheAry = new PermEntry[fieldAry.length];
-      }
-    else
+    if (permCacheAry != null)
       {
         result = permCacheAry[index];
-      }
-
-    if (result == null)
-      {
-        result = permManager.getPerm(this, fieldcode);
 
         if (result == null)
           {
-            result = permManager.getPerm(this);
+            result = permManager.getPerm(this, fieldcode);
+
+            if (result == null)
+              {
+                result = permManager.getPerm(this);
+              }
+
+            permCacheAry[index] = result;
           }
       }
-
-    permCacheAry[index] = result;
 
     return result;
   }
@@ -851,7 +1002,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public db_field getLabelField()
+  public final db_field getLabelField()
   {
     return getField(objectBase.getLabelField());
   }
@@ -863,7 +1014,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public short getLabelFieldID()
+  public final short getLabelFieldID()
   {
     return objectBase.getLabelField();
   }
@@ -874,7 +1025,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public boolean isEmbedded()
+  public final boolean isEmbedded()
   {
     return objectBase.isEmbedded();
   }
@@ -888,7 +1039,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * {@link arlut.csd.ganymede.server.DBStore DBStore} writing stream.
    */
 
-  void emit(DataOutput out) throws IOException
+  final void emit(DataOutput out) throws IOException
   {
     //    System.err.println("Emitting " + objectBase.getName() + " <" + id + ">");
 
@@ -945,54 +1096,21 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * database.</p>
    */
 
-  synchronized void receive(DataInput in, boolean journalProcessing) throws IOException
+  private synchronized void receive(DataInput in, boolean journalProcessing) throws IOException
   {
-    DBField
-      tmp = null;
-
-    DBObjectBaseField
-      definition;
-
-    short
-      fieldcode,
-      type;
-
     int
-      tmp_count,
       upgradeSkipCount = 0;
 
     /* -- */
 
-    // get our unique id
-
-    myInvid = Invid.createInvid(objectBase.getTypeID(), in.readInt());
-
-    if (debugReceive)
-      {
-        System.err.println("Reading invid " + myInvid);
-      }
-
-    // get number of fields
-
-    tmp_count = in.readShort();
-
-    if (debug && tmp_count == 0)
-      {
-        // "DBObject.receive(): No fields reading object {0}"
-        System.err.println(ts.l("receive.nofields", Integer.valueOf(getID())));
-      }
-
-    fieldAry = new DBField[tmp_count];
-    permCacheAry = null;        // okay in synchronized block
-
-    for (int i = 0; i < tmp_count; i++)
+    for (int i = 0; i < this.fieldAry.length; i++)
       {
         // read our field code, look it up in our
         // DBObjectBase
 
-        fieldcode = in.readShort();
+        short fieldcode = in.readShort();
 
-        definition = objectBase.getFieldDef(fieldcode);
+        DBObjectBaseField definition = this.getFieldDef(fieldcode);
 
         // we used to have a couple of Invid vector fields that we
         // have gotten rid of, for the sake of improving Ganymede's
@@ -1046,7 +1164,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
             System.err.println("Reading field " + definition);
           }
 
-        tmp = DBField.readField(this, in, definition);
+        DBField tmp = DBField.readField(this, in, definition);
 
         if (tmp == null)
           {
@@ -1143,7 +1261,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>This method is used when this object is being dumped.</p>
    */
 
-  synchronized public void emitXML(XMLDumpContext xmlOut) throws IOException
+  public final synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
     xmlOut.startElementIndent("object");
     xmlOut.attribute("type", XMLUtils.XMLEncode(getTypeName()));
@@ -1195,9 +1313,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @param editset The transaction to own this shadow.
    */
 
-  synchronized DBEditObject createShadow(DBEditSet editset)
+  final synchronized DBEditObject createShadow(DBEditSet editset)
   {
-    if (shadowObject != null)
+    if (this.shadowObject != null)
       {
         // this object has already been checked out
         // for editing / deleting
@@ -1205,16 +1323,16 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         return null;
       }
 
-    shadowObject = objectBase.createNewObject(this, editset);
+    this.shadowObject = objectBase.createNewObject(this, editset);
 
     // if this object currently points to an object that
     // is being deleted by way of an asymmetric InvidDBField,
     // addObject() may fail.  In this case, we have to deny
     // the edit
 
-    if (!editset.addObject(shadowObject))
+    if (!editset.addObject(this.shadowObject))
       {
-        shadowObject = null;
+        this.shadowObject = null;
         return null;
       }
 
@@ -1227,9 +1345,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         editset.session.GSession.checkOut(); // update session checked out count
       }
 
-    objectBase.getStore().checkOut(); // update checked out count
+    this.objectBase.getStore().checkOut(); // update checked out count
 
-    return shadowObject;
+    return this.shadowObject;
   }
 
   /**
@@ -1241,9 +1359,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.server.DBEditSet#release()
    */
 
-  synchronized boolean clearShadow(DBEditSet editset)
+  final synchronized boolean clearShadow(DBEditSet editset)
   {
-    if (editset != shadowObject.editset)
+    if (editset != this.shadowObject.editset)
       {
         // couldn't clear the shadow..  this editSet
         // wasn't the one to create the shadow
@@ -1254,16 +1372,29 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
         return false;
       }
 
-    shadowObject = null;
+    this.shadowObject = null;
 
     if (editset.session.GSession != null)
       {
         editset.session.GSession.checkIn();
       }
 
-    objectBase.getStore().checkIn(); // update checked out count
+    this.objectBase.getStore().checkIn(); // update checked out count
 
     return true;
+  }
+
+  /**
+   * <p>If this object is currently being edited by an active
+   * GanymedeSession, this method will return a pointer to the
+   * DBEditObject that is handling the edits.</p>
+   *
+   * <p>Otherwise, getShadow() returns null.</p>
+   */
+
+  final public DBEditObject getShadow()
+  {
+    return this.shadowObject;
   }
 
   /**
@@ -1279,7 +1410,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public Vector<FieldInfo> getFieldInfoVector()
+  public final Vector<FieldInfo> getFieldInfoVector()
   {
     Vector<FieldInfo> results = new Vector<FieldInfo>();
     DBField field;
@@ -1319,10 +1450,17 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * <p>This method provides a Vector copy of the DBFields contained
    * in this object in a fashion that does not contribute to fieldAry
    * threadlock.</p>
+   *
+   * <p>Server-side only.</p>
    */
 
   public final Vector<DBField> getFieldVect()
   {
+    if (this.fieldAry == null)
+      {
+        return null;
+      }
+
     Vector<DBField> fieldVect = new Vector<DBField>(fieldAry.length);
 
     synchronized (fieldAry)
@@ -1337,39 +1475,17 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <p>This method adds a DBField to this object.  It is used when
-   * loading journal entries that cause new fields to be added, and by
-   * InvidDBField.bind(), when anonymously adding an InvidDBField to
-   * an object that the user would not normally have needs to add a
-   * field after the fact.</p>
+   * <p>Used by the DBEditObject check-out constructor to place an
+   * array of fields in field order into the parent object's
+   * pre-created fieldAry.</p>
    */
 
-  final synchronized void addField(DBField field)
+  void setAllFields(DBField[] newFields)
   {
-    if (fieldAry == null)
+    for (int i = 0; i < newFields.length; i++)
       {
-        throw new NullPointerException(ts.l("global.pseudostatic"));
+        this.fieldAry[i] = newFields[i];
       }
-
-    if (field == null)
-      {
-        // "null value passed to addField"
-        throw new IllegalArgumentException(ts.l("addField.null"));
-      }
-
-    if (retrieveField(field.getID()) != null)
-      {
-        // "Error, field {0} is already present in object {1}."
-        throw new IllegalArgumentException(ts.l("addField.preexisting", field.getID(), this.toString()));
-      }
-
-    DBField[] newFieldAry = new DBField[fieldAry.length + 1];
-
-    java.lang.System.arraycopy(fieldAry, 0, newFieldAry, 0, fieldAry.length);
-
-    fieldAry = newFieldAry;
-
-    saveField(field);
   }
 
   /**
@@ -1378,11 +1494,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * optimization, this method makes no checks to ensure that another
    * DBField with the same field id has not previously been stored, so
    * it should only be used when the DBObject's fieldAry is in a known
-   * state.  Otherwise, {@link
-   * arlut.csd.ganymede.server.DBObject#clearField(short) clearField()}
-   * should be called before calling saveField(), so that duplicate
-   * field id's are not accidentally introduced into the DBObject's
-   * fieldAry.</p>
+   * state.</p>
    *
    * <p>saveField() saves fields in field id order to try and speed up
    * field retrieving, by allowing us to do boolean search to find
@@ -1438,83 +1550,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
             bubbleField = currentField;
 
             i++;
-          }
-      }
-  }
-
-  /**
-   * <p>This method replaces a DBField with a given field id in this
-   * object's fieldAry DBField array with a new DBField sharing the
-   * same id.  If this DBObject does not contain a field with the same
-   * id as the field argument for this method, no action will be taken
-   * and an IllegalArgumentException will be thrown.</p>
-   *
-   * <p>replaceField() saves fields in field id order to try and speed
-   * up field retrieving, by allowing us to do boolean search to find
-   * elements.</p>
-   */
-
-  final void replaceField(DBField field)
-  {
-    if (fieldAry == null)
-      {
-        throw new NullPointerException(ts.l("global.pseudostatic"));
-      }
-
-    if (field == null)
-      {
-        // "null value passed to replaceField"
-        throw new IllegalArgumentException(ts.l("replaceField.null"));
-      }
-
-    synchronized (fieldAry)
-      {
-        int index = java.util.Arrays.binarySearch(fieldAry, field);
-
-        if (index < 0)
-          {
-            // "Error, DBObject.replaceField could not find matching field"
-            throw new IllegalArgumentException(ts.l("replaceField.none"));
-          }
-
-        fieldAry[index] = field;
-
-        if (permCacheAry != null)
-          {
-            permCacheAry[index] = null;
-          }
-      }
-  }
-
-  /**
-   * <p>This method removes a DBField that has the a field id matching
-   * the argument from this object's fieldAry.  This method will never
-   * fail..  if there is no field matching the given field id, the
-   * method will return without changing the fieldAry.</p>
-   */
-
-  final void clearField(short id)
-  {
-    if (fieldAry == null)
-      {
-        throw new NullPointerException(ts.l("global.pseudostatic"));
-      }
-
-    synchronized (fieldAry)
-      {
-        int index = java.util.Arrays.binarySearch(fieldAry, id);
-
-        if (index < 0)
-          {
-            // "Error, DBObject.replaceField could not find matching field"
-            throw new IllegalArgumentException(ts.l("replaceField.none"));
-          }
-
-        fieldAry[index] = null;
-
-        if (permCacheAry != null)
-          {
-            permCacheAry[index] = null;
           }
       }
   }
@@ -1597,6 +1632,12 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   /**
    * <p>This method clears any cached PermEntry value for the
    * given field id.</p>.
+   *
+   * <p>It is intended for use by custom DBEditObject subclasses which
+   * oversee some of their own permissions.  By calling this method, a
+   * subclass can remove a cached field permission and cause the
+   * permissions system to consult with the controlling custom
+   * DBEditObject subclass afresh.</p>
    */
 
   public final void clearFieldPerm(short id)
@@ -1764,7 +1805,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public boolean canInactivate()
+  public final boolean canInactivate()
   {
     return objectBase.canInactivate();
   }
@@ -2030,7 +2071,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public String getImageURL()
+  public final String getImageURL()
   {
     return objectBase.getObjectHook().getImageURLForObject(this);
   }
@@ -2461,16 +2502,68 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
-   * <p>Shortcut method to set a field's value.  Using this
-   * method saves a roundtrip to the server, which is
-   * particularly useful in database loading.</p>
+   * <p>Shortcut method to set a field's value.  Using this method
+   * saves a roundtrip to the server, which is particularly useful in
+   * database loading.</p>
+   *
+   * <p>The Vector returned by getFieldValues() is a cloned copy of
+   * the vector held in the DBField.</p>
+   *
+   * <p>If no such Vector field is defined on this object type, an
+   * IllegalArgumentException will be thrown.  If the field is defined
+   * on this object type but is undefined in this individual object,
+   * an empty Vector, detached from the field's internal state will be
+   * returned.</p>
+   *
+   * <p>Will never return null.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final Vector getFieldValues(String fieldName) throws GanyPermissionsException
   {
-    return getFieldValues((DBField) getField(fieldName));
+    DBField field = (DBField) this.getField(fieldName);
+
+    if (field == null)
+      {
+        // Okay, this field doesn't have a copy of the desired field.
+        // Let's see if we can go ahead and return an empty
+        // synthesized Vector to the caller.
+
+        DBObjectBaseField fieldDef = this.getFieldDef(fieldName);
+
+        if (fieldDef == null)
+          {
+            throw new RuntimeException("No field named " + fieldName + " defined.");
+          }
+
+        if (this.gSession != null)
+          {
+            PermEntry perm = this.gSession.getPermManager().getPerm(this, fieldDef.getID());
+
+            if (!perm.isVisible())
+              {
+                // "Don''t have permission to read field {0} in object {1}"
+                throw new GanyPermissionsException(ts.l("global.no_read_perms", fieldName, this.getLabel()));
+              }
+          }
+
+        if (!fieldDef.isArray())
+          {
+            // "Couldn't get vector values on scalar field {0}"
+            throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
+          }
+
+        return new Vector();
+      }
+
+    if (!field.isVector())
+      {
+        // "Couldn't get vector values on scalar field {0}"
+        throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
+      }
+
+    return field.getValues();
   }
 
   /**
@@ -2478,28 +2571,69 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * method saves a roundtrip to the server, which is
    * particularly useful in database loading.</p>
    *
+   * <p>The Vector returned by getFieldValues() is a cloned copy of
+   * the vector held in the DBField.</p>
+   *
+   * <p>If no such Vector field is defined on this object type, an
+   * IllegalArgumentException will be thrown.  If the field is defined
+   * on this object type but is undefined in this individual object,
+   * an empty Vector, detached from the field's internal state will be
+   * returned.</p>
+   *
+   * <p>Will never return null.</p>
+   *
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
   public final Vector getFieldValues(short fieldID) throws GanyPermissionsException
   {
-    return getFieldValues((DBField) getField(fieldID));
-  }
+    DBField field = (DBField) this.getField(fieldID);
+    String fieldName = null;
 
-  private Vector getFieldValues(DBField f) throws GanyPermissionsException
-  {
-    if (f == null)
+    if (field == null)
       {
-        return null;
+        // Okay, this field doesn't have a copy of the desired field.
+        // Let's see if we can go ahead and return a new, empty Vector
+        // to the caller.
+
+        DBObjectBaseField fieldDef = this.getFieldDef(fieldID);
+
+        if (fieldDef == null)
+          {
+            throw new RuntimeException("No field numbered " + fieldID + " is defined.");
+          }
+
+        fieldName = fieldDef.getName();
+
+        if (this.gSession != null)
+          {
+            PermEntry perm = this.gSession.getPermManager().getPerm(this, fieldID);
+
+            if (!perm.isVisible())
+              {
+                // "Don''t have permission to read field {0} in object {1}"
+                throw new GanyPermissionsException(ts.l("global.no_read_perms", fieldName, this.getLabel()));
+              }
+          }
+
+        if (!fieldDef.isArray())
+          {
+            // "Couldn't get vector values on scalar field {0}"
+            throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
+          }
+
+        return new Vector();
       }
 
-    if (!f.isVector())
+    fieldName = field.getName();
+
+    if (!field.isVector())
       {
         // "Couldn't get vector values on scalar field {0}"
-        throw new IllegalArgumentException(ts.l("getFieldValues.badtype", f.getName()));
+        throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
       }
 
-    return f.getValues();
+    return field.getValues();
   }
 
   /**
@@ -2507,15 +2641,47 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * method, but it can be a quick way to get a vector of
    * elements.</p>
    *
-   * <p><b>Warning!</b> The Vector returned by getFieldValuesLocal()
-   * is not a clone, but is direct access to the vector held in the
-   * DBField.  Clone the vector you get back if you need to do
-   * anything with it other than read it.</p>
+   * <p>The Vector returned by getFieldValuesLocal() is a cloned copy
+   * of the vector held in the DBField.</p>
+   *
+   * <p>If no such Vector field is defined on this object type, an
+   * IllegalArgumentException will be thrown.  If the field is defined
+   * on this object type but is undefined in this individual object,
+   * an empty Vector, detached from the field's internal state will be
+   * returned.</p>
+   *
+   * <p>Will never return null.</p>
    */
 
   public final Vector getFieldValuesLocal(String fieldName)
   {
-    return getFieldValuesLocal((DBField) getField(fieldName));
+    DBField field = (DBField) this.getField(fieldName);
+
+    if (field == null)
+      {
+        DBObjectBaseField fieldDef = this.getFieldDef(fieldName);
+
+        if (fieldDef == null)
+          {
+            throw new RuntimeException("No field named " + fieldName + " defined.");
+          }
+
+        if (!fieldDef.isArray())
+          {
+            // "Couldn't get vector values on scalar field {0}"
+            throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
+          }
+
+        return new Vector();
+      }
+
+    if (!field.isVector())
+      {
+        // "Couldn't get vector values on scalar field {0}"
+        throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
+      }
+
+    return field.getValuesLocal();
   }
 
   /**
@@ -2523,32 +2689,52 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * is a server-side method, but it can be a quick
    * way to get a vector of elements.</p>
    *
-   * <p><b>Warning!</b>  The Vector returned by getFieldValuesLocal()
-   * is not a clone, but is direct access to the vector
-   * held in the DBField.  Clone the vector you get back
-   * if you need to do anything with it other than read
-   * it.</p>
+   * <p>The Vector returned by getFieldValuesLocal() is a cloned copy
+   * of the vector held in the DBField.</p>
+   *
+   * <p>If no such Vector field is defined on this object type, an
+   * IllegalArgumentException will be thrown.  If the field is defined
+   * on this object type but is undefined in this individual object,
+   * an empty Vector, detached from the field's internal state will be
+   * returned.</p>
+   *
+   * <p>Will never return null.</p>
    */
 
   public final Vector getFieldValuesLocal(short fieldID)
   {
-    return getFieldValuesLocal((DBField) getField(fieldID));
-  }
+    DBField field = (DBField) this.getField(fieldID);
+    String fieldName = null;
 
-  private Vector getFieldValuesLocal(DBField f)
-  {
-    if (f == null)
+    if (field == null)
       {
-        return null;
+        DBObjectBaseField fieldDef = this.getFieldDef(fieldID);
+
+        if (fieldDef == null)
+          {
+            throw new RuntimeException("No field numbered " + fieldID + " is defined.");
+          }
+
+        fieldName = fieldDef.getName();
+
+        if (!fieldDef.isArray())
+          {
+            // "Couldn't get vector values on scalar field {0}"
+            throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
+          }
+
+        return new Vector();
       }
 
-    if (!f.isVector())
+    fieldName = field.getName();
+
+    if (!field.isVector())
       {
         // "Couldn't get vector values on scalar field {0}"
-        throw new IllegalArgumentException(ts.l("getFieldValues.badtype", f.getName()));
+        throw new IllegalArgumentException(ts.l("getFieldValues.badtype", fieldName));
       }
 
-    return f.getValuesLocal();
+    return field.getValuesLocal();
   }
 
   /**
@@ -2722,76 +2908,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   public String lookupLabel(DBObject object)
   {
     return object.getLabel();   // default
-  }
-
-  /**
-   * <p>This method is used to correct this object's base pointers
-   * when the base changes.  This happens when the schema is
-   * edited.. this method is called on all objects under a {@link
-   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase} to make the object
-   * point to the new version of the DBObjectBase.  This method also
-   * takes care of cleaning out any fields that have become undefined
-   * due to a change in the schema for the field, as in a change from
-   * a vector to a scalar field, or vice-versa.</p>
-   */
-
-  final void updateBaseRefs(DBObjectBase newBase)
-  {
-    this.objectBase = newBase;
-
-    short count = 0;
-
-    // we need to be double-synchronized because we are looping
-    // over fieldAry and because we are replacing fieldAry in midstream
-
-    if (fieldAry == null)
-      {
-        throw new NullPointerException(ts.l("global.pseudostatic"));
-      }
-
-    DBField oldAry[] = fieldAry;
-
-    synchronized (oldAry)
-      {
-        for (DBField field: fieldAry)
-          {
-            if (field == null)
-              {
-                continue;
-              }
-
-            if (newBase.getField(field.getID()) != null && field.isDefined())
-              {
-                count++;
-              }
-          }
-
-        DBField tmpFieldAry[] = new DBField[count];
-
-        // we sync on the new field ary before we update the fieldAry ref so
-        // that we can preemptively block other threads from messing
-        // with fieldAry until we get it set the way we want
-
-        synchronized (tmpFieldAry)
-          {
-            fieldAry = tmpFieldAry;
-
-            permCacheAry = null;        // okay in synchronized block
-
-            for (DBField field: oldAry)
-              {
-                if (field == null)
-                  {
-                    continue;
-                  }
-
-                if (newBase.getField(field.getID()) != null && field.isDefined())
-                  {
-                    saveField(field); // safe since we start with an empty fieldAry
-                  }
-              }
-          }
-      }
   }
 
   /**
@@ -2976,7 +3092,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   {
     StringBuffer result = new StringBuffer();
 
-    if (permManager != null && !permManager.getPerm(this).isVisible())
+    if (this.gSession != null && !this.gSession.getPermManager().getPerm(this).isVisible())
       {
         return result;
       }
@@ -3081,13 +3197,31 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
                           }
                       }
 
-                    if (prefix != null)
+                    if (remObj != null)
                       {
-                        remObj.appendObjectInfo(buffer, prefix + "\t", local);
+                        if (prefix != null)
+                          {
+                            remObj.appendObjectInfo(buffer, prefix + "\t", local);
+                          }
+                        else
+                          {
+                            remObj.appendObjectInfo(buffer, "\t", local);
+                          }
                       }
                     else
                       {
-                        remObj.appendObjectInfo(buffer, "\t", local);
+                        // remObj shouldn't be null during normal
+                        // operations, but it might be if we're doing
+                        // debug logging during loading, or something.
+
+                        if (prefix != null)
+                          {
+                            buffer.append(prefix + "\t" + x);
+                          }
+                        else
+                          {
+                            buffer.append("\t" + x);
+                          }
                       }
                   }
               }

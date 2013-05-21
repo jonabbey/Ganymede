@@ -1011,6 +1011,9 @@ public final class Ganymede {
 
     // Start up the RMI registry thread.
 
+    // "Creating RMI registry on port {0,number,###}"
+    debug(ts.l("main.info_starting_registry", registryPortProperty));
+
     try
       {
         rmi.startRMIRegistry(registryPortProperty);
@@ -1341,9 +1344,6 @@ public final class Ganymede {
 
     try
       {
-        // "Binding GanymedeServer in RMI Registry"
-        debug(ts.l("main.info_binding_registry"));
-
         if (serverHostProperty != null && !serverHostProperty.equals(""))
           {
             hostname = java.net.InetAddress.getByName(serverHostProperty).getHostAddress();
@@ -1419,8 +1419,8 @@ public final class Ganymede {
 
         bindingName = "rmi://" + hostname + ":" + registryPortProperty + "/ganymede.server";
 
-        // "Binding server to {0}"
-        debug("\n" + ts.l("main.info_binding_hostname", bindingName));
+        // "Binding GanymedeServer in RMI Registry as {0}"
+        debug(ts.l("main.info_binding_hostname", bindingName));
 
         Naming.bind(bindingName, server);
       }
@@ -1482,7 +1482,7 @@ public final class Ganymede {
         public void run() {
           try
             {
-              GanymedeServer.shutdown(null);
+              GanymedeServer.shutdown("SIGQUIT received", null);
             }
           finally
             {
@@ -2122,7 +2122,7 @@ class GanymedeStartupException extends Exception {
 
     if (Ganymede.server != null)
       {
-        GanymedeServer.shutdown(null);
+        GanymedeServer.shutdown("Error thrown during startup", null);
       }
 
     System.exit(1);
@@ -2179,7 +2179,7 @@ class GanymedeSilentStartupException extends GanymedeStartupException {
 
     if (Ganymede.server != null)
       {
-        GanymedeServer.shutdown(null);
+        GanymedeServer.shutdown("Error thrown during startup", null);
       }
 
     System.exit(1);

@@ -1452,7 +1452,7 @@ public final class DBBaseCategory implements Category, CategoryNode {
 
   public synchronized Vector<CategoryNode> getNodes()
   {
-    return (Vector<CategoryNode>) contents.clone();
+    return new Vector<CategoryNode>(contents);
   }
 
   /**

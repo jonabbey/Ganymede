@@ -122,7 +122,7 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
    * invid fields.</p>
    */
 
-  public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
+  @Override public QueryResult obtainChoiceList(DBField field) throws NotLoggedInException
   {
     if (field.getID() == IRISListSchema.MEMBERS)
       {
@@ -143,7 +143,7 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
    * subclass' obtainChoiceList() method.</p>
    */
 
-  public boolean mustChoose(DBField field)
+  @Override public boolean mustChoose(DBField field)
   {
     if (field.getID() == IRISListSchema.MEMBERS)
       {
@@ -188,9 +188,9 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
    * @param gsession Who is trying to do this linking?
    */
 
-  public boolean anonymousLinkOK(DBObject targetObject, short targetFieldID,
-                                 DBObject sourceObject, short sourceFieldID,
-                                 GanymedeSession gsession)
+  @Override public boolean anonymousLinkOK(DBObject targetObject, short targetFieldID,
+                                           DBObject sourceObject, short sourceFieldID,
+                                           GanymedeSession gsession)
   {
     // if someone tries to put this list in another email list, let
     // them.
@@ -221,7 +221,7 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
    * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean fieldRequired(DBObject object, short fieldid)
+  @Override public boolean fieldRequired(DBObject object, short fieldid)
   {
     // the email list name is required
 
@@ -250,7 +250,7 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
    * be provided.
    */
 
-  public ReturnVal verifyNewValue(DBField field, Object value)
+  @Override public ReturnVal verifyNewValue(DBField field, Object value)
   {
     if (field.getID() == QUERY)
       {
@@ -310,7 +310,7 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
    * be provided.
    */
 
-  public ReturnVal finalizeSetValue(DBField field, Object value)
+  @Override public ReturnVal finalizeSetValue(DBField field, Object value)
   {
     try
       {
@@ -366,7 +366,7 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
    * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public PermEntry permOverride(GanymedeSession session, DBObject object, short fieldid)
+  @Override public PermEntry permOverride(GanymedeSession session, DBObject object, short fieldid)
   {
     if (fieldid == MEMBERS)
       {

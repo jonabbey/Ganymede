@@ -71,7 +71,6 @@ import arlut.csd.ganymede.common.ReturnVal;
  * is the remote interface used by the admin console to send system commands
  * to the Ganymede server.</P>
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 

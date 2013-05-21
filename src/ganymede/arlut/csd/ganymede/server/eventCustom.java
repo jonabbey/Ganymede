@@ -3,17 +3,19 @@
    eventCustom.java
 
    This file is a management class for event-class records in Ganymede.
-   
+
    Created: 9 December 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2004
+
+   Copyright (C) 1996 - 2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -94,15 +96,24 @@ public class eventCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
+   * <p>Customization method to control whether a specified field
+   * is required to be defined at commit time for a given object.</p>
    *
-   * Customization method to control whether a specified field
-   * is required to be defined at commit time for a given object.<br><br>
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * To be overridden in DBEditObject subclasses.
+   * <p>Note that this method will not be called if the controlling
+   * GanymedeSession's enableOversight is turned off, as in
+   * bulk loading.</p>
    *
+   * <p>Note as well that the designated label field for objects are
+   * always required, whatever this method returns, and that this
+   * requirement holds without regard to the GanymedeSession's
+   * enableOversight value.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
    */
 
-  public boolean fieldRequired(DBObject object, short fieldid)
+  @Override public boolean fieldRequired(DBObject object, short fieldid)
   {
     // both fields defined in event are required
 

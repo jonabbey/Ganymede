@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-22 November 2010
+17 April 2013
 README.source
 
 ---------------------------------------------
@@ -23,8 +23,6 @@ what you do:
    source files that have been changed since the initial configure
    will be recompiled, and their class files placed under
    src/build/classes.
-
-   You shouldn't see any errors or warnings during the build.
 
 3. Run 'ant jars'.  This will recreate the 4 jar files used by
    the installation scripts.

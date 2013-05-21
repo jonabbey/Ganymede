@@ -56,6 +56,7 @@ import java.io.IOException;
 import java.lang.reflect.*;
 import java.rmi.Remote;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -235,7 +236,12 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * and attach it to a DBObject, using the appropriate DBField
    * subclass' copy constructor.</p>
    *
-   * <p>Used by the DBEditObject's check-out and check-in constructor.</p>
+   * <p>Used by the DBEditObject's check-out and check-in constructor,
+   * but not by object cloning, which is creating a new object whose
+   * fields are being copied from the old object as if a user was
+   * doing it manually.  This copyField method, by contrast, will only
+   * do a dumb data copy, and will not fix up and InvidDBField
+   * bindings, etc.</p>
    *
    * <p>Note that it is essential that this method never throw an
    * uncaught exception, because that will break commits in a very
@@ -629,6 +635,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * that would normally occur from a user manually setting a value
    * into the field will occur.</p>
    *
+   * <p>This includes most particularly the InvidDBField bind
+   * logic.</p>
+   *
    * @param target The DBField to copy this field's contents to.
    * @param local If true, permissions checking is skipped.
    *
@@ -668,7 +677,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
         /* -- */
 
-        valuesToCopy = getValuesLocal();
+        valuesToCopy = getVectVal();
 
         if (valuesToCopy == null || valuesToCopy.size() == 0)
           {
@@ -1077,7 +1086,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
         // we have to clone our values Vector in order to use
         // deleteElements().
 
-        Vector currentValues = (Vector) getVectVal().clone();
+        Vector currentValues = new Vector(getVectVal());
 
         if (currentValues.size() != 0)
           {
@@ -1276,12 +1285,14 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * <p>Returns the value of this field, if a scalar.  An IllegalArgumentException
-   * will be thrown if this field is a vector.</p>
+   * <p>Returns the value of this field, if a scalar.  An
+   * IllegalArgumentException will be thrown if this field is a
+   * vector.</p>
    *
    * <p>This method will throw a GanyPermissionsException if this
    * DBObject is being viewed by a GanymedeSession, and that
-   * GanymedeSession lacks appropriate permission to see the value.</p>
+   * GanymedeSession lacks appropriate permission to see the
+   * value.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_field
    */
@@ -1446,6 +1457,12 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     /* -- */
 
+    if (!isEditable(local))     // *sync* possible
+      {
+        // "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
+        throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
+      }
+
     if (isVector())
       {
         // "Scalar method called on a vector field: {0} in object {1}"
@@ -1457,12 +1474,6 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
         return null;            // no change (useful for null and for xmlclient)
       }
 
-    if (!isEditable(local))     // *sync* possible
-      {
-        // "Can''t change field {0} in object {1}, due to a lack of permissions or the object being in a non-editable state."
-        throw new GanyPermissionsException(ts.l("global.no_write_perms", getName(), owner.getLabel()));
-      }
-
     if (submittedValue instanceof String)
       {
         submittedValue = ((String) submittedValue).intern();
@@ -1470,6 +1481,10 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     else if (submittedValue instanceof Invid)
       {
         submittedValue = ((Invid) submittedValue).intern();
+      }
+    else if (submittedValue instanceof Date)
+      {
+        submittedValue = new Date(((Date) submittedValue).getTime()); // defensive copy
       }
 
     retVal = verifyNewValue(submittedValue);
@@ -1569,11 +1584,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    *
    * <p>This method checks for read permissions.</p>
    *
-   * <p><b>Be very careful using this for server-side code, because
-   * the Vector returned is not cloned from the field's actual data
-   * Vector, for performance reasons.  If this is called by the client,
-   * the serialization process will protect us from the client being
-   * able to mess with our contents.</b></p>
+   * <p>This method returns a safe copy of the contained Vector.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_field
    */
@@ -1592,7 +1603,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
         throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
-    return getVectVal();
+    return new Vector(getVectVal()); // defensive copy
   }
 
   /**
@@ -2873,7 +2884,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
   public final ReturnVal deleteAllElements() throws GanyPermissionsException
   {
-    return this.deleteElements((Vector) this.getValues().clone());
+    return this.deleteElements(this.getValues());
   }
 
   /**
@@ -3611,15 +3622,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p>This is intended to be used within the Ganymede server, it
    * bypasses the permissions checking that getValues() does.</p>
    *
-   * <p>The server code <b>*must not*</b> make any modifications to the
-   * returned vector as doing such may violate the namespace maintenance
-   * logic.  Always, <b>always</b>, use the addElement(), deleteElement(),
-   * setElement() methods in this class.</p>
-   *
-   * <p>Remember, this method gives you <b>*direct access</b> to the vector
-   * from this field.  Always always clone the Vector returned if you
-   * find you need to modify the results you get back.  I'm trusting you
-   * here.  Pay attention.</p>
+   * <p>This method returns a safe copy of the contained Vector.</p>
    */
 
   public Vector getValuesLocal()
@@ -3630,7 +3633,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
         throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
-    return getVectVal();
+    return new Vector(getVectVal()); // defensive copy
   }
 
   /**
@@ -3680,7 +3683,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     if (isVector())
       {
-        return getVectVal().clone();
+        return new Vector(getVectVal());
       }
     else
       {

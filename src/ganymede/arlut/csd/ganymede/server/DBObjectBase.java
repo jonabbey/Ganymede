@@ -3461,7 +3461,7 @@ public final class DBObjectBase implements Base, CategoryNode, JythonMap {
                 System.err.println(ts.l("updateBaseRefs.updating", obj));
               }
 
-            obj.updateBaseRefs(this);
+            objectTable.replaceNoSync(new DBObject(obj, this));
           }
       }
   }

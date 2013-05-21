@@ -141,7 +141,7 @@ public final class DBDeletionManager {
 
     /* -- */
 
-    eObj = obj.shadowObject;
+    eObj = obj.getShadow();
 
     // N.B. the obj that we get as a parameter may well be a
     // DBEditObject already if this session has checked it out for
@@ -313,7 +313,7 @@ public final class DBDeletionManager {
     for (Invid invid: toAdd)
       {
         obj = session.viewDBObject(invid);
-        eObj = obj.shadowObject;
+        eObj = obj.getShadow();
 
         // N.B. the obj that we get from session.viewDBObject() may
         // well be a DBEditObject already if this session has checked

@@ -2163,7 +2163,7 @@ final public class GanymedeSession implements Session, Unreferenced {
             String edit_username;
             String edit_hostname;
 
-            DBEditObject editing = obj.shadowObject;
+            DBEditObject editing = obj.getShadow();
 
             try
               {
@@ -3163,7 +3163,6 @@ final public class GanymedeSession implements Session, Unreferenced {
             Ganymede.debug(ts.l("logout.logged_off", permManager.getUserName()));
           }
 
-        permManager = null;
         queryEngine = null;
       }
   }

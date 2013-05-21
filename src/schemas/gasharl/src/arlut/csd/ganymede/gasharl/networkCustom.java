@@ -118,7 +118,7 @@ public class networkCustom extends DBEditObject {
   {
     if (fieldid == networkSchema.NAME)
       {
-	return true;
+        return true;
       }
 
     // the network number is only required if the allocrange is not
@@ -126,12 +126,12 @@ public class networkCustom extends DBEditObject {
 
     if (fieldid == networkSchema.NETNUMBER)
       {
-	DBField allocField = (DBField) object.getField(networkSchema.ALLOCRANGE);
+        DBField allocField = (DBField) object.getField(networkSchema.ALLOCRANGE);
 
-	if (allocField == null || !allocField.isDefined())
-	  {
-	    return true;
-	  }
+        if (allocField == null || !allocField.isDefined())
+          {
+            return true;
+          }
       }
 
     // the allocrange is only required if the network number is not
@@ -139,12 +139,12 @@ public class networkCustom extends DBEditObject {
 
     if (fieldid == networkSchema.ALLOCRANGE)
       {
-	DBField netnumField = (DBField) object.getField(networkSchema.NETNUMBER);
+        DBField netnumField = (DBField) object.getField(networkSchema.NETNUMBER);
 
-	if (netnumField == null || !netnumField.isDefined())
-	  {
-	    return true;
-	  }
+        if (netnumField == null || !netnumField.isDefined())
+          {
+            return true;
+          }
       }
 
     if (fieldid == networkSchema.MACREQUIRED)
@@ -167,9 +167,9 @@ public class networkCustom extends DBEditObject {
   public boolean anonymousLinkOK(DBObject object, short fieldID)
   {
     if ((fieldID == networkSchema.INTERFACES) ||
-	(fieldID == networkSchema.ROOMS))
+        (fieldID == networkSchema.ROOMS))
       {
-	return true;
+        return true;
       }
 
     return false;
@@ -214,18 +214,18 @@ public class networkCustom extends DBEditObject {
   {
     if (field.getID() == networkSchema.INTERFACES)
       {
-	if ((operation == DELELEMENT || operation == DELELEMENTS) &&
-	    getStatus() != DBEditObject.DELETING && getStatus() != DBEditObject.DROPPING)
-	  {
-	    return Ganymede.createErrorDialog("Sorry, you can't delete interfaces here",
-					      "You can't delete interfaces from the network object.  If you were " +
-					      "to do so, the interface you are attempting to delete would be left " +
-					      "without a network connection.  Please edit the system containing the " +
-					      "interface on this net directly to change its network connection.");
-	  }
+        if ((operation == DELELEMENT || operation == DELELEMENTS) &&
+            getStatus() != DBEditObject.DELETING && getStatus() != DBEditObject.DROPPING)
+          {
+            return Ganymede.createErrorDialog("Sorry, you can't delete interfaces here",
+                                              "You can't delete interfaces from the network object.  If you were " +
+                                              "to do so, the interface you are attempting to delete would be left " +
+                                              "without a network connection.  Please edit the system containing the " +
+                                              "interface on this net directly to change its network connection.");
+          }
       }
 
-    return null;		// by default, we just ok whatever
+    return null;                // by default, we just ok whatever
   }
 
   /**
@@ -244,7 +244,7 @@ public class networkCustom extends DBEditObject {
 
     if (object.getTypeID() != 267)
       {
-	return false;
+        return false;
       }
 
     // we want to grant ownership if the "Public Network" checkbox
@@ -252,21 +252,21 @@ public class networkCustom extends DBEditObject {
 
     if (object.isSet(networkSchema.PUBLICNETWORK))
       {
-	if (debug)
-	  {
-	    System.err.println("networkCustom.grantOwnership(): returning true for " + object);
-	  }
+        if (debug)
+          {
+            System.err.println("networkCustom.grantOwnership(): returning true for " + object);
+          }
 
-	return true;
+        return true;
       }
     else
       {
-	if (debug)
-	  {
-	    System.err.println("networkCustom.grantOwnership(): returning false for " + object);
-	  }
+        if (debug)
+          {
+            System.err.println("networkCustom.grantOwnership(): returning false for " + object);
+          }
 
-	return false;
+        return false;
       }
   }
 
@@ -288,7 +288,7 @@ public class networkCustom extends DBEditObject {
 
     if (field.getID() == networkSchema.INTERFACES)
       {
-	return null;
+        return null;
       }
 
     return super.obtainChoicesKey(field);
@@ -312,27 +312,33 @@ public class networkCustom extends DBEditObject {
 
     if (field.getID() == networkSchema.INTERFACES)
       {
-	return null;
+        return null;
       }
 
     return super.obtainChoiceList(field);
   }
 
   /**
+   * <p>This method is used to provide a hook to allow different
+   * objects to generate different labels for a given object based on
+   * their perspective.  This is used to sort of hackishly simulate a
+   * relational-type capability for the purposes of viewing
+   * context-sensitive labels of objects that are linked from Invid
+   * fields in this object.</p>
    *
-   * This method is used to provide a hook to allow different
-   * objects to generate different labels for a given object
-   * based on their perspective.  This is used to sort
-   * of hackishly simulate a relational-type capability for
-   * the purposes of viewing backlinks.<br><br>
+   * <p>This method primarily affects the results returned by {@link
+   * arlut.csd.ganymede.server.InvidDBField#encodedValues()}, but it
+   * can also affect the results shown by {@link
+   * arlut.csd.ganymede.server.DBQueryEngine#query(arlut.csd.ganymede.common.Query,
+   * arlut.csd.ganymede.server.DBEditObject)} when the
+   * perspectiveObject parameter is non-null.</p>
    *
-   * See the automounter map and NFS volume DBEditObject
+   * <p>See the automounter map and NFS volume DBEditObject
    * subclasses for how this is to be used, if you have
-   * them.
-   *
+   * them.</p>
    */
 
-  public String lookupLabel(DBObject object)
+  @Override public String lookupLabel(DBObject object)
   {
     // we want to create our own, network-centric view of interface objects
     //
@@ -342,40 +348,40 @@ public class networkCustom extends DBEditObject {
 
     if (object.getTypeID() == 265)
       {
-	InvidDBField iField;
-	Invid tmpInvid;
-	String sysName;
+        InvidDBField iField;
+        Invid tmpInvid;
+        String sysName;
 
-	/* -- */
+        /* -- */
 
-	String name = (String) object.getFieldValueLocal(interfaceSchema.NAME);
+        String name = (String) object.getFieldValueLocal(interfaceSchema.NAME);
 
-	if (name != null)
-	  {
-	    return name;
-	  }
+        if (name != null)
+          {
+            return name;
+          }
 
-	iField = (InvidDBField) object.getField((short) 0); // containing object, the system
-	tmpInvid = iField.value();
+        iField = (InvidDBField) object.getField((short) 0); // containing object, the system
+        tmpInvid = iField.value();
 
-	if (editset != null)
-	  {
-	    sysName = editset.getDBSession().getObjectLabel(tmpInvid);
-	  }
-	else if (Ganymede.getInternalSession() != null)
-	  {
-	    sysName = Ganymede.getInternalSession().getDBSession().getObjectLabel(tmpInvid);
-	  }
-	else
-	  {
-	    sysName = tmpInvid.toString();
-	  }
+        if (editset != null)
+          {
+            sysName = editset.getDBSession().getObjectLabel(tmpInvid);
+          }
+        else if (Ganymede.getInternalSession() != null)
+          {
+            sysName = Ganymede.getInternalSession().getDBSession().getObjectLabel(tmpInvid);
+          }
+        else
+          {
+            sysName = tmpInvid.toString();
+          }
 
-	return sysName;
+        return sysName;
       }
     else
       {
-	return super.lookupLabel(object);
+        return super.lookupLabel(object);
       }
   }
 }

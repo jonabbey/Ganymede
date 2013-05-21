@@ -16,6 +16,8 @@
    Copyright (C) 1996-2013
    The University of Texas at Austin
 
+   Ganymede is a registered trademark of The University of Texas at Austin
+
    Contact information
 
    Web site: http://www.arlut.utexas.edu/gash2
@@ -176,17 +178,17 @@ public class DateDBField extends DBField implements date_field {
     throw new IllegalArgumentException("vector constructor called on scalar field");
   }
 
-  public Object clone() throws CloneNotSupportedException
+  @Override public Object clone() throws CloneNotSupportedException
   {
     throw new CloneNotSupportedException();
   }
 
-  void emit(DataOutput out) throws IOException
+  @Override void emit(DataOutput out) throws IOException
   {
     out.writeLong(((Date) value).getTime());
   }
 
-  void receive(DataInput in, DBObjectBaseField definition) throws IOException
+  @Override void receive(DataInput in, DBObjectBaseField definition) throws IOException
   {
     value = new Date(in.readLong());
   }
@@ -196,7 +198,7 @@ public class DateDBField extends DBField implements date_field {
    * out this field to disk.</p>
    */
 
-  synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
+  @Override synchronized void emitXML(XMLDumpContext xmlOut) throws IOException
   {
     xmlOut.startElementIndent(this.getXMLName());
     emitDateXML(xmlOut, value());
@@ -224,7 +226,12 @@ public class DateDBField extends DBField implements date_field {
 
   public Date value()
   {
-    return (Date) value;
+    if (value == null)
+      {
+        return null;
+      }
+
+    return new Date(((Date) value).getTime()); // return a defensive copy
   }
 
   public Date value(int index)
@@ -237,7 +244,7 @@ public class DateDBField extends DBField implements date_field {
    * without checking permissions.
    */
 
-  public synchronized String getValueString()
+  @Override public synchronized String getValueString()
   {
     /* -- */
 
@@ -260,7 +267,7 @@ public class DateDBField extends DBField implements date_field {
    * and selection purposes.
    */
 
-  public synchronized String getEncodingString()
+  @Override public synchronized String getEncodingString()
   {
     if (value == null)
       {
@@ -280,7 +287,7 @@ public class DateDBField extends DBField implements date_field {
    * <p>If there is no change in the field, null will be returned.</p>
    */
 
-  public String getDiffString(DBField orig)
+  @Override public String getDiffString(DBField orig)
   {
     DateDBField origD;
     StringBuilder result = new StringBuilder();
@@ -404,12 +411,12 @@ public class DateDBField extends DBField implements date_field {
   //
   // ****
 
-  public boolean verifyTypeMatch(Object o)
+  @Override public boolean verifyTypeMatch(Object o)
   {
     return ((o == null) || (o instanceof Date));
   }
 
-  public ReturnVal verifyNewValue(Object o)
+  @Override public ReturnVal verifyNewValue(Object o)
   {
     DBEditObject eObj;
     Date d, d2;

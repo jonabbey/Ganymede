@@ -229,188 +229,90 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   /* -- */
 
   /**
-   * Dummy constructor, is responsible for creating a DBEditObject
+   * <p>Dummy constructor, is responsible for creating a DBEditObject
    * strictly for the purpose of having a handle to call our
-   * pseudostatic customization methods on.
+   * pseudostatic customization methods on.</p>
    *
-   * This is the version of the constructor that the
-   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase}'s
-   * {@link arlut.csd.ganymede.server.DBObjectBase#createHook() createHook()}
-   * method uses to create the {@link arlut.csd.ganymede.server.DBObjectBase#objectHook objectHook}
-   * object.
-   **/
+   * <p>This is the version of the constructor that the {@link
+   * arlut.csd.ganymede.server.DBObjectBase DBObjectBase}'s {@link
+   * arlut.csd.ganymede.server.DBObjectBase#createHook() createHook()}
+   * method uses to create the {@link
+   * arlut.csd.ganymede.server.DBObjectBase#objectHook objectHook}
+   * object.</p>
+   */
 
   public DBEditObject(DBObjectBase base)
   {
-    super();
+    super(base);
 
-    this.objectBase = base;
     this.stored = false;
     this.editset = null;             // this will be our cue to our static handle status for our methods
   }
 
   /**
-   * <p>Creation constructor, is responsible for creating a new editable
-   * object with all fields listed in the
-   * {@link arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField} instantiated
-   * but undefined.</p>
+   * <p>Creation constructor, is responsible for creating a new
+   * editable object with all fields listed in the {@link
+   * arlut.csd.ganymede.server.DBObjectBaseField DBObjectBaseField}
+   * instantiated but undefined.</p>
    *
-   * <p>This constructor is not really intended to be overridden in subclasses.
-   * Creation time field value initialization is to be handled by
-   * initializeNewObject().</p>
+   * <p>This constructor is not really intended to be called via
+   * super() from subclass constructors.  Creation time field value
+   * initialization is to be handled by initializeNewObject().</p>
    *
    * @see arlut.csd.ganymede.server.DBField
    */
 
   public DBEditObject(DBObjectBase objectBase, Invid invid, DBEditSet editset)
   {
-    super(objectBase, invid.getNum());
+    super(objectBase, invid, editset);
 
-    if (editset == null)
-      {
-        // "Null DBEditSet"
-        throw new NullPointerException(ts.l("init.notrans"));
-      }
-
-    original = null;
+    this.original = null;
     this.editset = editset;
-    this.gSession = editset.getDBSession().getGSession();
     commitSemaphore.set(false);
-    stored = false;
-    status = CREATING;
-
-    /* -- */
-
-    synchronized (objectBase)
-      {
-        int count = 0;
-
-        for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
-          {
-            // check for permission to create a particular field
-
-            if (checkNewField(fieldDef.getID()))
-              {
-                count++;
-              }
-          }
-
-        fieldAry = new DBField[count];
-
-        int i = 0;
-
-        // the iterator on DBBaseFieldTable gives us the field
-        // defintion objects in field id order, which we need to order
-        // the fieldAry elements properly.
-
-        for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
-          {
-            if (!checkNewField(fieldDef.getID()))
-              {
-                continue;
-              }
-
-            DBField newField = DBField.createTypedField(this, fieldDef);
-
-            if (newField == null)
-              {
-                throw new NullPointerException("Error creating typed field when creating object");
-              }
-
-            fieldAry[i++] = newField;
-          }
-      }
+    this.stored = false;
+    this.status = CREATING;
   }
 
   /**
-   * Check-out constructor, used by
-   * {@link arlut.csd.ganymede.server.DBObject#createShadow(arlut.csd.ganymede.server.DBEditSet) DBObject.createShadow()}
-   * to pull out an object for editing.
+   * <p>Check-out constructor, used by {@link
+   * arlut.csd.ganymede.server.DBObject#createShadow(arlut.csd.ganymede.server.DBEditSet)
+   * DBObject.createShadow()} to pull out an object for editing.</p>
    */
 
   public DBEditObject(DBObject original, DBEditSet editset)
   {
-    super(original.objectBase);
+    super(original.objectBase, original.getID(), editset.getDBSession().getGSession());
 
     /* -- */
 
     this.editset = editset;
-    this.gSession = editset.getDBSession().getGSession();
-
-    commitSemaphore.set(false);
-    stored = true;
-    status = EDITING;
-
+    this.commitSemaphore.set(false);
+    this.stored = true;
+    this.status = EDITING;
     this.original = original;
-    this.myInvid = original.myInvid;
-    this.objectBase = original.objectBase;
-
-    // clone the fields from the original object
-    // since we own these, the field-modifying
-    // methods on the copied fields will allow editing
-    // to go forward
-
-    Vector<DBField> fieldVect = original.getFieldVect();
-
-    int count = 0;
-    int j = 0;
-
-    DBField field = fieldVect.elementAt(j);
-
-    for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
-      {
-        if (field != null && fieldDef.getID() == field.getID())
-          {
-            count++;
-
-            if (++j < fieldVect.size())
-              {
-                field = fieldVect.elementAt(j);
-              }
-            else
-              {
-                field = null;   // end of the fields in fieldVect
-              }
-          }
-        else
-          {
-            if (checkNewField(fieldDef.getID()))
-              {
-                count++;
-              }
-          }
-      }
-
-    this.fieldAry = new DBField[count];
 
     int i = 0;
-    j = 0;
-
-    field = fieldVect.elementAt(j);
+    DBField newFields[] = new DBField[objectBase.getFieldCount()];
 
     for (DBObjectBaseField fieldDef: objectBase.getFieldsInFieldOrder())
       {
-        if (field != null && fieldDef.getID() == field.getID())
-          {
-            fieldAry[i++] = DBField.copyField(this, field);
+        short id = fieldDef.getID();
+        DBField originalField = original.retrieveField(id);
+        DBField copyField;
 
-            if (++j < fieldVect.size())
-              {
-                field = fieldVect.elementAt(j);
-              }
-            else
-              {
-                field = null;
-              }
+        if (originalField != null)
+          {
+            copyField = DBField.copyField(this, originalField);
           }
         else
           {
-            if (checkNewField(fieldDef.getID()))
-              {
-                fieldAry[i++] = DBField.createTypedField(this, fieldDef);
-              }
+            copyField = DBField.createTypedField(this, fieldDef);
           }
+
+        newFields[i++] = copyField;
       }
+
+    this.setAllFields(newFields);
   }
 
   /**
@@ -468,7 +370,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public final String getLabel()
+  @Override public final String getLabel()
   {
     if (getStatus() == DELETING)
       {
@@ -500,7 +402,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public final String getEmbeddedObjectDisplayLabel()
+  @Override public final String getEmbeddedObjectDisplayLabel()
   {
     if (getStatus() == DELETING)
       {
@@ -585,7 +487,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * @see arlut.csd.ganymede.rmi.db_object
    */
 
-  public final ReturnVal setFieldValue(short fieldID, Object value) throws GanyPermissionsException
+  @Override public final ReturnVal setFieldValue(short fieldID, Object value) throws GanyPermissionsException
   {
     DBField field = retrieveField(fieldID);
 
@@ -666,23 +568,27 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * to allow a link based on what field of what object wants to link
    * to it.</p>
    *
-   * <p>By default, the 3 variants of the DBEditObject anonymousLinkOK()
-   * method are chained together, so that the customizer can choose
-   * which level of detail he is interested in.
+   * <p>By default, the 3 variants of the DBEditObject
+   * anonymousLinkOK() method are chained together, so that the
+   * customizer can choose which level of detail he is interested in.
    * {@link arlut.csd.ganymede.server.InvidDBField InvidDBField}'s
-   * {@link arlut.csd.ganymede.server.InvidDBField#bind(arlut.csd.ganymede.common.Invid,arlut.csd.ganymede.common.Invid,boolean) bind()}
-   * method calls this version.  This version calls the three parameter
-   * version, which calls the two parameter version, which returns
-   * false by default.  Customizers can implement any of the three
-   * versions, but unless you maintain the version chaining yourself,
-   * there's no point to implementing more than one of them.</p>
+   * {@link
+   * arlut.csd.ganymede.server.InvidDBField#bind(arlut.csd.ganymede.common.Invid,arlut.csd.ganymede.common.Invid,boolean)
+   * bind()} method calls this version.  This version calls the three
+   * parameter version, which calls the two parameter version, which
+   * returns false by default.  Customizers can implement any of the
+   * three versions, but unless you maintain the version chaining
+   * yourself, there's no point to implementing more than one of
+   * them.</p>
    *
-   * <p>Note that the {@link arlut.csd.ganymede.server.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.server.DBField)
-   * choiceListHasExceptions()} method will call this version of anonymousLinkOK()
-   * with a null targetObject, to determine that the client should not
-   * use its cache for an InvidDBField's choices.  Any overriding done
-   * of this method must be able to handle a null targetObject, or else
-   * an exception will be thrown inappropriately.</p>
+   * <p>Note that the {@link
+   * arlut.csd.ganymede.server.DBEditObject#choiceListHasExceptions(arlut.csd.ganymede.server.DBField)
+   * choiceListHasExceptions()} method will call this version of
+   * anonymousLinkOK() with a null targetObject, to determine that the
+   * client should not use its cache for an InvidDBField's choices.
+   * Any overriding done of this method must be able to handle a null
+   * targetObject, or else an exception will be thrown
+   * inappropriately.</p>
    *
    * <p>The only reason to consult targetObject in any case is to
    * allow or disallow anonymous object linking to a field based on
@@ -698,7 +604,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * @param targetFieldID The field that the link is to be created in
    * @param sourceObject The object on the other side of the proposed link
    * @param sourceFieldID  The field on the other side of the proposed link
-   * @param gsession Who is trying to do this linking?  */
+   * @param gsession Who is trying to do this linking?
+   */
 
   public boolean anonymousLinkOK(DBObject targetObject, short targetFieldID,
                                  DBObject sourceObject, short sourceFieldID,
@@ -1007,20 +914,20 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   }
 
   /**
-   * <p>Customization method to verify overall consistency of
-   * a DBObject.  This method is intended to be overridden
-   * in DBEditObject subclasses, and will be called by
-   * {@link arlut.csd.ganymede.server.DBEditObject#commitPhase1() commitPhase1()}
-   * to verify the readiness of this object for commit.  The
-   * DBObject passed to this method will be a DBEditObject,
-   * complete with that object's GanymedeSession reference
-   * if this method is called during transaction commit, and
-   * that session reference may be used by the verifying code if
-   * the code needs to access the database.</p>
+   * <p>Customization method to verify overall consistency of a
+   * DBObject.  This method is intended to be overridden in
+   * DBEditObject subclasses, and will be called by {@link
+   * arlut.csd.ganymede.server.DBEditObject#commitPhase1()
+   * commitPhase1()} to verify the readiness of this object for
+   * commit.  The DBObject passed to this method will be a
+   * DBEditObject, complete with that object's GanymedeSession
+   * reference if this method is called during transaction commit, and
+   * that session reference may be used by the verifying code if the
+   * code needs to access the database.</p>
    *
-   * <p>This method is for custom checks specific to custom DBEditObject
-   * subclasses.  Standard checking for missing fields for which
-   * fieldRequired() returns true is done by {@link
+   * <p>This method is for custom checks specific to custom
+   * DBEditObject subclasses.  Standard checking for missing fields
+   * for which fieldRequired() returns true is done by {@link
    * arlut.csd.ganymede.server.DBEditSet#commit_checkObjectMissingFields(arlut.csd.ganymede.server.DBEditObject)}
    * during {@link
    * arlut.csd.ganymede.server.DBEditSet#commit_handlePhase1()}.</p>
@@ -1587,39 +1494,42 @@ public class DBEditObject extends DBObject implements ObjectStatus {
    * list will not be seen.</p>
    *
    * <p>To be overridden on necessity in DBEditObject subclasses.</p>
-   *
    */
 
   public boolean instantiateNewField(short fieldID)
   {
-    return gSession.getPermManager().getPerm(getTypeID(), fieldID, true).isCreatable(); // *sync* GanymedeSession
+    return getGSession().getPermManager().getPerm(getTypeID(), fieldID, true).isCreatable(); // *sync* GanymedeSession
   }
 
   /**
    * <p>Hook to allow the cloning of an object.  If this object type
    * supports cloning (which should be very much customized for this
    * object type.. creation of the ancillary objects, which fields to
-   * clone, etc.), this customization method will actually do the work.</p>
+   * clone, etc.), this customization method will actually do the
+   * work.</p>
    *
-   * <p>This method is called on a newly created object, in order
-   * to clone the state of origObj into it.  This method does not actually
-   * create a new object.. that is handled by
-   * {@link arlut.csd.ganymede.server.GanymedeSession#clone_db_object(arlut.csd.ganymede.common.Invid) clone_db_object()}
-   * before this method is called on the newly created object.</p>
+   * <p>This method is called on a newly created object, in order to
+   * clone the state of origObj into it.  This method does not
+   * actually create a new object.. that is handled by {@link
+   * arlut.csd.ganymede.server.GanymedeSession#clone_db_object(arlut.csd.ganymede.common.Invid)
+   * clone_db_object()} before this method is called on the newly
+   * created object.</p>
    *
-   * <p>The default (DBEditObject) implementation of this method will only clone
-   * fields for which
-   * {@link arlut.csd.ganymede.server.DBEditObject#canCloneField(arlut.csd.ganymede.server.DBSession,
-   * arlut.csd.ganymede.server.DBObject, arlut.csd.ganymede.server.DBField) canCloneField()}
-   * returns true, and which are not connected to a namespace (and
-   * thus could not possibly be cloned, because the values are
-   * constrained to be unique and non-duplicated).</p>
+   * <p>The default (DBEditObject) implementation of this method will
+   * only clone fields for which {@link
+   * arlut.csd.ganymede.server.DBEditObject#canCloneField(arlut.csd.ganymede.server.DBSession,
+   * arlut.csd.ganymede.server.DBObject,
+   * arlut.csd.ganymede.server.DBField) canCloneField()} returns true,
+   * and which are not connected to a namespace (and thus could not
+   * possibly be cloned, because the values are constrained to be
+   * unique and non-duplicated).</p>
    *
-   * <p>If one or more fields in the original object are unreadable by the cloning
-   * session, we will provide a list of fields that could not be cloned due to
-   * a lack of read permissions in a dialog in the ReturnVal.  Such a problem will
-   * not result in a failure code being returned, however.. the clone will succeed,
-   * but an informative dialog will be provided to the user.</p>
+   * <p>If one or more fields in the original object are unreadable by
+   * the cloning session, we will provide a list of fields that could
+   * not be cloned due to a lack of read permissions in a dialog in
+   * the ReturnVal.  Such a problem will not result in a failure code
+   * being returned, however.. the clone will succeed, but an
+   * informative dialog will be provided to the user.</p>
    *
    * <p>To be overridden on necessity in DBEditObject subclasses, but
    * this method's default logic will probably do what you need it to
@@ -2393,7 +2303,7 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     return targetBase.getObjectHook().anonymousLinkOK(null, targetField,
                                                       this, field.getID(),
-                                                      this.gSession);
+                                                      this.getGSession());
   }
 
   /**
@@ -2653,8 +2563,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
                                                  getTypeName(),
                                                  getLabel(),
                                                  getFieldValueLocal(SchemaConstants.RemovalField).toString()),
-                                            gSession.getPermManager().getResponsibleInvid(),
-                                            gSession.getPermManager().getIdentity(),
+                                            getGSession().getPermManager().getResponsibleInvid(),
+                                            getGSession().getPermManager().getIdentity(),
                                             invids,
                                             getEmailTargets(this)));
           }
@@ -2667,8 +2577,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
             // "{0} {1} has been inactivated.\n\nThe object has no removal date set.\n\n"
             editset.logEvent(new DBLogEvent("inactivateobject",
                                             ts.l("finalizeInactivate.noRemove", getTypeName(), getLabel()),
-                                            gSession.getPermManager().getResponsibleInvid(),
-                                            gSession.getPermManager().getIdentity(),
+                                            getGSession().getPermManager().getResponsibleInvid(),
+                                            getGSession().getPermManager().getIdentity(),
                                             invids,
                                             getEmailTargets(this)));
           }
@@ -2754,8 +2664,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
         // "{0} {1} has been reactivated.\n\n"
         editset.logEvent(new DBLogEvent("reactivateobject",
                                         ts.l("finalizeReactivate.message", getTypeName(), getLabel()),
-                                        gSession.getPermManager().getResponsibleInvid(),
-                                        gSession.getPermManager().getIdentity(),
+                                        getGSession().getPermManager().getResponsibleInvid(),
+                                        getGSession().getPermManager().getIdentity(),
                                         invids,
                                         getEmailTargets(this)));
 
@@ -3593,24 +3503,23 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     // call any methods within the sync block that should trigger any
     // external synchronization issues
 
-    synchronized (fieldAry)
+    Vector<DBField> fields = this.getFieldVect();
+
+    for (DBField field: fields)
       {
-        for (DBField field: fieldAry)
+        key = Short.valueOf(field.getID());
+        value = field.checkpoint();
+
+        if (value != null)
           {
-            key = Short.valueOf(field.getID());
-            value = field.checkpoint();
+            result.put(key, value);
+          }
+        else
+          {
+            // hack, hack.. we're using a reference
+            // to this object to represent a null value
 
-            if (value != null)
-              {
-                result.put(key, value);
-              }
-            else
-              {
-                // hack, hack.. we're using a reference
-                // to this object to represent a null value
-
-                result.put(key, this);
-              }
+            result.put(key, this);
           }
       }
 
@@ -3954,22 +3863,20 @@ public class DBEditObject extends DBObject implements ObjectStatus {
           }
         else
           {
-            if (okToLogField(currentField) && okToLogField(origField))
+            String diff = currentField.getDiffString(origField);
+
+            if (diff != null)
               {
-                String diff = currentField.getDiffString(origField);
-
-                if (diff != null)
+                if (changedFieldDefs != null)
                   {
-                    if (changedFieldDefs != null)
-                      {
-                        changedFieldDefs.add(fieldDef);
-                      }
+                    changedFieldDefs.add(fieldDef);
+                  }
 
+                if (okToLogField(currentField) && okToLogField(origField))
+                  {
                     changed.append(fieldDef.getName());
                     changed.append("\n");
                     changed.append(diff);
-
-                    diffFound = true;
 
                     if (debug)
                       {
@@ -3978,11 +3885,13 @@ public class DBEditObject extends DBObject implements ObjectStatus {
                                            diff);
                       }
                   }
-              }
-            else
-              {
-                changed.append(fieldDef.getName());
-                changed.append("\n");
+                else
+                  {
+                    changed.append(fieldDef.getName());
+                    changed.append("\n");
+                  }
+
+                diffFound = true;
               }
           }
       }
