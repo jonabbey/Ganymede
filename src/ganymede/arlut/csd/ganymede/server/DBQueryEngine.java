@@ -603,8 +603,12 @@ public final class DBQueryEngine {
   }
 
   /**
-   * This method is the primary Query engine for the Ganymede
-   * databases.  It is used by dump(), query(), and internalQuery().
+   * <p>This method is the primary Query engine for the Ganymede
+   * databases.  It is used by dump(), query(), and
+   * internalQuery().</p>
+   *
+   * <p>Individual objects are tested for a match with query by the
+   * {@link arlut.csd.ganymede.server.DBQueryHandler} class.</p>
    *
    * @param query The query to be handled
    * @param internal If true, the query filter setting will not be honored
@@ -658,186 +662,14 @@ public final class DBQueryEngine {
         return null;
       }
 
-    // are we able to optimize the query into a direct lookup?  If so,
-    // we won't need to get a lock on the database, since viewDBObject()
-    // will be nice and atomic for our needs
+    // Can we do a direct or namespace optimized lookup?
 
-    if ((query.root instanceof QueryDataNode) &&
-        ((QueryDataNode) query.root).comparator == QueryDataNode.EQUALS)
+    if (directLookup(query, result, base, internal, forTransport, extantLock, perspectiveObject))
       {
-        QueryDataNode node = (QueryDataNode) query.root;
-        DBObjectBaseField fieldDef = null;
-
-        /* -- */
-
-        // we're looking for a specific invid.. go ahead and do it
-
-        if (node.fieldId == -2)
-          {
-            DBObject resultobject = dbSession.viewDBObject((Invid) node.value);
-
-            addResultRow(resultobject, query, result, internal, perspectiveObject);
-
-            return result;
-          }
-
-        // we're looking at a data field.. determine which field we're
-        // looking at, find the dictionary definition for that field,
-        // see if it is in a namespace so we can do a direct lookup
-        // via a namespace hash.
-
-        if (node.fieldId >= 0)
-          {
-            fieldDef = (DBObjectBaseField) base.getField(node.fieldId);
-          }
-        else if (node.fieldname != null)
-          {
-            fieldDef = (DBObjectBaseField) base.getField(node.fieldname); // *sync* DBObjectBase
-          }
-        else if (node.fieldId == -1)
-          {
-            fieldDef = (DBObjectBaseField) base.getField(base.getLabelField()); // *sync* DBObjectBase
-          }
-
-        if (fieldDef == null)
-          {
-            // "Invalid field identifier"
-            throw new IllegalArgumentException(ts.l("queryDispatch.bad_field"));
-          }
-
-        // now we've got a field definition that we can try to do a
-        // direct look up on.  check to see if it has a namespace
-        // index we can use
-
-        if (fieldDef.getNameSpace() != null)
-          {
-            // aha!  We've got an optimized case!
-
-            if (debug)
-              {
-                System.err.println("Eureka!  Optimized query!\n" + query.toString());
-              }
-
-            DBObject resultobject;
-            DBNameSpace ns = fieldDef.getNameSpace();
-
-            synchronized (ns)
-              {
-                DBField resultfield = null;
-
-                // if we are looking to match against an IP address
-                // field and we were given a String, we need to
-                // convert that String to an array of Bytes before
-                // looking it up in the namespace
-
-                if (fieldDef.isIP() && node.value instanceof String)
-                  {
-                    Byte[] ipBytes = null;
-
-                    try
-                      {
-                        ipBytes = IPDBField.genIPV4bytes((String) node.value);
-                      }
-                    catch (IllegalArgumentException ex)
-                      {
-                      }
-
-                    if (ipBytes != null)
-                      {
-                        resultfield = ns.lookupMyValue(gSession, ipBytes);
-                      }
-
-                    // it's hard to tell here whether any fields of
-                    // this type will accept IPv6 bytes, so if we
-                    // don't find it as an IPv4 address, look for it
-                    // as an IPv6 address
-
-                    if (resultfield == null)
-                      {
-                        try
-                          {
-                            ipBytes = IPDBField.genIPV6bytes((String) node.value);
-                          }
-                        catch (IllegalArgumentException ex)
-                          {
-                          }
-
-                        if (ipBytes != null)
-                          {
-                            resultfield = ns.lookupMyValue(gSession, ipBytes);
-                          }
-                      }
-                  }
-                else
-                  {
-                    // we don't allow associating Invid fields
-                    // with a namespace, so we don't need to try
-                    // to convert strings to invids here for a
-                    // namespace-optimized lookup
-
-                    if (node.value != null)
-                      {
-                        resultfield = ns.lookupMyValue(gSession, node.value); // *sync* DBNameSpace
-
-                        if (debug)
-                          {
-                            System.err.println("Did a namespace lookup in " + ns.getName() +
-                                               " for value " + node.value);
-                            System.err.println("Found " + resultfield);
-                          }
-                      }
-                  }
-
-                if (resultfield == null)
-                  {
-                    return result;
-                  }
-                else
-                  {
-                    // a namespace can map across different field and
-                    // object types.. make sure we've got an instance
-                    // of the right kind of field
-
-                    if (resultfield.getFieldDef() != fieldDef)
-                      {
-                        if (debug)
-                          {
-                            System.err.println("Error, didn't find the right kind of field");
-                            System.err.println("Found: " + resultfield.getFieldDef());
-                            System.err.println("Wanted: " + fieldDef);
-                          }
-
-                        return result;
-                      }
-
-                    // since we used this GanymedeSession to do
-                    // the namespace lookup, we know that the
-                    // owner object will be in the version we are
-                    // editing, if any
-
-                    resultobject = resultfield.getOwner();
-
-                    if (debug)
-                      {
-                        System.err.println("Found object: " + resultobject);
-                      }
-
-                    // addResultRow() will do our permissions checking for us
-
-                    addResultRow(resultobject, query, result, internal, perspectiveObject);
-
-                    if (debug)
-                      {
-                        System.err.println("Returning result from optimized query");
-                      }
-
-                    return result;
-                  }
-              }
-          }
+        return result;
       }
 
-    // okay, so we weren't able to do a namespace index lookup
+    // nope.
 
     // now we need to generate a vector listing the object bases that
     // need to be locked to perform this query.  Note that we need to
@@ -1054,6 +886,201 @@ public final class DBQueryEngine {
             dbSession.releaseLock(rLock); // *sync* DBSession DBStore
           }
       }
+  }
+
+  /**
+   * <p>If we can do a direct lookup, either because query is asking
+   * for an Invid, or because we're doing a direct equality test on a
+   * namespace controlled field, we'll return true.</p>
+   *
+   * <p>Otherwise, we'll return false, and internalQuery() will need
+   * to do an iteration over the objectbase to check the objects one
+   * by one.</p>
+   */
+
+  private boolean directLookup(Query query, QueryResult result, DBObjectBase base,
+                               boolean internal, boolean forTransport,
+                               DBLock extantLock, DBEditObject perspectiveObject)
+  {
+    // If we're doing anything other than a direct equality test, we
+    // won't be able to do a direct lookup.
+
+    if (!(query.root instanceof QueryDataNode) ||
+        ((QueryDataNode) query.root).comparator != QueryDataNode.EQUALS)
+      {
+        return false;
+      }
+
+    QueryDataNode node = (QueryDataNode) query.root;
+    DBObjectBaseField fieldDef = null;
+
+    // we're looking for a specific invid.. go ahead and do it
+
+    if (node.fieldId == -2)
+      {
+        DBObject resultobject = dbSession.viewDBObject((Invid) node.value);
+
+        addResultRow(resultobject, query, result, internal, perspectiveObject);
+
+        return true;
+      }
+
+    // we're looking at a data field.. determine which field we're
+    // looking at, find the dictionary definition for that field,
+    // see if it is in a namespace so we can do a direct lookup
+    // via a namespace hash.
+
+    if (node.fieldId >= 0)
+      {
+        fieldDef = (DBObjectBaseField) base.getField(node.fieldId);
+      }
+    else if (node.fieldname != null)
+      {
+        fieldDef = (DBObjectBaseField) base.getField(node.fieldname); // *sync* DBObjectBase
+      }
+    else if (node.fieldId == -1)
+      {
+        fieldDef = (DBObjectBaseField) base.getField(base.getLabelField()); // *sync* DBObjectBase
+      }
+
+    if (fieldDef == null)
+      {
+        // "Invalid field identifier"
+        throw new IllegalArgumentException(ts.l("queryDispatch.bad_field"));
+      }
+
+    // now we've got a field definition that we can try to do a
+    // direct look up on.  check to see if it has a namespace
+    // index we can use
+
+    if (fieldDef.getNameSpace() != null)
+      {
+        // aha!  We've got an optimized case!
+
+        if (debug)
+          {
+            System.err.println("Eureka!  Optimized query!\n" + query.toString());
+          }
+
+        DBObject resultobject;
+        DBNameSpace ns = fieldDef.getNameSpace();
+
+        synchronized (ns)
+          {
+            DBField resultfield = null;
+
+            // if we are looking to match against an IP address
+            // field and we were given a String, we need to
+            // convert that String to an array of Bytes before
+            // looking it up in the namespace
+
+            if (fieldDef.isIP() && node.value instanceof String)
+              {
+                Byte[] ipBytes = null;
+
+                try
+                  {
+                    ipBytes = IPDBField.genIPV4bytes((String) node.value);
+                  }
+                catch (IllegalArgumentException ex)
+                  {
+                  }
+
+                if (ipBytes != null)
+                  {
+                    resultfield = ns.lookupMyValue(gSession, ipBytes);
+                  }
+
+                // it's hard to tell here whether any fields of
+                // this type will accept IPv6 bytes, so if we
+                // don't find it as an IPv4 address, look for it
+                // as an IPv6 address
+
+                if (resultfield == null)
+                  {
+                    try
+                      {
+                        ipBytes = IPDBField.genIPV6bytes((String) node.value);
+                      }
+                    catch (IllegalArgumentException ex)
+                      {
+                      }
+
+                    if (ipBytes != null)
+                      {
+                        resultfield = ns.lookupMyValue(gSession, ipBytes);
+                      }
+                  }
+              }
+            else
+              {
+                // we don't allow associating Invid fields
+                // with a namespace, so we don't need to try
+                // to convert strings to invids here for a
+                // namespace-optimized lookup
+
+                if (node.value != null)
+                  {
+                    resultfield = ns.lookupMyValue(gSession, node.value); // *sync* DBNameSpace
+
+                    if (debug)
+                      {
+                        System.err.println("Did a namespace lookup in " + ns.getName() +
+                                           " for value " + node.value);
+                        System.err.println("Found " + resultfield);
+                      }
+                  }
+              }
+
+            if (resultfield == null)
+              {
+                return true;
+              }
+            else
+              {
+                // a namespace can map across different field and
+                // object types.. make sure we've got an instance
+                // of the right kind of field
+
+                if (resultfield.getFieldDef() != fieldDef)
+                  {
+                    if (debug)
+                      {
+                        System.err.println("Error, didn't find the right kind of field");
+                        System.err.println("Found: " + resultfield.getFieldDef());
+                        System.err.println("Wanted: " + fieldDef);
+                      }
+
+                    return true;
+                  }
+
+                // since we used this GanymedeSession to do
+                // the namespace lookup, we know that the
+                // owner object will be in the version we are
+                // editing, if any
+
+                resultobject = resultfield.getOwner();
+
+                if (debug)
+                  {
+                    System.err.println("Found object: " + resultobject);
+                  }
+
+                // addResultRow() will do our permissions checking for us
+
+                addResultRow(resultobject, query, result, internal, perspectiveObject);
+
+                if (debug)
+                  {
+                    System.err.println("Returning result from optimized query");
+                  }
+
+                return true;
+              }
+          }
+      }
+
+    return false;
   }
 
   /**
