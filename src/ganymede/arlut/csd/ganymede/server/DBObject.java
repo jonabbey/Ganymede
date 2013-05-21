@@ -1494,11 +1494,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
    * optimization, this method makes no checks to ensure that another
    * DBField with the same field id has not previously been stored, so
    * it should only be used when the DBObject's fieldAry is in a known
-   * state.  Otherwise, {@link
-   * arlut.csd.ganymede.server.DBObject#clearField(short) clearField()}
-   * should be called before calling saveField(), so that duplicate
-   * field id's are not accidentally introduced into the DBObject's
-   * fieldAry.</p>
+   * state.</p>
    *
    * <p>saveField() saves fields in field id order to try and speed up
    * field retrieving, by allowing us to do boolean search to find
