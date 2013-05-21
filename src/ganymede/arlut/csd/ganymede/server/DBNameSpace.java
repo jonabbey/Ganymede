@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -76,22 +76,25 @@ import arlut.csd.ganymede.rmi.NameSpace;
  * coordinate unique value allocation and management during object
  * editing across concurrent transactions.</p>
  *
- * <p>In general, transactions in Ganymede are not able to affect each other
- * at all, save through the acquisition of exclusive editing locks on
- * invidivual objects, and through the atomic acquisition of values
- * for unique value constrained DBFields.  Once a transaction allocates
- * a unique value using either the {@link arlut.csd.ganymede.server.DBNameSpace#mark(arlut.csd.ganymede.server.DBEditSet,
- * java.lang.Object,arlut.csd.ganymede.server.DBField) mark()},
- * {@link arlut.csd.ganymede.server.DBNameSpace#unmark(arlut.csd.ganymede.server.DBEditSet,
- * java.lang.Object,arlut.csd.ganymede.server.DBField oldField) unmark()}, or
- * {@link arlut.csd.ganymede.server.DBNameSpace#reserve(arlut.csd.ganymede.server.DBEditSet,
- * java.lang.Object) reserve()}
- * methods, no other transaction can allocate that value, until the first transaction
- * calls the {@link arlut.csd.ganymede.server.DBNameSpace#commit(arlut.csd.ganymede.server.DBEditSet)
- * commit()}, {@link arlut.csd.ganymede.server.DBNameSpace#abort(arlut.csd.ganymede.server.DBEditSet)
- * abort()}, or {@link arlut.csd.ganymede.server.DBNameSpace#rollback(arlut.csd.ganymede.server.DBEditSet,
- * java.lang.String) rollback()}
- * methods.</p>
+ * <p>In general, transactions in Ganymede are not able to affect each
+ * other at all, save through the acquisition of exclusive editing
+ * locks on invidivual objects, and through the atomic acquisition of
+ * values for unique value constrained DBFields.  Once a transaction
+ * allocates a unique value using either the {@link
+ * arlut.csd.ganymede.server.DBNameSpace#mark(arlut.csd.ganymede.server.DBEditSet,
+ * java.lang.Object,arlut.csd.ganymede.server.DBField) mark()}, {@link
+ * arlut.csd.ganymede.server.DBNameSpace#unmark(arlut.csd.ganymede.server.DBEditSet,
+ * java.lang.Object,arlut.csd.ganymede.server.DBField oldField)
+ * unmark()}, or {@link
+ * arlut.csd.ganymede.server.DBNameSpace#reserve(arlut.csd.ganymede.server.DBEditSet,
+ * java.lang.Object) reserve()} methods, no other transaction can
+ * allocate that value, until the first transaction calls the {@link
+ * arlut.csd.ganymede.server.DBNameSpace#commit(arlut.csd.ganymede.server.DBEditSet)
+ * commit()}, {@link
+ * arlut.csd.ganymede.server.DBNameSpace#abort(arlut.csd.ganymede.server.DBEditSet)
+ * abort()}, or {@link
+ * arlut.csd.ganymede.server.DBNameSpace#rollback(arlut.csd.ganymede.server.DBEditSet,
+ * java.lang.String) rollback()} methods.</p>
  *
  * <p>In order to perform this unique value management, DBNameSpace
  * maintains a private Hashtable, {@link
@@ -357,15 +360,16 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * Publicly accessible function used to record the presence of a
+   * <p>Publicly accessible function used to record the presence of a
    * namespace value in this namespace during Ganymede database
-   * loading.
+   * loading.</p>
    *
-   * Used by the {@link arlut.csd.ganymede.server.DBObject DBObject}
-   * receive() method and the {@link arlut.csd.ganymede.server.DBJournal
-   * DBJournal}'s {@link arlut.csd.ganymede.server.JournalEntry JournalEntry}
-   * class' process() method to build up the namespace during server
-   * start-up.
+   * <p>Used by the {@link arlut.csd.ganymede.server.DBObject
+   * DBObject} receive() method and the {@link
+   * arlut.csd.ganymede.server.DBJournal DBJournal}'s {@link
+   * arlut.csd.ganymede.server.JournalEntry JournalEntry} class'
+   * process() method to build up the namespace during server
+   * start-up.</p>
    */
 
   public synchronized void receiveValue(Object value, DBField field)
@@ -374,13 +378,13 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * Publicly accessible function used to clear the given
-   * value from this namespace in a non-transactional fashion.
+   * <p>Publicly accessible function used to clear the given
+   * value from this namespace in a non-transactional fashion.</p>
    *
-   * Used by {@link arlut.csd.ganymede.server.DBJournal DBJournal}'s
-   * {@link arlut.csd.ganymede.server.JournalEntry JournalEntry} class'
-   * process() method to rectify the namespace during server
-   * start-up.
+   * <p>Used by {@link arlut.csd.ganymede.server.DBJournal
+   * DBJournal}'s {@link arlut.csd.ganymede.server.JournalEntry
+   * JournalEntry} class' process() method to rectify the namespace
+   * during server start-up.</p>
    */
 
   public synchronized void removeHandle(Object value)
@@ -389,17 +393,17 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * This method allows the namespace to be used as a unique valued
-   * search index.
+   * <p>This method allows the namespace to be used as a unique valued
+   * search index.</p>
    *
-   * Note that this lookup is case sensitive or not according to the case
-   * sensitivity of this DBNameSpace.  If this DBNameSpace is case insensitive,
-   * the DBField returned may contain the value (if value is a String) with
-   * different capitalization.
+   * <p>Note that this lookup is case sensitive or not according to
+   * the case sensitivity of this DBNameSpace.  If this DBNameSpace is
+   * case insensitive, the DBField returned may contain the value (if
+   * value is a String) with different capitalization.</p>
    *
-   * As well, this method is really probably only useful in the context of
-   * a DBReadLock, but we're not doing anything to enforce this requirement
-   * at this point.
+   * <p>As well, this method is really probably only useful in the
+   * context of a DBReadLock, but we're not doing anything to enforce
+   * this requirement at this point.</p>
    *
    * @param value The value to search for in the namespace hash.
    */
@@ -417,18 +421,18 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * If the value is attached to an object that is being created or edited in
-   * a transaction, this method will return the editable DBField that contains
-   * the constrained value during editing.
+   * <p>If the value is attached to an object that is being created or
+   * edited in a transaction, this method will return the editable
+   * DBField that contains the constrained value during editing.</p>
    *
-   * Note that this lookup is case sensitive or not according to the case
-   * sensitivity of this DBNameSpace.  If this DBNameSpace is case insensitive,
-   * the DBField returned may contain the value (if value is a String) with
-   * different capitalization.
+   * <p>Note that this lookup is case sensitive or not according to
+   * the case sensitivity of this DBNameSpace.  If this DBNameSpace is
+   * case insensitive, the DBField returned may contain the value (if
+   * value is a String) with different capitalization.</p>
    *
-   * As well, this method is really probably useful in the context of
-   * a DBReadLock, but we're not doing anything to enforce this requirement
-   * at this point.
+   * <p>As well, this method is really probably useful in the context
+   * of a DBReadLock, but we're not doing anything to enforce this
+   * requirement at this point.</p>
    *
    * @param value The value to search for in the namespace hash.
    */
@@ -446,24 +450,24 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * This method looks to find where the given value is bound in the
-   * namespace, taking into account the transactional view the calling
-   * session has.  If the value is attached to an object in the
-   * current transaction, this method will return a reference to the
-   * editable shadow DBField containing the value.  If not, this
+   * <p>This method looks to find where the given value is bound in
+   * the namespace, taking into account the transactional view the
+   * calling session has.  If the value is attached to an object in
+   * the current transaction, this method will return a reference to
+   * the editable shadow DBField containing the value.  If not, this
    * method will either return the DBField containing the read-only
    * persistent version from the DBStore, or null if the value sought
    * has been cleared from use in the objects being edited by the
-   * transaction.
+   * transaction.</p>
    *
-   * Note that this lookup is case sensitive or not according to the case
-   * sensitivity of this DBNameSpace.  If this DBNameSpace is case insensitive,
-   * the DBField returned may contain the value (if value is a String) with
-   * different capitalization.
+   * <p>Note that this lookup is case sensitive or not according to
+   * the case sensitivity of this DBNameSpace.  If this DBNameSpace is
+   * case insensitive, the DBField returned may contain the value (if
+   * value is a String) with different capitalization.</p>
    *
-   * As well, this method is really probably useful in the context of
-   * a DBReadLock, but we're not doing anything to enforce this requirement
-   * at this point.
+   * <p>As well, this method is really probably useful in the context
+   * of a DBReadLock, but we're not doing anything to enforce this
+   * requirement at this point.</p>
    *
    * @param session The GanymedeSession to use to lookup the containing object..
    * useful when a GanymedeSession is doing the looking up of value
@@ -488,18 +492,18 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * This method reserves a value so that the given editSet is
+   * <p>This method reserves a value so that the given editSet is
    * assured of being able to use this value at some point before the
    * transaction is commited or canceled.  reserve() is different from
    * mark() in that there is no field specified to be holding the
    * value, and that when the transaction is committed or canceled,
    * the value will be returned to the available list.  During the
    * transaction, the transaction code can mark the value at any time
-   * with assurance that they will be able to do so.
+   * with assurance that they will be able to do so.</p>
    *
-   * If a transaction attempts to reserve() a value that is already
+   * <p>If a transaction attempts to reserve() a value that is already
    * being held by an object in the transaction, reserve() will return
-   * false.
+   * false.</p>
    *
    * @param editSet The transaction claiming the unique value <value>
    * @param value The unique value that transaction editset is attempting to claim
@@ -563,19 +567,19 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * This method reserves a value so that the given editSet is assured
-   * of being able to use this value at some point before the
+   * <p>This method reserves a value so that the given editSet is
+   * assured of being able to use this value at some point before the
    * transaction is commited or canceled.  reserve() is different from
    * mark() in that there is no field specified to be holding the
    * value, and that when the transaction is committed or canceled,
    * the value will be returned to the available list.  During the
    * transaction, the transaction code can mark the value at any time
-   * with assurance that they will be able to do so.
+   * with assurance that they will be able to do so.</p>
    *
-   * If onlyUsed is false and a transaction attempts to reserve() a
+   * <p>If onlyUsed is false and a transaction attempts to reserve() a
    * value that is already being held by an object in the transaction,
    * reserve() will return true, even though a subsequent mark()
-   * attempt would fail unless the value is first unmarked.
+   * attempt would fail unless the value is first unmarked.</p>
    *
    * @param editSet The transaction claiming the unique value <value>
    * @param value The unique value that transaction editset is
@@ -603,23 +607,23 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * This method tests to see whether a value in the namespace can
+   * <p>This method tests to see whether a value in the namespace can
    * be marked as in use.  Such a marking is done to allow an editset
    * to have the ability to juggle values in namespace associated
-   * fields without allowing another editset to acquire a value
-   * needed if the editset transaction is aborted.
+   * fields without allowing another editset to acquire a value needed
+   * if the editset transaction is aborted.</p>
    *
-   * For array db fields, all elements in the array should be
+   * <p>For array db fields, all elements in the array should be
    * testmark'ed in the context of a synchronized block on the
    * namespace before going back and marking each value (while still
-   * in the synchronized block on the namespace).. this ensures
-   * that we won't mark several values in an array before discovering
-   * that one of the values in a DBArrayField is already taken.
+   * in the synchronized block on the namespace).. this ensures that
+   * we won't mark several values in an array before discovering that
+   * one of the values in a DBArrayField is already taken.</p>
    *
-   * The success of testmark() is no guarantee of a future successful
-   * mark() operation, of course, unless the testmark and mark
-   * operations are done within a synchronization block on the
-   * namespace.
+   * <p>The success of testmark() is no guarantee of a future
+   * successful mark() operation, of course, unless the testmark and
+   * mark operations are done within a synchronization block on the
+   * namespace.</p>
    *
    * @param editSet The transaction testing permission to claim value.
    * @param value The unique value desired by editSet.
@@ -750,19 +754,19 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * This method tests to see whether a value in the namespace can
+   * <p>This method tests to see whether a value in the namespace can
    * be marked as not in use.  Such a marking is done to allow an
    * editset to have the ability to juggle values in namespace
    * associated fields without allowing another editset to acquire a
-   * value needed if the editset transaction is aborted.
+   * value needed if the editset transaction is aborted.</p>
    *
-   * For array db fields, all elements in the array should be
+   * <p>For array db fields, all elements in the array should be
    * testunmark'ed in the context of a synchronized block on the
    * namespace before actually unmarking all the values.  See the
    * comments in testmark() for the logic here.  Note that
    * testunmark() is less useful than testmark() because we really
    * aren't expecting anything to prevent us from unmarking()
-   * something.
+   * something.</p>
    *
    * @param editSet The transaction that is determining whether value can be freed.
    * @param value The unique value being tested.
@@ -912,14 +916,14 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * Method to remove a checkpoint from this namespace's
+   * <p>Method to remove a checkpoint from this namespace's
    * DBNameSpaceCkPoint hash.  This is to be done when the calling
    * code knows that it will no longer need to be able to rollback to
-   * the named checkpoint.
+   * the named checkpoint.</p>
    *
-   * This method really isn't very important, because when the
+   * <p>This method really isn't very important, because when the
    * transaction is committed or aborted, the checkpoints hashtable
-   * will be cleared of editSet anyway.
+   * will be cleared of editSet anyway.</p>
    *
    * @param editSet The transaction that is requesting the checkpoint pop.
    * @param name The name of the checkpoint to be popped.
@@ -1006,16 +1010,17 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * This method returns null if the given transaction doesn't have
+   * <p>This method returns null if the given transaction doesn't have
    * any shadowFieldB's outstanding.  This is the desired case.  If
    * the given transaction has some values with shadowFieldB's set,
    * that means that those unique values are left "bound" to more than
    * one field, which is an error that non-interactive clients (the
-   * xmlclient) can run into.
+   * xmlclient) can run into.</p>
    *
-   * If we have such conflicts, we return a vector of namespace values
-   * that are in conflict at transaction commit time, else we return
-   * null, which indicates that this namespace has been verified.
+   * <p>If we have such conflicts, we return a vector of namespace
+   * values that are in conflict at transaction commit time, else we
+   * return null, which indicates that this namespace has been
+   * verified.</p>
    */
 
   public synchronized Vector<String> verify_noninteractive(DBEditSet editSet)
@@ -1080,14 +1085,15 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * Method to put the editSet's current namespace modifications into
-   * final effect and to make any abandoned values available for other
-   * namespaces.
+   * <p>Method to put the editSet's current namespace modifications
+   * into final effect and to make any abandoned values available for
+   * other namespaces.</p>
    *
-   * Note that a NameSpace should really never fail here.  We assume that
-   * all NameSpace management code up to this point has functioned properly..
-   * at this point, the EditSet has already committed changes to the DBStore
-   * and to any external processes, we're just doing paperwork at this point.
+   * <p>Note that a NameSpace should really never fail here.  We
+   * assume that all NameSpace management code up to this point has
+   * functioned properly..  at this point, the EditSet has already
+   * committed changes to the DBStore and to any external processes,
+   * we're just doing paperwork at this point.</p>
    *
    * @param editSet The transaction being committed.
    */
@@ -1405,15 +1411,15 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * This method is designed for doing conflict detection between this
-   * DBNameSpace and another DBNameSpace that we might be looking at
-   * merging into this namespace.  This is usually necessary when a
-   * Ganymede adopter is collapsing two namespaces into one.
+   * <p>This method is designed for doing conflict detection between
+   * this DBNameSpace and another DBNameSpace that we might be looking
+   * at merging into this namespace.  This is usually necessary when a
+   * Ganymede adopter is collapsing two namespaces into one.</p>
    *
-   * In addition to returning true if there are values in conflict
+   * <p>In addition to returning true if there are values in conflict
    * between the two namespaces, or false if conflicts exist, a report
    * of the conflicting values will be written to the Ganymede admin
-   * console and the Ganymede server's stdout.
+   * console and the Ganymede server's stdout.</p>
    */
 
   public synchronized boolean findConflicts(DBNameSpace otherSpace)
@@ -1479,13 +1485,13 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * This method returns the {@link
+   * <p>This method returns the {@link
    * arlut.csd.ganymede.server.DBNameSpace.DBNameSpaceTransaction
    * DBNameSpaceTransaction} associated with the given transaction,
-   * creating one if one was not previously so associated.
+   * creating one if one was not previously so associated.</p>
    *
-   * This method will always return a valid DBNameSpaceTransaction
-   * record.
+   * <p>This method will always return a valid DBNameSpaceTransaction
+   * record.</p>
    */
 
   private synchronized DBNameSpaceTransaction getTransactionRecord(DBEditSet transaction)
@@ -1502,14 +1508,14 @@ public final class DBNameSpace implements NameSpace {
   }
 
   /**
-   * Remember that this editSet has changed the location/status of
-   * this value.
+   * <p>Remember that this editSet has changed the location/status of
+   * this value.</p>
    *
-   * This is a private convenience method.
+   * <p>This is a private convenience method.</p>
    *
-   * This method associates the value with the given editset in a
+   * <p>This method associates the value with the given editset in a
    * stored transaction record, so that we can rollback the namespace
-   * to a fixed state later.
+   * to a fixed state later.</p>
    */
 
   private void remember(DBEditSet editSet, Object value)
@@ -1743,14 +1749,14 @@ public final class DBNameSpace implements NameSpace {
 class DBNameSpaceHandle {
 
   /**
-   * So that the namespace hash can be used as an index,
+   * <p>So that the namespace hash can be used as an index,
    * persistentFieldInvid always points to the object that contained
    * the field that contained this value at the time this field was
-   * last committed in a transaction.
+   * last committed in a transaction.</p>
    *
-   * persistentFieldInvid will be null if the value pointing to
+   * <p>persistentFieldInvid will be null if the value pointing to
    * this handle has not been committed into the database outside of
-   * an active transaction.
+   * an active transaction.</p>
    */
 
   private Invid persistentFieldInvid = null;
@@ -1787,17 +1793,17 @@ class DBNameSpaceHandle {
   }
 
   /**
-   * This method creates a new editable DBNameSpaceEditingHandle that
-   * will revert to this handle if the DBEditSet is aborted.
+   * <p>This method creates a new editable DBNameSpaceEditingHandle
+   * that will revert to this handle if the DBEditSet is aborted.</p>
    *
-   * The checked out handle is returned with a null shadowField and
+   * <p>The checked out handle is returned with a null shadowField and
    * shadowFieldB, as would be appropriate if a user was unmarking a
-   * value in the namespace uniqueHash.
+   * value in the namespace uniqueHash.</p>
    *
-   * If the handle is being checked out by a non-interactive xmlclient
-   * that needs to address the shadowFieldB member, it will need to be
-   * sure to set the shadowField() to point to the appropriate field
-   * at check out time.
+   * <p>If the handle is being checked out by a non-interactive
+   * xmlclient that needs to address the shadowFieldB member, it will
+   * need to be sure to set the shadowField() to point to the
+   * appropriate field at check out time.</p>
    */
 
   public DBNameSpaceEditingHandle checkout(DBEditSet editSet)
@@ -1821,13 +1827,13 @@ class DBNameSpaceHandle {
   }
 
   /**
-   * This method returns true if the namespace-managed value that
-   * this handle is associated with is held in a committed object in the
-   * Ganymede data store.
+   * <p>This method returns true if the namespace-managed value that
+   * this handle is associated with is held in a committed object in
+   * the Ganymede data store.</p>
    *
-   * If this method returns false, that means that this handle must
+   * <p>If this method returns false, that means that this handle must
    * be associated with a field in an active DBEditSet's transaction
-   * set, or else we wouldn't have a handle for it.
+   * set, or else we wouldn't have a handle for it.</p>
    */
 
   public boolean isPersisted()
@@ -1869,18 +1875,18 @@ class DBNameSpaceHandle {
   }
 
   /**
-   * If the value that this handle is associated with is stored in
+   * <p>If the value that this handle is associated with is stored in
    * the Ganymede server's persistent data store (i.e., that this
    * handle is associated with a field in an already-committed
    * object), this method will return a pointer to the DBField that
-   * contains this handle's value in the committed data store.
+   * contains this handle's value in the committed data store.</p>
    *
-   * Note that if the DBEditSet passed in is currently editing the
+   * <p>Note that if the DBEditSet passed in is currently editing the
    * object which is identified by persistentFieldInvid, the DBField
    * returned will be the editable version of the field from the
    * DBEditObject the session is working with.  This may be something
    * of a surprise, as the field returned may not actually contain the
-   * value sought.
+   * value sought.</p>
    */
 
   public DBField getPersistentField(DBEditSet editSet)
@@ -1889,18 +1895,18 @@ class DBNameSpaceHandle {
   }
 
   /**
-   * If the value that this handle is associated with is stored in
+   * <p>If the value that this handle is associated with is stored in
    * the Ganymede server's persistent data store (i.e., that this
    * handle is associated with a field in an already-committed
    * object), this method will return a pointer to the DBField that
-   * contains this handle's value in the committed data store.
+   * contains this handle's value in the committed data store.</p>
    *
-   * Note that if the GanymedeSession passed in is currently
+   * <p>Note that if the GanymedeSession passed in is currently
    * editing the object which is identified by persistentFieldInvid,
    * the DBField returned will be the editable version of the field
    * from the DBEditObject the session is working with.  This may be
    * something of a surprise, as the field returned may not actually
-   * contain the value sought.
+   * contain the value sought.</p>
    */
 
   public DBField getPersistentField(GanymedeSession gsession)
@@ -1909,18 +1915,18 @@ class DBNameSpaceHandle {
   }
 
   /**
-   * If the value that this handle is associated with is stored in
+   * <p>If the value that this handle is associated with is stored in
    * the Ganymede server's persistent data store (i.e., that this
    * handle is associated with a field in an already-committed
    * object), this method will return a pointer to the DBField that
-   * contains this handle's value in the committed data store.
+   * contains this handle's value in the committed data store.</p>
    *
-   * Note that if the DBSession passed in is currently
-   * editing the object which is identified by persistentFieldInvid,
-   * the DBField returned will be the editable version of the field
-   * from the DBEditObject the session is working with.  This may be
-   * something of a surprise, as the field returned may not actually
-   * contain the value sought.
+   * <p>Note that if the DBSession passed in is currently editing the
+   * object which is identified by persistentFieldInvid, the DBField
+   * returned will be the editable version of the field from the
+   * DBEditObject the session is working with.  This may be something
+   * of a surprise, as the field returned may not actually contain the
+   * value sought.</p>
    */
 
   public DBField getPersistentField(DBSession session)
@@ -2014,17 +2020,17 @@ class DBNameSpaceHandle {
   }
 
   /**
-   * If this namespace-managed value is being edited in an active,
+   * <p>If this namespace-managed value is being edited in an active,
    * non-interactive Ganymede transaction, this method may be used to
    * set a pointer to the editable DBField which aspires to contain
-   * the constrained value in the active transaction.
+   * the constrained value in the active transaction.</p>
    *
-   * This is the 'B' shadowField because it is not a firm association,
-   * and cannot be one unless and until the original persistent field
-   * that contains the constrained value is made to release the value.
-   * At the time the constrained value is released from the earlier
-   * field, shadowField will be set to shadowFieldB, and shadowFieldB
-   * will be cleared.
+   * <p>This is the 'B' shadowField because it is not a firm
+   * association, and cannot be one unless and until the original
+   * persistent field that contains the constrained value is made to
+   * release the value.  At the time the constrained value is released
+   * from the earlier field, shadowField will be set to shadowFieldB,
+   * and shadowFieldB will be cleared.</p>
    */
 
   public void setShadowFieldB(DBField newShadow)
