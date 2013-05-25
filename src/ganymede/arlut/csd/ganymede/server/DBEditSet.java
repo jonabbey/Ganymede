@@ -904,18 +904,18 @@ public final class DBEditSet {
 
     // and now we get rid of DBEditObjects we need to drop
 
-    for (DBEditObject obj: drop)
+    for (DBEditObject eObj: drop)
       {
-        obj.release(true);
+        eObj.release(true);
 
-        switch (obj.getStatus())
+        switch (eObj.getStatus())
           {
           case ObjectStatus.CREATING:
           case ObjectStatus.DROPPING:
-            obj.getBase().releaseId(obj.getID()); // relinquish the unused invid
+            eObj.getBase().releaseId(eObj.getID()); // relinquish the unused invid
 
             session.GSession.checkIn(); // XXX *synchronized* on GanymedeSession
-            obj.getBase().getStore().checkIn(); // update checked out count
+            eObj.getBase().getStore().checkIn(); // update checked out count
             break;
 
           case ObjectStatus.EDITING:
@@ -923,7 +923,7 @@ public final class DBEditSet {
 
             // note that clearShadow updates the checked out count for us.
 
-            if (!obj.original.clearShadow(this))
+            if (!eObj.original.clearShadow(this))
               {
                 throw new RuntimeException("editset ownership synchronization error");
               }
@@ -934,9 +934,9 @@ public final class DBEditSet {
 
     // now go ahead and clean out the dropped objects
 
-    for (DBEditObject obj: drop)
+    for (DBEditObject eObj: drop)
       {
-        this.objects.remove(obj.getInvid());
+        this.objects.remove(eObj.getInvid());
       }
 
     // and our namespaces
