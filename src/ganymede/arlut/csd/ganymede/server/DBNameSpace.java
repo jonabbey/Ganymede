@@ -219,8 +219,8 @@ public final class DBNameSpace implements NameSpace {
     this.name = name;
     this.caseInsensitive = caseInsensitive;
 
-    uniqueHash = new GHashtable(DEFAULTSIZE, caseInsensitive);
-    transactions = new Hashtable<DBEditSet, DBNameSpaceTransaction>(TRANSCOUNT);
+    this.uniqueHash = new GHashtable(DEFAULTSIZE, caseInsensitive);
+    this.transactions = new Hashtable<DBEditSet, DBNameSpaceTransaction>(TRANSCOUNT);
   }
 
   /**
@@ -231,8 +231,8 @@ public final class DBNameSpace implements NameSpace {
   {
     receive(in);
 
-    uniqueHash = new GHashtable(hashSize, caseInsensitive);
-    transactions = new Hashtable<DBEditSet, DBNameSpaceTransaction>(TRANSCOUNT);
+    this.uniqueHash = new GHashtable(hashSize, caseInsensitive);
+    this.transactions = new Hashtable<DBEditSet, DBNameSpaceTransaction>(TRANSCOUNT);
   }
 
   /**
@@ -241,16 +241,16 @@ public final class DBNameSpace implements NameSpace {
 
   private void receive(DataInput in) throws IOException
   {
-    name = in.readUTF();
-    caseInsensitive = in.readBoolean();
+    this.name = in.readUTF();
+    this.caseInsensitive = in.readBoolean();
 
     if (Ganymede.db.isAtLeast(2, 14))
       {
-        hashSize = gnu.trove.PrimeFinder.nextPrime((int)Math.ceil((in.readInt() + GROWTHSPACE) / 0.75f));
+        this.hashSize = gnu.trove.PrimeFinder.nextPrime((int)Math.ceil((in.readInt() + GROWTHSPACE) / 0.75f));
       }
     else
       {
-        hashSize = DEFAULTSIZE;
+        this.hashSize = DEFAULTSIZE;
       }
   }
 
@@ -260,9 +260,9 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized void emit(DataOutput out) throws IOException
   {
-    out.writeUTF(name);
-    out.writeBoolean(caseInsensitive);
-    out.writeInt(uniqueHash.size()); // added at DBStore version 2.14
+    out.writeUTF(this.name);
+    out.writeBoolean(this.caseInsensitive);
+    out.writeInt(this.uniqueHash.size()); // added at DBStore version 2.14
   }
 
   /**
@@ -274,7 +274,7 @@ public final class DBNameSpace implements NameSpace {
     xDump.startElementIndent("namespace");
     xDump.attribute("name", getName());
 
-    if (caseInsensitive)
+    if (this.caseInsensitive)
       {
         xDump.attribute("case-sensitive", "false");
       }
@@ -294,7 +294,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized String getName()
   {
-    return name;
+    return this.name;
   }
 
   /**
@@ -309,7 +309,7 @@ public final class DBNameSpace implements NameSpace {
     // XXX need to make sure this new name isn't in conflict
     // with existing names XXX
 
-    name = newName;
+    this.name = newName;
     return true;
   }
 
@@ -322,7 +322,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized boolean isCaseInsensitive()
   {
-    return caseInsensitive;
+    return this.caseInsensitive;
   }
 
   /**
@@ -356,7 +356,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized boolean containsKey(Object value)
   {
-    return uniqueHash.containsKey(value);
+    return this.uniqueHash.containsKey(value);
   }
 
   /**
@@ -389,7 +389,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized void removeHandle(Object value)
   {
-    uniqueHash.remove(value);
+    this.uniqueHash.remove(value);
   }
 
   /**
@@ -410,7 +410,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized DBField lookupPersistent(Object value)
   {
-    DBNameSpaceHandle handle = (DBNameSpaceHandle) uniqueHash.get(value);
+    DBNameSpaceHandle handle = (DBNameSpaceHandle) this.uniqueHash.get(value);
 
     if (handle == null)
       {
@@ -439,7 +439,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized DBField lookupShadow(Object value)
   {
-    DBNameSpaceHandle handle = (DBNameSpaceHandle) uniqueHash.get(value);
+    DBNameSpaceHandle handle = (DBNameSpaceHandle) this.uniqueHash.get(value);
 
     if (handle == null)
       {
@@ -476,7 +476,7 @@ public final class DBNameSpace implements NameSpace {
 
   public synchronized DBField lookupMyValue(GanymedeSession session, Object value)
   {
-    DBNameSpaceHandle handle = (DBNameSpaceHandle) uniqueHash.get(value);
+    DBNameSpaceHandle handle = (DBNameSpaceHandle) this.uniqueHash.get(value);
 
     if (handle == null)
       {
@@ -526,9 +526,9 @@ public final class DBNameSpace implements NameSpace {
 
     // Is this value already taken?
 
-    if (uniqueHash.containsKey(value))
+    if (this.uniqueHash.containsKey(value))
       {
-        handle = (DBNameSpaceHandle) uniqueHash.get(value);
+        handle = (DBNameSpaceHandle) this.uniqueHash.get(value);
 
         if (!handle.isCheckedOut())
           {
@@ -1496,12 +1496,12 @@ public final class DBNameSpace implements NameSpace {
 
   private synchronized DBNameSpaceTransaction getTransactionRecord(DBEditSet transaction)
   {
-    DBNameSpaceTransaction transRecord = transactions.get(transaction);
+    DBNameSpaceTransaction transRecord = this.transactions.get(transaction);
 
     if (transRecord == null)
       {
         transRecord = new DBNameSpaceTransaction(transaction, caseInsensitive);
-        transactions.put(transaction, transRecord);
+        this.transactions.put(transaction, transRecord);
       }
 
     return transRecord;
@@ -1538,7 +1538,7 @@ public final class DBNameSpace implements NameSpace {
 
   static class DBNameSpaceTransaction {
 
-    private NamedStack checkpointStack;
+    private NamedStack<DBNameSpaceCkPoint> checkpointStack;
     private GHashtable reservedValues;
     private DBEditSet transaction;
 
@@ -1548,7 +1548,7 @@ public final class DBNameSpace implements NameSpace {
     {
       this.transaction = transaction;
       this.reservedValues = new GHashtable(caseInsensitive);
-      this.checkpointStack = new NamedStack();
+      this.checkpointStack = new NamedStack<DBNameSpaceCkPoint>();
     }
 
     public synchronized void remember(Object value)
@@ -1588,7 +1588,7 @@ public final class DBNameSpace implements NameSpace {
         {
           while (checkpointStack.size() != 0)
             {
-              DBNameSpaceCkPoint ckpoint = (DBNameSpaceCkPoint) checkpointStack.pop();
+              DBNameSpaceCkPoint ckpoint = checkpointStack.pop();
               ckpoint.cleanup();
             }
 
@@ -1626,7 +1626,7 @@ public final class DBNameSpace implements NameSpace {
 
     public DBNameSpaceCkPoint popCheckpoint(String name)
     {
-      DBNameSpaceCkPoint point = (DBNameSpaceCkPoint) checkpointStack.pop(name);
+      DBNameSpaceCkPoint point = checkpointStack.pop(name);
 
       if (point == null)
         {

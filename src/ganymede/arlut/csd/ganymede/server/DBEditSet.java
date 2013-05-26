@@ -2482,13 +2482,13 @@ public final class DBEditSet {
    * with this DBEditSet.  All DBObjects created, deleted, or
    * modified, and all unique values allocated and freed during the
    * course of actions on this transaction will be reverted to their
-   * state when this transaction was created. </p>
+   * state when this transaction was created.</p>
    *
    * <p>Note that this does not mean that the entire DBStore will
    * revert to its state at the beginning of this transaction; any
    * changes not relating to objects and namespace values connected to
    * this transaction will not be affected by this transaction's
-   * release. </p>
+   * release.</p>
    */
 
   private final void release()
