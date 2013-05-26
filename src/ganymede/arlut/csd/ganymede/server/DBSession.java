@@ -309,6 +309,7 @@ public final class DBSession implements QueryDescriber {
               {
                 if (tmpInvid.getType() != SchemaConstants.OwnerBase)
                   {
+                    // "bad ownership invid"
                     throw new RuntimeException(ts.l("createDBObject.badowner"));
                   }
 
@@ -330,6 +331,7 @@ public final class DBSession implements QueryDescriber {
 
                         String checkedOutBy = owner.getShadow().editset.description;
 
+                        // "Owner group {0} is currently checked out by:\n{1}"
                         retVal.getDialog().appendText("\n" + ts.l("createDBObject.checkedout", name, checkedOutBy));
                       }
                     catch (NullPointerException ex)
@@ -414,11 +416,14 @@ public final class DBSession implements QueryDescriber {
 
     if (false)
       {
+        // "Created new object : {0}, invid = {1}"
         Ganymede.debug(ts.l("createDBObject.created", e_object.getLabel(), e_object.getInvid().toString()));
+
         DBField[] fields = e_object.listDBFields();
 
         for (int i = 0; i < fields.length; i++)
           {
+            // "field {0} is {1}:{2}"
             Ganymede.debug(ts.l("createDBObject.field_report", Integer.valueOf(i), Integer.valueOf(fields[i].getID()), fields[i].getName()));
           }
       }
