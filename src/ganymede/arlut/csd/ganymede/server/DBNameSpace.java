@@ -1693,7 +1693,12 @@ public final class DBNameSpace implements NameSpace {
         {
           DBNameSpaceHandle handle = space.getHandle(value);
 
-          handle = new DBNameSpaceHandle(handle);
+          // XXX clone() rather than use a copy constructor because
+          // some of our values will be DBNameSpaceEditingHandles
+          // rather than DBNameSpaceHandles, and we need to get the
+          // subclass properly.
+
+          handle = (DBNameSpaceHandle) handle.clone();
 
           uniqueHash.put(value, handle);
         }
@@ -1746,7 +1751,7 @@ public final class DBNameSpace implements NameSpace {
  * value.
  */
 
-class DBNameSpaceHandle {
+class DBNameSpaceHandle implements Cloneable {
 
   /**
    * <p>So that the namespace hash can be used as an index,
@@ -2113,6 +2118,22 @@ class DBNameSpaceHandle {
   public void setReserved(boolean reserved)
   {
     throw new UnsupportedOperationException();
+  }
+
+  /**
+   * We want to allow cloning.
+   */
+
+  public Object clone()
+  {
+    try
+      {
+        return super.clone();
+      }
+    catch (CloneNotSupportedException ex)
+      {
+        throw new RuntimeException(ex.getMessage());
+      }
   }
 }
 
