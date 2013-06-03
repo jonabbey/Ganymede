@@ -522,7 +522,8 @@ public class IPDBField extends DBField implements ip_field {
 
                 // "Server: Error in IPDBField.setValue()"
                 // "IP address {0} already in use in the server"
-                return Ganymede.createErrorDialog(ts.l("setValue.oops"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("setValue.oops"),
                                                   ts.l("global.already_in_use", genIPString(bytes)));
               }
           }
@@ -606,7 +607,8 @@ public class IPDBField extends DBField implements ip_field {
       {
         // "Server: Error in IPDBField.setElement()"
         // "Null value passed to {0}:{1}.setElement()"
-        return Ganymede.createErrorDialog(ts.l("setElement.oops"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("setElement.oops"),
                                           ts.l("setElement.null_value",
                                                this.owner.getLabel(), getName()));
       }
@@ -677,7 +679,8 @@ public class IPDBField extends DBField implements ip_field {
 
                 // "Server: Error in IPDBField.setElement()"
                 // "IP address {0} already in use in the server"
-                return Ganymede.createErrorDialog(ts.l("setElement.oops"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("setElement.oops"),
                                                   ts.l("global.already_in_use", genIPString(bytes)));
               }
           }
@@ -776,7 +779,8 @@ public class IPDBField extends DBField implements ip_field {
       {
         // "Server: Error in IPDBField.addElement()"
         // "Error in IPDBField.addElement(): Field {1} already at or beyond array size limit in object {0}"
-        return Ganymede.createErrorDialog(ts.l("addElement.oops"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("addElement.oops"),
                                           ts.l("addElement.too_big",
                                                this.owner.getLabel(), getName()));
       }
@@ -805,7 +809,8 @@ public class IPDBField extends DBField implements ip_field {
           {
             // "Server: Error in IPDBField.addElement()"
             // "IP address {0} already in use in the server"
-            return Ganymede.createErrorDialog(ts.l("addElement.oops"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("addElement.oops"),
                                               ts.l("global.already_in_use", genIPString(bytes)));
           }
       }
@@ -885,7 +890,8 @@ public class IPDBField extends DBField implements ip_field {
       {
         // "Server: Error in IPDBField.addElements()"
         // "IPDBField.addElements(): Can''t add a null or empty vector to field {1} in object {0}"
-        return Ganymede.createErrorDialog(ts.l("addElements.oops"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("addElements.oops"),
                                           ts.l("addElements.null_value",
                                                this.owner.getLabel(), getName()));
       }
@@ -905,7 +911,8 @@ public class IPDBField extends DBField implements ip_field {
       {
         // "Server: Error in IPDBField.addElements()"
         // "Error in IPDBField.addElements(): Field {1} in object {0} is limited to {2} items.  Can't add the {3} additional items requested."
-        return Ganymede.createErrorDialog(ts.l("addElements.oops"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("addElements.oops"),
                                           ts.l("addElements.too_big",
                                                this.owner.getLabel(), getName(),
                                                Integer.valueOf(getMaxArraySize()),
@@ -979,7 +986,8 @@ public class IPDBField extends DBField implements ip_field {
 
     if (approvedValues.size() == 0)
       {
-        return Ganymede.createErrorDialog("AddElements Error",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "AddElements Error",
                                           errorBuf.toString());
       }
 
@@ -1406,14 +1414,16 @@ public class IPDBField extends DBField implements ip_field {
 
     if (!isEditable(true))
       {
-        return Ganymede.createErrorDialog("IP Field Error",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "IP Field Error",
                                           "Don't have permission to edit field " + getName() +
                                           " in object " + eObj.getLabel());
       }
 
     if (!verifyTypeMatch(o))
       {
-        return Ganymede.createErrorDialog("IP Field Error",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "IP Field Error",
                                           "Submitted value " + o + " is not a IP address!  Major client error while" +
                                           " trying to edit field " + getName() +
                                           " in object " + eObj.getLabel());

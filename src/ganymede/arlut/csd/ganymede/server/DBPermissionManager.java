@@ -988,7 +988,8 @@ public final class DBPermissionManager {
 
         if (ownerInvidItem.getType() != SchemaConstants.OwnerBase)
           {
-            return Ganymede.createErrorDialog(ts.l("setDefaultOwner.error_title"),
+            return Ganymede.createErrorDialog(gSession,
+                                              ts.l("setDefaultOwner.error_title"),
                                               ts.l("setDefaultOwner.error_text"));
           }
 
@@ -1011,7 +1012,8 @@ public final class DBPermissionManager {
 
     if (!supergashMode && !isMemberAll(tmpInvids))
       {
-        return Ganymede.createErrorDialog(ts.l("setDefaultOwner.error_title"),
+        return Ganymede.createErrorDialog(gSession,
+                                          ts.l("setDefaultOwner.error_title"),
                                           ts.l("setDefaultOwner.error_text2"));
       }
     else
@@ -1101,7 +1103,8 @@ public final class DBPermissionManager {
 
     if (!supergashMode && !isMemberAll(ownerInvids))
       {
-        return Ganymede.createErrorDialog(ts.l("filterQueries.error"),
+        return Ganymede.createErrorDialog(gSession,
+                                          ts.l("filterQueries.error"),
                                           ts.l("setDefaultOwner.error_text2"));
       }
     else

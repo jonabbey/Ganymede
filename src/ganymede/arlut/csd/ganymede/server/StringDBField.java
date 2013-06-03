@@ -827,7 +827,8 @@ public class StringDBField extends DBField implements string_field {
     if (!verifyTypeMatch(o))
       {
         // "Submitted value {0} is not a String!  Major client error while trying to edit field {1} in object {2}."
-        return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("verifyBasicConstraints.error_title"),
                                           ts.l("verifyBasicConstraints.type_error",
                                                o, this.getName(), this.owner.getLabel()));
       }
@@ -837,10 +838,9 @@ public class StringDBField extends DBField implements string_field {
     if (s.length() > maxSize())
       {
         // string too long
-
         // "String value {0} is too long for field {1} in object {2}.  Strings in this field must be less than or equal to {3,number,#} characters long."
-
-        return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("verifyBasicConstraints.error_title"),
                                           ts.l("verifyBasicConstraints.overlength",
                                                s, this.getName(), this.owner.getLabel(),
                                                Integer.valueOf(this.maxSize())));
@@ -849,10 +849,9 @@ public class StringDBField extends DBField implements string_field {
     if (s.length() < minSize())
       {
         // string too short
-
         // "String value {0} is too short for field {1} in object {2}.  Strings in this field must be greater than or equal to {3,number,#} characters long."
-
-        return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("verifyBasicConstraints.error_title"),
                                           ts.l("verifyBasicConstraints.underlength",
                                                s, this.getName(), this.owner.getLabel(),
                                                Integer.valueOf(this.minSize())));
@@ -872,7 +871,8 @@ public class StringDBField extends DBField implements string_field {
                   "{3}"
                 */
 
-                return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("verifyBasicConstraints.error_title"),
                                                   ts.l("verifyBasicConstraints.regexp_nodesc",
                                                        s, this.getName(), this.owner.getLabel(),
                                                        getFieldDef().getRegexpPat()));
@@ -885,7 +885,8 @@ public class StringDBField extends DBField implements string_field {
                   "{3}"
                 */
 
-                return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("verifyBasicConstraints.error_title"),
                                                   ts.l("verifyBasicConstraints.regexp_desc",
                                                        s, this.getName(), this.owner.getLabel(), desc));
               }
@@ -901,7 +902,8 @@ public class StringDBField extends DBField implements string_field {
             if (okChars.indexOf(s.charAt(i)) == -1)
               {
                 // "String value "{0}" contains a character '{1}' which is not allowed in field {2} in object {3}."
-                return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("verifyBasicConstraints.error_title"),
                                                   ts.l("verifyBasicConstraints.bad_char",
                                                        s, Character.valueOf(s.charAt(i)), this.getName(), this.owner.getLabel()));
               }
@@ -917,7 +919,8 @@ public class StringDBField extends DBField implements string_field {
             if (badChars.indexOf(s.charAt(i)) != -1)
               {
                 // "String value "{0}" contains a character '{1}' which is not allowed in field {2} in object {3}."
-                return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("verifyBasicConstraints.error_title"),
                                                   ts.l("verifyBasicConstraints.bad_char",
                                                        s, Character.valueOf(s.charAt(i)), this.getName(), this.owner.getLabel()));
               }
@@ -965,7 +968,9 @@ public class StringDBField extends DBField implements string_field {
     if (!isEditable(true))
       {
         // "Don''t have permission to edit field {0} in object {1}."
-        return Ganymede.createErrorDialog(ts.l("verifyNewValue.non_editable", getName(), this.owner.getLabel()));
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          null,
+                                          ts.l("verifyNewValue.non_editable", getName(), this.owner.getLabel()));
       }
 
     eObj = (DBEditObject) this.owner;
@@ -996,8 +1001,9 @@ public class StringDBField extends DBField implements string_field {
             if (!qr.containsLabel(s))
               {
                 // "String value "{0}" is not a valid choice for field {1} in object {2}."
-
-                return Ganymede.createErrorDialog(ts.l("verifyNewValue.invalid_choice",
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  null,
+                                                  ts.l("verifyNewValue.invalid_choice",
                                                        s, getName(), eObj.getLabel()));
               }
           }

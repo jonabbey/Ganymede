@@ -905,7 +905,8 @@ public final class InvidDBField extends DBField implements invid_field {
         // "Link Error"
         // "Your operation could not be performed.  The target object {0} can only be linked to one {1} at a time."
 
-        return Ganymede.createErrorDialog(ts.l("checkBindConflict.subj"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("checkBindConflict.subj"),
                                           ts.l("checkBindConflict.overlink",
                                                remobj.getLabel(),
                                                this.owner.getTypeName()));
@@ -1043,7 +1044,8 @@ public final class InvidDBField extends DBField implements invid_field {
           {
             // "Bind link error"
             // "Can't forge an asymmetric link between {0} and invid {1}, the target object is being deleted."
-            return Ganymede.createErrorDialog(ts.l("bind.deletedremote_sub"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("bind.deletedremote_sub"),
                                               ts.l("bind.deletedremote_text", this.getName(), newRemote.toString()));
           }
 
@@ -1078,7 +1080,8 @@ public final class InvidDBField extends DBField implements invid_field {
             // "InvidDBField.bind(): Couldn''t find old reference"
             // "Your operation could not succeed because field {0} was linked to a remote reference {1} that could not be found \
             //  for unlinking.\n\nThis is a serious logic error in the server."
-            return Ganymede.createErrorDialog(ts.l("bind.no_oldref"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("bind.no_oldref"),
                                               ts.l("bind.no_oldref_text", getName(), oldRemote.toString()));
           }
 
@@ -1108,7 +1111,8 @@ public final class InvidDBField extends DBField implements invid_field {
                 // "InvidDBField.bind(): Couldn''t unlink from old reference"
                 // "Your operation could not succeed because you don''t have permission to dissolve the link to the old object \
                 // held in field {0} in object {1}"
-                return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("bind.no_unlink_sub"),
                                                   ts.l("bind.no_perms_old", getName(), this.owner.getLabel()));
               }
           }
@@ -1140,7 +1144,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
                         // "InvidDBField.bind(): Couldn''t unlink from old reference"
                         // "Field {0} could not be unlinked from the {1} {2} object, which is busy being edited by {3} on system {4}"
-                        return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
+                        return Ganymede.createErrorDialog(this.getGSession(),
+                                                          ts.l("bind.no_unlink_sub"),
                                                           ts.l("bind.busy_old",
                                                                this.getName(), remobj.getLabel(), remobj.getTypeName(),
                                                                edit_username, edit_hostname));
@@ -1148,7 +1153,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
                     // "InvidDBField.bind(): Couldn''t unlink from old reference"
                     // "Field {0} could not be unlinked from the {1} {2} object, which is busy being edited by another user."
-                    return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      ts.l("bind.no_unlink_sub"),
                                                       ts.l("bind.busy_old2",
                                                            this.getName(), remobj.getLabel(), remobj.getTypeName()));
                   }
@@ -1157,7 +1163,8 @@ public final class InvidDBField extends DBField implements invid_field {
                     // "InvidDBField.bind(): Couldn''t unlink from old reference"
                     // "Field {0} could not be unlinked from the {1} {2} object.
                     // This is probably a temporary condition due to other user activity on the Ganymede server."
-                    return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      ts.l("bind.no_unlink_sub"),
                                                       ts.l("bind.busy_old_temp",
                                                            this.getName(), remobj.getLabel(), remobj.getTypeName()));
                   }
@@ -1167,7 +1174,8 @@ public final class InvidDBField extends DBField implements invid_field {
                 // "InvidDBField.bind(): Couldn''t unlink from old reference"
                 // "Field {0} could not be unlinked from the {1} {2} object.
                 // This is probably a temporary condition due to other user activity on the Ganymede server."
-                return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("bind.no_unlink_sub"),
                                                   ts.l("bind.busy_old_temp",
                                                        this.getName(), remobj.getLabel(), remobj.getTypeName()));
               }
@@ -1183,7 +1191,8 @@ public final class InvidDBField extends DBField implements invid_field {
               {
                 // "InvidDBField.bind(): Couldn''t unlink from old reference"
                 // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
-                return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("bind.no_unlink_sub"),
                                                   ts.l("bind.schema_error",
                                                        oldRef.getField(targetField).getName(),
                                                        oldRef.getLabel()));
@@ -1192,7 +1201,8 @@ public final class InvidDBField extends DBField implements invid_field {
               {
                 // "InvidDBField.bind(): Couldn''t unlink from old reference"
                 // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
-                return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("bind.no_unlink_sub"),
                                                   ts.l("bind.schema_error",
                                                        Integer.toString(targetField), oldRef.getLabel()));
               }
@@ -1212,14 +1222,16 @@ public final class InvidDBField extends DBField implements invid_field {
               {
                 // "InvidDBField.bind(): Couldn''t unlink from old reference"
                 // "Your operation could not succeed due to a possible inconsistency in the server database.  Target field number {0} in object {1} does not exist."
-                return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("bind.no_unlink_sub"),
                                                   ts.l("bind.inconsistency", Integer.toString(targetField), oldRef.getLabel()));
               }
             else
               {
                 // "InvidDBField.bind(): Couldn''t unlink from old reference"
                 // "Your operation could not succeed due to a possible inconsistency in the server database.  Target field {0} is undefined in object {1}."
-                return Ganymede.createErrorDialog(ts.l("bind.no_unlink_sub"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("bind.no_unlink_sub"),
                                                   ts.l("bind.inconsistency2", fieldDef.getName(), oldRef.getLabel()));
               }
           }
@@ -1241,7 +1253,8 @@ public final class InvidDBField extends DBField implements invid_field {
       {
         // "InvidDBField.bind(): Couldn''t find new reference"
         // "Your operation could not succeed because field {0} cannot link to non-existent invid {1}.\n\nThis is a serious logic error in the server."
-        return Ganymede.createErrorDialog(ts.l("bind.no_newref_sub"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("bind.no_newref_sub"),
                                           ts.l("bind.no_newref", getName(), newRemote.toString()));
       }
 
@@ -1265,7 +1278,8 @@ public final class InvidDBField extends DBField implements invid_field {
           {
             // "InvidDBField.bind(): Couldn''t link to remote object"
             // "Field {0} cannot be linked to remote object {1}.\n\nThe remote object has been deleted."
-            return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("bind.no_new_link_sub"),
                                               ts.l("bind.deleted_new", this.getName(), newRemote.toString()));
           }
       }
@@ -1279,7 +1293,8 @@ public final class InvidDBField extends DBField implements invid_field {
           {
             // "InvidDBField.bind(): Couldn''t link to remote object"
             // "Field {0} could not be linked to the {1} {2} object.  You do not have permission to edit the {1} {2} object."
-            return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("bind.no_new_link_sub"),
                                               ts.l("bind.no_newref_perm",
                                                    this.getName(), remobj.getLabel(), remobj.getTypeName()));
           }
@@ -1308,14 +1323,16 @@ public final class InvidDBField extends DBField implements invid_field {
 
                     // "InvidDBField.bind(): Couldn''t link to new reference"
                     // "Field {0} could not be linked to the {1} {2} object, which is busy being edited by {3} on system {4}."
-                    return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      ts.l("bind.no_new_link_sub"),
                                                       ts.l("bind.busy_new", this.getName(), remobj.getLabel(), remobj.getTypeName(),
                                                            edit_username, edit_hostname));
                   }
 
                 // "InvidDBField.bind(): Couldn''t link to new reference"
                 // "Field {0} could not be linked to the {1} {2} object, which is busy being edited by another user."
-                return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("bind.no_new_link_sub"),
                                                   ts.l("bind.busy_new2", this.getName(), remobj.getLabel(), remobj.getTypeName()));
               }
             else
@@ -1323,7 +1340,8 @@ public final class InvidDBField extends DBField implements invid_field {
                 // "InvidDBField.bind(): Couldn''t link to new reference"
                 // "Field {0} could not be linked to the {1} {2} object.
                 // This is probably a temporary condition due to other user activity on the Ganymede server."
-                return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("bind.no_new_link_sub"),
                                                   ts.l("bind.busy_new_temp", this.getName(), remobj.getLabel(), remobj.getTypeName()));
               }
           }
@@ -1332,7 +1350,8 @@ public final class InvidDBField extends DBField implements invid_field {
             // "InvidDBField.bind(): Couldn''t link to new reference"
             // "Field {0} could not be linked to the {1} {2} object.
             // This is probably a temporary condition due to other user activity on the Ganymede server."
-            return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("bind.no_new_link_sub"),
                                               ts.l("bind.busy_new_temp", this.getName(), remobj.getLabel(), remobj.getTypeName()));
           }
       }
@@ -1345,7 +1364,8 @@ public final class InvidDBField extends DBField implements invid_field {
           {
             // "InvidDBField.bind(): Couldn''t link to new reference"
             // "Your operation could not succeed due to a possible inconsistency in the server database.  Target field number {0} in object {1} does not exist."
-            return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("bind.no_new_link_sub"),
                                               ts.l("bind.inconsistency", Integer.toString(targetField), newRef.getLabel()));
           }
       }
@@ -1355,14 +1375,16 @@ public final class InvidDBField extends DBField implements invid_field {
           {
             // "InvidDBField.bind(): Couldn''t link to new reference"
             // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
-            return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("bind.no_new_link_sub"),
                                               ts.l("bind.schema_error", newRef.getField(targetField).getName(), newRef.getLabel()));
           }
         catch (RemoteException rx)
           {
             // "InvidDBField.bind(): Couldn''t link to new reference"
             // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
-            return Ganymede.createErrorDialog(ts.l("bind.no_new_link_sub"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("bind.no_new_link_sub"),
                                               ts.l("bind.schema_error", Integer.toString(targetField), newRef.getLabel()));
           }
       }
@@ -1504,7 +1526,8 @@ public final class InvidDBField extends DBField implements invid_field {
         // "InvidDBField.unbind(): Couldn't find old reference"
         // "Your operation could not succeed because field {0} was linked to a remote reference {1} that could not be found
         // for unlinking.\n\nThis is a serious logic error in the server."
-        return Ganymede.createErrorDialog(ts.l("unbind.no_oldref"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("unbind.no_oldref"),
                                           ts.l("bind.no_oldref_text",  getName(), remote.toString()));
       }
 
@@ -1553,7 +1576,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
                     // "InvidDBField.unbind(): Couldn''t unlink from old reference"
                     // "Field {0} could not be unlinked from the {1} {2} object, which is busy being edited by {3} on system {4}."
-                    return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      ts.l("unbind.no_unlink_sub"),
                                                       ts.l("bind.busy_old",
                                                            this.getName(),
                                                            remobj.getLabel(),
@@ -1566,7 +1590,8 @@ public final class InvidDBField extends DBField implements invid_field {
                     // "InvidDBField.unbind(): Couldn''t unlink from old reference"
                     // "Field {0} could not be unlinked from the {1} {2} object.
                     // This is probably a temporary condition due to other user activity on the Ganymede server."
-                    return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      ts.l("unbind.no_unlink_sub"),
                                                       ts.l("bind.busy_old_temp",
                                                            this.getName(),
                                                            remobj.getLabel(),
@@ -1580,7 +1605,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
             // "InvidDBField.unbind(): Couldn''t unlink from old reference"
             // "We couldn''t unlink field {0} in object {1} from field {2} in object {3} due to a permissions problem."
-            return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("unbind.no_unlink_sub"),
                                               ts.l("unbind.perm_fail",
                                                    getName(),
                                                    this.owner.getLabel(),
@@ -1597,7 +1623,8 @@ public final class InvidDBField extends DBField implements invid_field {
       {
         // "InvidDBField.unbind(): Couldn''t unlink from old reference"
         // "Your operation could not succeed due to an error in the server''s schema.  Target field {0} in object {1} is not an invid field."
-        return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("unbind.no_unlink_sub"),
                                           ts.l("bind.schema_error",
                                                oldRef.getFieldName(targetField),
                                                oldRef.getLabel()));
@@ -1617,7 +1644,8 @@ public final class InvidDBField extends DBField implements invid_field {
           {
             // "InvidDBField.unbind(): Couldn''t unlink from old reference"
             // "Your operation could not succeed due to a possible inconsistency in the server database.  Target field number {0} in object {1} does not exist."
-            return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("unbind.no_unlink_sub"),
                                               ts.l("bind.inconsistency",
                                                    Integer.toString(targetField),
                                                    oldRef.getLabel()));
@@ -1626,7 +1654,8 @@ public final class InvidDBField extends DBField implements invid_field {
           {
             // "InvidDBField.unbind(): Couldn''t unlink from old reference"
             // "Your operation could not succeed due to a possible inconsistency in the server database.  Target field {0} is undefined in object {1}."
-            return Ganymede.createErrorDialog(ts.l("unbind.no_unlink_sub"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("unbind.no_unlink_sub"),
                                               ts.l("bind.inconsistency",
                                                    fieldDef.getName(),
                                                    oldRef.getLabel()));
@@ -1740,7 +1769,8 @@ public final class InvidDBField extends DBField implements invid_field {
                   {
                     // "InvidDBField.dissolve(): couldn''t finalizeDeleteElement"
                     // "The custom plug-in class for object {0} refused to allow us to clear out all the references in field {1}:\n\n{2}"
-                    return Ganymede.createErrorDialog(ts.l("dissolve.no_finalize_vect"),
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      ts.l("dissolve.no_finalize_vect"),
                                                       ts.l("dissolve.refused_vect",
                                                            eObj.getLabel(),
                                                            getName(),
@@ -1750,7 +1780,8 @@ public final class InvidDBField extends DBField implements invid_field {
                   {
                     // "InvidDBField.dissolve(): couldn''t finalizeDeleteElement"
                     // "The custom plug-in class for object {0} refused to allow us to clear out all the references in field {1}"
-                    return Ganymede.createErrorDialog(ts.l("dissolve.no_finalize_vect"),
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      ts.l("dissolve.no_finalize_vect"),
                                                       ts.l("dissolve.refused_vect_notext",
                                                            eObj.getLabel(),
                                                            getName()));
@@ -1792,14 +1823,16 @@ public final class InvidDBField extends DBField implements invid_field {
               {
                 // "InvidDBField.dissolve(): couldn''t finalizeSetValue"
                 // "The custom plug-in class for object {0} refused to allow us to clear out the reference in field {1}:\n\n{2}"
-                return Ganymede.createErrorDialog(ts.l("dissolve.no_finalize_scalar"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("dissolve.no_finalize_scalar"),
                                                   ts.l("dissolve.refused_scalar", eObj.getLabel(), getName(), retVal.getDialog().getText()));
               }
             else
               {
                 // "InvidDBField.dissolve(): couldn''t finalizeSetValue"
                 // "The custom plug-in class for object {0} refused to allow us to clear out the reference in field {1}"
-                return Ganymede.createErrorDialog(ts.l("dissolve.no_finalize_scalar"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("dissolve.no_finalize_scalar"),
                                                   ts.l("dissolve.refused_scalar_notext", eObj.getLabel(), getName()));
               }
           }
@@ -1852,7 +1885,8 @@ public final class InvidDBField extends DBField implements invid_field {
       {
         // "InvidDBField.establish(): can''t link to deleted object"
         // "Couldn''t establish a new linkage in field {0} because object {1} has been deleted."
-        return Ganymede.createErrorDialog(ts.l("establish.deletion_sub"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("establish.deletion_sub"),
                                           ts.l("establish.deletion_text", this.getName(), this.owner.getLabel()));
       }
 
@@ -1862,7 +1896,8 @@ public final class InvidDBField extends DBField implements invid_field {
           {
             // "InvidDBField.establish(): Can''t link to full field"
             // "Couldn''t establish a new linkage in vector field {0} in object {1} because the vector field is already at maximum capacity."
-            return Ganymede.createErrorDialog(ts.l("establish.overrun_sub"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("establish.overrun_sub"),
                                               ts.l("establish.overrun_text", getName(), this.owner.getLabel()));
           }
 
@@ -1878,7 +1913,8 @@ public final class InvidDBField extends DBField implements invid_field {
             // object {2} {3} are trying to link to one vector field in we, the target, which can''t work.  If one of the fields in {3}
             // were ever cleared or changed, we''d be cleared and the symmetric relationship would be broken.\n\n
             // Have your adopter check the schema."
-            return Ganymede.createErrorDialog(ts.l("establish.schema_sub"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("establish.schema_sub"),
                                               ts.l("establish.schema_text",
                                                    getName(),
                                                    this.owner.getLabel(),
@@ -1895,7 +1931,8 @@ public final class InvidDBField extends DBField implements invid_field {
                 // "InvidDBField.establish(): finalizeAddElement refused"
                 // "Couldn''t establish a new linkage in vector field {0} in object {1} because the custom plug in code
                 // for this object refused to approve the operation:\n\n{2}"
-                return Ganymede.createErrorDialog(ts.l("establish.no_add_sub"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("establish.no_add_sub"),
                                                   ts.l("establish.no_add_text",
                                                        getName(), this.owner.getLabel(), retVal.getDialog().getText()));
               }
@@ -1904,7 +1941,8 @@ public final class InvidDBField extends DBField implements invid_field {
                 // "InvidDBField.establish(): finalizeAddElement refused"
                 // "Couldn''t establish a new linkage in vector field {0} in object {1} because the custom plug in code
                 // for this object refused to approve the operation."
-                return Ganymede.createErrorDialog(ts.l("establish.no_add_sub"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("establish.no_add_sub"),
                                                   ts.l("establish.no_add_text2", getName(), this.owner.getLabel()));
               }
           }
@@ -1933,7 +1971,8 @@ public final class InvidDBField extends DBField implements invid_field {
                 // object {2} {3} are trying to link to one scalar field in we, the target, which can''t work.  If one of the fields in {3}
                 // were ever cleared or changed, we''d be cleared and the symmetric relationship would be broken.\n\n
                 // Have your adopter check the schema."
-                return Ganymede.createErrorDialog(ts.l("establish.schema_sub"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("establish.schema_sub"),
                                                   ts.l("establish.schema_scalar_text",
                                                        getName(),
                                                        this.owner.getLabel(),
@@ -1970,7 +2009,8 @@ public final class InvidDBField extends DBField implements invid_field {
                 // "InvidDBField.establish(): finalizeSetValue refused"
                 // "Couldn''t establish a new linkage in field {0} in object {1} because the custom plug in code
                 // for this object refused to approve the operation:\n\n{2}"
-                return Ganymede.createErrorDialog(ts.l("establish.no_set_sub"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("establish.no_set_sub"),
                                                   ts.l("establish.no_set_text",
                                                        getName(), this.owner.getLabel(), retVal.getDialog().getText()));
               }
@@ -1979,7 +2019,8 @@ public final class InvidDBField extends DBField implements invid_field {
                 // "InvidDBField.establish(): finalizeSetValue refused"
                 // "Couldn''t establish a new linkage in field {0} in object {1} because the custom plug in code
                 // for this object refused to approve the operation."
-                return Ganymede.createErrorDialog(ts.l("establish.no_set_sub"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("establish.no_set_sub"),
                                                   ts.l("establish.no_set_text2",
                                                        getName(), this.owner.getLabel()));
               }
@@ -2272,7 +2313,8 @@ public final class InvidDBField extends DBField implements invid_field {
     if (!isEditable(local))
       {
         // "Don''t have permission to change field {0} in object {1}"
-        return Ganymede.createErrorDialog("InvidDBField.setValue()",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "InvidDBField.setValue()",
                                           ts.l("global.no_perms", getName(), this.owner.getLabel()));
       }
 
@@ -2427,7 +2469,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(local))
       {
-        return Ganymede.createErrorDialog("InvidDBField.setElement()",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "InvidDBField.setElement()",
                                           ts.l("global.no_perms", getName(), this.owner.getLabel()));
       }
 
@@ -2556,13 +2599,15 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(local))     // *sync* on GanymedeSession possible
       {
-        return Ganymede.createErrorDialog("InvidDBField.addElement()",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "InvidDBField.addElement()",
                                           ts.l("global.no_perms", getName(), this.owner.getLabel()));
       }
 
     if (isEditInPlace())
       {
-        return Ganymede.createErrorDialog("InvidDBField.addElement()",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "InvidDBField.addElement()",
                                           ts.l("addElement.edit_in_place", getName(), this.owner.getLabel()));
       }
 
@@ -2591,7 +2636,8 @@ public final class InvidDBField extends DBField implements invid_field {
       {
         // "InvidDBField.addElement() - vector overflow"
         // "Field {0} already at or beyond array size limit."
-        return Ganymede.createErrorDialog(ts.l("addElement.overflow_sub"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("addElement.overflow_sub"),
                                           ts.l("addElement.overflow_text", getName()));
       }
 
@@ -2724,13 +2770,15 @@ public final class InvidDBField extends DBField implements invid_field {
     if (isEditInPlace())
       {
         // "Can''t manually add elements to edit-in-place vector: {0} in object {1}"
-        return Ganymede.createErrorDialog("InvidDBField.addElements()",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "InvidDBField.addElements()",
                                           ts.l("addElements.edit_in_place", getName(), this.owner.getLabel()));
       }
 
     if (!isEditable(local))     // *sync* on GanymedeSession possible
       {
-        return Ganymede.createErrorDialog("InvidDBField.addElements()",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "InvidDBField.addElements()",
                                           ts.l("global.no_perms", getName(), this.owner.getLabel()));
       }
 
@@ -2743,7 +2791,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (newValues == null || newValues.size() == 0)
       {
-        return Ganymede.createErrorDialog(ts.l("addElements.error_sub"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("addElements.error_sub"),
                                           ts.l("addElements.null_empty_param", getName()));
       }
 
@@ -2751,7 +2800,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (size() + newValues.size() > getMaxArraySize())
       {
-        return Ganymede.createErrorDialog(ts.l("addElements.error_sub"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("addElements.error_sub"),
                                           ts.l("addElements.overflow_text", getName(), Integer.toString(newValues.size()),
                                                Integer.toString(size()), Integer.toString(getMaxArraySize())));
       }
@@ -2815,7 +2865,8 @@ public final class InvidDBField extends DBField implements invid_field {
     if (approvedValues.size() == 0)
       {
         // "AddElements Error"
-        return Ganymede.createErrorDialog(ts.l("addElements.subject"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("addElements.subject"),
                                           errorBuf.toString());
       }
 
@@ -2947,7 +2998,8 @@ public final class InvidDBField extends DBField implements invid_field {
         if (!any_success)
           {
             // "AddElements Error"
-            return Ganymede.createErrorDialog(ts.l("addElements.subject"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("addElements.subject"),
                                               errorBuf.toString());
           }
 
@@ -2999,7 +3051,8 @@ public final class InvidDBField extends DBField implements invid_field {
             if (!any_success)
               {
                 // "AddElements Error"
-                return Ganymede.createErrorDialog(ts.l("addElements.subject"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("addElements.subject"),
                                                   errorBuf.toString());
               }
           }
@@ -3118,7 +3171,8 @@ public final class InvidDBField extends DBField implements invid_field {
   {
     if (!isEditable(local))
       {
-        return Ganymede.createErrorDialog("InvidDBField.createNewEmbedded()",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "InvidDBField.createNewEmbedded()",
                                           ts.l("global.no_perms", getName(), this.owner.getLabel()));
       }
 
@@ -3136,7 +3190,8 @@ public final class InvidDBField extends DBField implements invid_field {
     if (size() >= getMaxArraySize())
       {
         // "Field {0} is already at or beyond the specified array size limit."
-        return Ganymede.createErrorDialog("InvidDBField.createNewEmbedded()",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "InvidDBField.createNewEmbedded()",
                                           ts.l("addElement.overflow_text", getName()));
       }
 
@@ -3383,7 +3438,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(local))
       {
-        return Ganymede.createErrorDialog("InvidDBField.deleteElement()",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "InvidDBField.deleteElement()",
                                           ts.l("global.no_perms", getName(), this.owner.getLabel()));
       }
 
@@ -3487,7 +3543,8 @@ public final class InvidDBField extends DBField implements invid_field {
               {
                 // "InvidDBField.deleteElement() - custom code rejected element deletion"
                 // "Custom code refused deletion of element {0} from field {1} in object {2}.\n\n{3}"
-                return Ganymede.createErrorDialog(ts.l("deleteElement.rejected"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("deleteElement.rejected"),
                                                   ts.l("deleteElement.no_finalize", Integer.toString(index),
                                                        getName(), this.owner.getLabel(), retVal.getDialog().getText()));
               }
@@ -3495,7 +3552,8 @@ public final class InvidDBField extends DBField implements invid_field {
               {
                 // "InvidDBField.deleteElement() - custom code rejected element deletion"
                 // "Custom code refused deletion of element {0} from field {1} in object {2}."
-                return Ganymede.createErrorDialog(ts.l("deleteElement.rejected"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("deleteElement.rejected"),
                                                   ts.l("deleteElement.no_finalize_no_text",
                                                        Integer.toString(index), getName(), this.owner.getLabel()));
               }
@@ -3538,7 +3596,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(local))
       {
-        return Ganymede.createErrorDialog("InvidDBField.deleteElements()",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "InvidDBField.deleteElements()",
                                           ts.l("global.no_perms", getName(), this.owner.getLabel()));
       }
 
@@ -3557,7 +3616,8 @@ public final class InvidDBField extends DBField implements invid_field {
     if (notPresent.size() != 0)
       {
         // "Field {0} can''t remove non-present items: {1}."
-        return Ganymede.createErrorDialog("InvidDBField.deleteElements()",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "InvidDBField.deleteElements()",
                                           ts.l("deleteElements.not_found",
                                                getName(),
                                                VectorUtils.vectorString(notPresent)));
@@ -3943,7 +4003,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!isEditable(true))
       {
-        return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "InvidDBField.verifyNewValue()",
                                           ts.l("global.no_perms", getName(), this.owner.getLabel()));
       }
 
@@ -3951,7 +4012,8 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (!verifyTypeMatch(o))
       {
-        return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "InvidDBField.verifyNewValue()",
                                           ts.l("verifyNewValue.bad_type", o, getName(), this.owner.getLabel()));
       }
 
@@ -3964,7 +4026,8 @@ public final class InvidDBField extends DBField implements invid_field {
           {
             // the invid points to an object of the wrong type
 
-            return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              "InvidDBField.verifyNewValue()",
                                               ts.l("verifyNewValue.bad_object_type", inv, getName(), this.owner.getLabel(), Integer.toString(getTargetBase())));
           }
 
@@ -3978,7 +4041,8 @@ public final class InvidDBField extends DBField implements invid_field {
                   }
                 catch (NotLoggedInException ex)
                   {
-                    return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      "InvidDBField.verifyNewValue()",
                                                       ts.l("global.not_logged_in"));
                   }
               }
@@ -4005,7 +4069,8 @@ public final class InvidDBField extends DBField implements invid_field {
                         System.err.println(this.qr);
                       }
 
-                    return Ganymede.createErrorDialog("InvidDBField.verifyNewValue()",
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      "InvidDBField.verifyNewValue()",
                                                       ts.l("verifyNewValue.bad_choice",
                                                            invLabel, getName(),
                                                            this.owner.getLabel()));

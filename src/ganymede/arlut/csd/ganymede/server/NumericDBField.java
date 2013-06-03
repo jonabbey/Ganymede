@@ -387,7 +387,8 @@ public class NumericDBField extends DBField implements num_field {
     if (!verifyTypeMatch(o))
       {
         // "Submitted value {0} is not a number!  Major client error while trying to edit field {1} in object {2}."
-        return Ganymede.createErrorDialog(ts.l("verifyBasicConstraints.error_title"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("verifyBasicConstraints.error_title"),
                                           ts.l("verifyBasicConstraints.type_error",
                                                o, this.getName(), this.owner.getLabel()));
       }
@@ -423,7 +424,8 @@ public class NumericDBField extends DBField implements num_field {
       {
         if (getMinValue() > I.intValue())
           {
-            return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("verifyNewValue.error_title"),
                                               ts.l("verifyNewValue.over_range",
                                                    I, this.getName(), eObj.getLabel(),
                                                    Integer.valueOf(this.getMinValue())));
@@ -431,7 +433,8 @@ public class NumericDBField extends DBField implements num_field {
 
         if (getMaxValue() < I.intValue())
           {
-            return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("verifyNewValue.error_title"),
                                               ts.l("verifyNewValue.under_range",
                                                    I, this.getName(), eObj.getLabel(),
                                                    Integer.valueOf(this.getMinValue())));

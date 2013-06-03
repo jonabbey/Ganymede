@@ -282,7 +282,8 @@ public final class DBSession implements QueryDescriber {
 
         // "Object Creation Failure"
         // "Couldn''t create the new object in the database."
-        return Ganymede.createErrorDialog(ts.l("createDBObject.failure"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("createDBObject.failure"),
                                           ts.l("createDBObject.failure_text"));
       }
 
@@ -355,7 +356,8 @@ public final class DBSession implements QueryDescriber {
 
         if (!editSet.addObject(e_object))
           {
-            return Ganymede.createErrorDialog(ts.l("createDBObject.failure"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("createDBObject.failure"),
                                               ts.l("createDBObject.addObject_failed"));
           }
 
@@ -851,7 +853,8 @@ public final class DBSession implements QueryDescriber {
 
     if (eObj == null)
       {
-        return Ganymede.createErrorDialog(ts.l("deleteDBObject.cant_delete", obj.getLabel()),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("deleteDBObject.cant_delete", obj.getLabel()),
                                           ts.l("deleteDBObject.cant_delete_text", obj.getLabel()));
       }
 
@@ -925,7 +928,8 @@ public final class DBSession implements QueryDescriber {
 
             popCheckpoint(ckp_label);
 
-            return Ganymede.createErrorDialog(ts.l("deleteDBObject.cant_delete", eObj.toString()),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("deleteDBObject.cant_delete", eObj.toString()),
                                               ts.l("deleteDBObject.cant_delete_text2", eObj.toString()));
           }
 
@@ -949,7 +953,8 @@ public final class DBSession implements QueryDescriber {
 
         rollback(ckp_label);
 
-        return Ganymede.createErrorDialog(ts.l("deleteDBObject.error"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("deleteDBObject.error"),
                                           ts.l("deleteDBObject.error_text", eObj.toString(), ex.getMessage()));
       }
 
@@ -1031,7 +1036,8 @@ public final class DBSession implements QueryDescriber {
         break;
 
       default:
-        return Ganymede.createErrorDialog(ts.l("inactivateDBObject.error"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("inactivateDBObject.error"),
                                           ts.l("inactivateDBObject.error_text"));
       }
 
@@ -1054,7 +1060,8 @@ public final class DBSession implements QueryDescriber {
 
         eObj.finalizeInactivate(false, ckp_label);
 
-        return Ganymede.createErrorDialog(ts.l("inactivateDBObject.error"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("inactivateDBObject.error"),
                                           ts.l("inactivateDBObject.error_text2", eObj.toString(), ex.getMessage()));
       }
 
@@ -1127,13 +1134,15 @@ public final class DBSession implements QueryDescriber {
       {
       case DBEditObject.DELETING:
       case DBEditObject.DROPPING:
-        return Ganymede.createErrorDialog(ts.l("reactivateDBObject.error"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("reactivateDBObject.error"),
                                           ts.l("reactivateDBObject.error_text"));
       }
 
     if (!eObj.isInactivated())
       {
-        return Ganymede.createErrorDialog(ts.l("reactivateDBObject.error"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("reactivateDBObject.error"),
                                           ts.l("reactivateDBObject.error_text2"));
       }
 
@@ -1153,7 +1162,8 @@ public final class DBSession implements QueryDescriber {
 
         rollback(ckp_label);
 
-        return Ganymede.createErrorDialog(ts.l("reactivateDBObject.error"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("reactivateDBObject.error"),
                                           ts.l("reactivateDBObject.error_text3", eObj.toString(), ex.getMessage()));
       }
 
@@ -1664,7 +1674,8 @@ public final class DBSession implements QueryDescriber {
       {
         Ganymede.debug(ts.l("abortTransaction.cant_abort", String.valueOf(key)));
 
-        return Ganymede.createErrorDialog(ts.l("abortTransaction.error"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("abortTransaction.error"),
                                           ts.l("abortTransaction.error_text"));
       }
     else

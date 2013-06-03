@@ -653,7 +653,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
           {
             // "Copy field error"
             // "Can''t copy from field {0} in object {1}, due to a lack of read privileges."
-            return Ganymede.createErrorDialog(ts.l("copyFieldTo.copy_error_sub"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("copyFieldTo.copy_error_sub"),
                                               ts.l("copyFieldTo.no_read", getName(), owner.getLabel()));
           }
       }
@@ -662,7 +663,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
       {
         // "Copy field error"
         // "Can''t copy to field {0} in object {1}, due to a lack of write privileges."
-        return Ganymede.createErrorDialog(ts.l("copyFieldTo.copy_error_sub"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("copyFieldTo.copy_error_sub"),
                                           ts.l("copyFieldTo.no_write",
                                                target.getName(), target.owner.getLabel()));
       }
@@ -738,7 +740,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
             if (size() > getMaxArraySize())
               {
                 // "Field {0} in object {1} contains more elements ({2,number,#}) than is allowed ({3,number,#})."
-                return Ganymede.createErrorDialog(ts.l("validateContents.too_big_array",
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  null,
+                                                  ts.l("validateContents.too_big_array",
                                                        this.getName(),
                                                        owner.getLabel(),
                                                        Integer.valueOf(size()),
@@ -1693,7 +1697,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (value == null)
       {
-        return Ganymede.createErrorDialog("Field Error",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "Field Error",
                                           "Null value passed to " + owner.getLabel() + ":" +
                                           getName() + ".setElement()");
       }
@@ -1748,7 +1753,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     if (value == null)
       {
         // "Null value passed to setElement() on field {0} in object {1}."
-        return Ganymede.createErrorDialog(ts.l("setElementLocal.bad_null", getName(), owner.getLabel()));
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          null,
+                                          ts.l("setElementLocal.bad_null", getName(), owner.getLabel()));
       }
 
     if ((index < 0) || (index > getVectVal().size()))
@@ -2099,7 +2106,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     if (size() >= getMaxArraySize())
       {
         // "addElement() Error: Field {0} in object {1} is already at or beyond its maximum allowed size."
-        return Ganymede.createErrorDialog(ts.l("addElement.overflow", getName(), owner.getLabel()));
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          null,
+                                          ts.l("addElement.overflow", getName(), owner.getLabel()));
       }
 
     eObj = (DBEditObject) owner;
@@ -2389,7 +2398,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     if (submittedValues == null || submittedValues.size() == 0)
       {
         // "Null or empty Vector passed to addElements() on field {0} in object {1}."
-        return Ganymede.createErrorDialog(ts.l("addElements.bad_null", getName(), owner.getLabel()));
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          null,
+                                          ts.l("addElements.bad_null", getName(), owner.getLabel()));
       }
 
     if (submittedValues == getVectVal())
@@ -2418,7 +2429,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
       {
         // "addElements() Error: Field {0} in object {1} can''t take {2,number,#} new values..\n
         // It already has {3,number,#} elements, and may not have more than {4,number,#} total."
-        return Ganymede.createErrorDialog(ts.l("addElements.overflow",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          null,
+                                          ts.l("addElements.overflow",
                                                getName(),
                                                owner.getLabel(),
                                                Integer.valueOf(submittedValues.size()),
@@ -2483,7 +2496,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     if (approvedValues.size() == 0)
       {
         // "addElements() Error"
-        return Ganymede.createErrorDialog(ts.l("addElements.unapproved_title"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("addElements.unapproved_title"),
                                           errorBuf.toString());
       }
 
@@ -2849,7 +2863,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     if (value == null)
       {
         // "deleteElement() Error: Can''t delete null value from field {0} in object {1}."
-        return Ganymede.createErrorDialog(ts.l("deleteElement.bad_null", getName(), owner.getLabel()));
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          null,
+                                          ts.l("deleteElement.bad_null", getName(), owner.getLabel()));
       }
 
     int index = indexOfValue(value);
@@ -2857,7 +2873,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     if (index == -1)
       {
         // "deleteElement() Error: Value ''{0}'' not present to be deleted from field {1} in object {2}."
-        return Ganymede.createErrorDialog(ts.l("deleteElement.missing_element", value, getName(), owner.getLabel()));
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          null,
+                                          ts.l("deleteElement.missing_element", value, getName(), owner.getLabel()));
       }
 
     return deleteElement(index, local, noWizards);      // *sync* DBNameSpace possible
@@ -3013,7 +3031,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     if (valuesToDelete == null || valuesToDelete.size() == 0)
       {
         // "Null or empty Vector passed to deleteElements() on field {0} in object {1}."
-        return Ganymede.createErrorDialog(ts.l("deleteElements.bad_null", getName(), owner.getLabel()));
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          null,
+                                          ts.l("deleteElements.bad_null", getName(), owner.getLabel()));
       }
 
     // get access to our value vector.
@@ -3036,7 +3056,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     if (notPresent.size() != 0)
       {
         // "deleteElements() Error: Values ''{0}'' not present to be deleted from field {1} in object {2}."
-        return Ganymede.createErrorDialog(ts.l("deleteElements.missing_elements",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          null,
+                                          ts.l("deleteElements.missing_elements",
                                                VectorUtils.vectorString(notPresent),
                                                getName(), owner.getLabel()));
       }
@@ -3843,7 +3865,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
             //
             // You can choose a different value here, or you can try to edit or delete the "{2}" object to remove the conflict.
 
-            return Ganymede.createErrorDialog(ts.l("getConflictDialog.errorTitle", methodName),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("getConflictDialog.errorTitle", methodName),
                                               ts.l("getConflictDialog.persistentError",
                                                    conflictValue, conflictClassName, conflictLabel, conflictField.getName()));
           }
@@ -3861,7 +3884,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
             //
             // You can choose a different value here, or you can try to edit or delete the "{2}" object to remove the conflict.
 
-            return Ganymede.createErrorDialog(ts.l("getConflictDialog.errorTitle", methodName),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("getConflictDialog.errorTitle", methodName),
                                               ts.l("getConflictDialog.transactionError",
                                                    conflictValue, conflictClassName, conflictLabel, conflictField.getName()));
           }
@@ -3870,7 +3894,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
       {
         Ganymede.logError(ex);
 
-        return Ganymede.createErrorDialog(ts.l("getConflictDialog.errorTitle", methodName),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("getConflictDialog.errorTitle", methodName),
                                           ts.l("getConflictDialog.simpleError", conflictValue));
       }
   }
@@ -3884,7 +3909,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     // "Server: Error in {0}"
     // "This action could not be performed because "{0}" is already contained in field {1} in object {2}."
-    return Ganymede.createErrorDialog(ts.l("getDuplicateValueDialog.error_in_method_title", methodName),
+    return Ganymede.createErrorDialog(this.getGSession(),
+                                      ts.l("getDuplicateValueDialog.error_in_method_title", methodName),
                                       ts.l("getDuplicateValueDialog.error_body",
                                            String.valueOf(conflictValue), getName(), owner.getLabel()));
   }
@@ -3898,7 +3924,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   {
     // "Server: Error in {0}"
     // "This action could not be performed because "{0}" are already contained in field {1} in object {2}."
-    return Ganymede.createErrorDialog(ts.l("getDuplicateValueDialog.error_in_method_title", methodName),
+    return Ganymede.createErrorDialog(this.getGSession(),
+                                      ts.l("getDuplicateValueDialog.error_in_method_title", methodName),
                                       ts.l("getDuplicateValuesDialog.error_body",
                                            conflictValues, getName(), owner.getLabel()));
   }

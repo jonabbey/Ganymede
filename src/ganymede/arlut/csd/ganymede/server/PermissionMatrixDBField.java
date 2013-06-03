@@ -158,7 +158,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       }
 
     // "Don''t have permission to clear this permission matrix field\n{0}"
-    return Ganymede.createErrorDialog(ts.l("setUndefined.error", getName()));
+    return Ganymede.createErrorDialog(this.getGSession(),
+                                      null,
+                                      ts.l("setUndefined.error", getName()));
   }
 
   /**
@@ -528,7 +530,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   @Override public ReturnVal verifyNewValue(Object v)
   {
-    return Ganymede.createErrorDialog("Permission Matrix Field Error",
+    return Ganymede.createErrorDialog(this.getGSession(),
+                                      "Permission Matrix Field Error",
                                       "setValue() not allowed on PermissionMatrixDBField.");
   }
 
@@ -605,7 +608,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
           {
             // "Copy Field Error"
             // "Can''t copy field {0}, no read privileges."
-            return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("copyFieldTo.error_subj"),
                                               ts.l("copyFieldTo.no_read", getName()));
           }
       }
@@ -614,7 +618,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       {
         // "Copy Field Error"
         // "Can''t copy field {0}, no write privileges."
-        return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("copyFieldTo.error_subj"),
                                           ts.l("copyFieldTo.no_write", getName()));
       }
 
@@ -622,7 +627,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       {
         // "Copy Field Error"
         // "Can''t copy field {0}, target is not a PermissionMatrixDBField"
-        return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("copyFieldTo.error_subj"),
                                           ts.l("copyFieldTo.bad_param", getName()));
       }
 
@@ -679,7 +685,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
   {
     // "Server: Error in PermissionMatrixDBField.setValue()"
     // "Error.. can''t call setValue() on a PermissionMatrixDBField."
-    return Ganymede.createErrorDialog(ts.l("setValue.error_subj"),
+    return Ganymede.createErrorDialog(this.getGSession(),
+                                      ts.l("setValue.error_subj"),
                                       ts.l("setValue.error_text"));
   }
 
@@ -1107,7 +1114,8 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
       {
         // "Permissions Failure"
         // "You don''t have permissions to reset {0}''s permission matrix."
-        return Ganymede.createErrorDialog(ts.l("resetPerms.error_subj"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("resetPerms.error_subj"),
                                           ts.l("resetPerms.error_text", toString()));
       }
   }
@@ -1132,7 +1140,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     catch (RemoteException ex)
       {
         // "Couldn''t process setPerm(): {0}"
-        return Ganymede.createErrorDialog(ts.l("setPerm.error_text", ex.getMessage()));
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          null,
+                                          ts.l("setPerm.error_text", ex.getMessage()));
       }
   }
 
@@ -1169,7 +1179,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
             String fieldName = field.getName();
 
             // "You can''t set privileges for base {0}, field {1}, that you yourself do not have."
-            return Ganymede.createErrorDialog(ts.l("setPerm.delegation_error", baseName, fieldName));
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              null,
+                                              ts.l("setPerm.delegation_error", baseName, fieldName));
           }
       }
     else
@@ -1209,7 +1221,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     catch (RemoteException ex)
       {
         // "Couldn''t process setPerm(): {0}"
-        return Ganymede.createErrorDialog(ts.l("setPerm.error_text", ex.getMessage()));
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          null,
+                                          ts.l("setPerm.error_text", ex.getMessage()));
       }
   }
 
@@ -1238,7 +1252,9 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
             String baseName = base.getName();
 
             // "You can''t set privileges for base {0} that you yourself do not have."
-            return Ganymede.createErrorDialog(ts.l("setPerm.base_delegation_error", baseName));
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              null,
+                                              ts.l("setPerm.base_delegation_error", baseName));
           }
       }
     else
