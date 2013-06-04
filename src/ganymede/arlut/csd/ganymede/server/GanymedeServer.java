@@ -1105,12 +1105,12 @@ public final class GanymedeServer implements Server {
       {
         if (GanymedeServer.shutdownAdmin == null)
           {
-            // "Ganymede server going down for ''{0}''."
+            // "Ganymede server going down:\n{0}"
             shuttingDownNowMsg = ts.l("shutdown.console_notify_reason", GanymedeServer.shutdownReason);
           }
         else
           {
-            // "Ganymede admin {1} on host {2} shutting down server for ''{0}''."
+            // "Ganymede admin {1} on host {2} shutting down server:\n\n{0}"
             shuttingDownNowMsg = ts.l("shutdown.console_notify_reason_admin",
                                       GanymedeServer.shutdownReason,
                                       shutdownAdmin.getAdminName(),
