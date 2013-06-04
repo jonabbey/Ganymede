@@ -1639,20 +1639,18 @@ public final class Ganymede {
             if (hostname != null && !hostname.trim().equals(""))
               {
                 // "{0} on {1}: "
-                msgText = StringUtils.insertPrefixPerLine(msgText,
-                                                          ts.l("createInfoDialog.user_host_prefix",
-                                                               username,
-                                                               hostname));
+                System.err.print(StringUtils.insertPrefixPerLine(msgText,
+                                                                 ts.l("createInfoDialog.user_host_prefix",
+                                                                      username,
+                                                                      hostname)));
               }
             else
               {
                 // "{0}: "
-                msgText = StringUtils.insertPrefixPerLine(msgText,
-                                                          ts.l("createInfoDialog.user_prefix",
-                                                               username));
+                System.err.print(StringUtils.insertPrefixPerLine(msgText,
+                                                                 ts.l("createInfoDialog.user_prefix",
+                                                                      username)));
               }
-
-            System.err.println(msgText);
           }
       }
 
@@ -1720,20 +1718,18 @@ public final class Ganymede {
             if (hostname != null && !hostname.trim().equals(""))
               {
                 // "{0} on {1}: "
-                msgText = StringUtils.insertPrefixPerLine(msgText,
-                                                          ts.l("createErrorDialog.user_host_prefix",
-                                                               username,
-                                                               hostname));
+                System.err.print(StringUtils.insertPrefixPerLine(msgText,
+                                                                 ts.l("createErrorDialog.user_host_prefix",
+                                                                      username,
+                                                                      hostname)));
               }
             else
               {
                 // "{0}: "
-                msgText = StringUtils.insertPrefixPerLine(msgText,
-                                                          ts.l("createErrorDialog.user_prefix",
-                                                               username));
+                System.err.print(StringUtils.insertPrefixPerLine(msgText,
+                                                                 ts.l("createErrorDialog.user_prefix",
+                                                                      username)));
               }
-
-            System.err.println(msgText);
           }
       }
 
