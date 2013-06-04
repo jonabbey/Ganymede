@@ -1627,7 +1627,7 @@ public final class Ganymede {
       {
         if (session == null)
           {
-            // "Ganymede.createInfoDialog(): dialog says {0}"
+            // "[INFO]: {0}"
             System.err.println(ts.l("createInfoDialog.log_info", body));
           }
         else
@@ -1705,7 +1705,7 @@ public final class Ganymede {
       {
         if (session == null)
           {
-            // "Ganymede.createErrorDialog(): dialog says {0}"
+            // "[ERR]: {0}"
             System.err.println(ts.l("createErrorDialog.log_error", body));
           }
         else
