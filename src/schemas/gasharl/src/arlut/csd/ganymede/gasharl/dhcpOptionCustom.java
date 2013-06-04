@@ -478,19 +478,25 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
 
     if (builtIn && !builtInOptions.contains(name))
       {
-        return Ganymede.createErrorDialog("Option name " + name + " is not a supported built-in keyword in our DHCP server.");
+        return Ganymede.createErrorDialog(object.getGSession(),
+                                          null,
+                                          "Option name " + name + " is not a supported built-in keyword in our DHCP server.");
       }
 
     boolean custom = object.isSet(dhcpOptionSchema.CUSTOMOPTION);
 
     if (!custom && !supportedOptions.contains(name) && !builtInOptions.contains(name))
       {
-        return Ganymede.createErrorDialog("Option name " + name + " is not a recognized standard option supported by our DHCP server.  You will need to set this as a custom option with a numeric custom option code.");
+        return Ganymede.createErrorDialog(object.getGSession(),
+                                          null,
+                                          "Option name " + name + " is not a recognized standard option supported by our DHCP server.  You will need to set this as a custom option with a numeric custom option code.");
       }
 
     if (custom && (supportedOptions.contains(name) || builtInOptions.contains(name)))
       {
-        return Ganymede.createErrorDialog("Option name " + name + " is a standard option supported by our DHCP server.  It cannot be created as a custom valued option type.");
+        return Ganymede.createErrorDialog(object.getGSession(),
+                                          null,
+                                          "Option name " + name + " is a standard option supported by our DHCP server.  It cannot be created as a custom valued option type.");
       }
 
     return null;
@@ -626,7 +632,9 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
 
                 if (name != null && !builtInOptions.contains(name))
                   {
-                    return Ganymede.createErrorDialog("Option name " + name + " not supported as a 'built-in' option type in dhcpd server.");
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      null,
+                                                      "Option name " + name + " not supported as a 'built-in' option type in dhcpd server.");
                   }
 
                 innerRetVal = parent.setFieldValueLocal(dhcpOptionSchema.CUSTOMOPTION, Boolean.FALSE);
@@ -702,7 +710,9 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
             valueStr.startsWith("nwip.") ||
             valueStr.startsWith("fqdn."))
           {
-            return Ganymede.createErrorDialog("We do not currently support the use of the built-in option spaces.");
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              null,
+                                              "We do not currently support the use of the built-in option spaces.");
           }
       }
 
@@ -746,7 +756,8 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
       {
         if (!flagRegex.matcher(value).matches())
           {
-            return Ganymede.createErrorDialog("Unacceptable value",
+            return Ganymede.createErrorDialog(object.getGSession(),
+                                              "Unacceptable value",
                                               "The only acceptable values for this field are 'true' and 'false'.");
           }
         else
@@ -777,7 +788,8 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
           }
         catch (NumberFormatException ex)
           {
-            return Ganymede.createErrorDialog("Unacceptable value",
+            return Ganymede.createErrorDialog(object.getGSession(),
+                                              "Unacceptable value",
                                               "This dhcp option requires a numeric parameter.");
           }
 
@@ -788,7 +800,8 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
             (currentType.equals("uint32") && (longValue < 0 || longValue > maxUInt)) ||
             (currentType.equals("int32") && (longValue < Integer.MIN_VALUE || longValue > Integer.MAX_VALUE)))
           {
-            return Ganymede.createErrorDialog("Unacceptable value",
+            return Ganymede.createErrorDialog(object.getGSession(),
+                                              "Unacceptable value",
                                               "This value is out of range for this dhcp option.");
           }
 
@@ -882,7 +895,8 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
 
         if (hostname == null)
           {
-            return Ganymede.createErrorDialog("Unacceptable value",
+            return Ganymede.createErrorDialog(object.getGSession(),
+                                              "Unacceptable value",
                                               "This dhcp option type requires an IP address");
           }
         else
@@ -906,18 +920,21 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
               }
             catch (NotLoggedInException exa)
               {
-                return Ganymede.createErrorDialog("Internal error",
+                return Ganymede.createErrorDialog(object.getGSession(),
+                                                  "Internal error",
                                                   exa.getMessage());
               }
             catch (GanyParseException exb)
               {
-                return Ganymede.createErrorDialog("Internal error",
+                return Ganymede.createErrorDialog(object.getGSession(),
+                                                  "Internal error",
                                                   exb.getMessage());
               }
 
             if (results.size() != 1)
               {
-                return Ganymede.createErrorDialog("Unacceptable error",
+                return Ganymede.createErrorDialog(object.getGSession(),
+                                                  "Unacceptable error",
                                                   "This dhcp option type requires an IP address.\n\n" +
                                                   "Couldn't recognize hostname " + ipOrHost);
               }
@@ -935,7 +952,8 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
               }
             catch (NullPointerException ex2)
               {
-                return Ganymede.createErrorDialog("Internal error",
+                return Ganymede.createErrorDialog(object.getGSession(),
+                                                  "Internal error",
                                                   ex2.getMessage());
               }
           }

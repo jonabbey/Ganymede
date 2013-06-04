@@ -394,7 +394,8 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
                   }
                 catch (GanyPermissionsException ex)
                   {
-                    tmpVal = Ganymede.createErrorDialog("permissions",
+                    tmpVal = Ganymede.createErrorDialog(session.getGSession(),
+                                                        "permissions",
                                                         "permissions failure creating embedded option " + ex);
                   }
 
@@ -571,7 +572,9 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
                   }
                 catch (GanyPermissionsException ex)
                   {
-                    return Ganymede.createErrorDialog("permissions", "permissions error deleting embedded object" + ex);
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      "permissions",
+                                                      "permissions error deleting embedded object" + ex);
                   }
               }
             finally
@@ -617,7 +620,9 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
                   }
                 catch (GanyPermissionsException ex)
                   {
-                    return Ganymede.createErrorDialog("permissions", "permissions error deleting embedded object" + ex);
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      "permissions",
+                                                      "permissions error deleting embedded object" + ex);
                   }
               }
             finally

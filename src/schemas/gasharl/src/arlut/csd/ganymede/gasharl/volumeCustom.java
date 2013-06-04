@@ -476,7 +476,8 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 
             if (entries.size() == 0)
               {
-                return Ganymede.createErrorDialog("Logic error in server",
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  "Logic error in server",
                                                   "volumeCustom.wizardHook(): can't delete element out of empty field");
               }
 
@@ -488,12 +489,14 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
               }
             catch (ClassCastException ex)
               {
-                return Ganymede.createErrorDialog("Logic error in server",
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  "Logic error in server",
                                                   "volumeCustom.wizardHook(): unexpected element in entries field");
               }
             catch (ArrayIndexOutOfBoundsException ex)
               {
-                return Ganymede.createErrorDialog("Logic error in server",
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  "Logic error in server",
                                                   "volumeCustom.wizardHook(): deleteElement index out of range in entries field");
               }
 
@@ -505,7 +508,8 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 
             if (mapName != null && mapName.equals("auto.home.default"))
               {
-                return Ganymede.createErrorDialog("Cannot remove entries from auto.home.default",
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  "Cannot remove entries from auto.home.default",
                                                   "Error, cannot remove entries from auto.home.default. " +
                                                   "All UNIX users in Ganymede must have an entry in auto.home.default " +
                                                   "to represent the location of their home directory.");
@@ -528,7 +532,8 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 
                 if (eObj == null)
                   {
-                    return Ganymede.createErrorDialog("Couldn't remove map entry",
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      "Couldn't remove map entry",
                                                       "Couldn't remove map entry for " +
                                                       getDBSession().getObjectLabel(user) +
                                                       ", permissions denied to edit the user.");
@@ -538,7 +543,8 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
 
                 if (invf == null)
                   {
-                    return Ganymede.createErrorDialog("Couldn't remove map entry",
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      "Couldn't remove map entry",
                                                       "Couldn't remove map entry for " +
                                                       getDBSession().getObjectLabel(user) +
                                                       ", couldn't access the volumes field in the user record.");
@@ -558,7 +564,8 @@ public class volumeCustom extends DBEditObject implements SchemaConstants, volum
                   }
                 catch (GanyPermissionsException ex)
                   {
-                    retVal  = Ganymede.createErrorDialog("volumeCustom: Error",
+                    retVal  = Ganymede.createErrorDialog(this.getGSession(),
+                                                         "volumeCustom: Error",
                                                          "Permissions error unlinking user " + getDBSession().getObjectLabel(user) +
                                                          " from volume.");
                   }

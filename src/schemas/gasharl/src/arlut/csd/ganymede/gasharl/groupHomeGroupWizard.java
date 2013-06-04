@@ -1,19 +1,21 @@
 /*
 
-  groupHomeGroupWizard.java
+   groupHomeGroupWizard.java
 
-  A wizard to allow deletion of a user's home group from the group edit window.
+   A wizard to allow deletion of a user's home group from the group edit window.
 
-  Created: 8 April 1998
-  Version: $Revision$ %D%
-  Module by: Mike Mulvaney
+   Created: 8 April 1998
+
+   Module by: Mike Mulvaney
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -96,8 +98,8 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
    */
 
   public groupHomeGroupWizard(GanymedeSession session,
-			      groupCustom groupObject, 
-			      Invid userInvid) throws RemoteException
+                              groupCustom groupObject,
+                              Invid userInvid) throws RemoteException
   {
     super(session);
 
@@ -119,56 +121,57 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
   public ReturnVal cancel()
   {
     return fail("User removal Canceled",
-		"User removal Canceled",
-		"OK",
-		null,
-		"ok.gif");
+                "User removal Canceled",
+                "OK",
+                null,
+                "ok.gif");
   }
 
   public ReturnVal processDialog0() throws NotLoggedInException
   {
     print("Starting new dialog");
-    
+
     user = (userCustom) (session.edit_db_object(userInvid).getObject());
 
     if (user == null)
       {
-	return Ganymede.createErrorDialog("groupHomeGroupWizard error",
-					  "Could not get the user.");
+        return Ganymede.createErrorDialog(this.session,
+                                          "groupHomeGroupWizard error",
+                                          "Could not get the user.");
       }
 
     if (debug)
       {
-	System.err.println("groupHomeGroupWizard: creating start dialog.");
+        System.err.println("groupHomeGroupWizard: creating start dialog.");
       }
 
     int size = 0;
 
     try
       {
-	size = user.getField(userSchema.GROUPLIST).size();
+        size = user.getField(userSchema.GROUPLIST).size();
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("could not get the size. " + rx);
+        throw new RuntimeException("could not get the size. " + rx);
       }
 
     // If size is less than one, then there won't be any other groups to change to.
 
-    if (size > 1)  
+    if (size > 1)
       {
-	return continueOn("Home Group Change", 
-			  "In order to remove a user's home group, you must choose another home group for that user.",
-			  "Next", "Cancel", "question.gif");
-	
+        return continueOn("Home Group Change",
+                          "In order to remove a user's home group, you must choose another home group for that user.",
+                          "Next", "Cancel", "question.gif");
+
       }
     else
       {
-	// no groups to choose from
+        // no groups to choose from
 
-	return fail("Home Group Change",
-		    "Each user must have a home group.  For that user, this is it.  So don't.",
-		    "Sorry", null, "ok.gif");
+        return fail("Home Group Change",
+                    "Each user must have a home group.  For that user, this is it.  So don't.",
+                    "Sorry", null, "ok.gif");
       }
   }
 
@@ -183,42 +186,42 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
 
     if (debug)
       {
-	System.err.println("groupHomeGroupWizard.respond(): state == 1");
+        System.err.println("groupHomeGroupWizard.respond(): state == 1");
       }
-    
+
     retVal = continueOn("Change Home Group", "",
-			"OK", "Cancel", "question.gif");
-    
+                        "OK", "Cancel", "question.gif");
+
     try
       {
-	print("Getting values.");
-	
-	QueryResult values = ((invid_field)user.getField(userSchema.GROUPLIST)).encodedValues();
-	
-	print("Adding choices to dialog.");
-	
-	Vector labels = values.getLabels();
-	String currentGroup = groupObject.getLabel();
-	
-	for (int i = 0; i < labels.size(); i++)
-	  {
-	    if (currentGroup.equals((String)labels.elementAt(i)))
-	      {
-		labels.removeElementAt(i);
-		break;
-	      }
-	  }
-	
-	retVal.getDialog().addChoice("Home Group:" , labels, null);
+        print("Getting values.");
+
+        QueryResult values = ((invid_field)user.getField(userSchema.GROUPLIST)).encodedValues();
+
+        print("Adding choices to dialog.");
+
+        Vector labels = values.getLabels();
+        String currentGroup = groupObject.getLabel();
+
+        for (int i = 0; i < labels.size(); i++)
+          {
+            if (currentGroup.equals((String)labels.elementAt(i)))
+              {
+                labels.removeElementAt(i);
+                break;
+              }
+          }
+
+        retVal.getDialog().addChoice("Home Group:" , labels, null);
       }
     catch (RemoteException rx)
       {
-	throw new RuntimeException("Could not get the groups.");
+        throw new RuntimeException("Could not get the groups.");
       }
-    
+
     if (debug)
       {
-	System.err.println("groupHomeGroupWizard.respond(): state == 1, returning dialog");
+        System.err.println("groupHomeGroupWizard.respond(): state == 1, returning dialog");
       }
 
     return retVal;
@@ -235,80 +238,82 @@ public class groupHomeGroupWizard extends GanymediatorWizard implements groupSch
 
     if (debug)
       {
-	System.err.println("groupHomeGroupWizard.respond: state == 2");
-	
-	Enumeration en = getKeys();
-	int i = 0;
+        System.err.println("groupHomeGroupWizard.respond: state == 2");
 
-	while (en.hasMoreElements())
-	  {
-	    Object key = en.nextElement();
-	    Object value = getParam(key);
-	    System.err.println("Item: (" + i++ + ") " + key + ":" + value);
-	  } 
+        Enumeration en = getKeys();
+        int i = 0;
+
+        while (en.hasMoreElements())
+          {
+            Object key = en.nextElement();
+            Object value = getParam(key);
+            System.err.println("Item: (" + i++ + ") " + key + ":" + value);
+          }
       }
-	
+
     String gString = (String) getParam("Home Group:");
 
     // Now we have to do a query to find which group has this name.
-    
+
     QueryDataNode node = new QueryDataNode(QueryDataNode.EQUALS, gString);
     Query query = new Query(groupObject.getTypeID(), node);
     QueryResult qr = session.query(query);
-    
+
     if (qr.size() == 1)
       {
-	// this is what we want.
-	newGroup = qr.getInvid(0);
+        // this is what we want.
+        newGroup = qr.getInvid(0);
 
-	userHomeGroupField = user.getField(userSchema.HOMEGROUP);
+        userHomeGroupField = user.getField(userSchema.HOMEGROUP);
 
-	try
-	  {
-	    if (debug)
-	      {
-		print("Setting user home group field to " + newGroup);
-	      }
+        try
+          {
+            if (debug)
+              {
+                print("Setting user home group field to " + newGroup);
+              }
 
-	    retVal = userHomeGroupField.setValue(newGroup);
-	  }
-	catch (RemoteException rx)
-	  {
-	    throw new RuntimeException("Could not set the value: " + rx);
-	  }
-	    
-	if ((retVal == null) || (retVal.didSucceed()))
-	  {
-	    ReturnVal ret = success("Home group changed",
-				    "User's home group successfully changed.",
-				    "OK", null, "ok.gif");
+            retVal = userHomeGroupField.setValue(newGroup);
+          }
+        catch (RemoteException rx)
+          {
+            throw new RuntimeException("Could not set the value: " + rx);
+          }
 
-	    if (debug)
-	      {
-		print("Before union: setValue return: " + retVal.dumpRescanInfo());
-		print("Before union: success: " + ret.dumpRescanInfo());
-	      }
+        if ((retVal == null) || (retVal.didSucceed()))
+          {
+            ReturnVal ret = success("Home group changed",
+                                    "User's home group successfully changed.",
+                                    "OK", null, "ok.gif");
 
-	    ReturnVal rv = ret.unionRescan(retVal);
+            if (debug)
+              {
+                print("Before union: setValue return: " + retVal.dumpRescanInfo());
+                print("Before union: success: " + ret.dumpRescanInfo());
+              }
 
-	    if (debug)
-	      {
-		print(rv.dumpRescanInfo());
-	      }
+            ReturnVal rv = ret.unionRescan(retVal);
 
-	    return(rv);
-	  }
-	else if (retVal.getDialog() == null)
-	  {
-	    // we failed :(
-	    retVal = Ganymede.createErrorDialog("groupHomeGroupWizard: error",
-						"Ran into trouble during user interaction.");
-	  }
+            if (debug)
+              {
+                print(rv.dumpRescanInfo());
+              }
+
+            return(rv);
+          }
+        else if (retVal.getDialog() == null)
+          {
+            // we failed :(
+            retVal = Ganymede.createErrorDialog(this.session,
+                                                "groupHomeGroupWizard: error",
+                                                "Ran into trouble during user interaction.");
+          }
       }
     else // could not find the group
       {
-	retVal = Ganymede.createErrorDialog("groupHomeGroupWizard: error",
-					    "Could not find the group you wanted, Sorry.");
+        retVal = Ganymede.createErrorDialog(this.session,
+                                            "groupHomeGroupWizard: error",
+                                            "Could not find the group you wanted, Sorry.");
       }
 
     return retVal;

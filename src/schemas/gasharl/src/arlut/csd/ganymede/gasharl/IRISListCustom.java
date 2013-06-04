@@ -260,7 +260,9 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
           {
             if (queryString.toLowerCase().contains("update"))
               {
-                return Ganymede.createErrorDialog("Update statements not allowed in Query field.");
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  null,
+                                                  "Update statements not allowed in Query field.");
               }
           }
       }
@@ -331,7 +333,9 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
                   }
                 catch (java.sql.SQLException ex)
                   {
-                    return Ganymede.createErrorDialog(ex.getMessage());
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      null,
+                                                      ex.getMessage());
                   }
               }
           }
@@ -449,7 +453,9 @@ public class IRISListCustom extends DBEditObject implements SchemaConstants, IRI
       }
     catch (java.sql.SQLException ex)
       {
-        return Ganymede.createErrorDialog(ex.getMessage());
+        return Ganymede.createErrorDialog(listObject.getGSession(),
+                                          null,
+                                          ex.getMessage());
       }
 
     List<Invid> userInvids = new ArrayList<Invid>();

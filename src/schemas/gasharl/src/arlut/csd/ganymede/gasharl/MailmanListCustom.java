@@ -385,7 +385,8 @@ public class MailmanListCustom extends DBEditObject implements SchemaConstants, 
               }
             else
               {
-                return Ganymede.createErrorDialog("MailmanListCustom: Error",
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  "MailmanListCustom: Error",
                                                   "Ran into a problem during alias creation, and rollback failed");
               }
           }
