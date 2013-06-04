@@ -1634,11 +1634,11 @@ public final class Ganymede {
           {
             String username = session.getIdentity();
             String hostname = session.getClientHostName();
-            String msgText = ts.l("createInfoDialog.log_info", body); // "Ganymede.createInfoDialog(): dialog says {0}"
+            String msgText = body;
 
             if (hostname != null && !hostname.trim().equals(""))
               {
-                // "{0} on {1}: "
+                // "{0} on {1} [INFO]: "
                 System.err.print(StringUtils.insertPrefixPerLine(msgText,
                                                                  ts.l("createInfoDialog.user_host_prefix",
                                                                       username,
@@ -1646,7 +1646,7 @@ public final class Ganymede {
               }
             else
               {
-                // "{0}: "
+                // "{0} [INFO]: "
                 System.err.print(StringUtils.insertPrefixPerLine(msgText,
                                                                  ts.l("createInfoDialog.user_prefix",
                                                                       username)));
@@ -1713,11 +1713,11 @@ public final class Ganymede {
           {
             String username = session.getIdentity();
             String hostname = session.getClientHostName();
-            String msgText = ts.l("createErrorDialog.log_error", body); // "Ganymede.createErrorDialog(): dialog says {0}"
+            String msgText = body;
 
             if (hostname != null && !hostname.trim().equals(""))
               {
-                // "{0} on {1}: "
+                // "{0} on {1} [ERR]: "
                 System.err.print(StringUtils.insertPrefixPerLine(msgText,
                                                                  ts.l("createErrorDialog.user_host_prefix",
                                                                       username,
@@ -1725,7 +1725,7 @@ public final class Ganymede {
               }
             else
               {
-                // "{0}: "
+                // "{0} [ERR]: "
                 System.err.print(StringUtils.insertPrefixPerLine(msgText,
                                                                  ts.l("createErrorDialog.user_prefix",
                                                                       username)));
