@@ -809,7 +809,14 @@ public final class SyncRunner implements Runnable {
                 xmlOut.indentIn();
                 xmlOut.endElementIndent("transaction");
                 xmlOut.skipLine();
-                xmlOut.close();         // close() automatically flushes before closing
+                xmlOut.flush();
+
+                if (xmlOut.getFileOutputStream() != null)
+                  {
+                    xmlOut.getFileOutputStream().getFD().sync();
+                  }
+
+                xmlOut.close();
                 xmlOut = null;
 
                 needBuild.set(true);
@@ -910,6 +917,7 @@ public final class SyncRunner implements Runnable {
                                                this,
                                                true); // include oid's in the object to act as remote foreign keys
 
+    xmlOut.setFileOutputStream(outStream);
     xmlOut.setDumpPasswords(true);
 
     xmlOut.startElement("transaction");
@@ -1612,9 +1620,10 @@ public final class SyncRunner implements Runnable {
 
     ReturnVal retVal = session.getDataXML(this.name, true, true);
     FileTransmitter transmitter = retVal.getFileTransmitter();
+    FileOutputStream fos = new FileOutputStream(this.fullStateFile);
     BufferedOutputStream out = null;
 
-    out = new BufferedOutputStream(new FileOutputStream(this.fullStateFile));
+    out = new BufferedOutputStream(fos);
 
     try
       {
@@ -1628,6 +1637,8 @@ public final class SyncRunner implements Runnable {
       }
     finally
       {
+        out.flush();
+        fos.getFD().sync();
         out.close();
       }
   }
