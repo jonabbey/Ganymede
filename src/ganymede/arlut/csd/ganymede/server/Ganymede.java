@@ -1637,7 +1637,7 @@ public final class Ganymede {
 
             if (hostname != null && !hostname.trim().equals(""))
               {
-                // "{0} on {1} [INFO]: "
+                // "[INFO] {0} on {1}: "
                 System.err.print(StringUtils.insertPrefixPerLine(body,
                                                                  ts.l("createInfoDialog.user_host_prefix",
                                                                       username,
@@ -1645,7 +1645,7 @@ public final class Ganymede {
               }
             else
               {
-                // "{0} [INFO]: "
+                // "[INFO] {0}: "
                 System.err.print(StringUtils.insertPrefixPerLine(body,
                                                                  ts.l("createInfoDialog.user_prefix",
                                                                       username)));
@@ -1715,7 +1715,7 @@ public final class Ganymede {
 
             if (hostname != null && !hostname.trim().equals(""))
               {
-                // "{0} on {1} [ERR]: "
+                // "[ERR] {0} on {1}: "
                 System.err.print(StringUtils.insertPrefixPerLine(body,
                                                                  ts.l("createErrorDialog.user_host_prefix",
                                                                       username,
@@ -1723,7 +1723,7 @@ public final class Ganymede {
               }
             else
               {
-                // "{0} [ERR]: "
+                // "[ERR] {0}: "
                 System.err.print(StringUtils.insertPrefixPerLine(body,
                                                                  ts.l("createErrorDialog.user_prefix",
                                                                       username)));
