@@ -1243,7 +1243,7 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
    * Handle notification from popupmenus and from key board navigation
    * actions
    *
-   * @param e The event we're receiving as an ActionListener 
+   * @param e The event we're receiving as an ActionListener
    */
 
   public void actionPerformed(ActionEvent e)
@@ -1822,7 +1822,8 @@ public class treeControl extends JPanel implements AdjustmentListener, ActionLis
   {
     if (vbar_visible)
       {
-        int adj = vbar.getBlockIncrement();
+        // Scroll three lines per mousewheel turn.
+        int adj = vbar.getUnitIncrement() * 3;
 
         int totalScrollAmount = e.getWheelRotation() * adj;
 
