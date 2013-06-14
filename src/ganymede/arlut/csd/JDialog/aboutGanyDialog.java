@@ -73,7 +73,6 @@ import javax.swing.event.HyperlinkEvent;
 import java.awt.Desktop;
 import java.io.IOException;
 
-import arlut.csd.JDataComponent.JMultiLineLabel;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.TranslationService;
 
@@ -104,7 +103,6 @@ public class aboutGanyDialog extends JDialog {
 
   // ---
 
-  private JMultiLineLabel creditsTextbox = null;
   private JScrollPane scrollpane = null;
   private GridBagLayout gbl = null;
   private GridBagConstraints gbc = null;

@@ -79,7 +79,6 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
-import arlut.csd.JDataComponent.JMultiLineLabel;
 import arlut.csd.JDataComponent.JcalendarField;
 import arlut.csd.JDataComponent.JpassField;
 import arlut.csd.JDataComponent.JpasswordField;
