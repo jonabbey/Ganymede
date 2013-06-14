@@ -65,7 +65,6 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-import arlut.csd.JDataComponent.JMultiLineLabel;
 import arlut.csd.JDataComponent.TimedKeySelectionManager;
 import arlut.csd.JDataComponent.listHandle;
 import arlut.csd.JDialog.StandardDialog;
@@ -147,7 +146,7 @@ public class createObjectDialog extends StandardDialog implements ActionListener
     gbc.ipady = 8;
 
     // "Choose the type of object\nyou wish to create"
-    JMultiLineLabel text = new JMultiLineLabel(ts.l("init.dialog_text"));
+    JLabel text = new JLabel(ts.l("init.dialog_text"));
     gbc.gridx = 1;
     gbc.gridwidth = 2;
     gbl.setConstraints(text, gbc);

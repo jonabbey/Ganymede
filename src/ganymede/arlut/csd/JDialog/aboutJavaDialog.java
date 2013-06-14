@@ -65,7 +65,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 
-import arlut.csd.JDataComponent.JMultiLineLabel;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.TranslationService;
 
@@ -121,7 +120,7 @@ public class aboutJavaDialog extends JDialog {
 
   // ---
 
-  private JMultiLineLabel textbox = null;
+  private JLabel textbox = null;
   private JScrollPane scrollpane = null;
   private GridBagLayout gbl = null;
   private GridBagConstraints gbc = null;
@@ -144,7 +143,9 @@ public class aboutJavaDialog extends JDialog {
                                                                      getClass()));
     JLabel pictureLabel = new JLabel(logo);
 
-    textbox = new JMultiLineLabel(true);
+    textbox = new JLabel();
+    String versionText = "<html>" + getVersionInfoString().replace("\n","<br>") + "</html>";
+    textbox.setText(versionText);
 
     JScrollPane scrollPane = new JScrollPane(textbox,
                                              JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -172,8 +173,6 @@ public class aboutJavaDialog extends JDialog {
     pane.add(scrollPane);
 
     this.setContentPane(pane);
-
-    textbox.setText(getVersionInfoString());
 
     pack();
 

@@ -171,7 +171,7 @@ public class StringDialog extends StandardDialog implements ActionListener, Wind
     dataPanel,
     buttonPanel;
 
-  JMultiLineLabel
+  JLabel
     textLabel;
 
   GridBagLayout
@@ -335,7 +335,9 @@ public class StringDialog extends StandardDialog implements ActionListener, Wind
 
     if (resource.getText() != null && !resource.getText().trim().equals(""))
       {
-        textLabel = new JMultiLineLabel(resource.getText());
+        String resourceText = resource.getText();
+        resourceText = "<html>" + resourceText.replace("\n", "<br>") + "</html>";
+        textLabel = new JLabel(resourceText);
 
         JScrollPane pane = new JScrollPane(textLabel,
                                            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -782,7 +784,7 @@ public class StringDialog extends StandardDialog implements ActionListener, Wind
 
   public void setWrapLength(int wrapLength)
   {
-    textLabel.setWrapLength(wrapLength);
+    //textLabel.setWrapLength(wrapLength);
   }
 
   public void setFont(Font font)
