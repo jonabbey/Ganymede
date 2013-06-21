@@ -3128,7 +3128,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
                 if (!ReturnVal.didSucceed(result))
                   {
-                    return result;
+                    return result; // random username collision?
                   }
 
                 result = ReturnVal.merge(result, passField.setPlainTextPass(RandomUtils.getRandomPassword(20)));
