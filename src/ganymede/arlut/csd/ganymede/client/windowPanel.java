@@ -54,6 +54,8 @@ import java.awt.Cursor;
 import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -90,6 +92,7 @@ import arlut.csd.ganymede.rmi.Session;
 import arlut.csd.ganymede.rmi.db_field;
 import arlut.csd.ganymede.rmi.db_object;
 import arlut.csd.ganymede.rmi.invid_field;
+
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -213,6 +216,8 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
     removeAllMI,
     toggleToolBarMI;
 
+  Image backGroundImg;
+
   /* -- */
 
   /**
@@ -223,6 +228,14 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
   public windowPanel(gclient gc, JMenu windowMenu)
   {
+    try {
+      backGroundImg = PackageResources.getImageResource(this, "ganymedepic.jpg", getClass());
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+
+
+
     setDesktopManager(new clientDesktopMgr());
 
     this.gc = gc;
@@ -264,6 +277,30 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
 
     setBackground(ClientColor.background);
   }
+
+
+  // A specialized layered pane to be used with JInternalFrames
+  // Shows a custom background image now - James July 2013
+  @Override protected void paintComponent(Graphics grphcs)
+  {
+    // Do not call super paint function, to remove the blue nimbus ray traced background.
+
+    // REF: http://www.java-forums.org/advanced-java/20761-loading-image-into-jdesktoppane-background.html
+    Graphics2D g2d = (Graphics2D)grphcs;
+
+    // Scale the image to fit the size of the Panel
+    double mw = backGroundImg.getWidth(null);
+    double mh = backGroundImg.getHeight(null);
+    double sw = getWidth() / mw;
+    double sh = getHeight() / mh;
+
+    // Scale up, draw image, then scale back to normal.
+    g2d.scale(sw, sw);
+    // Draw image here if you wish to have a different background.
+    //g2d.drawImage(backGroundImg, 0, 0, this);
+    g2d.scale(1/sw, 1/sw);
+  }
+
 
   /**
    * Get the parent gclient

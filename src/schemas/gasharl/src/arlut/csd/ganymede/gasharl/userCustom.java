@@ -492,12 +492,34 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
         return null;
       }
 
+
+    // james test debug TODO TEST
+    //return Ganymede.createErrorDialog("Test popup title....debug", "TEST DEBUG DIALOG ");
+
+
     ReturnVal retVal = renameEntries(this.getLabel());
 
     if (!ReturnVal.didSucceed(retVal))
       {
         return retVal;
       }
+
+    Invid category = (Invid) this.getFieldValueLocal(userSchema.CATEGORY);
+    DBObject categoryObj = lookupInvid(category, false);
+    // james look at invid function
+    if (categoryObj == null)
+      {
+        // The fieldRequired() method is run after preCommitHook(), so
+        // this could be null here.
+        //
+        // If null, we'll just return early and let DBEditSet call
+        // checkRequiredFields() on this later to report the error.
+
+        return null;
+      }
+
+    String categoryName = categoryObj.getLabel();
+
 
     // now check to make sure that the username/badge combination
     // doesn't conflict with something in IRIS' history.
@@ -524,22 +546,6 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
             needBadgeNameCheck = true;
           }
       }
-
-    Invid category = (Invid) this.getFieldValueLocal(userSchema.CATEGORY);
-    DBObject categoryObj = lookupInvid(category, false);
-
-    if (categoryObj == null)
-      {
-        // The fieldRequired() method is run after preCommitHook(), so
-        // this could be null here.
-        //
-        // If null, we'll just return early and let DBEditSet call
-        // checkRequiredFields() on this later to report the error.
-
-        return null;
-      }
-
-    String categoryName = categoryObj.getLabel();
 
     if (!categoryName.equals("normal"))
       {
@@ -603,6 +609,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     // Send out mail describing the external credentials for this
     // user, if such are defined
+
+    // TODO MAKE THIS A FUNCTION.
 
     if (isSet(userSchema.ALLOWEXTERNAL) && isDefined(userSchema.MAILUSER) && isDefined(userSchema.MAILPASSWORD2))
       {
@@ -707,7 +715,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
             objVect.add(this.getInvid());
 
-            // we want to sent to the user but not to the owners
+            // We want to send to the user but not to the owners.
 
             Ganymede.log.sendMail(null, titleString, messageString, DBLog.MailMode.USERS, objVect);
           }
@@ -1380,7 +1388,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
   @Override public boolean fieldRequired(DBObject object, short fieldid)
   {
     switch (fieldid)
-      {
+    {
       case userSchema.USERNAME:
       case userSchema.UID:
       case userSchema.LOGINSHELL:
@@ -1406,7 +1414,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
       case userSchema.EXCHANGESTORE:
         return StringUtils.stringEquals((String) object.getFieldValueLocal(EMAILACCOUNTTYPE), "Exchange");
-      }
+    }
 
     // Whether or not the Badge number field is required depends on
     // the user category.
@@ -3321,8 +3329,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         if (field.getID() == CATEGORY)
           {
-            if (gSession.isWizardActive() &&
-                gSession.getWizard() instanceof userCategoryWizard)
+            if (gSession.isWizardActive() && gSession.getWizard() instanceof userCategoryWizard)
               {
                 userCategoryWizard uw = (userCategoryWizard) gSession.getWizard();
 
@@ -3339,7 +3346,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
               {
                 if (param1 != null || !isDeleting())
                   {
-                    return new userCategoryWizard(getGSession(), this,
+                     return new userCategoryWizard(getGSession(), this,
                                                   (Invid) getFieldValueLocal(userSchema.CATEGORY),
                                                   (Invid) param1).respond(null);
                   }
