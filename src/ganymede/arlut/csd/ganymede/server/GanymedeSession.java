@@ -3613,8 +3613,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    * ArrayList if this GanymedeSession is configured for remote access
    * with exported objects.</p>
    *
-   * @param all if false, unexportObjects() will only unexport editing
-   * objects, leaving view-only objects exported.
+   * @param all If true, unexportObjects() will unexport all BObject
+   * and DBFields exported to this session.  If false
+   * unexportObjects() will only unexport editing objects, leaving
+   * view-only objects exported for further use by the client.
    */
 
   private void unexportObjects(boolean all)

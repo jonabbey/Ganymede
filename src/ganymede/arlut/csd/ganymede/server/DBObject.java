@@ -680,9 +680,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 
   /**
-   * <p>This method pulls the fields in this object from remote accessibility through
-   * RMI, possibly improving our security posture and reducing the memory loading
-   * on the RMI system.</p>
+   * <p>This method pulls the fields in this object from remote
+   * accessibility through RMI, possibly improving our security
+   * posture and reducing the memory loading on the RMI system.</p>
    */
 
   public final void unexportFields()
