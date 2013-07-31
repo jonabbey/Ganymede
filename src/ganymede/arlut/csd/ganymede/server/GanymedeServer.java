@@ -389,6 +389,12 @@ public final class GanymedeServer implements Server {
 
         return reportSuccessLogin(session);
       }
+    catch (Throwable ex)
+      {
+        Ganymede.logError(ex, ts.l("processLogin.failure"));
+
+        return reportFailedLogin(clientName);
+      }
     finally
       {
         if (!success)
@@ -708,8 +714,6 @@ public final class GanymedeServer implements Server {
 
     if (!ALLOW_MONITOR_CLIENT_USE)
       {
-        // don't let the monitor account login to the client
-
         if (personaObj.getInvid().equals(Invid.createInvid(SchemaConstants.PersonaBase,
                                                            SchemaConstants.PersonaMonitorObj)))
           {
