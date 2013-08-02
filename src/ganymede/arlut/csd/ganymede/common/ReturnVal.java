@@ -871,7 +871,7 @@ public final class ReturnVal implements java.io.Serializable {
           }
         else
           {
-            Vector vec;
+            Vector<Short> vec;
             Short fieldID = Short.valueOf(atom);
 
             if (original.containsKey(invid) && original.get(invid) != all)
@@ -880,13 +880,13 @@ public final class ReturnVal implements java.io.Serializable {
 
                 if (!vec.contains(fieldID))
                   {
-                    vec.addElement(fieldID);
+                    vec.add(fieldID);
                   }
               }
             else if (!original.containsKey(invid))
               {
                 vec = new Vector<Short>();
-                vec.addElement(fieldID);
+                vec.add(fieldID);
 
                 original.put(invid, vec);
               }
@@ -1489,7 +1489,7 @@ public final class ReturnVal implements java.io.Serializable {
     HashMap<Invid,Vector<Short>> rescanInfo = new HashMap<Invid,Vector<Short>>(1);
 
     Vector<Short> fields = new Vector<Short>(1);
-    fields.addElement(Short.valueOf(fieldId));
+    fields.add(Short.valueOf(fieldId));
 
     rescanInfo.put(invid, fields);
 
