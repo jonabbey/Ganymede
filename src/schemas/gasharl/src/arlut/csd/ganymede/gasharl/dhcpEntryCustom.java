@@ -256,7 +256,7 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
 
   private boolean ownedBySystem(DBObject object)
   {
-    return object.getParentInvid().getType() == (short) 263;
+    return object.getParentInvid().getType() == systemSchema.BASE;
   }
 
   private boolean ownedByDHCPGroup()
@@ -266,7 +266,7 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
 
   private boolean ownedByDHCPGroup(DBObject object)
   {
-    return object.getParentInvid().getType() == (short) 262;
+    return object.getParentInvid().getType() == dhcpGroupSchema.BASE;
   }
 
   private boolean ownedByDHCPNetwork()
@@ -276,7 +276,17 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
 
   private boolean ownedByDHCPNetwork(DBObject object)
   {
-    return object.getParentInvid().getType() == (short) 268;
+    return object.getParentInvid().getType() == dhcpNetworkSchema.BASE;
+  }
+
+  private boolean ownedByDHCPSubnet()
+  {
+    return this.ownedByDHCPSubnet(this);
+  }
+
+  private boolean ownedByDHCPSubnet(DBObject object)
+  {
+    return object.getParentInvid().getType() == dhcpSubnetSchema.BASE;
   }
 
   private Vector<Invid> getSiblingInvids()
@@ -299,9 +309,23 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
           {
             result = optionsVect;
           }
-        else if (getParentObj().isDefined(dhcpNetworkSchema.GUEST_OPTIONS))
+
+        if (result == null)
           {
-            Vector<Invid> guestOptionsVect = (Vector<Invid>) getParentObj().getFieldValuesLocal(dhcpNetworkSchema.GUEST_OPTIONS);
+            throw new RuntimeException("couldn't find our own invid in parent dhcp network fields.");
+          }
+      }
+    else if (ownedByDHCPSubnet())
+      {
+        Vector<Invid> optionsVect = (Vector<Invid>) getParentObj().getFieldValuesLocal(dhcpSubnetSchema.OPTIONS);
+
+        if (optionsVect.contains(getInvid()))
+          {
+            result = optionsVect;
+          }
+        else if (getParentObj().isDefined(dhcpSubnetSchema.GUEST_OPTIONS))
+          {
+            Vector<Invid> guestOptionsVect = (Vector<Invid>) getParentObj().getFieldValuesLocal(dhcpSubnetSchema.GUEST_OPTIONS);
 
             if (guestOptionsVect.contains(getInvid()))
               {
@@ -311,7 +335,7 @@ public class dhcpEntryCustom extends DBEditObject implements SchemaConstants, dh
 
         if (result == null)
           {
-            throw new RuntimeException("couldn't find our own invid in parent dhcp network fields.");
+            throw new RuntimeException("couldn't find our own invid in parent dhcp subnet fields.");
           }
       }
 
