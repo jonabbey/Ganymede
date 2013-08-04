@@ -163,6 +163,16 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
             {
               return true;
             }
+
+          break;
+
+        case SUBNETS:
+          if (!"_GLOBAL_".equals(object.getFieldValueLocal(NAME)))
+            {
+              return true;
+            }
+
+          break;
       }
 
     return false;
