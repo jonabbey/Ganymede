@@ -54,7 +54,6 @@ import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
-import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.server.DBEditObject;
@@ -66,21 +65,18 @@ import arlut.csd.ganymede.server.DBSession;
 import arlut.csd.ganymede.server.Ganymede;
 import arlut.csd.ganymede.server.GanymedeSession;
 import arlut.csd.ganymede.server.InvidDBField;
-import arlut.csd.ganymede.server.IPDBField;
 import arlut.csd.ganymede.server.StringDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                 dhcpNetworkCustom
+                                                               dhcpNetworkCustom
 
 ------------------------------------------------------------------------------*/
 
 public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, dhcpNetworkSchema {
 
   /**
-   *
-   * Customization Constructor
-   *
+   * <p>Customization Constructor</p>
    */
 
   public dhcpNetworkCustom(DBObjectBase objectBase)
@@ -89,9 +85,7 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
   }
 
   /**
-   *
-   * Create new object constructor
-   *
+   * <p>Create new object constructor</p>
    */
 
   public dhcpNetworkCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset)
@@ -100,15 +94,43 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
   }
 
   /**
-   *
-   * Check-out constructor, used by DBObject.createShadow()
-   * to pull out an object for editing.
-   *
+   * <p>Check-out constructor, used by DBObject.createShadow() to pull
+   * out an object for editing.</p>
    */
 
   public dhcpNetworkCustom(DBObject original, DBEditSet editset)
   {
     super(original, editset);
+  }
+
+  /**
+   * <p>Customization method to verify whether the user should be able to
+   * see a specific field in a given object.  Instances of
+   * {@link arlut.csd.ganymede.server.DBField DBField} will
+   * wind up calling up to here to let us override the normal visibility
+   * process.</p>
+   *
+   * <p>Note that it is permissible for session to be null, in which case
+   * this method will always return the default visiblity for the field
+   * in question.</p>
+   *
+   * <p>If field is not from an object of the same base as this DBEditObject,
+   * an exception will be thrown.</p>
+   *
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
+   *
+   * <p><b>*PSEUDOSTATIC*</b></p>
+   */
+
+  @Override public boolean canSeeField(DBSession session, DBField field)
+  {
+    if (field.getID() == SUBNETS &&
+        "_GLOBAL_".equals(field.getOwner().getFieldValueLocal(NAME)))
+      {
+        return false;
+      }
+
+    return super.canSeeField(session, field);
   }
 
   /**
@@ -133,97 +155,60 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
   {
     switch (fieldid)
       {
-        case dhcpNetworkSchema.NAME:
+        case NAME:
           return true;
-      }
 
-    if (fieldid == dhcpNetworkSchema.GUEST_RANGE)
-      {
-        return object.isDefined(dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS);
-      }
-
-    // If network name is _GLOBAL_ we dont want a network number or mask, or allow registered guests.... just options.
-    // otherwise network number and mask are required.
-
-    String name = (String) object.getFieldValueLocal(dhcpNetworkSchema.NAME);
-
-    if (!name.equals("_GLOBAL_"))
-      {
-        switch (fieldid)
-          {
-            case dhcpNetworkSchema.NETWORK_NUMBER:
-            case dhcpNetworkSchema.NETWORK_MASK:
+        case OPTIONS:
+          if ("_GLOBAL_".equals(object.getFieldValueLocal(NAME)))
+            {
               return true;
-          }
+            }
       }
 
     return false;
   }
 
+
   /**
-   * <p>Initializes a newly created DBEditObject.</p>
+   * <p>Customization method to verify overall consistency of a
+   * DBObject.  This method is intended to be overridden in
+   * DBEditObject subclasses, and will be called by {@link
+   * arlut.csd.ganymede.server.DBEditObject#commitPhase1()
+   * commitPhase1()} to verify the readiness of this object for
+   * commit.  The DBObject passed to this method will be a
+   * DBEditObject, complete with that object's GanymedeSession
+   * reference if this method is called during transaction commit, and
+   * that session reference may be used by the verifying code if the
+   * code needs to access the database.</p>
    *
-   * <p>When this method is called, the DBEditObject has been created,
-   * its ownership set, and all fields defined in the controlling
-   * {@link arlut.csd.ganymede.server.DBObjectBase DBObjectBase} have
-   * been instantiated without defined values.  If this DBEditObject
-   * is an embedded type, it will have been linked into its parent
-   * object before this method is called.</p>
+   * <p>This method is for custom checks specific to custom
+   * DBEditObject subclasses.  Standard checking for missing fields
+   * for which fieldRequired() returns true is done by {@link
+   * arlut.csd.ganymede.server.DBEditSet#commit_checkObjectMissingFields(arlut.csd.ganymede.server.DBEditObject)}
+   * during {@link
+   * arlut.csd.ganymede.server.DBEditSet#commit_handlePhase1()}.</p>
    *
-   * <p>This method is responsible for filling in any default values
-   * that can be calculated from the {@link
-   * arlut.csd.ganymede.server.DBSession DBSession} associated with
-   * the editset defined in this DBEditObject.</p>
+   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
-   * <p>If initialization fails for some reason, initializeNewObject()
-   * will return a ReturnVal with an error result..  If the owning
-   * GanymedeSession is not in bulk-loading mode (i.e.,
-   * GanymedeSession.enableOversight is true), {@link
-   * arlut.csd.ganymede.server.DBSession#createDBObject(short,
-   * arlut.csd.ganymede.common.Invid, java.util.Vector)
-   * DBSession.createDBObject()} will checkpoint the transaction
-   * before calling this method.  If this method returns a failure
-   * code, the calling method will rollback the transaction.  This
-   * method has no responsibility for undoing partial initialization,
-   * the checkpoint/rollback logic will take care of that.</p>
-   *
-   * <p>If enableOversight is false, DBSession.createDBObject() will
-   * not checkpoint the transaction status prior to calling
-   * initializeNewObject(), so it is the responsibility of this method
-   * to handle any checkpointing needed.</p>
-   *
-   * <p>This method should be overridden in subclasses.</p>
+   * <p><b>*PSEUDOSTATIC*</b></p>
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
    */
 
-  @Override public ReturnVal initializeNewObject()
+  @Override public ReturnVal consistencyCheck(DBObject object)
   {
+    if ("_GLOBAL_".equals(object.getFieldValueLocal(NAME)))
+      {
+        if (object.isDefined(SUBNETS))
+          {
+            return Ganymede.createErrorDialog("DHCP Network Problem",
+                                              "The _GLOBAL_ DHCP Network definition cannot have any subnets.");
+          }
+      }
+
     return null;
-        /*
-    try
-      {
-        ReturnVal retVal = null;
-        InvidDBField invf = (InvidDBField) getField(dhcpNetworkSchema.OPTIONS);
-
-        try
-          {
-            retVal = invf.createNewEmbedded(true);
-          }
-        catch (GanyPermissionsException ex)
-          {
-            return Ganymede.createErrorDialog("permissions", "permissions error creating embedded object" + ex);
-          }
-
-        return retVal;
-      }
-    catch (NotLoggedInException ex)
-      {
-        return Ganymede.loginError(ex);
-      }
-        */
   }
 
   /**
@@ -238,11 +223,6 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
 
   @Override public boolean canCloneField(DBSession session, DBObject object, DBField field)
   {
-    if (field.getID() == dhcpNetworkSchema.NETWORK_NUMBER)
-      {
-        return false;           // let's not mess with the net number field
-      }
-
     return super.canCloneField(session, object, field);
   }
 
@@ -293,136 +273,76 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
 
   @Override public ReturnVal cloneFromObject(DBSession session, DBObject origObj, boolean local)
   {
-    boolean problem = false;
-    StringBuilder resultBuf = new StringBuilder();
+    boolean parentCloneProblem = false;
     ReturnVal retVal = super.cloneFromObject(session, origObj, local);
 
-    if (retVal != null)
-      {
-        if (!retVal.didSucceed())
-          {
-            return retVal;
-          }
-
-        if (retVal.getDialog() != null)
-          {
-            resultBuf.append("\n\n");
-            resultBuf.append(retVal.getDialog().getText());
-
-            problem = true;
-          }
-      }
-
-    // and clone the embedded objects.
-    //
-    // Remember, dhcpNetworkCustom.initializeNewObject() will create
-    // a single embedded option object as part of the normal dhcp
-    // network creation process.  We'll put this (single)
-    // automatically created embedded object into the newOnes
-    // vector, then create any new embedded options necessary when
-    // cloning a multiple option dhcp network.
-
-    InvidDBField oldOptions = (InvidDBField) origObj.getField(dhcpNetworkSchema.OPTIONS);
-    InvidDBField newOptions = (InvidDBField) getField(dhcpNetworkSchema.OPTIONS);
-
-    retVal = CopyOptions(session, oldOptions, newOptions, local);
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
         return retVal;
       }
 
-    oldOptions = (InvidDBField) origObj.getField(dhcpNetworkSchema.GUEST_OPTIONS);
-    newOptions = (InvidDBField) getField(dhcpNetworkSchema.GUEST_OPTIONS);
+    retVal = ReturnVal.merge(retVal, copyObjects(session, origObj, OPTIONS, local));
 
-    retVal = CopyOptions(session, oldOptions, newOptions, local);
-    if (retVal != null && !retVal.didSucceed())
+    if (!ReturnVal.didSucceed(retVal))
       {
         return retVal;
       }
 
-
-    retVal = new ReturnVal(true, !problem);
-
-    if (problem)
-      {
-        retVal.setDialog(new JDialogBuff("Possible Clone Problems", resultBuf.toString(),
-                                         "Ok", null, "ok.gif"));
-      }
+    retVal = ReturnVal.merge(retVal, copyObjects(session, origObj, SUBNETS, local));
 
     return retVal;
   }
 
-  public ReturnVal CopyOptions(DBSession session, InvidDBField oldOptions, InvidDBField newOptions, boolean local)
+  private ReturnVal copyObjects(DBSession session, DBObject origObject, short copyFieldID, boolean local)
   {
-    Vector<Invid> newOnes = (Vector<Invid>) newOptions.getValuesLocal();
-    Vector<Invid> oldOnes = (Vector<Invid>) oldOptions.getValuesLocal();
+    if (!origObject.isDefined(copyFieldID))
+      {
+        return null;
+      }
 
-    DBObject origOption;
-    DBEditObject workingOption;
-    int i;
+    InvidDBField origField = (InvidDBField) origObject.getField(copyFieldID);
+    InvidDBField newField = (InvidDBField) getField(copyFieldID);
 
-    boolean problem = false;
-    ReturnVal tmpVal;
     StringBuilder resultBuf = new StringBuilder();
 
     try
       {
-        for (i = 0; i < newOnes.size(); i++)
+        for (Invid oldInvid: (Vector<Invid>) origField.getValuesLocal())
           {
-            workingOption = (DBEditObject) session.editDBObject(newOnes.get(i));
-            origOption = session.viewDBObject(oldOnes.get(i));
-            tmpVal = workingOption.cloneFromObject(session, origOption, local);
+            DBObject origSubObject = session.viewDBObject(oldInvid);
+            ReturnVal tmpVal;
 
-            if (tmpVal != null && tmpVal.getDialog() != null)
+            try
               {
-                resultBuf.append("\n\n");
-                resultBuf.append(tmpVal.getDialog().getText());
-
-                problem = true;
+                tmpVal = newField.createNewEmbedded(local);
               }
-          }
-
-        Invid newInvid;
-
-        if (i < oldOnes.size())
-          {
-            for (; i < oldOnes.size(); i++)
+            catch (GanyPermissionsException ex)
               {
-                try
-                  {
-                    tmpVal = newOptions.createNewEmbedded(local);
-                  }
-                catch (GanyPermissionsException ex)
-                  {
-                    tmpVal = Ganymede.createErrorDialog(session.getGSession(),
-                                                        "permissions",
-                                                        "permissions failure creating embedded option " + ex);
-                  }
+                tmpVal = Ganymede.createErrorDialog(session.getGSession(),
+                                                    "permissions",
+                                                    "permissions failure creating embedded object " + ex);
+              }
 
-                if (!tmpVal.didSucceed())
-                  {
-                    if (tmpVal != null && tmpVal.getDialog() != null)
-                      {
-                        resultBuf.append("\n\n");
-                        resultBuf.append(tmpVal.getDialog().getText());
-
-                        problem = true;
-                      }
-                    continue;
-                  }
-
-                newInvid = tmpVal.getInvid();
-
-                workingOption = (DBEditObject) session.editDBObject(newInvid);
-                origOption = session.viewDBObject(oldOnes.get(i));
-                tmpVal = workingOption.cloneFromObject(session, origOption, local);
-
-                if (tmpVal != null && tmpVal.getDialog() != null)
+            if (!ReturnVal.didSucceed(tmpVal))
+              {
+                if (tmpVal.getDialog() != null)
                   {
                     resultBuf.append("\n\n");
                     resultBuf.append(tmpVal.getDialog().getText());
+                  }
 
-                    problem = true;
+                continue;
+              }
+
+            DBEditObject newSubObject = session.editDBObject(tmpVal.getInvid());
+            tmpVal = newSubObject.cloneFromObject(session, origSubObject, local);
+
+            if (!ReturnVal.didSucceed(tmpVal))
+              {
+                if (tmpVal.getDialog() != null)
+                  {
+                    resultBuf.append("\n\n");
+                    resultBuf.append(tmpVal.getDialog().getText());
                   }
               }
           }
@@ -432,66 +352,16 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
         return Ganymede.loginError(ex);
       }
 
-    ReturnVal retVal = new ReturnVal(true, !problem);
-
-    if (problem)
+    if (resultBuf.length() != 0)
       {
-        retVal.setDialog(new JDialogBuff("Possible Clone Problems", resultBuf.toString(),
+        ReturnVal retVal = new ReturnVal(true, false);
+
+        retVal.setDialog(new JDialogBuff("Possible Clone Problems",
+                                         resultBuf.toString(),
                                          "Ok", null, "ok.gif"));
       }
 
-    return retVal;
-  }
-
-  /**
-   * <p>Customization method to verify whether the user should be able to
-   * see a specific field in a given object.  Instances of
-   * {@link arlut.csd.ganymede.server.DBField DBField} will
-   * wind up calling up to here to let us override the normal visibility
-   * process.</p>
-   *
-   * <p>Note that it is permissible for session to be null, in which case
-   * this method will always return the default visiblity for the field
-   * in question.</p>
-   *
-   * <p>If field is not from an object of the same base as this DBEditObject,
-   * an exception will be thrown.</p>
-   *
-   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
-   *
-   * <p><b>*PSEUDOSTATIC*</b></p>
-   */
-
-  @Override public boolean canSeeField(DBSession session, DBField field)
-  {
-    String name = (String) field.getOwner().getFieldValueLocal(dhcpNetworkSchema.NAME);
-
-    if (name != null && name.equals("_GLOBAL_"))
-      {
-        if ( field.getID() == dhcpNetworkSchema.NETWORK_NUMBER ||
-             field.getID() == dhcpNetworkSchema.NETWORK_MASK ||
-             field.getID() == dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS ||
-             field.getID() == dhcpNetworkSchema.GUEST_RANGE ||
-             field.getID() == dhcpNetworkSchema.GUEST_OPTIONS
-             )
-          {
-            return false;
-          }
-      }
-
-    Boolean allow_registered_guests = (Boolean) field.getOwner().getFieldValueLocal(dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS);
-
-    if (allow_registered_guests == null || !allow_registered_guests.booleanValue())
-      {
-        if ( field.getID() == dhcpNetworkSchema.GUEST_RANGE ||
-             field.getID() == dhcpNetworkSchema.GUEST_OPTIONS
-             )
-          {
-            return false;
-          }
-      }
-
-    return super.canSeeField(session, field);
+    return null;
   }
 
   /**
@@ -536,115 +406,32 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
    * be provided.
    */
 
-  @Override public synchronized ReturnVal finalizeSetValue(DBField field, Object value)
+  @Override public ReturnVal finalizeSetValue(DBField field, Object value)
   {
-    // If the name is _GLOBAL_ it does not get a network number, netmask or allow registered guests.
-    // by when the username field is being changed.
-
-    if (field.getID() == dhcpNetworkSchema.NAME)
+    if (field.getID() == NAME)
       {
-        ReturnVal result = new ReturnVal(true,true);
+        String currentValue = (String) field.getValueLocal();
 
-        String name = (String) value;
-
-        if (name != null && name.equals("_GLOBAL_"))
+        if ("_GLOBAL_".equals(currentValue))
           {
-            getDBSession().checkpoint("clearing _global_ fields");
-
-            try
-              {
-                IPDBField network_number = (IPDBField) getField(dhcpNetworkSchema.NETWORK_NUMBER);
-                result = ReturnVal.merge(result, network_number.setValueLocal(null));
-
-                IPDBField network_mask = (IPDBField) getField(dhcpNetworkSchema.NETWORK_MASK);
-                result = ReturnVal.merge(result, network_mask.setValueLocal(null));
-
-                DBField allow_registered_guests = (DBField) getField(dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS);
-                result = ReturnVal.merge(result, allow_registered_guests.setValueLocal(false));
-
-                StringDBField guest_range = (StringDBField) getField(dhcpNetworkSchema.GUEST_RANGE);
-                result = ReturnVal.merge(result, guest_range.setValueLocal(null));
-
-                DBField guest_options = (DBField) getField(dhcpNetworkSchema.GUEST_OPTIONS);
-                try
-                  {
-                    result = ReturnVal.merge(result, guest_options.deleteAllElements());
-                  }
-                catch (GanyPermissionsException ex)
-                  {
-                    return Ganymede.createErrorDialog(this.getGSession(),
-                                                      "permissions",
-                                                      "permissions error deleting embedded object" + ex);
-                  }
-              }
-            finally
-              {
-                if (!ReturnVal.didSucceed(result))
-                  {
-                    getDBSession().rollback("clearing _global_ fields");
-                  }
-                else
-                  {
-                    getDBSession().popCheckpoint("clearing _global_ fields");
-                  }
-              }
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              "Can't change name of _GLOBAL_ DHCP Network",
+                                              "The _GLOBAL_ DHCP Network is required in order to provide the default configuration for DHCP.  It may not be renamed or deleted.");
           }
 
-        result.addRescanField(field.getOwner().getInvid(), dhcpNetworkSchema.NETWORK_NUMBER);
-        result.addRescanField(field.getOwner().getInvid(), dhcpNetworkSchema.NETWORK_MASK);
-        result.addRescanField(field.getOwner().getInvid(), dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS);
-        result.addRescanField(field.getOwner().getInvid(), dhcpNetworkSchema.GUEST_RANGE);
-        result.addRescanField(field.getOwner().getInvid(), dhcpNetworkSchema.GUEST_OPTIONS);
-        return result;
-      }
-
-    // If the allow register guests checkbox is changed, hide/show the field and options next.
-
-    if (field.getID() == dhcpNetworkSchema.ALLOW_REGISTERED_GUESTS)
-      {
-        ReturnVal result = new ReturnVal(true,true);
-
-        if (value == null || Boolean.FALSE.equals(value))
+        if ("_GLOBAL_".equals(value))
           {
-            getDBSession().checkpoint("clearing guest fields");
-
-            try
+            if (isDefined(SUBNETS))
               {
-                StringDBField guest_range = (StringDBField) getField(dhcpNetworkSchema.GUEST_RANGE);
-                result = ReturnVal.merge(result, guest_range.setValueLocal(null));
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  "Can't set DHCP Network name to _GLOBAL_",
+                                                  "The subnets field must be empty in the _GLOBAL_ DHCP network.");
+              }
 
-                DBField guest_options = (DBField) getField(dhcpNetworkSchema.GUEST_OPTIONS);
-                try
-                  {
-                    result = ReturnVal.merge(result, guest_options.deleteAllElements());
-                  }
-                catch (GanyPermissionsException ex)
-                  {
-                    return Ganymede.createErrorDialog(this.getGSession(),
-                                                      "permissions",
-                                                      "permissions error deleting embedded object" + ex);
-                  }
-              }
-            finally
-              {
-                if (!ReturnVal.didSucceed(result))
-                  {
-                    getDBSession().rollback("clearing guest fields");
-                  }
-                else
-                  {
-                    getDBSession().popCheckpoint("clearing guest fields");
-                  }
-              }
+            return ReturnVal.success().addRescanField(getInvid(), SUBNETS);
           }
-
-        result.addRescanField(field.getOwner().getInvid(), dhcpNetworkSchema.GUEST_RANGE);
-        result.addRescanField(field.getOwner().getInvid(), dhcpNetworkSchema.GUEST_OPTIONS);
-
-        return result;
       }
 
     return null;
   }
-
 }
