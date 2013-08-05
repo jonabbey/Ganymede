@@ -471,7 +471,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
             if (typeDefinition.getField(field.getID()) != null && field.isDefined())
               {
-                this.fieldAry[i++] = field;
+                // we have to make a new copy of each field to make
+                // sure the final owner reference points back to us.
+
+                this.fieldAry[i++] = field.getCopy(this);
               }
           }
       }
