@@ -57,7 +57,9 @@ import java.rmi.RemoteException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 import java.util.Vector;
 
 import arlut.csd.Util.TranslationService;
@@ -1278,9 +1280,15 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   private void clean()
   {
-    for (String key: matrix.keySet())
+    Set<Map.Entry<String, PermEntry>> elements = matrix.entrySet();
+    Iterator<Map.Entry<String, PermEntry>> iterator = elements.iterator();
+
+    while (iterator.hasNext())
       {
-        PermEntry pe = matrix.get(key);
+        Map.Entry<String, PermEntry> entry = iterator.next();
+
+        String key = entry.getKey();
+        PermEntry pe = entry.getValue();
 
         // If we have invalid entries, we're just going to throw them out,
         // forget they even existed..  this is only remotely reasonable
@@ -1292,7 +1300,7 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
         if (!isValidCode(key))
           {
-            matrix.remove(key);
+            iterator.remove();
 
             if (debug)
               {
