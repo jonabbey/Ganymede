@@ -653,7 +653,8 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
         if (address == null)
           {
-            return Ganymede.createErrorDialog("Network Full",
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              "Network Full",
                                               "There are no more addresses available in the " +
                                               getDBSession().getObjectLabel((Invid) value) +
                                               " network.");
@@ -713,7 +714,8 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
         if (netInvid == null)
           {
-            return Ganymede.createErrorDialog("Unacceptable IP address",
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              "Unacceptable IP address",
                                               "IP address " + IPDBField.genIPString(address) +
                                               " does not match any network available to you.");
           }
@@ -733,7 +735,8 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
             if (retVal != null && !retVal.didSucceed())
               {
-                return Ganymede.createErrorDialog("schema error",
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  "schema error",
                                                   "interfaceCustom.finalizeSetValue(): failed to set ip net");
               }
 
@@ -744,7 +747,8 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
           }
         catch (GanyPermissionsException ex)
           {
-            return Ganymede.createErrorDialog("permissions", "permissions error setting network " + ex);
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              "permissions", "permissions error setting network " + ex);
           }
       }
 
@@ -850,7 +854,8 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
           }
         catch (MACAddressException ex)
           {
-            return Ganymede.createErrorDialog("Bad Ethernet Address",
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              "Bad Ethernet Address",
                                               "You entered an invalid ethernet address (" + etherString +
                                               ")\n\nEthernet addresses should be in the form of 6 colon-separated" +
                                               " hexadecimal numbers.\n\nExample:\n01:a2:cc:04:12:2d\n");
@@ -1035,7 +1040,9 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
     if (address != null && !systemCustom.checkMatchingNet(getDBSession(), netInvid, address))
       {
-        return Ganymede.createErrorDialog("Bad IP Address", "Error, I.P. number/network mismatch in " + object.toString());
+        return Ganymede.createErrorDialog(object.getGSession(),
+                                          "Bad IP Address",
+                                          "Error, I.P. number/network mismatch in " + object.toString());
       }
 
     return null;

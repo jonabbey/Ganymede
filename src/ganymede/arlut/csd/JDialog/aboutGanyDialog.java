@@ -68,7 +68,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTabbedPane;
 
-import arlut.csd.JDataComponent.JMultiLineLabel;
+import javax.swing.event.HyperlinkListener;
+import javax.swing.event.HyperlinkEvent;
+import java.awt.Desktop;
+import java.io.IOException;
+
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.TranslationService;
 
@@ -99,8 +103,6 @@ public class aboutGanyDialog extends JDialog {
 
   // ---
 
-  private JMultiLineLabel aboutTextbox = null;
-  private JMultiLineLabel creditsTextbox = null;
   private JScrollPane scrollpane = null;
   private GridBagLayout gbl = null;
   private GridBagConstraints gbc = null;
@@ -167,19 +169,49 @@ public class aboutGanyDialog extends JDialog {
 
   private void addTab(String title, String text)
   {
-    JMultiLineLabel textbox = new JMultiLineLabel(true);
-    textbox.setOpaque(true);
-    textbox.setText(text);
-    textbox.setCaretPosition(0);
+    try
+      {
+        JEditorPane textbox = new JEditorPane("text/html",text);
+        textbox.setCaretPosition(0);
+        textbox.setOpaque(true);
+        textbox.setEditable(false);
+        textbox.addHyperlinkListener(new HyperlinkListener()
+          {
+            @Override
+            public void hyperlinkUpdate(HyperlinkEvent e)
+            {
+              if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED)
+                {
+                  try
+                    {
+                      Desktop.getDesktop().browse(e.getURL().toURI());
+                    }
+                  catch (Exception e1)
+                    {
+                      new StringDialog(new JFrame(),
+                                       ts.l("global.linkErrorTitle"), // "Error Opening Link"
+                                       ts.l("global.linkErrorMsg"), // "Error Opening Link"
+                                       ts.l("global.linkErrorOKButton"), // "Ok"
+                                       null,
+                                       StandardDialog.ModalityType.DOCUMENT_MODAL).showDialog();
+                    }
+                }
+            }
+          });
 
-    JScrollPane scrollpane = new JScrollPane(textbox,
-                                             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-                                             JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-    scrollpane.setBorder(null);
-    scrollpane.setViewportBorder(null);
-    scrollpane.getViewport().setOpaque(true);
+        JScrollPane scrollpane = new JScrollPane(textbox,
+                                                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+                                                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+        scrollpane.setBorder(null);
+        scrollpane.setViewportBorder(null);
+        scrollpane.getViewport().setOpaque(true);
 
-    tabPane.addTab(title, null, scrollpane);
+        tabPane.addTab(title, null, scrollpane);
+      }
+    catch (Exception ex)
+      {
+        throw new RuntimeException("Error creating addTab" + ex);
+      }
   }
 
   public void setVisible(boolean state)

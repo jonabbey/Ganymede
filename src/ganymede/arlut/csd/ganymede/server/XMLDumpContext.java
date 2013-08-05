@@ -55,6 +55,7 @@ import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.Util.XMLUtils;
 import com.jclark.xml.output.XMLWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 /*------------------------------------------------------------------------------
@@ -169,6 +170,16 @@ public final class XMLDumpContext {
    */
 
   XMLWriter xmlOut;
+
+  /**
+   * <p>The underlying FileOutputStream, if we have been given it in
+   * addition to the XMLWriter.</p>
+   *
+   * <p>We store this reference to allow the caller to sync() our
+   * output to disc.</p>
+   */
+
+  FileOutputStream out;
 
   int indentLevel = 0;
 
@@ -533,6 +544,26 @@ public final class XMLDumpContext {
   public void skipLine() throws IOException
   {
     XMLUtils.indent(xmlOut, 0);
+  }
+
+  /**
+   * <p>Sets the FileOutputStream associated with this XMLDumpContext,
+   * if any.</p>
+   */
+
+  public void setFileOutputStream(FileOutputStream outStream)
+  {
+    this.out = outStream;
+  }
+
+  /**
+   * <p>Gets the FileOutputStream associated with this XMLDumpContext,
+   * if any.</p>
+   */
+
+  public FileOutputStream getFileOutputStream()
+  {
+    return this.out;
   }
 
   /**

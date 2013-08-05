@@ -390,7 +390,8 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 
             if (mapName != null && mapName.equals("auto.home.default"))
               {
-                return Ganymede.createErrorDialog("Cannot remove entries from auto.home.default",
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  "Cannot remove entries from auto.home.default",
                                                   "Error, cannot remove entries from auto.home.default. " +
                                                   "All UNIX users in Ganymede must have an entry in auto.home.default " +
                                                   "to represent the location of their home directory.");
@@ -412,12 +413,14 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
                   }
                 catch (ClassCastException ex)
                   {
-                    return Ganymede.createErrorDialog("Logic error in server",
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      "Logic error in server",
                                                       "mapCustom.wizardHook(): unexpected element in entries field");
                   }
                 catch (ArrayIndexOutOfBoundsException ex)
                   {
-                    return Ganymede.createErrorDialog("Logic error in server",
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      "Logic error in server",
                                                       "mapCustom.wizardHook(): deleteElement index out of range in entries field");
                   }
 
@@ -434,7 +437,8 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 
                 if (eObj == null)
                   {
-                    return Ganymede.createErrorDialog("Couldn't remove map entry",
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      "Couldn't remove map entry",
                                                       "Couldn't remove map entry for " +
                                                       getDBSession().getObjectLabel(user) +
                                                       ", permissions denied to edit the user.");
@@ -444,7 +448,8 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
 
                 if (invf == null)
                   {
-                    return Ganymede.createErrorDialog("Couldn't remove map entry",
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      "Couldn't remove map entry",
                                                       "Couldn't remove map entry for " +
                                                       getDBSession().getObjectLabel(user) +
                                                       ", couldn't access the volumes field in the user record.");
@@ -464,7 +469,8 @@ public class mapCustom extends DBEditObject implements SchemaConstants, mapSchem
                   }
                 catch (GanyPermissionsException ex)
                   {
-                    retVal = Ganymede.createErrorDialog("mapCustom: Error",
+                    retVal = Ganymede.createErrorDialog(this.getGSession(),
+                                                        "mapCustom: Error",
                                                         "Permissions error unlinking user " + getDBSession().getObjectLabel(user) +
                                                         " from map.");
                   }

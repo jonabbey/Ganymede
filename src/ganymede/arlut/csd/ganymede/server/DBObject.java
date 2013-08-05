@@ -471,7 +471,10 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
             if (typeDefinition.getField(field.getID()) != null && field.isDefined())
               {
-                this.fieldAry[i++] = field;
+                // we have to make a new copy of each field to make
+                // sure the final owner reference points back to us.
+
+                this.fieldAry[i++] = field.getCopy(this);
               }
           }
       }
@@ -680,9 +683,9 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
 
   /**
-   * <p>This method pulls the fields in this object from remote accessibility through
-   * RMI, possibly improving our security posture and reducing the memory loading
-   * on the RMI system.</p>
+   * <p>This method pulls the fields in this object from remote
+   * accessibility through RMI, possibly improving our security
+   * posture and reducing the memory loading on the RMI system.</p>
    */
 
   public final void unexportFields()
@@ -2091,7 +2094,7 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     if (field == null)
       {
         // "Error, object {0} does not contain a field named "{1}"."
-        return Ganymede.createErrorDialog(ts.l("global.bad_field_name", this.getTypeName(), fieldName));
+        return Ganymede.createErrorDialog(this.getGSession(), null, ts.l("global.bad_field_name", this.getTypeName(), fieldName));
       }
 
     // NB: we would go ahead and do like we did for getFieldValue(),
@@ -2120,7 +2123,8 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
     // "Server: Error in DBObject.setFieldValue()"
     // "setFieldValue called on a non-editable object"
 
-    return Ganymede.createErrorDialog(ts.l("setFieldValue.noneditable"),
+    return Ganymede.createErrorDialog(this.getGSession(),
+                                      ts.l("setFieldValue.noneditable"),
                                       ts.l("setFieldValue.noneditabletext"));
   }
 

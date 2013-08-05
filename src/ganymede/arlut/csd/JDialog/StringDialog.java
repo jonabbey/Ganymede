@@ -79,7 +79,6 @@ import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 
-import arlut.csd.JDataComponent.JMultiLineLabel;
 import arlut.csd.JDataComponent.JcalendarField;
 import arlut.csd.JDataComponent.JpassField;
 import arlut.csd.JDataComponent.JpasswordField;
@@ -171,7 +170,7 @@ public class StringDialog extends StandardDialog implements ActionListener, Wind
     dataPanel,
     buttonPanel;
 
-  JMultiLineLabel
+  JLabel
     textLabel;
 
   GridBagLayout
@@ -335,7 +334,9 @@ public class StringDialog extends StandardDialog implements ActionListener, Wind
 
     if (resource.getText() != null && !resource.getText().trim().equals(""))
       {
-        textLabel = new JMultiLineLabel(resource.getText());
+        String resourceText = resource.getText();
+        resourceText = "<html>" + resourceText.replace("\n", "<br>") + "</html>";
+        textLabel = new JLabel(resourceText);
 
         JScrollPane pane = new JScrollPane(textLabel,
                                            JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -782,7 +783,7 @@ public class StringDialog extends StandardDialog implements ActionListener, Wind
 
   public void setWrapLength(int wrapLength)
   {
-    textLabel.setWrapLength(wrapLength);
+    //textLabel.setWrapLength(wrapLength);
   }
 
   public void setFont(Font font)

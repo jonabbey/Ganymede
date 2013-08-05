@@ -296,7 +296,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         if (guidField == null)
           {
-            return Ganymede.createErrorDialog("User Initialization Failure",
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              "User Initialization Failure",
                                               "Couldn't find the guid field.. schema problem?");
           }
 
@@ -315,7 +316,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         if (numField == null)
           {
-            return Ganymede.createErrorDialog("User Initialization Failure",
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              "User Initialization Failure",
                                               "Couldn't find the uid field.. schema problem?");
           }
 
@@ -323,7 +325,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         if (namespace == null)
           {
-            return Ganymede.createErrorDialog("User Initialization Failure",
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              "User Initialization Failure",
                                               "Couldn't find the uid namespace.. schema problem?");
           }
 
@@ -389,7 +392,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
           }
         catch (GanyPermissionsException ex)
           {
-            return Ganymede.createErrorDialog("permissions", "permissions error creating embedded object" + ex);
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              "permissions",
+                                              "permissions error creating embedded object" + ex);
 
           }
 
@@ -557,7 +562,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
                   {
                     IRISWarningGiven = true;
 
-                    return ReturnVal.merge(retVal, Ganymede.createErrorDialog("Warning: Badge number not in HR database",
+                    return ReturnVal.merge(retVal, Ganymede.createErrorDialog(this.getGSession(),
+                                                                              "Warning: Badge number not in HR database",
                                                                               "The " + username + " user object is currently registered as having badge number " +
                                                                               badge + ", which is not registered in the HR database.\n\n" +
                                                                               "You should either correct the badge number or contact HR to find out why the badge " +
@@ -574,7 +580,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
                   {
                     IRISWarningGiven = true;
 
-                    return ReturnVal.merge(retVal, Ganymede.createErrorDialog("Warning: Historical username conflict",
+                    return ReturnVal.merge(retVal, Ganymede.createErrorDialog(this.getGSession(),
+                                                                              "Warning: Historical username conflict",
                                                                              "The '" + username +
                                                                              "' user object (with badge id '" + badge + "') conflicts with an earlier '" + username +
                                                                              "' account that is still referenced in the HR database.\n\n" +
@@ -729,7 +736,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         if (mapInvid == null)
           {
-            return Ganymede.createErrorDialog("Can't commit transaction with an empty automounter map definition in user " + this.getLabel());
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              null,
+                                              "Can't commit transaction with an empty automounter map definition in user " + this.getLabel());
           }
 
         DBObject mapObj = getDBSession().viewDBObject(mapInvid);
@@ -996,7 +1005,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
               }
             catch (GanyPermissionsException ex)
               {
-                return Ganymede.createErrorDialog("permissions", "permissions error setting category" + ex);
+                return Ganymede.createErrorDialog(dbSession.getGSession(),
+                                                  "permissions",
+                                                  "permissions error setting category" + ex);
               }
           }
 
@@ -1064,7 +1075,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
                   }
                 catch (GanyPermissionsException ex)
                   {
-                    tmpVal = Ganymede.createErrorDialog("permissions", "permissions error creating embedded object during user cloning" + ex);
+                    tmpVal = Ganymede.createErrorDialog(dbSession.getGSession(),
+                                                        "permissions",
+                                                        "permissions error creating embedded object during user cloning" + ex);
                   }
 
                 if (!tmpVal.didSucceed())
@@ -1499,7 +1512,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
         if (!object.isDefined(SchemaConstants.ExpirationField) &&
             !object.isDefined(SchemaConstants.RemovalField))
           {
-            return Ganymede.createErrorDialog("Missing Expiration Field",
+            return Ganymede.createErrorDialog(object.getGSession(),
+                                              "Missing Expiration Field",
                                               "User objects belonging to the " + categoryName +
                                               " category require an expiration date to be set.");
           }
@@ -1514,7 +1528,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
     if (!StringUtils.stringEquals(signature, myUsername) &&
         !aliases.contains(signature))
       {
-        return Ganymede.createErrorDialog("Bad Signature Alias",
+        return Ganymede.createErrorDialog(object.getGSession(),
+                                          "Bad Signature Alias",
                                           "Ganymede server configuration error.  The signature alias (" + signature + ") for this user is " +
                                           "not a valid choice.");
       }
@@ -1530,21 +1545,24 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
         if (homeGroupObj != null)
           {
-            return Ganymede.createErrorDialog("Bad Home Group",
+            return Ganymede.createErrorDialog(object.getGSession(),
+                                              "Bad Home Group",
                                               "Ganymede server configuration error.  The home group (" +
                                               homeGroupObj.getLabel() + ") for this user is " +
                                               "not a valid choice.");
           }
         else
           {
-            return Ganymede.createErrorDialog("Bad Home Group",
+            return Ganymede.createErrorDialog(object.getGSession(),
+                                              "Bad Home Group",
                                               "Ganymede server configuration error.  The home group " +
                                               "for this user does not point to a valid object.");
           }
       }
     else if (myGroups.size() == 0)
       {
-        return Ganymede.createErrorDialog("Missing Groups",
+        return Ganymede.createErrorDialog(object.getGSession(),
+                                          "Missing Groups",
                                           "This user is not a member of any groups.");
       }
 
@@ -1601,7 +1619,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
                 if (!badge_is_admin)
                   {
-                    return Ganymede.createErrorDialog("Duplicate Badge Number",
+                    return Ganymede.createErrorDialog(object.getGSession(),
+                                                      "Duplicate Badge Number",
                                                       "This user object shares a badge number with the " + conflict_name + " user object.\n\n" +
                                                       "Since both of these user accounts are 'normal' accounts, Ganymede can't tell which one should " +
                                                       "be the account of record for information transfer to the HR database.");
@@ -1959,7 +1978,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
     if (reactivateWizard == null)
       {
-        return Ganymede.createErrorDialog("userCustom.reactivate() error",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "userCustom.reactivate() error",
                                           "Error, reactivate() called without a valid user wizard");
       }
 
@@ -1979,7 +1999,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
           }
         else
           {
-            return Ganymede.createErrorDialog("userCustom.reactivate() error",
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              "userCustom.reactivate() error",
                                               "Error, reactivate() called without a password selected");
           }
 
@@ -1995,7 +2016,9 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
               }
             catch (GanyPermissionsException ex)
               {
-                return Ganymede.createErrorDialog("permissions", "permissions error setting shell during reactivation" + ex);
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  "permissions",
+                                                  "permissions error setting shell during reactivation" + ex);
               }
 
             if (retVal != null && !retVal.didSucceed())
@@ -2578,7 +2601,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
                 if (!dir.equals(expected))
                   {
-                    return Ganymede.createErrorDialog("Schema Error",
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      "Schema Error",
                                                       "Home directory should be " + expected + ".\n" +
                                                       "This is a restriction encoded in userCustom.java.");
                   }
@@ -2675,7 +2699,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
             if (expDateRequired.booleanValue())
               {
-                return Ganymede.createErrorDialog("Schema Error",
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  "Schema Error",
                                                   "This user requires an expiration date because of its " +
                                                   "user category.");
               }
@@ -3103,7 +3128,7 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
                 if (!ReturnVal.didSucceed(result))
                   {
-                    return result;
+                    return result; // random username collision?
                   }
 
                 result = ReturnVal.merge(result, passField.setPlainTextPass(RandomUtils.getRandomPassword(20)));
@@ -3233,7 +3258,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
 
                         groupWizard.unregister();
 
-                        return Ganymede.createErrorDialog("User Object Error",
+                        return Ganymede.createErrorDialog(this.getGSession(),
+                                                          "User Object Error",
                                                           "The client is attempting to do an operation on " +
                                                           "a user object with an active wizard.");
                       }
@@ -3241,7 +3267,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
                 else if (gSession.isWizardActive() &&
                          !(gSession.getWizard() instanceof userHomeGroupDelWizard))
                   {
-                    return Ganymede.createErrorDialog("User Object Error",
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      "User Object Error",
                                                       "The client is attempting to do an operation on " +
                                                       "a user object with mismatched active wizard.");
                   }
@@ -3282,7 +3309,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
                   }
                 else
                   {
-                    return Ganymede.createErrorDialog("User Validation Error",
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      "User Validation Error",
                                                       "Can't remove home group in bulk transfer.");
                   }
               }
@@ -3322,7 +3350,8 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
               }
             catch (RemoteException ex)
               {
-                return Ganymede.createErrorDialog("Server error",
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  "Server error",
                                                   "userCustom.wizardHook(): can't initialize userCategoryWizard.");
               }
           }
@@ -3410,14 +3439,16 @@ public class userCustom extends DBEditObject implements SchemaConstants, userSch
                   }
 
                 renameWizard.unregister();
-                return Ganymede.createErrorDialog("User Object Error",
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  "User Object Error",
                                                   "The client is attempting to do an operation on " +
                                                   "a user object with an active wizard.");
               }
           }
         else if (gSession.isWizardActive())
           {
-            return Ganymede.createErrorDialog("User Object Error",
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              "User Object Error",
                                               "The client is attempting to do an operation on " +
                                               "a user object with mismatched active wizard.\n" +
                                               "Wizard id: " + gSession.getWizard());

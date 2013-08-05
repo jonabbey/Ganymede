@@ -297,7 +297,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
             (getID() <= 2))
           {
             // "It is not permitted (or necessary) to set an associated user on the supergash or monitor persona objects."
-            return Ganymede.createErrorDialog(ts.l("finalizeSetValue.restricted_persona"));
+            return Ganymede.createErrorDialog(this.getGSession(), null, ts.l("finalizeSetValue.restricted_persona"));
           }
 
         return refreshLabelField(null, (Invid) value, null);
@@ -493,7 +493,7 @@ public class adminPersonaCustom extends DBEditObject implements SchemaConstants 
       {
         // "Persona object "{0}" is incomplete. Personas must either have
         // a role defined or be a member of the supergash owner set."
-        return Ganymede.createErrorDialog(ts.l("consistencyCheck.role_needed", this.getLabel()));
+        return Ganymede.createErrorDialog(this.getGSession(), null, ts.l("consistencyCheck.role_needed", this.getLabel()));
       }
 
     return null;

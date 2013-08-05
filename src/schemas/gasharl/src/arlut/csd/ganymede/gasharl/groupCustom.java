@@ -186,7 +186,8 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
     if (guidField == null)
       {
-        return Ganymede.createErrorDialog("Group Initialization Failure",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "Group Initialization Failure",
                                           "Couldn't find the guid field.. schema problem?");
       }
 
@@ -229,7 +230,8 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
     if (numField == null)
       {
-        return Ganymede.createErrorDialog("Group Initialization Failure",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "Group Initialization Failure",
                                           "Couldn't find the gid field.. schema problem?");
       }
 
@@ -237,7 +239,8 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
     if (namespace == null)
       {
-        return Ganymede.createErrorDialog("Group Initialization Failure",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "Group Initialization Failure",
                                           "Couldn't find the gid namespace.. schema problem?");
       }
 
@@ -543,7 +546,8 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
               }
           }
 
-        return Ganymede.createErrorDialog("Group Consistency Violation",
+        return Ganymede.createErrorDialog(object.getGSession(),
+                                          "Group Consistency Violation",
                                           "Error, the following users have group " + object.getLabel() + " listed as their home " +
                                           "group, but are not listed as normal members of the group:\n\n" +
                                           VectorUtils.vectorString(names));
@@ -776,7 +780,8 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
                   }
                 else
                   {
-                    return Ganymede.createErrorDialog("Group Validation Error",
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      "Group Validation Error",
                                                       "Can't do bulk removal of home group entries right now.");
                   }
 
@@ -850,13 +855,15 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
                     else if (size < 1)
                       {
                         // They are only in one group, so what good is that?
-                        return Ganymede.createErrorDialog("Group Change Failed",
+                        return Ganymede.createErrorDialog(this.getGSession(),
+                                                          "Group Change Failed",
                                                           "This user has this group for a home group. " +
                                                           " You cannot remove this user, since this is his only group.");
                       }
                     else
                       {
-                        return Ganymede.createErrorDialog("Group Change Failed",
+                        return Ganymede.createErrorDialog(this.getGSession(),
+                                                          "Group Change Failed",
                                                           "This user has many groups to choose from. " +
                                                           " You must choose one to be the home group, or turn wizards on.");
                       }
@@ -906,7 +913,8 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
                           }
 
                         homeWizard.unregister(); // get rid of it, so it doesn't mess other stuff up
-                        return Ganymede.createErrorDialog("Group object error",
+                        return Ganymede.createErrorDialog(this.getGSession(),
+                                                          "Group object error",
                                                           "The client is attempting to do an operation " +
                                                           "on a user object with an active wizard.");
                       }
@@ -914,7 +922,8 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
                 else if (gSession.isWizardActive() &&
                          !(gSession.getWizard() instanceof groupHomeGroupWizard))
                   {
-                    return Ganymede.createErrorDialog("Group Object Error",
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      "Group Object Error",
                                                       "The client is trying to change the group object " +
                                                       "while other wizards are running around.");
                   }
@@ -951,7 +960,8 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
                   }
                 else
                   {
-                    return Ganymede.createErrorDialog("Group Validation Error",
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      "Group Validation Error",
                                                       "Can't do bulk removal of group entries right now.");
                   }
 
@@ -984,7 +994,8 @@ public class groupCustom extends DBEditObject implements SchemaConstants, groupS
 
                 String username = gSession.getDBSession().getObjectLabel(userInvid);
 
-                return Ganymede.createErrorDialog("Group Validation Error",
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  "Group Validation Error",
                                                   "Can't remove user " + username + " from group " + getLabel()
                                                   + "'s list of users, this user is using " + getLabel() +
                                                   " as their home group.  Remove this user from the home users list first.");

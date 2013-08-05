@@ -277,7 +277,9 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
           }
         catch (GanyPermissionsException ex)
           {
-            return Ganymede.createErrorDialog("permissions", "permissions error initializing main system interface. " + ex);
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              "permissions",
+                                              "permissions error initializing main system interface. " + ex);
           }
       }
 
@@ -385,7 +387,8 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
                   }
                 catch (GanyPermissionsException ex)
                   {
-                    tmpVal = Ganymede.createErrorDialog("permissions",
+                    tmpVal = Ganymede.createErrorDialog(session.getGSession(),
+                                                        "permissions",
                                                         "permissions failure creating embedded interface " + ex);
                   }
 
@@ -451,7 +454,8 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
                   }
                 catch (GanyPermissionsException ex)
                   {
-                    tmpVal = Ganymede.createErrorDialog("permissions",
+                    tmpVal = Ganymede.createErrorDialog(session.getGSession(),
+                                                        "permissions",
                                                         "permissions failure creating embedded option " + ex);
                   }
 

@@ -501,7 +501,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     // "DBEditObject.setFieldValue() error"
     // "DBEditObject.setFieldValue() couldn''t find field {0} in object {1}"
 
-    return Ganymede.createErrorDialog(ts.l("setFieldValue.error"),
+    return Ganymede.createErrorDialog(this.getGSession(),
+                                      ts.l("setFieldValue.error"),
                                       ts.l("setFieldValue.errorTxt", Short.valueOf(fieldID), getLabel()));
   }
 
@@ -528,7 +529,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     // "DBEditObject.setFieldValueLocal() error"
     // "DBEditObject.setFieldValueLocal() couldn''t find field {0} in object {1}"
 
-    return Ganymede.createErrorDialog(ts.l("setFieldValueLocal.error"),
+    return Ganymede.createErrorDialog(this.getGSession(),
+                                      ts.l("setFieldValueLocal.error"),
                                       ts.l("setFieldValueLocal.errorTxt", Short.valueOf(fieldID), getLabel()));
   }
 
@@ -1560,7 +1562,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
       {
         // "Clone Error"
         // "Can''t clone an object of the wrong type.  This is an internal error."
-        return Ganymede.createErrorDialog(ts.l("cloneFromObject.error"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("cloneFromObject.error"),
                                           ts.l("cloneFromObject.typeError"));
       }
 
@@ -1807,7 +1810,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     if (getGSession() == null)
       {
         // "Error in custom code on server.  createNewEmbeddedObject() called without a valid GanymedeSession"
-        return Ganymede.createErrorDialog(ts.l("global.serverError"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("global.serverError"),
                                           ts.l("createNewEmbeddedObject.badSession"));
       }
 
@@ -1825,7 +1829,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     if (fieldDef.getTargetBase() == -1)
       {
         // "Error in custom code on server.  createNewEmbeddedObject() called without a valid target"
-        return Ganymede.createErrorDialog(ts.l("global.serverError"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("global.serverError"),
                                           ts.l("createNewEmbeddedObject.badTarget"));
       }
 
@@ -1836,7 +1841,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     if (retVal == null)
       {
         // "DBEditObject.createNewEmbeddedObject could not get a useful result from create_db_object"
-        return Ganymede.createErrorDialog(ts.l("global.serverError"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("global.serverError"),
                                           ts.l("createNewEmbeddedObject.badCreate"));
       }
 
@@ -2532,7 +2538,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   {
     // "DBEditObject.inactivate() Error"
     // "This object type has not been configured to allow inactivation."
-    return Ganymede.createErrorDialog(ts.l("inactivate.error"),
+    return Ganymede.createErrorDialog(this.getGSession(),
+                                      ts.l("inactivate.error"),
                                       ts.l("inactivate.errorTxt"));
   }
 
@@ -2643,7 +2650,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
     // "DBEditObject.reactivate() error"
     // "I can''t reactivate this object.  It was not inactivated."
 
-    return Ganymede.createErrorDialog(ts.l("reactivate.error"),
+    return Ganymede.createErrorDialog(this.getGSession(),
+                                      ts.l("reactivate.error"),
                                       ts.l("reactivate.errorTxt"));
   }
 
@@ -2759,7 +2767,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
         // "Object Removal Error"
         // "Could not delete object {0}.  Custom code in the server rejected this operation."
 
-        return Ganymede.createErrorDialog(ts.l("finalizeRemove.error"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("finalizeRemove.error"),
                                           ts.l("finalizeRemove.errorTxt", label));
       }
 
@@ -2811,7 +2820,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
                             // "Server: Error in DBEditObject.finalizeRemove()"
                             // "Custom code disapproved of deleting element from field {0}."
-                            return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
+                            return Ganymede.createErrorDialog(this.getGSession(),
+                                                              ts.l("finalizeRemove.myError"),
                                                               ts.l("finalizeRemove.badDelete", memberField.getName()));
                           }
                       }
@@ -2821,7 +2831,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
                         // "Server: Error in DBEditObject.finalizeRemove()"
                         // "Permissions violation during attempted deletion of element from field {0}."
-                        return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
+                        return Ganymede.createErrorDialog(this.getGSession(),
+                                                          ts.l("finalizeRemove.myError"),
                                                           ts.l("finalizeRemove.badDeletePerm", memberField.getName()));
                       }
                   }
@@ -2851,7 +2862,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
                         // "Server: Error in DBEditObject.finalizeRemove()"
                         // "Custom code disapproved of clearing the value held in field {0}."
-                        return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
+                        return Ganymede.createErrorDialog(this.getGSession(),
+                                                          ts.l("finalizeRemove.myError"),
                                                           ts.l("finalizeRemove.badScalarClear", memberField.getName()));
                       }
                   }
@@ -2897,7 +2909,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
                         // "Server: Error in DBEditObject.finalizeRemove()"
                         // "Custom code disapproved of deleting element from field {0}."
-                        return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
+                        return Ganymede.createErrorDialog(this.getGSession(),
+                                                          ts.l("finalizeRemove.myError"),
                                                           ts.l("finalizeRemove.badDelete", field.getName()));
                       }
                   }
@@ -2919,7 +2932,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
                     // "Server: Error in DBEditObject.finalizeRemove()"
                     // "Custom code disapproved of clearing the value held in field {0}."
-                    return Ganymede.createErrorDialog(ts.l("finalizeRemove.myError"),
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      ts.l("finalizeRemove.myError"),
                                                       ts.l("finalizeRemove.badScalarClear", field.getName()));
                   }
               }
@@ -3055,7 +3069,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
       {
         // "DBEditObject.clearBackLink(): Couldn''t find old reference"
         // "Your operation could not succeed because {0} was linked to a remote reference {1} that could not be resolved for unlinking.\n\nThis is a serious logic error in the server.  You should run the invid diagnostics in the admin console."
-        return Ganymede.createErrorDialog(ts.l("clearBackLink.badRef"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("clearBackLink.badRef"),
                                           ts.l("clearBackLink.badRefTxt", toString(), remote.toString()));
       }
 
@@ -3131,7 +3146,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
         // "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
         // "You don''t have permission to unlink object {0} from one or more fields in object {1}."
-        return Ganymede.createErrorDialog(ts.l("clearBackLink.badUnlink"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("clearBackLink.badUnlink"),
                                           ts.l("clearBackLink.perm", getLabel(), remobj.toString()));
       }
 
@@ -3153,14 +3169,16 @@ public class DBEditObject extends DBObject implements ObjectStatus {
               {
                 // "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
                 // "Your operation could not succeed due to an error in the server''s custom schema code.  Target field {0} in object {1} is not an Invid field."
-                return Ganymede.createErrorDialog(ts.l("clearBackLink.badUnlink"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("clearBackLink.badUnlink"),
                                                   ts.l("clearBackLink.badTarget", oldRef.getField(targetField).getName(), oldRef.getLabel()));
               }
             catch (RemoteException rx)
               {
                 // "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
                 // "Your operation could not succeed due to an error in the server''s custom schema code.  Target field {0} in object {1} is not an Invid field."
-                return Ganymede.createErrorDialog(ts.l("clearBackLink.badUnlink"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("clearBackLink.badUnlink"),
                                                   ts.l("clearBackLink.badTarget", Short.valueOf(targetField), oldRef.getLabel()));
               }
           }
@@ -3174,7 +3192,8 @@ public class DBEditObject extends DBObject implements ObjectStatus {
             // "DBEditObject.clearBackLink(): Couldn''t unlink old reference"
             // "Your operation could not succeed due to an inconsistency in the server''s database schema.  Target field number {0} in object {1} does not exist, or you do not have permission to access this field."
 
-            return Ganymede.createErrorDialog(ts.l("clearBackLink.badUnlink"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("clearBackLink.badUnlink"),
                                               ts.l("clearBackLink.badSchema", Short.valueOf(targetField), oldRef.getLabel()));
           }
 

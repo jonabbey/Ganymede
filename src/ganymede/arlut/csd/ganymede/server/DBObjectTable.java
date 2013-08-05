@@ -548,8 +548,6 @@ public final class DBObjectTable implements Iterable<DBObject> {
                 prev.next = replaceObject;
               }
 
-            this.count--;
-
             return;
           }
       }

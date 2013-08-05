@@ -91,20 +91,22 @@ import arlut.csd.Util.TranslationService;
  * returned and/or a list of objects and fields that need to be
  * updated in response to the successful update.</p>
  *
- * <p>Alternatively, {@link arlut.csd.ganymede.common.ReturnVal#didSucceed() didSucceed()}
- *  may return false, in which case the
- * operation either could not succeed or is incomplete.  In this case,
- * {@link arlut.csd.ganymede.common.ReturnVal#doRescan() doRescan()} will return false, and
- * {@link arlut.csd.ganymede.common.ReturnVal#getDialog() getDialog()} should return a valid
- * {@link arlut.csd.JDialog.JDialogBuff JDialogBuff}.  If the operation is
- * simply incomplete pending more
- * data from the user, {@link arlut.csd.ganymede.common.ReturnVal#getCallback() getCallback()}
- * will return a non-null value.  In
- * this case, the user should be presented the dialog box, and the
- * results of that dialog should be passed to the callback.  The
- * callback will in return pass back another ReturnVal object.  The
- * server may walk the user through an iterative set of dialogs to
- * finally complete the desired operation.</p>
+ * <p>Alternatively, {@link
+ * arlut.csd.ganymede.common.ReturnVal#didSucceed() didSucceed()} may
+ * return false, in which case the operation either could not succeed
+ * or is incomplete.  In this case, {@link
+ * arlut.csd.ganymede.common.ReturnVal#doRescan() doRescan()} will
+ * return false, and {@link
+ * arlut.csd.ganymede.common.ReturnVal#getDialog() getDialog()} should
+ * return a valid {@link arlut.csd.JDialog.JDialogBuff JDialogBuff}.
+ * If the operation is simply incomplete pending more data from the
+ * user, {@link arlut.csd.ganymede.common.ReturnVal#getCallback()
+ * getCallback()} will return a non-null value.  In this case, the
+ * user should be presented the dialog box, and the results of that
+ * dialog should be passed to the callback.  The callback will in
+ * return pass back another ReturnVal object.  The server may walk the
+ * user through an iterative set of dialogs to finally complete the
+ * desired operation.</p>
  *
  * <p>ReturnVal is not thread safe, so don't use it in multiple
  * concurrent threads.</p>
@@ -200,12 +202,12 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * This static method is responsible for intelligently merging a
+   * <p>This static method is responsible for intelligently merging a
    * pair of ReturnVal objects, ensuring that the appropriate
-   * information from each is propagated forward.
+   * information from each is propagated forward.</p>
    *
-   * The logic in this method is critical for the proper chaining of
-   * results in server-side code.
+   * <p>The logic in this method is critical for the proper chaining
+   * of results in server-side code.</p>
    */
 
   static final public ReturnVal merge(ReturnVal retVal, ReturnVal retVal2)
@@ -400,8 +402,8 @@ public final class ReturnVal implements java.io.Serializable {
   // ---
 
   /**
-   * If true, the operation that this ReturnVal is reporting on
-   * succeeded.
+   * <p>If true, the operation that this ReturnVal is reporting on
+   * succeeded.</p>
    */
 
   boolean success;
@@ -422,9 +424,11 @@ public final class ReturnVal implements java.io.Serializable {
   private ErrorTypeEnum errorType = ErrorTypeEnum.UNSPECIFIED;
 
   /**
-   * <p>A remote handle to an RMI reference of various kinds ({@link arlut.csd.ganymede.rmi.db_object db_object},
-   * {@link arlut.csd.ganymede.rmi.Session Session}, {@link arlut.csd.ganymede.rmi.XMLSession XMLSession})
-   * on the server returned for use by the client.</p>
+   * <p>A remote handle to an RMI reference of various kinds ({@link
+   * arlut.csd.ganymede.rmi.db_object db_object}, {@link
+   * arlut.csd.ganymede.rmi.Session Session}, {@link
+   * arlut.csd.ganymede.rmi.XMLSession XMLSession}) on the server
+   * returned for use by the client.</p>
    */
 
   private Remote remoteObjectRef = null;
@@ -449,14 +453,14 @@ public final class ReturnVal implements java.io.Serializable {
   private Ganymediator callback = null;
 
   /**
-   * This variable will be non-null if the operation being reported on
-   * changed the object's label.  The GUI client will look for this
+   * <p>This variable will be non-null if the operation being reported
+   * on changed the object's label.  The GUI client will look for this
    * variable in order to trigger a fix-up of all pointers to the
    * object that was modified by the action that resulted in this
-   * ReturnVal.
+   * ReturnVal.</p>
    *
-   * If newLabel is not null, newObjectInvid must be set to point to
-   * the Invid which is being relabeled.
+   * <p>If newLabel is not null, newObjectInvid must be set to point
+   * to the Invid which is being relabeled.</p>
    */
 
   private String newLabel = null;
@@ -484,10 +488,10 @@ public final class ReturnVal implements java.io.Serializable {
   private transient HashMap<Invid,Vector<Short>> rescanHash = null;
 
   /**
-   * This field is set if the verifyNewValue() method transforms a
-   * value during the input.
+   * <p>This field is set if the verifyNewValue() method transforms a
+   * value during the input.</p>
    *
-   * Server-side only.
+   * <p>Server-side only.</p>
    */
 
   private transient Object transformedValue = null;
@@ -612,12 +616,12 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * <p>If the operation was not successful, this method should
-   * return a dialog box describing the problem and, potentially,
-   * asking for more information to complete the operation.</p>
+   * <p>If the operation was not successful, this method should return
+   * a dialog box describing the problem and, potentially, asking for
+   * more information to complete the operation.</p>
    *
-   * <p>This method should be checked after all calls to the server that
-   * return non-null ReturnVal objects.</p>
+   * <p>This method should be checked after all calls to the server
+   * that return non-null ReturnVal objects.</p>
    */
 
   public JDialogBuff getDialog()
@@ -627,11 +631,10 @@ public final class ReturnVal implements java.io.Serializable {
 
   /**
    * <p>If the operation was not successful, this method should return
-   * a the text of any encoded dialog box describing the problem.  This
-   * method is intended for text-mode clients that do not support the
-   * full callback/wizard features that the
-   * {@link arlut.csd.JDialog.JDialogBuff JDialogBuff}
-   * class supports.</p>
+   * a the text of any encoded dialog box describing the problem.
+   * This method is intended for text-mode clients that do not support
+   * the full callback/wizard features that the {@link
+   * arlut.csd.JDialog.JDialogBuff JDialogBuff} class supports.</p>
    *
    * <p>This method (or getDialog() for GUI clients) should be checked
    * after all calls to the server that return non-null ReturnVal
@@ -651,14 +654,14 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * <p>If the server is asking for more interaction from the user
-   * to complete this operation, this method will return an RMI
-   * handle to a callback on the server.  The client should
-   * popup the dialog box specified by getDialog() and pass the
-   * results to the callback returned by this method.</p>
+   * <p>If the server is asking for more interaction from the user to
+   * complete this operation, this method will return an RMI handle to
+   * a callback on the server.  The client should popup the dialog box
+   * specified by getDialog() and pass the results to the callback
+   * returned by this method.</p>
    *
-   * <p>This method will return null if getDialog() returns
-   * null, and need not be checked in that case.</p>
+   * <p>This method will return null if getDialog() returns null, and
+   * need not be checked in that case.</p>
    */
 
   public Ganymediator getCallback()
@@ -697,10 +700,10 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * If this method returns true, the object that was modified by the
-   * operation resulting in this ReturnVal changed the object's label
-   * field.  The client will use this as a signal to refresh displayed
-   * links to the object's Invid.
+   * <p>If this method returns true, the object that was modified by
+   * the operation resulting in this ReturnVal changed the object's
+   * label field.  The client will use this as a signal to refresh
+   * displayed links to the object's Invid.</p>
    */
 
   public boolean objectLabelChanged()
@@ -709,8 +712,9 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * Returns a non-null String if the object pointed to by getInvid()
-   * has had its label changed.  The returned String is the new label.
+   * <p>Returns a non-null String if the object pointed to by
+   * getInvid() has had its label changed.  The returned String is the
+   * new label.</p>
    */
 
   public String getNewLabel()
@@ -794,8 +798,8 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * <p>This private method converts the rescanList StringBuffer to
-   * a HashMap (rescanHash) that maps Invid's to either Vector of
+   * <p>This private method converts the rescanList StringBuffer to a
+   * HashMap (rescanHash) that maps Invid's to either Vector of
    * Short's or "all".</p>
    */
 
@@ -815,11 +819,11 @@ public final class ReturnVal implements java.io.Serializable {
    *
    * <pre>263:170|all|271:131|31|57|286:41|all|310:4|134|13|92|</pre>
    *
-   * <p>and returns a HashMap mapping Invid's to the rescan information
-   * for that Invid, where the rescan information will either be the
-   * String "all", indicating that all fields need to be rescanned, or
-   * a Vector of Short's specifying field id's to be rescanned for
-   * that object.</p>
+   * <p>and returns a HashMap mapping Invid's to the rescan
+   * information for that Invid, where the rescan information will
+   * either be the String "all", indicating that all fields need to be
+   * rescanned, or a Vector of Short's specifying field id's to be
+   * rescanned for that object.</p>
    *
    * @param buffer The StringBuffer to be decoded.
    * @param original The HashMap to put the results into.. this method
@@ -867,7 +871,7 @@ public final class ReturnVal implements java.io.Serializable {
           }
         else
           {
-            Vector vec;
+            Vector<Short> vec;
             Short fieldID = Short.valueOf(atom);
 
             if (original.containsKey(invid) && original.get(invid) != all)
@@ -876,13 +880,13 @@ public final class ReturnVal implements java.io.Serializable {
 
                 if (!vec.contains(fieldID))
                   {
-                    vec.addElement(fieldID);
+                    vec.add(fieldID);
                   }
               }
             else if (!original.containsKey(invid))
               {
                 vec = new Vector<Short>();
-                vec.addElement(fieldID);
+                vec.add(fieldID);
 
                 original.put(invid, vec);
               }
@@ -1006,11 +1010,11 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * <p>unionRescan merges field and object rescan requests from
-   * the supplied ReturnVal with and rescan requests we contain.</p>
+   * <p>unionRescan merges field and object rescan requests from the
+   * supplied ReturnVal with and rescan requests we contain.</p>
    *
-   * <p>It is used to allow multiple sources in InvidDBField to contribute
-   * rescan requests.</p>
+   * <p>It is used to allow multiple sources in InvidDBField to
+   * contribute rescan requests.</p>
    *
    * <p>This method returns this so you can do a cascading return.</p>
    */
@@ -1048,9 +1052,9 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * <p>This method takes a HashMap mapping Invid's to Vectors
-   * of Short field identifiers or the String "all" and generates
-   * the StringBuffer to be serialized down to the client.</p>
+   * <p>This method takes a HashMap mapping Invid's to Vectors of
+   * Short field identifiers or the String "all" and generates the
+   * StringBuffer to be serialized down to the client.</p>
    *
    * <p>For use on the server-side.</p>
    */
@@ -1090,11 +1094,11 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * <p>This method can be handy if you know for a certain fact that the
-   * ReturnVal you're calling merge on is not null.  Remember that any
-   * method returning a ReturnVal is likely to return null to indicate
-   * unexceptional success, and that if you assume you have a real
-   * ReturnVal without checking, you're going to lose.</p>
+   * <p>This method can be handy if you know for a certain fact that
+   * the ReturnVal you're calling merge on is not null.  Remember that
+   * any method returning a ReturnVal is likely to return null to
+   * indicate unexceptional success, and that if you assume you have a
+   * real ReturnVal without checking, you're going to lose.</p>
    *
    * <p>In most situations, you should be using
    * ReturnVal.merge(retVal1, retVal2), even though that makes for
@@ -1126,8 +1130,8 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * This method controls whether or not this ReturnVal will return a
-   * 'my label changed!' message to the client.
+   * <p>This method controls whether or not this ReturnVal will return
+   * a 'my label changed!' message to the client.</p>
    */
 
   public ReturnVal setObjectLabelChanged(Invid objInvid, String newLabel)
@@ -1144,8 +1148,8 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * <p>This method makes a note in this ReturnVal to have the
-   * client rescan all fields in object objID.</p>
+   * <p>This method makes a note in this ReturnVal to have the client
+   * rescan all fields in object objID.</p>
    *
    * <p>For use on the server-side.</p>
    */
@@ -1169,8 +1173,8 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * <p>This method makes a note in this ReturnVal to have the
-   * client rescan field fieldID in object objID.</p>
+   * <p>This method makes a note in this ReturnVal to have the client
+   * rescan field fieldID in object objID.</p>
    *
    * <p>For use on the server-side.</p>
    */
@@ -1196,9 +1200,9 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * <p>This method attaches a remote reference to a
-   * {@link arlut.csd.ganymede.rmi.Ganymediator}
-   * wizard-handler to this ReturnVal for extraction by the client.</p>
+   * <p>This method attaches a remote reference to a {@link
+   * arlut.csd.ganymede.rmi.Ganymediator} wizard-handler to this
+   * ReturnVal for extraction by the client.</p>
    *
    * <p>For use on the server-side.</p>
    */
@@ -1211,12 +1215,13 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * This method sets up a basic error text dialog for this ReturnVal.
+   * <p>This method sets up a basic error text dialog for this
+   * ReturnVal.</p>
    *
-   * Unlike {@link
+   * <p>Unlike {@link
    * arlut.csd.ganymede.server.Ganymede#createErrorDialog(java.lang.String,
    * java.lang.String)}, this method does not write the error text to
-   * stderr.
+   * stderr.</p>
    */
 
   public ReturnVal setErrorText(String body)
@@ -1227,12 +1232,13 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * This method sets up a basic error text dialog for this ReturnVal.
+   * <p>This method sets up a basic error text dialog for this
+   * ReturnVal.</p>
    *
-   * Unlike {@link
+   * <p>Unlike {@link
    * arlut.csd.ganymede.server.Ganymede#createErrorDialog(java.lang.String,
    * java.lang.String)}, this method does not write the error text to
-   * stderr.
+   * stderr.</p>
    */
 
   public ReturnVal setErrorText(String title, String body)
@@ -1246,12 +1252,13 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * This method sets up a basic info text dialog for this ReturnVal.
+   * <p>This method sets up a basic info text dialog for this
+   * ReturnVal.</p>
    *
-   * Unlike {@link
+   * <p>Unlike {@link
    * arlut.csd.ganymede.server.Ganymede#createErrorDialog(java.lang.String,
    * java.lang.String)}, this method does not write the error text to
-   * stderr.
+   * stderr.</p>
    */
 
   public ReturnVal setInfoText(String body)
@@ -1262,12 +1269,13 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * This method sets up a basic info text dialog for this ReturnVal.
+   * <p>This method sets up a basic info text dialog for this
+   * ReturnVal.</p>
    *
-   * Unlike {@link
+   * <p>Unlike {@link
    * arlut.csd.ganymede.server.Ganymede#createErrorDialog(java.lang.String,
    * java.lang.String)}, this method does not write the error text to
-   * stderr.
+   * stderr.</p>
    */
 
   public ReturnVal setInfoText(String title, String body)
@@ -1281,8 +1289,8 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * <p>This method attaches a dialog definition to this ReturnVal
-   * for extraction by the client.</p>
+   * <p>This method attaches a dialog definition to this ReturnVal for
+   * extraction by the client.</p>
    *
    * <p>For use on the server-side.</p>
    */
@@ -1312,9 +1320,10 @@ public final class ReturnVal implements java.io.Serializable {
 
   /**
    * <p>This method is used to set a {@link
-   * arlut.csd.ganymede.rmi.db_object db_object} reference that the client
-   * can retrieve from us in those cases where a method on the server
-   * really does need to return a db_object _and_ a return val.</p>
+   * arlut.csd.ganymede.rmi.db_object db_object} reference that the
+   * client can retrieve from us in those cases where a method on the
+   * server really does need to return a db_object _and_ a return
+   * val.</p>
    *
    * <p>For use on the server-side.</p>
    */
@@ -1343,8 +1352,8 @@ public final class ReturnVal implements java.io.Serializable {
 
   /**
    * <p>This method is used to set a {@link
-   * arlut.csd.ganymede.rmi.XMLSession XMLSession} reference that the client
-   * can retrieve from us at login time.</p>
+   * arlut.csd.ganymede.rmi.XMLSession XMLSession} reference that the
+   * client can retrieve from us at login time.</p>
    *
    * <p>For use on the server-side.</p>
    */
@@ -1358,8 +1367,8 @@ public final class ReturnVal implements java.io.Serializable {
 
   /**
    * <p>This method is used to set a {@link
-   * arlut.csd.ganymede.rmi.FileTransmitter FileTransmitter} reference that the client
-   * can retrieve from us.</p>
+   * arlut.csd.ganymede.rmi.FileTransmitter FileTransmitter} reference
+   * that the client can retrieve from us.</p>
    *
    * <p>For use on the server-side.</p>
    */
@@ -1373,8 +1382,9 @@ public final class ReturnVal implements java.io.Serializable {
 
   /**
    * <p>This method is used to set a {@link
-   * arlut.csd.ganymede.rmi.adminSession adminSession} reference that the
-   * admin console can retrieve from us at console connect time.</p>
+   * arlut.csd.ganymede.rmi.adminSession adminSession} reference that
+   * the admin console can retrieve from us at console connect
+   * time.</p>
    *
    * <p>For use on the server-side.</p>
    */
@@ -1387,20 +1397,20 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * This method is intended to be used by {@link
+   * <p>This method is intended to be used by {@link
    * arlut.csd.ganymede.server.DBEditObject#verifyNewValue(arlut.csd.ganymede.server.DBField,
    * java.lang.Object)}, when the verifyNewValue() method wants to
-   * take the submitted input and canonicalize it.
+   * take the submitted input and canonicalize it.</p>
    *
-   * Code in the Ganymede server (mostly the base logic in DBField)
+   * <p>Code in the Ganymede server (mostly the base logic in DBField)
    * which calls the verifyNewValue() method should respond to a
    * transformed value by substituting the transformed value for the
-   * originally submitted value.
+   * originally submitted value.</p>
    *
-   * This version of setTransformedValueObject() only sets the
+   * <p>This version of setTransformedValueObject() only sets the
    * transformed value to be returned, but an additional call will
    * need to be made on this ReturnVal to set a refresh order for the
-   * field which triggered this ReturnVal.
+   * field which triggered this ReturnVal.</p>
    */
 
   public ReturnVal setTransformedValueObject(Object obj)
@@ -1412,19 +1422,19 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * This method is intended to be used by {@link
+   * <p>This method is intended to be used by {@link
    * arlut.csd.ganymede.server.DBEditObject#verifyNewValue(arlut.csd.ganymede.server.DBField,
    * java.lang.Object)}, when the verifyNewValue() method wants to
-   * take the submitted input and canonicalize it.
+   * take the submitted input and canonicalize it.</p>
    *
-   * Code in the Ganymede server (mostly the base logic in DBField)
+   * <p>Code in the Ganymede server (mostly the base logic in DBField)
    * which calls the verifyNewValue() method should respond to a
    * transformed value by substituting the transformed value for the
-   * originally submitted value.
+   * originally submitted value.</p>
    *
-   * If a value is transformed, setTranformedValueObject() will also
-   * set the ReturnVal so that it encodes a rescan of the field in
-   * question so the client will refresh it.
+   * <p>If a value is transformed, setTranformedValueObject() will
+   * also set the ReturnVal so that it encodes a rescan of the field
+   * in question so the client will refresh it.</p>
    */
 
   public ReturnVal setTransformedValueObject(Object obj, Invid invid, short fieldId)
@@ -1438,14 +1448,14 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * This method returns true if the code returning this ReturnVal
+   * <p>This method returns true if the code returning this ReturnVal
    * wants to substitute a canonicalized value for the value submitted
-   * to verifyNewValue().
+   * to verifyNewValue().</p>
    *
-   * Code in the Ganymede server (mostly the base logic in DBField)
+   * <p>Code in the Ganymede server (mostly the base logic in DBField)
    * which calls the verifyNewValue() method should respond if this
    * method returns true by substituting the transformed value for the
-   * originally submitted value.
+   * originally submitted value.</p>
    */
 
   public boolean hasTransformedValue()
@@ -1454,10 +1464,10 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * Code in the Ganymede server (mostly the base logic in DBField)
+   * <p>Code in the Ganymede server (mostly the base logic in DBField)
    * which calls the verifyNewValue() method should respond to a
    * transformed value by substituting the transformed value for the
-   * originally submitted value.
+   * originally submitted value.</p>
    */
 
   public Object getTransformedValueObject()
@@ -1466,8 +1476,8 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * This method causes this ReturnVal to request that the field we're
-   * manipulating will be refreshed by the client.
+   * <p>This method causes this ReturnVal to request that the field
+   * we're manipulating will be refreshed by the client.</p>
    */
 
   public ReturnVal requestRefresh(Invid invid, short fieldId)
@@ -1479,7 +1489,7 @@ public final class ReturnVal implements java.io.Serializable {
     HashMap<Invid,Vector<Short>> rescanInfo = new HashMap<Invid,Vector<Short>>(1);
 
     Vector<Short> fields = new Vector<Short>(1);
-    fields.addElement(Short.valueOf(fieldId));
+    fields.add(Short.valueOf(fieldId));
 
     rescanInfo.put(invid, fields);
 
@@ -1489,13 +1499,13 @@ public final class ReturnVal implements java.io.Serializable {
   }
 
   /**
-   * This private helper for the static merge() method is used to
+   * <p>This private helper for the static merge() method is used to
    * determine whether two ReturnVals are trivially identical, in
    * which case the merge() method will not need to create a new
-   * result object.
+   * result object.</p>
    *
-   * Useful especially in avoiding extra work when merging simple
-   * ReturnVal.success() objects.
+   * <p>Useful especially in avoiding extra work when merging simple
+   * ReturnVal.success() objects.</p>
    */
 
   private boolean isCompatible(ReturnVal retVal)

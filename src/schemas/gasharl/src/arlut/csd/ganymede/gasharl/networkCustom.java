@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -217,7 +217,8 @@ public class networkCustom extends DBEditObject {
         if ((operation == DELELEMENT || operation == DELELEMENTS) &&
             getStatus() != DBEditObject.DELETING && getStatus() != DBEditObject.DROPPING)
           {
-            return Ganymede.createErrorDialog("Sorry, you can't delete interfaces here",
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              "Sorry, you can't delete interfaces here",
                                               "You can't delete interfaces from the network object.  If you were " +
                                               "to do so, the interface you are attempting to delete would be left " +
                                               "without a network connection.  Please edit the system containing the " +

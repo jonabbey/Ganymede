@@ -427,7 +427,8 @@ public class DateDBField extends DBField implements date_field {
       {
         // "Date Field Error"
         // "Don''t have permission to edit field {0} in object {1}."
-        return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("verifyNewValue.error_title"),
                                           ts.l("verifyNewValue.bad_perm", getName(), this.owner.getLabel()));
       }
 
@@ -437,7 +438,8 @@ public class DateDBField extends DBField implements date_field {
       {
         // "Date Field Error"
         // "Type error.  Submitted value {0} is not a Date!  Major client error while trying to edit field {1} in object {2}."
-        return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("verifyNewValue.error_title"),
                                           ts.l("verifyNewValue.bad_type", o, getName(), this.owner.getLabel()));
       }
 
@@ -459,7 +461,8 @@ public class DateDBField extends DBField implements date_field {
                 // "Date Field Error"
                 // "Submitted Date {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz} is out of range for field {1} in object {2}.\n
                 // This field will not accept dates before {3,date,EEE, MMM d yyyy hh:mm:ss aaa zz}."
-                return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("verifyNewValue.error_title"),
                                                   ts.l("verifyNewValue.under_range", d, getName(), this.owner.getLabel(), d2));
               }
           }
@@ -472,7 +475,8 @@ public class DateDBField extends DBField implements date_field {
                 // "Date Field Error"
                 // "Submitted Date {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz} is out of range for field {1} in object {2}.\n
                 // This field will not accept dates after {3,date,EEE, MMM d yyyy hh:mm:ss aaa zz}."
-                return Ganymede.createErrorDialog(ts.l("verifyNewValue.error_title"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("verifyNewValue.error_title"),
                                                   ts.l("verifyNewValue.over_range", d, getName(), this.owner.getLabel(), d2));
               }
           }

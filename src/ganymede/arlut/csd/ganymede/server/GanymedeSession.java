@@ -1042,7 +1042,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Server: Error in openTransaction()"
         // "Error.. transaction already opened"
-        return Ganymede.createErrorDialog(ts.l("openTransaction.error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("openTransaction.error"),
                                           ts.l("openTransaction.error_text"));
       }
 
@@ -1169,7 +1170,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
     if (dbSession.editSet == null)
       {
-        return Ganymede.createErrorDialog(ts.l("commitTransaction.error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("commitTransaction.error"),
                                           ts.l("commitTransaction.error_text"));
       }
 
@@ -2030,7 +2032,8 @@ final public class GanymedeSession implements Session, Unreferenced {
         // "Object Not Found"
         // "Could not find object {0} in the database.  Perhaps the object does not exist?"
 
-        return Ganymede.createErrorDialog(ts.l("view_db_object.no_object_error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("view_db_object.no_object_error"),
                                           ts.l("view_db_object.no_object_error_text", String.valueOf(invid)));
       }
 
@@ -2070,7 +2073,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       }
     else
       {
-        return Ganymede.createErrorDialog(ts.l("global.permissions_error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("global.permissions_error"),
                                           ts.l("view_db_object.permissions_error_text", viewObjectLabel(invid), String.valueOf(invid)));
       }
   }
@@ -2106,7 +2110,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Object Not Found"
         // "Error, object [{0}] does not appear to exist.  Couldn't edit it."
-        return Ganymede.createErrorDialog(ts.l("view_db_object.no_object_error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("view_db_object.no_object_error"),
                                           ts.l("edit_db_object.no_object_error_text", String.valueOf(invid)));
       }
 
@@ -2139,7 +2144,8 @@ final public class GanymedeSession implements Session, Unreferenced {
           {
             // "Error checking object out for editing"
             // "Error loading custom class for this object."
-            return Ganymede.createErrorDialog(ts.l("edit_db_object.checking_out_error"),
+            return Ganymede.createErrorDialog(this,
+                                              ts.l("edit_db_object.checking_out_error"),
                                               ts.l("edit_db_object.custom_class_load_error_text"));
           }
 
@@ -2172,7 +2178,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
                 // "Error, object already being edited"
                 // "{0} [{1} - {2}] is already being edited by user {3} on host {4}"
-                return Ganymede.createErrorDialog(ts.l("edit_db_object.already_editing"),
+                return Ganymede.createErrorDialog(this,
+                                                  ts.l("edit_db_object.already_editing"),
                                                   ts.l("edit_db_object.already_editing_text",
                                                        obj.getTypeName(),
                                                        viewObjectLabel(invid),
@@ -2188,7 +2195,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
                 // "Error checking object out for editing"
                 // "Error checking out {0} [{1} - {2}] for editing.\nPerhaps someone else was editing it?"
-                return Ganymede.createErrorDialog(ts.l("edit_db_object.checking_out_error"),
+                return Ganymede.createErrorDialog(this,
+                                                  ts.l("edit_db_object.checking_out_error"),
                                                   ts.l("edit_db_object.checking_out_error_text",
                                                        obj.getTypeName(),
                                                        viewObjectLabel(invid),
@@ -2200,7 +2208,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Permissions Error"
         // "Permission to edit {0} [{1} - {2}] denied."
-        return Ganymede.createErrorDialog(ts.l("global.permissions_error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("global.permissions_error"),
                                           ts.l("edit_db_object.permissions_error_text",
                                                obj.getTypeName(),
                                                viewObjectLabel(invid),
@@ -2266,7 +2275,9 @@ final public class GanymedeSession implements Session, Unreferenced {
     if (base == null)
       {
         // "Error, "{0}" is not a valid object type in this Ganymede server."
-        return Ganymede.createErrorDialog(ts.l("global.no_such_object_type", objectType));
+        return Ganymede.createErrorDialog(this,
+                                          null,
+                                          ts.l("global.no_such_object_type", objectType));
       }
 
     setLastEvent("create:" + objectType);
@@ -2302,7 +2313,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Client error"
         // "Error, the client attempted to clone a null invid."
-        return Ganymede.createErrorDialog(ts.l("clone_db_object.clone_error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("clone_db_object.clone_error"),
                                           ts.l("clone_db_object.clone_error_text"));
       }
 
@@ -2323,7 +2335,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Cloning DENIED"
         // "Cloning operation refused for {0} object {1}."
-        return Ganymede.createErrorDialog(ts.l("clone_db_object.denied"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("clone_db_object.denied"),
                                           ts.l("clone_db_object.denied_msg", vObj.getTypeName(), vObj.getLabel()));
       }
 
@@ -2398,7 +2411,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
         // "Server: Error in inactivate_db_object()"
         // "Can''t inactivate a non-existent object"
-        return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("inactivate_db_object.error"),
                                           ts.l("inactivate_db_object.error_text"));
       }
 
@@ -2406,7 +2420,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Server: Can''t inactivate an inactive object"
         // "Error.. can''t inactivate {0} {1}, object is already inactivated"
-        return Ganymede.createErrorDialog(ts.l("inactivate_db_object.already_inactivated"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("inactivate_db_object.already_inactivated"),
                                           ts.l("inactivate_db_object.already_inactivated_text",
                                                vObj.getTypeName(),
                                                vObj.getLabel()));
@@ -2420,7 +2435,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
         // "Server: Error in inactivate_db_object()"
         // "Don''t have permission to inactivate {0} {1}"
-        return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("inactivate_db_object.error"),
                                           ts.l("inactivate_db_object.permission_text",
                                                vObj.getTypeName(), vObj.getLabel()));
       }
@@ -2433,7 +2449,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Server: Error in inactivate_db_object()"
         // "Couldn''t check out {0} {1} for inactivation"
-        return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("inactivate_db_object.error"),
                                           ts.l("inactivate_db_object.no_checkout",
                                                vObj.getTypeName(), vObj.getLabel()));
       }
@@ -2442,7 +2459,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Server: Error in inactivate_db_object()"
         // "Object {0} is not of a type that may be inactivated"
-        return Ganymede.createErrorDialog(ts.l("inactivate_db_object.error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("inactivate_db_object.error"),
                                           ts.l("inactivate_db_object.not_inactivatable", eObj.getLabel()));
       }
 
@@ -2483,7 +2501,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Server: Error in reactivate_db_object()"
         // "Can''t reactivate a non-existent object"
-        return Ganymede.createErrorDialog(ts.l("reactivate_db_object.error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("reactivate_db_object.error"),
                                           ts.l("reactivate_db_object.no_such"));
       }
 
@@ -2491,7 +2510,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Server: Error in reactivate_db_object()"
         // "Error, can''t reactivate {0} {1}, object is not inactivated"
-        return Ganymede.createErrorDialog(ts.l("reactivate_db_object.error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("reactivate_db_object.error"),
                                           ts.l("reactivate_db_object.not_inactivated",
                                                vObj.getTypeName(),
                                                vObj.getLabel()));
@@ -2503,7 +2523,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Server: Error in reactivate_db_object()"
         // "You do not have permission to reactivate {0} {1}"
-        return Ganymede.createErrorDialog(ts.l("reactivate_db_object.error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("reactivate_db_object.error"),
                                           ts.l("reactivate_db_object.permission_text",
                                                vObj.getTypeName(),
                                                vObj.getLabel()));
@@ -2517,7 +2538,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Server: Error in reactivate_db_object()"
         // "Couldn''t check out {0} {1} for reactivation"
-        return Ganymede.createErrorDialog(ts.l("reactivate_db_object.error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("reactivate_db_object.error"),
                                           ts.l("reactivate_db_object.no_checkout",
                                                vObj.getTypeName(),
                                                vObj.getLabel()));
@@ -2566,7 +2588,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Server: Error in remove_db_object()"
         // "Error.. can''t delete the default permissions definitions.  This object is critical to the proper functioning of the Ganymede server."
-        return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("remove_db_object.error"),
                                           ts.l("remove_db_object.badobj1"));
       }
 
@@ -2575,7 +2598,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Server: Error in remove_db_object()"
         // "Error.. can''t delete the {0} persona.  This object is critical to the proper functioning of the Ganymede server."
-        return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("remove_db_object.error"),
                                           ts.l("remove_db_object.badobj2", Ganymede.rootname));
       }
 
@@ -2584,7 +2608,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Server: Error in remove_db_object()"
         // "Error.. can''t delete the supergash owner group.  This object is critical to the proper functioning of the Ganymede server."
-        return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("remove_db_object.error"),
                                           ts.l("remove_db_object.badobj3"));
       }
 
@@ -2595,7 +2620,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Server: Error in remove_db_object()"
         // "Can''t delete a non-existent object"
-        return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("remove_db_object.error"),
                                           ts.l("remove_db_object.no_such"));
       }
 
@@ -2612,7 +2638,8 @@ final public class GanymedeSession implements Session, Unreferenced {
           {
             // "Server: Error in remove_db_object()"
             // "You do not have permission to delete {0} {1}"
-            return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+            return Ganymede.createErrorDialog(this,
+                                              ts.l("remove_db_object.error"),
                                               ts.l("remove_db_object.permission_text",
                                                    vObj.getTypeName(),
                                                    vObj.getLabel()));
@@ -2634,7 +2661,8 @@ final public class GanymedeSession implements Session, Unreferenced {
               {
                 // "Server: Error in remove_db_object()"
                 // "You do not have permission to delete {0} {1}.\n\nOnly supergash-level admins can remove objects of this type, other admins must use inactivate."
-                return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+                return Ganymede.createErrorDialog(this,
+                                                  ts.l("remove_db_object.error"),
                                                   ts.l("remove_db_object.must_inactivate",
                                                        vObj.getTypeName(),
                                                        vObj.getLabel()));
@@ -2644,7 +2672,8 @@ final public class GanymedeSession implements Session, Unreferenced {
 
             // "Server: Error in remove_db_object()"
             // "Permission to delete {0} {1} has been refused by custom code"
-            return Ganymede.createErrorDialog(ts.l("remove_db_object.error"),
+            return Ganymede.createErrorDialog(this,
+                                              ts.l("remove_db_object.error"),
                                               ts.l("remove_db_object.deletion_refused",
                                                    vObj.getTypeName(),
                                                    vObj.getLabel()));
@@ -2693,7 +2722,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Error transmitting XML Query"
         // "Exception caught trying to initialize XML query transmitter\n\n{0}"
-        return Ganymede.createErrorDialog(ts.l("runXMLQuery.transmitter_error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("runXMLQuery.transmitter_error"),
                                           ts.l("runXMLQuery.transmitter_error_msg", ex.getMessage()));
       }
 
@@ -2739,7 +2769,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Error transmitting XML Query"
         // "Exception caught trying to initialize XML query transmitter\n\n{0}"
-        return Ganymede.createErrorDialog(ts.l("runXMLQuery.transmitter_error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("runXMLQuery.transmitter_error"),
                                           ts.l("runXMLQuery.transmitter_error_msg", ex.getMessage()));
       }
 
@@ -3341,7 +3372,9 @@ final public class GanymedeSession implements Session, Unreferenced {
           }
 
         // "Can''t Create Object"
-        return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"), error);
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("create_db_object.cant_create"),
+                                          error);
       }
 
     // if embedded is true, this code was called from
@@ -3356,7 +3389,8 @@ final public class GanymedeSession implements Session, Unreferenced {
           {
             // "Can''t Create Object"
             // "Can''t create new object, no owner group to put it in."
-            return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
+            return Ganymede.createErrorDialog(this,
+                                              ts.l("create_db_object.cant_create"),
                                               ts.l("create_db_object.no_owner_group"));
           }
       }
@@ -3371,7 +3405,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Can''t Create Object"
         // "Error loading custom class for this object."
-        return Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("create_db_object.cant_create"),
                                           ts.l("create_db_object.custom_class_load_error_text"));
       }
 
@@ -3379,7 +3414,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Can''t Create Object"
         // "Can't create new object, the operation was refused"
-        return ReturnVal.merge(Ganymede.createErrorDialog(ts.l("create_db_object.cant_create"),
+        return ReturnVal.merge(Ganymede.createErrorDialog(this,
+                                                          ts.l("create_db_object.cant_create"),
                                                           ts.l("create_db_object.operation_refused")),
                                retVal);
       }
@@ -3415,7 +3451,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Permissions Error"
         // "You do not have permissions to dump the server''s data with the xml client"
-        return Ganymede.createErrorDialog(ts.l("global.permissions_error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("global.permissions_error"),
                                           ts.l("getXML.data_refused"));
       }
 
@@ -3429,7 +3466,8 @@ final public class GanymedeSession implements Session, Unreferenced {
       {
         // "Error transmitting XML"
         // "Exception caught trying to initialize server transmitter\n\n{0}"
-        return Ganymede.createErrorDialog(ts.l("getXML.transmitter_error"),
+        return Ganymede.createErrorDialog(this,
+                                          ts.l("getXML.transmitter_error"),
                                           ts.l("getXML.transmitter_error_msg", ex.getMessage()));
       }
 
@@ -3575,8 +3613,10 @@ final public class GanymedeSession implements Session, Unreferenced {
    * ArrayList if this GanymedeSession is configured for remote access
    * with exported objects.</p>
    *
-   * @param all if false, unexportObjects() will only unexport editing
-   * objects, leaving view-only objects exported.
+   * @param all If true, unexportObjects() will unexport all BObject
+   * and DBFields exported to this session.  If false
+   * unexportObjects() will only unexport editing objects, leaving
+   * view-only objects exported for further use by the client.
    */
 
   private void unexportObjects(boolean all)

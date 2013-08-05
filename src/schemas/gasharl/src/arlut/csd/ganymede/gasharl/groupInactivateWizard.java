@@ -1,4 +1,4 @@
-/* 
+/*
    groupInactivateWizard.java
 
    A wizard to facilitate the inactivation of a group.
@@ -8,11 +8,13 @@
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
-	    
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2010
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -134,7 +136,7 @@ public class groupInactivateWizard extends GanymediatorWizard {
    * home users, getStartDialog chooses a different path for the dialog.
    */
 
-  InvidDBField 
+  InvidDBField
     homeField;
 
   // From superclass.
@@ -154,11 +156,11 @@ public class groupInactivateWizard extends GanymediatorWizard {
    */
 
   public groupInactivateWizard(GanymedeSession session,
-			       groupCustom group,
+                               groupCustom group,
                                String ckp_label) throws RemoteException
   {
     super(session);
-    
+
     this.session = session;
     this.groupObject = group;
     this.ckp_label = ckp_label;
@@ -176,8 +178,8 @@ public class groupInactivateWizard extends GanymediatorWizard {
   public ReturnVal cancel()
   {
     return fail("Group Inactivation Canceled",
-		"Group Inactivation Canceled",
-		"OK", null, "ok.gif");
+                "Group Inactivation Canceled",
+                "OK", null, "ok.gif");
   }
 
   /**
@@ -200,45 +202,46 @@ public class groupInactivateWizard extends GanymediatorWizard {
 
     if (homeField.size() == 0)
       {
-	if (debug)
-	  {
-	    System.err.println("groupInactivateWizard: there are no home users.");
-	  }
-	buffer.append("Inactivating " + groupObject.getLabel());
-	buffer.append("\n\nAre you sure you want to inactivate " + groupObject.getLabel() + "?");
+        if (debug)
+          {
+            System.err.println("groupInactivateWizard: there are no home users.");
+          }
 
-	setNextState(50);
+        buffer.append("Inactivating " + groupObject.getLabel());
+        buffer.append("\n\nAre you sure you want to inactivate " + groupObject.getLabel() + "?");
 
-	return continueOn("Group Inactivate Dialog", 
-			  buffer.toString(),
-			  "Inactivate",
-			  "Cancel",
-			  "question.gif");
-	
+        setNextState(50);
+
+        return continueOn("Group Inactivate Dialog",
+                          buffer.toString(),
+                          "Inactivate",
+                          "Cancel",
+                          "question.gif");
+
 
       }
     else
       {
 
-	if (debug)
-	  {
-	    System.err.println("groupInactivateWizard: creating inactivation wizard, there are " + 
-			       homeField.size() + " home users.");
-	  }
-	
-	buffer.append("Inactivating ");
-	buffer.append(groupObject.getLabel());
-	
-	buffer.append("\n\nThis group will be rendered unusable, but will be kept ");
-	buffer.append("in the database for 3 months to preserve accounting information.\n\n");
-	buffer.append("If any users have this group as their home group, you will ");
-	buffer.append("have to provide a new home group for them.");
-	
-	return continueOn("Group Inactivate Dialog",
-			  buffer.toString(),
-			  "Ok",
-			  "Cancel",
-			  "question.gif");
+        if (debug)
+          {
+            System.err.println("groupInactivateWizard: creating inactivation wizard, there are " +
+                               homeField.size() + " home users.");
+          }
+
+        buffer.append("Inactivating ");
+        buffer.append(groupObject.getLabel());
+
+        buffer.append("\n\nThis group will be rendered unusable, but will be kept ");
+        buffer.append("in the database for 3 months to preserve accounting information.\n\n");
+        buffer.append("If any users have this group as their home group, you will ");
+        buffer.append("have to provide a new home group for them.");
+
+        return continueOn("Group Inactivate Dialog",
+                          buffer.toString(),
+                          "Ok",
+                          "Cancel",
+                          "question.gif");
       }
   }
 
@@ -249,19 +252,19 @@ public class groupInactivateWizard extends GanymediatorWizard {
    * at this point.
    *
    */
-  
+
   public ReturnVal processDialog1() throws NotLoggedInException
   {
     ReturnVal retVal;
 
     retVal = continueOn("Group Inactivation Wizard",
-			"Choose a new home group for each user.  The choices " +
-			"are the groups the user is currently a memeber of.  " +
-			"If the user isn't in any other groups, then I guess " +
-			"I will give you something else.",
-			"Ok",
-			"Cancel",
-			"question.gif");
+                        "Choose a new home group for each user.  The choices " +
+                        "are the groups the user is currently a memeber of.  " +
+                        "If the user isn't in any other groups, then I guess " +
+                        "I will give you something else.",
+                        "Ok",
+                        "Cancel",
+                        "question.gif");
 
     // First get a list of the home users
 
@@ -271,84 +274,84 @@ public class groupInactivateWizard extends GanymediatorWizard {
 
     if (debug)
       {
-	System.err.println("groupInactivateWizard: " + homeUsers.size() + 
-			   " home users.");
+        System.err.println("groupInactivateWizard: " + homeUsers.size() +
+                           " home users.");
       }
-    
+
     // Loop through the home users, and find out what other groups
     // they are in.  What if they are in no groups?  Must have a
     // button or something.
-    
+
     Vector rejectedUsers = new Vector();
-    
+
     for (int i = 0; i < homeUsers.size(); i++)
       {
-	ObjectHandle lh = (ObjectHandle) homeUsers.elementAt(i);
-	DBObject user;
+        ObjectHandle lh = (ObjectHandle) homeUsers.elementAt(i);
+        DBObject user;
 
-	if (debug)
-	  {
-	    System.err.println("groupInactivateWizard: dealing with user: " + lh.getLabel());
-	  }
+        if (debug)
+          {
+            System.err.println("groupInactivateWizard: dealing with user: " + lh.getLabel());
+          }
 
-	ReturnVal rv = session.edit_db_object(lh.getInvid());
-	
-	if ((rv != null) && (!rv.didSucceed()))
-	  {
-	    if (debug)
-	      {
-		System.err.println("groupInactivateWizard: edit_db_object failed, aborting");
-	      }
+        ReturnVal rv = session.edit_db_object(lh.getInvid());
 
-	    groupObject.inactivate(false, true, ckp_label); // not sucessful, from wizard
-	    return rv;
-	  }
-	
-	user = (DBObject) rv.getObject();
+        if ((rv != null) && (!rv.didSucceed()))
+          {
+            if (debug)
+              {
+                System.err.println("groupInactivateWizard: edit_db_object failed, aborting");
+              }
 
-	// Keep a reference to the user object.
+            groupObject.inactivate(false, true, ckp_label); // not sucessful, from wizard
+            return rv;
+          }
 
-	userObjectHash.put(lh.getLabel(), user);
+        user = (DBObject) rv.getObject();
 
-	InvidDBField userGroupField = (InvidDBField) user.getField(userSchema.GROUPLIST);
-	QueryResult queryr = userGroupField.encodedValues();
+        // Keep a reference to the user object.
 
-	// The list of groups will contain the current group,
-	// which is being inactivated.  We need to remove that
-	// group from the vector.
+        userObjectHash.put(lh.getLabel(), user);
 
-	Vector handles = queryr.getHandles();
-	Invid invid = groupObject.getInvid();
+        InvidDBField userGroupField = (InvidDBField) user.getField(userSchema.GROUPLIST);
+        QueryResult queryr = userGroupField.encodedValues();
 
-	for (int j = 0; j < handles.size(); j++)
-	  {
-	    if (queryr.getInvid(j).equals(invid))
-	      {
-		handles.removeElementAt(j);
-		break;
-	      }
-	    else
-	      {
-		groupNameHash.put(queryr.getLabel(j), queryr.getInvid(j));
-	      }
-	  }
+        // The list of groups will contain the current group,
+        // which is being inactivated.  We need to remove that
+        // group from the vector.
 
-	if (debug)
-	  {
-	    System.err.println("groupInactivateWizard: " + lh.getLabel() + 
-			       " has " + handles.size() + 
-			       " groups left, besides the home group.");
-	  }
+        Vector handles = queryr.getHandles();
+        Invid invid = groupObject.getInvid();
 
-	// If there aren't any groups left, get the hell out of
-	// here.  The user is not ready for this operation.
+        for (int j = 0; j < handles.size(); j++)
+          {
+            if (queryr.getInvid(j).equals(invid))
+              {
+                handles.removeElementAt(j);
+                break;
+              }
+            else
+              {
+                groupNameHash.put(queryr.getLabel(j), queryr.getInvid(j));
+              }
+          }
 
-	if (handles.size() < 1)
-	  {
-	    rejectedUsers.addElement(lh.getLabel());
-	  }
-		
-	retVal.getDialog().addChoice(lh.getLabel(), queryr.getLabels());
+        if (debug)
+          {
+            System.err.println("groupInactivateWizard: " + lh.getLabel() +
+                               " has " + handles.size() +
+                               " groups left, besides the home group.");
+          }
+
+        // If there aren't any groups left, get the hell out of
+        // here.  The user is not ready for this operation.
+
+        if (handles.size() < 1)
+          {
+            rejectedUsers.addElement(lh.getLabel());
+          }
+
+        retVal.getDialog().addChoice(lh.getLabel(), queryr.getLabels());
       }
 
     // were there users who had no other groups to belong to?  If so,
@@ -356,29 +359,29 @@ public class groupInactivateWizard extends GanymediatorWizard {
 
     if (rejectedUsers.size() != 0)
       {
-	StringBuffer rejectedBuffer = new StringBuffer();
+        StringBuffer rejectedBuffer = new StringBuffer();
 
-	rejectedBuffer.append("The following users don't have any other groups:\n\n");
+        rejectedBuffer.append("The following users don't have any other groups:\n\n");
 
-	for (int i = 0; i < rejectedUsers.size(); i++)
-	  {
-	    rejectedBuffer.append(rejectedUsers.elementAt(i));
-	    rejectedBuffer.append("\n");
-	  }
+        for (int i = 0; i < rejectedUsers.size(); i++)
+          {
+            rejectedBuffer.append(rejectedUsers.elementAt(i));
+            rejectedBuffer.append("\n");
+          }
 
-	rejectedBuffer.append("\nYou must modify or inactivate these users before ");
-	rejectedBuffer.append("inactivating this group.");
+        rejectedBuffer.append("\nYou must modify or inactivate these users before ");
+        rejectedBuffer.append("inactivating this group.");
 
-	groupObject.inactivate(false, true, ckp_label); // Not sucessful, from wizard
+        groupObject.inactivate(false, true, ckp_label); // Not sucessful, from wizard
 
-	return fail("Group Inactivate Failed",
-		    rejectedBuffer.toString(),
-		    "Ok", null, "ok.gif");
+        return fail("Group Inactivate Failed",
+                    rejectedBuffer.toString(),
+                    "Ok", null, "ok.gif");
       }
 
     if (debug)
       {
-	System.err.println("groupInactivateWizard: returning dialog with all the choices, state now = 2");
+        System.err.println("groupInactivateWizard: returning dialog with all the choices, state now = 2");
       }
 
     return retVal;
@@ -388,7 +391,7 @@ public class groupInactivateWizard extends GanymediatorWizard {
    * If we are called here, the user responded to a dialog asking them
    * to select new home groups for users who had this group chosen as
    * their home group.
-   * 
+   *
    */
 
   public ReturnVal processDialog2() throws NotLoggedInException
@@ -397,62 +400,64 @@ public class groupInactivateWizard extends GanymediatorWizard {
 
     if (debug)
       {
-	System.err.println("groupInactivateWizard: state = 2");
+        System.err.println("groupInactivateWizard: state = 2");
       }
-    
+
     Enumeration keys = getKeys();
 
     while (keys.hasMoreElements())
       {
-	String userName = (String) keys.nextElement();
-	String newHomeGroupName = (String) getParam(userName);
-	Invid newHomeGroup = (Invid) groupNameHash.get(newHomeGroupName);
+        String userName = (String) keys.nextElement();
+        String newHomeGroupName = (String) getParam(userName);
+        Invid newHomeGroup = (Invid) groupNameHash.get(newHomeGroupName);
 
-	if (debug)
-	  {
-	    System.err.println("groupInactivateWizard: fixing up " + userName);
-	  }
-	    
-	DBObject usr = (DBObject) userObjectHash.get(userName);
+        if (debug)
+          {
+            System.err.println("groupInactivateWizard: fixing up " + userName);
+          }
 
-	if (debug)
-	  {
-	    System.err.println("Setting home group for " + userName + " to " + newHomeGroup);
-	  }
+        DBObject usr = (DBObject) userObjectHash.get(userName);
 
-	InvidDBField ugField = (InvidDBField) usr.getField(userSchema.HOMEGROUP);
+        if (debug)
+          {
+            System.err.println("Setting home group for " + userName + " to " + newHomeGroup);
+          }
 
-	try
-	  {
-	    ReturnVal retv = ugField.setValue(newHomeGroup);
+        InvidDBField ugField = (InvidDBField) usr.getField(userSchema.HOMEGROUP);
 
-	    if ((retv != null) && (! retv.didSucceed()))
-	      {
-		groupObject.inactivate(false, true, ckp_label);
-		return retv;
-	      }
-	    else
-	      {
-		finalReturnVal.unionRescan(retv);
-	      }
-	  }
-	catch (GanyPermissionsException ex)
-	  {
-	    return Ganymede.createErrorDialog("permissions", "permissions error setting home group object " + ex);
-	  }
+        try
+          {
+            ReturnVal retv = ugField.setValue(newHomeGroup);
+
+            if ((retv != null) && (! retv.didSucceed()))
+              {
+                groupObject.inactivate(false, true, ckp_label);
+                return retv;
+              }
+            else
+              {
+                finalReturnVal.unionRescan(retv);
+              }
+          }
+        catch (GanyPermissionsException ex)
+          {
+            return Ganymede.createErrorDialog(this.session,
+                                              "permissions",
+                                              "permissions error setting home group object " + ex);
+          }
       }
 
     groupObject.inactivate(true, true, ckp_label);
 
     if (debug)
       {
-	System.err.println("groupInactivateWizard: all done.");
+        System.err.println("groupInactivateWizard: all done.");
       }
-    
+
     ReturnVal result = success("Group Inactivation performed",
-			       "The Group has been inactivated, and all " +
-			       "the users have new home groups.",
-			       "OK", null, "ok.gif").unionRescan(finalReturnVal);
+                               "The Group has been inactivated, and all " +
+                               "the users have new home groups.",
+                               "OK", null, "ok.gif").unionRescan(finalReturnVal);
 
     System.err.println(result.dumpRescanInfo());
 
@@ -470,10 +475,10 @@ public class groupInactivateWizard extends GanymediatorWizard {
 
     if (debug)
       {
-	System.err.println("groupInactivateWizard: all done, no home groups.");
+        System.err.println("groupInactivateWizard: all done, no home groups.");
       }
 
     return success("Group Inactivation performed",
-		   "The group has been inactivated.", "OK", null, "ok.gif");
+                   "The group has been inactivated.", "OK", null, "ok.gif");
   }
 }

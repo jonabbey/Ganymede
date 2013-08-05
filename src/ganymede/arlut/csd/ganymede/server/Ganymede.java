@@ -82,6 +82,7 @@ import org.solinger.cracklib.Packer;
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.PackageResources;
 import arlut.csd.Util.ParseArgs;
+import arlut.csd.Util.StringUtils;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.BaseListTransport;
 import arlut.csd.ganymede.common.CategoryTransport;
@@ -1605,6 +1606,16 @@ public final class Ganymede {
 
   static public ReturnVal createInfoDialog(String title, String body)
   {
+    return Ganymede.createInfoDialog(null, title, body);
+  }
+
+  /**
+   * <p>This is a convenience method used by the server to return a
+   * standard informative dialog.</p>
+   */
+
+  static public ReturnVal createInfoDialog(GanymedeSession session, String title, String body)
+  {
     ReturnVal retVal = new ReturnVal(true,true); // success ok, doNormalProcessing ok
     retVal.setDialog(new JDialogBuff(title,
                                      body,
@@ -1614,29 +1625,32 @@ public final class Ganymede {
 
     if (logInfoDialogs)
       {
-        System.err.println(ts.l("createInfoDialog.log_info", body));
-      }
+        if (session == null)
+          {
+            // "[INFO]: {0}"
+            System.err.println(ts.l("createInfoDialog.log_info", body));
+          }
+        else
+          {
+            String username = session.getIdentity();
+            String hostname = session.getClientHostName();
 
-    return retVal;
-  }
-
-  /**
-   * <p>This is a convenience method used by the server to return a
-   * standard error dialog.</p>
-   */
-
-  static public ReturnVal createErrorDialog(String title, String body)
-  {
-    ReturnVal retVal = new ReturnVal(false);
-    retVal.setDialog(new JDialogBuff(title,
-                                     body,
-                                     OK,
-                                     null,
-                                     "error.gif"));
-
-    if (logErrorDialogs)
-      {
-        System.err.println(ts.l("createErrorDialog.log_error", body));
+            if (hostname != null && !hostname.trim().equals(""))
+              {
+                // "[INFO] {0} on {1}: "
+                System.err.print(StringUtils.insertPrefixPerLine(body,
+                                                                 ts.l("createInfoDialog.user_host_prefix",
+                                                                      username,
+                                                                      hostname)));
+              }
+            else
+              {
+                // "[INFO] {0}: "
+                System.err.print(StringUtils.insertPrefixPerLine(body,
+                                                                 ts.l("createInfoDialog.user_prefix",
+                                                                      username)));
+              }
+          }
       }
 
     return retVal;
@@ -1653,8 +1667,35 @@ public final class Ganymede {
 
   static public ReturnVal createErrorDialog(String body)
   {
+    return Ganymede.createErrorDialog(null, null, body);
+  }
+
+  /**
+   * <p>This is a convenience method used by the server to return a
+   * standard error dialog.</p>
+   */
+
+  static public ReturnVal createErrorDialog(String title, String body)
+  {
+    return Ganymede.createErrorDialog(null, title, body);
+  }
+
+  /**
+   * <p>This is a convenience method used by the server to return a
+   * standard error dialog.</p>
+   */
+
+  static public ReturnVal createErrorDialog(GanymedeSession session, String title, String body)
+  {
+    String myTitle = title;
+
+    if (myTitle == null)
+      {
+        myTitle = ts.l("createErrorDialog.default_title"); // "Error"
+      }
+
     ReturnVal retVal = new ReturnVal(false);
-    retVal.setDialog(new JDialogBuff(ts.l("createErrorDialog.default_title"),
+    retVal.setDialog(new JDialogBuff(myTitle,
                                      body,
                                      OK,
                                      null,
@@ -1662,7 +1703,32 @@ public final class Ganymede {
 
     if (logErrorDialogs)
       {
-        System.err.println(ts.l("createErrorDialog.log_error", body));
+        if (session == null)
+          {
+            // "[ERR]: {0}"
+            System.err.println(ts.l("createErrorDialog.log_error", body));
+          }
+        else
+          {
+            String username = session.getIdentity();
+            String hostname = session.getClientHostName();
+
+            if (hostname != null && !hostname.trim().equals(""))
+              {
+                // "[ERR] {0} on {1}: "
+                System.err.print(StringUtils.insertPrefixPerLine(body,
+                                                                 ts.l("createErrorDialog.user_host_prefix",
+                                                                      username,
+                                                                      hostname)));
+              }
+            else
+              {
+                // "[ERR] {0}: "
+                System.err.print(StringUtils.insertPrefixPerLine(body,
+                                                                 ts.l("createErrorDialog.user_prefix",
+                                                                      username)));
+              }
+          }
       }
 
     return retVal;
@@ -1680,7 +1746,7 @@ public final class Ganymede {
   static public ReturnVal loginError(Exception ex)
   {
     return createErrorDialog(ts.l("loginError.error"),
-                                      ts.l("loginError.explain"));
+                             ts.l("loginError.explain"));
   }
 
   /**

@@ -215,7 +215,8 @@ public class emailRedirectCustom extends DBEditObject implements SchemaConstants
 
     if (!fitsInNIS(newItemVect))
       {
-        return Ganymede.createErrorDialog("Overflow error",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "Overflow error",
                                           "The address that you are attempting to add to the " + getTypeName() +
                                           " email redirection cannot all fit.  No NIS email alias definition in the laboratory's " +
                                           "network can be longer than 1024 characters.");
@@ -257,7 +258,8 @@ public class emailRedirectCustom extends DBEditObject implements SchemaConstants
 
     if (!fitsInNIS((Vector<String>)submittedValues))
       {
-        return Ganymede.createErrorDialog("Overflow error",
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          "Overflow error",
                                           "The " + submittedValues.size() +
                                           " addresses that you are attempting to add to the " + getTypeName() +
                                           " email redirection cannot all fit.  No NIS email list in the laboratory's " +

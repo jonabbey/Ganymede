@@ -337,7 +337,9 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
               }
             catch (GanyPermissionsException ex)
               {
-                retVal = Ganymede.createErrorDialog("permissions" , "permissions error setting home group " + ex);
+                retVal = Ganymede.createErrorDialog(this.session,
+                                                    "permissions" ,
+                                                    "permissions error setting home group " + ex);
               }
 
             break;
@@ -375,7 +377,8 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
           }
         catch (GanyPermissionsException ex)
           {
-            retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
+            retVal = Ganymede.createErrorDialog(this.session,
+                                                "userHomeGroupDelWizard: Error",
                                                 "Permissions error in deleting old home group.");
           }
 
@@ -402,7 +405,8 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
 
             if (!session.getDBSession().rollback(checkPointKey))
               {
-                retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
+                retVal = Ganymede.createErrorDialog(this.session,
+                                                    "userHomeGroupDelWizard: Error",
                                                     "Ran into a problem during home group deletion, and rollback failed");
               }
 
@@ -415,7 +419,8 @@ public class userHomeGroupDelWizard extends GanymediatorWizard implements userSc
 
         if (!session.getDBSession().rollback(checkPointKey))
           {
-            retVal = Ganymede.createErrorDialog("userHomeGroupDelWizard: Error",
+            retVal = Ganymede.createErrorDialog(this.session,
+                                                "userHomeGroupDelWizard: Error",
                                                 "Ran into a problem during home group change, and rollback failed");
           }
 

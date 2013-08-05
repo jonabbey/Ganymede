@@ -72,7 +72,6 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 
-import arlut.csd.JDataComponent.JMultiLineLabel;
 import arlut.csd.JDialog.StandardDialog;
 import arlut.csd.JDialog.StringDialog;
 import arlut.csd.Util.TranslationService;
@@ -186,8 +185,8 @@ public class PersonaDialog extends StandardDialog implements ActionListener {
 
         JPanel topPersonaPanel = new JPanel(new BorderLayout());
 
-        // "\nThe Ganymede server timed you out due to inactivity.\n\nYou will have to re-authenticate with your password in order to continue using Ganymede."
-        JMultiLineLabel explanation = new JMultiLineLabel(ts.l("init.timed_out_msg"));
+        // "<html><br>The Ganymede server timed you out due to inactivity.<br><br>You will have to re-authenticate with your password in order to continue using Ganymede.</html>"
+        JLabel explanation = new JLabel(ts.l("init.timed_out_msg"));
 
         explanation.setBorder(new EmptyBorder(new Insets(0,0,0,10)));
 

@@ -1,5 +1,5 @@
 Ganymede Release 2.0
-8 February 2012
+29 June 2013
 CREDITS
 
 ---------------------------------------------
@@ -124,9 +124,9 @@ interface recommendations and bug reports.  Marcus also helped
 designed the gasharl schema's support for Active Directory constructs.
 Jay Scott contributed work on the build script environment used to
 propagate data from Ganymede into the laboratory's information
-systems.  GASH admins Glen Kronschnabl, Carrie Woodworth, Rich
-Gramann, Andrew Helyer, Richard Mach, Randy Zagar, and many others
-made helpful reports on gaps and problems with Ganymede.
+systems.  GASH admins Mark Parker, Glen Kronschnabl, Carrie Woodworth,
+Rich Gramann, Andrew Helyer, Richard Mach, Randy Zagar, and many
+others made helpful reports on gaps and problems with Ganymede.
 
 John Knutson has provided bug reports and code contributions in the
 course of evaluating the Ganymede code for use on an SGL

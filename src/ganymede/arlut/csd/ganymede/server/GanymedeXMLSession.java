@@ -3148,10 +3148,12 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
       {
         if (!(ex instanceof XMLIntegrationException))
           {
-            tell(ex.getStackTrace());
+            tell(ex);
           }
-
-        tell(ex.getMessage());
+        else
+          {
+            tell(ex.getMessage());
+          }
 
         // "Errors encountered, aborting transaction. "
         tell(ts.l("integrateXMLTransaction.agony_of_defeat"));
@@ -3452,12 +3454,9 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * receive.
    */
 
-  public void tell(StackTraceElement[] buf)
+  public void tell(Throwable ex)
   {
-    synchronized (this.parsing)
-      {
-        this.err.println(buf);
-      }
+    this.err.println(Ganymede.stackTrace(ex));
   }
 }
 

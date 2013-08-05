@@ -624,7 +624,9 @@ public class userCategoryWizard extends GanymediatorWizard {
       }
     catch (GanyPermissionsException ex)
       {
-        return Ganymede.createErrorDialog("permissions", "permissions error setting category. " + ex);
+        return Ganymede.createErrorDialog(this.session,
+                                          "permissions",
+                                          "permissions error setting category. " + ex);
       }
 
     if (retVal != null && !retVal.didSucceed())
@@ -650,7 +652,9 @@ public class userCategoryWizard extends GanymediatorWizard {
       }
     catch (GanyPermissionsException ex)
       {
-        return Ganymede.createErrorDialog("permissions", "permissions error setting expiration date " + ex);
+        return Ganymede.createErrorDialog(this.session,
+                                          "permissions",
+                                          "permissions error setting expiration date " + ex);
       }
 
     if (retVal != null && !retVal.didSucceed())

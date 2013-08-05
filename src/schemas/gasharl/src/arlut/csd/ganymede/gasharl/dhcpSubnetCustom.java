@@ -1,10 +1,10 @@
 /*
 
-   dhcpNetworkCustom.java
+   dhcpSubnetCustom.java
 
    This file is a management class for DHCP Network objects in Ganymede.
 
-   Created: 10 October 2007
+   Created: 1 August 2013
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
@@ -54,6 +54,7 @@ import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
 import arlut.csd.ganymede.common.NotLoggedInException;
+import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
 import arlut.csd.ganymede.server.DBEditObject;
@@ -69,17 +70,17 @@ import arlut.csd.ganymede.server.StringDBField;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                               dhcpNetworkCustom
+                                                                dhcpSubnetCustom
 
 ------------------------------------------------------------------------------*/
 
-public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, dhcpNetworkSchema {
+public class dhcpSubnetCustom extends DBEditObject implements SchemaConstants, dhcpSubnetSchema {
 
   /**
    * <p>Customization Constructor</p>
    */
 
-  public dhcpNetworkCustom(DBObjectBase objectBase)
+  public dhcpSubnetCustom(DBObjectBase objectBase)
   {
     super(objectBase);
   }
@@ -88,7 +89,7 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
    * <p>Create new object constructor</p>
    */
 
-  public dhcpNetworkCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset)
+  public dhcpSubnetCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset)
   {
     super(objectBase, invid, editset);
   }
@@ -98,39 +99,9 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
    * out an object for editing.</p>
    */
 
-  public dhcpNetworkCustom(DBObject original, DBEditSet editset)
+  public dhcpSubnetCustom(DBObject original, DBEditSet editset)
   {
     super(original, editset);
-  }
-
-  /**
-   * <p>Customization method to verify whether the user should be able to
-   * see a specific field in a given object.  Instances of
-   * {@link arlut.csd.ganymede.server.DBField DBField} will
-   * wind up calling up to here to let us override the normal visibility
-   * process.</p>
-   *
-   * <p>Note that it is permissible for session to be null, in which case
-   * this method will always return the default visiblity for the field
-   * in question.</p>
-   *
-   * <p>If field is not from an object of the same base as this DBEditObject,
-   * an exception will be thrown.</p>
-   *
-   * <p>To be overridden on necessity in DBEditObject subclasses.</p>
-   *
-   * <p><b>*PSEUDOSTATIC*</b></p>
-   */
-
-  @Override public boolean canSeeField(DBSession session, DBField field)
-  {
-    if (field.getID() == SUBNETS &&
-        "_GLOBAL_".equals(field.getOwner().getFieldValueLocal(NAME)))
-      {
-        return false;
-      }
-
-    return super.canSeeField(session, field);
   }
 
   /**
@@ -156,69 +127,47 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
     switch (fieldid)
       {
         case NAME:
+        case NETWORK_NUMBER:
+        case NETWORK_MASK:
           return true;
+      }
 
-        case OPTIONS:
-          if ("_GLOBAL_".equals(object.getFieldValueLocal(NAME)))
-            {
-              return true;
-            }
-
-          break;
-
-        case SUBNETS:
-          if (!"_GLOBAL_".equals(object.getFieldValueLocal(NAME)))
-            {
-              return true;
-            }
-
-          break;
+    if (fieldid == GUEST_RANGE)
+      {
+        return object.isSet(ALLOW_REGISTERED_GUESTS);
       }
 
     return false;
   }
 
-
   /**
-   * <p>Customization method to verify overall consistency of a
-   * DBObject.  This method is intended to be overridden in
-   * DBEditObject subclasses, and will be called by {@link
-   * arlut.csd.ganymede.server.DBEditObject#commitPhase1()
-   * commitPhase1()} to verify the readiness of this object for
-   * commit.  The DBObject passed to this method will be a
-   * DBEditObject, complete with that object's GanymedeSession
-   * reference if this method is called during transaction commit, and
-   * that session reference may be used by the verifying code if the
-   * code needs to access the database.</p>
+   * <p>Customization method to verify whether the user should be able to
+   * see a specific field in a given object.  Instances of
+   * {@link arlut.csd.ganymede.server.DBField DBField} will
+   * wind up calling up to here to let us override the normal visibility
+   * process.</p>
    *
-   * <p>This method is for custom checks specific to custom
-   * DBEditObject subclasses.  Standard checking for missing fields
-   * for which fieldRequired() returns true is done by {@link
-   * arlut.csd.ganymede.server.DBEditSet#commit_checkObjectMissingFields(arlut.csd.ganymede.server.DBEditObject)}
-   * during {@link
-   * arlut.csd.ganymede.server.DBEditSet#commit_handlePhase1()}.</p>
+   * <p>Note that it is permissible for session to be null, in which case
+   * this method will always return the default visiblity for the field
+   * in question.</p>
+   *
+   * <p>If field is not from an object of the same base as this DBEditObject,
+   * an exception will be thrown.</p>
    *
    * <p>To be overridden on necessity in DBEditObject subclasses.</p>
    *
    * <p><b>*PSEUDOSTATIC*</b></p>
-   *
-   * @return A ReturnVal indicating success or failure.  May
-   * be simply 'null' to indicate success if no feedback need
-   * be provided.
    */
 
-  @Override public ReturnVal consistencyCheck(DBObject object)
+  @Override public boolean canSeeField(DBSession session, DBField field)
   {
-    if ("_GLOBAL_".equals(object.getFieldValueLocal(NAME)))
+    if (field.getID() == GUEST_RANGE ||
+        field.getID() == GUEST_OPTIONS)
       {
-        if (object.isDefined(SUBNETS))
-          {
-            return Ganymede.createErrorDialog("DHCP Network Problem",
-                                              "The _GLOBAL_ DHCP Network definition cannot have any subnets.");
-          }
+        return field.getOwner().isSet(ALLOW_REGISTERED_GUESTS);
       }
 
-    return null;
+    return super.canSeeField(session, field);
   }
 
   /**
@@ -233,6 +182,11 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
 
   @Override public boolean canCloneField(DBSession session, DBObject object, DBField field)
   {
+    if (field.getID() == NETWORK_NUMBER)
+      {
+        return false;
+      }
+
     return super.canCloneField(session, object, field);
   }
 
@@ -291,16 +245,7 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
         return retVal;
       }
 
-    retVal = ReturnVal.merge(retVal, copyObjects(session, origObj, OPTIONS, local));
-
-    if (!ReturnVal.didSucceed(retVal))
-      {
-        return retVal;
-      }
-
-    retVal = ReturnVal.merge(retVal, copyObjects(session, origObj, SUBNETS, local));
-
-    return retVal;
+    return ReturnVal.merge(retVal, copyObjects(session, origObj, OPTIONS, local));
   }
 
   private ReturnVal copyObjects(DBSession session, DBObject origObject, short copyFieldID, boolean local)
@@ -416,30 +361,53 @@ public class dhcpNetworkCustom extends DBEditObject implements SchemaConstants, 
    * be provided.
    */
 
-  @Override public ReturnVal finalizeSetValue(DBField field, Object value)
+  @Override public synchronized ReturnVal finalizeSetValue(DBField field, Object value)
   {
-    if (field.getID() == NAME)
+    // If the allow register guests checkbox is changed, hide/show the field and options next.
+
+    if (field.getID() == ALLOW_REGISTERED_GUESTS)
       {
-        String currentValue = (String) field.getValueLocal();
+        ReturnVal result = ReturnVal.success();
 
-        if ("_GLOBAL_".equals(currentValue))
+        if (value == null || Boolean.FALSE.equals(value))
           {
-            return Ganymede.createErrorDialog(this.getGSession(),
-                                              "Can't change name of _GLOBAL_ DHCP Network",
-                                              "The _GLOBAL_ DHCP Network is required in order to provide the default configuration for DHCP.  It may not be renamed or deleted.");
-          }
+            getDBSession().checkpoint("clearing guest fields");
 
-        if ("_GLOBAL_".equals(value))
-          {
-            if (isDefined(SUBNETS))
+            try
               {
-                return Ganymede.createErrorDialog(this.getGSession(),
-                                                  "Can't set DHCP Network name to _GLOBAL_",
-                                                  "The subnets field must be empty in the _GLOBAL_ DHCP network.");
-              }
+                StringDBField guest_range = (StringDBField) getField(GUEST_RANGE);
+                result = ReturnVal.merge(result, guest_range.setValueLocal(null));
 
-            return ReturnVal.success().addRescanField(getInvid(), SUBNETS);
+                DBField guest_options = (DBField) getField(GUEST_OPTIONS);
+
+                try
+                  {
+                    result = ReturnVal.merge(result, guest_options.deleteAllElements());
+                  }
+                catch (GanyPermissionsException ex)
+                  {
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      "permissions",
+                                                      "permissions error deleting embedded object" + ex);
+                  }
+              }
+            finally
+              {
+                if (!ReturnVal.didSucceed(result))
+                  {
+                    getDBSession().rollback("clearing guest fields");
+                  }
+                else
+                  {
+                    getDBSession().popCheckpoint("clearing guest fields");
+                  }
+              }
           }
+
+        result.addRescanField(field.getOwner().getInvid(), GUEST_RANGE);
+        result.addRescanField(field.getOwner().getInvid(), GUEST_OPTIONS);
+
+        return result;
       }
 
     return null;

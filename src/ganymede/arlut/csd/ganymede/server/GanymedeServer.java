@@ -112,6 +112,14 @@ public final class GanymedeServer implements Server {
   static GanymedeServer server = null;
 
   /**
+   * <p>You may want to change this if you don't want to let the
+   * monitor account do unprivileged (Default role equivalent) queries
+   * on the client.</p>
+   */
+
+  static private final boolean ALLOW_MONITOR_CLIENT_USE = true;
+
+  /**
    * <p>Vector of {@link arlut.csd.ganymede.server.GanymedeSession
    * GanymedeSession} objects for user sessions to be monitored by the
    * admin console.</p>
@@ -381,16 +389,23 @@ public final class GanymedeServer implements Server {
 
         return reportSuccessLogin(session);
       }
+    catch (Throwable ex)
+      {
+        Ganymede.logError(ex, ts.l("processLogin.failure"));
+
+        return reportFailedLogin(clientName);
+      }
     finally
       {
         if (!success)
           {
-            GanymedeServer.lSemaphore.decrement();
-
             // notify the consoles after decrementing the login
             // semaphore so the notify won't show the transient
             // semaphore increment
 
+            GanymedeServer.lSemaphore.decrement();
+
+            // "Bad login attempt for username: {0} from host {1}"
             Ganymede.debug(ts.l("reportFailedLogin.badlogevent", clientName, GanymedeServer.getClientHost()));
           }
       }
@@ -697,13 +712,14 @@ public final class GanymedeServer implements Server {
         return this.validateUserLogin(name, clientPass);
       }
 
-    // don't let the monitor account login to the client
-    //
-    //    if (personaObj.getInvid().equals(Invid.createInvid(SchemaConstants.PersonaBase,
-    //                                                       SchemaConstants.PersonaMonitorObj)))
-    //      {
-    //        return null;
-    //      }
+    if (!ALLOW_MONITOR_CLIENT_USE)
+      {
+        if (personaObj.getInvid().equals(Invid.createInvid(SchemaConstants.PersonaBase,
+                                                           SchemaConstants.PersonaMonitorObj)))
+          {
+            return null;
+          }
+      }
 
     DBObject userObj = getUserFromPersona(personaObj);
 
@@ -1105,12 +1121,12 @@ public final class GanymedeServer implements Server {
       {
         if (GanymedeServer.shutdownAdmin == null)
           {
-            // "Ganymede server going down for ''{0}''."
+            // "Ganymede server going down:\n{0}"
             shuttingDownNowMsg = ts.l("shutdown.console_notify_reason", GanymedeServer.shutdownReason);
           }
         else
           {
-            // "Ganymede admin {1} on host {2} shutting down server for ''{0}''."
+            // "Ganymede admin {1} on host {2} shutting down server:\n\n{0}"
             shuttingDownNowMsg = ts.l("shutdown.console_notify_reason_admin",
                                       GanymedeServer.shutdownReason,
                                       shutdownAdmin.getAdminName(),

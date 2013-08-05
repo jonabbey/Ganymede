@@ -420,7 +420,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Permissions Error"
         // "You do not have permission to clear the "{0}" password field in object "{1}"."
-        return Ganymede.createErrorDialog(ts.l("setUndefined.perm_error_subj"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("setUndefined.perm_error_subj"),
                                           ts.l("setUndefined.perm_error_text", this.getName(),
                                                this.owner.getLabel()));
       }
@@ -582,7 +583,8 @@ public class PasswordDBField extends DBField implements pass_field {
           {
             // "Error Copying Password Field"
             // "Can''t copy field "{0}" in object "{1}", no read privileges on source."
-            return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("copyFieldTo.error_subj"),
                                               ts.l("copyFieldTo.no_read", this.getName(),
                                                    this.owner.getLabel()));
           }
@@ -592,7 +594,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Error Copying Password Field"
         // "Can''t copy field "{0}" in object "{1}", no write privileges on target."
-        return Ganymede.createErrorDialog(ts.l("copyFieldTo.error_subj"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("copyFieldTo.error_subj"),
                                           ts.l("copyFieldTo.no_write", this.getName(),
                                                this.owner.getLabel()));
       }
@@ -1997,7 +2000,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Password Field Error"
         // "Don''t have permission to edit field {0} in object {1}."
-        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("global.error_subj"),
                                           ts.l("global.perm_error_text", this.getName(),
                                                this.owner.getLabel()));
       }
@@ -2006,7 +2010,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Server: Error in PasswordDBField.setCryptTextPass()"
         // "Password field not configured to support traditional Unix crypt hashing."
-        return Ganymede.createErrorDialog(ts.l("setCryptPass.error_title"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("setCryptPass.error_title"),
                                           ts.l("setCryptPass.error_text"));
       }
 
@@ -2104,7 +2109,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Password Field Error"
         // "Don''t have permission to edit field {0} in object {1}."
-        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("global.error_subj"),
                                           ts.l("global.perm_error_text", this.getName(),
                                                this.owner.getLabel()));
       }
@@ -2113,7 +2119,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Server: Error in PasswordDBField.setMD5CryptPass()"
         // "Password field not configured to support MD5Crypt hashing."
-        return Ganymede.createErrorDialog(ts.l("setMD5CryptPass.error_title"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("setMD5CryptPass.error_title"),
                                           ts.l("setMD5CryptPass.error_text"));
       }
 
@@ -2121,7 +2128,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Password Field Error"
         // "The hash text passed to setMD5CryptPass(), "{0}", is not a well-formed MD5Crypt hash text."
-        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("global.error_subj"),
                                           ts.l("setMD5CryptPass.format_error", text));
       }
 
@@ -2221,7 +2229,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Password Field Error"
         // "Don''t have permission to edit field {0} in object {1}."
-        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("global.error_subj"),
                                           ts.l("global.perm_error_text", this.getName(),
                                                this.owner.getLabel()));
       }
@@ -2230,7 +2239,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Server: Error in PasswordDBField.setApacheMD5CryptTextPass()"
         // "Password field not configured to support ApacheMD5Crypt hashing."
-        return Ganymede.createErrorDialog(ts.l("setApacheMD5CryptPass.error_title"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("setApacheMD5CryptPass.error_title"),
                                           ts.l("setApacheMD5CryptPass.error_text"));
       }
 
@@ -2238,7 +2248,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Password Field Error"
         // "The hash text passed to setMD5CryptPass(), "{0}", is not a well-formed ApacheMD5Crypt hash text."
-        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("global.error_subj"),
                                           ts.l("setApacheMD5CryptPass.format_error", text));
       }
 
@@ -2339,7 +2350,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Password Field Error"
         // "Don''t have permission to edit field {0} in object {1}."
-        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("global.error_subj"),
                                           ts.l("global.perm_error_text", this.getName(),
                                                this.owner.getLabel()));
       }
@@ -2348,7 +2360,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Server: Error in PasswordDBField.setWinCryptedPass()"
         // "Password field is not configured to accept Samba hashed password strings."
-        return Ganymede.createErrorDialog(ts.l("setWinCryptedPass.error_title"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("setWinCryptedPass.error_title"),
                                           ts.l("setWinCryptedPass.error_text"));
       }
 
@@ -2455,7 +2468,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Password Field Error"
         // "Don''t have permission to edit field {0} in object {1}."
-        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("global.error_subj"),
                                           ts.l("global.perm_error_text", this.getName(),
                                                this.owner.getLabel()));
       }
@@ -2464,7 +2478,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Server: Error in PasswordDBField.setSSHAPass()"
         // "Password field is not configured to accept SSHA-1 hashed password strings."
-        return Ganymede.createErrorDialog(ts.l("setSSHAPass.error_title"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("setSSHAPass.error_title"),
                                           ts.l("setSSHAPass.error_text"));
       }
 
@@ -2472,7 +2487,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Server: Error in PasswordDBField.setSSHAPass()"
         // "The hash text passed to setSSHAPass(), "{0}", is not a well-formed, OpenLDAP-encoded SSHA-1 hash text."
-        return Ganymede.createErrorDialog(ts.l("setSSHAPass.error_title"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("setSSHAPass.error_title"),
                                           ts.l("setSSHAPass.format_error", this.getName()));
       }
 
@@ -2606,7 +2622,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Password Field Error"
         // "Don''t have permission to edit field {0} in object {1}."
-        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("global.error_subj"),
                                           ts.l("global.perm_error_text", this.getName(),
                                                this.owner.getLabel()));
       }
@@ -2615,7 +2632,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Server: Error in PasswordDBField.setShaUnixCryptPass()"
         // "Password field not configured to accept SHA Unix Crypt hashed password strings."
-        return Ganymede.createErrorDialog(ts.l("setShaUnixCryptPass.error_title"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("setShaUnixCryptPass.error_title"),
                                           ts.l("setShaUnixCryptPass.error_text"));
       }
 
@@ -2624,7 +2642,8 @@ public class PasswordDBField extends DBField implements pass_field {
         // "Server: Error in PasswordDBField.setShaUnixCryptPass()"
         // "The hash text passed to setShaUnixCryptPass(), "{0}", is
         // not a well-formed, SHA Unix Crypt hash text"
-        return Ganymede.createErrorDialog(ts.l("setShaUnixCryptPass.error_title"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("setShaUnixCryptPass.error_title"),
                                           ts.l("setShaUnixCryptPass.format_error", this.getName()));
       }
 
@@ -2740,7 +2759,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Password Field Error"
         // "Don''t have permission to edit field {0} in object {1}."
-        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("global.error_subj"),
                                           ts.l("global.perm_error_text", this.getName(),
                                                this.owner.getLabel()));
       }
@@ -2749,7 +2769,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Server: Error in PasswordDBField.setBCryptPass()"
         // "Password field not configured to accept bCrypt hashed password strings."
-        return Ganymede.createErrorDialog(ts.l("setBCryptPass.error_title"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("setBCryptPass.error_title"),
                                           ts.l("setBCryptPass.error_text"));
       }
 
@@ -2758,7 +2779,8 @@ public class PasswordDBField extends DBField implements pass_field {
         // "Server: Error in PasswordDBField.setBCryptPass()"
         // "The hash text passed to setBCryptPass(), "{0}", is
         // not a well-formed, bCrypt hash text"
-        return Ganymede.createErrorDialog(ts.l("setBCryptPass.error_title"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("setBCryptPass.error_title"),
                                           ts.l("setBCryptPass.format_error", this.getName()));
       }
 
@@ -2853,7 +2875,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Password Field Error"
         // "Don''t have permission to edit field {0} in object {1}."
-        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("global.error_subj"),
                                           ts.l("global.perm_error_text", this.getName(),
                                                this.owner.getLabel()));
       }
@@ -2881,7 +2904,8 @@ public class PasswordDBField extends DBField implements pass_field {
           {
             // "Server: Error in PasswordDBField.setAllHashes()"
             // "The SSHA hash text passed to setAllHashes() is not a well-formed, OpenLDAP-encoded SSHA-1 hash text."
-            return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("setAllHashes.error_title"),
                                               ts.l("setAllHashes.ssha_format_error"));
           }
       }
@@ -2892,7 +2916,8 @@ public class PasswordDBField extends DBField implements pass_field {
           {
             // "Server: Error in PasswordDBField.setAllHashes()"
             // "The hash text passed to setShaUnixCryptPass(), "{0}", is not a well-formed, SHA Unix Crypt hash text"
-            return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("setAllHashes.error_title"),
                                               ts.l("setShaUnixCryptPass.format_error", ShaUnixCryptText));
           }
       }
@@ -2903,7 +2928,8 @@ public class PasswordDBField extends DBField implements pass_field {
           {
             // "Server: Error in PasswordDBField.setAllHashes()"
             // "The MD5Crypt hash text passed to setAllHashes(), "{0}", is not well-formed."
-            return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("setAllHashes.error_title"),
                                               ts.l("setAllHashes.md5_format_error", md5crypt));
           }
       }
@@ -2914,7 +2940,8 @@ public class PasswordDBField extends DBField implements pass_field {
           {
             // "Server: Error in PasswordDBField.setAllHashes()"
             // "The Apache MD5Crypt hash text passed to setAllHashes(), "{0}", is not well-formed."
-            return Ganymede.createErrorDialog(ts.l("setAllHashes.error_title"),
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              ts.l("setAllHashes.error_title"),
                                               ts.l("setAllHashes.apache_format_error", apacheMd5Crypt));
           }
       }
@@ -3120,7 +3147,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Password Field Error"
         // "Don''t have permission to edit field {0} in object {1}."
-        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("global.error_subj"),
                                           ts.l("global.perm_error_text", this.getName(),
                                                this.owner.getLabel()));
       }
@@ -3131,7 +3159,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Password Field Error"
         // "Submitted value "{0}" is not a String object!  Major client error while trying to edit password field."
-        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("global.error_subj"),
                                           ts.l("verifyNewValue.type_error", o));
       }
 
@@ -3148,7 +3177,8 @@ public class PasswordDBField extends DBField implements pass_field {
 
         // "Password Field Error"
         // "The submitted password is too long.  The maximum plaintext password length accepted is {0,number,#} characters."
-        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("global.error_subj"),
                                           ts.l("verifyNewValue.too_long", Integer.valueOf(this.maxSize())));
       }
 
@@ -3156,7 +3186,8 @@ public class PasswordDBField extends DBField implements pass_field {
       {
         // "Password Field Error"
         // "The submitted password is too short.  The minimum plaintext password length accepted is {0,number,#} characters."
-        return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+        return Ganymede.createErrorDialog(this.getGSession(),
+                                          ts.l("global.error_subj"),
                                           ts.l("verifyNewValue.too_short", Integer.valueOf(this.minSize())));
       }
 
@@ -3170,7 +3201,8 @@ public class PasswordDBField extends DBField implements pass_field {
               {
                 // "Password Field Error"
                 // "Submitted password contains an unacceptable character ('{0}')."
-                return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("global.error_subj"),
                                                   ts.l("verifyNewValue.bad_char",
                                                        Character.valueOf(s.charAt(i))));
               }
@@ -3187,7 +3219,8 @@ public class PasswordDBField extends DBField implements pass_field {
               {
                 // "Password Field Error"
                 // "Submitted password contains an unacceptable character ('{0}')."
-                return Ganymede.createErrorDialog(ts.l("global.error_subj"),
+                return Ganymede.createErrorDialog(this.getGSession(),
+                                                  ts.l("global.error_subj"),
                                                   ts.l("verifyNewValue.bad_char",
                                                        Character.valueOf(s.charAt(i))));
               }
@@ -3215,7 +3248,8 @@ public class PasswordDBField extends DBField implements pass_field {
                   {
                     // "Password Quality Problem"
                     // "The password fails quality checking.\nThe checker reported the following problem:\n{0}"
-                    return Ganymede.createErrorDialog(ts.l("verifyNewValue.cracklib_failure_title"),
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      ts.l("verifyNewValue.cracklib_failure_title"),
                                                       ts.l("verifyNewValue.cracklib_failure_error", cracklibCheck));
                   }
               }
@@ -3247,7 +3281,8 @@ public class PasswordDBField extends DBField implements pass_field {
                   {
                     // "Password Used Before"
                     // "This password has been used too recently with this account.\n\nIt was last used with this account at {0, time} on {0, date, full}."
-                    return Ganymede.createErrorDialog(ts.l("verifyNewValue.history_reuse_title"),
+                    return Ganymede.createErrorDialog(this.getGSession(),
+                                                      ts.l("verifyNewValue.history_reuse_title"),
                                                       ts.l("verifyNewValue.history_reuse_error",
                                                            previousDate));
                   }

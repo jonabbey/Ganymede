@@ -249,7 +249,9 @@ public class userRenameWizard extends GanymediatorWizard {
       }
     catch (GanyPermissionsException ex)
       {
-        retVal = Ganymede.createErrorDialog("permissions", "permissions error setting user name " + ex);
+        retVal = Ganymede.createErrorDialog(this.session,
+                                            "permissions",
+                                            "permissions error setting user name " + ex);
       }
 
     System.err.println("userRenameWizard: Returned from field.setValue()");

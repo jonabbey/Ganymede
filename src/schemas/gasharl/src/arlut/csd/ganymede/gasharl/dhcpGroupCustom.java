@@ -191,7 +191,9 @@ public class dhcpGroupCustom extends DBEditObject implements SchemaConstants, dh
           }
         catch (GanyPermissionsException ex)
           {
-            return Ganymede.createErrorDialog("permissions", "permissions error creating embedded object" + ex);
+            return Ganymede.createErrorDialog(this.getGSession(),
+                                              "permissions",
+                                              "permissions error creating embedded object" + ex);
           }
 
         return retVal;
@@ -338,7 +340,8 @@ public class dhcpGroupCustom extends DBEditObject implements SchemaConstants, dh
                   }
                 catch (GanyPermissionsException ex)
                   {
-                    tmpVal = Ganymede.createErrorDialog("permissions",
+                    tmpVal = Ganymede.createErrorDialog(session.getGSession(),
+                                                        "permissions",
                                                         "permissions failure creating embedded option " + ex);
                   }
 
