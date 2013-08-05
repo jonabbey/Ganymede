@@ -3456,7 +3456,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     synchronized (this.parsing)
       {
-        this.err.println(buf);
+        for (StackTraceElement element: buf)
+          {
+            this.err.println(element.toString());
+          }
       }
   }
 }
