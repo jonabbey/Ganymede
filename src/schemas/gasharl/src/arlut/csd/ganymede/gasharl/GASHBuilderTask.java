@@ -5172,7 +5172,6 @@ public class GASHBuilderTask extends GanymedeBuilderTask {
                 network_mask = (String) ipField.getEncodingString();
               }
 
-            writer.write("{\n");
             writer.write("\tsubnet\t" + network_number + "\tnetmask\t\t" + network_mask + "\n");
             writer.write("\t{ \n");
 
