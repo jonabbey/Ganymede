@@ -325,9 +325,7 @@ public final class Invid implements java.io.Serializable {
   }
 
   /**
-   *
-   * Method to write this Invid out to a stream.
-   *
+   * <p>Method to write this Invid out to a stream.</p>
    */
 
   public void emit(DataOutput out) throws IOException
