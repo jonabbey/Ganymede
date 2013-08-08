@@ -4,15 +4,15 @@
 
    This controller interface handles the recording and retrieval of
    events from persistent storage.
-   
+
    Created: 18 February 2003
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
+
    Copyright (C) 1996-2010
    The University of Texas at Austin
 
@@ -66,7 +66,7 @@ import arlut.csd.ganymede.common.Invid;
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
-public interface DBLogController {
+public interface DBLogController extends java.io.Closeable {
 
   /**
    * <p>This method writes the given event to the persistent storage managed by
