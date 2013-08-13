@@ -79,6 +79,7 @@ import arlut.csd.JDataComponent.JsetValueCallback;
 import arlut.csd.ganymede.common.FieldInfo;
 import arlut.csd.ganymede.common.FieldTemplate;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.IPAddress;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.rmi.db_field;
 import arlut.csd.ganymede.rmi.db_object;
@@ -350,7 +351,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
                 JIPField ipf = new JIPField(editable,
                                             ipfield.v6Allowed());
 
-                ipf.setValue((Byte[]) ipfield.getElement(i));
+                ipf.setValue((IPAddress) ipfield.getElement(i));
                 ipf.setCallback(this);
 
                 addElement(ipf, false);
@@ -980,7 +981,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
                   {
                     JIPField ipf = (JIPField) compVector.elementAt(i);
 
-                    ipf.setValue((Byte[])my_field.getElement(i));
+                    ipf.setValue((IPAddress)my_field.getElement(i));
 
                     elementWrapper ew = ewHash.get(ipf);
 
@@ -993,7 +994,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
                     JIPField ipf = new JIPField(editable,
                                                 ipfield.v6Allowed());
 
-                    ipf.setValue((Byte[]) ipfield.getElement(i));
+                    ipf.setValue((IPAddress) ipfield.getElement(i));
                     ipf.setCallback(this);
 
                     addElement(ipf, false);
@@ -1260,7 +1261,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
               {
                 try
                   {
-                    returnValue = changeElement((Byte[])v.getValue(), index);
+                    returnValue = changeElement((IPAddress)v.getValue(), index);
                   }
                 catch (Exception rx)
                   {

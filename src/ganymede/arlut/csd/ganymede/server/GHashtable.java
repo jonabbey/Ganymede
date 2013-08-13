@@ -64,27 +64,13 @@ import java.util.Hashtable;
  * this by basically mapping all strings to the lowercase version
  * internally.  The case sensitivity of the hashtable is specified at
  * hash creation time, and may not change thereafter.</p>
- *
- * <p>This hashtable also has special support for handling arrays of
- * Bytes as keys in the hash, using the {@link
- * arlut.csd.ganymede.server.IPwrap IPwrap} class for I.P. address
- * representation.  All enumerations or iterations on GHashtables will
- * represent keys originally presented as Byte arrays as IPwrap
- * objects.</p>
  */
 
 public final class GHashtable extends Hashtable {
 
   public static String keyString(Object x)
   {
-    if (x instanceof Byte[])
-      {
-        return String.valueOf(new IPwrap((Byte[]) x));
-      }
-    else
-      {
-        return String.valueOf(x);
-      }
+    return String.valueOf(x);
   }
 
   private boolean caseInsensitive; // we don't allow this to change after creation
@@ -92,7 +78,6 @@ public final class GHashtable extends Hashtable {
   /* -- */
 
   /**
-   *
    * Fully specified constructor.
    *
    * @param initialCapacity as for Hashtable
@@ -100,7 +85,6 @@ public final class GHashtable extends Hashtable {
    * @param caseInsensitive if true, lowercase and uppercase string keys will be mapped together
    *
    * @see java.util.Hashtable
-   *
    */
 
   public GHashtable(int initialCapacity, float loadFactor, boolean caseInsensitive)
@@ -110,14 +94,12 @@ public final class GHashtable extends Hashtable {
   }
 
   /**
-   *
    * Medium specified constructor.
    *
    * @param initialCapacity as for Hashtable
    * @param caseInsensitive if true, lowercase and uppercase string keys will be mapped together
    *
    * @see java.util.Hashtable
-   *
    */
 
   public GHashtable(int initialCapacity, boolean caseInsensitive)
@@ -127,13 +109,11 @@ public final class GHashtable extends Hashtable {
   }
 
   /**
-   *
    * Least specified constructor.
    *
    * @param caseInsensitive if true, lowercase and uppercase string keys will be mapped together
    *
    * @see java.util.Hashtable
-   *
    */
 
   public GHashtable(boolean caseInsensitive)
@@ -248,11 +228,6 @@ public final class GHashtable extends Hashtable {
 
   public synchronized boolean containsKey(Object key)
   {
-    if (key instanceof Byte[])
-      {
-        key = new IPwrap((Byte[]) key);
-      }
-
     if (caseInsensitive)
       {
         return super.containsKey(new GKey(key));
@@ -265,11 +240,6 @@ public final class GHashtable extends Hashtable {
 
   public synchronized Object get(Object key)
   {
-    if (key instanceof Byte[])
-      {
-        key = new IPwrap((Byte[]) key);
-      }
-
     if (caseInsensitive)
       {
         return super.get(new GKey(key));
@@ -286,11 +256,6 @@ public final class GHashtable extends Hashtable {
 
     /* -- */
 
-    if (key instanceof Byte[])
-      {
-        key = new IPwrap((Byte[]) key);
-      }
-
     if (caseInsensitive)
       {
         result = super.put(new GKey(key), value);
@@ -305,11 +270,6 @@ public final class GHashtable extends Hashtable {
 
   public synchronized Object remove(Object key)
   {
-    if (key instanceof Byte[])
-      {
-        key = new IPwrap((Byte[]) key);
-      }
-
     if (caseInsensitive)
       {
         return super.remove(new GKey(key));
@@ -328,9 +288,10 @@ public final class GHashtable extends Hashtable {
 ------------------------------------------------------------------------------*/
 
 /**
- * This class provides a mapping to allow keys of differing capitalization to be
- * treated as identical in a hashtable, while allowing the capitalization-preserved
- * key value to be retrieved on demand, in support of the Hashtable.keys() method.
+ * This class provides a mapping to allow keys of differing
+ * capitalization to be treated as identical in a hashtable, while
+ * allowing the capitalization-preserved key value to be retrieved on
+ * demand, in support of the Hashtable.keys() method.
  */
 
 class GKey {
@@ -389,9 +350,10 @@ class GKey {
 ------------------------------------------------------------------------------*/
 
 /**
- * This class is in support of the Hashtable keys() method, to provide an
- * enumeration which will 'unwrap' GKey objects to provide access to the original
- * key submitted to the GHashtable, with capitalization preserved.
+ * This class is in support of the Hashtable keys() method, to provide
+ * an enumeration which will 'unwrap' GKey objects to provide access
+ * to the original key submitted to the GHashtable, with
+ * capitalization preserved.
  */
 
 class GEnum implements Enumeration {

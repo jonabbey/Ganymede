@@ -611,11 +611,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
               {
                 for (Object value: fieldRec.addValues)
                   {
-                    if (value instanceof IPwrap)
-                      {
-                        value = ((IPwrap) value).address;
-                      }
-
                     fieldCopy.getVectVal().add(value);
                   }
               }
@@ -624,11 +619,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
               {
                 for (Object value: fieldRec.delValues)
                   {
-                    if (value instanceof IPwrap)
-                      {
-                        value = ((IPwrap) value).address;
-                      }
-
                     fieldCopy.getVectVal().remove(value);
                   }
               }

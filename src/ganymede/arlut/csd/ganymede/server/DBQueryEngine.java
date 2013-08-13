@@ -55,6 +55,7 @@ import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.DumpResult;
 import arlut.csd.ganymede.common.GanyParseException;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.IPAddress;
 import arlut.csd.ganymede.common.ObjectHandle;
 import arlut.csd.ganymede.common.ObjectStatus;
 import arlut.csd.ganymede.common.PermEntry;
@@ -980,7 +981,7 @@ public final class DBQueryEngine {
 
                 try
                   {
-                    ipBytes = IPDBField.genIPV4bytes((String) node.value);
+                    ipBytes = IPAddress.genIPV4bytes((String) node.value);
                   }
                 catch (IllegalArgumentException ex)
                   {
@@ -1000,7 +1001,7 @@ public final class DBQueryEngine {
                   {
                     try
                       {
-                        ipBytes = IPDBField.genIPV6bytes((String) node.value);
+                        ipBytes = IPAddress.genIPV6bytes((String) node.value);
                       }
                     catch (IllegalArgumentException ex)
                       {

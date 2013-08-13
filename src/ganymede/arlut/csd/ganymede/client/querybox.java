@@ -112,6 +112,7 @@ import arlut.csd.Util.TranslationService;
 import arlut.csd.ganymede.common.BaseDump;
 import arlut.csd.ganymede.common.DumpResult;
 import arlut.csd.ganymede.common.FieldTemplate;
+import arlut.csd.ganymede.common.IPAddress;
 import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.QueryAndNode;
 import arlut.csd.ganymede.common.QueryDataNode;
@@ -1741,7 +1742,7 @@ class QueryRow implements ItemListener {
 
             // we only do a string operation if our operator is
             // "matching" or "matching [Case Insensitive]", otherwise
-            // we'll send a binary array of Byte objects up to the
+            // we'll send an encapsulated IPAddress object up to the
             // server for the IP match.
 
             if (!opName.equals(matching) &&
@@ -1749,25 +1750,12 @@ class QueryRow implements ItemListener {
                 !opName.equals(contain_matching_ci) &&
                 !opName.equals(contain_matching))
               {
-                if (strValue.indexOf(':') != -1)
+                try
                   {
-                    try
-                      {
-                        value = JIPField.genIPV6bytes(strValue);
-                      }
-                    catch (IllegalArgumentException ex)
-                      {
-                      }
+                    value = new IPAddress(strValue);
                   }
-                else
+                catch (IllegalArgumentException ex)
                   {
-                    try
-                      {
-                        value = JIPField.genIPV4bytes(strValue);
-                      }
-                    catch (IllegalArgumentException ex)
-                      {
-                      }
                   }
               }
           }

@@ -1,6 +1,6 @@
 /*
 
-   IPwrap.java
+   IPAddress.java
 
    This is a wrapper class for the Byte array IP value representation
    that allows IP addresses to be stored and processed in the Ganymede
@@ -48,7 +48,7 @@
 
 */
 
-package arlut.csd.ganymede.server;
+package arlut.csd.ganymede.common;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -56,10 +56,11 @@ import java.io.IOException;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /*------------------------------------------------------------------------------
                                                                            class
-                                                                          IPwrap
+                                                                       IPAddress
 
 ------------------------------------------------------------------------------*/
 
@@ -69,11 +70,11 @@ import java.util.List;
  * processed in the Ganymede system.
  */
 
-public final class IPwrap implements Cloneable {
+public final class IPAddress implements Cloneable, java.io.Serializable {
 
   static final boolean debug = false;
   private static String IPv4allowedChars = "1234567890.";
-  private static String IPv6allowedChars = "1234567890.ABCDEF:";
+  private static String IPv6allowedChars = "1234567890.abcdefABCDEF:";
 
   // ---
 
@@ -81,7 +82,7 @@ public final class IPwrap implements Cloneable {
 
   /* -- */
 
-  public IPwrap(Byte[] address)
+  public IPAddress(Byte[] address)
   {
     if (address == null)
       {
@@ -96,15 +97,15 @@ public final class IPwrap implements Cloneable {
     this.address = (Byte[]) address.clone();
   }
 
-  public IPwrap(String addressStr)
+  public IPAddress(String addressStr)
   {
     if (addressStr.indexOf(':') == -1)
       {
-        this.address = IPwrap.genIPV4bytes(addressStr);
+        this.address = IPAddress.genIPV4bytes(addressStr);
       }
     else
       {
-        this.address = IPwrap.genIPV6bytes(addressStr);
+        this.address = IPAddress.genIPV6bytes(addressStr);
       }
   }
 
@@ -138,8 +139,8 @@ public final class IPwrap implements Cloneable {
   }
 
   /**
-   * Equality test.  This IPwrap can be compared to either
-   * another IPwrap object or to an array of Bytes.
+   * Equality test.  This IPAddress can be compared to either
+   * another IPAddress object or to an array of Bytes.
    */
 
   @Override public boolean equals(Object value)
@@ -153,9 +154,9 @@ public final class IPwrap implements Cloneable {
         return false;
       }
 
-    if (value instanceof IPwrap)
+    if (value instanceof IPAddress)
       {
-        foreignBytes = ((IPwrap) value).address;
+        foreignBytes = ((IPAddress) value).address;
       }
     else
       {
@@ -187,7 +188,7 @@ public final class IPwrap implements Cloneable {
 
   @Override public Object clone()
   {
-    return new IPwrap(this.getAddress());
+    return new IPAddress(this.getBytes());
   }
 
   /**
@@ -196,7 +197,7 @@ public final class IPwrap implements Cloneable {
    * the internally editable array representation.</p>
    */
 
-  public Byte[] getAddress()
+  public Byte[] getBytes()
   {
     Byte[] result = new Byte[this.address.length];
 
@@ -215,12 +216,12 @@ public final class IPwrap implements Cloneable {
     return this.address[index].byteValue();
   }
 
-  public boolean isIPV4()
+  public boolean isIPv4()
   {
     return this.address.length == 4;
   }
 
-  public boolean isIPV6()
+  public boolean isIPv6()
   {
     return this.address.length == 16;
   }
@@ -232,7 +233,7 @@ public final class IPwrap implements Cloneable {
 
   public String toString()
   {
-    return IPwrap.genIPString(this.address);
+    return IPAddress.genIPString(this.address);
   }
 
   public void emit(DataOutput out) throws IOException
@@ -253,7 +254,7 @@ public final class IPwrap implements Cloneable {
 
     ------------------------------------------------------------*/
 
-  public static IPwrap readIPAddr(DataInput in) throws IOException
+  public static IPAddress readIPAddr(DataInput in) throws IOException
   {
     Byte[] bytes = new Byte[in.readByte()];
 
@@ -262,7 +263,7 @@ public final class IPwrap implements Cloneable {
         bytes[j] = Byte.valueOf(in.readByte());
       }
 
-    return new IPwrap(bytes);
+    return new IPAddress(bytes);
   }
 
   /**
@@ -299,7 +300,7 @@ public final class IPwrap implements Cloneable {
 
   private static final boolean isAllowedV4(char ch)
   {
-    return !(IPv4allowedChars.indexOf(ch) == -1);
+    return IPv4allowedChars.indexOf(ch) != -1;
   }
 
   /**
@@ -311,7 +312,7 @@ public final class IPwrap implements Cloneable {
 
   private static final boolean isAllowedV6(char ch)
   {
-    return !(IPv6allowedChars.indexOf(ch) == -1);
+    return IPv6allowedChars.indexOf(ch) != -1;
   }
 
   /**
@@ -328,11 +329,11 @@ public final class IPwrap implements Cloneable {
 
     if (octets.length == 4)
       {
-        return IPwrap.genIPV4string(octets);
+        return IPAddress.genIPV4string(octets);
       }
     else if (octets.length == 16)
       {
-        return IPwrap.genIPV6string(octets);
+        return IPAddress.genIPV6string(octets);
       }
     else
       {
@@ -920,5 +921,98 @@ public final class IPwrap implements Cloneable {
       }
 
     return result.toString().toUpperCase();
+  }
+
+  /**
+   * Test rig
+   */
+
+  public static void main(String argv[])
+  {
+    Byte[] octets;
+    Random rand = new Random();
+
+    /* -- */
+
+    octets = new Byte[16];
+
+    for (int i = 0; i < 16; i++)
+      {
+        octets[i] = Byte.valueOf((byte) -128);
+      }
+
+    System.out.println("All zero v6 string: " + genIPV6string(octets));
+
+    octets[15] = Byte.valueOf((byte) -127);
+
+    System.out.println("Trailing 1 string: " + genIPV6string(octets));
+
+    byte[] randbytes = new byte[16];
+
+    rand.nextBytes(randbytes);
+
+    for (int i = 4; i < 16; i++)
+      {
+        octets[i] = Byte.valueOf(randbytes[i]);
+      }
+
+    System.out.println("4 Leading zero rand string: " + genIPV6string(octets));
+
+    for (int i = 0; i < 16; i++)
+      {
+        octets[i] = Byte.valueOf((byte) -128);
+      }
+
+    rand.nextBytes(randbytes);
+
+    for (int i = 0; i < 8; i++)
+      {
+        if (rand.nextInt() > 0)
+          {
+            octets[i*2] = Byte.valueOf(randbytes[i]);
+            octets[(i*2)+1] = Byte.valueOf(randbytes[i]);
+
+            System.out.print("**");
+          }
+        else
+          {
+            System.out.print("00");
+          }
+      }
+
+    System.out.println();
+
+    System.out.println("Random compression block string: " + genIPV6string(octets));
+
+    for (int i = 0; i < 12; i++)
+      {
+        octets[i] = Byte.valueOf((byte) -128);
+      }
+
+    rand.nextBytes(randbytes);
+
+    for (int i = 12; i < 16; i++)
+      {
+        octets[i] = Byte.valueOf(randbytes[i]);
+      }
+
+    System.out.println("IPv4 compatible string (A): " + genIPV6string(octets));
+
+    for (int i = 0; i < 10; i++)
+      {
+        octets[i] = Byte.valueOf((byte) -128);
+      }
+
+    octets[10] = Byte.valueOf((byte) 127);
+    octets[11] = Byte.valueOf((byte) 127);
+
+    rand.nextBytes(randbytes);
+
+    for (int i = 12; i < 16; i++)
+      {
+        octets[i] = Byte.valueOf(randbytes[i]);
+      }
+
+    System.out.println("IPv4 compatible string (B): " + genIPV6string(octets));
   }
 }

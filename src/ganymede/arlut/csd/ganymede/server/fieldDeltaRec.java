@@ -126,18 +126,13 @@ class fieldDeltaRec {
         addValues = new Vector();
       }
 
-    if (value instanceof Byte[])
-      {
-        value = new IPwrap((Byte []) value);
-      }
-
     if (delValues != null && delValues.contains(value))
       {
         delValues.removeElement(value);
       }
     else if (!addValues.contains(value))
       {
-        addValues.addElement(value);
+        addValues.add(value);
       }
   }
 
@@ -158,18 +153,13 @@ class fieldDeltaRec {
         delValues = new Vector();
       }
 
-    if (value instanceof Byte[])
-      {
-        value = new IPwrap((Byte []) value);
-      }
-
     if (addValues != null && addValues.contains(value))
       {
         addValues.removeElement(value);
       }
     else if (!delValues.contains(value))
       {
-        delValues.addElement(value);
+        delValues.add(value);
       }
   }
 

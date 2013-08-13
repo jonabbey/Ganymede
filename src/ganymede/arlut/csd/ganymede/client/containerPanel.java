@@ -104,6 +104,7 @@ import arlut.csd.ganymede.common.FieldInfo;
 import arlut.csd.ganymede.common.FieldTemplate;
 import arlut.csd.ganymede.common.FieldType;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.IPAddress;
 import arlut.csd.ganymede.common.QueryResult;
 import arlut.csd.ganymede.common.ReturnVal;
 import arlut.csd.ganymede.common.SchemaConstants;
@@ -1597,7 +1598,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
                 println("Updating JIPField.");
               }
 
-            Byte[] bytes = (Byte[]) currentInfo.getValue();
+            IPAddress address = (IPAddress) currentInfo.getValue();
 
             if (comp.equals(currentlyChangingComponent))
               {
@@ -1605,11 +1606,11 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
                 // that we are processing a callback from.  the
                 // JIPField has specific support for this, etc.
 
-                ((JIPField)comp).substituteValueByCallBack(this, bytes);
+                ((JIPField)comp).substituteValueByCallBack(this, address);
               }
             else
               {
-                ((JIPField)comp).setValue(bytes);
+                ((JIPField)comp).setValue(address);
               }
           }
         else
@@ -3700,7 +3701,7 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
     JIPField
       ipf;
 
-    Byte[] bytes;
+    IPAddress address;
 
     /* -- */
 
@@ -3722,11 +3723,11 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
     registerComponent(ipf, field, fieldTemplate);
 
-    bytes = (Byte[]) fieldInfo.getValue();
+    address = (IPAddress) fieldInfo.getValue();
 
-    if (bytes != null)
+    if (address != null)
       {
-        ipf.setValue(bytes);
+        ipf.setValue(address);
       }
 
     ipf.setCallback(this);

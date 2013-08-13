@@ -54,6 +54,7 @@ import java.util.Vector;
 
 import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.IPAddress;
 import arlut.csd.ganymede.common.Query;
 import arlut.csd.ganymede.common.QueryAndNode;
 import arlut.csd.ganymede.common.QueryDeRefNode;
@@ -591,8 +592,8 @@ public class DBQueryHandler {
             // we're looking at to Strings for the compare.
 
             if (n.value instanceof String &&
-                (((value != null) && value instanceof Byte[]) ||
-                ((values != null) && (values.size() > 0) && (values.get(0) instanceof Byte[]))))
+                (((value != null) && value instanceof IPAddress) ||
+                ((values != null) && (values.size() > 0) && (values.get(0) instanceof IPAddress))))
               {
                 String
                   s1 = null,
@@ -608,16 +609,7 @@ public class DBQueryHandler {
                 if (n.arrayOp == QueryDataNode.NONE)
                   {
                     s1 = (String) n.value;
-                    Byte[] ipBytes = (Byte[]) value;
-
-                    if (ipBytes.length == 4)
-                      {
-                        s2 = IPDBField.genIPV4string(ipBytes);
-                      }
-                    else if (ipBytes.length == 16)
-                      {
-                        s2 = IPDBField.genIPV6string(ipBytes);
-                      }
+                    s2 = ((IPAddress) value).toString();
 
                     if (debug)
                       {
@@ -639,16 +631,7 @@ public class DBQueryHandler {
 
                     for (int i = 0; i < values.size(); i++)
                       {
-                        Byte[] ipBytes = (Byte[]) values.get(i);
-
-                        if (ipBytes.length == 4)
-                          {
-                            s2 = IPDBField.genIPV4string(ipBytes);
-                          }
-                        else if (ipBytes.length == 16)
-                          {
-                            s2 = IPDBField.genIPV6string(ipBytes);
-                          }
+                        s2 = ((IPAddress) values.get(i)).toString();
 
                         if (compareString(n, s1, s2))
                           {
@@ -679,7 +662,7 @@ public class DBQueryHandler {
 
                 if (n.arrayOp == QueryDataNode.NONE)
                   {
-                    fBytes = (Byte[]) value;
+                    fBytes = ((IPAddress) value).getBytes();
                     oBytes = (Byte[]) n.value;
 
                     if (n.comparator == QueryDataNode.EQUALS)
@@ -711,7 +694,7 @@ public class DBQueryHandler {
 
                             for (int i = 0; i < values.size(); i++)
                               {
-                                if (compareIPs(oBytes, ((Byte[]) values.get(i))))
+                                if (compareIPs(oBytes, ((IPAddress) values.get(i)).getBytes()))
                                   {
                                     return true;
                                   }
@@ -1232,5 +1215,4 @@ public class DBQueryHandler {
   {
     return (short) (b + 128);
   }
-
 }
