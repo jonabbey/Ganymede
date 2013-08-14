@@ -78,6 +78,28 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
   // ---
 
+  /**
+   * <p>Note that the values held in the address array are, for
+   * historical reasons, not the signed 2's complement interpretation
+   * of an unsigned set of 8 bits, as you might expect in C.</p>
+   *
+   * <p>Instead, they are equal to a value of 0-255, minus 128.  So 0
+   * is -128, 100 is -28, etc., up to 255 is 127.</p>
+   *
+   * <p>This makes it impossible to just mask these values against
+   * 0xff to get an unsigned int value, but changing these bytes to
+   * proper 2's complement (where masking -1 against 0xff will result
+   * in a int whose least significant 8 bits would be 11111111 instead
+   * of 0111111) will break Ganymede's on-disk database and journal
+   * format.</p>
+   *
+   * <p>For compatibility, be sure to use s2u() to do the conversion
+   * to the unsigned value, or you can just add 128 if you are
+   * confident I won't change my mind about this down the road.</p>
+   *
+   * <p>Very sorry about that.</p>
+   */
+
   private final byte[] address;
 
   /* -- */
