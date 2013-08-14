@@ -82,7 +82,8 @@ import java.io.IOException;
 
 public final class Invid implements java.io.Serializable {
 
-  static final long serialVersionUID = 5357151693275369893L;
+  static final long serialVersionUID = 566674975372557093L;
+
   static private InvidAllocator allocator = null;
   static private int counter = 0;
   static private int reuseCounter = 0;
