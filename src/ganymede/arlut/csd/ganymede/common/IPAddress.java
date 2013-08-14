@@ -86,19 +86,16 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
    * <p>While Java uses 2's complement for holding signed numeric
    * values, we are not, for historical reasons, using the bits in
    * these bytes as if they were unsigned (i.e., storing a value that
-   * would be held in an unsigned char in C using the bit pattern of
-   * the 2's complement of that unsigned value), as you might expect
-   * in C.</p>
+   * would be held in an unsigned char in C using the 2's complement
+   * interpretation of that bit pattern), as you might expect in
+   * C.</p>
    *
    * <p>Instead, they are equal to a value of 0-255, minus 128.  So 0
    * is -128, 100 is -28, etc., up to 255 is 127.</p>
    *
    * <p>This makes it impossible to just mask these values against
-   * 0xff to get an unsigned int value, but changing these bytes to
-   * proper 2's complement (where masking -1 against 0xff will result
-   * in a int whose least significant 8 bits would be 11111111 instead
-   * of 0111111) will break Ganymede's on-disk database and journal
-   * format.</p>
+   * 0xff to get the unsigned int value.  Fixing this would break
+   * Ganymede's on-disk database and journal format.</p>
    *
    * <p>For compatibility, be sure to use s2u() to do the conversion
    * to the unsigned value, or you can just add 128 if you are
