@@ -1734,8 +1734,6 @@ class QueryRow implements ItemListener {
         JstringField stringField = (JstringField) operand;
         value = stringField.getValue();
 
-        String strValue = (String) value;
-
         if (field.isIP())
           {
             String opName = (String) compareChoice.getSelectedItem();
@@ -1752,7 +1750,7 @@ class QueryRow implements ItemListener {
               {
                 try
                   {
-                    value = new IPAddress(strValue);
+                    value = new IPAddress((String) value);
                   }
                 catch (IllegalArgumentException ex)
                   {
