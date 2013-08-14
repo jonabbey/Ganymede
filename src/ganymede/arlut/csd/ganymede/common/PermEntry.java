@@ -103,7 +103,7 @@ public class PermEntry implements java.io.Serializable {
       viewPerms = permObs[1];
     }
 
-  static final long serialVersionUID = 1595596943430809895L;
+  static final long serialVersionUID = 1867526089374473743L;
 
   public static void main(String argv[])
   {

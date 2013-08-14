@@ -13,8 +13,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -96,7 +98,7 @@ public class PermMatrix implements java.io.Serializable {
 
   static final boolean debug = false;
 
-  static final long serialVersionUID = 7354985227082627640L;
+  static final long serialVersionUID = -6816094603281289860L;
 
   // ---
 

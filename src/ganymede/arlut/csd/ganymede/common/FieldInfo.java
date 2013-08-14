@@ -4,17 +4,19 @@
 
    This class is a serializable object to return all the information
    the container panel needs to render a field.
-   
+
    Created: 4 November 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -77,7 +79,7 @@ import arlut.csd.ganymede.server.PasswordDBField;
 
 public class FieldInfo implements java.io.Serializable {
 
-  static final long serialVersionUID = -3986768111784239002L;
+  static final long serialVersionUID = -4457805568492289591L;
 
   // ---
 
@@ -114,7 +116,7 @@ public class FieldInfo implements java.io.Serializable {
         defined = field.isDefined();
         editable = field.isEditable();
         visible = field.isVisible();
-        
+
         ID = field.getID();
 
         if (field instanceof PasswordDBField)

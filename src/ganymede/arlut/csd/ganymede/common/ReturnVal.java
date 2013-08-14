@@ -120,7 +120,7 @@ import arlut.csd.Util.TranslationService;
 public final class ReturnVal implements java.io.Serializable {
 
   static final boolean debug = false;
-  static final long serialVersionUID = 5358187112973957394L;
+  static final long serialVersionUID = 6467433232278467398L;
 
   /**
    * Sentinel object representing an order to have the client refresh

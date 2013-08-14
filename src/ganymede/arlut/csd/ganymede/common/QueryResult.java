@@ -75,7 +75,7 @@ import arlut.csd.Util.VecSortInsert;
 
 public class QueryResult implements java.io.Serializable {
 
-  static final long serialVersionUID = 7593411645538822028L;
+  static final long serialVersionUID = 8575279549274172762L;
 
   static final boolean debug = false;
 
