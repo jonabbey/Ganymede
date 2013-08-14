@@ -1169,9 +1169,9 @@ public class DBQueryHandler {
    * 129.116.</p>
    *
    * <p>Note that, like all Ganymede code dealing with IP addresses,
-   * Ganymede is using the u2s() and s2u() methods here to handle
-   * encoded unsigned values in the Java signed byte/Byte
-   * type/object.</p>
+   * Ganymede is using the IPAddress.s2u() method here to convert the
+   * signed numeric encoding in an IPAddress byte to an unsigned 0-255
+   * value.</p>
    */
 
   private static byte[] ipAddrNoPad(byte[] ipaddr)
@@ -1179,7 +1179,7 @@ public class DBQueryHandler {
     int i = ipaddr.length;
 
     for (; i > 0 &&
-           (s2u(ipaddr[i-1]) == 0); i--);
+           (IPAddress.s2u(ipaddr[i-1]) == 0); i--);
 
     byte[] result = new byte[i];
 
@@ -1189,30 +1189,5 @@ public class DBQueryHandler {
       }
 
     return result;
-  }
-
-  /**
-   * <p>This method maps an int value between 0 and 255 inclusive to a
-   * legal signed byte value.</p>
-   */
-
-  private final static byte u2s(int x)
-  {
-    if ((x < 0) || (x > 255))
-      {
-        throw new IllegalArgumentException("Out of range: " + x);
-      }
-
-    return (byte) (x - 128);
-  }
-
-  /**
-   * <p>This method maps a u2s-encoded signed byte value to an int
-   * value between 0 and 255 inclusive.</p>
-   */
-
-  private final static short s2u(byte b)
-  {
-    return (short) (b + 128);
   }
 }
