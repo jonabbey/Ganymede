@@ -79,9 +79,16 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
   // ---
 
   /**
-   * <p>Note that the values held in the address array are, for
-   * historical reasons, not the signed 2's complement interpretation
-   * of an unsigned set of 8 bits, as you might expect in C.</p>
+   * <p>Note that Java doesn't have unsigned bytes, so we have to deal
+   * with the bytes in address in terms of signed arithmetic, with
+   * values between -128 and 127.</p>
+   *
+   * <p>While Java uses 2's complement for holding signed numeric
+   * values, we are not, for historical reasons, using the bits in
+   * these bytes as if they were unsigned (i.e., storing a value that
+   * would be held in an unsigned char in C using the bit pattern of
+   * the 2's complement of that unsigned value), as you might expect
+   * in C.</p>
    *
    * <p>Instead, they are equal to a value of 0-255, minus 128.  So 0
    * is -128, 100 is -28, etc., up to 255 is 127.</p>
