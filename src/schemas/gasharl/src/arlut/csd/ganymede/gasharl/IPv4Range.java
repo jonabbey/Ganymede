@@ -100,6 +100,10 @@ public class IPv4Range {
    *
    * <p>The individual signed Java bytes are encoded using the
    * IPAddress u2s() method.</p>
+   *
+   * <p>Note that u2s() encoding bytes can be compared for greater
+   * than or less than, and subtracting them from each other will
+   * result in the proper distance between them.</p>
    */
 
   private byte[][][] range = null;
@@ -753,9 +757,26 @@ public class IPv4Range {
 
 final class IPv4RangeEnumerator implements Enumeration {
 
+  /**
+   * <p>An array of arrays of byte arrays.</p>
+   *
+   * <p>The individual signed Java bytes are encoded using the
+   * IPAddress u2s() method.</p>
+   *
+   * <p>Note that u2s() encoding bytes can be compared for greater
+   * than or less than, and subtracting them from each other will
+   * result in the proper distance between them.</p>
+   */
+
   private byte[][][] range = null;
 
   private int line = 0;
+
+  /**
+   * <p>An array of directions, each int will be either 1 for an
+   * ascending range, 0 for no change, or -1 for a descending
+   * range.</p>
+   */
 
   private int index[] = new int[4];
 
@@ -960,6 +981,17 @@ final class IPv4RangeEnumerator implements Enumeration {
 
 final class IPv4SubRangeEnumerator implements Enumeration {
 
+  /**
+   * <p>An array of arrays of byte arrays.</p>
+   *
+   * <p>The individual signed Java bytes are encoded using the
+   * IPAddress u2s() method.</p>
+   *
+   * <p>Note that u2s() encoding bytes can be compared for greater
+   * than or less than, and subtracting them from each other will
+   * result in the proper distance between them.</p>
+   */
+
   private byte[][][] range = null;
 
   private int line = 0;
@@ -994,28 +1026,47 @@ final class IPv4SubRangeEnumerator implements Enumeration {
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class handles enumerating across a set of Class C sized (three octet prefix)
- * subsets specified in an {@arlut.csd.ganymede.gasharl.IPv4Range IPv4Range} object.  An
- * IPv4ClassCEnumerator is created as a snapshot of the state of an IPv4Range object,
- * and may be iterated over even if the source IPv4Range object is modified
- * after it has been created.</p>
+ * <p>This class handles enumerating across a set of Class C sized
+ * (three octet prefix) subsets specified in an
+ * {@arlut.csd.ganymede.gasharl.IPv4Range IPv4Range} object.  An
+ * IPv4ClassCEnumerator is created as a snapshot of the state of an
+ * IPv4Range object, and may be iterated over even if the source
+ * IPv4Range object is modified after it has been created.</p>
  *
  * <p>The nextElement() method in IPv4ClassCEnumerator returns Byte[]
  * arrays which contain four elements, one for each of the four octets
- * of an IPv4 address.  The elements hold values in the range -128 to 127,
- * which are equivalent to the 0 to 255 range for IPv4 octets.  These
- * numbers can be converted to the appropriate number for IPv4 by adding
- * 128 to each element.</p>
+ * of an IPv4 address.  The elements hold values in the range -128 to
+ * 127, which are equivalent to the 0 to 255 range for IPv4 octets.
+ * These numbers can be converted to the appropriate number for IPv4
+ * by adding 128 to each element.</p>
  *
- * <p>The fourth and final octet of each Byte array returned by nextElement()
- * will contain a value of -128, representing 0 for the last octet.</p>
+ * <p>The fourth and final octet of each Byte array returned by
+ * nextElement() will contain a value of -128, representing 0 for the
+ * last octet.</p>
  */
 
 final class IPv4ClassCEnumerator implements Enumeration {
 
+  /**
+   * <p>An array of arrays of byte arrays.</p>
+   *
+   * <p>The individual signed Java bytes are encoded using the
+   * IPAddress u2s() method.</p>
+   *
+   * <p>Note that u2s() encoding bytes can be compared for greater
+   * than or less than, and subtracting them from each other will
+   * result in the proper distance between them.</p>
+   */
+
   private byte[][][] range = null;
 
   private int line = 0;
+
+  /**
+   * <p>An array of directions, each int will be either 1 for an
+   * ascending range, 0 for no change, or -1 for a descending
+   * range.</p>
+   */
 
   private int index[] = new int[3];
 
@@ -1045,14 +1096,14 @@ final class IPv4ClassCEnumerator implements Enumeration {
 
     // create the next Class C-sized subnet to return
 
-    Byte[] bytes = new Byte[4];
+    byte[] bytes = new byte[4];
 
     for (int i = 0; i < 3; i++)
       {
-        bytes[i] = new Byte((byte) (range[line][i][0] + index[i]));
+        bytes[i] = (byte) (range[line][i][0] + index[i]);
       }
 
-    bytes[3] = new Byte((byte) -128);
+    bytes[3] = IPAddress.u2s(0);
 
     IPAddress address = new IPAddress(bytes);
 
