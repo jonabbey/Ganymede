@@ -97,11 +97,13 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
    * 0xff to get the unsigned int value.  Fixing this would break
    * Ganymede's on-disk database and journal format.</p>
    *
-   * <p>For compatibility, be sure to use s2u() to do the conversion
-   * to the unsigned value, or you can just add 128 if you are
-   * confident I won't change my mind about this down the road.</p>
+   * <p>On the other hand, the u2s() encoded bytes can be safely
+   * compared for greater than or less than, and subtracting them from
+   * each other will result in the proper distance between them.</p>
    *
-   * <p>Very sorry about that.</p>
+   * <p>For compatibility, be sure to use s2u() to do the conversion
+   * to the unsigned value, or you can just add 128 to do it
+   * yourself.</p>
    */
 
   private final byte[] address;
