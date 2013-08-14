@@ -681,10 +681,8 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
     for (int i = 0; i < 16; i++)
       {
-        result[i] = Byte.valueOf(u2s(0));
+        result[i] = -128;
       }
-
-    // trim the input
 
     input = input.trim();
 
