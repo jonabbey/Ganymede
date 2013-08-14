@@ -646,15 +646,15 @@ public class DBQueryHandler {
               }
 
             // i.p. address can be arrays.. note that the client's
-            // query box will pass us a true array of Bytes for
-            // equality, starts with, or ends with tests.  if the user
-            // is attempting a regexp match, the parameter will be a
+            // query box will pass us an IPAddress for equality,
+            // starts with, or ends with tests.  if the user is
+            // attempting a regexp match, the parameter will be a
             // String.
 
-            if (n.value instanceof Byte[])
+            if (n.value instanceof IPAddress)
               {
-                Byte[] fBytes;
-                Byte[] oBytes;
+                byte[] fBytes;
+                byte[] oBytes;
 
                 /* -- */
 
@@ -663,7 +663,7 @@ public class DBQueryHandler {
                 if (n.arrayOp == QueryDataNode.NONE)
                   {
                     fBytes = ((IPAddress) value).getBytes();
-                    oBytes = (Byte[]) n.value;
+                    oBytes = ((IPAddress) n.value).getBytes();
 
                     if (n.comparator == QueryDataNode.EQUALS)
                       {
@@ -686,7 +686,7 @@ public class DBQueryHandler {
                   {
                     if (n.comparator == n.EQUALS)
                       {
-                        oBytes = (Byte[]) n.value;
+                        oBytes = ((IPAddress) n.value).getBytes();
 
                         switch (n.arrayOp)
                           {
@@ -1077,7 +1077,7 @@ public class DBQueryHandler {
    * method is used to compare two IP address values for equality.
    */
 
-  private static boolean compareIPs(Byte[] param1, Byte[] param2)
+  private static boolean compareIPs(byte[] param1, byte[] param2)
   {
     if (param1.length != param2.length)
       {
@@ -1087,7 +1087,7 @@ public class DBQueryHandler {
       {
         for (int i = 0; i < param1.length; i++)
           {
-            if (param1[i].byteValue() != param2[i].byteValue())
+            if (param1[i] != param2[i])
               {
                 return false;
               }
@@ -1104,9 +1104,9 @@ public class DBQueryHandler {
    * @return Returns true if param1 begins with param2.
    */
 
-  private static boolean ipBeginsWith(Byte[] param1, Byte[] param2)
+  private static boolean ipBeginsWith(byte[] param1, byte[] param2)
   {
-    Byte[] prefix = ipAddrNoPad(param2);
+    byte[] prefix = ipAddrNoPad(param2);
 
     /* -- */
 
@@ -1118,7 +1118,7 @@ public class DBQueryHandler {
       {
         for (int i = 0; i < prefix.length; i++)
           {
-            if (prefix[i].byteValue() != param1[i].byteValue())
+            if (prefix[i] != param1[i])
               {
                 return false;
               }
@@ -1135,9 +1135,9 @@ public class DBQueryHandler {
    * @return Returns true if param1 ends with param2.
    */
 
-  private static boolean ipEndsWith(Byte[] param1, Byte[] param2)
+  private static boolean ipEndsWith(byte[] param1, byte[] param2)
   {
-    Byte[] suffix = ipAddrNoPad(param2);
+    byte[] suffix = ipAddrNoPad(param2);
 
     /* -- */
 
@@ -1151,7 +1151,7 @@ public class DBQueryHandler {
              j >= 0;
              i--, j--)
           {
-            if (suffix[j].byteValue() != param1[i].byteValue())
+            if (suffix[j] != param1[i])
               {
                 return false;
               }
@@ -1174,14 +1174,14 @@ public class DBQueryHandler {
    * type/object.</p>
    */
 
-  private static Byte[] ipAddrNoPad(Byte[] ipaddr)
+  private static byte[] ipAddrNoPad(byte[] ipaddr)
   {
     int i = ipaddr.length;
 
     for (; i > 0 &&
-           (s2u(ipaddr[i-1].byteValue()) == 0); i--);
+           (s2u(ipaddr[i-1]) == 0); i--);
 
-    Byte[] result = new Byte[i];
+    byte[] result = new byte[i];
 
     for (i = 0; i < result.length; i++)
       {

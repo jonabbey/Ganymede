@@ -55,6 +55,7 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
@@ -65,12 +66,12 @@ import java.util.Random;
 ------------------------------------------------------------------------------*/
 
 /**
- * This is an immutable wrapper class for the Byte array IP value
- * representation that allows IP addresses to be safely stored and
- * processed in the Ganymede system.
+ * <p>This is an immutable, serializable IPv4 or IPv6 address.</p>
  */
 
 public final class IPAddress implements Cloneable, java.io.Serializable {
+
+  static final long serialVersionUID = -2432213571055741805L;
 
   static final boolean debug = false;
   private static String IPv4allowedChars = "1234567890.";
@@ -78,24 +79,153 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
   // ---
 
-  private final Byte[] address;
+  private final byte[] address;
 
   /* -- */
 
-  public IPAddress(Byte[] address)
-  {
-    if (address == null)
-      {
-        throw new NullPointerException();
-      }
+  /**
+   * <p>Primitive byte array constructor</p>
+   *
+   * <p>Because bytes are signed in Java, the bytes submitted for the
+   * octets of this address will range from -128 to 127.  You can use
+   * IPAddress.u2s() to convert ints in the range 0 to 255 to the
+   * range used by bytes in this class.</p>
+   *
+   * <p>The address parameter must be of length 4 for an IPv4 address,
+   * and 16 for an IPv6 address.</p>
+   */
 
+  public IPAddress(byte[] address)
+  {
     if (address.length !=4 && address.length != 16)
       {
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentException("Wrong number of bytes for an IP address: " + address.length);
       }
 
-    this.address = (Byte[]) address.clone();
+    this.address = Arrays.copyOf(address, address.length);
   }
+
+  /**
+   * <p>java.lang.Byte array constructor</p>
+   *
+   * <p>Because bytes are signed in Java, the bytes submitted for the
+   * octets of this address will range from -128 to 127.  You can use
+   * IPAddress.u2s() to convert ints in the range 0 to 255 to the
+   * range used by bytes in this class.</p>
+   *
+   * <p>The address parameter must be of length 4 for an IPv4 address,
+   * and 16 for an IPv6 address.</p>
+   */
+
+  public IPAddress(Byte[] address)
+  {
+    if (address.length !=4 && address.length != 16)
+      {
+        throw new IllegalArgumentException("Wrong number of bytes for an IP address: " + address.length);
+      }
+
+    this.address = new byte[address.length];
+
+    for (int i = 0; i < address.length; i++)
+      {
+        this.address[i] = address[i].byteValue();
+      }
+  }
+
+  /**
+   * <p>Primitive short array constructor</p>
+   *
+   * <p>shorts in the address array must all be between 0 and 255, or
+   * an IllegalArgumentException will be thrown.</p>
+   *
+   * <p>The address parameter must be of length 4 for an IPv4 address,
+   * and 16 for an IPv6 address.</p>
+   */
+
+  public IPAddress(short[] address)
+  {
+    if (address.length !=4 && address.length != 16)
+      {
+        throw new IllegalArgumentException("Wrong number of octets for an IP address: " + address.length);
+      }
+
+    this.address = u2s(address);
+  }
+
+  /**
+   * <p>Short object array constructor</p>
+   *
+   * <p>Shorts in the address array must all be between 0 and 255, or
+   * an IllegalArgumentException will be thrown.</p>
+   *
+   * <p>The address parameter must be of length 4 for an IPv4 address,
+   * and 16 for an IPv6 address.</p>
+   */
+
+  public IPAddress(Short[] address)
+  {
+    if (address.length !=4 && address.length != 16)
+      {
+        throw new IllegalArgumentException("Wrong number of octets for an IP address: " + address.length);
+      }
+
+    this.address = new byte[address.length];
+
+    for (int i = 0; i < address.length; i++)
+      {
+        this.address[i] = u2s(address[i].intValue());
+      }
+  }
+
+  /**
+   * <p>Primitive int array constructor</p>
+   *
+   * <p>ints in the address array must all be between 0 and 255, or an
+   * IllegalArgumentException will be thrown.</p>
+   *
+   * <p>The address parameter must be of length 4 for an IPv4 address,
+   * and 16 for an IPv6 address.</p>
+   */
+
+  public IPAddress(int[] address)
+  {
+    if (address.length !=4 && address.length != 16)
+      {
+        throw new IllegalArgumentException("Wrong number of octets for an IP address: " + address.length);
+      }
+
+    this.address = u2s(address);
+  }
+
+  /**
+   * <p>Integer object array constructor</p>
+   *
+   * <p>Integers in the address array must all be between 0 and 255,
+   * or an IllegalArgumentException will be thrown.</p>
+   *
+   * <p>The address parameter must be of length 4 for an IPv4 address,
+   * and 16 for an IPv6 address.</p>
+   */
+
+  public IPAddress(Integer[] address)
+  {
+    if (address.length !=4 && address.length != 16)
+      {
+        throw new IllegalArgumentException("Wrong number of octets for an IP address: " + address.length);
+      }
+
+    this.address = new byte[address.length];
+
+    for (int i = 0; i < address.length; i++)
+      {
+        this.address[i] = u2s(address[i].intValue());
+      }
+  }
+
+  /**
+   * <p>String constructor, supports IPv4 dotted decimal and RFC5952
+   * style IPv6 encodings.</p>
+   */
 
   public IPAddress(String addressStr)
   {
@@ -116,26 +246,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
   @Override public int hashCode()
   {
-    if ((address == null) || (address.length == 0))
-      {
-        return 0;
-      }
-
-    int result = 0;
-
-    try
-      {
-        for (int i = 0; i < address.length; i++)
-          {
-            result += address[i].intValue();
-          }
-      }
-    catch (ArithmeticException ex)
-      {
-        return result;
-      }
-
-    return result;
+    return Arrays.hashCode(this.address);
   }
 
   /**
@@ -145,75 +256,63 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
   @Override public boolean equals(Object value)
   {
-    Byte[] foreignBytes;
-
-    /* -- */
-
-    if (value == null)
+    if (!(value instanceof IPAddress))
       {
         return false;
       }
 
-    if (value instanceof IPAddress)
-      {
-        foreignBytes = ((IPAddress) value).address;
-      }
-    else
-      {
-        return false;
-      }
-
-    if (foreignBytes.length != this.address.length)
-      {
-        return false;
-      }
-
-    for (int i = 0; i < this.address.length; i++)
-      {
-        try
-          {
-            if (!foreignBytes[i].equals(this.address[i]))
-              {
-                return false;
-              }
-          }
-        catch (NullPointerException ex)
-          {
-            return false;
-          }
-      }
-
-    return true;
+    return Arrays.equals(this.address, ((IPAddress) value).address);
   }
 
   @Override public Object clone()
   {
-    return new IPAddress(this.getBytes());
+    return new IPAddress(this.address);
   }
 
   /**
-   * <p>Getter method.  This method creates a copy of the address
-   * before returning it, to avoid the calling function messing with
-   * the internally editable array representation.</p>
+   * <p>Returns a copy of the array of primitive bytes in this
+   * address.</p>
+   *
+   * <p>Because bytes are signed in Java, the range of of the bytes
+   * are from -128 to 127.  You can use IPAddress.s2u() to convert the
+   * individual bytes to shorts in the range 0-255, or you can use
+   * getOctets() to get the bytes in this IPAddress in int form.</p>
    */
 
-  public Byte[] getBytes()
+  public byte[] getBytes()
   {
-    Byte[] result = new Byte[this.address.length];
-
-    System.arraycopy(this.address, 0, result, 0, this.address.length);
-
-    return result;
+    return Arrays.copyOf(this.address, this.address.length);
   }
 
-  public byte getOctet(int index)
+  /**
+   * <p>Gets an individual byte from this IPAddress.</p>
+   *
+   * <p>Because bytes are signed in Java, the range of of the returned
+   * byte is from -128 to 127.  You can add 128 to the returned value
+   * to convert it to the range 0-255.</p>
+   */
+
+  public byte getByte(int index)
   {
-    if (index < 0 || index > this.address.length)
+    return this.address[index];
+  }
+
+  /**
+   * <p>Returns an array of ints containing the octets in this address.</p>
+   *
+   * <p>Each int will be in the range 0-255.</p>
+   */
+
+  public int[] getOctets()
+  {
+    int[] result = new int[this.address.length];
+
+    for (int i = 0; i < this.address.length; i++)
       {
-        throw new ArrayIndexOutOfBoundsException();
+        result[i] = s2u(this.address[i]);
       }
 
-    return this.address[index].byteValue();
+    return result;
   }
 
   public boolean isIPv4()
@@ -231,7 +330,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
     return this.address.length;
   }
 
-  public String toString()
+  @Override public String toString()
   {
     return IPAddress.genIPString(this.address);
   }
@@ -239,11 +338,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
   public void emit(DataOutput out) throws IOException
   {
     out.writeByte(this.address.length);
-
-    for (int i = 0; i < this.address.length; i++)
-      {
-        out.writeByte(this.address[i].byteValue());
-      }
+    out.write(this.address);
   }
 
   /*------------------------------------------------------------
@@ -256,19 +351,17 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
   public static IPAddress readIPAddr(DataInput in) throws IOException
   {
-    Byte[] bytes = new Byte[in.readByte()];
-
-    for (int j = 0; j < bytes.length; j++)
-      {
-        bytes[j] = Byte.valueOf(in.readByte());
-      }
+    byte[] bytes = new byte[in.readByte()];
+    in.readFully(bytes);
 
     return new IPAddress(bytes);
   }
 
   /**
-   * This method maps an int value between 0 and 255 inclusive
-   * to a legal signed byte value.
+   * <p>This method maps an int value between 0 and 255 inclusive
+   * to a legal signed byte value.</p>
+   *
+   * <p>Read u2s as 'unsigned to signed'.</p>
    */
 
   public final static byte u2s(int x)
@@ -282,8 +375,63 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
   }
 
   /**
-   * This method maps a u2s-encoded signed byte value to an
-   * int value between 0 and 255 inclusive.
+   * <p>This method maps an array of primitive int values between 0
+   * and 255 to an array of primitive byte values between -128 and 127
+   * inclusive, as is used in the internal byte array in
+   * IPAddress.</p>
+   *
+   * <p>Read u2s as 'unsigned to signed'.</p>
+   */
+
+  public final static byte[] u2s(int[] octets)
+  {
+    byte[] result = new byte[octets.length];
+
+    for (int i = 0; i < octets.length; i++)
+      {
+        if ((octets[i] < 0) || (octets[i] > 255))
+          {
+            throw new IllegalArgumentException("Out of range: " + octets[i]);
+          }
+
+        result[i] = (byte) (octets[i] - 128);
+      }
+
+    return result;
+  }
+
+  /**
+   * <p>This method maps an array of primitive short values between 0
+   * and 255 to an array of primitive byte values between -128 and 127
+   * inclusive, as is used in the internal byte array in
+   * IPAddress.</p>
+   *
+   * <p>Read u2s as 'unsigned to signed'.</p>
+   */
+
+  public final static byte[] u2s(short[] octets)
+  {
+    byte[] result = new byte[octets.length];
+
+    for (int i = 0; i < octets.length; i++)
+      {
+        if ((octets[i] < 0) || (octets[i] > 255))
+          {
+            throw new IllegalArgumentException("Out of range: " + octets[i]);
+          }
+
+        result[i] = (byte) (octets[i] - 128);
+      }
+
+    return result;
+  }
+
+  /**
+   * <p>This method maps a u2s-encoded signed byte value (-128 to 127)
+   * to a positive primitive short value between 0 and 255
+   * inclusive.</p>
+   *
+   * <p>Read s2u as 'signed to unsigned'.</p>
    */
 
   public final static short s2u(byte b)
@@ -292,27 +440,33 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
   }
 
   /**
-   * Determines whether a given character is valid or invalid for an
-   * IPDBField
+   * <p>This method maps a u2s-encoded signed array of primitive byte
+   * values (-128 to 127) to an array of positive primitive short
+   * value between 0 and 255 inclusive.</p>
    *
-   * @param ch the character which is being tested for its validity
+   * <p>Read s2u as 'signed to unsigned'.</p>
    */
 
-  private static final boolean isAllowedV4(char ch)
+  public final static short[] s2u(byte[] b)
   {
-    return IPv4allowedChars.indexOf(ch) != -1;
+    short[] result = new short[b.length];
+
+    for (int i = 0; i < b.length; i++)
+      {
+        result[i] = (short) (b[i] + 128);
+      }
+
+    return result;
   }
 
   /**
-   * Determines whether a given character is valid or invalid for an
-   * IPDBField
-   *
-   * @param ch the character which is being tested for its validity
+   * <p>Returns an IPv4 or IPv6 string, based on the length of the
+   * octets parameter.</p>
    */
 
-  private static final boolean isAllowedV6(char ch)
+  public static String genIPString(int[] octets)
   {
-    return IPv6allowedChars.indexOf(ch) != -1;
+    return genIPString(u2s(octets));
   }
 
   /**
@@ -321,6 +475,16 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
    */
 
   public static String genIPString(Byte[] octets)
+  {
+    return genIPString(unwrap(octets));
+  }
+
+  /**
+   * <p>Returns an IPv4 or IPv6 string, based on the length of the
+   * octets parameter.</p>
+   */
+
+  public static String genIPString(byte[] octets)
   {
     if (octets == null)
       {
@@ -337,7 +501,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
       }
     else
       {
-        throw new IllegalArgumentException();
+        throw new IllegalArgumentException("Wrong number of octets for an IP address: " + octets.length);
       }
   }
 
@@ -347,9 +511,9 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
    * accept.</p>
    */
 
-  public static Byte[] genIPV4bytes(String input)
+  public static byte[] genIPV4bytes(String input)
   {
-    Byte[] result = new Byte[4];
+    byte[] result = new byte[4];
     List<String> octets = new ArrayList<String>();
     char[] cAry;
     int length = 0;
@@ -374,7 +538,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
     for (int i = 0; i < 4; i++)
       {
-        result[i] = Byte.valueOf(u2s(0));
+        result[i] = u2s(0);
       }
 
     input = input.trim();
@@ -420,7 +584,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
     for (int i = 0; i < octets.size(); i++)
       {
-        result[i] = Byte.valueOf(u2s(Integer.parseInt(octets.get(i))));
+        result[i] = u2s(Integer.parseInt(octets.get(i)));
       }
 
     return result;
@@ -433,30 +597,30 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
   public static String genIPV4string(Byte[] octets)
   {
-    StringBuilder result = new StringBuilder();
-    Short absoctets[];
+    return genIPV4string(unwrap(octets));
+  }
 
-    /* -- */
+  /**
+   * <p>This method generates a standard string representation of an
+   * IPv4 address from an array of 4 octets.</p>
+   */
 
+  public static String genIPV4string(byte[] octets)
+  {
     if (octets.length != 4)
       {
         throw new IllegalArgumentException("bad number of octets.");
       }
 
-    absoctets = new Short[octets.length];
+    StringBuilder result = new StringBuilder();
 
-    for (int i = 0; i < octets.length; i++)
-      {
-        absoctets[i] = Short.valueOf((short) (octets[i].shortValue() + 128)); // don't want negative values
-      }
-
-    result.append(absoctets[0].toString());
+    result.append(Integer.toString(octets[0] + 128));
     result.append(".");
-    result.append(absoctets[1].toString());
+    result.append(Integer.toString(octets[1] + 128));
     result.append(".");
-    result.append(absoctets[2].toString());
+    result.append(Integer.toString(octets[2] + 128));
     result.append(".");
-    result.append(absoctets[3].toString());
+    result.append(Integer.toString(octets[3] + 128));
 
     return result.toString();
   }
@@ -468,10 +632,10 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
    * address.</p>
    */
 
-  public static Byte[] genIPV6bytes(String input)
+  public static byte[] genIPV6bytes(String input)
   {
-    Byte[] result = new Byte[16];
-    Byte[] ipv4bytes = null;
+    byte[] result = new byte[16];
+    byte[] ipv4bytes = null;
     List<String> segments = new ArrayList<String>();
     char[] cAry;
 
@@ -582,8 +746,8 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
         ipv4bytes = genIPV4bytes(input);
 
-        result[10] = Byte.valueOf(u2s(255));
-        result[11] = Byte.valueOf(u2s(255));
+        result[10] = u2s(255);
+        result[11] = u2s(255);
         result[12] = ipv4bytes[0];
         result[13] = ipv4bytes[1];
         result[14] = ipv4bytes[2];
@@ -707,13 +871,13 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
             throw new Error("logic error");
           }
 
-        result[i * 2] = Byte.valueOf(u2s(Integer.parseInt(tmp.substring(0, 2), 16)));
-        result[(i * 2) + 1] = Byte.valueOf(u2s(Integer.parseInt(tmp.substring(2, 4), 16)));
+        result[i * 2] = u2s(Integer.parseInt(tmp.substring(0, 2), 16));
+        result[(i * 2) + 1] = u2s(Integer.parseInt(tmp.substring(2, 4), 16));
 
         if (debug)
           {
-            System.err.println("Byte " + (i*2) + " = " + s2u(result[i*2].byteValue()));
-            System.err.println("Byte " + ((i*2)+1) + " = " + s2u(result[(i*2)+1].byteValue()));
+            System.err.println("Byte " + (i*2) + " = " + s2u(result[i*2]));
+            System.err.println("Byte " + ((i*2)+1) + " = " + s2u(result[(i*2)+1]));
           }
       }
 
@@ -739,13 +903,13 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
             throw new Error("logic error");
           }
 
-        result[tailOffset + (x * 2)] = Byte.valueOf(u2s(Integer.parseInt(tmp.substring(0, 2), 16)));
-        result[tailOffset + (x * 2) + 1] = Byte.valueOf(u2s(Integer.parseInt(tmp.substring(2, 4), 16)));
+        result[tailOffset + (x * 2)] = u2s(Integer.parseInt(tmp.substring(0, 2), 16));
+        result[tailOffset + (x * 2) + 1] = u2s(Integer.parseInt(tmp.substring(2, 4), 16));
 
         if (debug)
           {
-            System.err.println("Byte " + (tailOffset + (x*2)) + " = " + s2u(result[(tailOffset + (x*2))].byteValue()));
-            System.err.println("Byte " + (tailOffset + ((x*2)+1)) + " = " + s2u(result[tailOffset + (x*2) + 1].byteValue()));
+            System.err.println("Byte " + (tailOffset + (x*2)) + " = " + s2u(result[(tailOffset + (x*2))]));
+            System.err.println("Byte " + (tailOffset + ((x*2)+1)) + " = " + s2u(result[tailOffset + (x*2) + 1]));
           }
 
       }
@@ -754,51 +918,47 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
   }
 
   /**
-   * <p>This method takes an array of 4 or 16 bytes and generates an
-   * optimal RFC 1884 string encoding suitable for display.</p>
+   * <p>This method takes an array of 4 or 16 Byte objects and
+   * generates an optimal RFC 1884 string encoding suitable for
+   * display.</p>
    */
 
   public static String genIPV6string(Byte[] octets)
+  {
+    return genIPV6string(unwrap(octets));
+  }
+
+  /**
+   * <p>This method takes an array of 4 or 16 primitive bytes and
+   * generates an optimal RFC 1884 string encoding suitable for
+   * display.</p>
+   */
+
+  public static String genIPV6string(byte[] octets)
   {
     StringBuilder result = new StringBuilder();
     int[] stanzas;
     String[] stanzaStrings;
     int i, j;
     int loCompress, hiCompress;
-    Short absoctets[];
+    short absoctets[];
 
     /* -- */
 
-    absoctets = new Short[octets.length];
-
-    for (i = 0; i < octets.length; i++)
+    if (octets.length == 4)
       {
-        absoctets[i] = Short.valueOf((short) (octets[i].shortValue() + 128)); // don't want negative values
-
-        //      System.err.println("Converting byte " + octets[i].intValue() + " to abs " + absoctets[i].intValue());
-      }
-
-    if (absoctets.length == 4)
-      {
-        // okay, here's the easy one..
-
-        result.append("::FFFF:"); // this is IPV6's compatibility mode
-
-        result.append(absoctets[0].toString());
-        result.append(".");
-        result.append(absoctets[1].toString());
-        result.append(".");
-        result.append(absoctets[2].toString());
-        result.append(".");
-        result.append(absoctets[3].toString());
+        result.append("::ffff:"); // this is IPV6's compatibility mode
+        result.append(genIPV4string(octets));
 
         return result.toString();
       }
 
-    if (absoctets.length != 16)
+    if (octets.length != 16)
       {
         throw new IllegalArgumentException("bad number of octets.");
       }
+
+    absoctets = s2u(octets);
 
     // now for the challenge..
 
@@ -806,7 +966,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
     for (i = 0; i < 8; i++)
       {
-        stanzas[i] = (absoctets[i*2].intValue()*256) + absoctets[(i*2) + 1].intValue();
+        stanzas[i] = absoctets[i*2] * 256 + absoctets[(i*2) + 1];
       }
 
     stanzaStrings = new String[8];
@@ -815,9 +975,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
     for (i = 0; i < 8; i++)
       {
-        stanzaStrings[i] = Integer.toString(stanzas[i], 16); // generate the 4 hex digits
-
-        //      System.err.println("Hex for " + stanzas[i] + " is " + stanzaStrings[i]);
+        stanzaStrings[i] = Integer.toString(stanzas[i], 16);
       }
 
     // okay, we've got 8 stanzas.. now we have to determine
@@ -861,16 +1019,24 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
     // let's also check to see if we want to represent the
     // last 4 bytes in dotted decimal IPv4 form
 
-    if ((loCompress == 0) && (hiCompress == 5))
+    if (loCompress == 0 && hiCompress == 5)
       {
-        return "::" + absoctets[12].toString() + "." + absoctets[13].toString() + "." +
-          absoctets[14].toString() + "." + absoctets[15].toString();
+        return "::" +
+          Short.toString(absoctets[12]) + "." +
+          Short.toString(absoctets[13]) + "." +
+          Short.toString(absoctets[14]) + "." +
+          Short.toString(absoctets[15]);
       }
-    else if ((loCompress == 0) && (hiCompress == 4) &&
-             (absoctets[10].shortValue() == 255) && (absoctets[11].shortValue() == 255))
+    else if (loCompress == 0 &&
+             hiCompress == 4 &&
+             absoctets[10] == 255 &&
+             absoctets[11] == 255)
       {
-        return "::FFFF:" + absoctets[12].toString() + "." + absoctets[13].toString() + "." +
-          absoctets[14].toString() + "." + absoctets[15].toString();
+        return "::ffff:" +
+          Short.toString(absoctets[12]) + "." +
+          Short.toString(absoctets[13]) + "." +
+          Short.toString(absoctets[14]) + "." +
+          Short.toString(absoctets[15]);
       }
 
     // nope, we're gonna go all the way in IPv6 form..
@@ -920,7 +1086,65 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
           }
       }
 
-    return result.toString().toUpperCase();
+    return result.toString();
+  }
+
+  /**
+   * Determines whether a given character is valid or invalid for an
+   * IPDBField
+   *
+   * @param ch the character which is being tested for its validity
+   */
+
+  private static final boolean isAllowedV4(char ch)
+  {
+    return IPv4allowedChars.indexOf(ch) != -1;
+  }
+
+  /**
+   * Determines whether a given character is valid or invalid for an
+   * IPDBField
+   *
+   * @param ch the character which is being tested for its validity
+   */
+
+  private static final boolean isAllowedV6(char ch)
+  {
+    return IPv6allowedChars.indexOf(ch) != -1;
+  }
+
+  /**
+   * Convenience function to copy an array of primitive byte to an
+   * array of Byte objects.
+   */
+
+  private static final Byte[] wrap(byte[] octets)
+  {
+    Byte[] results = new Byte[octets.length];
+
+    for (int i = 0; i < results.length; i++)
+      {
+        results[i] = Byte.valueOf(octets[i]);
+      }
+
+    return results;
+  }
+
+  /**
+   * Convenience function to copy an array of Byte objects to an
+   * array of primitive bytes.
+   */
+
+  private static final byte[] unwrap(Byte[] octets)
+  {
+    byte[] results = new byte[octets.length];
+
+    for (int i = 0; i < results.length; i++)
+      {
+        results[i] = octets[i].byteValue();
+      }
+
+    return results;
   }
 
   /**
@@ -929,12 +1153,98 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
   public static void main(String argv[])
   {
-    Byte[] octets;
     Random rand = new Random();
+    int[][] testOctets = {{192,168,0,1},
+                          {127,0,0,1},
+                          {0x20,0x01,0xdd,0xdd,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
+                          {0x20,0x01,0x0d,0xb8,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01},
+                          {0x20,0x01,0x0d,0xb8,0x00,0x00,0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01},
+                          {0x20,0x01,0x0d,0xb8,0x85,0xa3,0x00,0x00,0x00,0x00,0x8a,0x2e,0x03,0x70,0x73,0x34},
+                          {0x20,0x01,0x0d,0xb8,0x85,0xa3,0xaa,0xbb,0xcc,0xdd,0x8a,0x2e,0x03,0x70,0x73,0x34},
+                          {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x03,0x70,0x73,0x34},
+                          {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0xff,0xff,0x03,0x70,0x73,0x34},
+                          {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x01},
+                          {0x10,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
+                          {0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00},
+                          {0x00,0x01,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x0f},
+                          {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00}};
+
+    String[] testStrings = {"10",
+                            "10.1",
+                            "10.1.4",
+                            "192.168.0.1",
+                            "127.0.0.1",
+                            "::ffff:3.112.115.52",
+                            "::",
+                            "::1",
+                            "::192.168.0.1",
+                            "cafe:babe::1",
+                            "CAFE:babe::01",
+                            "cafe:babe:0000:0000:0000:0000:0000:0001",
+                            "f::dead:beef",
+                            "f2f2:7474:2e2e:0:3030:0:b2b2:0",
+                            "F2F2:7474:2E2E:0000:3030:00:B2B2:0000"};
 
     /* -- */
 
-    octets = new Byte[16];
+    for (int i = 0; i < testOctets.length; i++)
+      {
+        IPAddress addr = new IPAddress(testOctets[i]);
+
+        String first = addr.toString();
+        String second = new IPAddress(first).toString();
+
+        if (addr.isIPv4())
+          {
+            System.out.println("IPv4 (from octets): " + first);
+            System.out.println("IPv4 (roundtrip  ): " + second);
+          }
+        else
+          {
+            System.out.println("IPv6 (from octets): " + first);
+            System.out.println("IPv6 (roundtrip  ): " + second);
+          }
+
+        if (!first.equals(second))
+          {
+            System.out.println("FAILURE");
+          }
+
+        if (!first.equals((new IPAddress(addr.getOctets())).toString()))
+          {
+            System.out.println("FAILURE!");
+          }
+      }
+
+    for (int i = 0; i < testStrings.length; i++)
+      {
+        IPAddress addr = new IPAddress(testStrings[i]);
+        IPAddress readdr = new IPAddress(addr.getBytes());
+
+        if (addr.isIPv4())
+          {
+            System.out.println("IPv4 (from string): " + addr);
+            System.out.println("IPv4 (roundtrip  ): " + readdr);
+          }
+        else
+          {
+            System.out.println("IPv6 (from string): " + addr);
+            System.out.println("IPv6 (roundtrip  ): " + readdr);
+          }
+
+        if (!addr.equals(readdr))
+          {
+            System.out.println("FAILURE");
+          }
+
+        if (!addr.toString().equals((new IPAddress(addr.getOctets())).toString()))
+          {
+            System.out.println("FAILURE!");
+          }
+      }
+
+
+    Byte[] octets = new Byte[16];
 
     for (int i = 0; i < 16; i++)
       {
