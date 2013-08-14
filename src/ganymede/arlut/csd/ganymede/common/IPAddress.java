@@ -73,7 +73,6 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
   static final long serialVersionUID = -2432213571055741805L;
 
-  static final boolean debug = false;
   private static String IPv4allowedChars = "1234567890.";
   private static String IPv6allowedChars = "1234567890.abcdefABCDEF:";
 
@@ -842,14 +841,6 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
     int tailOffset = 16 - tailBytes;
 
-    if (debug)
-      {
-        System.err.println("tailBytes = " + tailBytes);
-        System.err.println("tailOffset = " + tailOffset);
-      }
-
-    //
-
     for (int i = 0; i < compressBoundary; i++)
       {
         tmp = segments.get(i);
@@ -871,12 +862,6 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
         result[i * 2] = u2s(Integer.parseInt(tmp.substring(0, 2), 16));
         result[(i * 2) + 1] = u2s(Integer.parseInt(tmp.substring(2, 4), 16));
-
-        if (debug)
-          {
-            System.err.println("Byte " + (i*2) + " = " + s2u(result[i*2]));
-            System.err.println("Byte " + ((i*2)+1) + " = " + s2u(result[(i*2)+1]));
-          }
       }
 
     int x;
@@ -903,13 +888,6 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
         result[tailOffset + (x * 2)] = u2s(Integer.parseInt(tmp.substring(0, 2), 16));
         result[tailOffset + (x * 2) + 1] = u2s(Integer.parseInt(tmp.substring(2, 4), 16));
-
-        if (debug)
-          {
-            System.err.println("Byte " + (tailOffset + (x*2)) + " = " + s2u(result[(tailOffset + (x*2))]));
-            System.err.println("Byte " + (tailOffset + ((x*2)+1)) + " = " + s2u(result[tailOffset + (x*2) + 1]));
-          }
-
       }
 
     return result;
