@@ -706,7 +706,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
     for (int i = 0; i < 16; i++)
       {
-        result[i] = -128;
+        result[i] = u2s(0);
       }
 
     input = input.trim();
@@ -1250,12 +1250,12 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
     for (int i = 0; i < 16; i++)
       {
-        octets[i] = Byte.valueOf((byte) -128);
+        octets[i] = Byte.valueOf(u2s(0));
       }
 
     System.out.println("All zero v6 string: " + genIPV6string(octets));
 
-    octets[15] = Byte.valueOf((byte) -127);
+    octets[15] = Byte.valueOf(u2s(1));
 
     System.out.println("Trailing 1 string: " + genIPV6string(octets));
 
@@ -1272,7 +1272,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
     for (int i = 0; i < 16; i++)
       {
-        octets[i] = Byte.valueOf((byte) -128);
+        octets[i] = Byte.valueOf(u2s(0));
       }
 
     rand.nextBytes(randbytes);
@@ -1298,7 +1298,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
     for (int i = 0; i < 12; i++)
       {
-        octets[i] = Byte.valueOf((byte) -128);
+        octets[i] = Byte.valueOf(u2s(0));
       }
 
     rand.nextBytes(randbytes);
@@ -1312,11 +1312,11 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
     for (int i = 0; i < 10; i++)
       {
-        octets[i] = Byte.valueOf((byte) -128);
+        octets[i] = Byte.valueOf(u2s(0));
       }
 
-    octets[10] = Byte.valueOf((byte) 127);
-    octets[11] = Byte.valueOf((byte) 127);
+    octets[10] = Byte.valueOf(u2s(255));
+    octets[11] = Byte.valueOf(u2s(255));
 
     rand.nextBytes(randbytes);
 
