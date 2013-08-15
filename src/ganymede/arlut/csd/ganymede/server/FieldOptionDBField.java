@@ -443,7 +443,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   // ---
 
-  Map<String, SyncPrefEnum> matrix;
+  private Map<String, SyncPrefEnum> matrix;
 
   /* -- */
 
@@ -921,6 +921,11 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     return result.toString();
   }
 
+  public HashMap<String, SyncPrefEnum> getInternalsCopy()
+  {
+    return new HashMap<String, SyncPrefEnum>(this.matrix);
+  }
+
   /**
    * Return a serializable, read-only copy of this field's field
    * option matrix
@@ -1312,6 +1317,6 @@ class FieldOptionMatrixCkPoint {
 
   public FieldOptionMatrixCkPoint(FieldOptionDBField field)
   {
-    this.matrix = new HashMap<String, SyncPrefEnum>(field.matrix);
+    this.matrix = field.getInternalsCopy();
   }
 }
