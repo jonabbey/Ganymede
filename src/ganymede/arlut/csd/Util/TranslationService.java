@@ -185,9 +185,17 @@ public final class TranslationService {
 
   private ResourceBundle getBundle()
   {
-    if (this.bundle == null)
+    if (this.bundle != null)
       {
-        this.bundle = ResourceBundle.getBundle(resourceName, ourLocale);
+        return this.bundle;
+      }
+
+    synchronized (this)
+      {
+        if (this.bundle == null)
+          {
+            this.bundle = ResourceBundle.getBundle(resourceName, ourLocale);
+          }
       }
 
     return this.bundle;
