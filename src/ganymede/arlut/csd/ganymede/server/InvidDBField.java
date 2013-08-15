@@ -3853,8 +3853,7 @@ public final class InvidDBField extends DBField implements invid_field {
   }
 
   /**
-   * Returns a StringBuffer encoded list of acceptable invid values
-   * for this field.
+   * Returns a list of acceptable invid values for this field.
    *
    * @see arlut.csd.ganymede.rmi.invid_field
    */
@@ -3865,8 +3864,11 @@ public final class InvidDBField extends DBField implements invid_field {
   }
 
   /**
-   * Returns a StringBuffer encoded list of acceptable invid values
-   * for this field.
+   * <p>Returns a possibly filtered list of acceptable invid values
+   * for this field.</p>
+   *
+   * @param applyFilter If true, the results returned will be filtered
+   * by the GanymedeSession's owner filter query.
    *
    * @see arlut.csd.ganymede.rmi.invid_field
    */

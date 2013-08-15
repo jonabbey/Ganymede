@@ -9,11 +9,13 @@
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996 - 2004
+
+   Copyright (C) 1996 - 2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -82,18 +84,20 @@ public interface invid_field extends db_field {
   boolean mustChoose() throws RemoteException;
 
   /**
-   * <p>Returns a StringBuffer encoded list of acceptable invid values
-   * for this field.</p>
-   */
-
-  QueryResult choices(boolean applyFilter) throws RemoteException;
-
-  /**
-   * <p>Returns a StringBuffer encoded list of acceptable invid values
-   * for this field.</p>
+   * <p>Returns a list of acceptable invid values for this field.</p>
    */
 
   QueryResult choices() throws RemoteException;
+
+  /**
+   * <p>Returns a possibly filtered list of acceptable invid values
+   * for this field.</p>
+   *
+   * @param applyFilter If true, the results returned will be filtered
+   * by the GanymedeSession's owner filter query.
+   */
+
+  QueryResult choices(boolean applyFilter) throws RemoteException;
 
   /**
    * <p>This method returns a key that can be used by the client
