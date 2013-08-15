@@ -126,6 +126,20 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
 
   static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.server.DBSchemaEdit");
 
+  /**
+   * <p>We'll set this to true if the schema has been edited since the
+   * server started.</p>
+   *
+   * <p>FieldOptionDBField checks this to see if it needs to clean out
+   * obsolete values.</p>
+   *
+   * <p>It's a minor optimization, and we'll never bother setting this
+   * back to false even after all the FieldOptionDBFields in the
+   * system have cleaned out obsolete values.</p>
+   */
+
+  static boolean schemaEditedSinceStartup = false;
+
   // ---
 
   /**
@@ -1022,6 +1036,8 @@ public final class DBSchemaEdit implements Unreferenced, SchemaEdit {
     // GanymedeSessions like GanymedeServer.loginSession, because
     // GanymedeSession isn't keeping any references to the old
     // DBObjectBase / DBObjectBaseField definitions.
+
+    DBSchemaEdit.schemaEditedSinceStartup = true;
 
     GanymedeAdmin.setState(DBStore.normal_state); // "Normal Operation"
 

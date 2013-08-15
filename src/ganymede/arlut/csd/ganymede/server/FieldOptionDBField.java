@@ -673,7 +673,10 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     // dumped after changing the schema, this is an appropriate place
     // to always do the cleanup.
 
-    this.clean();
+    if (DBSchemaEdit.schemaEditedSinceStartup)
+      {
+        this.clean();
+      }
 
     // now actually emit stuff.
 
@@ -707,6 +710,8 @@ public class FieldOptionDBField extends DBField implements field_option_field {
       {
         matrix.put(in.readUTF(), SyncPrefEnum.find(in.readUTF()));
       }
+
+    this.clean();
   }
 
   /**
@@ -809,8 +814,6 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     /* -- */
 
-    this.clean();
-
     for (Map.Entry<String, SyncPrefEnum> entry: matrix.entrySet())
       {
         result.append(decodeBaseName(entry.getKey()) + " " + decodeFieldName(entry.getKey()) +
@@ -857,8 +860,6 @@ public class FieldOptionDBField extends DBField implements field_option_field {
       {
         return null;
       }
-
-    this.clean();
 
     FieldOptionDBField origFO = (FieldOptionDBField) orig;
 
