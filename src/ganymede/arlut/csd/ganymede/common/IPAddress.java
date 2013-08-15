@@ -108,6 +108,13 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
   private final byte[] address;
 
+  /**
+   * We'll cache the string representation of our IPAddress for
+   * performance.
+   */
+
+  private transient String text;
+
   /* -- */
 
   /**
@@ -359,7 +366,12 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
   @Override public String toString()
   {
-    return IPAddress.genIPString(this.address);
+    if (text == null)
+      {
+        text = IPAddress.genIPString(this.address);
+      }
+
+    return text;
   }
 
   public void emit(DataOutput out) throws IOException
