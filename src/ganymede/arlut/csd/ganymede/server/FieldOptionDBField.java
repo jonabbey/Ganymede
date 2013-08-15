@@ -710,8 +710,6 @@ public class FieldOptionDBField extends DBField implements field_option_field {
       {
         matrix.put(in.readUTF(), SyncPrefEnum.find(in.readUTF()));
       }
-
-    this.clean();
   }
 
   /**

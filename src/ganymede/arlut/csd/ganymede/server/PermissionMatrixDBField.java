@@ -758,8 +758,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
         pe = PermEntry.getPermEntry(in);
         matrix.put(key, pe);
       }
-
-    clean();
   }
 
   @Override void emitXML(XMLDumpContext dump) throws IOException
