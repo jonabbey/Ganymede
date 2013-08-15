@@ -414,42 +414,42 @@ public class PermEntry implements java.io.Serializable {
 
     if (visible && (p == null || !p.visible))
       {
-        addString(result, "+ visible");
+        addString(result, "+visible");
       }
 
     if (p != null && p.visible && !visible)
       {
-        addString(result, "- visible");
+        addString(result, "-visible");
       }
 
     if (editable && (p == null || !p.editable))
       {
-        addString(result, "+ editable");
+        addString(result, "+editable");
       }
 
     if (p != null && p.editable && !editable)
       {
-        addString(result, "- editable");
+        addString(result, "-editable");
       }
 
     if (create && (p == null || !p.create))
       {
-        addString(result, "+ create");
+        addString(result, "+create");
       }
 
     if (p != null && p.create && !create)
       {
-        addString(result, "- create");
+        addString(result, "-create");
       }
 
     if (delete && (p == null || !p.delete))
       {
-        addString(result, "+ delete");
+        addString(result, "+delete");
       }
 
     if (p != null && p.delete && !delete)
       {
-        addString(result, "- delete");
+        addString(result, "-delete");
       }
 
     return result.toString();
