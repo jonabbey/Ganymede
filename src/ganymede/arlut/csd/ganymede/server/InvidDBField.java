@@ -2842,14 +2842,13 @@ public final class InvidDBField extends DBField implements invid_field {
               }
             else
               {
-                if (errorBuf == null)
-                  {
-                    errorBuf = new StringBuilder();
-                  }
-
                 if (retVal.getDialog() != null)
                   {
-                    if (errorBuf.length() != 0)
+                    if (errorBuf == null)
+                      {
+                        errorBuf = new StringBuilder();
+                      }
+                    else if (errorBuf.length() != 0)
                       {
                         errorBuf.append("\n\n");
                       }
@@ -2913,7 +2912,11 @@ public final class InvidDBField extends DBField implements invid_field {
               {
                 if (newRetVal.getDialog() != null)
                   {
-                    if (errorBuf.length() != 0)
+                    if (errorBuf == null)
+                      {
+                        errorBuf = new StringBuilder();
+                      }
+                    else if (errorBuf.length() != 0)
                       {
                         errorBuf.append("\n\n");
                       }
@@ -2977,7 +2980,11 @@ public final class InvidDBField extends DBField implements invid_field {
                   {
                     if (newRetVal.getDialog() != null)
                       {
-                        if (errorBuf.length() != 0)
+                        if (errorBuf == null)
+                          {
+                            errorBuf = new StringBuilder();
+                          }
+                        else if (errorBuf.length() != 0)
                           {
                             errorBuf.append("\n\n");
                           }
@@ -3042,7 +3049,11 @@ public final class InvidDBField extends DBField implements invid_field {
                   {
                     if (newRetVal.getDialog() != null)
                       {
-                        if (errorBuf.length() != 0)
+                        if (errorBuf == null)
+                          {
+                            errorBuf = new StringBuilder();
+                          }
+                        else if (errorBuf.length() != 0)
                           {
                             errorBuf.append("\n\n");
                           }
@@ -3086,7 +3097,7 @@ public final class InvidDBField extends DBField implements invid_field {
         // therefore have partialSuccessOk set), encode a description
         // of what happened to go along with the success code.
 
-        if (errorBuf.length() != 0)
+        if (errorBuf != null && errorBuf.length() != 0)
           {
             retVal = ReturnVal.merge(retVal, ReturnVal.success()); // force non-null retVal
 
@@ -3123,7 +3134,6 @@ public final class InvidDBField extends DBField implements invid_field {
           }
       }
   }
-
 
   /**
    * <p>Creates and adds a new embedded object in this
