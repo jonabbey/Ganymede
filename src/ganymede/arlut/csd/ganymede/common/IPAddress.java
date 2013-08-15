@@ -366,9 +366,17 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
   @Override public String toString()
   {
-    if (text == null)
+    if (text != null)
       {
-        text = IPAddress.genIPString(this.address);
+        return text;
+      }
+
+    synchronized (this.address)
+      {
+        if (text == null)
+          {
+            text = IPAddress.genIPString(this.address);
+          }
       }
 
     return text;
