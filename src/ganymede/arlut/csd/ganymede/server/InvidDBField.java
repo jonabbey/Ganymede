@@ -720,7 +720,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
   @Override public synchronized String getDiffString(DBField orig)
   {
-    StringBuilder result = new StringBuilder();
     InvidDBField origI;
     GanymedeSession gsession = null;
 
@@ -734,7 +733,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (orig == this)
       {
-        return "";
+        return null;
       }
 
     origI = (InvidDBField) orig;
@@ -761,6 +760,8 @@ public final class InvidDBField extends DBField implements invid_field {
           }
         else
           {
+            StringBuilder result = new StringBuilder();
+
             if (deleted.size() != 0)
               {
                 StringBuilder deleteString = new StringBuilder();
@@ -806,18 +807,16 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-        if (origI.value().equals(this.value()))
+        if (origI.value.equals(this.value))
           {
             return null;
           }
         else
           {
             // "\tOld: {0}\n\tNew:{1}\n"
-            result.append(ts.l("getDiffString.scalar",
-                               getRemoteLabel(gsession, origI.value(), true),
-                               getRemoteLabel(gsession, this.value(), false)));
-
-            return result.toString();
+            return ts.l("getDiffString.scalar",
+                        getRemoteLabel(gsession, origI.value(), true),
+                        getRemoteLabel(gsession, this.value(), false));
           }
       }
   }

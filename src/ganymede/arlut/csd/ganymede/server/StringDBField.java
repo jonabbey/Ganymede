@@ -418,24 +418,20 @@ public class StringDBField extends DBField implements string_field {
 
   @Override public synchronized String getDiffString(DBField orig)
   {
-    StringBuilder result = new StringBuilder();
-    StringDBField origS;
-
-    /* -- */
-
     if (!(orig instanceof StringDBField))
       {
         throw new IllegalArgumentException("bad field comparison");
       }
 
-    origS = (StringDBField) orig;
+    if (orig == this)
+      {
+        return null;
+      }
 
     if (isVector())
       {
-        Vector<String> values = (Vector<String>) getVectVal();
-        Vector<String> origValues = (Vector<String>) origS.getVectVal();
-        Vector<String> deleted = VectorUtils.difference(origValues, values);
-        Vector<String> added = VectorUtils.difference(values, origValues);
+        Vector<String> added = VectorUtils.difference(getVectVal(), orig.getVectVal());
+        Vector<String> deleted = VectorUtils.difference(orig.getVectVal(), getVectVal());
 
         // were there any changes at all?
 
@@ -445,40 +441,18 @@ public class StringDBField extends DBField implements string_field {
           }
         else
           {
+            StringBuilder result = new StringBuilder();
+
             if (deleted.size() != 0)
               {
-                StringBuilder itemList = new StringBuilder();
-
-                for (int i = 0; i < deleted.size(); i++)
-                  {
-                    if (i > 0)
-                      {
-                        itemList.append(", ");
-                      }
-
-                    itemList.append(deleted.get(i));
-                  }
-
                 // "\tDeleted: {0}\n"
-                result.append(ts.l("getDiffString.deleted", itemList.toString()));
+                result.append(ts.l("getDiffString.deleted", VectorUtils.vectorString(deleted, ", ")));
               }
 
             if (added.size() != 0)
               {
-                StringBuilder itemList = new StringBuilder();
-
-                for (int i = 0; i < added.size(); i++)
-                  {
-                    if (i > 0)
-                      {
-                        itemList.append(", ");
-                      }
-
-                    itemList.append(added.get(i));
-                  }
-
                 // "\tAdded: {0}\n"
-                result.append(ts.l("getDiffString.added", itemList.toString()));
+                result.append(ts.l("getDiffString.added", VectorUtils.vectorString(added, ", ")));
               }
 
             return result.toString();
@@ -486,20 +460,20 @@ public class StringDBField extends DBField implements string_field {
       }
     else
       {
-        if (origS.value().equals(this.value()))
+        if (orig.value.equals(this.value))
           {
             return null;
           }
-        else
-          {
-            // "\tOld: {0}\n"
-            result.append(ts.l("getDiffString.old", origS.value()));
 
-            // "\tNew: {0}\n"
-            result.append(ts.l("getDiffString.new", this.value()));
+        StringBuilder result = new StringBuilder();
 
-            return result.toString();
-          }
+        // "\tOld: {0}\n"
+        result.append(ts.l("getDiffString.old", orig.value));
+
+        // "\tNew: {0}\n"
+        result.append(ts.l("getDiffString.new", this.value));
+
+        return result.toString();
       }
   }
 

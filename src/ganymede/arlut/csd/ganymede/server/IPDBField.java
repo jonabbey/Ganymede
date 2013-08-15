@@ -322,10 +322,15 @@ public class IPDBField extends DBField implements ip_field {
         throw new IllegalArgumentException("bad field comparison");
       }
 
+    if (orig == this)
+      {
+        return null;
+      }
+
     if (isVector())
       {
         Vector added = VectorUtils.difference(getVectVal(), orig.getVectVal());
-        Vector deleted = VectorUtils.difference(getVectVal(), orig.getVectVal());
+        Vector deleted = VectorUtils.difference(orig.getVectVal(), getVectVal());
 
         // were there any changes at all?
 
@@ -339,16 +344,14 @@ public class IPDBField extends DBField implements ip_field {
 
             if (deleted.size() != 0)
               {
-                result.append("\tDeleted: ");
-                result.append(VectorUtils.vectorString(deleted));
-                result.append("\n");
+                // "\tDeleted: {0}\n"
+                result.append(ts.l("getDiffString.deleted", VectorUtils.vectorString(deleted, ", ")));
               }
 
             if (added.size() != 0)
               {
-                result.append("\tAdded: ");
-                result.append(VectorUtils.vectorString(added));
-                result.append("\n");
+                // "\tAdded: {0}\n"
+                result.append(ts.l("getDiffString.added", VectorUtils.vectorString(added, ", ")));
               }
 
             return result.toString();
@@ -356,21 +359,18 @@ public class IPDBField extends DBField implements ip_field {
       }
     else
       {
-        IPAddress x = (IPAddress) orig.value;
-        IPAddress y = (IPAddress) this.value;
-
-        if (x.equals(y))
+        if (orig.value.equals(this.value))
           {
             return null;
           }
 
         StringBuilder result = new StringBuilder();
 
-        result.append("\tOld: ");
-        result.append(x);
-        result.append("\n\tNew: ");
-        result.append(y);
-        result.append("\n");
+        // "\tOld: {0}\n"
+        result.append(ts.l("getDiffString.old", orig.value));
+
+        // "\tNew: {0}\n"
+        result.append(ts.l("getDiffString.new", this.value));
 
         return result.toString();
       }
