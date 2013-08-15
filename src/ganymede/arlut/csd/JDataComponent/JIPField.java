@@ -227,6 +227,10 @@ public class JIPField extends JentryField {
         try
           {
             address = new IPAddress(str);
+
+            // canonicalize the address entered
+
+            setValue(address);
           }
         catch (IllegalArgumentException ex)
           {
