@@ -2828,7 +2828,7 @@ public final class InvidDBField extends DBField implements invid_field {
     // type and in identity.  if partialSuccessOk, we won't complain
     // unless none of the submitted values are acceptable
 
-    StringBuilder errorBuf = new StringBuilder();
+    StringBuilder errorBuf = null;
 
     for (Invid remote: newValues)
       {
@@ -2842,6 +2842,11 @@ public final class InvidDBField extends DBField implements invid_field {
               }
             else
               {
+                if (errorBuf == null)
+                  {
+                    errorBuf = new StringBuilder();
+                  }
+
                 if (retVal.getDialog() != null)
                   {
                     if (errorBuf.length() != 0)

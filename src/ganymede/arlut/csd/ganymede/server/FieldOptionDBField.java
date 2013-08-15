@@ -671,9 +671,9 @@ public class FieldOptionDBField extends DBField implements field_option_field {
     // The field option matrix strings generally become invalid after
     // schema editing.  Since normally the database/schema needs to be
     // dumped after changing the schema, this is an appropriate place
-    // to do the cleanup.
+    // to always do the cleanup.
 
-    clean();
+    this.clean();
 
     // now actually emit stuff.
 
@@ -809,7 +809,7 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
     /* -- */
 
-    clean();
+    this.clean();
 
     for (Map.Entry<String, SyncPrefEnum> entry: matrix.entrySet())
       {
@@ -848,24 +848,26 @@ public class FieldOptionDBField extends DBField implements field_option_field {
 
   @Override public String getDiffString(DBField orig)
   {
-    StringBuilder result = new StringBuilder();
-    FieldOptionDBField origFO;
-
-    /* -- */
-
     if (!(orig instanceof FieldOptionDBField))
       {
         throw new IllegalArgumentException("bad field comparison");
       }
 
-    clean();
+    if (this == orig)
+      {
+        return null;
+      }
 
-    origFO = (FieldOptionDBField) orig;
+    this.clean();
+
+    FieldOptionDBField origFO = (FieldOptionDBField) orig;
 
     if (origFO.equals(this))
       {
         return null;
       }
+
+    StringBuilder result = new StringBuilder();
 
     Set<String> myKeys = new HashSet<String>(matrix.keySet());
     Set<String> newKeys = new HashSet<String>(myKeys);

@@ -3755,11 +3755,10 @@ public class DBEditObject extends DBObject implements ObjectStatus {
   public final synchronized String diff(Set<DBObjectBaseField> changedFieldDefs)
   {
     boolean diffFound = false;
-    StringBuilder result = new StringBuilder();
     DBField origField, currentField;
-    StringBuilder added = new StringBuilder();
-    StringBuilder deleted = new StringBuilder();
-    StringBuilder changed = new StringBuilder();
+    StringBuilder added = null;
+    StringBuilder deleted = null;
+    StringBuilder changed = null;
 
     /* -- */
 
@@ -3833,6 +3832,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
                 changedFieldDefs.add(fieldDef);
               }
 
+            if (added == null)
+              {
+                added = new StringBuilder();
+              }
+
             if (okToLogField(currentField))
               {
                 // "\t{0}: {1}\n"
@@ -3859,6 +3863,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
             if (changedFieldDefs != null)
               {
                 changedFieldDefs.add(fieldDef);
+              }
+
+            if (deleted == null)
+              {
+                deleted = new StringBuilder();
               }
 
             if (okToLogField(origField))
@@ -3891,6 +3900,11 @@ public class DBEditObject extends DBObject implements ObjectStatus {
                     changedFieldDefs.add(fieldDef);
                   }
 
+                if (changed == null)
+                  {
+                    changed = new StringBuilder();
+                  }
+
                 if (okToLogField(currentField) && okToLogField(origField))
                   {
                     changed.append(fieldDef.getName());
@@ -3917,19 +3931,21 @@ public class DBEditObject extends DBObject implements ObjectStatus {
 
     if (diffFound)
       {
-        if (added.length() > 0)
+        StringBuilder result = new StringBuilder();
+
+        if (added != null && added.length() > 0)
           {
             // "Fields Added:\n\n{0}\n"
             result.append(ts.l("diff.added", added));
           }
 
-        if (changed.length() > 0)
+        if (changed != null && changed.length() > 0)
           {
             // "Fields Changed:\n\n{0}\n"
             result.append(ts.l("diff.changed", changed));
           }
 
-        if (deleted.length() > 0)
+        if (deleted != null && deleted.length() > 0)
           {
             // "Fields Deleted:\n\n{0}\n"
             result.append(ts.l("diff.deleted", deleted));

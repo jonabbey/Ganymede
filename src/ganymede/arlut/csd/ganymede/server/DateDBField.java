@@ -289,32 +289,27 @@ public class DateDBField extends DBField implements date_field {
 
   @Override public String getDiffString(DBField orig)
   {
-    DateDBField origD;
-    StringBuilder result = new StringBuilder();
-
-    /* -- */
-
     if (!(orig instanceof DateDBField))
       {
         throw new IllegalArgumentException("bad field comparison");
       }
 
-    origD = (DateDBField) orig;
+    DateDBField origD = (DateDBField) orig;
 
-    if (!origD.value().equals(this.value()))
-      {
-        // "\tOld: {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz}\n"
-        result.append(ts.l("getDiffString.old", origD.value));
-
-        // "\tNew: {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz}\n"
-        result.append(ts.l("getDiffString.new", this.value));
-
-        return result.toString();
-      }
-    else
+    if (origD.value().equals(this.value()))
       {
         return null;
       }
+
+    StringBuilder result = new StringBuilder();
+
+    // "\tOld: {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz}\n"
+    result.append(ts.l("getDiffString.old", origD.value));
+
+    // "\tNew: {0,date,EEE, MMM d yyyy hh:mm:ss aaa zz}\n"
+    result.append(ts.l("getDiffString.new", this.value));
+
+    return result.toString();
   }
 
   // ****
