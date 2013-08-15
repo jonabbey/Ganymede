@@ -230,7 +230,7 @@ public class JIPField extends JentryField {
 
             // canonicalize the address entered
 
-            setValue(address);
+            setText(address.toString());
           }
         catch (IllegalArgumentException ex)
           {
