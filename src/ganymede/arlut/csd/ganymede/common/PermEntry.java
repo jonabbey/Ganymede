@@ -52,6 +52,8 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 
+import arlut.csd.Util.TranslationService;
+
 /*------------------------------------------------------------------------------
                                                                            class
                                                                        PermEntry
@@ -71,6 +73,13 @@ import java.io.IOException;
  */
 
 public class PermEntry implements java.io.Serializable {
+
+  /**
+   * TranslationService object for handling string localization in
+   * the Ganymede server.
+   */
+
+  static final TranslationService ts = TranslationService.getTranslationService("arlut.csd.ganymede.common.PermEntry");
 
   static private PermEntry[] permObs;
   static public final PermEntry fullPerms;
@@ -414,42 +423,50 @@ public class PermEntry implements java.io.Serializable {
 
     if (visible && (p == null || !p.visible))
       {
-        addString(result, "+visible");
+        // "+visible"
+        addString(result, ts.l("difference.addVisible"));
       }
 
     if (p != null && p.visible && !visible)
       {
-        addString(result, "-visible");
+        // "-visible"
+        addString(result, ts.l("difference.remVisible"));
       }
 
     if (editable && (p == null || !p.editable))
       {
-        addString(result, "+editable");
+        // "+editable"
+        addString(result, ts.l("difference.addEditable"));
       }
 
     if (p != null && p.editable && !editable)
       {
-        addString(result, "-editable");
+        // "-editable"
+        addString(result, ts.l("difference.remEditable"));
       }
 
     if (create && (p == null || !p.create))
       {
-        addString(result, "+create");
+        // "+create"
+        addString(result, ts.l("difference.addCreate"));
       }
 
     if (p != null && p.create && !create)
       {
-        addString(result, "-create");
+        // "-create"
+        addString(result, ts.l("difference.remCreate"));
       }
 
     if (delete && (p == null || !p.delete))
       {
-        addString(result, "+delete");
+        // "+delete"
+        addString(result, ts.l("difference.addDelete"));
       }
 
     if (p != null && p.delete && !delete)
       {
-        addString(result, "-delete");
+        // "-delete"
+        addString(result, ts.l("difference.remDelete"));
       }
 
     return result.toString();
@@ -477,25 +494,32 @@ public class PermEntry implements java.io.Serializable {
 
     if (visible)
       {
-        result.append("visible ");
+        // "visible"
+        result.append(ts.l("toString.visible"));
+        result.append(" ");
       }
 
     if (editable)
       {
-        result.append("editable ");
+        // "editable"
+        result.append(ts.l("toString.editable"));
+        result.append(" ");
       }
 
     if (create)
       {
-        result.append("create ");
+        // "create"
+        result.append(ts.l("toString.create"));
+        result.append(" ");
       }
 
     if (delete)
       {
-        result.append("delete ");
+        // "delete"
+        result.append(ts.l("toString.delete"));
       }
 
-    return result.toString();
+    return result.toString().trim();
   }
 
   public String getXMLCode()
