@@ -1409,14 +1409,26 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
         return false;
       }
 
-    if (this.owner.gSession.getPermManager().isSuperGash())
-      {
-        return true;
-      }
-
     if (entry == null)
       {
         throw new IllegalArgumentException("entry is null");
+      }
+
+    DBObjectBase base = Ganymede.db.getObjectBase(baseID);
+
+    if (base == null)
+      {
+        throw new IllegalArgumentException("bad base id");
+      }
+
+    if (fieldID != -1 && base.getFieldDef(fieldID) == null)
+      {
+        throw new IllegalArgumentException("bad field id");
+      }
+
+    if (this.owner.gSession.getPermManager().isSuperGash())
+      {
+        return true;
       }
 
     if (getID() == SchemaConstants.RoleMatrix)
