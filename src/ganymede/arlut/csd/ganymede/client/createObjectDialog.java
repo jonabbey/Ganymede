@@ -49,7 +49,9 @@
 
 package arlut.csd.ganymede.client;
 
+import java.awt.BorderLayout;
 import java.awt.Dialog;
+import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -64,6 +66,8 @@ import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import javax.swing.border.EmptyBorder;
 
 import arlut.csd.JDataComponent.TimedKeySelectionManager;
 import arlut.csd.JDataComponent.listHandle;
@@ -111,11 +115,21 @@ public class createObjectDialog extends StandardDialog implements ActionListener
   JComboBox
     types;
 
+  JPanel
+    middle;
+
   GridBagLayout
-    gbl = new GridBagLayout();
+    gbl;
 
   GridBagConstraints
-    gbc = new GridBagConstraints();
+    gbc;
+
+  ImageIcon
+    icon;
+
+  JLabel
+    titleL,
+    iconL;
 
   JButton
     ok,
@@ -127,33 +141,42 @@ public class createObjectDialog extends StandardDialog implements ActionListener
   {
     // "Create Object"
     super(client, ts.l("init.dialog_title"), StandardDialog.ModalityType.DOCUMENT_MODAL);
-
     this.gc = client;
 
-    JPanel p = new JPanel(gbl);
 
-    gbc.insets = new Insets(3,3,3,3);
+    gbl = new GridBagLayout();
+    gbc = new GridBagConstraints();
+
+    getContentPane().setLayout(new BorderLayout());
+    middle = new JPanel(gbl);
+    getContentPane().add(middle, BorderLayout.CENTER);
+    gbc.insets = new Insets(4,4,4,4);
+
+    icon = new ImageIcon(gc.createDialogImage);
+    iconL = new JLabel(icon);
+    iconL.setBorder(new EmptyBorder(10,15,10,15));
 
     gbc.gridx = 0;
     gbc.gridy = 0;
-    gbc.gridheight = 2;
-    JLabel image = new JLabel(new ImageIcon(gc.createDialogImage));
-    gbl.setConstraints(image, gbc);
-    p.add(image);
-
-    gbc.gridheight = 1;
-    gbc.ipadx = 8;
-    gbc.ipady = 8;
-
-    // "Choose the type of object\nyou wish to create"
-    JLabel text = new JLabel(ts.l("init.dialog_text"));
-    gbc.gridx = 1;
-    gbc.gridwidth = 2;
-    gbl.setConstraints(text, gbc);
-    p.add(text);
-
     gbc.gridwidth = 1;
-    gbc.ipadx = gbc.ipady = 0;
+    gbl.setConstraints(iconL, gbc);
+
+    middle.add(iconL);
+
+    // "Create Object"
+    titleL = new JLabel(ts.l("init.dialog_text"), SwingConstants.CENTER);
+    titleL.setFont(new Font("Helvetica", Font.BOLD, 14));
+    titleL.setOpaque(true);
+    titleL.setBorder(client.emptyBorder5);
+
+    gbc.gridx = 1;
+    gbc.gridy = 0;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
+    gbl.setConstraints(titleL, gbc);
+    middle.add(titleL);
+
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridwidth = 1;
 
     // get list of types from gclient
 
@@ -192,7 +215,9 @@ public class createObjectDialog extends StandardDialog implements ActionListener
       }
 
     listHandles = gc.sortListHandleVector(listHandles);
+
     types = new JComboBox(listHandles);
+    types.setKeySelectionManager(new TimedKeySelectionManager());
 
     // see if we remember a type of object to create
 
@@ -213,65 +238,53 @@ public class createObjectDialog extends StandardDialog implements ActionListener
           }
       }
 
-    types.setKeySelectionManager(new TimedKeySelectionManager());
+    gbc.gridx = 0;
+    gbc.gridy = 1;
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.gridwidth = 2;
 
-    // Ideally, we'd really like for our JComboBox's pop-ups to be
-    // able to go beyond the borders of our dialog.  Unfortunately,
-    // the Swing library, up to and including Swing 1.1 beta 3, is
-    // hideously broken when it comes to handling pop-ups in dialogs.
-
-    // By leaving it lightweight, our pop-up will get truncated to the
-    // dialog's edges, but at least it will be fully displayed, with a
-    // scrollable menu region that fits within our dialog.
-
-    // **  types.setLightWeightPopupEnabled(false);
-
-    // "Type of object:"
+    // "Object Type:"
     JLabel l = new JLabel(ts.l("init.type_label"));
 
-    gbc.gridx = 1;
-    gbc.gridy = 1;
     gbl.setConstraints(l, gbc);
-    p.add(l);
+    middle.add(l);
 
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+    gbc.gridwidth = GridBagConstraints.REMAINDER;
     gbc.gridx = 2;
     gbl.setConstraints(types, gbc);
-    p.add(types);
+    middle.add(types);
 
-    JPanel buttonP = new JPanel();
     ok = new JButton(StringDialog.getDefaultOk());
     ok.addActionListener(this);
+
     cancel = new JButton(StringDialog.getDefaultCancel());
     cancel.addActionListener(this);
 
-    if (glogin.isRunningOnMac())
+    if (isRunningOnMac())
       {
+        JPanel macPanel = new JPanel();
+        macPanel.setLayout(new BorderLayout());
+
+        JPanel buttonP = new JPanel();
+
         buttonP.add(cancel);
         buttonP.add(ok);
+
+        macPanel.add(buttonP, BorderLayout.EAST);
+        getContentPane().add(macPanel, BorderLayout.SOUTH);
       }
     else
       {
+        JPanel buttonP = new JPanel();
+
         buttonP.add(ok);
         buttonP.add(cancel);
+
+        getContentPane().add(buttonP, BorderLayout.SOUTH);
       }
 
-    gbc.insets = new Insets(4,4,4,4);
-    gbc.gridwidth = 3;
-    gbc.fill = GridBagConstraints.BOTH;
-    gbc.gridy = 3;
-    gbc.gridx = 0;
-
-    if (glogin.isRunningOnMac())
-      {
-        gbc.gridx = 2;
-        gbc.gridwidth = GridBagConstraints.REMAINDER;
-        gbc.anchor = GridBagConstraints.EAST;
-      }
-
-    gbl.setConstraints(buttonP, gbc);
-    p.add(buttonP);
-
-    this.setContentPane(p);
+    setBounds(150,100, 200,100);
 
     pack();
 
