@@ -256,16 +256,9 @@ public class createObjectDialog extends StandardDialog implements ActionListener
       }
 
     gbc.insets = new Insets(4,4,4,4);
-
-    gbc.gridy = 3;
-    gbc.gridx = 0;
     gbc.gridwidth = 3;
     gbc.fill = GridBagConstraints.BOTH;
-    javax.swing.JSeparator sep = new javax.swing.JSeparator();
-    gbl.setConstraints(sep, gbc);
-    p.add(sep);
-
-    gbc.gridy = 4;
+    gbc.gridy = 3;
     gbc.gridx = 0;
 
     if (glogin.isRunningOnMac())
