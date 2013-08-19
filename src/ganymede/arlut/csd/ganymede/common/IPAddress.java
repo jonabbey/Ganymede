@@ -109,8 +109,11 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
   private final byte[] address;
 
   /**
-   * We'll cache the string representation of our IPAddress for
-   * performance.
+   * <p>We'll cache the string representation of our IPAddress for
+   * performance.</p>
+   *
+   * <p>(Generating the string for IPv4 addresses is fast, but
+   * generating the string for IPv6 addresses is less so.)</p>
    */
 
   private transient String text;
@@ -145,7 +148,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
    * <p>Because bytes are signed in Java, the bytes submitted for the
    * octets of this address will range from -128 to 127.  You can use
    * IPAddress.u2s() to convert ints in the range 0 to 255 to the
-   * range used by bytes in this class.</p>
+   * range used by bytes in this class, or just subtract 128.</p>
    *
    * <p>The address parameter must be of length 4 for an IPv4 address,
    * and 16 for an IPv6 address.</p>
@@ -311,6 +314,9 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
    * are from -128 to 127.  You can use IPAddress.s2u() to convert the
    * individual bytes to shorts in the range 0-255, or you can use
    * getOctets() to get the bytes in this IPAddress in int form.</p>
+   *
+   * <p>Or you can just add 128 to each signed value to get a short or
+   * int ranged value from 0-255.</p>
    */
 
   public byte[] getBytes()
@@ -322,8 +328,9 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
    * <p>Gets an individual byte from this IPAddress.</p>
    *
    * <p>Because bytes are signed in Java, the range of of the returned
-   * byte is from -128 to 127.  You can add 128 to the returned value
-   * to convert it to the range 0-255.</p>
+   * byte is from -128 to 127.  You can use IPAddress.s2u() to convert
+   * the byte returned to a 0-255 int value, or you can just add 128
+   * to the returned value.</p>
    */
 
   public byte getByte(int index)
@@ -382,6 +389,11 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
     return text;
   }
 
+  /**
+   * <p>Writes this IPAddress to out in a form compatible with the
+   * ganymede.db and/or journal file serializations.</p>
+   */
+
   public void emit(DataOutput out) throws IOException
   {
     out.writeByte(this.address.length);
@@ -395,6 +407,11 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
 
     ------------------------------------------------------------*/
+
+  /**
+   * <p>Reads an IPAddress from in using the Ganymede database and/or
+   * journal file serialization.</p>
+   */
 
   public static IPAddress readIPAddr(DataInput in) throws IOException
   {
