@@ -172,6 +172,17 @@ public interface db_object extends java.rmi.Remote {
   public String getLabel() throws RemoteException;
 
   /**
+   * <p>If this object is not embedded, returns the label of this
+   * object in the same way that getLabel() does.</p>
+   *
+   * <p>If this object is embedded, returns a /-separated label
+   * containing the name of all containing objects followed by this
+   * object's label.</p>
+   */
+
+  public String getPathLabel() throws RemoteException;
+
+  /**
    * <p>Returns true if this object is an embedded type</p>
    */
 

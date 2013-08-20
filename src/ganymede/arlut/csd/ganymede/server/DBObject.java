@@ -973,6 +973,29 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
   }
 
   /**
+   * <p>If this object is not embedded, returns the label of this
+   * object in the same way that getLabel() does.</p>
+   *
+   * <p>If this object is embedded, returns a /-separated label
+   * containing the name of all containing objects followed by this
+   * object's label.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final String getPathLabel()
+  {
+    if (!isEmbedded())
+      {
+        return this.getLabel();
+      }
+    else
+      {
+        return getParentObj().getPathLabel() + "/" + this.getLabel();
+      }
+  }
+
+  /**
    * <p>If this object type is embedded, this method will return the
    * desired display label for the embedded object.</p>
    *
