@@ -3856,7 +3856,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
         if (conflictField != null)
           {
             DBObject conflictObject = conflictField.getOwner();
-            String conflictLabel = conflictObject.getLabel();
+            String conflictLabel = conflictObject.getPathLabel();
             String conflictClassName = conflictObject.getTypeName();
 
             // This action could not be completed because "{0}" is already being used.
@@ -3875,7 +3875,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
             conflictField = ns.lookupShadow(conflictValue);
 
             DBObject conflictObject = conflictField.getOwner();
-            String conflictLabel = conflictObject.getLabel();
+            String conflictLabel = conflictObject.getPathLabel();
             String conflictClassName = conflictObject.getTypeName();
 
             // This action could not be completed because "{0}" is currently being manipulated in a concurrent transaction.
