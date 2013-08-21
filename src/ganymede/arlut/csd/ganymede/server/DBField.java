@@ -65,6 +65,7 @@ import java.util.Vector;
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
+import arlut.csd.Util.WordWrap;
 
 import arlut.csd.ganymede.common.FieldInfo;
 import arlut.csd.ganymede.common.FieldTemplate;
@@ -3867,8 +3868,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
             return Ganymede.createErrorDialog(this.getGSession(),
                                               ts.l("getConflictDialog.errorTitle", methodName),
-                                              ts.l("getConflictDialog.persistentError",
-                                                   conflictValue, conflictClassName, conflictLabel, conflictField.getName()));
+                                              WordWrap.wrap(ts.l("getConflictDialog.persistentError",
+                                                                 conflictValue, conflictClassName, conflictLabel, conflictField.getName()),
+                                                            80));
           }
         else
           {
@@ -3886,8 +3888,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
             return Ganymede.createErrorDialog(this.getGSession(),
                                               ts.l("getConflictDialog.errorTitle", methodName),
-                                              ts.l("getConflictDialog.transactionError",
-                                                   conflictValue, conflictClassName, conflictLabel, conflictField.getName()));
+                                              WordWrap.wrap(ts.l("getConflictDialog.transactionError",
+                                                                 conflictValue, conflictClassName, conflictLabel, conflictField.getName()),
+                                                            80));
           }
       }
     catch (NullPointerException ex)
@@ -3911,8 +3914,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     // "This action could not be performed because "{0}" is already contained in field {1} in object {2}."
     return Ganymede.createErrorDialog(this.getGSession(),
                                       ts.l("getDuplicateValueDialog.error_in_method_title", methodName),
-                                      ts.l("getDuplicateValueDialog.error_body",
-                                           String.valueOf(conflictValue), getName(), owner.getLabel()));
+                                      WordWrap.wrap(ts.l("getDuplicateValueDialog.error_body",
+                                                         String.valueOf(conflictValue), getName(), owner.getLabel()),
+                                                    80));
   }
 
   /**
@@ -3926,7 +3930,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     // "This action could not be performed because "{0}" are already contained in field {1} in object {2}."
     return Ganymede.createErrorDialog(this.getGSession(),
                                       ts.l("getDuplicateValueDialog.error_in_method_title", methodName),
-                                      ts.l("getDuplicateValuesDialog.error_body",
-                                           conflictValues, getName(), owner.getLabel()));
+                                      WordWrap.wrap(ts.l("getDuplicateValuesDialog.error_body",
+                                                         conflictValues, getName(), owner.getLabel()),
+                                                    80));
   }
 }
