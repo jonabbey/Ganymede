@@ -1170,7 +1170,7 @@ you'd see a ton of login/logout events if that user happened to be a
 Ganymede administrator, or even an end-user change his password
 through Ganymede.
 
-We're not filtering out this event spam from the retrieveHistory
+We're now filtering out this event spam from the retrieveHistory
 method on the DBLog, so that it will be easier to see actual changes
 committed against a user object.
 
