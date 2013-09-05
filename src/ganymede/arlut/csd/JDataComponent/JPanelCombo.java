@@ -7,18 +7,19 @@
    You can mostly just use JComboBox functions on it, and it will pass them along.
 
    But you should extend this, or it doesn't make much sense.
-   
-   Created: ? April 1998
 
+   Created: ? April 1998
 
    Module By: Mike Mulvaney
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -52,12 +53,16 @@
 package arlut.csd.JDataComponent;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.ItemListener;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Vector;
 
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 
 /*------------------------------------------------------------------------------
@@ -68,17 +73,14 @@ import javax.swing.JPanel;
 
 public class JPanelCombo extends JPanel {
 
-  //  myCellRenderer
-  //renderer = new myCellRenderer();
-
-  JComboBox 
-    combo = null;
+  final JComboBox
+    combo;
 
   public JPanelCombo()
   {
     this(null);
   }
-  
+
   public JPanelCombo(Vector items)
   {
     setLayout(new BorderLayout());
@@ -110,12 +112,6 @@ public class JPanelCombo extends JPanel {
 
   public JComboBox getCombo()
   {
-    if (combo == null)
-      {
-        combo = new JComboBox();
-        combo.setKeySelectionManager(new TimedKeySelectionManager());
-      }
-
     return combo;
   }
 

@@ -52,6 +52,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
+import javax.swing.JComponent;
 import javax.swing.JTextField;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
@@ -230,6 +231,8 @@ abstract public class JentryField extends JTextField implements FocusListener, A
       {
         System.err.println("focusGained");
       }
+
+    ((JComponent) this.getParent()).scrollRectToVisible(this.getBounds());
   }
 
   /**

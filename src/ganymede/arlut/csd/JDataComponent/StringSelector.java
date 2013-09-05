@@ -12,7 +12,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2013
    The University of Texas at Austinb
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -56,6 +56,8 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
@@ -66,6 +68,7 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
@@ -115,7 +118,7 @@ import arlut.csd.Util.VectorUtils;
  * @author Mike Mulvaney, Jonathan Abbey
  */
 
-public class StringSelector extends JPanel implements ActionListener, JsetValueCallback {
+public class StringSelector extends JPanel implements ActionListener, JsetValueCallback, FocusListener {
 
   static final boolean debug = false;
 
@@ -228,9 +231,8 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     inPanel.add("Center", new JScrollPane(in));
 
     inTitle.setText(org_in.concat(" : 0"));
-    //    inTitle.setHorizontalAlignment( SwingConstants.LEFT );
-    //    inTitle.setMargin( new Insets(0,0,0,0) );
     inTitle.addActionListener(this);
+    inTitle.addFocusListener(this);
 
     inPanel.add("North", inTitle);
 
@@ -251,6 +253,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
         remove.setOpaque(true);
         remove.setActionCommand("Remove");
         remove.addActionListener(this);
+        remove.addFocusListener(this);
         inPanel.add("South", remove);
       }
 
@@ -275,6 +278,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
         //      outTitle.setHorizontalAlignment( SwingConstants.LEFT );
         //      outTitle.setMargin( new Insets(0,0,0,0) );
         outTitle.addActionListener(this);
+        outTitle.addFocusListener(this);
 
         out = new JstringListBox();
         out.setCallback(this);
@@ -285,6 +289,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
         add.setOpaque(true);
         add.setActionCommand("Add");
         add.addActionListener(this);
+        add.addFocusListener(this);
 
         outPanel.setBorder(bborder);
         outPanel.setLayout(new BorderLayout());
@@ -316,6 +321,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
                                        addCustom.doClick();
                                      }
                                  });
+        custom.addFocusListener(this);
 
         JPanel customP = new JPanel();
         customP.setLayout(new BorderLayout());
@@ -328,6 +334,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
             addCustom.setEnabled(false);
             addCustom.setActionCommand("AddNewString");
             addCustom.addActionListener(this);
+            addCustom.addFocusListener(this);
             customP.add("West", addCustom);
 
             // we only want this add button to be active when the user
@@ -945,6 +952,26 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       }
 
     return false;  // should never really get here.
+  }
+
+  // FocusListener methods ------------------------------------------------------
+
+  public void focusLost(FocusEvent e)
+  {
+    if (debug)
+      {
+        System.out.println("StringSelector: focusLost");
+      }
+  }
+
+  public void focusGained(FocusEvent e)
+  {
+    if (debug)
+      {
+        System.out.println("focusGained");
+      }
+
+    ((JComponent) this.getParent()).scrollRectToVisible(this.getBounds());
   }
 
   // Private methods ------------------------------------------------------------

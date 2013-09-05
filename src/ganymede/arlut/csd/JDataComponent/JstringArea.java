@@ -1,16 +1,18 @@
 /*
    JentryField.java
-   
+
    Created: 12 Jul 1996
 
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -51,6 +53,7 @@ import java.awt.event.KeyEvent;
 import java.rmi.RemoteException;
 
 import javax.swing.BorderFactory;
+import javax.swing.JComponent;;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -87,7 +90,7 @@ public class JstringArea extends JScrollPane implements FocusListener {
 
   public boolean allowCallback = false;
 
-  protected boolean changed = false; 
+  protected boolean changed = false;
 
   protected JsetValueCallback my_parent = null;
 
@@ -102,12 +105,12 @@ public class JstringArea extends JScrollPane implements FocusListener {
 
   /* -- */
 
-  public JstringArea() 
+  public JstringArea()
   {
     this(0,0);  // Call to main contructor function
   }
 
-  public JstringArea(int rows, int columns) 
+  public JstringArea(int rows, int columns)
   {
     // create myTextArea to put inside the JScrollPane, JScrollPane
     // fits to area size
@@ -122,6 +125,8 @@ public class JstringArea extends JScrollPane implements FocusListener {
     // Add textArea to scrollPane viewport
     setViewportView(textArea);
     textArea.setVisible(true);
+
+    addFocusListener(this);
   } // JstringArea
 
   ///////////////////
@@ -129,7 +134,7 @@ public class JstringArea extends JScrollPane implements FocusListener {
   ///////////////////
 
   /**
-   *  returns true if the value in the JentryField has 
+   *  returns true if the value in the JentryField has
    *  been modified.
    */
 
@@ -185,7 +190,7 @@ public class JstringArea extends JScrollPane implements FocusListener {
       {
         throw new IllegalArgumentException("Invalid Parameter: parent cannot be null");
       }
-    
+
     my_parent = parent;
 
     allowCallback = textArea.isEditable();
@@ -198,7 +203,7 @@ public class JstringArea extends JScrollPane implements FocusListener {
   public void sendCallback()
   {
     String str;
-    
+
     /* -- */
 
     synchronized (this)
@@ -207,7 +212,7 @@ public class JstringArea extends JScrollPane implements FocusListener {
           {
             return;
           }
-        
+
         processingCallback = true;
       }
 
@@ -215,16 +220,16 @@ public class JstringArea extends JScrollPane implements FocusListener {
       {
         // if nothing in the JstringArea has changed,
         // we don't need to worry about this event.
-    
+
         str = getText();
-    
+
         if (value != null)
           {
             if (debug)
               {
                 System.err.println("JstringArea.sendCallback: old value != null");
               }
-        
+
             changed = !value.equals(str);
           }
         else
@@ -248,29 +253,29 @@ public class JstringArea extends JScrollPane implements FocusListener {
           {
             System.err.println("JstringArea.sendCallback(): str == '" + str + "', value == '" + value + "'");
           }
-    
+
         if (!changed)
           {
             if (debug)
               {
                 System.err.println("JstringArea.sendCallback: no change, ignoring");
               }
-        
+
             return;
           }
 
         // if we don't need to handle callbacks, just accept the new
         // string value from the user and return
-    
-        if (!allowCallback) 
+
+        if (!allowCallback)
           {
             value = str;
             return;
           }
 
         boolean b = false;
-          
-        try 
+
+        try
           {
             if (debug)
               {
@@ -292,13 +297,13 @@ public class JstringArea extends JScrollPane implements FocusListener {
 
         // If the setValuePerformed callback failed, we'll revert the value to our last
         // approved value
-    
-        if (!b) 
+
+        if (!b)
           {
             if (debug)
               {
                 System.err.println("JstringArea.sendCallback: setValue rejected");
-                
+
                 if (value == null)
                   {
                     System.err.println("JstringArea.sendCallback: resetting to empty string");
@@ -308,7 +313,7 @@ public class JstringArea extends JScrollPane implements FocusListener {
                     System.err.println("JstringArea.sendCallback: resetting to " + value);
                   }
               }
-            
+
             if (value == null)
               {
                 textArea.setText("");
@@ -317,10 +322,10 @@ public class JstringArea extends JScrollPane implements FocusListener {
               {
                 textArea.setText(value);
               }
-            
+
             changed = false;
           }
-        else 
+        else
           {
             if (debug)
               {
@@ -335,7 +340,7 @@ public class JstringArea extends JScrollPane implements FocusListener {
               {
                 value = str;
               }
-                
+
             changed = false;
           }
       }
@@ -364,7 +369,7 @@ public class JstringArea extends JScrollPane implements FocusListener {
             return false;
           }
       }
-    
+
     if (allowedChars != null)
       {
         if (allowedChars.indexOf(ch) == -1)
@@ -377,10 +382,10 @@ public class JstringArea extends JScrollPane implements FocusListener {
             return false;
           }
       }
-    
+
     return true;
   }
-  
+
   public void focusLost(FocusEvent e)
   {
     if (debug)
@@ -397,6 +402,8 @@ public class JstringArea extends JScrollPane implements FocusListener {
       {
         System.out.println("focusGained");
       }
+
+    ((JComponent) this.getParent()).scrollRectToVisible(this.getBounds());
   }
 
   /**
@@ -405,7 +412,7 @@ public class JstringArea extends JScrollPane implements FocusListener {
    *
    */
 
-  public static final void main(String argv[]) 
+  public static final void main(String argv[])
   {
     JFrame frame = new JFrame();
 
@@ -458,7 +465,7 @@ class myTextArea extends JTextArea
     enableEvents(AWTEvent.KEY_EVENT_MASK);
     addFocusListener(x);
   }
-  
+
   /**
    * We only want certain keystrokes to be registered by the field.
    *
@@ -480,7 +487,7 @@ class myTextArea extends JTextArea
       case KeyEvent.VK_END:
       case KeyEvent.VK_HOME:
         super.processKeyEvent(e);
-        return; 
+        return;
       }
 
     // We check against KeyEvent.CHAR_UNDEFINED so that we pass

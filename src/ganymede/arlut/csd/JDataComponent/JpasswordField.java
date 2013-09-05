@@ -11,8 +11,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -49,6 +51,7 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.rmi.RemoteException;
 
+import javax.swing.JComponent;
 import javax.swing.JPasswordField;
 
 /*------------------------------------------------------------------------------
@@ -438,7 +441,11 @@ public class JpasswordField extends JPasswordField implements FocusListener {
 
   // FocusListener methods
 
-  public void focusGained(FocusEvent e) {}
+  public void focusGained(FocusEvent e)
+  {
+    ((JComponent) this.getParent()).scrollRectToVisible(this.getBounds());
+  }
+
   public void focusLost(FocusEvent e)
   {
     sendCallback();
