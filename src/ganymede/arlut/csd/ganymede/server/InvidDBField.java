@@ -578,13 +578,13 @@ public final class InvidDBField extends DBField implements invid_field {
 
     // now do the work
 
+    if (value == null)
+      {
+        return "";
+      }
+
     if (!isVector())
       {
-        if (value == null)
-          {
-            return "null";
-          }
-
         Invid localInvid = (Invid) this.value();
 
         // XXX note: we don't use our owner's lookupLabel() method

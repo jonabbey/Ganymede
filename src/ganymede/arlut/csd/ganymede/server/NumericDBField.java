@@ -217,7 +217,7 @@ public class NumericDBField extends DBField implements num_field {
   {
     if (value == null)
       {
-        return "null";
+        return "";
       }
 
     return Integer.toString(this.value());

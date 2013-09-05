@@ -340,13 +340,13 @@ public class StringDBField extends DBField implements string_field {
 
   @Override public synchronized String getValueString()
   {
+    if (value == null)
+      {
+        return "";
+      }
+
     if (!isVector())
       {
-        if (value == null)
-          {
-            return "null";
-          }
-
         return this.value();
       }
 

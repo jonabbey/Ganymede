@@ -250,8 +250,7 @@ public class DateDBField extends DBField implements date_field {
 
     if (value == null)
       {
-        // "null"
-        return ts.l("getValueString.null");
+        return "";
       }
 
     // pass the date through the localized default formatter rather
@@ -271,7 +270,7 @@ public class DateDBField extends DBField implements date_field {
   {
     if (value == null)
       {
-        return "null";
+        return "";
       }
 
     return Long.toString(((Date) this.value).getTime());
