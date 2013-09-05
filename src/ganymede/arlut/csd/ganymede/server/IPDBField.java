@@ -286,6 +286,11 @@ public class IPDBField extends DBField implements ip_field {
 
   @Override public synchronized String getValueString()
   {
+    if (this.value == null)
+      {
+        return "";
+      }
+
     if (!isVector())
       {
         return ((IPAddress) this.value).toString();
