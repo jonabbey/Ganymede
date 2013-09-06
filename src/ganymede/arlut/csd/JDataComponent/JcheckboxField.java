@@ -1,17 +1,19 @@
 /*
    JcheckboxField.java
-   
+
    Created: 12 Jul 1996
 
 
    Module By: Navin Manohar
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -49,6 +51,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
 import javax.swing.JCheckBox;
+import javax.swing.JComponent;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -68,7 +71,7 @@ import javax.swing.JCheckBox;
 public class JcheckboxField extends JCheckBox implements ItemListener {
 
   private boolean allowCallback = false;
-  private boolean changed = false; 
+  private boolean changed = false;
 
   private boolean isEditable = true;
 
@@ -76,7 +79,7 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
 
   private boolean value;
   private boolean oldvalue;
-  
+
   private String label;
 
   private boolean notifyOnFocus = false;
@@ -97,18 +100,18 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
 
     value = state;
     oldvalue = state;
-    
+
     setSelected(state);
-    
+
     setEnabled(editable);
     isEditable = editable;
 
-    //enableEvents(AWTEvent.FOCUS_EVENT_MASK); 
+    //enableEvents(AWTEvent.FOCUS_EVENT_MASK);
 
     addItemListener(this);
   }
 
-  /** 
+  /**
    * Constructor that creates a basic checkbox with default foreground and background
    */
 
@@ -117,10 +120,10 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
     this(null, false, true);
     /*
     super();
-    
+
     value = false;
     oldvalue = false;
-    
+
     setSelected(false);
 
     enableEvents(AWTEvent.MOUSE_EVENT_MASK);
@@ -129,7 +132,7 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
     //addItemListener(this);
     */
   }
-  
+
   /**
    *
    * @param label the label to use for this JcheckboxField
@@ -141,7 +144,7 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
   public JcheckboxField(String label,boolean state,boolean editable,JsetValueCallback callback)
   {
     this(label,state,editable);
-    
+
     setCallback(callback);
   }
 
@@ -155,7 +158,7 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
       {
         throw new IllegalArgumentException("Invalid Parameter: callback cannot be null");
       }
-    
+
     this.callback = callback;
 
     allowCallback = true;
@@ -163,7 +166,7 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
 
   /**
    * sets the value back to what it was before it was
-   * changed 
+   * changed
    */
 
   public void resetValue()
@@ -175,7 +178,7 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
    * sets the value of this JcheckboxField to the boolean
    * value of state.
    */
-  
+
   public void setValue(boolean state)
   {
     setSelected(state);
@@ -194,7 +197,7 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
    * returns true if the value of this JcheckboxField has changed
    * since it was initiallly created.
    */
-  
+
   public boolean getChanged()
   {
     return changed;
@@ -242,13 +245,13 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
       {
         return;
       }
-    
-    switch (e.getID()) 
+
+    switch (e.getID())
       {
-      
+
       case FocusEvent.FOCUS_LOST:
         {
-          if (!changed) 
+          if (!changed)
             {
               break;
             }
@@ -261,6 +264,7 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
 
       case FocusEvent.FOCUS_GAINED:
         {
+          ((JComponent) this.getParent()).scrollRectToVisible(this.getBounds());
         }
     }
 
@@ -276,21 +280,21 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
   {
     Boolean bval = Boolean.valueOf(value);
 
-    if (allowCallback) 
+    if (allowCallback)
       {
         // do a callback to talk to the server
 
         boolean b = false;
 
-        try 
+        try
           {
             b = callback.setValuePerformed(new JSetValueObject(this,bval));
           }
-        catch (java.rmi.RemoteException ex) 
+        catch (java.rmi.RemoteException ex)
           {
             throw new RuntimeException("notify caught remote exception: " + ex);
           }
-        
+
         if (b==false)
           {
             resetValue();
