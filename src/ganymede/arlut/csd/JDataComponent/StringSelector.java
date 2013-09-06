@@ -13,7 +13,7 @@
    Ganymede Directory Management System
 
    Copyright (C) 1996-2013
-   The University of Texas at Austinb
+   The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
 
