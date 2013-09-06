@@ -207,6 +207,7 @@ public class windowPanel extends JDesktopPane implements InternalFrameListener, 
   CompoundBorder
     eWrapperBorder = new CompoundBorder(emptyBorder3, new LineBorder(ClientColor.vectorTitles, 2)),
     eWrapperBorderInvalid = new CompoundBorder(emptyBorder3, new LineBorder(ClientColor.vectorTitlesInvalid, 2)),
+    eWrapperButtonBorder = new CompoundBorder(emptyBorder5, blackLineB),
     lineEmptyBorder = new CompoundBorder(blackLineB, emptyBorder15);
 
   JMenuItem
