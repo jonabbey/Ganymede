@@ -334,7 +334,6 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     if (editable)
       {
         custom = new JstringField();
-        custom.setBorder(new EmptyBorder(new Insets(0,0,0,4)));
         custom.addActionListener(new ActionListener()
                                  {
                                    public void actionPerformed(ActionEvent e)
