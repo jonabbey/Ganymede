@@ -618,7 +618,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
       {
         if (!isAllowedV4(cAry[i]))
           {
-            throw new IllegalArgumentException("bad char in input: " + input);
+            throw new IllegalArgumentException("Invalid IP address: " + input);
           }
 
         if (cAry[i] == '.')
@@ -629,7 +629,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
     if (dotCount > 3)
       {
-        throw new IllegalArgumentException("too many dots for an IPv4 address: " + input);
+        throw new IllegalArgumentException("Invalid IP address (too many octets for IPv4): " + input);
       }
 
     while (length < cAry.length)
@@ -763,7 +763,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
       {
         if (!isAllowedV6(cAry[i]))
           {
-            throw new IllegalArgumentException("bad char in input: " + input);
+            throw new IllegalArgumentException("Invalid IP Address: " + input);
           }
 
         if (cAry[i] == '.')
@@ -784,22 +784,22 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
     if (dotCount > 3)
       {
-        throw new IllegalArgumentException("too many dots for a mixed IPv4/IPv6 address: " + input);
+        throw new IllegalArgumentException("Invalid IP Address (too many dots for a mixed IPv4/IPv6 address): " + input);
       }
 
     if (colonCount > 7)
       {
-        throw new IllegalArgumentException("too many colons for an IPv6 address: " + input);
+        throw new IllegalArgumentException("Invalid IP Address (too many colons for an IPv6 address): " + input);
       }
 
     if (doublecolon > 1)
       {
-        throw new IllegalArgumentException("error: more than one double-colon.  Invalid IPv6 address: " + input);
+        throw new IllegalArgumentException("Invalid IP Address (error: more than one double-colon): " + input);
       }
 
     if (dotCount > 0 && colonCount > 6)
       {
-        throw new IllegalArgumentException("invalid mixed IPv4/IPv6 address: " + input);
+        throw new IllegalArgumentException("Invalid IP Address (bad mixed IPv4/IPv6 address): " + input);
       }
 
     if ((colonCount == 0) && (dotCount != 0))
@@ -824,14 +824,7 @@ public final class IPAddress implements Cloneable, java.io.Serializable {
 
         v4v6boundary = input.lastIndexOf(':');
 
-        try
-          {
-            ipv4bytes = genIPV4bytes(input.substring(v4v6boundary + 1));
-          }
-        catch (Exception ex)
-          {
-            throw new IllegalArgumentException("couldn't do mixed IPv4 parsing: " + ex);
-          }
+        ipv4bytes = genIPV4bytes(input.substring(v4v6boundary + 1));
 
         result[12] = ipv4bytes[0];
         result[13] = ipv4bytes[1];
