@@ -47,6 +47,8 @@
 
 package arlut.csd.JDataComponent;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.rmi.RemoteException;
@@ -68,7 +70,7 @@ import javax.swing.JPasswordField;
  * be preset.</p>
  */
 
-public class JpasswordField extends JPasswordField implements FocusListener {
+public class JpasswordField extends JPasswordField implements FocusListener, ActionListener {
 
   public static final boolean debug = false;
 
@@ -128,6 +130,7 @@ public class JpasswordField extends JPasswordField implements FocusListener {
         setDisallowedChars(disallowed);
       }
 
+    addActionListener(this);
     addFocusListener(this);
   }
 
@@ -449,5 +452,10 @@ public class JpasswordField extends JPasswordField implements FocusListener {
   public void focusLost(FocusEvent e)
   {
     sendCallback();
+  }
+
+  public void actionPerformed(ActionEvent e)
+  {
+    transferFocus();
   }
 }
