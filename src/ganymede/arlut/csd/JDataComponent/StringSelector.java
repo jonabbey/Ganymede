@@ -50,6 +50,7 @@
 package arlut.csd.JDataComponent;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Container;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -67,6 +68,7 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -75,7 +77,10 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.border.BevelBorder;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 
@@ -142,6 +147,10 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     in,
     out = null;
 
+  JScrollPane
+    inScrollPane = null,
+    outScrollPane = null;
+
   JPanel
     inPanel = new JPanel(),
     outPanel = new JPanel();
@@ -162,6 +171,10 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
   Container
     parent;
+
+  Border
+    focusedBorder = new LineBorder(Color.black, 1),
+    unfocusedBorder = BorderFactory.createEmptyBorder(1,1,1,1);
 
   private boolean
     replacingValue = false,
@@ -219,6 +232,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
     in = new JstringListBox();
     in.setCallback(this);
+    in.addFocusListener(this);
 
     this.currentRows = in.getVisibleRowCount();
 
@@ -228,7 +242,10 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     inPanel.setBorder(bborder);
     inPanel.setLayout(new BorderLayout());
 
-    inPanel.add("Center", new JScrollPane(in));
+    inScrollPane = new JScrollPane(in);
+    inScrollPane.setViewportBorder(unfocusedBorder);
+
+    inPanel.add("Center", inScrollPane);
 
     inTitle.setText(org_in.concat(" : 0"));
     inTitle.addActionListener(this);
@@ -282,6 +299,10 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
         out = new JstringListBox();
         out.setCallback(this);
+        out.addFocusListener(this);
+
+        outScrollPane = new JScrollPane(out);
+        outScrollPane.setViewportBorder(unfocusedBorder);
 
         // "<< Add"
         add = new JButton(ts.l("global.add_choice_button"));
@@ -293,7 +314,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
         outPanel.setBorder(bborder);
         outPanel.setLayout(new BorderLayout());
-        outPanel.add("Center", new JScrollPane(out));
+        outPanel.add("Center", outScrollPane);
         outPanel.add("North", outTitle);
         outPanel.add("South", add);
 
@@ -958,17 +979,33 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
 
   public void focusLost(FocusEvent e)
   {
-    if (debug)
+    Object source = e.getSource();
+
+    if (source == in)
       {
-        System.out.println("StringSelector: focusLost");
+        inScrollPane.setViewportBorder(unfocusedBorder);
+        this.repaint();
+      }
+    else if (source == out)
+      {
+        outScrollPane.setViewportBorder(unfocusedBorder);
+        this.repaint();
       }
   }
 
   public void focusGained(FocusEvent e)
   {
-    if (debug)
+    Object source = e.getSource();
+
+    if (source == in)
       {
-        System.out.println("focusGained");
+        inScrollPane.setViewportBorder(focusedBorder);
+        this.repaint();
+      }
+    else if (source == out)
+      {
+        outScrollPane.setViewportBorder(focusedBorder);
+        this.repaint();
       }
 
     ((JComponent) this.getParent()).scrollRectToVisible(this.getBounds());
