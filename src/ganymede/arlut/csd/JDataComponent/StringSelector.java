@@ -1635,6 +1635,15 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
       {
         setVisibleRowCount(lowerBound, false);
       }
+
+    in.setFocusable(in.getSizeOfList() > 0);
+    inTitle.setFocusable(in.getSizeOfList() > 0);
+
+    if (out != null)
+      {
+        out.setFocusable(out.getSizeOfList() > 0);
+        outTitle.setFocusable(out.getSizeOfList() > 0);
+      }
   }
 
   /**
