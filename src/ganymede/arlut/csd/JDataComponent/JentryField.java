@@ -232,7 +232,12 @@ abstract public class JentryField extends JTextField implements FocusListener, A
         System.err.println("focusGained");
       }
 
-    ((JComponent) this.getParent()).scrollRectToVisible(this.getBounds());
+    if (this.getParent() != null)
+      {
+        JComponent parent = (JComponent) this.getParent();
+
+        parent.scrollRectToVisible(this.getBounds());
+      }
   }
 
   /**
