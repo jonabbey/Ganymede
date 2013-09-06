@@ -47,6 +47,7 @@
 package arlut.csd.JDataComponent;
 
 import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 
@@ -68,7 +69,7 @@ import javax.swing.JComponent;
  * will revert its state if a call to JsetValueCallback is rejected.</p>
  */
 
-public class JcheckboxField extends JCheckBox implements ItemListener {
+public class JcheckboxField extends JCheckBox implements ItemListener, FocusListener {
 
   private boolean allowCallback = false;
   private boolean changed = false;
@@ -82,8 +83,6 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
 
   private String label;
 
-  private boolean notifyOnFocus = false;
-
   /* -- */
 
   /**
@@ -94,7 +93,7 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
    * @param state the state to which this JcheckboxField is to be set
    */
 
-  public JcheckboxField(String label,boolean state,boolean editable)
+  public JcheckboxField(String label, boolean state, boolean editable)
   {
     super(label);
 
@@ -106,9 +105,8 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
     setEnabled(editable);
     isEditable = editable;
 
-    //enableEvents(AWTEvent.FOCUS_EVENT_MASK);
-
     addItemListener(this);
+    addFocusListener(this);
   }
 
   /**
@@ -118,30 +116,15 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
   public JcheckboxField()
   {
     this(null, false, true);
-    /*
-    super();
-
-    value = false;
-    oldvalue = false;
-
-    setSelected(false);
-
-    enableEvents(AWTEvent.MOUSE_EVENT_MASK);
-    enableEvents(AWTEvent.FOCUS_EVENT_MASK);
-
-    //addItemListener(this);
-    */
   }
 
   /**
-   *
    * @param label the label to use for this JcheckboxField
    * @param state the state to which this JcheckboxField is to be set
    * @param callback the component which can use the value of this JcheckboxField
-   *
    */
 
-  public JcheckboxField(String label,boolean state,boolean editable,JsetValueCallback callback)
+  public JcheckboxField(String label, boolean state, boolean editable, JsetValueCallback callback)
   {
     this(label,state,editable);
 
@@ -160,7 +143,6 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
       }
 
     this.callback = callback;
-
     allowCallback = true;
   }
 
@@ -235,45 +217,23 @@ public class JcheckboxField extends JCheckBox implements ItemListener {
       }
 
     this.value = state;
-
     super.setSelected(state);
-  }
-
-  protected void processFocusEvent(FocusEvent e)
-  {
-    if (!notifyOnFocus)
-      {
-        return;
-      }
-
-    switch (e.getID())
-      {
-
-      case FocusEvent.FOCUS_LOST:
-        {
-          if (!changed)
-            {
-              break;
-            }
-
-          value = isSelected();
-          notify(value);
-
-          break;
-        }
-
-      case FocusEvent.FOCUS_GAINED:
-        {
-          ((JComponent) this.getParent()).scrollRectToVisible(this.getBounds());
-        }
-    }
-
-    super.processFocusEvent(e);
   }
 
   public void itemStateChanged(ItemEvent e)
   {
     notify(e.getStateChange() == ItemEvent.SELECTED);
+  }
+
+  public void focusLost(FocusEvent e)
+  {
+  }
+
+  public void focusGained(FocusEvent e)
+  {
+    System.err.println("JcheckboxField gained focus");
+
+    scrollRectToVisible(this.getBounds());
   }
 
   private void notify(boolean value)
