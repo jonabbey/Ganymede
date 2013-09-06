@@ -496,9 +496,8 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener, Fo
       }
 
     trigger.setBorderPainted(false);
-
     trigger.invalidate();
-    vp.container.frame.validate();
+    repaint();
   }
 
   public void focusGained(FocusEvent e)
@@ -515,9 +514,8 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener, Fo
       }
 
     trigger.setBorderPainted(true);
-
     trigger.invalidate();
-    vp.container.frame.validate();
+    repaint();
 
     if (expanded)
       {
