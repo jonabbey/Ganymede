@@ -1250,7 +1250,6 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
 
             cb.removeActionListener(this);
             cb.setSelected((value == null) ? false : value.booleanValue());
-            cb.addActionListener(this);
           }
         else if (comp instanceof JComboBox)
           {
@@ -3326,9 +3325,21 @@ public class containerPanel extends JStretchPanel implements ActionListener, Jse
   private void addBooleanField(db_field field, FieldInfo fieldInfo,
                                FieldTemplate fieldTemplate) throws RemoteException
   {
-    JCheckBox cb = new JCheckBox();
+    final JCheckBox cb = new JCheckBox();
 
     /* -- */
+
+    cb.addFocusListener(new FocusListener()
+      {
+        public void focusLost(FocusEvent e)
+        {
+        }
+
+        public void focusGained(FocusEvent e)
+        {
+          scrollRectToVisible(cb.getBounds());
+        }
+      });
 
     registerComponent(cb, field, fieldTemplate);
 
