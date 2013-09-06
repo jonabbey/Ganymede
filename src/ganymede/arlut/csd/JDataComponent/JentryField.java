@@ -247,7 +247,11 @@ abstract public class JentryField extends JTextField implements FocusListener, A
         System.err.println("enter hit");
       }
 
-    if (notifier != null && sendCallback() >= 0)
+    if (notifier == null)
+      {
+        transferFocus();
+      }
+    else if (sendCallback() >= 0)
       {
         if (debug)
           {
