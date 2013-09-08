@@ -337,7 +337,12 @@ public class JdateField extends JPanel implements ActionListener, FocusListener
 
   public void focusGained(FocusEvent e)
   {
-    ((JComponent) this.getParent()).scrollRectToVisible(this.getBounds());
+    JComponent parent = (JComponent) this.getParent();
+
+    if (parent != null)
+      {
+        parent.scrollRectToVisible(this.getBounds());
+      }
   }
 
   /**

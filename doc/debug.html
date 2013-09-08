@@ -145,18 +145,13 @@
     when the fault occurred.</p>
 
     <p>These exception traces, whether they occur in the
-    <code>server.log</code> or the <a
-    href="glossary.html#debug.log">debug.log</a> file, will hopefully
-    provide the information necessary for me (or you!) to get an idea
-    of what might have happened.  What they probably won't show, if
-    you are running the server with a JVM that is using Just In Time
-    (JIT) compilation, is the line number where the exception actually
-    occurred.  If you are seeing an exception occur repeatedly, it
-    would be worthwhile to shut down the server, start it with the JIT
-    disabled, and see if you can get the same error condition to show
-    up again.  If so, please cut and paste the trace information with the
-    line numbers and file a bug report at <a
-    href="https://tools.arlut.utexas.edu/bugzilla/index.cgi">https://tools.arlut.utexas.edu/bugzilla/index.cgi</a>
+    <code>server.log</code> or
+    the <a href="glossary.html#debug.log">debug.log</a> file, will
+    hopefully provide the information necessary for me (or you!) to
+    get an idea of what might have happened.  If so, please cut and
+    paste the trace information with the line numbers and file a bug
+    report
+    at <a href="https://tools.arlut.utexas.edu/bugzilla/index.cgi">https://tools.arlut.utexas.edu/bugzilla/index.cgi</a>
     about it.</p>
 
     <h3>Deadlock</h3>
@@ -236,10 +231,7 @@
     analysis.</p>
 
     <p>To do this, do a <code>ps</code> to find the Java process that
-      is running the Ganymede server.  Keep in mind that on Linux,
-      you'll see a <b>lot</b> of Java processes running.  These
-      are actually the threads of the server being listed individually
-      in the ps output.  Find the primary process entry, and type:</p>
+      is running the Ganymede server. Then type:</p>
 
     <pre>
        kill -QUIT &lt;procnum&gt;
@@ -250,13 +242,6 @@
     information added to your <code>server.log</code> file.  Go ahead
     and kill off the server (<code>kill &lt;procnum&gt;</code>), save
     the <code>server.log</code> file, and send it in for analysis.</p>
-
-    <p>Note that, just as with the exception trace recording, the
-    thread dump will not include line numbers if the server is running
-    in the high performance JIT mode.  If you can reliably get the
-    server into deadlock, try to do so with the JIT disabled.  The
-    line number information may mean the difference as to whether the
-    deadlock can be tracked.</p>
 
     <p>If the deadlock was triggered in response to client activity,
     you should plan on sending both the <code>server.log</code> file

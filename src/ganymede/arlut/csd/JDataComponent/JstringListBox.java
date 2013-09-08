@@ -1110,7 +1110,12 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
         System.out.println("focusGained");
       }
 
-    ((JComponent) this.getParent()).scrollRectToVisible(this.getBounds());
+    JComponent parent = (JComponent) this.getParent();
+
+    if (parent != null)
+      {
+        parent.scrollRectToVisible(this.getBounds());
+      }
   }
 
   /**

@@ -403,7 +403,12 @@ public class JstringArea extends JScrollPane implements FocusListener {
         System.out.println("focusGained");
       }
 
-    ((JComponent) this.getParent()).scrollRectToVisible(this.getBounds());
+    JComponent parent = (JComponent) this.getParent();
+
+    if (parent != null)
+      {
+        parent.scrollRectToVisible(this.getBounds());
+      }
   }
 
   /**
