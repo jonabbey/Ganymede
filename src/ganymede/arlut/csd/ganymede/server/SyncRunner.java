@@ -108,10 +108,19 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * used to process the files, and what data needs to be written out
  * for synchronization.</p>
  *
- * <p>(It is possible to register a custom {@link
+ * <p>Because there are times when a direct dump of Ganymede field
+ * information may not provide enough context for a given Sync
+ * Channel, it is possible to register a custom {@link
  * arlut.csd.ganymede.server.SyncMaster} implementation with a
- * <code>Sync Channel</code> object in order to synthesize auxiliary
- * information in the XML stream if needed)</p>
+ * <code>Sync Channel</code> object to bring in additional objects and
+ * fields as necessary.  It is also possible to use the {@link
+ * arlut.csd.ganymede.server.DBEditObject#getForeignSyncKeys(arlut.csd.ganymede.common.Invid,arlut.csd.ganymede.server.DBObject,arlut.csd.ganymede.server.DBObject,java.lang.String,boolean)}
+ * and {@link
+ * arlut.csd.ganymede.server.DBEditObject#getMyExtraInvidAttributes(arlut.csd.ganymede.server.DBObject,java.lang.String,boolean)}
+ * methods on an object type's custom {@link
+ * arlut.csd.ganymede.server.DBEditObject} class to synthesize
+ * additional information specific to a given external Sync Channel
+ * handler.</p>
  *
  * <p>Every time a transaction is committed, the Ganymede server
  * compares all objects involved in the transaction against every
