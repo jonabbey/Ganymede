@@ -14,8 +14,10 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2010
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -62,9 +64,13 @@ import java.util.Set;
 ------------------------------------------------------------------------------*/
 
 /**
- * A data structure which identifies a collection of invids and field
- * identifiers which are to be used for some kind of external
- * processing.
+ * <p>A data structure which identifies a collection of Invids and
+ * field identifiers to add to an XML transaction record being written
+ * out by {@link arlut.csd.ganymede.server.SyncRunner}.</p>
+ *
+ * <p>FieldBook is in particular designed to support augmentations to
+ * incremental sync records by custom {@link
+ * arlut.csd.ganymede.server.SyncMaster} classes.</p>
  */
 
 public class FieldBook {
@@ -78,7 +84,7 @@ public class FieldBook {
    * Invid will map to a Set which enumerates the fields to be
    * included in the book.</p>
    */
-  
+
   private Map<Invid, Set<Short>> map;
 
   /* -- */
@@ -145,7 +151,7 @@ public class FieldBook {
         map.put(invid, set);
       }
   }
-  
+
   /**
    * Adds all DBObject and field identifiers from parameter book to this FieldBook.
    */
