@@ -55,6 +55,7 @@ import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.DumpResult;
 import arlut.csd.ganymede.common.GanyParseException;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.IPAddress;
 import arlut.csd.ganymede.common.ObjectHandle;
 import arlut.csd.ganymede.common.ObjectStatus;
 import arlut.csd.ganymede.common.PermEntry;
@@ -976,11 +977,11 @@ public final class DBQueryEngine {
 
             if (fieldDef.isIP() && node.value instanceof String)
               {
-                Byte[] ipBytes = null;
+                IPAddress ipBytes = null;
 
                 try
                   {
-                    ipBytes = IPDBField.genIPV4bytes((String) node.value);
+                    ipBytes = new IPAddress((String) node.value);
                   }
                 catch (IllegalArgumentException ex)
                   {
@@ -989,27 +990,6 @@ public final class DBQueryEngine {
                 if (ipBytes != null)
                   {
                     resultfield = ns.lookupMyValue(gSession, ipBytes);
-                  }
-
-                // it's hard to tell here whether any fields of
-                // this type will accept IPv6 bytes, so if we
-                // don't find it as an IPv4 address, look for it
-                // as an IPv6 address
-
-                if (resultfield == null)
-                  {
-                    try
-                      {
-                        ipBytes = IPDBField.genIPV6bytes((String) node.value);
-                      }
-                    catch (IllegalArgumentException ex)
-                      {
-                      }
-
-                    if (ipBytes != null)
-                      {
-                        resultfield = ns.lookupMyValue(gSession, ipBytes);
-                      }
                   }
               }
             else

@@ -121,7 +121,7 @@ import java.util.Random;
  * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  */
 
-public class Qsmtp implements Runnable {
+public class Qsmtp implements Runnable, java.io.Closeable {
 
   static final boolean debug = false;
 

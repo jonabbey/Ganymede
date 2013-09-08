@@ -92,7 +92,7 @@ import org.xml.sax.helpers.DefaultHandler;
  * overflowing the XMLReader's internal buffer.</p>
  */
 
-public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Runnable {
+public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implements Runnable, java.io.Closeable {
 
   public final static boolean debug = false;
 

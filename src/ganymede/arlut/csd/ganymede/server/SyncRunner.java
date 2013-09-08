@@ -488,7 +488,7 @@ public final class SyncRunner implements Runnable {
       }
     else
       {
-        this.matrix = new HashMap<String, SyncPrefEnum>(f.matrix);
+        this.matrix = f.getInternalsCopy();
       }
   }
 

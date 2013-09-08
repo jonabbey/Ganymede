@@ -506,6 +506,8 @@ public class JLabelPanel extends JPanel {
             l.setFont(font);
           }
 
+        l.setLabelFor(comp);    // for assistive technology use
+
         rowHash.put(comp, l);
 
         gbc.anchor = GridBagConstraints.NORTHWEST;

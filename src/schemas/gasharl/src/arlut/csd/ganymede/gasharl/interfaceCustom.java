@@ -52,6 +52,7 @@ import java.util.Vector;
 
 import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.IPAddress;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ObjectHandle;
 import arlut.csd.ganymede.common.ObjectStatus;
@@ -608,7 +609,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
         // if the net is being set to a net that matches what's already
         // in the address field for some reason, we'll go ahead and ok it
 
-        Byte[] address = (Byte[]) getFieldValueLocal(interfaceSchema.ADDRESS);
+        IPAddress address = (IPAddress) getFieldValueLocal(interfaceSchema.ADDRESS);
 
         if (address != null && systemCustom.checkMatchingNet(getDBSession(), (Invid) value, address))
           {
@@ -690,7 +691,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
     if (field.getID() == interfaceSchema.ADDRESS)
       {
         Invid netInvid = (Invid) getFieldValueLocal(interfaceSchema.IPNET);
-        Byte[] address = (Byte[]) value;
+        IPAddress address = (IPAddress) value;
 
         // if the address is being set in response to a network change,
         // don't bounce back and set the network again
@@ -716,7 +717,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
           {
             return Ganymede.createErrorDialog(this.getGSession(),
                                               "Unacceptable IP address",
-                                              "IP address " + IPDBField.genIPString(address) +
+                                              "IP address " + address +
                                               " does not match any network available to you.");
           }
 
@@ -1035,7 +1036,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
   @Override public ReturnVal consistencyCheck(DBObject object)
   {
-    Byte[] address = (Byte[]) object.getFieldValueLocal(interfaceSchema.ADDRESS);
+    IPAddress address = (IPAddress) object.getFieldValueLocal(interfaceSchema.ADDRESS);
     Invid netInvid = (Invid) object.getFieldValueLocal(interfaceSchema.IPNET);
 
     if (address != null && !systemCustom.checkMatchingNet(getDBSession(), netInvid, address))

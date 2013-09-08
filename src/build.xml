@@ -52,6 +52,21 @@
   <property name="pubcert.truststore" value="${build.crypto}/arlut/csd/ganymede/common/client.truststore"/>
   <property name="pubcert.storepass" value="gclientpassphrase"/>
 
+  <!--
+      We're going to encode the DOMAIN name of the build host into
+      the client and admin console jar files, to let Java7u25 and
+      later know not to let people run the jar files we are building
+      here from some random foreign system.
+
+      See
+
+      http://docs.oracle.com/javase/7/docs/technotes/guides/jweb/no_redeploy.html
+
+      for details.
+  -->
+
+  <hostinfo/>
+
   <condition property="sslkeys.notgenerated">
     <not>
       <and>
@@ -317,6 +332,14 @@ refresh the jar files.
       <!-- add in a few extra for use w new calendar popup widget. James -->
       
       <zipfileset src="${lib.dir}/swingx-core-1.6.2.jar"/>
+
+      <!-- Manifest attributes to satisfy a couple of security checks
+           that Oracle added in Java 7u25. -->
+
+      <manifest>
+	<attribute name="Permissions" value="all-permissions"/>
+	<attribute name="Codebase" value="*.${DOMAIN}"/>
+      </manifest>
     </jar>
 
     <!-- Build the admin jar file -->
@@ -357,6 +380,14 @@ refresh the jar files.
 
       <zipfileset src="${lib.dir}/mac_widgets.jar"/>
       <zipfileset src="${lib.dir}/forms-1.3.0pre4.jar"/>
+
+      <!-- Manifest attributes to satisfy a couple of security checks
+           that Oracle added in Java 7u25. -->
+
+      <manifest>
+	<attribute name="Permissions" value="all-permissions"/>
+	<attribute name="Codebase" value="*.${DOMAIN}"/>
+      </manifest>
     </jar>
 
     <antcall target="signjars"/>

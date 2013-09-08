@@ -715,7 +715,10 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
     // dumped after changing the schema, this is an appropriate place
     // to do the cleanup.
 
-    clean();
+    if (DBSchemaEdit.schemaEditedSinceStartup)
+      {
+        clean();
+      }
 
     // now actually emit stuff.
 
@@ -850,8 +853,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
     /* -- */
 
-    clean();
-
     for (String key: matrix.keySet())
       {
         PermEntry entry = matrix.get(key);
@@ -900,7 +901,6 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
 
   @Override public String getDiffString(DBField orig)
   {
-    StringBuilder result = new StringBuilder();
     PermissionMatrixDBField origP;
 
     /* -- */
@@ -910,14 +910,14 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
         throw new IllegalArgumentException("bad field comparison");
       }
 
-    clean();
-
     origP = (PermissionMatrixDBField) orig;
 
     if (origP.equals(this))
       {
         return null;
       }
+
+    StringBuilder result = new StringBuilder();
 
     Vector<String> myKeys = new Vector<String>();
     Vector<String> origKeys = new Vector<String>();
@@ -1407,14 +1407,26 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
         return false;
       }
 
-    if (this.owner.gSession.getPermManager().isSuperGash())
-      {
-        return true;
-      }
-
     if (entry == null)
       {
         throw new IllegalArgumentException("entry is null");
+      }
+
+    DBObjectBase base = Ganymede.db.getObjectBase(baseID);
+
+    if (base == null)
+      {
+        throw new IllegalArgumentException("bad base id");
+      }
+
+    if (fieldID != -1 && base.getFieldDef(fieldID) == null)
+      {
+        throw new IllegalArgumentException("bad field id");
+      }
+
+    if (this.owner.gSession.getPermManager().isSuperGash())
+      {
+        return true;
       }
 
     if (getID() == SchemaConstants.RoleMatrix)

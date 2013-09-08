@@ -218,7 +218,7 @@ public class FloatDBField extends DBField implements float_field {
   {
     if (value == null)
       {
-        return "null";
+        return "";
       }
 
     return Double.toString(this.value());

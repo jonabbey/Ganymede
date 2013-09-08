@@ -578,13 +578,13 @@ public final class InvidDBField extends DBField implements invid_field {
 
     // now do the work
 
+    if (value == null)
+      {
+        return "";
+      }
+
     if (!isVector())
       {
-        if (value == null)
-          {
-            return "null";
-          }
-
         Invid localInvid = (Invid) this.value();
 
         // XXX note: we don't use our owner's lookupLabel() method
@@ -720,7 +720,6 @@ public final class InvidDBField extends DBField implements invid_field {
 
   @Override public synchronized String getDiffString(DBField orig)
   {
-    StringBuilder result = new StringBuilder();
     InvidDBField origI;
     GanymedeSession gsession = null;
 
@@ -734,7 +733,7 @@ public final class InvidDBField extends DBField implements invid_field {
 
     if (orig == this)
       {
-        return "";
+        return null;
       }
 
     origI = (InvidDBField) orig;
@@ -761,6 +760,8 @@ public final class InvidDBField extends DBField implements invid_field {
           }
         else
           {
+            StringBuilder result = new StringBuilder();
+
             if (deleted.size() != 0)
               {
                 StringBuilder deleteString = new StringBuilder();
@@ -806,18 +807,16 @@ public final class InvidDBField extends DBField implements invid_field {
       }
     else
       {
-        if (origI.value().equals(this.value()))
+        if (origI.value.equals(this.value))
           {
             return null;
           }
         else
           {
             // "\tOld: {0}\n\tNew:{1}\n"
-            result.append(ts.l("getDiffString.scalar",
-                               getRemoteLabel(gsession, origI.value(), true),
-                               getRemoteLabel(gsession, this.value(), false)));
-
-            return result.toString();
+            return ts.l("getDiffString.scalar",
+                        getRemoteLabel(gsession, origI.value(), true),
+                        getRemoteLabel(gsession, this.value(), false));
           }
       }
   }
@@ -2829,7 +2828,7 @@ public final class InvidDBField extends DBField implements invid_field {
     // type and in identity.  if partialSuccessOk, we won't complain
     // unless none of the submitted values are acceptable
 
-    StringBuilder errorBuf = new StringBuilder();
+    StringBuilder errorBuf = null;
 
     for (Invid remote: newValues)
       {
@@ -2845,7 +2844,11 @@ public final class InvidDBField extends DBField implements invid_field {
               {
                 if (retVal.getDialog() != null)
                   {
-                    if (errorBuf.length() != 0)
+                    if (errorBuf == null)
+                      {
+                        errorBuf = new StringBuilder();
+                      }
+                    else if (errorBuf.length() != 0)
                       {
                         errorBuf.append("\n\n");
                       }
@@ -2909,7 +2912,11 @@ public final class InvidDBField extends DBField implements invid_field {
               {
                 if (newRetVal.getDialog() != null)
                   {
-                    if (errorBuf.length() != 0)
+                    if (errorBuf == null)
+                      {
+                        errorBuf = new StringBuilder();
+                      }
+                    else if (errorBuf.length() != 0)
                       {
                         errorBuf.append("\n\n");
                       }
@@ -2973,7 +2980,11 @@ public final class InvidDBField extends DBField implements invid_field {
                   {
                     if (newRetVal.getDialog() != null)
                       {
-                        if (errorBuf.length() != 0)
+                        if (errorBuf == null)
+                          {
+                            errorBuf = new StringBuilder();
+                          }
+                        else if (errorBuf.length() != 0)
                           {
                             errorBuf.append("\n\n");
                           }
@@ -3038,7 +3049,11 @@ public final class InvidDBField extends DBField implements invid_field {
                   {
                     if (newRetVal.getDialog() != null)
                       {
-                        if (errorBuf.length() != 0)
+                        if (errorBuf == null)
+                          {
+                            errorBuf = new StringBuilder();
+                          }
+                        else if (errorBuf.length() != 0)
                           {
                             errorBuf.append("\n\n");
                           }
@@ -3082,7 +3097,7 @@ public final class InvidDBField extends DBField implements invid_field {
         // therefore have partialSuccessOk set), encode a description
         // of what happened to go along with the success code.
 
-        if (errorBuf.length() != 0)
+        if (errorBuf != null && errorBuf.length() != 0)
           {
             retVal = ReturnVal.merge(retVal, ReturnVal.success()); // force non-null retVal
 
@@ -3119,7 +3134,6 @@ public final class InvidDBField extends DBField implements invid_field {
           }
       }
   }
-
 
   /**
    * <p>Creates and adds a new embedded object in this
@@ -3849,8 +3863,7 @@ public final class InvidDBField extends DBField implements invid_field {
   }
 
   /**
-   * Returns a StringBuffer encoded list of acceptable invid values
-   * for this field.
+   * Returns a list of acceptable invid values for this field.
    *
    * @see arlut.csd.ganymede.rmi.invid_field
    */
@@ -3861,8 +3874,11 @@ public final class InvidDBField extends DBField implements invid_field {
   }
 
   /**
-   * Returns a StringBuffer encoded list of acceptable invid values
-   * for this field.
+   * <p>Returns a possibly filtered list of acceptable invid values
+   * for this field.</p>
+   *
+   * @param applyFilter If true, the results returned will be filtered
+   * by the GanymedeSession's owner filter query.
    *
    * @see arlut.csd.ganymede.rmi.invid_field
    */

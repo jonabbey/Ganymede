@@ -69,7 +69,7 @@ import java.io.IOException;
  * the server in doing an XML dump.
  */
 
-public final class XMLDumpContext {
+public final class XMLDumpContext implements java.io.Closeable {
 
   /**
    * <p>If true, the Ganymede server thread using this XMLDumpContext

@@ -6,17 +6,19 @@
    database queries.
 
    Result is serializable.
-   
-   Created: 21 October 1996 
+
+   Created: 21 October 1996
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -66,10 +68,10 @@ package arlut.csd.ganymede.common;
 
 public class Result implements java.io.Serializable {
 
-  static final long serialVersionUID = -8417751229367613063L;
+  static final long serialVersionUID = -9016358861157235903L;
 
   // ---
-  
+
   Invid invid;  // remote reference to an object on the server
   String label = null;
 
@@ -99,7 +101,7 @@ public class Result implements java.io.Serializable {
     /* -- */
 
     chars = invid.toString().toCharArray();
-    
+
     for (int j = 0; j < chars.length; j++)
       {
         if (chars[j] == '|')
@@ -123,7 +125,7 @@ public class Result implements java.io.Serializable {
     buffer.append("|");
 
     chars = label.toCharArray();
-    
+
     for (int j = 0; j < chars.length; j++)
       {
         if (chars[j] == '|')

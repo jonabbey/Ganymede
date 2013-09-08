@@ -65,6 +65,7 @@ import java.util.Vector;
 import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.TranslationService;
 import arlut.csd.Util.VectorUtils;
+import arlut.csd.Util.WordWrap;
 
 import arlut.csd.ganymede.common.FieldInfo;
 import arlut.csd.ganymede.common.FieldTemplate;
@@ -3856,7 +3857,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
         if (conflictField != null)
           {
             DBObject conflictObject = conflictField.getOwner();
-            String conflictLabel = conflictObject.getLabel();
+            String conflictLabel = conflictObject.getPathLabel();
             String conflictClassName = conflictObject.getTypeName();
 
             // This action could not be completed because "{0}" is already being used.
@@ -3867,15 +3868,16 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
             return Ganymede.createErrorDialog(this.getGSession(),
                                               ts.l("getConflictDialog.errorTitle", methodName),
-                                              ts.l("getConflictDialog.persistentError",
-                                                   conflictValue, conflictClassName, conflictLabel, conflictField.getName()));
+                                              WordWrap.wrap(ts.l("getConflictDialog.persistentError",
+                                                                 conflictValue, conflictClassName, conflictLabel, conflictField.getName()),
+                                                            80));
           }
         else
           {
             conflictField = ns.lookupShadow(conflictValue);
 
             DBObject conflictObject = conflictField.getOwner();
-            String conflictLabel = conflictObject.getLabel();
+            String conflictLabel = conflictObject.getPathLabel();
             String conflictClassName = conflictObject.getTypeName();
 
             // This action could not be completed because "{0}" is currently being manipulated in a concurrent transaction.
@@ -3886,8 +3888,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
             return Ganymede.createErrorDialog(this.getGSession(),
                                               ts.l("getConflictDialog.errorTitle", methodName),
-                                              ts.l("getConflictDialog.transactionError",
-                                                   conflictValue, conflictClassName, conflictLabel, conflictField.getName()));
+                                              WordWrap.wrap(ts.l("getConflictDialog.transactionError",
+                                                                 conflictValue, conflictClassName, conflictLabel, conflictField.getName()),
+                                                            80));
           }
       }
     catch (NullPointerException ex)
@@ -3911,8 +3914,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     // "This action could not be performed because "{0}" is already contained in field {1} in object {2}."
     return Ganymede.createErrorDialog(this.getGSession(),
                                       ts.l("getDuplicateValueDialog.error_in_method_title", methodName),
-                                      ts.l("getDuplicateValueDialog.error_body",
-                                           String.valueOf(conflictValue), getName(), owner.getLabel()));
+                                      WordWrap.wrap(ts.l("getDuplicateValueDialog.error_body",
+                                                         String.valueOf(conflictValue), getName(), owner.getLabel()),
+                                                    80));
   }
 
   /**
@@ -3926,7 +3930,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     // "This action could not be performed because "{0}" are already contained in field {1} in object {2}."
     return Ganymede.createErrorDialog(this.getGSession(),
                                       ts.l("getDuplicateValueDialog.error_in_method_title", methodName),
-                                      ts.l("getDuplicateValuesDialog.error_body",
-                                           conflictValues, getName(), owner.getLabel()));
+                                      WordWrap.wrap(ts.l("getDuplicateValuesDialog.error_body",
+                                                         conflictValues, getName(), owner.getLabel()),
+                                                    80));
   }
 }

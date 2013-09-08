@@ -611,11 +611,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
               {
                 for (Object value: fieldRec.addValues)
                   {
-                    if (value instanceof IPwrap)
-                      {
-                        value = ((IPwrap) value).address;
-                      }
-
                     fieldCopy.getVectVal().add(value);
                   }
               }
@@ -624,11 +619,6 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
               {
                 for (Object value: fieldRec.delValues)
                   {
-                    if (value instanceof IPwrap)
-                      {
-                        value = ((IPwrap) value).address;
-                      }
-
                     fieldCopy.getVectVal().remove(value);
                   }
               }
@@ -979,6 +969,29 @@ public class DBObject implements db_object, FieldType, Remote, JythonMap {
 
         // "New {0}: {1,number,#}"
         return ts.l("getLabel.null_label", getTypeName(), Integer.valueOf(getID()));
+      }
+  }
+
+  /**
+   * <p>If this object is not embedded, returns the label of this
+   * object in the same way that getLabel() does.</p>
+   *
+   * <p>If this object is embedded, returns a /-separated label
+   * containing the name of all containing objects followed by this
+   * object's label.</p>
+   *
+   * @see arlut.csd.ganymede.rmi.db_object
+   */
+
+  public final String getPathLabel()
+  {
+    if (!isEmbedded())
+      {
+        return this.getLabel();
+      }
+    else
+      {
+        return getParentObj().getPathLabel() + "/" + this.getLabel();
       }
   }
 

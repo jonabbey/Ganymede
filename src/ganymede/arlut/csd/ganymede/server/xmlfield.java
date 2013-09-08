@@ -73,6 +73,7 @@ import arlut.csd.Util.XMLUtils;
 import arlut.csd.ganymede.common.FieldTemplate;
 import arlut.csd.ganymede.common.FieldType;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.IPAddress;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.PermEntry;
 import arlut.csd.ganymede.common.ReturnVal;
@@ -999,7 +1000,7 @@ public final class xmlfield implements FieldType {
     return result;
   }
 
-  public String parseIP(XMLItem item) throws SAXException
+  public IPAddress parseIP(XMLItem item) throws SAXException
   {
     if (!item.matches("ip"))
       {
@@ -1012,7 +1013,7 @@ public final class xmlfield implements FieldType {
         owner.xSession.tell("\nError, found a non-empty ip field value element: " + item);
       }
 
-    return item.getAttrStr("val");
+    return new IPAddress(item.getAttrStr("val"));
   }
 
   public Double parseFloat(XMLItem item) throws SAXException

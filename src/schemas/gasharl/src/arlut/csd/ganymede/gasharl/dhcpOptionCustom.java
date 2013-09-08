@@ -57,6 +57,7 @@ import java.util.regex.Pattern;
 
 import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.IPAddress;
 import arlut.csd.ganymede.common.GanyParseException;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.QueryResult;
@@ -869,11 +870,11 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
 
   private static ReturnVal validateIP(DBObject object, String ipOrHost)
   {
-    Byte[] parsedAddress = null;
+    IPAddress parsedAddress = null;
 
     try
       {
-        parsedAddress = IPDBField.genIPV4bytes(ipOrHost);
+        parsedAddress = new IPAddress(ipOrHost);
       }
     catch (IllegalArgumentException ex)
       {
@@ -960,7 +961,7 @@ public class dhcpOptionCustom extends DBEditObject implements SchemaConstants, d
       }
 
     ReturnVal retVal = new ReturnVal(true, true);
-    retVal.setTransformedValueObject(IPDBField.genIPV4string(parsedAddress));
+    retVal.setTransformedValueObject(parsedAddress.toString());
 
     return retVal;
   }

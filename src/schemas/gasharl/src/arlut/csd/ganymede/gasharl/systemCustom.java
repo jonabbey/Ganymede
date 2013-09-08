@@ -56,6 +56,7 @@ import arlut.csd.JDialog.JDialogBuff;
 import arlut.csd.Util.VectorUtils;
 import arlut.csd.ganymede.common.GanyPermissionsException;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.IPAddress;
 import arlut.csd.ganymede.common.NotLoggedInException;
 import arlut.csd.ganymede.common.ObjectHandle;
 import arlut.csd.ganymede.common.Query;
@@ -94,7 +95,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    * network object pointed to by netInvid, or false otherwise.</p>
    */
 
-  public final static boolean checkMatchingNet(DBSession session, Invid netInvid, Byte[] address)
+  public final static boolean checkMatchingNet(DBSession session, Invid netInvid, IPAddress address)
   {
     IPv4Range range;
 
@@ -124,7 +125,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
       }
     else
       {
-        Byte[] netNum = (Byte[]) netObj.getFieldValueLocal(networkSchema.NETNUMBER);
+        IPAddress netNum = (IPAddress) netObj.getFieldValueLocal(networkSchema.NETNUMBER);
 
         if (netNum == null)
           {
@@ -150,13 +151,13 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
   Vector<ObjectHandle> netsToChooseFrom = new Vector<ObjectHandle>();
 
   /**
-   * <p>Vector of IP addresses in Byte array form.  If the user
-   * switches the network of an interface, we push the old network on
-   * a stack in ipAddresses so that we can pop it back off if another
-   * interface is moved onto that network.</p>
+   * <p>Vector of IP addresses.  If the user switches the network of
+   * an interface, we push the old network on a stack in ipAddresses
+   * so that we can pop it back off if another interface is moved onto
+   * that network.</p>
    */
 
-  Vector<Byte[]> ipAddresses = new Vector<Byte[]>();
+  Vector<IPAddress> ipAddresses = new Vector<IPAddress>();
 
   /**
    * <p>If this system is associated with a system type that
@@ -540,7 +541,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    * interfaceCustom}.</p>
    */
 
-  public Invid findMatchingNet(Byte[] address)
+  public Invid findMatchingNet(IPAddress address)
   {
     for (int i = 0; i < netsToChooseFrom.size(); i++)
       {
@@ -567,7 +568,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    * IPv4Range.</p>
    */
 
-  public synchronized boolean saveAddress(Byte[] address)
+  public synchronized boolean saveAddress(IPAddress address)
   {
     VectorUtils.unionAdd(ipAddresses, address);
 
@@ -581,7 +582,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    * choices.</p>
    */
 
-  public synchronized Byte[] getAddress(Invid netInvid)
+  public synchronized IPAddress getAddress(Invid netInvid)
   {
     return getIPAddress(netInvid, startSearchRange, stopSearchRange);
   }
@@ -750,7 +751,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
    * @return An IP address if one could be allocated, null otherwise
    */
 
-  private Byte[] getIPAddress(Invid netInvid, int start, int stop)
+  private IPAddress getIPAddress(Invid netInvid, int start, int stop)
   {
     // the namespace being used to manage the IP address space
 
@@ -781,7 +782,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
       }
     else
       {
-        Byte[] netNum = (Byte[]) netObj.getFieldValueLocal(networkSchema.NETNUMBER);
+        IPAddress netNum = (IPAddress) netObj.getFieldValueLocal(networkSchema.NETNUMBER);
 
         if (netNum == null)
           {
@@ -793,7 +794,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
         if (debug)
           {
-            System.err.println("systemCustom.getIPAddress(): created range from net number: " + IPDBField.genIPString(netNum) + ": " + range);
+            System.err.println("systemCustom.getIPAddress(): created range from net number: " + netNum + ": " + range);
           }
       }
 
@@ -801,7 +802,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
     for (int i = 0; i < ipAddresses.size(); i++)
       {
-        Byte[] address = ipAddresses.get(i);
+        IPAddress address = (IPAddress) ipAddresses.get(i);
 
         if (range.matches(address, start, stop))
           {
@@ -813,15 +814,15 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
     en = range.getElements(start, stop);
 
     boolean found = false;
-    Byte[] address = null;
+    IPAddress address = null;
 
     while (!found && en.hasMoreElements())
       {
-        address = (Byte[]) en.nextElement();
+        address = (IPAddress) en.nextElement();
 
         if (debug)
           {
-            System.err.println("systemCustom checking " + IPDBField.genIPString(address));
+            System.err.println("systemCustom checking " + address);
           }
 
         if (namespace.reserve(editset, address))
@@ -837,37 +838,10 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
 
     if (debug)
       {
-        System.err.println("systemCustom.getIPAddress(): returning " + IPDBField.genIPString(address));
+        System.err.println("systemCustom.getIPAddress(): returning " + address);
       }
 
     return address;
-  }
-
-  /**
-   * This method maps an int value between 0 and 255 inclusive
-   * to a legal signed byte value, and is used to down shift
-   * values from the 0-255 that can only be held in a short or
-   * larger to a signed byte for storage.
-   */
-
-  public final static byte u2s(int x)
-  {
-    if ((x < 0) || (x > 255))
-      {
-        throw new IllegalArgumentException("Out of range: " + x);
-      }
-
-    return (byte) (x - 128);
-  }
-
-  /**
-   * This method maps a u2s-encoded signed byte value to an
-   * int value between 0 and 255 inclusive.
-   */
-
-  public final static short s2u(byte b)
-  {
-    return (short) (b + 128);
   }
 
   /**
@@ -1158,7 +1132,7 @@ public class systemCustom extends DBEditObject implements SchemaConstants {
           getDBSession().editDBObject(interfaces.get(index));
 
         Invid oldNet = (Invid) delInterface.getFieldValueLocal(interfaceSchema.IPNET);
-        Byte[] address = (Byte[]) delInterface.getFieldValueLocal(interfaceSchema.ADDRESS);
+        IPAddress address = (IPAddress) delInterface.getFieldValueLocal(interfaceSchema.ADDRESS);
 
         if (oldNet != null && address != null)
           {

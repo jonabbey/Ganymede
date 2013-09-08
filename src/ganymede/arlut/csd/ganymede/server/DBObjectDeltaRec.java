@@ -62,6 +62,7 @@ import java.util.Vector;
 
 import arlut.csd.ganymede.common.FieldType;
 import arlut.csd.ganymede.common.Invid;
+import arlut.csd.ganymede.common.IPAddress;
 
 /*------------------------------------------------------------------------------
                                                                            class
@@ -257,15 +258,7 @@ public final class DBObjectDeltaRec implements FieldType, Iterable<fieldDeltaRec
                         break;
 
                       case IP:
-                        byte bytelength = in.readByte();
-                        Byte[] bytes = new Byte[bytelength];
-
-                        for (int k = 0; k < bytelength; k++)
-                          {
-                            bytes[k] = Byte.valueOf(in.readByte());
-                          }
-
-                        value = bytes;
+                        value = IPAddress.readIPAddr(in);
                       }
 
                     fieldRec.addValue(value);
@@ -286,15 +279,7 @@ public final class DBObjectDeltaRec implements FieldType, Iterable<fieldDeltaRec
                         break;
 
                       case IP:
-                        byte bytelength = in.readByte();
-                        Byte[] bytes = new Byte[bytelength];
-
-                        for (int k = 0; k < bytelength; k++)
-                          {
-                            bytes[k] = Byte.valueOf(in.readByte());
-                          }
-
-                        value = bytes;
+                        value = IPAddress.readIPAddr(in);
                       }
 
                     fieldRec.delValue(value);
@@ -380,16 +365,9 @@ public final class DBObjectDeltaRec implements FieldType, Iterable<fieldDeltaRec
                   {
                     ((Invid) value).emit(out);
                   }
-                else if (value instanceof IPwrap)
+                else if (value instanceof IPAddress)
                   {
-                    Byte[] bytes = ((IPwrap) value).address;
-
-                    out.writeByte(bytes.length);
-
-                    for (int i = 0; i < bytes.length; i++)
-                      {
-                        out.writeByte(bytes[i].byteValue());
-                      }
+                    ((IPAddress) value).emit(out);
                   }
                 else
                   {
@@ -416,21 +394,11 @@ public final class DBObjectDeltaRec implements FieldType, Iterable<fieldDeltaRec
                   }
                 else if (value instanceof Invid)
                   {
-                    Invid invid = (Invid) value;
-
-                    out.writeShort(invid.getType());
-                    out.writeInt(invid.getNum());
+                    ((Invid) value).emit(out);
                   }
-                else if (value instanceof IPwrap)
+                else if (value instanceof IPAddress)
                   {
-                    Byte[] bytes = ((IPwrap) value).address;
-
-                    out.writeByte(bytes.length);
-
-                    for (int i = 0; i < bytes.length; i++)
-                      {
-                        out.writeByte(bytes[i].byteValue());
-                      }
+                    ((IPAddress) value).emit(out);
                   }
               }
           }

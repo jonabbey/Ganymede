@@ -98,7 +98,7 @@ import arlut.csd.Util.VectorUtils;
  * the logfile orderly.</p>
  */
 
-final public class DBLog {
+final public class DBLog implements java.io.Closeable {
 
   static final boolean debug = false;
 
@@ -345,7 +345,7 @@ final public class DBLog {
    * This method closes out the log file.
    */
 
-  synchronized void close() throws IOException
+  public synchronized void close() throws IOException
   {
     try
       {

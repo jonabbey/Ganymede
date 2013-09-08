@@ -52,6 +52,8 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -60,6 +62,7 @@ import java.util.Comparator;
 
 import javax.swing.DefaultListModel;
 import javax.swing.DefaultListSelectionModel;
+import javax.swing.JComponent;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
@@ -98,7 +101,8 @@ import arlut.csd.Util.VecQuickSort;
  * @author Mike Mulvaney
  */
 
-public class JstringListBox extends JList implements ActionListener, ListSelectionListener,
+public class JstringListBox extends JList implements ActionListener, FocusListener,
+                                                     ListSelectionListener,
                                                      MouseListener, MouseMotionListener,
                                                      Comparator {
 
@@ -1087,6 +1091,26 @@ public class JstringListBox extends JList implements ActionListener, ListSelecti
               }
           }
       }
+  }
+
+  // FocusListener methods ------------------------------------------------------
+
+  public void focusLost(FocusEvent e)
+  {
+    if (debug)
+      {
+        System.out.println("JstringListBox: focusLost");
+      }
+  }
+
+  public void focusGained(FocusEvent e)
+  {
+    if (debug)
+      {
+        System.out.println("focusGained");
+      }
+
+    ((JComponent) this.getParent()).scrollRectToVisible(this.getBounds());
   }
 
   /**

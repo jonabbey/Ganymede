@@ -52,6 +52,8 @@ import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
@@ -61,6 +63,7 @@ import java.util.Vector;
 import javax.swing.ComboBoxEditor;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.MutableComboBoxModel;
@@ -83,7 +86,7 @@ import arlut.csd.Util.TranslationService;
  * @author Jonathan Abbey
  */
 
-public class JInvidChooser extends JPanelCombo implements ActionListener, ItemListener {
+public class JInvidChooser extends JPanelCombo implements ActionListener, ItemListener, FocusListener {
 
   private final static boolean debug = false;
 
@@ -148,6 +151,7 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
     // "View"
     view = new JButton(ts.l("global.view_button"));
     view.addActionListener(this);
+    view.addFocusListener(this);
 
     editor = new JInvidChooserFieldEditor(this);
     getCombo().setEditor(editor);
@@ -385,6 +389,24 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
       }
   }
 
+  public void focusLost(FocusEvent e)
+  {
+    if (debug)
+      {
+        System.out.println("StringSelector: focusLost");
+      }
+  }
+
+  public void focusGained(FocusEvent e)
+  {
+    if (debug)
+      {
+        System.out.println("focusGained");
+      }
+
+    ((JComponent) this.getParent()).scrollRectToVisible(this.getBounds());
+  }
+
   private final void  showErrorMessage(String message) {
     cp.getgclient().showErrorMessage(message);
   }
@@ -423,9 +445,11 @@ class JInvidChooserFieldEditor extends KeyAdapter implements ComboBoxEditor, Act
   {
     this.chooser = chooser;
     this.box = chooser.getCombo();
+    this.box.addFocusListener(chooser);
     theField = new JTextField();
     theField.addKeyListener(this);
     theField.addActionListener(this);
+    theField.addFocusListener(chooser);
   }
 
   public void setItem(Object anObject)

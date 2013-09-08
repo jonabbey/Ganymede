@@ -2447,12 +2447,12 @@ public final class DBStore implements JythonMap {
   }
 
   // debug routine
+
   /**
-   *
    * This is a convenience method used by server-side code to send
    * debug output to stderr and to any attached admin consoles.
-   *
    */
+
   static public void debug(String string)
   {
     if (debug)
