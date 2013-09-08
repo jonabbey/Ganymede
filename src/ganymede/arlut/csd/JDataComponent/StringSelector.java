@@ -1007,7 +1007,12 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
         this.repaint();
       }
 
-    ((JComponent) this.getParent()).scrollRectToVisible(this.getBounds());
+    JComponent parent = (JComponent) this.getParent();
+
+    if (parent != null)
+      {
+        parent.scrollRectToVisible(this.getBounds());
+      }
   }
 
   // Private methods ------------------------------------------------------------

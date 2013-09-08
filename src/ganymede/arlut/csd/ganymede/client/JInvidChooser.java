@@ -404,7 +404,12 @@ public class JInvidChooser extends JPanelCombo implements ActionListener, ItemLi
         System.out.println("focusGained");
       }
 
-    ((JComponent) this.getParent()).scrollRectToVisible(this.getBounds());
+    JComponent parent = (JComponent) this.getParent();
+
+    if (parent != null)
+      {
+        parent.scrollRectToVisible(this.getBounds());
+      }
   }
 
   private final void  showErrorMessage(String message) {

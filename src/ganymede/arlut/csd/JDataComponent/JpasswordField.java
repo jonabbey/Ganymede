@@ -446,7 +446,12 @@ public class JpasswordField extends JPasswordField implements FocusListener, Act
 
   public void focusGained(FocusEvent e)
   {
-    ((JComponent) this.getParent()).scrollRectToVisible(this.getBounds());
+    JComponent parent = (JComponent) this.getParent();
+
+    if (parent != null)
+      {
+        parent.scrollRectToVisible(this.getBounds());
+      }
   }
 
   public void focusLost(FocusEvent e)
