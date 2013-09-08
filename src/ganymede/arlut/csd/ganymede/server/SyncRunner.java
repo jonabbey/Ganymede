@@ -114,9 +114,9 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * arlut.csd.ganymede.server.SyncMaster} implementation with a
  * <code>Sync Channel</code> object to bring in additional objects and
  * fields as necessary.  It is also possible to use the {@link
- * arlut.csd.ganymede.server.DBEditObject#getForeignSyncKeys(arlut.csd.ganymede.common.Invid,arlut.csd.ganymede.server.DBObject,arlut.csd.ganymede.server.DBObject,java.lang.String,boolean)}
+ * arlut.csd.ganymede.server.DBEditObject#getForeignSyncKeys(arlut.csd.ganymede.common.Invid,arlut.csd.ganymede.server.DBObject,arlut.csd.ganymede.server.DBObject,java.lang.String,boolean) getForeignSyncKeys()}
  * and {@link
- * arlut.csd.ganymede.server.DBEditObject#getMyExtraInvidAttributes(arlut.csd.ganymede.server.DBObject,java.lang.String,boolean)}
+ * arlut.csd.ganymede.server.DBEditObject#getMyExtraInvidAttributes(arlut.csd.ganymede.server.DBObject,java.lang.String,boolean) getMyExtraInvidAttributes()}
  * methods on an object type's custom {@link
  * arlut.csd.ganymede.server.DBEditObject} class to synthesize
  * additional information specific to a given external Sync Channel
@@ -251,6 +251,8 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * <p>See the <a href="../../../../../synchronization/index.html"
  * target="_top">Ganymede synchronization guide</a> for more details
  * on all of this.</p>
+ *
+ * @author Jonathan Abbey jonabbey@arlut.utexas.edu
  */
 
 public final class SyncRunner implements Runnable {

@@ -164,6 +164,8 @@ import arlut.csd.ganymede.rmi.Server;
  * arlut.csd.ganymede.server.SyncRunner} and {@link
  * arlut.csd.ganymede.server.GanymedeBuilderTask} classes registered
  * for execution in the Ganymede server's database.</p>
+ *
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 public final class Ganymede {
