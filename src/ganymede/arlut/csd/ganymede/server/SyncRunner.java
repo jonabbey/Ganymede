@@ -134,13 +134,14 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * XML files to the proper output directory.  If a problem prevents
  * any of the SyncRunners from successfully writing its XML files, the
  * transaction will be aborted as if it never happened.  All of this
- * is done with proper ACID transactional guarantees.  The SyncRunner
- * implementation is designed so that the Ganymede server can be
- * killed at any time without leaving a transaction partially
- * committed between the Sync Channels and the Ganymede journal file.
- * Either a transaction is successfully recorded to all relevant Sync
- * Channels and the journal, or it will not be recorded to any of
- * them.</p>
+ * is done with proper ACID transactional guarantees.  The {@link
+ * arlut.csd.ganymede.server.DBJournal} is not updated to record that
+ * a transaction was successfully committed until all updates are
+ * written to all registered Sync Channels.  If the server is killed
+ * during the process of writing a transaction to the Sync Channels,
+ * it will delete the non-finalized transaction record from all Sync
+ * Channels on startup as part of the process of rolling back the
+ * non-finalized transaction.</p>
  *
  * <p>Whenever any transaction is successfully committed, each
  * incremental Sync Channel Runner is scheduled for execution by the
@@ -184,8 +185,8 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * the Ganymede scheduler.  When the full-state sync channel is
  * serviced by the scheduler, the full state of the system (as
  * filtered by the requirements of the Sync Channel object at the time
- * the scheduler runs) the XML file is generated and the service
- * program is run immediately therafter.</p>
+ * the scheduler runs) is written into the XML file generated and the
+ * service program is run immediately therafter.</p>
  *
  * <p>Incremental sync channels can be more efficient, as only changed
  * data need be written to the Sync Channel, but not all types of data
@@ -232,8 +233,9 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * expensive process of reconciliation to bring the directory service
  * target into compliance with the data in the Ganymede server.</p>
  *
- * <p>See the <a href="../../../../../synchronization/index.html" target="_top">Ganymede
- * synchronization guide</a> for more details on all of this.</p>
+ * <p>See the <a href="../../../../../synchronization/index.html"
+ * target="_top">Ganymede synchronization guide</a> for more details
+ * on all of this.</p>
  */
 
 public final class SyncRunner implements Runnable {
@@ -869,8 +871,8 @@ public final class SyncRunner implements Runnable {
   /**
    * <p>If we go to commit a transaction and we find that we can't
    * write a sync to its sync channel for some reason, we'll need to
-   * go back and erase the sync files that we did write out.  This method
-   * is responsible for wielding the axe.</p>
+   * go back and erase the sync files that we did write out.  This
+   * method is responsible for wielding the axe.</p>
    *
    * @param transRecord A transaction description record describing
    * the transaction we are clearing from this sync channel

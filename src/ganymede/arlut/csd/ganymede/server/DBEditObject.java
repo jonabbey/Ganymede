@@ -127,8 +127,9 @@ import arlut.csd.Util.TranslationService;
  * Reflection API rather than being able to call methods on a
  * instance of the appropriate DBEditObject subclass.</p>
  *
- * <p>See the DBEditObject subclassing guide for more information generally on
- * DBEditObject customization.</p>
+ * <p>See the <a href="../../../../../customization/index.html"
+ * target="_top">DBEditObject subclassing guide</a> for more
+ * information generally on DBEditObject customization.</p>
  *
  * <p><b>IMPORTANT PROGRAMMING NOTE!</b>: It is critical that
  * synchronized methods in DBEditObject and in subclasses thereof do not
