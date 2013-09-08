@@ -131,9 +131,10 @@ import arlut.csd.ganymede.common.SchemaConstants;
  * <p>If a DBEditSet commit() operation fails catastrophically, or if
  * {@link arlut.csd.ganymede.server.DBEditSet#abort() abort()} is
  * called, all DBEditObjects created or checked out during the course
- * of the transaction will be discarded, all DBNameSpace values
- * allocated will be relinquished, and any logging information for the
- * abandoned transaction will be forgotten.</p>
+ * of the transaction will be discarded, all {@link
+ * arlut.csd.ganymede.server.DBNameSpace DBNameSpace} values allocated
+ * will be relinquished, and any logging information for the abandoned
+ * transaction will be forgotten.</p>
  *
  * <p>As if all that wasn't enough, the DBEditSet class also maintains
  * a stack of {@link arlut.csd.ganymede.server.DBCheckPoint
@@ -144,11 +145,13 @@ import arlut.csd.ganymede.common.SchemaConstants;
  * linked operations within a transaction cannot all be completed.</p>
  *
  * <p>Finally, note that the DBEditSet class does not actually track
- * namespace value allocations.. instead, the DBNameSpace class is
+ * namespace value allocations.. instead, the {@link
+ * arlut.csd.ganymede.server.DBNameSpace DBNameSpace} class is
  * responsible for recording a list of values allocated by each active
- * DBEditSet.  When a DBEditSet commits or releases, all DBNameSpace
- * objects in the server are informed of this, whereupon they do their
- * own cleanup.</p>
+ * DBEditSet.  When a DBEditSet commits or releases, all {@link
+ * arlut.csd.ganymede.server.DBNameSpace DBNameSpace} objects in the
+ * server are informed of this, whereupon they do their own
+ * cleanup.</p>
  */
 
 public final class DBEditSet {

@@ -64,12 +64,12 @@ import arlut.csd.ganymede.common.ReturnVal;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>Remote reference to a Ganymede {@link arlut.csd.ganymede.server.DBObject DBObject}
- * or {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}, the db_object is used by the
- * client to get information about and/or make changes to a object held
- * in the Ganymede server.</p>
+ * <p>Remote reference to a Ganymede {@link
+ * arlut.csd.ganymede.server.DBObject DBObject} or {@link
+ * arlut.csd.ganymede.server.DBEditObject DBEditObject}, the db_object
+ * is used by the client to get information about and/or make changes
+ * to a object held in the Ganymede server.</p>
  *
- * @version $Id$
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 

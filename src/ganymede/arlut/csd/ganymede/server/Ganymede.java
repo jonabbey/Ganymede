@@ -117,16 +117,11 @@ import arlut.csd.ganymede.rmi.Server;
  * arlut.csd.ganymede.server.DBField DBField}'s which ultimately hold
  * the actual data from the database.</p>
  *
- * <p>The ganymede.db file may define a number of task classes that
- * are to be run by the server at defined times.  The server's main()
- * method starts a background {@link
- * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}
- * thread to handle background tasks.</p>
- *
  * <p>When the database has been loaded from disk, the main() method
- * creates a {@link arlut.csd.ganymede.server.GanymedeServer GanymedeServer}
- * object.  GanymedeServer implements the {@link arlut.csd.ganymede.rmi.Server
- * Server} RMI remote interface, and is published in the RMI registry.</p>
+ * creates a {@link arlut.csd.ganymede.server.GanymedeServer
+ * GanymedeServer} object.  GanymedeServer implements the {@link
+ * arlut.csd.ganymede.rmi.Server Server} RMI remote interface, and is
+ * published in the RMI registry.</p>
  *
  * <p>Clients and admin consoles may then connect to the published
  * GanymedeServer object via RMI to establish a connection to the
@@ -151,15 +146,24 @@ import arlut.csd.ganymede.rmi.Server;
  * the {@link arlut.csd.ganymede.rmi.adminSession adminSession} RMI
  * remote interface.</p>
  *
- * <p>Most of the server's database logic is handled by the DBStore
- * object and its related classes ({@link
- * arlut.csd.ganymede.server.DBObject DBObject}, {@link
+ * <p>All client permissions and communications are handled by the
+ * higher level {@link arlut.csd.ganymede.server.GanymedeSession}
+ * class, all lower level data manipulation by the {@link
+ * arlut.csd.ganymede.server.DBStore} object and its related classes
+ * ({@link arlut.csd.ganymede.server.DBObject DBObject}, {@link
  * arlut.csd.ganymede.server.DBEditSet DBEditSet}, {@link
  * arlut.csd.ganymede.server.DBNameSpace DBNameSpace}, and {@link
  * arlut.csd.ganymede.server.DBJournal DBJournal}).</p>
  *
- * <p>All client permissions and communications are handled by the
- * GanymedeSession class.</p>
+ * <p>The ganymede.db file may define a number of task classes that
+ * are to be run by the server at defined times.  The server's main()
+ * method starts a background {@link
+ * arlut.csd.ganymede.server.GanymedeScheduler GanymedeScheduler}
+ * thread to schedule the execution of background tasks on additional
+ * threads, including the running of appropriate {@link
+ * arlut.csd.ganymede.server.SyncRunner} and {@link
+ * arlut.csd.ganymede.server.GanymedeBuilderTask} classes registered
+ * for execution in the Ganymede server's database.</p>
  */
 
 public final class Ganymede {
