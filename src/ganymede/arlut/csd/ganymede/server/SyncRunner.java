@@ -102,10 +102,16 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * object (using the {@link
  * arlut.csd.ganymede.server.syncChannelCustom} DBEditObject subclass
  * for management) is created in the Ganymede data store.  This
- * <code>Sync Channel</code> object provides all of the configuration
- * controls which determine where the XML synchronization files are
- * written, what external program should be used to process the files,
- * and what data needs to be written out for synchronization.</p>
+ * <code>Sync Channel</code> object typically provides all of the
+ * configuration controls which determine where the XML
+ * synchronization files are written, what external program should be
+ * used to process the files, and what data needs to be written out
+ * for synchronization.</p>
+ *
+ * <p>(It is possible to register a custom {@link
+ * arlut.csd.ganymede.server.SyncMaster} implementation with a
+ * <code>Sync Channel</code> object in order to synthesize auxiliary
+ * information in the XML stream if needed)</p>
  *
  * <p>Every time a transaction is committed, the Ganymede server
  * compares all objects involved in the transaction against every
