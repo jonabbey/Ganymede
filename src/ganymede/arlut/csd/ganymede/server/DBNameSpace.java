@@ -114,8 +114,7 @@ import arlut.csd.ganymede.rmi.NameSpace;
  * either case sensitive or case insensitive.  The DBNameSpace class
  * uses the {@link arlut.csd.ganymede.server.GHashtable GHashtable}
  * class to handle the representational issues in the unique value
- * hash for this, as well as for things like IP address
- * representation.</p>
+ * hash for this.</p>
  */
 
 public final class DBNameSpace implements NameSpace {

@@ -5,7 +5,6 @@
 
    Created: 29 March 2001
 
-
    Module By: Jonathan Abbey
 
    -----------------------------------------------------------------------
@@ -62,11 +61,12 @@ package arlut.csd.Util;
  * can be examined by separate threads without worry over funky memory
  * model behavior on multiprocessor systems, etc.</p>
  *
- * <p>This class is serializable only because the Ganymede
- * scheduleHandle class includes a booleanSempahore for server-side
- * use, and scheduleHandle objects are themselves serializable.
- * Obviously, we don't really care too much about fancy multithreaded
- * semantics when we are being serialized.</p>
+ * <p>This class is serializable only because the Ganymede {@link
+ * arlut.csd.ganymede.common.scheduleHandle} class includes a
+ * booleanSempahore for server-side use, and {@link
+ * arlut.csd.ganymede.common.scheduleHandle} objects are themselves
+ * serializable.  Obviously, we don't really care too much about fancy
+ * multithreaded semantics when we are being serialized.</p>
  */
 
 public class booleanSemaphore implements java.io.Serializable {

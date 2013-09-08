@@ -92,10 +92,10 @@ import arlut.csd.ganymede.rmi.BaseField;
  * appropriate.</p>
  *
  * <p>Each {@link arlut.csd.ganymede.server.DBField DBField} held in
- * the server's database holds a reference to a DBObjectBaseField, and
- * the DBField's methods will consult the DBObjectBaseField during
- * run-time to make decisions based on specified constraints defined
- * in the DBObjectBaseField.</p>
+ * the server's database knows how to lookup its controlling
+ * DBObjectBaseField, and the DBField's methods will consult the
+ * DBObjectBaseField during run-time to make decisions based on
+ * specified constraints defined in the DBObjectBaseField.</p>
  *
  * <p>The Ganymede schema editor uses the {@link
  * arlut.csd.ganymede.rmi.BaseField BaseField} remote interface to
