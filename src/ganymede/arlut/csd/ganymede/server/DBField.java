@@ -1894,7 +1894,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (ReturnVal.didSucceed(retVal))
       {
-        values.setElementAt(submittedValue, index);
+        values.set(index, submittedValue);
       }
     else
       {
