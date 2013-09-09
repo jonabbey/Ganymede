@@ -49,7 +49,7 @@
 
 package arlut.csd.ganymede.server;
 
-import java.util.Vector;
+import java.util.List;
 
 import arlut.csd.ganymede.common.DumpResult;
 
@@ -72,16 +72,16 @@ public class DumpResultBuilder {
    */
 
   private DumpResult transport = null;
-  private Vector<DBObjectBaseField> fieldDefs = null;
+  private List<DBObjectBaseField> fieldDefs = null;
 
   /* -- */
 
-  public DumpResultBuilder(Vector<DBObjectBaseField> fieldDefs)
+  public DumpResultBuilder(List<DBObjectBaseField> fieldDefs)
   {
     this.initializeFields(fieldDefs);
   }
 
-  public void initializeFields(Vector<DBObjectBaseField> fieldDefs)
+  public void initializeFields(List<DBObjectBaseField> fieldDefs)
   {
     StringBuffer buffer = null;
 
