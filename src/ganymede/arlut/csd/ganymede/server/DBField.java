@@ -3218,9 +3218,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * Returns a {@link arlut.csd.ganymede.server.fieldDeltaRec
+   * <p>Returns a {@link arlut.csd.ganymede.server.fieldDeltaRec
    * fieldDeltaRec} object listing the changes between this field's
-   * state and that of the prior oldField state.
+   * state and that of the prior oldField state.</p>
    */
 
   public fieldDeltaRec getVectorDiff(DBField oldField)
