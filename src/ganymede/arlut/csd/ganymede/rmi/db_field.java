@@ -3,18 +3,20 @@
    db_field.java
 
    A db_field is an item in a db_object.  A db_field can be a vector
-   or a scalar.  
+   or a scalar.
 
    Created: 10 April 1996
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -61,9 +63,11 @@ import arlut.csd.ganymede.common.ReturnVal;
 
 ------------------------------------------------------------------------------*/
 /**
- * <p>Remote reference to a Ganymede {@link arlut.csd.ganymede.server.DBField DBField}, the
- * db_field is used by the client to make changes to a field when editing the
- * {@link arlut.csd.ganymede.rmi.db_object db_object} the field is contained within.</p>
+ * <p>Remote reference to a Ganymede {@link
+ * arlut.csd.ganymede.server.DBField DBField}, the db_field is used by
+ * the client to make changes to a field when editing the {@link
+ * arlut.csd.ganymede.rmi.db_object db_object} the field is contained
+ * within.</p>
  *
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
@@ -77,7 +81,11 @@ public interface db_field extends java.rmi.Remote {
   FieldTemplate getFieldTemplate() throws RemoteException;
 
   /**
-   * <p>Returns a summary of this field's current value and visibility/editability status.</p>
+   * <p>Returns a summary of this field's current value and
+   * visibility/editability status.</p>
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to read from this field.
    */
 
   FieldInfo getFieldInfo() throws RemoteException;
@@ -117,8 +125,8 @@ public interface db_field extends java.rmi.Remote {
   String getTypeDesc() throws RemoteException;
 
   /**
-   * Returns the type code for this field from the
-   * schema.
+   * <p>Returns the type code for this field from the schema as
+   * defined in {@link arlut.csd.ganymede.common.FieldType}.</p>
    */
 
   short getType() throws RemoteException;
@@ -166,6 +174,9 @@ public interface db_field extends java.rmi.Remote {
    * <p>Returns the value of this field, if a scalar.  An exception
    * will be thrown if this field represents a vector or other
    * non-scalar data.</p>
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to read from this field.
    */
 
   Object getValue() throws RemoteException;
@@ -173,9 +184,11 @@ public interface db_field extends java.rmi.Remote {
   /**
    * <p>Sets the value of this field, if a scalar.</p>
    *
-   * <p>The ReturnVal object returned encodes
-   * success or failure, and may optionally
-   * pass back a dialog.</p>
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.</p>
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to write to this field.
    */
 
   ReturnVal setValue(Object value) throws RemoteException;
@@ -189,12 +202,15 @@ public interface db_field extends java.rmi.Remote {
 
   int size() throws RemoteException;
 
-  /** 
+  /**
    * <p>Returns a Vector of the values of the elements in this field,
    * if a vector.</p>
    *
    * <p>This is only valid for vectors.  If the field is a scalar, use
    * getValue().</p>
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to read from this field.
    */
 
   Vector getValues() throws RemoteException;
@@ -202,6 +218,9 @@ public interface db_field extends java.rmi.Remote {
   /**
    * <p>Returns the value of an element of this field,
    * if a vector.</p>
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to read from this field.
    */
 
   Object getElement(int index) throws RemoteException;
@@ -213,6 +232,9 @@ public interface db_field extends java.rmi.Remote {
    * may optionally pass back a dialog.  A null result means the
    * operation was carried out successfully and no information
    * needed to be passed back about side-effects.</p>
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to write to this field.
    */
 
   ReturnVal setElement(int index, Object value) throws RemoteException;
@@ -225,6 +247,9 @@ public interface db_field extends java.rmi.Remote {
    *
    * <p>The ReturnVal resulting from a successful addElement will
    * encode an order to rescan this field.</p>
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to write to this field.
    */
 
   ReturnVal addElement(Object value) throws RemoteException;
@@ -242,7 +267,10 @@ public interface db_field extends java.rmi.Remote {
    * were added.</p>
    *
    * <p>The ReturnVal resulting from a successful addElements will
-   * encode an order to rescan this field.</p> 
+   * encode an order to rescan this field.</p>
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to write to this field.
    */
 
   ReturnVal addElements(Vector values) throws RemoteException;
@@ -250,11 +278,14 @@ public interface db_field extends java.rmi.Remote {
   /**
    * <p>Deletes an element of this field, if a vector.</p>
    *
-   * <p>The ReturnVal object returned encodes success or failure, 
+   * <p>The ReturnVal object returned encodes success or failure,
    * and may optionally pass back a dialog.</p>
    *
    * <p>The ReturnVal resulting from a successful deleteElement will
    * encode an order to rescan this field.</p>
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to write to this field.
    */
 
   ReturnVal deleteElement(int index) throws RemoteException;
@@ -262,11 +293,14 @@ public interface db_field extends java.rmi.Remote {
   /**
    * <p>Deletes an element of this field, if a vector.</p>
    *
-   * <p>The ReturnVal object returned encodes success or failure, 
+   * <p>The ReturnVal object returned encodes success or failure,
    * and may optionally pass back a dialog.</p>
    *
    * <p>The ReturnVal resulting from a successful deleteElement will
    * encode an order to rescan this field.</p>
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to write to this field.
    */
 
   ReturnVal deleteElement(Object value) throws RemoteException;
@@ -284,7 +318,10 @@ public interface db_field extends java.rmi.Remote {
    * were deleted.</p>
    *
    * <p>The ReturnVal resulting from a successful deleteElements will
-   * encode an order to rescan this field.</p> 
+   * encode an order to rescan this field.</p>
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to write to this field.
    */
 
   ReturnVal deleteElements(Vector values) throws RemoteException;
@@ -295,11 +332,14 @@ public interface db_field extends java.rmi.Remote {
    *
    * <p>The ReturnVal object returned encodes success or failure, and
    * may optionally pass back a dialog.  If a success code is returned,
-   * all elements in values was removed from this field.  If a 
+   * all elements in values was removed from this field.  If a
    * failure code is returned, no elements in values were removed.</p>
    *
    * <p>The ReturnVal resulting from a successful deleteAllElements will
-   * encode an order to rescan this field.</p> 
+   * encode an order to rescan this field.</p>
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to write to this field.
    */
 
   ReturnVal deleteAllElements() throws RemoteException;
@@ -311,6 +351,9 @@ public interface db_field extends java.rmi.Remote {
    * <p>This method always checks for read privileges.</p>
    *
    * @param value The value to look for in this field
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to read from this field.
    */
 
   boolean containsElement(Object value) throws RemoteException;

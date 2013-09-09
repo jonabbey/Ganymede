@@ -811,9 +811,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   // ****
 
   /**
-   *
-   * Returns a handy field description packet for this field,
-   * containing the static field elements for this field..
+   * <p>Returns a handy field description packet for this field,
+   * containing the static field elements for this field..</p>
    *
    * @see arlut.csd.ganymede.rmi.db_field
    */
@@ -824,8 +823,10 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
+   * <p>Returns a handy field description packet for this field.</p>
    *
-   * Returns a handy field description packet for this field.
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to read from this field.
    *
    * @see arlut.csd.ganymede.rmi.db_field
    */
@@ -836,8 +837,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
-   * Returns the schema name for this field.
+   * <p>Returns the schema name for this field.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_field
    */
@@ -848,9 +848,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * Returns the name for this field, encoded
-   * in a form suitable for use as an XML element
-   * name.
+   * <p>Returns the name for this field, encoded in a form suitable
+   * for use as an XML element name.</p>
    */
 
   public final String getXMLName()
@@ -859,8 +858,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
-   * Returns the field # for this field.
+   * <p>Returns the field # for this field.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_field
    */
@@ -883,9 +881,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
-   * Returns the description of this field from the
-   * schema.
+   * <p>Returns the description of this field from the schema.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_field
    */
@@ -896,9 +892,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
-   * Returns the description of this field's type from
-   * the schema.
+   * <p>Returns the description of this field's type from the
+   * schema.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_field
    */
@@ -909,12 +904,10 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
-   * Returns the type code for this field from the
-   * schema.
+   * <p>Returns the type code for this field from the schema as
+   * defined in {@link arlut.csd.ganymede.common.FieldType}.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_field
-   *
    */
 
   public final short getType()
@@ -962,10 +955,10 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   abstract public String getDiffString(DBField orig);
 
   /**
-   * This method returns true if this field is owned by an editable
+   * <p>This method returns true if this field is owned by an editable
    * object and its contents differ from the same field in the
    * DBEditObject's original object.  If this field belongs to a newly
-   * created DBEditObject, hasChanged() will always return true.
+   * created DBEditObject, hasChanged() will always return true.</p>
    */
 
   public boolean hasChanged()
@@ -986,9 +979,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * This method returns true if this field differs from the orig.
+   * <p>This method returns true if this field differs from the orig.
    * It is intended to do a quick before/after comparison when we are
-   * handling a transaction commit.
+   * handling a transaction commit.</p>
    */
 
   public boolean hasChanged(DBField orig)
@@ -1007,12 +1000,10 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
-   * Returns true if this field has a value associated
-   * with it, or false if it is an unfilled 'placeholder'.
+   * <p>Returns true if this field has a value associated with it, or
+   * false if it is an unfilled 'placeholder'</p>.
    *
    * @see arlut.csd.ganymede.rmi.db_field
-   *
    */
 
   public synchronized boolean isDefined()
@@ -1066,6 +1057,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * local is false and permission is denied to write to this field.
    */
 
   public synchronized ReturnVal setUndefined(boolean local) throws GanyPermissionsException
@@ -1099,9 +1093,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
-   * Returns true if this field is a vector, false
-   * otherwise.
+   * <p>Returns true if this field is a vector, false otherwise.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_field
    */
@@ -1128,19 +1120,17 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * <p>Returns true if this field is editable, false
-   * otherwise.</p>
+   * <p>Returns true if this field is editable, false otherwise.</p>
    *
-   * <p>Note that DBField are only editable if they are
-   * contained in a subclass of
-   * {@link arlut.csd.ganymede.server.DBEditObject DBEditObject}.</p>
+   * <p>Note that DBField are only editable if they are contained in a
+   * subclass of {@link arlut.csd.ganymede.server.DBEditObject
+   * DBEditObject}.</p>
    *
    * <p>Server-side method only</p>
    *
    * <p><b>*Deadlock Hazard.*</b></p>>
    *
    * @param local If true, skip permissions checking
-   *
    */
 
   public final boolean isEditable(boolean local)
@@ -1173,8 +1163,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * This method returns true if this field is one of the
-   * system fields present in all objects.
+   * <p>This method returns true if this field is one of the system
+   * fields present in all objects.</p>
    */
 
   public final boolean isBuiltIn()
@@ -1183,9 +1173,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
-   * Returns true if this field should be displayed in the
-   * current client context.
+   * <p>Returns true if this field should be displayed in the current
+   * client context.</p>
    *
    * @see arlut.csd.ganymede.rmi.db_field
    */
@@ -1197,9 +1186,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
-   * Returns true if this field is edit in place.
-   *
+   * <p>Returns true if this field is edit in place.</p>
    */
 
   public final boolean isEditInPlace()
@@ -1208,9 +1195,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
-   * Returns the object type id for the object containing this field.
-   *
+   * <p>Returns the object type id for the object containing this
+   * field.</p>
    */
 
   public final int getObjTypeID()
@@ -1219,10 +1205,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
-   * Returns the DBNameSpace that this field is associated with, or
-   * null if no NameSpace field is associated with this field.
-   *
+   * <p>Returns the DBNameSpace that this field is associated with, or
+   * null if no NameSpace field is associated with this field.</p>
    */
 
   public final DBNameSpace getNameSpace()
@@ -1231,9 +1215,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
-   * Returns the DBObjectBaseField for this field.
-   *
+   * <p>Returns the DBObjectBaseField for this field.</p>
    */
 
   public final DBObjectBaseField getFieldDef()
@@ -1242,11 +1224,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
-   * This version of getFieldDef() is intended for use by code
+   * <p>This version of getFieldDef() is intended for use by code
    * sections that need to interrogate a field's type definition
-   * before it is linked to an owner object.
-   *
+   * before it is linked to an owner object.</p>
    */
 
   public final DBObjectBaseField getFieldDef(short objectType)
@@ -1262,11 +1242,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
-   * This version of getFieldDef() is intended for use by code
+   * <p>This version of getFieldDef() is intended for use by code
    * sections that need to interrogate a field's type definition
-   * before it is linked to an owner object.
-   *
+   * before it is linked to an owner object.</p>
    */
 
   public final DBObjectBaseField getFieldDef(DBObjectBase base)
@@ -1288,6 +1266,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * DBObject is being viewed by a GanymedeSession, and that
    * GanymedeSession lacks appropriate permission to see the
    * value.</p>
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to read from this field.
    *
    * @see arlut.csd.ganymede.rmi.db_field
    */
@@ -1312,21 +1293,21 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   /**
    * <p>Sets the value of this field, if a scalar.</p>
    *
-   * <p>The ReturnVal object returned encodes
-   * success or failure, and may optionally
-   * pass back a dialog.</p>
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.</p>
    *
    * <p>This method is intended to be called by code that needs to go
    * through the permission checking regime, and that needs to have
    * rescan information passed back.  This includes most wizard
    * setValue calls.</p>
    *
-   * @see arlut.csd.ganymede.server.DBSession
-   * @see arlut.csd.ganymede.rmi.db_field
+   * @return A ReturnVal indicating success or failure.  May be simply
+   * 'null' to indicate success if no feedback need be provided.
    *
-   * @return A ReturnVal indicating success or failure.  May
-   * be simply 'null' to indicate success if no feedback need
-   * be provided.
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to write to this field.
+   *
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final ReturnVal setValue(Object value) throws GanyPermissionsException
@@ -1350,16 +1331,14 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   /**
    * <p>Sets the value of this field, if a scalar.</p>
    *
-   * <p><b>This method is server-side only, and bypasses
-   * permissions checking.</b></p>
+   * <p><b>This method is server-side only, and bypasses permissions
+   * checking.</b></p>
    *
-   * <p>The ReturnVal object returned encodes
-   * success or failure, and may optionally
-   * pass back a dialog.</p>
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.</p>
    *
-   * @return A ReturnVal indicating success or failure.  May
-   * be simply 'null' to indicate success if no feedback need
-   * be provided.
+   * @return A ReturnVal indicating success or failure.  May be simply
+   * 'null' to indicate success if no feedback need be provided.
    */
 
   public final ReturnVal setValueLocal(Object value)
@@ -1386,9 +1365,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @param value Value to set this field to
    * @param noWizards If true, wizards will be skipped
    *
-   * @return A ReturnVal indicating success or failure.  May
-   * be simply 'null' to indicate success if no feedback need
-   * be provided.
+   * @return A ReturnVal indicating success or failure.  May be simply
+   * 'null' to indicate success if no feedback need be provided.
    */
 
   public final ReturnVal setValueLocal(Object value, boolean noWizards)
@@ -1408,15 +1386,17 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    *
    * <p><b>This method is server-side only.</b></p>
    *
-   * <p>The ReturnVal object returned encodes success or failure, and may
-   * optionally pass back a dialog.</p>
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.</p>
    *
    * @param submittedValue Value to set this field to
    * @param local If true, permissions checking will be skipped
    *
-   * @return A ReturnVal indicating success or failure.  May
-   * be simply 'null' to indicate success if no feedback need
-   * be provided.
+   * @return A ReturnVal indicating success or failure.  May be simply
+   * 'null' to indicate success if no feedback need be provided.
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * local is false and permission is denied to write to this field.
    */
 
   public final ReturnVal setValue(Object submittedValue, boolean local) throws GanyPermissionsException
@@ -1429,19 +1409,21 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    *
    * <p><b>This method is server-side only.</b></p>
    *
-   * <p>The ReturnVal object returned encodes success or failure, and may
-   * optionally pass back a dialog.</p>
+   * <p>The ReturnVal object returned encodes success or failure, and
+   * may optionally pass back a dialog.</p>
    *
-   * <p>This method will be overridden by DBField subclasses with special
-   * needs.</p>
+   * <p>This method will be overridden by DBField subclasses with
+   * special needs.</p>
    *
    * @param submittedValue Value to set this field to
    * @param local If true, permissions checking will be skipped
    * @param noWizards If true, wizards will be skipped
    *
-   * @return A ReturnVal indicating success or failure.  May
-   * be simply 'null' to indicate success if no feedback need
-   * be provided.
+   * @return A ReturnVal indicating success or failure.  May be simply
+   * 'null' to indicate success if no feedback need be provided.
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * local is false and permission is denied to write to this field.
    */
 
   public synchronized ReturnVal setValue(Object submittedValue, boolean local, boolean noWizards) throws GanyPermissionsException
@@ -1581,6 +1563,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    *
    * <p>This method returns a safe copy of the contained Vector.</p>
    *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to read from this field.
+   *
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
@@ -1602,8 +1587,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * Returns the value of an element of this field,
-   * if a vector.
+   * <p>Returns the value of an element of this field, if a
+   * vector.</p>
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to read from this field.
    *
    * @see arlut.csd.ganymede.rmi.db_field
    */
@@ -1635,8 +1623,10 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * Returns the value of an element of this field,
-   * if a vector.
+   * <p>Returns the value of an element of this field, if a
+   * vector.</p>
+   *
+   * <p>For server-side use only, permissions are not checked.</p>
    */
 
   public Object getElementLocal(int index)
@@ -1671,12 +1661,13 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p>Note that vector fields in Ganymede are not allowed to contain
    * duplicate values.</p>
    *
-   * @see arlut.csd.ganymede.server.DBSession
-   * @see arlut.csd.ganymede.rmi.db_field
+   * @return A ReturnVal indicating success or failure.  May be simply
+   * 'null' to indicate success if no feedback need be provided.
    *
-   * @return A ReturnVal indicating success or failure.  May
-   * be simply 'null' to indicate success if no feedback need
-   * be provided.
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to to this field.
+   *
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final ReturnVal setElement(int index, Object value) throws GanyPermissionsException
@@ -1714,7 +1705,6 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
    * <p>Sets the value of an element of this field, if a vector.</p>
    *
    * <p>Server-side method only</p>
@@ -1725,8 +1715,6 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    *
    * <p>Note that vector fields in Ganymede are not allowed to contain
    * duplicate values.</p>
-   *
-   * @see arlut.csd.ganymede.server.DBSession
    *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
@@ -1780,6 +1768,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    *
    * <p>Note that vector fields in Ganymede are not allowed to contain
    * duplicate values.</p>
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * local is false and permission is denied to write to this field.
    */
 
   public final ReturnVal setElement(int index, Object submittedValue, boolean local) throws GanyPermissionsException
@@ -1799,6 +1790,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    *
    * <p>Note that vector fields in Ganymede are not allowed to contain
    * duplicate values.</p>
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * local is false and permission is denied to write to this field.
    */
 
   public synchronized ReturnVal setElement(int index, Object submittedValue, boolean local, boolean noWizards) throws GanyPermissionsException
@@ -1942,11 +1936,14 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p>Note that vector fields in Ganymede are not allowed to contain
    * duplicate values.</p>
    *
-   * @see arlut.csd.ganymede.rmi.db_field
-   *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to to this field.
+   *
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final ReturnVal addElement(Object value) throws GanyPermissionsException
@@ -2008,6 +2005,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * local is false and permission is denied to write to this field.
    */
 
   public final ReturnVal addElement(Object submittedValue, boolean local) throws GanyPermissionsException
@@ -2034,6 +2034,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * local is false and permission is denied to write to this field.
    */
 
   public synchronized ReturnVal addElement(Object submittedValue, boolean local, boolean noWizards) throws GanyPermissionsException
@@ -2177,11 +2180,14 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p>Note that vector fields in Ganymede are not allowed to contain
    * duplicate values.</p>
    *
-   * @see arlut.csd.ganymede.rmi.db_field
-   *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to write to this field.
+   *
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final ReturnVal addElements(Vector values) throws GanyPermissionsException
@@ -2293,6 +2299,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * local is false and permission is denied to write to this field.
    */
 
   public final ReturnVal addElements(Vector submittedValues, boolean local) throws GanyPermissionsException
@@ -2324,6 +2333,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * local is false and permission is denied to write to this field.
    */
 
   public final ReturnVal addElements(Vector submittedValues, boolean local,
@@ -2360,6 +2372,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * local is false and permission is denied to write to this field.
    */
 
   public synchronized ReturnVal addElements(Vector submittedValues, boolean local,
@@ -2618,11 +2633,14 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p>The ReturnVal resulting from a successful deleteElement will
    * encode an order to rescan this field.</p>
    *
-   * @see arlut.csd.ganymede.rmi.db_field
-   *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to write to this field.
+   *
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final ReturnVal deleteElement(int index) throws GanyPermissionsException
@@ -2666,6 +2684,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * local is false and permission is denied to write to this field.
    */
 
   public final ReturnVal deleteElement(int index, boolean local) throws GanyPermissionsException
@@ -2684,6 +2705,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * local is false and permission is denied to write to this field.
    */
 
   public synchronized ReturnVal deleteElement(int index, boolean local, boolean noWizards) throws GanyPermissionsException
@@ -2758,11 +2782,14 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p>The ReturnVal resulting from a successful deleteElement will
    * encode an order to rescan this field.</p>
    *
-   * @see arlut.csd.ganymede.rmi.db_field
-   *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to write to this field.
+   *
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final ReturnVal deleteElement(Object value) throws GanyPermissionsException
@@ -2806,6 +2833,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * local is false and permission is denied to write to this field.
    */
 
   public final ReturnVal deleteElement(Object value, boolean local) throws GanyPermissionsException
@@ -2824,6 +2854,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * local is false and permission is denied to write to this field.
    */
 
   public final synchronized ReturnVal deleteElement(Object value, boolean local, boolean noWizards) throws GanyPermissionsException
@@ -2873,11 +2906,14 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p>The ReturnVal resulting from a successful deleteAllElements will
    * encode an order to rescan this field.</p>
    *
-   * @see arlut.csd.ganymede.rmi.db_field
-   *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to write to this field.
+   *
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final ReturnVal deleteAllElements() throws GanyPermissionsException
@@ -2900,11 +2936,14 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * <p>The ReturnVal resulting from a successful deleteElements will
    * encode an order to rescan this field.</p>
    *
-   * @see arlut.csd.ganymede.rmi.db_field
-   *
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to write to this field.
+   *
+   * @see arlut.csd.ganymede.rmi.db_field
    */
 
   public final ReturnVal deleteElements(Vector values) throws GanyPermissionsException
@@ -2960,6 +2999,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * local is false and permission is denied to write to this field.
    */
 
   public final ReturnVal deleteElements(Vector valuesToDelete, boolean local) throws GanyPermissionsException
@@ -2984,6 +3026,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * @return A ReturnVal indicating success or failure.  May
    * be simply 'null' to indicate success if no feedback need
    * be provided.
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * local is false and permission is denied to write to this field.
    */
 
   public synchronized ReturnVal deleteElements(Vector valuesToDelete, boolean local, boolean noWizards) throws GanyPermissionsException
@@ -3111,6 +3156,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    *
    * @param value The value to look for in this field
    *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * permission is denied to read from this field.
+   *
    * @see arlut.csd.ganymede.rmi.db_field
    */
 
@@ -3149,6 +3197,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    *
    * @param value The value to look for in this field
    * @param local If false, read permissin is checked for this field
+   *
+   * @throws arlut.csd.ganymede.common.GanyPermissionsException If
+   * local is false and permission is denied to read from this field.
    */
 
   public final boolean containsElement(Object value, boolean local) throws GanyPermissionsException
