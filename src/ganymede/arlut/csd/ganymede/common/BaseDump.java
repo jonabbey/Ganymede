@@ -73,19 +73,20 @@ import arlut.csd.ganymede.rmi.Session;
 
 /**
  * <p>This class is intended to serve as a stub to hold basic
- * information about server side categories for the client
- * to process locally.</p>
+ * information about server side categories for the client to process
+ * locally.</p>
  *
  * <p>Many of the methods in the Base interface are there to support
- * remote schema editing by the admin console's schema editor, and have no
- * effect when called on instances of this class. RuntimeException's
- * will be thrown if those methods are called on BaseDump.</p>
+ * remote schema editing by the admin console's schema editor, and
+ * have no effect when called on instances of this
+ * class. RuntimeException's will be thrown if those methods are
+ * called on BaseDump.</p>
  *
  * <p>Note that even though this class is implementing a remote
- * interface, it is doing so for the purpose of providing
- * a consistent interface for the client, not for actual
- * remote access.  Thus, we are not extending UnicastRemoteObject
- * as we would if we were truly a remote object.</p>
+ * interface, it is doing so for the purpose of providing a consistent
+ * interface for the client, not for actual remote access.  Thus, we
+ * are not extending UnicastRemoteObject as we would if we were truly
+ * a remote object.</p>
  *
  * @author Jonathan Abbey, jonabbey@arlut.utexas.edu
  */
@@ -108,9 +109,7 @@ public class BaseDump implements Base, CategoryNode {
   /* -- */
 
   /**
-   *
    * Constructor for use by a CategoryDump object
-   *
    */
 
   public BaseDump(CategoryDump parent, char[] src, int index)
@@ -145,16 +144,12 @@ public class BaseDump implements Base, CategoryNode {
     labelFieldName = getChunk(src, lastIndex);
 
     this.canInactivate = Boolean.valueOf(getChunk(src, lastIndex)).booleanValue();
-
     this.canCreate = Boolean.valueOf(getChunk(src, lastIndex)).booleanValue();
-
     this.isEmbedded = Boolean.valueOf(getChunk(src, lastIndex)).booleanValue();
   }
 
   /**
-   *
    * Constructor for use by a BaseListTransport object
-   *
    */
 
   public BaseDump(BaseListTransport baselist, char[] src, int index)
@@ -190,9 +185,7 @@ public class BaseDump implements Base, CategoryNode {
     labelFieldName = getChunk(src, lastIndex);
 
     this.canInactivate = Boolean.valueOf(getChunk(src, lastIndex)).booleanValue();
-
     this.canCreate = Boolean.valueOf(getChunk(src, lastIndex)).booleanValue();
-
     this.isEmbedded = Boolean.valueOf(getChunk(src, lastIndex)).booleanValue();
   }
 
@@ -208,10 +201,8 @@ public class BaseDump implements Base, CategoryNode {
   // ***
 
   /**
-   *
    * This method tells the CategoryNode what it's containing
    * category is.
-   *
    */
 
   public void setCategory(Category category)
@@ -296,10 +287,8 @@ public class BaseDump implements Base, CategoryNode {
   }
 
   /**
-   *
    * We ignore the Session param here, since we're a client side dump
    * associated with a known Session.
-   *
    */
 
   public boolean canCreate(Session session)
