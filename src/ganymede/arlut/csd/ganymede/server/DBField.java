@@ -670,13 +670,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
       }
     else
       {
-        Vector valuesToCopy;
+        Vector valuesToCopy = getVectVal();
 
-        /* -- */
-
-        valuesToCopy = getVectVal();
-
-        if (valuesToCopy == null || valuesToCopy.size() == 0)
+        if (valuesToCopy.size() == 0)
           {
             return null;
           }
@@ -717,13 +713,13 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
       {
         if (isVector())
           {
-            Vector values = (Vector) this.value;
+            Vector values = getVectVal();
 
             synchronized (values)
               {
-                for (Object element: values)
+                for (Object item: values)
                   {
-                    ReturnVal retVal = this.verifyBasicConstraints(element);
+                    ReturnVal retVal = this.verifyBasicConstraints(item);
 
                     if (!ReturnVal.didSucceed(retVal))
                       {
@@ -1025,7 +1021,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
       {
         Vector values = getVectVal();
 
-        if (values != null && values.size() > 0)
+        if (values.size() > 0)
           {
             return true;
           }
