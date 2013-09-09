@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -61,33 +61,28 @@ import arlut.csd.ganymede.common.DumpResult;
 
 /**
  * <p>The DumpResultBuilder is a server-side factory tool used to
- * generate the serializable {@link arlut.csd.ganymede.common.DumpResult
- * DumpResult} object used to pass data dump results to the client.</p>
+ * generate the serializable {@link
+ * arlut.csd.ganymede.common.DumpResult DumpResult} object used to
+ * pass data dump results to the client.</p>
  */
 
 public class DumpResultBuilder {
-
-  static final boolean debug = false;
-
-  // ---
 
   /** our transport
    */
 
   private DumpResult transport = null;
-  private Vector fieldDefs = null;
+  private Vector<DBObjectBaseField> fieldDefs = null;
 
   /* -- */
 
-  public DumpResultBuilder(Vector fieldDefs)
+  public DumpResultBuilder(Vector<DBObjectBaseField> fieldDefs)
   {
     this.initializeFields(fieldDefs);
   }
 
-  public void initializeFields(Vector fieldDefs)
+  public void initializeFields(Vector<DBObjectBaseField> fieldDefs)
   {
-    DBObjectBaseField field;
-    char[] chars;
     StringBuffer buffer = null;
 
     /* -- */
@@ -102,35 +97,28 @@ public class DumpResultBuilder {
     // bar-separated triples:
     // fieldName|fieldId|fieldType|fieldName|fieldId|fieldType|, etc.
 
-    for (int i = 0; i < fieldDefs.size(); i++)
+    for (DBObjectBaseField field: fieldDefs)
       {
-        field = (DBObjectBaseField) fieldDefs.elementAt(i);
-
-        // need to also check here for permission restrictions on 
-        // field visibility
-
-        chars = field.getName().toCharArray();
-        
-        for (int j = 0; j < chars.length; j++)
+        for (char ch: field.getName().toCharArray())
           {
-            if (chars[j] == '|')
+            if (ch == '|')
               {
                 buffer.append("\\|");
               }
-            else if (chars[j] == '\n')
+            else if (ch == '\n')
               {
                 buffer.append("\\\n");
               }
-            else if (chars[j] == '\\')
+            else if (ch == '\\')
               {
                 buffer.append("\\\\");
               }
             else
               {
-                buffer.append(chars[j]);
+                buffer.append(ch);
               }
           }
-        
+
         buffer.append("|");
 
         buffer.append(field.getID());
@@ -144,8 +132,8 @@ public class DumpResultBuilder {
   }
 
   /**
-   * <p>Returns the {@link arlut.csd.ganymede.common.DumpResult DumpResult} object
-   * created by this DumpResultBuilder.</p>
+   * <p>Returns the {@link arlut.csd.ganymede.common.DumpResult
+   * DumpResult} object created by this DumpResultBuilder.</p>
    */
 
   public DumpResult getDumpResult()
@@ -154,11 +142,9 @@ public class DumpResultBuilder {
   }
 
   /**
-   *
    * This method is used to add an object's information to
    * the dumpResult's serializable buffer.  It is intended
-   * to be called on the server.  
-   *
+   * to be called on the server.
    */
 
   public void addRow(DBObject object)
@@ -167,39 +153,22 @@ public class DumpResultBuilder {
   }
 
   /**
-   *
    * This method is used to add an object's information to
    * the dumpResult's serializable buffer.  It is intended
-   * to be called on the server.  
-   *
+   * to be called on the server.
    */
 
   public void addRow(DBObject object, GanymedeSession owner)
   {
     StringBuilder localBuffer = new StringBuilder();
-    DBObjectBaseField fieldDef;
-    DBField field;
-    char[] chars;
 
     /* -- */
-
-    if (debug)
-      {
-        System.err.println("DumpResultBuilder: addRow(" + object.getLabel() + ")");
-      }
 
     localBuffer.append(object.getInvid().toString());
     localBuffer.append("|");
 
-    for (int i = 0; i < fieldDefs.size(); i++)
+    for (DBObjectBaseField fieldDef: fieldDefs)
       {
-        fieldDef = (DBObjectBaseField) fieldDefs.elementAt(i);
-
-        if (debug)
-          {
-            System.err.print("_");
-          }
-
         // make sure we have permission to see this field
 
         if (owner != null && !owner.getPermManager().getPerm(object, fieldDef.getID()).isVisible())
@@ -208,31 +177,14 @@ public class DumpResultBuilder {
             // continue
 
             localBuffer.append("|");
-
-            if (debug)
-              {
-                System.err.println("n");
-              }
-
             continue;
           }
 
-        if (debug)
-          {
-            System.err.print("y");
-          }
-        
-        field = (DBField) object.getField(fieldDef.getID());
+        DBField field = (DBField) object.getField(fieldDef.getID());
 
         if (field == null)
           {
             localBuffer.append("|");
-
-            if (debug)
-              {
-                System.err.println(" x");
-              }
-
             continue;
           }
 
@@ -241,14 +193,9 @@ public class DumpResultBuilder {
         // sorted on the client, and which can be presented in
         // whatever fashion the client chooses.
 
-        if (debug)
-          {
-            System.err.println("+");
-          }
-
         String valString = field.getEncodingString();
 
-        // I got a null pointer exception here 
+        // I got a null pointer exception here
 
         if (valString == null)
           {
@@ -257,33 +204,26 @@ public class DumpResultBuilder {
             return;
           }
 
-        chars = valString.toCharArray();
-
-        if (debug)
+        for (char ch: valString.toCharArray())
           {
-            System.err.println(" ok");
-          }
-                
-        for (int j = 0; j < chars.length; j++)
-          {
-            if (chars[j] == '|')
+            if (ch == '|')
               {
                 localBuffer.append("\\|");
               }
-            else if (chars[j] == '\n')
+            else if (ch == '\n')
               {
                 localBuffer.append("\\\n");
               }
-            else if (chars[j] == '\\')
+            else if (ch == '\\')
               {
                 localBuffer.append("\\\\");
               }
             else
               {
-                localBuffer.append(chars[j]);
+                localBuffer.append(ch);
               }
           }
-        
+
         localBuffer.append("|");
       }
 
