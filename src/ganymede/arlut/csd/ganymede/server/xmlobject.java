@@ -52,7 +52,8 @@
 package arlut.csd.ganymede.server;
 
 import java.rmi.RemoteException;
-import java.util.Hashtable;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
 import org.xml.sax.SAXException;
@@ -156,11 +157,11 @@ public final class xmlobject {
   int num = -1;
 
   /**
-   * Hashtable mapping non-XML-coded {@link arlut.csd.ganymede.server.xmlfield xmlfield}
-   * names to xmlfield objects.
+   * Map from non-XML-coded {@link arlut.csd.ganymede.server.xmlfield
+   * xmlfield} names to xmlfield objects.
    */
 
-  Hashtable<String, xmlfield> fields = null;
+  Map<String, xmlfield> fields = null;
 
   /**
    * Reference to server-side object, if we have already created it/got a reference
@@ -306,7 +307,7 @@ public final class xmlobject {
 
     // okay, we should contain some fields, then
 
-    fields = new Hashtable<String, xmlfield>();
+    fields = new HashMap<String, xmlfield>();
 
     XMLItem nextItem = xSession.getNextItem();
 

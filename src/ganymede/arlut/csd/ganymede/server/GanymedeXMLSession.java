@@ -59,7 +59,6 @@ import java.rmi.server.Unreferenced;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -200,31 +199,28 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   private int bufferSize = 100;
 
   /**
-   * Hashtable mapping object type names to
-   * hashtables mapping field names to
+   * Map from names to Maps mapping field names to {@link
+   * arlut.csd.ganymede.common.FieldTemplate FieldTemplate} objects.
+   */
+
+  private Map<String, Map<String, FieldTemplate>> objectTypes =
+    new HashMap<String, Map<String, FieldTemplate>>();
+
+  /**
+   * Map from Short object type ids to Maps mapping field names to
    * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}
    * objects.
    */
 
-  private Hashtable<String, Hashtable<String, FieldTemplate>> objectTypes =
-    new Hashtable<String, Hashtable<String, FieldTemplate>>();
+  private Map<Short, Map<String, FieldTemplate>> objectTypeIDs =
+    new HashMap<Short, Map<String, FieldTemplate>>();
 
   /**
-   * Hashtable mapping Short object type ids to
-   * hashtables mapping field names to
-   * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate}
-   * objects.
-   */
-
-  private Hashtable<Short, Hashtable<String, FieldTemplate>> objectTypeIDs =
-    new Hashtable<Short, Hashtable<String, FieldTemplate>>();
-
-  /**
-   * <p>Rather overloaded Hashtable mapping Short type ids to hashes
-   * which map local object designations (either id Strings or num
-   * Integers from the &lt;object&gt; elements) either to actual
-   * {@link arlut.csd.ganymede.server.xmlobject xmlobject} records or
-   * to raw {@link arlut.csd.ganymede.common.Invid Invids}.</p>
+   * <p>Rather overloaded HashMap mapping Short type ids to Maps from
+   * local object designations (either id Strings or num Integers from
+   * the &lt;object&gt; elements) either to actual {@link
+   * arlut.csd.ganymede.server.xmlobject xmlobject} records or to raw
+   * {@link arlut.csd.ganymede.common.Invid Invids}.</p>
    *
    * <p>The purpose of this structure is to efficiently (time-wise) track
    * targets for the &lt;invid&gt; elements that are encountered
@@ -237,7 +233,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * will contain simple Invid objects rather than xmlobjects.</p>
    */
 
-  private Hashtable<Short, Hashtable> objectStore = new Hashtable<Short, Hashtable>();
+  private Map<Short, Map<Object,Object>> objectStore = new HashMap<Short, Map<Object,Object>>();
 
   /**
    * HashSet used to detect &lt;object&gt; elements that map to the same Invid
@@ -1586,7 +1582,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         XMLItem _XNamespaces[] = this.namespaceTree.getChildren();
 
         Vector<String> _newSpaces = new Vector<String>(_XNamespaces.length);
-        Hashtable<String, XMLItem> _entries = new Hashtable<String, XMLItem>(_XNamespaces.length);
+        Map<String, XMLItem> _entries = new HashMap<String, XMLItem>(_XNamespaces.length);
 
         for (XMLItem _xns: _XNamespaces)
           {
@@ -1693,7 +1689,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     // our xml tree
 
     Vector<Short> xmlBases = new Vector<Short>();
-    Hashtable<Short, XMLItem> entries = new Hashtable<Short, XMLItem>(); // for Short id's
+    Map<Short, XMLItem> entries = new HashMap<Short, XMLItem>(); // for Short id's
     HashSet<String> nameTable = new HashSet<String>(); // for checking for redundant names
 
     for (XMLItem objectdef: newBases)
@@ -2248,7 +2244,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
     for (DBObjectBase base: Ganymede.db.getBases())
       {
         Vector<FieldTemplate> templates = base.getFieldTemplateVector();
-        Hashtable<String, FieldTemplate> fieldHash = new Hashtable<String, FieldTemplate>();
+        Map<String, FieldTemplate> fieldHash = new HashMap<String, FieldTemplate>();
 
         for (FieldTemplate tmpl: templates)
           {
@@ -2275,11 +2271,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         errPrintln("GanymedeXMLSession: storeObject(" + object + ")");
       }
 
-    Hashtable objectHash = this.objectStore.get(object.type);
+    Map<Object,Object> objectHash = this.objectStore.get(object.type);
 
     if (objectHash == null)
       {
-        objectHash = new Hashtable(OBJECTHASHSIZE, 0.75f);
+        objectHash = new HashMap<Object,Object>(OBJECTHASHSIZE, 0.75f);
         this.objectStore.put(object.type, objectHash);
       }
 
@@ -2389,7 +2385,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public xmlobject getXMLObjectTarget(short typeId, String objectId)
   {
-    Hashtable objectHash = this.objectStore.get(Short.valueOf(typeId));
+    Map<Object,Object> objectHash = this.objectStore.get(Short.valueOf(typeId));
 
     if (objectHash == null)
       {
@@ -2422,7 +2418,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   {
     Invid invid = null;
     Short typeKey;
-    Hashtable objectHash;
+    Map<Object,Object> objectHash;
 
     /* -- */
 
@@ -2434,7 +2430,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
         // we do this mainly so we can fall through to our if (element
         // == null) logic below.
 
-        objectHash = new Hashtable(OBJECTHASHSIZE, 0.75f);
+        objectHash = new HashMap<Object,Object>(OBJECTHASHSIZE, 0.75f);
         this.objectStore.put(typeKey, objectHash);
       }
 
@@ -2537,7 +2533,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public xmlobject getObject(Short baseID, String objectID)
   {
-    Hashtable objectHash = this.objectStore.get(baseID);
+    Map<Object,Object> objectHash = this.objectStore.get(baseID);
 
     if (objectHash == null)
       {
@@ -2577,7 +2573,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public xmlobject getObject(Short baseID, Integer objectNum)
   {
-    Hashtable objectHash = this.objectStore.get(baseID);
+    Map<Object,Object> objectHash = this.objectStore.get(baseID);
 
     if (objectHash == null)
       {
@@ -2639,11 +2635,11 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * {@link arlut.csd.ganymede.common.FieldTemplate FieldTemplate} based
    * on the underscore-for-space XML encoded object type name.</p>
    *
-   * <p>The Hashtable returned by this method is intended to be used
-   * with the getObjectFieldType method.</p>
+   * <p>The Map returned by this method is intended to be used with
+   * the getObjectFieldType method.</p>
    */
 
-  public Hashtable<String, FieldTemplate> getFieldHash(String objectTypeName)
+  public Map<String, FieldTemplate> getFieldHash(String objectTypeName)
   {
     return this.objectTypes.get(XMLUtils.XMLDecode(objectTypeName));
   }
@@ -2656,7 +2652,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
    * returned.
    */
 
-  public FieldTemplate getObjectFieldType(Hashtable<String, FieldTemplate> fieldHash, String fieldName)
+  public FieldTemplate getObjectFieldType(Map<String, FieldTemplate> fieldHash, String fieldName)
   {
     return fieldHash.get(XMLUtils.XMLDecode(fieldName));
   }
@@ -2682,7 +2678,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
   public FieldTemplate getFieldTemplate(Short type, String fieldName)
   {
-    Hashtable<String, FieldTemplate> fieldHash = this.objectTypeIDs.get(type);
+    Map<String, FieldTemplate> fieldHash = this.objectTypeIDs.get(type);
 
     if (fieldHash == null)
       {
@@ -3183,10 +3179,10 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
 
     /* -- */
 
-    for (Map.Entry<Short, Hashtable> entry: this.objectStore.entrySet())
+    for (Map.Entry<Short, Map<Object,Object>> entry: this.objectStore.entrySet())
       {
         Short type = entry.getKey();
-        Hashtable<Object, Object> objectHash = entry.getValue();
+        Map<Object, Object> objectHash = entry.getValue();
 
         for (Map.Entry<Object, Object> innerEntry: objectHash.entrySet())
           {
