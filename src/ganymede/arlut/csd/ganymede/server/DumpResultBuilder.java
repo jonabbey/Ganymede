@@ -68,9 +68,6 @@ import arlut.csd.ganymede.common.DumpResult;
 
 public class DumpResultBuilder {
 
-  /** our transport
-   */
-
   private DumpResult transport = null;
   private List<DBObjectBaseField> fieldDefs = null;
 
