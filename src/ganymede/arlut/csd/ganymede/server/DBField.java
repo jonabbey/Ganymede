@@ -470,10 +470,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
-   * Object value of a vector DBField.  Used to represent value in value hashes.
-   * Subclasses need to override this method in subclass.
-   *
+   * <p>Object value of a vector DBField.  Used to represent value in
+   * value hashes.  Subclasses need to override this method in
+   * subclass.</p>
    */
 
   public Object key(int index)
@@ -484,7 +483,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
         throw new IllegalArgumentException(ts.l("global.oops_scalar", getName(), owner.getLabel()));
       }
 
-    return getVectVal().elementAt(index);
+    return getVectVal().get(index);
   }
 
   /**
@@ -1636,7 +1635,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
                                                       owner.getLabel()));
       }
 
-    return getVectVal().elementAt(index);
+    return getVectVal().get(index);
   }
 
   /**
@@ -1661,7 +1660,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
                                                       owner.getLabel()));
       }
 
-    return getVectVal().elementAt(index);
+    return getVectVal().get(index);
   }
 
   /**
@@ -1889,11 +1888,11 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (ns != null)
       {
-        unmark(values.elementAt(index));
+        unmark(values.get(index));
 
         if (!mark(submittedValue))
           {
-            mark(values.elementAt(index)); // we aren't clearing the old value after all
+            mark(values.get(index)); // we aren't clearing the old value after all
 
             return getConflictDialog("DBField.setElement()", submittedValue);
           }
@@ -1928,7 +1927,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
             // mark the old value.. we can always do this safely, even
             // if the value was already marked
 
-            mark(values.elementAt(index));
+            mark(values.get(index));
           }
       }
 
@@ -2144,7 +2143,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (ReturnVal.didSucceed(retVal))
       {
-        getVectVal().addElement(submittedValue);
+        getVectVal().add(submittedValue);
       }
     else
       {
@@ -2738,8 +2737,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     if (ReturnVal.didSucceed(retVal))
       {
-        Object valueToDelete = values.elementAt(index);
-        values.removeElementAt(index);
+        Object valueToDelete = values.get(index);
+        values.remove(index);
 
         // if this field no longer contains the element that
         // we are deleting, we're going to unmark that value
@@ -3210,12 +3209,12 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     for (int i = 0; i < addedValues.size(); i++)
       {
-        deltaRec.addValue(addedValues.elementAt(i));
+        deltaRec.addValue(addedValues.get(i));
       }
 
     for (int i = 0; i < deletedValues.size(); i++)
       {
-        deltaRec.delValue(deletedValues.elementAt(i));
+        deltaRec.delValue(deletedValues.get(i));
       }
 
     return deltaRec;
