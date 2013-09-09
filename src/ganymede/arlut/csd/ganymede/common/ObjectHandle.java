@@ -6,17 +6,19 @@
    used in the QueryResult class to keep things organized, and
    on the client to keep track of the status of objects on the
    server.
-   
+
    Created: 6 February 1998
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -59,11 +61,10 @@ import arlut.csd.JDataComponent.listHandle;
 
 /**
  * <p>This class is used to group information about objects.  It is
- * used in the {@link arlut.csd.ganymede.common.QueryResult QueryResult}
- * class to keep things organized, and on the client to keep
- * track of the status of objects on the server.</p>
+ * used in the {@link arlut.csd.ganymede.common.QueryResult
+ * QueryResult} class to keep things organized, and on the client to
+ * keep track of the status of objects on the server.</p>
  *
- * @version $Id$
  * @author Jonathan Abbey
  */
 
@@ -126,9 +127,7 @@ public class ObjectHandle implements Cloneable {
   }
 
   /**
-   *
    * Various GUI components use listHandles.
-   *
    */
 
   public final listHandle getListHandle()
@@ -199,7 +198,7 @@ public class ObjectHandle implements Cloneable {
 
     tmpBuf.append(label);
     tmpBuf.append(": ");
-    
+
     if (editable)
       {
         tmpBuf.append("editable :");
@@ -209,7 +208,7 @@ public class ObjectHandle implements Cloneable {
       {
         tmpBuf.append("inactive :");
       }
-    
+
     if (expirationSet)
       {
         tmpBuf.append("expiration set :");
