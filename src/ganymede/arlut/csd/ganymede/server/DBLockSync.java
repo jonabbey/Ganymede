@@ -13,7 +13,7 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2012
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Ganymede is a registered trademark of The University of Texas at Austin
@@ -155,15 +155,15 @@ public final class DBLockSync {
             return false;
           }
 
-        Vector lockList = (Vector) obj;
+        Vector<DBLock> lockList = (Vector<DBLock>) obj;
 
         if (lockList == null)
           {
-            lockList = new Vector();
+            lockList = new Vector<DBLock>();
             lockHash.put(key, lockList);
           }
 
-        lockList.addElement(lock);
+        lockList.add(lock);
       }
     else
       {
@@ -204,7 +204,7 @@ public final class DBLockSync {
                                             ".. there are no readlocks here.");
           }
 
-        Vector lockList = (Vector) obj;
+        Vector<DBLock> lockList = (Vector<DBLock>) obj;
 
         if (!lockList.contains(lock))
           {
@@ -242,7 +242,7 @@ public final class DBLockSync {
    * code.</p>
    */
 
-  public synchronized Vector getReadLockVector(Object key)
+  public synchronized Vector<DBReadLock> getReadLockVector(Object key)
   {
     Object o = lockHash.get(key);
 
@@ -253,7 +253,7 @@ public final class DBLockSync {
 
     if (o instanceof Vector)
       {
-        return (Vector) o;
+        return (Vector<DBReadLock>) o;
       }
 
     throw new IllegalStateException("DBLockSync does not contain a readlock vector for key " + key);
