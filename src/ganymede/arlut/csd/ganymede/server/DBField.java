@@ -53,13 +53,8 @@ package arlut.csd.ganymede.server;
 import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
-import java.lang.reflect.*;
 import java.rmi.Remote;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
@@ -2448,7 +2443,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
     for (int i = 0; i < submittedValues.size(); i++)
       {
-        Object submittedValue = submittedValues.elementAt(i);
+        Object submittedValue = submittedValues.get(i);
 
         // intern our strings and invids
 
@@ -2490,7 +2485,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
           }
         else
           {
-            approvedValues.addElement(submittedValue);
+            approvedValues.add(submittedValue);
           }
       }
 
@@ -2530,17 +2525,17 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
       {
         synchronized (ns)
           {
-            for (int i = 0; i < approvedValues.size(); i++)
+            for (Object item: approvedValues)
               {
-                if (!ns.testmark(editset, approvedValues.elementAt(i)))
+                if (!ns.testmark(editset, item))
                   {
-                    return getConflictDialog("DBField.addElements()", approvedValues.elementAt(i));
+                    return getConflictDialog("DBField.addElements()", item);
                   }
               }
 
-            for (int i = 0; i < approvedValues.size(); i++)
+            for (Object item: approvedValues)
               {
-                if (!ns.mark(editset, approvedValues.elementAt(i), this))
+                if (!ns.mark(editset, item, this))
                   {
                     throw new RuntimeException("error: testmark / mark inconsistency");
                   }
@@ -2557,10 +2552,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
       {
         // okay, we're allowed to do it, so we add them all
 
-        for (int i = 0; i < approvedValues.size(); i++)
-          {
-            getVectVal().addElement(approvedValues.elementAt(i));
-          }
+        getVectVal().addAll(approvedValues);
 
         if (retVal == null)
           {
@@ -2599,29 +2591,21 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
             // marked in our namespace above), we need to unmark it if
             // it is not contained in our vector at this point.
 
-            Vector currentValues = getVectVal();
-
-            // build up a hashtable of our current values so we can
-            // efficiently do membership checks for our namespace
-
-            Hashtable valuesLeft = new Hashtable(currentValues.size());
-
-            for (int i = 0; i < currentValues.size(); i++)
+            for (Object item: VectorUtils.difference(approvedValues, getVectVal()))
               {
-                valuesLeft.put(currentValues.elementAt(i), currentValues.elementAt(i));
-              }
-
-            // for each item we were submitted, unmark it in our
-            // namespace if we don't have it left in our vector.
-
-            for (int i = 0; i < approvedValues.size(); i++)
-              {
-                if (!valuesLeft.containsKey(approvedValues.elementAt(i)))
+                if (!ns.unmark(editset, item, this))
                   {
-                    if (!ns.unmark(editset, approvedValues.elementAt(i), this))
-                      {
-                        throw new RuntimeException(ts.l("global.bad_unmark", approvedValues.elementAt(i), this));
-                      }
+                    // "Error encountered attempting to dissociate
+                    // reserved value {0} from field {1}.  This
+                    // may be due to a server error, or it may be
+                    // due to a non-interactive transaction
+                    // currently at work trying to shuffle
+                    // namespace values between multiple objects.
+                    // In the latter case, you may be able to
+                    // succeed at this operation after the
+                    // non-interactive transaction gives up."
+
+                    throw new RuntimeException(ts.l("global.bad_unmark", item, this));
                   }
               }
           }
@@ -3092,10 +3076,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
       {
         // okay, we're allowed to remove, so take the items out
 
-        for (int i = 0; i < valuesToDelete.size(); i++)
-          {
-            currentValues.removeElement(valuesToDelete.elementAt(i));
-          }
+        currentValues.removeAll(valuesToDelete);
 
         // if this vector is connected to a namespace, clear out what
         // we've left out from the namespace
@@ -3104,37 +3085,21 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
 
         if (ns != null)
           {
-            // build up a hashtable of our current values so we can
-            // efficiently do membership checks for our namespace
-
-            Hashtable valuesLeft = new Hashtable(currentValues.size());
-
-            for (int i = 0; i < currentValues.size(); i++)
+            for (Object item: valuesToDelete)
               {
-                valuesLeft.put(currentValues.elementAt(i), currentValues.elementAt(i));
-              }
-
-            // for each item we were submitted, unmark it in our
-            // namespace if we don't have it left in our vector.
-
-            for (int i = 0; i < valuesToDelete.size(); i++)
-              {
-                if (!valuesLeft.containsKey(valuesToDelete.elementAt(i)))
+                if (!ns.unmark(editset, item, this))
                   {
-                    if (!ns.unmark(editset, valuesToDelete.elementAt(i), this))
-                      {
-                        // "Error encountered attempting to dissociate
-                        // reserved value {0} from field {1}.  This
-                        // may be due to a server error, or it may be
-                        // due to a non-interactive transaction
-                        // currently at work trying to shuffle
-                        // namespace values between multiple objects.
-                        // In the latter case, you may be able to
-                        // succeed at this operation after the
-                        // non-interactive transaction gives up."
+                    // "Error encountered attempting to dissociate
+                    // reserved value {0} from field {1}.  This
+                    // may be due to a server error, or it may be
+                    // due to a non-interactive transaction
+                    // currently at work trying to shuffle
+                    // namespace values between multiple objects.
+                    // In the latter case, you may be able to
+                    // succeed at this operation after the
+                    // non-interactive transaction gives up."
 
-                        throw new RuntimeException(ts.l("global.bad_unmark", valuesToDelete.elementAt(i), this));
-                      }
+                    throw new RuntimeException(ts.l("global.bad_unmark", item, this));
                   }
               }
           }
