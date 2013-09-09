@@ -453,10 +453,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
-   * Object value of DBField.  Used to represent value in value hashes.
-   * Subclasses need to override this method in subclass.
-   *
+   * <p>Object value of DBField.  Used to represent value in value
+   * hashes.  Subclasses need to override this method in subclass.</p>
    */
 
   public Object key()
@@ -492,7 +490,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    * throw exception?)</p>
    */
 
-  public int size()             // returns number of elements in array
+  public int size()
   {
     if (!isVector())
       {
@@ -934,11 +932,10 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   abstract public String getValueString();
 
   /**
-   * Returns a String representing a reversible encoding of the
+   * <p>Returns a String representing a reversible encoding of the
    * value of this field.  Each field type will have its own encoding,
-   * suitable for embedding in a {@link arlut.csd.ganymede.common.DumpResult DumpResult}.
-   *
-   * @see arlut.csd.ganymede.rmi.db_field
+   * suitable for embedding in a {@link
+   * arlut.csd.ganymede.common.DumpResult DumpResult}.</p>
    */
 
   abstract public String getEncodingString();
