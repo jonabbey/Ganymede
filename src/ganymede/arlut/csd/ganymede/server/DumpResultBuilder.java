@@ -78,7 +78,11 @@ public class DumpResultBuilder {
     this.initializeFields(fieldDefs);
   }
 
-  public void initializeFields(List<DBObjectBaseField> fieldDefs)
+  /**
+   * <p>Write the header names into the transport buffer.</p>
+   */
+
+  private void initializeFields(List<DBObjectBaseField> fieldDefs)
   {
     StringBuffer buffer = null;
 
