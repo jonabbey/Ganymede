@@ -487,8 +487,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   * Returns number of elements in vector if this is a vector field.  If
-   * this is not a vector field, will return 1. (Should throw exception?)
+   * <p>Returns number of elements in vector if this is a vector
+   * field.  If this is not a vector field, will return 1. (Should
+   * throw exception?)</p>
    */
 
   public int size()             // returns number of elements in array
@@ -504,9 +505,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   }
 
   /**
-   *
-   * Returns the maximum length of an array in this field type
-   *
+   * <p>Returns the maximum length of an array in this field type</p>
    */
 
   public int getMaxArraySize()
@@ -556,7 +555,9 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
   abstract void emitXML(XMLDumpContext dump) throws IOException;
 
   /**
-   * We don't expect these fields to ever be stored in a hash.
+   * <p>We don't expect these fields to ever be stored in a hash.</p>
+   *
+   * @throws UnsupportedOperationException
    */
 
   public int hashCode()

@@ -62,6 +62,7 @@ import arlut.csd.ganymede.common.ReturnVal;
                                                                         db_field
 
 ------------------------------------------------------------------------------*/
+
 /**
  * <p>Remote reference to a Ganymede {@link
  * arlut.csd.ganymede.server.DBField DBField}, the db_field is used by
