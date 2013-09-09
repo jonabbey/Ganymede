@@ -170,11 +170,11 @@ public class QueryDataNode extends QueryNode {
   /**
    * <p>Field comparison node constructor.</p>
    *
-   * <p.This constructor creates a query node that will be matched
+   * <p>.This constructor creates a query node that will be matched
    * against a field in an object.</p>
    *
-   * <p.If fieldID == -1, the labels of objects in the database will be
-   * taken as the field for comparison's sake.</p>
+   * <p>.If fieldID == -1, the labels of objects in the database will
+   * be taken as the field for comparison's sake.</p>
    *
    * <p>If fieldID == -2, the Invid of objects in the database will be
    * taken as the field for comparison's sake.</p>

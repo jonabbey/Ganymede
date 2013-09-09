@@ -1004,8 +1004,8 @@ public final class DBStore implements JythonMap {
    * an unfiltered dump.
    *
    * @param includeHistory If true, the historical fields (creation
-   * date & info, last modification date & info) will be included in
-   * the xml stream.
+   * date &amp; info, last modification date &amp; info) will be
+   * included in the xml stream.
    *
    * @see arlut.csd.ganymede.server.DBEditSet
    * @see arlut.csd.ganymede.server.DBJournal
@@ -1055,8 +1055,8 @@ public final class DBStore implements JythonMap {
    * an unfiltered dump.
    *
    * @param includeHistory If true, the historical fields (creation
-   * date & info, last modification date & info) will be included in
-   * the xml stream.
+   * date &amp; info, last modification date &amp; info) will be
+   * included in the xml stream.
    *
    * @param includeOid If true, the objects written out to the xml
    * stream will include an "oid" attribute which contains the precise
@@ -1066,7 +1066,8 @@ public final class DBStore implements JythonMap {
    * @see arlut.csd.ganymede.server.DBJournal
    */
 
-  public synchronized void dumpXML(OutputStream outStream, boolean dumpDataObjects, boolean dumpSchema, String syncChannel,
+  public synchronized void dumpXML(OutputStream outStream, boolean dumpDataObjects,
+                                   boolean dumpSchema, String syncChannel,
                                    boolean includeHistory, boolean includeOid) throws IOException
   {
     XMLDumpContext xmlOut = null;

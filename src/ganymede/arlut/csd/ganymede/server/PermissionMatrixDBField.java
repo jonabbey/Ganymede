@@ -1156,9 +1156,11 @@ public class PermissionMatrixDBField extends DBField implements perm_field {
    * PermissionMatrixDBField is not editable.</p>
    *
    * @param baseID the object type to set permissions for
-   * @param fieldID the field to set permissions for.  If fieldID < 0,
+   * @param fieldID the field to set permissions for.  If fieldID &lt; 0,
    * the permission will be applied to the object as a whole rather
    * than any individual field within the object
+   *
+   * @return A ReturnVal encoding success or failure
    *
    * @see arlut.csd.ganymede.rmi.perm_field
    * @see arlut.csd.ganymede.common.PermEntry

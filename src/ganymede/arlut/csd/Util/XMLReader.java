@@ -532,8 +532,8 @@ public final class XMLReader extends org.xml.sax.helpers.DefaultHandler implemen
 
   /**
    * <p>This method is intended to be called in the situation where we
-   * have some text between an open and close tag, as in '<open>Some
-   * string</open>'.</p>
+   * have some text between an open and close tag, as in
+   * '&lt;open&gt;Some string&lt;/open&gt;'.</p>
    *
    * <p>getFollowingString() does not expect there to be any other XML
    * elements between the open and close element in the stream.</p>

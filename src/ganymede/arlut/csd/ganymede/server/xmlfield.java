@@ -1998,9 +1998,9 @@ class xInvid {
    * actual on-server Invid corresponding to this xInvid object.</p>
    *
    * <p>invidPtr will contain an actual {@link
-   * arlut.csd.ganymede.common.Invid} object if this <invid> element
-   * could be matched against a pre-existing Invid on the Ganymede
-   * server.</p>
+   * arlut.csd.ganymede.common.Invid} object if this &lt;invid&gt;
+   * element could be matched against a pre-existing Invid on the
+   * Ganymede server.</p>
    *
    * <p>If no server-side Invid can be found, invidPtr may instead
    * point to the {@link arlut.csd.ganymede.server.xmlobject} object

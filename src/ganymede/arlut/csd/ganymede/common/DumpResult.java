@@ -86,9 +86,11 @@ import java.util.Vector;
  *
  * <p>Field values are encoded as follows:</p>
  *
- * <p>Date fields as {@link java.util.Date Date} objects<br/> Float
- * fields as {@link java.lang.Double Double} objects<br/> Numeric
- * fields as {@link java.lang.Integer Integer} objects<br/></p>
+ * <ul>
+ * <li>Date fields as {@link java.util.Date Date} objects</li>
+ * <li>Float fields as {@link java.lang.Double Double} objects</li>
+ * <li>Numeric fields as {@link java.lang.Integer Integer} objects</li>
+ * </ul>
  *
  * <p>And Strings for everything else.</p>
  *
@@ -100,7 +102,7 @@ import java.util.Vector;
  * <p>Yes, I know how utterly horrifying this is.  It's something I
  * did very early on during development, and it worked well for high
  * speed data dumping, so I just kept it.  Mea culpa, mea maxima
- * culpa.</pp>
+ * culpa.</p>
  *
  * <p>Yet, it works.</p>
  */

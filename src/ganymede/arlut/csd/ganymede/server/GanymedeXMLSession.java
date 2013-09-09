@@ -401,7 +401,7 @@ public final class GanymedeXMLSession extends java.lang.Thread implements XMLSes
   private XMLItem categoryTree = null;
 
   /**
-   * Comment for the <ganydata> transaction commit, if any is
+   * Comment for the &lt;ganydata&gt; transaction commit, if any is
    * provided.
    */
 

@@ -224,7 +224,7 @@ import com.jclark.xml.output.UTF8XMLWriter;
  * you want looks like</p>
  *
  * <pre>
- *   xmlclient -dumpdata sync=Users > full_users_sync.xml
+ *   xmlclient -dumpdata sync=Users &gt; full_users_sync.xml
  * </pre>
  *
  * <p>The effect of this command is to dump all data in the server

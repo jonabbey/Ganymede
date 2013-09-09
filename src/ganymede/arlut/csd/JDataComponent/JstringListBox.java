@@ -466,7 +466,6 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
    * went wrong.  Value is the error message to be displayed to the
    * user in whatever fashion is appropriate.</li>
    * </ul>
-   * </p>
    *
    * @see JsetValueCallback
    * @see JValueObject
