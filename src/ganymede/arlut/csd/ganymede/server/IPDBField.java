@@ -419,9 +419,9 @@ public class IPDBField extends DBField implements ip_field {
   }
 
   /**
-   * Returns true if the value stored in the given element of this IP
-   * field is an IPV4 address, if no value is set, this method will
-   * return false.
+   * <p>Returns true if the value stored in the given element of this
+   * IP field is an IPV4 address, if no value is set, this method will
+   * return false.</p>
    *
    * @param index Array index for the value to be checked
    *
@@ -441,8 +441,9 @@ public class IPDBField extends DBField implements ip_field {
   }
 
   /**
-   * Returns true if the value stored in this IP field is an IPV6 address.  If
-   * this field has no value set, this method will return false by default.
+   * <p>Returns true if the value stored in this IP field is an IPV6
+   * address.  If this field has no value set, this method will return
+   * false by default.</p>
    *
    * @see arlut.csd.ganymede.rmi.ip_field
    */
@@ -460,9 +461,9 @@ public class IPDBField extends DBField implements ip_field {
   }
 
   /**
-   * Returns true if the value stored in the given element of this IP
-   * field is an IPV6 address.  If no value is stored in this field,
-   * false is returned.
+   * <p>Returns true if the value stored in the given element of this
+   * IP field is an IPV6 address.  If no value is stored in this
+   * field, false is returned.</p>
    *
    * @param index Array index for the value to be checked
    *
@@ -520,9 +521,9 @@ public class IPDBField extends DBField implements ip_field {
 
 
   /**
-   * Returns a {@link arlut.csd.ganymede.server.fieldDeltaRec fieldDeltaRec}
-   * object listing the changes between this field's state and that
-   * of the prior oldField state.
+   * <p>Returns a {@link arlut.csd.ganymede.server.fieldDeltaRec
+   * fieldDeltaRec} object listing the changes between this field's
+   * state and that of the prior oldField state.</p>
    */
 
   @Override public fieldDeltaRec getVectorDiff(DBField oldField)
