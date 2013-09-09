@@ -3207,15 +3207,8 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
     Vector addedValues = VectorUtils.difference(newValues, oldValues);
     Vector deletedValues = VectorUtils.difference(oldValues, newValues);
 
-    for (int i = 0; i < addedValues.size(); i++)
-      {
-        deltaRec.addValue(addedValues.get(i));
-      }
-
-    for (int i = 0; i < deletedValues.size(); i++)
-      {
-        deltaRec.delValue(deletedValues.get(i));
-      }
+    deltaRec.addValues(addedValues);
+    deltaRec.delValues(deletedValues);
 
     return deltaRec;
   }
