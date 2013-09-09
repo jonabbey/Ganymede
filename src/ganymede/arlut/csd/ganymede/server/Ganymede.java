@@ -150,7 +150,8 @@ import arlut.csd.ganymede.rmi.Server;
  * higher level {@link arlut.csd.ganymede.server.GanymedeSession}
  * class, all lower level data manipulation by the {@link
  * arlut.csd.ganymede.server.DBStore} object and its related classes
- * ({@link arlut.csd.ganymede.server.DBObject DBObject}, {@link
+ * ({@link arlut.csd.ganymede.server.DBSession DBSession}, {@link
+ * arlut.csd.ganymede.server.DBObject DBObject}, {@link
  * arlut.csd.ganymede.server.DBEditSet DBEditSet}, {@link
  * arlut.csd.ganymede.server.DBNameSpace DBNameSpace}, and {@link
  * arlut.csd.ganymede.server.DBJournal DBJournal}).</p>
