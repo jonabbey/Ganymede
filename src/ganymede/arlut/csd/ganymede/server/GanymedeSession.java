@@ -1355,21 +1355,10 @@ final public class GanymedeSession implements Session, Unreferenced {
         body.append(WordWrap.wrap(signature.toString(), 78, null));
         body.append("\n--------------------------------------------------------------------------------\n");
 
-        try
-          {
-            mailer.sendmsg(permManager.getIdentityReturnAddress(),
-                           addresses,
-                           "Ganymede: " + subject,
-                           body.toString());
-          }
-        catch (ProtocolException ex)
-          {
-            throw new RuntimeException("Couldn't figure address " + ex);
-          }
-        catch (IOException ex)
-          {
-            throw new RuntimeException("IO problem " + ex);
-          }
+        mailer.sendmsg(permManager.getIdentityReturnAddress(),
+                       addresses,
+                       "Ganymede: " + subject,
+                       body.toString());
       }
     finally
       {
@@ -1450,23 +1439,12 @@ final public class GanymedeSession implements Session, Unreferenced {
         asciiContent.append(WordWrap.wrap(signature.toString(), 78, null));
         asciiContent.append("\n--------------------------------------------------------------------------------\n");
 
-        try
-          {
-            mailer.sendHTMLmsg(permManager.getIdentityReturnAddress(),
-                               addresses,
-                               "Ganymede: " + subject,
-                               (HTMLbody != null) ? HTMLbody.toString(): null,
-                               "greport.html",
-                               asciiContent.toString());
-          }
-        catch (ProtocolException ex)
-          {
-            throw new RuntimeException("Couldn't figure address " + ex);
-          }
-        catch (IOException ex)
-          {
-            throw new RuntimeException("IO problem " + ex);
-          }
+        mailer.sendHTMLmsg(permManager.getIdentityReturnAddress(),
+                           addresses,
+                           "Ganymede: " + subject,
+                           (HTMLbody != null) ? HTMLbody.toString(): null,
+                           "greport.html",
+                           asciiContent.toString());
       }
     finally
       {
