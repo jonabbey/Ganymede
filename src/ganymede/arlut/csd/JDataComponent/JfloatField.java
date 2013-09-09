@@ -1,18 +1,18 @@
 /*
    JfloatField.java
 
-   
    Created: 29 October 1999
-
 
    Module By: Navin Manohar, Jonathan Abbey, Michael Mulvaney, John Knutson
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -56,7 +56,7 @@ package arlut.csd.JDataComponent;
  * This class defines a GUI field component that is capable of
  * handling Java doubles.  The maximum and minimum bounds for the
  * range of doubles that can be entered into this JfloatField can also
- * be preset.  
+ * be preset.
  */
 
 public class JfloatField extends JentryField {
@@ -84,13 +84,14 @@ public class JfloatField extends JentryField {
 
   /**
    * Base constructor for JfloatField
-   * 
+   *
    * @param columns number of columns in the JfloatField
    * @param iseditable true if this JfloatField is editable
    * @param islimited true if there is a restriction on the range of values
    * @param minsize the minimum limit on the range of values
    * @param maxsize the maximum limit on the range of values
-   */ 
+   */
+
   public JfloatField(int columns,
                      boolean iseditable,
                      boolean islimited,
@@ -98,15 +99,15 @@ public class JfloatField extends JentryField {
                      double maxsize)
   {
     super(columns);
-    
+
     if (islimited)
       {
         limited = true;
-        
+
         maxSize = maxsize;
         minSize = minsize;
       }
-    
+
     setEditable(iseditable);  // will this JfloatField be editable or not?
   }
 
@@ -131,11 +132,11 @@ public class JfloatField extends JentryField {
   {
     this(JfloatField.DEFAULT_COLS);
   }
- 
+
   /**
    * Constructor that allows for the creation of a JfloatField
    * that knows about its parent and can invoke a callback method.
-   *  
+   *
    * @param columns number of columns in the JfloatField
    * @param iseditable true if this JfloatField is editable
    * @param islimited true if there is a restriction on the range of values
@@ -144,8 +145,8 @@ public class JfloatField extends JentryField {
    * @param parent the container within which this JfloatField is contained
    *        (This container will implement an interface that will utilize the
    *         data contained within this JfloatField.)
-   *
-   */ 
+   */
+
   public JfloatField(int columns,
                      boolean iseditable,
                      boolean islimited,
@@ -154,20 +155,17 @@ public class JfloatField extends JentryField {
                      JsetValueCallback parent)
   {
     this(columns,iseditable,islimited,minsize,maxsize);
-    
+
     setCallback(parent);
   }
-
 
   ///////////////////
   // Class Methods //
   ///////////////////
- 
+
   /**
-   * returns true if <c> is a valid numerical
-   * digit.
-   *
    * @param c the character to check
+   * @return true if c is a valid character in a float field
    */
 
   public boolean isAllowed(char c)
@@ -186,12 +184,11 @@ public class JfloatField extends JentryField {
   }
 
   /**
-   * returns the value of this JfloatField as an Integer object
+   * <p>If this field is empty, will return null. If this field is not
+   * empty and has a non-numeric string, will throw a
+   * NumberFormatException.</p>
    *
-   * If this field is empty, will return null. If this field is
-   * not empty and has a non-numeric string, will throw a
-   * NumberFormatException.
-   *
+   * @return The value of this JfloatField as a Double object
    */
 
   public Double getValue() throws NumberFormatException
@@ -207,14 +204,14 @@ public class JfloatField extends JentryField {
   }
 
   /**
-   * sets the value of this JfloatField to num
+   * <p>Sets the value of this JfloatField to num</p>
    *
-   * This method does not trigger a callback to our container.. we
+   * <p>This method does not trigger a callback to our container.. we
    * only callback as a result of loss-of-focus brought on by the
-   * user.
+   * user.</p>
    *
    * @param num the number to use
-   */ 
+   */
 
   public void setValue(double num)
   {
@@ -222,11 +219,11 @@ public class JfloatField extends JentryField {
   }
 
   /**
-   * sets the value of this JfloatField using an Double object.
+   * <p>Sets the value of this JfloatField using an Double object.</p>
    *
-   * This method does not trigger a callback to our container.. we
+   * <p>This method does not trigger a callback to our container.. we
    * only callback as a result of loss-of-focus brought on by the
-   * user.
+   * user.</p>
    *
    * @param num the Double object to use
    */
@@ -246,11 +243,11 @@ public class JfloatField extends JentryField {
       }
 
     // remember the value that is being set.
-    
+
     storedValue = num;
-    
+
     // and set the text field
-    
+
     if (num != null)
       {
         setText(num.toString());
@@ -262,10 +259,9 @@ public class JfloatField extends JentryField {
   }
 
   /**
-   * Sets the limited/non-limited status of this JfloatField
-   * If setLimited is given a true value as a parameter, then
-   * certain bounds will be imposed on the range of possible 
-   * values.
+   * <p>Sets the limited/non-limited status of this JfloatField If
+   * setLimited is given a true value as a parameter, then certain
+   * bounds will be imposed on the range of possible values.</p>
    *
    * @param bool true if a limit is to be set on the range of values
    */
@@ -276,68 +272,73 @@ public class JfloatField extends JentryField {
   }
 
   /**
-   *  sets the maximum value in the range of possible values.
+   * <p>Sets the maximum value in the range of possible values.</p>
    *
    * @param n the number to use when setting the maximum value
    */
+
   public void setMaxValue(double n)
   {
     limited = true;
-    
+
     maxSize = n;
   }
-  
+
   /**
-   *  sets the minimum value in the range of possible values.
+   * <p>Sets the minimum value in the range of possible values.</p>
    *
    * @param n the number to use when setting the minimum value
    */
+
   public void setMinValue(double n)
   {
     limited = true;
-    
+
     minSize = n;
   }
 
   /**
-   * returns true if there is a bound on the range of values that
-   * can be entered into this JfloatField
+   * @return True if there is a bound on the range of values that can
+   * be entered into this JfloatField
    */
+
   public boolean isLimited()
   {
     return limited;
   }
-  
+
   /**
-   * returns the maximum value in the range of valid values for this
+   * @return The maximum value in the range of valid values for this
    * JfloatField
    */
+
   public double getMaxValue()
     {
       return maxSize;
     }
 
   /**
-   * returns the minimum value in the range of valid values for this
+   * @return The minimum value in the range of valid values for this
    * JfloatField
    */
+
   public double getMinValue()
   {
     return minSize;
   }
 
   /**
-   * overrides JentryField.sendCallback().
+   * <p>overrides JentryField.sendCallback().</p>
    *
-   * This is called when the float field loses focus.
+   * <p>This is called when the float field loses focus.</p>
    *
-   * sendCallback is called when focus is lost, or when we are otherwise
-   * triggered.
+   * <p>sendCallback is called when focus is lost, or when we are
+   * otherwise triggered.</p>
    *
    * @return -1 on change rejected, 0 on no change required, 1 on change approved
    */
 
-  public int sendCallback()
+  @Override public int sendCallback()
   {
     synchronized (this)
       {
@@ -345,7 +346,7 @@ public class JfloatField extends JentryField {
           {
             return -1;
           }
-        
+
         processingCallback = true;
       }
 
@@ -436,8 +437,12 @@ public class JfloatField extends JentryField {
   }
 
   /**
-   * <p>This private helper method relays a descriptive error message to
-   * our callback interface.</p>
+   * <p>This private helper method relays a descriptive error message
+   * to our callback interface.</p>
+   *
+   * @param errorString A descriptive error message that will be
+   * passed to our callback in a {@link
+   * arlut.csd.JDataComponent.JErrorValueObject JErrorValueObject}.
    */
 
   private void reportError(String errorString)
@@ -456,13 +461,18 @@ public class JfloatField extends JentryField {
   }
 
   /**
-   * This method is intended to be called if the setValuePerformed()
-   * callback that we call out to decides that it wants to substitute
-   * a replacement value for the value that we asked to have
-   * validated.
+   * <p>This method is intended to be called if the
+   * setValuePerformed() callback that we call out to decides that it
+   * wants to substitute a replacement value for the value that we
+   * asked to have validated.</p>
    *
-   * This is used to allow the server to reformat/canonicalize data
-   * that we passed to it.
+   * <p>This is used to allow the server to reformat/canonicalize data
+   * that we passed to it.</p>
+   *
+   * @param callback The JsetValueCallback that is ordering us to
+   * translate the value we sent to the callback
+   * @param replacementValue The Double that the callback wishes to
+   * have us rewrite ourselves with
    */
 
   public void substituteValueByCallBack(JsetValueCallback callback, Double replacementValue)
