@@ -54,7 +54,6 @@ import java.io.DataInput;
 import java.io.DataOutput;
 import java.io.IOException;
 import java.rmi.RemoteException;
-import java.util.Enumeration;
 import java.util.Vector;
 
 import arlut.csd.JDialog.JDialogBuff;
