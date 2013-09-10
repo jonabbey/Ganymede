@@ -3,17 +3,19 @@
    Compare.java
 
    Comparison interface for arlut.csd.Util sort classes.
-   
+
    Created: 24 April 1997
 
    Module By: Jonathan Abbey, jonabbey@arlut.utexas.edu
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
@@ -53,22 +55,21 @@ package arlut.csd.Util;
 ------------------------------------------------------------------------------*/
 
 /**
- * <P>This interface provides a common comparator operator that can be implemented
- * for use with  
+ * <p>This interface provides a common comparator operator that can be implemented
+ * for use with
  * {@link arlut.csd.Util.VecQuickSort VecQuickSort}, and
- * {@link arlut.csd.Util.VecSortInsert VecSortInsert}.
+ * {@link arlut.csd.Util.VecSortInsert VecSortInsert}.</p>
  *
  * @version Id: 1.4 $
- * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT 
+ * @author Jonathan Abbey, jonabbey@arlut.utexas.edu, ARL:UT
  */
 
 public interface Compare {
 
   /**
+   * <p>Comparator for arlut.csd.Util sort classes.</p>
    *
-   * Comparator for arlut.csd.Util sort classes.  compare returns
-   * -1 if a < b, 0 if a = b, and 1 if a > b in sort order.
-   *
+   * @return -1 if a &lt; b, 0 if a = b, and 1 if a &gt; b in sort order.
    */
 
   public int compare(Object a, Object b);

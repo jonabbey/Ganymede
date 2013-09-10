@@ -114,10 +114,12 @@ public class GanymedeRMIManager {
   }
 
   /**
-   * <p>Creates and starts a remote object registry on the specified port.</p>
+   * <p>Creates and starts a remote object registry on the specified
+   * port.</p>
    *
-   * <p>This has the same effect as running the <pre>rmiregistry</pre> command
-   * that is bundled with the JDK.</p>
+   * <p>This has the same effect as running the
+   * <code>rmiregistry</code> command that is bundled with the
+   * JDK.</p>
    *
    * @param port
    * @throws RemoteException

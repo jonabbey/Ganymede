@@ -2831,7 +2831,7 @@ public class PasswordDBField extends DBField implements pass_field {
    * hashes really match the same password, so caveat emptor.  If any of
    * these hashes are null or empty string, those hashes will be cleared.</p>
    *
-   * </p>Calling this method will clear the password's stored plaintext,
+   * <p>Calling this method will clear the password's stored plaintext,
    * if any.</p>
    *
    * <p>This method is intended to be called via the {@link

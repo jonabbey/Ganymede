@@ -77,11 +77,11 @@ import arlut.csd.Util.TranslationService;
 ------------------------------------------------------------------------------*/
 
 /**
- * The JythonServer class is used to provide a tcp port on the
+ * <p>The JythonServer class is used to provide a tcp port on the
  * Ganymede server which can be telnetted to in order to interact with
- * a Python (Jython) console.
+ * a Python (Jython) console.</p>
  *
- * @author Deepak Giridharagopal <deepak@brownman.org>
+ * @author Deepak Giridharagopal deepak@brownman.org
  */
 
 public class JythonServer extends Thread {
@@ -175,10 +175,11 @@ public class JythonServer extends Thread {
 ------------------------------------------------------------------------------*/
 
 /**
- * Implementation of the server I/O protocol. Principally, it reads in lines
- * of input from the client and execs them inside a Jython interpreter.
+ * <p>Implementation of the server I/O protocol. Principally, it reads
+ * in lines of input from the client and execs them inside a Jython
+ * interpreter.</p>
  *
- * @author Deepak Giridharagopal <deepak@brownman.org>
+ * @author Deepak Giridharagopal deepak@brownman.org
  */
 
 class JythonServerProtocol {
@@ -285,9 +286,10 @@ class JythonServerProtocol {
 ------------------------------------------------------------------------------*/
 
 /**
- * Handles passing input and output to the above Protocol class.
+ * <p>Handles passing input and output to the above Protocol
+ * class.</p>
  *
- * @author Deepak Giridharagopal <deepak@brownman.org>
+ * @author Deepak Giridharagopal deepak@brownman.org
  */
 
 class JythonServerWorker extends Thread {

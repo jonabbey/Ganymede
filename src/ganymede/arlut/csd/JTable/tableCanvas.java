@@ -830,13 +830,14 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
   }
 
   /**
+   * <p>This method handles clearing and rendering an element into the
+   * table with a specified clipping rectangle.</p>
    *
-   * This method handles rendering into the blit template for
-   * column <col>, row <row>, portion <spanSubset>.  That is,
-   * if a particular row is more than one standard row_height
-   * tall, spanSubset indicates what portion of the row
-   * should be rendered into the blitCell.
-   *
+   * @param cellRect A clipping rectangle
+   * @param g The AWT Graphics context to draw with
+   * @param col The column to draw into cellRect
+   * @param row The row to draw into cellRect
+   * @param element The column definition for col
    */
 
   private void renderBlitCell(Rectangle cellRect, Graphics g,
@@ -937,11 +938,12 @@ class tableCanvas extends JComponent implements MouseListener, MouseMotionListen
   }
 
   /**
+   * <p>This method takes a y coordinate in virtual table space (i.e.,
+   * after vertical scrollbar transform) and returns the index for the
+   * row containing that point.</p>
    *
-   * This method takes a y coordinate in virtual table space
-   * (i.e., after vertical scrollbar transform) and returns
-   * the index for the row containing that point.
-   *
+   * @param vy The virtual coordinate the click was received in
+   * @return The index of the row that was clicked in
    */
 
   int mapClickToRow(int vy)

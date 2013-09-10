@@ -920,9 +920,9 @@ public final class DBLinkTracker {
     }
 
     /**
-     * This method removes the virtual reverse pointers (target->source)
-     * for all forward asymmetric links registered from source to the
-     * Invids in the targets Set.
+     * <p>This method removes the virtual reverse pointers
+     * (target-&gt;source) for all forward asymmetric links registered
+     * from source to the Invids in the targets Set.</p>
      */
 
     public void unregisterObject(Set<Invid> targets, Invid source)

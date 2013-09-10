@@ -1126,7 +1126,7 @@ public abstract class DBField implements Remote, db_field, FieldType, Comparable
    *
    * <p>Server-side method only</p>
    *
-   * <p><b>*Deadlock Hazard.*</b></p>>
+   * <p><b>*Deadlock Hazard.*</b></p>
    *
    * @param local If true, skip permissions checking
    */

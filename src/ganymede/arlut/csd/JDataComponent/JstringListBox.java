@@ -80,19 +80,22 @@ import arlut.csd.Util.VecQuickSort;
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>A sorted listbox that handles {@link arlut.csd.JDataComponent.listHandle listHandle}'s.
- * JstringListBox supports pop-up menus and uses the
- * @link arlut.csd.JDataComponent.JsetValueCallback JsetValueCallback}
- * interface to report selection and pop-up menu activity to the registered
- * callback.</p>
+ * <p>A sorted listbox that handles {@link
+ * arlut.csd.JDataComponent.listHandle listHandle}'s.  JstringListBox
+ * supports pop-up menus and uses the {@link
+ * arlut.csd.JDataComponent.JsetValueCallback JsetValueCallback}
+ * interface to report selection and pop-up menu activity to the
+ * registered callback.</p>
  *
- * <p>listHandles are wrappers that can hold both a String and (optionally) a related
- * object, such as an Invid.  The JstringListBox uses them to allow the client to
- * manipulate labeled object pointers.</p>
+ * <p>listHandles are wrappers that can hold both a String and
+ * (optionally) a related object, such as an Invid.  The
+ * JstringListBox uses them to allow the client to manipulate labeled
+ * object pointers.</p>
  *
- * <p>The {@link arlut.csd.JDataComponent.StringSelector StringSelector} class uses
- * JstringListBoxes to support adding or removing Strings and Objects from String
- * and Invid vector fields.</p>
+ * <p>The {@link arlut.csd.JDataComponent.StringSelector
+ * StringSelector} class uses JstringListBoxes to support adding or
+ * removing Strings and Objects from String and Invid vector
+ * fields.</p>
  *
  * @see arlut.csd.ganymede.common.Invid
  * @see arlut.csd.JDataComponent.listHandle
@@ -168,9 +171,7 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
   /* -- */
 
   /**
-   *
    * Default Constructor
-   *
    */
 
   public JstringListBox()
@@ -184,6 +185,8 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
   /**
    * <p>This method associates a node-linked popup menu to this
    * listbox.</p>
+   *
+   * @param popup A menu to be shown when an item is right-clicked
    */
 
   public void registerPopupMenu(JPopupMenu popup)
@@ -277,13 +280,14 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
                   }
               }
           }
-        else  //It must be a string, or it will throw a ClassCastException
+        else  // It must be a String, or it will throw a
+              // ClassCastException
           {
             Vector convertedVect = new Vector(items.size());
 
             for (int i = 0; i < items.size(); i++)
               {
-                String s = (String)items.elementAt(i);
+                String s = (String) items.elementAt(i);
 
                 if (s.length() > maxWidthString.length())
                   {
@@ -316,6 +320,9 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
   /**
    * This method is used to change the dynamically label of an object in this
    * StringSelector.
+   *
+   * @param object The object to be relabeled
+   * @param newLabel The new label to be applied to object
    */
 
   public synchronized void relabelObject(Object object, String newLabel)
@@ -380,6 +387,8 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
 
   /**
    * <p>This method sets the default cell width for this list.</p>
+   *
+   * @param width The width to be set in pixels for items in this list.
    */
 
   public void setCellWidth(int width)
@@ -403,6 +412,9 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
 
   /**
    * <p>This method sets the default cell width for this list.</p>
+   *
+   * @param template This String will be rendered to calculate the
+   * default cell width for this list.
    */
 
   public void setCellWidth(String template)
@@ -412,6 +424,9 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
 
   /**
    * <p>This method enables and disables item dragging in this list.</p>
+   *
+   * @param dragOk If true, items can be dragged up and down in this
+   * list.
    */
 
   public void setDragEnabled(boolean dragOk)
@@ -427,6 +442,8 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
 
   /**
    * Convenience method to set the size on the model.
+   *
+   * @param size New size for hte model.
    */
 
   public void setSize(int size)
@@ -466,6 +483,9 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
    * went wrong.  Value is the error message to be displayed to the
    * user in whatever fashion is appropriate.</li>
    * </ul>
+   *
+   * @param callback The callback to be called by when the user
+   * manipulates this JstringListBox.
    *
    * @see JsetValueCallback
    * @see JValueObject
@@ -548,7 +568,10 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
   }
 
   /**
-   * <p>This method moves an item around in the list.</p>
+   * <p>This method moves an item up or down in the list.</p>
+   *
+   * @param sourceRow The row to move
+   * @param targetRow The index to place sourceRow at after the move.
    */
 
   public void moveItem(int sourceRow, int targetRow)
@@ -574,7 +597,11 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
   }
 
   /**
-   * Use this one to skip the sorting.  Called by all the add methods.
+   * <p>Use this one to skip the sorting.  Called by all the add
+   * methods.</p>
+   *
+   * @param handle The item to place in the list.
+   * @param row The position to place handle in the list.
    */
 
   public void insertHandleAt(listHandle handle, int row)
@@ -583,7 +610,7 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
   }
 
   /**
-   * Remove an item from list.
+   * <p>Remove an item from list.</p>
    *
    * @param o can be listHandle or String
    */
@@ -624,7 +651,7 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
   }
 
   /**
-   * Remove an object by label
+   * <p>Remove an object by label</p>
    *
    * @param s Label of object to remove.
    */
@@ -647,7 +674,9 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
   }
 
   /**
-   * Returns true if the list contains an object with the specified label.
+   * @param string The label to search for.
+   * @return True if the list contains an object with the specified
+   * label.
    */
 
   public boolean containsLabel(String string)
@@ -656,11 +685,12 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
   }
 
   /**
-   * <p>Returns true if the list contains an object with the specified
-   * label.</p>
-   *
    * <p>Since everything is a listHandle internally, this is the same
    * as containsLabel</p>
+   *
+   * @param string The label to search for.
+   * @return True if the list contains an object with the specified
+   * label.
    */
 
   public boolean containsString(String string)
@@ -677,9 +707,8 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
   }
 
   /**
-   * Returns true if the item is in the list
-   *
    * @param o Can be a String(label) or listHandle
+   * @return True if the item is in the list
    */
 
   public boolean containsItem(Object o)
@@ -707,7 +736,9 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
   }
 
   /**
-   * This selects the item with the given label.
+   * <p>This selects the item with the given label.</p>
+   *
+   * @param s The label to select.
    */
 
   public void setSelectedLabel(String s)
@@ -716,7 +747,11 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
   }
 
   /**
-   * This selects the item with the given label.
+   * <p>This selects the item with the given label.</p>
+   *
+   * @param s The label to select.
+   * @param ensureVisible If true, the list will be scrolled to show
+   * the objet with the given label.
    */
 
   public void setSelectedLabel(String s, boolean ensureVisible)
@@ -743,7 +778,7 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
   }
 
   /**
-   * Sets the selected item.
+   * <p>Sets the selected item.</p>
    *
    * @param o Can be listHandle or String
    */
@@ -761,7 +796,7 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
   }
 
   /**
-   * This returns just the label.
+   * @return The label of the selected item, if any.
    */
 
   public String getSelectedLabel()
@@ -770,7 +805,7 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
   }
 
   /**
-   * This returns the whole listHandle.
+   * @return The listHandle of the selected item, if any.
    */
 
   public listHandle getSelectedHandle()
@@ -814,7 +849,7 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
   }
 
   /**
-   * This returns the object, without the label.
+   * @return The object selected in the list, without the label.
    */
 
   public Object getSelectedItem()
@@ -829,10 +864,6 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
         return null;
       }
   }
-
-  /**
-   * For the ListSelectionListener
-   */
 
   public void valueChanged(ListSelectionEvent e)
   {
@@ -866,10 +897,6 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
           }
       }
   }
-
-  /**
-   * For the MouseListener interface
-   */
 
   public void mouseClicked(MouseEvent e)
   {
@@ -944,25 +971,13 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
       }
   }
 
-  /**
-   * For the MouseListener interface
-   */
-
   public void mouseEntered(MouseEvent e)
   {
   }
 
-  /**
-   * For the MouseListener interface
-   */
-
   public void mouseExited(MouseEvent e)
   {
   }
-
-  /**
-   * For the mouseListener interface
-   */
 
   public void mousePressed(MouseEvent e)
   {
@@ -977,10 +992,6 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
     dragNode = locationToIndex(e.getPoint());
     startDragIndex = dragNode;
   }
-
-  /**
-   * For the MouseListener interface
-   */
 
   public void mouseReleased(MouseEvent e)
   {
@@ -1013,10 +1024,6 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
     startDragIndex = -1;
   }
 
-  /**
-   * For the MouseMotionListener interface
-   */
-
   public void mouseDragged(MouseEvent e)
   {
     if (dragNode == -1)
@@ -1040,17 +1047,16 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
       }
   }
 
-  /**
-   * For the MouseMotionListener interface
-   */
-
   public void mouseMoved(MouseEvent e)
   {
   }
 
   /**
-   * For the pop up menu callback.  We use the popUpIndex variable to
-   * identify the item in the list that the popup menu was issued on.
+   * <p>For the pop up menu callback.  We use the popUpIndex variable
+   * to identify the item in the list that the popup menu was issued
+   * on.</p>
+   *
+   * @param e The event received from the popup menu.
    */
 
   public void actionPerformed(ActionEvent e)
@@ -1120,6 +1126,12 @@ public class JstringListBox extends JList implements ActionListener, FocusListen
   /**
    * <p>Default comparator, does a string comparison on the
    * toString() output of the objects for ordering.</p>
+   *
+   * @param a The first object to compare
+   * @param b The second object to compare
+   *
+   * @return -1 if a is less then b, 0 if they are equal, 1 if a is
+   * greater than b.
    */
 
   public int compare(Object a, Object b)

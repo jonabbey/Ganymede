@@ -552,7 +552,8 @@ public class Qsmtp implements Runnable, java.io.Closeable {
    *
    * @param from_address Who is sending this message?
    * @param to_addresses List of string addresses to send this message to
-   * @param from_address_desc A more elaborate version of the from address, with optional leading <Description> section
+   * @param from_address_desc A more elaborate version of the from
+   * address, with optional leading &lt;Description&gt; section
    * @param subject Subject for this message
    * @param message The text for the mail message
    * @param extraHeaders List of string headers to include in the message's

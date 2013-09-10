@@ -2335,10 +2335,12 @@ public class baseTable extends JComponent implements AdjustmentListener, ActionL
   }
 
   /**
+   * <p>This method is used to adjust the vertical scrollbar (if
+   * present) such that row rowIndex has its topEdge at y.</p>
    *
-   * This method is used to adjust the vertical scrollbar (if present)
-   * such that row <rowIndex> has its topEdge at y
-   *
+   * @param rowIndex The index of the row to scroll
+   * @param y The vertical position to place the top edge of
+   * row[rowIndex] to.
    */
 
   synchronized void scrollRowTo(int rowIndex, int y)

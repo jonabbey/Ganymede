@@ -8,10 +8,12 @@
    Module By: Navin Manohar, Michael Mulvaney, and Jonathan Abbey
 
    -----------------------------------------------------------------------
-            
+
    Ganymede Directory Management System
- 
-   Copyright (C) 1996-2010
+
+   Ganymede is a registered trademark of The University of Texas at Austin
+
+   Copyright (C) 1996-2013
    The University of Texas at Austin
 
    Contact information
@@ -94,7 +96,7 @@ import arlut.csd.Util.TranslationService;
 /*------------------------------------------------------------------------------
                                                                            class
                                                                   JpanelCalendar
-        
+
 ------------------------------------------------------------------------------*/
 
 /**
@@ -167,7 +169,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   private JPanel calButtonPanel = null;
   private JPanel buttonPanel = null;
   private JTimePanel timePanel;
-  
+
   protected Font todayFont = new Font("Monospaced", Font.BOLD, 12);
   protected Font notTodayFont = new Font("Monospaced", Font.PLAIN, 12);
 
@@ -226,8 +228,10 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   /* -- */
 
   /**
-   * Lots of constructors.  
-   *
+   * @param parentCalendar The date to initialize this JpanelCalendar to
+   * @param callback A callback to receive and approve changes to this JpanelCalendar
+   * @param editable If false, this JpanelCalendar will be a
+   * non-changeable calendar for display.
    */
 
   public JpanelCalendar(GregorianCalendar parentCalendar, JsetValueCallback callback, boolean editable)
@@ -238,41 +242,51 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   /**
    * Constructors.
    *
-   * @param showTime If true, then the "Choose a time" part will be there.  Also, if true, time will appear in date at top.
-   *
+   * @param parentCalendar The date to initialize this JpanelCalendar to
+   * @param callback A callback to receive and approve changes to this JpanelCalendar
+   * @param editable If false, this JpanelCalendar will be a
+   * non-changeable calendar for display.
+   * @param showTime If true, then the "Choose a time" part will be
+   * there.  Also, if true, time will appear in date at top.
    */
-  public JpanelCalendar(GregorianCalendar parentCalendar, JsetValueCallback callback, 
+
+  public JpanelCalendar(GregorianCalendar parentCalendar, JsetValueCallback callback,
                         boolean showTime, boolean editable)
   {
     this(parentCalendar, callback, showTime, false, editable);
   }
 
-  public JpanelCalendar(JpopUpCalendar pC,GregorianCalendar parentCalendar, 
-                        JsetValueCallback callback, boolean editable) 
+  public JpanelCalendar(JpopUpCalendar pC, GregorianCalendar parentCalendar,
+                        JsetValueCallback callback, boolean editable)
   {
     this(pC, parentCalendar, callback, true, false, editable);
   }
 
-  public JpanelCalendar(JpopUpCalendar pC,GregorianCalendar parentCalendar, 
-                        JsetValueCallback callback, boolean showTime, 
-                        boolean editable) 
+  public JpanelCalendar(JpopUpCalendar pC, GregorianCalendar parentCalendar,
+                        JsetValueCallback callback, boolean showTime,
+                        boolean editable)
   {
     this(pC, parentCalendar, callback, showTime, false, editable);
   }
 
   /**
-   *
-   *
+   * @param pC The dialog that this JpanelCalendar will be displayed in.
+   * @param parentCalendar The date to initialize this JpanelCalendar to
+   * @param callback A callback to receive and approve changes to this JpanelCalendar
+   * @param showTime If true, then the "Choose a time" part will be
+   * there.  Also, if true, time will appear in date at top.
    * @param compact If true, calendar will be drawn smaller.
+   * @param editable If false, this JpanelCalendar will be a
+   * non-changeable calendar for display.
    */
 
   public JpanelCalendar(JpopUpCalendar pC,
-                        GregorianCalendar parentCalendar, 
-                        JsetValueCallback callback, 
+                        GregorianCalendar parentCalendar,
+                        JsetValueCallback callback,
                         boolean showTime, boolean compact,
-                        boolean editable) 
+                        boolean editable)
   {
-    this(parentCalendar,callback, showTime, compact, editable);
+    this(parentCalendar, callback, showTime, compact, editable);
 
     if (pC == null)
       {
@@ -293,10 +307,18 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
   /**
    * <p>The main constructor.  Here's where all the magic happens.</p>
+   *
+   * @param parentCalendar The date to initialize this JpanelCalendar to
+   * @param callback A callback to receive and approve changes to this JpanelCalendar
+   * @param showTime If true, then the "Choose a time" part will be
+   * there.  Also, if true, time will appear in date at top.
+   * @param compact If true, calendar will be drawn smaller.
+   * @param editable If false, this JpanelCalendar will be a
+   * non-changeable calendar for display.
    */
 
-  public JpanelCalendar(GregorianCalendar parentCalendar, 
-                        JsetValueCallback callback,  
+  public JpanelCalendar(GregorianCalendar parentCalendar,
+                        JsetValueCallback callback,
                         boolean showTime, boolean compact,
                         boolean editable)
   {
@@ -305,7 +327,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
         // if we weren't given a calendar object, create a default
         // calendar, which will be initialized to current date/time.
 
-        parentCalendar = new GregorianCalendar(); 
+        parentCalendar = new GregorianCalendar();
         dateIsSet = false;
       }
     else
@@ -330,7 +352,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
       }
 
     this.callback = callback;
-    
+
     selectedDate_calendar = parentCalendar;
 
     previousDate = selectedDate_calendar.getTime();
@@ -357,7 +379,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
     GridBagLayout gbl = new GridBagLayout();
     GridBagConstraints gbc = new GridBagConstraints();
     daysPanel.setLayout(gbl);
-    
+
     gbc.gridy = 0;
     gbc.gridx = 0;
     gbc.anchor = GridBagConstraints.CENTER;
@@ -417,10 +439,10 @@ public class JpanelCalendar extends JPanel implements ActionListener {
     gbl.setConstraints(sat, gbc);
     daysPanel.add(sat);
 
-    gbc.insets = new Insets(0,2,0,2); 
+    gbc.insets = new Insets(0,2,0,2);
     gbc.ipadx = 0;
 
-    for (int i=0;i<37;i++) 
+    for (int i=0; i<37; i++)
       {
         gbc.gridx = i % 7;
         gbc.gridy = (i / 7) + 1;
@@ -441,7 +463,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
     centerPanel.setLayout(new FlowLayout()); //borderlayout
     centerPanel.add(daysPanel);
     //    centerPanel.setBackground(new Color(200,200,255));  // light blue
-    mainPanel.add(centerPanel, "Center"); 
+    mainPanel.add(centerPanel, "Center");
 
 
     JPanel southPanel = new JPanel();
@@ -450,7 +472,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
     buttonPanel = new JPanel();
     buttonPanel.setLayout(new BorderLayout());
     // Adds close button to popup - in upper constructor
-    southPanel.add(buttonPanel,"South"); 
+    southPanel.add(buttonPanel,"South");
 
     if (showTime)
       {
@@ -479,8 +501,6 @@ public class JpanelCalendar extends JPanel implements ActionListener {
     add(mainPanel);
   }
 
-
-
   /**
    * <p>This is the main programmatic entry point for setting the date selected
    * in this calendar widget.  Calling this method will update the selected
@@ -489,8 +509,10 @@ public class JpanelCalendar extends JPanel implements ActionListener {
    *
    * <p>Calling this method will not trigger a callback to report the date
    * change to our client.</p>
+   *
+   * @param date The date to be loaded
    */
- 
+
   public synchronized void setDate(Date date)
   {
     if (date == null)
@@ -557,7 +579,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   }
 
   /**
-   * <p>This method returns the selected date held in this calendar.</p>
+   * @return The date held in this calendar
    */
 
   public Date getDate()
@@ -566,8 +588,8 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   }
 
   /**
-   * <p>Returns true if this calendar is configured to allow editing
-   * of the selected date.</p>
+   * @return True if this calendar is configured to allow editing of
+   * the selected date
    */
 
   public boolean isEditable()
@@ -576,9 +598,8 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   }
 
   /**
-   * <p>This method returns the month of the year
-   * currently being displayed in the calendar gui,
-   * in the range 0-11.</p>
+   * @return The month of the year currently being displayed in the
+   * calendar gui, in the range 0-11.
    */
 
   public int getVisibleMonth()
@@ -587,8 +608,8 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   }
 
   /**
-   * <p>This method returns the month of the year for the selected
-   * date, in the range 0-11.</p>
+   * @return The month of the year for the selected date, in the range
+   * 0-11.
    */
 
   public int getSelectedMonth()
@@ -597,8 +618,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   }
 
   /**
-   * <p>This method returns the year being displayed
-   * in the calendar gui.</p>
+   * @return The year being displayed in the calendar gui.
    */
 
   public int getVisibleYear()
@@ -607,8 +627,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   }
 
   /**
-   * <p>This method returns the year being displayed
-   * in the calendar gui.</p>
+   * @return The year being displayed in the calendar gui.
    */
 
   public int getSelectedYear()
@@ -629,12 +648,15 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   }
 
   /**
-   * <p>This method may be used to enable or disable the month and year changing
-   * buttons.  If this method is called with a false parameter, the calendar
-   * will not allow changing of the month/year.</p>
+   * <p>This method may be used to enable or disable the month and
+   * year changing buttons.</p>
    *
-   * <p>By default, the JpanelCalendar allows month flipping in editable calendars
-   * and does not allow it in non-editable calendars.</p>
+   * <p>By default, the JpanelCalendar allows month flipping in
+   * editable calendars and does not allow it in non-editable
+   * calendars.</p>
+   *
+   * @param okay If true, the calendar will allow changing of the
+   * month and year.
    */
 
   public void setAllowMonthChange(boolean okay)
@@ -645,9 +667,10 @@ public class JpanelCalendar extends JPanel implements ActionListener {
 
   /**
    * <p>This method may be used to query the calendar to see if the
-   * month and year changing buttons are enabled.  If this method
-   * returns false, the calendar does not allow changing of the
-   * month/year.</p>
+   * month and year changing buttons are enabled.</p>
+   *
+   * @return False if the calendar does not allow changing of the
+   * month/year.
    */
 
   public boolean getAllowMonthChange()
@@ -655,11 +678,11 @@ public class JpanelCalendar extends JPanel implements ActionListener {
     return allowMonthChange;
   }
 
-  /** 
-   * This will update the visibleDate_calendar according to the current
-   * year and month visible in the GUI controls.
+  /**
+   * <p>This will update the visibleDate_calendar according to the
+   * current year and month visible in the GUI controls.</p>
    *
-   * Call this from writeDates().
+   * <p>Call this from writeDates().</p>
    */
 
   void updateDate()
@@ -671,8 +694,8 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   }
 
   /**
-   * <p>This method forces the calendar to jump to the page containing the
-   * selected date.</p>
+   * <p>This method forces the calendar to jump to the page containing
+   * the selected date.</p>
    */
 
   public void displaySelectedPage()
@@ -686,21 +709,17 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   }
 
   /**
-   * <p>This method returns a string describing the month and year
-   * of the currently selected date</p>
+   * @return A string describing the month and year of the currently
+   * selected date.
    */
 
   public String getSelectedMonthString()
   {
-    return month_names[selectedDate_calendar.get(Calendar.MONTH)] + " " + 
+    return month_names[selectedDate_calendar.get(Calendar.MONTH)] + " " +
       selectedDate_calendar.get(Calendar.YEAR);
   }
 
-  /**
-   * Our buttons call us back here.
-   */
-
-  public void actionPerformed(ActionEvent e) 
+  public void actionPerformed(ActionEvent e)
   {
     if (e.getSource() == closeButton)
       {
@@ -708,7 +727,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
           {
             System.err.println("Closing pCal");
           }
-        
+
         pCal.setVisible(false);
       }
     else if (e.getSource() == resetButton)
@@ -741,11 +760,11 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   }
 
   /**
-   * This method takes the current time held in selectedDate_calendar and refreshes
-   * the calendar with it.
+   * <p>This method takes the current time held in
+   * selectedDate_calendar and refreshes the calendar with it.</p>
    */
 
-  public void update() 
+  public void update()
   {
     displaySelectedPage();
 
@@ -760,7 +779,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
    * in visibleDate_calendar.</p>
    */
 
-  protected synchronized void writeDates() 
+  protected synchronized void writeDates()
   {
     try
       {
@@ -778,9 +797,9 @@ public class JpanelCalendar extends JPanel implements ActionListener {
         temp.add(Calendar.DATE,-(temp.get(Calendar.DATE)-1));
 
         // this is presumably here for a bug workaround
-        
+
         temp.setTime(temp.getTime());
-   
+
         int startDay = temp.get(Calendar.DAY_OF_WEEK);
 
         for (int i = 0; i<startDay-1; i++)
@@ -789,7 +808,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
           }
 
         int numDays;
-    
+
         if (temp.isLeapYear(temp.get(Calendar.YEAR)))
           {
             numDays = leapDays[temp.get(Calendar.MONTH)];
@@ -812,7 +831,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
                 _datebuttonArray[i].setFont(todayFont);
                 _datebuttonArray[i].showYourself(Color.red);
               }
-            else 
+            else
               {
                 _datebuttonArray[i].setText(Integer.toString(day,10));
                 _datebuttonArray[i].setFont(notTodayFont);
@@ -820,7 +839,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
               }
           }
 
-        for (int i=startDay+numDays-1;i<37;i++)
+        for (int i=startDay+numDays-1; i<37; i++)
           {
             _datebuttonArray[i].hideYourself();
           }
@@ -847,13 +866,13 @@ public class JpanelCalendar extends JPanel implements ActionListener {
   }
 
   /**
+   * <p>This method handles the final processing of any calendar button
+   * pushed.</p>
    *
-   * This method handles the final processing of any calendar button
-   * pushed.
-   *
+   * @param _bttn The button that was pressed.
    */
 
-  public void buttonPressed(JdateButton _bttn) 
+  public void buttonPressed(JdateButton _bttn)
   {
     if (debug)
       {
@@ -865,7 +884,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
         return;
       }
 
-    if (_bttn == null) 
+    if (_bttn == null)
       {
         throw new IllegalArgumentException("The dateButton parameter is null");
       }
@@ -874,7 +893,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
       {
         return;                 // no-op
       }
-    
+
     int date = Integer.parseInt(_bttn.getText(),10);
 
     if (debug)
@@ -883,9 +902,9 @@ public class JpanelCalendar extends JPanel implements ActionListener {
       }
 
     visibleDate_calendar.set(Calendar.DATE,date);
-    
+
     visibleDate_calendar.setTime(visibleDate_calendar.getTime()); // this sets all the fields properly
-    
+
     selectedDate_calendar.setTime(visibleDate_calendar.getTime());
 
     if (debug)
@@ -894,10 +913,10 @@ public class JpanelCalendar extends JPanel implements ActionListener {
       }
 
     // clear the button that was pressed previously
-    
+
     writeDates();
 
-    try 
+    try
       {
         if (callback != null)
           {
@@ -908,7 +927,7 @@ public class JpanelCalendar extends JPanel implements ActionListener {
               {
                 if (debug)
                   {
-                    System.err.println("JpanelCalendar.buttonPressed(): oops, unacceptable date.. reverting to " + 
+                    System.err.println("JpanelCalendar.buttonPressed(): oops, unacceptable date.. reverting to " +
                                        previousDate);
                   }
 
@@ -921,19 +940,20 @@ public class JpanelCalendar extends JPanel implements ActionListener {
               }
           }
       }
-    catch (RemoteException re) 
+    catch (RemoteException re)
       {
       }
   }
 
   /**
+   * <p>This method is used to update the calendar's notion of time from
+   * information passed in from the time panel.</p>
    *
-   * This method is used to update the calendar's notion of time from
-   * information passed in from the time panel.
-   *
+   * @param _field "hour", "min", or "sec"
+   * @param _value The hour, month, or second
    */
 
-  public void timeChanged(String _field,int _value)
+  public void timeChanged(String _field, int _value)
   {
     if (!editable)
       {
@@ -950,12 +970,12 @@ public class JpanelCalendar extends JPanel implements ActionListener {
         visibleDate_calendar.set(Calendar.HOUR_OF_DAY,_value);
         selectedDate_calendar.set(Calendar.HOUR_OF_DAY,_value);
       }
-    else if (_field.equals("min")) 
+    else if (_field.equals("min"))
       {
         visibleDate_calendar.set(Calendar.MINUTE,_value);
         selectedDate_calendar.set(Calendar.MINUTE,_value);
       }
-    else if (_field.equals("sec")) 
+    else if (_field.equals("sec"))
       {
         visibleDate_calendar.set(Calendar.SECOND,_value);
         selectedDate_calendar.set(Calendar.SECOND,_value);
@@ -965,31 +985,25 @@ public class JpanelCalendar extends JPanel implements ActionListener {
         return;
       }
 
-    try 
+    try
       {
         if (!callback.setValuePerformed(new JSetValueObject(this, selectedDate_calendar.getTime())))
           {
             // constructing a JErrorDialog causes it to be shown.
 
-            // "Date Out Of Range"          
+            // "Date Out Of Range"
             // "The date you have chosen is out of the acceptable range."
             new JErrorDialog(new JFrame(),
-                             ts.l("timeChanged.dateRangeError"), 
+                             ts.l("timeChanged.dateRangeError"),
                              ts.l("timeChanged.dateRangeErrorText"), StandardDialog.ModalityType.DOCUMENT_MODAL);
-            
+
             setDate(previousDate);
           }
       }
-    catch (RemoteException re) 
+    catch (RemoteException re)
       {
       }
   }
-
-  /**
-   *
-   * Command line test rig
-   *
-   */
 
   public static void main(String[] argv)
   {
@@ -1026,7 +1040,7 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
     bg;
 
   private boolean active = true;
-  
+
   /* -- */
 
   public JdateButton(JpanelCalendar parent)
@@ -1078,7 +1092,7 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
           {
             setBackground(bg); // reset background
           }
-        
+
         setEnabled(true);
 
         this.active = true;
@@ -1148,18 +1162,19 @@ class JdateButton extends JButton implements ActionListener, MouseListener {
 /*------------------------------------------------------------------------------
                                                                            class
                                                                       JTimePanel
-        
+
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class displays the time at the bottom of the composite {@link
- * arlut.csd.JCalendar.JpanelCalendar JpanelCalendar} widget.  If the
- * calendar widget is editable, this panel will allow the user to set
- * the time corresponding with the date shown in the calendar widget.</p>
+ * <p>This class displays the time at the bottom of the composite
+ * {@link arlut.csd.JCalendar.JpanelCalendar JpanelCalendar} widget.
+ * If the calendar widget is editable, this panel will allow the user
+ * to set the time corresponding with the date shown in the calendar
+ * widget.</p>
  *
  * <p>The numeric fields contained in this panel will transmit the
- * change in time back to the JpanelCalendar's client whenever the focus
- * exits one of the numeric fields.</p>
+ * change in time back to the JpanelCalendar's client whenever the
+ * focus exits one of the numeric fields.</p>
  */
 
 class JTimePanel extends JPanel implements JsetValueCallback {
@@ -1185,7 +1200,7 @@ class JTimePanel extends JPanel implements JsetValueCallback {
       {
         throw new IllegalArgumentException("The parameter parent is null");
       }
-    
+
     container = parent;
 
     _hour = new JnumberField(3,true,true,0,23,this);
@@ -1199,12 +1214,12 @@ class JTimePanel extends JPanel implements JsetValueCallback {
         _sec.setEditable(false);
       }
 
-  
+
     GridLayout g = new GridLayout(1,1);
     g.setHgap(0);
     g.setVgap(0);
     setLayout(g);
-  
+
 
     JPanel p = new JPanel();
 
@@ -1225,24 +1240,24 @@ class JTimePanel extends JPanel implements JsetValueCallback {
     p.add(_min);
     p.add(l2);
     p.add(_sec);
-    
+
     JPanel panel = new JPanel(new BorderLayout());
     panel.add("West", new JLabel(ts.l("init.timeLabel"))); // "Time:"
     panel.add("Center", p);
-    
+
     add(panel);
 
     update();
   }
 
   /**
-   * <p>This method updates the numeric fields from
-   * our JpanelCalendar's current selected time.</p>
+   * <p>This method updates the numeric fields from our
+   * JpanelCalendar's current selected time.</p>
    */
 
-  public void update() 
+  public void update()
   {
-    GregorianCalendar cal = new GregorianCalendar(); 
+    GregorianCalendar cal = new GregorianCalendar();
     cal.setTime(container.getDate());
 
     _hour.setValue(cal.get(Calendar.HOUR_OF_DAY));
@@ -1252,6 +1267,8 @@ class JTimePanel extends JPanel implements JsetValueCallback {
 
   /**
    * <p>Process callbacks from the numeric fields.</p>
+   *
+   * @param valueObj The value set.
    */
 
   public boolean setValuePerformed(JValueObject valueObj)
@@ -1297,16 +1314,17 @@ class JTimePanel extends JPanel implements JsetValueCallback {
 /*------------------------------------------------------------------------------
                                                                            class
                                                                     JYearChooser
-        
+
 ------------------------------------------------------------------------------*/
 
 /**
- * <p>This class provides a 'spinner' widget for displaying and allowing the
- * editing of the year in the composite {@link
+ * <p>This class provides a 'spinner' widget for displaying and
+ * allowing the editing of the year in the composite {@link
  * arlut.csd.JCalendar.JpanelCalendar JpanelCalendar} widget.</p>
  *
- * <p>JYearChooser is incorporated into JpanelCalendar by way of
- * the {@link arlut.csd.JCalendar.JMonthYearPanel JMonthYearPanel} widget.</p>
+ * <p>JYearChooser is incorporated into JpanelCalendar by way of the
+ * {@link arlut.csd.JCalendar.JMonthYearPanel JMonthYearPanel}
+ * widget.</p>
  */
 
 class JYearChooser extends JPanel implements ActionListener {
@@ -1334,10 +1352,10 @@ class JYearChooser extends JPanel implements ActionListener {
     year_field = new JnumberField(4);
     year_field.setValue(year);
     year_field.setEditable(true);
-    
+
     Image upImage = PackageResources.getImageResource(this, "up.gif", getClass());
     Image downImage = PackageResources.getImageResource(this, "down.gif", getClass());
-      
+
     Insets my_insets = new Insets(0,0,0,0);
     up = new JButton(new ImageIcon(upImage));
     up.setMargin(my_insets);
@@ -1345,11 +1363,11 @@ class JYearChooser extends JPanel implements ActionListener {
     down = new JButton(new ImageIcon(downImage));
     down.setMargin(my_insets);
     down.addActionListener(this);
-    
+
     JPanel buttonP = new JPanel(new GridLayout(2,1));
     buttonP.add(up);
     buttonP.add(down);
-    
+
     setLayout(new BorderLayout());
     add(year_field,"West");
     add(buttonP,"Center");
@@ -1396,7 +1414,7 @@ class JYearChooser extends JPanel implements ActionListener {
 /*------------------------------------------------------------------------------
                                                                            class
                                                                  JMonthYearPanel
-        
+
 ------------------------------------------------------------------------------*/
 
 /**
@@ -1454,11 +1472,12 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
   }
 
   /**
-   * <p>This method sets the month in the JMonthYearPanel.  The
-   * appropriate range is from 0 to 11.</p>
+   * <p>This method sets the month in the JMonthYearPanel.</p>
    *
    * <p>Calling this method will update the display, but it will
    * not trigger a callback to the JpanelCalendar.</p>
+   *
+   * @param index The month of year, 0 to 11.
    */
 
   public void setMonth(int index)
@@ -1484,6 +1503,8 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
    * <p>Returns the month currently selected in the JMonthYearPanel.
    * This is not necessarily the same as the month of the currently
    * selected day in the calendar.</p>
+   *
+   * @return The month of year chosen in this JpanelCalendar, from 0 to 11
    */
 
   public int getMonth()
@@ -1492,8 +1513,8 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
   }
 
   /**
-   * <p>This method returns a human readable string containing
-   * the month shown in the JMonthYearPanel.</p>
+   * @return A human readable string containing the month shown in the
+   * JMonthYearPanel.
    */
 
   public String getMonthString()
@@ -1506,6 +1527,8 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
    *
    * <p>Calling this method will update the display, but it will
    * not trigger a callback to the JpanelCalendar.</p>
+   *
+   * @param index The year to set in the JMonthYearPanel
    */
 
   public void setYear(int index)
@@ -1525,6 +1548,8 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
   /**
    * <p>This method passes changes from the JYearChooser up to
    * the parent calendar widget.</p>
+   *
+   * @param index The year to set in the JMonthYearPanel
    */
 
   public void updateYear(int index)
@@ -1537,6 +1562,8 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
    * <p>Returns the year currently selected in the JMonthYearPanel.
    * This is not necessarily the same as the year of the currently
    * selected day in the calendar.</p>
+   *
+   * @return The year currently selected in the JMonthYearPanel
    */
 
   public int getYear()
@@ -1585,14 +1612,14 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
     month.addItemListener(this);
 
     year = new JYearChooser(currentYear, this);
-       
+
     JPanel middlePanel = new JPanel(new BorderLayout());
     add(_prevdate, "West");
     middlePanel.add("Center", month);
     middlePanel.add("East", _nextdate);
     add(middlePanel, "Center");
     add(year, "East");
-   
+
     validate();
   }
 
@@ -1615,9 +1642,11 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
   }
 
   /**
-   * <p>This method toggles this panel from display mode to editing mode
-   * or vice-versa.  If allow is true, this panel will be editable, and
-   * the year and month will be changable by the user.</p>
+   * <p>This method toggles this panel from display mode to editing
+   * mode or vice-versa.</p>
+   *
+   * @param allow If true, this panel will be editable, and the year
+   * and month will be changeable by the user.
    */
 
   public void setAllowMonthChange(boolean allow)
@@ -1641,7 +1670,7 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
 
   public void actionPerformed(ActionEvent e)
   {
-    if (e.getSource() == _nextdate) 
+    if (e.getSource() == _nextdate)
       {
         currentMonth++;
 
@@ -1661,7 +1690,7 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
 
         performCallback();
       }
-    else if (e.getSource() == _prevdate) 
+    else if (e.getSource() == _prevdate)
       {
         currentMonth--;
 
@@ -1682,10 +1711,6 @@ class JMonthYearPanel extends JPanel implements ActionListener, ItemListener {
         performCallback();
       }
   }
-
-  /**
-   * This is called when our month is changed
-   */
 
   public void itemStateChanged(ItemEvent e)
   {
