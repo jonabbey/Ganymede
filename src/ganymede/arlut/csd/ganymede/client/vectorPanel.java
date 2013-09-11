@@ -171,7 +171,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
    * Button used to add a new element to the vector
    */
 
-  JButton
+  final JButton
     addB;
 
   /**
@@ -1404,7 +1404,7 @@ public class vectorPanel extends JPanel implements JsetValueCallback, ActionList
 
   public void focusGained(FocusEvent e)
   {
-    ((JComponent) this.getParent()).scrollRectToVisible(this.getBounds());
+    addB.scrollRectToVisible(addB.getBounds());
   }
 
   // convenience stuff

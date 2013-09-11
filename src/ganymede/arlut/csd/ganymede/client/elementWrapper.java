@@ -118,7 +118,7 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener, Fo
     expand,
     remove;
 
-  vectorPanel
+  final vectorPanel
     vp;
 
   boolean
@@ -513,17 +513,17 @@ class elementWrapper extends JPanel implements ActionListener, MouseListener, Fo
         return;
       }
 
-    trigger.setBorderPainted(true);
-    trigger.invalidate();
-    repaint();
-
     if (expanded)
       {
-        scrollRectToVisible(trigger.getBounds());
+        vp.scrollRectToVisible(trigger.getBounds());
       }
     else
       {
-        scrollRectToVisible(this.getBounds());
+        vp.scrollRectToVisible(this.getBounds());
       }
+
+    trigger.setBorderPainted(true);
+    trigger.invalidate();
+    repaint();
   }
 }
