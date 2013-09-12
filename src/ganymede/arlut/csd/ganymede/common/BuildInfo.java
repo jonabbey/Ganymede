@@ -174,7 +174,7 @@ public class BuildInfo {
       {
         String dateString = dateFormatter.format(getBuildDate());
 
-        // "Built ${0} on ${1} with Java ${2}"
+        // "{0} on {2} with Java {1}"
         BuildInfo.releaseString = ts.l("release_string", dateString, getBuildJVM(), getBuildHost());
       }
 
