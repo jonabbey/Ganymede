@@ -129,7 +129,7 @@ public class aboutGanyDialog extends JDialog {
     tabPane = new JTabbedPane();
 
     addTab(ts.l("init.about_tab"), ts.l("init.aboutText",
-                                        arlut.csd.Util.SVNVersion.getReleaseString()));
+                                        arlut.csd.ganymede.common.BuildInfo.getReleaseString()));
 
     gbc.anchor = GridBagConstraints.NORTHWEST;
     gbc.fill = GridBagConstraints.NONE;
