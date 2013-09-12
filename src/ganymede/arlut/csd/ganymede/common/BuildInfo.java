@@ -82,12 +82,34 @@ public class BuildInfo {
 
   private final static Properties properties = new Properties();
 
+  /**
+   * <p>Parses dates placed into the build.properties file at build
+   * time by Ant.  Do not change format.</p>
+   */
+
+  private static SimpleDateFormat dateParser = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
+
+  // "EEE, dd MMM yyyy HH:mm:ss z"
+  private static SimpleDateFormat dateFormatter = new SimpleDateFormat(ts.l("date_format"));
+
+  private static Date buildDate = null;
+  private static String buildHost = null;
+  private static String buildJVM = null;
+  private static String releaseString = null;
+
+  // We're going to load all our properties and build all of our
+  // strings up front so that we can pop up the 'About Ganymede'
+  // dialog as fast as possible in the Ganymede client and admin
+  // console.
+
   static
   {
     loadProps();
+    getBuildDate();
+    getBuildJVM();
+    getBuildHost();
+    getReleaseString();
   }
-
-  private static SimpleDateFormat dateParser = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
 
   // ---
 
@@ -96,6 +118,7 @@ public class BuildInfo {
     try
       {
         properties.load(BuildInfo.class.getResourceAsStream("build.properties"));
+        getBuildDate();
       }
     catch (IOException ex)
       {
@@ -104,37 +127,57 @@ public class BuildInfo {
 
   public static Date getBuildDate()
   {
-    String dateString = properties.getProperty("build_date");
+    if (BuildInfo.buildDate == null)
+      {
+        String dateString = properties.getProperty("build_date");
 
-    try
-      {
-        return dateParser.parse(dateString);
+        try
+          {
+            BuildInfo.buildDate = dateParser.parse(dateString);
+          }
+        catch (ParseException ex)
+          {
+          }
       }
-    catch (ParseException ex)
-      {
-        return null;
-      }
+
+    return BuildInfo.buildDate;
   }
 
   public static String getBuildJVM()
   {
-    return properties.getProperty("build_jvm");
+    if (BuildInfo.buildJVM == null)
+      {
+        BuildInfo.buildJVM = properties.getProperty("build_jvm");
+      }
+
+    return BuildInfo.buildJVM;
   }
 
   public static String getBuildHost()
   {
-    return properties.getProperty("build_host");
+    if (BuildInfo.buildHost == null)
+      {
+        BuildInfo.buildHost = properties.getProperty("build_host");
+      }
+
+    return BuildInfo.buildHost;
   }
+
+  /**
+   * <p>Returns a release string suitable for inclusion in the About
+   * Ganymede dialog and elsewhere.</p>
+   */
 
   public static String getReleaseString()
   {
-    Date buildDate = getBuildDate();
+    if (BuildInfo.releaseString == null)
+      {
+        String dateString = dateFormatter.format(getBuildDate());
 
-    // "EEE, dd MMM yyyy HH:mm:ss z"
-    SimpleDateFormat dateFormatter = new SimpleDateFormat(ts.l("date_format"));
-    String dateString = dateFormatter.format(buildDate);
+        // "Built ${0} on ${1} with Java ${2}"
+        BuildInfo.releaseString = ts.l("release_string", dateString, getBuildJVM(), getBuildHost());
+      }
 
-    // "Built ${0} on ${1} with Java ${2}"
-    return ts.l("release_string", dateString, getBuildJVM(), getBuildHost());
+    return BuildInfo.releaseString;
   }
 }
