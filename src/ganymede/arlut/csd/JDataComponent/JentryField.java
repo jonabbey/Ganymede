@@ -118,7 +118,20 @@ abstract public class JentryField extends JTextField implements FocusListener, A
 
   protected boolean transferFocusOnEntry = true;
 
+  /**
+   * <p>The custom arlut.csd.ganymede.JDataComponent JsetValueCallback
+   * callback that we use to propagate the value change notice to.</p>
+   */
+
   protected JsetValueCallback my_parent = null;
+
+  /**
+   * <p>If notifier is not-null, a custom handler will be run when the
+   * user hits enter.  Otherwise, enter is treated as equivalent to
+   * hitting tab, and the JsetValueCallback my_parent will be
+   * called.</p>
+   */
+
   protected ActionListener notifier = null;
 
   /* -- */
