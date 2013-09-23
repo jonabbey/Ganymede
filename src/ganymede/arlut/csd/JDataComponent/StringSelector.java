@@ -2,7 +2,8 @@
 
    StringSelector.java
 
-   A two list box for adding strings to lists.
+   A two list box for adding strings to and/or removing strings from
+   lists.
 
    Created: 10 October 1997
 
@@ -334,6 +335,7 @@ public class StringSelector extends JPanel implements ActionListener, JsetValueC
     if (editable)
       {
         custom = new JstringField();
+        custom.transferFocusOnEntry = false;
         custom.addActionListener(new ActionListener()
                                  {
                                    public void actionPerformed(ActionEvent e)

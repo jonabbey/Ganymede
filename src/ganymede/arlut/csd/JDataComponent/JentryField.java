@@ -12,11 +12,14 @@
 
    Ganymede Directory Management System
 
-   Copyright (C) 1996-2011
+   Copyright (C) 1996-2013
    The University of Texas at Austin
+
+   Ganymede is a registered trademark of The University of Texas at Austin
 
    Contact information
 
+   Web site: http://www.arlut.utexas.edu/gash2
    Author Email: ganymede_author@arlut.utexas.edu
    Email mailing list: ganymede@arlut.utexas.edu
 
@@ -102,6 +105,18 @@ abstract public class JentryField extends JTextField implements FocusListener, A
    */
 
   protected boolean loadingText = false;
+
+  /**
+   * <p>If transferFocusOnEntry is true, this JentryField will
+   * transfer focus to the next component in the container when enter
+   * is hit.</p>
+   *
+   * <p>Should be set to false when a JentryField should retain focus
+   * after hitting enter.  E.g., when a JentryField is being used as
+   * the text entry field for a StringSelector.</p>
+   */
+
+  protected boolean transferFocusOnEntry = true;
 
   protected JsetValueCallback my_parent = null;
   protected ActionListener notifier = null;
@@ -254,7 +269,10 @@ abstract public class JentryField extends JTextField implements FocusListener, A
 
     if (notifier == null)
       {
-        transferFocus();
+        if (transferFocusOnEntry)
+          {
+            transferFocus();
+          }
       }
     else if (sendCallback() >= 0)
       {
