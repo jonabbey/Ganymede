@@ -1044,7 +1044,16 @@ class messageObject {
   {
     this.from_address = from_address;
     this.to_addresses = to_addresses;
-    this.from_address_desc = from_address_desc;
+
+    if (from_address_desc == null || from_address_desc.trim().equals(""))
+      {
+        this.from_address_desc = from_address;
+      }
+    else
+      {
+        this.from_address_desc = from_address_desc;
+      }
+
     this.subject = subject;
     this.message = message;
     this.extraHeaders = extraHeaders;
