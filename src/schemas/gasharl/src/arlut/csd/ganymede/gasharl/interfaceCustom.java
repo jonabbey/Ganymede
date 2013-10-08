@@ -87,9 +87,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   /* -- */
 
   /**
-   *
    * Customization Constructor
-   *
    */
 
   public interfaceCustom(DBObjectBase objectBase)
@@ -98,9 +96,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * Create new object constructor
-   *
    */
 
   public interfaceCustom(DBObjectBase objectBase, Invid invid, DBEditSet editset)
@@ -109,10 +105,8 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
   }
 
   /**
-   *
    * Check-out constructor, used by DBObject.createShadow()
    * to pull out an object for editing.
-   *
    */
 
   public interfaceCustom(DBObject original, DBEditSet editset)
@@ -165,18 +159,25 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
           }
       }
 
-    return updateHiddenLabel();
+    return null;
   }
 
   /**
    * This method patches up the hidden label field in this object.
    */
 
-  public ReturnVal updateHiddenLabel()
+  private ReturnVal updateHiddenLabel()
   {
     String newLabel = calcLabel(this);
 
-    return setFieldValueLocal(interfaceSchema.HIDDENLABEL, newLabel);
+    ReturnVal retVal = setFieldValueLocal(interfaceSchema.HIDDENLABEL, newLabel);
+
+    if (ReturnVal.didSucceed(retVal))
+      {
+        return retVal.merge(ReturnVal.success().requestRefresh(getParentSysObj().getInvid(), systemSchema.INTERFACES));
+      }
+
+    return retVal;
   }
 
   private final String calcLabel(interfaceCustom object)
@@ -585,14 +586,6 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
         return null;
       }
 
-    // we don't want to mess with the available-network
-    // management code if we are doing bulk-loading.
-
-    //    if (!gSession.enableOversight || !gSession.enableWizards)
-    //      {
-    //  return null;
-    //      }
-
     if (field.getID() == interfaceSchema.IPNET)
       {
         // if this net change was initiated by an approved ADDRESS change,
@@ -603,7 +596,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
             ReturnVal retVal = new ReturnVal(true, true);
             retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
 
-            return retVal;
+            return retVal.merge(updateHiddenLabel());
           }
 
         // if the net is being set to a net that matches what's already
@@ -621,7 +614,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
             ReturnVal retVal = new ReturnVal(true, true);
             retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
 
-            return retVal;
+            return retVal.merge(updateHiddenLabel());
           }
 
         // okay, we didn't match, tell the system object to remember the
@@ -644,7 +637,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
             retVal.addRescanField(this.getInvid(), interfaceSchema.ADDRESS);
             retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
 
-            return retVal;
+            return retVal.merge(updateHiddenLabel());
           }
 
         // now find a new address for this object based on the network we
@@ -685,7 +678,7 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
 
         retVal.addRescanField(this.getInvid(), interfaceSchema.ETHERNETINFO);
 
-        return retVal;
+        return retVal.merge(updateHiddenLabel());
       }
 
     if (field.getID() == interfaceSchema.ADDRESS)
@@ -744,13 +737,23 @@ public class interfaceCustom extends DBEditObject implements SchemaConstants {
             retVal = new ReturnVal(true, true);
             retVal.addRescanField(this.getInvid(), interfaceSchema.IPNET);
 
-            return retVal;
+            return retVal.merge(updateHiddenLabel());
           }
         catch (GanyPermissionsException ex)
           {
             return Ganymede.createErrorDialog(this.getGSession(),
                                               "permissions", "permissions error setting network " + ex);
           }
+      }
+
+    // we also need to update the hidden label if the MAC address or
+    // interface name was changed
+
+    switch (field.getID())
+      {
+      case interfaceSchema.ETHERNETINFO: // deliberate fall-through
+      case interfaceSchema.NAME:
+        return updateHiddenLabel();
       }
 
     return null;
